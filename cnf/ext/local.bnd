@@ -1,0 +1,8 @@
+strangeSkiesDependency: uk.co.strangeskies.${1}\;version=latest
+
+-plugin.8.StrangeSkies: \
+\
+		aQute.bnd.deployer.repository.LocalIndexedRepo;\
+			name                =       StrangeSkies;\
+			pretty              =       true;\
+			local               =       ${user.home}/git/uk.co.strangeskies/cnf/release

@@ -1,0 +1,189 @@
+/*
+ * Master Gradle build script
+ *
+ * Depends on bndPlugin property set by settings.gradle.
+ * and bnd_* values from gradle.properties.
+ */
+
+import aQute.bnd.build.Workspace
+
+/* Add bnd gradle plugin as a script dependency */
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath bndPlugin
+    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1'
+    classpath ('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
+      /* Resolve dependency conflict with aether: */
+      exclude group: 'org.apache.maven'
+    }
+    classpath ('org.ajoberstar:gradle-git:1.2.0') {
+      /* Resolve dependency conflict with bndtools: */
+      exclude group: 'org.apache.httpcomponents'
+    }
+  }
+}
+
+task wrapper(type: Wrapper) {
+  jarFile = rootProject.file('.gradle-wrapper/gradle-wrapper.jar')
+  gradleVersion = '2.7'
+}
+
+/* Initialize the bnd workspace */
+ext.bndWorkspace = Workspace.getWorkspace(rootDir, bnd_cnf)
+if (bndWorkspace == null) {
+  throw new GradleException("Unable to load workspace ${rootDir}/${bnd_cnf}")
+}
+
+ext.cnf = rootProject.project(bnd_cnf)
+
+/* Configure the subprojects */
+def bndProjects() {
+  return subprojects.findAll {
+    bndWorkspace.getProject(it.name) != null && new File(it.projectDir, "src").exists()
+  }
+}
+
+configure(bndProjects()) {
+  plugins.apply 'biz.aQute.bnd'
+}
+
+/* Source License Generation */
+apply plugin: 'license'
+configure(bndProjects()) {
+  apply plugin: 'license'
+
+  license {
+    header rootProject.file('LICENSE')
+
+    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+    ext.name = 'Elias N Vasylenko'
+    ext.email = 'eliasvasylenko@gmail.com'
+    ext.software = project.name
+
+    mapping {
+      java = 'SLASHSTAR_STYLE'
+    }
+  }
+}
+
+/* Javadoc Generation */
+def javadocOptions(options, title) {
+  configure(options) {
+    docTitle = title
+    windowTitle = title
+    memberLevel = JavadocMemberLevel.PROTECTED
+    charSet = 'UTF-8'
+    encoding = 'UTF-8'
+    docEncoding = 'UTF-8'
+    links('http://docs.oracle.com/javase/8/docs/api/')
+  }
+}
+
+def javadocExports(project) {
+  def javadocSpecs = project.bnd('Export-Package', project.name)
+
+  return javadocSpecs.split(/\s*,\s*/).collect {
+    it.replace('.','/')+"/*.java"
+  }
+}
+
+configure(bndProjects()) {
+  def javadocTitle = bnd('javadoc.title', project.name)
+
+  javadoc {
+    javadocOptions(options, javadocTitle)
+
+    javadocExports(project).each { include it }
+
+    doFirst {
+      project.delete(destinationDir)
+      logger.info "Title    : ${options.windowTitle}"
+      logger.info "Destdir  : ${destinationDir}"
+    }
+  }
+}
+
+task aggregateJavadoc(type: Javadoc) {
+  javadocOptions(options, project.name)
+
+  bndProjects().each {
+    javadocExports(it).each { include it }
+  }
+
+  source bndProjects().collect { it.sourceSets.main.allJava }
+
+  destinationDir = new File(buildDir, 'javadoc')
+
+  classpath = files(bndProjects().collect {project -> project.sourceSets.main.compileClasspath})
+
+  doFirst {
+    project.delete(destinationDir)
+    logger.info "Title    : ${options.windowTitle}"
+    logger.info "Destdir  : ${destinationDir}"
+  }
+}
+
+/* Javadoc Publish to GH Pages */
+apply plugin: 'org.ajoberstar.github-pages'
+
+githubPages {
+  repoUri = 'https://github.com/Scientific-Analysis-Instruments/uk.co.saiman.git'
+  if (project.hasProperty('githubUser') && project.hasProperty('githubPassword')) {
+    credentials.setUsername githubUser
+    credentials.setPassword githubPassword
+  }
+
+  pages {
+    from aggregateJavadoc
+  }
+}
+
+/* Artifactory Publication */
+configure(bndProjects()) {
+  apply plugin: 'com.jfrog.artifactory'
+  apply plugin: 'maven-publish'
+
+  artifactory {
+    contextUrl = 'https://oss.jfrog.org'
+
+    publish {
+      repository {
+        repoKey = 'oss-snapshot-local'
+        maven = true
+
+        if (project.hasProperty('jfrogUser') && project.hasProperty('jfrogPassword')) {
+          username = jfrogUser
+          password = jfrogPassword
+        }
+      }
+
+      defaults {
+        project.bnd.project.getSubBuilders().each {
+          publications("maven_${it.getBsn()}")
+        }
+      }
+    }
+  }
+
+  artifactoryPublish { 
+    dependsOn jar
+    properties = ['bintray.package': project.name]
+  }
+
+  publishing {
+    publications {
+      bnd.project.getSubBuilders().each {
+        builder -> "maven_${builder.getBsn()}"(MavenPublication) {
+          artifactId = builder.getBsn()
+          version = builder.getProperty('Bundle-Version').replaceAll('.[^.]+$', '-SNAPSHOT')
+
+          artifact new File("${buildDir}/${artifactId}.jar")
+        }
+      }
+    }
+  }
+}
+

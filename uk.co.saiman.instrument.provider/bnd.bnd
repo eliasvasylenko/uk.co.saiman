@@ -1,0 +1,18 @@
+Bundle-Name: SAI MSApex :: Instrument :: Provider
+
+-runee: JavaSE-1.8
+-runfw: org.eclipse.osgi;version='[3.10.1.v20140909-1633,3.10.1.v20140909-1633]'
+-buildpath: \
+	osgi.enroute.base.api;version=latest,\
+	osgi.enroute.junit.wrapper,\
+	osgi.enroute.hamcrest.wrapper,\
+	org.hamcrest__java-hamcrest,\
+	uk.co.saiman.instrument.api;version=project,\
+	${ss;utilities},\
+	${ss;reflection}
+
+#,\
+#	org.checkerframework__checker-qual,\
+#	org.checkerframework__jdk8
+Bundle-Version: 0.0.1.${tstamp}
+Private-Package: uk.co.saiman.instrument.impl
