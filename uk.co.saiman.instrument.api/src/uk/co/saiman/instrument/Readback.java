@@ -18,23 +18,30 @@
  */
 package uk.co.saiman.instrument;
 
-import java.util.List;
-
-import org.osgi.service.component.annotations.Component;
+import java.util.Set;
 
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
-@Component
-public interface InstrumentModule<T> {
-	T getConfiguration();
+public interface Readback<T> {
+	/**
+	 * If the readback is not providing readings when it is not necessarily
+	 * expected to, such as when it is switched off, this method should return
+	 * null. If the readback is expected to be able to return values but something
+	 * has gone wrong, this method should throw an exception.
+	 * 
+	 * @return The current value of the readback.
+	 */
+	T getValue();
 
-	void setConfiguration(T configuration);
+	/**
+	 * 
+	 * @return
+	 */
+	Set<String> getStatus();
 
-	List<Readback<?>> getReadbacks();
-
-	default TypeToken<T> getConfigurationType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(InstrumentModule.class)
+	default TypeToken<T> getDataType() {
+		return TypeToken.over(getClass()).resolveSupertypeParameters(Readback.class)
 				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
 	}
 }

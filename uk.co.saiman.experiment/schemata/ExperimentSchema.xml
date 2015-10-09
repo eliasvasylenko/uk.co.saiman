@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<schema xmlns="http://saiman.co.uk/2015-10-08/" name="ExperimentSchema">
+	<dependencies />
+
+	<types />
+
+	<models>
+		<model name="experimentPart" dataType="uk.co.saiman.experiment.ExperimentPart"
+			abstract="true" />
+
+		<model name="experimentPartContainer" baseModel="experimentPart">
+			<complex name="part" model="experimentPart" occurances="0.."
+				extensible="true" abstract="true" />
+		</model>
+
+		<model name="experiment" baseModel="experimentPartContainer"
+			dataType="uk.co.saiman.experiment.Experiment">
+		</model>
+	</models>
+</schema>

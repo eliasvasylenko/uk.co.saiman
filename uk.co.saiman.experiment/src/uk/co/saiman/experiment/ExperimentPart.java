@@ -18,23 +18,10 @@
  */
 package uk.co.saiman.experiment;
 
-public interface Experiment extends ExperimentPart {
-	public enum ExperimentLifecycleState {
-		/**
-		 * 
-		 */
-		CONFIGURE,
-		/**
-		 * Move stage into position, etc.
-		 */
-		PREPARE,
-		/**
-		 * Optimise laser, acquire from tdc, etc.
-		 */
-		PROCESS,
-		/**
-		 * Finalise file, etc.
-		 */
-		COMPLETE
-	}
+import java.util.List;
+
+public interface ExperimentPart {
+	public ExperimentType type();
+
+	public List<ExperimentPart> children();
 }

@@ -11,7 +11,7 @@ javac.target: 1.8
 
 -dsannotations: \
 	*
-	
+
 bnd-release = https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact/dist/bundles
 
 copyright.year = ${tstamp;yyyy}
@@ -37,6 +37,7 @@ Bundle-License: LGPL <http://www.gnu.org/licenses/>
 		url = ${bnd-release}/biz.aQute.repository.aether/biz.aQute.repository.aether-latest.jar
 
 ss: ${def;strangeSkiesDependency;uk.co.strangeskies:uk.co.strangeskies.${1}\\;version=latest}
+mdb: ${def;modabiDependency;uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.${1}\\;version=latest}
 
 -plugin.7.StrangeSkies: \
 \

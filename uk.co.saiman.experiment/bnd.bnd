@@ -8,7 +8,8 @@ Bundle-Name: SAI MSApex :: Utilities :: Library
 	osgi.enroute.base.api;version=latest,\
 	osgi.enroute.junit.wrapper,\
 	osgi.enroute.hamcrest.wrapper,\
-	org.hamcrest__java-hamcrest
+	org.hamcrest__java-hamcrest,\
+	uk.co.saiman.instrument.api;version=project
 #,\
 #	org.checkerframework__checker-qual,\
 #	org.checkerframework__jdk8
