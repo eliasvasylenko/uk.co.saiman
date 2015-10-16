@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="Hydrogen" formula="H-" />
+	<chemical name="Carbon" formula="C-" />
+	<chemical formula="CH-" />
+	<chemical formula="CH2-" />
+	<chemical name="Nitrogen" formula="N-" />
+	<chemical name="Oxygen" formula="O-" />
+	<chemical formula="OH-" />
+	<chemical name="Fluorine" formula="F-" />
+	<chemical formula="C2-" />
+	<chemical formula="C2H-" />
+	<chemical formula="CN-" />
+	<chemical formula="BO-" />
+	<chemical name="Silicon" formula="Si-" />
+	<chemical name="Phosphorous" formula="P-" />
+	<chemical formula="CH3O-" />
+	<chemical name="Sulphur" formula="S-" />
+	<chemical formula="O2-" />
+	<chemical formula="SH-" />
+	<chemical name="Chlorine" formula="Cl-" />
+	<chemical formula="C3-" />
+	<chemical formula="C3H-" />
+	<chemical formula="C2N-" />
+	<chemical formula="C2O-" />
+	<chemical formula="C2OH-" />
+	<chemical formula="CNO-" />
+	<chemical formula="SiN-" />
+	<chemical formula="AlO-" />
+	<chemical formula="BO2-" />
+	<chemical formula="C2H3O-" />
+	<chemical formula="CO2-" />
+	<chemical formula="CO2H-" />
+	<chemical formula="C2H5O-" />
+	<chemical formula="NO2-" />
+	<chemical formula="PO-" />
+	<chemical formula="C4-" />
+	<chemical formula="C4H-" />
+	<chemical formula="C3N-" />
+	<chemical formula="C2H3CO-" />
+	<chemical formula="CNS-" />
+	<chemical formula="AlO2-" />
+	<chemical formula="CH3SiO-" />
+	<chemical formula="CH3COO-" />
+	<chemical formula="BO3-" />
+	<chemical formula="C3H7O-" />
+	<chemical formula="SiO2-" />
+	<chemical formula="C5-" />
+	<chemical formula="SiO2H-" />
+	<chemical formula="C5H-" />
+	<chemical formula="NO3-" />
+	<chemical formula="PO2-" />
+	<chemical formula="SO2-" />
+	<chemical formula="S2-" />
+	<chemical formula="C3NO-" />
+	<chemical formula="C6-" />
+	<chemical formula="C6H-" />
+	<chemical formula="C2H5COO-" />
+	<chemical formula="C4H9O-" />
+	<chemical name="Arsenic" formula="As-" />
+	<chemical formula="CH3SiO2-" />
+	<chemical formula="SiO3-" />
+	<chemical formula="SiO3H-" />
+	<chemical name="Bromine" formula="BR-" />
+	<chemical formula="PO3-" />
+	<chemical formula="SO3-" />
+	<chemical name="Selenium" formula="Se-" />
+	<chemical formula="SO3H-" />
+	<chemical formula="CrO2-" />
+	<chemical formula="CrO2H-" />
+	<chemical formula="C4H5O2-" />
+	<chemical formula="GaO-" />
+	<chemical formula="71GaO-" />
+	<chemical formula="AsO-" />
+	<chemical formula="C7H9-" />
+	<chemical formula="C3F3-" />
+	<chemical formula="PO4-" />
+	<chemical formula="SO4-" />
+	<chemical formula="SO4H-" />
+	<chemical formula="CrO3-" />
+	<chemical name="Iodine" formula="I-" />
+</chemicals>

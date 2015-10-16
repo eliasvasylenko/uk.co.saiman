@@ -9,8 +9,14 @@ Bundle-Name: SAI MSApex :: Utilities :: Library
 	osgi.enroute.junit.wrapper,\
 	osgi.enroute.hamcrest.wrapper,\
 	org.hamcrest__java-hamcrest,\
-	${ss;utilities},\
 	${ss;reflection},\
-	uk.co.saiman.utilities;version=project
+	${mdb;core.api},\
+	${ss;utilities},\
+	${ss;mathematics}
+#,\
+#	org.checkerframework__checker-qual,\
+#	org.checkerframework__jdk8
 Bundle-Version: 0.0.1.${tstamp}
-Export-Package: uk.co.saiman.processing
+Export-Package: \
+	uk.co.saiman,\
+	uk.co.saiman.chemistry

@@ -18,8 +18,14 @@
  */
 package uk.co.saiman.instrument;
 
-import java.util.Set;
-
+/**
+ * An instrument is essentially the aggregation of a collection of
+ * {@link HardwareModule}s, and is responsible for supervising their lifecycles
+ * and interactions as part of the collected whole.
+ * 
+ * @author Elias N Vasylenko
+ *
+ */
 public interface Instrument {
 	/**
 	 * An instrument has a 1 to 1 relationship with a lifecycle state. When
@@ -34,14 +40,17 @@ public interface Instrument {
 		 * Instrument is in idle state.
 		 */
 		STANDBY,
+
 		/**
 		 * Make sure vacuum is ready and ramp up voltages, etc.
 		 */
 		BEGIN_OPERATION,
+
 		/**
 		 * Whilst operating, experiments may be processed.
 		 */
 		OPERATING,
+
 		/**
 		 * Ramp down voltages, disengage any operating hardware, etc.
 		 */
@@ -57,12 +66,4 @@ public interface Instrument {
 	void registerLifecycleParticipant(InstrumentLifecycleParticipant participant);
 
 	void unregisterLifecycleParticipant(InstrumentLifecycleParticipant participant);
-
-	Set<InstrumentModule<?>> getModules();
-
-	<T extends InstrumentModule<?>> T getExactModule(Class<T> moduleClass);
-
-	<T extends InstrumentModule<?>> Set<T> getModules(Class<T> moduleClass);
-
-	boolean hasModule(Class<? extends InstrumentModule<?>> moduleClass);
 }

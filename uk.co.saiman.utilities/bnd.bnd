@@ -16,3 +16,6 @@ Bundle-Name: SAI MSApex :: Utilities :: Library
 #	org.checkerframework__checker-qual,\
 #	org.checkerframework__jdk8
 Bundle-Version: 0.0.1.${tstamp}
+Export-Package: \
+	uk.co.saiman,\
+	uk.co.saiman.utilities

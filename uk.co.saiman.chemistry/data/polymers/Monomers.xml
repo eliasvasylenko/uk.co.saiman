@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="Aramids" formula="-CO-C6H4-CO-NH-C6H4-NH" />
+	<chemical name="Epoxy Resins" formula="-C6H4-C(CH3)2-C6H4-OCH2CH(OH)CH2O" />
+	<chemical name="Nylon" formula="-CO(CH2)4CONH(CH2)6NH" />
+	<chemical name="acrylonitrile" formula="-CH2-CH(CN)" />
+	<chemical name="butadiene" formula="-CH2CHCHCH2" />
+	<chemical name="carbonates" formula="-CO3C6H4-C(CH3)2-C6H4" />
+	<chemical name="chloroprene" formula="CH2CH2CCHCl" />
+	<chemical name="cyanoacrylates" formula="-CH2C(CN)(CO2CH3)" />
+	<chemical name="dicyclopentadiene" formula="-C8H10-CHCH" />
+	<chemical name="esters" formula="-COC6H4CO2CH2CH2O" />
+	<chemical name="ether sulfone(s)" formula="-C6H4-SO2-C6H4-O-C6H4-C(CH3)2-C6H4-O" />
+	<chemical name="ethylene" formula="-CH2CH2" />
+	<chemical name="ethylene glycol" formula="-CH2OCH2" />
+	<chemical name="imides"
+		formula="N(CO)2C6H3-O-C6H4-C(CH3)2-C6H4-O-C6H3(CO)2-N-C6H4" />
+	<chemical name="isobutylene" formula="CH2C(CH3)2" />
+	<chemical name="isoprene" formula="-C(CH2(CH3)C(CH2)H)" />
+	<chemical name="ketones" formula="-CH2CH2CO" />
+	<chemical name="methyl methacrylate" formula="C5O2H8" />
+	<chemical name="phenylene oxide" formula="C6H2(CH3)2-O" />
+	<chemical name="phenylene sulfide" formula="-C6H4S" />
+	<chemical name="propylene" formula="-(CH2)(CH3)CH" />
+	<chemical name="styrene" formula="-CH2-(C6H5)-CH" />
+	<chemical name="tetrafluoroethylene" formula="-CF2CF2" />
+	<chemical name="urethanes" formula="-CONH-C6H4-NHCO2.(CH2)2.O" />
+	<chemical name="vinyl acetate" formula="-CH2CH(CO2.CH3)" />
+	<chemical name="vinyl chloride" formula="-CH2CHCl" />
+	<chemical name="vinylidene chloride" formula="-CH2C(Cl)2" />
+	<chemical name="vinylidene fluoride" formula="-CH2CF2" />
+	<chemical name="vinylpyrrolidone" formula="C6H9NO" />
+	<chemical name="1-1-1SBS rubber" formula="-(CH2-C6H4)1-(CH2(CH)2CH2)1-(CH2CH(C6H5))1" />
+	<chemical name="1-2-1SBS rubber" formula="-(CH2-C6H4)1-(CH2(CH)2CH2)2-(CH2CH(C6H5))1" />
+	<chemical name="1-1-2SBS rubber" formula="-(CH2-C6H4)1-(CH2(CH)2CH2)1-(CH2CH(C6H5))2" />
+</chemicals>

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="cyclic" formula="." />
+	<chemical name="Hydroxyl" formula="OH" />
+	<chemical name="Carboxyl" formula="COOH" />
+	<chemical name="Hydrogen" formula="H" />
+</chemicals>

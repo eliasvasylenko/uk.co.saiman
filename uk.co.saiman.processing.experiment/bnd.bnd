@@ -11,6 +11,8 @@ Bundle-Name: SAI MSApex :: Utilities :: Library
 	org.hamcrest__java-hamcrest,\
 	${ss;utilities},\
 	${ss;reflection},\
-	uk.co.saiman.utilities;version=project
+	uk.co.saiman.utilities;version=project,\
+	uk.co.saiman.processing;version=project,\
+	uk.co.saiman.experiment.api;version=project
 Bundle-Version: 0.0.1.${tstamp}
-Export-Package: uk.co.saiman.processing
+Export-Package: uk.co.saiman.processing.experiment

@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="Capric Acid" formula="CH3(CH2)8CO2H" />
+	<chemical name="Lauric Acid" formula="CH3(CH2)10CO2H" />
+	<chemical name="Myristic Acid" formula="CH3(CH2)12CO2H" />
+	<chemical name="Palmitic Acid" formula="CH3(CH2)14CO2H" />
+	<chemical name="Stearic Acid" formula="CH3(CH2)16CO2H" />
+	<chemical name="OLeic Acid" formula="CH3(C16H3O)CO2H" />
+	<chemical name="Linoleic Acid" formula="CH3(C16H28)CO2H" />
+	<chemical name="Linolenic Acid" formula="CH3(C16H26)CO2H" />
+</chemicals>

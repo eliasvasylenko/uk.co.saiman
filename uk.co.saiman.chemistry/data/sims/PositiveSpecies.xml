@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="Hydrogen" formula="H+" />
+	<chemical name="Lithium" formula="Li+" />
+	<chemical name="Beryllium" formula="Be+" />
+	<chemical name="Aluminium" formula="Al^3+" />
+	<chemical name="Boron" formula="B+" />
+	<chemical name="Carbon" formula="C+" />
+	<chemical formula="CH+" />
+	<chemical formula="CH2+" />
+	<chemical name="Nitrogen" formula="N+" />
+	<chemical formula="CH3+" />
+	<chemical name="Oxygen" formula="O+" />
+	<chemical formula="H2O+" />
+	<chemical formula="H3O+" />
+	<chemical name="Calcium" formula="Ca^2+" />
+	<chemical name="Sodium" formula="Na+" />
+	<chemical name="Magnesium" formula="Mg+" />
+	<chemical formula="C2H2+" />
+	<chemical name="Aluminium" formula="Al+" />
+	<chemical formula="C2H3+" />
+	<chemical name="Silicon" formula="Si+" />
+	<chemical formula="CHNH+" />
+	<chemical formula="CO+" />
+	<chemical formula="N2+" />
+	<chemical formula="SiH+" />
+	<chemical formula="C2H5+" />
+	<chemical formula="CH3NH+" />
+	<chemical name="Phosphorous" formula="P+" />
+	<chemical formula="CF+" />
+	<chemical formula="CH3O+" />
+	<chemical formula="O2+" />
+	<chemical formula="H3O(H2O)+" />
+	<chemical name="Potassium" formula="K+" />
+	<chemical formula="C3H3+" />
+	<chemical name="Calcium" formula="Ca+" />
+	<chemical name="Argon" formula="Ar+" />
+	<chemical formula="CH2CN+" />
+	<chemical formula="C3H5" />
+	<chemical formula="AlO+" />
+	<chemical formula="C3H7+" />
+	<chemical formula="CH3Si+" />
+	<chemical formula="C2H3O+" />
+	<chemical formula="SiOH+" />
+	<chemical name="Scandium" formula="Sc+" />
+	<chemical formula="C2H5O+" />
+	<chemical formula="Na2+" />
+	<chemical formula="PO+" />
+	<chemical formula="CFO+" />
+	<chemical name="Titanium" formula="Ti+" />
+	<chemical formula="CF2+" />
+	<chemical name="Vanadium" formula="V+" />
+	<chemical name="Chromium" formula="Cr+" />
+	<chemical formula="C4H5+" />
+	<chemical formula="Al2+" />
+	<chemical name="Manganese" formula="Mn+" />
+	<chemical formula="C4H7+" />
+	<chemical formula="H3O(H2O)2+" />
+	<chemical name="Iron" formula="Fe+" />
+	<chemical formula="FeH+" />
+	<chemical formula="C4H9+" />
+	<chemical formula="CaOH+" />
+	<chemical name="Nickel" formula="Ni+" />
+	<chemical name="Cobalt" formula="Co+" />
+	<chemical formula="C3H7O+" />
+	<chemical formula="(CH3)2SiH+" />
+	<chemical name="Copper" formula="Cu+" />
+	<chemical name="Zinc" formula="Zn+" />
+	<chemical formula="TiO+" />
+	<chemical formula="C5H7+" />
+	<chemical name="Galium" formula="Ga+" />
+	<chemical formula="CF3+" />
+	<chemical formula="C4H5O+" />
+	<chemical formula="CrOH+" />
+	<chemical formula="C5H9+" />
+	<chemical formula="C5H11+" />
+	<chemical formula="(CH3)3Si+" />
+	<chemical formula="FeOH+" />
+	<chemical formula="H3O(H2O)3+" />
+	<chemical name="Germanium" formula="Ge+" />
+	<chemical name="Arsenic" formula="As+" />
+	<chemical formula="C6H5+" />
+	<chemical formula="C6H7+" />
+	<chemical name="Selenium" formula="Se+" />
+	<chemical formula="ZnOH+" />
+	<chemical formula="C6H9+" />
+	<chemical formula="C6H11+" />
+	<chemical formula="C4H5O2+" />
+	<chemical name="Strontium" formula="Sr+" />
+	<chemical name="Yttrium" formula="Y+" />
+	<chemical name="Zirconium" formula="Zr+" />
+	<chemical formula="YH+" />
+	<chemical formula="C7H7+" />
+	<chemical formula="H3O(H2O)4+" />
+	<chemical formula="C3F3+" />
+	<chemical name="Niobium" formula="Nb+" />
+	<chemical formula="C7H9+" />
+	<chemical formula="C7H11+" />
+	<chemical formula="C7H13+" />
+	<chemical name="Molybdenum" formula="Mo+" />
+	<chemical formula="C2F4+" />
+	<chemical formula="(CH3)5Si2O+" />
+</chemicals>

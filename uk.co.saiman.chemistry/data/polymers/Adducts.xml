@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="proton" formula="H" />
+	<chemical name="Potassium" formula="K" />
+	<chemical name="Sodium" formula="Na" />
+	<chemical name="Silver" formula="Ag" />
+	<chemical name="Cesium" formula="Cs" />
+</chemicals>

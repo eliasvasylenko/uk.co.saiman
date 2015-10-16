@@ -21,7 +21,7 @@ package uk.co.saiman.processing;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
-public interface ConfigurableProcessor<T, R, C> {
+public interface ConfigurableProcessor<C, T, R> {
 	Processor<T, R> configure(C configuration);
 
 	default TypeToken<T> getTargetType() {

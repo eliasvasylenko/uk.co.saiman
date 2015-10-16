@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="Polydimethylsiloxane" formula="-(C2H6SiO)" />
+	<chemical name="Polystyrene" formula="-(C6H5CHCH2)" />
+	<chemical name="Poly(methyl mthacrylate)" formula="-(CH3CCH2COOCH3)" />
+	<chemical name="Poly(ethylene terephthalate)" formula="-(C6H4(CO)2(OCH2)2)" />
+</chemicals>

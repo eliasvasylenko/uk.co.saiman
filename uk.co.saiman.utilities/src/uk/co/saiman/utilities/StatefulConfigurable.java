@@ -16,37 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.instrument;
+package uk.co.saiman.utilities;
 
-import java.util.Set;
+import org.osgi.service.component.annotations.Component;
 
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
-/**
- * @author Elias N Vasylenko
- *
- * @param <T>
- */
-public interface Readback<T> {
-	/**
-	 * If the readback is not providing readings when it is not necessarily
-	 * expected to, such as when it is switched off, this method should return
-	 * null. If the readback is expected to be able to return values but something
-	 * has gone wrong, this method should throw an exception.
-	 * 
-	 * @return The current value of the readback.
-	 */
-	T getValue();
+@Component
+public interface StatefulConfigurable<C, S> extends Configurable<C> {
+	S getState();
 
-	/**
-	 * 
-	 * @return
-	 */
-	Set<String> getStatus();
-
-	default TypeToken<T> getDataType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(Readback.class)
-				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
+	default TypeToken<S> getStateType() {
+		return TypeToken.over(getClass()).resolveSupertypeParameters(StatefulConfigurable.class)
+				.resolveTypeArgument(new TypeParameter<S>() {}).infer();
 	}
 }

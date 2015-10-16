@@ -18,32 +18,25 @@
  */
 package uk.co.saiman.instrument.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleParticipant;
-import uk.co.saiman.instrument.InstrumentModule;
 import uk.co.strangeskies.utilities.IdentityProperty;
 
-@Component(service = Instrument.class)
+@Component
 public class InstrumentImpl implements Instrument {
 	private InstrumentLifecycleState state;
 	private final Set<InstrumentLifecycleParticipant> participants;
 
-	private final Map<Class<?>, InstrumentModule<?>> modules;
-
 	public InstrumentImpl() {
 		state = InstrumentLifecycleState.STANDBY;
 		participants = new HashSet<>();
-
-		modules = new HashMap<>();
 	}
 
 	@Override
@@ -52,13 +45,14 @@ public class InstrumentImpl implements Instrument {
 	}
 
 	@Override
-	@Reference
-	public void registerLifecycleParticipant(InstrumentLifecycleParticipant participant) {
+	@Reference(cardinality = ReferenceCardinality.MULTIPLE)
+	public synchronized void registerLifecycleParticipant(InstrumentLifecycleParticipant participant) {
 		participants.add(participant);
+		participant.initialise(this);
 	}
 
 	@Override
-	public void unregisterLifecycleParticipant(InstrumentLifecycleParticipant participant) {
+	public synchronized void unregisterLifecycleParticipant(InstrumentLifecycleParticipant participant) {
 		participants.remove(participant);
 	}
 
@@ -80,6 +74,10 @@ public class InstrumentImpl implements Instrument {
 	}
 
 	private synchronized boolean transitionToState(InstrumentLifecycleState state) {
+		return transitionToStateImpl(state);
+	}
+
+	private boolean transitionToStateImpl(InstrumentLifecycleState state) {
 		IdentityProperty<Boolean> success = new IdentityProperty<>(true);
 
 		if (this.state == state) {
@@ -99,7 +97,7 @@ public class InstrumentImpl implements Instrument {
 									executingThread.interrupt();
 								}
 								this.state = state;
-								transitionToState(InstrumentLifecycleState.STANDBY);
+								transitionToStateImpl(InstrumentLifecycleState.STANDBY);
 							}
 						}
 					}
@@ -116,6 +114,10 @@ public class InstrumentImpl implements Instrument {
 
 			for (Thread thread : participatingThreads) {
 				try {
+					/*
+					 * TODO some sort of timeout here: If not in standby, try fall back to
+					 * it. If already going to standby, more severe failure.
+					 */
 					thread.join();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -130,37 +132,5 @@ public class InstrumentImpl implements Instrument {
 		}
 
 		return success.get();
-	}
-
-	@Reference
-	public void addModule(InstrumentModule<?> module) {
-		modules.putIfAbsent(module.getClass(), module);
-	}
-
-	public void removeModule(InstrumentModule<?> module) {
-		modules.remove(module.getClass(), module);
-	}
-
-	@Override
-	public Set<InstrumentModule<?>> getModules() {
-		return new HashSet<>(modules.values());
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends InstrumentModule<?>> T getExactModule(Class<T> moduleType) {
-		return (T) modules.get(moduleType);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends InstrumentModule<?>> Set<T> getModules(Class<T> moduleClass) {
-		return modules.keySet().stream().filter(moduleClass::isAssignableFrom).map(c -> (T) modules.get(c))
-				.collect(Collectors.toSet());
-	}
-
-	@Override
-	public boolean hasModule(Class<? extends InstrumentModule<?>> moduleClass) {
-		return modules.containsKey(moduleClass);
 	}
 }

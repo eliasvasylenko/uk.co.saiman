@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<chemicals xmlns="http://saiman.co.uk/2015-10-08/">
+	<chemical name="Erucamide" formula="CH3(C20H38)CONH2" />
+	<chemical name="Oleamide" formula="CH3(CH2)10CO2H" />
+	<chemical name="Stearamide" formula="CH3(CH2)16CONH2" />
+	<chemical name="Glyceryl Monostearate" formula="C21H42O4" />
+	<chemical name="Glyceryl Monooleate" formula="C21H40O4" />
+	<chemical name="Irgafos 168" formula="C42H63O3P" />
+	<chemical name="Irganox 245" formula="C34H50O8" />
+	<chemical name="Irganox 259" formula="C39H62O6" />
+	<chemical name="Irganox 1010" formula="C73H108O12" />
+	<chemical name="Tinuvin 328" formula="C22H39N3O" />
+	<chemical name="Tinuvin 770" formula="C28H52O4N2" />
+	<chemical name="Tinuvin 900" formula="C30H29N3O" />
+	<chemical name="Di(isooctyl)phthalate" formula="C24H38O4" />
+</chemicals>
