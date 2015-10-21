@@ -120,7 +120,7 @@ public class MassSpectrumIdentifier {
 		double scalingFactor = spectrum.getNormalisingConstant() * comparisonSpectrum.getNormalisingConstant();
 
 		// range of intersection
-		Range<Double> intersectionRange = spectrum.getRange().getIntersectedWith(comparisonSpectrum.getRange());
+		Range<Double> intersectionRange = spectrum.getRange().getIntersectionWith(comparisonSpectrum.getRange());
 
 		double similaritySum = 0;
 		if (!intersectionRange.isEmpty()) {

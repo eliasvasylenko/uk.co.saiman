@@ -1,15 +1,15 @@
-strangeSkiesDependency: uk.co.strangeskies.${1}
-modabiDependency: uk.co.strangeskies.modabi.${1}
-
--plugin.8.StrangeSkies: \
+strangeSkiesDependency: uk.co.strangeskies.${1}\;version=latest
+strangeSkiesRepo: \
 \
 		aQute.bnd.deployer.repository.LocalIndexedRepo;\
 			name                =       StrangeSkies;\
 			pretty              =       true;\
-			local               =       ${user.home}/git/uk.co.strangeskies/cnf/release,\
+			local               =       ${user.home}/git/uk.co.strangeskies/cnf/release
+
+modabiDependency: uk.co.strangeskies.modabi.${1}\;version=latest
+modabiRepo: \
 \
 		aQute.bnd.deployer.repository.LocalIndexedRepo;\
 			name                =       Modabi;\
 			pretty              =       true;\
 			local               =       ${user.home}/git/uk.co.strangeskies.modabi/cnf/release
-			

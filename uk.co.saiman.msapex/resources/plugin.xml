@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            name="uk.co.saiman.msapex"
+            application="org.eclipse.e4.ui.workbench.swt.E4Application">
+         <property
+               name="applicationCSS"
+               value="platform:/plugin/uk.co.saiman.msapex/css/default.css">
+         </property>
+         <property
+               name="appName"
+               value="uk.co.saiman.msapex">
+         </property>
+      </product>
+   </extension>
+
+</plugin>

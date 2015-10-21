@@ -3,3 +3,5 @@
 /cache/
 /release/
 !/local/**/*.jar
+!/org.eclipse.rcp-4.5.1/**/*.jar
+/ext/local.bnd

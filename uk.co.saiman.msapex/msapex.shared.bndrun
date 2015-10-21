@@ -1,0 +1,27 @@
+# This run file contains all the cross-platform bundle and settings to run Bndtools.
+
+# Do not run this, use the platform-specific bndrun files (which "-include" this)
+
+-runfw: org.eclipse.osgi
+
+runreq.msapex: \
+	${runreq.eclipse.e4},\
+	${runreq.eclipse.p2},\
+	${runreq.felix.shell},\
+	${req;uk.co.saiman.msapex}
+
+vmargs.msapex: \
+	-Xmx512m \
+	-XX:MaxPermSize=256m
+
+runpath.msapex:\
+	${runpath.eclipse}
+
+runprops.msapex: \
+	eclipse.application=org.eclipse.e4.ui.workbench.swt.E4Application,\
+	eclipse.product=uk.co.saiman.msapex.product,\
+	osgi.console=,\
+	eclipse.consoleLog=,\
+	equinox.use.ds=true,\
+	osgi.instance.area.default=./workspace,\
+	osgi.console.enable.builtin=false

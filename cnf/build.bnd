@@ -23,6 +23,8 @@ Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saiman.co.uk/
 Bundle-Copyright: ${copyright}
 Bundle-License: LGPL <http://www.gnu.org/licenses/>
 
+Bundle-ActivationPolicy: lazy
+
 ## Properties from ext/*.bnd can be referenced in order to extend them. For
 ## example, to add one additional plugin to the list defined in
 ## ext/repositories.bnd:
@@ -36,14 +38,29 @@ Bundle-License: LGPL <http://www.gnu.org/licenses/>
 	${build}/cache/biz.aQute.repository.aether.jar; \
 		url = ${bnd-release}/biz.aQute.repository.aether/biz.aQute.repository.aether-latest.jar
 
-ss: ${def;strangeSkiesDependency;uk.co.strangeskies:uk.co.strangeskies.${1}\\;version=latest}
-mdb: ${def;modabiDependency;uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.${1}\\;version=latest}
+ss: ${def;strangeSkiesDependency;uk.co.strangeskies:uk.co.strangeskies.${1}\\\;version=latest}
+strangeSkiesDefaultRepo: \
+\
+		aQute.bnd.deployer.repository.aether.AetherRepository\; \
+			name				=		StrangeSkies\; \
+			url					=		http://oss.jfrog.org/libs-snapshot/
+
+mdb: ${def;modabiDependency;uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.${1}\\\;version=latest}
+modabiDefaultRepo: \
+\
+		aQute.bnd.deployer.repository.aether.AetherRepository\; \
+			name				=		Modabi\; \
+			url					=		http://oss.jfrog.org/libs-snapshot/
 
 -plugin.7.StrangeSkies: \
+		${def;strangeSkiesRepo;\\\$\{strangeSkiesDefaultRepo\}}, \
+		${def;modabiRepo;\\\$\{modabiDefaultRepo\}}
+
+-plugin.8.EclipsePlatform: \
 \
-		aQute.bnd.deployer.repository.aether.AetherRepository; \
-			name				=		StrangeSkies; \
-			url					=		http://oss.jfrog.org/libs-snapshot/
+		aQute.bnd.deployer.repository.FixedIndexedRepo; \
+			name				=		"Eclipse Platform"; \
+			locations			=		https://dl.bintray.com/sai/uk.co.saiman/org.eclipse.platform/4.5.1/index.xml
 
 # For users with a copy of the uk.co.strangeskies project checked out
 # from git locally, they can redirect dependencies on bundles in that
@@ -55,35 +72,86 @@ mdb: ${def;modabiDependency;uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.
 # uk.co.strangeskies project.
 #
 #strangeSkiesDependency: uk.co.strangeskies.${1}\;version=latest
-#
-#-plugin.8.StrangeSkies: \
+#strangeSkiesRepo: \
 #\
 #		aQute.bnd.deployer.repository.LocalIndexedRepo;\
 #			name                =       StrangeSkies;\
 #			pretty              =       true;\
 #			local               =       ${user.home}[/workspaces]/uk.co.strangeskies/cnf/release
 
+# Version of bnd/bndlib to use consistently throughout the build
+# NB. this must be specified as full M.m.u version (but no qualifier)
+# On advice of Peter we use an up-to-major version range
+bnd-version-base:         3.1.0
+bnd-version-ceiling:      4.0.0
+bndlib:                   aQute.libg;version='[${bnd-version-base},${bnd-version-ceiling})', \
+                          biz.aQute.bndlib;version='[${bnd-version-base},${bnd-version-ceiling})'
+
+# Version of the repository plugin to use consistently throughout the build
+# NB. this must be specified as full M.m.u version (but no qualifier)
+aQute-repository:         biz.aQute.repository;version='[${bnd-version-base},${bnd-version-ceiling})'
+aQute-resolve:            biz.aQute.resolve;version='[${bnd-version-base},${bnd-version-ceiling})'
+
+osgi.core.version:        5.0.0
+osgi.cmpn.version:        5.0.0
+
 ## If you use git, you might want to uncomment the following lines:
 Git-Descriptor: ${system-allow-fail;git describe --dirty --always}
 Git-SHA: ${system-allow-fail;git rev-list -1 HEAD}
 -diffignore: Git-Descriptor,Git-SHA
 
+# Requirement
+req: osgi.identity;filter:='(osgi.identity=${1})'
+
+# Run path groups:
+runpath.eclipse:\
+	org.eclipse.osgi.compatibility.state
+
 # Run requirement groups:
-runreq.base=\
-	osgi.identity;filter:='(osgi.identity=osgi.enroute.logger.simple.provider)'
+runreq.base:\
+	${req;osgi.enroute.logger.simple.provider}
 
-runreq.felix.shell=\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.command)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.shell)'
+runreq.eclipse.e4:\
+	${req;bndtools.runtime.eclipse.applaunch},\
+	${req;org.eclipse.equinox.launcher},\
+	${req;org.eclipse.equinox.console},\
+	${req;org.eclipse.e4.ui.workbench.swt},\
+	${req;org.eclipse.emf.databinding},\
+	${req;org.eclipse.core.databinding.beans},\
+	${req;org.eclipse.equinox.concurrent},\
+	${req;org.eclipse.e4.ui.workbench.renderers.swt},\
+	${req;org.eclipse.equinox.event}
 
-runreq.felix.web=\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.http.whiteboard)',\
-	osgi.identity;filter:='(osgi.identity=aQute.xray.plugin)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.event)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.memoryusage)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.scriptconsole)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.useradmin)'
+runreq.eclipse.p2:\
+	${req;org.eclipse.equinox.p2.core},\
+	${req;org.eclipse.equinox.p2.engine},\
+	${req;org.eclipse.equinox.p2.jarprocessor},\
+	${req;org.eclipse.equinox.p2.metadata},\
+	${req;org.eclipse.equinox.p2.metadata.repository},\
+	${req;org.eclipse.equinox.p2.repository}
+	
+runreq.felix.shell:\
+	${req;org.apache.felix.gogo.command},\
+	${req;org.apache.felix.gogo.shell},\
+	${req;org.apache.felix.gogo.runtime}
 
-runreq.eclipselink.jpa=\,\
-	osgi.identity;filter:='(osgi.identity=org.apache.aries.jpa.eclipselink.adapter)'
-	osgi.identity;filter:='(osgi.identity=javax.persistence)'
+runreq.felix.web:\
+	${req;org.apache.felix.http.whiteboard},\
+	${req;aQute.xray.plugin},\
+	${req;org.apache.felix.webconsole.plugins.event},\
+	${req;org.apache.felix.webconsole.plugins.memoryusage},\
+	${req;org.apache.felix.webconsole.plugins.scriptconsole},\
+	${req;org.apache.felix.webconsole.plugins.useradmin}
+
+# Build path groups:
+buildpath.eclipse:\
+	javax.inject,\
+	org.eclipse.core.runtime,\
+	org.eclipse.swt,\
+	org.eclipse.e4.ui.model.workbench,\
+	org.eclipse.jface,\
+	org.eclipse.e4.ui.services,\
+	org.eclipse.e4.ui.workbench,\
+	org.eclipse.e4.core.di,\
+	org.eclipse.e4.ui.di,\
+	org.eclipse.e4.core.contexts

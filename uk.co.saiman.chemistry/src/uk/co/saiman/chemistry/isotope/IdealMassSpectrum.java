@@ -433,7 +433,7 @@ public class IdealMassSpectrum {
 	}
 
 	public double getBestFitScaleAgainst(IdealMassSpectrum massSpectrum) {
-		Range<Double> intersectionRange = getRange().getIntersectedWith(massSpectrum.getRange());
+		Range<Double> intersectionRange = getRange().getIntersectionWith(massSpectrum.getRange());
 
 		double weightedAverageScale = 0;
 		if (!intersectionRange.isEmpty()) {
