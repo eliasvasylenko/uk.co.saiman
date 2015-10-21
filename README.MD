@@ -1,4 +1,4 @@
-# Scientific Analysis Instruments - Common Libraries
+# Scientific Analysis Instruments
 
 <a href="https://travis-ci.org/Scientific-Analysis-Instruments/uk.co.saiman">
   <img src="http://img.shields.io/travis/Scientific-Analysis-Instruments/uk.co.saiman.svg"
