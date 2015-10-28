@@ -1,7 +1,6 @@
 -include: msapex.shared.bndrun
 
--runvm: \
-	${vmargs.msapex}
+-runvm: ${vmargs.msapex}
 
 -runpath: \
 	${runpath.msapex},\
@@ -9,10 +8,10 @@
 	org.eclipse.equinox.launcher.win32.win32.x86_64
 
 -runproperties: \
-	${runprops.msapex},\
 	osgi.ws=win32,\
-	osgi.arch=x86_64,\
-	osgi.os=win32
+	osgi.os=win32,\
+	${runprops.msapex},\
+	osgi.arch=x86_64
 
 -runfw: org.eclipse.osgi;version='[3.10.101.v20150820-1432,3.10.101.v20150820-1432]'
 -runee: JavaSE-1.8
@@ -105,4 +104,5 @@
 	org.w3c.dom.events;version='[3.0.0,3.0.1)',\
 	org.w3c.dom.smil;version='[1.0.1,1.0.2)',\
 	org.w3c.dom.svg;version='[1.1.0,1.1.1)',\
-	uk.co.saiman.msapex;version=snapshot
+	uk.co.saiman.msapex;version=snapshot,\
+	uk.co.saiman.msapex.acquisition;version=snapshot

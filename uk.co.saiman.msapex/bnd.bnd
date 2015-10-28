@@ -1,10 +1,9 @@
-Bundle-SymbolicName: uk.co.saiman.msapex;singleton:=true
+Bundle-SymbolicName: ${project.name};singleton:=true
 Bundle-Localization: plugin
 
 # 1. JUNit and Felix Shell are optional dependencies.
 # 2. Disable ALL Eclipse split package attributes, to ensure we import from the "aggregator" bundle(s).
-Import-Package: junit.framework;resolution:=optional,\
-	org.apache.felix.shell;resolution:=optional,\
+Import-Package: \
 	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!
 
 # Bundle Content
@@ -20,5 +19,4 @@ Include-Resource: \
 	css/default.css=resources/css/default.css
 
 -buildpath: \
-	${buildpath.eclipse},\
-	osgi.enroute.base.api
+	${buildpath.eclipse}

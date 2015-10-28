@@ -13,9 +13,7 @@ Bundle-Name: SAI MSApex :: Utilities :: Library
 	${mdb;core.api},\
 	${ss;utilities},\
 	${ss;mathematics}
-#,\
-#	org.checkerframework__checker-qual,\
-#	org.checkerframework__jdk8
+
 Bundle-Version: 0.0.1.${tstamp}
 Export-Package: \
 	uk.co.saiman,\

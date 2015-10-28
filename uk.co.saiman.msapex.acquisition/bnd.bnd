@@ -1,0 +1,21 @@
+Bundle-SymbolicName: ${project.name};singleton:=true
+Bundle-Name: MSApex :: Acquisition :: Provider
+Bundle-Localization: plugin
+
+-runee: JavaSE-1.8
+-runfw: org.eclipse.osgi;version='[3.10.1.v20140909-1633,3.10.1.v20140909-1633]'
+-buildpath: \
+	${buildpath.eclipse},\
+	${ss;utilities},\
+	${ss;reflection},\
+	uk.co.saiman.acquisition.api;version=project,\
+	uk.co.saiman.utilities;version=project
+
+Import-Package: \
+	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!
+
+Private-Package: uk.co.saiman.msapex.acquisition
+
+Include-Resource: \
+	resources/fragment.e4xmi,\
+	resources/plugin.xml

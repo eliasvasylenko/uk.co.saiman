@@ -9,9 +9,6 @@ javac.target: 1.8
 ## Bnd Options
 -sources: true
 
--dsannotations: \
-	*
-
 bnd-release = https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact/dist/bundles
 
 copyright.year = ${tstamp;yyyy}
@@ -19,11 +16,15 @@ copyright = Copyright (c) Scientific Analysis Instruments Limited (2015, ${copyr
 
 groupid: uk.co.saiman.msapex
 
+strangeskies-version: 1.0.0
+strangeskies-version-ceiling: 2.0.0
+
 Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saiman.co.uk/
 Bundle-Copyright: ${copyright}
 Bundle-License: LGPL <http://www.gnu.org/licenses/>
+Bundle-Version: ${strangeskies-version}.${tstamp}
 
-Bundle-ActivationPolicy: lazy
+-dsannotations: *
 
 ## Properties from ext/*.bnd can be referenced in order to extend them. For
 ## example, to add one additional plugin to the list defined in

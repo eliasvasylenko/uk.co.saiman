@@ -353,9 +353,6 @@ public class IsotopeDistribution {
 			}
 		}
 
-		// iterate over values in current state
-		Iterator<MassAbundance> dataIterator;
-		MassAbundance dataMassAbundance;
 		// working variables for next state (sorted so pruning is quick as possible)
 		TreeSet<MassAbundance> nextState = new TreeSet<MassAbundance>();
 		MassAbundance nextMassAbundance;
@@ -442,10 +439,7 @@ public class IsotopeDistribution {
 				}
 
 				for (Isotope isotope : isotopes) {
-					dataIterator = dataHash.iterator();
-					while (dataIterator.hasNext()) {
-						dataMassAbundance = dataIterator.next();
-
+					for (MassAbundance dataMassAbundance : dataHash) {
 						double mass;
 						if (mergeDistance >= 0) {
 							mass = dataMassAbundance.getMass() + isotope.getMass();
@@ -498,7 +492,6 @@ public class IsotopeDistribution {
 				 * (to reduce error)
 				 */
 				dataHash.clear();
-				dataIterator = nextState.iterator();
 				double highestProbability = 0;
 				if (maxStates == 0) {
 					dataIterator = nextState.iterator();
@@ -540,10 +533,7 @@ public class IsotopeDistribution {
 			for (int i = 0; i < specificIsotopeCounts.get(specificIsotope); i++) {
 				nextState.clear();
 
-				dataIterator = dataHash.iterator();
-				while (dataIterator.hasNext()) {
-					dataMassAbundance = dataIterator.next();
-
+				for (MassAbundance dataMassAbundance : dataHash) {
 					nextMassAbundance = new MassAbundance();
 
 					// are we using real mass?
@@ -589,10 +579,9 @@ public class IsotopeDistribution {
 		 * remove all peaks below a certain value
 		 */
 
-		dataIterator = dataHash.iterator();
+		Iterator<MassAbundance> dataIterator = dataHash.iterator();
 		while (dataIterator.hasNext()) {
-			dataMassAbundance = dataIterator.next();
-			if (dataMassAbundance.getAbundance() < (minimumAbundance / 100)) {
+			if (dataIterator.next().getAbundance() < (minimumAbundance / 100)) {
 				dataIterator.remove();
 			}
 		}

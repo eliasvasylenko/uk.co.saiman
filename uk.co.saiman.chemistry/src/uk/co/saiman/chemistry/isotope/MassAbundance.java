@@ -3,12 +3,12 @@ package uk.co.saiman.chemistry.isotope;
 import java.util.Comparator;
 
 public class MassAbundance implements Comparable<MassAbundance> {
-	private double mass;
-	private double abundance;
+	private final double mass;
+	private final double abundance;
 
 	// expected error / variance margins
-	private double massVariance; // given by approximate variance in merges
-	private double abundanceVariance; // given by original data
+	private final double massVariance; // given by approximate variance in merges
+	private final double abundanceVariance; // given by original data
 
 	public MassAbundance() {
 		mass = 0;

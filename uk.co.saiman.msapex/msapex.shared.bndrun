@@ -8,11 +8,11 @@ runreq.msapex: \
 	${runreq.eclipse.e4},\
 	${runreq.eclipse.p2},\
 	${runreq.felix.shell},\
-	${req;uk.co.saiman.msapex}
+	${req;uk.co.saiman.msapex},\
+	${req;uk.co.saiman.msapex.acquisition}
 
 vmargs.msapex: \
-	-Xmx512m \
-	-XX:MaxPermSize=256m
+	-Xmx1024m
 
 runpath.msapex:\
 	${runpath.eclipse}
@@ -21,7 +21,9 @@ runprops.msapex: \
 	eclipse.application=org.eclipse.e4.ui.workbench.swt.E4Application,\
 	eclipse.product=uk.co.saiman.msapex.product,\
 	osgi.console=,\
-	eclipse.consoleLog=,\
+	eclipse.consoleLog=true,\
 	equinox.use.ds=true,\
 	osgi.instance.area.default=./workspace,\
-	osgi.console.enable.builtin=false
+	osgi.console.enable.builtin=false,\
+	osgi.clean=true,\
+	clearPersistedState=true

@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmi:id="_eiA3gHZuEeWsqc-VkLgtpQ" elementId="org.eclipse.e4.ide.application" bindingContexts="_eiA3iXZuEeWsqc-VkLgtpQ">
   <children xsi:type="basic:TrimmedWindow" xmi:id="_eiA3gXZuEeWsqc-VkLgtpQ" elementId="uk.co.saiman.msapex" label="MSApex" width="960" height="720">
-    <children xsi:type="advanced:PerspectiveStack" xmi:id="_JUWF8HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.perspectivestack.root">
-      <children xsi:type="advanced:Perspective" xmi:id="_OR2hwHfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.perspective.experiment">
-        <children xsi:type="basic:PartSashContainer" xmi:id="_Vg0C0HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partsashcontainer.0" horizontal="true">
-          <children xsi:type="basic:PartStack" xmi:id="_Znkc0HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partstack.experiment"/>
-          <children xsi:type="basic:PartSashContainer" xmi:id="_bVxEAHfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partsashcontainer.1">
-            <children xsi:type="advanced:Placeholder" xmi:id="_dCdPUHfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.placeholder.editor"/>
-            <children xsi:type="basic:PartStack" xmi:id="_cpNB0HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partstack.instrument"/>
+    <children xsi:type="advanced:PerspectiveStack" xmi:id="_JUWF8HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.perspectivestack.root" selectedElement="_OR2hwHfZEeW4bozxYcFcjw">
+      <children xsi:type="advanced:Perspective" xmi:id="_OR2hwHfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.perspective.experiment" selectedElement="_Vg0C0HfZEeW4bozxYcFcjw">
+        <children xsi:type="basic:PartSashContainer" xmi:id="_Vg0C0HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partsashcontainer.0" selectedElement="_bVxEAHfZEeW4bozxYcFcjw" horizontal="true">
+          <children xsi:type="basic:PartStack" xmi:id="_Znkc0HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partstack.overview"/>
+          <children xsi:type="basic:PartSashContainer" xmi:id="_bVxEAHfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partsashcontainer.1" selectedElement="_9Mo_YHf7EeWeCa5uXT_XfA">
+            <children xsi:type="advanced:Area" xmi:id="_9Mo_YHf7EeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.area.editor" label="Editor">
+              <children xsi:type="basic:PartStack" xmi:id="_Dw4bIHiOEeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.partstack.editor"/>
+            </children>
+            <children xsi:type="basic:PartStack" xmi:id="_cpNB0HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partstack.status"/>
           </children>
         </children>
       </children>
     </children>
+    <mainMenu xmi:id="_fLUg0Hf7EeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.menu.0"/>
   </children>
   <rootContext xmi:id="_eiA3iXZuEeWsqc-VkLgtpQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_eiA3inZuEeWsqc-VkLgtpQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
