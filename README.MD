@@ -13,7 +13,7 @@
 
 [**Snapshot** *@OJO*](https://oss.jfrog.org/artifactory/simple/libs-snapshot/uk/co/saiman/)
 
-[**Release** *@Bintray*](https://bintray.com/saiman/uk.co.saiman)
+[**Release** *@Bintray*](https://bintray.com/sai/uk.co.saiman)
 
 ## Documentation
 
