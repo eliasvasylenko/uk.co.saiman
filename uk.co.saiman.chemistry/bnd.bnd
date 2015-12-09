@@ -16,5 +16,6 @@ Bundle-Name: SAI MSApex :: Utilities :: Library
 
 Bundle-Version: 0.0.1.${tstamp}
 Export-Package: \
-	uk.co.saiman,\
+	uk.co.saiman.chemistry.analysis,\
+	uk.co.saiman.chemistry.isotope,\
 	uk.co.saiman.chemistry

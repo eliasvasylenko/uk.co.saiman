@@ -1,4 +1,5 @@
 Bundle-SymbolicName: ${project.name};singleton:=true
+Bundle-Name: MSApex
 Bundle-Localization: plugin
 
 # 1. JUNit and Felix Shell are optional dependencies.
@@ -6,17 +7,12 @@ Bundle-Localization: plugin
 Import-Package: \
 	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!
 
-# Bundle Content
-
 Private-Package: \
-	uk.co.saiman.msapex
 
-Export-Package: \
-
+Export-Package: uk.co.saiman.msapex
 Include-Resource: \
 	resources/plugin.xml,\
 	resources/Application.e4xmi,\
 	css/default.css=resources/css/default.css
 
--buildpath: \
-	${buildpath.eclipse}
+-buildpath: ${buildpath.eclipse.fx}

@@ -8,12 +8,14 @@ Bundle-Name: SAI MSApex :: Instrument :: Provider
 	osgi.enroute.hamcrest.wrapper,\
 	org.hamcrest__java-hamcrest,\
 	${ss;utilities},\
+	${ss;mathematics},\
 	${ss;reflection},\
 	uk.co.saiman.instrument.api;version=project,\
-	uk.co.saiman.utilities;version=project
+	uk.co.saiman.utilities;version=project,\
+	uk.co.saiman.data.api;version=project
 
 #,\
 #	org.checkerframework__checker-qual,\
 #	org.checkerframework__jdk8
 Bundle-Version: 0.0.1.${tstamp}
-Private-Package: uk.co.saiman.acquisition
+-sub: *.bnd

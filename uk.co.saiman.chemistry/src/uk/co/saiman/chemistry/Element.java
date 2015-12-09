@@ -1,18 +1,20 @@
 package uk.co.saiman.chemistry;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 
 import uk.co.saiman.chemistry.isotope.Isotope;
 import uk.co.strangeskies.mathematics.values.DoubleValue;
 
 public class Element implements Comparable<Element> {
-	private int atomicNumber;
-	private String name;
-	private String symbol;
-	private TreeSet<Isotope> isotopes;
-	private Category category;
+	private final int atomicNumber;
+	private final String name;
+	private final String symbol;
+	private final TreeSet<Isotope> isotopes;
+	private final Category category;
 
 	public enum Category {
 		NONE("None"), ALKALI("Alkali"), ALKALINE("Alkaline"), LANTHANIDE("Lanthanide"), ACTINIDE("Actinide"), TRANSITION(
@@ -41,12 +43,13 @@ public class Element implements Comparable<Element> {
 		}
 	}
 
-	public Element() {
+	public Element(double mass) {
+		name = "Unknown element";
+		symbol = "Uk";
 		atomicNumber = 0;
-		name = "";
-		symbol = "";
-		isotopes = new TreeSet<Isotope>();
-		category = Category.NONE;
+		category = Element.Category.NONE;
+		isotopes = new TreeSet<>();
+		isotopes.add(new Isotope((int) mass, mass, 1, this));
 	}
 
 	public Element(Element element) {
@@ -57,7 +60,8 @@ public class Element implements Comparable<Element> {
 		this.category = element.category;
 	}
 
-	public Element(int atomicNumber, String name, String symbol, TreeSet<Isotope> isotopes, Category category) {
+	public Element(int atomicNumber, String name, String symbol, Collection<? extends Isotope> isotopes,
+			Category category) {
 		this.atomicNumber = atomicNumber;
 		this.name = name;
 		this.symbol = symbol;
@@ -167,28 +171,30 @@ public class Element implements Comparable<Element> {
 		return category;
 	}
 
-	public void setAtomicNumber(int atomicNumber) {
-		this.atomicNumber = atomicNumber;
+	public Element withAtomicNumber(int atomicNumber) {
+		return new Element(atomicNumber, name, symbol, isotopes, category);
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public Element withName(String name) {
+		return new Element(atomicNumber, name, symbol, isotopes, category);
 	}
 
-	public void setSymbol(String symbol) {
-		this.symbol = symbol;
+	public Element withSymbol(String symbol) {
+		return new Element(atomicNumber, name, symbol, isotopes, category);
 	}
 
-	public void setIsotopes(Collection<Isotope> isotopes) {
-		this.isotopes.clear();
-		// iterator over isotopes
-		Iterator<Isotope> isotopeIterator = isotopes.iterator();
-		while (isotopeIterator.hasNext())
-			this.isotopes.add(new Isotope(isotopeIterator.next()));
+	public Element withIsotopes(Collection<? extends Isotope> isotopes) {
+		return new Element(atomicNumber, name, symbol, isotopes, category);
 	}
 
-	public void setCategory(Category category) {
-		this.category = category;
+	public Element withIsotope(Isotope isotope) {
+		Set<Isotope> isotopes = new HashSet<>(this.isotopes);
+		isotopes.add(isotope);
+		return withIsotopes(isotopes);
+	}
+
+	public Element withCategory(Category category) {
+		return new Element(atomicNumber, name, symbol, isotopes, category);
 	}
 
 	public boolean isNaturallyOccurring() {
@@ -242,10 +248,6 @@ public class Element implements Comparable<Element> {
 		}
 
 		return false;
-	}
-
-	public void addIsotope(Isotope isotope) {
-		isotopes.add(new Isotope(isotope));
 	}
 
 	@Override

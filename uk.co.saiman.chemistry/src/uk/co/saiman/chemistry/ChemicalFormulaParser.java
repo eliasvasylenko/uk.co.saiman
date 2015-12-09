@@ -253,16 +253,7 @@ public class ChemicalFormulaParser {
 					throw new ChemicalFormulaParserException(
 							"Unable to parse mass of unknown \"" + valueString + "\" in \"" + molecularFormula + "\".");
 				}
-				Element unknown = new Element();
-				unknown.setName("Unknown element");
-				unknown.setSymbol("Uk");
-				unknown.setAtomicNumber(0);
-				unknown.setCategory(Element.Category.NONE);
-				Isotope unknownIsotope = new Isotope(unknown);
-				unknownIsotope.setMass(mass);
-				unknownIsotope.setAbundance(1);
-				unknownIsotope.setMassNumber((int) mass);
-				unknown.addIsotope(unknownIsotope);
+				Element unknown = new Element(mass);
 				moleculeStack.peek().withElement(unknown);
 			} else if ('+' == currentChar || '-' == currentChar) {
 				if (index + 1 < molecularFormula.length()) {

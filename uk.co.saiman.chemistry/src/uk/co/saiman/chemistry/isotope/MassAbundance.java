@@ -3,6 +3,16 @@ package uk.co.saiman.chemistry.isotope;
 import java.util.Comparator;
 
 public class MassAbundance implements Comparable<MassAbundance> {
+	private static Comparator<MassAbundance> ABUNDANCE_COMPARATOR = (first, second) -> {
+		if (first.abundance < second.abundance)
+			return 1;
+		return -1;
+	};
+
+	public static Comparator<MassAbundance> abundanceComparator() {
+		return ABUNDANCE_COMPARATOR;
+	}
+
 	private final double mass;
 	private final double abundance;
 
@@ -110,14 +120,5 @@ public class MassAbundance implements Comparable<MassAbundance> {
 	@Override
 	public int hashCode() {
 		return ((Double) mass).hashCode();
-	}
-
-	public static class AbundanceComparator implements Comparator<MassAbundance> {
-		@Override
-		public int compare(MassAbundance first, MassAbundance second) {
-			if (first.abundance < second.abundance)
-				return 1;
-			return -1;
-		}
 	}
 }

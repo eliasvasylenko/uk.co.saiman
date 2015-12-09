@@ -4,17 +4,22 @@
    <extension
          id="product"
          point="org.eclipse.core.runtime.products">
+
       <product
             name="uk.co.saiman.msapex"
-            application="org.eclipse.e4.ui.workbench.swt.E4Application">
-         <property
-               name="applicationCSS"
-               value="platform:/plugin/uk.co.saiman.msapex/css/default.css">
-         </property>
+            application="org.eclipse.fx.ui.workbench.fx.application">
+
          <property
                name="appName"
-               value="uk.co.saiman.msapex">
-         </property>
+               value="MSApex"/>
+
+         <property
+               name="applicationXMI"
+               value="uk.co.saiman.msapex/Application.e4xmi" />
+
+         <property
+               name="cssTheme"
+               value="theme.default" />
       </product>
    </extension>
 

@@ -16,7 +16,7 @@ Service-Component: 		*
 test-cases: 			${classes;NAMED;*Test}
 -resolve.effective:		resolve, active
 
--plugin.4.Central:  \
+-plugin.4.Central: \
 \
         aQute.bnd.deployer.repository.wrapper.Plugin; \
             location            =		"${build}/cache/wrapper"; \

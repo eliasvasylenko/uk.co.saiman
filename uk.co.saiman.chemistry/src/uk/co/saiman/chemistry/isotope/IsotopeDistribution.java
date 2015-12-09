@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import javax.swing.event.EventListenerList;
 
@@ -30,8 +30,6 @@ public class IsotopeDistribution {
 	private ChemicalComposition molecule;
 	// average mass
 	private double mass;
-	// low precision
-	private boolean lowPrecision;
 	// effective resolution
 	private double mergeDistance = 0.1;
 	// mass spectrum
@@ -63,7 +61,6 @@ public class IsotopeDistribution {
 			molecule = null;
 		}
 		mass = isotopeDistribution.mass;
-		lowPrecision = isotopeDistribution.lowPrecision;
 		if (isotopeDistribution.data != null) {
 			data = new TreeSet<MassAbundance>();
 
@@ -207,7 +204,6 @@ public class IsotopeDistribution {
 	public void loadFromFile(File file) {
 		dataHash = new HashSet<MassAbundance>();
 		molecule = null;
-		lowPrecision = false;
 
 		String[] splitName = file.getName().split("\\.");
 		String extension = splitName[splitName.length - 1].toLowerCase();
@@ -305,15 +301,10 @@ public class IsotopeDistribution {
 	private void calculateDistribution(int maxStates, double mergeDistance, double minimumAbundance) {
 		cancelled = false;
 
-		lowPrecision = mergeDistance < 0;
-		if (lowPrecision) {
+		if (mergeDistance <= 0) {
 			this.mergeDistance = 0.1;
 		} else {
-			if (mergeDistance == 0) {
-				this.mergeDistance = 0.1;
-			} else if (mergeDistance > 0) {
-				this.mergeDistance = mergeDistance;
-			}
+			this.mergeDistance = mergeDistance;
 		}
 
 		// keep old data in case of interrupt
@@ -346,10 +337,6 @@ public class IsotopeDistribution {
 		for (Element element : elementCounts.keySet()) {
 			if (element.getIsotopes().size() == 0) {
 				throw new IsotopeDistributionException("No known isotopes for element: \"" + element.getName() + "\"");
-			}
-			if (!element.isNaturallyOccurring()) {
-				String newLine = System.getProperty("line.separator");
-				Iterator<Isotope> isotopeIterator = element.getIsotopes().iterator();
 			}
 		}
 
@@ -494,34 +481,27 @@ public class IsotopeDistribution {
 				dataHash.clear();
 				double highestProbability = 0;
 				if (maxStates == 0) {
-					dataIterator = nextState.iterator();
-					while (dataIterator.hasNext()) {
-						dataMassAbundance = dataIterator.next();
-						dataHash.add(dataMassAbundance);
-
+					for (MassAbundance dataMassAbundance : nextState) {
 						if (dataMassAbundance.getAbundance() > highestProbability) {
 							highestProbability = dataMassAbundance.getAbundance();
 						}
+					}
+
+					for (MassAbundance dataMassAbundance : nextState) {
+						dataHash.add(dataMassAbundance.withAbundance(dataMassAbundance.getAbundance() / highestProbability));
 					}
 				} else {
-					TreeSet<MassAbundance> abundanceSorted = new TreeSet<MassAbundance>(new MassAbundance.AbundanceComparator());
+					Set<MassAbundance> abundanceSorted = new TreeSet<>(MassAbundance.abundanceComparator());
 					abundanceSorted.addAll(nextState);
-					dataIterator = abundanceSorted.iterator();
+
+					highestProbability = abundanceSorted.iterator().next().getAbundance();
+
+					Iterator<MassAbundance> dataIterator = abundanceSorted.iterator();
 					int index = 0;
 					while (dataIterator.hasNext() && index++ < maxStates) {
-						dataMassAbundance = dataIterator.next();
-						dataHash.add(dataMassAbundance);
-
-						if (dataMassAbundance.getAbundance() > highestProbability) {
-							highestProbability = dataMassAbundance.getAbundance();
-						}
+						MassAbundance dataMassAbundance = dataIterator.next();
+						dataHash.add(dataMassAbundance.withAbundance(dataMassAbundance.getAbundance() / highestProbability));
 					}
-				}
-
-				dataIterator = dataHash.iterator();
-				while (dataIterator.hasNext()) {
-					dataMassAbundance = dataIterator.next();
-					dataMassAbundance.setAbundance(dataMassAbundance.getAbundance() / highestProbability);
 				}
 
 				nextState.clear();
@@ -538,16 +518,18 @@ public class IsotopeDistribution {
 
 					// are we using real mass?
 					if (mergeDistance >= 0) {
-						nextMassAbundance.setMass(dataMassAbundance.getMass() + specificIsotope.getMass());
+						nextMassAbundance = nextMassAbundance.withMass(dataMassAbundance.getMass() + specificIsotope.getMass());
 					} else {
-						nextMassAbundance.setMass(dataMassAbundance.getMass() + specificIsotope.getMassNumber());
+						nextMassAbundance = nextMassAbundance
+								.withMass(dataMassAbundance.getMass() + specificIsotope.getMassNumber());
 					}
-					nextMassAbundance.setAbundance(dataMassAbundance.getAbundance());
+					nextMassAbundance = nextMassAbundance.withAbundance(dataMassAbundance.getAbundance());
 					// add data to next state;
 					if (nextState.contains(nextMassAbundance)) {
 						MassAbundance existing = nextState.floor(nextMassAbundance);
-						existing.setAbundance(
-								existing.getAbundance() + nextMassAbundance.getAbundance() + dataMassAbundance.getAbundance());
+						nextState.remove(existing);
+						nextState.add(existing.withAbundance(
+								existing.getAbundance() + nextMassAbundance.getAbundance() + dataMassAbundance.getAbundance()));
 					} else {
 						nextState.add(nextMassAbundance);
 					}
@@ -623,7 +605,7 @@ public class IsotopeDistribution {
 						// already merged masses. Pretty simple.
 				done = true;
 
-				dataIterator = data.iterator();
+				dataIterator = new HashSet<>(data).iterator();
 				lastStateMassAbundance = dataIterator.next();
 				// check each distance one at a time, repeat until done
 				while (dataIterator.hasNext()) {
@@ -658,14 +640,18 @@ public class IsotopeDistribution {
 						newAbundanceVariance = lastStateMassAbundance.getAbundanceVariance()
 								+ dataMassAbundance.getAbundanceVariance();
 
-						// apply new values
-						lastStateMassAbundance.setMass(newMass);
-						lastStateMassAbundance.setAbundance(newAbundance);
-						lastStateMassAbundance.setMassVariance(newMassVariance);
-						lastStateMassAbundance.setAbundanceVariance(newAbundanceVariance);
-
 						// remove merged
-						dataIterator.remove();
+						data.remove(dataMassAbundance);
+						data.remove(lastStateMassAbundance);
+
+						// apply new values
+						lastStateMassAbundance = lastStateMassAbundance.withMass(newMass);
+						lastStateMassAbundance = lastStateMassAbundance.withAbundance(newAbundance);
+						lastStateMassAbundance = lastStateMassAbundance.withMassVariance(newMassVariance);
+						lastStateMassAbundance = lastStateMassAbundance.withAbundanceVariance(newAbundanceVariance);
+
+						data.add(lastStateMassAbundance);
+
 						if (dataIterator.hasNext()) {
 							lastStateMassAbundance = dataIterator.next();
 						}
@@ -698,10 +684,11 @@ public class IsotopeDistribution {
 
 		// normalise abundances/probabilities and get average mass
 		mass = 0;
-		for (MassAbundance massAbundance : data) {
+		for (MassAbundance massAbundance : new HashSet<>(data)) {
 			mass += massAbundance.getMass() * massAbundance.getAbundance();
 			if (normalise && massAbundance != mostAbundantMass) {
-				massAbundance.setAbundance(massAbundance.getAbundance() / mostAbundantMass.getAbundance());
+				data.remove(massAbundance);
+				data.add(massAbundance.withAbundance(massAbundance.getAbundance() / mostAbundantMass.getAbundance()));
 			}
 		}
 
@@ -835,10 +822,6 @@ public class IsotopeDistribution {
 		return mergeDistance;
 	}
 
-	public boolean isLowPrecision() {
-		return lowPrecision;
-	}
-
 	public void removeMassAbundance(int index) {
 		MassAbundance currentMassAbundance = (MassAbundance) data.toArray()[index];
 		data.remove(currentMassAbundance);
@@ -918,18 +901,16 @@ public class IsotopeDistribution {
 	public void filterToResolution(double visibleResolution) {
 		visibleResolution /= 2;
 
-		Vector<MassAbundance> forRemoval = new Vector<MassAbundance>();
-
 		long lastSampleBlock = -1;
 		MassAbundance lastMassAbundance = null;
-		for (MassAbundance massAbundance : data) {
+		for (MassAbundance massAbundance : new ArrayList<>(data)) {
 			long sampleBlock = (long) (massAbundance.getMass() / visibleResolution);
 
 			if (sampleBlock == lastSampleBlock) {
 				if (lastMassAbundance.getAbundance() > massAbundance.getAbundance()) {
-					forRemoval.add(massAbundance);
+					data.remove(massAbundance);
 				} else {
-					forRemoval.add(lastMassAbundance);
+					data.remove(lastMassAbundance);
 					lastMassAbundance = massAbundance;
 				}
 			} else {
@@ -937,8 +918,6 @@ public class IsotopeDistribution {
 				lastSampleBlock = sampleBlock;
 			}
 		}
-
-		data.removeAll(forRemoval);
 	}
 
 	public IsotopeDistribution filteredToResolution(double resolution) {

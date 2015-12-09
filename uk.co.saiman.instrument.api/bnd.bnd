@@ -9,11 +9,16 @@ Bundle-Name: SAI MSApex :: Instrument :: API
 	osgi.enroute.hamcrest.wrapper,\
 	org.hamcrest__java-hamcrest,\
 	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;mathematics.geometry},\
 	${ss;reflection},\
-	uk.co.saiman.utilities;version=project
+	uk.co.saiman.utilities;version=project,\
+	uk.co.saiman.data.api;version=project
 
 #,\
 #	org.checkerframework__checker-qual,\
 #	org.checkerframework__jdk8
 Bundle-Version: 0.0.1.${tstamp}
-Export-Package: uk.co.saiman.instrument
+Export-Package: \
+	uk.co.saiman.instrument,\
+	uk.co.saiman.instrument.raster

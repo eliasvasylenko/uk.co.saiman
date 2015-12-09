@@ -2,28 +2,31 @@
 
 # Do not run this, use the platform-specific bndrun files (which "-include" this)
 
--runfw: org.eclipse.osgi
-
-runreq.msapex: \
-	${runreq.eclipse.e4},\
-	${runreq.eclipse.p2},\
+runreq.msapex:\
 	${runreq.felix.shell},\
+	${runreq.eclipse.p2},\
+	${runreq.eclipse.e4.fx.${platform}},\
 	${req;uk.co.saiman.msapex},\
 	${req;uk.co.saiman.msapex.acquisition}
 
-vmargs.msapex: \
+runvm.msapex:\
 	-Xmx1024m
 
-runpath.msapex:\
-	${runpath.eclipse}
+runfw.msapex:\
+	org.eclipse.osgi
 
-runprops.msapex: \
-	eclipse.application=org.eclipse.e4.ui.workbench.swt.E4Application,\
-	eclipse.product=uk.co.saiman.msapex.product,\
-	osgi.console=,\
-	eclipse.consoleLog=true,\
-	equinox.use.ds=true,\
-	osgi.instance.area.default=./workspace,\
-	osgi.console.enable.builtin=false,\
-	osgi.clean=true,\
-	clearPersistedState=true
+runee.msapex:\
+	JavaSE-1.8
+
+runpath.msapex:\
+	${runpath.eclipse.${platform}},\
+	${runpath.eclipse.fx}
+
+runprops.msapex:\
+	osgi.framework.extensions=\
+		org.eclipse.fx.osgi,\
+	${runprops.eclipse},\
+	eclipse.product=uk.co.saiman.msapex.product
+
+systempath.msapex:\
+	${systempath.fx}

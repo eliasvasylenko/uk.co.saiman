@@ -35,7 +35,7 @@ Bundle-Version: ${strangeskies-version}.${tstamp}
 # -baseline: *
 -releaserepo: Release
 
--pluginpath:\
+-pluginpath: \
 	${build}/cache/biz.aQute.repository.aether.jar; \
 		url = ${bnd-release}/biz.aQute.repository.aether/biz.aQute.repository.aether-latest.jar
 
@@ -62,6 +62,19 @@ modabiDefaultRepo: \
 		aQute.bnd.deployer.repository.FixedIndexedRepo; \
 			name				=		"Eclipse Platform"; \
 			locations			=		https://dl.bintray.com/sai/uk.co.saiman/org.eclipse.platform/4.5.1/index.xml
+
+-plugin.9.EclipseFX: \
+\
+		aQute.bnd.deployer.repository.LocalIndexedRepo; \
+			name				=		"E(fx)clipse Runtime"; \
+			pretty              =       true;\
+			local               =       ${user.home}/eclipse-repos/e(fx)clipse-2.1.0/runtime, \
+\
+		aQute.bnd.deployer.repository.LocalIndexedRepo; \
+			name				=		"Eclipse Xtext"; \
+			pretty              =       true;\
+			local               =       ${user.home}/eclipse-repos/xtext
+
 
 # For users with a copy of the uk.co.strangeskies project checked out
 # from git locally, they can redirect dependencies on bundles in that
@@ -101,28 +114,72 @@ Git-Descriptor: ${system-allow-fail;git describe --dirty --always}
 Git-SHA: ${system-allow-fail;git rev-list -1 HEAD}
 -diffignore: Git-Descriptor,Git-SHA
 
-# Requirement
+# #Requirement
 req: osgi.identity;filter:='(osgi.identity=${1})'
 
-# Run path groups:
+## Run path groups:
 runpath.eclipse:\
+	org.eclipse.osgi,\
 	org.eclipse.osgi.compatibility.state
 
-# Run requirement groups:
+runpath.eclipse.win64:\
+	${runpath.eclipse},\
+	org.eclipse.equinox.launcher.win32.win32.x86_64
+
+runpath.eclipse.swt:\
+	${runpath.eclipse}
+
+runpath.eclipse.fx:\
+	${runpath.eclipse},\
+	org.eclipse.fx.osgi
+
+## Run requirement groups:
 runreq.base:\
 	${req;osgi.enroute.logger.simple.provider}
 
+# e4 base
 runreq.eclipse.e4:\
 	${req;bndtools.runtime.eclipse.applaunch},\
 	${req;org.eclipse.equinox.launcher},\
 	${req;org.eclipse.equinox.console},\
-	${req;org.eclipse.e4.ui.workbench.swt},\
 	${req;org.eclipse.emf.databinding},\
 	${req;org.eclipse.core.databinding.beans},\
 	${req;org.eclipse.equinox.concurrent},\
-	${req;org.eclipse.e4.ui.workbench.renderers.swt},\
 	${req;org.eclipse.equinox.event}
+	
+runreq.eclipse.e4.win64:\
+	${runreq.eclipse.e4},\
+	${req;org.eclipse.core.filesystem.win32.x86_64},\
+	${req;org.eclipse.core.resources.win32.x86_64},\
+	${req;org.eclipse.equinox.security.win32.x86_64},\
+	${req;org.eclipse.equinox.launcher.win32.win32.x86_64}
 
+# e4 swt	
+runreq.eclipse.e4.swt:\
+	${runreq.eclipse.e4},\
+	${req;org.eclipse.e4.ui.workbench.swt},\
+	${req;org.eclipse.e4.ui.workbench.renderers.swt}
+	
+runreq.eclipse.e4.swt.win64:\
+	${runreq.eclipse.e4.swt},\
+	${runreq.eclipse.e4.win64},\
+	${req;org.eclipse.swt.win32.win32.x86_64}
+
+# e4 fx
+runreq.eclipse.e4.fx:\
+	${runreq.eclipse.e4},\
+	${req;org.eclipse.fx.ui.workbench.fx},\
+	${req;org.eclipse.fx.ui.workbench.renderers.fx},\
+	${req;org.eclipse.fx.ui.di.interopt},\
+	${req;org.eclipse.fx.core},\
+	${req;org.eclipse.fx.core.di},\
+	${req;org.eclipse.fx.core.p2}
+
+runreq.eclipse.e4.fx.win64:\
+	${runreq.eclipse.e4.fx},\
+	${runreq.eclipse.e4.win64}
+
+# p2
 runreq.eclipse.p2:\
 	${req;org.eclipse.equinox.p2.core},\
 	${req;org.eclipse.equinox.p2.engine},\
@@ -130,7 +187,8 @@ runreq.eclipse.p2:\
 	${req;org.eclipse.equinox.p2.metadata},\
 	${req;org.eclipse.equinox.p2.metadata.repository},\
 	${req;org.eclipse.equinox.p2.repository}
-	
+
+# felix
 runreq.felix.shell:\
 	${req;org.apache.felix.gogo.command},\
 	${req;org.apache.felix.gogo.shell},\
@@ -144,7 +202,7 @@ runreq.felix.web:\
 	${req;org.apache.felix.webconsole.plugins.scriptconsole},\
 	${req;org.apache.felix.webconsole.plugins.useradmin}
 
-# Build path groups:
+## Build path groups:
 buildpath.core:\
 	osgi.enroute.base.api;version=latest,\
 	osgi.enroute.junit.wrapper,\
@@ -155,7 +213,6 @@ buildpath.eclipse:\
 	${buildpath.core},\
 	javax.inject,\
 	org.eclipse.core.runtime,\
-	org.eclipse.swt,\
 	org.eclipse.e4.ui.model.workbench,\
 	org.eclipse.jface,\
 	org.eclipse.e4.ui.services,\
@@ -163,3 +220,58 @@ buildpath.eclipse:\
 	org.eclipse.e4.core.di,\
 	org.eclipse.e4.ui.di,\
 	org.eclipse.e4.core.contexts
+
+buildpath.eclipse.swt:\
+	${buildpath.eclipse},\
+	org.eclipse.swt
+
+buildpath.eclipse.fx:\
+	${buildpath.eclipse},\
+	org.eclipse.fx.ui.theme,\
+	org.eclipse.fx.ui.services
+
+## Run properties groups:
+runprops.eclipse:\
+	osgi.console=,\
+	eclipse.consoleLog=true,\
+	equinox.use.ds=true,\
+	osgi.instance.area.default=./workspace,\
+	osgi.console.enable.builtin=true,\
+	osgi.clean=true,\
+	clearPersistedState=true
+
+## Run system packages groups:
+systempath.fx:\
+    javafx.animation,\
+    javafx.application,\
+    javafx.beans,\
+    javafx.beans.binding,\
+    javafx.beans.property,\
+    javafx.beans.property.adapter,\
+    javafx.beans.value,\
+    javafx.collections,\
+    javafx.concurrent,\
+    javafx.embed.swing,\
+    javafx.embed.swt,\
+    javafx.event,\
+    javafx.fxml,\
+    javafx.geometry,\
+    javafx.scene,\
+    javafx.scene.canvas,\
+    javafx.scene.chart,\
+    javafx.scene.control,\
+    javafx.scene.control.cell,\
+    javafx.scene.effect,\
+    javafx.scene.image,\
+    javafx.scene.input,\
+    javafx.scene.layout,\
+    javafx.scene.media,\
+    javafx.scene.paint,\
+    javafx.scene.shape,\
+    javafx.scene.text,\
+    javafx.scene.transform,\
+    javafx.scene.web,\
+    javafx.stage,\
+    javafx.util,\
+    javafx.util.converter,\
+    netscape.javascript

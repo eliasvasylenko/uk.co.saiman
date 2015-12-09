@@ -10,11 +10,10 @@ Bundle-Name: SAI MSApex :: Instrument :: Provider
 	${ss;utilities},\
 	${ss;reflection},\
 	${ss;mathematics},\
-	uk.co.saiman.instrument.api;version=project,\
 	uk.co.saiman.utilities;version=project
 
 #,\
 #	org.checkerframework__checker-qual,\
 #	org.checkerframework__jdk8
 Bundle-Version: 0.0.1.${tstamp}
-Private-Package: uk.co.saiman.data.api
+Export-Package: uk.co.saiman.data.api
