@@ -5,9 +5,11 @@
 runreq.msapex:\
 	${runreq.felix.shell},\
 	${runreq.eclipse.p2},\
-	${runreq.eclipse.e4.fx.${platform}},\
+	${runreq.eclipse.${platform}},\
 	${req;uk.co.saiman.msapex},\
-	${req;uk.co.saiman.msapex.acquisition}
+	${req;uk.co.saiman.msapex.acquisition},\
+	${req;uk.co.saiman.acquisition.api},\
+	${req;uk.co.saiman.acquisition.simulation}
 
 runvm.msapex:\
 	-Xmx1024m
@@ -19,14 +21,11 @@ runee.msapex:\
 	JavaSE-1.8
 
 runpath.msapex:\
-	${runpath.eclipse.${platform}},\
-	${runpath.eclipse.fx}
+	${runpath.eclipse.${platform}}
 
 runprops.msapex:\
-	osgi.framework.extensions=\
-		org.eclipse.fx.osgi,\
 	${runprops.eclipse},\
 	eclipse.product=uk.co.saiman.msapex.product
 
 systempath.msapex:\
-	${systempath.fx}
+	${systempath.eclipse}

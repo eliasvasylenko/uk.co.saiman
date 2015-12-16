@@ -1,9 +1,5 @@
+Bundle-Name: SAI :: Processing
 
-Bundle-Name: SAI MSApex :: Utilities :: Library
--dsannotations:  \
-	*
--runee: JavaSE-1.8
--runfw: org.eclipse.osgi;version='[3.10.1.v20140909-1633,3.10.1.v20140909-1633]'
 -buildpath: \
 	osgi.enroute.base.api;version=latest,\
 	osgi.enroute.junit.wrapper,\
@@ -12,5 +8,5 @@ Bundle-Name: SAI MSApex :: Utilities :: Library
 	${ss;utilities},\
 	${ss;reflection},\
 	uk.co.saiman.utilities;version=project
-Bundle-Version: 0.0.1.${tstamp}
+
 Export-Package: uk.co.saiman.processing

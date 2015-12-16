@@ -1,19 +1,17 @@
-Bundle-SymbolicName: ${project.name};singleton:=true
-Bundle-Name: MSApex :: Acquisition :: Provider
-Bundle-Localization: plugin
+Bundle-Name: SAI :: MSApex :: Acquisition
+Bundle-SymbolicName: ${p};singleton:=true
 
--runee: JavaSE-1.8
--runfw: org.eclipse.osgi;version='[3.10.1.v20140909-1633,3.10.1.v20140909-1633]'
 -buildpath: \
-	${buildpath.eclipse.fx},\
+	${buildpath.eclipse},\
 	${ss;utilities},\
 	${ss;mathematics},\
 	${ss;reflection},\
 	uk.co.saiman.instrument.api;version=project,\
+	uk.co.saiman.data.api;version=project,\
+	uk.co.saiman.msapex.data;version=project,\
+	uk.co.saiman.acquisition;version=project,\
+	uk.co.saiman.utilities.eclipse;version=project,\
 	uk.co.saiman.utilities;version=project
-
-Import-Package: \
-	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!
 
 Private-Package: uk.co.saiman.msapex.acquisition
 

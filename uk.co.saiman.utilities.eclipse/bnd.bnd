@@ -1,0 +1,11 @@
+Bundle-Name: SAI :: Utilities :: Eclipse
+
+-buildpath: \
+	${buildpath.eclipse},\
+	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;reflection}
+
+Export-Package: \
+	uk.co.saiman.eclipse,\
+	uk.co.saiman.utilities

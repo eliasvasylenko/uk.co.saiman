@@ -1,18 +1,14 @@
-Bundle-SymbolicName: ${project.name};singleton:=true
-Bundle-Name: MSApex
-Bundle-Localization: plugin
+Bundle-Name: SAI :: MSApex
+Bundle-SymbolicName: ${p};singleton:=true
 
-# 1. JUNit and Felix Shell are optional dependencies.
-# 2. Disable ALL Eclipse split package attributes, to ensure we import from the "aggregator" bundle(s).
-Import-Package: \
-	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!
+-buildpath:\
+	${buildpath.eclipse}
 
-Private-Package: \
+Export-Package:\
+	uk.co.saiman.msapex,\
+	uk.co.saiman.msapex.utilities
 
-Export-Package: uk.co.saiman.msapex
-Include-Resource: \
+Include-Resource:\
 	resources/plugin.xml,\
 	resources/Application.e4xmi,\
-	css/default.css=resources/css/default.css
-
--buildpath: ${buildpath.eclipse.fx}
+	css=resources/css

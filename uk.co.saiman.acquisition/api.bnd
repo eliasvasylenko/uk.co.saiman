@@ -1,1 +1,3 @@
+Bundle-Name: SAI :: Acquisition
+
 Export-Package: uk.co.saiman.instrument.acquisition

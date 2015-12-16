@@ -1,20 +1,12 @@
+Bundle-Name: SAI :: Chemistry
 
-Bundle-Name: SAI MSApex :: Utilities :: Library
--dsannotations:  \
-	*
--runee: JavaSE-1.8
--runfw: org.eclipse.osgi;version='[3.10.1.v20140909-1633,3.10.1.v20140909-1633]'
 -buildpath: \
-	osgi.enroute.base.api;version=latest,\
-	osgi.enroute.junit.wrapper,\
-	osgi.enroute.hamcrest.wrapper,\
-	org.hamcrest__java-hamcrest,\
-	${ss;reflection},\
+	${buildpath.core},\
 	${mdb;core.api},\
+	${ss;reflection},\
 	${ss;utilities},\
 	${ss;mathematics}
 
-Bundle-Version: 0.0.1.${tstamp}
 Export-Package: \
 	uk.co.saiman.chemistry.analysis,\
 	uk.co.saiman.chemistry.isotope,\
