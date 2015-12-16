@@ -79,6 +79,10 @@ modabiDefaultRepo: \
 			name				=		"Eclipse Xtext"; \
 			pretty              =       true;\
 			local               =       ${user.home}/eclipse-repos/xtext
+#\
+#		aQute.bnd.deployer.repository.FixedIndexedRepo; \
+#			name				=		"E(fx)clipse Runtime 2.1.0"; \
+#			locations               =       http://download.eclipse.org/efxclipse/runtime-released/2.1.0/site/repository.xml.gz
 
 # For users with a copy of the uk.co.strangeskies project checked out
 # from git locally, they can redirect dependencies on bundles in that
