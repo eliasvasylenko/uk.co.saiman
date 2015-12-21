@@ -70,19 +70,9 @@ modabiDefaultRepo: \
 
 -plugin.9.EclipseFX: \
 \
-		aQute.bnd.deployer.repository.LocalIndexedRepo; \
-			name				=		"E(fx)clipse Runtime"; \
-			pretty              =       true;\
-			local               =       ${user.home}/eclipse-repos/e(fx)clipse-2.1.0/runtime, \
-\
-		aQute.bnd.deployer.repository.LocalIndexedRepo; \
-			name				=		"Eclipse Xtext"; \
-			pretty              =       true;\
-			local               =       ${user.home}/eclipse-repos/xtext
-#\
-#		aQute.bnd.deployer.repository.FixedIndexedRepo; \
-#			name				=		"E(fx)clipse Runtime 2.1.0"; \
-#			locations               =       http://download.eclipse.org/efxclipse/runtime-released/2.1.0/site/repository.xml.gz
+		aQute.bnd.deployer.repository.FixedIndexedRepo; \
+			name				=		"E(fx)clipse Runtime 2.2.0"; \
+			locations               =       http://download.eclipse.org/efxclipse/runtime-nightly/site/repository.xml.gz
 
 # For users with a copy of the uk.co.strangeskies project checked out
 # from git locally, they can redirect dependencies on bundles in that
@@ -135,6 +125,10 @@ runpath.eclipse.win64:\
 	${runpath.eclipse},\
 	org.eclipse.equinox.launcher.win32.win32.x86_64
 
+runpath.eclipse.linux64:\
+	${runpath.eclipse},\
+	org.eclipse.equinox.launcher.gtk.linux.x86_64
+
 ## Run requirement groups:
 runreq.base:\
 	${req;osgi.enroute.logger.simple.provider}
@@ -152,14 +146,21 @@ runreq.eclipse:\
 	${req;org.eclipse.fx.ui.workbench.renderers.fx},\
 	${req;org.eclipse.fx.ui.di.interopt},\
 	${req;org.eclipse.fx.core},\
-	${req;org.eclipse.fx.core.di}
-	
+	${req;org.eclipse.fx.core.di},\
+	${req;org.eclipse.fx.core.di.context}
+
 runreq.eclipse.win64:\
 	${runreq.eclipse},\
 	${req;org.eclipse.core.filesystem.win32.x86_64},\
 	${req;org.eclipse.core.resources.win32.x86_64},\
 	${req;org.eclipse.equinox.security.win32.x86_64},\
 	${req;org.eclipse.equinox.launcher.win32.win32.x86_64}
+
+runreq.eclipse.linux64:\
+	${runreq.eclipse},\
+	${req;org.eclipse.core.filesystem.linux.x86_64},\
+	${req;org.eclipse.core.net.linux.x86_64},\
+	${req;org.eclipse.equinox.launcher.gtk.linux.x86_64}
 
 # p2
 runreq.eclipse.p2:\
