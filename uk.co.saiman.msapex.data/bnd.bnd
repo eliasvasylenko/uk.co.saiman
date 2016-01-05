@@ -8,3 +8,6 @@ Bundle-SymbolicName: ${p};singleton:=true
 	uk.co.saiman.data.api;version=project
 
 Export-Package: uk.co.saiman.msapex.data
+
+Include-Resource: \
+	res

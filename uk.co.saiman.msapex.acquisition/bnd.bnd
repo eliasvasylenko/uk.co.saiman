@@ -16,5 +16,5 @@ Bundle-SymbolicName: ${p};singleton:=true
 Private-Package: uk.co.saiman.msapex.acquisition
 
 Include-Resource: \
-	resources/fragment.e4xmi,\
-	resources/plugin.xml
+	fragment.e4xmi,\
+	plugin.xml

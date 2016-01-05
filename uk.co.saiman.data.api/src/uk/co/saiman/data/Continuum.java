@@ -27,8 +27,6 @@ import uk.co.strangeskies.mathematics.Range;
  * Project Valhalla, for now will just use double.
  * 
  * @author Elias N Vasylenko
- *
- * @param <V>
  */
 public interface Continuum {
 	Range<Double> getXRange();

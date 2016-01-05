@@ -55,7 +55,7 @@ public class MassSpectrumIdentifier {
 	 * identify an isotope distribution as belonging to a molecule or a set of
 	 * molecules.
 	 *
-	 * @param distribution
+	 * @param spectrum
 	 *          the mass spectrum to identify
 	 * @return a map of results to the algorithms degree of belief of those
 	 *         results. each result is in the form of a set of isotope

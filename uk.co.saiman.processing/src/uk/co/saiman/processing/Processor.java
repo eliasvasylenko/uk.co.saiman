@@ -29,7 +29,9 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @author Elias N Vasylenko
  *
  * @param <T>
+ *          The type of the processing target.
  * @param <R>
+ *          The type of the processing result.
  */
 public interface Processor<T, R> {
 	String name();

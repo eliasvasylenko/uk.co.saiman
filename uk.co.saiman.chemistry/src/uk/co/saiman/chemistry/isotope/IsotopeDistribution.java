@@ -181,7 +181,7 @@ public class IsotopeDistribution {
 	 *
 	 * @param molecule
 	 *          molecule to calculate for
-	 * @param resolution
+	 * @param mergeDistance
 	 *          maximum resolvable distance between output masses (merge closer)
 	 */
 	public void calculateForMolecule(ChemicalComposition molecule, double mergeDistance, double minimumAbundance) {
@@ -200,7 +200,7 @@ public class IsotopeDistribution {
 	 *          molecule to calculate for
 	 * @param maxMasses
 	 *          maximum number of masses to report (highest abundances only)
-	 * @param resolution
+	 * @param mergeDistance
 	 *          maximum resolvable distance between output masses (merge closer),
 	 *          with no limit of distribution size (number of masses in output)
 	 */
@@ -216,8 +216,8 @@ public class IsotopeDistribution {
 	/**
 	 * load an input stream into a new isotope distribution object
 	 *
-	 * @param inputReader
-	 *          the stream to be read
+	 * @param file
+	 *          the file to be read
 	 */
 	public void loadFromFile(File file) {
 		dataHash = new HashSet<MassAbundance>();
@@ -312,7 +312,7 @@ public class IsotopeDistribution {
 	 * @param maxStates
 	 *          maximum number of states to consider (most probable first). zero
 	 *          for no limit.
-	 * @param resolution
+	 * @param mergeDistance
 	 *          minimum resolvable distance between isotope combination weights.
 	 *          negative to use mass numbers instead of mass.
 	 */
@@ -914,7 +914,7 @@ public class IsotopeDistribution {
 	 * rendering time by omitting clusters of smaller peaks which are very close
 	 * to larger peaks
 	 *
-	 * @param visibleResolution
+	 * @param visibleResolution The resolvable resolution below which clusters can be merged
 	 */
 	public void filterToResolution(double visibleResolution) {
 		visibleResolution /= 2;

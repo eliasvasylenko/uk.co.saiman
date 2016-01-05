@@ -23,15 +23,7 @@ import java.util.Set;
 import uk.co.saiman.instrument.Instrument;
 
 /**
- * 
  * @author Elias N Vasylenko
- *
- * @param <C>
- *          The type of configuration object.
- * @param <I>
- *          The type of the experiment's input.
- * @param <O>
- *          The type of the experiment's output.
  */
 public interface ExperimentManager {
 	public Set<ExperimentPart<?, Instrument, ?>> getRootExperiments();

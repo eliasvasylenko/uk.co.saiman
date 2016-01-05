@@ -30,13 +30,13 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.fx.core.di.LocalInstance;
 import org.eclipse.fx.core.di.Service;
-import org.eclipse.fx.ui.di.FXMLLoader;
-import org.eclipse.fx.ui.di.FXMLLoaderFactory;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
@@ -47,8 +47,8 @@ public class AcquisitionPart {
 	@Inject
 	IEclipseContext context;
 
-	private ObservableSet<AcquisitionModule> selectedModules;
-	private Map<AcquisitionModule, DataChartController> controllers;
+	private ObservableSet<AcquisitionModule> selectedModules = FXCollections.observableSet();
+	private Map<AcquisitionModule, DataChartController> controllers = new HashMap<>();
 
 	public boolean setAcquisitionModules(Collection<? extends AcquisitionModule> selectedModules) {
 		return this.selectedModules.removeAll(selectedModules) | this.selectedModules.addAll(selectedModules);
@@ -67,21 +67,23 @@ public class AcquisitionPart {
 	}
 
 	@PostConstruct
-	void initialise(BorderPane pane, @FXMLLoader FXMLLoaderFactory factory,
+	void initialise(BorderPane pane, @LocalInstance FXMLLoader loader,
 			@Service List<AcquisitionModule> acquisitionModules) {
+		loader.setLocation(getClass().getResource(DataChartController.FXML));
+
 		TilePane chartPane = new TilePane();
 		Text emptyText = new Text("No acquisition modules selected");
 
-		controllers = new HashMap<>();
-		selectedModules = FXCollections.observableSet();
 		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionModule> change) -> {
 			DataChartController controller;
 
 			chartPane.setPrefColumns(selectedModules.size());
 			if (change.wasAdded()) {
 				try {
-					controller = factory.loadRequestorRelative(DataChartController.FXML)
-							.<DataChartController> loadWithController().getController();
+					loader.setRoot(null);
+					loader.setController(null);
+					loader.load();
+					controller = loader.getController();
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}

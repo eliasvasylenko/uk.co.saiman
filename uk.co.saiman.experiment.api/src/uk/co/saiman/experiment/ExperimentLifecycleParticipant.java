@@ -34,7 +34,9 @@ public interface ExperimentLifecycleParticipant {
 	 * will fail.
 	 * 
 	 * @param from
+	 *          Previous state.
 	 * @param to
+	 *          Next state.
 	 */
 	public void transition(ExperimentLifecycleState from, ExperimentLifecycleState to);
 }

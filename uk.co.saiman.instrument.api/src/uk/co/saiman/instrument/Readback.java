@@ -27,6 +27,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @author Elias N Vasylenko
  *
  * @param <T>
+ *          The type of the readback value
  */
 public interface Readback<T> {
 	/**
@@ -40,8 +41,7 @@ public interface Readback<T> {
 	T getValue();
 
 	/**
-	 * 
-	 * @return
+	 * @return A set of status descriptions
 	 */
 	Set<String> getStatus();
 

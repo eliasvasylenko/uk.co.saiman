@@ -27,28 +27,31 @@ import uk.co.saiman.processing.ConfigurableProcessor;
  * such that implementation and persistence of configuration can more
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- * @param <R>
+ * 
  * @param <C>
+ *          The type of the configuration interface.
+ * @param <T>
+ *          The type of the experiment processing target.
+ * @param <R>
+ *          The type of the experiment processing result.
  */
 public interface ConfigurableProcessingExperiment<C, T, R> extends ExperimentType<C, T, R> {
 	ConfigurableProcessor<C, T, R> getConfigurableProcessor();
 
-	static <T, R, C> ConfigurableProcessingExperiment<T, R, C> over(ConfigurableProcessor<T, R, C> processor) {
-		return new ConfigurableProcessingExperiment<T, R, C>() {
+	static <T, R, C> ConfigurableProcessingExperiment<C, T, R> over(ConfigurableProcessor<C, T, R> processor) {
+		return new ConfigurableProcessingExperiment<C, T, R>() {
 			@Override
-			public ConfigurableProcessor<T, R, C> getConfigurableProcessor() {
+			public ConfigurableProcessor<C, T, R> getConfigurableProcessor() {
 				return processor;
 			}
 
 			@Override
-			public void validate(T configuration) {
+			public void validate(C configuration) {
 				processor.configure(configuration);
 			}
 
 			@Override
-			public C process(T configuration, R input) {
+			public R process(C configuration, T input) {
 				return processor.configure(configuration).process(input);
 			}
 		};

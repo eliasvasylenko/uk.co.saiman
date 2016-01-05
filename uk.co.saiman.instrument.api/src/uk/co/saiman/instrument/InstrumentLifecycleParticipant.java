@@ -32,7 +32,7 @@ public interface InstrumentLifecycleParticipant {
 	 * Invoked by the controlling instrument upon registration. If participants
 	 * throw an exception from this invocation, the registration will fail.
 	 * 
-	 * @param instrument
+	 * @param instrument The instrument to participate with.
 	 */
 	public void initialise(Instrument instrument);
 
@@ -48,8 +48,8 @@ public interface InstrumentLifecycleParticipant {
 	 * happen asynchronously with a previous invocation, and cannot be caused to
 	 * fail by throwing.
 	 * 
-	 * @param from
-	 * @param to
+	 * @param from Previous state
+	 * @param to Next state
 	 */
 	public void transition(InstrumentLifecycleState from, InstrumentLifecycleState to);
 }

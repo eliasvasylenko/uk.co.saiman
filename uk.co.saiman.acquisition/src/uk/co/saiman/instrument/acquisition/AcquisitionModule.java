@@ -41,10 +41,9 @@ public interface AcquisitionModule extends HardwareModule {
 	boolean isAcquiring();
 
 	/**
-	 * Get the last acquired acquisition data. This leaves the format of the
-	 * acquired data to the discretion of the implementing hardware module.
-	 * 
-	 * @return
+	 * @return The last acquired acquisition data. This leaves the format of the
+	 *         acquired data to the discretion of the implementing hardware
+	 *         module.
 	 */
 	SampledContinuum getLastAcquisitionData();
 
