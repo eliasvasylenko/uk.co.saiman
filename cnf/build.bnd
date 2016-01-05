@@ -142,8 +142,10 @@ runreq.eclipse:\
 	${req;org.eclipse.core.databinding.beans},\
 	${req;org.eclipse.equinox.concurrent},\
 	${req;org.eclipse.equinox.event},\
+	${req;org.eclipse.fx.ui.databinding},\
 	${req;org.eclipse.fx.ui.workbench.fx},\
 	${req;org.eclipse.fx.ui.workbench.renderers.fx},\
+	${req;org.eclipse.fx.ui.di},\
 	${req;org.eclipse.fx.ui.di.interopt},\
 	${req;org.eclipse.fx.core},\
 	${req;org.eclipse.fx.core.di},\
@@ -205,8 +207,10 @@ buildpath.eclipse:\
 	org.eclipse.e4.core.di.annotations,\
 	org.eclipse.e4.core.services,\
 	org.eclipse.e4.ui.di,\
-	org.eclipse.fx.ui.di,\
 	org.eclipse.e4.core.contexts,\
+	org.eclipse.fx.core,\
+	org.eclipse.fx.core.di,\
+	org.eclipse.fx.ui.di,\
 	org.eclipse.fx.ui.theme,\
 	org.eclipse.fx.ui.services
 
