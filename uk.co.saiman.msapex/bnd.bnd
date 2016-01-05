@@ -9,6 +9,6 @@ Export-Package:\
 	uk.co.saiman.msapex.utilities
 
 Include-Resource:\
-	resources/plugin.xml,\
-	resources/Application.e4xmi,\
-	css=resources/css
+	plugin.xml,\
+	Application.e4xmi,\
+	css=css
