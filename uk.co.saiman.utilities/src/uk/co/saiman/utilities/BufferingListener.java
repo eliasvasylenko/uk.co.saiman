@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *
  * This file is part of uk.co.saiman.utilities.
  *
