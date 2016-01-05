@@ -18,6 +18,9 @@ import uk.co.saiman.data.Continuum;
 import uk.co.strangeskies.reflection.TypeToken;
 
 public class DataChartController {
+	public static final String FXML = "/" + DataChartController.class.getPackage().getName().replace('.', '/')
+			+ "/DataChart.fxml";
+
 	@FXML
 	private Pane rootNode;
 
