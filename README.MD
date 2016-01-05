@@ -5,7 +5,7 @@
       alt="Travis CI">
 </a>
 <a href="https://tldrlegal.com/license/gnu-general-public-license-v3-%28gpl-3%29">
-  <img src="https://img.shields.io/github/license/Scientific-Analysis-Instruments/uk.co.saiman.svg"
+  <img src="https://img.shields.io/badge/license-GPL3-blue.svg"
       alt="License">
 </a>
 
