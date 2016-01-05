@@ -1,0 +1,15 @@
+uk.co.saiman
+uk.co.saiman.chemistry
+uk.co.saiman.chemistry.analysis
+uk.co.saiman.chemistry.isotope
+uk.co.saiman.data
+uk.co.saiman.eclipse
+uk.co.saiman.experiment
+uk.co.saiman.instrument
+uk.co.saiman.instrument.raster
+uk.co.saiman.msapex
+uk.co.saiman.msapex.acquisition
+uk.co.saiman.msapex.data
+uk.co.saiman.processing
+uk.co.saiman.processing.experiment
+uk.co.saiman.utilities
