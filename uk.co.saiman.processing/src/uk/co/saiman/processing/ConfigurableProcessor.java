@@ -21,19 +21,48 @@ package uk.co.saiman.processing;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
+/**
+ * Conceptually, a configurable {@link Processor}. This interface consumes a
+ * given configuration to provide a {@link Processor} for that configuration.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <C>
+ *          The configuration interface type
+ * @param <T>
+ *          The processing target type
+ * @param <R>
+ *          The processing result type
+ */
 public interface ConfigurableProcessor<C, T, R> {
+	/**
+	 * Provide a processor for the given configuration.
+	 * 
+	 * @param configuration
+	 *          The configuration of the requested processor
+	 * @return A configured processor
+	 */
 	Processor<T, R> configure(C configuration);
 
+	/**
+	 * @return The exact generic type of the processing target
+	 */
 	default TypeToken<T> getTargetType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
 				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
 	}
 
+	/**
+	 * @return The exact generic type of the processing result
+	 */
 	default TypeToken<R> getResultType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
 				.resolveTypeArgument(new TypeParameter<R>() {}).infer();
 	}
 
+	/**
+	 * @return The exact generic type of the configuration interface
+	 */
 	default TypeToken<C> getConfigurationType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
 				.resolveTypeArgument(new TypeParameter<C>() {}).infer();

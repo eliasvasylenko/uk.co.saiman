@@ -38,7 +38,7 @@ import uk.co.saiman.processing.ConfigurableProcessor;
 public interface ConfigurableProcessingExperiment<C, T, R> extends ExperimentType<C, T, R> {
 	ConfigurableProcessor<C, T, R> getConfigurableProcessor();
 
-	static <T, R, C> ConfigurableProcessingExperiment<C, T, R> over(ConfigurableProcessor<C, T, R> processor) {
+	static <C, T, R> ConfigurableProcessingExperiment<C, T, R> over(ConfigurableProcessor<C, T, R> processor) {
 		return new ConfigurableProcessingExperiment<C, T, R>() {
 			@Override
 			public ConfigurableProcessor<C, T, R> getConfigurableProcessor() {

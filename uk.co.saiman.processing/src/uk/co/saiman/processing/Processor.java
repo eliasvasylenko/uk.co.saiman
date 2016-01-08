@@ -22,9 +22,11 @@ import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
 /**
- * A processor instance should be completely idempotent and stateless. Because
- * of this, they may be used asynchronously, and they may be modelled as
- * singletons where appropriate.
+ * A process to be applied to a target to create a result.
+ * <p>
+ * A processor instance should be completely stateless, and idempotent with the
+ * same input. Because of this, they may be used asynchronously, and they may be
+ * modelled as singletons where appropriate.
  * 
  * @author Elias N Vasylenko
  *
@@ -34,15 +36,31 @@ import uk.co.strangeskies.reflection.TypeToken;
  *          The type of the processing result.
  */
 public interface Processor<T, R> {
+	/**
+	 * @return The name of the process
+	 */
 	String name();
 
+	/**
+	 * Process a given target into a result.
+	 * 
+	 * @param target
+	 *          The target to be processed
+	 * @return The result of applying processing to the target
+	 */
 	R process(T target);
 
+	/**
+	 * @return The exact generic type of the processing target
+	 */
 	default TypeToken<T> getTargetType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(Processor.class)
 				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
 	}
 
+	/**
+	 * @return The exact generic type of the processing result
+	 */
 	default TypeToken<R> getResultType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(Processor.class)
 				.resolveTypeArgument(new TypeParameter<R>() {}).infer();
