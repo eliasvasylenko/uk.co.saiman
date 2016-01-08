@@ -36,7 +36,7 @@ public class HardwareConfigurationExperiment<C> implements ExperimentType<C, Ins
 	public void validate(C configuration) {}
 
 	@Override
-	public Instrument process(C configuration, Instrument input) {
+	public Instrument execute(C configuration, Instrument input) {
 		return input;
 	}
 }

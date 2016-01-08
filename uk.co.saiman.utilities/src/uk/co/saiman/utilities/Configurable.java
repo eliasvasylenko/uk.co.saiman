@@ -27,12 +27,38 @@ import org.osgi.service.component.annotations.Component;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
+/**
+ * Implementation of this API designates a class which is configurable by a
+ * given configuration interface type.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <C>
+ *          The configuration interface type
+ */
 @Component
 public interface Configurable<C> {
+	/**
+	 * @return The current configuration
+	 */
 	C getConfiguration();
 
+	/**
+	 * Update the configuration.
+	 * 
+	 * @param configuration
+	 *          The new configuration to adopt
+	 */
 	void setConfiguration(C configuration);
 
+	/**
+	 * Partially update the configuration.
+	 * 
+	 * @param partialConfiguration
+	 *          A superinterface of the configuration type, such that its members
+	 *          can be partially applied to the configuration of this configurable
+	 *          instance
+	 */
 	@SuppressWarnings("unchecked")
 	default void updateConfiguration(Supplier<? super C> partialConfiguration) {
 		Object partial = partialConfiguration.get();
@@ -49,10 +75,23 @@ public interface Configurable<C> {
 				}));
 	}
 
+	/**
+	 * Partially update a configuration.
+	 * 
+	 * @param configurable
+	 *          A configurable to partially update
+	 * @param configurationOverride
+	 *          A superinterface of the configuration type, such that its members
+	 *          can be partially applied to the configuration of the given
+	 *          configurable instance
+	 */
 	static <S> void updateConfiguration(Configurable<? extends S> configurable, S configurationOverride) {
 		configurable.updateConfiguration((Supplier<S>) () -> configurationOverride);
 	}
 
+	/**
+	 * @return The exact generic type of the configuration interface
+	 */
 	default TypeToken<C> getConfigurationType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(Configurable.class)
 				.resolveTypeArgument(new TypeParameter<C>() {}).infer();

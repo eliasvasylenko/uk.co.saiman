@@ -20,19 +20,38 @@ package uk.co.saiman.experiment;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import uk.co.saiman.utilities.Configurable;
 
+/**
+ * A node in an experiment part tree.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <C>
+ *          The type of the experiment configuration interface
+ * @param <I>
+ *          The type of the experiment input
+ * @param <O>
+ *          The type of the experiment output
+ */
 public interface ExperimentPart<C, I, O> extends Configurable<C> {
-	public ExperimentType<C, I, O> type();
+	ExperimentType<C, I, O> type();
 
-	public Optional<ExperimentPart<?, ?, ?>> parent();
+	Optional<ExperimentPart<?, ?, ? extends I>> parent();
 
-	public List<ExperimentPart<?, ?, ?>> children();
+	void remove();
 
-	public ExperimentLifecycleState state();
+	List<ExperimentPart<?, ? super O, ?>> children();
 
-	public enum ExperimentLifecycleState {
+	<T> Set<ExperimentType<?, ? super O, ?>> getChildTypes();
+
+	<D, U> ExperimentPart<D, O, U> addChild(ExperimentType<D, ? super O, U> childType);
+
+	ExperimentLifecycleState state();
+
+	enum ExperimentLifecycleState {
 		/**
 		 * Experiment if configurable and unprocessed.
 		 */

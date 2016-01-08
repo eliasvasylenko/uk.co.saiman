@@ -20,6 +20,7 @@ package uk.co.saiman.processing.experiment;
 
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.processing.Processor;
+import uk.co.strangeskies.reflection.TypeToken;
 
 public interface ProcessingExperiment<T, R> extends ExperimentType<Void, T, R> {
 	Processor<T, R> getProcessor();
@@ -35,9 +36,19 @@ public interface ProcessingExperiment<T, R> extends ExperimentType<Void, T, R> {
 			public void validate(Void configuration) {}
 
 			@Override
-			public R process(Void configuration, T input) {
+			public R execute(Void configuration, T input) {
 				return processor.process(input);
 			}
 		};
+	}
+
+	@Override
+	default TypeToken<T> getInputType() {
+		return getProcessor().getTargetType();
+	}
+
+	@Override
+	default TypeToken<R> getOutputType() {
+		return getProcessor().getResultType();
 	}
 }

@@ -18,22 +18,90 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.List;
 import java.util.Set;
 
 import uk.co.saiman.instrument.Instrument;
 
 /**
+ * API for experiment management, i.e. registration and discovery of experiment
+ * types, and registration of root experiment parts such that experiment part
+ * trees can be built.
+ * 
  * @author Elias N Vasylenko
  */
 public interface ExperimentManager {
-	public Set<ExperimentPart<?, Instrument, ?>> getRootExperiments();
+	/**
+	 * Execute the experiment tree at the given root.
+	 * 
+	 * @param experimentRoot
+	 *          The root of the experiment tree to execute
+	 */
+	public void execute(ExperimentPart<?, Instrument, ?> experimentRoot);
 
-	public Set<ExperimentType<?, Instrument, ?>> getRootExperimentTypes();
+	/**
+	 * Get the current processing state of the experiment manager.
+	 * 
+	 * @return The current state, in the form of the stack of all currently
+	 *         executing experiment parts
+	 */
+	public List<ExperimentPart<?, ?, ?>> state();
 
-	public <C, O> ExperimentPart<C, Instrument, O> addRootExperiment(ExperimentType<C, Instrument, O> rootType);
+	/*
+	 * Root experiment types
+	 */
 
-	public <T> Set<ExperimentType<?, T, ?>> getChildExperimentTypes(ExperimentPart<?, ?, T> parentPart);
+	/**
+	 * @return All known available root experiment types
+	 */
+	Set<ExperimentType<?, Instrument, ?>> getRootExperimentTypes();
 
-	public <C, T, O> ExperimentPart<C, T, O> addChildExperiment(ExperimentPart<?, ?, T> parentPart,
-			ExperimentType<C, T, O> childType);
+	/**
+	 * Register an available root experiment type
+	 * 
+	 * @param rootType
+	 *          A possible root experiment type
+	 * @return True if the type was added successfully, false otherwise
+	 */
+	boolean addRootExperimentType(ExperimentType<?, Instrument, ?> rootType);
+
+	/**
+	 * Unregister an available root experiment type
+	 * 
+	 * @param rootType
+	 *          A possible root experiment type
+	 * @return True if the type was removed successfully, false otherwise
+	 */
+	boolean removeRootExperimentType(ExperimentType<?, Instrument, ?> rootType);
+
+	/**
+	 * @return All registered root experiment parts
+	 */
+	Set<ExperimentPart<?, Instrument, ?>> getRootExperiments();
+
+	/**
+	 * Add a root experiment node of the given type to management.
+	 * 
+	 * @param rootType
+	 *          The type of experiment
+	 * @return A new root experiment part of the given type
+	 */
+	<C, O> ExperimentPart<C, Instrument, O> addRootExperiment(ExperimentType<C, Instrument, O> rootType);
+
+	/**
+	 * Remove the given root experiment node from management.
+	 * 
+	 * @param rootPart
+	 *          The experiment part
+	 * @return True if the part was removed successfully, false otherwise
+	 */
+	boolean removeRootExperiment(ExperimentPart<?, Instrument, ?> rootPart);
+
+	/*
+	 * Child experiment types
+	 */
+
+	boolean addExperimentType(ExperimentType<?, ?, ?> childType);
+
+	boolean removeExperimentType(ExperimentType<?, ?, ?> childType);
 }

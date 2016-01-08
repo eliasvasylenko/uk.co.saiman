@@ -29,7 +29,6 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.ExperimentManager;
 import uk.co.saiman.experiment.ExperimentPart;
-import uk.co.saiman.experiment.ExperimentPart.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.instrument.Instrument;
 
@@ -55,28 +54,24 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	}
 
 	@Reference
-	public void addExperimentType(ExperimentType<?, ?, ?> experimentType) {
-		experimentTypes.add(experimentType);
-	}
-
-	@Reference
-	public void removeExperimentType(ExperimentType<?, ?, ?> experimentType) {
-		experimentTypes.remove(experimentType);
-	}
-
-	@Reference
 	public void setInstrument(Instrument instrument) {
 		this.instrument = instrument;
 	}
 
-	public List<ExperimentLifecycleState> state() {
-		return processingStack.stream().map(ExperimentPart::state).collect(Collectors.toList());
+	@Override
+	public void execute(ExperimentPart<?, Instrument, ?> experimentRoot) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
-	public Set<ExperimentPart<?, Instrument, ?>> getRootExperiments() {
-		return null;
+	public List<ExperimentPart<?, ?, ?>> state() {
+		return processingStack;
 	}
+
+	/*
+	 * Root experiment types
+	 */
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -86,21 +81,47 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	}
 
 	@Override
+	public boolean addRootExperimentType(ExperimentType<?, Instrument, ?> rootType) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean removeRootExperimentType(ExperimentType<?, Instrument, ?> rootType) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Set<ExperimentPart<?, Instrument, ?>> getRootExperiments() {
+		return null;
+	}
+
+	@Override
 	public <C, O> ExperimentPart<C, Instrument, O> addRootExperiment(ExperimentType<C, Instrument, O> rootType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <T> Set<ExperimentType<?, T, ?>> getChildExperimentTypes(ExperimentPart<?, ?, T> parentPart) {
+	public boolean removeRootExperiment(ExperimentPart<?, Instrument, ?> rootPart) {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
+	}
+
+	/*
+	 * Child experiment types
+	 */
+
+	@Override
+	public boolean addExperimentType(ExperimentType<?, ?, ?> childType) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
-	public <C, T, O> ExperimentPart<C, T, O> addChildExperiment(ExperimentPart<?, ?, T> parentPart,
-			ExperimentType<C, T, O> childType) {
+	public boolean removeExperimentType(ExperimentType<?, ?, ?> childType) {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 }

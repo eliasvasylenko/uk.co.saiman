@@ -20,6 +20,7 @@ package uk.co.saiman.processing.experiment;
 
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.processing.ConfigurableProcessor;
+import uk.co.strangeskies.reflection.TypeToken;
 
 /**
  * A configurable processor accepts an instance of a specified configuration
@@ -51,9 +52,24 @@ public interface ConfigurableProcessingExperiment<C, T, R> extends ExperimentTyp
 			}
 
 			@Override
-			public R process(C configuration, T input) {
+			public R execute(C configuration, T input) {
 				return processor.configure(configuration).process(input);
 			}
 		};
+	}
+
+	@Override
+	default TypeToken<C> getConfigurationType() {
+		return getConfigurableProcessor().getConfigurationType();
+	}
+
+	@Override
+	default TypeToken<T> getInputType() {
+		return getConfigurableProcessor().getTargetType();
+	}
+
+	@Override
+	default TypeToken<R> getOutputType() {
+		return getConfigurableProcessor().getResultType();
 	}
 }

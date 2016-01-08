@@ -36,7 +36,7 @@ import uk.co.strangeskies.reflection.TypeToken;
 public interface ExperimentType<C, I, O> {
 	public void validate(C configuration);
 
-	public O process(C configuration, I input);
+	public O execute(C configuration, I input);
 
 	default TypeToken<C> getConfigurationType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(Configurable.class)
