@@ -19,19 +19,36 @@
 package uk.co.saiman.utilities;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
+/**
+ * A buffer to decouple the delivery of events with their sequential
+ * consumption, such that the event firing threads are not blocked by listeners.
+ * 
+ * Listeners are invoked in the order they are added.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          The type of event to listen for
+ */
 public class BufferingListener<T> implements Consumer<T> {
 	private final Deque<T> buffer;
-	private final Set<Consumer<? super T>> listeners;
+	private final List<Consumer<? super T>> listeners;
 	private boolean disposed;
 
+	/**
+	 * Initialise a buffering listener with an empty queue and an empty set of
+	 * listeners.
+	 */
 	public BufferingListener() {
 		buffer = new ArrayDeque<>();
-		listeners = new HashSet<>();
+		listeners = new ArrayList<>();
 		disposed = false;
 
 		Thread forwardThread = new Thread(() -> {
@@ -53,7 +70,7 @@ public class BufferingListener<T> implements Consumer<T> {
 				}
 
 				if (item != null) {
-					for (Consumer<? super T> listener : listeners) {
+					for (Consumer<? super T> listener : new ArrayList<>(listeners)) {
 						listener.accept(item);
 					}
 				}
@@ -72,6 +89,9 @@ public class BufferingListener<T> implements Consumer<T> {
 		}
 	}
 
+	/**
+	 * Discard the event queue and cease forwarding of events to listeners.
+	 */
 	public void dispose() {
 		synchronized (buffer) {
 			disposed = true;
@@ -79,6 +99,12 @@ public class BufferingListener<T> implements Consumer<T> {
 		}
 	}
 
+	/**
+	 * Fire an event.
+	 * 
+	 * @param item
+	 *          The event data
+	 */
 	@Override
 	public void accept(T item) {
 		synchronized (buffer) {
@@ -87,19 +113,37 @@ public class BufferingListener<T> implements Consumer<T> {
 		}
 	}
 
+	/**
+	 * Add the given listener to the set.
+	 * 
+	 * @param listener
+	 *          A listener to receive forwarded events
+	 */
 	public void addListener(Consumer<? super T> listener) {
 		listeners.add(listener);
 	}
 
+	/**
+	 * Remove the given listener from the set.
+	 * 
+	 * @param listener
+	 *          A listener to receive forwarded events
+	 */
 	public void removeListener(Consumer<? super T> listener) {
 		listeners.remove(listener);
 	}
 
+	/**
+	 * @return The set of all chained listeners.
+	 */
 	public Set<Consumer<? super T>> getListeners() {
 		return new HashSet<>(listeners);
 	}
 
-	public void removeAllListeners() {
+	/**
+	 * Clear all chained listeners.
+	 */
+	public void clearListeners() {
 		listeners.clear();
 	}
 }

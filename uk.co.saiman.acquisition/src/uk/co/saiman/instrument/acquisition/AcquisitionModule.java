@@ -23,9 +23,24 @@ import java.util.function.Consumer;
 import uk.co.saiman.data.SampledContinuum;
 import uk.co.saiman.instrument.HardwareModule;
 
+/**
+ * Software module for acquisition of continuum data through some mechanism.
+ * Typically continuum data may correspond to a mass spectrum.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface AcquisitionModule extends HardwareModule {
+	/**
+	 * Begin an acquisition experiment with the current configuration.
+	 * 
+	 * @throws IllegalStateException
+	 *           If acquisition is already in progress.
+	 */
 	void startAcquisition();
 
+	/**
+	 * Stop any acquisition experiment that may be in progress.
+	 */
 	void stopAcquisition();
 
 	@Override
@@ -38,6 +53,9 @@ public interface AcquisitionModule extends HardwareModule {
 		abortOperation();
 	}
 
+	/**
+	 * @return True if the module is currently in acquisition, false otherwise.
+	 */
 	boolean isAcquiring();
 
 	/**
@@ -48,9 +66,10 @@ public interface AcquisitionModule extends HardwareModule {
 	SampledContinuum getLastAcquisitionData();
 
 	/**
-	 * Add an acquisition event listener indefinitely. The listener will not be
-	 * triggered until the start of an experiment via {@link #startAcquisition()},
-	 * and will be removed after the experiment is complete.
+	 * Add an acquisition event listener for the next acquisition experiment. The
+	 * listener will not be triggered until the start of an experiment via
+	 * {@link #startAcquisition()}, and will be removed after the experiment is
+	 * complete.
 	 * 
 	 * @param listener
 	 *          A consumer of {@link SampledContinuum} objects which will be
@@ -80,12 +99,32 @@ public interface AcquisitionModule extends HardwareModule {
 	 */
 	void removeAcquisitionListener(Consumer<? super SampledContinuum> listener);
 
+	/**
+	 * Get the time resolution between each sample in the acquired continuum.
+	 * 
+	 * @return The acquisition resolution in milliseconds
+	 */
 	double getAcquisitionResolution();
 
+	/**
+	 * Set the active sampling duration for a single continuum acquisition.
+	 * 
+	 * @param time
+	 *          The time an acquisition will last in milliseconds
+	 */
 	void setAcquisitionTime(double time);
 
+	/**
+	 * Get the active sampling duration for a single continuum acquisition.
+	 * 
+	 * @return The time an acquisition will last in milliseconds
+	 */
 	double getAcquisitionTime();
 
+	/**
+	 * @return The number of samples in an acquired continuum given the current
+	 *         acquisition time and acquisition resolution configuration
+	 */
 	default int getAcquisitionDepth() {
 		return (int) (getAcquisitionTime() / getAcquisitionResolution());
 	}

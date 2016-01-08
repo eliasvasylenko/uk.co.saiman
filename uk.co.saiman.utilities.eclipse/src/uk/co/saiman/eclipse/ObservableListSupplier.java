@@ -28,6 +28,20 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+/**
+ * A supplier of observable lists, primarily intended to be populated
+ * automatically by the OSGi service registry, for consumption by the Eclipse
+ * dependency injection framework.
+ * 
+ * Declarative service implementations should extend this class, passing
+ * services to {@link #addItem(Object)} and {@link #removeItem(Object)} as they
+ * become available and unavailable via the service registry.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          The type of the elements of the list we wish to supply
+ */
 public class ObservableListSupplier<T> extends ExtendedObjectSupplier {
 	private final ObservableList<T> items = FXCollections.observableArrayList();
 
@@ -36,11 +50,25 @@ public class ObservableListSupplier<T> extends ExtendedObjectSupplier {
 		return FXCollections.unmodifiableObservableList(items);
 	}
 
+	/**
+	 * Add an item to the supplier observable list. Intended to be invoked by the
+	 * OSGi service registry.
+	 * 
+	 * @param item
+	 *          An item we wish to add to the list.
+	 */
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	public void addItem(T item) {
 		items.add(item);
 	}
 
+	/**
+	 * Remove an item from the supplier observable list. Intended to be invoked by
+	 * the OSGi service registry.
+	 * 
+	 * @param item
+	 *          An item we wish to remove from the list.
+	 */
 	public void removeItem(T item) {
 		items.remove(item);
 	}

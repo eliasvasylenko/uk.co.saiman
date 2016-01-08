@@ -28,6 +28,20 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
+/**
+ * A supplier of observable sets, primarily intended to be populated
+ * automatically by the OSGi service registry, for consumption by the Eclipse
+ * dependency injection framework.
+ * 
+ * Declarative service implementations should extend this class, passing
+ * services to {@link #addItem(Object)} and {@link #removeItem(Object)} as they
+ * become available and unavailable via the service registry.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          The type of the elements of the set we wish to supply
+ */
 public class ObservableSetSupplier<T> extends ExtendedObjectSupplier {
 	@SuppressWarnings("unchecked")
 	private final ObservableSet<T> items = FXCollections.observableSet();
@@ -37,11 +51,25 @@ public class ObservableSetSupplier<T> extends ExtendedObjectSupplier {
 		return FXCollections.unmodifiableObservableSet(items);
 	}
 
+	/**
+	 * Add an item to the supplier observable set. Intended to be invoked by the
+	 * OSGi service registry.
+	 * 
+	 * @param item
+	 *          An item we wish to add to the set.
+	 */
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	public void addItem(T item) {
 		items.add(item);
 	}
 
+	/**
+	 * Remove an item from the supplier observable set. Intended to be invoked by
+	 * the OSGi service registry.
+	 * 
+	 * @param item
+	 *          An item we wish to remove from the set.
+	 */
 	public void removeItem(T item) {
 		items.remove(item);
 	}

@@ -28,10 +28,24 @@ import uk.co.saiman.data.SparseSampledContinuum;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.saiman.utilities.BufferingListener;
 
+/**
+ * A configurable software simulation of an acquisition hardware module.
+ * 
+ * @author Elias N Vasylenko
+ */
 @Component
 public class AcquisitionSimulation implements AcquisitionModule {
-	private double acquisitionResolution = 0.00_000_1;
-	private double acquisitionFrequency = 10_000;
+	/**
+	 * The default acquisition resolution when none are provided.
+	 */
+	public static final double DEFAULT_ACQUISITION_RESOLUTION = 0.00_000_1;
+	/**
+	 * The default acquisition time when none are provided.
+	 */
+	public static final double DEFAULT_ACQUISITION_TIME = 10_000;
+
+	private double acquisitionResolution = DEFAULT_ACQUISITION_RESOLUTION;
+	private double acquisitionFrequency = DEFAULT_ACQUISITION_TIME;
 	private double acquisitionTime;
 
 	private SampledContinuum acquisitionData;
@@ -44,6 +58,11 @@ public class AcquisitionSimulation implements AcquisitionModule {
 	private final int[] hitIndices;
 	private final double[] hitIntensities;
 
+	/**
+	 * Create an acquisition simulation with the default values given by:
+	 * {@link #DEFAULT_ACQUISITION_RESOLUTION} and
+	 * {@link #DEFAULT_ACQUISITION_TIME}.
+	 */
 	public AcquisitionSimulation() {
 		singleAcquisitionListeners = new BufferingListener<>();
 		acquisitionListeners = new BufferingListener<>();
@@ -54,6 +73,23 @@ public class AcquisitionSimulation implements AcquisitionModule {
 		for (int i = 0; i < MAXIMUM_HITS; i++) {
 			hitIntensities[i] = 1;
 		}
+	}
+
+	/**
+	 * Create an acquisition simulation with the given acquisition resolution and
+	 * acquisition time.
+	 * 
+	 * @param acquisitionResolution
+	 *          The time resolution between each sample in the acquired continuum,
+	 *          in milliseconds
+	 * @param acquisitionTime
+	 *          The active sampling duration for a single continuum acquisition,
+	 *          in milliseconds.
+	 */
+	public AcquisitionSimulation(double acquisitionResolution, double acquisitionTime) {
+		this();
+		setAcquisitionResolution(acquisitionResolution);
+		setAcquisitionTime(acquisitionTime);
 	}
 
 	@Override
@@ -93,7 +129,7 @@ public class AcquisitionSimulation implements AcquisitionModule {
 		}
 	}
 
-	public void acquire() {
+	private void acquire() {
 		Random random = new Random();
 
 		for (int i = 0; i < acquisitionTime * acquisitionFrequency; i++) {
@@ -121,7 +157,7 @@ public class AcquisitionSimulation implements AcquisitionModule {
 			for (Consumer<? super SampledContinuum> listener : singleAcquisitionListeners.getListeners()) {
 				acquisitionListeners.removeListener(listener);
 			}
-			singleAcquisitionListeners.removeAllListeners();
+			singleAcquisitionListeners.clearListeners();
 
 			isAcquiring = false;
 		}
@@ -152,6 +188,12 @@ public class AcquisitionSimulation implements AcquisitionModule {
 		acquisitionListeners.removeListener(listener);
 	}
 
+	/**
+	 * Set the time resolution between each sample in the acquired continuum.
+	 * 
+	 * @param resolution
+	 *          The acquisition resolution in milliseconds
+	 */
 	public void setAcquisitionResolution(double resolution) {
 		acquisitionResolution = resolution;
 	}

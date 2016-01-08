@@ -22,6 +22,17 @@ import java.time.LocalDate;
 
 import uk.co.strangeskies.modabi.Namespace;
 
+/**
+ * Utilities relating conceptually to the Scientific Analysis Instruments set of
+ * products.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class SAI {
+	private SAI() {}
+
+	/**
+	 * The root namespace associated with Scientific Analysis Instruments products
+	 */
 	public static final Namespace NAMESPACE = new Namespace(SAI.class.getPackage(), LocalDate.of(2015, 10, 8));
 }

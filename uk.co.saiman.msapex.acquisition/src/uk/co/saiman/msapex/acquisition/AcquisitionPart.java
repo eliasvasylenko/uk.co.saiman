@@ -38,8 +38,10 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
+import uk.co.saiman.eclipse.FXUtilities;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.saiman.msapex.data.DataChartController;
 
@@ -49,6 +51,7 @@ public class AcquisitionPart {
 
 	private ObservableSet<AcquisitionModule> selectedModules = FXCollections.observableSet();
 	private Map<AcquisitionModule, DataChartController> controllers = new HashMap<>();
+	private Map<DataChartController, Pane> roots = new HashMap<>();
 
 	public boolean setAcquisitionModules(Collection<? extends AcquisitionModule> selectedModules) {
 		return this.selectedModules.removeAll(selectedModules) | this.selectedModules.addAll(selectedModules);
@@ -69,12 +72,13 @@ public class AcquisitionPart {
 	@PostConstruct
 	void initialise(BorderPane pane, @LocalInstance FXMLLoader loader,
 			@Service List<AcquisitionModule> acquisitionModules) {
-		loader.setLocation(getClass().getResource(DataChartController.FXML));
+		loader.setLocation(FXUtilities.getResource(DataChartController.class));
 
 		TilePane chartPane = new TilePane();
 		Text emptyText = new Text("No acquisition modules selected");
 
 		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionModule> change) -> {
+			Pane root;
 			DataChartController controller;
 
 			chartPane.setPrefColumns(selectedModules.size());
@@ -82,20 +86,22 @@ public class AcquisitionPart {
 				try {
 					loader.setRoot(null);
 					loader.setController(null);
-					loader.load();
+					root = loader.load();
 					controller = loader.getController();
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 				controllers.put(change.getElementAdded(), controller);
+				roots.put(controller, root);
 
-				chartPane.getChildren().add(controller.getRootPane());
+				chartPane.getChildren().add(root);
 
 				pane.setCenter(chartPane);
 			} else if (change.wasRemoved()) {
 				controller = controllers.remove(change.getElementRemoved());
+				root = roots.remove(controller);
 
-				chartPane.getChildren().remove(controller.getRootPane());
+				chartPane.getChildren().remove(root);
 
 				if (selectedModules.isEmpty()) {
 					pane.setCenter(emptyText);
