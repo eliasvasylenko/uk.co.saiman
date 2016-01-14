@@ -18,25 +18,32 @@
  */
 package uk.co.saiman.instrument;
 
-import java.util.function.Consumer;
-
-public interface HardwareModule {
-	String getName();
+/**
+ * An instrument has a many to one relationship with a lifecycle state. When
+ * transitions between states are requested of an instrument, the action is
+ * delegated to lifecycle participants registered with that instrument.
+ * 
+ * @author Elias N Vasylenko
+ *
+ */
+public enum InstrumentLifecycleState {
+	/**
+	 * Instrument is in idle state.
+	 */
+	STANDBY,
 
 	/**
-	 * @return True if a communication link with the hardware properly
-	 *         established, false otherwise
+	 * Make sure vacuum is ready and ramp up voltages, etc.
 	 */
-	boolean isConnected();
-
-	void reset();
+	BEGIN_OPERATION,
 
 	/**
-	 * If the hardware module is performing some sort of operation, e.g. a
-	 * currently running raster or acquisition card, that operation should be
-	 * aborted, or for high voltages they should be turned off if possible.
+	 * Whilst operating, experiments may be processed.
 	 */
-	void abortOperation();
+	OPERATING,
 
-	void addErrorListener(Consumer<Exception> exception);
+	/**
+	 * Ramp down voltages, disengage any operating hardware, etc.
+	 */
+	END_OPERATION
 }

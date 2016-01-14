@@ -37,50 +37,67 @@ import uk.co.saiman.utilities.Configurable;
  *          The type of the experiment output
  */
 public interface ExperimentPart<C, I, O> extends Configurable<C> {
+	/**
+	 * Execute the experiment tree from the root of the receiving node.
+	 */
+	public void execute();
+
+	/**
+	 * @return The output of this experiment part if its {@link #state()} is
+	 *         {@link ExperimentLifecycleState#COMPLETION}, otherwise an empty
+	 *         optional
+	 */
+	public Optional<O> output();
+
+	/**
+	 * @return The type of the experiment
+	 */
 	ExperimentType<C, I, O> type();
 
+	/**
+	 * @return The parent part of this experiment, if present, otherwise an empty
+	 *         optional
+	 */
 	Optional<ExperimentPart<?, ?, ? extends I>> parent();
 
+	/**
+	 * @return The root part of the experiment tree this part occurs in
+	 */
+	@SuppressWarnings("unchecked")
+	default ExperimentPart<?, Void, ?> root() {
+		return parent().<ExperimentPart<?, Void, ?>> map(ExperimentPart::root).orElse((ExperimentPart<?, Void, ?>) this);
+	}
+
+	/**
+	 * Remove this part from its parent, or from the containing manager if it is
+	 * the root part.
+	 */
 	void remove();
 
+	/**
+	 * Get all child experiment parts, to be executed sequentially during this
+	 * parts {@link ExperimentLifecycleState#PROCESSING} state.
+	 * 
+	 * @return An ordered list of all sequential child experiment parts
+	 */
 	List<ExperimentPart<?, ? super O, ?>> children();
 
-	<T> Set<ExperimentType<?, ? super O, ?>> getChildTypes();
+	/**
+	 * @return All known available child experiment types
+	 */
+	Set<ExperimentType<?, ? super O, ?>> getAvailableChildExperimentTypes();
 
+	/**
+	 * Add a child experiment node of the given type to this node.
+	 * 
+	 * @param childType
+	 *          The type of experiment
+	 * @return A new child experiment part of the given type
+	 */
 	<D, U> ExperimentPart<D, O, U> addChild(ExperimentType<D, ? super O, U> childType);
 
+	/**
+	 * @return The current execution lifecycle state of the experiment part.
+	 */
 	ExperimentLifecycleState state();
-
-	enum ExperimentLifecycleState {
-		/**
-		 * Experiment if configurable and unprocessed.
-		 */
-		CONFIGURATION,
-
-		/**
-		 * Experiment part is locked out of configuration and waiting in part of a
-		 * processing queue.
-		 */
-		WAITING,
-
-		/**
-		 * Move stage into position, etc.
-		 */
-		PREPARATION,
-
-		/**
-		 * Optimise laser, acquire from TDC, etc.
-		 */
-		PROCESSING,
-
-		/**
-		 * Once transitioned to this state, data is acquired
-		 */
-		COMPLETION,
-
-		/**
-		 * Something went wrong...
-		 */
-		FAILURE
-	}
 }

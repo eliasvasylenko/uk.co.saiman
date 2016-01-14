@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleParticipant;
+import uk.co.saiman.instrument.InstrumentLifecycleState;
 import uk.co.strangeskies.utilities.IdentityProperty;
 
 @Component

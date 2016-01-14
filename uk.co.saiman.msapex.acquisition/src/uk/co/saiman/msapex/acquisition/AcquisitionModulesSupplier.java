@@ -24,6 +24,6 @@ import org.osgi.service.component.annotations.Component;
 import uk.co.saiman.eclipse.ObservableListSupplier;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 
-@Component(service = ExtendedObjectSupplier.class, property = "dependency.injection.annotation=uk.co.saiman.msapex.acquisition.AcquisitionModules")
-public class AcquisitionModulesSupplier extends ObservableListSupplier<AcquisitionModule> {
-}
+@Component(service = ExtendedObjectSupplier.class, property = ExtendedObjectSupplier.SERVICE_CONTEXT_KEY
+		+ "=uk.co.saiman.msapex.acquisition.AcquisitionModules")
+public class AcquisitionModulesSupplier extends ObservableListSupplier<AcquisitionModule> {}

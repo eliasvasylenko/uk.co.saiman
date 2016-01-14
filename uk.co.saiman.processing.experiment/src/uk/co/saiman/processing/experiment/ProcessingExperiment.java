@@ -22,9 +22,28 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.processing.Processor;
 import uk.co.strangeskies.reflection.TypeToken;
 
+/**
+ * An experiment type which will apply a {@link Processor} to the result of a
+ * parent experiment part, and output the result.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          The type of the experiment input
+ * @param <R>
+ *          The type of the experiment output
+ */
 public interface ProcessingExperiment<T, R> extends ExperimentType<Void, T, R> {
+	/**
+	 * @return The processor to be applied via experiment execution
+	 */
 	Processor<T, R> getProcessor();
 
+	/**
+	 * @param processor
+	 *          The processor to be applied via experiment execution
+	 * @return A {@link ProcessingExperiment} over the given {@link Processor}
+	 */
 	static <T, R> ProcessingExperiment<T, R> over(Processor<T, R> processor) {
 		return new ProcessingExperiment<T, R>() {
 			@Override

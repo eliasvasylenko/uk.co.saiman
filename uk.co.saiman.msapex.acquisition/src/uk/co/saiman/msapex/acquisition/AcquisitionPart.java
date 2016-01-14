@@ -36,11 +36,12 @@ import org.eclipse.fx.core.di.Service;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.TilePane;
-import javafx.scene.text.Text;
+import javafx.scene.layout.Priority;
 import uk.co.saiman.eclipse.FXUtilities;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.saiman.msapex.data.DataChartController;
@@ -49,9 +50,11 @@ public class AcquisitionPart {
 	@Inject
 	IEclipseContext context;
 
+	@FXML
+	private Pane chartPane;
+
 	private ObservableSet<AcquisitionModule> selectedModules = FXCollections.observableSet();
 	private Map<AcquisitionModule, DataChartController> controllers = new HashMap<>();
-	private Map<DataChartController, Pane> roots = new HashMap<>();
 
 	public boolean setAcquisitionModules(Collection<? extends AcquisitionModule> selectedModules) {
 		return this.selectedModules.removeAll(selectedModules) | this.selectedModules.addAll(selectedModules);
@@ -70,48 +73,35 @@ public class AcquisitionPart {
 	}
 
 	@PostConstruct
-	void initialise(BorderPane pane, @LocalInstance FXMLLoader loader,
+	void initialise(BorderPane container, @LocalInstance FXMLLoader loader,
 			@Service List<AcquisitionModule> acquisitionModules) {
-		loader.setLocation(FXUtilities.getResource(DataChartController.class));
-
-		TilePane chartPane = new TilePane();
-		Text emptyText = new Text("No acquisition modules selected");
+		container.setCenter(FXUtilities.loadIntoController(loader, this));
 
 		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionModule> change) -> {
-			Pane root;
-			DataChartController controller;
-
-			chartPane.setPrefColumns(selectedModules.size());
 			if (change.wasAdded()) {
-				try {
-					loader.setRoot(null);
-					loader.setController(null);
-					root = loader.load();
-					controller = loader.getController();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-				controllers.put(change.getElementAdded(), controller);
-				roots.put(controller, root);
-
-				chartPane.getChildren().add(root);
-
-				pane.setCenter(chartPane);
+				selectAcquisitionModule(loader, change.getElementAdded());
 			} else if (change.wasRemoved()) {
-				controller = controllers.remove(change.getElementRemoved());
-				root = roots.remove(controller);
-
-				chartPane.getChildren().remove(root);
-
-				if (selectedModules.isEmpty()) {
-					pane.setCenter(emptyText);
-				}
+				deselectAcquisitionModule(change.getElementRemoved());
 			}
 		});
 
-		pane.setCenter(emptyText);
-
 		setAcquisitionModules(acquisitionModules);
+	}
+
+	private void selectAcquisitionModule(FXMLLoader loader, AcquisitionModule acquisitionModule) {
+		DataChartController controller = FXUtilities.loadController(loader, DataChartController.class);
+		controller.setTitle(acquisitionModule.getName());
+
+		controllers.put(acquisitionModule, controller);
+
+		HBox.setHgrow(controller.getRoot(), Priority.ALWAYS);
+		chartPane.getChildren().add(controller.getRoot());
+	}
+
+	private void deselectAcquisitionModule(AcquisitionModule acquisitionModule) {
+		DataChartController controller = controllers.remove(acquisitionModule);
+
+		chartPane.getChildren().remove(controller.getRoot());
 	}
 
 	@Focus

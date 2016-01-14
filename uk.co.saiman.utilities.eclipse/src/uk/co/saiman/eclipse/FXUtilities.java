@@ -18,7 +18,10 @@
  */
 package uk.co.saiman.eclipse;
 
+import java.io.IOException;
 import java.net.URL;
+
+import javafx.fxml.FXMLLoader;
 
 /**
  * A collection of general utility methods for working with JavaFX and
@@ -30,6 +33,145 @@ public class FXUtilities {
 	private static final String CONTROLLER_STRING = "Controller";
 
 	private FXUtilities() {}
+
+	/**
+	 * For a given controller instance, load an FXML document into that
+	 * controller. The location of the document is found by convention, according
+	 * to {@link #getResource(Class)}.
+	 * 
+	 * @param loader
+	 *          The FXML loader to use
+	 * @param controller
+	 *          The controller to load an FXML document into
+	 * @return The root JavaFX component associated with the controller
+	 */
+	public static <T> T loadIntoController(FXMLLoader loader, Object controller) {
+		loader.setController(controller);
+
+		return loadRoot(loader, controller.getClass());
+	}
+
+	/**
+	 * For a given controller instance, load an FXML document into that
+	 * controller. The location of the document is found by convention, according
+	 * to {@link #getResource(Class, String)}.
+	 * 
+	 * @param loader
+	 *          The FXML loader to use
+	 * @param controller
+	 *          The controller to load an FXML document into
+	 * @param resourceName
+	 *          The name of the resource file
+	 * @return The root JavaFX component associated with the controller
+	 */
+	public static <T> T loadIntoController(FXMLLoader loader, Object controller, String resourceName) {
+		loader.setController(controller);
+
+		return loadRoot(loader, controller.getClass(), resourceName);
+	}
+
+	/**
+	 * For a given controller class, load an FXML document and create a controller
+	 * instance. The location of the document is found by convention, according to
+	 * {@link #getResource(Class)}.
+	 * 
+	 * @param loader
+	 *          The FXML loader to use
+	 * @param controllerClass
+	 *          The controller class to load an FXML document for
+	 * @return The root JavaFX component associated with the controller
+	 */
+	public static <T> T loadRoot(FXMLLoader loader, Class<?> controllerClass) {
+		loader.setLocation(FXUtilities.getResource(controllerClass));
+
+		return loadRootImpl(loader);
+	}
+
+	/**
+	 * For a given controller class, load an FXML document and create a controller
+	 * instance. The location of the document is found by convention, according to
+	 * {@link #getResource(Class, String)}.
+	 * 
+	 * @param loader
+	 *          The FXML loader to use
+	 * @param controllerClass
+	 *          The controller class to load an FXML document for
+	 * @param resourceName
+	 *          The name of the resource file
+	 * @return The root JavaFX component associated with the controller
+	 */
+	public static <T> T loadRoot(FXMLLoader loader, Class<?> controllerClass, String resourceName) {
+		loader.setLocation(FXUtilities.getResource(controllerClass, resourceName));
+
+		return loadRootImpl(loader);
+	}
+
+	/**
+	 * For a given controller class, load an FXML document and create a controller
+	 * instance. The location of the document is found by convention, according to
+	 * {@link #getResource(Class)}.
+	 * 
+	 * @param loader
+	 *          The FXML loader to use
+	 * @param controllerClass
+	 *          The controller class to load an FXML document for
+	 * @return The loaded controller
+	 */
+	public static <T> T loadController(FXMLLoader loader, Class<T> controllerClass) {
+		loader.setLocation(FXUtilities.getResource(controllerClass));
+
+		return loadControllerImpl(loader);
+	}
+
+	/**
+	 * For a given controller class, load an FXML document and create a controller
+	 * instance. The location of the document is found by convention, according to
+	 * {@link #getResource(Class, String)}.
+	 * 
+	 * @param loader
+	 *          The FXML loader to use
+	 * @param controllerClass
+	 *          The controller class to load an FXML document for
+	 * @param resourceName
+	 *          The name of the resource file
+	 * @return The loaded controller
+	 */
+	public static <T> T loadController(FXMLLoader loader, Class<T> controllerClass, String resourceName) {
+		loader.setLocation(FXUtilities.getResource(controllerClass, resourceName));
+
+		return loadControllerImpl(loader);
+	}
+
+	private static <T> T loadRootImpl(FXMLLoader loader) {
+		T root;
+
+		try {
+			root = loader.load();
+			loader.setRoot(null);
+			loader.setController(null);
+			loader.setLocation(null);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		return root;
+	}
+
+	private static <T> T loadControllerImpl(FXMLLoader loader) {
+		T controller;
+
+		try {
+			loader.load();
+			controller = loader.getController();
+			loader.setRoot(null);
+			loader.setController(null);
+			loader.setLocation(null);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		return controller;
+	}
 
 	/**
 	 * Find the {@code .fxml} resource associated with a given controller class by

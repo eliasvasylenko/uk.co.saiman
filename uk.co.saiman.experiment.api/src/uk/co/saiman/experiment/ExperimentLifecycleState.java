@@ -19,22 +19,43 @@
 package uk.co.saiman.experiment;
 
 /**
- * Implementers should be registered with an instrument to participate in its
- * lifecycle.
+ * An {@link ExperimentPart} has a many to one relationship with a lifecycle
+ * state. When transitions between states are requested of an experiment
+ * execution, the action is delegated to lifecycle participants registered with
+ * that experiment part.
  * 
  * @author Elias N Vasylenko
  *
  */
-public interface ExperimentLifecycleParticipant {
+public enum ExperimentLifecycleState {
 	/**
-	 * Invoked by the instrument upon transition into a different lifecycle state.
-	 * If participants throw an exception from this invocation, the transition
-	 * will fail.
-	 * 
-	 * @param from
-	 *          Previous state.
-	 * @param to
-	 *          Next state.
+	 * Experiment if configurable and unprocessed.
 	 */
-	public void transition(ExperimentLifecycleState from, ExperimentLifecycleState to);
+	CONFIGURATION,
+
+	/**
+	 * Experiment part is locked out of configuration and waiting in part of a
+	 * processing queue.
+	 */
+	WAITING,
+
+	/**
+	 * Move stage into position, etc.
+	 */
+	PREPARATION,
+
+	/**
+	 * Optimise laser, acquire from TDC, etc.
+	 */
+	PROCESSING,
+
+	/**
+	 * Once transitioned to this state, data is acquired
+	 */
+	COMPLETION,
+
+	/**
+	 * Something went wrong...
+	 */
+	FAILURE
 }

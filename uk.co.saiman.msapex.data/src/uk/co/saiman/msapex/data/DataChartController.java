@@ -31,15 +31,19 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import uk.co.saiman.data.Continuum;
 import uk.co.strangeskies.reflection.TypeToken;
 
 /**
- * FXML controller for an annotatable data chart over a continuum.
+ * FXML controller for an annotatable data chart over a {@link Continuum}.
  * 
  * @author Elias N Vasylenko
  */
 public class DataChartController {
+	@FXML
+	private Pane root;
+
 	/*
 	 * Chart
 	 */
@@ -59,12 +63,20 @@ public class DataChartController {
 	private Map<TypeToken<?>, AnnotationHandler<?>> annotationHandlers = new HashMap<>();
 	private Map<ChartAnnotation<?>, Node> annotationNodes = new HashMap<>();
 
+	public Pane getRoot() {
+		return root;
+	}
+
 	public NumberAxis getXAxis() {
 		return (NumberAxis) lineChart.getXAxis();
 	}
 
 	public NumberAxis getYAxis() {
 		return (NumberAxis) lineChart.getYAxis();
+	}
+
+	public void setTitle(String title) {
+		lineChart.setTitle(title);
 	}
 
 	@FXML

@@ -24,39 +24,8 @@ package uk.co.saiman.instrument;
  * and interactions as part of the collected whole.
  * 
  * @author Elias N Vasylenko
- *
  */
 public interface Instrument {
-	/**
-	 * An instrument has a 1 to 1 relationship with a lifecycle state. When
-	 * transitions between states are requested of an instrument, the action is
-	 * delegated to lifecycle participants registered with that instrument.
-	 * 
-	 * @author Elias N Vasylenko
-	 *
-	 */
-	public enum InstrumentLifecycleState {
-		/**
-		 * Instrument is in idle state.
-		 */
-		STANDBY,
-
-		/**
-		 * Make sure vacuum is ready and ramp up voltages, etc.
-		 */
-		BEGIN_OPERATION,
-
-		/**
-		 * Whilst operating, experiments may be processed.
-		 */
-		OPERATING,
-
-		/**
-		 * Ramp down voltages, disengage any operating hardware, etc.
-		 */
-		END_OPERATION
-	}
-
 	boolean operate();
 
 	void standby();

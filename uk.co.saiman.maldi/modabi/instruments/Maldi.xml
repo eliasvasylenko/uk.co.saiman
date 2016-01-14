@@ -1,0 +1,27 @@
+<instrument name="Maldi">
+	<components>
+		<gauge name="Lock" />
+		<gauge name="Chamber" />
+		<stage />
+		<voltages />
+		<acquisition />
+	</components>
+</instrument>
+
+<!---
+
+Instrument definition specified exactly:
+- miniature replication of service registry inside instrument definition, complex
+- experiments associated with a specific instrument, and retrieve hardware components from it
+
+Instrument definition implied via loosely coupled services: 
+- How to deal with duplicate hardware services? (sometimes intended!)
+	= Have experiment parts configurable with which hardware component versions they're associated with
+- Can only feasibly have one instrument operational at a time within a framework.
+	= Is this really a problem?
+	= Following from solution to above problem, we can have multiple experiment type
+	  copies, so it's really only one instrument per experiment manager.
+- Further to above, can only easily have one instrument lifecycle.
+	= Associate instrument lifecycle with an experiment manager? How to sync?
+
+ -->

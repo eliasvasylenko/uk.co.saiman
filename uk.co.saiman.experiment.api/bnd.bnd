@@ -1,8 +1,12 @@
 Bundle-Name: SAI :: Experiment
+
 -buildpath: \
 	${buildpath.core},\
 	${ss;utilities},\
 	${ss;reflection},\
-	uk.co.saiman.instrument.api;version=project,\
 	uk.co.saiman.utilities;version=project
+
 Export-Package: uk.co.saiman.experiment
+
+-includeresource: \
+	META-INF/modabi=modabi/schemata

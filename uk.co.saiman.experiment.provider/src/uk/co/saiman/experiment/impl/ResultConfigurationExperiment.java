@@ -18,25 +18,17 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import org.osgi.service.component.annotations.Component;
-
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.instrument.Instrument;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.saiman.utilities.Configurable;
 
-@Component
-public class HardwareConfigurationExperiment<C> implements ExperimentType<C, Instrument, Instrument> {
-	private final TypeToken<C> configurationType;
-
-	public HardwareConfigurationExperiment(TypeToken<C> hardwareConfiguration) {
-		this.configurationType = hardwareConfiguration;
-	}
-
+public class ResultConfigurationExperiment<C, T extends Configurable<C>> implements ExperimentType<C, T, T> {
 	@Override
 	public void validate(C configuration) {}
 
 	@Override
-	public Instrument execute(C configuration, Instrument input) {
+	public T execute(C configuration, T input) {
+		input.configure(configuration);
+
 		return input;
 	}
 }

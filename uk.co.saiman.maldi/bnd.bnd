@@ -1,0 +1,17 @@
+Bundle-Name: SAI :: Maldi
+
+-buildpath: \
+	${buildpath.core},\
+	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;mathematics.geometry},\
+	${ss;reflection},\
+	uk.co.saiman.utilities;version=project,\
+	uk.co.saiman.data.api;version=project
+
+Export-Package: \
+	uk.co.saiman.instrument,\
+	uk.co.saiman.instrument.raster
+
+-includeresource: \
+	META-INF/modabi=modabi/instruments

@@ -18,8 +18,6 @@
  */
 package uk.co.saiman.instrument;
 
-import uk.co.saiman.instrument.Instrument.InstrumentLifecycleState;
-
 /**
  * Implementers should be registered for control with an instrument to
  * participate in its lifecycle.

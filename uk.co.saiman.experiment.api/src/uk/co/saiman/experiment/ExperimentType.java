@@ -23,31 +23,57 @@ import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
 /**
+ * A type of experiment which may be available to be executed on a particular
+ * instrument.
  * 
  * @author Elias N Vasylenko
  *
  * @param <C>
- *          The type of configuration object.
+ *          The type of the experiment configuration interface
  * @param <I>
- *          The type of the experiment's input.
+ *          The type of the experiment input
  * @param <O>
- *          The type of the experiment's output.
+ *          The type of the experiment output
  */
 public interface ExperimentType<C, I, O> {
-	public void validate(C configuration);
+	/**
+	 * Verify that a given configuration is valid for this experiment type.
+	 * 
+	 * @param configuration
+	 *          The configuration to test
+	 */
+	void validate(C configuration);
 
-	public O execute(C configuration, I input);
+	/**
+	 * Execute this experiment type for a given input and configuration.
+	 * 
+	 * @param configuration
+	 *          The configuration to apply to the execution
+	 * @param input
+	 *          The input of the execution
+	 * @return The output of the execution
+	 */
+	O execute(C configuration, I input);
 
+	/**
+	 * @return The exact generic type of the configuration interface
+	 */
 	default TypeToken<C> getConfigurationType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(Configurable.class)
 				.resolveTypeArgument(new TypeParameter<C>() {}).infer();
 	}
 
+	/**
+	 * @return The exact generic type of the experiment input
+	 */
 	default TypeToken<I> getInputType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(Configurable.class)
 				.resolveTypeArgument(new TypeParameter<I>() {}).infer();
 	}
 
+	/**
+	 * @return The exact generic type of the experiment output
+	 */
 	default TypeToken<O> getOutputType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(Configurable.class)
 				.resolveTypeArgument(new TypeParameter<O>() {}).infer();

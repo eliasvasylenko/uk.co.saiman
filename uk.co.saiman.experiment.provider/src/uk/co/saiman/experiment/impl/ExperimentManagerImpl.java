@@ -25,17 +25,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.ExperimentManager;
 import uk.co.saiman.experiment.ExperimentPart;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.instrument.Instrument;
 
 @Component
 public class ExperimentManagerImpl implements ExperimentManager {
-	private Instrument instrument;
-
 	private final Set<ExperimentType<?, ?, ?>> experimentTypes;
 
 	private final Set<ExperimentPart<?, ?, ?>> experiments;
@@ -46,22 +42,6 @@ public class ExperimentManagerImpl implements ExperimentManager {
 
 		experiments = new HashSet<>();
 		processingStack = new ArrayList<>();
-	}
-
-	public ExperimentManagerImpl(Instrument instrument) {
-		this();
-		this.instrument = instrument;
-	}
-
-	@Reference
-	public void setInstrument(Instrument instrument) {
-		this.instrument = instrument;
-	}
-
-	@Override
-	public void execute(ExperimentPart<?, Instrument, ?> experimentRoot) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -75,38 +55,20 @@ public class ExperimentManagerImpl implements ExperimentManager {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Set<ExperimentType<?, Instrument, ?>> getRootExperimentTypes() {
-		return experimentTypes.stream().filter(e -> e.getInputType().isAssignableFrom(Instrument.class))
-				.map(e -> (ExperimentType<?, Instrument, ?>) e).collect(Collectors.toSet());
+	public Set<ExperimentType<?, Void, ?>> getAvailableRootExperimentTypes() {
+		return experimentTypes.stream().filter(e -> e.getInputType().isAssignableFrom(Void.class))
+				.map(e -> (ExperimentType<?, Void, ?>) e).collect(Collectors.toSet());
 	}
 
 	@Override
-	public boolean addRootExperimentType(ExperimentType<?, Instrument, ?> rootType) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removeRootExperimentType(ExperimentType<?, Instrument, ?> rootType) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Set<ExperimentPart<?, Instrument, ?>> getRootExperiments() {
+	public Set<ExperimentPart<?, Void, ?>> getRootExperiments() {
 		return null;
 	}
 
 	@Override
-	public <C, O> ExperimentPart<C, Instrument, O> addRootExperiment(ExperimentType<C, Instrument, O> rootType) {
+	public <C, O> ExperimentPart<C, Void, O> addRootExperiment(ExperimentType<C, Void, O> rootType) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public boolean removeRootExperiment(ExperimentPart<?, Instrument, ?> rootPart) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	/*
@@ -114,13 +76,13 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	 */
 
 	@Override
-	public boolean addExperimentType(ExperimentType<?, ?, ?> childType) {
+	public boolean registerExperimentType(ExperimentType<?, ?, ?> childType) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean removeExperimentType(ExperimentType<?, ?, ?> childType) {
+	public boolean unregisterExperimentType(ExperimentType<?, ?, ?> childType) {
 		// TODO Auto-generated method stub
 		return false;
 	}

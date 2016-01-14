@@ -23,10 +23,24 @@ import org.osgi.service.component.annotations.Component;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
+/**
+ * @author Elias N Vasylenko
+ *
+ * @param <C>
+ *          The configuration interface type
+ * @param <S>
+ *          The state interface type
+ */
 @Component
 public interface StatefulConfigurable<C, S> extends Configurable<C> {
+	/**
+	 * @return The current state
+	 */
 	S getState();
 
+	/**
+	 * @return The exact generic type of the state interface
+	 */
 	default TypeToken<S> getStateType() {
 		return TypeToken.over(getClass()).resolveSupertypeParameters(StatefulConfigurable.class)
 				.resolveTypeArgument(new TypeParameter<S>() {}).infer();

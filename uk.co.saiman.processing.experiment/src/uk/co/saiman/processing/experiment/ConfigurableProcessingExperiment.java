@@ -20,12 +20,12 @@ package uk.co.saiman.processing.experiment;
 
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.processing.ConfigurableProcessor;
+import uk.co.saiman.processing.Processor;
 import uk.co.strangeskies.reflection.TypeToken;
 
 /**
- * A configurable processor accepts an instance of a specified configuration
- * model type. The type of the configuration should typically be an interface,
- * such that implementation and persistence of configuration can more
+ * An experiment type which will apply a {@link ConfigurableProcessor} to the
+ * result of a parent experiment part, and output the result.
  * 
  * @author Elias N Vasylenko
  * 
@@ -37,8 +37,16 @@ import uk.co.strangeskies.reflection.TypeToken;
  *          The type of the experiment processing result.
  */
 public interface ConfigurableProcessingExperiment<C, T, R> extends ExperimentType<C, T, R> {
+	/**
+	 * @return The configurable processor to be applied via experiment execution
+	 */
 	ConfigurableProcessor<C, T, R> getConfigurableProcessor();
 
+	/**
+	 * @param processor
+	 *          The processor to be applied via experiment execution
+	 * @return A {@link ProcessingExperiment} over the given {@link Processor}
+	 */
 	static <C, T, R> ConfigurableProcessingExperiment<C, T, R> over(ConfigurableProcessor<C, T, R> processor) {
 		return new ConfigurableProcessingExperiment<C, T, R>() {
 			@Override

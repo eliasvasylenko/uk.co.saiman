@@ -41,7 +41,7 @@ public interface Configurable<C> {
 	/**
 	 * @return The current configuration
 	 */
-	C getConfiguration();
+	C configuration();
 
 	/**
 	 * Update the configuration.
@@ -49,7 +49,7 @@ public interface Configurable<C> {
 	 * @param configuration
 	 *          The new configuration to adopt
 	 */
-	void setConfiguration(C configuration);
+	void configure(C configuration);
 
 	/**
 	 * Partially update the configuration.
@@ -62,9 +62,9 @@ public interface Configurable<C> {
 	@SuppressWarnings("unchecked")
 	default void updateConfiguration(Supplier<? super C> partialConfiguration) {
 		Object partial = partialConfiguration.get();
-		C overridden = getConfiguration();
+		C overridden = configuration();
 
-		setConfiguration((C) Proxy.newProxyInstance(getClass().getClassLoader(),
+		configure((C) Proxy.newProxyInstance(getClass().getClassLoader(),
 				getConfigurationType().getRawTypes().toArray(new Class<?>[getConfigurationType().getRawTypes().size()]),
 				(Object proxy, Method method, Object[] args) -> {
 					if (method.getDeclaringClass().isAssignableFrom(proxy.getClass())) {
