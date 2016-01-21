@@ -20,7 +20,11 @@ package uk.co.saiman.eclipse;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.function.Supplier;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 
 /**
@@ -176,8 +180,22 @@ public class FXUtilities {
 	/**
 	 * Find the {@code .fxml} resource associated with a given controller class by
 	 * location and naming conventions. The location of the file is assumed to be
-	 * the same package as the controller class. The name of the file is assumed
-	 * to be {@code [classname].fxml}, or if {@code [classname]} takes the form
+	 * the same package as the controller class. The name of the file is determind
+	 * according to the convention described by {@link #getResourceName(Class)}.
+	 * 
+	 * @param controllerClass
+	 *          The controller class whose resource we wish to locate
+	 * @return The URL for the resource associated with the given controller
+	 *         class.
+	 */
+	public static URL getResource(Class<?> controllerClass) {
+		return getResource(controllerClass, getResourceName(controllerClass));
+	}
+
+	/**
+	 * Find the name of the {@code .fxml} resource associated with a given
+	 * controller class by convention. The name of the file is assumed to be
+	 * {@code [classname].fxml}, or if {@code [classname]} takes the form
 	 * {@code [classnameprefix]Controller}, the name of the file is assumed to be
 	 * {@code [classnameprefix].fxml}.
 	 * 
@@ -186,14 +204,14 @@ public class FXUtilities {
 	 * @return The URL for the resource associated with the given controller
 	 *         class.
 	 */
-	public static URL getResource(Class<?> controllerClass) {
+	public static String getResourceName(Class<?> controllerClass) {
 		String resourceName = controllerClass.getSimpleName();
 
 		if (resourceName.endsWith(CONTROLLER_STRING)) {
 			resourceName = resourceName.substring(0, resourceName.length() - CONTROLLER_STRING.length());
 		}
 
-		return getResource(controllerClass, resourceName);
+		return resourceName;
 	}
 
 	/**
@@ -213,5 +231,26 @@ public class FXUtilities {
 				+ ".fxml";
 
 		return controllerClass.getResource(resourceLocation);
+	}
+
+	public static void runNow(Runnable runnable) {
+		runNow(() -> {
+			runnable.run();
+			return null;
+		});
+	}
+
+	public static <T> T runNow(Supplier<T> runnable) {
+		if (Platform.isFxApplicationThread()) {
+			return runnable.get();
+		} else {
+			FutureTask<T> task = new FutureTask<>(runnable::get);
+			Platform.runLater(task);
+			try {
+				return task.get();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
 	}
 }

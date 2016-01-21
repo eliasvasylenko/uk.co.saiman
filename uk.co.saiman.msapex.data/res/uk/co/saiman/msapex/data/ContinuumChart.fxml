@@ -6,10 +6,15 @@
 <?import javafx.scene.layout.*?>
 
 <StackPane
-	fx:id="root"
+	fx:id="msapexDataChart"
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml"
-	fx:controller="uk.co.saiman.msapex.data.DataChartController">
+	fx:controller="uk.co.saiman.msapex.data.ContinuumChartController"
+
+	focusTraversable="true"
+	onKeyPressed="#onKeyPressed"
+	onScroll="#onScroll"
+	onMouseClicked="#requestFocus">
 
 	<children>
 		<LineChart
@@ -18,10 +23,17 @@
 			legendVisible="false">
 
 			<xAxis>
-				<NumberAxis side="BOTTOM" />
+				<NumberAxis
+					side="BOTTOM"
+					autoRanging="false"
+					tickUnit="1">
+				</NumberAxis>
 			</xAxis>
 			<yAxis>
-				<NumberAxis side="LEFT" />
+				<NumberAxis
+					side="LEFT"
+					autoRanging="false"
+					tickUnit="10" />
 			</yAxis>
 		</LineChart>
 

@@ -18,10 +18,9 @@
  */
 package uk.co.saiman.instrument.acquisition;
 
-import java.util.function.Consumer;
-
 import uk.co.saiman.data.SampledContinuum;
 import uk.co.saiman.instrument.HardwareModule;
+import uk.co.strangeskies.utilities.Observable;
 
 /**
  * Software module for acquisition of continuum data through some mechanism.
@@ -66,48 +65,46 @@ public interface AcquisitionModule extends HardwareModule {
 	SampledContinuum getLastAcquisitionData();
 
 	/**
-	 * Add an acquisition event listener for the next acquisition experiment. The
-	 * listener will not be triggered until the start of an experiment via
+	 * Add or remove continuum event observers for the next acquisition
+	 * experiment.
+	 * <p>
+	 * The observers will not be triggered until the start of an experiment via
 	 * {@link #startAcquisition()}, and will be removed after the experiment is
 	 * complete.
 	 * 
-	 * @param listener
-	 *          A consumer of {@link SampledContinuum} objects which will be
-	 *          passed the results of each acquisition step.
+	 * @return An observable interface for registering single acquisition
+	 *         continuum event listeners.
 	 */
-	void addSingleAcquisitionListener(Consumer<? super SampledContinuum> listener);
+	Observable<SampledContinuum> singleAcquisitionContinuumEvents();
 
 	/**
-	 * Add an acquisition event listener indefinitely. The listener may be
-	 * triggered with acquisition events that happen outside the scope of an
-	 * actual acquisition experiment, in the case of an "always on" instrument
-	 * setup.
+	 * Add or remove continuum event observers.
+	 * <p>
+	 * The observers may be triggered with continuum events that happen outside
+	 * the scope of an actual acquisition experiment, in the case of an
+	 * "always on" instrument setup.
 	 * 
-	 * @param listener
-	 *          A consumer of {@link SampledContinuum} objects which will be
-	 *          passed the results of each acquisition step.
+	 * @return An observable interface for registering continuum event listeners.
 	 */
-	void addAcquisitionListener(Consumer<? super SampledContinuum> listener);
+	Observable<SampledContinuum> continuumEvents();
 
 	/**
-	 * Remove an acquisition listener which has been added via
-	 * {@link #addAcquisitionListener(Consumer)} or
-	 * {@link #addSingleAcquisitionListener(Consumer)}.
+	 * Set the total acquisition count for a single experiment.
 	 * 
-	 * @param listener
-	 *          The consumer to remove.
+	 * @param count
+	 *          The number of continua to acquire for a single experiment
 	 */
-	void removeAcquisitionListener(Consumer<? super SampledContinuum> listener);
+	void setAcquisitionCount(int count);
 
 	/**
-	 * Get the time resolution between each sample in the acquired continuum.
+	 * Get the total acquisition count for a single experiment.
 	 * 
-	 * @return The acquisition resolution in milliseconds
+	 * @return The number of continua to acquire for a single experiment
 	 */
-	double getAcquisitionResolution();
+	int getAcquisitionCount();
 
 	/**
-	 * Set the active sampling duration for a single continuum acquisition.
+	 * Set the active sampling duration for a single continuum acquisition .
 	 * 
 	 * @param time
 	 *          The time an acquisition will last in milliseconds
@@ -115,7 +112,7 @@ public interface AcquisitionModule extends HardwareModule {
 	void setAcquisitionTime(double time);
 
 	/**
-	 * Get the active sampling duration for a single continuum acquisition.
+	 * Get the active sampling duration for a single continuum acquisition .
 	 * 
 	 * @return The time an acquisition will last in milliseconds
 	 */
@@ -128,4 +125,11 @@ public interface AcquisitionModule extends HardwareModule {
 	default int getAcquisitionDepth() {
 		return (int) (getAcquisitionTime() / getAcquisitionResolution());
 	}
+
+	/**
+	 * Get the time resolution between each sample in the acquired continuum.
+	 * 
+	 * @return The acquisition resolution in milliseconds
+	 */
+	double getAcquisitionResolution();
 }

@@ -22,45 +22,39 @@ import java.util.Arrays;
 
 import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
 
-public class SparseSampledContinuum extends MutableExpressionImpl<Continuum> implements RegularSampledContinuum {
-	private final double frequency;
-	private final int depth;
-
-	private final int[] indices;
+public class SimpleSampledContinuum extends MutableExpressionImpl<Continuum> implements SampledContinuum {
+	private final double[] values;
 	private final double[] intensities;
 
-	public SparseSampledContinuum(double frequency, int depth, int samples, int[] indices, double[] intensities) {
-		this.frequency = frequency;
-		this.depth = depth;
-
-		/*
-		 * TODO sort the indices & intensities here
-		 */
-
-		this.indices = Arrays.copyOf(indices, samples);
+	public SimpleSampledContinuum(int samples, double[] values, double[] intensities) {
+		this.values = Arrays.copyOf(values, samples);
 		this.intensities = Arrays.copyOf(intensities, samples);
 	}
 
-	private int getIndexIndex(int index) {
+	@Override
+	public int getDepth() {
+		return values.length;
+	}
+
+	@Override
+	public int getIndexBelow(double xValue) {
 		int from = 0;
-		int to = indices.length - 1;
+		int to = values.length - 1;
 
 		if (to < 0) {
 			return -1;
 		}
 
 		do {
-			if (indices[to] < index) {
-				return -1;
-			} else if (indices[to] == index) {
+			if (values[to] <= xValue) {
 				return to;
-			} else if (indices[from] > index) {
+			} else if (values[from] > xValue) {
 				return -1;
-			} else if (indices[from] == index) {
+			} else if (values[from] == xValue) {
 				return from;
 			} else {
 				int mid = (to + from) / 2;
-				if (indices[mid] > index) {
+				if (values[mid] > xValue) {
 					to = mid;
 				} else {
 					from = mid;
@@ -68,22 +62,17 @@ public class SparseSampledContinuum extends MutableExpressionImpl<Continuum> imp
 			}
 		} while (to - from > 1);
 
-		return -1;
+		return from;
 	}
 
 	@Override
-	public int getDepth() {
-		return depth;
+	public double getXSample(int index) {
+		return values[index];
 	}
 
 	@Override
 	public double getYSample(int index) {
-		int indexIndex = getIndexIndex(index);
-		if (indexIndex < 0) {
-			return 0;
-		} else {
-			return intensities[indexIndex];
-		}
+		return intensities[index];
 	}
 
 	@Override
@@ -95,22 +84,12 @@ public class SparseSampledContinuum extends MutableExpressionImpl<Continuum> imp
 	}
 
 	@Override
-	public double getFrequency() {
-		return frequency;
-	}
-
-	@Override
-	public SparseSampledContinuum copy() {
+	public SimpleSampledContinuum copy() {
 		return this;
 	}
 
 	@Override
 	protected Continuum getValueImpl(boolean dirty) {
-		return this;
-	}
-
-	@Override
-	public SampledContinuum resample(double startX, double endX, int resolvableUnits) {
 		return this;
 	}
 }

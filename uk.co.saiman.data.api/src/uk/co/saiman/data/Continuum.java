@@ -18,9 +18,8 @@
  */
 package uk.co.saiman.data;
 
-import java.util.stream.DoubleStream;
-
 import uk.co.strangeskies.mathematics.Range;
+import uk.co.strangeskies.mathematics.expression.SelfExpression;
 
 /**
  * TODO Difficult to genericise over data type with acceptable performance until
@@ -28,7 +27,7 @@ import uk.co.strangeskies.mathematics.Range;
  * 
  * @author Elias N Vasylenko
  */
-public interface Continuum {
+public interface Continuum extends SelfExpression<Continuum> {
 	Range<Double> getXRange();
 
 	Range<Double> getYRange();
@@ -37,16 +36,5 @@ public interface Continuum {
 
 	Range<Double> getYRange(double startX, double endX);
 
-	default DoubleStream sampleYStream(Range<Double> between, double delta) {
-		double from = between.getFrom();
-		if (!between.isFromInclusive())
-			from += delta;
-
-		long count = (long) ((between.getTo() - from) / delta) + 1;
-		if (!between.isToInclusive())
-			count--;
-
-		// TODO takeWhile with Java 9
-		return DoubleStream.iterate(from, d -> d + delta).limit(count);
-	}
+	SampledContinuum resample(double startX, double endX, int resolvableUnits);
 }

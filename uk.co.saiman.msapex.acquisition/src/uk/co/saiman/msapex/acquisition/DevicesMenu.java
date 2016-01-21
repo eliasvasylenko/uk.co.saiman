@@ -38,25 +38,6 @@ import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 
 public class DevicesMenu {
-	private class DeviceMenuItemOpen {
-		private AcquisitionModule module;
-		private MDirectMenuItem menuItem;
-
-		public DeviceMenuItemOpen(AcquisitionModule module, MDirectMenuItem menuItem) {
-			this.module = module;
-			this.menuItem = menuItem;
-		}
-
-		@Execute
-		public void execute() {
-			if (menuItem.isSelected()) {
-				acquisitionPart.addAcquisitionModule(module);
-			} else {
-				acquisitionPart.removeAcquisitionModule(module);
-			}
-		}
-	}
-
 	@Inject
 	@Service
 	List<AcquisitionModule> acquisitionModules;
@@ -66,6 +47,7 @@ public class DevicesMenu {
 	@PostConstruct
 	void initialise(EPartService partService) {
 		acquisitionPart = (AcquisitionPart) partService.findPart("uk.co.saiman.msapex.acquisition.part").getObject();
+		acquisitionPart.setAcquisitionModules(acquisitionModules);
 	}
 
 	@Execute
@@ -75,18 +57,23 @@ public class DevicesMenu {
 
 	@AboutToShow
 	void aboutToShow(List<MMenuElement> items) {
-		try {
-			for (AcquisitionModule module : new ArrayList<>(acquisitionModules)) {
-				MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-				moduleItem.setLabel(module.getName());
-				moduleItem.setType(ItemType.CHECK);
-				moduleItem.setObject(new DeviceMenuItemOpen(module, moduleItem));
-				moduleItem.setSelected(acquisitionPart.getSelectedAcquisitionModules().contains(module));
-				items.add(moduleItem);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
+		for (AcquisitionModule module : new ArrayList<>(acquisitionModules)) {
+			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
+			moduleItem.setLabel(module.getName());
+			moduleItem.setType(ItemType.CHECK);
+			moduleItem.setSelected(acquisitionPart.getSelectedAcquisitionModules().contains(module));
+			moduleItem.setObject(new Object() {
+				@Execute
+				public void execute() {
+					if (moduleItem.isSelected()) {
+						acquisitionPart.addAcquisitionModule(module);
+					} else {
+						acquisitionPart.removeAcquisitionModule(module);
+					}
+				}
+			});
+
+			items.add(moduleItem);
 		}
 	}
 }

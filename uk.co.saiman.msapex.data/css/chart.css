@@ -1,0 +1,8 @@
+#msapexDataChart .chart-series-line {    
+    -fx-stroke-width: 1.0px;
+    -fx-effect: null;
+}
+
+#msapexDataChart .chart-line-symbol {
+    visibility: hidden;
+}

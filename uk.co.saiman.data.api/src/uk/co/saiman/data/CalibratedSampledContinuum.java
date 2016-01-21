@@ -18,44 +18,45 @@
  */
 package uk.co.saiman.data;
 
-import uk.co.strangeskies.mathematics.Range;
+import uk.co.strangeskies.mathematics.expression.DependentExpression;
 
-public class CalibratedSampledContinuum implements SampledContinuum {
+public class CalibratedSampledContinuum extends DependentExpression<Continuum> implements SampledContinuumDecorator {
 	private final SampledContinuum component;
 	private final Calibration calibration;
 
 	public CalibratedSampledContinuum(SampledContinuum component, Calibration calibration) {
 		this.component = component;
+		getDependencies().add(component);
+
 		this.calibration = calibration;
 	}
 
 	@Override
-	public Range<Double> getYRange() {
-		return component.getYRange();
+	public SampledContinuum getComponent() {
+		return component;
 	}
 
-	@Override
-	public int getDepth() {
-		return component.getDepth();
+	public Calibration getCalibration() {
+		return calibration;
 	}
 
 	@Override
 	public double getXSample(int index) {
-		return calibration.calibrate(component.getXSample(index));
-	}
-
-	@Override
-	public double getYSample(int index) {
-		return component.getYSample(index);
-	}
-
-	@Override
-	public InterpolationStrategy getInterpolationStrategy() {
-		return component.getInterpolationStrategy();
+		return getCalibration().calibrate(SampledContinuumDecorator.super.getXSample(index));
 	}
 
 	@Override
 	public int getIndexBelow(double xValue) {
-		return component.getIndexBelow(calibration.decalibrate(xValue));
+		return SampledContinuumDecorator.super.getIndexBelow(getCalibration().decalibrate(xValue));
+	}
+
+	@Override
+	public CalibratedSampledContinuum copy() {
+		return this;
+	}
+
+	@Override
+	protected Continuum evaluate() {
+		return this;
 	}
 }

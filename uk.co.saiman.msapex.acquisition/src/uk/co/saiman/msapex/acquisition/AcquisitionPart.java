@@ -21,7 +21,6 @@ package uk.co.saiman.msapex.acquisition;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,20 +30,22 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.fx.core.di.LocalInstance;
-import org.eclipse.fx.core.di.Service;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import uk.co.saiman.data.ContinuumExpression;
+import uk.co.saiman.data.SimpleRegularSampledContinuum;
 import uk.co.saiman.eclipse.FXUtilities;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
-import uk.co.saiman.msapex.data.DataChartController;
+import uk.co.saiman.msapex.data.ContinuumChartController;
 
 public class AcquisitionPart {
 	@Inject
@@ -53,11 +54,14 @@ public class AcquisitionPart {
 	@FXML
 	private Pane chartPane;
 
+	@FXML
+	private Label noSelectionLabel;
+
 	private ObservableSet<AcquisitionModule> selectedModules = FXCollections.observableSet();
-	private Map<AcquisitionModule, DataChartController> controllers = new HashMap<>();
+	private Map<AcquisitionModule, ContinuumChartController> controllers = new HashMap<>();
 
 	public boolean setAcquisitionModules(Collection<? extends AcquisitionModule> selectedModules) {
-		return this.selectedModules.removeAll(selectedModules) | this.selectedModules.addAll(selectedModules);
+		return this.selectedModules.retainAll(selectedModules) | this.selectedModules.addAll(selectedModules);
 	}
 
 	public boolean addAcquisitionModule(AcquisitionModule module) {
@@ -73,8 +77,7 @@ public class AcquisitionPart {
 	}
 
 	@PostConstruct
-	void initialise(BorderPane container, @LocalInstance FXMLLoader loader,
-			@Service List<AcquisitionModule> acquisitionModules) {
+	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
 		container.setCenter(FXUtilities.loadIntoController(loader, this));
 
 		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionModule> change) -> {
@@ -84,24 +87,39 @@ public class AcquisitionPart {
 				deselectAcquisitionModule(change.getElementRemoved());
 			}
 		});
-
-		setAcquisitionModules(acquisitionModules);
 	}
 
 	private void selectAcquisitionModule(FXMLLoader loader, AcquisitionModule acquisitionModule) {
-		DataChartController controller = FXUtilities.loadController(loader, DataChartController.class);
-		controller.setTitle(acquisitionModule.getName());
+		noSelectionLabel.setVisible(false);
 
-		controllers.put(acquisitionModule, controller);
+		/*
+		 * New chart controller for module
+		 */
+		ContinuumChartController chartController = FXUtilities.loadController(loader, ContinuumChartController.class);
+		chartController.setTitle(acquisitionModule.getName());
+		controllers.put(acquisitionModule, chartController);
+		chartPane.getChildren().add(chartController.getRoot());
+		HBox.setHgrow(chartController.getRoot(), Priority.ALWAYS);
 
-		HBox.setHgrow(controller.getRoot(), Priority.ALWAYS);
-		chartPane.getChildren().add(controller.getRoot());
+		/*
+		 * Create continuum view of latest data from module
+		 */
+		ContinuumExpression latestContinuum = new ContinuumExpression(
+				new SimpleRegularSampledContinuum(1, new double[] {}));
+		acquisitionModule.continuumEvents().addWeakObserver(latestContinuum, l -> c -> l.setComponent(c));
+
+		/*
+		 * Add latest data to chart controller
+		 */
+		chartController.getContinuums().add(latestContinuum);
 	}
 
 	private void deselectAcquisitionModule(AcquisitionModule acquisitionModule) {
-		DataChartController controller = controllers.remove(acquisitionModule);
+		ContinuumChartController controller = controllers.remove(acquisitionModule);
 
 		chartPane.getChildren().remove(controller.getRoot());
+
+		noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
 	}
 
 	@Focus

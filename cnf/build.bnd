@@ -198,6 +198,7 @@ buildpath.core:\
 buildpath.eclipse:\
 	${buildpath.core},\
 	javax.inject,\
+	org.eclipse.equinox.common,\
 	org.eclipse.core.runtime,\
 	org.eclipse.e4.ui.model.workbench,\
 	org.eclipse.jface,\

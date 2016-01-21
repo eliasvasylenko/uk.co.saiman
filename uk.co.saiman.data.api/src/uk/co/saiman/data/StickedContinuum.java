@@ -21,9 +21,11 @@ package uk.co.saiman.data;
 import java.util.Arrays;
 
 import uk.co.strangeskies.mathematics.Range;
+import uk.co.strangeskies.mathematics.expression.ImmutableExpressionImpl;
 
-public class StickedContinuum implements Continuum {
+public class StickedContinuum extends ImmutableExpressionImpl<Continuum> implements Continuum {
 	private final Range<Double> xRange;
+
 	private final double[] xPositions;
 	private final double[] intensities;
 
@@ -59,5 +61,20 @@ public class StickedContinuum implements Continuum {
 	public double sampleY(double xPosition) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public StickedContinuum copy() {
+		return new StickedContinuum(xRange, xPositions.length, xPositions, intensities);
+	}
+
+	@Override
+	public Continuum getValue() {
+		return this;
+	}
+
+	@Override
+	public SampledContinuum resample(double startX, double endX, int resolvableUnits) {
+		return null;
 	}
 }

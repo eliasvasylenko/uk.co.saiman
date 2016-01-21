@@ -5,10 +5,14 @@ Bundle-SymbolicName: ${p};singleton:=true
 	${buildpath.eclipse},\
 	${ss;utilities},\
 	${ss;reflection},\
+	${ss;mathematics},\
+	${ss;expressions},\
 	uk.co.saiman.data.api;version=project,\
 	uk.co.saiman.utilities.eclipse;version=project
 
 Export-Package: uk.co.saiman.msapex.data
 
 Include-Resource: \
-	res
+	res,\
+	css=css
+	

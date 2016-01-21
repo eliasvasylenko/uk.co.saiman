@@ -10,7 +10,9 @@
 	xmlns:fx="http://javafx.com/fxml">
 
 	<children>
-		<Label text="No acquisition modules selected" />
+		<Label
+			fx:id="noSelectionLabel"
+			text="No acquisition modules selected" />
 
 		<HBox fx:id="chartPane" />
 	</children>

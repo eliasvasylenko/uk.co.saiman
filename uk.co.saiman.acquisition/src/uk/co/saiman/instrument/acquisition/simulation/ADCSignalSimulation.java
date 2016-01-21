@@ -24,9 +24,10 @@ import java.util.function.Consumer;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.SampledContinuum;
-import uk.co.saiman.data.SparseSampledContinuum;
+import uk.co.saiman.data.SimpleRegularSampledContinuum;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
-import uk.co.saiman.utilities.BufferingListener;
+import uk.co.strangeskies.utilities.BufferingListener;
+import uk.co.strangeskies.utilities.Observable;
 
 /**
  * A configurable software simulation of an acquisition hardware module.
@@ -34,45 +35,53 @@ import uk.co.saiman.utilities.BufferingListener;
  * @author Elias N Vasylenko
  */
 @Component
-public class AcquisitionSimulation implements AcquisitionModule {
+public class ADCSignalSimulation implements AcquisitionModule {
 	/**
-	 * The default acquisition resolution when none are provided.
+	 * The default acquisition resolution when none is provided.
 	 */
-	public static final double DEFAULT_ACQUISITION_RESOLUTION = 0.00_000_1;
+	public static final double DEFAULT_ACQUISITION_RESOLUTION = 0.00_000_025;
 	/**
-	 * The default acquisition time when none are provided.
+	 * The default acquisition frequency when none is provided.
 	 */
-	public static final double DEFAULT_ACQUISITION_TIME = 10_000;
+	public static final double DEFAULT_ACQUISITION_TIME = 0.01;
+	/**
+	 * The default acquisition frequency when none is provided.
+	 */
+	public static final int DEFAULT_ACQUISITION_COUNT = 1000;
 
 	private double acquisitionResolution = DEFAULT_ACQUISITION_RESOLUTION;
-	private double acquisitionFrequency = DEFAULT_ACQUISITION_TIME;
-	private double acquisitionTime;
+	private double acquisitionTime = DEFAULT_ACQUISITION_TIME;
+
+	private int acquisitionCount = DEFAULT_ACQUISITION_COUNT;
 
 	private SampledContinuum acquisitionData;
 	private final BufferingListener<SampledContinuum> singleAcquisitionListeners;
 	private final BufferingListener<SampledContinuum> acquisitionListeners;
 
-	private Boolean isAcquiring;
+	private final Object acquiringLock = new Object();
+	private Integer acquiringCounter;
 
-	private static final int MAXIMUM_HITS = 10;
-	private final int[] hitIndices;
-	private final double[] hitIntensities;
+	private double[] intensities;
+
+	private boolean finalised = false;
 
 	/**
 	 * Create an acquisition simulation with the default values given by:
 	 * {@link #DEFAULT_ACQUISITION_RESOLUTION} and
 	 * {@link #DEFAULT_ACQUISITION_TIME}.
 	 */
-	public AcquisitionSimulation() {
+	public ADCSignalSimulation() {
 		singleAcquisitionListeners = new BufferingListener<>();
 		acquisitionListeners = new BufferingListener<>();
-		isAcquiring = false;
+		acquiringCounter = 0;
 
-		hitIndices = new int[MAXIMUM_HITS];
-		hitIntensities = new double[MAXIMUM_HITS];
-		for (int i = 0; i < MAXIMUM_HITS; i++) {
-			hitIntensities[i] = 1;
-		}
+		resetDataArray();
+
+		new Thread(this::acquire).start();
+	}
+
+	private void resetDataArray() {
+		intensities = new double[getAcquisitionDepth()];
 	}
 
 	/**
@@ -86,15 +95,21 @@ public class AcquisitionSimulation implements AcquisitionModule {
 	 *          The active sampling duration for a single continuum acquisition,
 	 *          in milliseconds.
 	 */
-	public AcquisitionSimulation(double acquisitionResolution, double acquisitionTime) {
+	public ADCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
 		this();
 		setAcquisitionResolution(acquisitionResolution);
 		setAcquisitionTime(acquisitionTime);
 	}
 
 	@Override
+	protected void finalize() throws Throwable {
+		finalised = true;
+		super.finalize();
+	}
+
+	@Override
 	public String getName() {
-		return "Acquisition Simulation";
+		return "ADC Signal Simulation";
 	}
 
 	@Override
@@ -110,62 +125,66 @@ public class AcquisitionSimulation implements AcquisitionModule {
 
 	@Override
 	public void startAcquisition() {
-		synchronized (isAcquiring) {
-			if (isAcquiring) {
+		synchronized (acquiringLock) {
+			if (acquiringCounter > 0) {
 				throw new IllegalStateException("Cannot start new acquisition, already acquiring");
 			}
 
-			for (Consumer<? super SampledContinuum> listener : singleAcquisitionListeners.getListeners()) {
-				if (acquisitionListeners.getListeners().contains(listener)) {
-					singleAcquisitionListeners.removeListener(listener);
-				} else {
-					acquisitionListeners.addListener(listener);
-				}
-			}
-
-			isAcquiring = true;
-
-			new Thread(this::acquire).start();
+			acquiringCounter = acquisitionCount;
 		}
 	}
 
 	private void acquire() {
 		Random random = new Random();
 
-		for (int i = 0; i < acquisitionTime * acquisitionFrequency; i++) {
-			int hits = random.nextInt(MAXIMUM_HITS);
+		while (!finalised) {
+			boolean acquired;
 
-			/*
-			 * TODO distribute "hits" number of hits
-			 */
+			synchronized (acquiringLock) {
+				acquired = acquiringCounter > 0;
+				if (acquired) {
+					acquiringCounter -= 1;
+				}
+			}
 
-			acquisitionData = new SparseSampledContinuum(1 / getAcquisitionResolution(), getAcquisitionDepth(), hits,
-					hitIndices, hitIntensities);
+			double scale = 0;
+			double scaleDelta = 1d / intensities.length;
+			for (int j = 0; j < intensities.length; j++) {
+				intensities[j] = 0.5
+						+ (scale += scaleDelta) * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1)) * 20;
+			}
+
+			acquisitionData = new SimpleRegularSampledContinuum(1 / (getAcquisitionResolution() * 1_000), intensities);
 
 			acquisitionListeners.accept(acquisitionData);
 
-			/*
-			 * TODO wait
-			 */
+			if (acquired) {
+				singleAcquisitionListeners.accept(acquisitionData);
+				if (acquiringCounter == 0) {
+					singleAcquisitionListeners.clearObservers();
+				}
+			}
+
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {}
 		}
+
 		stopAcquisition();
 	}
 
 	@Override
 	public void stopAcquisition() {
-		synchronized (isAcquiring) {
-			for (Consumer<? super SampledContinuum> listener : singleAcquisitionListeners.getListeners()) {
-				acquisitionListeners.removeListener(listener);
-			}
-			singleAcquisitionListeners.clearListeners();
+		synchronized (acquiringLock) {
+			singleAcquisitionListeners.clearObservers();
 
-			isAcquiring = false;
+			acquiringCounter = 0;
 		}
 	}
 
 	@Override
 	public boolean isAcquiring() {
-		return isAcquiring;
+		return acquiringCounter > 0;
 	}
 
 	@Override
@@ -174,18 +193,13 @@ public class AcquisitionSimulation implements AcquisitionModule {
 	}
 
 	@Override
-	public void addSingleAcquisitionListener(Consumer<? super SampledContinuum> listener) {
-		singleAcquisitionListeners.addListener(listener);
+	public Observable<SampledContinuum> singleAcquisitionContinuumEvents() {
+		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public void addAcquisitionListener(Consumer<? super SampledContinuum> listener) {
-		acquisitionListeners.addListener(listener);
-	}
-
-	@Override
-	public void removeAcquisitionListener(Consumer<? super SampledContinuum> listener) {
-		acquisitionListeners.removeListener(listener);
+	public Observable<SampledContinuum> continuumEvents() {
+		return acquisitionListeners;
 	}
 
 	/**
@@ -196,6 +210,8 @@ public class AcquisitionSimulation implements AcquisitionModule {
 	 */
 	public void setAcquisitionResolution(double resolution) {
 		acquisitionResolution = resolution;
+
+		resetDataArray();
 	}
 
 	@Override
@@ -206,10 +222,22 @@ public class AcquisitionSimulation implements AcquisitionModule {
 	@Override
 	public void setAcquisitionTime(double time) {
 		acquisitionTime = time;
+
+		resetDataArray();
 	}
 
 	@Override
 	public double getAcquisitionTime() {
 		return acquisitionTime;
+	}
+
+	@Override
+	public void setAcquisitionCount(int count) {
+		acquisitionCount = count;
+	}
+
+	@Override
+	public int getAcquisitionCount() {
+		return acquisitionCount;
 	}
 }

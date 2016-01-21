@@ -18,9 +18,6 @@
  */
 package uk.co.saiman.data;
 
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-
 import uk.co.strangeskies.mathematics.Range;
 
 public interface SampledContinuum extends Continuum {
@@ -35,6 +32,8 @@ public interface SampledContinuum extends Continuum {
 
 	@Override
 	default Range<Double> getYRange() {
+		if (getDepth() == 0)
+			return Range.between(0d, 0d).setInclusive(false, false);
 		return getYRange(0, getDepth() - 1);
 	}
 
@@ -42,20 +41,29 @@ public interface SampledContinuum extends Continuum {
 		Range<Double> yRange = Range.between(getYSample(startIndex), getYSample(endIndex));
 
 		for (int i = startIndex; i < endIndex; i++)
-			yRange = yRange.extendThrough(getYSample(i), true);
+			yRange.extendThrough(getYSample(i), true);
 
 		return yRange;
 	}
 
 	@Override
 	default Range<Double> getYRange(double startX, double endX) {
-		Range<Double> yRange = Range.between(startX, endX);
+		if (getDepth() == 0) {
+			return Range.between(0d, 0d);
+		}
 
-		yRange = yRange.extendThrough(sampleY(startX), true);
-		yRange = yRange.extendThrough(sampleY(endX), true);
+		double startSample = sampleY(startX);
+		double endSample = sampleY(endX);
 
-		for (int i = getIndexAbove(startX); i < getIndexBelow(endX); i++)
-			yRange = yRange.extendThrough(getYSample(i), true);
+		Range<Double> yRange;
+		if (getDepth() > 2) {
+			yRange = getYRange(getIndexAbove(startX), getIndexBelow(endX));
+		} else {
+			yRange = Range.between(startSample, startSample);
+		}
+
+		yRange.extendThrough(startSample, true);
+		yRange.extendThrough(endSample, true);
 
 		return yRange;
 	}
@@ -74,26 +82,168 @@ public interface SampledContinuum extends Continuum {
 
 	@Override
 	default double sampleY(double xPosition) {
-		double yBelow = getYSample(getIndexBelow(xPosition));
-		double yAbove = getYSample(getIndexAbove(xPosition));
+		xPosition = getXRange().getConfined(xPosition);
 
-		double xBelow = getXSample(getIndexBelow(xPosition));
-		double xAbove = getXSample(getIndexAbove(xPosition));
+		int indexBelow = getIndexBelow(xPosition);
+		int indexAbove = getIndexAbove(xPosition);
 
-		return getInterpolationStrategy().interpolate(yBelow, yAbove, (xAbove - xBelow) / (xPosition - xBelow));
+		if (indexBelow < 0)
+			indexBelow = 0;
+		if (indexAbove < 0)
+			indexAbove = 0;
+		if (indexBelow >= getDepth())
+			indexBelow = getDepth() - 1;
+		if (indexAbove >= getDepth())
+			indexAbove = getDepth() - 1;
+
+		double yBelow = getYSample(indexBelow);
+		double yAbove = getYSample(indexAbove);
+
+		double xBelow = getXSample(indexBelow);
+		double xAbove = getXSample(indexAbove);
+
+		if (xBelow == xAbove || xPosition == xBelow) {
+			return yBelow;
+		} else {
+			return getInterpolationStrategy().interpolate(yBelow, yAbove, (xPosition - xBelow) / (xAbove - xBelow));
+		}
 	}
 
 	InterpolationStrategy getInterpolationStrategy();
 
-	default DoubleStream sampleYStream(Range<Integer> betweenIndices) {
-		int from = betweenIndices.getFrom();
-		if (!betweenIndices.isFromInclusive())
-			from++;
+	@Override
+	SampledContinuum copy();
 
-		int to = betweenIndices.getTo();
-		if (!betweenIndices.isToInclusive())
-			to--;
+	@Override
+	default SampledContinuum resample(double startX, double endX, int resolvableUnits) {
+		getReadLock().lock();
 
-		return IntStream.rangeClosed(from, to).mapToDouble(this::getYSample);
+		try {
+			if (getDepth() <= 2) {
+				return copy();
+			}
+
+			int[] indices;
+			double[] values;
+			double[] intensities;
+			int count;
+
+			/*
+			 * Prepare significant indices
+			 */
+			double xRange = endX - startX;
+			indices = new int[resolvableUnits * 4 + 8];
+			count = 0;
+
+			int indexFrom = getIndexBelow(startX);
+			if (indexFrom < 0) {
+				indexFrom = 0;
+			}
+			int indexTo = getIndexAbove(endX);
+			if (indexTo >= getDepth()) {
+				indexTo = getDepth() - 1;
+			}
+
+			indices[count++] = indexFrom;
+
+			int resolvedUnit = 0;
+			double resolvableUnitLength = xRange / resolvableUnits;
+			double resolvableUnitFrequency = resolvableUnits / xRange;
+			double resolvedUnitX = startX;
+
+			int lastIndex;
+			int minIndex;
+			double minY;
+			int maxIndex;
+			double maxY;
+			lastIndex = minIndex = maxIndex = indexFrom;
+			minY = maxY = getYSample(lastIndex);
+			for (int index = indexFrom + 1; index < indexTo; index++) {
+				/*
+				 * Get sample location at index
+				 */
+				double sampleX = getXSample(index);
+				double sampleY = getYSample(index);
+
+				/*
+				 * Check if passed resolution boundary (or last position)
+				 */
+				if (sampleX > resolvedUnitX || index + 1 == indexTo) {
+					/*
+					 * Move to next resolution boundary
+					 */
+					resolvedUnit = (int) ((sampleX - startX) * resolvableUnitFrequency) + 1;
+					resolvedUnitX = startX + resolvedUnit * resolvableUnitLength;
+
+					/*
+					 * Add indices of minimum and maximum y encountered in boundary span
+					 */
+					if (sampleY < minY) {
+						minIndex = -1;
+					} else if (sampleY > maxY) {
+						maxIndex = -1;
+					}
+
+					if (minIndex > 0) {
+						if (maxIndex > 0) {
+							if (maxIndex > minIndex) {
+								indices[count++] = minIndex;
+								indices[count++] = maxIndex;
+							} else {
+								indices[count++] = maxIndex;
+								indices[count++] = minIndex;
+							}
+						} else {
+							indices[count++] = minIndex;
+						}
+					} else if (maxIndex > 0) {
+						indices[count++] = maxIndex;
+					}
+
+					if (index > lastIndex) {
+						indices[count++] = index;
+					}
+					lastIndex = index + 1;
+					indices[count++] = lastIndex;
+
+					minIndex = -1;
+					maxIndex = -1;
+				} else if (index > lastIndex) {
+					/*
+					 * Check for Y range expansion
+					 */
+					if (maxIndex == -1 || sampleY > maxY) {
+						maxY = sampleY;
+						maxIndex = index;
+					} else if (minIndex == -1 || sampleY < minY) {
+						minY = sampleY;
+						minIndex = index;
+					}
+				}
+			}
+
+			/*
+			 * Prepare significant values
+			 */
+			values = new double[count];
+			for (int i = 0; i < count; i++) {
+				values[i] = getXSample(indices[i]);
+			}
+
+			/*
+			 * Prepare significant intensities
+			 */
+			intensities = new double[count];
+			for (int i = 0; i < count; i++) {
+				intensities[i] = getYSample(indices[i]);
+			}
+
+			/*
+			 * Prepare linearisation
+			 */
+			return new SimpleSampledContinuum(count, values, intensities);
+		} finally {
+			getReadLock().unlock();
+		}
 	}
 }
