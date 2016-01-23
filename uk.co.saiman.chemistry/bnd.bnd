@@ -1,7 +1,6 @@
 Bundle-Name: SAI :: Chemistry
 
 -buildpath: \
-	${buildpath.core},\
 	${mdb;core.api},\
 	${ss;reflection},\
 	${ss;utilities},\

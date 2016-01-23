@@ -189,14 +189,15 @@ runreq.felix.web:\
 	${req;org.apache.felix.webconsole.plugins.useradmin}
 
 ## Build path groups:
-buildpath.core:\
-	osgi.enroute.base.api;version=latest,\
+-buildpath.base=\
+	osgi.enroute.base.api;version=latest
+
+-testpath.base=\
 	osgi.enroute.junit.wrapper,\
 	osgi.enroute.hamcrest.wrapper,\
-	org.hamcrest__java-hamcrest,\
+	org.hamcrest__java-hamcrest
 
 buildpath.eclipse:\
-	${buildpath.core},\
 	javax.inject,\
 	org.eclipse.equinox.common,\
 	org.eclipse.core.runtime,\

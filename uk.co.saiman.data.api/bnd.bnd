@@ -1,7 +1,6 @@
 Bundle-Name: SAI :: Data
 
 -buildpath: \
-	${buildpath.core},\
 	${ss;utilities},\
 	${ss;reflection},\
 	${ss;mathematics},\

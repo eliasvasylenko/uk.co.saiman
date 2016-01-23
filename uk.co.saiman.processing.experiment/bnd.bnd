@@ -1,10 +1,6 @@
 Bundle-Name: SAI :: Processing :: Experiment
 
 -buildpath: \
-	osgi.enroute.base.api;version=latest,\
-	osgi.enroute.junit.wrapper,\
-	osgi.enroute.hamcrest.wrapper,\
-	org.hamcrest__java-hamcrest,\
 	${ss;utilities},\
 	${ss;reflection},\
 	uk.co.saiman.utilities;version=project,\

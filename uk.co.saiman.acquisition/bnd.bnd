@@ -1,5 +1,4 @@
 -buildpath: \
-	${buildpath.core},\
 	${ss;utilities},\
 	${ss;mathematics},\
 	${ss;reflection},\

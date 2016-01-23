@@ -1,7 +1,6 @@
 Bundle-Name: SAI :: Maldi
 
 -buildpath: \
-	${buildpath.core},\
 	${ss;utilities},\
 	${ss;mathematics},\
 	${ss;mathematics.geometry},\
