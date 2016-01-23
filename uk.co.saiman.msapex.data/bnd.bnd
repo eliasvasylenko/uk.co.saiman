@@ -7,12 +7,11 @@ Bundle-SymbolicName: ${p};singleton:=true
 	${ss;reflection},\
 	${ss;mathematics},\
 	${ss;expressions},\
-	uk.co.saiman.data.api;version=project,\
-	uk.co.saiman.utilities.eclipse;version=project
+	${ss;fx},\
+	uk.co.saiman.data.api;version=project
 
 Export-Package: uk.co.saiman.msapex.data
 
 Include-Resource: \
 	res,\
 	css=css
-	

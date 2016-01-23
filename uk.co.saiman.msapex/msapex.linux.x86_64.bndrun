@@ -89,8 +89,8 @@ platform: linux64
 	org.eclipse.fx.core.fxml;version='[2.2.0,2.2.1)',\
 	org.eclipse.fx.core.p2;version='[2.2.0,2.2.1)',\
 	org.eclipse.fx.osgi.util;version='[2.2.0,2.2.1)',\
-	org.eclipse.fx.ui.animation;version='[2.2.0,2.2.1)',\
 	org.eclipse.fx.ui.controls;version='[2.2.0,2.2.1)',\
+	org.eclipse.fx.ui.databinding;version='[2.2.0,2.2.1)',\
 	org.eclipse.fx.ui.di;version='[2.2.0,2.2.1)',\
 	org.eclipse.fx.ui.di.interopt;version='[2.2.0,2.2.1)',\
 	org.eclipse.fx.ui.dialogs;version='[2.2.0,2.2.1)',\
@@ -115,8 +115,9 @@ platform: linux64
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.msapex.acquisition;version=snapshot,\
 	uk.co.saiman.msapex.data;version=snapshot,\
-	uk.co.saiman.utilities.eclipse;version=snapshot,\
+	uk.co.strangeskies.eclipse;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.expressions;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.fx;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.mathematics;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.mathematics.geometry;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.reflection;version='[1.0.13,1.0.14)',\

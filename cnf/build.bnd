@@ -112,7 +112,7 @@ Git-Descriptor: ${system-allow-fail;git describe --dirty --always}
 Git-SHA: ${system-allow-fail;git rev-list -1 HEAD}
 -diffignore: Git-Descriptor,Git-SHA
 
-# #Requirement
+## Requirement
 req: osgi.identity;filter:='(osgi.identity=${1})'
 
 ## Run path groups:

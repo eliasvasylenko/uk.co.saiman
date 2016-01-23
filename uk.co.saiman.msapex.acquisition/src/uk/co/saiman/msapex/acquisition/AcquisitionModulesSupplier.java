@@ -21,8 +21,8 @@ package uk.co.saiman.msapex.acquisition;
 import org.eclipse.e4.core.di.suppliers.ExtendedObjectSupplier;
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.eclipse.ObservableListSupplier;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
+import uk.co.strangeskies.eclipse.ObservableListSupplier;
 
 @Component(service = ExtendedObjectSupplier.class, property = ExtendedObjectSupplier.SERVICE_CONTEXT_KEY
 		+ "=uk.co.saiman.msapex.acquisition.AcquisitionModules")

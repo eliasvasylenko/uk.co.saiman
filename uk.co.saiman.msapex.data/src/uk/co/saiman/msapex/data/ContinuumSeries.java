@@ -29,7 +29,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import uk.co.saiman.data.Continuum;
 import uk.co.saiman.data.SampledContinuum;
-import uk.co.saiman.eclipse.FXUtilities;
+import uk.co.strangeskies.fx.FXUtilities;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
 
