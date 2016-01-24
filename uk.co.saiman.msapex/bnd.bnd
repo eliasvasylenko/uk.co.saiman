@@ -5,8 +5,7 @@ Bundle-SymbolicName: ${p};singleton:=true
 	${buildpath.eclipse}
 
 Export-Package:\
-	uk.co.saiman.msapex,\
-	uk.co.saiman.msapex.utilities
+	uk.co.saiman.msapex
 
 Include-Resource:\
 	plugin.xml,\
