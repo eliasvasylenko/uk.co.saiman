@@ -41,11 +41,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
-import uk.co.saiman.eclipse.FXUtilities;
+import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.saiman.msapex.data.ContinuumChartController;
+import uk.co.strangeskies.fx.FXUtilities;
 
 public class AcquisitionPart {
 	@Inject

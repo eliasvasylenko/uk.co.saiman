@@ -1,7 +1,6 @@
 Bundle-Name: SAI :: Experiment
 
 -buildpath: \
-	${buildpath.core},\
 	${ss;utilities},\
 	${ss;reflection},\
 	uk.co.saiman.utilities;version=project
