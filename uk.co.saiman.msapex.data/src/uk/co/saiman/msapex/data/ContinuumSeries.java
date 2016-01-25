@@ -27,8 +27,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import uk.co.saiman.data.Continuum;
-import uk.co.saiman.data.SampledContinuum;
+import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.eclipse.FXUtilities;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
@@ -42,8 +42,8 @@ public class ContinuumSeries {
 	/*
 	 * Continuum data
 	 */
-	private final Continuum continuum;
-	private final Consumer<Expression<Continuum>> continuumObserver;
+	private final ContinuousFunction continuum;
+	private final Consumer<Expression<ContinuousFunction>> continuumObserver;
 
 	/*
 	 * Series data
@@ -63,7 +63,7 @@ public class ContinuumSeries {
 	private final Range<Double> range = Range.between(0d, 100d);
 	private int resolution = 100;
 
-	public ContinuumSeries(Continuum continuum) {
+	public ContinuumSeries(ContinuousFunction continuum) {
 		this.continuum = continuum;
 		continuumObserver = e -> refresh();
 
@@ -83,7 +83,7 @@ public class ContinuumSeries {
 		refresh();
 	}
 
-	public ContinuumSeries(Continuum continuum, String name) {
+	public ContinuumSeries(ContinuousFunction continuum, String name) {
 		this(continuum);
 
 		series.setName(name);
@@ -102,7 +102,7 @@ public class ContinuumSeries {
 		}
 	}
 
-	private Continuum getRefreshedContinuum() {
+	private ContinuousFunction getRefreshedContinuum() {
 		synchronized (refreshTimer) {
 			if (refresh) {
 				refresh = false;
@@ -115,10 +115,10 @@ public class ContinuumSeries {
 	}
 
 	private void refreshImpl() {
-		Continuum continuum = getRefreshedContinuum();
+		ContinuousFunction continuum = getRefreshedContinuum();
 
 		if (continuum != null) {
-			SampledContinuum sampledContinuum = continuum.resample(range.getFrom(), range.getTo(), resolution);
+			SampledContinuousFunction sampledContinuum = continuum.resample(range.getFrom(), range.getTo(), resolution);
 
 			FXUtilities.runNow(() -> {
 				if (data.size() > sampledContinuum.getDepth()) {
@@ -139,7 +139,7 @@ public class ContinuumSeries {
 		}
 	}
 
-	public Continuum getContinuum() {
+	public ContinuousFunction getContinuum() {
 		return continuum;
 	}
 

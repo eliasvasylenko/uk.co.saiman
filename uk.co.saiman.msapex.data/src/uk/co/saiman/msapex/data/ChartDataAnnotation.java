@@ -18,16 +18,16 @@
  */
 package uk.co.saiman.msapex.data;
 
-import uk.co.saiman.data.Continuum;
+import uk.co.saiman.data.ContinuousFunction;
 
 public interface ChartDataAnnotation<T> extends ChartAnnotation<T> {
 	@Override
 	double getX();
 
-	Continuum getContinuum();
+	ContinuousFunction getContinuum();
 
 	@Override
 	default double getY() {
-		return getContinuum().sampleY(getX());
+		return getContinuum().sample(getX());
 	}
 }

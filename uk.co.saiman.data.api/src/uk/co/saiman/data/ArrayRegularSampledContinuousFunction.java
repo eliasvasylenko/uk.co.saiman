@@ -22,11 +22,12 @@ import java.util.function.Consumer;
 
 import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
 
-public class SimpleRegularSampledContinuum extends MutableExpressionImpl<Continuum> implements RegularSampledContinuum {
+public class ArrayRegularSampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction>
+		implements RegularSampledContinuousFunction {
 	private final double frequency;
 	private final double[] intensities;
 
-	public SimpleRegularSampledContinuum(double frequency, double[] intensities) {
+	public ArrayRegularSampledContinuousFunction(double frequency, double[] intensities) {
 		this.frequency = frequency;
 
 		this.intensities = intensities.clone();
@@ -40,14 +41,6 @@ public class SimpleRegularSampledContinuum extends MutableExpressionImpl<Continu
 	@Override
 	public double getYSample(int index) {
 		return intensities[index];
-	}
-
-	@Override
-	public InterpolationStrategy getInterpolationStrategy() {
-		// TODO Auto-generated method stub
-		return (from, to, delta) -> {
-			return from + (to - from) * delta;
-		};
 	}
 
 	/**
@@ -71,12 +64,12 @@ public class SimpleRegularSampledContinuum extends MutableExpressionImpl<Continu
 	}
 
 	@Override
-	public SimpleRegularSampledContinuum copy() {
-		return new SimpleRegularSampledContinuum(frequency, intensities);
+	public ArrayRegularSampledContinuousFunction copy() {
+		return new ArrayRegularSampledContinuousFunction(frequency, intensities);
 	}
 
 	@Override
-	public Continuum getValueImpl(boolean dirty) {
+	public ContinuousFunction getValueImpl(boolean dirty) {
 		return this;
 	}
 }

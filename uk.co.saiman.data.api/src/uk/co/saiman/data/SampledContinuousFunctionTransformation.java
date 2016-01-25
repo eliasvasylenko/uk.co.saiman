@@ -22,25 +22,24 @@ import java.util.function.Function;
 
 import uk.co.strangeskies.mathematics.expression.FunctionExpression;
 
-public class ContinuumTransformation<C extends Continuum> extends FunctionExpression<Continuum, Continuum>
-		implements ContinuumDecorator {
-	private final Function<C, Continuum> transformation;
+public class SampledContinuousFunctionTransformation<C extends ContinuousFunction> extends FunctionExpression<ContinuousFunction, ContinuousFunction>
+		implements SampledContinuousFunctionDecorator {
+	private final Function<C, SampledContinuousFunction> transformation;
 
 	@SuppressWarnings("unchecked")
-	public ContinuumTransformation(C dependency, Function<C, Continuum> transformation) {
+	public SampledContinuousFunctionTransformation(C dependency, Function<C, SampledContinuousFunction> transformation) {
 		super(dependency, c -> transformation.apply((C) c));
 
 		this.transformation = transformation;
 	}
 
 	@Override
-	public Continuum getComponent() {
-		return getValue();
+	public SampledContinuousFunction getComponent() {
+		return (SampledContinuousFunction) getValue();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Continuum copy() {
+	public SampledContinuousFunction copy() {
 		C component;
 
 		try {
@@ -50,6 +49,6 @@ public class ContinuumTransformation<C extends Continuum> extends FunctionExpres
 			getReadLock().unlock();
 		}
 
-		return new ContinuumTransformation<>(component, transformation);
+		return new SampledContinuousFunctionTransformation<>(component, transformation);
 	}
 }

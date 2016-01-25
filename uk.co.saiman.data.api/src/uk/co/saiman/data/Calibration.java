@@ -18,6 +18,12 @@
  */
 package uk.co.saiman.data;
 
+/**
+ * A reversible calibration or conversion between units for a
+ * {@link ContinuousFunction} domain.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface Calibration {
 	double calibrate(double from);
 

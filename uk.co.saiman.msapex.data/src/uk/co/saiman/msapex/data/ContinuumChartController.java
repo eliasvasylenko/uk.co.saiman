@@ -35,12 +35,12 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import uk.co.saiman.data.Continuum;
+import uk.co.saiman.data.ContinuousFunction;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.reflection.TypeToken;
 
 /**
- * FXML controller for an annotatable data chart over a {@link Continuum}.
+ * FXML controller for an annotatable data chart over a {@link ContinuousFunction}.
  * 
  * @author Elias N Vasylenko
  */
@@ -54,8 +54,8 @@ public class ContinuumChartController {
 	@FXML
 	private LineChart<Number, Number> lineChart;
 
-	private ObservableSet<Continuum> continuums = FXCollections.observableSet(new LinkedHashSet<>());
-	private final Map<Continuum, ContinuumSeries> series = new HashMap<>();
+	private ObservableSet<ContinuousFunction> continuums = FXCollections.observableSet(new LinkedHashSet<>());
+	private final Map<ContinuousFunction, ContinuumSeries> series = new HashMap<>();
 
 	private boolean zoomed;
 	private final Range<Double> domain = Range.between(0d, 100d);
@@ -93,7 +93,7 @@ public class ContinuumChartController {
 		lineChart.setTitle(title);
 	}
 
-	public ObservableSet<Continuum> getContinuums() {
+	public ObservableSet<ContinuousFunction> getContinuums() {
 		return continuums;
 	}
 
@@ -175,7 +175,7 @@ public class ContinuumChartController {
 		}
 	}
 
-	private Range<Double> getMaxZoom(Function<Continuum, Range<Double>> continuumRange) {
+	private Range<Double> getMaxZoom(Function<ContinuousFunction, Range<Double>> continuumRange) {
 		synchronized (domain) {
 			return new ArrayList<>(continuums).stream().map(continuumRange).reduce(Range::getExtendedThrough)
 					.orElse(Range.between(0d, 100d));
@@ -196,7 +196,7 @@ public class ContinuumChartController {
 
 	public void zoomDomain(double zoomAmount) {
 		synchronized (domain) {
-			zoomDomain(zoomAmount, (getDomain().getTo() - getDomain().getFrom()) / 2);
+			zoomDomain(zoomAmount, (getDomain().getTo() + getDomain().getFrom()) / 2);
 		}
 	}
 
@@ -213,7 +213,7 @@ public class ContinuumChartController {
 
 	public void resetZoomDomain() {
 		synchronized (domain) {
-			Range<Double> maxZoom = getMaxZoom(Continuum::getXRange);
+			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
 			setDomainImpl(maxZoom.getFrom(), maxZoom.getTo());
 
 			zoomed = false;
@@ -222,7 +222,7 @@ public class ContinuumChartController {
 
 	public void resetZoomRange() {
 		synchronized (domain) {
-			Range<Double> maxZoom = getMaxZoom(c -> c.getYRange(domain.getFrom(), domain.getTo()));
+			Range<Double> maxZoom = getMaxZoom(c -> c.getRangeBetween(domain.getFrom(), domain.getTo()));
 
 			if (maxZoom.getFrom() >= 0) {
 				range.setFrom(0d);
@@ -267,7 +267,7 @@ public class ContinuumChartController {
 
 	public void setDomain(double from, double to) {
 		synchronized (this.domain) {
-			Range<Double> maxZoom = getMaxZoom(Continuum::getXRange);
+			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
 
 			if ((to - from) > (maxZoom.getTo() - maxZoom.getFrom())) {
 				resetZoomDomain();
@@ -330,7 +330,7 @@ public class ContinuumChartController {
 		updateAnnotations();
 	}
 
-	private void continuumModified(Continuum continuum) {
+	private void continuumModified(ContinuousFunction continuum) {
 		synchronized (this.domain) {
 			if (!zoomed) {
 				resetZoomDomain();
@@ -339,9 +339,9 @@ public class ContinuumChartController {
 		}
 	}
 
-	private void continuumsChanged(Change<? extends Continuum> d) {
+	private void continuumsChanged(Change<? extends ContinuousFunction> d) {
 		if (d.wasAdded()) {
-			Continuum continuum = d.getElementAdded();
+			ContinuousFunction continuum = d.getElementAdded();
 
 			ContinuumSeries continuumSeries = new ContinuumSeries(continuum);
 
@@ -351,7 +351,7 @@ public class ContinuumChartController {
 			continuum.addWeakObserver(this, o -> c -> o.continuumModified(c.getValue()));
 			continuumModified(continuum);
 		} else if (d.wasRemoved()) {
-			Continuum continuum = d.getElementRemoved();
+			ContinuousFunction continuum = d.getElementRemoved();
 
 			lineChart.getData().remove(series.get(continuum).getSeries());
 

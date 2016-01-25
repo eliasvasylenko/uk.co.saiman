@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.data.SampledContinuum;
-import uk.co.saiman.data.SparseSampledContinuum;
+import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SparseSampledContinuousFunction;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.strangeskies.utilities.BufferingListener;
 import uk.co.strangeskies.utilities.Observable;
@@ -55,9 +55,9 @@ public class TDCSignalSimulation implements AcquisitionModule {
 
 	private int acquisitionCount = DEFAULT_ACQUISITION_COUNT;
 
-	private SampledContinuum acquisitionData;
-	private final BufferingListener<SampledContinuum> singleAcquisitionListeners;
-	private final BufferingListener<SampledContinuum> acquisitionListeners;
+	private SampledContinuousFunction acquisitionData;
+	private final BufferingListener<SampledContinuousFunction> singleAcquisitionListeners;
+	private final BufferingListener<SampledContinuousFunction> acquisitionListeners;
 
 	private final Object acquiringLock = new Object();
 	private Integer acquiringCounter;
@@ -156,7 +156,7 @@ public class TDCSignalSimulation implements AcquisitionModule {
 			 * TODO distribute "hits" number of hits
 			 */
 
-			acquisitionData = new SparseSampledContinuum(1 / getAcquisitionResolution(), getAcquisitionDepth(), hits,
+			acquisitionData = new SparseSampledContinuousFunction(1 / getAcquisitionResolution(), getAcquisitionDepth(), hits,
 					hitIndices, hitIntensities);
 
 			acquisitionListeners.accept(acquisitionData);
@@ -193,17 +193,17 @@ public class TDCSignalSimulation implements AcquisitionModule {
 	}
 
 	@Override
-	public SampledContinuum getLastAcquisitionData() {
+	public SampledContinuousFunction getLastAcquisitionData() {
 		return acquisitionData;
 	}
 
 	@Override
-	public Observable<SampledContinuum> singleAcquisitionContinuumEvents() {
+	public Observable<SampledContinuousFunction> singleAcquisitionContinuumEvents() {
 		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public Observable<SampledContinuum> continuumEvents() {
+	public Observable<SampledContinuousFunction> continuumEvents() {
 		return acquisitionListeners;
 	}
 

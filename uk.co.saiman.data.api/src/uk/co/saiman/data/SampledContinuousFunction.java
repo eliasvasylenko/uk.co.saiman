@@ -20,9 +20,9 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.Range;
 
-public interface SampledContinuum extends Continuum {
+public interface SampledContinuousFunction extends ContinuousFunction {
 	@Override
-	default Range<Double> getXRange() {
+	default Range<Double> getDomain() {
 		return getXRange(0, getDepth() - 1);
 	}
 
@@ -31,7 +31,7 @@ public interface SampledContinuum extends Continuum {
 	}
 
 	@Override
-	default Range<Double> getYRange() {
+	default Range<Double> getRange() {
 		if (getDepth() == 0)
 			return Range.between(0d, 0d).setInclusive(false, false);
 		return getYRange(0, getDepth() - 1);
@@ -47,13 +47,13 @@ public interface SampledContinuum extends Continuum {
 	}
 
 	@Override
-	default Range<Double> getYRange(double startX, double endX) {
+	default Range<Double> getRangeBetween(double startX, double endX) {
 		if (getDepth() == 0) {
 			return Range.between(0d, 0d);
 		}
 
-		double startSample = sampleY(startX);
-		double endSample = sampleY(endX);
+		double startSample = sample(startX);
+		double endSample = sample(endX);
 
 		Range<Double> yRange;
 		if (getDepth() > 2) {
@@ -81,8 +81,8 @@ public interface SampledContinuum extends Continuum {
 	double getYSample(int index);
 
 	@Override
-	default double sampleY(double xPosition) {
-		xPosition = getXRange().getConfined(xPosition);
+	default double sample(double xPosition) {
+		xPosition = getDomain().getConfined(xPosition);
 
 		int indexBelow = getIndexBelow(xPosition);
 		int indexAbove = getIndexAbove(xPosition);
@@ -105,17 +105,15 @@ public interface SampledContinuum extends Continuum {
 		if (xBelow == xAbove || xPosition == xBelow) {
 			return yBelow;
 		} else {
-			return getInterpolationStrategy().interpolate(yBelow, yAbove, (xPosition - xBelow) / (xAbove - xBelow));
+			return yBelow + (yAbove - yBelow) * (xPosition - xBelow) / (xAbove - xBelow);
 		}
 	}
 
-	InterpolationStrategy getInterpolationStrategy();
+	@Override
+	SampledContinuousFunction copy();
 
 	@Override
-	SampledContinuum copy();
-
-	@Override
-	default SampledContinuum resample(double startX, double endX, int resolvableUnits) {
+	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
 		getReadLock().lock();
 
 		try {
@@ -241,7 +239,7 @@ public interface SampledContinuum extends Continuum {
 			/*
 			 * Prepare linearisation
 			 */
-			return new SimpleSampledContinuum(count, values, intensities);
+			return new ArraySampledContinuousFunction(count, values, intensities);
 		} finally {
 			getReadLock().unlock();
 		}

@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.instrument.acquisition;
 
-import uk.co.saiman.data.SampledContinuum;
+import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.instrument.HardwareModule;
 import uk.co.strangeskies.utilities.Observable;
 
@@ -62,7 +62,7 @@ public interface AcquisitionModule extends HardwareModule {
 	 *         acquired data to the discretion of the implementing hardware
 	 *         module.
 	 */
-	SampledContinuum getLastAcquisitionData();
+	SampledContinuousFunction getLastAcquisitionData();
 
 	/**
 	 * Add or remove continuum event observers for the next acquisition
@@ -75,7 +75,7 @@ public interface AcquisitionModule extends HardwareModule {
 	 * @return An observable interface for registering single acquisition
 	 *         continuum event listeners.
 	 */
-	Observable<SampledContinuum> singleAcquisitionContinuumEvents();
+	Observable<SampledContinuousFunction> singleAcquisitionContinuumEvents();
 
 	/**
 	 * Add or remove continuum event observers.
@@ -86,7 +86,7 @@ public interface AcquisitionModule extends HardwareModule {
 	 * 
 	 * @return An observable interface for registering continuum event listeners.
 	 */
-	Observable<SampledContinuum> continuumEvents();
+	Observable<SampledContinuousFunction> continuumEvents();
 
 	/**
 	 * Set the total acquisition count for a single experiment.

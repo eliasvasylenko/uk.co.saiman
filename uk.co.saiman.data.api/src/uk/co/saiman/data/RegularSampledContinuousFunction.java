@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.data;
 
-public interface RegularSampledContinuum extends SampledContinuum {
+public interface RegularSampledContinuousFunction extends SampledContinuousFunction {
 	@Override
 	default double getXSample(int index) {
 		return index / getFrequency();
@@ -29,8 +29,8 @@ public interface RegularSampledContinuum extends SampledContinuum {
 		return (int) (xValue * getFrequency());
 	}
 
-	/*
-	 * Samples per X unit
+	/**
+	 * @return The number of samples per unit in the domain
 	 */
 	public double getFrequency();
 }

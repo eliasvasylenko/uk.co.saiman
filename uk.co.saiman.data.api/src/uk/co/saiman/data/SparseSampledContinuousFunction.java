@@ -22,39 +22,45 @@ import java.util.Arrays;
 
 import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
 
-public class SimpleSampledContinuum extends MutableExpressionImpl<Continuum> implements SampledContinuum {
-	private final double[] values;
+public class SparseSampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction> implements RegularSampledContinuousFunction {
+	private final double frequency;
+	private final int depth;
+
+	private final int[] indices;
 	private final double[] intensities;
 
-	public SimpleSampledContinuum(int samples, double[] values, double[] intensities) {
-		this.values = Arrays.copyOf(values, samples);
+	public SparseSampledContinuousFunction(double frequency, int depth, int samples, int[] indices, double[] intensities) {
+		this.frequency = frequency;
+		this.depth = depth;
+
+		/*
+		 * TODO sort the indices & intensities here
+		 */
+
+		this.indices = Arrays.copyOf(indices, samples);
 		this.intensities = Arrays.copyOf(intensities, samples);
 	}
 
-	@Override
-	public int getDepth() {
-		return values.length;
-	}
-
-	@Override
-	public int getIndexBelow(double xValue) {
+	private int getIndexIndex(int index) {
 		int from = 0;
-		int to = values.length - 1;
+		int to = indices.length - 1;
 
 		if (to < 0) {
 			return -1;
 		}
 
 		do {
-			if (values[to] <= xValue) {
-				return to;
-			} else if (values[from] > xValue) {
+			if (indices[to] < index) {
 				return -1;
-			} else if (values[from] == xValue) {
+			} else if (indices[to] == index) {
+				return to;
+			} else if (indices[from] > index) {
+				return -1;
+			} else if (indices[from] == index) {
 				return from;
 			} else {
 				int mid = (to + from) / 2;
-				if (values[mid] > xValue) {
+				if (indices[mid] > index) {
 					to = mid;
 				} else {
 					from = mid;
@@ -62,34 +68,41 @@ public class SimpleSampledContinuum extends MutableExpressionImpl<Continuum> imp
 			}
 		} while (to - from > 1);
 
-		return from;
+		return -1;
 	}
 
 	@Override
-	public double getXSample(int index) {
-		return values[index];
+	public int getDepth() {
+		return depth;
 	}
 
 	@Override
 	public double getYSample(int index) {
-		return intensities[index];
+		int indexIndex = getIndexIndex(index);
+		if (indexIndex < 0) {
+			return 0;
+		} else {
+			return intensities[indexIndex];
+		}
 	}
 
 	@Override
-	public InterpolationStrategy getInterpolationStrategy() {
-		// TODO Auto-generated method stub
-		return (from, to, delta) -> {
-			return from + (to - from) * delta;
-		};
+	public double getFrequency() {
+		return frequency;
 	}
 
 	@Override
-	public SimpleSampledContinuum copy() {
+	public SparseSampledContinuousFunction copy() {
 		return this;
 	}
 
 	@Override
-	protected Continuum getValueImpl(boolean dirty) {
+	protected ContinuousFunction getValueImpl(boolean dirty) {
+		return this;
+	}
+
+	@Override
+	public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
 		return this;
 	}
 }

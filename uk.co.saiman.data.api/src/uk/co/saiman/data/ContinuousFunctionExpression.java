@@ -20,43 +20,45 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.expression.DependentExpression;
 
-public class CalibratedSampledContinuum extends DependentExpression<Continuum> implements SampledContinuumDecorator {
-	private final SampledContinuum component;
-	private final Calibration calibration;
+public class ContinuousFunctionExpression extends DependentExpression<ContinuousFunction> implements ContinuousFunctionDecorator {
+	private ContinuousFunction component;
 
-	public CalibratedSampledContinuum(SampledContinuum component, Calibration calibration) {
-		this.component = component;
-		getDependencies().add(component);
-
-		this.calibration = calibration;
+	public ContinuousFunctionExpression(ContinuousFunction component) {
+		setComponent(component);
 	}
 
 	@Override
-	public SampledContinuum getComponent() {
+	public ContinuousFunction getComponent() {
 		return component;
 	}
 
-	public Calibration getCalibration() {
-		return calibration;
+	public void setComponent(ContinuousFunction component) {
+		try {
+			getWriteLock().lock();
+			this.component = component;
+			getDependencies().clear();
+			getDependencies().add(component);
+		} finally {
+			postUpdate();
+		}
 	}
 
 	@Override
-	public double getXSample(int index) {
-		return getCalibration().calibrate(SampledContinuumDecorator.super.getXSample(index));
+	public ContinuousFunctionExpression copy() {
+		ContinuousFunction component;
+
+		try {
+			getReadLock().lock();
+			component = getComponent().copy();
+		} finally {
+			getReadLock().unlock();
+		}
+
+		return new ContinuousFunctionExpression(component);
 	}
 
 	@Override
-	public int getIndexBelow(double xValue) {
-		return SampledContinuumDecorator.super.getIndexBelow(getCalibration().decalibrate(xValue));
-	}
-
-	@Override
-	public CalibratedSampledContinuum copy() {
-		return this;
-	}
-
-	@Override
-	protected Continuum evaluate() {
+	protected ContinuousFunction evaluate() {
 		return this;
 	}
 }

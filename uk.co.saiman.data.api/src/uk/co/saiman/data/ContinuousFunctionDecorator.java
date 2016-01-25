@@ -18,37 +18,33 @@
  */
 package uk.co.saiman.data;
 
-import java.util.function.Function;
+import uk.co.strangeskies.mathematics.Range;
 
-import uk.co.strangeskies.mathematics.expression.FunctionExpression;
+public interface ContinuousFunctionDecorator extends ContinuousFunction {
+	ContinuousFunction getComponent();
 
-public class SampledContinuumTransformation<C extends Continuum> extends FunctionExpression<Continuum, Continuum>
-		implements SampledContinuumDecorator {
-	private final Function<C, SampledContinuum> transformation;
-
-	@SuppressWarnings("unchecked")
-	public SampledContinuumTransformation(C dependency, Function<C, SampledContinuum> transformation) {
-		super(dependency, c -> transformation.apply((C) c));
-
-		this.transformation = transformation;
+	@Override
+	default Range<Double> getDomain() {
+		return getComponent().getDomain();
 	}
 
 	@Override
-	public SampledContinuum getComponent() {
-		return (SampledContinuum) getValue();
+	default Range<Double> getRange() {
+		return getComponent().getRange();
 	}
 
 	@Override
-	public SampledContinuum copy() {
-		C component;
+	default double sample(double xPosition) {
+		return getComponent().sample(xPosition);
+	}
 
-		try {
-			getReadLock().lock();
-			component = (C) getValue().copy();
-		} finally {
-			getReadLock().unlock();
-		}
+	@Override
+	default Range<Double> getRangeBetween(double startX, double endX) {
+		return getComponent().getRangeBetween(startX, endX);
+	}
 
-		return new SampledContinuumTransformation<>(component, transformation);
+	@Override
+	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+		return getComponent().resample(startX, endX, resolvableUnits);
 	}
 }

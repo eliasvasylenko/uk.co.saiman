@@ -20,13 +20,13 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.Range;
 
-public interface SampledContinuumDecorator extends SampledContinuum, ContinuumDecorator {
+public interface SampledContinuousFunctionDecorator extends SampledContinuousFunction, ContinuousFunctionDecorator {
 	@Override
-	public SampledContinuum getComponent();
+	public SampledContinuousFunction getComponent();
 
 	@Override
-	default Range<Double> getYRange() {
-		return getComponent().getYRange();
+	default Range<Double> getRange() {
+		return getComponent().getRange();
 	}
 
 	@Override
@@ -45,32 +45,27 @@ public interface SampledContinuumDecorator extends SampledContinuum, ContinuumDe
 	}
 
 	@Override
-	default InterpolationStrategy getInterpolationStrategy() {
-		return getComponent().getInterpolationStrategy();
-	}
-
-	@Override
 	default int getIndexBelow(double xValue) {
 		return getComponent().getIndexBelow(xValue);
 	}
 
 	@Override
-	default double sampleY(double xPosition) {
-		return ContinuumDecorator.super.sampleY(xPosition);
+	default double sample(double xPosition) {
+		return ContinuousFunctionDecorator.super.sample(xPosition);
 	}
 
 	@Override
-	default Range<Double> getYRange(double startX, double endX) {
-		return ContinuumDecorator.super.getYRange(startX, endX);
+	default Range<Double> getRangeBetween(double startX, double endX) {
+		return ContinuousFunctionDecorator.super.getRangeBetween(startX, endX);
 	}
 
 	@Override
-	default Range<Double> getXRange() {
-		return ContinuumDecorator.super.getXRange();
+	default Range<Double> getDomain() {
+		return ContinuousFunctionDecorator.super.getDomain();
 	}
 
 	@Override
-	default SampledContinuum resample(double startX, double endX, int resolvableUnits) {
-		return ContinuumDecorator.super.resample(startX, endX, resolvableUnits);
+	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+		return ContinuousFunctionDecorator.super.resample(startX, endX, resolvableUnits);
 	}
 }
