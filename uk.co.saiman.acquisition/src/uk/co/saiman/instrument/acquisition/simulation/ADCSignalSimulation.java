@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
+import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.strangeskies.utilities.BufferingListener;
 import uk.co.strangeskies.utilities.Observable;
@@ -89,11 +89,11 @@ public class ADCSignalSimulation implements AcquisitionModule {
 	 * acquisition time.
 	 * 
 	 * @param acquisitionResolution
-	 *          The time resolution between each sample in the acquired continuum,
-	 *          in milliseconds
+	 *          The time resolution between each sample in the acquired data, in
+	 *          milliseconds
 	 * @param acquisitionTime
-	 *          The active sampling duration for a single continuum acquisition,
-	 *          in milliseconds.
+	 *          The active sampling duration for a single data acquisition, in
+	 *          milliseconds.
 	 */
 	public ADCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
 		this();
@@ -154,7 +154,8 @@ public class ADCSignalSimulation implements AcquisitionModule {
 						+ (scale += scaleDelta) * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1)) * 20;
 			}
 
-			acquisitionData = new ArrayRegularSampledContinuousFunction(1 / (getAcquisitionResolution() * 1_000), intensities);
+			acquisitionData = new ArrayRegularSampledContinuousFunction(1 / (getAcquisitionResolution() * 1_000),
+					intensities);
 
 			acquisitionListeners.accept(acquisitionData);
 
@@ -193,17 +194,17 @@ public class ADCSignalSimulation implements AcquisitionModule {
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction> singleAcquisitionContinuumEvents() {
+	public Observable<SampledContinuousFunction> singleAcquisitionDataEvents() {
 		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction> continuumEvents() {
+	public Observable<SampledContinuousFunction> dataEvents() {
 		return acquisitionListeners;
 	}
 
 	/**
-	 * Set the time resolution between each sample in the acquired continuum.
+	 * Set the time resolution between each sample in the acquired data.
 	 * 
 	 * @param resolution
 	 *          The acquisition resolution in milliseconds

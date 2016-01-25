@@ -44,7 +44,7 @@ public class ArrayRegularSampledContinuousFunction extends MutableExpressionImpl
 	}
 
 	/**
-	 * Safely modify the data of this sampled continuum.
+	 * Safely modify the data of this sampled continuous function.
 	 * 
 	 * @param mutation
 	 *          The mutation operation

@@ -33,14 +33,14 @@ import uk.co.strangeskies.mathematics.expression.SelfExpression;
  */
 public interface ContinuousFunction extends SelfExpression<ContinuousFunction> {
 	/**
-	 * The smallest interval containing all values in the domain of the continuum.
+	 * The smallest interval containing all values in the domain of the function.
 	 * 
 	 * @return The extent of the domain
 	 */
 	Range<Double> getDomain();
 
 	/**
-	 * An interval containing all values in the codomain of the continuum. Some
+	 * An interval containing all values in the codomain of the function. Some
 	 * implementations may not quickly be able to calculate the smallest such
 	 * interval, in which case they should return a close approximation
 	 * guaranteed, to contain the exact smallest interval.
@@ -55,7 +55,7 @@ public interface ContinuousFunction extends SelfExpression<ContinuousFunction> {
 	 * @param endX
 	 *          The end of the interval whose range we wish to determine
 	 * @return The range from the smallest to the largest value of the codomain of
-	 *         the continuum within the given interval
+	 *         the function within the given interval
 	 */
 	Range<Double> getRangeBetween(double startX, double endX);
 

@@ -40,11 +40,12 @@ import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.reflection.TypeToken;
 
 /**
- * FXML controller for an annotatable data chart over a {@link ContinuousFunction}.
+ * FXML controller for an annotatable data chart over a
+ * {@link ContinuousFunction}.
  * 
  * @author Elias N Vasylenko
  */
-public class ContinuumChartController {
+public class ContinuousFunctionChartController {
 	@FXML
 	private Pane msapexDataChart;
 
@@ -54,8 +55,8 @@ public class ContinuumChartController {
 	@FXML
 	private LineChart<Number, Number> lineChart;
 
-	private ObservableSet<ContinuousFunction> continuums = FXCollections.observableSet(new LinkedHashSet<>());
-	private final Map<ContinuousFunction, ContinuumSeries> series = new HashMap<>();
+	private ObservableSet<ContinuousFunction> continuousFunctions = FXCollections.observableSet(new LinkedHashSet<>());
+	private final Map<ContinuousFunction, ContinuousFunctionSeries> series = new HashMap<>();
 
 	private boolean zoomed;
 	private final Range<Double> domain = Range.between(0d, 100d);
@@ -93,8 +94,8 @@ public class ContinuumChartController {
 		lineChart.setTitle(title);
 	}
 
-	public ObservableSet<ContinuousFunction> getContinuums() {
-		return continuums;
+	public ObservableSet<ContinuousFunction> getContinuousFunctions() {
+		return continuousFunctions;
 	}
 
 	public ObservableSet<ChartAnnotation<?>> getAnnotations() {
@@ -110,7 +111,7 @@ public class ContinuumChartController {
 		getYAxis().scaleProperty().addListener(num -> updateAnnotations());
 
 		annotations.addListener(this::annotationsChanged);
-		continuums.addListener(this::continuumsChanged);
+		continuousFunctions.addListener(this::continuousFunctionsChanged);
 
 		getXAxis().scaleProperty().addListener(num -> updateResolutionDomain());
 
@@ -175,10 +176,10 @@ public class ContinuumChartController {
 		}
 	}
 
-	private Range<Double> getMaxZoom(Function<ContinuousFunction, Range<Double>> continuumRange) {
+	private Range<Double> getMaxZoom(Function<ContinuousFunction, Range<Double>> continuousFunctionRange) {
 		synchronized (domain) {
-			return new ArrayList<>(continuums).stream().map(continuumRange).reduce(Range::getExtendedThrough)
-					.orElse(Range.between(0d, 100d));
+			return new ArrayList<>(continuousFunctions).stream().map(continuousFunctionRange)
+					.reduce(Range::getExtendedThrough).orElse(Range.between(0d, 100d));
 		}
 	}
 
@@ -300,7 +301,7 @@ public class ContinuumChartController {
 
 	private void updateZoomDomain() {
 		synchronized (this.domain) {
-			new ArrayList<>(continuums).stream().map(series::get).forEach(s -> s.setRange(domain));
+			new ArrayList<>(continuousFunctions).stream().map(series::get).forEach(s -> s.setRange(domain));
 		}
 	}
 
@@ -308,7 +309,7 @@ public class ContinuumChartController {
 		synchronized (this.domain) {
 			int from = (int) getXAxis().getDisplayPosition(domain.getFrom());
 			int to = (int) getXAxis().getDisplayPosition(domain.getTo());
-			new ArrayList<>(continuums).stream().map(series::get).forEach(s -> s.setResolution(to - from));
+			new ArrayList<>(continuousFunctions).stream().map(series::get).forEach(s -> s.setResolution(to - from));
 		}
 	}
 
@@ -330,7 +331,7 @@ public class ContinuumChartController {
 		updateAnnotations();
 	}
 
-	private void continuumModified(ContinuousFunction continuum) {
+	private void continuousFunctionModified(ContinuousFunction continuousFunction) {
 		synchronized (this.domain) {
 			if (!zoomed) {
 				resetZoomDomain();
@@ -339,23 +340,23 @@ public class ContinuumChartController {
 		}
 	}
 
-	private void continuumsChanged(Change<? extends ContinuousFunction> d) {
+	private void continuousFunctionsChanged(Change<? extends ContinuousFunction> d) {
 		if (d.wasAdded()) {
-			ContinuousFunction continuum = d.getElementAdded();
+			ContinuousFunction continuousFunction = d.getElementAdded();
 
-			ContinuumSeries continuumSeries = new ContinuumSeries(continuum);
+			ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(continuousFunction);
 
-			series.put(continuum, continuumSeries);
-			lineChart.getData().add(continuumSeries.getSeries());
+			series.put(continuousFunction, continuousFunctionSeries);
+			lineChart.getData().add(continuousFunctionSeries.getSeries());
 
-			continuum.addWeakObserver(this, o -> c -> o.continuumModified(c.getValue()));
-			continuumModified(continuum);
+			continuousFunction.addWeakObserver(this, o -> c -> o.continuousFunctionModified(c.getValue()));
+			continuousFunctionModified(continuousFunction);
 		} else if (d.wasRemoved()) {
-			ContinuousFunction continuum = d.getElementRemoved();
+			ContinuousFunction continuousFunction = d.getElementRemoved();
 
-			lineChart.getData().remove(series.get(continuum).getSeries());
+			lineChart.getData().remove(series.get(continuousFunction).getSeries());
 
-			continuum.removeWeakObserver(this);
+			continuousFunction.removeWeakObserver(this);
 		}
 
 		updateAnnotations();

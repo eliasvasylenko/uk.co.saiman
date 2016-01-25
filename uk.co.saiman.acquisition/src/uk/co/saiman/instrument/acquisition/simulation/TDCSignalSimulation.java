@@ -92,10 +92,10 @@ public class TDCSignalSimulation implements AcquisitionModule {
 	 * acquisition time.
 	 * 
 	 * @param acquisitionResolution
-	 *          The time resolution between each sample in the acquired continuum,
+	 *          The time resolution between each sample in the acquired data,
 	 *          in milliseconds
 	 * @param acquisitionTime
-	 *          The active sampling duration for a single continuum acquisition,
+	 *          The active sampling duration for a single data acquisition,
 	 *          in milliseconds.
 	 */
 	public TDCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
@@ -198,17 +198,17 @@ public class TDCSignalSimulation implements AcquisitionModule {
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction> singleAcquisitionContinuumEvents() {
+	public Observable<SampledContinuousFunction> singleAcquisitionDataEvents() {
 		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction> continuumEvents() {
+	public Observable<SampledContinuousFunction> dataEvents() {
 		return acquisitionListeners;
 	}
 
 	/**
-	 * Set the time resolution between each sample in the acquired continuum.
+	 * Set the time resolution between each sample in the acquired data.
 	 * 
 	 * @param resolution
 	 *          The acquisition resolution in milliseconds

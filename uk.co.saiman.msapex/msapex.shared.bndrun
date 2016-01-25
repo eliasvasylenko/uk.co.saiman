@@ -8,6 +8,8 @@ runreq.msapex:\
 	${runreq.eclipse.${platform}},\
 	${req;uk.co.saiman.msapex},\
 	${req;uk.co.saiman.msapex.acquisition},\
+	${req;uk.co.saiman.msapex.chemistry},\
+	${req;uk.co.saiman.msapex.experiment},\
 	${req;uk.co.saiman.acquisition.api},\
 	${req;uk.co.saiman.acquisition.simulation}
 
@@ -25,6 +27,8 @@ runpath.msapex:\
 
 runprops.msapex:\
 	${runprops.eclipse},\
+	${runprops.eclipse.clean},\
+	${runprops.eclipse.fx},\
 	eclipse.product=uk.co.saiman.msapex.product
 
 systempath.msapex:\

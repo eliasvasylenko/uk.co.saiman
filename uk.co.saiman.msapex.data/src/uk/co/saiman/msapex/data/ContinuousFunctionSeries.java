@@ -38,12 +38,12 @@ import uk.co.strangeskies.mathematics.expression.Expression;
  * @author Elias N Vasylenko
  *
  */
-public class ContinuumSeries {
+public class ContinuousFunctionSeries {
 	/*
-	 * Continuum data
+	 * Continuous function data
 	 */
-	private final ContinuousFunction continuum;
-	private final Consumer<Expression<ContinuousFunction>> continuumObserver;
+	private final ContinuousFunction continuousFunction;
+	private final Consumer<Expression<ContinuousFunction>> continuousFunctionObserver;
 
 	/*
 	 * Series data
@@ -63,14 +63,14 @@ public class ContinuumSeries {
 	private final Range<Double> range = Range.between(0d, 100d);
 	private int resolution = 100;
 
-	public ContinuumSeries(ContinuousFunction continuum) {
-		this.continuum = continuum;
-		continuumObserver = e -> refresh();
+	public ContinuousFunctionSeries(ContinuousFunction continuousFunction) {
+		this.continuousFunction = continuousFunction;
+		continuousFunctionObserver = e -> refresh();
 
 		data = FXCollections.observableArrayList();
 		series = new Series<>(data);
 
-		continuum.addObserver(continuumObserver);
+		continuousFunction.addObserver(continuousFunctionObserver);
 
 		refreshTimer = new AnimationTimer() {
 			@Override
@@ -83,15 +83,15 @@ public class ContinuumSeries {
 		refresh();
 	}
 
-	public ContinuumSeries(ContinuousFunction continuum, String name) {
-		this(continuum);
+	public ContinuousFunctionSeries(ContinuousFunction continuousFunction, String name) {
+		this(continuousFunction);
 
 		series.setName(name);
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
-		continuum.removeObserver(continuumObserver);
+		continuousFunction.removeObserver(continuousFunctionObserver);
 		refreshTimer.stop();
 		super.finalize();
 	}
@@ -102,12 +102,12 @@ public class ContinuumSeries {
 		}
 	}
 
-	private ContinuousFunction getRefreshedContinuum() {
+	private ContinuousFunction getRefreshedContinuousFunction() {
 		synchronized (refreshTimer) {
 			if (refresh) {
 				refresh = false;
 
-				return this.continuum.getValue().copy();
+				return this.continuousFunction.getValue().copy();
 			}
 		}
 
@@ -115,32 +115,33 @@ public class ContinuumSeries {
 	}
 
 	private void refreshImpl() {
-		ContinuousFunction continuum = getRefreshedContinuum();
+		ContinuousFunction continuousFunction = getRefreshedContinuousFunction();
 
-		if (continuum != null) {
-			SampledContinuousFunction sampledContinuum = continuum.resample(range.getFrom(), range.getTo(), resolution);
+		if (continuousFunction != null) {
+			SampledContinuousFunction sampledContinuousFunction = continuousFunction.resample(range.getFrom(), range.getTo(),
+					resolution);
 
 			FXUtilities.runNow(() -> {
-				if (data.size() > sampledContinuum.getDepth()) {
-					data.remove(sampledContinuum.getDepth(), data.size());
+				if (data.size() > sampledContinuousFunction.getDepth()) {
+					data.remove(sampledContinuousFunction.getDepth(), data.size());
 				}
 
 				for (int i = 0; i < data.size(); i++) {
-					data.get(i).setXValue(sampledContinuum.getXSample(i));
-					data.get(i).setYValue(sampledContinuum.getYSample(i));
+					data.get(i).setXValue(sampledContinuousFunction.getXSample(i));
+					data.get(i).setYValue(sampledContinuousFunction.getYSample(i));
 				}
 
-				List<Data<Number, Number>> dataTemp = new ArrayList<>(sampledContinuum.getDepth() - data.size());
-				for (int i = data.size(); i < sampledContinuum.getDepth(); i++) {
-					dataTemp.add(new Data<>(sampledContinuum.getXSample(i), sampledContinuum.getYSample(i)));
+				List<Data<Number, Number>> dataTemp = new ArrayList<>(sampledContinuousFunction.getDepth() - data.size());
+				for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
+					dataTemp.add(new Data<>(sampledContinuousFunction.getXSample(i), sampledContinuousFunction.getYSample(i)));
 				}
 				data.addAll(dataTemp);
 			});
 		}
 	}
 
-	public ContinuousFunction getContinuum() {
-		return continuum;
+	public ContinuousFunction getContinuousFunction() {
+		return continuousFunction;
 	}
 
 	public Series<Number, Number> getSeries() {

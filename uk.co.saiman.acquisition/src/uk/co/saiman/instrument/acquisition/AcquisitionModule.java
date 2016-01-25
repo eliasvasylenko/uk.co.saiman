@@ -23,8 +23,9 @@ import uk.co.saiman.instrument.HardwareModule;
 import uk.co.strangeskies.utilities.Observable;
 
 /**
- * Software module for acquisition of continuum data through some mechanism.
- * Typically continuum data may correspond to a mass spectrum.
+ * Software module for acquisition of {@link SampledContinuousFunction} data
+ * through some mechanism. Typically continuous function data may correspond to
+ * a mass spectrum.
  * 
  * @author Elias N Vasylenko
  */
@@ -65,28 +66,27 @@ public interface AcquisitionModule extends HardwareModule {
 	SampledContinuousFunction getLastAcquisitionData();
 
 	/**
-	 * Add or remove continuum event observers for the next acquisition
-	 * experiment.
+	 * Add or remove data event observers for the next acquisition experiment.
 	 * <p>
 	 * The observers will not be triggered until the start of an experiment via
 	 * {@link #startAcquisition()}, and will be removed after the experiment is
 	 * complete.
 	 * 
-	 * @return An observable interface for registering single acquisition
-	 *         continuum event listeners.
+	 * @return An observable interface for registering single acquisition data
+	 *         event listeners.
 	 */
-	Observable<SampledContinuousFunction> singleAcquisitionContinuumEvents();
+	Observable<SampledContinuousFunction> singleAcquisitionDataEvents();
 
 	/**
-	 * Add or remove continuum event observers.
+	 * Add or remove data event observers.
 	 * <p>
-	 * The observers may be triggered with continuum events that happen outside
-	 * the scope of an actual acquisition experiment, in the case of an
-	 * "always on" instrument setup.
+	 * The observers may be triggered with data events that happen outside the
+	 * scope of an actual acquisition experiment, in the case of an "always on"
+	 * instrument setup.
 	 * 
-	 * @return An observable interface for registering continuum event listeners.
+	 * @return An observable interface for registering data event listeners.
 	 */
-	Observable<SampledContinuousFunction> continuumEvents();
+	Observable<SampledContinuousFunction> dataEvents();
 
 	/**
 	 * Set the total acquisition count for a single experiment.
@@ -104,7 +104,7 @@ public interface AcquisitionModule extends HardwareModule {
 	int getAcquisitionCount();
 
 	/**
-	 * Set the active sampling duration for a single continuum acquisition .
+	 * Set the active sampling duration for a single data acquisition event.
 	 * 
 	 * @param time
 	 *          The time an acquisition will last in milliseconds
@@ -112,22 +112,24 @@ public interface AcquisitionModule extends HardwareModule {
 	void setAcquisitionTime(double time);
 
 	/**
-	 * Get the active sampling duration for a single continuum acquisition .
+	 * Get the active sampling duration for a single data acquisition event.
 	 * 
 	 * @return The time an acquisition will last in milliseconds
 	 */
 	double getAcquisitionTime();
 
 	/**
-	 * @return The number of samples in an acquired continuum given the current
-	 *         acquisition time and acquisition resolution configuration
+	 * @return The number of samples in an acquired sampled continuous function
+	 *         given the current acquisition time and acquisition resolution
+	 *         configuration
 	 */
 	default int getAcquisitionDepth() {
 		return (int) (getAcquisitionTime() / getAcquisitionResolution());
 	}
 
 	/**
-	 * Get the time resolution between each sample in the acquired continuum.
+	 * Get the time resolution between each sample in the acquired sampled
+	 * continuous function.
 	 * 
 	 * @return The acquisition resolution in milliseconds
 	 */

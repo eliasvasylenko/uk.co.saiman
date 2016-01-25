@@ -25,7 +25,7 @@ import org.eclipse.fx.ui.services.theme.Theme;
 import org.osgi.service.component.annotations.Component;
 
 @Component
-public class ContinuumChartStylesheet implements Stylesheet {
+public class ContinuousFunctionChartStylesheet implements Stylesheet {
 	@Override
 	public boolean appliesToTheme(Theme t) {
 		return true;
@@ -33,6 +33,6 @@ public class ContinuumChartStylesheet implements Stylesheet {
 
 	@Override
 	public URL getURL(Theme t) {
-		return ContinuumChartStylesheet.class.getClassLoader().getResource("css/chart.css");
+		return ContinuousFunctionChartStylesheet.class.getClassLoader().getResource("css/chart.css");
 	}
 }
