@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane
+	fx:id="msapexDataChart"
+	xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml"
+	fx:controller="uk.co.saiman.msapex.data.ContinuousFunctionChartController"
+
+	focusTraversable="true"
+	onKeyPressed="#onKeyPressed"
+	onScroll="#onScroll"
+	onMouseClicked="#requestFocus">
+
+	<children>
+		<LineChart
+			fx:id="lineChart"
+			animated="false"
+			legendVisible="false">
+
+			<xAxis>
+				<NumberAxis
+					side="BOTTOM"
+					autoRanging="false"
+					tickUnit="1">
+				</NumberAxis>
+			</xAxis>
+			<yAxis>
+				<NumberAxis
+					side="LEFT"
+					autoRanging="false"
+					tickUnit="10" />
+			</yAxis>
+		</LineChart>
+
+		<AnchorPane fx:id="annotationPane" />
+	</children>
+</StackPane>

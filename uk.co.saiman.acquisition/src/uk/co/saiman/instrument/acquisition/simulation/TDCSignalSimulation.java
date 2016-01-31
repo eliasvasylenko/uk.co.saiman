@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.data.SampledContinuum;
-import uk.co.saiman.data.SparseSampledContinuum;
+import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SparseSampledContinuousFunction;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.strangeskies.utilities.BufferingListener;
 import uk.co.strangeskies.utilities.Observable;
@@ -55,9 +55,9 @@ public class TDCSignalSimulation implements AcquisitionModule {
 
 	private int acquisitionCount = DEFAULT_ACQUISITION_COUNT;
 
-	private SampledContinuum acquisitionData;
-	private final BufferingListener<SampledContinuum> singleAcquisitionListeners;
-	private final BufferingListener<SampledContinuum> acquisitionListeners;
+	private SampledContinuousFunction acquisitionData;
+	private final BufferingListener<SampledContinuousFunction> singleAcquisitionListeners;
+	private final BufferingListener<SampledContinuousFunction> acquisitionListeners;
 
 	private final Object acquiringLock = new Object();
 	private Integer acquiringCounter;
@@ -92,10 +92,10 @@ public class TDCSignalSimulation implements AcquisitionModule {
 	 * acquisition time.
 	 * 
 	 * @param acquisitionResolution
-	 *          The time resolution between each sample in the acquired continuum,
+	 *          The time resolution between each sample in the acquired data,
 	 *          in milliseconds
 	 * @param acquisitionTime
-	 *          The active sampling duration for a single continuum acquisition,
+	 *          The active sampling duration for a single data acquisition,
 	 *          in milliseconds.
 	 */
 	public TDCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
@@ -156,7 +156,7 @@ public class TDCSignalSimulation implements AcquisitionModule {
 			 * TODO distribute "hits" number of hits
 			 */
 
-			acquisitionData = new SparseSampledContinuum(1 / getAcquisitionResolution(), getAcquisitionDepth(), hits,
+			acquisitionData = new SparseSampledContinuousFunction(1 / getAcquisitionResolution(), getAcquisitionDepth(), hits,
 					hitIndices, hitIntensities);
 
 			acquisitionListeners.accept(acquisitionData);
@@ -193,22 +193,22 @@ public class TDCSignalSimulation implements AcquisitionModule {
 	}
 
 	@Override
-	public SampledContinuum getLastAcquisitionData() {
+	public SampledContinuousFunction getLastAcquisitionData() {
 		return acquisitionData;
 	}
 
 	@Override
-	public Observable<SampledContinuum> singleAcquisitionContinuumEvents() {
+	public Observable<SampledContinuousFunction> singleAcquisitionDataEvents() {
 		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public Observable<SampledContinuum> continuumEvents() {
+	public Observable<SampledContinuousFunction> dataEvents() {
 		return acquisitionListeners;
 	}
 
 	/**
-	 * Set the time resolution between each sample in the acquired continuum.
+	 * Set the time resolution between each sample in the acquired data.
 	 * 
 	 * @param resolution
 	 *          The acquisition resolution in milliseconds

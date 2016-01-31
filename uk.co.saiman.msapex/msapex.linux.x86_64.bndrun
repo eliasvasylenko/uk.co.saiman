@@ -114,7 +114,9 @@ platform: linux64
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.msapex.acquisition;version=snapshot,\
+	uk.co.saiman.msapex.chemistry;version=snapshot,\
 	uk.co.saiman.msapex.data;version=snapshot,\
+	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.strangeskies.eclipse;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.expressions;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.fx;version='[1.0.13,1.0.14)',\

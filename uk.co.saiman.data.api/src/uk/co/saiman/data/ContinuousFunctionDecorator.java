@@ -18,14 +18,33 @@
  */
 package uk.co.saiman.data;
 
-/**
- * A reversible calibration or conversion between units for a
- * {@link ContinuousFunction} domain.
- * 
- * @author Elias N Vasylenko
- */
-public interface Calibration {
-	double calibrate(double from);
+import uk.co.strangeskies.mathematics.Range;
 
-	double decalibrate(double from);
+public interface ContinuousFunctionDecorator extends ContinuousFunction {
+	ContinuousFunction getComponent();
+
+	@Override
+	default Range<Double> getDomain() {
+		return getComponent().getDomain();
+	}
+
+	@Override
+	default Range<Double> getRange() {
+		return getComponent().getRange();
+	}
+
+	@Override
+	default double sample(double xPosition) {
+		return getComponent().sample(xPosition);
+	}
+
+	@Override
+	default Range<Double> getRangeBetween(double startX, double endX) {
+		return getComponent().getRangeBetween(startX, endX);
+	}
+
+	@Override
+	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+		return getComponent().resample(startX, endX, resolvableUnits);
+	}
 }

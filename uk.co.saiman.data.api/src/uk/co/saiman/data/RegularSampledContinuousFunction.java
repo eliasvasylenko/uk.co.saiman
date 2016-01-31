@@ -18,14 +18,19 @@
  */
 package uk.co.saiman.data;
 
-/**
- * A reversible calibration or conversion between units for a
- * {@link ContinuousFunction} domain.
- * 
- * @author Elias N Vasylenko
- */
-public interface Calibration {
-	double calibrate(double from);
+public interface RegularSampledContinuousFunction extends SampledContinuousFunction {
+	@Override
+	default double getXSample(int index) {
+		return index / getFrequency();
+	}
 
-	double decalibrate(double from);
+	@Override
+	default int getIndexBelow(double xValue) {
+		return (int) (xValue * getFrequency());
+	}
+
+	/**
+	 * @return The number of samples per unit in the domain
+	 */
+	public double getFrequency();
 }

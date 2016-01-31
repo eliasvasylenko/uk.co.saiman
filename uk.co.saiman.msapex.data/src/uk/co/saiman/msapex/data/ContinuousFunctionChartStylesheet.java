@@ -18,16 +18,21 @@
  */
 package uk.co.saiman.msapex.data;
 
-import uk.co.saiman.data.ContinuousFunction;
+import java.net.URL;
 
-public interface ChartDataAnnotation<T> extends ChartAnnotation<T> {
+import org.eclipse.fx.ui.services.theme.Stylesheet;
+import org.eclipse.fx.ui.services.theme.Theme;
+import org.osgi.service.component.annotations.Component;
+
+@Component
+public class ContinuousFunctionChartStylesheet implements Stylesheet {
 	@Override
-	double getX();
-
-	ContinuousFunction getContinuousFunction();
+	public boolean appliesToTheme(Theme t) {
+		return true;
+	}
 
 	@Override
-	default double getY() {
-		return getContinuousFunction().sample(getX());
+	public URL getURL(Theme t) {
+		return ContinuousFunctionChartStylesheet.class.getClassLoader().getResource("css/chart.css");
 	}
 }

@@ -41,10 +41,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import uk.co.saiman.data.ContinuumExpression;
-import uk.co.saiman.data.SimpleRegularSampledContinuum;
+import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
+import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
-import uk.co.saiman.msapex.data.ContinuumChartController;
+import uk.co.saiman.msapex.data.ContinuousFunctionChartController;
 import uk.co.strangeskies.fx.FXUtilities;
 
 public class AcquisitionPart {
@@ -58,7 +58,7 @@ public class AcquisitionPart {
 	private Label noSelectionLabel;
 
 	private ObservableSet<AcquisitionModule> selectedModules = FXCollections.observableSet();
-	private Map<AcquisitionModule, ContinuumChartController> controllers = new HashMap<>();
+	private Map<AcquisitionModule, ContinuousFunctionChartController> controllers = new HashMap<>();
 
 	public boolean setAcquisitionModules(Collection<? extends AcquisitionModule> selectedModules) {
 		return this.selectedModules.retainAll(selectedModules) | this.selectedModules.addAll(selectedModules);
@@ -95,27 +95,28 @@ public class AcquisitionPart {
 		/*
 		 * New chart controller for module
 		 */
-		ContinuumChartController chartController = FXUtilities.loadController(loader, ContinuumChartController.class);
+		ContinuousFunctionChartController chartController = FXUtilities.loadController(loader,
+				ContinuousFunctionChartController.class);
 		chartController.setTitle(acquisitionModule.getName());
 		controllers.put(acquisitionModule, chartController);
 		chartPane.getChildren().add(chartController.getRoot());
 		HBox.setHgrow(chartController.getRoot(), Priority.ALWAYS);
 
 		/*
-		 * Create continuum view of latest data from module
+		 * Create continuous function view of latest data from module
 		 */
-		ContinuumExpression latestContinuum = new ContinuumExpression(
-				new SimpleRegularSampledContinuum(1, new double[] {}));
-		acquisitionModule.continuumEvents().addWeakObserver(latestContinuum, l -> c -> l.setComponent(c));
+		ContinuousFunctionExpression latestContinuousFunction = new ContinuousFunctionExpression(
+				new ArrayRegularSampledContinuousFunction(1, new double[] {}));
+		acquisitionModule.dataEvents().addWeakObserver(latestContinuousFunction, l -> c -> l.setComponent(c));
 
 		/*
 		 * Add latest data to chart controller
 		 */
-		chartController.getContinuums().add(latestContinuum);
+		chartController.getContinuousFunctions().add(latestContinuousFunction);
 	}
 
 	private void deselectAcquisitionModule(AcquisitionModule acquisitionModule) {
-		ContinuumChartController controller = controllers.remove(acquisitionModule);
+		ContinuousFunctionChartController controller = controllers.remove(acquisitionModule);
 
 		chartPane.getChildren().remove(controller.getRoot());
 

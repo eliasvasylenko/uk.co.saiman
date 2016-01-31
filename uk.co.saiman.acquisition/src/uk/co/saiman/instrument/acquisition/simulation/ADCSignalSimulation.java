@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.data.SampledContinuum;
-import uk.co.saiman.data.SimpleRegularSampledContinuum;
+import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
+import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.strangeskies.utilities.BufferingListener;
 import uk.co.strangeskies.utilities.Observable;
@@ -54,9 +54,9 @@ public class ADCSignalSimulation implements AcquisitionModule {
 
 	private int acquisitionCount = DEFAULT_ACQUISITION_COUNT;
 
-	private SampledContinuum acquisitionData;
-	private final BufferingListener<SampledContinuum> singleAcquisitionListeners;
-	private final BufferingListener<SampledContinuum> acquisitionListeners;
+	private SampledContinuousFunction acquisitionData;
+	private final BufferingListener<SampledContinuousFunction> singleAcquisitionListeners;
+	private final BufferingListener<SampledContinuousFunction> acquisitionListeners;
 
 	private final Object acquiringLock = new Object();
 	private Integer acquiringCounter;
@@ -89,11 +89,11 @@ public class ADCSignalSimulation implements AcquisitionModule {
 	 * acquisition time.
 	 * 
 	 * @param acquisitionResolution
-	 *          The time resolution between each sample in the acquired continuum,
-	 *          in milliseconds
+	 *          The time resolution between each sample in the acquired data, in
+	 *          milliseconds
 	 * @param acquisitionTime
-	 *          The active sampling duration for a single continuum acquisition,
-	 *          in milliseconds.
+	 *          The active sampling duration for a single data acquisition, in
+	 *          milliseconds.
 	 */
 	public ADCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
 		this();
@@ -154,7 +154,8 @@ public class ADCSignalSimulation implements AcquisitionModule {
 						+ (scale += scaleDelta) * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1)) * 20;
 			}
 
-			acquisitionData = new SimpleRegularSampledContinuum(1 / (getAcquisitionResolution() * 1_000), intensities);
+			acquisitionData = new ArrayRegularSampledContinuousFunction(1 / (getAcquisitionResolution() * 1_000),
+					intensities);
 
 			acquisitionListeners.accept(acquisitionData);
 
@@ -188,22 +189,22 @@ public class ADCSignalSimulation implements AcquisitionModule {
 	}
 
 	@Override
-	public SampledContinuum getLastAcquisitionData() {
+	public SampledContinuousFunction getLastAcquisitionData() {
 		return acquisitionData;
 	}
 
 	@Override
-	public Observable<SampledContinuum> singleAcquisitionContinuumEvents() {
+	public Observable<SampledContinuousFunction> singleAcquisitionDataEvents() {
 		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public Observable<SampledContinuum> continuumEvents() {
+	public Observable<SampledContinuousFunction> dataEvents() {
 		return acquisitionListeners;
 	}
 
 	/**
-	 * Set the time resolution between each sample in the acquired continuum.
+	 * Set the time resolution between each sample in the acquired data.
 	 * 
 	 * @param resolution
 	 *          The acquisition resolution in milliseconds
