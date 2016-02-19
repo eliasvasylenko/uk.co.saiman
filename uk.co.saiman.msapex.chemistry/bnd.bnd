@@ -8,6 +8,8 @@ Bundle-SymbolicName: ${p};singleton:=true
 	${ss;reflection},\
 	${ss;fx},\
 	${ss;eclipse},\
+	${mdb;core.api},\
+	uk.co.saiman.chemistry;version=project,\
 	uk.co.saiman.data.api;version=project,\
 	uk.co.saiman.msapex.data;version=project,\
 	uk.co.saiman.utilities;version=project
@@ -16,4 +18,7 @@ Private-Package: uk.co.saiman.msapex.chemistry
 
 Include-Resource: \
 	fragment.e4xmi,\
-	plugin.xml
+	plugin.xml,\
+	res,\
+	css=css
+	

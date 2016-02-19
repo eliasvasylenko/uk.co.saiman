@@ -4,13 +4,16 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.GridPane?>
+<?import uk.co.saiman.msapex.chemistry.ChemicalElementTile?>
 
-<StackPane
+<ScrollPane
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml">
 
-	<children>
-		<Label
-			text="Periodic Table" />
-	</children>
-</StackPane>
+	<content>
+		<fx:include
+			fx:id="elementGrid"
+			source="PeriodicTable.fxml" />
+	</content>
+</ScrollPane>

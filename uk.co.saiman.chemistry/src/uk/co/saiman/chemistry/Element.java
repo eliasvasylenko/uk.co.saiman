@@ -32,16 +32,22 @@ public class Element implements Comparable<Element> {
 	private final String name;
 	private final String symbol;
 	private final TreeSet<Isotope> isotopes;
-	private final Category category;
+	private final Group group;
 
-	public enum Category {
+	/**
+	 * The group, or family, of the element on the periodic table.
+	 * 
+	 * @author Elias N Vasylenko
+	 */
+	@SuppressWarnings("javadoc")
+	public enum Group {
 		NONE("None"), ALKALI("Alkali"), ALKALINE("Alkaline"), LANTHANIDE("Lanthanide"), ACTINIDE("Actinide"), TRANSITION(
 				"Transition"), POOR_METAL("Poor Metal"), METALLOID("Metalloid"), NONMETAL("Nonmetal"), HALOGEN(
 						"Halogen"), NOBLE_GAS("Noble Gas");
 
 		private final String name;
 
-		Category(String name) {
+		Group(String name) {
 			this.name = name;
 		}
 
@@ -50,8 +56,17 @@ public class Element implements Comparable<Element> {
 			return name;
 		}
 
-		public static Category valueOfName(String name) {
-			Category[] categories = Category.values();
+		/**
+		 * Similar in function to {@link #valueOf(String)}, but looking up by given
+		 * name, i.e. the value of {@link #toString()}.
+		 * 
+		 * @param name
+		 *          The value of {@link #toString()} for the element group whose
+		 *          enum instance we wish to find.
+		 * @return The enum instance matching the given name.
+		 */
+		public static Group valueOfName(String name) {
+			Group[] categories = Group.values();
 			for (int i = 0; i < categories.length; i++) {
 				if (name.equals(categories[i].toString())) {
 					return categories[i];
@@ -65,7 +80,7 @@ public class Element implements Comparable<Element> {
 		name = "Unknown element";
 		symbol = "Uk";
 		atomicNumber = 0;
-		category = Element.Category.NONE;
+		group = Element.Group.NONE;
 		isotopes = new TreeSet<>();
 		isotopes.add(new Isotope((int) mass, mass, 1, this));
 	}
@@ -75,16 +90,18 @@ public class Element implements Comparable<Element> {
 		this.name = element.name;
 		this.symbol = element.symbol;
 		this.isotopes = new TreeSet<Isotope>(element.isotopes);
-		this.category = element.category;
+		this.group = element.group;
 	}
 
-	public Element(int atomicNumber, String name, String symbol, Collection<? extends Isotope> isotopes,
-			Category category) {
+	public Element(int atomicNumber, String name, String symbol, Collection<? extends Isotope> isotopes, Group group) {
 		this.atomicNumber = atomicNumber;
 		this.name = name;
 		this.symbol = symbol;
-		this.isotopes = new TreeSet<Isotope>(isotopes);
-		this.category = category;
+		this.isotopes = new TreeSet<>();
+		for (Isotope isotope : isotopes) {
+			this.isotopes.add(new Isotope(isotope.getMassNumber(), isotope.getMass(), isotope.getAbundance(), this));
+		}
+		this.group = group;
 	}
 
 	public int getAtomicNumber() {
@@ -185,24 +202,24 @@ public class Element implements Comparable<Element> {
 		return isotopes;
 	}
 
-	public Category getCategory() {
-		return category;
+	public Group getGroup() {
+		return group;
 	}
 
 	public Element withAtomicNumber(int atomicNumber) {
-		return new Element(atomicNumber, name, symbol, isotopes, category);
+		return new Element(atomicNumber, name, symbol, isotopes, group);
 	}
 
 	public Element withName(String name) {
-		return new Element(atomicNumber, name, symbol, isotopes, category);
+		return new Element(atomicNumber, name, symbol, isotopes, group);
 	}
 
 	public Element withSymbol(String symbol) {
-		return new Element(atomicNumber, name, symbol, isotopes, category);
+		return new Element(atomicNumber, name, symbol, isotopes, group);
 	}
 
 	public Element withIsotopes(Collection<? extends Isotope> isotopes) {
-		return new Element(atomicNumber, name, symbol, isotopes, category);
+		return new Element(atomicNumber, name, symbol, isotopes, group);
 	}
 
 	public Element withIsotope(Isotope isotope) {
@@ -211,8 +228,8 @@ public class Element implements Comparable<Element> {
 		return withIsotopes(isotopes);
 	}
 
-	public Element withCategory(Category category) {
-		return new Element(atomicNumber, name, symbol, isotopes, category);
+	public Element withGroup(Group group) {
+		return new Element(atomicNumber, name, symbol, isotopes, group);
 	}
 
 	public boolean isNaturallyOccurring() {

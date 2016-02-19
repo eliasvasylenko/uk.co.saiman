@@ -26,8 +26,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.ChemicalComposition;
+import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.strangeskies.mathematics.Range;
 

@@ -18,6 +18,8 @@
  */
 package uk.co.saiman.chemistry.isotope;
 
+import java.util.Objects;
+
 import uk.co.saiman.chemistry.Element;
 
 public class Isotope implements Comparable<Isotope> {
@@ -33,11 +35,8 @@ public class Isotope implements Comparable<Isotope> {
 		element = null;
 	}
 
-	public Isotope(Element element) {
-		massNumber = 0;
-		mass = 0;
-		abundance = 0; // default to not naturally occurring
-		this.element = element;
+	public Isotope(int massNumber, double mass, double abundance) {
+		this(massNumber, mass, abundance, null);
 	}
 
 	public Isotope(int massNumber, double mass, double abundance, Element element) {
@@ -61,18 +60,6 @@ public class Isotope implements Comparable<Isotope> {
 
 	public double getAbundance() {
 		return abundance;
-	}
-
-	public Isotope withMassNumber(int massNumber) {
-		return new Isotope(massNumber, mass, abundance, element);
-	}
-
-	public Isotope withMass(double mass) {
-		return new Isotope(massNumber, mass, abundance, element);
-	}
-
-	public Isotope withAbundance(double abundance) {
-		return new Isotope(massNumber, mass, abundance, element);
 	}
 
 	@Override
@@ -100,12 +87,12 @@ public class Isotope implements Comparable<Isotope> {
 		if (this == that)
 			return true;
 
-		if (!(that instanceof Element))
+		if (!(that instanceof Isotope))
 			return false;
 
 		Isotope thatIsotope = (Isotope) that;
 
-		if (this.massNumber != thatIsotope.massNumber)
+		if (this.massNumber != thatIsotope.massNumber || !Objects.equals(this.element, thatIsotope.element))
 			return false;
 
 		return true;

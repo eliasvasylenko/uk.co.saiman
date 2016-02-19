@@ -18,9 +18,6 @@
  */
 package uk.co.saiman.msapex.chemistry;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -33,12 +30,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.GridPane;
 import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.strangeskies.eclipse.ObservableService;
 import uk.co.strangeskies.fx.FXUtilities;
 
-public class PeriodicTablePart {
+public class PeriodicTableController {
 	@Inject
 	IEclipseContext context;
 
@@ -47,7 +44,7 @@ public class PeriodicTablePart {
 	ObservableList<PeriodicTable> periodicTables;
 
 	@FXML
-	private Pane elementGrid;
+	private GridPane elementGrid;
 
 	// @FXML
 	// private ContinuousFunctionChartController chartPane;
@@ -58,13 +55,7 @@ public class PeriodicTablePart {
 			container.setCenter(FXUtilities.loadIntoController(loader, this));
 
 			periodicTables.addListener((ListChangeListener<? super PeriodicTable>) change -> {
-				List<PeriodicTable> added = new ArrayList<>();
-				while (change.next()) {
-					if (change.wasAdded()) {
-						added.addAll(change.getAddedSubList());
-					}
-				}
-				if (added.size() <= periodicTables.size()) {
+				if (change.wasAdded() && change.getAddedSize() <= periodicTables.size()) {
 					setPeriodicTable(change.getAddedSubList().get(0));
 				}
 			});

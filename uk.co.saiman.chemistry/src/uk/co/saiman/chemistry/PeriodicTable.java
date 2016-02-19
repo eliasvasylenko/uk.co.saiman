@@ -26,11 +26,14 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.osgi.service.component.annotations.Component;
+
 /**
  *
  * @author Elias Vasylenko
  *
  */
+@Component(service = PeriodicTable.class)
 public class PeriodicTable {
 	private List<Element> elements;
 

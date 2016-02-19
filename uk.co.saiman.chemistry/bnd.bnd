@@ -12,4 +12,10 @@ Export-Package: \
 	uk.co.saiman.chemistry
 
 -includeresource: \
-	META-INF/modabi=schemata
+	META-INF/schemata=schemata
+
+-pluginpath: \
+	${pluginpath.modabi}
+
+-plugin: \
+	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlRegistration

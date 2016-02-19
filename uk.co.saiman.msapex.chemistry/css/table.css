@@ -1,0 +1,57 @@
+.ChemicalElementTile {
+	-fx-max-width: 40.0pt;
+	-fx-min-width: 40.0pt;
+	-fx-max-height: 40.0pt;
+	-fx-min-height: 40.0pt;
+	
+	-fx-border-width: 2.0px;
+	-fx-background-color: #CCCCCC;
+	-fx-border-color: rgba(127.0, 127.0, 127.0, 0.4);
+}
+.ChemicalElementTile:hover {
+	-fx-border-color: rgba(255.0, 255.0, 255.0, 0.1);
+}
+
+.ChemicalElementTile #atomicNumberText {
+	-fx-font-size: 7.0pt;
+}
+.ChemicalElementTile #nameText {
+	-fx-font-size: 7.0pt;
+}
+.ChemicalElementTile #symbolNameText {
+	-fx-font-size: 14.0pt;
+}
+
+.ChemicalElementTile:NONE {
+	-fx-background-color: #CCCCCC;
+}
+.ChemicalElementTile:ALKALI {
+	-fx-background-color: #9CE6FF;
+}
+.ChemicalElementTile:ALKALINE {
+	-fx-background-color: #A3FFBA;
+}
+.ChemicalElementTile:LANTHANIDE {
+	-fx-background-color: #FFDCA1;
+}
+.ChemicalElementTile:ACTINIDE {
+	-fx-background-color: #FFC8C4;
+}
+.ChemicalElementTile:TRANSITION {
+	-fx-background-color: #F0FFA7;
+}
+.ChemicalElementTile:POOR_METAL {
+	-fx-background-color: #BFFFE4;
+}
+.ChemicalElementTile:METALLOID {
+	-fx-background-color: #E8C9FF;
+}
+.ChemicalElementTile:NONMETAL {
+	-fx-background-color: #C7C8FF;
+}
+.ChemicalElementTile:HALOGEN {
+	-fx-background-color: #FFD1F1;
+}
+.ChemicalElementTile:NOBLE_GAS {
+	-fx-background-color: #E7FFBF;
+}
