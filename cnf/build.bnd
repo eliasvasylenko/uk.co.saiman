@@ -16,6 +16,7 @@ copyright = Copyright (c) Scientific Analysis Instruments Limited (2015, ${copyr
 
 groupid: uk.co.saiman.msapex
 
+modabi-version: 1.0.0
 saiman-version: 1.0.0
 saiman-version-ceiling: 2.0.0
 
@@ -45,6 +46,12 @@ Import-Package:\
 -plugin.8.Eclipse:\
 	${plugin.eclipse.platform},\
 	${plugin.eclipse.fx}
+
+## This is currently local only with modabi! Will otherwise break build!
+modabi-bnd-plugin: ${user.home}/git/uk.co.strangeskies.modabi/cnf/release/uk.co.strangeskies.modabi.bnd.${1}/uk.co.strangeskies.modabi.bnd.${1}-${modabi-version}.jar
+
+pluginpath.modabi: \
+	${modabi-bnd-plugin;xml}
 
 # Version of bnd/bndlib to use consistently throughout the build
 # NB. this must be specified as full M.m.u version (but no qualifier)
