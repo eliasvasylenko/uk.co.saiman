@@ -6,6 +6,7 @@ runreq.msapex:\
 	${runreq.felix.shell},\
 	${runreq.eclipse.p2},\
 	${runreq.eclipse.${platform}},\
+	${req;uk.co.strangeskies.osgi.consolelog},\
 	${req;uk.co.saiman.msapex},\
 	${req;uk.co.saiman.msapex.acquisition},\
 	${req;uk.co.saiman.msapex.chemistry},\

@@ -26,8 +26,16 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
+/**
+ * Default css theme for JavaFX components.
+ *
+ * @author Elias N Vasylenko
+ */
 @Component(service = Theme.class)
 public class DefaultTheme extends AbstractTheme {
+	/**
+	 * Instantiate from default theme file.
+	 */
 	public DefaultTheme() {
 		super("theme.default", "Default theme", DefaultTheme.class.getClassLoader().getResource("css/default.css"));
 	}
