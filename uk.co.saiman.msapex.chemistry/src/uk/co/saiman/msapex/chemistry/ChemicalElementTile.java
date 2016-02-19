@@ -33,6 +33,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.converter.NumberStringConverter;
 import uk.co.saiman.chemistry.Element;
 
+/**
+ * @author Elias N Vasylenko
+ */
 public class ChemicalElementTile extends BorderPane {
 	private Element element;
 

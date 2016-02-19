@@ -21,9 +21,23 @@ package uk.co.saiman.experiment.impl;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.utilities.Configurable;
 
+/**
+ * An experiment type to configure a given configurable instance.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <C>
+ *          The configuration interface type
+ * @param <T>
+ *          The input type, to pass through to the output
+ */
 public class ConfigurationExperiment<C, T> implements ExperimentType<C, T, T> {
 	private final Configurable<C> configurable;
 
+	/**
+	 * @param configurable
+	 *          The configurable instance for this experiment to manage
+	 */
 	public ConfigurationExperiment(Configurable<C> configurable) {
 		this.configurable = configurable;
 	}

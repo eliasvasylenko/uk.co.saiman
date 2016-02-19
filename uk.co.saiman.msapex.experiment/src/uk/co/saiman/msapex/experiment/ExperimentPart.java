@@ -29,6 +29,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.strangeskies.fx.FXUtilities;
 
+/**
+ * Experiment management view part. Manage experiments and their results in the
+ * experiment tree.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class ExperimentPart {
 	@Inject
 	IEclipseContext context;

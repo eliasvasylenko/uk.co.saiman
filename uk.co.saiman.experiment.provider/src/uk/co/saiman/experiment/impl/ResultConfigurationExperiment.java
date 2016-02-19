@@ -21,6 +21,16 @@ package uk.co.saiman.experiment.impl;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.utilities.Configurable;
 
+/**
+ * An experiment type to configure the result of another experiment.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <C>
+ *          The configuration interface type
+ * @param <T>
+ *          The configurable result type
+ */
 public class ResultConfigurationExperiment<C, T extends Configurable<C>> implements ExperimentType<C, T, T> {
 	@Override
 	public void validate(C configuration) {}

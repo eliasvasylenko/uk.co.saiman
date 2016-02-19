@@ -30,6 +30,11 @@ import uk.co.saiman.experiment.ExperimentManager;
 import uk.co.saiman.experiment.ExperimentPart;
 import uk.co.saiman.experiment.ExperimentType;
 
+/**
+ * Reference implementation of {@link ExperimentManager}.
+ * 
+ * @author Elias N Vasylenko
+ */
 @Component
 public class ExperimentManagerImpl implements ExperimentManager {
 	private final Set<ExperimentType<?, ?, ?>> experimentTypes;
