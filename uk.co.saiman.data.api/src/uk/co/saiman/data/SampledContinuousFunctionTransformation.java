@@ -22,15 +22,37 @@ import java.util.function.Function;
 
 import uk.co.strangeskies.mathematics.expression.FunctionExpression;
 
-public class SampledContinuousFunctionTransformation<C extends ContinuousFunction> extends FunctionExpression<ContinuousFunction, ContinuousFunction>
+/**
+ * A {@link SampledContinuousFunction} which is backed by a given
+ * {@link ContinuousFunction} and which is derived from it by a given
+ * transformation function.
+ * <p>
+ * Changes in the backing function will be reflected in this function and
+ * forwarded to listeners, and the transformation will only be evaluated lazily,
+ * as necessary.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class SampledContinuousFunctionTransformation extends FunctionExpression<ContinuousFunction, ContinuousFunction>
 		implements SampledContinuousFunctionDecorator {
-	private final Function<C, SampledContinuousFunction> transformation;
+	private final Function<ContinuousFunction, SampledContinuousFunction> transformation;
 
+	/**
+	 * Create a mapping from a given {@link ContinuousFunction} to a
+	 * {@link SampledContinuousFunction} by the given transformation.
+	 * 
+	 * @param dependency
+	 *          The backing function, changes in this function will be reflected
+	 *          in the instantiated function
+	 * @param transformation
+	 *          The transformation to apply to the backing function
+	 */
 	@SuppressWarnings("unchecked")
-	public SampledContinuousFunctionTransformation(C dependency, Function<C, SampledContinuousFunction> transformation) {
-		super(dependency, c -> transformation.apply((C) c));
+	public <C> SampledContinuousFunctionTransformation(C dependency,
+			Function<C, SampledContinuousFunction> transformation) {
+		super((ContinuousFunction) dependency, c -> transformation.apply((C) c));
 
-		this.transformation = transformation;
+		this.transformation = (Function<ContinuousFunction, SampledContinuousFunction>) transformation;
 	}
 
 	@Override
@@ -40,15 +62,15 @@ public class SampledContinuousFunctionTransformation<C extends ContinuousFunctio
 
 	@Override
 	public SampledContinuousFunction copy() {
-		C component;
+		ContinuousFunction component;
 
 		try {
 			getReadLock().lock();
-			component = (C) getValue().copy();
+			component = getValue().copy();
 		} finally {
 			getReadLock().unlock();
 		}
 
-		return new SampledContinuousFunctionTransformation<>(component, transformation);
+		return new SampledContinuousFunctionTransformation(component, transformation);
 	}
 }

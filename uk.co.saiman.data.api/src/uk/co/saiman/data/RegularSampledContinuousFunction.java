@@ -18,9 +18,17 @@
  */
 package uk.co.saiman.data;
 
+/**
+ * A partial-implementation of {@link SampledContinuousFunction} with regular
+ * intervals in the domain between samples.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface RegularSampledContinuousFunction extends SampledContinuousFunction {
 	@Override
-	default double getXSample(int index) {
+	default double getX(int index) {
+		if (index < 0 || index > getDepth())
+			throw new ArrayIndexOutOfBoundsException(index);
 		return index / getFrequency();
 	}
 

@@ -20,6 +20,13 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.Range;
 
+/**
+ * A partial implementation of a {@link SampledContinuousFunction} decorator, to
+ * reduce boilerplate for functions which are in some way mappings of other
+ * functions.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface SampledContinuousFunctionDecorator extends SampledContinuousFunction, ContinuousFunctionDecorator {
 	@Override
 	public SampledContinuousFunction getComponent();
@@ -35,13 +42,13 @@ public interface SampledContinuousFunctionDecorator extends SampledContinuousFun
 	}
 
 	@Override
-	default double getXSample(int index) {
-		return getComponent().getXSample(index);
+	default double getX(int index) {
+		return getComponent().getX(index);
 	}
 
 	@Override
-	default double getYSample(int index) {
-		return getComponent().getYSample(index);
+	default double getY(int index) {
+		return getComponent().getY(index);
 	}
 
 	@Override

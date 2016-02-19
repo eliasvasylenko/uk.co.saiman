@@ -18,13 +18,22 @@
  */
 package uk.co.saiman.data;
 
+import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
+
 import uk.co.strangeskies.mathematics.Range;
+import uk.co.strangeskies.mathematics.expression.Expression;
+import uk.co.strangeskies.mathematics.expression.ImmutableReadLock;
 import uk.co.strangeskies.mathematics.expression.SelfExpression;
 
 /**
  * A set of domain values (X) mapped via some continuous function to a
  * corresponding value in the range (Y). The domain is defined by a single
  * inclusive interval, and the function is defined for all values in the domain.
+ * <p>
+ * {@link ContinuousFunction}s may be mutable, depending on implementation, but
+ * in this case they should notify listeners by way of the API provided through
+ * {@link SelfExpression}.
  * <p>
  * TODO: Difficult to genericise over data type with acceptable performance
  * until Project Valhalla, for now will just use double.
@@ -33,7 +42,69 @@ import uk.co.strangeskies.mathematics.expression.SelfExpression;
  */
 public interface ContinuousFunction extends SelfExpression<ContinuousFunction> {
 	/**
-	 * The smallest interval containing all values in the domain of the function.
+	 * A very simple, immutable implementation of a continuous function describing
+	 * a single point at 0 in both the domain and codomain.
+	 */
+	public static final ContinuousFunction EMPTY = new SampledContinuousFunction() {
+		@Override
+		public SampledContinuousFunction copy() {
+			return this;
+		}
+
+		@Override
+		public boolean removeObserver(Consumer<? super Expression<ContinuousFunction>> observer) {
+			return true;
+		}
+
+		@Override
+		public boolean addObserver(Consumer<? super Expression<ContinuousFunction>> observer) {
+			return true;
+		}
+
+		@Override
+		public ContinuousFunction getValue() {
+			return this;
+		}
+
+		@Override
+		public Lock getReadLock() {
+			return new ImmutableReadLock();
+		}
+
+		@Override
+		public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+			return this;
+		}
+
+		@Override
+		public int getIndexBelow(double xValue) {
+			if (xValue >= 0)
+				return 0;
+			else
+				return -1;
+		}
+
+		@Override
+		public int getDepth() {
+			return 1;
+		}
+
+		@Override
+		public double getX(int index) {
+			if (index != 0)
+				throw new ArrayIndexOutOfBoundsException(index);
+			return 0;
+		}
+
+		@Override
+		public double getY(int index) {
+			return getX(index);
+		}
+	};
+
+	/**
+	 * Find the smallest interval containing all values in the domain of the
+	 * function.
 	 * 
 	 * @return The extent of the domain
 	 */
@@ -50,10 +121,13 @@ public interface ContinuousFunction extends SelfExpression<ContinuousFunction> {
 	Range<Double> getRange();
 
 	/**
+	 * Find the interval between the smallest to the largest value of the codomain
+	 * of the function within the given domain interval.
+	 * 
 	 * @param startX
-	 *          The start of the interval whose range we wish to determine
+	 *          The start of the domain interval whose range we wish to determine
 	 * @param endX
-	 *          The end of the interval whose range we wish to determine
+	 *          The end of the domain interval whose range we wish to determine
 	 * @return The range from the smallest to the largest value of the codomain of
 	 *         the function within the given interval
 	 */

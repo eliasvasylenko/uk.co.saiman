@@ -127,13 +127,13 @@ public class ContinuousFunctionSeries {
 				}
 
 				for (int i = 0; i < data.size(); i++) {
-					data.get(i).setXValue(sampledContinuousFunction.getXSample(i));
-					data.get(i).setYValue(sampledContinuousFunction.getYSample(i));
+					data.get(i).setXValue(sampledContinuousFunction.getX(i));
+					data.get(i).setYValue(sampledContinuousFunction.getY(i));
 				}
 
 				List<Data<Number, Number>> dataTemp = new ArrayList<>(sampledContinuousFunction.getDepth() - data.size());
 				for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
-					dataTemp.add(new Data<>(sampledContinuousFunction.getXSample(i), sampledContinuousFunction.getYSample(i)));
+					dataTemp.add(new Data<>(sampledContinuousFunction.getX(i), sampledContinuousFunction.getY(i)));
 				}
 				data.addAll(dataTemp);
 			});

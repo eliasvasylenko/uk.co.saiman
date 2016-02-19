@@ -24,6 +24,11 @@ import org.eclipse.fx.ui.services.theme.Stylesheet;
 import org.eclipse.fx.ui.services.theme.Theme;
 import org.osgi.service.component.annotations.Component;
 
+/**
+ * Default stylesheet for data charts.
+ * 
+ * @author Elias N Vasylenko
+ */
 @Component
 public class ContinuousFunctionChartStylesheet implements Stylesheet {
 	@Override

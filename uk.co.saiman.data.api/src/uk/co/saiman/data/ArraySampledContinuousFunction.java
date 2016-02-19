@@ -19,16 +19,55 @@
 package uk.co.saiman.data;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
 
-public class ArraySampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction> implements SampledContinuousFunction {
+/**
+ * A mutable, array backed implementation of {@link SampledContinuousFunction}.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class ArraySampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction>
+		implements SampledContinuousFunction {
 	private final double[] values;
 	private final double[] intensities;
 
+	/**
+	 * Instantiate with the given number of samples, values, and intensities.
+	 * Arrays are copied into the function, truncated to the sample length given,
+	 * or padded with 0s.
+	 * 
+	 * @param samples
+	 *          The number of samples in the function
+	 * @param values
+	 *          The X values of the samples, in the domain
+	 * @param intensities
+	 *          The Y values of the samples, in the codomain
+	 */
 	public ArraySampledContinuousFunction(int samples, double[] values, double[] intensities) {
 		this.values = Arrays.copyOf(values, samples);
 		this.intensities = Arrays.copyOf(intensities, samples);
+	}
+
+	/**
+	 * Safely modify the data of this sampled continuous function.
+	 * 
+	 * @param valueMutation
+	 *          The mutation operation on the values of the samples, i.e. the X
+	 *          values, in the domain
+	 * @param intensityMutation
+	 *          The mutation operation on the intensities of the samples, i.e. the
+	 *          Y values, in the codomain
+	 */
+	public void mutateIntensities(Consumer<double[]> valueMutation, Consumer<double[]> intensityMutation) {
+		getReadLock().lock();
+		try {
+			valueMutation.accept(values);
+			intensityMutation.accept(intensities);
+		} finally {
+			getReadLock().unlock();
+		}
 	}
 
 	@Override
@@ -66,12 +105,12 @@ public class ArraySampledContinuousFunction extends MutableExpressionImpl<Contin
 	}
 
 	@Override
-	public double getXSample(int index) {
+	public double getX(int index) {
 		return values[index];
 	}
 
 	@Override
-	public double getYSample(int index) {
+	public double getY(int index) {
 		return intensities[index];
 	}
 

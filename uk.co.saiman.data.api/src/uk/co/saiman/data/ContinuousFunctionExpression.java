@@ -20,9 +20,32 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.expression.DependentExpression;
 
-public class ContinuousFunctionExpression extends DependentExpression<ContinuousFunction> implements ContinuousFunctionDecorator {
+/**
+ * A basic wrapper around another continuous function which reflects all changes
+ * in that function, and propagates events to listeners. The function which is
+ * wrapped can be changed via {@link #setComponent(ContinuousFunction)}, which
+ * will notify listeners of the modification.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class ContinuousFunctionExpression extends DependentExpression<ContinuousFunction>
+		implements ContinuousFunctionDecorator {
 	private ContinuousFunction component;
 
+	/**
+	 * Create a default empty expression about the function
+	 * {@link ContinuousFunction#EMPTY}.
+	 */
+	public ContinuousFunctionExpression() {
+		this(ContinuousFunction.EMPTY);
+	}
+
+	/**
+	 * Create an instance which is initially over the given component.
+	 * 
+	 * @param component
+	 *          The component to wrap
+	 */
 	public ContinuousFunctionExpression(ContinuousFunction component) {
 		setComponent(component);
 	}
@@ -32,6 +55,12 @@ public class ContinuousFunctionExpression extends DependentExpression<Continuous
 		return component;
 	}
 
+	/**
+	 * Change the component to be wrapped by this function.
+	 * 
+	 * @param component
+	 *          The continuous function we wish to wrap
+	 */
 	public void setComponent(ContinuousFunction component) {
 		try {
 			getWriteLock().lock();

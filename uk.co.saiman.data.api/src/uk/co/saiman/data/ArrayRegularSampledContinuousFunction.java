@@ -22,13 +22,32 @@ import java.util.function.Consumer;
 
 import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
 
+/**
+ * A mutable implementation conforming to the contract of
+ * {@link RegularSampledContinuousFunction} and backed by an array.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class ArrayRegularSampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction>
 		implements RegularSampledContinuousFunction {
 	private final double frequency;
+	private final double domainStart;
 	private final double[] intensities;
 
-	public ArrayRegularSampledContinuousFunction(double frequency, double[] intensities) {
+	/**
+	 * Create an instance with the given frequency, intensities, and domain value
+	 * of first index.
+	 * 
+	 * @param frequency
+	 *          The frequency as per {@link #getFrequency()}
+	 * @param domainStart
+	 *          The domain value of the sample at the first index
+	 * @param intensities
+	 *          The intensities of each sample in sequence
+	 */
+	public ArrayRegularSampledContinuousFunction(double frequency, double domainStart, double[] intensities) {
 		this.frequency = frequency;
+		this.domainStart = domainStart;
 
 		this.intensities = intensities.clone();
 	}
@@ -39,7 +58,7 @@ public class ArrayRegularSampledContinuousFunction extends MutableExpressionImpl
 	}
 
 	@Override
-	public double getYSample(int index) {
+	public double getY(int index) {
 		return intensities[index];
 	}
 
@@ -64,8 +83,13 @@ public class ArrayRegularSampledContinuousFunction extends MutableExpressionImpl
 	}
 
 	@Override
+	public double getX(int index) {
+		return RegularSampledContinuousFunction.super.getX(index) + domainStart;
+	}
+
+	@Override
 	public ArrayRegularSampledContinuousFunction copy() {
-		return new ArrayRegularSampledContinuousFunction(frequency, intensities);
+		return new ArrayRegularSampledContinuousFunction(frequency, domainStart, intensities);
 	}
 
 	@Override

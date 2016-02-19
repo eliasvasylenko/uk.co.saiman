@@ -25,7 +25,23 @@ package uk.co.saiman.data;
  * @author Elias N Vasylenko
  */
 public interface Calibration {
+	/**
+	 * Map a value in the domain of a function to a calibrated value in some other
+	 * domain.
+	 * 
+	 * @param from
+	 *          The value in the uncalibrated domain
+	 * @return The value in the calibrated domain
+	 */
 	double calibrate(double from);
 
+	/**
+	 * Map a calibrated value in the domain of a function to its uncalibrated
+	 * value in the domain of the source function.
+	 * 
+	 * @param from
+	 *          The value in the uncalibrated domain
+	 * @return The value in the calibrated domain
+	 */
 	double decalibrate(double from);
 }

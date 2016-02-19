@@ -22,15 +22,36 @@ import java.util.function.Function;
 
 import uk.co.strangeskies.mathematics.expression.FunctionExpression;
 
-public class ContinuousFunctionTransformation<C extends ContinuousFunction> extends FunctionExpression<ContinuousFunction, ContinuousFunction>
+/**
+ * A {@link ContinuousFunction} which is backed by a given
+ * {@link ContinuousFunction} and which is derived from it by a given
+ * transformation function.
+ * <p>
+ * Changes in the backing function will be reflected in this function and
+ * forwarded to listeners, and the transformation will only be evaluated lazily,
+ * as necessary.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class ContinuousFunctionTransformation extends FunctionExpression<ContinuousFunction, ContinuousFunction>
 		implements ContinuousFunctionDecorator {
-	private final Function<C, ContinuousFunction> transformation;
+	private final Function<ContinuousFunction, ContinuousFunction> transformation;
 
+	/**
+	 * Create a mapping from a given {@link ContinuousFunction} to a
+	 * {@link ContinuousFunction} by the given transformation.
+	 * 
+	 * @param dependency
+	 *          The backing function, changes in this function will be reflected
+	 *          in the instantiated function
+	 * @param transformation
+	 *          The transformation to apply to the backing function
+	 */
 	@SuppressWarnings("unchecked")
-	public ContinuousFunctionTransformation(C dependency, Function<C, ContinuousFunction> transformation) {
-		super(dependency, c -> transformation.apply((C) c));
+	public <C> ContinuousFunctionTransformation(C dependency, Function<C, ContinuousFunction> transformation) {
+		super((ContinuousFunction) dependency, c -> transformation.apply((C) c));
 
-		this.transformation = transformation;
+		this.transformation = (Function<ContinuousFunction, ContinuousFunction>) transformation;
 	}
 
 	@Override
@@ -38,18 +59,17 @@ public class ContinuousFunctionTransformation<C extends ContinuousFunction> exte
 		return getValue();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public ContinuousFunction copy() {
-		C component;
+		ContinuousFunction component;
 
 		try {
 			getReadLock().lock();
-			component = (C) getValue().copy();
+			component = getValue().copy();
 		} finally {
 			getReadLock().unlock();
 		}
 
-		return new ContinuousFunctionTransformation<>(component, transformation);
+		return new ContinuousFunctionTransformation(component, transformation);
 	}
 }

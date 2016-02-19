@@ -20,28 +20,63 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.Range;
 
+/**
+ * A partial-implementation of {@link ContinuousFunction} for sampled continua.
+ * The model is as a sequence of (X, Y) points, with (X) increasing in the
+ * domain with each index, starting at 0.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface SampledContinuousFunction extends ContinuousFunction {
 	@Override
 	default Range<Double> getDomain() {
-		return getXRange(0, getDepth() - 1);
+		return getDomain(0, getDepth() - 1);
 	}
 
-	default Range<Double> getXRange(int startIndex, int endIndex) {
-		return Range.between(getXSample(0), getXSample(getDepth() - 1));
+	/**
+	 * Find the interval in the domain described by the given sample indices.
+	 * 
+	 * @param startIndex
+	 *          The index of the sample at the beginning of the interval
+	 * @param endIndex
+	 *          The index of the sample at the end of the interval
+	 * @return The extent of the samples between those given
+	 */
+	default Range<Double> getDomain(int startIndex, int endIndex) {
+		return Range.between(getX(0), getX(getDepth() - 1));
 	}
 
 	@Override
 	default Range<Double> getRange() {
 		if (getDepth() == 0)
 			return Range.between(0d, 0d).setInclusive(false, false);
-		return getYRange(0, getDepth() - 1);
+		return getRangeBetween(0, getDepth() - 1);
 	}
 
-	default Range<Double> getYRange(int startIndex, int endIndex) {
-		Range<Double> yRange = Range.between(getYSample(startIndex), getYSample(endIndex));
+	/**
+	 * Find the interval between the smallest to the largest value of the codomain
+	 * of the function within the interval in the domain described by the given
+	 * sample indices.
+	 * 
+	 * @param startIndex
+	 *          The index of the sample at the beginning of the domain interval
+	 *          whose range we wish to determine
+	 * @param endIndex
+	 *          The index of the sample at the end of the domain interval whose
+	 *          range we wish to determine
+	 * @return The range from the smallest to the largest value of the codomain of
+	 *         the function within the given interval
+	 */
+	default Range<Double> getRangeBetween(int startIndex, int endIndex) {
+		if (startIndex < 0)
+			startIndex = 0;
+		if (endIndex >= getDepth())
+			endIndex = getDepth() - 1;
+
+		Range<Double> yRange = Range.between(getY(startIndex), getY(endIndex));
 
 		for (int i = startIndex; i < endIndex; i++)
-			yRange.extendThrough(getYSample(i), true);
+			yRange.extendThrough(getY(i), true);
 
 		return yRange;
 	}
@@ -57,7 +92,7 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 
 		Range<Double> yRange;
 		if (getDepth() > 2) {
-			yRange = getYRange(getIndexAbove(startX), getIndexBelow(endX));
+			yRange = getRangeBetween(getIndexAbove(startX), getIndexBelow(endX));
 		} else {
 			yRange = Range.between(startSample, startSample);
 		}
@@ -68,17 +103,58 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 		return yRange;
 	}
 
+	/**
+	 * Find the nearest index with a value on the domain above the value given.
+	 * 
+	 * @param xValue
+	 *          The value we wish to find the nearest greater sampled neighbour
+	 *          to.
+	 * @return The index of the sample adjacent and above the given value, or -1
+	 *         if no such sample exists.
+	 */
 	default int getIndexAbove(double xValue) {
-		return getIndexBelow(xValue) + 1;
+		int index = getIndexBelow(xValue) + 1;
+		if (index >= getDepth()) {
+			index = -1;
+		}
+		return index;
 	}
 
+	/**
+	 * Find the nearest index with a value on the domain below, or equal to, the
+	 * value given.
+	 * 
+	 * @param xValue
+	 *          The value we wish to find the nearest lower sampled neighbour to.
+	 * @return The index of the sample adjacent and below the given value, or -1
+	 *         if no such sample exists.
+	 */
 	int getIndexBelow(double xValue);
 
+	/**
+	 * Find the number of samples in the continuum.
+	 * 
+	 * @return The depth of the sampled continuum.
+	 */
 	int getDepth();
 
-	double getXSample(int index);
+	/**
+	 * The value in the domain at the given index.
+	 * 
+	 * @param index
+	 *          The sample index.
+	 * @return The X value of the sample at the given index.
+	 */
+	double getX(int index);
 
-	double getYSample(int index);
+	/**
+	 * The value in the codomain at the given index.
+	 * 
+	 * @param index
+	 *          The sample index.
+	 * @return The Y value of the sample at the given index.
+	 */
+	double getY(int index);
 
 	@Override
 	default double sample(double xPosition) {
@@ -96,11 +172,11 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 		if (indexAbove >= getDepth())
 			indexAbove = getDepth() - 1;
 
-		double yBelow = getYSample(indexBelow);
-		double yAbove = getYSample(indexAbove);
+		double yBelow = getY(indexBelow);
+		double yAbove = getY(indexAbove);
 
-		double xBelow = getXSample(indexBelow);
-		double xAbove = getXSample(indexAbove);
+		double xBelow = getX(indexBelow);
+		double xAbove = getX(indexAbove);
 
 		if (xBelow == xAbove || xPosition == xBelow) {
 			return yBelow;
@@ -155,13 +231,13 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 			int maxIndex;
 			double maxY;
 			lastIndex = minIndex = maxIndex = indexFrom;
-			minY = maxY = getYSample(lastIndex);
+			minY = maxY = getY(lastIndex);
 			for (int index = indexFrom + 1; index < indexTo; index++) {
 				/*
 				 * Get sample location at index
 				 */
-				double sampleX = getXSample(index);
-				double sampleY = getYSample(index);
+				double sampleX = getX(index);
+				double sampleY = getY(index);
 
 				/*
 				 * Check if passed resolution boundary (or last position)
@@ -225,7 +301,7 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 			 */
 			values = new double[count];
 			for (int i = 0; i < count; i++) {
-				values[i] = getXSample(indices[i]);
+				values[i] = getX(indices[i]);
 			}
 
 			/*
@@ -233,7 +309,7 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 			 */
 			intensities = new double[count];
 			for (int i = 0; i < count; i++) {
-				intensities[i] = getYSample(indices[i]);
+				intensities[i] = getY(indices[i]);
 			}
 
 			/*

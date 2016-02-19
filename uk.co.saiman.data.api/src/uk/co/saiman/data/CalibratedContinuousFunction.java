@@ -20,11 +20,29 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.expression.DependentExpression;
 
-public class CalibratedSampledFunctionGraph extends DependentExpression<ContinuousFunction> implements SampledContinuousFunctionDecorator {
+/**
+ * An implementation of {@link SampledContinuousFunction} which maps from
+ * another {@link SampledContinuousFunction} by some {@link Calibration}.
+ * <p>
+ * Changes in the backing function are reflected in this function.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class CalibratedContinuousFunction extends DependentExpression<ContinuousFunction>
+		implements SampledContinuousFunctionDecorator {
 	private final SampledContinuousFunction component;
 	private final Calibration calibration;
 
-	public CalibratedSampledFunctionGraph(SampledContinuousFunction component, Calibration calibration) {
+	/**
+	 * Create an instance over the given {@link SampledContinuousFunction} and
+	 * {@link Calibration}.
+	 * 
+	 * @param component
+	 *          The continuous function we wish to calibrate
+	 * @param calibration
+	 *          The calibration we wish to apply
+	 */
+	public CalibratedContinuousFunction(SampledContinuousFunction component, Calibration calibration) {
 		this.component = component;
 		getDependencies().add(component);
 
@@ -36,13 +54,16 @@ public class CalibratedSampledFunctionGraph extends DependentExpression<Continuo
 		return component;
 	}
 
+	/**
+	 * @return The calibration applied to the component function
+	 */
 	public Calibration getCalibration() {
 		return calibration;
 	}
 
 	@Override
-	public double getXSample(int index) {
-		return getCalibration().calibrate(SampledContinuousFunctionDecorator.super.getXSample(index));
+	public double getX(int index) {
+		return getCalibration().calibrate(SampledContinuousFunctionDecorator.super.getX(index));
 	}
 
 	@Override
@@ -51,7 +72,7 @@ public class CalibratedSampledFunctionGraph extends DependentExpression<Continuo
 	}
 
 	@Override
-	public CalibratedSampledFunctionGraph copy() {
+	public CalibratedContinuousFunction copy() {
 		return this;
 	}
 

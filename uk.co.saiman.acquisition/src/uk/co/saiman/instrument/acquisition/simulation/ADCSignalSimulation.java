@@ -154,7 +154,7 @@ public class ADCSignalSimulation implements AcquisitionModule {
 						+ (scale += scaleDelta) * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1)) * 20;
 			}
 
-			acquisitionData = new ArrayRegularSampledContinuousFunction(1 / (getAcquisitionResolution() * 1_000),
+			acquisitionData = new ArrayRegularSampledContinuousFunction(1 / (getAcquisitionResolution() * 1_000), 0,
 					intensities);
 
 			acquisitionListeners.accept(acquisitionData);

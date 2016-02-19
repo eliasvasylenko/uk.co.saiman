@@ -22,14 +22,39 @@ import java.util.Arrays;
 
 import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
 
-public class SparseSampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction> implements RegularSampledContinuousFunction {
+/**
+ * A (currently) immutable implementation of
+ * {@link RegularSampledContinuousFunction} which optimises memory usage for
+ * sampled continua with mostly 0 sample values in the codomain.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class SparseSampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction>
+		implements RegularSampledContinuousFunction {
 	private final double frequency;
 	private final int depth;
 
 	private final int[] indices;
 	private final double[] intensities;
 
-	public SparseSampledContinuousFunction(double frequency, int depth, int samples, int[] indices, double[] intensities) {
+	/**
+	 * Instantiate based on the given significant sample indices and intensities.
+	 * Samples at indices other than those given are assumed to be of intensity 0
+	 * in the codomain.
+	 * 
+	 * @param frequency
+	 *          The number of samples per unit in the domain
+	 * @param depth
+	 *          The number of conceptual samples, starting from 0
+	 * @param samples
+	 *          The number of non-zero samples
+	 * @param indices
+	 *          The sequential indices of non-zero samples
+	 * @param intensities
+	 *          The intensities at the given non-zero sample indices
+	 */
+	public SparseSampledContinuousFunction(double frequency, int depth, int samples, int[] indices,
+			double[] intensities) {
 		this.frequency = frequency;
 		this.depth = depth;
 
@@ -39,6 +64,41 @@ public class SparseSampledContinuousFunction extends MutableExpressionImpl<Conti
 
 		this.indices = Arrays.copyOf(indices, samples);
 		this.intensities = Arrays.copyOf(intensities, samples);
+	}
+
+	/**
+	 * Create a memory efficient view of the given array, with the given
+	 * frequency.
+	 * 
+	 * @param frequency
+	 *          The number of samples per unit in the domain
+	 * @param intensities
+	 *          The intensities as a sequence of samples at the given frequency
+	 */
+	public SparseSampledContinuousFunction(double frequency, double[] intensities) {
+		this.frequency = frequency;
+		int depth = 0;
+
+		for (double intensity : intensities) {
+			if (intensity != 0) {
+				depth++;
+			}
+		}
+
+		this.depth = depth;
+
+		this.indices = new int[depth];
+		this.intensities = new double[depth];
+
+		int index = 0;
+		for (int i = 0; i < intensities.length; i++) {
+			if (intensities[i] != 0) {
+				indices[index] = i;
+				this.intensities[index] = intensities[i];
+
+				index++;
+			}
+		}
 	}
 
 	private int getIndexIndex(int index) {
@@ -77,7 +137,7 @@ public class SparseSampledContinuousFunction extends MutableExpressionImpl<Conti
 	}
 
 	@Override
-	public double getYSample(int index) {
+	public double getY(int index) {
 		int indexIndex = getIndexIndex(index);
 		if (indexIndex < 0) {
 			return 0;

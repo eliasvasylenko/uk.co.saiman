@@ -41,7 +41,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
 import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.instrument.acquisition.AcquisitionModule;
 import uk.co.saiman.msapex.data.ContinuousFunctionChartController;
@@ -105,8 +104,7 @@ public class AcquisitionPart {
 		/*
 		 * Create continuous function view of latest data from module
 		 */
-		ContinuousFunctionExpression latestContinuousFunction = new ContinuousFunctionExpression(
-				new ArrayRegularSampledContinuousFunction(1, new double[] {}));
+		ContinuousFunctionExpression latestContinuousFunction = new ContinuousFunctionExpression();
 		acquisitionModule.dataEvents().addWeakObserver(latestContinuousFunction, l -> c -> l.setComponent(c));
 
 		/*

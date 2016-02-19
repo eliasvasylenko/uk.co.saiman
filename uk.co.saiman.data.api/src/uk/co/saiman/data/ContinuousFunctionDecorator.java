@@ -20,7 +20,16 @@ package uk.co.saiman.data;
 
 import uk.co.strangeskies.mathematics.Range;
 
+/**
+ * A partial implementation of a {@link ContinuousFunction} decorator, to reduce
+ * boilerplate for functions which are in some way mappings of other functions.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface ContinuousFunctionDecorator extends ContinuousFunction {
+	/**
+	 * @return The {@link ContinuousFunction} backing this decorator
+	 */
 	ContinuousFunction getComponent();
 
 	@Override
