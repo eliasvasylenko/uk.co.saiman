@@ -18,60 +18,37 @@
  */
 package uk.co.saiman.msapex.chemistry;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.fx.core.di.LocalInstance;
-
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.strangeskies.eclipse.ObservableService;
-import uk.co.strangeskies.fx.FXUtilities;
 
+/**
+ * A JavaFX UI component for display of a {@link PeriodicTable}.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class PeriodicTableController {
-	@Inject
-	IEclipseContext context;
-
-	@ObservableService
-	@Inject
-	ObservableList<PeriodicTable> periodicTables;
+	private PeriodicTable periodicTable;
 
 	@FXML
 	private GridPane elementGrid;
 
-	// @FXML
-	// private ContinuousFunctionChartController chartPane;
-
-	@PostConstruct
-	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
-		try {
-			container.setCenter(FXUtilities.loadIntoController(loader, this));
-
-			periodicTables.addListener((ListChangeListener<? super PeriodicTable>) change -> {
-				if (change.wasAdded() && change.getAddedSize() <= periodicTables.size()) {
-					setPeriodicTable(change.getAddedSubList().get(0));
-				}
-			});
-
-			if (periodicTables.size() > 0) {
-				setPeriodicTable(periodicTables.get(0));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
+	/**
+	 * @param table
+	 *          The periodic table to be displayed
+	 */
 	public void setPeriodicTable(PeriodicTable table) {
 		int element = 1;
 		for (Node node : elementGrid.getChildren()) {
 			((ChemicalElementTile) node).setElement(table.getElement(element++));
 		}
+	}
+
+	/**
+	 * @return The periodic table currently displayed, or null if none is selected
+	 */
+	public PeriodicTable getPeriodicTable() {
+		return periodicTable;
 	}
 }

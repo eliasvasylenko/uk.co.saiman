@@ -16,27 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.instrument;
+package uk.co.saiman.instrument.raster;
 
-import java.util.function.Consumer;
+import java.util.Set;
 
-public interface HardwareModule {
-	String getName();
+import uk.co.saiman.instrument.HardwareDevice;
 
-	/**
-	 * @return True if a communication link with the hardware properly
-	 *         established, false otherwise
-	 */
-	boolean isConnected();
+public interface RasterDevice extends HardwareDevice {
+	Set<RasterMode> availableRasterModes();
 
-	void reset();
+	RasterMode getRasterMode();
 
-	/**
-	 * If the hardware module is performing some sort of operation, e.g. a
-	 * currently running raster or acquisition card, that operation should be
-	 * aborted, or for high voltages they should be turned off if possible.
-	 */
-	void abortOperation();
+	void setRasterMode(RasterMode mode);
 
-	void addErrorListener(Consumer<Exception> exception);
+	void setRasterSize(int width, int height);
+
+	int getRasterWidth();
+
+	int getRasterHeight();
+
+	default int getRasterLength() {
+		return getRasterHeight() * getRasterWidth();
+	}
+
+	void startRaster();
 }

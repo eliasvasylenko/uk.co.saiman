@@ -21,8 +21,26 @@ package uk.co.saiman.msapex.data;
 import javafx.scene.Node;
 import uk.co.strangeskies.reflection.TypeToken;
 
+/**
+ * An annotation handler applies to all annotation of its type. It translates a
+ * conceptual annotation into an UI representation.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          The type of the annotation to be handled by this handler
+ */
 public interface AnnotationHandler<T> {
+	/**
+	 * @return The data type of annotation to handle
+	 */
 	TypeToken<T> getDataType();
 
+	/**
+	 * @param annotationData
+	 *          The data of an annotation
+	 * @return The {@link Node} representation of the annotation to apply to the
+	 *         scene
+	 */
 	Node handle(T annotationData);
 }

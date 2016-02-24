@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.acquisition;
+package uk.co.saiman.msapex.chemistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,29 +31,43 @@ import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.fx.core.di.Service;
 
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
+import uk.co.saiman.chemistry.PeriodicTable;
+import uk.co.strangeskies.eclipse.ObservableService;
 
 /**
- * Track acquisition devices available through OSGi services and select which
- * device to display in the acquisition part.
+ * Track periodic tables available through OSGi services and select which table
+ * to display in the periodic table part.
  * 
  * @author Elias N Vasylenko
  */
-public class DevicesMenu {
+public class PeriodicTablesMenu {
 	@Inject
-	@Service
-	List<AcquisitionDevice> acquisitionModules;
+	@ObservableService
+	ObservableList<PeriodicTable> periodicTables;
 
-	private AcquisitionPart acquisitionPart;
+	private PeriodicTablePart periodicTablePart;
 
 	@PostConstruct
 	void initialise(EPartService partService) {
-		acquisitionPart = (AcquisitionPart) partService.findPart("uk.co.saiman.msapex.acquisition.part").getObject();
-		acquisitionPart.setAcquisitionModules(acquisitionModules);
+		periodicTablePart = (PeriodicTablePart) partService.findPart("uk.co.saiman.msapex.periodictable.part").getObject();
+
+		periodicTables.addListener((ListChangeListener<? super PeriodicTable>) change -> {
+			if (periodicTablePart.getPeriodicTableController().getPeriodicTable() == null) {
+				while (change.next()) {
+					if (change.wasAdded()) {
+						periodicTablePart.getPeriodicTableController().setPeriodicTable(change.getAddedSubList().get(0));
+						break;
+					}
+				}
+			}
+		});
+
+		periodicTables.stream().findAny().ifPresent(periodicTablePart.getPeriodicTableController()::setPeriodicTable);
 	}
 
 	@Execute
@@ -63,18 +77,16 @@ public class DevicesMenu {
 
 	@AboutToShow
 	void aboutToShow(List<MMenuElement> items) {
-		for (AcquisitionDevice module : new ArrayList<>(acquisitionModules)) {
+		for (PeriodicTable table : new ArrayList<>(periodicTables)) {
 			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-			moduleItem.setLabel(module.getName());
-			moduleItem.setType(ItemType.CHECK);
-			moduleItem.setSelected(acquisitionPart.getSelectedAcquisitionModules().contains(module));
+			moduleItem.setLabel(table.getName());
+			moduleItem.setType(ItemType.RADIO);
+			moduleItem.setSelected(periodicTablePart.getPeriodicTableController().getPeriodicTable() == table);
 			moduleItem.setObject(new Object() {
 				@Execute
 				public void execute() {
 					if (moduleItem.isSelected()) {
-						acquisitionPart.addAcquisitionModule(module);
-					} else {
-						acquisitionPart.removeAcquisitionModule(module);
+						periodicTablePart.getPeriodicTableController().setPeriodicTable(table);
 					}
 				}
 			});

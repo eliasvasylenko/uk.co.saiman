@@ -13,7 +13,7 @@
 
 	<content>
 		<fx:include
-			fx:id="elementGrid"
+			fx:id="periodicTable"
 			source="PeriodicTable.fxml" />
 	</content>
 </ScrollPane>

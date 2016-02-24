@@ -86,3 +86,6 @@ runreq.base:\
 	osgi.enroute.junit.wrapper,\
 	osgi.enroute.hamcrest.wrapper,\
 	org.hamcrest__java-hamcrest
+
+## Fix warnings
+-fixupmessages.res: "Bndtools: Found source folder 'res' that is not on bnd's source path 'src'"

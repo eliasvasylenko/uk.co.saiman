@@ -1,5 +1,8 @@
 <?xml version="1.0" ?>
-<periodicTable xmlns="http://saiman.co.uk/2015-10-08/">
+<periodicTable
+	xmlns="http://saiman.co.uk/2015-10-08/"
+	name="Default">
+
 	<element
 		name="Hydrogen"
 		atomicNumber="1"

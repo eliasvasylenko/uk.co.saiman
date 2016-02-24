@@ -18,69 +18,41 @@
  */
 package uk.co.saiman.msapex.chemistry;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.fx.core.di.LocalInstance;
 
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.strangeskies.eclipse.ObservableService;
 import uk.co.strangeskies.fx.FXUtilities;
 
+/**
+ * An Eclipse part for display of a periodic table.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class PeriodicTablePart {
 	@Inject
 	IEclipseContext context;
 
-	@ObservableService
-	@Inject
-	ObservableList<PeriodicTable> periodicTables;
-
 	@FXML
-	private Pane elementGrid;
+	PeriodicTableController periodicTableController;
 
 	// @FXML
 	// private ContinuousFunctionChartController chartPane;
 
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
-		try {
-			container.setCenter(FXUtilities.loadIntoController(loader, this));
-
-			periodicTables.addListener((ListChangeListener<? super PeriodicTable>) change -> {
-				List<PeriodicTable> added = new ArrayList<>();
-				while (change.next()) {
-					if (change.wasAdded()) {
-						added.addAll(change.getAddedSubList());
-					}
-				}
-				if (added.size() <= periodicTables.size()) {
-					setPeriodicTable(change.getAddedSubList().get(0));
-				}
-			});
-
-			if (periodicTables.size() > 0) {
-				setPeriodicTable(periodicTables.get(0));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		container.setCenter(FXUtilities.loadIntoController(loader, this));
 	}
 
-	public void setPeriodicTable(PeriodicTable table) {
-		int element = 1;
-		for (Node node : elementGrid.getChildren()) {
-			((ChemicalElementTile) node).setElement(table.getElement(element++));
-		}
+	/**
+	 * @return The controller of the periodic table UI component
+	 */
+	public PeriodicTableController getPeriodicTableController() {
+		return periodicTableController;
 	}
 }

@@ -34,9 +34,15 @@ import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
 
 /**
+ * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series
+ * is backed by the function in that changes in the function will be reflected
+ * in the series. The series is only updated as frequently as necessary to
+ * achieve a real-time image.
+ * <p>
+ * The series is only created over a given view range, and to a given
+ * resolution, to avoid unnecessary computation.
  * 
  * @author Elias N Vasylenko
- *
  */
 public class ContinuousFunctionSeries {
 	/*
@@ -60,9 +66,16 @@ public class ContinuousFunctionSeries {
 	/*
 	 * View data
 	 */
-	private final Range<Double> range = Range.between(0d, 100d);
+	private final Range<Double> domain = Range.between(0d, 100d);
 	private int resolution = 100;
 
+	/**
+	 * Create a mapping from a given {@link ContinuousFunction} to a
+	 * {@link Series}.
+	 * 
+	 * @param continuousFunction
+	 *          The backing function
+	 */
 	public ContinuousFunctionSeries(ContinuousFunction continuousFunction) {
 		this.continuousFunction = continuousFunction;
 		continuousFunctionObserver = e -> refresh();
@@ -83,6 +96,15 @@ public class ContinuousFunctionSeries {
 		refresh();
 	}
 
+	/**
+	 * Create a mapping from a given {@link ContinuousFunction} to a
+	 * {@link Series}.
+	 * 
+	 * @param continuousFunction
+	 *          The backing function
+	 * @param name
+	 *          The name of the series
+	 */
 	public ContinuousFunctionSeries(ContinuousFunction continuousFunction, String name) {
 		this(continuousFunction);
 
@@ -96,7 +118,7 @@ public class ContinuousFunctionSeries {
 		super.finalize();
 	}
 
-	public void refresh() {
+	private void refresh() {
 		synchronized (refreshTimer) {
 			refresh = true;
 		}
@@ -118,8 +140,8 @@ public class ContinuousFunctionSeries {
 		ContinuousFunction continuousFunction = getRefreshedContinuousFunction();
 
 		if (continuousFunction != null) {
-			SampledContinuousFunction sampledContinuousFunction = continuousFunction.resample(range.getFrom(), range.getTo(),
-					resolution);
+			SampledContinuousFunction sampledContinuousFunction = continuousFunction.resample(domain.getFrom(),
+					domain.getTo(), resolution);
 
 			FXUtilities.runNow(() -> {
 				if (data.size() > sampledContinuousFunction.getDepth()) {
@@ -140,21 +162,41 @@ public class ContinuousFunctionSeries {
 		}
 	}
 
+	/**
+	 * @return The continuous function backing the series
+	 */
 	public ContinuousFunction getContinuousFunction() {
 		return continuousFunction;
 	}
 
+	/**
+	 * @return The series providing a view of the continuous function
+	 */
 	public Series<Number, Number> getSeries() {
 		return series;
 	}
 
-	public void setRange(Range<Double> range) {
-		if (!this.range.equals(range)) {
-			this.range.set(range);
+	/**
+	 * Set the interval in the domain of the function we are interested in.
+	 * 
+	 * @param domain
+	 *          An AOI range in the domain of the function
+	 */
+	public void setDomain(Range<Double> domain) {
+		if (!this.domain.equals(domain)) {
+			this.domain.set(domain);
 			refresh();
 		}
 	}
 
+	/**
+	 * Set the resolution in the domain of the function to which we are
+	 * interested.
+	 * 
+	 * @param resolution
+	 *          The number of resolvable units across the domain interval we are
+	 *          interested in
+	 */
 	public void setResolution(int resolution) {
 		if (!(this.resolution == resolution)) {
 			this.resolution = resolution;

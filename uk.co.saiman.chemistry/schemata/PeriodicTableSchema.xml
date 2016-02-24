@@ -75,18 +75,24 @@
 			dataType="uk.co.saiman.chemistry.PeriodicTable"
 			bindingStrategy="CONSTRUCTOR">
 
-			<inline
-				name="sai:elementList"
-				outMethod="getElements"
-				dataType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.Collection&lt;?&gt;"
-				bindingType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.List&lt;?&gt;">
+			<inputSequence name="sai:constructor">
+				<property
+					name="sai:name"
+					type="string" />
 
-				<complex
-					baseModel="sai:element"
-					outMethod="this"
-					occurrences="0.."
-					inMethod="add" />
-			</inline>
+				<inline
+					name="sai:elementList"
+					outMethod="getElements"
+					dataType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.Collection&lt;?&gt;"
+					bindingType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.List&lt;?&gt;">
+
+					<complex
+						baseModel="sai:element"
+						outMethod="this"
+						occurrences="0.."
+						inMethod="add" />
+				</inline>
+			</inputSequence>
 		</model>
 	</models>
 </schema>

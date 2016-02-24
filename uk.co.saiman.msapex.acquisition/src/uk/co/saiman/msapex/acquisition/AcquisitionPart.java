@@ -42,10 +42,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.data.ContinuousFunctionExpression;
-import uk.co.saiman.instrument.acquisition.AcquisitionModule;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.msapex.data.ContinuousFunctionChartController;
 import uk.co.strangeskies.fx.FXUtilities;
 
+/**
+ * An Eclipse part for management and display of acquisition devices.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class AcquisitionPart {
 	@Inject
 	IEclipseContext context;
@@ -56,22 +61,54 @@ public class AcquisitionPart {
 	@FXML
 	private Label noSelectionLabel;
 
-	private ObservableSet<AcquisitionModule> selectedModules = FXCollections.observableSet();
-	private Map<AcquisitionModule, ContinuousFunctionChartController> controllers = new HashMap<>();
+	private ObservableSet<AcquisitionDevice> selectedModules = FXCollections.observableSet();
+	private Map<AcquisitionDevice, ContinuousFunctionChartController> controllers = new HashMap<>();
 
-	public boolean setAcquisitionModules(Collection<? extends AcquisitionModule> selectedModules) {
+	/**
+	 * Set the visible acquisition devices. All devices in the given set will be
+	 * made visible, and all others will be removed.
+	 * 
+	 * @param selectedModules
+	 *          The acquisition devices to show
+	 * @return True if the device selection changes as a result of this
+	 *         invocation, false otherwise
+	 */
+	public boolean setAcquisitionModules(Collection<? extends AcquisitionDevice> selectedModules) {
 		return this.selectedModules.retainAll(selectedModules) | this.selectedModules.addAll(selectedModules);
 	}
 
-	public boolean addAcquisitionModule(AcquisitionModule module) {
+	/**
+	 * Set an acquisition device to be visible. All currently visible devices will
+	 * remain so.
+	 * 
+	 * @param module
+	 *          The acquisition device to show
+	 * @return True if the device selection changes as a result of this
+	 *         invocation, false otherwise
+	 */
+	public boolean addAcquisitionModule(AcquisitionDevice module) {
 		return selectedModules.add(module);
 	}
 
-	public boolean removeAcquisitionModule(AcquisitionModule module) {
+	/**
+	 * Set an acquisition device to not be visible. All other currently visible
+	 * devices will remain so.
+	 * 
+	 * @param module
+	 *          The acquisition device to not show
+	 * @return True if the device selection changes as a result of this
+	 *         invocation, false otherwise
+	 */
+	public boolean removeAcquisitionModule(AcquisitionDevice module) {
 		return selectedModules.remove(module);
 	}
 
-	public Set<AcquisitionModule> getSelectedAcquisitionModules() {
+	/**
+	 * Get the visible acquisition devices.
+	 * 
+	 * @return The set of all currently visible acquisition devices
+	 */
+	public Set<AcquisitionDevice> getSelectedAcquisitionModules() {
 		return new HashSet<>(selectedModules);
 	}
 
@@ -79,7 +116,7 @@ public class AcquisitionPart {
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
 		container.setCenter(FXUtilities.loadIntoController(loader, this));
 
-		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionModule> change) -> {
+		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionDevice> change) -> {
 			if (change.wasAdded()) {
 				selectAcquisitionModule(loader, change.getElementAdded());
 			} else if (change.wasRemoved()) {
@@ -88,7 +125,7 @@ public class AcquisitionPart {
 		});
 	}
 
-	private void selectAcquisitionModule(FXMLLoader loader, AcquisitionModule acquisitionModule) {
+	private void selectAcquisitionModule(FXMLLoader loader, AcquisitionDevice acquisitionModule) {
 		noSelectionLabel.setVisible(false);
 
 		/*
@@ -113,7 +150,7 @@ public class AcquisitionPart {
 		chartController.getContinuousFunctions().add(latestContinuousFunction);
 	}
 
-	private void deselectAcquisitionModule(AcquisitionModule acquisitionModule) {
+	private void deselectAcquisitionModule(AcquisitionDevice acquisitionModule) {
 		ContinuousFunctionChartController controller = controllers.remove(acquisitionModule);
 
 		chartPane.getChildren().remove(controller.getRoot());

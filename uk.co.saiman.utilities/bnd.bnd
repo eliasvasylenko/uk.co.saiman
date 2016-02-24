@@ -8,3 +8,13 @@ Bundle-Name: SAI :: Utilities
 Export-Package: \
 	uk.co.saiman,\
 	uk.co.saiman.utilities
+
+-includeresource: \
+	META-INF/schemata=schemata
+
+-pluginpath: \
+	${pluginpath.modabi}
+
+-plugin: \
+	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlRegistration
+	

@@ -61,7 +61,7 @@ public class ContinuousFunctionChartController {
 	private boolean zoomed;
 	private final Range<Double> domain = Range.between(0d, 100d);
 	private final Range<Double> range = Range.between(0d, 100d);
-	private static final double DEFAULT_ZOOM_STEP = 0.2;
+	private static final double ZOOM_STEP_PERCENTAGE = 20;
 	private static final double MAX_ZOOM_STEP = 0.5;
 	private static final double PIXEL_ZOOM_DAMP = 50;
 	private static final double MOVE_STEP_PERCENTAGE = 10;
@@ -78,26 +78,45 @@ public class ContinuousFunctionChartController {
 	private Map<TypeToken<?>, AnnotationHandler<?>> annotationHandlers = new HashMap<>();
 	private Map<ChartAnnotation<?>, Node> annotationNodes = new HashMap<>();
 
+	/**
+	 * @return The root node of the chart
+	 */
 	public Pane getRoot() {
 		return msapexDataChart;
 	}
 
+	/**
+	 * @return The domain axis of the chart
+	 */
 	public NumberAxis getXAxis() {
 		return (NumberAxis) lineChart.getXAxis();
 	}
 
+	/**
+	 * @return The range axis of the chart
+	 */
 	public NumberAxis getYAxis() {
 		return (NumberAxis) lineChart.getYAxis();
 	}
 
+	/**
+	 * @param title
+	 *          The title of the chart
+	 */
 	public void setTitle(String title) {
 		lineChart.setTitle(title);
 	}
 
+	/**
+	 * @return The backing functions of the chart
+	 */
 	public ObservableSet<ContinuousFunction> getContinuousFunctions() {
 		return continuousFunctions;
 	}
 
+	/**
+	 * @return The annotations on the chart
+	 */
 	public ObservableSet<ChartAnnotation<?>> getAnnotations() {
 		return annotations;
 	}
@@ -120,6 +139,9 @@ public class ContinuousFunctionChartController {
 		updateAnnotations();
 	}
 
+	/**
+	 * Request the chart receive UI focus
+	 */
 	public void requestFocus() {
 		msapexDataChart.requestFocus();
 	}
@@ -170,6 +192,9 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
+	/**
+	 * @return The current view range in the domain
+	 */
 	public Range<Double> getDomain() {
 		synchronized (domain) {
 			return domain;
@@ -183,24 +208,46 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
+	/**
+	 * Zoom in the view in the domain by {@value #ZOOM_STEP_PERCENTAGE}%.
+	 */
 	public void zoomInDomain() {
 		synchronized (domain) {
-			zoomDomain(1 + DEFAULT_ZOOM_STEP);
+			zoomDomain(1 + (ZOOM_STEP_PERCENTAGE / 100d));
 		}
 	}
 
+	/**
+	 * Zoom out the view in the domain by {@value #ZOOM_STEP_PERCENTAGE}%.
+	 */
 	public void zoomOutDomain() {
 		synchronized (domain) {
-			zoomDomain(1 / (1 + DEFAULT_ZOOM_STEP));
+			zoomDomain(1 / (1 + (ZOOM_STEP_PERCENTAGE / 100d)));
 		}
 	}
 
+	/**
+	 * Zoom in the view in the domain by the given factor.
+	 * 
+	 * @param zoomAmount
+	 *          The amount to zoom in, as a multiplier of the size of a chart
+	 *          beneath a fixed viewport
+	 */
 	public void zoomDomain(double zoomAmount) {
 		synchronized (domain) {
 			zoomDomain(zoomAmount, (getDomain().getTo() + getDomain().getFrom()) / 2);
 		}
 	}
 
+	/**
+	 * Zoom in the view in the domain by the given factor, about the given centre.
+	 * 
+	 * @param zoomAmount
+	 *          The amount to zoom in, as a multiplier of the size of a chart
+	 *          beneath a fixed viewport
+	 * @param centre
+	 *          The focus of the zoom in the domain
+	 */
 	public void zoomDomain(double zoomAmount, double centre) {
 		synchronized (domain) {
 			double zoomLeft = centre - getDomain().getFrom();
@@ -212,6 +259,10 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
+	/**
+	 * Reset the zoom over the domain to contain the entire range of all member
+	 * functions.
+	 */
 	public void resetZoomDomain() {
 		synchronized (domain) {
 			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
@@ -221,6 +272,10 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
+	/**
+	 * Reset the zoom over the codomain to contain the entire range of all member
+	 * functions.
+	 */
 	public void resetZoomRange() {
 		synchronized (domain) {
 			Range<Double> maxZoom = getMaxZoom(c -> c.getRangeBetween(domain.getFrom(), domain.getTo()));
@@ -246,14 +301,30 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
+	/**
+	 * Move the view over the underlying charts to the left by
+	 * {@value #MOVE_STEP_PERCENTAGE}%.
+	 */
 	public void moveLeftDomain() {
 		moveDomain(-MOVE_STEP_PERCENTAGE);
 	}
 
+	/**
+	 * Move the view over the underlying charts to the right by
+	 * {@value #MOVE_STEP_PERCENTAGE}%.
+	 */
 	public void moveRightDomain() {
 		moveDomain(MOVE_STEP_PERCENTAGE);
 	}
 
+	/**
+	 * Move the view over the underlying charts through the domain by a given
+	 * percentage.
+	 * 
+	 * @param percentage
+	 *          A percentage of the full width of the view area by which to move
+	 *          the chart
+	 */
 	public void moveDomain(double percentage) {
 		synchronized (domain) {
 			if (zoomed) {
@@ -266,6 +337,15 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
+	/**
+	 * Move the view of the domain to contain exactly the interval between the
+	 * given values.
+	 * 
+	 * @param from
+	 *          The leftmost value in the domain to show in the view
+	 * @param to
+	 *          The rightmost value in the domain to show in the view
+	 */
 	public void setDomain(double from, double to) {
 		synchronized (this.domain) {
 			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
@@ -301,7 +381,7 @@ public class ContinuousFunctionChartController {
 
 	private void updateZoomDomain() {
 		synchronized (this.domain) {
-			new ArrayList<>(continuousFunctions).stream().map(series::get).forEach(s -> s.setRange(domain));
+			new ArrayList<>(continuousFunctions).stream().map(series::get).forEach(s -> s.setDomain(domain));
 		}
 	}
 

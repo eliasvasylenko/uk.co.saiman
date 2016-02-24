@@ -20,7 +20,7 @@ package uk.co.saiman.instrument;
 
 /**
  * An instrument is essentially the aggregation of a collection of
- * {@link HardwareModule}s, and is responsible for supervising their lifecycles
+ * {@link HardwareDevice}s, and is responsible for supervising their lifecycles
  * and interactions as part of the collected whole.
  * 
  * @author Elias N Vasylenko

@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.instrument.acquisition.AcquisitionModule;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.strangeskies.utilities.BufferingListener;
 import uk.co.strangeskies.utilities.Observable;
 
@@ -35,7 +35,7 @@ import uk.co.strangeskies.utilities.Observable;
  * @author Elias N Vasylenko
  */
 @Component
-public class ADCSignalSimulation implements AcquisitionModule {
+public class ADCSignalSimulation implements AcquisitionDevice {
 	/**
 	 * The default acquisition resolution when none is provided.
 	 */

@@ -6,10 +6,10 @@
 	
 	-fx-border-width: 2.0px;
 	-fx-background-color: #CCCCCC;
-	-fx-border-color: rgba(127.0, 127.0, 127.0, 0.4);
+	-fx-border-color: rgba(128.0, 128.0, 128.0, 0.4);
 }
 .ChemicalElementTile:hover {
-	-fx-border-color: rgba(255.0, 255.0, 255.0, 0.1);
+	-fx-border-color: rgba(64.0, 64.0, 64.0, 0.6);
 }
 
 .ChemicalElementTile #atomicNumberText {

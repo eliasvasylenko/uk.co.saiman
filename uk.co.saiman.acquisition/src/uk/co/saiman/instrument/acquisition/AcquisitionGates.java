@@ -36,10 +36,10 @@ public interface AcquisitionGates {
 	 * The acquisition module this gate configuration interface is associated
 	 * with.
 	 * 
-	 * @return An {@link AcquisitionModule} instance which can be configured via
+	 * @return An {@link AcquisitionDevice} instance which can be configured via
 	 *         this {@link AcquisitionGates} instance.
 	 */
-	AcquisitionModule acquisitionModule();
+	AcquisitionDevice acquisitionModule();
 
 	/**
 	 * Get the time before which acquisition data should be ignored. This is

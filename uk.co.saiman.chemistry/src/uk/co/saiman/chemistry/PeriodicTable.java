@@ -26,19 +26,22 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.osgi.service.component.annotations.Component;
-
 /**
  *
  * @author Elias Vasylenko
  *
  */
-@Component(service = PeriodicTable.class)
 public class PeriodicTable {
-	private List<Element> elements;
+	private final String name;
+	private final List<Element> elements;
 
-	public PeriodicTable(Collection<? extends Element> elements) {
+	public PeriodicTable(String name, Collection<? extends Element> elements) {
+		this.name = name;
 		this.elements = Collections.unmodifiableList(new ArrayList<>(elements));
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public SortedSet<Element> getElements() {

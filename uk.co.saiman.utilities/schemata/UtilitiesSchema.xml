@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<schema
+	xmlns="http://modabi.strangeskies.co.uk/2014-01-01/"
+	xmlns:sai="http://saiman.co.uk/2015-10-08/"
+	name="UtilitiesSchema">
+
+	<dependencies>
+		BaseSchema
+	</dependencies>
+
+	<types />
+
+	<models>
+		<!-- model name="sai:configurable" dataType="@uk.co.strangeskies.reflection.TypeToken.Infer 
+			uk.co.saiman.utilities.Configurable&lt;?&gt;"> <complex name="sai:configuration" 
+			abstract="true" extensible="true" outMethod="configuration" unbindingStrategy="SIMPLE" 
+			inMethod="configure"> </complex> </model -->
+	</models>
+</schema>

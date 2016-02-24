@@ -11,8 +11,9 @@
 	fx:id="elementGrid"
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml"
-	hgap="3"
-	vgap="3">
+	fx:controller="uk.co.saiman.msapex.chemistry.PeriodicTableController"
+	hgap="2"
+	vgap="2">
 
 	<children>
 		<!-- Row 1 -->

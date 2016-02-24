@@ -214,7 +214,7 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 				indexFrom = 0;
 			}
 			int indexTo = getIndexAbove(endX);
-			if (indexTo >= getDepth()) {
+			if (indexTo >= getDepth() || indexTo < 0) {
 				indexTo = getDepth() - 1;
 			}
 

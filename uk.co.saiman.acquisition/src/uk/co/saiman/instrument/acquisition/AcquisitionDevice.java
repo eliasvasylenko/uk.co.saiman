@@ -19,7 +19,7 @@
 package uk.co.saiman.instrument.acquisition;
 
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.instrument.HardwareModule;
+import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.strangeskies.utilities.Observable;
 
 /**
@@ -29,7 +29,7 @@ import uk.co.strangeskies.utilities.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface AcquisitionModule extends HardwareModule {
+public interface AcquisitionDevice extends HardwareDevice {
 	/**
 	 * Begin an acquisition experiment with the current configuration.
 	 * 

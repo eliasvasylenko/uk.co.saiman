@@ -22,9 +22,23 @@ import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
+/**
+ * A typed data annotation on a chart at a specific location.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          The type of the data of the annotation
+ */
 public interface ChartAnnotation<T> extends Reified<ChartAnnotation<T>> {
+	/**
+	 * @return The data of the annotation
+	 */
 	T getData();
 
+	/**
+	 * @return The type of the data of the annotation
+	 */
 	TypeToken<T> getDataType();
 
 	@Override
@@ -37,7 +51,13 @@ public interface ChartAnnotation<T> extends Reified<ChartAnnotation<T>> {
 		return this;
 	}
 
+	/**
+	 * @return The position in the domain of the chart data
+	 */
 	double getX();
 
+	/**
+	 * @return The position in the codomain of the chart data
+	 */
 	double getY();
 }

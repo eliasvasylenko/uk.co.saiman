@@ -8,4 +8,10 @@ Bundle-Name: SAI :: Experiment
 Export-Package: uk.co.saiman.experiment
 
 -includeresource: \
-	META-INF/modabi=modabi/schemata
+	META-INF/schemata=schemata
+
+-pluginpath: \
+	${pluginpath.modabi}
+
+-plugin: \
+	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlRegistration

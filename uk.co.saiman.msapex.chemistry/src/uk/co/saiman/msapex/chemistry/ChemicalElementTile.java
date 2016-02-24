@@ -32,8 +32,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.util.converter.NumberStringConverter;
 import uk.co.saiman.chemistry.Element;
+import uk.co.saiman.chemistry.Element.Group;
 
 /**
+ * A clickable UI node for displaying a chemical element. Typically for use in a
+ * periodic table, as per {@link PeriodicTableController}, but also usable in
+ * other contexts. Themable via css by pseudo classes for each {@link Group}.
+ * 
  * @author Elias N Vasylenko
  */
 public class ChemicalElementTile extends BorderPane {
@@ -49,7 +54,20 @@ public class ChemicalElementTile extends BorderPane {
 	@FXML
 	private Label nameText;
 
+	/**
+	 * Create a chemical element tile with no element.
+	 */
 	public ChemicalElementTile() {
+		this(null);
+	}
+
+	/**
+	 * Create a chemical element tile for the given element.
+	 * 
+	 * @param element
+	 *          The element for the tile to display, or null for an empty tile
+	 */
+	public ChemicalElementTile(Element element) {
 		getStyleClass().add("ChemicalElementTile");
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ChemicalElementTile.fxml"));
@@ -63,29 +81,57 @@ public class ChemicalElementTile extends BorderPane {
 		}
 
 		Bindings.bindBidirectional(atomicNumberText.textProperty(), atomicNumber, new NumberStringConverter());
+
+		setElement(element);
 	}
 
+	/**
+	 * Change the element displayed by the tile.
+	 * 
+	 * @param element
+	 *          The element for the tile to display, or null for an empty tile
+	 */
 	public void setElement(Element element) {
-		if (this.element == null || element == null || !Objects.equals(this.element.getGroup(), element.getGroup())) {
-			if (this.element != null) {
-				pseudoClassStateChanged(PseudoClass.getPseudoClass(this.element.getGroup().name()), false);
-			}
-			if (element != null) {
-				pseudoClassStateChanged(PseudoClass.getPseudoClass(element.getGroup().name()), true);
-			}
+		if (element != null) {
+			setGroup(element.getGroup());
+
+			atomicNumber.set(element.getAtomicNumber());
+			symbolNameText.setText(element.getSymbol());
+			nameText.setText(element.getName());
+		} else {
+			setGroup(Group.NONE);
+
+			atomicNumberText.setText("");
+			symbolNameText.setText("");
+			nameText.setText("Unknown");
 		}
 
 		this.element = element;
 
-		atomicNumber.set(element.getAtomicNumber());
-		symbolNameText.setText(element.getSymbol());
-		nameText.setText(element.getName());
 	}
 
+	private void setGroup(Group group) {
+		if (this.element == null || !Objects.equals(this.element.getGroup(), group)) {
+			if (this.element != null) {
+				pseudoClassStateChanged(PseudoClass.getPseudoClass(this.element.getGroup().name()), false);
+			}
+			pseudoClassStateChanged(PseudoClass.getPseudoClass(group.name()), true);
+		}
+	}
+
+	/**
+	 * @return The element displayed by the tile
+	 */
 	public Element getElement() {
 		return element;
 	}
 
+	/**
+	 * Send a click event to the tile.
+	 * 
+	 * @param event
+	 *          The mouse event to apply to this tile
+	 */
 	public void onMouseClicked(MouseEvent event) {
 		System.out.println("halp");
 	}
