@@ -13,7 +13,7 @@ Export-Package: \
 	META-INF/schemata=schemata
 
 -pluginpath: \
-	${pluginpath.modabi}
+	${pluginpath.modabi;xml}
 
 -plugin: \
 	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlRegistration

@@ -13,12 +13,7 @@
 	<models>
 		<model
 			name="sai:experimentPart"
-			dataType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.experiment.ExperimentPart"
-			abstract="true" />
-
-		<model
-			name="sai:configurable"
-			dataType="uk.co.saiman.utilities.Configurable"
+			dataType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.experiment.ExperimentPart&lt;?\, ?\, ?&gt;"
 			abstract="true" />
 	</models>
 </schema>

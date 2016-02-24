@@ -11,9 +11,21 @@
 	<types />
 
 	<models>
-		<!-- model name="sai:configurable" dataType="@uk.co.strangeskies.reflection.TypeToken.Infer 
-			uk.co.saiman.utilities.Configurable&lt;?&gt;"> <complex name="sai:configuration" 
-			abstract="true" extensible="true" outMethod="configuration" unbindingStrategy="SIMPLE" 
-			inMethod="configure"> </complex> </model -->
+		<model
+			name="sai:configurable"
+			abstract="true"
+			dataType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.utilities.Configurable&lt;?&gt;"
+			bindingType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.utilities.Configurable&lt;?&gt;"
+			unbindingType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.utilities.Configurable&lt;?&gt;">
+
+			<!--  complex
+				name="sai:configuration"
+				abstract="true"
+				extensible="true"
+				outMethod="configuration"
+				unbindingStrategy="SIMPLE"
+				inMethod="configure">
+			</complex-->
+		</model>
 	</models>
 </schema>
