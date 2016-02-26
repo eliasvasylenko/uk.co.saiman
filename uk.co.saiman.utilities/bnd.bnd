@@ -16,5 +16,5 @@ Export-Package: \
 	${pluginpath.modabi;xml}
 
 -plugin: \
-	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlRegistration
+	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlPlugin
 	
