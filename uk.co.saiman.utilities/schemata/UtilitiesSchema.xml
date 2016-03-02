@@ -2,7 +2,7 @@
 <schema
 	xmlns="http://modabi.strangeskies.co.uk/2014-01-01/"
 	xmlns:sai="http://saiman.co.uk/2015-10-08/"
-	name="UtilitiesSchema">
+	name="sai:UtilitiesSchema">
 
 	<dependencies>
 		BaseSchema

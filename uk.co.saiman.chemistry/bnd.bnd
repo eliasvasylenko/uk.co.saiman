@@ -4,7 +4,8 @@ Bundle-Name: SAI :: Chemistry
 	${mdb;core.api},\
 	${ss;reflection},\
 	${ss;utilities},\
-	${ss;mathematics}
+	${ss;mathematics},\
+	uk.co.saiman.utilities
 
 Export-Package: \
 	uk.co.saiman.chemistry.analysis,\
