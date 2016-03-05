@@ -5,8 +5,7 @@
 	name="sai:PeriodicTableSchema">
 
 	<dependencies>
-		BaseSchema,
-		sai:UtilitiesSchema
+		BaseSchema
 	</dependencies>
 
 	<types />

@@ -5,7 +5,8 @@
 	name="ExperimentSchema">
 
 	<dependencies>
-		BaseSchema
+		BaseSchema,
+		sai:UtilitiesSchema
 	</dependencies>
 
 	<types />
