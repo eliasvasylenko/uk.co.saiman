@@ -190,9 +190,7 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 
 	@Override
 	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
-		getReadLock().lock();
-
-		try {
+		synchronized (this) {
 			if (getDepth() <= 2) {
 				return copy();
 			}
@@ -316,8 +314,6 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 			 * Prepare linearisation
 			 */
 			return new ArraySampledContinuousFunction(count, values, intensities);
-		} finally {
-			getReadLock().unlock();
 		}
 	}
 }

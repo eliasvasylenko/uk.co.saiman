@@ -3,7 +3,7 @@ Bundle-Name: SAI :: Experiment
 -buildpath: \
 	${ss;utilities},\
 	${ss;reflection},\
-	uk.co.saiman.utilities;version=project
+	uk.co.saiman.utilities;version=snapshot
 
 Export-Package: uk.co.saiman.experiment
 

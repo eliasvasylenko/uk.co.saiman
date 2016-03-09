@@ -18,14 +18,15 @@
 			bindingType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.utilities.Configurable&lt;?&gt;"
 			unbindingType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.utilities.Configurable&lt;?&gt;">
 
-			<!--  complex
+			<complex
 				name="sai:configuration"
 				abstract="true"
 				extensible="true"
 				outMethod="configuration"
+				dataType="java.lang.Object"
 				unbindingStrategy="SIMPLE"
 				inMethod="configure">
-			</complex-->
+			</complex>
 		</model>
 	</models>
 </schema>

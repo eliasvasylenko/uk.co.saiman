@@ -20,7 +20,7 @@ package uk.co.saiman.data;
 
 import java.util.function.Consumer;
 
-import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
+import uk.co.strangeskies.mathematics.expression.LockingExpressionImpl;
 
 /**
  * A mutable implementation conforming to the contract of
@@ -28,7 +28,7 @@ import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
  * 
  * @author Elias N Vasylenko
  */
-public class ArrayRegularSampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction>
+public class ArrayRegularSampledContinuousFunction extends LockingExpressionImpl<ContinuousFunction, ContinuousFunction>
 		implements RegularSampledContinuousFunction {
 	private final double frequency;
 	private final double domainStart;

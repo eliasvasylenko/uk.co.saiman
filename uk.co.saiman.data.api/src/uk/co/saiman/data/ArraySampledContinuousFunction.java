@@ -21,14 +21,14 @@ package uk.co.saiman.data;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import uk.co.strangeskies.mathematics.expression.MutableExpressionImpl;
+import uk.co.strangeskies.mathematics.expression.LockingExpressionImpl;
 
 /**
  * A mutable, array backed implementation of {@link SampledContinuousFunction}.
  * 
  * @author Elias N Vasylenko
  */
-public class ArraySampledContinuousFunction extends MutableExpressionImpl<ContinuousFunction>
+public class ArraySampledContinuousFunction extends LockingExpressionImpl<ContinuousFunction, ContinuousFunction>
 		implements SampledContinuousFunction {
 	private final double[] values;
 	private final double[] intensities;

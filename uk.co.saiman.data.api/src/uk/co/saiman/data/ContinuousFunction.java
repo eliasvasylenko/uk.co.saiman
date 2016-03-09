@@ -18,12 +18,10 @@
  */
 package uk.co.saiman.data;
 
-import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
-import uk.co.strangeskies.mathematics.expression.ImmutableReadLock;
 import uk.co.strangeskies.mathematics.expression.SelfExpression;
 
 /**
@@ -40,7 +38,8 @@ import uk.co.strangeskies.mathematics.expression.SelfExpression;
  * 
  * @author Elias N Vasylenko
  */
-public interface ContinuousFunction extends SelfExpression<ContinuousFunction> {
+public interface ContinuousFunction
+		extends SelfExpression<ContinuousFunction>, Expression<ContinuousFunction, ContinuousFunction> {
 	/**
 	 * A very simple, immutable implementation of a continuous function describing
 	 * a single point at 0 in both the domain and codomain.
@@ -52,23 +51,18 @@ public interface ContinuousFunction extends SelfExpression<ContinuousFunction> {
 		}
 
 		@Override
-		public boolean removeObserver(Consumer<? super Expression<ContinuousFunction>> observer) {
+		public boolean removeObserver(Consumer<? super ContinuousFunction> observer) {
 			return true;
 		}
 
 		@Override
-		public boolean addObserver(Consumer<? super Expression<ContinuousFunction>> observer) {
+		public boolean addObserver(Consumer<? super ContinuousFunction> observer) {
 			return true;
 		}
 
 		@Override
 		public ContinuousFunction getValue() {
 			return this;
-		}
-
-		@Override
-		public Lock getReadLock() {
-			return new ImmutableReadLock();
 		}
 
 		@Override

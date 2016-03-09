@@ -49,7 +49,7 @@ public class ContinuousFunctionSeries {
 	 * Continuous function data
 	 */
 	private final ContinuousFunction continuousFunction;
-	private final Consumer<Expression<ContinuousFunction>> continuousFunctionObserver;
+	private final Consumer<Expression<ContinuousFunction, ContinuousFunction>> continuousFunctionObserver;
 
 	/*
 	 * Series data

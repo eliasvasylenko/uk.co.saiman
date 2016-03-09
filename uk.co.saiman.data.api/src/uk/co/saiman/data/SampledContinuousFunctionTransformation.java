@@ -20,7 +20,7 @@ package uk.co.saiman.data;
 
 import java.util.function.Function;
 
-import uk.co.strangeskies.mathematics.expression.FunctionExpression;
+import uk.co.strangeskies.mathematics.expression.DependentExpression;
 
 /**
  * A {@link SampledContinuousFunction} which is backed by a given
@@ -33,7 +33,7 @@ import uk.co.strangeskies.mathematics.expression.FunctionExpression;
  * 
  * @author Elias N Vasylenko
  */
-public class SampledContinuousFunctionTransformation extends FunctionExpression<ContinuousFunction, ContinuousFunction>
+public class SampledContinuousFunctionTransformation extends DependentExpression<ContinuousFunction, ContinuousFunction>
 		implements SampledContinuousFunctionDecorator {
 	private final Function<ContinuousFunction, SampledContinuousFunction> transformation;
 
@@ -48,9 +48,9 @@ public class SampledContinuousFunctionTransformation extends FunctionExpression<
 	 *          The transformation to apply to the backing function
 	 */
 	@SuppressWarnings("unchecked")
-	public <C> SampledContinuousFunctionTransformation(C dependency,
+	public <C extends ContinuousFunction> SampledContinuousFunctionTransformation(C dependency,
 			Function<C, SampledContinuousFunction> transformation) {
-		super((ContinuousFunction) dependency, c -> transformation.apply((C) c));
+		super(dependency);
 
 		this.transformation = (Function<ContinuousFunction, SampledContinuousFunction>) transformation;
 	}
@@ -63,14 +63,15 @@ public class SampledContinuousFunctionTransformation extends FunctionExpression<
 	@Override
 	public SampledContinuousFunction copy() {
 		ContinuousFunction component;
-
-		try {
-			getReadLock().lock();
+		synchronized (this) {
 			component = getValue().copy();
-		} finally {
-			getReadLock().unlock();
 		}
 
 		return new SampledContinuousFunctionTransformation(component, transformation);
+	}
+
+	@Override
+	protected ContinuousFunction evaluate() {
+		return this;
 	}
 }

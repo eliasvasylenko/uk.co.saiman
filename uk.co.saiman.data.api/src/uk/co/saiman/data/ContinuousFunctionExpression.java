@@ -28,7 +28,7 @@ import uk.co.strangeskies.mathematics.expression.DependentExpression;
  * 
  * @author Elias N Vasylenko
  */
-public class ContinuousFunctionExpression extends DependentExpression<ContinuousFunction>
+public class ContinuousFunctionExpression extends DependentExpression<ContinuousFunction, ContinuousFunction>
 		implements ContinuousFunctionDecorator {
 	private ContinuousFunction component;
 
@@ -61,26 +61,22 @@ public class ContinuousFunctionExpression extends DependentExpression<Continuous
 	 * @param component
 	 *          The continuous function we wish to wrap
 	 */
-	public void setComponent(ContinuousFunction component) {
+	public synchronized void setComponent(ContinuousFunction component) {
 		try {
-			getWriteLock().lock();
+			beginChange();
 			this.component = component;
 			getDependencies().clear();
 			getDependencies().add(component);
 		} finally {
-			postUpdate();
+			endChange();
 		}
 	}
 
 	@Override
 	public ContinuousFunctionExpression copy() {
 		ContinuousFunction component;
-
-		try {
-			getReadLock().lock();
+		synchronized (this) {
 			component = getComponent().copy();
-		} finally {
-			getReadLock().unlock();
 		}
 
 		return new ContinuousFunctionExpression(component);

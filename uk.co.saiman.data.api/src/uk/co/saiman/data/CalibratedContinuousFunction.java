@@ -28,7 +28,7 @@ import uk.co.strangeskies.mathematics.expression.DependentExpression;
  * 
  * @author Elias N Vasylenko
  */
-public class CalibratedContinuousFunction extends DependentExpression<ContinuousFunction>
+public class CalibratedContinuousFunction extends DependentExpression<ContinuousFunction, ContinuousFunction>
 		implements SampledContinuousFunctionDecorator {
 	private final SampledContinuousFunction component;
 	private final Calibration calibration;
