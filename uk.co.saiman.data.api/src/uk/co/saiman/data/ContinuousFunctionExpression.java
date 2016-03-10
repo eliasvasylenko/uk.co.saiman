@@ -76,10 +76,10 @@ public class ContinuousFunctionExpression extends DependentExpression<Continuous
 	public ContinuousFunctionExpression copy() {
 		ContinuousFunction component;
 		synchronized (this) {
-			component = getComponent().copy();
+			component = getComponent();
 		}
 
-		return new ContinuousFunctionExpression(component);
+		return new ContinuousFunctionExpression(component.copy());
 	}
 
 	@Override
