@@ -62,12 +62,7 @@ public class SampledContinuousFunctionTransformation extends DependentExpression
 
 	@Override
 	public SampledContinuousFunction copy() {
-		ContinuousFunction component;
-		synchronized (this) {
-			component = getValue().copy();
-		}
-
-		return new SampledContinuousFunctionTransformation(component, transformation);
+		return new SampledContinuousFunctionTransformation(getComponent(), transformation);
 	}
 
 	@Override

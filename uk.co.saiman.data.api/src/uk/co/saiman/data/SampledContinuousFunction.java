@@ -190,130 +190,128 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 
 	@Override
 	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
-		synchronized (this) {
-			if (getDepth() <= 2) {
-				return copy();
-			}
+		if (getDepth() <= 2) {
+			return copy();
+		}
 
-			int[] indices;
-			double[] values;
-			double[] intensities;
-			int count;
+		int[] indices;
+		double[] values;
+		double[] intensities;
+		int count;
+
+		/*
+		 * Prepare significant indices
+		 */
+		double xRange = endX - startX;
+		indices = new int[resolvableUnits * 4 + 8];
+		count = 0;
+
+		int indexFrom = getIndexBelow(startX);
+		if (indexFrom < 0) {
+			indexFrom = 0;
+		}
+		int indexTo = getIndexAbove(endX);
+		if (indexTo >= getDepth() || indexTo < 0) {
+			indexTo = getDepth() - 1;
+		}
+
+		indices[count++] = indexFrom;
+
+		int resolvedUnit = 0;
+		double resolvableUnitLength = xRange / resolvableUnits;
+		double resolvableUnitFrequency = resolvableUnits / xRange;
+		double resolvedUnitX = startX;
+
+		int lastIndex;
+		int minIndex;
+		double minY;
+		int maxIndex;
+		double maxY;
+		lastIndex = minIndex = maxIndex = indexFrom;
+		minY = maxY = getY(lastIndex);
+		for (int index = indexFrom + 1; index < indexTo; index++) {
+			/*
+			 * Get sample location at index
+			 */
+			double sampleX = getX(index);
+			double sampleY = getY(index);
 
 			/*
-			 * Prepare significant indices
+			 * Check if passed resolution boundary (or last position)
 			 */
-			double xRange = endX - startX;
-			indices = new int[resolvableUnits * 4 + 8];
-			count = 0;
-
-			int indexFrom = getIndexBelow(startX);
-			if (indexFrom < 0) {
-				indexFrom = 0;
-			}
-			int indexTo = getIndexAbove(endX);
-			if (indexTo >= getDepth() || indexTo < 0) {
-				indexTo = getDepth() - 1;
-			}
-
-			indices[count++] = indexFrom;
-
-			int resolvedUnit = 0;
-			double resolvableUnitLength = xRange / resolvableUnits;
-			double resolvableUnitFrequency = resolvableUnits / xRange;
-			double resolvedUnitX = startX;
-
-			int lastIndex;
-			int minIndex;
-			double minY;
-			int maxIndex;
-			double maxY;
-			lastIndex = minIndex = maxIndex = indexFrom;
-			minY = maxY = getY(lastIndex);
-			for (int index = indexFrom + 1; index < indexTo; index++) {
+			if (sampleX > resolvedUnitX || index + 1 == indexTo) {
 				/*
-				 * Get sample location at index
+				 * Move to next resolution boundary
 				 */
-				double sampleX = getX(index);
-				double sampleY = getY(index);
+				resolvedUnit = (int) ((sampleX - startX) * resolvableUnitFrequency) + 1;
+				resolvedUnitX = startX + resolvedUnit * resolvableUnitLength;
 
 				/*
-				 * Check if passed resolution boundary (or last position)
+				 * Add indices of minimum and maximum y encountered in boundary span
 				 */
-				if (sampleX > resolvedUnitX || index + 1 == indexTo) {
-					/*
-					 * Move to next resolution boundary
-					 */
-					resolvedUnit = (int) ((sampleX - startX) * resolvableUnitFrequency) + 1;
-					resolvedUnitX = startX + resolvedUnit * resolvableUnitLength;
+				if (sampleY < minY) {
+					minIndex = -1;
+				} else if (sampleY > maxY) {
+					maxIndex = -1;
+				}
 
-					/*
-					 * Add indices of minimum and maximum y encountered in boundary span
-					 */
-					if (sampleY < minY) {
-						minIndex = -1;
-					} else if (sampleY > maxY) {
-						maxIndex = -1;
-					}
-
-					if (minIndex > 0) {
-						if (maxIndex > 0) {
-							if (maxIndex > minIndex) {
-								indices[count++] = minIndex;
-								indices[count++] = maxIndex;
-							} else {
-								indices[count++] = maxIndex;
-								indices[count++] = minIndex;
-							}
+				if (minIndex > 0) {
+					if (maxIndex > 0) {
+						if (maxIndex > minIndex) {
+							indices[count++] = minIndex;
+							indices[count++] = maxIndex;
 						} else {
+							indices[count++] = maxIndex;
 							indices[count++] = minIndex;
 						}
-					} else if (maxIndex > 0) {
-						indices[count++] = maxIndex;
+					} else {
+						indices[count++] = minIndex;
 					}
+				} else if (maxIndex > 0) {
+					indices[count++] = maxIndex;
+				}
 
-					if (index > lastIndex) {
-						indices[count++] = index;
-					}
-					lastIndex = index + 1;
-					indices[count++] = lastIndex;
+				if (index > lastIndex) {
+					indices[count++] = index;
+				}
+				lastIndex = index + 1;
+				indices[count++] = lastIndex;
 
-					minIndex = -1;
-					maxIndex = -1;
-				} else if (index > lastIndex) {
-					/*
-					 * Check for Y range expansion
-					 */
-					if (maxIndex == -1 || sampleY > maxY) {
-						maxY = sampleY;
-						maxIndex = index;
-					} else if (minIndex == -1 || sampleY < minY) {
-						minY = sampleY;
-						minIndex = index;
-					}
+				minIndex = -1;
+				maxIndex = -1;
+			} else if (index > lastIndex) {
+				/*
+				 * Check for Y range expansion
+				 */
+				if (maxIndex == -1 || sampleY > maxY) {
+					maxY = sampleY;
+					maxIndex = index;
+				} else if (minIndex == -1 || sampleY < minY) {
+					minY = sampleY;
+					minIndex = index;
 				}
 			}
-
-			/*
-			 * Prepare significant values
-			 */
-			values = new double[count];
-			for (int i = 0; i < count; i++) {
-				values[i] = getX(indices[i]);
-			}
-
-			/*
-			 * Prepare significant intensities
-			 */
-			intensities = new double[count];
-			for (int i = 0; i < count; i++) {
-				intensities[i] = getY(indices[i]);
-			}
-
-			/*
-			 * Prepare linearisation
-			 */
-			return new ArraySampledContinuousFunction(count, values, intensities);
 		}
+
+		/*
+		 * Prepare significant values
+		 */
+		values = new double[count];
+		for (int i = 0; i < count; i++) {
+			values[i] = getX(indices[i]);
+		}
+
+		/*
+		 * Prepare significant intensities
+		 */
+		intensities = new double[count];
+		for (int i = 0; i < count; i++) {
+			intensities[i] = getY(indices[i]);
+		}
+
+		/*
+		 * Prepare linearisation
+		 */
+		return new ArraySampledContinuousFunction(count, values, intensities);
 	}
 }

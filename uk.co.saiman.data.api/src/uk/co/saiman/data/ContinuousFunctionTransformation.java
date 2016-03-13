@@ -62,12 +62,7 @@ public class ContinuousFunctionTransformation extends DependentExpression<Contin
 
 	@Override
 	public ContinuousFunction copy() {
-		ContinuousFunction component;
-		synchronized (this) {
-			component = getValue().copy();
-		}
-
-		return new ContinuousFunctionTransformation(component, transformation);
+		return new ContinuousFunctionTransformation(getComponent(), transformation);
 	}
 
 	@Override

@@ -20,7 +20,7 @@ package uk.co.saiman.data;
 
 import java.util.Arrays;
 
-import uk.co.strangeskies.mathematics.expression.ExpressionImpl;
+import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
 
 /**
  * A (currently) immutable implementation of
@@ -29,7 +29,7 @@ import uk.co.strangeskies.mathematics.expression.ExpressionImpl;
  * 
  * @author Elias N Vasylenko
  */
-public class SparseSampledContinuousFunction extends ExpressionImpl<ContinuousFunction, ContinuousFunction>
+public class SparseSampledContinuousFunction extends ImmutableExpression<ContinuousFunction, ContinuousFunction>
 		implements RegularSampledContinuousFunction {
 	private final double frequency;
 	private final int depth;
@@ -157,7 +157,7 @@ public class SparseSampledContinuousFunction extends ExpressionImpl<ContinuousFu
 	}
 
 	@Override
-	protected ContinuousFunction getValueImpl(boolean dirty) {
+	public ContinuousFunction getValue() {
 		return this;
 	}
 

@@ -2,7 +2,12 @@
 <schema
 	xmlns="http://modabi.strangeskies.co.uk/2014-01-01/"
 	xmlns:sai="http://saiman.co.uk/2015-10-08/"
-	name="ExperimentSchema">
+	name="sai:ExperimentSchema">
+	
+	<imports>
+		uk.co.strangeskies.reflection.TypeToken.Infer,
+		uk.co.saiman.experiment.ExperimentPart
+	</imports>
 
 	<dependencies>
 		BaseSchema,
@@ -14,7 +19,8 @@
 	<models>
 		<model
 			name="sai:experimentPart"
-			dataType="@uk.co.strangeskies.reflection.TypeToken.Infer uk.co.saiman.experiment.ExperimentPart&lt;?\, ?\, ?&gt;"
+			model="sai:configurable"
+			dataType="@Infer ExperimentPart&lt;?\, ?\, ?&gt;"
 			abstract="true" />
 	</models>
 </schema>

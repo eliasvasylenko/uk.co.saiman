@@ -125,16 +125,15 @@ public class ContinuousFunctionSeries {
 	}
 
 	private ContinuousFunction getRefreshedContinuousFunction() {
-		boolean refreshed;
-
 		synchronized (refreshTimer) {
-			refreshed = refresh;
 			if (refresh) {
 				refresh = false;
+
+				return this.continuousFunction.getValue().copy();
+			} else {
+				return null;
 			}
 		}
-
-		return refreshed ? this.continuousFunction.getValue().copy() : null;
 	}
 
 	private void refreshImpl() {

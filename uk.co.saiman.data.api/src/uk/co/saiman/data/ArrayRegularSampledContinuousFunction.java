@@ -20,15 +20,13 @@ package uk.co.saiman.data;
 
 import java.util.function.Consumer;
 
-import uk.co.strangeskies.mathematics.expression.LockingExpressionImpl;
-
 /**
  * A mutable implementation conforming to the contract of
  * {@link RegularSampledContinuousFunction} and backed by an array.
  * 
  * @author Elias N Vasylenko
  */
-public class ArrayRegularSampledContinuousFunction extends LockingExpressionImpl<ContinuousFunction, ContinuousFunction>
+public class ArrayRegularSampledContinuousFunction extends LockingSampledContinuousFunction
 		implements RegularSampledContinuousFunction {
 	private final double frequency;
 	private final double domainStart;
@@ -54,12 +52,12 @@ public class ArrayRegularSampledContinuousFunction extends LockingExpressionImpl
 
 	@Override
 	public int getDepth() {
-		return intensities.length;
+		return read(() -> intensities.length);
 	}
 
 	@Override
 	public double getY(int index) {
-		return intensities[index];
+		return read(() -> intensities[index]);
 	}
 
 	/**
@@ -69,27 +67,32 @@ public class ArrayRegularSampledContinuousFunction extends LockingExpressionImpl
 	 *          The mutation operation
 	 */
 	public void mutate(Consumer<double[]> mutation) {
-		getReadLock().lock();
+		getWriteLock().lock();
 		try {
 			mutation.accept(intensities);
 		} finally {
-			getReadLock().unlock();
+			getWriteLock().unlock();
 		}
 	}
 
 	@Override
 	public double getFrequency() {
-		return frequency;
+		return read(() -> frequency);
 	}
 
 	@Override
 	public double getX(int index) {
-		return RegularSampledContinuousFunction.super.getX(index) + domainStart;
+		return read(() -> RegularSampledContinuousFunction.super.getX(index) + domainStart);
+	}
+
+	@Override
+	public int getIndexBelow(double xValue) {
+		return read(() -> RegularSampledContinuousFunction.super.getIndexBelow(xValue));
 	}
 
 	@Override
 	public ArrayRegularSampledContinuousFunction copy() {
-		return new ArrayRegularSampledContinuousFunction(frequency, domainStart, intensities);
+		return read(() -> new ArrayRegularSampledContinuousFunction(frequency, domainStart, intensities));
 	}
 
 	@Override

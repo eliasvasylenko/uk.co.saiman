@@ -21,14 +21,12 @@ package uk.co.saiman.data;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import uk.co.strangeskies.mathematics.expression.LockingExpressionImpl;
-
 /**
  * A mutable, array backed implementation of {@link SampledContinuousFunction}.
  * 
  * @author Elias N Vasylenko
  */
-public class ArraySampledContinuousFunction extends LockingExpressionImpl<ContinuousFunction, ContinuousFunction>
+public class ArraySampledContinuousFunction extends LockingSampledContinuousFunction
 		implements SampledContinuousFunction {
 	private final double[] values;
 	private final double[] intensities;
@@ -61,62 +59,68 @@ public class ArraySampledContinuousFunction extends LockingExpressionImpl<Contin
 	 *          Y values, in the codomain
 	 */
 	public void mutateIntensities(Consumer<double[]> valueMutation, Consumer<double[]> intensityMutation) {
-		getReadLock().lock();
+		getWriteLock().lock();
 		try {
 			valueMutation.accept(values);
 			intensityMutation.accept(intensities);
+		} finally {
+			getWriteLock().unlock();
+		}
+	}
+
+	@Override
+	public int getDepth() {
+		return read(() -> values.length);
+	}
+
+	@Override
+	public int getIndexBelow(double xValue) {
+		getReadLock().lock();
+
+		try {
+			int from = 0;
+			int to = values.length - 1;
+
+			if (to < 0) {
+				return -1;
+			}
+
+			do {
+				if (values[to] <= xValue) {
+					return to;
+				} else if (values[from] > xValue) {
+					return -1;
+				} else if (values[from] == xValue) {
+					return from;
+				} else {
+					int mid = (to + from) / 2;
+					if (values[mid] > xValue) {
+						to = mid;
+					} else {
+						from = mid;
+					}
+				}
+			} while (to - from > 1);
+
+			return from;
 		} finally {
 			getReadLock().unlock();
 		}
 	}
 
 	@Override
-	public int getDepth() {
-		return values.length;
-	}
-
-	@Override
-	public int getIndexBelow(double xValue) {
-		int from = 0;
-		int to = values.length - 1;
-
-		if (to < 0) {
-			return -1;
-		}
-
-		do {
-			if (values[to] <= xValue) {
-				return to;
-			} else if (values[from] > xValue) {
-				return -1;
-			} else if (values[from] == xValue) {
-				return from;
-			} else {
-				int mid = (to + from) / 2;
-				if (values[mid] > xValue) {
-					to = mid;
-				} else {
-					from = mid;
-				}
-			}
-		} while (to - from > 1);
-
-		return from;
-	}
-
-	@Override
 	public double getX(int index) {
-		return values[index];
+		return read(() -> values[index]);
 	}
 
 	@Override
 	public double getY(int index) {
-		return intensities[index];
+		return read(() -> intensities[index]);
 	}
 
 	@Override
 	public ArraySampledContinuousFunction copy() {
-		return new ArraySampledContinuousFunction(getDepth(), values, intensities);
+		return read(() -> new ArraySampledContinuousFunction(getDepth(), values, intensities));
 	}
 
 	@Override

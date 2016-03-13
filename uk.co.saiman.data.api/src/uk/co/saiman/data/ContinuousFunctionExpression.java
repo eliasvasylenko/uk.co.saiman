@@ -61,24 +61,20 @@ public class ContinuousFunctionExpression extends DependentExpression<Continuous
 	 * @param component
 	 *          The continuous function we wish to wrap
 	 */
-	public synchronized void setComponent(ContinuousFunction component) {
+	public void setComponent(ContinuousFunction component) {
+		beginWrite();
+
 		try {
-			beginChange();
 			this.component = component;
 			getDependencies().clear();
 			getDependencies().add(component);
 		} finally {
-			endChange();
+			endWrite();
 		}
 	}
 
 	@Override
 	public ContinuousFunctionExpression copy() {
-		ContinuousFunction component;
-		synchronized (this) {
-			component = getComponent();
-		}
-
 		return new ContinuousFunctionExpression(component.copy());
 	}
 

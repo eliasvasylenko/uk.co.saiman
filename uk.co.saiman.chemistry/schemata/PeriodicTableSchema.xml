@@ -4,6 +4,16 @@
 	xmlns:sai="http://saiman.co.uk/2015-10-08/"
 	name="sai:PeriodicTableSchema">
 
+	<imports>
+		uk.co.strangeskies.reflection.TypeToken.Infer,
+		java.util.Collection,
+		java.util.List,
+		uk.co.saiman.chemistry.Element.Group,
+		uk.co.saiman.chemistry.PeriodicTable,
+		uk.co.saiman.chemistry.Element,
+		uk.co.saiman.chemistry.isotope.Isotope
+	</imports>
+
 	<dependencies>
 		BaseSchema
 	</dependencies>
@@ -13,7 +23,7 @@
 	<models>
 		<model
 			name="sai:isotope"
-			dataType="uk.co.saiman.chemistry.isotope.Isotope"
+			dataType="Isotope"
 			bindingStrategy="CONSTRUCTOR">
 
 			<inputSequence name="sai:constructor">
@@ -33,7 +43,7 @@
 
 		<model
 			name="sai:element"
-			dataType="uk.co.saiman.chemistry.Element"
+			dataType="Element"
 			bindingStrategy="CONSTRUCTOR">
 
 			<inputSequence name="sai:constructor">
@@ -53,8 +63,8 @@
 				<inline
 					name="sai:isotopeList"
 					outMethod="getIsotopes"
-					dataType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.Collection&lt;?&gt;"
-					bindingType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.List&lt;?&gt;">
+					dataType="@Infer Collection&lt;?&gt;"
+					bindingType="@Infer List&lt;?&gt;">
 
 					<complex
 						baseModel="sai:isotope"
@@ -65,14 +75,14 @@
 
 				<property
 					name="sai:group"
-					dataType="uk.co.saiman.chemistry.Element.Group"
+					dataType="Group"
 					type="enum" />
 			</inputSequence>
 		</model>
 
 		<model
 			name="sai:periodicTable"
-			dataType="uk.co.saiman.chemistry.PeriodicTable"
+			dataType="PeriodicTable"
 			bindingStrategy="CONSTRUCTOR">
 
 			<inputSequence name="sai:constructor">
@@ -83,8 +93,8 @@
 				<inline
 					name="sai:elementList"
 					outMethod="getElements"
-					dataType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.Collection&lt;?&gt;"
-					bindingType="@uk.co.strangeskies.reflection.TypeToken.Infer java.util.List&lt;?&gt;">
+					dataType="@Infer Collection&lt;?&gt;"
+					bindingType="@Infer List&lt;?&gt;">
 
 					<complex
 						baseModel="sai:element"
