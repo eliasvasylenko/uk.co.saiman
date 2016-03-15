@@ -1,5 +1,7 @@
 package uk.co.saiman.msapex.chemistry;
 
+import static uk.co.strangeskies.utilities.Enumeration.next;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,10 +29,7 @@ public class PeriodicTableResize {
 
 		Size currentSize = periodicTablePart.getPeriodicTableController().getTileSize();
 
-		int ordinal = currentSize.ordinal() + 1;
-		currentSize = Size.values().length == ordinal ? Size.values()[0] : Size.values()[ordinal];
-
-		periodicTablePart.getPeriodicTableController().setTileSize(currentSize);
+		periodicTablePart.getPeriodicTableController().setTileSize(next(currentSize));
 	}
 
 	@AboutToShow
