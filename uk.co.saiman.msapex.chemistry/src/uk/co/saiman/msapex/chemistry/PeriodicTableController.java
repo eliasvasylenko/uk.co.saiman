@@ -22,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import uk.co.saiman.chemistry.PeriodicTable;
+import uk.co.saiman.msapex.chemistry.ChemicalElementTile.Size;
 
 /**
  * A JavaFX UI component for display of a {@link PeriodicTable}.
@@ -33,6 +34,13 @@ public class PeriodicTableController {
 
 	@FXML
 	private GridPane elementGrid;
+
+	private Size tileSize;
+
+	@FXML
+	void initialize() {
+		setTileSize(Size.NORMAL);
+	}
 
 	/**
 	 * @param table
@@ -50,5 +58,23 @@ public class PeriodicTableController {
 	 */
 	public PeriodicTable getPeriodicTable() {
 		return periodicTable;
+	}
+
+	/**
+	 * @param size
+	 *          the new size of the element tiles
+	 */
+	public void setTileSize(Size size) {
+		tileSize = size;
+		for (Node node : elementGrid.getChildren()) {
+			((ChemicalElementTile) node).setSize(size);
+		}
+	}
+
+	/**
+	 * @return the current size of the element tiles
+	 */
+	public Size getTileSize() {
+		return tileSize;
 	}
 }

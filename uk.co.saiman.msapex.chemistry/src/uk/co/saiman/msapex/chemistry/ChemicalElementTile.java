@@ -42,6 +42,27 @@ import uk.co.saiman.chemistry.Element.Group;
  * @author Elias N Vasylenko
  */
 public class ChemicalElementTile extends BorderPane {
+	/**
+	 * The size of the tile. Smaller sizes may choose to present less information
+	 * in order to take less space.
+	 * 
+	 * @author Elias N Vasylenko
+	 */
+	public enum Size {
+		/**
+		 * Smaller, with less information.
+		 */
+		SMALL,
+		/**
+		 * Normal size.
+		 */
+		NORMAL,
+		/**
+		 * Larger, with more information.
+		 */
+		LARGE
+	}
+
 	private Element element;
 
 	@FXML
@@ -83,6 +104,22 @@ public class ChemicalElementTile extends BorderPane {
 		Bindings.bindBidirectional(atomicNumberText.textProperty(), atomicNumber, new NumberStringConverter());
 
 		setElement(element);
+
+		setSize(Size.NORMAL);
+	}
+
+	/**
+	 * @param size
+	 *          the new size of the tile
+	 */
+	public void setSize(Size size) {
+		pseudoClassStateChanged(PseudoClass.getPseudoClass(size.name()), true);
+
+		for (Size other : Size.values()) {
+			if (other != size) {
+				pseudoClassStateChanged(PseudoClass.getPseudoClass(other.name()), false);
+			}
+		}
 	}
 
 	/**
@@ -133,6 +170,6 @@ public class ChemicalElementTile extends BorderPane {
 	 *          The mouse event to apply to this tile
 	 */
 	public void onMouseClicked(MouseEvent event) {
-		System.out.println("halp");
+		System.out.println("Clicked: " + element.getSymbol());
 	}
 }

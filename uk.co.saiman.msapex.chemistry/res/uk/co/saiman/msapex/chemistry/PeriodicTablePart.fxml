@@ -6,14 +6,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.GridPane?>
 <?import uk.co.saiman.msapex.chemistry.ChemicalElementTile?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
 
 <ScrollPane
 	xmlns="http://javafx.com/javafx/8"
-	xmlns:fx="http://javafx.com/fxml">
+	xmlns:fx="http://javafx.com/fxml"
+	fitToWidth="true"
+	fitToHeight="true">
 
 	<content>
 		<fx:include
 			fx:id="periodicTable"
-			source="PeriodicTable.fxml" />
+			source="PeriodicTable.fxml"
+			alignment="CENTER" />
 	</content>
 </ScrollPane>

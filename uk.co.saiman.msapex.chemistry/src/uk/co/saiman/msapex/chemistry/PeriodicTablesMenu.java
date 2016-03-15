@@ -61,7 +61,7 @@ public class PeriodicTablesMenu {
 				while (change.next()) {
 					if (change.wasAdded()) {
 						periodicTablePart.getPeriodicTableController().setPeriodicTable(change.getAddedSubList().get(0));
-						break;
+						return;
 					}
 				}
 			}
