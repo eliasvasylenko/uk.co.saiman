@@ -35,7 +35,7 @@ public interface ExperimentManager {
 	 * @return The current state, in the form of the stack of all currently
 	 *         executing experiment parts
 	 */
-	public List<ExperimentPart<?, ?, ?>> state();
+	public List<ExperimentNode<?, ?, ?>> state();
 
 	/*
 	 * Root experiment types
@@ -52,7 +52,7 @@ public interface ExperimentManager {
 	 * 
 	 * @return All registered root experiment parts
 	 */
-	Set<ExperimentPart<?, Void, ?>> getRootExperiments();
+	Set<ExperimentNode<?, Void, ?>> getRootExperiments();
 
 	/**
 	 * Add a root experiment node of the given type to management.
@@ -61,7 +61,7 @@ public interface ExperimentManager {
 	 *          The type of experiment
 	 * @return A new root experiment part of the given type
 	 */
-	<C, O> ExperimentPart<C, Void, O> addRootExperiment(ExperimentType<C, Void, O> rootType);
+	<C, O> ExperimentNode<C, Void, O> addRootExperiment(ExperimentType<C, Void, O> rootType);
 
 	/*
 	 * Child experiment types

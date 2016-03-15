@@ -17,4 +17,3 @@ Export-Package: \
 
 -plugin: \
 	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin
-	

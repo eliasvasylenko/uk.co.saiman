@@ -18,14 +18,11 @@
 	<models>
 		<model
 			name="sai:configurable"
-			abstract="true"
-			dataType="@Infer Configurable&lt;?&gt;"
-			bindingType="@Infer Configurable&lt;?&gt;"
-			unbindingType="@Infer Configurable&lt;?&gt;">
+			extensible="true"
+			dataType="@Infer Configurable&lt;?&gt;">
 
 			<complex
 				name="sai:configuration"
-				abstract="true"
 				extensible="true"
 				outMethod="configuration"
 				dataType="@Infer ?"

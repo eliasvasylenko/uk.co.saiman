@@ -36,7 +36,7 @@ import uk.co.saiman.utilities.Configurable;
  * @param <O>
  *          The type of the experiment output
  */
-public interface ExperimentPart<C, I, O> extends Configurable<C> {
+public interface ExperimentNode<C, I, O> extends Configurable<C> {
 	/**
 	 * Execute the experiment tree from the root of the receiving node.
 	 */
@@ -58,14 +58,14 @@ public interface ExperimentPart<C, I, O> extends Configurable<C> {
 	 * @return The parent part of this experiment, if present, otherwise an empty
 	 *         optional
 	 */
-	Optional<ExperimentPart<?, ?, ? extends I>> parent();
+	Optional<ExperimentNode<?, ?, ? extends I>> parent();
 
 	/**
 	 * @return The root part of the experiment tree this part occurs in
 	 */
 	@SuppressWarnings("unchecked")
-	default ExperimentPart<?, Void, ?> root() {
-		return parent().<ExperimentPart<?, Void, ?>> map(ExperimentPart::root).orElse((ExperimentPart<?, Void, ?>) this);
+	default ExperimentNode<?, Void, ?> root() {
+		return parent().<ExperimentNode<?, Void, ?>> map(ExperimentNode::root).orElse((ExperimentNode<?, Void, ?>) this);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public interface ExperimentPart<C, I, O> extends Configurable<C> {
 	 * 
 	 * @return An ordered list of all sequential child experiment parts
 	 */
-	List<ExperimentPart<?, ? super O, ?>> children();
+	List<ExperimentNode<?, ? super O, ?>> children();
 
 	/**
 	 * @return All known available child experiment types
@@ -94,7 +94,7 @@ public interface ExperimentPart<C, I, O> extends Configurable<C> {
 	 *          The type of experiment
 	 * @return A new child experiment part of the given type
 	 */
-	<D, U> ExperimentPart<D, O, U> addChild(ExperimentType<D, ? super O, U> childType);
+	<D, U> ExperimentNode<D, O, U> addChild(ExperimentType<D, ? super O, U> childType);
 
 	/**
 	 * @return The current execution lifecycle state of the experiment part.

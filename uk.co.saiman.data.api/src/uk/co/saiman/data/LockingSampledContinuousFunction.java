@@ -3,6 +3,13 @@ package uk.co.saiman.data;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.LockingExpression;
 
+/**
+ * A simple abstract partial implementation of a
+ * {@link SampledContinuousFunction} which ensures all default method
+ * implementations lock for reading.
+ * 
+ * @author Elias N Vasylenko
+ */
 public abstract class LockingSampledContinuousFunction extends LockingExpression<ContinuousFunction, ContinuousFunction>
 		implements SampledContinuousFunction {
 	@Override

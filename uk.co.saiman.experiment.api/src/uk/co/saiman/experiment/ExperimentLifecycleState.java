@@ -19,7 +19,7 @@
 package uk.co.saiman.experiment;
 
 /**
- * An {@link ExperimentPart} has a many to one relationship with a lifecycle
+ * An {@link ExperimentNode} has a many to one relationship with a lifecycle
  * state. When transitions between states are requested of an experiment
  * execution, the action is delegated to lifecycle participants registered with
  * that experiment part.

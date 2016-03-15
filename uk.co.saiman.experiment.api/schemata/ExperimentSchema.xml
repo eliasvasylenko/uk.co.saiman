@@ -6,7 +6,7 @@
 	
 	<imports>
 		uk.co.strangeskies.reflection.TypeToken.Infer,
-		uk.co.saiman.experiment.ExperimentPart
+		uk.co.saiman.experiment.ExperimentNode
 	</imports>
 
 	<dependencies>
@@ -18,9 +18,9 @@
 
 	<models>
 		<model
-			name="sai:experimentPart"
-			model="sai:configurable"
-			dataType="@Infer ExperimentPart&lt;?\, ?\, ?&gt;"
+			name="sai:experimentNode"
+			baseModel="sai:configurable"
+			dataType="@Infer ExperimentNode&lt;?\, ?\, ?&gt;"
 			abstract="true" />
 	</models>
 </schema>

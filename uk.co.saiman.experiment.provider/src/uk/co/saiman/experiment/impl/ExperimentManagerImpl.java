@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.experiment.ExperimentManager;
-import uk.co.saiman.experiment.ExperimentPart;
+import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 
 /**
@@ -39,9 +39,12 @@ import uk.co.saiman.experiment.ExperimentType;
 public class ExperimentManagerImpl implements ExperimentManager {
 	private final Set<ExperimentType<?, ?, ?>> experimentTypes;
 
-	private final Set<ExperimentPart<?, ?, ?>> experiments;
-	private final List<ExperimentPart<?, ?, ?>> processingStack;
+	private final Set<ExperimentNode<?, ?, ?>> experiments;
+	private final List<ExperimentNode<?, ?, ?>> processingStack;
 
+	/**
+	 * Create an empty experiment manager.
+	 */
 	public ExperimentManagerImpl() {
 		experimentTypes = new HashSet<>();
 
@@ -50,7 +53,7 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	}
 
 	@Override
-	public List<ExperimentPart<?, ?, ?>> state() {
+	public List<ExperimentNode<?, ?, ?>> state() {
 		return processingStack;
 	}
 
@@ -66,12 +69,12 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	}
 
 	@Override
-	public Set<ExperimentPart<?, Void, ?>> getRootExperiments() {
+	public Set<ExperimentNode<?, Void, ?>> getRootExperiments() {
 		return null;
 	}
 
 	@Override
-	public <C, O> ExperimentPart<C, Void, O> addRootExperiment(ExperimentType<C, Void, O> rootType) {
+	public <C, O> ExperimentNode<C, Void, O> addRootExperiment(ExperimentType<C, Void, O> rootType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
