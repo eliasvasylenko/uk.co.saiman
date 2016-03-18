@@ -96,7 +96,7 @@ public class ArrayRegularSampledContinuousFunction extends LockingSampledContinu
 	}
 
 	@Override
-	public ContinuousFunction getValueImpl(boolean dirty) {
+	public ContinuousFunction evaluate() {
 		return this;
 	}
 }

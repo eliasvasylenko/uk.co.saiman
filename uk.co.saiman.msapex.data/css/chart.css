@@ -6,3 +6,8 @@
 #msapexDataChart .chart-line-symbol {
     visibility: hidden;
 }
+
+#msapexDataChart:focused {
+    -fx-border-color: -fx-focus-color;
+    -fx-padding: -1;
+}

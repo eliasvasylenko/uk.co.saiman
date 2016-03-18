@@ -10,7 +10,8 @@
 	type="BorderPane"
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml"
-	onMouseClicked="#onMouseClicked">
+	focusTraversable="false"
+	onMousePressed="#onMousePressed">
 
 	<top>
 		<Label fx:id="atomicNumberText" />

@@ -52,7 +52,7 @@ public interface ExperimentNode<C, I, O> extends Configurable<C> {
 	/**
 	 * @return The type of the experiment
 	 */
-	ExperimentType<C, I, O> type();
+	ExperimentNodeType<C, I, O> type();
 
 	/**
 	 * @return The parent part of this experiment, if present, otherwise an empty
@@ -85,7 +85,7 @@ public interface ExperimentNode<C, I, O> extends Configurable<C> {
 	/**
 	 * @return All known available child experiment types
 	 */
-	Set<ExperimentType<?, ? super O, ?>> getAvailableChildExperimentTypes();
+	Set<ExperimentNodeType<?, ? super O, ?>> getAvailableChildExperimentTypes();
 
 	/**
 	 * Add a child experiment node of the given type to this node.
@@ -94,7 +94,7 @@ public interface ExperimentNode<C, I, O> extends Configurable<C> {
 	 *          The type of experiment
 	 * @return A new child experiment part of the given type
 	 */
-	<D, U> ExperimentNode<D, O, U> addChild(ExperimentType<D, ? super O, U> childType);
+	<D, U> ExperimentNode<D, O, U> addChild(ExperimentNodeType<D, ? super O, U> childType);
 
 	/**
 	 * @return The current execution lifecycle state of the experiment part.

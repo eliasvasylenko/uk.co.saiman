@@ -18,12 +18,18 @@
  */
 package uk.co.saiman.msapex.chemistry;
 
+import static uk.co.saiman.msapex.chemistry.ChemicalElementTile.Size.NORMAL;
+import static uk.co.saiman.msapex.chemistry.ChemicalElementTile.Size.SMALL;
+
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,6 +39,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.converter.NumberStringConverter;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
+import uk.co.strangeskies.utilities.Observable;
+import uk.co.strangeskies.utilities.ObservableImpl;
 
 /**
  * A clickable UI node for displaying a chemical element. Typically for use in a
@@ -41,7 +49,7 @@ import uk.co.saiman.chemistry.Element.Group;
  * 
  * @author Elias N Vasylenko
  */
-public class ChemicalElementTile extends BorderPane {
+public class ChemicalElementTile extends BorderPane implements Observable<Element> {
 	/**
 	 * The size of the tile. Smaller sizes may choose to present less information
 	 * in order to take less space.
@@ -63,6 +71,8 @@ public class ChemicalElementTile extends BorderPane {
 		LARGE
 	}
 
+	private ObservableImpl<Element> clickObservable = new ObservableImpl<>();
+
 	private Element element;
 
 	@FXML
@@ -74,6 +84,8 @@ public class ChemicalElementTile extends BorderPane {
 
 	@FXML
 	private Label nameText;
+
+	private Property<Size> sizeProperty;
 
 	/**
 	 * Create a chemical element tile with no element.
@@ -105,21 +117,47 @@ public class ChemicalElementTile extends BorderPane {
 
 		setElement(element);
 
-		setSize(Size.NORMAL);
+		sizeProperty = new SimpleObjectProperty<>(SMALL);
+		sizeProperty.addListener(c -> {
+			pseudoClassStateChanged(PseudoClass.getPseudoClass(getSize().name()), true);
+
+			for (Size other : Size.values()) {
+				if (other != getSize()) {
+					pseudoClassStateChanged(PseudoClass.getPseudoClass(other.name()), false);
+				}
+			}
+		});
+
+		setSize(NORMAL);
+	}
+
+	@Override
+	public void requestFocus() {
+		if (isFocusTraversable()) {
+			super.requestFocus();
+		}
+	}
+
+	/**
+	 * @return the current size of the tile
+	 */
+	public Size getSize() {
+		return sizeProperty.getValue();
 	}
 
 	/**
 	 * @param size
-	 *          the new size of the tile
+	 *          a new size for the tile
 	 */
 	public void setSize(Size size) {
-		pseudoClassStateChanged(PseudoClass.getPseudoClass(size.name()), true);
+		this.sizeProperty.setValue(size);
+	}
 
-		for (Size other : Size.values()) {
-			if (other != size) {
-				pseudoClassStateChanged(PseudoClass.getPseudoClass(other.name()), false);
-			}
-		}
+	/**
+	 * @return a property over the size of the tile
+	 */
+	public Property<Size> getSizeProperty() {
+		return sizeProperty;
 	}
 
 	/**
@@ -144,7 +182,6 @@ public class ChemicalElementTile extends BorderPane {
 		}
 
 		this.element = element;
-
 	}
 
 	private void setGroup(Group group) {
@@ -169,7 +206,26 @@ public class ChemicalElementTile extends BorderPane {
 	 * @param event
 	 *          The mouse event to apply to this tile
 	 */
-	public void onMouseClicked(MouseEvent event) {
-		System.out.println("Clicked: " + element.getSymbol());
+	public void onMousePressed(MouseEvent event) {
+		select();
+		event.consume();
+	}
+
+	/**
+	 * Select the tile, and focus if focusable
+	 */
+	public void select() {
+		requestFocus();
+		clickObservable.fire(element);
+	}
+
+	@Override
+	public boolean addObserver(Consumer<? super Element> observer) {
+		return clickObservable.addObserver(observer);
+	}
+
+	@Override
+	public boolean removeObserver(Consumer<? super Element> observer) {
+		return clickObservable.removeObserver(observer);
 	}
 }

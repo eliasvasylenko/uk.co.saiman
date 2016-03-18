@@ -5,12 +5,21 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane
+<BorderPane
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml">
 
-	<children>
-		<Label
-			text="Experiments" />
-	</children>
-</StackPane>
+	<center>
+		<ScrollPane
+			fx:id="experimentTreeScrollPane"
+			fitToWidth="true"
+			fitToHeight="true">
+
+			<content>
+				<fx:include
+					fx:id="experimentTree"
+					source="ExperimentTree.fxml" />
+			</content>
+		</ScrollPane>
+	</center>
+</BorderPane>

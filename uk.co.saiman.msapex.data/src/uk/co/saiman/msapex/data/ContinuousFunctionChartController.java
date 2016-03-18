@@ -32,6 +32,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -65,7 +66,7 @@ public class ContinuousFunctionChartController {
 	private static final double MAX_ZOOM_STEP = 0.5;
 	private static final double PIXEL_ZOOM_DAMP = 50;
 	private static final double MOVE_STEP_PERCENTAGE = 10;
-	private final Range<Double> rangeFit = Range.between(1.05d, 1.35d);
+	private static final Range<Double> rangeFit = Range.between(1.05d, 1.35d);
 
 	/*
 	 * Annotations
@@ -141,9 +142,13 @@ public class ContinuousFunctionChartController {
 
 	/**
 	 * Request the chart receive UI focus
+	 * 
+	 * @param event
+	 *          the mouse press event
 	 */
-	public void requestFocus() {
+	public void onMousePressed(MouseEvent event) {
 		msapexDataChart.requestFocus();
+		event.consume();
 	}
 
 	@FXML
@@ -266,23 +271,30 @@ public class ContinuousFunctionChartController {
 	public void resetZoomDomain() {
 		synchronized (domain) {
 			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
-			setDomainImpl(maxZoom.getFrom(), maxZoom.getTo());
+			if (!maxZoom.equals(domain)) {
+				setDomainImpl(maxZoom.getFrom(), maxZoom.getTo());
+			}
 
 			zoomed = false;
 		}
 	}
 
 	/**
-	 * Reset the zoom over the codomain to contain the entire range of all member
-	 * functions.
+	 * Update the zoom over the codomain to contain the visible range of all
+	 * member functions.
+	 * 
+	 * @param reset
+	 *          If true, we reset to the exact needed size, otherwise we keep the
+	 *          current size so long as its 'close enough' to within a certain
+	 *          range.
 	 */
-	public void resetZoomRange() {
+	public void updateZoomRange(boolean reset) {
 		synchronized (domain) {
 			Range<Double> maxZoom = getMaxZoom(c -> c.getRangeBetween(domain.getFrom(), domain.getTo()));
 
 			if (maxZoom.getFrom() >= 0) {
 				range.setFrom(0d);
-			} else if (maxZoom.getFrom() * rangeFit.getTo() < range.getFrom()) {
+			} else if (reset || maxZoom.getFrom() * rangeFit.getTo() < range.getFrom()) {
 				range.setFrom(maxZoom.getFrom() * rangeFit.getTo());
 			} else if (maxZoom.getFrom() * rangeFit.getFrom() > range.getFrom()) {
 				range.setFrom(maxZoom.getFrom() * rangeFit.getFrom());
@@ -290,7 +302,7 @@ public class ContinuousFunctionChartController {
 
 			if (maxZoom.getTo() <= 0) {
 				range.setTo(0d);
-			} else if (maxZoom.getTo() * rangeFit.getTo() < range.getTo()) {
+			} else if (reset || maxZoom.getTo() * rangeFit.getTo() < range.getTo()) {
 				range.setTo(maxZoom.getTo() * rangeFit.getTo());
 			} else if (maxZoom.getTo() * rangeFit.getFrom() > range.getTo()) {
 				range.setTo(maxZoom.getTo() * rangeFit.getFrom());
@@ -376,6 +388,8 @@ public class ContinuousFunctionChartController {
 			updateZoomDomain();
 
 			zoomed = true;
+
+			updateZoomRange(true);
 		}
 	}
 
@@ -415,8 +429,9 @@ public class ContinuousFunctionChartController {
 		synchronized (this.domain) {
 			if (!zoomed) {
 				resetZoomDomain();
+			} else {
+				updateZoomRange(false);
 			}
-			resetZoomRange();
 		}
 	}
 

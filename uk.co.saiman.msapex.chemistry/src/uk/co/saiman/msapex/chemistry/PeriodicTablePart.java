@@ -19,14 +19,16 @@
 package uk.co.saiman.msapex.chemistry;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import uk.co.saiman.chemistry.Element;
+import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.strangeskies.fx.FXUtilities;
 
 /**
@@ -35,18 +37,20 @@ import uk.co.strangeskies.fx.FXUtilities;
  * @author Elias N Vasylenko
  */
 public class PeriodicTablePart {
-	@Inject
-	IEclipseContext context;
+	@FXML
+	private PeriodicTableController periodicTableController;
 
 	@FXML
-	PeriodicTableController periodicTableController;
+	private ChemicalElementPanelController chemicalElementPanelController;
 
-	// @FXML
-	// private ContinuousFunctionChartController chartPane;
+	@FXML
+	private ScrollPane periodicTableScrollPane;
 
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
 		container.setCenter(FXUtilities.loadIntoController(loader, this));
+		periodicTableController.addObserver(this::setElement);
+		periodicTableController.setTilesFocusTraversable(true);
 	}
 
 	/**
@@ -54,5 +58,39 @@ public class PeriodicTablePart {
 	 */
 	public PeriodicTableController getPeriodicTableController() {
 		return periodicTableController;
+	}
+
+	/**
+	 * @return the current periodic table
+	 */
+	public PeriodicTable getPeriodicTable() {
+		return periodicTableController.getPeriodicTable();
+	}
+
+	/**
+	 * @param periodicTable
+	 *          the new periodic table
+	 */
+	public void setPeriodicTable(PeriodicTable periodicTable) {
+		periodicTableController.setPeriodicTable(periodicTable);
+		chemicalElementPanelController.setElement(periodicTable.getElement(1));
+	}
+
+	/**
+	 * Send a click event to the tile.
+	 * 
+	 * @param event
+	 *          The mouse event to apply to this tile
+	 */
+	public void onMousePressed(MouseEvent event) {
+		periodicTableScrollPane.requestFocus();
+		event.consume();
+	}
+
+	private void setElement(Element element) {
+		chemicalElementPanelController.setElement(element);
+		ChemicalElementTile tile = periodicTableController.getElementTile(element);
+
+		; // TODO ensure visible
 	}
 }

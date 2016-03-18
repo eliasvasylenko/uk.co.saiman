@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.data;
 
-import uk.co.strangeskies.mathematics.expression.DependentExpression;
+import uk.co.strangeskies.mathematics.expression.LockingExpression;
 
 /**
  * A basic wrapper around another continuous function which reflects all changes
@@ -28,7 +28,7 @@ import uk.co.strangeskies.mathematics.expression.DependentExpression;
  * 
  * @author Elias N Vasylenko
  */
-public class ContinuousFunctionExpression extends DependentExpression<ContinuousFunction, ContinuousFunction>
+public class ContinuousFunctionExpression extends LockingExpression<ContinuousFunction, ContinuousFunction>
 		implements ContinuousFunctionDecorator {
 	private ContinuousFunction component;
 
@@ -52,7 +52,12 @@ public class ContinuousFunctionExpression extends DependentExpression<Continuous
 
 	@Override
 	public ContinuousFunction getComponent() {
-		return component;
+		getReadLock().lock();
+		try {
+			return component;
+		} finally {
+			getReadLock().unlock();
+		}
 	}
 
 	/**
@@ -75,7 +80,7 @@ public class ContinuousFunctionExpression extends DependentExpression<Continuous
 
 	@Override
 	public ContinuousFunctionExpression copy() {
-		return new ContinuousFunctionExpression(component.copy());
+		return new ContinuousFunctionExpression(getComponent().copy());
 	}
 
 	@Override

@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.processing.experiment;
 
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentNodeType;
 import uk.co.saiman.processing.Processor;
 import uk.co.strangeskies.reflection.TypeToken;
 
@@ -33,7 +33,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @param <R>
  *          The type of the experiment output
  */
-public interface ProcessingExperiment<T, R> extends ExperimentType<Void, T, R> {
+public interface ProcessingExperiment<T, R> extends ExperimentNodeType<Void, T, R> {
 	/**
 	 * @return The processor to be applied via experiment execution
 	 */

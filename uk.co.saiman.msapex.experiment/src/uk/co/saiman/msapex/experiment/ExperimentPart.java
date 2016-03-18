@@ -21,12 +21,14 @@ package uk.co.saiman.msapex.experiment;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.fx.core.di.LocalInstance;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Reference;
 
+import aQute.bnd.annotation.headers.RequireCapability;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
+import uk.co.saiman.experiment.ExperimentManager;
 import uk.co.strangeskies.fx.FXUtilities;
 
 /**
@@ -35,15 +37,17 @@ import uk.co.strangeskies.fx.FXUtilities;
  * 
  * @author Elias N Vasylenko
  */
+@RequireCapability(ns = ExperimentPart.OSGI_SERVICE, filter = "(" + Constants.OBJECTCLASS
+		+ "=uk.co.saiman.experiment.ExperimentManager)")
 public class ExperimentPart {
+	static final String OSGI_SERVICE = "osgi.service";
+
 	@Inject
-	IEclipseContext context;
+	@Reference
+	ExperimentManager manager;
 
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
 		container.setCenter(FXUtilities.loadIntoController(loader, this));
 	}
-
-	@Focus
-	void focus() {}
 }

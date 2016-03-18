@@ -8,17 +8,31 @@
 <?import uk.co.saiman.msapex.chemistry.ChemicalElementTile?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
+<?import uk.co.saiman.msapex.chemistry.PeriodicTableController?>
 
-<ScrollPane
+<BorderPane
 	xmlns="http://javafx.com/javafx/8"
-	xmlns:fx="http://javafx.com/fxml"
-	fitToWidth="true"
-	fitToHeight="true">
+	xmlns:fx="http://javafx.com/fxml">
 
-	<content>
+	<center>
+		<ScrollPane
+			fx:id="periodicTableScrollPane"
+			fitToWidth="true"
+			fitToHeight="true"
+			onMousePressed="#onMousePressed">
+
+			<content>
+				<fx:include
+					fx:id="periodicTable"
+					source="PeriodicTable.fxml"
+					alignment="CENTER" />
+			</content>
+		</ScrollPane>
+	</center>
+
+	<right>
 		<fx:include
-			fx:id="periodicTable"
-			source="PeriodicTable.fxml"
-			alignment="CENTER" />
-	</content>
-</ScrollPane>
+			fx:id="chemicalElementPanel"
+			source="ChemicalElementPanel.fxml" />
+	</right>
+</BorderPane>

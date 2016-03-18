@@ -44,7 +44,7 @@ public interface ExperimentManager {
 	/**
 	 * @return All known available root experiment types
 	 */
-	Set<ExperimentType<?, Void, ?>> getAvailableRootExperimentTypes();
+	Set<ExperimentNodeType<?, Void, ?>> getAvailableRootExperimentTypes();
 
 	/**
 	 * Get all registered experiment types which can be placed at the root of a
@@ -61,7 +61,7 @@ public interface ExperimentManager {
 	 *          The type of experiment
 	 * @return A new root experiment part of the given type
 	 */
-	<C, O> ExperimentNode<C, Void, O> addRootExperiment(ExperimentType<C, Void, O> rootType);
+	<C, O> ExperimentNode<C, Void, O> addRootExperiment(ExperimentNodeType<C, Void, O> rootType);
 
 	/*
 	 * Child experiment types
@@ -74,7 +74,7 @@ public interface ExperimentManager {
 	 *          A possible experiment type
 	 * @return True if the type was added successfully, false otherwise
 	 */
-	boolean registerExperimentType(ExperimentType<?, ?, ?> childType);
+	boolean registerExperimentType(ExperimentNodeType<?, ?, ?> childType);
 
 	/**
 	 * Unregister an available experiment type
@@ -83,5 +83,5 @@ public interface ExperimentManager {
 	 *          A possible experiment type
 	 * @return True if the type was removed successfully, false otherwise
 	 */
-	boolean unregisterExperimentType(ExperimentType<?, ?, ?> childType);
+	boolean unregisterExperimentType(ExperimentNodeType<?, ?, ?> childType);
 }

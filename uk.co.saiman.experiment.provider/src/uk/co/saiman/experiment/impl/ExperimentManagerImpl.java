@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.experiment.ExperimentManager;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentNodeType;
 
 /**
  * Reference implementation of {@link ExperimentManager}.
@@ -37,7 +37,7 @@ import uk.co.saiman.experiment.ExperimentType;
  */
 @Component
 public class ExperimentManagerImpl implements ExperimentManager {
-	private final Set<ExperimentType<?, ?, ?>> experimentTypes;
+	private final Set<ExperimentNodeType<?, ?, ?>> experimentTypes;
 
 	private final Set<ExperimentNode<?, ?, ?>> experiments;
 	private final List<ExperimentNode<?, ?, ?>> processingStack;
@@ -63,9 +63,9 @@ public class ExperimentManagerImpl implements ExperimentManager {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Set<ExperimentType<?, Void, ?>> getAvailableRootExperimentTypes() {
+	public Set<ExperimentNodeType<?, Void, ?>> getAvailableRootExperimentTypes() {
 		return experimentTypes.stream().filter(e -> e.getInputType().isAssignableFrom(Void.class))
-				.map(e -> (ExperimentType<?, Void, ?>) e).collect(Collectors.toSet());
+				.map(e -> (ExperimentNodeType<?, Void, ?>) e).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	}
 
 	@Override
-	public <C, O> ExperimentNode<C, Void, O> addRootExperiment(ExperimentType<C, Void, O> rootType) {
+	public <C, O> ExperimentNode<C, Void, O> addRootExperiment(ExperimentNodeType<C, Void, O> rootType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -84,13 +84,13 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	 */
 
 	@Override
-	public boolean registerExperimentType(ExperimentType<?, ?, ?> childType) {
+	public boolean registerExperimentType(ExperimentNodeType<?, ?, ?> childType) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean unregisterExperimentType(ExperimentType<?, ?, ?> childType) {
+	public boolean unregisterExperimentType(ExperimentNodeType<?, ?, ?> childType) {
 		// TODO Auto-generated method stub
 		return false;
 	}

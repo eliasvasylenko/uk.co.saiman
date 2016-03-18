@@ -35,7 +35,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @param <O>
  *          The type of the experiment output
  */
-public interface ExperimentType<C, I, O> {
+public interface ExperimentNodeType<C, I, O> {
 	/**
 	 * Verify that a given configuration is valid for this experiment type.
 	 * 

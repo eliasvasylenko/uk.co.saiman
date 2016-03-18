@@ -14,7 +14,7 @@
 	focusTraversable="true"
 	onKeyPressed="#onKeyPressed"
 	onScroll="#onScroll"
-	onMouseClicked="#requestFocus">
+	onMousePressed="#onMousePressed">
 
 	<children>
 		<LineChart

@@ -6,8 +6,11 @@
 	-fx-background-color: #CCCCCC;
 	-fx-border-color: rgba(255.0, 255.0, 255.0, 0.4);
 }
-.ChemicalElementTile:hover {
+.ChemicalElementTile:focused {
 	-fx-border-color: rgba(64.0, 64.0, 64.0, 0.6);
+}
+.ChemicalElementTile:hover {
+	-fx-border-color: rgba(64.0, 64.0, 64.0, 0.4);
 }
 
 /*
@@ -76,7 +79,7 @@
 	-fx-background-color: #66FF99;
 }
 .ChemicalElementTile:LANTHANIDE {
-	-fx-background-color: #FFA34B;
+	-fx-background-color: #FFBF66;
 }
 .ChemicalElementTile:ACTINIDE {
 	-fx-background-color: #FF8080;

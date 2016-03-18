@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentNodeType;
 import uk.co.saiman.utilities.Configurable;
 
 /**
@@ -31,7 +31,7 @@ import uk.co.saiman.utilities.Configurable;
  * @param <T>
  *          The configurable result type
  */
-public class ResultConfigurationExperiment<C, T extends Configurable<C>> implements ExperimentType<C, T, T> {
+public class ResultConfigurationExperiment<C, T extends Configurable<C>> implements ExperimentNodeType<C, T, T> {
 	@Override
 	public void validate(C configuration) {}
 

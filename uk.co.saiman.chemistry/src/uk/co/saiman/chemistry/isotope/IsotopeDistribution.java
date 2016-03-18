@@ -914,7 +914,8 @@ public class IsotopeDistribution {
 	 * rendering time by omitting clusters of smaller peaks which are very close
 	 * to larger peaks
 	 *
-	 * @param visibleResolution The resolvable resolution below which clusters can be merged
+	 * @param visibleResolution
+	 *          The resolvable resolution below which clusters can be merged
 	 */
 	public void filterToResolution(double visibleResolution) {
 		visibleResolution /= 2;

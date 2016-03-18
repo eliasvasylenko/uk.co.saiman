@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentNodeType;
 import uk.co.saiman.utilities.Configurable;
 
 /**
@@ -31,7 +31,7 @@ import uk.co.saiman.utilities.Configurable;
  * @param <T>
  *          The input type, to pass through to the output
  */
-public class ConfigurationExperiment<C, T> implements ExperimentType<C, T, T> {
+public class ConfigurationExperiment<C, T> implements ExperimentNodeType<C, T, T> {
 	private final Configurable<C> configurable;
 
 	/**

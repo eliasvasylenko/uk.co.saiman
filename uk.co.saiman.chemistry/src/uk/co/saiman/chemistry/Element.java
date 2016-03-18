@@ -42,8 +42,8 @@ public class Element implements Comparable<Element> {
 	@SuppressWarnings("javadoc")
 	public enum Group {
 		NONE("None"), ALKALI("Alkali"), ALKALINE("Alkaline"), LANTHANIDE("Lanthanide"), ACTINIDE("Actinide"), TRANSITION(
-				"Transition"), POOR_METAL("Poor Metal"), METALLOID("Metalloid"), NONMETAL("Nonmetal"), HALOGEN(
-						"Halogen"), NOBLE_GAS("Noble Gas");
+				"Transition"), POOR_METAL(
+						"Poor Metal"), METALLOID("Metalloid"), NONMETAL("Nonmetal"), HALOGEN("Halogen"), NOBLE_GAS("Noble Gas");
 
 		private final String name;
 

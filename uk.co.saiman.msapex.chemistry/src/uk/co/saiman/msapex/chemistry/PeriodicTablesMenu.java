@@ -57,17 +57,17 @@ public class PeriodicTablesMenu {
 		periodicTablePart = (PeriodicTablePart) partService.findPart("uk.co.saiman.msapex.periodictable.part").getObject();
 
 		periodicTables.addListener((ListChangeListener<? super PeriodicTable>) change -> {
-			if (periodicTablePart.getPeriodicTableController().getPeriodicTable() == null) {
+			if (periodicTablePart.getPeriodicTable() == null) {
 				while (change.next()) {
 					if (change.wasAdded()) {
-						periodicTablePart.getPeriodicTableController().setPeriodicTable(change.getAddedSubList().get(0));
+						periodicTablePart.setPeriodicTable(change.getAddedSubList().get(0));
 						return;
 					}
 				}
 			}
 		});
 
-		periodicTables.stream().findAny().ifPresent(periodicTablePart.getPeriodicTableController()::setPeriodicTable);
+		periodicTables.stream().findAny().ifPresent(periodicTablePart::setPeriodicTable);
 	}
 
 	@Execute
@@ -81,12 +81,12 @@ public class PeriodicTablesMenu {
 			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
 			moduleItem.setLabel(table.getName());
 			moduleItem.setType(ItemType.RADIO);
-			moduleItem.setSelected(periodicTablePart.getPeriodicTableController().getPeriodicTable() == table);
+			moduleItem.setSelected(periodicTablePart.getPeriodicTable() == table);
 			moduleItem.setObject(new Object() {
 				@Execute
 				public void execute() {
 					if (moduleItem.isSelected()) {
-						periodicTablePart.getPeriodicTableController().setPeriodicTable(table);
+						periodicTablePart.setPeriodicTable(table);
 					}
 				}
 			});

@@ -44,6 +44,9 @@ public class ArraySampledContinuousFunction extends LockingSampledContinuousFunc
 	 *          The Y values of the samples, in the codomain
 	 */
 	public ArraySampledContinuousFunction(int samples, double[] values, double[] intensities) {
+		/*
+		 * TODO sort values
+		 */
 		this.values = Arrays.copyOf(values, samples);
 		this.intensities = Arrays.copyOf(intensities, samples);
 	}
@@ -124,7 +127,7 @@ public class ArraySampledContinuousFunction extends LockingSampledContinuousFunc
 	}
 
 	@Override
-	protected ContinuousFunction getValueImpl(boolean dirty) {
+	protected ContinuousFunction evaluate() {
 		return this;
 	}
 }
