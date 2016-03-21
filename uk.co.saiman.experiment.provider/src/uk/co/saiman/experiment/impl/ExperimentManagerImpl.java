@@ -53,7 +53,7 @@ public class ExperimentManagerImpl implements ExperimentManager {
 	}
 
 	@Override
-	public List<ExperimentNode<?, ?, ?>> state() {
+	public List<ExperimentNode<?, ?, ?>> processingState() {
 		return processingStack;
 	}
 

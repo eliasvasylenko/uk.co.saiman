@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_vaQRoHl8EeWeCa5uXT_XfA">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2LXuMHl-EeWeCa5uXT_XfA" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.overview" positionInList="first">
+    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.experiment.msapex.part" containerData="" contributionURI="bundleclass://uk.co.saiman.experiment.msapex/uk.co.saiman.experiment.msapex.ExperimentPart" label="Experiment">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.experiment.msapex.toolbar"/>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

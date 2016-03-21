@@ -35,7 +35,7 @@ public interface ExperimentManager {
 	 * @return The current state, in the form of the stack of all currently
 	 *         executing experiment parts
 	 */
-	public List<ExperimentNode<?, ?, ?>> state();
+	public List<ExperimentNode<?, ?, ?>> processingState();
 
 	/*
 	 * Root experiment types
