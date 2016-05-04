@@ -63,11 +63,11 @@
 				<inline
 					name="sai:isotopeList"
 					outMethod="getIsotopes"
-					dataType="@Infer Collection&lt;?&gt;"
-					bindingType="@Infer List&lt;?&gt;">
+					dataType="@Infer Collection{?}"
+					bindingType="@Infer List{?}">
 
 					<complex
-						baseModel="sai:isotope"
+						model="sai:isotope"
 						outMethod="this"
 						occurrences="0.."
 						inMethod="add" />
@@ -93,11 +93,11 @@
 				<inline
 					name="sai:elementList"
 					outMethod="getElements"
-					dataType="@Infer Collection&lt;?&gt;"
-					bindingType="@Infer List&lt;?&gt;">
+					dataType="@Infer Collection{?}"
+					bindingType="@Infer List{?}">
 
 					<complex
-						baseModel="sai:element"
+						model="sai:element"
 						outMethod="this"
 						occurrences="0.."
 						inMethod="add" />

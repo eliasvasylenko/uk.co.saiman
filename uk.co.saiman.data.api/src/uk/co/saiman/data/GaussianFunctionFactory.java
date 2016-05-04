@@ -14,23 +14,28 @@ import java.util.function.Function;
 public class GaussianFunctionFactory implements PeakShapeFunctionFactory {
 	private final Function<Double, Double> varianceAtPosition;
 
+	/**
+	 * @param variance
+	 *          the uniform variance for peaks at any point across the entire
+	 *          domain
+	 */
 	public GaussianFunctionFactory(double variance) {
 		varianceAtPosition = p -> variance;
 	}
 
 	@Override
-	public PeakShapeFunction atPeakPosition(double position, double intensity) {
+	public PeakShapeFunction atPeakPosition(double mean, double intensity) {
 		return new PeakShapeFunction() {
-			private final double standardDeviation = Math.sqrt(varianceAtPosition.apply(position));
+			private final double standardDeviation = Math.sqrt(varianceAtPosition.apply(mean));
 			private final double fullWidthHalfMaximum = standardDeviation * 2 * sqrt(2 * log(2));
 			private final double peakHeightReciprocal = standardDeviation * sqrt(2 * PI);
 
-			private final double domainStart = position - standardDeviation * 4;
-			private final double domainEnd = position + standardDeviation * 4;
+			private final double domainStart = mean - standardDeviation * 4;
+			private final double domainEnd = mean + standardDeviation * 4;
 
 			@Override
 			public double sample(double value) {
-				double powerNumerator = value - position;
+				double powerNumerator = value - mean;
 				powerNumerator *= -powerNumerator;
 
 				double powerDenominator = standardDeviation;
@@ -39,12 +44,22 @@ public class GaussianFunctionFactory implements PeakShapeFunctionFactory {
 				double sampleFromItem = Math.pow(Math.E, powerNumerator / powerDenominator) / peakHeightReciprocal * intensity;
 
 				// if near edges then interpolate to 0 for smoother fall-off.
-				double difference = Math.abs(value - position);
+				double difference = Math.abs(value - mean);
 				if (difference > standardDeviation * 3) {
 					sampleFromItem *= 4 - difference / standardDeviation;
 				}
 
 				return sampleFromItem;
+			}
+
+			@Override
+			public double maximum() {
+				return mean;
+			}
+
+			@Override
+			public double mean() {
+				return mean;
 			}
 
 			@Override

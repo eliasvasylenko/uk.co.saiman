@@ -1,0 +1,23 @@
+Bundle-Name: SAI :: MSApex :: Chemistry
+Bundle-SymbolicName: ${p};singleton:=true
+
+-buildpath: \
+	${buildpath.eclipse},\
+	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;reflection},\
+	${ss;fx},\
+	${ss;eclipse},\
+	${mdb;core.api},\
+	uk.co.saiman.chemistry;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot,\
+	uk.co.saiman.msapex.data;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
+
+Private-Package: uk.co.saiman.msapex.chemistry
+
+-includeresource: \
+	fragment.e4xmi,\
+	plugin.xml,\
+	res,\
+	css=css

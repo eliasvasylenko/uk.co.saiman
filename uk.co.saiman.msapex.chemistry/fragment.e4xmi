@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_vaQRoHl8EeWeCa5uXT_XfA">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2LXuMHl-EeWeCa5uXT_XfA" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.status" positionInList="first">
+    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.chemistry.periodictable.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTablePart" label="Periodic Table" iconURI="platform:/plugin/uk.co.saiman.msapex.icons.fugue/uk/co/saiman/msapex/icons/fugue/size16/application-table.png">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.chemistry.periodictable.toolbar">
+        <children xsi:type="menu:DirectToolItem" xmi:id="_euWs8NrgEeWM9vcwQ96VAg" elementId="uk.co.saiman.msapex.chemistry.periodictable.directtoolitem.tables" label="Periodic Tables" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTablesMenu">
+          <menu xmi:id="_uubeUNrgEeWM9vcwQ96VAg" elementId="uk.co.saiman.msapex.chemistry.periodictable.toolbar.tables.menu">
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_zfSlQNrgEeWM9vcwQ96VAg" elementId="uk.co.saiman.msapex.chemistry.periodictable.toolbar.tables.menu.contribution" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTablesMenu"/>
+          </menu>
+        </children>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_RmRSUOq4EeWKke_KADPjBg" elementId="uk.co.saiman.msapex.chemistry.periodictable.handledtoolitem.size" label="Size" iconURI="" command="_k0WbUOq5EeWKke_KADPjBg">
+          <menu xmi:id="_qrS2AOq4EeWKke_KADPjBg" elementId="uk.co.saiman.msapex.chemistry.periodictable.toolbar.size.menu">
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_6c5GgOq4EeWKke_KADPjBg" elementId="uk.co.saiman.msapex.periodictable.toolbar.size.menu.sizes" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTableResize"/>
+          </menu>
+        </children>
+      </toolbar>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_TzUjQOq5EeWKke_KADPjBg" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Command" xmi:id="_k0WbUOq5EeWKke_KADPjBg" elementId="uk.co.saiman.msapex.chemistry.periodictable.command.resize" commandName="Periodic Table Resize" description="Resize the periodic table" category="_l4yeYOq6EeWKke_KADPjBg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_Pk3JUOq6EeWKke_KADPjBg" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Handler" xmi:id="_T7yGQOq6EeWKke_KADPjBg" elementId="uk.co.saiman.msapex.chemistry.periodictable.handler.resize" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTableResize" command="_k0WbUOq5EeWKke_KADPjBg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_iwNj4Oq6EeWKke_KADPjBg" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Category" xmi:id="_l4yeYOq6EeWKke_KADPjBg" elementId="uk.co.saiman.msapex.chemistry.category" name="Chemistry" description="Chemical inspection"/>
+  </fragments>
+</fragment:ModelFragments>

@@ -5,8 +5,8 @@ Bundle-Name: SAI :: Maldi
 	${ss;mathematics},\
 	${ss;mathematics.geometry},\
 	${ss;reflection},\
-	uk.co.saiman.utilities;version=project,\
-	uk.co.saiman.data.api;version=project
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot
 
 
 -includeresource: \

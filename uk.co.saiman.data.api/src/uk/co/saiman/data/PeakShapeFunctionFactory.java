@@ -16,11 +16,11 @@ package uk.co.saiman.data;
  */
 public interface PeakShapeFunctionFactory {
 	/**
-	 * @param position
+	 * @param mean
 	 *          the position of the peak in the domain axis
 	 * @param intensity
 	 *          the total intensity of the peak, i.e. the integral over the peak
 	 * @return a peak shape function for the given position and intensity
 	 */
-	PeakShapeFunction atPeakPosition(double position, double intensity);
+	PeakShapeFunction atPeakPosition(double mean, double intensity);
 }

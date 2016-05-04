@@ -3,7 +3,7 @@ Bundle-Name: SAI :: Experiment :: Provider
 -buildpath: \
 	${ss;utilities},\
 	${ss;reflection},\
-	uk.co.saiman.experiment.api;version=project,\
-	uk.co.saiman.utilities;version=project
+	uk.co.saiman.experiment.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
 
 Private-Package: uk.co.saiman.experiment.impl

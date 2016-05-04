@@ -18,10 +18,6 @@
  */
 package uk.co.saiman.utilities;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.function.Supplier;
-
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.strangeskies.reflection.TypeParameter;
@@ -39,7 +35,7 @@ import uk.co.strangeskies.reflection.TypeToken;
 @Component
 public interface Configurable<C> {
 	/**
-	 * @return The current configuration
+	 * @return The current configuration object.
 	 */
 	C configuration();
 
@@ -50,44 +46,6 @@ public interface Configurable<C> {
 	 *          The new configuration to adopt
 	 */
 	void configure(C configuration);
-
-	/**
-	 * Partially update the configuration.
-	 * 
-	 * @param partialConfiguration
-	 *          A superinterface of the configuration type, such that its members
-	 *          can be partially applied to the configuration of this configurable
-	 *          instance
-	 */
-	@SuppressWarnings("unchecked")
-	default void updateConfiguration(Supplier<? super C> partialConfiguration) {
-		Object partial = partialConfiguration.get();
-		C overridden = configuration();
-
-		configure((C) Proxy.newProxyInstance(getClass().getClassLoader(),
-				getConfigurationType().getRawTypes().toArray(new Class<?>[getConfigurationType().getRawTypes().size()]),
-				(Object proxy, Method method, Object[] args) -> {
-					if (method.getDeclaringClass().isAssignableFrom(proxy.getClass())) {
-						return method.invoke(partial, args);
-					} else {
-						return method.invoke(overridden, args);
-					}
-				}));
-	}
-
-	/**
-	 * Partially update a configuration.
-	 * 
-	 * @param configurable
-	 *          A configurable to partially update
-	 * @param configurationOverride
-	 *          A superinterface of the configuration type, such that its members
-	 *          can be partially applied to the configuration of the given
-	 *          configurable instance
-	 */
-	static <S> void updateConfiguration(Configurable<? extends S> configurable, S configurationOverride) {
-		configurable.updateConfiguration((Supplier<S>) () -> configurationOverride);
-	}
 
 	/**
 	 * @return The exact generic type of the configuration interface

@@ -7,18 +7,36 @@ import java.util.Arrays;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
 
+/**
+ * A function described by a convolution operation over a given set of impulses,
+ * or stick intensities, by a given peak shape.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<ContinuousFunction, ContinuousFunction>
 		implements ContinuousFunction {
 	private static final int TWEEN_STEPS = 5;
 
 	private final int samples;
 	private final double[] values;
-	private final double[] intensities;
 	private final PeakShapeFunction[] peakFunctions;
 
 	private final Range<Double> domain;
 	private final Range<Double> range;
 
+	/**
+	 * Define a new function by way of convolution of the given samples by the
+	 * given peak shape description.
+	 * 
+	 * @param samples
+	 *          the number of contributing samples
+	 * @param values
+	 *          the sorted sample positions
+	 * @param intensities
+	 *          the intensities corresponding to the given values
+	 * @param peakFunctionFactory
+	 *          the peak function by which to convolve
+	 */
 	public PeakShapeImpulseConvolutionFunction(int samples, double[] values, double[] intensities,
 			PeakShapeFunctionFactory peakFunctionFactory) {
 		/*
@@ -26,7 +44,6 @@ public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<Con
 		 */
 		this.samples = samples;
 		this.values = Arrays.copyOf(values, samples);
-		this.intensities = Arrays.copyOf(intensities, samples);
 
 		peakFunctions = new PeakShapeFunction[samples];
 		for (int i = 0; i < samples; i++) {

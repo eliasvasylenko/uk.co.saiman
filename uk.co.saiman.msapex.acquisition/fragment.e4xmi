@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_vaQRoHl8EeWeCa5uXT_XfA">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2LXuMHl-EeWeCa5uXT_XfA" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.status" positionInList="first">
+    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.acquisition.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.acquisition/uk.co.saiman.msapex.acquisition.AcquisitionPart" label="Acquisition" iconURI="platform:/plugin/uk.co.saiman.msapex.icons.fugue/uk/co/saiman/msapex/icons/fugue/size16/compile.png">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.acquisition.toolbar">
+        <children xsi:type="menu:DirectToolItem" xmi:id="_HMHsEKNFEeWE1fWzNHjQjQ" elementId="uk.co.saiman.msapex.acquisition.directtoolitem.devices" label="Devices" contributionURI="bundleclass://uk.co.saiman.msapex.acquisition/uk.co.saiman.msapex.acquisition.DevicesMenu">
+          <menu xmi:id="_iZiDIKNGEeWE1fWzNHjQjQ" elementId="uk.co.saiman.msapex.acquisition.toolbar.devices.menu">
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_UlN-sKNGEeWE1fWzNHjQjQ" elementId="uk.co.saiman.msapex.acquisition.toolbar.devices.menu.contribution" contributionURI="bundleclass://uk.co.saiman.msapex.acquisition/uk.co.saiman.msapex.acquisition.DevicesMenu"/>
+          </menu>
+        </children>
+      </toolbar>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

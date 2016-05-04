@@ -3,12 +3,14 @@ Bundle-Name: SAI :: Experiment
 -buildpath: \
 	${ss;utilities},\
 	${ss;reflection},\
-	uk.co.saiman.utilities;version=snapshot
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.processing;version=snapshot
 
 Export-Package: uk.co.saiman.experiment
 
 -includeresource: \
-	META-INF/schemata=schemata
+	META-INF/schemata=schemata,\
+	res
 
 -pluginpath: \
 	${pluginpath.modabi;xml}

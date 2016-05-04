@@ -13,7 +13,7 @@ buildpath.debug =\
 Export-Package:\
 	uk.co.saiman.msapex
 
-Include-Resource:\
+-includeresource:\
 	plugin.xml,\
 	Application.e4xmi,\
 	css=css

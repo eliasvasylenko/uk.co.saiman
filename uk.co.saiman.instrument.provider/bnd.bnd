@@ -3,7 +3,7 @@ Bundle-Name: SAI :: Instrument :: Provider
 -buildpath: \
 	${ss;utilities},\
 	${ss;reflection},\
-	uk.co.saiman.instrument.api;version=project,\
-	uk.co.saiman.utilities;version=project
+	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
 
 Private-Package: uk.co.saiman.instrument.impl

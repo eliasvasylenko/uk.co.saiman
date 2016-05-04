@@ -4,6 +4,6 @@ Bundle-Name: SAI :: Data
 	${ss;utilities},\
 	${ss;reflection},\
 	${ss;mathematics},\
-	uk.co.saiman.utilities;version=project
+	uk.co.saiman.utilities;version=snapshot
 
 Export-Package: uk.co.saiman.data

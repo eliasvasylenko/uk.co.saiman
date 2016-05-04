@@ -18,54 +18,80 @@
  */
 package uk.co.saiman.experiment;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import uk.co.saiman.utilities.Configurable;
+import uk.co.strangeskies.reflection.TypeToken;
 
 /**
  * A node in an experiment part tree.
  * 
  * @author Elias N Vasylenko
  *
- * @param <C>
- *          The type of the experiment configuration interface
- * @param <I>
- *          The type of the experiment input
- * @param <O>
- *          The type of the experiment output
+ * @param <S>
+ *          the type of the data describing the experiment configuration and
+ *          results
  */
-public interface ExperimentNode<C, I, O> extends Configurable<C> {
+public interface ExperimentNode<S> extends Configurable<S> {
 	/**
-	 * Execute the experiment tree from the root of the receiving node.
+	 * @return the experiment workspace containing this experiment
 	 */
-	public void execute();
+	ExperimentWorkspace getExperimentWorkspace();
 
 	/**
-	 * @return The output of this experiment part if its {@link #state()} is
-	 *         {@link ExperimentLifecycleState#COMPLETION}, otherwise an empty
-	 *         optional
+	 * Experiment data root directories are defined hierarchically from the
+	 * {@link ExperimentWorkspace#getWorkspaceDataRoot() workspace root}.
+	 * 
+	 * @return the data root of the experiment
 	 */
-	public Optional<O> output();
+	Path getExperimentDataRoot();
+
+	@Override
+	void configure(S configuration);
 
 	/**
 	 * @return The type of the experiment
 	 */
-	ExperimentNodeType<C, I, O> type();
+	ExperimentType<S> type();
 
 	/**
 	 * @return The parent part of this experiment, if present, otherwise an empty
 	 *         optional
 	 */
-	Optional<ExperimentNode<?, ?, ? extends I>> parent();
+	Optional<ExperimentNode<?>> parent();
 
 	/**
 	 * @return The root part of the experiment tree this part occurs in
 	 */
-	@SuppressWarnings("unchecked")
-	default ExperimentNode<?, Void, ?> root() {
-		return parent().<ExperimentNode<?, Void, ?>> map(ExperimentNode::root).orElse((ExperimentNode<?, Void, ?>) this);
+	default ExperimentNode<ExperimentConfiguration> root() {
+		return ancestor(getExperimentWorkspace().getRootExperimentType()).get();
+	}
+
+	/**
+	 * Get the nearest available ancestor node of the processing experiment node
+	 * which is of the given {@link ExperimentType experiment type}.
+	 * 
+	 * @param type
+	 *          the type of the ancestor we wish to inspect
+	 * @return the nearest ancestor of the given type, or null if no such ancestor
+	 *         exists
+	 */
+	default <T, E extends ExperimentType<T>> Optional<ExperimentNode<T>> ancestor(E type) {
+		Optional<ExperimentNode<?>> ancestor = parent();
+		do {
+			if (ancestor.get().type() == type) {
+				@SuppressWarnings("unchecked")
+				ExperimentNode<T> node = (ExperimentNode<T>) ancestor.get();
+				return Optional.of(node);
+			}
+
+			ancestor = ancestor.flatMap(ExperimentNode::parent);
+		} while (ancestor.isPresent());
+
+		return Optional.empty();
 	}
 
 	/**
@@ -80,12 +106,12 @@ public interface ExperimentNode<C, I, O> extends Configurable<C> {
 	 * 
 	 * @return An ordered list of all sequential child experiment parts
 	 */
-	List<ExperimentNode<?, ? super O, ?>> children();
+	List<ExperimentNode<?>> children();
 
 	/**
 	 * @return All known available child experiment types
 	 */
-	Set<ExperimentNodeType<?, ? super O, ?>> getAvailableChildExperimentTypes();
+	Set<ExperimentType<?>> getAvailableChildExperimentTypes();
 
 	/**
 	 * Add a child experiment node of the given type to this node.
@@ -94,10 +120,15 @@ public interface ExperimentNode<C, I, O> extends Configurable<C> {
 	 *          The type of experiment
 	 * @return A new child experiment part of the given type
 	 */
-	<D, U> ExperimentNode<D, O, U> addChild(ExperimentNodeType<D, ? super O, U> childType);
+	<T> ExperimentNode<T> addChild(ExperimentType<T> childType);
 
 	/**
 	 * @return The current execution lifecycle state of the experiment part.
 	 */
-	ExperimentLifecycleState state();
+	ExperimentLifecycleState lifecycleState();
+
+	@Override
+	default TypeToken<S> getConfigurationType() {
+		return type().getStateType();
+	}
 }

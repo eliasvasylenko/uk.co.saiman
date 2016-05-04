@@ -48,11 +48,10 @@ public class PeriodicTableService {
 		new Thread(() -> {
 			try {
 				PeriodicTable periodicTable = manager.bind(PeriodicTable.class)
-						.from(getClass().getResource("PeriodicTable.xml")).resolve();
+						.from(getClass().getResource("PeriodicTable.xml")).resolve(2000);
 
 				context.registerService(PeriodicTable.class, periodicTable, new Hashtable<>());
 			} catch (Throwable e) {
-				e.printStackTrace();
 				throw e;
 			}
 		}).start();

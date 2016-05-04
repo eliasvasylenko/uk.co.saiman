@@ -2,8 +2,8 @@
 	${ss;utilities},\
 	${ss;mathematics},\
 	${ss;reflection},\
-	uk.co.saiman.instrument.api;version=project,\
-	uk.co.saiman.utilities;version=project,\
-	uk.co.saiman.data.api;version=project
+	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot
 
 -sub: *.bnd

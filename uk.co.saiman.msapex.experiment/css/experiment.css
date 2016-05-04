@@ -1,0 +1,11 @@
+#uk-co-saiman-msapex-experiment-handledtoolitem-addexperiment {
+	-fx-graphic: url(platform:/plugin/uk.co.saiman.msapex.icons.fugue/uk/co/saiman/msapex/icons/fugue/size16/book--plus.png);
+}
+
+.ExperimentTreeCell #name {
+	-fx-graphic: url(platform:/plugin/uk.co.saiman.msapex.icons.fugue/uk/co/saiman/msapex/icons/fugue/size16/book.png);
+}
+
+.ExperimentTreeCell #supplemental {
+    -fx-opacity: 0.5;
+}

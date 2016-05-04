@@ -1,3 +1,3 @@
 Bundle-Name: SAI :: Acquisition :: Simulation
 
-Private-Package: uk.co.saiman.instrument.acquisition.simulation
+Private-Package: uk.co.saiman.acquisition.simulation

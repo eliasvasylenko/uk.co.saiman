@@ -3,10 +3,14 @@
 	xmlns="http://modabi.strangeskies.co.uk/2014-01-01/"
 	xmlns:sai="http://saiman.co.uk/2015-10-08/"
 	name="sai:ExperimentSchema">
-	
+
 	<imports>
 		uk.co.strangeskies.reflection.TypeToken.Infer,
-		uk.co.saiman.experiment.ExperimentNode
+		uk.co.saiman.experiment.ExperimentNode,
+		uk.co.saiman.experiment.ExperimentType,
+		uk.co.saiman.experiment.ExperimentResult,
+		uk.co.saiman.processing.Processor,
+		java.util.List
 	</imports>
 
 	<dependencies>
@@ -18,9 +22,44 @@
 
 	<models>
 		<model
+			name="sai:experimentResult"
+			dataType="@Infer ExperimentResult{?}"
+			unbindingType="@Infer ExperimentResult{?}"
+			abstract="true">
+
+			<complex
+				name="sai:processing"
+				occurrances="0..1"
+
+				dataType="@Infer List{?}"
+
+				bindingType="ExperimentResult{?}"
+				bindingStrategy="TARGET_ADAPTOR"
+				inMethod="null"
+				outMethod="processingItems">
+
+				<inputSequence
+					name="sai:processingItems"
+					inMethodChained="true"/>
+
+				<complex
+					name="sai:processor"
+					occurrances="0.."
+					extensible="true"
+					abstract="true"
+
+					dataType="Processor{?\, ?}"
+
+					inMethod="add"
+					outMethod="this" />
+			</complex>
+		</model>
+
+		<model
 			name="sai:experimentNode"
 			baseModel="sai:configurable"
-			dataType="@Infer ExperimentNode&lt;?\, ?\, ?&gt;"
+			dataType="@Infer ExperimentNode{?}"
+			bindingType="@Infer ExperimentType{?}"
 			abstract="true" />
 	</models>
 </schema>
