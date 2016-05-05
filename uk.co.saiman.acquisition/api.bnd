@@ -1,3 +1,6 @@
 Bundle-Name: SAI :: Acquisition
 
 Export-Package: uk.co.saiman.acquisition
+
+-includeresource: \
+	l10n
