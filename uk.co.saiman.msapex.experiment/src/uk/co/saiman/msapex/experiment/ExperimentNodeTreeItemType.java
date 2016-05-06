@@ -1,6 +1,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
@@ -30,10 +31,8 @@ public class ExperimentNodeTreeItemType<T> implements TreeItemType<ExperimentNod
 	}
 
 	@Override
-	public void addChildren(ExperimentNode<T> data, List<TreeItemData<?>> children) {
-		for (ExperimentNode<?> child : data.children()) {
-			children.add(getItemData(child));
-		}
+	public List<TreeItemData<?>> getChildren(ExperimentNode<T> data) {
+		return data.children().stream().map(c -> getItemData(c)).collect(Collectors.toList());
 	}
 
 	@Override

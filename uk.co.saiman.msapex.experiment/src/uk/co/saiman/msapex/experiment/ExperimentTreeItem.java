@@ -51,7 +51,7 @@ public class ExperimentTreeItem<T> extends TreeItem<TreeItemData<?>> {
 	public void rebuildChildren() {
 		if (getItemType().hasChildren(getData())) {
 			List<TreeItemData<?>> children = new ArrayList<>();
-			getItemType().addChildren(getData(), children);
+			children.addAll(getItemType().getChildren(getData()));
 			super.getChildren().setAll(children.stream().map(i -> new ExperimentTreeItem<>(i)).collect(toList()));
 			childrenCalculated = true;
 		}

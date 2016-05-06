@@ -7,11 +7,11 @@ import java.util.List;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import uk.co.saiman.msapex.chemistry.ChemicalElementTile.Size;
 import uk.co.strangeskies.utilities.Enumeration;
@@ -23,9 +23,8 @@ import uk.co.strangeskies.utilities.Enumeration;
  */
 public class PeriodicTableResize {
 	@Execute
-	void execute(EPartService partService) {
-		PeriodicTablePart periodicTablePart = (PeriodicTablePart) partService.findPart(PeriodicTablePart.PART_ID)
-				.getObject();
+	void execute(MPart part) {
+		PeriodicTablePart periodicTablePart = (PeriodicTablePart) part.getObject();
 
 		Size currentSize = periodicTablePart.getPeriodicTableController().getTileSize();
 
@@ -33,9 +32,8 @@ public class PeriodicTableResize {
 	}
 
 	@AboutToShow
-	void aboutToShow(List<MMenuElement> items, EPartService partService) {
-		PeriodicTablePart periodicTablePart = (PeriodicTablePart) partService.findPart(PeriodicTablePart.PART_ID)
-				.getObject();
+	void aboutToShow(List<MMenuElement> items, MPart part) {
+		PeriodicTablePart periodicTablePart = (PeriodicTablePart) part.getObject();
 
 		for (Size size : Arrays.asList(Size.values())) {
 			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();

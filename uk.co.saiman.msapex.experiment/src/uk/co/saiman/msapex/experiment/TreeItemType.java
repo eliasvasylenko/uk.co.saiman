@@ -13,7 +13,7 @@ public interface TreeItemType<T> {
 
 	public boolean hasChildren(T data);
 
-	public void addChildren(T data, List<TreeItemData<?>> children);
+	public List<TreeItemData<?>> getChildren(T data);
 
 	default String getText(T data) {
 		return data.toString();

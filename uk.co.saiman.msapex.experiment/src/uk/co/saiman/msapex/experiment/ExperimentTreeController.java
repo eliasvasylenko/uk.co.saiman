@@ -1,12 +1,17 @@
 package uk.co.saiman.msapex.experiment;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeView;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentText;
 import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.strangeskies.eclipse.Localize;
 
 public class ExperimentTreeController {
 	@FXML
@@ -17,6 +22,10 @@ public class ExperimentTreeController {
 	private final TreeItemType<ExperimentWorkspace> workspaceItemType;
 	private TreeItemType<ExperimentNode<ExperimentConfiguration>> rootExperimentNodeItemType;
 
+	@Inject
+	@Localize
+	ExperimentText text;
+
 	public ExperimentTreeController() {
 		workspaceItemType = new TreeItemType<ExperimentWorkspace>() {
 			@Override
@@ -25,10 +34,9 @@ public class ExperimentTreeController {
 			}
 
 			@Override
-			public void addChildren(ExperimentWorkspace data, List<TreeItemData<?>> children) {
-				for (ExperimentNode<ExperimentConfiguration> root : data.getRootExperiments()) {
-					children.add(new TreeItemData<>(rootExperimentNodeItemType, root));
-				}
+			public List<TreeItemData<?>> getChildren(ExperimentWorkspace data) {
+				return data.getRootExperiments().stream().map(r -> new TreeItemData<>(rootExperimentNodeItemType, r))
+						.collect(Collectors.toList());
 			}
 		};
 	}
@@ -52,7 +60,7 @@ public class ExperimentTreeController {
 
 			@Override
 			public String getSupplementalText(ExperimentNode<ExperimentConfiguration> data) {
-				return "[" + data.lifecycleState() + "]";
+				return "[" + text.lifecycleState(data.lifecycleState()) + "]";
 			}
 		};
 

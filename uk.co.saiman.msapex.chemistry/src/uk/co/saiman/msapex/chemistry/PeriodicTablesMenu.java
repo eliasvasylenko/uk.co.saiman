@@ -26,11 +26,11 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -53,8 +53,8 @@ public class PeriodicTablesMenu {
 	private PeriodicTablePart periodicTablePart;
 
 	@PostConstruct
-	void initialise(EPartService partService) {
-		periodicTablePart = (PeriodicTablePart) partService.findPart(PeriodicTablePart.PART_ID).getObject();
+	void initialise(MPart part) {
+		periodicTablePart = (PeriodicTablePart) part.getObject();
 
 		periodicTables.addListener((ListChangeListener<? super PeriodicTable>) change -> {
 			if (periodicTablePart.getPeriodicTable() == null) {

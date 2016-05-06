@@ -52,10 +52,6 @@ import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
 @RequireCapability(ns = ExperimentPart.OSGI_SERVICE, filter = "(" + Constants.OBJECTCLASS
 		+ "=uk.co.saiman.experiment.ExperimentWorkspaceFactory)")
 public class ExperimentPart {
-	/**
-	 * The id of the part definition in the e4 model fragment
-	 */
-	public static final String PART_ID = "uk.co.saiman.msapex.experiment.part";
 	static final String OSGI_SERVICE = "osgi.service";
 
 	@FXML

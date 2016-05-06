@@ -1,12 +1,16 @@
 package uk.co.saiman.msapex.experiment;
 
+import static uk.co.strangeskies.fx.FXUtilities.wrap;
+
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import uk.co.saiman.experiment.ExperimentConfiguration;
+import uk.co.saiman.experiment.ExperimentText;
+import uk.co.strangeskies.eclipse.Localize;
 
 /**
  * Toggle available size options for the periodic table
@@ -14,18 +18,16 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
  * @author Elias N Vasylenko
  */
 public class AddExperiment {
-	private static final String NEW_EXPERIMENT = "New experiment";
-	private static final String NEW_EXPERIMENT_NAME = "Please enter a new experiment name";
 	private static final String ALPHANUMERIC = "[a-zA-Z0-9]+";
 	private static final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
 
 	@Execute
-	void execute(EPartService partService) {
-		ExperimentPart experimentPart = (ExperimentPart) partService.findPart(ExperimentPart.PART_ID).getObject();
+	void execute(MPart part, @Localize ExperimentText text) {
+		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 
 		TextInputDialog nameDialog = new TextInputDialog();
-		nameDialog.setTitle(NEW_EXPERIMENT);
-		nameDialog.setHeaderText(NEW_EXPERIMENT_NAME);
+		nameDialog.titleProperty().bind(wrap(text.newExperiment()));
+		nameDialog.headerTextProperty().bind(wrap(text.newExperimentName()));
 
 		Button okButton = (Button) nameDialog.getDialogPane().lookupButton(ButtonType.OK);
 		okButton.setDisable(true);

@@ -26,11 +26,11 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.fx.core.di.Service;
 
 import javafx.scene.control.Alert;
@@ -51,8 +51,8 @@ public class DevicesMenu {
 	private AcquisitionPart acquisitionPart;
 
 	@PostConstruct
-	void initialise(EPartService partService) {
-		acquisitionPart = (AcquisitionPart) partService.findPart("uk.co.saiman.msapex.acquisition.part").getObject();
+	void initialise(MPart part) {
+		acquisitionPart = (AcquisitionPart) part.getObject();
 		acquisitionPart.setAcquisitionModules(acquisitionModules);
 	}
 

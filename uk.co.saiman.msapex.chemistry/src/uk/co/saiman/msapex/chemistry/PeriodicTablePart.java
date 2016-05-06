@@ -40,11 +40,6 @@ import uk.co.strangeskies.fx.FXUtilities;
  * @author Elias N Vasylenko
  */
 public class PeriodicTablePart {
-	/**
-	 * The id of the part definition in the e4 model fragment
-	 */
-	public static final String PART_ID = "uk.co.saiman.msapex.chemistry.periodictable.part";
-
 	@FXML
 	private PeriodicTableController periodicTableController;
 

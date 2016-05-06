@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.fx.core.di.LocalInstance;
@@ -52,9 +53,12 @@ import uk.co.strangeskies.fx.FXUtilities;
  * @author Elias N Vasylenko
  */
 public class AcquisitionPart {
+	@Localize
+	@Inject
+	AcquisitionText text;
+
 	@FXML
 	private Pane chartPane;
-
 	@FXML
 	private Label noSelectionLabel;
 
@@ -110,7 +114,7 @@ public class AcquisitionPart {
 	}
 
 	@PostConstruct
-	void initialise(BorderPane container, @LocalInstance FXMLLoader loader, @Localize AcquisitionText text) {
+	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
 		container.setCenter(FXUtilities.loadIntoController(loader, this));
 
 		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionDevice> change) -> {
@@ -120,8 +124,6 @@ public class AcquisitionPart {
 				deselectAcquisitionModule(change.getElementRemoved());
 			}
 		});
-		
-		System.out.println(text.device());
 	}
 
 	private void selectAcquisitionModule(FXMLLoader loader, AcquisitionDevice acquisitionModule) {
