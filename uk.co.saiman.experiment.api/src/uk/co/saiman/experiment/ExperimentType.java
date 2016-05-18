@@ -45,32 +45,41 @@ public interface ExperimentType<S> {
 	 * @return a new state object suitable for an instance of
 	 *         {@link ExperimentNode} over this type.
 	 */
-	S createConfiguration(ExperimentNode<S> forNode);
+	S createState(ExperimentNode<? extends S> forNode);
 
 	/**
-	 * Update a given state object to match the given configuration. This method
-	 * may simply return the {@code configuration} parameter directly, or it may
-	 * return the {@code currentState} parameter after applying the configuration
-	 * to it, depending on whether identity of the configuration object needs to
-	 * be preserved.
-	 * <p>
-	 * Validation may also be performed here.
-	 * 
-	 * @param currentState
-	 *          the current state of the experiment node to be updated
-	 * @param newConfiguration
-	 *          the configuration we wish to apply to the current state
-	 * @return the new state object to use
-	 */
-	S updateConfiguration(S currentState, S newConfiguration);
-
-	/**
-	 * Execute this experiment type for a given input and configuration.
+	 * Execute this experiment type for a given node. The node may not necessarily
+	 * be of this exact type, and may be of a derived type instead.
 	 * 
 	 * @param node
 	 *          the node to be processed
 	 */
-	void execute(ExperimentNode<S> node);
+	void execute(ExperimentNode<? extends S> node);
+
+	/**
+	 * Test whether a node of this type may follow from the given preceding node
+	 * and be validly added as its child.
+	 * 
+	 * @param parentNode
+	 *          the candidate parent node
+	 * @return true if a node of this type may be added as a child, false
+	 *         otherwise
+	 */
+	boolean mayComeAfter(ExperimentNode<?> parentNode);
+
+	/**
+	 * Test whether a node of the given type may follow from the given node and be
+	 * validly added as its child. The penultimate descendant node should be a
+	 * descendant of a node of this type.
+	 * 
+	 * @param penultimateDescendantNode
+	 *          the candidate parent node
+	 * @param descendantNodeType
+	 *          the candidate child node
+	 * @return true if a node of the given type may be added as a child of the
+	 *         given node, false otherwise
+	 */
+	boolean mayComeBefore(ExperimentNode<?> penultimateDescendantNode, ExperimentType<?> descendantNodeType);
 
 	/**
 	 * @return the exact generic type of the configuration interface

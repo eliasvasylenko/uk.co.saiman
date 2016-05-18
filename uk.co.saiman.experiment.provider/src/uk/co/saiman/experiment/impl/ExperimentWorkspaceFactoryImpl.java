@@ -21,9 +21,12 @@ package uk.co.saiman.experiment.impl;
 import java.nio.file.Path;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.experiment.ExperimentText;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
+import uk.co.strangeskies.utilities.text.Localizer;
 
 /**
  * Reference implementation of {@link ExperimentWorkspaceFactory}.
@@ -32,8 +35,11 @@ import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
  */
 @Component
 public class ExperimentWorkspaceFactoryImpl implements ExperimentWorkspaceFactory {
+	@Reference
+	Localizer localizer;
+
 	@Override
 	public ExperimentWorkspace openWorkspace(Path location) {
-		return new ExperimentWorkspaceImpl(location);
+		return new ExperimentWorkspaceImpl(location, localizer.getLocalization(ExperimentText.class));
 	}
 }

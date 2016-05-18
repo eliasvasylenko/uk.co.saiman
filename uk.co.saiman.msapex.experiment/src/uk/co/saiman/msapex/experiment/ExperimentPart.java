@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.strangeskies.fx.FXUtilities.loadIntoController;
+import static uk.co.strangeskies.fx.FXMLLoadBuilder.buildWith;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -61,7 +61,7 @@ public class ExperimentPart {
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader,
 			@Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation, ExperimentWorkspaceFactory workspaceFactory) {
-		container.setCenter(loadIntoController(loader, this));
+		container.setCenter(buildWith(loader).controller(this).loadRoot());
 
 		Path workspaceLocation;
 		try {

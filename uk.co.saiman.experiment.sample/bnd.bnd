@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: Instrument :: Stage
+
+Export-Package: uk.co.saiman.experiment.sample
+
+-includeresource: \
+	l10n
+
+-buildpath: \
+	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;reflection},\
+	uk.co.saiman.experiment.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot

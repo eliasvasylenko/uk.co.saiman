@@ -2,7 +2,7 @@ package uk.co.saiman.experiment;
 
 /**
  * General configuration interface for experiment root nodes, as created via
- * {@link ExperimentWorkspace#addRootExperiment(ExperimentConfiguration)}
+ * {@link ExperimentWorkspace#addRootExperiment(String)}
  * 
  * @author Elias N Vasylenko
  */

@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+
+import org.eclipse.e4.ui.services.EMenuService;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeView;
@@ -11,7 +14,11 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentText;
 import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.strangeskies.eclipse.E4TreeCellImpl;
 import uk.co.strangeskies.eclipse.Localize;
+import uk.co.strangeskies.fx.TreeItemData;
+import uk.co.strangeskies.fx.TreeItemImpl;
+import uk.co.strangeskies.fx.TreeItemType;
 
 public class ExperimentTreeController {
 	@FXML
@@ -25,6 +32,12 @@ public class ExperimentTreeController {
 	@Inject
 	@Localize
 	ExperimentText text;
+
+	@Inject
+	EMenuService menuService;
+
+	@Inject
+	private Provider<E4TreeCellImpl> cellProvider;
 
 	public ExperimentTreeController() {
 		workspaceItemType = new TreeItemType<ExperimentWorkspace>() {
@@ -43,7 +56,7 @@ public class ExperimentTreeController {
 
 	@FXML
 	void initialize() {
-		treeView.setCellFactory(v -> new ExperimentTreeCell());
+		treeView.setCellFactory(v -> cellProvider.get());
 	}
 
 	public void setWorkspace(ExperimentWorkspace workspace) {
@@ -52,20 +65,20 @@ public class ExperimentTreeController {
 
 		// create root experiment node type
 		rootExperimentNodeItemType = new ExperimentNodeTreeItemType<ExperimentConfiguration>(
-				workspace.getRootExperimentType()) {
+				workspace.getRootExperimentType(), menuService) {
 			@Override
 			public String getText(ExperimentNode<ExperimentConfiguration> data) {
-				return data.configuration().getName();
+				return data.getState().getName();
 			}
 
 			@Override
 			public String getSupplementalText(ExperimentNode<ExperimentConfiguration> data) {
-				return "[" + text.lifecycleState(data.lifecycleState()) + "]";
+				return "[" + text.lifecycleState(data.getLifecycleState()) + "]";
 			}
 		};
 
 		// create root of experiment tree
-		ExperimentTreeItem<ExperimentWorkspace> root = new ExperimentTreeItem<>(workspaceItemType, workspace);
+		TreeItemImpl<ExperimentWorkspace> root = workspaceItemType.getTreeItem(workspace);
 		root.setExpanded(true);
 
 		// add root
@@ -74,6 +87,10 @@ public class ExperimentTreeController {
 	}
 
 	public void refresh() {
-		((ExperimentTreeItem<?>) treeView.getRoot()).rebuildChildren();
+		((TreeItemImpl<?>) treeView.getRoot()).rebuildChildren();
+	}
+
+	public TreeItemData<?> getSelection() {
+		return treeView.getSelectionModel().getSelectedItem().getValue();
 	}
 }

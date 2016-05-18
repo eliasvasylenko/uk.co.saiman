@@ -10,8 +10,8 @@ runreq.msapex:\
 	${req;uk.co.saiman.msapex.chemistry},\
 	${req;uk.co.saiman.msapex.experiment},\
 	${req;uk.co.saiman.msapex.acquisition},\
-	${req;uk.co.saiman.acquisition.api},\
-	${req;uk.co.saiman.acquisition.simulation},\
+	${req;uk.co.saiman.instrument.acquisition},\
+	${req;uk.co.saiman.instrument.simulation},\
 	${req;uk.co.saiman.msapex.icons.fugue}
 
 runvm.msapex:\

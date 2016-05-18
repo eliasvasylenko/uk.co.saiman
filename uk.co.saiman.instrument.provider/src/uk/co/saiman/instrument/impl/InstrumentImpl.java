@@ -30,11 +30,19 @@ import uk.co.saiman.instrument.InstrumentLifecycleParticipant;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
 import uk.co.strangeskies.utilities.IdentityProperty;
 
+/**
+ * Reference implementation of {@link Instrument}, as an OSGi service.
+ * 
+ * @author Elias N Vasylenko
+ */
 @Component
 public class InstrumentImpl implements Instrument {
 	private InstrumentLifecycleState state;
 	private final Set<InstrumentLifecycleParticipant> participants;
 
+	/**
+	 * Create an empty instrument in standby.
+	 */
 	public InstrumentImpl() {
 		state = InstrumentLifecycleState.STANDBY;
 		participants = new HashSet<>();

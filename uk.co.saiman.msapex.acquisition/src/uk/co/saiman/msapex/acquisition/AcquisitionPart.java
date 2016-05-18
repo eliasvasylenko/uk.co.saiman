@@ -18,6 +18,8 @@
  */
 package uk.co.saiman.msapex.acquisition;
 
+import static uk.co.strangeskies.fx.FXMLLoadBuilder.buildWith;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +47,6 @@ import uk.co.saiman.acquisition.AcquisitionText;
 import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.msapex.data.ContinuousFunctionChartController;
 import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.fx.FXUtilities;
 
 /**
  * An Eclipse part for management and display of acquisition devices.
@@ -115,7 +116,7 @@ public class AcquisitionPart {
 
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
-		container.setCenter(FXUtilities.loadIntoController(loader, this));
+		container.setCenter(buildWith(loader).controller(this).loadRoot());
 
 		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionDevice> change) -> {
 			if (change.wasAdded()) {
@@ -132,8 +133,8 @@ public class AcquisitionPart {
 		/*
 		 * New chart controller for module
 		 */
-		ContinuousFunctionChartController chartController = FXUtilities.loadController(loader,
-				ContinuousFunctionChartController.class);
+		ContinuousFunctionChartController chartController = buildWith(loader)
+				.controller(ContinuousFunctionChartController.class).loadController();
 		chartController.setTitle(acquisitionModule.getName());
 		controllers.put(acquisitionModule, chartController);
 		chartPane.getChildren().add(chartController.getRoot());

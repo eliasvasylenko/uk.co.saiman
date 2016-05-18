@@ -9,9 +9,9 @@ Bundle-SymbolicName: ${p};singleton:=true
 	${ss;fx},\
 	${ss;eclipse},\
 	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\
 	uk.co.saiman.msapex.data;version=snapshot,\
-	uk.co.saiman.acquisition.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 
 Private-Package: uk.co.saiman.msapex.acquisition

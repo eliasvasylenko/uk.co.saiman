@@ -9,5 +9,4 @@ Bundle-Name: SAI :: Instrument
 	uk.co.saiman.data.api;version=snapshot
 
 Export-Package: \
-	uk.co.saiman.instrument,\
-	uk.co.saiman.instrument.raster
+	uk.co.saiman.instrument

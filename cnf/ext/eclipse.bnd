@@ -42,6 +42,8 @@ plugin.eclipse.fx: \
 buildpath.eclipse:\
 	javax.inject,\
 	org.eclipse.equinox.common,\
+	org.eclipse.core.commands,\
+	org.eclipse.core.expressions,\
 	org.eclipse.core.runtime,\
 	org.eclipse.e4.ui.model.workbench,\
 	org.eclipse.jface,\

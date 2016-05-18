@@ -53,21 +53,21 @@ public interface ExperimentWorkspace {
 	ExperimentType<ExperimentConfiguration> getRootExperimentType();
 
 	/**
-	 * Get all registered experiment types which can be placed at the root of a
-	 * tree, i.e. those which accept {@link Void} as their input.
+	 * Get all experiments of the {@link #getRootExperiments() root experiment
+	 * type}.
 	 * 
 	 * @return all registered root experiment parts
 	 */
-	Set<ExperimentNode<ExperimentConfiguration>> getRootExperiments();
+	List<ExperimentNode<ExperimentConfiguration>> getRootExperiments();
 
 	/**
-	 * Add a root experiment node of the given type to management.
+	 * Add a root experiment node to management.
 	 * 
-	 * @param configuration
-	 *          the configuration to apply to the new experiment
+	 * @param name
+	 *          the name of the new experiment
 	 * @return a new root experiment part of the root type
 	 */
-	ExperimentNode<ExperimentConfiguration> addRootExperiment(ExperimentConfiguration configuration);
+	ExperimentNode<ExperimentConfiguration> addRootExperiment(String name);
 
 	/*
 	 * Child experiment types
@@ -90,4 +90,9 @@ public interface ExperimentWorkspace {
 	 * @return true if the type was removed successfully, false otherwise
 	 */
 	boolean unregisterExperimentType(ExperimentType<?> experimentType);
+
+	/**
+	 * @return the set of all experiment types registered to this workspace
+	 */
+	Set<ExperimentType<?>> getRegisteredExperimentTypes();
 }

@@ -14,11 +14,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.	
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
+import static uk.co.strangeskies.utilities.text.Localizer.getDefaultLocalizer;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import java.util.Set;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentText;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 
@@ -43,7 +46,9 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
 
 	private final ExperimentType<ExperimentConfiguration> rootExperimentType = new RootExperimentType(this);
-	private final Set<ExperimentNode<ExperimentConfiguration>> rootExperiments = new HashSet<>();
+	private final List<ExperimentNode<ExperimentConfiguration>> rootExperiments = new ArrayList<>();
+
+	private final ExperimentText text;
 
 	/**
 	 * Try to create a new experiment workspace over the given root path
@@ -52,7 +57,24 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	 *          the path of the workspace data
 	 */
 	public ExperimentWorkspaceImpl(Path workspaceRoot) {
+		this(workspaceRoot, getDefaultLocalizer().getLocalization(ExperimentText.class));
+	}
+
+	/**
+	 * Try to create a new experiment workspace over the given root path
+	 * 
+	 * @param workspaceRoot
+	 *          the path of the workspace data
+	 * @param text
+	 *          a localised text accessor implementation
+	 */
+	public ExperimentWorkspaceImpl(Path workspaceRoot, ExperimentText text) {
 		this.dataRoot = workspaceRoot;
+		this.text = text;
+	}
+
+	ExperimentText getText() {
+		return text;
 	}
 
 	@Override
@@ -65,10 +87,6 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 		return processingStack;
 	}
 
-	private <S> ExperimentNode<S> createExperimentNode(ExperimentType<S> experimentType, ExperimentNodeImpl<?> parent) {
-		return new ExperimentNodeImpl<S>(this, experimentType, parent);
-	}
-
 	/*
 	 * Root experiment types
 	 */
@@ -79,18 +97,22 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	}
 
 	@Override
-	public Set<ExperimentNode<ExperimentConfiguration>> getRootExperiments() {
-		return unmodifiableSet(rootExperiments);
+	public List<ExperimentNode<ExperimentConfiguration>> getRootExperiments() {
+		return unmodifiableList(rootExperiments);
 	}
 
 	@Override
-	public ExperimentNode<ExperimentConfiguration> addRootExperiment(ExperimentConfiguration configuration) {
-		ExperimentNode<ExperimentConfiguration> rootExperiment = createExperimentNode(rootExperimentType, null);
-		rootExperiment.configure(configuration);
+	public ExperimentNode<ExperimentConfiguration> addRootExperiment(String name) {
+		ExperimentNode<ExperimentConfiguration> rootExperiment = new ExperimentNodeImpl<>(rootExperimentType, this);
+		rootExperiment.getState().setName(name);
 
 		rootExperiments.add(rootExperiment);
 
 		return rootExperiment;
+	}
+
+	void removeRootExperiment(ExperimentNode<ExperimentConfiguration> rootNode) {
+		rootExperiments.remove(rootNode);
 	}
 
 	/*
@@ -105,5 +127,10 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	@Override
 	public boolean unregisterExperimentType(ExperimentType<?> experimentType) {
 		return experimentTypes.remove(experimentType);
+	}
+
+	@Override
+	public Set<ExperimentType<?>> getRegisteredExperimentTypes() {
+		return unmodifiableSet(experimentTypes);
 	}
 }

@@ -18,13 +18,13 @@
  */
 package uk.co.saiman.experiment;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import uk.co.saiman.utilities.Configurable;
-import uk.co.strangeskies.reflection.TypeToken;
 
 /**
  * A node in an experiment part tree.
@@ -32,10 +32,9 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @author Elias N Vasylenko
  *
  * @param <S>
- *          the type of the data describing the experiment configuration and
- *          results
+ *          the type of the data describing the experiment configuration
  */
-public interface ExperimentNode<S> extends Configurable<S> {
+public interface ExperimentNode<S> {
 	/**
 	 * @return the experiment workspace containing this experiment
 	 */
@@ -49,25 +48,32 @@ public interface ExperimentNode<S> extends Configurable<S> {
 	 */
 	Path getExperimentDataRoot();
 
-	@Override
-	void configure(S configuration);
-
 	/**
-	 * @return The type of the experiment
+	 * @return the current state object of the experiment node
 	 */
-	ExperimentType<S> type();
+	S getState();
 
 	/**
-	 * @return The parent part of this experiment, if present, otherwise an empty
+	 * @return the type of the experiment
+	 */
+	ExperimentType<S> getType();
+
+	/**
+	 * @return the parent part of this experiment, if present, otherwise an empty
 	 *         optional
 	 */
-	Optional<ExperimentNode<?>> parent();
+	Optional<ExperimentNode<?>> getParent();
 
 	/**
-	 * @return The root part of the experiment tree this part occurs in
+	 * @return the node's index in its parent's list of children
 	 */
-	default ExperimentNode<ExperimentConfiguration> root() {
-		return ancestor(getExperimentWorkspace().getRootExperimentType()).get();
+	int getIndex();
+
+	/**
+	 * @return the root part of the experiment tree this part occurs in
+	 */
+	default ExperimentNode<? extends ExperimentConfiguration> getRoot() {
+		return getAncestor(getExperimentWorkspace().getRootExperimentType()).get();
 	}
 
 	/**
@@ -79,19 +85,22 @@ public interface ExperimentNode<S> extends Configurable<S> {
 	 * @return the nearest ancestor of the given type, or null if no such ancestor
 	 *         exists
 	 */
-	default <T, E extends ExperimentType<T>> Optional<ExperimentNode<T>> ancestor(E type) {
-		Optional<ExperimentNode<?>> ancestor = parent();
+	default <T, E extends ExperimentType<T>> Optional<ExperimentNode<? extends T>> getAncestor(E type) {
+		Optional<ExperimentNode<?>> ancestor = of(this);
+
 		do {
-			if (ancestor.get().type() == type) {
+			ExperimentType<?> ancestorType = ancestor.get().getType();
+
+			if (ancestorType == type) {
 				@SuppressWarnings("unchecked")
-				ExperimentNode<T> node = (ExperimentNode<T>) ancestor.get();
-				return Optional.of(node);
+				ExperimentNode<? extends T> node = (ExperimentNode<? extends T>) ancestor.get();
+				return of(node);
 			}
 
-			ancestor = ancestor.flatMap(ExperimentNode::parent);
+			ancestor = ancestor.flatMap(ExperimentNode::getParent);
 		} while (ancestor.isPresent());
 
-		return Optional.empty();
+		return empty();
 	}
 
 	/**
@@ -106,7 +115,7 @@ public interface ExperimentNode<S> extends Configurable<S> {
 	 * 
 	 * @return An ordered list of all sequential child experiment parts
 	 */
-	List<ExperimentNode<?>> children();
+	List<ExperimentNode<?>> getChildren();
 
 	/**
 	 * @return All known available child experiment types
@@ -125,10 +134,5 @@ public interface ExperimentNode<S> extends Configurable<S> {
 	/**
 	 * @return The current execution lifecycle state of the experiment part.
 	 */
-	ExperimentLifecycleState lifecycleState();
-
-	@Override
-	default TypeToken<S> getConfigurationType() {
-		return type().getStateType();
-	}
+	ExperimentLifecycleState getLifecycleState();
 }

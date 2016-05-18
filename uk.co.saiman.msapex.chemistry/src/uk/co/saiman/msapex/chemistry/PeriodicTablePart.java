@@ -18,6 +18,8 @@
  */
 package uk.co.saiman.msapex.chemistry;
 
+import static uk.co.strangeskies.fx.FXMLLoadBuilder.buildWith;
+
 import javax.annotation.PostConstruct;
 
 import org.eclipse.fx.core.di.LocalInstance;
@@ -32,7 +34,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.strangeskies.fx.FXUtilities;
 
 /**
  * An Eclipse part for display of a periodic table.
@@ -51,7 +52,7 @@ public class PeriodicTablePart {
 
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
-		container.setCenter(FXUtilities.loadIntoController(loader, this));
+		container.setCenter(buildWith(loader).controller(this).loadRoot());
 		periodicTableController.addObserver(this::setElement);
 		periodicTableController.setTilesFocusTraversable(true);
 	}

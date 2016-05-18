@@ -6,10 +6,15 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 
+/**
+ * The root experiment type implementation for {@link ExperimentWorkspaceImpl}.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class RootExperimentType implements ExperimentType<ExperimentConfiguration> {
 	private final ExperimentWorkspaceImpl workspace;
 
-	public RootExperimentType(ExperimentWorkspaceImpl workspace) {
+	protected RootExperimentType(ExperimentWorkspaceImpl workspace) {
 		this.workspace = workspace;
 	}
 
@@ -19,7 +24,7 @@ public class RootExperimentType implements ExperimentType<ExperimentConfiguratio
 	}
 
 	@Override
-	public ExperimentConfiguration createConfiguration(ExperimentNode<ExperimentConfiguration> forNode) {
+	public ExperimentConfiguration createState(ExperimentNode<? extends ExperimentConfiguration> forNode) {
 		return new ExperimentConfiguration() {
 			private String name;
 			private String notes;
@@ -31,21 +36,21 @@ public class RootExperimentType implements ExperimentType<ExperimentConfiguratio
 
 			@Override
 			public void setName(String name) {
+				if (name == null)
+					throw new IllegalArgumentException("Experiment name must be non-null");
 				if (Objects.equals(name, this.name))
 					return;
 
-				if (name != null) {
-					// TODO check name is valid (i.e. def valid in a path)
+				// TODO check name is valid (i.e. def valid in a path)
 
-					if (workspace.getRootExperiments().stream().anyMatch(e -> name.equals(e.configuration().getName()))) {
-						// TODO already exists in workspace error!
-					}
+				if (workspace.getRootExperiments().stream().anyMatch(e -> name.equals(e.getState().getName()))) {
+					// TODO already exists in workspace error!
+				}
 
-					// TODO if data already exists on disk
+				// TODO if data already exists on disk
 
-					if (this.name != null) {
-						// TODO move from old location
-					}
+				if (this.name != null) {
+					// TODO move from old location
 				}
 
 				this.name = name;
@@ -64,14 +69,17 @@ public class RootExperimentType implements ExperimentType<ExperimentConfiguratio
 	}
 
 	@Override
-	public ExperimentConfiguration updateConfiguration(ExperimentConfiguration currentState,
-			ExperimentConfiguration configuration) {
-		currentState.set(configuration);
-		return currentState;
+	public void execute(ExperimentNode<? extends ExperimentConfiguration> node) {
+		// TODO create location
 	}
 
 	@Override
-	public void execute(ExperimentNode<ExperimentConfiguration> node) {
-		// TODO create location
+	public boolean mayComeAfter(ExperimentNode<?> parentNode) {
+		return false;
+	}
+
+	@Override
+	public boolean mayComeBefore(ExperimentNode<?> penultimateDescendantNode, ExperimentType<?> descendantNodeType) {
+		return true;
 	}
 }

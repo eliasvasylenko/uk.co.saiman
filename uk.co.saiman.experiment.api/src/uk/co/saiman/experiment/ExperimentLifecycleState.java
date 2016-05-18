@@ -57,5 +57,10 @@ public enum ExperimentLifecycleState {
 	/**
 	 * Something went wrong...
 	 */
-	FAILURE
+	FAILURE,
+
+	/**
+	 * The experiment node has been removed from the workspace
+	 */
+	DISPOSED
 }

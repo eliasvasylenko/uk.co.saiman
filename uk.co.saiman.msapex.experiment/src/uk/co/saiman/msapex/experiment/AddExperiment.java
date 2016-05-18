@@ -8,12 +8,11 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
-import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentText;
 import uk.co.strangeskies.eclipse.Localize;
 
 /**
- * Toggle available size options for the periodic table
+ * Add an experiment to the workspace
  * 
  * @author Elias N Vasylenko
  */
@@ -32,29 +31,14 @@ public class AddExperiment {
 		Button okButton = (Button) nameDialog.getDialogPane().lookupButton(ButtonType.OK);
 		okButton.setDisable(true);
 		nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-			okButton.setDisable(!newValue.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*"));
+			boolean exists = experimentPart.getExperimentWorkspace().getRootExperiments().stream()
+					.anyMatch(e -> e.getState().getName().equals(newValue));
+			boolean isValid = newValue.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
+			okButton.setDisable(!isValid || exists);
 		});
 
 		nameDialog.showAndWait().ifPresent(name -> {
-			ExperimentConfiguration configuration = new ExperimentConfiguration() {
-				@Override
-				public void setNotes(String notes) {}
-
-				@Override
-				public void setName(String name) {}
-
-				@Override
-				public String getNotes() {
-					return "";
-				}
-
-				@Override
-				public String getName() {
-					return name;
-				}
-			};
-
-			experimentPart.getExperimentWorkspace().addRootExperiment(configuration);
+			experimentPart.getExperimentWorkspace().addRootExperiment(name);
 			experimentPart.getExperimentTreeController().refresh();
 		});
 	}

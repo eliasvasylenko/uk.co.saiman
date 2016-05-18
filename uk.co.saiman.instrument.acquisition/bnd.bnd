@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: Instrument :: Acquisition
+
+Export-Package: uk.co.saiman.acquisition
+
+-includeresource: \
+	l10n
+
+-buildpath: \
+	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;reflection},\
+	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot

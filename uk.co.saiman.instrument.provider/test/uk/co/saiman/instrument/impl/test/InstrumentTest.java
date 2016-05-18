@@ -18,6 +18,7 @@
  */
 package uk.co.saiman.instrument.impl.test;
 
+@SuppressWarnings("javadoc")
 public class InstrumentTest {
 
 }
