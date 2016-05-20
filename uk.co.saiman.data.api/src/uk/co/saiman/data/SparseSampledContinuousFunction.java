@@ -163,6 +163,64 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 
 	@Override
 	public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
-		return this;
+		if (getDepth() <= 2) {
+			return copy();
+		}
+
+		int sourceSamples = this.indices.length;
+
+		int maximumSampleCount = sourceSamples * 3 + 2;
+		int sampleCount = 0;
+		double[] positions = new double[maximumSampleCount];
+		double[] intensities = new double[maximumSampleCount];
+
+		int previousIndex = indices[0];
+		double previousPosition = getX(previousIndex);
+		double previousIntensity = this.intensities[0];
+
+		if (previousPosition >= startX) {
+			positions[0] = previousPosition;
+			intensities[0] = previousIntensity;
+			sampleCount++;
+		}
+
+		for (int i = 1; i < sourceSamples; i++) {
+			int index = indices[i];
+			double position = getX(index);
+			double intensity = this.intensities[i];
+
+			if (position >= endX) {
+				/*
+				 * end of sample window
+				 */
+				positions[sampleCount] = previousPosition;
+				intensities[sampleCount] = previousIntensity;
+				sampleCount++;
+				break;
+			} else if (position >= startX) {
+				/*
+				 * within sample window
+				 */
+				if (sampleCount == 0) {
+					/*
+					 * start of sample window
+					 */
+					
+				}
+
+			}
+
+			previousIndex = index;
+			previousPosition = position;
+			previousIntensity = intensity;
+		}
+
+		double[] V = new double[2];
+		V[0] = startX;
+		V[1] = endX;
+
+		double[] I = new double[2];
+
+		return new ArraySampledContinuousFunction(2, V, I);
 	}
 }

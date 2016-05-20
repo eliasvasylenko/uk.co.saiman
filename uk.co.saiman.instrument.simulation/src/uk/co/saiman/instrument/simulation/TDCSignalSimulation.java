@@ -19,69 +19,24 @@
 package uk.co.saiman.instrument.simulation;
 
 import java.util.Random;
-import java.util.function.Consumer;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SparseSampledContinuousFunction;
 import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.strangeskies.utilities.BufferingListener;
-import uk.co.strangeskies.utilities.Observable;
-import uk.co.strangeskies.utilities.text.LocalizedString;
-import uk.co.strangeskies.utilities.text.LocalizedText;
-import uk.co.strangeskies.utilities.text.Localizer;
 
 /**
  * A configurable software simulation of an acquisition hardware module.
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = { AcquisitionDevice.class, HardwareDevice.class })
-public class TDCSignalSimulation implements AcquisitionDevice {
-	public interface AcquisitionText extends LocalizedText<AcquisitionText> {
-		LocalizedString simulationTDCDeviceName();
-
-		LocalizedString alreadyAcquiring();
-	}
-
-	@Reference
-	Localizer localizer;
-	AcquisitionText text;
-
-	/**
-	 * The default acquisition resolution when none is provided.
-	 */
-	public static final double DEFAULT_ACQUISITION_RESOLUTION = 0.00_000_001;
-	/**
-	 * The default acquisition frequency when none is provided.
-	 */
-	public static final double DEFAULT_ACQUISITION_TIME = 0.000_01;
-	/**
-	 * The default acquisition frequency when none is provided.
-	 */
-	public static final int DEFAULT_ACQUISITION_COUNT = 1000;
-
-	private double acquisitionResolution = DEFAULT_ACQUISITION_RESOLUTION;
-	private double acquisitionTime = DEFAULT_ACQUISITION_TIME;
-
-	private int acquisitionCount = DEFAULT_ACQUISITION_COUNT;
-
-	private SampledContinuousFunction acquisitionData;
-	private final BufferingListener<SampledContinuousFunction> singleAcquisitionListeners;
-	private final BufferingListener<SampledContinuousFunction> acquisitionListeners;
-
-	private final Object acquiringLock = new Object();
-	private Integer acquiringCounter;
-
+@Component
+public class TDCSignalSimulation extends AcquisitionSimulationDevice implements AcquisitionDevice, HardwareDevice {
 	private static final int MAXIMUM_HITS = 10;
-	private final int[] hitIndices;
-	private final double[] hitIntensities;
-
-	private boolean finalised = false;
+	private final int[] hitIndices = new int[MAXIMUM_HITS];
+	private final double[] hitIntensities = new double[MAXIMUM_HITS];
 
 	/**
 	 * Create an acquisition simulation with the default values given by:
@@ -89,22 +44,7 @@ public class TDCSignalSimulation implements AcquisitionDevice {
 	 * {@link #DEFAULT_ACQUISITION_TIME}.
 	 */
 	public TDCSignalSimulation() {
-		singleAcquisitionListeners = new BufferingListener<>();
-		acquisitionListeners = new BufferingListener<>();
-		acquiringCounter = 0;
-
-		hitIndices = new int[MAXIMUM_HITS];
-		hitIntensities = new double[MAXIMUM_HITS];
-		for (int i = 0; i < MAXIMUM_HITS; i++) {
-			hitIntensities[i] = 1;
-		}
-
-		new Thread(this::acquire).start();
-	}
-
-	@Activate
-	void activate() {
-		text = localizer.getLocalization(AcquisitionText.class);
+		super();
 	}
 
 	/**
@@ -119,147 +59,28 @@ public class TDCSignalSimulation implements AcquisitionDevice {
 	 *          milliseconds.
 	 */
 	public TDCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
-		this();
-		setAcquisitionResolution(acquisitionResolution);
-		setAcquisitionTime(acquisitionTime);
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		finalised = true;
-		super.finalize();
+		super(acquisitionResolution, acquisitionTime);
 	}
 
 	@Override
 	public String getName() {
-		return text.simulationTDCDeviceName().toString();
+		return getText().tdcDeviceName().toString();
 	}
 
 	@Override
-	public boolean isConnected() {
-		return true;
-	}
+	protected SampledContinuousFunction acquireImpl(Random random, double resolution, int depth) {
+		int hits = random.nextInt(MAXIMUM_HITS);
 
-	@Override
-	public void addErrorListener(Consumer<Exception> exception) {
-		// TODO Auto-generated method stub
+		/*
+		 * TODO distribute "hits" number of hits
+		 */
 
-	}
-
-	@Override
-	public void startAcquisition() {
-		synchronized (acquiringLock) {
-			if (acquiringCounter > 0) {
-				throw new IllegalStateException(text.alreadyAcquiring().toString());
-			}
-
-			acquiringCounter = acquisitionCount;
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		return new SparseSampledContinuousFunction(1 / resolution, depth, hits, hitIndices, hitIntensities);
 	}
-
-	private void acquire() {
-		Random random = new Random();
-
-		while (!finalised) {
-			boolean acquired;
-
-			synchronized (acquiringLock) {
-				acquired = acquiringCounter > 0;
-				if (acquired) {
-					acquiringCounter -= 1;
-				}
-			}
-
-			int hits = random.nextInt(MAXIMUM_HITS);
-
-			/*
-			 * TODO distribute "hits" number of hits
-			 */
-
-			acquisitionData = new SparseSampledContinuousFunction(1 / getAcquisitionResolution(), getAcquisitionDepth(), hits,
-					hitIndices, hitIntensities);
-
-			acquisitionListeners.accept(acquisitionData);
-
-			if (acquired) {
-				singleAcquisitionListeners.accept(acquisitionData);
-				if (acquiringCounter == 0) {
-					singleAcquisitionListeners.clearObservers();
-				}
-			}
-
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-
-		stopAcquisition();
-	}
-
-	@Override
-	public void stopAcquisition() {
-		synchronized (acquiringLock) {
-			singleAcquisitionListeners.clearObservers();
-
-			acquiringCounter = 0;
-		}
-	}
-
-	@Override
-	public boolean isAcquiring() {
-		return acquiringCounter > 0;
-	}
-
-	@Override
-	public SampledContinuousFunction getLastAcquisitionData() {
-		return acquisitionData;
-	}
-
-	@Override
-	public Observable<SampledContinuousFunction> nextAcquisitionDataEvents() {
-		return singleAcquisitionListeners;
-	}
-
-	@Override
-	public Observable<SampledContinuousFunction> dataEvents() {
-		return acquisitionListeners;
-	}
-
-	/**
-	 * Set the time resolution between each sample in the acquired data.
-	 * 
-	 * @param resolution
-	 *          The acquisition resolution in milliseconds
-	 */
-	public void setAcquisitionResolution(double resolution) {
-		acquisitionResolution = resolution;
-	}
-
-	@Override
-	public double getAcquisitionResolution() {
-		return acquisitionResolution;
-	}
-
-	@Override
-	public void setAcquisitionTime(double time) {
-		acquisitionTime = time;
-	}
-
-	@Override
-	public double getAcquisitionTime() {
-		return acquisitionTime;
-	}
-
-	@Override
-	public void setAcquisitionCount(int count) {
-		acquisitionCount = count;
-	}
-
-	@Override
-	public int getAcquisitionCount() {
-		return acquisitionCount;
-	}
-
 }

@@ -117,7 +117,9 @@ platform: win64
 	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.simulation;version=snapshot,\
+	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.msapex.acquisition;version=snapshot,\
 	uk.co.saiman.msapex.chemistry;version=snapshot,\

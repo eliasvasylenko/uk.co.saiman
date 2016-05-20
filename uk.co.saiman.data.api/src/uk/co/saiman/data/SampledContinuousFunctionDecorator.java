@@ -73,6 +73,6 @@ public interface SampledContinuousFunctionDecorator extends SampledContinuousFun
 
 	@Override
 	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
-		return ContinuousFunctionDecorator.super.resample(startX, endX, resolvableUnits);
+		return getComponent().resample(startX, endX, resolvableUnits);
 	}
 }

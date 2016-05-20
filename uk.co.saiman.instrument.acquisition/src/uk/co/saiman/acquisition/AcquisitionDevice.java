@@ -48,11 +48,6 @@ public interface AcquisitionDevice extends HardwareDevice {
 		stopAcquisition();
 	}
 
-	@Override
-	default void reset() {
-		abortOperation();
-	}
-
 	/**
 	 * @return True if the module is currently in acquisition, false otherwise.
 	 */

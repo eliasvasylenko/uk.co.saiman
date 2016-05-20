@@ -40,11 +40,11 @@ public interface RasterDevice extends HardwareDevice {
 		return getRasterHeight() * getRasterWidth();
 	}
 
-	void startRaster();
+	void startRasterOperation();
 
-	RasterPosition getPosition();
+	RasterPosition getRasterPosition();
 
-	Observable<RasterPosition> nextRasterPositionEvents();
+	Observable<RasterPosition> nextOperationRasterPositionEvents();
 
-	Observable<RasterPosition> positionEvents();
+	Observable<RasterPosition> rasterPositionEvents();
 }

@@ -80,4 +80,10 @@ public class CalibratedContinuousFunction extends DependentExpression<Continuous
 	protected ContinuousFunction evaluate() {
 		return this;
 	}
+
+	@Override
+	public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+		return new CalibratedContinuousFunction(
+				SampledContinuousFunctionDecorator.super.resample(startX, endX, resolvableUnits), calibration);
+	}
 }
