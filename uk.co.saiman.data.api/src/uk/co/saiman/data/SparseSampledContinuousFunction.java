@@ -18,6 +18,9 @@
  */
 package uk.co.saiman.data;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import java.util.Arrays;
 
 import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
@@ -163,64 +166,59 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 
 	@Override
 	public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
-		if (getDepth() <= 2) {
-			return copy();
+		int sourceSamples = indices.length;
+
+		/*
+		 * shortcut for empty
+		 */
+		if (sourceSamples == 0 || getX(indices[sourceSamples - 1]) < startX || getX(indices[0]) > endX) {
+			double from = max(startX, 0);
+			double to = min(endX, getRange().getTo());
+			if (to > from) {
+				return new ArraySampledContinuousFunction(2, new double[] { from, to }, new double[] { 0, 0 });
+			} else {
+				return new ArraySampledContinuousFunction(2, new double[] { from }, new double[] { 0 });
+			}
 		}
 
-		int sourceSamples = this.indices.length;
-
+		/*
+		 * result arrays
+		 */
 		int maximumSampleCount = sourceSamples * 3 + 2;
 		int sampleCount = 0;
 		double[] positions = new double[maximumSampleCount];
 		double[] intensities = new double[maximumSampleCount];
 
-		int previousIndex = indices[0];
-		double previousPosition = getX(previousIndex);
-		double previousIntensity = this.intensities[0];
+		int lastSampleIndex = -1;
+		for (int i = 0; i < indices.length; i++) {
+			int sampleIndex = indices[i];
 
-		if (previousPosition >= startX) {
-			positions[0] = previousPosition;
-			intensities[0] = previousIntensity;
+			if (sampleIndex > lastSampleIndex + 1) {
+				if (sampleIndex > lastSampleIndex + 2) {
+					positions[sampleCount] = getX(lastSampleIndex + 1);
+					intensities[sampleCount] = 0;
+					sampleCount++;
+				}
+
+				positions[sampleCount] = getX(sampleIndex - 1);
+				intensities[sampleCount] = 0;
+				sampleCount++;
+			}
+
+			positions[sampleCount] = getX(sampleIndex);
+			intensities[sampleCount] = this.intensities[i];
+			sampleCount++;
+
+			lastSampleIndex = sampleIndex;
+		}
+
+		if (lastSampleIndex < getDepth() - 1) {
+			positions[sampleCount] = getX(getDepth() - 1);
+			intensities[sampleCount] = 0;
 			sampleCount++;
 		}
 
-		for (int i = 1; i < sourceSamples; i++) {
-			int index = indices[i];
-			double position = getX(index);
-			double intensity = this.intensities[i];
-
-			if (position >= endX) {
-				/*
-				 * end of sample window
-				 */
-				positions[sampleCount] = previousPosition;
-				intensities[sampleCount] = previousIntensity;
-				sampleCount++;
-				break;
-			} else if (position >= startX) {
-				/*
-				 * within sample window
-				 */
-				if (sampleCount == 0) {
-					/*
-					 * start of sample window
-					 */
-					
-				}
-
-			}
-
-			previousIndex = index;
-			previousPosition = position;
-			previousIntensity = intensity;
-		}
-
-		double[] V = new double[2];
-		V[0] = startX;
-		V[1] = endX;
-
-		double[] I = new double[2];
-
-		return new ArraySampledContinuousFunction(2, V, I);
+		return new ArraySampledContinuousFunction(sampleCount, positions, intensities).resample(startX, endX,
+				resolvableUnits);
 	}
 }
