@@ -16,27 +16,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.instrument;
-
-import uk.co.strangeskies.utilities.Observable;
-
-public interface HardwareDevice {
-	String getName();
-
-	/**
-	 * @return True if a communication link with the hardware properly
-	 *         established, false otherwise
-	 */
-	boolean isConnected();
-
-	void reset();
-
-	/**
-	 * If the hardware module is performing some sort of operation, e.g. a
-	 * currently running raster or acquisition card, that operation should be
-	 * aborted, or for high voltages they should be turned off if possible.
-	 */
-	void abortOperation();
-
-	Observable<Exception> errors();
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.instrument.simulation;

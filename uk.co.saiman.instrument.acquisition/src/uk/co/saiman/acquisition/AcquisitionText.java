@@ -15,4 +15,14 @@ public interface AcquisitionText extends LocalizedText<AcquisitionText> {
 	LocalizedString devices();
 
 	LocalizedString noDevices();
+
+	LocalizedString alreadyAcquiring();
+
+	LocalizedString experimentInterrupted();
+
+	LocalizedString unexpectedException();
+
+	LocalizedString countMustBePositive();
+
+	LocalizedString noSignal();
 }

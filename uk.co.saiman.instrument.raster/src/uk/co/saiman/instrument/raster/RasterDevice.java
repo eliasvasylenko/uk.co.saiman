@@ -24,11 +24,11 @@ import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.strangeskies.utilities.Observable;
 
 public interface RasterDevice extends HardwareDevice {
-	Set<RasterMode> availableRasterModes();
+	Set<RasterPattern> availableRasterModes();
 
-	RasterMode getRasterMode();
+	RasterPattern getRasterPattern();
 
-	void setRasterMode(RasterMode mode);
+	void setRasterPattern(RasterPattern mode);
 
 	void setRasterSize(int width, int height);
 
@@ -39,6 +39,10 @@ public interface RasterDevice extends HardwareDevice {
 	default int getRasterLength() {
 		return getRasterHeight() * getRasterWidth();
 	}
+
+	void setRasterDwell(int dwell);
+
+	int getRasterDwell();
 
 	void startRasterOperation();
 

@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.instrument.simulation;
+package uk.co.saiman.instrument.simulation.impl;
 
 import java.util.Random;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SparseSampledContinuousFunction;
-import uk.co.saiman.instrument.HardwareDevice;
+import uk.co.saiman.instrument.simulation.SignalSimulation;
+import uk.co.saiman.instrument.simulation.SimulationSample;
 
 /**
  * A configurable software simulation of an acquisition hardware module.
@@ -33,54 +33,19 @@ import uk.co.saiman.instrument.HardwareDevice;
  * @author Elias N Vasylenko
  */
 @Component
-public class TDCSignalSimulation extends AcquisitionSimulationDevice implements AcquisitionDevice, HardwareDevice {
+public class TDCSignalSimulation implements SignalSimulation {
 	private static final int MAXIMUM_HITS = 10;
 	private final int[] hitIndices = new int[MAXIMUM_HITS];
 	private final double[] hitIntensities = new double[MAXIMUM_HITS];
 
-	/**
-	 * Create an acquisition simulation with the default values given by:
-	 * {@link #DEFAULT_ACQUISITION_RESOLUTION} and
-	 * {@link #DEFAULT_ACQUISITION_TIME}.
-	 */
-	public TDCSignalSimulation() {
-		super();
-	}
-
-	/**
-	 * Create an acquisition simulation with the given acquisition resolution and
-	 * acquisition time.
-	 * 
-	 * @param acquisitionResolution
-	 *          The time resolution between each sample in the acquired data, in
-	 *          milliseconds
-	 * @param acquisitionTime
-	 *          The active sampling duration for a single data acquisition, in
-	 *          milliseconds.
-	 */
-	public TDCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
-		super(acquisitionResolution, acquisitionTime);
-	}
-
 	@Override
-	public String getName() {
-		return getText().tdcDeviceName().toString();
-	}
-
-	@Override
-	protected SampledContinuousFunction acquireImpl(Random random, double resolution, int depth) {
+	public SampledContinuousFunction acquire(Random random, double resolution, int depth, SimulationSample sample) {
 		int hits = random.nextInt(MAXIMUM_HITS);
 
 		/*
 		 * TODO distribute "hits" number of hits
 		 */
 
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return new SparseSampledContinuousFunction(1 / resolution, depth, hits, hitIndices, hitIntensities);
 	}
 }

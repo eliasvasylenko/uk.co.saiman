@@ -16,16 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.instrument.simulation;
+package uk.co.saiman.instrument.simulation.impl;
 
 import java.util.Random;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.instrument.HardwareDevice;
+import uk.co.saiman.instrument.simulation.SignalSimulation;
+import uk.co.saiman.instrument.simulation.SimulationSample;
 
 /**
  * A configurable software simulation of an acquisition hardware module.
@@ -33,40 +33,11 @@ import uk.co.saiman.instrument.HardwareDevice;
  * @author Elias N Vasylenko
  */
 @Component
-public class ADCSignalSimulation extends AcquisitionSimulationDevice implements AcquisitionDevice, HardwareDevice {
+public class ADCSignalSimulation implements SignalSimulation {
 	private double[] intensities = new double[0];
 
-	/**
-	 * Create an acquisition simulation with the default values given by:
-	 * {@link #DEFAULT_ACQUISITION_RESOLUTION} and
-	 * {@link #DEFAULT_ACQUISITION_TIME}.
-	 */
-	public ADCSignalSimulation() {
-		super();
-	}
-
-	/**
-	 * Create an acquisition simulation with the given acquisition resolution and
-	 * acquisition time.
-	 * 
-	 * @param acquisitionResolution
-	 *          The time resolution between each sample in the acquired data, in
-	 *          milliseconds
-	 * @param acquisitionTime
-	 *          The active sampling duration for a single data acquisition, in
-	 *          milliseconds.
-	 */
-	public ADCSignalSimulation(double acquisitionResolution, double acquisitionTime) {
-		super(acquisitionResolution, acquisitionTime);
-	}
-
 	@Override
-	public String getName() {
-		return getText().adcDeviceName().toString();
-	}
-
-	@Override
-	protected SampledContinuousFunction acquireImpl(Random random, double resolution, int depth) {
+	public SampledContinuousFunction acquire(Random random, double resolution, int depth, SimulationSample sample) {
 		if (this.intensities.length != depth) {
 			intensities = new double[depth];
 		}
@@ -81,16 +52,5 @@ public class ADCSignalSimulation extends AcquisitionSimulationDevice implements 
 		}
 
 		return new ArrayRegularSampledContinuousFunction(1 / (resolution * 1_000), 0, intensities);
-	}
-
-	@Override
-	public void setAcquisitionResolution(double resolution) {
-		super.setAcquisitionResolution(resolution);
-
-	}
-
-	@Override
-	public void setAcquisitionTime(double time) {
-		super.setAcquisitionTime(time);
 	}
 }

@@ -1,0 +1,3 @@
+Bundle-Name: SAI :: Simulation :: Provider
+
+Private-Package: uk.co.saiman.instrument.simulation.impl

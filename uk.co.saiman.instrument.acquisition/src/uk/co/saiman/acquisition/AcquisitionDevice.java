@@ -31,7 +31,8 @@ import uk.co.strangeskies.utilities.Observable;
  */
 public interface AcquisitionDevice extends HardwareDevice {
 	/**
-	 * Begin an acquisition experiment with the current configuration.
+	 * Begin an acquisition experiment with the current configuration, and wait
+	 * until it is complete.
 	 * 
 	 * @throws IllegalStateException
 	 *           If acquisition is already in progress.
@@ -99,7 +100,18 @@ public interface AcquisitionDevice extends HardwareDevice {
 	int getAcquisitionCount();
 
 	/**
-	 * Set the active sampling duration for a single data acquisition event.
+	 * Get the time resolution between each sample in the acquired sampled
+	 * continuous function. Unless otherwise specified by a subclass this may be
+	 * considered to be a constant.
+	 * 
+	 * @return The acquisition resolution in milliseconds
+	 */
+	double getAcquisitionResolution();
+
+	/**
+	 * Set the active sampling duration for a single data acquisition event. This
+	 * may adjust the acquisition depth to fit according to the current
+	 * acquisition resolution.
 	 * 
 	 * @param time
 	 *          The time an acquisition will last in milliseconds
@@ -109,24 +121,24 @@ public interface AcquisitionDevice extends HardwareDevice {
 	/**
 	 * Get the active sampling duration for a single data acquisition event.
 	 * 
-	 * @return The time an acquisition will last in milliseconds
+	 * @return the time an acquisition will last in milliseconds
 	 */
 	double getAcquisitionTime();
 
 	/**
-	 * @return The number of samples in an acquired sampled continuous function
-	 *         given the current acquisition time and acquisition resolution
-	 *         configuration
+	 * Set the number of samples in an acquired sampled continuous function. This
+	 * may adjust the acquisition time to fit according to the current acquisition
+	 * resolution.
+	 * 
+	 * @param depth
+	 *          the sample depth for an acquired data array
 	 */
-	default int getAcquisitionDepth() {
-		return (int) (getAcquisitionTime() / getAcquisitionResolution());
-	}
+	void setAcquisitionDepth(int depth);
 
 	/**
-	 * Get the time resolution between each sample in the acquired sampled
-	 * continuous function.
+	 * Get the number of samples in an acquired sampled continuous function.
 	 * 
-	 * @return The acquisition resolution in milliseconds
+	 * @return the sample depth for an acquired data array
 	 */
-	double getAcquisitionResolution();
+	int getAcquisitionDepth();
 }
