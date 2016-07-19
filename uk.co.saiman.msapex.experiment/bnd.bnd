@@ -4,13 +4,16 @@ Bundle-SymbolicName: ${p};singleton:=true
 -buildpath: \
 	${buildpath.eclipse},\
 	${ss;utilities},\
+	${ss;text},\
 	${ss;mathematics},\
 	${ss;reflection},\
 	${ss;fx},\
 	${ss;eclipse},\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
-	uk.co.saiman.utilities;version=snapshot
+	uk.co.saiman.utilities;version=snapshot,\
+	org.eclipse.fx.ui.keybindings.e4,\
+	org.eclipse.fx.ui.keybindings
 
 Private-Package: uk.co.saiman.msapex.experiment
 

@@ -7,6 +7,7 @@
         <children xsi:type="menu:Menu" xmi:id="_nMptcBbBEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.menu.addnode" label="Add">
           <children xsi:type="menu:DynamicMenuContribution" xmi:id="_oveLEBbBEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddNodeMenu"/>
         </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_n5-Z8DlREea5o5gE5m5BIA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.removenode" label="Remove" command="_utdUkBdSEeam7aRU2m3oKA"/>
       </menus>
       <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.experiment.toolbar">
         <children xsi:type="menu:HandledToolItem" xmi:id="_9ygUUP_pEeWGgZ4SKxDvZg" elementId="uk.co.saiman.msapex.experiment.handledtoolitem.addexperiment" label="Add" command="_KtzIEP_UEeWa8e91zRTXJg"/>
@@ -19,7 +20,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_AVrBMP_VEeWa8e91zRTXJg" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Handler" xmi:id="_C18lkP_VEeWa8e91zRTXJg" elementId="uk.co.saiman.msapex.experiment.handler.addexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddExperiment" command="_KtzIEP_UEeWa8e91zRTXJg"/>
-    <elements xsi:type="commands:Handler" xmi:id="_MnXtIBdfEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.handler.removenode" command="_utdUkBdSEeam7aRU2m3oKA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_MnXtIBdfEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.handler.removenode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RemoveNode" command="_utdUkBdSEeam7aRU2m3oKA"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_DQiP0P_VEeWa8e91zRTXJg" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Category" xmi:id="_Dyg7gP_VEeWa8e91zRTXJg" elementId="uk.co.saiman.msapex.experiment.category" name="Experiments" description="Experiment definition and processing"/>

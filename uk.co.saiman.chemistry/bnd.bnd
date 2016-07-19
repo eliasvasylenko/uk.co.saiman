@@ -21,3 +21,7 @@ Export-Package: \
 
 -plugin: \
 	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin
+Import-Package: \
+	javafx.scene.control,\
+	javafx.scene.chart,\
+	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!

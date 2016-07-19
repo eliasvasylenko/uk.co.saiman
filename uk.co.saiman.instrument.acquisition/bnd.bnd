@@ -7,6 +7,7 @@ Export-Package: uk.co.saiman.acquisition
 
 -buildpath: \
 	${ss;utilities},\
+	${ss;text},\
 	${ss;mathematics},\
 	${ss;reflection},\
 	uk.co.saiman.instrument.api;version=snapshot,\

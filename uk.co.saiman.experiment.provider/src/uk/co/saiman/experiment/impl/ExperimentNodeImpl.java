@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *
+ * This file is part of uk.co.saiman.experiment.provider.
+ *
+ * uk.co.saiman.experiment.provider is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.experiment.provider is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.experiment.impl;
 
 import static java.util.Collections.unmodifiableList;
@@ -8,8 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
@@ -26,12 +43,12 @@ import uk.co.saiman.experiment.ExperimentWorkspace;
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public class ExperimentNodeImpl<S> implements ExperimentNode<S> {
+public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements ExperimentNode<T, S> {
 	private final ExperimentWorkspaceImpl workspace;
-	private final ExperimentType<S> type;
-	private final ExperimentNodeImpl<?> parent;
+	private final T type;
+	private final ExperimentNodeImpl<?, ?> parent;
 
-	private final List<ExperimentNodeImpl<?>> children;
+	private final List<ExperimentNodeImpl<?, ?>> children;
 
 	private ExperimentLifecycleState lifecycleState;
 	private S state;
@@ -45,23 +62,24 @@ public class ExperimentNodeImpl<S> implements ExperimentNode<S> {
 	 * @param parent
 	 *          the parent of the experiment
 	 */
-	protected ExperimentNodeImpl(ExperimentType<S> type, ExperimentNodeImpl<?> parent) {
+	protected ExperimentNodeImpl(T type, ExperimentNodeImpl<?, ?> parent) {
 		this(type, parent.workspace, parent);
 
-		forEachAncestorExclusive(a -> {
-			if (!a.type.mayComeBefore(parent, type) || !type.mayComeAfter(a)) {
-				throw new ExperimentException(workspace.getText().typeMayNotSucceed(type, a));
-			}
+		if (!type.mayComeAfter(parent)) {
+			throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, this));
+		}
+		parent.ancestorsImpl().filter(a -> !a.type.mayComeBefore(parent, type)).forEach(a -> {
+			throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, a));
 		});
 
 		parent.children.add(this);
 	}
 
-	protected ExperimentNodeImpl(ExperimentType<S> type, ExperimentWorkspaceImpl workspace) {
+	protected ExperimentNodeImpl(T type, ExperimentWorkspaceImpl workspace) {
 		this(type, workspace, null);
 	}
 
-	private ExperimentNodeImpl(ExperimentType<S> type, ExperimentWorkspaceImpl workspace, ExperimentNodeImpl<?> parent) {
+	private ExperimentNodeImpl(T type, ExperimentWorkspaceImpl workspace, ExperimentNodeImpl<?, ?> parent) {
 		this.workspace = workspace;
 		this.type = type;
 		this.parent = parent;
@@ -72,49 +90,8 @@ public class ExperimentNodeImpl<S> implements ExperimentNode<S> {
 		state = type.createState(this);
 	}
 
-	@Override
-	public int getIndex() {
-		return getParent().map(p -> p.getChildren().indexOf(this)).orElse(workspace.getRootExperiments().indexOf(this));
-	}
-
-	protected <T> Optional<T> forEachAncestorExclusive(Function<? super ExperimentNodeImpl<?>, T> action) {
-		Optional<? extends ExperimentNodeImpl<?>> ancestor = getParentImpl();
-
-		while (ancestor.isPresent()) {
-			T result = action.apply(ancestor.get());
-
-			if (result != null) {
-				return Optional.of(result);
-			}
-
-			ancestor = ancestor.flatMap(ExperimentNodeImpl::getParentImpl);
-		}
-
-		return Optional.empty();
-	}
-
-	protected void forEachAncestorExclusive(Consumer<? super ExperimentNodeImpl<?>> action) {
-		forEachAncestorExclusive(n -> {
-			action.accept(n);
-			return null;
-		});
-	}
-
-	protected <T> Optional<T> forEachAncestorInclusive(Function<? super ExperimentNodeImpl<?>, T> action) {
-		T result = action.apply(this);
-
-		if (result != null) {
-			return Optional.of(result);
-		}
-
-		return forEachAncestorExclusive(action);
-	}
-
-	protected void forEachAncestorInclusive(Consumer<? super ExperimentNodeImpl<?>> action) {
-		forEachAncestorInclusive(n -> {
-			action.accept(n);
-			return null;
-		});
+	protected Stream<ExperimentNodeImpl<?, ?>> ancestorsImpl() {
+		return getAncestors().stream().map(a -> (ExperimentNodeImpl<?, ?>) a);
 	}
 
 	@Override
@@ -133,16 +110,16 @@ public class ExperimentNodeImpl<S> implements ExperimentNode<S> {
 	}
 
 	@Override
-	public ExperimentType<S> getType() {
+	public T getType() {
 		return type;
 	}
 
-	protected Optional<ExperimentNodeImpl<?>> getParentImpl() {
+	protected Optional<ExperimentNodeImpl<?, ?>> getParentImpl() {
 		return Optional.ofNullable(parent);
 	}
 
 	@Override
-	public Optional<ExperimentNode<?>> getParent() {
+	public Optional<ExperimentNode<?, ?>> getParent() {
 		return Optional.ofNullable(parent);
 	}
 
@@ -152,9 +129,13 @@ public class ExperimentNodeImpl<S> implements ExperimentNode<S> {
 		assertAvailable();
 
 		if (parent != null) {
-			parent.children.remove(this);
+			if (!parent.children.remove(this)) {
+				throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
+			}
 		} else {
-			workspace.removeRootExperiment((ExperimentNode<ExperimentConfiguration>) this);
+			if (!workspace.removeRootExperiment((ExperimentNode<?, ExperimentConfiguration>) this)) {
+				throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
+			}
 		}
 
 		setDisposed();
@@ -162,19 +143,19 @@ public class ExperimentNodeImpl<S> implements ExperimentNode<S> {
 
 	private void setDisposed() {
 		lifecycleState = ExperimentLifecycleState.DISPOSED;
-		for (ExperimentNodeImpl<?> child : children) {
+		for (ExperimentNodeImpl<?, ?> child : children) {
 			child.setDisposed();
 		}
 	}
 
 	protected void assertAvailable() {
 		if (lifecycleState == ExperimentLifecycleState.DISPOSED) {
-			throw new ExperimentException(workspace.getText().experimentIsDisposed(this));
+			throw new ExperimentException(workspace.getText().exception().experimentIsDisposed(this));
 		}
 	}
 
 	@Override
-	public List<ExperimentNode<?>> getChildren() {
+	public List<ExperimentNode<?, ?>> getChildren() {
 		return unmodifiableList(children);
 	}
 
@@ -188,7 +169,7 @@ public class ExperimentNodeImpl<S> implements ExperimentNode<S> {
 	}
 
 	@Override
-	public <T> ExperimentNode<T> addChild(ExperimentType<T> childType) {
+	public <T, E extends ExperimentType<T>> ExperimentNode<E, T> addChild(E childType) {
 		assertAvailable();
 
 		return new ExperimentNodeImpl<>(childType, this);

@@ -1,0 +1,16 @@
+Bundle-Name: SAI :: Experiment :: Spectrum
+
+Export-Package: uk.co.saiman.experiment.spectrum
+
+-includeresource: \
+	l10n
+
+-buildpath: \
+	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;reflection},\
+	uk.co.saiman.experiment.api;version=snapshot,\
+	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot,\
+	javax.measure.unit-api

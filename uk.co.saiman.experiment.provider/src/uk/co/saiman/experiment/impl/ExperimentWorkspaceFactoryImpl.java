@@ -18,15 +18,22 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.util.Collections.unmodifiableSet;
+
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-import uk.co.saiman.experiment.ExperimentText;
+import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
-import uk.co.strangeskies.utilities.text.Localizer;
+import uk.co.strangeskies.text.properties.PropertyLoader;
 
 /**
  * Reference implementation of {@link ExperimentWorkspaceFactory}.
@@ -36,10 +43,25 @@ import uk.co.strangeskies.utilities.text.Localizer;
 @Component
 public class ExperimentWorkspaceFactoryImpl implements ExperimentWorkspaceFactory {
 	@Reference
-	Localizer localizer;
+	PropertyLoader loader;
+
+	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
+
+	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+	protected void registerExperimentType(ExperimentType<?> experimentType) {
+		experimentTypes.add(experimentType);
+	}
+
+	protected void unregisterExperimentType(ExperimentType<?> experimentType) {
+		experimentTypes.remove(experimentType);
+	}
+
+	public Set<ExperimentType<?>> getRegisteredExperimentTypes() {
+		return unmodifiableSet(experimentTypes);
+	}
 
 	@Override
 	public ExperimentWorkspace openWorkspace(Path location) {
-		return new ExperimentWorkspaceImpl(location, localizer.getLocalization(ExperimentText.class));
+		return new ExperimentWorkspaceImpl(this, location, loader.getProperties(ExperimentProperties.class));
 	}
 }

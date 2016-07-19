@@ -1,14 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *
- * This file is part of uk.co.saiman.acquisition.msapex.
+ * This file is part of uk.co.saiman.msapex.acquisition.
  *
- * uk.co.saiman.acquisition.msapex is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.acquisition is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.acquisition.msapex is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.acquisition is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -43,7 +43,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.acquisition.AcquisitionText;
+import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.msapex.data.ContinuousFunctionChartController;
 import uk.co.strangeskies.eclipse.Localize;
@@ -56,7 +56,7 @@ import uk.co.strangeskies.eclipse.Localize;
 public class AcquisitionPart {
 	@Localize
 	@Inject
-	AcquisitionText text;
+	AcquisitionProperties text;
 
 	@FXML
 	private Pane chartPane;

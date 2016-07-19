@@ -45,7 +45,7 @@ public interface ExperimentType<S> {
 	 * @return a new state object suitable for an instance of
 	 *         {@link ExperimentNode} over this type.
 	 */
-	S createState(ExperimentNode<? extends S> forNode);
+	S createState(ExperimentNode<?, ? extends S> forNode);
 
 	/**
 	 * Execute this experiment type for a given node. The node may not necessarily
@@ -54,23 +54,26 @@ public interface ExperimentType<S> {
 	 * @param node
 	 *          the node to be processed
 	 */
-	void execute(ExperimentNode<? extends S> node);
+	void execute(ExperimentNode<?, ? extends S> node);
 
 	/**
-	 * Test whether a node of this type may follow from the given preceding node
-	 * and be validly added as its child.
+	 * Test whether a node of this type may follow from the given directly
+	 * preceding node and be validly added as its child.
 	 * 
 	 * @param parentNode
 	 *          the candidate parent node
 	 * @return true if a node of this type may be added as a child, false
 	 *         otherwise
 	 */
-	boolean mayComeAfter(ExperimentNode<?> parentNode);
+	boolean mayComeAfter(ExperimentNode<?, ?> parentNode);
 
 	/**
 	 * Test whether a node of the given type may follow from the given node and be
 	 * validly added as its child. The penultimate descendant node should be a
 	 * descendant of a node of this type.
+	 * <p>
+	 * This test is performed on all ancestors when an attempt is made to add a
+	 * new node.
 	 * 
 	 * @param penultimateDescendantNode
 	 *          the candidate parent node
@@ -79,7 +82,7 @@ public interface ExperimentType<S> {
 	 * @return true if a node of the given type may be added as a child of the
 	 *         given node, false otherwise
 	 */
-	boolean mayComeBefore(ExperimentNode<?> penultimateDescendantNode, ExperimentType<?> descendantNodeType);
+	boolean mayComeBefore(ExperimentNode<?, ?> penultimateDescendantNode, ExperimentType<?> descendantNodeType);
 
 	/**
 	 * @return the exact generic type of the configuration interface

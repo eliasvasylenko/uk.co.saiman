@@ -18,10 +18,11 @@
  */
 package uk.co.saiman.experiment;
 
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +35,7 @@ import java.util.Set;
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public interface ExperimentNode<S> {
+public interface ExperimentNode<T extends ExperimentType<S>, S> {
 	/**
 	 * @return the experiment workspace containing this experiment
 	 */
@@ -56,24 +57,45 @@ public interface ExperimentNode<S> {
 	/**
 	 * @return the type of the experiment
 	 */
-	ExperimentType<S> getType();
+	T getType();
 
 	/**
 	 * @return the parent part of this experiment, if present, otherwise an empty
 	 *         optional
 	 */
-	Optional<ExperimentNode<?>> getParent();
+	Optional<ExperimentNode<?, ?>> getParent();
 
 	/**
 	 * @return the node's index in its parent's list of children
 	 */
-	int getIndex();
+	default int getIndex() {
+		return getParent().map(p -> p.getChildren().indexOf(this))
+				.orElse(getExperimentWorkspace().getRootExperiments().indexOf(this));
+	}
 
 	/**
 	 * @return the root part of the experiment tree this part occurs in
 	 */
-	default ExperimentNode<? extends ExperimentConfiguration> getRoot() {
+	default ExperimentNode<?, ExperimentConfiguration> getRoot() {
 		return getAncestor(getExperimentWorkspace().getRootExperimentType()).get();
+	}
+
+	/**
+	 * @return a list of all ancestors, nearest first, inclusive of the node
+	 *         itself
+	 */
+	default List<ExperimentNode<?, ?>> getAncestors() {
+		List<ExperimentNode<?, ?>> ancestors = new ArrayList<>();
+
+		Optional<ExperimentNode<?, ?>> ancestor = of(this);
+
+		do {
+			ancestors.add(ancestor.get());
+
+			ancestor = ancestor.flatMap(ExperimentNode::getParent);
+		} while (ancestor.isPresent());
+
+		return ancestors;
 	}
 
 	/**
@@ -82,25 +104,28 @@ public interface ExperimentNode<S> {
 	 * 
 	 * @param type
 	 *          the type of the ancestor we wish to inspect
-	 * @return the nearest ancestor of the given type, or null if no such ancestor
-	 *         exists
+	 * @return the nearest ancestor of the given type, or an empty optional if no
+	 *         such ancestor exists
 	 */
-	default <T, E extends ExperimentType<T>> Optional<ExperimentNode<? extends T>> getAncestor(E type) {
-		Optional<ExperimentNode<?>> ancestor = of(this);
+	@SuppressWarnings("unchecked")
+	default <T, E extends ExperimentType<T>> Optional<ExperimentNode<E, T>> getAncestor(E type) {
+		return getAncestors().stream().filter(a -> type.equals(a.getType())).findFirst().map(a -> (ExperimentNode<E, T>) a);
+	}
 
-		do {
-			ExperimentType<?> ancestorType = ancestor.get().getType();
-
-			if (ancestorType == type) {
-				@SuppressWarnings("unchecked")
-				ExperimentNode<? extends T> node = (ExperimentNode<? extends T>) ancestor.get();
-				return of(node);
-			}
-
-			ancestor = ancestor.flatMap(ExperimentNode::getParent);
-		} while (ancestor.isPresent());
-
-		return empty();
+	/**
+	 * Get the nearest available ancestor node of the processing experiment node
+	 * which is of one of the given {@link ExperimentType experiment types}.
+	 * 
+	 * @param types
+	 *          the possible types of the ancestor we wish to inspect
+	 * @return the nearest ancestor of the given type, or an empty optional if no
+	 *         such ancestor exists
+	 */
+	@SuppressWarnings("unchecked")
+	default <T, E extends ExperimentType<? extends T>> Optional<ExperimentNode<E, ? extends T>> getAncestor(
+			Collection<E> types) {
+		return getAncestors().stream().filter(a -> types.contains(a.getType())).findFirst()
+				.map(a -> (ExperimentNode<E, ? extends T>) a);
 	}
 
 	/**
@@ -115,7 +140,7 @@ public interface ExperimentNode<S> {
 	 * 
 	 * @return An ordered list of all sequential child experiment parts
 	 */
-	List<ExperimentNode<?>> getChildren();
+	List<ExperimentNode<?, ?>> getChildren();
 
 	/**
 	 * @return All known available child experiment types
@@ -129,7 +154,7 @@ public interface ExperimentNode<S> {
 	 *          The type of experiment
 	 * @return A new child experiment part of the given type
 	 */
-	<T> ExperimentNode<T> addChild(ExperimentType<T> childType);
+	<T, E extends ExperimentType<T>> ExperimentNode<E, T> addChild(E childType);
 
 	/**
 	 * @return The current execution lifecycle state of the experiment part.

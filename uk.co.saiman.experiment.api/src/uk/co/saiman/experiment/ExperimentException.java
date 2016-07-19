@@ -1,11 +1,28 @@
+/*
+ * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *
+ * This file is part of uk.co.saiman.experiment.api.
+ *
+ * uk.co.saiman.experiment.api is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.experiment.api is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.experiment;
-
-import static uk.co.strangeskies.utilities.text.Localizer.getDefaultLocalizer;
 
 import java.util.function.Function;
 
-import uk.co.strangeskies.utilities.text.LocalizedRuntimeException;
-import uk.co.strangeskies.utilities.text.LocalizedString;
+import uk.co.strangeskies.text.properties.Localized;
+import uk.co.strangeskies.text.properties.LocalizedRuntimeException;
+import uk.co.strangeskies.text.properties.PropertyLoader;
 
 /**
  * A problem with experiment configuration or processing.
@@ -17,43 +34,41 @@ public class ExperimentException extends LocalizedRuntimeException {
 
 	/**
 	 * @param message
-	 *          a function from a localised text interface to a
-	 *          {@link LocalizedString}
+	 *          a function from a localized text interface to a {@link Localized}
 	 * @param cause
 	 *          the exception cause
 	 */
-	public ExperimentException(Function<ExperimentText, LocalizedString> message, Throwable cause) {
+	public ExperimentException(Function<ExperimentProperties, Localized<String>> message, Throwable cause) {
 		super(message.apply(getText()), cause);
 	}
 
 	/**
 	 * @param message
-	 *          a function from a localised text interface to a
-	 *          {@link LocalizedString}
+	 *          a function from a localized text interface to a {@link Localized}
 	 */
-	public ExperimentException(Function<ExperimentText, LocalizedString> message) {
+	public ExperimentException(Function<ExperimentProperties, Localized<String>> message) {
 		this(message, null);
 	}
 
 	/**
 	 * @param message
-	 *          a {@link LocalizedString} describing the exception
+	 *          a {@link Localized} describing the exception
 	 * @param cause
 	 *          the exception cause
 	 */
-	public ExperimentException(LocalizedString message, Throwable cause) {
+	public ExperimentException(Localized<String> message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * @param message
-	 *          a {@link LocalizedString} describing the exception
+	 *          a {@link Localized} describing the exception
 	 */
-	public ExperimentException(LocalizedString message) {
+	public ExperimentException(Localized<String> message) {
 		this(message, null);
 	}
 
-	protected static ExperimentText getText() {
-		return getDefaultLocalizer().getLocalization(ExperimentText.class);
+	protected static ExperimentProperties getText() {
+		return PropertyLoader.getDefaultPropertyLoader().getProperties(ExperimentProperties.class);
 	}
 }

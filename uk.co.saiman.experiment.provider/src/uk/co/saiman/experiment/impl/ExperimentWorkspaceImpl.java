@@ -14,13 +14,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.	
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package uk.co.saiman.experiment.impl;
 
 import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableSet;
-import static uk.co.strangeskies.utilities.text.Localizer.getDefaultLocalizer;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,9 +28,11 @@ import java.util.Set;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentText;
+import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.saiman.experiment.RootExperiment;
+import uk.co.strangeskies.text.properties.PropertyLoader;
 
 /**
  * Reference implementation of {@link ExperimentWorkspace}.
@@ -40,40 +40,46 @@ import uk.co.saiman.experiment.ExperimentWorkspace;
  * @author Elias N Vasylenko
  */
 public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
+	private final ExperimentWorkspaceFactoryImpl factory;
 	private final Path dataRoot;
-	private final List<ExperimentNode<?>> processingStack = new ArrayList<>();
+	private final List<ExperimentNode<?, ?>> processingStack = new ArrayList<>();
 
 	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
 
-	private final ExperimentType<ExperimentConfiguration> rootExperimentType = new RootExperimentType(this);
-	private final List<ExperimentNode<ExperimentConfiguration>> rootExperiments = new ArrayList<>();
+	private final RootExperiment rootExperimentType = new RootExperimentImpl(this);
+	private final List<ExperimentNode<RootExperiment, ExperimentConfiguration>> rootExperiments = new ArrayList<>();
 
-	private final ExperimentText text;
+	private final ExperimentProperties text;
 
 	/**
 	 * Try to create a new experiment workspace over the given root path
 	 * 
+	 * @param factory
+	 *          the factory which produces the workspace
 	 * @param workspaceRoot
 	 *          the path of the workspace data
 	 */
-	public ExperimentWorkspaceImpl(Path workspaceRoot) {
-		this(workspaceRoot, getDefaultLocalizer().getLocalization(ExperimentText.class));
+	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot) {
+		this(factory, workspaceRoot, PropertyLoader.getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
 	}
 
 	/**
 	 * Try to create a new experiment workspace over the given root path
 	 * 
+	 * @param factory
+	 *          the factory which produces the workspace
 	 * @param workspaceRoot
 	 *          the path of the workspace data
 	 * @param text
-	 *          a localised text accessor implementation
+	 *          a localized text accessor implementation
 	 */
-	public ExperimentWorkspaceImpl(Path workspaceRoot, ExperimentText text) {
+	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot, ExperimentProperties text) {
+		this.factory = factory;
 		this.dataRoot = workspaceRoot;
 		this.text = text;
 	}
 
-	ExperimentText getText() {
+	ExperimentProperties getText() {
 		return text;
 	}
 
@@ -83,7 +89,7 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	}
 
 	@Override
-	public List<ExperimentNode<?>> processingState() {
+	public List<ExperimentNode<?, ?>> processingState() {
 		return processingStack;
 	}
 
@@ -92,18 +98,19 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	 */
 
 	@Override
-	public ExperimentType<ExperimentConfiguration> getRootExperimentType() {
+	public RootExperiment getRootExperimentType() {
 		return rootExperimentType;
 	}
 
 	@Override
-	public List<ExperimentNode<ExperimentConfiguration>> getRootExperiments() {
+	public List<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments() {
 		return unmodifiableList(rootExperiments);
 	}
 
 	@Override
-	public ExperimentNode<ExperimentConfiguration> addRootExperiment(String name) {
-		ExperimentNode<ExperimentConfiguration> rootExperiment = new ExperimentNodeImpl<>(rootExperimentType, this);
+	public ExperimentNode<RootExperiment, ExperimentConfiguration> addRootExperiment(String name) {
+		ExperimentNode<RootExperiment, ExperimentConfiguration> rootExperiment = new ExperimentNodeImpl<>(
+				rootExperimentType, this);
 		rootExperiment.getState().setName(name);
 
 		rootExperiments.add(rootExperiment);
@@ -111,8 +118,8 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 		return rootExperiment;
 	}
 
-	void removeRootExperiment(ExperimentNode<ExperimentConfiguration> rootNode) {
-		rootExperiments.remove(rootNode);
+	boolean removeRootExperiment(ExperimentNode<?, ExperimentConfiguration> rootNode) {
+		return rootExperiments.remove(rootNode);
 	}
 
 	/*
@@ -131,6 +138,8 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 
 	@Override
 	public Set<ExperimentType<?>> getRegisteredExperimentTypes() {
-		return unmodifiableSet(experimentTypes);
+		Set<ExperimentType<?>> experimentTypes = new HashSet<>(factory.getRegisteredExperimentTypes());
+		experimentTypes.addAll(this.experimentTypes);
+		return experimentTypes;
 	}
 }

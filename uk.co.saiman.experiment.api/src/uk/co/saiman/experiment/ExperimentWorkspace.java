@@ -41,7 +41,7 @@ public interface ExperimentWorkspace {
 	 * @return the current state, in the form of the stack of all currently
 	 *         executing experiment parts
 	 */
-	public List<ExperimentNode<?>> processingState();
+	public List<ExperimentNode<?, ?>> processingState();
 
 	/*
 	 * Root experiment types
@@ -50,7 +50,7 @@ public interface ExperimentWorkspace {
 	/**
 	 * @return the root experiment type
 	 */
-	ExperimentType<ExperimentConfiguration> getRootExperimentType();
+	RootExperiment getRootExperimentType();
 
 	/**
 	 * Get all experiments of the {@link #getRootExperiments() root experiment
@@ -58,7 +58,7 @@ public interface ExperimentWorkspace {
 	 * 
 	 * @return all registered root experiment parts
 	 */
-	List<ExperimentNode<ExperimentConfiguration>> getRootExperiments();
+	List<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments();
 
 	/**
 	 * Add a root experiment node to management.
@@ -67,7 +67,7 @@ public interface ExperimentWorkspace {
 	 *          the name of the new experiment
 	 * @return a new root experiment part of the root type
 	 */
-	ExperimentNode<ExperimentConfiguration> addRootExperiment(String name);
+	ExperimentNode<RootExperiment, ExperimentConfiguration> addRootExperiment(String name);
 
 	/*
 	 * Child experiment types

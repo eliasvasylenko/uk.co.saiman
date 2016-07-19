@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *
+ * This file is part of uk.co.saiman.msapex.experiment.
+ *
+ * uk.co.saiman.msapex.experiment is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.msapex.experiment is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.msapex.experiment;
 
 import java.util.List;
@@ -12,8 +30,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TreeView;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentText;
+import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.saiman.experiment.RootExperiment;
 import uk.co.strangeskies.eclipse.E4TreeCellImpl;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.TreeItemData;
@@ -27,14 +46,14 @@ public class ExperimentTreeController {
 	private ExperimentWorkspace workspace;
 
 	private final TreeItemType<ExperimentWorkspace> workspaceItemType;
-	private TreeItemType<ExperimentNode<ExperimentConfiguration>> rootExperimentNodeItemType;
+	private ExperimentNodeTreeItemType<RootExperiment, ExperimentConfiguration> rootExperimentNodeItemType;
 
 	@Inject
 	@Localize
-	ExperimentText text;
+	private ExperimentProperties text;
 
 	@Inject
-	EMenuService menuService;
+	private EMenuService menuService;
 
 	@Inject
 	private Provider<E4TreeCellImpl> cellProvider;
@@ -64,15 +83,15 @@ public class ExperimentTreeController {
 		this.workspace = workspace;
 
 		// create root experiment node type
-		rootExperimentNodeItemType = new ExperimentNodeTreeItemType<ExperimentConfiguration>(
+		rootExperimentNodeItemType = new ExperimentNodeTreeItemType<RootExperiment, ExperimentConfiguration>(
 				workspace.getRootExperimentType(), menuService) {
 			@Override
-			public String getText(ExperimentNode<ExperimentConfiguration> data) {
+			public String getText(ExperimentNode<RootExperiment, ExperimentConfiguration> data) {
 				return data.getState().getName();
 			}
 
 			@Override
-			public String getSupplementalText(ExperimentNode<ExperimentConfiguration> data) {
+			public String getSupplementalText(ExperimentNode<RootExperiment, ExperimentConfiguration> data) {
 				return "[" + text.lifecycleState(data.getLifecycleState()) + "]";
 			}
 		};
@@ -90,7 +109,11 @@ public class ExperimentTreeController {
 		((TreeItemImpl<?>) treeView.getRoot()).rebuildChildren();
 	}
 
-	public TreeItemData<?> getSelection() {
-		return treeView.getSelectionModel().getSelectedItem().getValue();
+	public TreeItemImpl<?> getSelection() {
+		return (TreeItemImpl<?>) treeView.getSelectionModel().getSelectedItem();
+	}
+
+	public TreeItemData<?> getSelectionData() {
+		return getSelection().getValue();
 	}
 }

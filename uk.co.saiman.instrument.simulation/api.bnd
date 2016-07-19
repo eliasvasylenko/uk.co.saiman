@@ -1,6 +1,0 @@
-Bundle-Name: SAI :: Simulation :: API
-
-Export-Package: uk.co.saiman.instrument.simulation
-
--includeresource: \
-	l10n

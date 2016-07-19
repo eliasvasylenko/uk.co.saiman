@@ -2,29 +2,25 @@ icondata: data:image/gif;base64,${base64;${project}\\icon.gif}
 
 copyright.work.name: {{projectName}}
 
+internal.use.notice: Please note that this template is primarily intended for internal use, and may contain copyright notices which reflect this.
+
 saiman.project.template:\
 	org.bndtools.template;\
 		org.bndtools.template=project;\
 		engine=mustache;\
 		name=${2};\
-		category=Scientific Analysis Instruments;\
+		category=${copyright.holder.name};\
 		dir=${1}/template;\
 		help=${1}/help.xml;\
 		icon="${icondata}"
 
 Provide-Capability: \
-	${saiman.project.template;\
-		api;\
-		API Project},\
-	${saiman.project.template;\
-		provider;\
-		Implementation Project},\
-	${saiman.project.template;\
-		split;\
-		Split Project},\
-	${saiman.project.template;\
-		msapex;\
-		MSApex Project}
+	${foreach;\
+		saiman.project.template;\
+			api			\\;		API Project;\
+			provider	\\;		Implementation Project;\
+			split		\\;		Split Project;\
+			msapex		\\;		MSApex Project}
 
 saiman.project.resources:\
 	{${1}/=res/${1}},\
@@ -37,5 +33,4 @@ saiman.project.resources:\
 			api,\
 			provider,\
 			split,\
-			msapex\
-	}
+			msapex}

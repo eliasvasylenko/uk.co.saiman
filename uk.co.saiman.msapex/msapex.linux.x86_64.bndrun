@@ -1,4 +1,4 @@
--include: msapex.shared.bndrun
+-include: msapex.shared.bnd
 platform: linux64
 
 -runrequires: ${runreq.msapex}

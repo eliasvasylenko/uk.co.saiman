@@ -3,14 +3,16 @@ Bundle-Name: SAI :: Utilities
 -buildpath: \
 	${mdb;core.api},\
 	${ss;reflection},\
-	${ss;utilities}
+	${ss;utilities},\
+	${ss;text}
 
 Export-Package: \
 	uk.co.saiman,\
 	uk.co.saiman.utilities
 
 -includeresource: \
-	META-INF/schemata=schemata
+	META-INF/schemata=schemata,\
+	{bundle.properties}
 
 -pluginpath: \
 	${pluginpath.modabi;xml}
