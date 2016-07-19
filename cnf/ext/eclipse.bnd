@@ -1,34 +1,34 @@
 ## Repository Plugins:
-repository.eclipse.platform: https://dl.bintray.com/strangeskies/org.eclipse/org.eclipse.platform/4.5.1/index.xml
-repository.eclipse.jdt: https://dl.bintray.com/strangeskies/org.eclipse/org.eclipse.jdt/4.5.1/index.xml
-repository.eclipse.pde: https://dl.bintray.com/strangeskies/org.eclipse/org.eclipse.pde/4.5.1/index.xml
-repository.eclipse.sdk: https://dl.bintray.com/strangeskies/org.eclipse/org.eclipse.sdk/4.5.1/index.xml
-repository.eclipse.wtp: https://dl.bintray.com/strangeskies/org.eclipse/org.eclipse.wtp/3.7.1/index.xml
-repository.eclipse.fx: http://download.eclipse.org/efxclipse/runtime-nightly/site/repository.xml.gz
+repository.eclipse.releases: http://download.eclipse.org/releases/mars/
+repository.eclipse.wtp: http://download.eclipse.org/webtools/repository/mars/
+repository.eclipse.updates:  http://download.eclipse.org/eclipse/updates/4.5/
+repository.eclipse.fx.tooling: http://download.eclipse.org/efxclipse/updates-released/2.4.0/site/
+repository.eclipse.fx.runtime: http://download.eclipse.org/efxclipse/runtime-released/2.4.0/site/
 
-plugin.eclipse.platform:\
-		aQute.bnd.deployer.repository.FixedIndexedRepo;\
-			name				=		"Eclipse Platform 4.5.1";\
-			locations			=		${repository.eclipse.platform}
+plugin.eclipse.releases:\
+        aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"Eclipse Simultaneous Release Mars";\
+			url					=		${repository.eclipse.releases}
 
-plugin.eclipse.sdk:\
-		aQute.bnd.deployer.repository.FixedIndexedRepo;\
-			name				=		"Eclipse SDK 4.5.1";\
-			locations			=		'\
-										${repository.eclipse.platform},\
-										${repository.eclipse.jdt},\
-										${repository.eclipse.pde},\
-										${repository.eclipse.sdk}'
+plugin.eclipse.updates:\
+        aQute.bnd.repository.p2.provider.P2Repository;\
+        	name				=		"Eclipse Platform 4.5.x";\
+			url					=		${repository.eclipse.updates}
+
+plugin.eclipse.fx.tooling:\
+        aQute.bnd.repository.p2.provider.P2Repository;\
+        	name				=		"E(fx)clipse 2.4.0 Tooling";\
+			url					=		${repository.eclipse.fx.tooling}
+
+plugin.eclipse.fx.runtime:\
+        aQute.bnd.repository.p2.provider.P2Repository;\
+        	name				=		"E(fx)clipse 2.4.0 Runtime";\
+			url					=		${repository.eclipse.fx.runtime}
 
 plugin.eclipse.wtp:\
-		aQute.bnd.deployer.repository.FixedIndexedRepo;\
-			name				=		"Eclipse WTP 3.7.1";\
-			locations			=		${repository.eclipse.wtp}
-
-plugin.eclipse.fx: \
-		aQute.bnd.deployer.repository.FixedIndexedRepo;\
-			name				=		"E(fx)clipse Runtime 2.2.0";\
-			locations			=       ${repository.eclipse.fx}
+        aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"Eclipse WTP Mars";\
+			url					=       ${repository.eclipse.wtp}
 
 ## Build path groups:
 -buildpath.base=\
@@ -48,6 +48,7 @@ buildpath.eclipse:\
 	org.eclipse.e4.ui.model.workbench,\
 	org.eclipse.jface,\
 	org.eclipse.e4.ui.services,\
+	org.eclipse.e4.ui.bindings,\
 	org.eclipse.e4.ui.workbench,\
 	org.eclipse.e4.core.di,\
 	org.eclipse.e4.core.di.annotations,\
@@ -108,18 +109,20 @@ runreq.eclipse.sdk:\
 
 runreq.eclipse:\
 	${req;bndtools.runtime.eclipse.applaunch},\
-	${req;org.eclipse.equinox.launcher},\
-	${req;org.eclipse.equinox.console},\
-	${req;org.eclipse.emf.databinding},\
 	${req;org.eclipse.core.databinding.beans},\
+	${req;org.eclipse.emf.databinding},\
 	${req;org.eclipse.equinox.app},\
 	${req;org.eclipse.equinox.concurrent},\
+	${req;org.eclipse.equinox.console},\
 	${req;org.eclipse.equinox.event},\
+	${req;org.eclipse.equinox.launcher},\
 	${req;org.eclipse.fx.ui.databinding},\
-	${req;org.eclipse.fx.ui.workbench.fx},\
-	${req;org.eclipse.fx.ui.workbench.renderers.fx},\
 	${req;org.eclipse.fx.ui.di},\
 	${req;org.eclipse.fx.ui.di.interopt},\
+	${req;org.eclipse.fx.ui.keybindings.e4},\
+	${req;org.eclipse.fx.ui.keybindings.generic},\
+	${req;org.eclipse.fx.ui.workbench.fx},\
+	${req;org.eclipse.fx.ui.workbench.renderers.fx},\
 	${req;org.eclipse.fx.core},\
 	${req;org.eclipse.fx.core.di},\
 	${req;org.eclipse.fx.core.di.context}

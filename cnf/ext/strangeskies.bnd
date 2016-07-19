@@ -19,7 +19,7 @@ plugin.modabi.default: \
 plugin.modabi: ${def;plugin.modabi.override;\\\$\{plugin.modabi.default\}}
 
 # For users with a copy of the uk.co.strangeskies or uk.co.strangeskies.modabi
-#  project checked out from git locally, they can redirect dependencies on
+# project checked out from git locally, they can redirect dependencies on
 # bundles in that project to local releases from the snapshots on OJO.
 #
 # The following can be added to a local.bnd file in cnf/ext/, which is

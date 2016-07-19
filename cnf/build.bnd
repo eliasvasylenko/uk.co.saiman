@@ -11,8 +11,10 @@ javac.target: 1.8
 
 bnd-release = https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact
 
+-include: ${workspace}/copyright.properties
+copyright.work.name = ${project.name}
 copyright.year = ${tstamp;yyyy}
-copyright = Copyright (c) Scientific Analysis Instruments Limited (2015, ${copyright.year}). All Rights Reserved.
+copyright = Copyright (c) ${copyright.holder.name} (2015, ${copyright.year}). All Rights Reserved.
 
 groupid: uk.co.saiman.msapex
 
@@ -24,7 +26,7 @@ Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saiman.co.uk/
 Bundle-Copyright: ${copyright}
 Bundle-License: GPL <http://www.gnu.org/licenses/>
 Bundle-Version: ${saiman-version}.${tstamp}
-Bundle-Localization: plugin
+Bundle-Localization: bundle
 
 # Disable ALL Eclipse split package attributes, to ensure we import from the "aggregator" bundle(s).
 Import-Package:\
@@ -45,8 +47,11 @@ Import-Package:\
 	${plugin.modabi}
 
 -plugin.8.Eclipse:\
-	${plugin.eclipse.platform},\
-	${plugin.eclipse.fx}
+	${plugin.eclipse.releases},\
+	${plugin.eclipse.updates},\
+	${plugin.eclipse.wtp},\
+	${plugin.eclipse.fx.runtime},\
+	${plugin.eclipse.fx.tooling}
 
 # Version of bnd/bndlib to use consistently throughout the build
 # NB. this must be specified as full M.m.u version (but no qualifier)
