@@ -29,4 +29,10 @@ public interface SampleConfiguration {
 	 * @return a human-identifiable name of the sample position
 	 */
 	String getName();
+
+	/**
+	 * @return a simple string representation of the sample position
+	 */
+	@Override
+	String toString();
 }

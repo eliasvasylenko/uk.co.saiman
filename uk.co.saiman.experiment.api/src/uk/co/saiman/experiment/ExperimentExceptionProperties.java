@@ -1,9 +1,15 @@
 package uk.co.saiman.experiment;
 
+import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.PropertyConfiguration;
+import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
+@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface ExperimentExceptionProperties extends Properties<ExperimentExceptionProperties> {
+	SaiProperties sai();
+
 	/**
 	 * @param descendantType
 	 *          the type of the descendant we wish to add
@@ -18,4 +24,6 @@ public interface ExperimentExceptionProperties extends Properties<ExperimentExce
 	Localized<String> illegalContextMenuFor(Object context);
 
 	Localized<String> experimentDoesNotExist(ExperimentNode<?, ?> experimentNode);
+
+	Localized<String> invalidExperimentName(String name);
 }

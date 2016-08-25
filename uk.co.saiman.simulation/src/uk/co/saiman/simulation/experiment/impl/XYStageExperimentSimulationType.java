@@ -18,6 +18,9 @@
  */
 package uk.co.saiman.simulation.experiment.impl;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -25,6 +28,7 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.SampleExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
+import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.experiment.SampleExperimentSimulationType;
 import uk.co.saiman.simulation.experiment.XYStageSimulationConfiguration;
 import uk.co.saiman.simulation.instrument.ImageSampleDeviceSimulation;
@@ -42,6 +46,9 @@ public class XYStageExperimentSimulationType implements XYStageExperimentType<XY
 	@Reference
 	ImageSampleDeviceSimulation rasterSimulation;
 
+	@Reference
+	Units units;
+
 	@Override
 	public ImageSampleDeviceSimulation device() {
 		return rasterSimulation;
@@ -50,7 +57,14 @@ public class XYStageExperimentSimulationType implements XYStageExperimentType<XY
 	@Override
 	public XYStageSimulationConfiguration createState(
 			ExperimentNode<?, ? extends XYStageSimulationConfiguration> forNode) {
-		return new XYStageSimulationConfiguration();
+		XYStageSimulationConfiguration configuration = new XYStageSimulationConfiguration();
+
+		Quantity<Length> home = units.metre().milli().getQuantity(0);
+
+		configuration.setX(home);
+		configuration.setY(home);
+
+		return configuration;
 	}
 
 	@Override

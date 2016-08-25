@@ -18,15 +18,21 @@
  */
 package uk.co.saiman.simulation;
 
+import uk.co.saiman.SaiProperties;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.PropertyConfiguration;
+import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @SuppressWarnings("javadoc")
-public interface SimulationText extends Properties<SimulationText> {
+@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
+public interface SimulationProperties extends Properties<SimulationProperties> {
 	Localized<String> xyRasterStageSimulationDeviceName();
 
 	Localized<String> acquisitionSimulationDeviceName();
 
 	AcquisitionProperties acquisition();
+
+	SaiProperties sai();
 }

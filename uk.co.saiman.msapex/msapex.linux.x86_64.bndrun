@@ -1,20 +1,7 @@
 -include: msapex.shared.bnd
-platform: linux64
-
--runrequires: ${runreq.msapex}
-
--runvm: ${runvm.msapex}
-
--runfw: ${runfw.msapex}
-
--runee: ${runee.msapex}
-
--runpath: ${runpath.msapex}
-
--runsystempackages: ${systempath.msapex}
+runplatform: linux64
 
 -runproperties:\
-	${runprops.msapex},\
 	osgi.ws=gtk,\
 	osgi.os=linux,\
 	osgi.arch=x86_64

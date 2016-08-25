@@ -20,6 +20,7 @@ package uk.co.saiman.experiment;
 
 import static uk.co.strangeskies.reflection.TypeToken.over;
 
+import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
@@ -33,7 +34,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  *          the type of the data describing the experiment state, including
  *          configuration and results
  */
-public interface ExperimentType<S> {
+public interface ExperimentType<S> extends Reified {
 	/**
 	 * @return the human readable name of the experiment type
 	 */
@@ -88,7 +89,12 @@ public interface ExperimentType<S> {
 	 * @return the exact generic type of the configuration interface
 	 */
 	default TypeToken<S> getStateType() {
-		return over(getClass()).resolveSupertypeParameters(ExperimentType.class)
-				.resolveTypeArgument(new TypeParameter<S>() {}).infer();
+		return getThisType().resolveSupertypeParameters(ExperimentType.class)
+				.resolveTypeArgument(new TypeParameter<S>() {});
+	}
+
+	@Override
+	default TypeToken<?> getThisType() {
+		return over(getClass());
 	}
 }

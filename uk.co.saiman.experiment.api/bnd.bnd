@@ -14,8 +14,8 @@ Export-Package: uk.co.saiman.experiment
 	res,\
 	l10n
 
--pluginpath: \
-	${pluginpath.modabi;xml}
+#-pluginpath: \
+#	${pluginpath.modabi;xml}
 
--plugin: \
-	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin
+#-plugin: \
+#	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin

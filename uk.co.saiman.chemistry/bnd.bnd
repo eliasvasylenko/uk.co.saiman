@@ -16,11 +16,12 @@ Export-Package: \
 -includeresource: \
 	META-INF/schemata=schemata
 
--pluginpath: \
-	${pluginpath.modabi;xml}
+#-pluginpath: \
+#	${pluginpath.modabi;xml}
 
--plugin: \
-	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin
+#-plugin: \
+#	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin
+
 Import-Package: \
 	javafx.scene.control,\
 	javafx.scene.chart,\

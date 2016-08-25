@@ -1,0 +1,11 @@
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.bnd.xml:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.core.api:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.core.provider:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.eclipse:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.eclipse.xml:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.extender:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.fx:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.io.xml:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.osgi:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.plugin:1.0.0-SNAPSHOT
+uk.co.strangeskies.modabi:uk.co.strangeskies.modabi.ui:1.0.0-SNAPSHOT

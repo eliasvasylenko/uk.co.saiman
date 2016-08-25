@@ -1,0 +1,129 @@
+<?xml version="1.0" ?>
+<schema
+	xmlns="http://modabi.strangeskies.co.uk/2014-01-01/"
+	xmlns:sai="http://saiman.co.uk/2015-10-08/"
+	name="sai:PeriodicTableSchema">
+
+	<imports>
+		uk.co.strangeskies.reflection.TypeToken.Infer,
+		java.util.Collection,
+		java.util.List,
+		uk.co.saiman.chemistry.Element.Group,
+		uk.co.saiman.chemistry.PeriodicTable,
+		uk.co.saiman.chemistry.Element,
+		uk.co.saiman.chemistry.isotope.Isotope
+	</imports>
+
+	<dependencies>
+		BaseSchema
+	</dependencies>
+
+	<types />
+
+	<models>
+		<model
+			name="sai:isotope"
+			dataType="Isotope"
+			inputBinding="null">
+
+			<bind name="sai:massNumber">
+				<property type="int" />
+			</bind>
+
+			<bind name="sai:mass">
+				<property type="double" />
+			</bind>
+
+			<bind name="sai:abundance">
+				<property type="double" />
+			</bind>
+
+			<input process="this = new(sai:massNumber, sai:mass, sai:abundance)" />
+
+			<output />
+		</model>
+
+		<model
+			name="sai:element"
+			dataType="Element"
+			inputBinding="null">
+
+			<bind
+				name="sai:atomicNumber"
+				input="void">
+
+				<property type="int" />
+			</bind>
+
+			<bind
+				name="sai:name"
+				occurrences="0..1"
+				input="void">
+
+				<property type="string" />
+			</bind>
+
+			<bind
+				name="sai:symbol"
+				input="void">
+
+				<property type="string" />
+			</bind>
+
+			<bind
+				name="sai:isotopes"
+				dataType="@Infer Collection{?}">
+
+				<inline inputBindingType="@Infer List{?}">
+					<bind
+						name="sai:isotope"
+						occurrences="0.."
+						output="this[]"
+						input="add($)">
+
+						<complex model="sai:isotope" />
+					</bind>
+				</inline>
+			</bind>
+
+			<bind
+				name="sai:group"
+				dataType="Group">
+
+				<property type="enum" />
+			</bind>
+
+			<bindInput
+				process="this = new(sai:atomicNumber, sai:name, sai:symbol, sai:isotope, sai:group)" />
+		</model>
+
+		<model
+			name="sai:periodicTable"
+			dataType="PeriodicTable"
+			inputBinding="null">
+
+			<bind name="sai:name">
+				<property type="string" />
+			</bind>
+
+
+			<bind
+				name="sai:elements"
+				dataType="@Infer Collection{?}">
+
+				<inline inputBindingType="@Infer List{?}">
+					<bind
+						name="sai:element"
+						occurrences="0.."
+						output="this[]"
+						inMethod="add">
+
+						<complex model="sai:element" />
+					</bind>
+				</inline>
+			</bind>
+
+			<bindInput process="this = new(sai:name, sai:elements)" />
+		</model>
+	</models>
+</schema>

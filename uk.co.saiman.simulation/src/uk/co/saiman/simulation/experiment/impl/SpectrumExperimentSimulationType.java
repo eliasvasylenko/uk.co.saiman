@@ -52,7 +52,12 @@ public class SpectrumExperimentSimulationType implements SpectrumExperimentType<
 
 	@Override
 	public SpectrumConfiguration createState(ExperimentNode<?, ? extends SpectrumConfiguration> forNode) {
-		return new SpectrumConfiguration() {};
+		return new SpectrumConfiguration() {
+			@Override
+			public String getSpectrumName() {
+				return "Untitled Spectrum";
+			}
+		};
 	}
 
 	@Override

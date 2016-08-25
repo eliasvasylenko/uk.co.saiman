@@ -2,10 +2,10 @@ Bundle-Name: SAI :: Instrument :: Stage
 
 Export-Package: uk.co.saiman.experiment.sample
 
--includeresource: \
+-includeresource:\
 	l10n
 
--buildpath: \
+-buildpath:\
 	${ss;utilities},\
 	${ss;mathematics},\
 	${ss;reflection},\

@@ -24,7 +24,9 @@ saiman-version-ceiling: 2.0.0
 
 Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saiman.co.uk/
 Bundle-Copyright: ${copyright}
-Bundle-License: GPL <http://www.gnu.org/licenses/>
+Bundle-License:\
+	LGPL;\
+	link = http://www.gnu.org/licenses/
 Bundle-Version: ${saiman-version}.${tstamp}
 Bundle-Localization: bundle
 
@@ -37,37 +39,49 @@ Import-Package:\
 
 ## To enable baselining, uncomment the following lines:
 # -baseline: *
+-buildrepo: Local
 -releaserepo: Release
+-pom: true,\
+		version = ${versionmask;===;${@version}}-SNAPSHOT
 
--pluginpath.base:\
-	${pluginpath.aether}
+-plugin.Managed: \
+\
+        aQute.bnd.deployer.repository.LocalIndexedRepo; \
+            name                =       Managed ; \
+            pretty              =       true ; \
+            local               =       ${build}/local
 
--plugin.7.StrangeSkies:\
-	${plugin.strangeskies},\
-	${plugin.modabi}
+-plugin.Local: \
+\
+		aQute.bnd.repository.maven.provider.MavenBndRepository; \
+			name				=		Local; \
+			index				=		${.}/local.maven
 
--plugin.8.Eclipse:\
-	${plugin.eclipse.releases},\
-	${plugin.eclipse.updates},\
-	${plugin.eclipse.wtp},\
-	${plugin.eclipse.fx.runtime},\
-	${plugin.eclipse.fx.tooling}
+-plugin.StrangeSkies: \
+\
+		aQute.bnd.repository.maven.provider.MavenBndRepository; \
+			name				=		StrangeSkies; \
+			index				=		${.}/strangeskies.maven; \
+			releaseUrl			=		http://oss.jfrog.org/libs-snapshot/
 
-# Version of bnd/bndlib to use consistently throughout the build
-# NB. this must be specified as full M.m.u version (but no qualifier)
-# On advice of Peter we use an up-to-major version range
-bnd-version-base:         3.1.0
-bnd-version-ceiling:      4.0.0
-bndlib:                   aQute.libg;version='[${bnd-version-base},${bnd-version-ceiling})', \
-                          biz.aQute.bndlib;version='[${bnd-version-base},${bnd-version-ceiling})'
+-plugin.Modabi: \
+\
+		aQute.bnd.repository.maven.provider.MavenBndRepository; \
+			name				=		Modabi; \
+			index				=		${.}/modabi.maven; \
+			releaseUrl			=		http://oss.jfrog.org/libs-snapshot/
 
-# Version of the repository plugin to use consistently throughout the build
-# NB. this must be specified as full M.m.u version (but no qualifier)
-aQute-repository:         biz.aQute.repository;version='[${bnd-version-base},${bnd-version-ceiling})'
-aQute-resolve:            biz.aQute.resolve;version='[${bnd-version-base},${bnd-version-ceiling})'
+-plugin.Release: \
+\
+		aQute.bnd.repository.maven.provider.MavenBndRepository; \
+			name				=		Saiman; \
+			index				=		${.}/saiman.maven; \
+			releaseUrl			=		http://oss.jfrog.org/libs-snapshot/
 
-osgi.core.version:        5.0.0
-osgi.cmpn.version:        5.0.0
+ss: uk.co.strangeskies.${1};version=latest
+mdb: uk.co.strangeskies.modabi.${1};version=latest
+
+include.ss: jar:file:///${replace;${repo;uk.co.strangeskies.build;latest};%;%25}!/include
 
 ## If you use git, you might want to uncomment the following lines:
 Git-Descriptor: ${system-allow-fail;git describe --dirty --always}
@@ -75,8 +89,8 @@ Git-SHA: ${system-allow-fail;git rev-list -1 HEAD}
 -diffignore: Git-Descriptor,Git-SHA
 
 ## Run requirement groups:
-runreq.base:\
-	${req;osgi.enroute.logger.simple.provider}
+-runrequires.base:\
+	osgi.identity;filter:='(&(osgi.identity=osgi.enroute.logger.simple.provider)(version>=0))'
 
 ## Build path groups:
 -buildpath.base=\

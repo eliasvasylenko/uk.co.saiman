@@ -21,7 +21,7 @@ package uk.co.saiman.experiment;
 import java.util.List;
 
 import uk.co.saiman.processing.Processor;
-import uk.co.strangeskies.reflection.Reified;
+import uk.co.strangeskies.reflection.ReifiedSelf;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
@@ -34,7 +34,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @param <T>
  *          the type of the result data
  */
-public class ExperimentResult<T> implements Reified<ExperimentResult<T>> {
+public class ExperimentResult<T> implements ReifiedSelf<ExperimentResult<T>> {
 	private final TypeToken<T> dataType;
 	private T data;
 

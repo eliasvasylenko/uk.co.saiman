@@ -25,7 +25,6 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.fx.TreeItemData;
 
 /**
  * Remove a node from an experiment in the workspace
@@ -36,13 +35,13 @@ public class RemoveNode {
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
 		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
-		TreeItemData<?> itemData = experimentPart.getExperimentTreeController().getSelectionData();
+		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().getObject();
 
-		if (!(itemData.getData() instanceof ExperimentNode<?, ?>)) {
-			throw new ExperimentException(text.exception().illegalContextMenuFor(itemData.getData()));
+		if (!(itemData instanceof ExperimentNode<?, ?>)) {
+			throw new ExperimentException(text.exception().illegalContextMenuFor(itemData));
 		}
 
-		ExperimentNode<?, ?> selectedNode = (ExperimentNode<?, ?>) itemData.getData();
+		ExperimentNode<?, ?> selectedNode = (ExperimentNode<?, ?>) itemData;
 		selectedNode.remove();
 
 		experimentPart.getExperimentTreeController().refresh();

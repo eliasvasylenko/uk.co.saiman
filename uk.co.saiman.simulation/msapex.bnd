@@ -1,0 +1,10 @@
+Bundle-Name: SAI :: Simulation :: MSApex
+
+Private-Package: \
+	uk.co.saiman.simulation.msapex
+
+-includeresource: \
+	fragment.e4xmi,\
+	plugin.xml,\
+	res,\
+	{css=css}

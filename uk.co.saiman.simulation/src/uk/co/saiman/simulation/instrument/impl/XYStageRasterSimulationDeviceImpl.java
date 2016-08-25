@@ -40,7 +40,7 @@ import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.instrument.raster.RasterPattern;
 import uk.co.saiman.instrument.raster.RasterPosition;
 import uk.co.saiman.instrument.stage.XYStageDevice;
-import uk.co.saiman.simulation.SimulationText;
+import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.ImageSampleDeviceSimulation;
 import uk.co.saiman.simulation.instrument.SampleDeviceSimulation;
 import uk.co.saiman.simulation.instrument.SampleImage;
@@ -56,7 +56,7 @@ public class XYStageRasterSimulationDeviceImpl implements RasterDevice, ImageSam
 		HardwareDevice, SampleDeviceSimulation, SimulatedDevice {
 	@Reference
 	PropertyLoader loader;
-	SimulationText text;
+	SimulationProperties text;
 
 	private final ObservableImpl<Exception> errors;
 
@@ -125,7 +125,7 @@ public class XYStageRasterSimulationDeviceImpl implements RasterDevice, ImageSam
 
 	@Activate
 	void activate() {
-		text = loader.getProperties(SimulationText.class);
+		text = loader.getProperties(SimulationProperties.class);
 	}
 
 	@Override

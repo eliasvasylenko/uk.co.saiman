@@ -18,8 +18,11 @@
  */
 package uk.co.saiman.acquisition;
 
+import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.PropertyConfiguration;
+import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -27,7 +30,10 @@ import uk.co.strangeskies.text.properties.Properties;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
+@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface AcquisitionProperties extends Properties<AcquisitionProperties> {
+	SaiProperties sai();
+
 	Localized<String> device();
 
 	Localized<String> devices();

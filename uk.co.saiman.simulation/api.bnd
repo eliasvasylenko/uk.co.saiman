@@ -4,8 +4,3 @@ Export-Package: \
 	uk.co.saiman.simulation,\
 	uk.co.saiman.simulation.experiment,\
 	uk.co.saiman.simulation.instrument
-
-
-
--includeresource: \
-	bundle.properties

@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.simulation.SimulationText;
+import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SampleDeviceSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
@@ -105,7 +105,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 
 	@Reference
 	PropertyLoader loader;
-	private SimulationText simulationText;
+	private SimulationProperties simulationText;
 
 	private final ObservableImpl<Exception> errors;
 
@@ -162,7 +162,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 
 	@Activate
 	void activate() {
-		simulationText = loader.getProperties(SimulationText.class);
+		simulationText = loader.getProperties(SimulationProperties.class);
 
 		new Thread(this::acquire).start();
 	}
@@ -315,7 +315,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 		}
 	}
 
-	protected SimulationText getText() {
+	protected SimulationProperties getText() {
 		return simulationText;
 	}
 

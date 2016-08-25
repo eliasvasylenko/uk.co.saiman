@@ -26,6 +26,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
+import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.strangeskies.eclipse.Localize;
 
@@ -35,9 +36,6 @@ import uk.co.strangeskies.eclipse.Localize;
  * @author Elias N Vasylenko
  */
 public class AddExperiment {
-	private static final String ALPHANUMERIC = "[a-zA-Z0-9]+";
-	private static final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
-
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
 		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
@@ -49,9 +47,12 @@ public class AddExperiment {
 		Button okButton = (Button) nameDialog.getDialogPane().lookupButton(ButtonType.OK);
 		okButton.setDisable(true);
 		nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+
 			boolean exists = experimentPart.getExperimentWorkspace().getRootExperiments().stream()
 					.anyMatch(e -> e.getState().getName().equals(newValue));
-			boolean isValid = newValue.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
+
+			boolean isValid = ExperimentConfiguration.isNameValid(newValue);
+
 			okButton.setDisable(!isValid || exists);
 		});
 

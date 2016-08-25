@@ -46,7 +46,7 @@ public class AddNodeMenu {
 	void aboutToShow(List<MMenuElement> items, @Localize ExperimentProperties text, MPart part) {
 		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
-		Object data = item.getValue().getData();
+		Object data = item.getValue().getObject();
 
 		if (!(data instanceof ExperimentNode<?, ?>)) {
 			throw new ExperimentException(text.exception().illegalContextMenuFor(data));

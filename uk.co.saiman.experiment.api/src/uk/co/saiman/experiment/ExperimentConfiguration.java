@@ -46,4 +46,11 @@ public interface ExperimentConfiguration {
 	 *          the new notes for the experiment
 	 */
 	void setNotes(String notes);
+
+	public static boolean isNameValid(String name) {
+		final String ALPHANUMERIC = "[a-zA-Z0-9]+";
+		final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
+
+		return name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
+	}
 }

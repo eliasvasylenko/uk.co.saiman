@@ -1,4 +1,6 @@
-icondata: data:image/gif;base64,${base64;${project}\\icon.gif}
+-include: ${build}/include/fugue.icons.bnd
+
+icondata: data:image/png;base64,${base64;${fugue.icon.path}/size16/wand.png}
 
 copyright.work.name: {{projectName}}
 

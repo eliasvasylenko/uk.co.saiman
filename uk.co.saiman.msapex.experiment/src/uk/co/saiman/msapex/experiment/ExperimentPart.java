@@ -57,7 +57,7 @@ public class ExperimentPart {
 	@FXML
 	private ExperimentTreeController experimentTreeController;
 	private ExperimentWorkspace workspace;
-	
+
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader,
 			@Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation, ExperimentWorkspaceFactory workspaceFactory) {

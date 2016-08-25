@@ -18,8 +18,11 @@
  */
 package uk.co.saiman.experiment;
 
+import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.PropertyConfiguration;
+import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 /**
  * {@link Properties} interface for texts relating to experiments.
@@ -27,7 +30,10 @@ import uk.co.strangeskies.text.properties.Properties;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
+@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface ExperimentProperties extends Properties<ExperimentProperties> {
+	SaiProperties sai();
+
 	Localized<String> newExperiment();
 
 	Localized<String> newExperimentName();

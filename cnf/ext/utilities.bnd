@@ -1,8 +1,0 @@
-## Plugin path Aether
-pluginpath.aether:\
-	${build}/cache/biz.aQute.repository.aether.jar;\
-		url = ${bnd-release}/biz.aQute.repository.aether/generated/biz.aQute.repository.aether.jar
-
-
-## Requirement shorthand
-req: osgi.identity;filter:='(osgi.identity=${1})'

@@ -97,4 +97,9 @@ public class XYStageSimulationConfiguration implements XYStageConfiguration {
 	public void setBlueChemical(ChemicalComposition blue) {
 		this.blue = blue;
 	}
+
+	@Override
+	public String toString() {
+		return getName() + " [" + x + ", " + y + "]";
+	}
 }

@@ -18,7 +18,7 @@
  */
 package uk.co.saiman.msapex.data;
 
-import uk.co.strangeskies.reflection.Reified;
+import uk.co.strangeskies.reflection.ReifiedSelf;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 
@@ -30,7 +30,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @param <T>
  *          The type of the data of the annotation
  */
-public interface ChartAnnotation<T> extends Reified<ChartAnnotation<T>> {
+public interface ChartAnnotation<T> extends ReifiedSelf<ChartAnnotation<T>> {
 	/**
 	 * @return The data of the annotation
 	 */

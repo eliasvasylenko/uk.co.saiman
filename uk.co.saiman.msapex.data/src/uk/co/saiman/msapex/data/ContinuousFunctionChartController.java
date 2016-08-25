@@ -66,7 +66,7 @@ public class ContinuousFunctionChartController {
 	private static final double MAX_ZOOM_STEP = 0.5;
 	private static final double PIXEL_ZOOM_DAMP = 50;
 	private static final double MOVE_STEP_PERCENTAGE = 10;
-	private static final Range<Double> rangeFit = Range.between(1.05d, 1.35d);
+	private static final Range<Double> RANGE_FIT = Range.between(1.05d, 1.35d);
 
 	/*
 	 * Annotations
@@ -294,18 +294,18 @@ public class ContinuousFunctionChartController {
 
 			if (maxZoom.getFrom() >= 0) {
 				range.setFrom(0d);
-			} else if (reset || maxZoom.getFrom() * rangeFit.getTo() < range.getFrom()) {
-				range.setFrom(maxZoom.getFrom() * rangeFit.getTo());
-			} else if (maxZoom.getFrom() * rangeFit.getFrom() > range.getFrom()) {
-				range.setFrom(maxZoom.getFrom() * rangeFit.getFrom());
+			} else if (reset || maxZoom.getFrom() * RANGE_FIT.getTo() < range.getFrom()) {
+				range.setFrom(maxZoom.getFrom() * RANGE_FIT.getTo());
+			} else if (maxZoom.getFrom() * RANGE_FIT.getFrom() > range.getFrom()) {
+				range.setFrom(maxZoom.getFrom() * RANGE_FIT.getFrom());
 			}
 
 			if (maxZoom.getTo() <= 0) {
 				range.setTo(0d);
-			} else if (reset || maxZoom.getTo() * rangeFit.getTo() < range.getTo()) {
-				range.setTo(maxZoom.getTo() * rangeFit.getTo());
-			} else if (maxZoom.getTo() * rangeFit.getFrom() > range.getTo()) {
-				range.setTo(maxZoom.getTo() * rangeFit.getFrom());
+			} else if (reset || maxZoom.getTo() * RANGE_FIT.getTo() < range.getTo()) {
+				range.setTo(maxZoom.getTo() * RANGE_FIT.getTo());
+			} else if (maxZoom.getTo() * RANGE_FIT.getFrom() > range.getTo()) {
+				range.setTo(maxZoom.getTo() * RANGE_FIT.getFrom());
 			}
 
 			getYAxis().setLowerBound(range.getFrom());

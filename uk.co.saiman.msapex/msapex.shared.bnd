@@ -1,11 +1,12 @@
-# This run file contains all the cross-platform bundle and settings to run Bndtools.
+-include:\
+	${include.ss}/felix.bndrun,\
+	${include.ss}/utilities.bnd,\
+	${include.ss}/eclipse.platform.neon.bndrun,\
+	${include.ss}/eclipse.fx.2.4.0.bndrun
 
-# Do not run this, use the platform-specific bndrun files (which "-include" this)
+req: osgi.identity;filter:='(&(osgi.identity=${1})(version${if;${is;${2};null};>=0;${2}}))'
 
-runreq.msapex:\
-	${runreq.felix.shell},\
-	${runreq.eclipse.p2},\
-	${runreq.eclipse.${platform}},\
+-runrequires.msapex:\
 	${req;uk.co.saiman.msapex},\
 	${req;uk.co.saiman.msapex.chemistry},\
 	${req;uk.co.saiman.msapex.experiment},\
@@ -14,23 +15,15 @@ runreq.msapex:\
 	${req;uk.co.saiman.simulation.provider},\
 	${req;uk.co.saiman.msapex.icons.fugue}
 
-runvm.msapex:\
+-runvm.msapex:\
 	-Xmx1024m
 
-runfw.msapex:\
+-runfw.msapex:\
 	org.eclipse.osgi
 
-runee.msapex:\
+-runee.msapex:\
 	JavaSE-1.8
 
-runpath.msapex:\
-	${runpath.eclipse.${platform}}
-
-runprops.msapex:\
-	${runprops.eclipse},\
-	${runprops.eclipse.clean},\
-	${runprops.eclipse.fx},\
+runproperties.eclipse.clean: true
+-runproperties.msapex:\
 	eclipse.product=uk.co.saiman.msapex.product
-
-systempath.msapex:\
-	${systempath.eclipse}

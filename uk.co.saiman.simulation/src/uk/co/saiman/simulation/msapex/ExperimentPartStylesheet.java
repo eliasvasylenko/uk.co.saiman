@@ -16,26 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment;
+package uk.co.saiman.simulation.msapex;
 
-import org.eclipse.e4.ui.services.EMenuService;
+import java.net.URL;
 
-import uk.co.strangeskies.eclipse.E4TreeItemType;
-import uk.co.strangeskies.fx.TreeItemType;
+import org.eclipse.fx.ui.services.theme.Stylesheet;
+import org.eclipse.fx.ui.services.theme.Theme;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
 /**
- * A partial implementation of {@link TreeItemType} which registers the
- * experiment tree pop-up menu from the experiment project model fragment.
+ * Default stylesheet for experiment interface components.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- *          the type of the object at the experiment tree node
  */
-public abstract class ExperimentTreeItemType<T> extends E4TreeItemType<T> {
-	private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
+@Component(property = Constants.SERVICE_RANKING + "=" + ExperimentPartStylesheet.RANKING)
+public class ExperimentPartStylesheet implements Stylesheet {
+	/**
+	 * The service ranking for this stylesheet.
+	 */
+	public static final int RANKING = 0;
 
-	public ExperimentTreeItemType(EMenuService menuService) {
-		super(menuService, EXPERIMENT_TREE_POPUP_MENU);
+	@Override
+	public boolean appliesToTheme(Theme t) {
+		return true;
+	}
+
+	@Override
+	public URL getURL(Theme t) {
+		return ExperimentPartStylesheet.class.getClassLoader().getResource("css/experiment.css");
 	}
 }

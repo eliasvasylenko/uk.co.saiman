@@ -1,0 +1,6 @@
+-buildpath: \
+	javax.measure.unit-api,\
+	tec.units.unit-ri,\
+	tec.uom.lib__uom-lib-common
+
+-sub: *.bnd

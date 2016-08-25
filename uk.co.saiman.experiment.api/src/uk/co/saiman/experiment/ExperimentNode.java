@@ -27,15 +27,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import uk.co.strangeskies.reflection.Reified;
+import uk.co.strangeskies.reflection.TypeParameter;
+import uk.co.strangeskies.reflection.TypeToken;
+
 /**
  * A node in an experiment part tree.
  * 
  * @author Elias N Vasylenko
- *
+ * @param <T>
+ *          the exact type of the experiment type
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public interface ExperimentNode<T extends ExperimentType<S>, S> {
+public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified {
 	/**
 	 * @return the experiment workspace containing this experiment
 	 */
@@ -108,8 +113,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
 	 *         such ancestor exists
 	 */
 	@SuppressWarnings("unchecked")
-	default <T, E extends ExperimentType<T>> Optional<ExperimentNode<E, T>> getAncestor(E type) {
-		return getAncestors().stream().filter(a -> type.equals(a.getType())).findFirst().map(a -> (ExperimentNode<E, T>) a);
+	default <U, E extends ExperimentType<U>> Optional<ExperimentNode<E, U>> getAncestor(E type) {
+		return getAncestors().stream().filter(a -> type.equals(a.getType())).findFirst().map(a -> (ExperimentNode<E, U>) a);
 	}
 
 	/**
@@ -122,10 +127,10 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
 	 *         such ancestor exists
 	 */
 	@SuppressWarnings("unchecked")
-	default <T, E extends ExperimentType<? extends T>> Optional<ExperimentNode<E, ? extends T>> getAncestor(
+	default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> getAncestor(
 			Collection<E> types) {
 		return getAncestors().stream().filter(a -> types.contains(a.getType())).findFirst()
-				.map(a -> (ExperimentNode<E, ? extends T>) a);
+				.map(a -> (ExperimentNode<E, ? extends U>) a);
 	}
 
 	/**
@@ -154,10 +159,19 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
 	 *          The type of experiment
 	 * @return A new child experiment part of the given type
 	 */
-	<T, E extends ExperimentType<T>> ExperimentNode<E, T> addChild(E childType);
+	<U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType);
 
 	/**
 	 * @return The current execution lifecycle state of the experiment part.
 	 */
 	ExperimentLifecycleState getLifecycleState();
+
+	@Override
+	default TypeToken<?> getThisType() {
+		@SuppressWarnings("unchecked")
+		TypeToken<T> typeType = (TypeToken<T>) getType().getThisType();
+
+		return new TypeToken<ExperimentNode<T, S>>() {}.withTypeArgument(new TypeParameter<T>() {}, typeType)
+				.withTypeArgument(new TypeParameter<S>() {}, getType().getStateType());
+	}
 }

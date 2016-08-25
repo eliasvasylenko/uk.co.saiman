@@ -23,6 +23,8 @@ import java.time.LocalDate;
 import uk.co.strangeskies.modabi.Namespace;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.PropertyConfiguration;
+import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 /**
  * Utilities relating conceptually to the Scientific Analysis Instruments set of
@@ -30,6 +32,7 @@ import uk.co.strangeskies.text.properties.Properties;
  * 
  * @author Elias N Vasylenko
  */
+@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SaiProperties extends Properties<SaiProperties> {
 	/**
 	 * The root namespace associated with Scientific Analysis Instruments products

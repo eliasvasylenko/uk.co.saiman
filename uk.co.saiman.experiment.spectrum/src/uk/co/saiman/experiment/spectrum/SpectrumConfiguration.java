@@ -23,4 +23,6 @@ package uk.co.saiman.experiment.spectrum;
  * 
  * @author Elias N Vasylenko
  */
-public interface SpectrumConfiguration {}
+public interface SpectrumConfiguration {
+	public String getSpectrumName();
+}

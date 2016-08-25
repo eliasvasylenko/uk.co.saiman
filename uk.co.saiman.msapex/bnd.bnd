@@ -1,17 +1,12 @@
 Bundle-Name: SAI :: MSApex
 Bundle-SymbolicName: ${p};singleton:=true
 
-# Some extra stuff on buildpath to aid debugging
-buildpath.debug =\
-	${mdb;core.api},\
-	${mdb;core.provider}
-
--buildpath:\
-	${buildpath.eclipse},\
-	${buildpath.debug}
-
 Export-Package:\
 	uk.co.saiman.msapex
+
+-include:\
+	${include.ss}/eclipse.platform.neon.bnd,\
+	${include.ss}/eclipse.fx.2.4.0.bnd
 
 -includeresource:\
 	plugin.xml,\

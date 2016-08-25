@@ -22,9 +22,8 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 
 /**
- * Configure the sample position to perform an experiment at. Typically most
- * other experiment nodes will be descendant to a sample experiment node, such
- * that they operate on the configured sample.
+ * An {@link SampleExperimentType experiment type} for {@link XYStageDevice XY
+ * stage devices}.
  * 
  * @author Elias N Vasylenko
  *

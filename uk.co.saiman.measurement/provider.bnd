@@ -1,0 +1,12 @@
+Bundle-Name: SAI :: Measurement :: Provider
+
+-includeresource:\
+	@${repo;tec.units.unit-ri},\
+	@${repo;tec.uom.lib__uom-lib-common}
+
+Private-Package:\
+	uk.co.saiman.measurement.impl,\
+	tec.units.ri.*
+
+Export-Package:\
+	tec.uom.lib.*

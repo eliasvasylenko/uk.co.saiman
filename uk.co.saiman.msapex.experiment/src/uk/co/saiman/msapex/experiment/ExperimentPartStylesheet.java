@@ -22,15 +22,21 @@ import java.net.URL;
 
 import org.eclipse.fx.ui.services.theme.Stylesheet;
 import org.eclipse.fx.ui.services.theme.Theme;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Default stylesheet for data charts.
+ * Default stylesheet for experiment interface components.
  * 
  * @author Elias N Vasylenko
  */
-@Component
+@Component(property = Constants.SERVICE_RANKING + "=" + ExperimentPartStylesheet.RANKING)
 public class ExperimentPartStylesheet implements Stylesheet {
+	/**
+	 * The service ranking for this stylesheet.
+	 */
+	public static final int RANKING = 0;
+
 	@Override
 	public boolean appliesToTheme(Theme t) {
 		return true;

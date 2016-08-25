@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
+import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
@@ -73,7 +74,8 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	 * @param text
 	 *          a localized text accessor implementation
 	 */
-	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot, ExperimentProperties text) {
+	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot,
+			ExperimentProperties text) {
 		this.factory = factory;
 		this.dataRoot = workspaceRoot;
 		this.text = text;
@@ -109,6 +111,10 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 
 	@Override
 	public ExperimentNode<RootExperiment, ExperimentConfiguration> addRootExperiment(String name) {
+		if (!ExperimentConfiguration.isNameValid(name)) {
+			throw new ExperimentException(t -> t.exception().invalidExperimentName(name));
+		}
+
 		ExperimentNode<RootExperiment, ExperimentConfiguration> rootExperiment = new ExperimentNodeImpl<>(
 				rootExperimentType, this);
 		rootExperiment.getState().setName(name);
