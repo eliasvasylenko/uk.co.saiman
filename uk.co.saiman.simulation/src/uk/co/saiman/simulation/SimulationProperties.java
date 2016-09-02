@@ -20,6 +20,7 @@ package uk.co.saiman.simulation;
 
 import uk.co.saiman.SaiProperties;
 import uk.co.saiman.acquisition.AcquisitionProperties;
+import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
@@ -34,5 +35,15 @@ public interface SimulationProperties extends Properties<SimulationProperties> {
 
 	AcquisitionProperties acquisition();
 
+	ExperimentProperties experiment();
+
 	SaiProperties sai();
+
+	Localized<String> sampleImage();
+
+	Localized<String> redChemical();
+
+	Localized<String> greenChemical();
+
+	Localized<String> blueChemical();
 }

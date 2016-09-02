@@ -37,6 +37,8 @@ public class ExperimentPartStylesheet implements Stylesheet {
 	 */
 	public static final int RANKING = 0;
 
+	public static final String CONFIGURATION_CONTRIBUTION = "ConfigurationContribution";
+
 	@Override
 	public boolean appliesToTheme(Theme t) {
 		return true;

@@ -24,16 +24,16 @@ public interface SimulatedAcquisitionDevice extends AcquisitionDevice, Simulated
 	/**
 	 * @return the sample device simulations available for use
 	 */
-	public Set<SampleDeviceSimulation> getSamples();
+	public Set<SimulatedSampleDevice> getSamples();
 
 	/**
 	 * @return the sample device simulation currently in use
 	 */
-	public SampleDeviceSimulation getSample();
+	public SimulatedSampleDevice getSample();
 
 	/**
 	 * @param sample
 	 *          the new sample device simulation to use
 	 */
-	public void setSample(SampleDeviceSimulation sample);
+	public void setSample(SimulatedSampleDevice sample);
 }

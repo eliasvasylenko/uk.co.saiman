@@ -1,0 +1,7 @@
+.ModularTreeCell *:SampleImageContribution #text {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/image.png");
+}
+
+.ModularTreeCell *:ChemicalContribution #text {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/molecule.png");
+}

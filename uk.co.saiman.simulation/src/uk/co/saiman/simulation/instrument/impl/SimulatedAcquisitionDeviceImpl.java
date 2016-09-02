@@ -34,7 +34,7 @@ import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
-import uk.co.saiman.simulation.instrument.SampleDeviceSimulation;
+import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
 import uk.co.strangeskies.text.properties.PropertyLoader;
@@ -48,10 +48,10 @@ import uk.co.strangeskies.utilities.ObservableImpl;
  * @author Elias N Vasylenko
  */
 @Component(service = { SimulatedAcquisitionDevice.class, AcquisitionDevice.class })
-public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, SimulatedAcquisitionDevice {
+public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, SimulatedAcquisitionDevice {
 	private class ExperimentConfiguration {
 		private final DetectorSimulation signal;
-		private final SampleDeviceSimulation sample;
+		private final SimulatedSampleDevice sample;
 		private final double resolution;
 		private final int depth;
 
@@ -81,7 +81,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 				detectors.notifyAll();
 			}
 
-			sample = AcquisitionSimulationDeviceImpl.this.sample;
+			sample = SimulatedAcquisitionDeviceImpl.this.sample;
 		}
 
 		public void setException(AcquisitionException exception) {
@@ -124,8 +124,8 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 	private Set<DetectorSimulation> detectors = new HashSet<>();
 	private DetectorSimulation detector;
 
-	private Set<SampleDeviceSimulation> samples = new HashSet<>();
-	private SampleDeviceSimulation sample;
+	private Set<SimulatedSampleDevice> samples = new HashSet<>();
+	private SimulatedSampleDevice sample;
 
 	private boolean finalised = false;
 
@@ -134,7 +134,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 	 * {@link #DEFAULT_ACQUISITION_RESOLUTION} and
 	 * {@link #DEFAULT_ACQUISITION_TIME}.
 	 */
-	public AcquisitionSimulationDeviceImpl() {
+	public SimulatedAcquisitionDeviceImpl() {
 		this(DEFAULT_ACQUISITION_RESOLUTION, DEFAULT_ACQUISITION_TIME);
 	}
 
@@ -149,7 +149,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 	 *          The active sampling duration for a single data acquisition, in
 	 *          milliseconds.
 	 */
-	public AcquisitionSimulationDeviceImpl(double acquisitionResolution, double acquisitionTime) {
+	public SimulatedAcquisitionDeviceImpl(double acquisitionResolution, double acquisitionTime) {
 		errors = new ObservableImpl<>();
 
 		singleAcquisitionListeners = new BufferingListener<>();
@@ -246,7 +246,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 	 *          a new sample simulation option
 	 */
 	@Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
-	public void addSampleSimulation(SampleDeviceSimulation sample) {
+	public void addSampleSimulation(SimulatedSampleDevice sample) {
 		synchronized (samples) {
 			if (samples.add(sample) && this.sample == null) {
 				this.sample = sample;
@@ -259,7 +259,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 	 * @param sample
 	 *          a sample simulation option to remove
 	 */
-	public void removeSampleSimulation(SampleDeviceSimulation sample) {
+	public void removeSampleSimulation(SimulatedSampleDevice sample) {
 		synchronized (samples) {
 			if (samples.remove(sample) && this.sample == sample) {
 				if (samples.isEmpty()) {
@@ -273,21 +273,21 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 	}
 
 	@Override
-	public Set<SampleDeviceSimulation> getSamples() {
+	public Set<SimulatedSampleDevice> getSamples() {
 		synchronized (samples) {
 			return unmodifiableSet(samples);
 		}
 	}
 
 	@Override
-	public SampleDeviceSimulation getSample() {
+	public SimulatedSampleDevice getSample() {
 		synchronized (samples) {
 			return sample;
 		}
 	}
 
 	@Override
-	public void setSample(SampleDeviceSimulation sample) {
+	public void setSample(SimulatedSampleDevice sample) {
 		synchronized (samples) {
 			if (this.sample != sample) {
 				/*-
@@ -301,9 +301,9 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 		}
 	}
 
-	private SampleDeviceSimulation waitForSample() throws InterruptedException {
+	private SimulatedSampleDevice waitForSample() throws InterruptedException {
 		synchronized (samples) {
-			SampleDeviceSimulation sample = getSample();
+			SimulatedSampleDevice sample = getSample();
 
 			while (sample == null) {
 				samples.wait();
@@ -365,7 +365,7 @@ public class AcquisitionSimulationDeviceImpl implements SimulatedDevice, Simulat
 		Random random = new Random();
 
 		while (!finalised) {
-			SampleDeviceSimulation sample;
+			SimulatedSampleDevice sample;
 			DetectorSimulation detector;
 			double resolution;
 			int depth;

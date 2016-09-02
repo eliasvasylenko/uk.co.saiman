@@ -1,9 +1,7 @@
 Bundle-Name: SAI :: MSApex :: Fuge Icons
-Bundle-SymbolicName: ${p};singleton:=true
+
+-includeresource:\
+	res
 
 Export-Package:\
 	uk.co.saiman.msapex.icons.fugue
-
--includeresource:\
-	res,\
-	css=css

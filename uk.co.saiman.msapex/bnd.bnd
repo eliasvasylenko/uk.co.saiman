@@ -10,5 +10,5 @@ Export-Package:\
 
 -includeresource:\
 	plugin.xml,\
-	Application.e4xmi,\
+	{Application.e4xmi},\
 	css=css

@@ -2,7 +2,7 @@ Bundle-Name: SAI :: Processing
 
 -buildpath: \
 	${ss;utilities},\
-	${ss;reflection},\
+	${ss;reflection.typesystem},\
 	uk.co.saiman.utilities;version=snapshot
 
 Export-Package: uk.co.saiman.processing

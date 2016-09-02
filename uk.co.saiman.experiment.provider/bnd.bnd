@@ -3,7 +3,7 @@ Bundle-Name: SAI :: Experiment :: Provider
 -buildpath: \
 	${ss;utilities},\
 	${ss;text},\
-	${ss;reflection},\
+	${ss;reflection.typesystem},\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 

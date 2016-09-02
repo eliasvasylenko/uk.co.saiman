@@ -21,7 +21,9 @@ public interface ExperimentExceptionProperties extends Properties<ExperimentExce
 
 	Localized<String> experimentIsDisposed(ExperimentNode<?, ?> experimentNode);
 
-	Localized<String> illegalContextMenuFor(Object context);
+	Localized<String> illegalCommandForSelection(String commandId, Object selection);
+
+	Localized<String> illegalMenuForSelection(String commandId, Object selection);
 
 	Localized<String> experimentDoesNotExist(ExperimentNode<?, ?> experimentNode);
 

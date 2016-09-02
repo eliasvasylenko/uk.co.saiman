@@ -1,2 +1,12 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_vaQRoHl8EeWeCa5uXT_XfA"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_vaQRoHl8EeWeCa5uXT_XfA">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_mZ3lsHBSEeaNPLS4ZZpYJQ" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Command" xmi:id="_-yVlYHBSEeaNPLS4ZZpYJQ" elementId="uk.co.saiman.simulation.msapex.command.choosesimulatedsampleimage" commandName="Choose Simulated Sample Image" description="Choose a sample image for a simulated experiment" category="_CXbOAHBZEeamhLyauWkpZg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_pIdS4HBSEeaNPLS4ZZpYJQ" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Handler" xmi:id="_64K14HBSEeaNPLS4ZZpYJQ" elementId="uk.co.saiman.simulation.msapex.handler.choosesimulatedsampleimage" contributionURI="bundleclass://uk.co.saiman.simulation.msapex/uk.co.saiman.simulation.msapex.ChooseSimulatedSampleImage" command="_-yVlYHBSEeaNPLS4ZZpYJQ"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_5sVtMHBYEeamhLyauWkpZg" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Category" xmi:id="_CXbOAHBZEeamhLyauWkpZg" elementId="uk.co.saiman.msapex.simulation.category" name="Simulation" description="Simulated instrument devices and experiments"/>
+  </fragments>
+</fragment:ModelFragments>

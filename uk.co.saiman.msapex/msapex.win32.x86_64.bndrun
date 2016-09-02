@@ -84,6 +84,7 @@ runplatform: win64
 	uk.co.saiman.processing;version=snapshot,\
 	uk.co.saiman.simulation.api;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\
+	uk.co.saiman.simulation.msapex;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.strangeskies.eclipse;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.fx;version='[1.0.13,1.0.14)',\
@@ -94,7 +95,8 @@ runplatform: win64
 	uk.co.strangeskies.modabi.io.xml;version='[1.0.0,1.0.1)',\
 	uk.co.strangeskies.osgi.api;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.osgi.provider;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.reflection;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.reflection.jar;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.reflection.typesystem;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.text;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.utilities;version='[1.0.13,1.0.14)',\
 	org.eclipse.core.commands;version='[3.8.0,3.8.1)',\

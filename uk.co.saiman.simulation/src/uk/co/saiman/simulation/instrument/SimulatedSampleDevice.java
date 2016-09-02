@@ -18,6 +18,6 @@
  */
 package uk.co.saiman.simulation.instrument;
 
-public interface SampleDeviceSimulation extends SimulatedDevice {
+public interface SimulatedSampleDevice extends SimulatedDevice {
 	SimulatedSample getNextSample();
 }

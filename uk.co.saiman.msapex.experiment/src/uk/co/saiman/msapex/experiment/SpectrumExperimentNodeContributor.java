@@ -23,7 +23,11 @@ import org.osgi.service.component.annotations.Component;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
+import uk.co.strangeskies.eclipse.EclipseTreeContributionImpl;
+import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeCellContribution;
+import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
 
 /**
@@ -32,24 +36,25 @@ import uk.co.strangeskies.fx.TreeTextContribution;
  * 
  * @author Elias N Vasylenko
  */
-@Component
-public class SpectrumExperimentNodeContributor implements ExperimentTreeContributor {
-	@Override
-	public Class<SpectrumExperimentNodeContribution> getContribution() {
-		return SpectrumExperimentNodeContribution.class;
+@Component(service = EclipseTreeContribution.class)
+public class SpectrumExperimentNodeContributor extends EclipseTreeContributionImpl {
+	public SpectrumExperimentNodeContributor() {
+		super(SpectrumExperimentNodeContribution.class);
 	}
 }
 
 class SpectrumExperimentNodeContribution implements
-		TreeTextContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> {
+		TreeTextContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>>,
+		PseudoClassTreeCellContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> {
 	@Override
-	public String getText(ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration> data) {
-		return data.getType().getName();
+	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getText(
+			TreeItemData<U> data) {
+		return data.data().getType().getName();
 	}
 
 	@Override
-	public String getSupplementalText(
-			ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration> data) {
-		return data.getState().getSpectrumName();
+	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getSupplementalText(
+			TreeItemData<U> data) {
+		return data.data().getState().getSpectrumName();
 	}
 }

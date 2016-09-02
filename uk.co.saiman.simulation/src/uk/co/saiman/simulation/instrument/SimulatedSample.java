@@ -21,12 +21,12 @@ package uk.co.saiman.simulation.instrument;
 import java.util.Map;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.saiman.simulation.instrument.impl.AcquisitionSimulationDeviceImpl;
+import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDeviceImpl;
 
 /**
  * A description of a simulated physical sample, which can be turned into a
  * simulated acquisition signal by way of a {@link DetectorSimulation} and an
- * {@link AcquisitionSimulationDeviceImpl}.
+ * {@link SimulatedAcquisitionDeviceImpl}.
  * 
  * @author Elias N Vasylenko
  */

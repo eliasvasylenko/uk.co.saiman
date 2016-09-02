@@ -27,8 +27,11 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
+import uk.co.strangeskies.eclipse.EclipseTreeContributionImpl;
 import uk.co.strangeskies.fx.TreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
+import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.reflection.TypeToken;
 import uk.co.strangeskies.reflection.TypedObject;
 
@@ -38,23 +41,22 @@ import uk.co.strangeskies.reflection.TypedObject;
  * 
  * @author Elias N Vasylenko
  */
-@Component
-public class WorkspaceContributor implements ExperimentTreeContributor {
-	@Override
-	public Class<WorkspaceContribution> getContribution() {
-		return WorkspaceContribution.class;
+@Component(service = EclipseTreeContribution.class)
+public class WorkspaceContributor extends EclipseTreeContributionImpl {
+	public WorkspaceContributor() {
+		super(WorkspaceContribution.class);
 	}
 }
 
 class WorkspaceContribution implements TreeChildContribution<ExperimentWorkspace> {
 	@Override
-	public boolean hasChildren(ExperimentWorkspace workspace) {
-		return !workspace.getRootExperiments().isEmpty();
+	public <U extends ExperimentWorkspace> boolean hasChildren(TreeItemData<U> data) {
+		return !data.data().getRootExperiments().isEmpty();
 	}
 
 	@Override
-	public List<TypedObject<?>> getChildren(ExperimentWorkspace workspace) {
-		return workspace.getRootExperiments().stream()
+	public <U extends ExperimentWorkspace> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
+		return data.data().getRootExperiments().stream()
 				.map(c -> new TypeToken<ExperimentNode<RootExperiment, ExperimentConfiguration>>() {}.typedObject(c))
 				.collect(Collectors.toList());
 	}

@@ -78,4 +78,6 @@ public interface ExperimentProperties extends Properties<ExperimentProperties> {
 	Localized<String> lifecycleStateWaiting();
 
 	ExperimentExceptionProperties exception();
+
+	Localized<String> configuration();
 }

@@ -49,7 +49,7 @@ import uk.co.strangeskies.utilities.ObservableImpl;
  * 
  * @author Elias N Vasylenko
  */
-public class ChemicalElementTile extends BorderPane implements Observable<Element> {
+public class ChemicalElementTile extends BorderPane implements Observable<ChemicalElementTile> {
 	/**
 	 * The size of the tile. Smaller sizes may choose to present less information
 	 * in order to take less space.
@@ -71,7 +71,7 @@ public class ChemicalElementTile extends BorderPane implements Observable<Elemen
 		LARGE
 	}
 
-	private ObservableImpl<Element> clickObservable = new ObservableImpl<>();
+	private ObservableImpl<ChemicalElementTile> clickObservable = new ObservableImpl<>();
 
 	private Element element;
 
@@ -214,16 +214,16 @@ public class ChemicalElementTile extends BorderPane implements Observable<Elemen
 	 */
 	public void select() {
 		requestFocus();
-		clickObservable.fire(element);
+		clickObservable.fire(this);
 	}
 
 	@Override
-	public boolean addObserver(Consumer<? super Element> observer) {
+	public boolean addObserver(Consumer<? super ChemicalElementTile> observer) {
 		return clickObservable.addObserver(observer);
 	}
 
 	@Override
-	public boolean removeObserver(Consumer<? super Element> observer) {
+	public boolean removeObserver(Consumer<? super ChemicalElementTile> observer) {
 		return clickObservable.removeObserver(observer);
 	}
 }

@@ -1,7 +1,7 @@
 Bundle-Name: SAI :: MSApex :: Experiment
-Bundle-SymbolicName: ${p};singleton:=true
 
 -include:\
+	${include.ss}/eclipse.plugin.bnd,\
 	${include.ss}/eclipse.platform.neon.bnd,\
 	${include.ss}/eclipse.fx.2.4.0.bnd,\
 	${build}/include/fugue.icons.bnd
@@ -10,7 +10,7 @@ Bundle-SymbolicName: ${p};singleton:=true
 	${ss;utilities},\
 	${ss;text},\
 	${ss;mathematics},\
-	${ss;reflection},\
+	${ss;reflection.typesystem},\
 	${ss;fx},\
 	${ss;eclipse},\
 	uk.co.saiman.experiment.api;version=snapshot,\
@@ -19,10 +19,9 @@ Bundle-SymbolicName: ${p};singleton:=true
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 
-Private-Package: uk.co.saiman.msapex.experiment
+Export-Package: uk.co.saiman.msapex.experiment
 
--includeresource: \
-	fragment.e4xmi,\
-	plugin.xml,\
+-includeresource:\
+	{css=css},\
 	res,\
-	{css=css}
+	fragment.e4xmi

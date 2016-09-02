@@ -32,7 +32,7 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.simulation.experiment.SampleExperimentSimulationType;
-import uk.co.saiman.simulation.instrument.SampleDeviceSimulation;
+import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 
 @Component(service = { ExperimentType.class, SpectrumExperimentType.class })
@@ -62,7 +62,7 @@ public class SpectrumExperimentSimulationType implements SpectrumExperimentType<
 
 	@Override
 	public void execute(ExperimentNode<?, ? extends SpectrumConfiguration> node) {
-		SampleDeviceSimulation sample = node.getAncestor(sampleExperiments).get().getType().device();
+		SimulatedSampleDevice sample = node.getAncestor(sampleExperiments).get().getType().device();
 		acquisitionSimulation.setSample(sample);
 
 		acquisitionSimulation.startAcquisition();

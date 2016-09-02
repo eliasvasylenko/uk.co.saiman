@@ -2,30 +2,34 @@
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book--plus.png");
 }
 
-.ModularTreeCell > #graphic #supplemental {
-    -fx-opacity: 0.5;
+.ModularTreeCell #supplementalText {
+    -fx-opacity: 0.65;
 }
 
-.ModularTreeCell > #graphic #name {
+.ModularTreeCell  #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/node.png");
 }
 
-.ModularTreeCell:ExperimentNodeContribution > #graphic #name {
+.ModularTreeCell *:ExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/document.png");
 }
 
-.ModularTreeCell:RootExperimentNodeContribution > #graphic #name {
+.ModularTreeCell *:RootExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book.png");
 }
 
-.ModularTreeCell:RootExperimentNodeContribution:expanded > #graphic #name {
+.ModularTreeCell *:RootExperimentNodeContribution:expanded #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open.png");
 }
 
-.ModularTreeCell:SampleExperimentNodeContribution > #graphic #name {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/flask--arrow.png");
+.ModularTreeCell *:SampleExperimentNodeContribution #text {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/flask.png");
 }
 
-.ModularTreeCell:SpectrumExperimentNodeContribution > #graphic #name {
+.ModularTreeCell *:SpectrumExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/spectrum.png");
+}
+
+.ModularTreeCell *:ConfigurationContribution #text {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/gear.png");
 }

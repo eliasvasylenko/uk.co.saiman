@@ -1,10 +1,14 @@
 Bundle-Name: SAI :: Simulation :: MSApex
 
+-include: ${include.ss}/eclipse.plugin.bnd
+
+-includeresource:\
+	{css=css},\
+	res,\
+	fragment.e4xmi
+
 Private-Package: \
 	uk.co.saiman.simulation.msapex
 
--includeresource: \
-	fragment.e4xmi,\
-	plugin.xml,\
-	res,\
-	{css=css}
+Import-Package: \
+	*

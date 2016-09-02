@@ -42,14 +42,19 @@ import uk.co.strangeskies.fx.TreeItemImpl;
  * @author Elias N Vasylenko
  */
 public class AddNodeMenu {
+	/**
+	 * The ID of the command in the e4 model fragment.
+	 */
+	public static final String MENU_ID = "uk.co.saiman.msapex.experiment.menu.addnode";
+
 	@AboutToShow
 	void aboutToShow(List<MMenuElement> items, @Localize ExperimentProperties text, MPart part) {
 		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
-		Object data = item.getValue().getObject();
+		Object data = item.getValue().data();
 
 		if (!(data instanceof ExperimentNode<?, ?>)) {
-			throw new ExperimentException(text.exception().illegalContextMenuFor(data));
+			throw new ExperimentException(text.exception().illegalMenuForSelection(MENU_ID, data));
 		}
 
 		ExperimentNode<?, ?> selectedNode = (ExperimentNode<?, ?>) data;
@@ -62,7 +67,7 @@ public class AddNodeMenu {
 				@Execute
 				public void execute() {
 					selectedNode.addChild(childType);
-					experimentPart.getExperimentTreeController().refresh();
+					experimentPart.getExperimentTreeController().getTreeView().refresh();
 					item.setExpanded(true);
 				}
 			});

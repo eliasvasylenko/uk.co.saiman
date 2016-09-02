@@ -21,21 +21,20 @@ package uk.co.saiman.simulation.experiment;
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.experiment.sample.XYStageConfiguration;
-import uk.co.saiman.simulation.instrument.SampleImage;
+import uk.co.saiman.measurement.Units;
 
-public class XYStageSimulationConfiguration implements XYStageConfiguration {
+public class SimulatedXYStageRasterConfiguration extends SimulatedSampleImageConfiguration
+		implements XYStageConfiguration {
+	private final Units units;
+
 	private String name;
 	private Quantity<Length> x;
 	private Quantity<Length> y;
 
-	private SampleImage image;
-	private ChemicalComposition red;
-	private ChemicalComposition green;
-	private ChemicalComposition blue;
-
-	public XYStageSimulationConfiguration() {}
+	public SimulatedXYStageRasterConfiguration(Units units) {
+		this.units = units;
+	}
 
 	@Override
 	public String getName() {
@@ -44,6 +43,34 @@ public class XYStageSimulationConfiguration implements XYStageConfiguration {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public Quantity<Length> getMinimumX() {
+		return units.metre().milli().getQuantity(0);
+	}
+
+	@Override
+	public Quantity<Length> getMaximumX() {
+		if (getSampleImage() == null) {
+			return getMinimumX();
+		} else {
+			return units.metre().milli().getQuantity(getSampleImage().getWidth());
+		}
+	}
+
+	@Override
+	public Quantity<Length> getMinimumY() {
+		return units.metre().milli().getQuantity(0);
+	}
+
+	@Override
+	public Quantity<Length> getMaximumY() {
+		if (getSampleImage() == null) {
+			return getMinimumY();
+		} else {
+			return units.metre().milli().getQuantity(getSampleImage().getHeight());
+		}
 	}
 
 	@Override
@@ -66,40 +93,8 @@ public class XYStageSimulationConfiguration implements XYStageConfiguration {
 		y = offset;
 	}
 
-	public SampleImage getSampleImage() {
-		return image;
-	}
-
-	public void setSampleImage(SampleImage image) {
-		this.image = image;
-	}
-
-	public ChemicalComposition getRedChemical() {
-		return red;
-	}
-
-	public void setRedChemical(ChemicalComposition red) {
-		this.red = red;
-	}
-
-	public ChemicalComposition getGreenChemical() {
-		return green;
-	}
-
-	public void setGreenChemical(ChemicalComposition green) {
-		this.green = green;
-	}
-
-	public ChemicalComposition getBlueChemical() {
-		return blue;
-	}
-
-	public void setBlueChemical(ChemicalComposition blue) {
-		this.blue = blue;
-	}
-
 	@Override
 	public String toString() {
-		return getName() + " [" + x + ", " + y + "]";
+		return "[" + x + ", " + y + "]";
 	}
 }

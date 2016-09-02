@@ -41,9 +41,9 @@ import uk.co.saiman.instrument.raster.RasterPattern;
 import uk.co.saiman.instrument.raster.RasterPosition;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.simulation.SimulationProperties;
-import uk.co.saiman.simulation.instrument.ImageSampleDeviceSimulation;
-import uk.co.saiman.simulation.instrument.SampleDeviceSimulation;
-import uk.co.saiman.simulation.instrument.SampleImage;
+import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
+import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
+import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.strangeskies.text.properties.PropertyLoader;
@@ -52,8 +52,8 @@ import uk.co.strangeskies.utilities.Observable;
 import uk.co.strangeskies.utilities.ObservableImpl;
 
 @Component
-public class XYStageRasterSimulationDeviceImpl implements RasterDevice, ImageSampleDeviceSimulation, XYStageDevice,
-		HardwareDevice, SampleDeviceSimulation, SimulatedDevice {
+public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, SimulatedSampleImageDevice, XYStageDevice,
+		HardwareDevice, SimulatedSampleDevice, SimulatedDevice {
 	@Reference
 	PropertyLoader loader;
 	SimulationProperties text;
@@ -74,10 +74,10 @@ public class XYStageRasterSimulationDeviceImpl implements RasterDevice, ImageSam
 	private ChemicalComposition redChemical;
 	private ChemicalComposition greenChemical;
 	private ChemicalComposition blueChemical;
-	private SampleImage sampleImage;
+	private SimulatedSampleImage sampleImage;
 	private SimulatedSample signalSample;
 
-	public XYStageRasterSimulationDeviceImpl() {
+	public SimulatedXYStageRasterDeviceImpl() {
 		errors = new ObservableImpl<>();
 
 		rasterModes = new HashSet<>(asList(values()));
@@ -119,7 +119,7 @@ public class XYStageRasterSimulationDeviceImpl implements RasterDevice, ImageSam
 	}
 
 	@Override
-	public void setSampleImage(SampleImage sampleImage) {
+	public void setSampleImage(SimulatedSampleImage sampleImage) {
 		this.sampleImage = sampleImage;
 	}
 

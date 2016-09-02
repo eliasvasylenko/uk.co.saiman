@@ -27,10 +27,21 @@ import javax.inject.Inject;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.osgi.service.component.annotations.Component;
 
+import javafx.scene.Node;
+import javafx.scene.control.Control;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
+import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.RootExperiment;
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
+import uk.co.strangeskies.eclipse.EclipseTreeContributionImpl;
+import uk.co.strangeskies.eclipse.Localize;
+import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeCellContribution;
-import uk.co.strangeskies.fx.TreeCellImpl;
 import uk.co.strangeskies.fx.TreeChildContribution;
+import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
 import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypedObject;
@@ -41,15 +52,33 @@ import uk.co.strangeskies.reflection.TypedObject;
  * 
  * @author Elias N Vasylenko
  */
-@Component
-public class ExperimentNodeContributor implements ExperimentTreeContributor {
-	@Override
-	public Class<ExperimentNodeContribution> getContribution() {
-		return ExperimentNodeContribution.class;
+@Component(service = EclipseTreeContribution.class)
+public class ExperimentNodeContributor extends EclipseTreeContributionImpl {
+	public ExperimentNodeContributor() {
+		super(RootExperimentNodeContribution.class, ExperimentNodeContribution.class);
 	}
 }
 
-class ExperimentNodeContribution implements TreeCellContribution<ExperimentNode<?, ?>>,
+class RootExperimentNodeContribution
+		implements TreeTextContribution<ExperimentNode<RootExperiment, ExperimentConfiguration>>,
+		PseudoClassTreeCellContribution<ExperimentNode<RootExperiment, ExperimentConfiguration>> {
+	@Inject
+	@Localize
+	ExperimentProperties text;
+
+	@Override
+	public <U extends ExperimentNode<RootExperiment, ExperimentConfiguration>> String getText(TreeItemData<U> data) {
+		return data.data().getState().getName();
+	}
+
+	@Override
+	public <U extends ExperimentNode<RootExperiment, ExperimentConfiguration>> String getSupplementalText(
+			TreeItemData<U> data) {
+		return "[" + text.lifecycleState(data.data().getLifecycleState()) + "]";
+	}
+}
+
+class ExperimentNodeContribution implements PseudoClassTreeCellContribution<ExperimentNode<?, ?>>,
 		TreeChildContribution<ExperimentNode<?, ?>>, TreeTextContribution<ExperimentNode<?, ?>> {
 	private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
 
@@ -61,34 +90,40 @@ class ExperimentNodeContribution implements TreeCellContribution<ExperimentNode<
 	}
 
 	@Override
-	public void configureCell(ExperimentNode<?, ?> data, String text, String supplementalText, TreeCellImpl cell) {
-		TreeTextContribution.super.configureCell(data, text, supplementalText, cell);
-		menuService.registerContextMenu(cell, EXPERIMENT_TREE_POPUP_MENU);
+	public <U extends ExperimentNode<?, ?>> Node configureCell(TreeItemData<U> data, Node content) {
+		PseudoClassTreeCellContribution.super.configureCell(data, content);
+
+		Control contextMenu = new Control() {};
+		menuService.registerContextMenu(contextMenu, EXPERIMENT_TREE_POPUP_MENU);
+
+		content.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+			contextMenu.getContextMenu().show(content, event.getScreenX(), event.getScreenY());
+			event.consume();
+		});
+		content.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+			contextMenu.getContextMenu().hide();
+		});
+
+		return content;
 	}
 
 	@Override
-	public void deconfigureCell(TreeCellImpl cell) {
-		TreeTextContribution.super.deconfigureCell(cell);
-		cell.contextMenuProperty().set(null);
+	public <U extends ExperimentNode<?, ?>> boolean hasChildren(TreeItemData<U> data) {
+		return !data.data().getChildren().isEmpty();
 	}
 
 	@Override
-	public boolean hasChildren(ExperimentNode<?, ?> data) {
-		return !data.getChildren().isEmpty();
+	public <U extends ExperimentNode<?, ?>> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
+		return data.data().getChildren().stream().map(Reified::asTypedObject).collect(toList());
 	}
 
 	@Override
-	public List<TypedObject<?>> getChildren(ExperimentNode<?, ?> data) {
-		return data.getChildren().stream().map(Reified::asTypedObject).collect(toList());
+	public <U extends ExperimentNode<?, ?>> String getText(TreeItemData<U> data) {
+		return data.data().getType().getName();
 	}
 
 	@Override
-	public String getText(ExperimentNode<?, ?> data) {
-		return data.getType().getName();
-	}
-
-	@Override
-	public String getSupplementalText(ExperimentNode<?, ?> data) {
-		return data.toString();
+	public <U extends ExperimentNode<?, ?>> String getSupplementalText(TreeItemData<U> data) {
+		return data.data().toString();
 	}
 }

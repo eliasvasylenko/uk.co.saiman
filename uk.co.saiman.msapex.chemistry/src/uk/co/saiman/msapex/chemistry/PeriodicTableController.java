@@ -46,8 +46,8 @@ import uk.co.strangeskies.utilities.ObservableImpl;
  * 
  * @author Elias N Vasylenko
  */
-public class PeriodicTableController implements Observable<Element> {
-	private ObservableImpl<Element> selectionObservable = new ObservableImpl<>();
+public class PeriodicTableController implements Observable<ChemicalElementTile> {
+	private ObservableImpl<ChemicalElementTile> selectionObservable = new ObservableImpl<>();
 
 	private PeriodicTable periodicTable;
 
@@ -58,7 +58,7 @@ public class PeriodicTableController implements Observable<Element> {
 	private Property<Size> tileSizeProperty;
 	private Property<Boolean> tilesFocusableProperty;
 
-	private Element selectedElement;
+	private ChemicalElementTile selectedElementTile;
 
 	@FXML
 	void initialize() {
@@ -76,7 +76,7 @@ public class PeriodicTableController implements Observable<Element> {
 		for (ChemicalElementTile tile : elementTiles) {
 			tile.getSizeProperty().bind(tileSizeProperty);
 			tile.focusTraversableProperty().bind(tilesFocusableProperty);
-			tile.addObserver(this::setSelectedElement);
+			tile.addObserver(c -> setSelectedElementTile(tile));
 		}
 
 		elementGrid.addEventHandler(KeyEvent.KEY_PRESSED, this::onKeyPressed);
@@ -116,15 +116,19 @@ public class PeriodicTableController implements Observable<Element> {
 	 *         if focusing is not enabled for the table
 	 */
 	public Element getSelectedElement() {
-		return selectedElement;
+		return getSelectedElementTile().getElement();
 	}
 
-	private void setSelectedElement(Element element) {
-		selectedElement = element;
+	private ChemicalElementTile getSelectedElementTile() {
+		return selectedElementTile;
+	}
+
+	private void setSelectedElementTile(ChemicalElementTile tile) {
+		selectedElementTile = tile;
 	}
 
 	private void onKeyPressed(KeyEvent event) {
-		ChemicalElementTile selectedTile = getElementTile(getSelectedElement());
+		ChemicalElementTile selectedTile = getSelectedElementTile();
 		int selectedColumn = getColumnIndex(selectedTile);
 		int selectedRow = getRowIndex(selectedTile);
 
@@ -167,7 +171,7 @@ public class PeriodicTableController implements Observable<Element> {
 			}
 
 			if (closest != null) {
-				getElementTile(closest.getElement()).select();
+				closest.select();
 			}
 
 			event.consume();
@@ -237,12 +241,12 @@ public class PeriodicTableController implements Observable<Element> {
 	}
 
 	@Override
-	public boolean addObserver(Consumer<? super Element> observer) {
+	public boolean addObserver(Consumer<? super ChemicalElementTile> observer) {
 		return selectionObservable.addObserver(observer);
 	}
 
 	@Override
-	public boolean removeObserver(Consumer<? super Element> observer) {
+	public boolean removeObserver(Consumer<? super ChemicalElementTile> observer) {
 		return selectionObservable.removeObserver(observer);
 	}
 }

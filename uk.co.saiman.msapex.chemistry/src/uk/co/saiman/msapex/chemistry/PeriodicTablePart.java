@@ -53,7 +53,7 @@ public class PeriodicTablePart {
 	@PostConstruct
 	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
 		container.setCenter(buildWith(loader).controller(this).loadRoot());
-		periodicTableController.addObserver(this::setElement);
+		periodicTableController.addObserver(this::setElementTile);
 		periodicTableController.setTilesFocusTraversable(true);
 	}
 
@@ -91,12 +91,13 @@ public class PeriodicTablePart {
 		event.consume();
 	}
 
-	private void setElement(Element element) {
+	private void setElementTile(ChemicalElementTile tile) {
+		Element element = tile.getElement();
+
 		double hPadding = 2;
 		double vPadding = 2;
 
 		chemicalElementPanelController.setElement(element);
-		ChemicalElementTile tile = periodicTableController.getElementTile(element);
 
 		Bounds contentBounds = periodicTableScrollPane.getContent().getBoundsInLocal();
 		Bounds viewportBounds = periodicTableScrollPane.getViewportBounds();

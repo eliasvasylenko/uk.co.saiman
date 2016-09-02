@@ -18,9 +18,6 @@
  */
 package uk.co.saiman.simulation.experiment.impl;
 
-import javax.measure.Quantity;
-import javax.measure.quantity.Length;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -30,8 +27,8 @@ import uk.co.saiman.experiment.sample.SampleExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.experiment.SampleExperimentSimulationType;
-import uk.co.saiman.simulation.experiment.XYStageSimulationConfiguration;
-import uk.co.saiman.simulation.instrument.ImageSampleDeviceSimulation;
+import uk.co.saiman.simulation.experiment.SimulatedXYStageRasterConfiguration;
+import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
 
 /**
  * An implementation of {@link SampleExperimentType} for a simulated XY stage
@@ -41,34 +38,36 @@ import uk.co.saiman.simulation.instrument.ImageSampleDeviceSimulation;
  */
 @Component(service = { XYStageExperimentType.class, SampleExperimentType.class, SampleExperimentSimulationType.class,
 		ExperimentType.class })
-public class XYStageExperimentSimulationType implements XYStageExperimentType<XYStageSimulationConfiguration>,
-		SampleExperimentSimulationType<XYStageSimulationConfiguration> {
+public class XYStageExperimentSimulationType implements XYStageExperimentType<SimulatedXYStageRasterConfiguration>,
+		SampleExperimentSimulationType<SimulatedXYStageRasterConfiguration> {
+	private static final String DEFAULT_NAME = "XY Sample";
+
 	@Reference
-	ImageSampleDeviceSimulation rasterSimulation;
+	SimulatedSampleImageDevice rasterSimulation;
 
 	@Reference
 	Units units;
 
 	@Override
-	public ImageSampleDeviceSimulation device() {
+	public SimulatedSampleImageDevice device() {
 		return rasterSimulation;
 	}
 
 	@Override
-	public XYStageSimulationConfiguration createState(
-			ExperimentNode<?, ? extends XYStageSimulationConfiguration> forNode) {
-		XYStageSimulationConfiguration configuration = new XYStageSimulationConfiguration();
+	public SimulatedXYStageRasterConfiguration createState(
+			ExperimentNode<?, ? extends SimulatedXYStageRasterConfiguration> forNode) {
+		SimulatedXYStageRasterConfiguration configuration = new SimulatedXYStageRasterConfiguration(units);
 
-		Quantity<Length> home = units.metre().milli().getQuantity(0);
+		configuration.setName(DEFAULT_NAME);
 
-		configuration.setX(home);
-		configuration.setY(home);
+		configuration.setX(units.metre().milli().getQuantity(0));
+		configuration.setY(units.metre().milli().getQuantity(0));
 
 		return configuration;
 	}
 
 	@Override
-	public void execute(ExperimentNode<?, ? extends XYStageSimulationConfiguration> node) {
+	public void execute(ExperimentNode<?, ? extends SimulatedXYStageRasterConfiguration> node) {
 		XYStageExperimentType.super.execute(node);
 
 		rasterSimulation.setSampleImage(node.getState().getSampleImage());

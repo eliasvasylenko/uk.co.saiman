@@ -18,15 +18,14 @@
  */
 package uk.co.saiman.simulation.instrument;
 
-import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.saiman.instrument.stage.XYStageDevice;
+public interface SimulatedSampleImage {
+	int getWidth();
 
-public interface ImageSampleDeviceSimulation extends SampleDeviceSimulation, XYStageDevice {
-	void setRedChemical(ChemicalComposition redChemical);
+	int getHeight();
 
-	void setGreenChemical(ChemicalComposition greenChemical);
+	double getRed(int x, int y);
 
-	void setBlueChemical(ChemicalComposition blueChemical);
+	double getGreen(int x, int y);
 
-	void setSampleImage(SampleImage sampleImage);
+	double getBlue(int x, int y);
 }

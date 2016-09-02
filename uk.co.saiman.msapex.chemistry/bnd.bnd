@@ -1,14 +1,14 @@
 Bundle-Name: SAI :: MSApex :: Chemistry
-Bundle-SymbolicName: ${p};singleton:=true
 
 -include:\
+	${include.ss}/eclipse.plugin.bnd,\
 	${include.ss}/eclipse.platform.neon.bnd,\
 	${include.ss}/eclipse.fx.2.4.0.bnd
 
 -buildpath: \
 	${ss;utilities},\
 	${ss;mathematics},\
-	${ss;reflection},\
+	${ss;reflection.typesystem},\
 	${ss;fx},\
 	${ss;eclipse},\
 	${mdb;core.api},\
@@ -21,6 +21,5 @@ Private-Package: uk.co.saiman.msapex.chemistry
 
 -includeresource: \
 	fragment.e4xmi,\
-	plugin.xml,\
 	res,\
 	css=css

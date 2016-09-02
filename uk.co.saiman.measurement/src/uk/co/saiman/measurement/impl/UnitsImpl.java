@@ -14,7 +14,7 @@ import tec.units.ri.unit.Units;
 import uk.co.saiman.measurement.UnitBuilder;
 
 @Component
-public class MeasurementImpl implements uk.co.saiman.measurement.Units {
+public class UnitsImpl implements uk.co.saiman.measurement.Units {
 	public class UnitBuilderImpl<T extends Quantity<T>> implements UnitBuilder<T> {
 		private final Unit<T> unit;
 
@@ -24,12 +24,12 @@ public class MeasurementImpl implements uk.co.saiman.measurement.Units {
 
 		@Override
 		public UnitBuilder<?> multiply(Function<uk.co.saiman.measurement.Units, UnitBuilder<?>> unit) {
-			return new UnitBuilderImpl<>(this.unit.multiply(unit.apply(MeasurementImpl.this).get()));
+			return new UnitBuilderImpl<>(this.unit.multiply(unit.apply(UnitsImpl.this).get()));
 		}
 
 		@Override
 		public UnitBuilder<?> divide(Function<uk.co.saiman.measurement.Units, UnitBuilder<?>> unit) {
-			return new UnitBuilderImpl<>(this.unit.divide(unit.apply(MeasurementImpl.this).get()));
+			return new UnitBuilderImpl<>(this.unit.divide(unit.apply(UnitsImpl.this).get()));
 		}
 
 		@Override

@@ -27,6 +27,14 @@ import javax.measure.quantity.Length;
  * @author Elias N Vasylenko
  */
 public interface XYStageConfiguration extends SampleConfiguration {
+	Quantity<Length> getMinimumX();
+
+	Quantity<Length> getMaximumX();
+
+	Quantity<Length> getMinimumY();
+
+	Quantity<Length> getMaximumY();
+
 	Quantity<Length> getX();
 
 	void setX(Quantity<Length> offset);

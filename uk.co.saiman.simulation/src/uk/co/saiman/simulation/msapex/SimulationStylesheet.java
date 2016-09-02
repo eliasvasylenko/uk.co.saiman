@@ -25,18 +25,15 @@ import org.eclipse.fx.ui.services.theme.Theme;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
+import uk.co.saiman.msapex.experiment.ExperimentPartStylesheet;
+
 /**
  * Default stylesheet for experiment interface components.
  * 
  * @author Elias N Vasylenko
  */
-@Component(property = Constants.SERVICE_RANKING + "=" + ExperimentPartStylesheet.RANKING)
-public class ExperimentPartStylesheet implements Stylesheet {
-	/**
-	 * The service ranking for this stylesheet.
-	 */
-	public static final int RANKING = 0;
-
+@Component(property = Constants.SERVICE_RANKING + "=" + (ExperimentPartStylesheet.RANKING + 1))
+public class SimulationStylesheet implements Stylesheet {
 	@Override
 	public boolean appliesToTheme(Theme t) {
 		return true;
@@ -44,6 +41,6 @@ public class ExperimentPartStylesheet implements Stylesheet {
 
 	@Override
 	public URL getURL(Theme t) {
-		return ExperimentPartStylesheet.class.getClassLoader().getResource("css/experiment.css");
+		return SimulationStylesheet.class.getClassLoader().getResource("css/simulation.css");
 	}
 }

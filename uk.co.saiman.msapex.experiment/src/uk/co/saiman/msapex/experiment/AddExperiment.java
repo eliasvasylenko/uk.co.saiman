@@ -36,6 +36,11 @@ import uk.co.strangeskies.eclipse.Localize;
  * @author Elias N Vasylenko
  */
 public class AddExperiment {
+	/**
+	 * The ID of the command in the e4 model fragment.
+	 */
+	public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.addexperiment";
+
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
 		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
@@ -58,7 +63,7 @@ public class AddExperiment {
 
 		nameDialog.showAndWait().ifPresent(name -> {
 			experimentPart.getExperimentWorkspace().addRootExperiment(name);
-			experimentPart.getExperimentTreeController().refresh();
+			experimentPart.getExperimentTreeController().getTreeView().refresh();
 		});
 	}
 }

@@ -19,9 +19,9 @@
 package uk.co.saiman.simulation.experiment;
 
 import uk.co.saiman.experiment.sample.SampleExperimentType;
-import uk.co.saiman.simulation.instrument.SampleDeviceSimulation;
+import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 
-public interface SampleExperimentSimulationType<T extends XYStageSimulationConfiguration>
+public interface SampleExperimentSimulationType<T extends SimulatedXYStageRasterConfiguration>
 		extends SampleExperimentType<T> {
-	SampleDeviceSimulation device();
+	SimulatedSampleDevice device();
 }

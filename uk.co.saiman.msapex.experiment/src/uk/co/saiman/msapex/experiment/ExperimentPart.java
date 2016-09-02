@@ -38,6 +38,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
+import uk.co.strangeskies.eclipse.ModularTreeController;
+import uk.co.strangeskies.reflection.TypeToken;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -55,7 +57,7 @@ public class ExperimentPart {
 	static final String OSGI_SERVICE = "osgi.service";
 
 	@FXML
-	private ExperimentTreeController experimentTreeController;
+	private ModularTreeController modularTreeController;
 	private ExperimentWorkspace workspace;
 
 	@PostConstruct
@@ -72,7 +74,7 @@ public class ExperimentPart {
 
 		workspace = workspaceFactory.openWorkspace(workspaceLocation);
 
-		experimentTreeController.setWorkspace(workspace);
+		modularTreeController.getTreeView().setRootData(new TypeToken<ExperimentWorkspace>() {}.typedObject(workspace));
 	}
 
 	/**
@@ -85,7 +87,7 @@ public class ExperimentPart {
 	/**
 	 * @return the controller for the experiment tree UI item
 	 */
-	public ExperimentTreeController getExperimentTreeController() {
-		return experimentTreeController;
+	public ModularTreeController getExperimentTreeController() {
+		return modularTreeController;
 	}
 }

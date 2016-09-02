@@ -32,18 +32,23 @@ import uk.co.strangeskies.eclipse.Localize;
  * @author Elias N Vasylenko
  */
 public class RemoveNode {
+	/**
+	 * The ID of the command in the e4 model fragment.
+	 */
+	public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.removenode";
+
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
 		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
-		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().getObject();
+		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
 
 		if (!(itemData instanceof ExperimentNode<?, ?>)) {
-			throw new ExperimentException(text.exception().illegalContextMenuFor(itemData));
+			throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
 		}
 
 		ExperimentNode<?, ?> selectedNode = (ExperimentNode<?, ?>) itemData;
 		selectedNode.remove();
 
-		experimentPart.getExperimentTreeController().refresh();
+		experimentPart.getExperimentTreeController().getTreeView().refresh();
 	}
 }

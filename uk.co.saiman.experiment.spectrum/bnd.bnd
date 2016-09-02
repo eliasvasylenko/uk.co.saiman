@@ -8,7 +8,7 @@ Export-Package: uk.co.saiman.experiment.spectrum
 -buildpath: \
 	${ss;utilities},\
 	${ss;mathematics},\
-	${ss;reflection},\
+	${ss;reflection.typesystem},\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
