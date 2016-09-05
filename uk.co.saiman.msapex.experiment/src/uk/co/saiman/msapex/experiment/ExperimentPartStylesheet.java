@@ -32,12 +32,8 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(property = Constants.SERVICE_RANKING + "=" + ExperimentPartStylesheet.RANKING)
 public class ExperimentPartStylesheet implements Stylesheet {
-	/**
-	 * The service ranking for this stylesheet.
-	 */
+	@SuppressWarnings("javadoc")
 	public static final int RANKING = 0;
-
-	public static final String CONFIGURATION_CONTRIBUTION = "ConfigurationContribution";
 
 	@Override
 	public boolean appliesToTheme(Theme t) {

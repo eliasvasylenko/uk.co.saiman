@@ -18,22 +18,28 @@
  */
 package uk.co.saiman.simulation.msapex;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
+import javafx.scene.image.Image;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.ExperimentPart;
+import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.experiment.SimulatedSampleImageConfiguration;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.reflection.jar.JarUtilities;
+import uk.co.strangeskies.reflection.jar.Jar;
 
 /**
  * Add an experiment to the workspace
@@ -41,36 +47,121 @@ import uk.co.strangeskies.reflection.jar.JarUtilities;
  * @author Elias N Vasylenko
  */
 public class ChooseSimulatedSampleImage {
+	@Inject
+	@Localize
+	SimulationProperties text;
+
+	private Path tempDirectory;
+
 	/**
 	 * The ID of the command in the e4 model fragment.
 	 */
 	public static final String COMMAND_ID = "uk.co.saiman.simulation.msapex.command.choosesimulatedsampleimage";
 
+	private static final String SAMPLE_IMAGES_DIRECTORY = "Sample-Images";
+	private static final String PNG = ".png";
+
 	@Execute
-	void execute(MPart part, @Localize ExperimentProperties text) throws IOException {
+	synchronized void execute(MPart part) throws IOException {
 		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 		TreeItemData<?> itemData = experimentPart.getExperimentTreeController().getSelectionData();
 
 		if (!(itemData.data() instanceof SimulatedSampleImage)) {
-			throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, itemData.data()));
+			throw new ExperimentException(
+					text.experiment().exception().illegalCommandForSelection(COMMAND_ID, itemData.data()));
 		}
 
-		TreeItemData<?> parentData = itemData.parent().orElseThrow(
-				() -> new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, itemData.data())));
+		TreeItemData<?> parentData = itemData.parent().orElseThrow(() -> new ExperimentException(
+				text.experiment().exception().illegalCommandForSelection(COMMAND_ID, itemData.data())));
 
 		if (!(parentData.data() instanceof SimulatedSampleImageConfiguration)) {
-			throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, itemData.data()));
+			throw new ExperimentException(
+					text.experiment().exception().illegalCommandForSelection(COMMAND_ID, itemData.data()));
 		}
 
 		SimulatedSampleImageConfiguration selectedConfiguration = (SimulatedSampleImageConfiguration) parentData.data();
 
-		FileSystem fileSystem = JarUtilities.getContainingJarFileSystem(getClass());
+		Path imageDirectory = getImageDirectory();
 
-		Path imagePath = fileSystem.getPath(getClass().getPackage().getName().replace('.', '/'));
-		for (Path imageFile : imagePath) {
-			if (!Files.isDirectory(imageFile) && imageFile.endsWith(".png")) {
-				System.out.println(imageFile);
+		Path imagePath = chooseImageFile(imageDirectory,
+				experimentPart.getExperimentTreeController().getTreeView().getScene().getWindow());
+
+		if (imagePath != null) {
+			selectedConfiguration.setSampleImage(loadSimulatedSampleImage(imagePath));
+
+			experimentPart.getExperimentTreeController().getTreeView().refresh();
+		}
+	}
+
+	private SimulatedSampleImage loadSimulatedSampleImage(Path imagePath) throws IOException {
+		Image image = new Image(Files.newInputStream(imagePath));
+
+		return new SimulatedSampleImage() {
+			@Override
+			public int getWidth() {
+				return (int) image.getWidth();
+			}
+
+			@Override
+			public int getHeight() {
+				return (int) image.getHeight();
+			}
+
+			@Override
+			public double getRed(int x, int y) {
+				return image.getPixelReader().getColor(x, y).getRed();
+			}
+
+			@Override
+			public double getGreen(int x, int y) {
+				return image.getPixelReader().getColor(x, y).getGreen();
+			}
+
+			@Override
+			public double getBlue(int x, int y) {
+				return image.getPixelReader().getColor(x, y).getBlue();
+			}
+
+			@Override
+			public String toString() {
+				return imagePath.getFileName().toString();
+			}
+		};
+	}
+
+	private Path chooseImageFile(Path imageDirectory, Window scene) throws IOException {
+		final FileChooser fileChooser = new FileChooser();
+
+		fileChooser.setTitle(text.loadSampleImageTitle().toString());
+
+		fileChooser.setInitialDirectory(imageDirectory.toFile());
+
+		FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter(
+				text.imageFileFilterTitle().toString(), text.imageFileFilter());
+		fileChooser.getExtensionFilters().add(extensionFilter);
+
+		File file = fileChooser.showOpenDialog(scene);
+
+		return file == null ? null : file.toPath();
+	}
+
+	private Path getImageDirectory() throws IOException {
+		if (tempDirectory == null) {
+			tempDirectory = Files.createTempDirectory(SAMPLE_IMAGES_DIRECTORY);
+
+			Path imagePath = Jar.getContainingJar(getClass()).getPackagePath(getClass().getPackage());
+
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(imagePath)) {
+				for (Path imageFile : stream) {
+					String fileName = imageFile.getFileName().toString();
+
+					if (!Files.isDirectory(imageFile) && fileName.endsWith(PNG)) {
+						Files.copy(imageFile, tempDirectory.resolve(fileName));
+					}
+				}
 			}
 		}
+
+		return tempDirectory;
 	}
 }

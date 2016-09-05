@@ -18,11 +18,6 @@
  */
 package uk.co.saiman.simulation.msapex;
 
-import static java.util.Collections.emptyMap;
-import static javafx.css.PseudoClass.getPseudoClass;
-import static javafx.scene.input.MouseButton.PRIMARY;
-import static uk.co.saiman.msapex.experiment.ExperimentPartStylesheet.CONFIGURATION_CONTRIBUTION;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -30,18 +25,15 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import org.eclipse.core.commands.ParameterizedCommand;
-import org.eclipse.e4.core.commands.ECommandService;
-import org.eclipse.e4.core.commands.EHandlerService;
 import org.osgi.service.component.annotations.Component;
 
 import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
 import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.experiment.SimulatedSampleImageConfiguration;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
+import uk.co.strangeskies.eclipse.CommandTreeCellContribution;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.eclipse.EclipseTreeContributionImpl;
 import uk.co.strangeskies.eclipse.Localize;
@@ -62,6 +54,7 @@ import uk.co.strangeskies.text.properties.Localized;
  */
 @Component(service = EclipseTreeContribution.class)
 public class SimulatedSampleExperimentNodeContributor extends EclipseTreeContributionImpl {
+	@SuppressWarnings("javadoc")
 	public SimulatedSampleExperimentNodeContributor() {
 		super(SampleExperimentNodeContribution.class, SampleImageConfigurationContribution.class,
 				SampleImageContribution.class, ChemicalContribution.class);
@@ -110,7 +103,8 @@ class ChemicalColor {
 }
 
 class SampleImageConfigurationContribution implements TreeChildContribution<SimulatedSampleImageConfiguration>,
-		TreeTextContribution<SimulatedSampleImageConfiguration>, TreeCellContribution<SimulatedSampleImageConfiguration> {
+		TreeTextContribution<SimulatedSampleImageConfiguration>,
+		PseudoClassTreeCellContribution<SimulatedSampleImageConfiguration> {
 	@Inject
 	@Localize
 	SimulationProperties properties;
@@ -147,28 +141,16 @@ class SampleImageConfigurationContribution implements TreeChildContribution<Simu
 	public <U extends SimulatedSampleImageConfiguration> String getSupplementalText(TreeItemData<U> data) {
 		return null;
 	}
-
-	@Override
-	public <U extends SimulatedSampleImageConfiguration> Node configureCell(TreeItemData<U> data, Node content) {
-		content.pseudoClassStateChanged(getPseudoClass(CONFIGURATION_CONTRIBUTION), true);
-		return content;
-	}
 }
 
-class SampleImageContribution
+class SampleImageContribution extends CommandTreeCellContribution<SimulatedSampleImage>
 		implements PseudoClassTreeCellContribution<SimulatedSampleImage>, TreeTextContribution<SimulatedSampleImage> {
 	@Inject
 	@Localize
 	SimulationProperties properties;
 
-	@Inject
-	EHandlerService handlerService;
-
-	private final ParameterizedCommand command;
-
-	@Inject
-	public SampleImageContribution(ECommandService commandService) {
-		command = commandService.createCommand(ChooseSimulatedSampleImage.COMMAND_ID, emptyMap());
+	public SampleImageContribution() {
+		super(ChooseSimulatedSampleImage.COMMAND_ID);
 	}
 
 	@Override
@@ -183,17 +165,7 @@ class SampleImageContribution
 
 	@Override
 	public <U extends SimulatedSampleImage> Node configureCell(TreeItemData<U> data, Node content) {
-		content.addEventHandler(MouseEvent.ANY, event -> {
-			if (event.getClickCount() == 2 && event.getButton().equals(PRIMARY)) {
-				event.consume();
-
-				if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-					handlerService.executeHandler(command);
-				}
-			}
-		});
-
-		return PseudoClassTreeCellContribution.super.configureCell(data, content);
+		return PseudoClassTreeCellContribution.super.configureCell(data, super.configureCell(data, content));
 	}
 }
 

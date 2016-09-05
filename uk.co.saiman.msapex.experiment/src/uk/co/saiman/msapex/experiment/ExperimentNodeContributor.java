@@ -54,6 +54,7 @@ import uk.co.strangeskies.reflection.TypedObject;
  */
 @Component(service = EclipseTreeContribution.class)
 public class ExperimentNodeContributor extends EclipseTreeContributionImpl {
+	@SuppressWarnings("javadoc")
 	public ExperimentNodeContributor() {
 		super(RootExperimentNodeContribution.class, ExperimentNodeContribution.class);
 	}

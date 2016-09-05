@@ -39,7 +39,8 @@ import uk.co.saiman.experiment.ExperimentWorkspace;
  * Reference implementation of {@link ExperimentNode}.
  * 
  * @author Elias N Vasylenko
- * 
+ * @param <T>
+ *          the type of the experiment type
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
@@ -169,7 +170,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	@Override
-	public <T, E extends ExperimentType<T>> ExperimentNode<E, T> addChild(E childType) {
+	public <U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType) {
 		assertAvailable();
 
 		return new ExperimentNodeImpl<>(childType, this);

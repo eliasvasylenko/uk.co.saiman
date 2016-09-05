@@ -29,7 +29,3 @@
 .ModularTreeCell *:SpectrumExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/spectrum.png");
 }
-
-.ModularTreeCell *:ConfigurationContribution #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/gear.png");
-}

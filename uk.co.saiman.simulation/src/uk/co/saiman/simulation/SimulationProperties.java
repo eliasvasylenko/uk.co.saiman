@@ -18,6 +18,8 @@
  */
 package uk.co.saiman.simulation;
 
+import java.util.List;
+
 import uk.co.saiman.SaiProperties;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.experiment.ExperimentProperties;
@@ -46,4 +48,10 @@ public interface SimulationProperties extends Properties<SimulationProperties> {
 	Localized<String> greenChemical();
 
 	Localized<String> blueChemical();
+
+	Localized<String> loadSampleImageTitle();
+
+	Localized<String> imageFileFilterTitle();
+
+	List<String> imageFileFilter();
 }
