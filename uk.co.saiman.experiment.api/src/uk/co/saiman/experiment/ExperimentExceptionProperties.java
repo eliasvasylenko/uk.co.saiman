@@ -28,4 +28,6 @@ public interface ExperimentExceptionProperties extends Properties<ExperimentExce
 	Localized<String> experimentDoesNotExist(ExperimentNode<?, ?> experimentNode);
 
 	Localized<String> invalidExperimentName(String name);
+
+	Localized<String> cannotProcessExperimentConcurrently(ExperimentNode<RootExperiment, ExperimentConfiguration> root);
 }

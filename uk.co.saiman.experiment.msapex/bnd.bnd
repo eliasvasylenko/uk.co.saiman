@@ -1,0 +1,27 @@
+Bundle-Name: SAI :: Experiment :: MSApex
+
+-include:\
+	${include.ss}/eclipse.plugin.bnd,\
+	${include.ss}/eclipse.platform.neon.bnd,\
+	${include.ss}/eclipse.fx.2.4.0.bnd,\
+	${build}/include/fugue.icons.bnd
+
+-buildpath: \
+	${ss;utilities},\
+	${ss;text},\
+	${ss;mathematics},\
+	${ss;reflection},\
+	${ss;fx},\
+	${ss;eclipse},\
+	uk.co.saiman.experiment.api;version=snapshot,\
+	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
+
+Export-Package: uk.co.saiman.experiment.msapex
+
+-includeresource:\
+	{css=css},\
+	res,\
+	fragment.e4xmi

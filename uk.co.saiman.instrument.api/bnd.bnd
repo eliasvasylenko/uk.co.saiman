@@ -4,7 +4,7 @@ Bundle-Name: SAI :: Instrument
 	${ss;utilities},\
 	${ss;mathematics},\
 	${ss;mathematics.geometry},\
-	${ss;reflection.typesystem},\
+	${ss;reflection},\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot
 

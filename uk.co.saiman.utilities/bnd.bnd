@@ -2,7 +2,7 @@ Bundle-Name: SAI :: Utilities
 
 -buildpath: \
 	${mdb;core.api},\
-	${ss;reflection.typesystem},\
+	${ss;reflection},\
 	${ss;utilities},\
 	${ss;text}
 

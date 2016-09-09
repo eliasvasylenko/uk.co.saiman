@@ -34,6 +34,10 @@ import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.saiman.experiment.RootExperiment;
+import uk.co.strangeskies.utilities.ObservableProperty;
+import uk.co.strangeskies.utilities.ObservablePropertyImpl;
+import uk.co.strangeskies.utilities.ObservableValue;
 
 /**
  * Reference implementation of {@link ExperimentNode}.
@@ -51,7 +55,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	private final List<ExperimentNodeImpl<?, ?>> children;
 
-	private ExperimentLifecycleState lifecycleState;
+	private final ObservableProperty<ExperimentLifecycleState, ExperimentLifecycleState> lifecycleState;
 	private S state;
 
 	/**
@@ -87,7 +91,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 		children = new ArrayList<>();
 
-		lifecycleState = ExperimentLifecycleState.PREPARATION;
+		lifecycleState = ObservablePropertyImpl.over(ExperimentLifecycleState.PREPARATION);
 		state = type.createState(this);
 	}
 
@@ -124,6 +128,10 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		return Optional.ofNullable(parent);
 	}
 
+	protected ExperimentNodeImpl<RootExperiment, ExperimentConfiguration> getRootImpl() {
+		return (ExperimentNodeImpl<RootExperiment, ExperimentConfiguration>) ExperimentNode.super.getRoot();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void remove() {
@@ -143,14 +151,14 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	private void setDisposed() {
-		lifecycleState = ExperimentLifecycleState.DISPOSED;
+		lifecycleState.set(ExperimentLifecycleState.DISPOSED);
 		for (ExperimentNodeImpl<?, ?> child : children) {
 			child.setDisposed();
 		}
 	}
 
 	protected void assertAvailable() {
-		if (lifecycleState == ExperimentLifecycleState.DISPOSED) {
+		if (lifecycleState.get() == ExperimentLifecycleState.DISPOSED) {
 			throw new ExperimentException(workspace.getText().exception().experimentIsDisposed(this));
 		}
 	}
@@ -177,12 +185,38 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	@Override
-	public ExperimentLifecycleState getLifecycleState() {
+	public ObservableValue<ExperimentLifecycleState> lifecycleState() {
 		return lifecycleState;
 	}
 
 	@Override
 	public String toString() {
 		return type.getName() + " [" + lifecycleState + "]";
+	}
+
+	@Override
+	public void process() {
+		workspace.process(this);
+	}
+
+	@Override
+	public boolean tryProcess() {
+		return workspace.tryProcess(this);
+	}
+
+	protected boolean execute() {
+		lifecycleState.set(ExperimentLifecycleState.PROCESSING);
+
+		try {
+			getType().execute(this);
+
+			lifecycleState.set(ExperimentLifecycleState.COMPLETION);
+
+			return true;
+		} catch (Exception e) {
+			lifecycleState.set(ExperimentLifecycleState.FAILURE);
+
+			return false;
+		}
 	}
 }

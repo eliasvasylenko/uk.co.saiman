@@ -87,11 +87,11 @@ platform: win64
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.msapex;version=snapshot,\
-	uk.co.saiman.msapex.acquisition;version=snapshot,\
-	uk.co.saiman.msapex.chemistry;version=snapshot,\
-	uk.co.saiman.msapex.data;version=snapshot,\
-	uk.co.saiman.msapex.experiment;version=snapshot,\
-	uk.co.saiman.msapex.icons.fugue;version=snapshot,\
+	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
+	uk.co.saiman.chemistry.msapex;version=snapshot,\
+	uk.co.saiman.data.msapex;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
+	uk.co.saiman.icons.fugue;version=snapshot,\
 	uk.co.saiman.processing;version=snapshot,\
 	uk.co.saiman.simulation.api;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\

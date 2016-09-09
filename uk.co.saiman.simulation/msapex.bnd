@@ -8,7 +8,8 @@ Bundle-Name: SAI :: Simulation :: MSApex
 	fragment.e4xmi
 
 Private-Package: \
-	uk.co.saiman.simulation.msapex
+	uk.co.saiman.simulation.msapex,\
+	uk.co.saiman.simulation.msapex.treecontributions
 
 Import-Package: \
 	*

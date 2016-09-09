@@ -7,13 +7,13 @@
 	${ss;utilities},\
 	${ss;text},\
 	${ss;mathematics},\
-	${ss;reflection.typesystem},\
-	${ss;reflection.jar},\
+	${ss;reflection},\
+	${ss;reflection.resource},\
 	${ss;fx},\
 	${ss;eclipse},\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
-	uk.co.saiman.msapex.experiment;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.experiment.api;version=snapshot,\

@@ -30,6 +30,7 @@ import java.util.Set;
 import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.utilities.ObservableValue;
 
 /**
  * A node in an experiment part tree.
@@ -81,7 +82,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	/**
 	 * @return the root part of the experiment tree this part occurs in
 	 */
-	default ExperimentNode<?, ExperimentConfiguration> getRoot() {
+	default ExperimentNode<RootExperiment, ExperimentConfiguration> getRoot() {
 		return getAncestor(getExperimentWorkspace().getRootExperimentType()).get();
 	}
 
@@ -162,9 +163,9 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	<U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType);
 
 	/**
-	 * @return The current execution lifecycle state of the experiment part.
+	 * @return the current execution lifecycle state of the experiment part
 	 */
-	ExperimentLifecycleState getLifecycleState();
+	ObservableValue<ExperimentLifecycleState> lifecycleState();
 
 	@Override
 	default TypeToken<?> getThisType() {
@@ -174,4 +175,20 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 		return new TypeToken<ExperimentNode<T, S>>() {}.withTypeArgument(new TypeParameter<T>() {}, typeType)
 				.withTypeArgument(new TypeParameter<S>() {}, getType().getStateType());
 	}
+
+	/**
+	 * Process this experiment node. The request will be passed down to the root
+	 * experiment node and executed within the workspace. Only one experiment may
+	 * be processed at a time for a workspace, and if an experiment is already in
+	 * progress then invocation of this method should throw.
+	 */
+	void process();
+
+	/**
+	 * Attempt to process according to {@link #process()}. If an experiment is
+	 * already in progress then return false.
+	 * 
+	 * @return true if the processing was able to start, false otherwise
+	 */
+	boolean tryProcess();
 }

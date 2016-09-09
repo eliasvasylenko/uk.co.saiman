@@ -8,12 +8,12 @@ req: osgi.identity;filter:='(&(osgi.identity=${1})(version${if;${is;${2};null};>
 
 -runrequires.msapex:\
 	${req;uk.co.saiman.msapex},\
-	${req;uk.co.saiman.msapex.chemistry},\
-	${req;uk.co.saiman.msapex.experiment},\
-	${req;uk.co.saiman.msapex.acquisition},\
+	${req;uk.co.saiman.chemistry.msapex},\
+	${req;uk.co.saiman.experiment.msapex},\
+	${req;uk.co.saiman.instrument.acquisition.msapex},\
 	${req;uk.co.saiman.instrument.acquisition},\
 	${req;uk.co.saiman.simulation.provider},\
-	${req;uk.co.saiman.msapex.icons.fugue}
+	${req;uk.co.saiman.icons.fugue}
 
 -runvm.msapex:\
 	-Xmx1024m

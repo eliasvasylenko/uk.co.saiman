@@ -1,0 +1,25 @@
+Bundle-Name: SAI :: MSApex :: Acquisition
+
+-include:\
+	${include.ss}/eclipse.plugin.bnd,\
+	${include.ss}/eclipse.platform.neon.bnd,\
+	${include.ss}/eclipse.fx.2.4.0.bnd
+
+-buildpath: \
+	${ss;utilities},\
+	${ss;mathematics},\
+	${ss;reflection},\
+	${ss;fx},\
+	${ss;eclipse},\
+	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot,\
+	uk.co.saiman.data.msapex;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
+
+Private-Package: uk.co.saiman.instrument.acquisition.msapex
+
+-includeresource: \
+	fragment.e4xmi,\
+	res,\
+	css=css

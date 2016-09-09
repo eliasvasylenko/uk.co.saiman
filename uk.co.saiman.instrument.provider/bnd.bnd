@@ -2,7 +2,7 @@ Bundle-Name: SAI :: Instrument :: Provider
 
 -buildpath: \
 	${ss;utilities},\
-	${ss;reflection.typesystem},\
+	${ss;reflection},\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 

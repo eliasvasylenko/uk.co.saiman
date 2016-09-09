@@ -22,9 +22,12 @@ import static java.util.Collections.unmodifiableList;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
@@ -43,7 +46,6 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
 public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	private final ExperimentWorkspaceFactoryImpl factory;
 	private final Path dataRoot;
-	private final List<ExperimentNode<?, ?>> processingStack = new ArrayList<>();
 
 	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
 
@@ -51,6 +53,9 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	private final List<ExperimentNode<RootExperiment, ExperimentConfiguration>> rootExperiments = new ArrayList<>();
 
 	private final ExperimentProperties text;
+
+	private final List<ExperimentNode<?, ?>> processingStack = new ArrayList<>();
+	private final Lock processingLock = new ReentrantLock();
 
 	/**
 	 * Try to create a new experiment workspace over the given root path
@@ -124,7 +129,7 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 		return rootExperiment;
 	}
 
-	boolean removeRootExperiment(ExperimentNode<?, ExperimentConfiguration> rootNode) {
+	protected boolean removeRootExperiment(ExperimentNode<?, ExperimentConfiguration> rootNode) {
 		return rootExperiments.remove(rootNode);
 	}
 
@@ -147,5 +152,48 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 		Set<ExperimentType<?>> experimentTypes = new HashSet<>(factory.getRegisteredExperimentTypes());
 		experimentTypes.addAll(this.experimentTypes);
 		return experimentTypes;
+	}
+
+	protected void process(ExperimentNodeImpl<?, ?> node) {
+		if (!tryProcess(node)) {
+			throw new ExperimentException(t -> t.exception().cannotProcessExperimentConcurrently(node.getRoot()));
+		}
+	}
+
+	protected boolean tryProcess(ExperimentNodeImpl<?, ?> node) {
+		if (processingLock.tryLock()) {
+			try {
+				tryProcessImpl(node);
+			} finally {
+				processingLock.unlock();
+			}
+		}
+
+		return true;
+	}
+
+	private void tryProcessImpl(ExperimentNode<?, ?> node) {
+		boolean success = true;
+
+		List<ExperimentNode<?, ?>> ancestors = new ArrayList<>(node.getAncestors());
+		Collections.reverse(ancestors);
+		for (ExperimentNode<?, ?> ancestor : ancestors) {
+			if (!((ExperimentNodeImpl<?, ?>) ancestor).execute()) {
+				success = false;
+				break;
+			}
+		}
+
+		if (success) {
+			processChildren(node);
+		}
+	}
+
+	private void processChildren(ExperimentNode<?, ?> node) {
+		for (ExperimentNode<?, ?> child : node.getChildren()) {
+			if (((ExperimentNodeImpl<?, ?>) child).execute()) {
+				processChildren(child);
+			}
+		}
 	}
 }

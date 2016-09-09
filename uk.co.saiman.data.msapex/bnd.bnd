@@ -1,0 +1,20 @@
+Bundle-Name: SAI :: Data :: MSApex
+
+-include:\
+	${include.ss}/eclipse.plugin.bnd,\
+	${include.ss}/eclipse.platform.neon.bnd,\
+	${include.ss}/eclipse.fx.2.4.0.bnd
+
+-buildpath: \
+	${ss;utilities},\
+	${ss;reflection},\
+	${ss;mathematics},\
+	${ss;expressions},\
+	${ss;fx},\
+	uk.co.saiman.data.api;version=snapshot
+
+Export-Package: uk.co.saiman.data.msapex
+
+-includeresource: \
+	res,\
+	css=css

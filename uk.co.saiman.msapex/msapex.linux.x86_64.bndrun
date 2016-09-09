@@ -104,7 +104,7 @@ runplatform: linux64
 	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.msapex;version=snapshot,\
-	uk.co.saiman.acquisition.msapex;version=snapshot,\
+	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
 	uk.co.saiman.chemistry.msapex;version=snapshot,\
 	uk.co.saiman.data.msapex;version=snapshot,\
 	uk.co.saiman.experiment.msapex;version=snapshot,\

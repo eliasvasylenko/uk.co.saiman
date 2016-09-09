@@ -1,0 +1,7 @@
+Bundle-Name: SAI :: MSApex :: Fuge Icons
+
+-includeresource:\
+	res
+
+Export-Package:\
+	uk.co.saiman.icons.fugue

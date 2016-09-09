@@ -8,7 +8,7 @@ Export-Package: uk.co.saiman.experiment.sample
 -buildpath:\
 	${ss;utilities},\
 	${ss;mathematics},\
-	${ss;reflection.typesystem},\
+	${ss;reflection},\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

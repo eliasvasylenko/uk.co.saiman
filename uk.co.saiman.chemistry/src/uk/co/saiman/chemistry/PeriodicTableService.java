@@ -18,14 +18,9 @@
  */
 package uk.co.saiman.chemistry;
 
-import java.util.Hashtable;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
-import uk.co.strangeskies.modabi.SchemaManager;
 
 /**
  * Loads the default periodic table resource and registers as a service.
@@ -34,8 +29,8 @@ import uk.co.strangeskies.modabi.SchemaManager;
  */
 @Component
 public class PeriodicTableService {
-	@Reference
-	protected SchemaManager manager;
+	// @Reference
+	// protected SchemaManager manager;
 
 	/**
 	 * Activation registers the periodic table service.
@@ -45,15 +40,17 @@ public class PeriodicTableService {
 	 */
 	@Activate
 	public void activate(BundleContext context) {
+		/*- TODO
 		new Thread(() -> {
 			try {
 				PeriodicTable periodicTable = manager.bindInput().with(PeriodicTable.class)
 						.from(getClass().getResource("PeriodicTable.xml")).resolve(2000);
-
+		
 				context.registerService(PeriodicTable.class, periodicTable, new Hashtable<>());
 			} catch (Throwable e) {
 				throw e;
 			}
-		}).start();
+		});.start();
+		 */
 	}
 }

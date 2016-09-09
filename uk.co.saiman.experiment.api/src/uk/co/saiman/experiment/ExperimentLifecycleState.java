@@ -45,7 +45,7 @@ public enum ExperimentLifecycleState {
 	PREPARATION,
 
 	/**
-	 * Optimise laser, acquire from TDC, etc.
+	 * Optimize laser, acquire from TDC, etc.
 	 */
 	PROCESSING,
 

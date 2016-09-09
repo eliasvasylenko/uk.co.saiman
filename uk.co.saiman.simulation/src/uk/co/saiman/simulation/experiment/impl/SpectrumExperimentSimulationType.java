@@ -32,8 +32,8 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.simulation.experiment.SampleExperimentSimulationType;
-import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
+import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 
 @Component(service = { ExperimentType.class, SpectrumExperimentType.class })
 public class SpectrumExperimentSimulationType implements SpectrumExperimentType<SpectrumConfiguration> {

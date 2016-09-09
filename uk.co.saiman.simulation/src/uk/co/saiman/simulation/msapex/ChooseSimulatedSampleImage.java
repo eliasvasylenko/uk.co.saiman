@@ -1,14 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *
- * This file is part of uk.co.saiman.msapex.experiment.
+ * This file is part of uk.co.saiman.experiment.msapex.
  *
- * uk.co.saiman.msapex.experiment is free software: you can redistribute it and/or modify
+ * uk.co.saiman.experiment.msapex is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.msapex.experiment is distributed in the hope that it will be useful,
+ * uk.co.saiman.experiment.msapex is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,13 +33,13 @@ import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.msapex.experiment.ExperimentPart;
+import uk.co.saiman.experiment.msapex.ExperimentPart;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.experiment.SimulatedSampleImageConfiguration;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.reflection.jar.Jar;
+import uk.co.strangeskies.reflection.resource.Jar;
 
 /**
  * Add an experiment to the workspace
