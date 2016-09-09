@@ -17,4 +17,4 @@ Export-Package: uk.co.saiman.data.msapex
 
 -includeresource: \
 	res,\
-	css=css
+	{css=css}

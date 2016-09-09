@@ -1,2 +1,2 @@
-fugue.icon.path: ${workspace}/uk.co.saiman.icons.fugue/res/uk/co/saiman/msapex/icons/fugue
-fugue.icon.runtime: platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/msapex/icons/fugue
+fugue.icon.path: ${workspace}/uk.co.saiman.icons.fugue/res/uk/co/saiman/icons/fugue
+fugue.icon.runtime: platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue

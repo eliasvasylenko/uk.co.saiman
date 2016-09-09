@@ -1,7 +1,7 @@
-#uk-co-saiman-msapex-experiment-handledtoolitem-addexperiment {
+#uk-co-saiman-experiment-msapex-handledtoolitem-addexperiment {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book--plus.png");
 }
-#uk-co-saiman-msapex-experiment-handledtoolitem-runexperiment {
+#uk-co-saiman-experiment-msapex-handledtoolitem-runexperiment {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open-next.png");
 }
 

@@ -34,7 +34,7 @@
 
 		<fx:include
 			fx:id="isotopeChart"
-			source="/uk/co/saiman/msapex/data/ContinuousFunctionChart.fxml" />
+			source="/uk/co/saiman/data/msapex/ContinuousFunctionChart.fxml" />
 
 		<TableView fx:id="isotopeTable">
 			<columns>
