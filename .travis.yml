@@ -16,6 +16,6 @@ env:
 before_install:
 - chmod +x gradlew
 install: "./gradlew --version"
-script: ./gradlew --continue build test aggregateJavadoc publishGhPages artifactoryPublish
+script: ./gradlew build test aggregateJavadoc publishGhPages
   -PgithubUser="${GITHUB_TOKEN}" -PgithubPassword="" -PjfrogUser="${JFROG_USER}" -PjfrogPassword="${JFROG_PASSWORD}"
   --stacktrace
