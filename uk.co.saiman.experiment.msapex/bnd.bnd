@@ -6,7 +6,7 @@ Bundle-Name: SAI :: Experiment :: MSApex
 	${include.ss}/eclipse.fx.2.4.0.bnd,\
 	${build}/include/fugue.icons.bnd
 
--buildpath: \
+-buildpath:\
 	${ss;utilities},\
 	${ss;text},\
 	${ss;mathematics},\

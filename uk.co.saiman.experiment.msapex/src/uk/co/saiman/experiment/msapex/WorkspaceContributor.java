@@ -52,12 +52,12 @@ public class WorkspaceContributor extends EclipseModularTreeContributorImpl {
 class WorkspaceContribution implements TreeChildContribution<ExperimentWorkspace> {
 	@Override
 	public <U extends ExperimentWorkspace> boolean hasChildren(TreeItemData<U> data) {
-		return !data.data().getRootExperiments().isEmpty();
+		return data.data().getRootExperiments().findAny().isPresent();
 	}
 
 	@Override
 	public <U extends ExperimentWorkspace> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return data.data().getRootExperiments().stream()
+		return data.data().getRootExperiments()
 				.map(c -> new TypeToken<ExperimentNode<RootExperiment, ExperimentConfiguration>>() {}.typedObject(c))
 				.collect(Collectors.toList());
 	}

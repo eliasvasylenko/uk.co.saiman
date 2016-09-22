@@ -19,8 +19,7 @@
 package uk.co.saiman.experiment;
 
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * API for experiment management, i.e. registration and discovery of experiment
@@ -33,7 +32,7 @@ public interface ExperimentWorkspace {
 	/**
 	 * @return the data root of the workspace
 	 */
-	Path getWorkspaceDataRoot();
+	Path getWorkspaceDataPath();
 
 	/**
 	 * Get the current processing state of the experiment manager.
@@ -41,7 +40,7 @@ public interface ExperimentWorkspace {
 	 * @return the current state, in the form of the stack of all currently
 	 *         executing experiment parts
 	 */
-	public List<ExperimentNode<?, ?>> processingState();
+	Stream<ExperimentNode<?, ?>> processingState();
 
 	/*
 	 * Root experiment types
@@ -58,7 +57,7 @@ public interface ExperimentWorkspace {
 	 * 
 	 * @return all registered root experiment parts
 	 */
-	List<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments();
+	Stream<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments();
 
 	/**
 	 * Add a root experiment node to management.
@@ -94,5 +93,5 @@ public interface ExperimentWorkspace {
 	/**
 	 * @return the set of all experiment types registered to this workspace
 	 */
-	Set<ExperimentType<?>> getRegisteredExperimentTypes();
+	Stream<ExperimentType<?>> getRegisteredExperimentTypes();
 }

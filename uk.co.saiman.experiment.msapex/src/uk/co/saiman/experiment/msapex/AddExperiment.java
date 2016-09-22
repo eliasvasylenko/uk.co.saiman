@@ -53,7 +53,7 @@ public class AddExperiment {
 		okButton.setDisable(true);
 		nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
 
-			boolean exists = experimentPart.getExperimentWorkspace().getRootExperiments().stream()
+			boolean exists = experimentPart.getExperimentWorkspace().getRootExperiments()
 					.anyMatch(e -> e.getState().getName().equals(newValue));
 
 			boolean isValid = ExperimentConfiguration.isNameValid(newValue);

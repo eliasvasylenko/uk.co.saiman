@@ -6,30 +6,30 @@
 }
 
 .ModularTreeCell #supplementalText {
-    -fx-opacity: 0.65;
+	-fx-opacity: 0.65;
 }
 
 .ModularTreeCell #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/node.png");
 }
 
-.ModularTreeCell *:ExperimentNodeContribution #text {
+.ModularTreeCell :ExperimentNodeContribution * #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/document.png");
 }
 
-.ModularTreeCell *:RootExperimentNodeContribution #text {
+.ModularTreeCell :RootExperimentNodeContribution * #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book.png");
 }
 
-.ModularTreeCell *:RootExperimentNodeContribution:expanded #text {
+.ModularTreeCell:expanded :RootExperimentNodeContribution * #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open.png");
 }
 
-.ModularTreeCell *:SampleExperimentNodeContribution #text {
+.ModularTreeCell :SampleExperimentNodeContribution * #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/flask.png");
 }
 
-.ModularTreeCell *:SpectrumExperimentNodeContribution #text {
+.ModularTreeCell :SpectrumExperimentNodeContribution * #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/spectrum.png");
 }
 

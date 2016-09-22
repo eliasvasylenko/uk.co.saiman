@@ -18,9 +18,10 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -36,6 +37,7 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.RootExperiment;
 import uk.co.strangeskies.eclipse.EclipseModularTreeContributor;
 import uk.co.strangeskies.eclipse.EclipseModularTreeContributorImpl;
@@ -59,7 +61,7 @@ import uk.co.strangeskies.reflection.TypedObject;
 public class ExperimentNodeContributor extends EclipseModularTreeContributorImpl {
 	@SuppressWarnings("javadoc")
 	public ExperimentNodeContributor() {
-		super(RootExperimentNodeContribution.class, ExperimentNodeContribution.class);
+		super(RootExperimentNodeContribution.class, ExperimentNodeContribution.class, ExperimentResultContribution.class);
 	}
 }
 
@@ -84,6 +86,28 @@ class RootExperimentNodeContribution
 	public <U extends ExperimentNode<RootExperiment, ExperimentConfiguration>> String getSupplementalText(
 			TreeItemData<U> data) {
 		return "[" + text.lifecycleState(data.data().lifecycleState().get()) + "]";
+	}
+}
+
+/**
+ * Contribution for root experiment nodes in the experiment tree
+ * 
+ * @author Elias N Vasylenko
+ */
+class ExperimentResultContribution
+		implements TreeTextContribution<ExperimentResult<?, ?>>, PseudoClassTreeCellContribution<ExperimentResult<?, ?>> {
+	@Inject
+	@Localize
+	ExperimentProperties text;
+
+	@Override
+	public <U extends ExperimentResult<?, ?>> String getText(TreeItemData<U> data) {
+		return data.data().getResultType().getName();
+	}
+
+	@Override
+	public <U extends ExperimentResult<?, ?>> String getSupplementalText(TreeItemData<U> data) {
+		return "[" + data.data().getData() + "]";
 	}
 }
 
@@ -130,12 +154,13 @@ class ExperimentNodeContribution extends MenuTreeCellContribution<ExperimentNode
 
 	@Override
 	public <U extends ExperimentNode<?, ?>> boolean hasChildren(TreeItemData<U> data) {
-		return !data.data().getChildren().isEmpty();
+		return data.data().getChildren().findAny().isPresent() || data.data().getResults().findAny().isPresent();
 	}
 
 	@Override
 	public <U extends ExperimentNode<?, ?>> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return data.data().getChildren().stream().map(Reified::asTypedObject).collect(toList());
+		return concat(data.data().getChildren(), data.data().getResults()).map(Reified::asTypedObject)
+				.collect(Collectors.toList());
 	}
 
 	@Override

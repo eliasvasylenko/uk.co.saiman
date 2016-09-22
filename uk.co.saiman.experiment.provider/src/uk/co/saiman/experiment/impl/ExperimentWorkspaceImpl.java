@@ -18,16 +18,14 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Collections.unmodifiableList;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
@@ -37,6 +35,7 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
 import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.strangeskies.utilities.collection.StreamUtilities;
 
 /**
  * Reference implementation of {@link ExperimentWorkspace}.
@@ -91,13 +90,13 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	}
 
 	@Override
-	public Path getWorkspaceDataRoot() {
+	public Path getWorkspaceDataPath() {
 		return dataRoot;
 	}
 
 	@Override
-	public List<ExperimentNode<?, ?>> processingState() {
-		return processingStack;
+	public Stream<ExperimentNode<?, ?>> processingState() {
+		return processingStack.stream();
 	}
 
 	/*
@@ -110,8 +109,8 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	}
 
 	@Override
-	public List<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments() {
-		return unmodifiableList(rootExperiments);
+	public Stream<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments() {
+		return rootExperiments.stream();
 	}
 
 	@Override
@@ -148,10 +147,8 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	}
 
 	@Override
-	public Set<ExperimentType<?>> getRegisteredExperimentTypes() {
-		Set<ExperimentType<?>> experimentTypes = new HashSet<>(factory.getRegisteredExperimentTypes());
-		experimentTypes.addAll(this.experimentTypes);
-		return experimentTypes;
+	public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
+		return Stream.concat(factory.getRegisteredExperimentTypes(), experimentTypes.stream());
 	}
 
 	protected void process(ExperimentNodeImpl<?, ?> node) {
@@ -172,28 +169,15 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 		return true;
 	}
 
-	private void tryProcessImpl(ExperimentNode<?, ?> node) {
-		boolean success = true;
-
-		List<ExperimentNode<?, ?>> ancestors = new ArrayList<>(node.getAncestors());
-		Collections.reverse(ancestors);
-		for (ExperimentNode<?, ?> ancestor : ancestors) {
-			if (!((ExperimentNodeImpl<?, ?>) ancestor).execute()) {
-				success = false;
-				break;
-			}
-		}
+	private void tryProcessImpl(ExperimentNodeImpl<?, ?> node) {
+		boolean success = StreamUtilities.reverse(node.getAncestorsImpl()).filter(ExperimentNodeImpl::execute).count() > 0;
 
 		if (success) {
 			processChildren(node);
 		}
 	}
 
-	private void processChildren(ExperimentNode<?, ?> node) {
-		for (ExperimentNode<?, ?> child : node.getChildren()) {
-			if (((ExperimentNodeImpl<?, ?>) child).execute()) {
-				processChildren(child);
-			}
-		}
+	private void processChildren(ExperimentNodeImpl<?, ?> node) {
+		node.getChildrenImpl().filter(ExperimentNodeImpl::execute).forEach(this::processChildren);
 	}
 }

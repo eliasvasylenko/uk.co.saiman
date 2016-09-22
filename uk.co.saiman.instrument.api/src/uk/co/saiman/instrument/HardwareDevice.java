@@ -24,7 +24,7 @@ public interface HardwareDevice {
 	String getName();
 
 	/**
-	 * @return True if a communication link with the hardware properly
+	 * @return true if a communication link with the hardware properly
 	 *         established, false otherwise
 	 */
 	boolean isConnected();

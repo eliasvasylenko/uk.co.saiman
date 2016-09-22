@@ -9,6 +9,7 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 -buildpath: \
 	${ss;utilities},\
 	${ss;mathematics},\
+	${ss;text},\
 	${ss;reflection},\
 	${ss;fx},\
 	${ss;eclipse},\

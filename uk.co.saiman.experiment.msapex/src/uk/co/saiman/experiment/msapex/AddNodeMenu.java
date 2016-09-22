@@ -31,7 +31,6 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentType;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.TreeItemImpl;
 
@@ -59,7 +58,7 @@ public class AddNodeMenu {
 
 		ExperimentNode<?, ?> selectedNode = (ExperimentNode<?, ?>) data;
 
-		for (ExperimentType<?> childType : selectedNode.getAvailableChildExperimentTypes()) {
+		selectedNode.getAvailableChildExperimentTypes().forEach(childType -> {
 			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
 			moduleItem.setLabel(childType.getName());
 			moduleItem.setType(ItemType.PUSH);
@@ -73,6 +72,6 @@ public class AddNodeMenu {
 			});
 
 			items.add(moduleItem);
-		}
+		});
 	}
 }

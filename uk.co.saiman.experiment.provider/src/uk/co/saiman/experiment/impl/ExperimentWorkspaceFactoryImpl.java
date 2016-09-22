@@ -18,11 +18,10 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Collections.unmodifiableSet;
-
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -56,8 +55,8 @@ public class ExperimentWorkspaceFactoryImpl implements ExperimentWorkspaceFactor
 		experimentTypes.remove(experimentType);
 	}
 
-	public Set<ExperimentType<?>> getRegisteredExperimentTypes() {
-		return unmodifiableSet(experimentTypes);
+	public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
+		return experimentTypes.stream();
 	}
 
 	@Override

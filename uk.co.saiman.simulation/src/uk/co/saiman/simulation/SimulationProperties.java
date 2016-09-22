@@ -54,4 +54,6 @@ public interface SimulationProperties extends Properties<SimulationProperties> {
 	Localized<String> imageFileFilterTitle();
 
 	List<String> imageFileFilter();
+
+	Localized<String> invalidAcquisitionCount(int count);
 }

@@ -18,7 +18,17 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import java.util.stream.Stream;
+
+import org.osgi.service.component.annotations.Activate;
+
+import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.text.properties.PropertyLoader;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -30,9 +40,64 @@ import uk.co.saiman.experiment.ExperimentType;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public interface SpectrumExperimentType<T extends SpectrumConfiguration> extends ExperimentType<T> {
+public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
+	private SpectraProperties properties;
+	private ExperimentResultType<T, ContinuousFunction> spectrumResult;
+
+	public SpectrumExperimentType() {
+		this(PropertyLoader.getDefaultProperties(SpectraProperties.class));
+	}
+
+	public SpectrumExperimentType(SpectraProperties properties) {
+		this.properties = properties;
+	}
+
+	/*
+	 * TODO this really should be moved to the constructor, and the 'properties'
+	 * and 'spectrumResult' fields should both be final ... hurry up OSGi r7 to
+	 * sort this mess out
+	 */
+	@Activate
+	public void activate() {
+		spectrumResult = new ExperimentResultType<>(properties.spectrumResultName().toString(), this,
+				new TypeToken<ContinuousFunction>() {});
+	}
+
+	protected SpectrumConfiguration createStateImpl(ExperimentNode<?, ? extends T> forNode) {
+		return new SpectrumConfiguration() {
+			@Override
+			public String getSpectrumName() {
+				return getProperties().defaultSpectrumName().toString();
+			}
+		};
+	}
+
+	protected void setProperties(SpectraProperties properties) {
+		this.properties = properties;
+	}
+
+	protected SpectraProperties getProperties() {
+		return properties;
+	}
+
 	@Override
-	default String getName() {
-		return "Spectrum";
+	public String getName() {
+		return properties.spectrumExperimentName().toString();
+	}
+
+	protected abstract AcquisitionDevice getAcquisitionDevice();
+
+	@Override
+	public void execute(ExperimentNode<?, ? extends T> node) {
+		ContinuousFunction accumulation = ContinuousFunction.EMPTY;
+
+		getAcquisitionDevice().startAcquisition(o -> o.addObserver(System.out::println));
+
+		node.setResult(spectrumResult, accumulation);
+	}
+
+	@Override
+	public Stream<ExperimentResultType<T, ?>> getResultTypes() {
+		return Stream.of(spectrumResult);
 	}
 }

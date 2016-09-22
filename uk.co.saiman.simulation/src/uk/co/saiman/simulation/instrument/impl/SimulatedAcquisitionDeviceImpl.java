@@ -23,6 +23,7 @@ import static java.util.Collections.unmodifiableSet;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -34,9 +35,9 @@ import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
-import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
+import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 import uk.co.strangeskies.utilities.BufferingListener;
 import uk.co.strangeskies.utilities.Observable;
@@ -336,27 +337,34 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	@Override
+	public void startAcquisition(Consumer<Observable<SampledContinuousFunction>> nextAcquisitionDataEvents) {
+		synchronized (acquiringLock) {
+			nextAcquisitionDataEvents.accept(singleAcquisitionListeners);
+			startAcquisition();
+		}
+	}
+
+	@Override
 	public void startAcquisition() {
 		synchronized (acquiringLock) {
 			if (experiment != null) {
+				singleAcquisitionListeners = new BufferingListener<>();
 				throw new IllegalStateException(simulationText.acquisition().alreadyAcquiring().toString());
 			}
 
-			if (acquisitionCount > 0) {
-				ExperimentConfiguration experiment = this.experiment = new ExperimentConfiguration();
+			ExperimentConfiguration experiment = this.experiment = new ExperimentConfiguration();
 
-				while (experiment == this.experiment) {
-					try {
-						acquiringLock.wait();
-					} catch (InterruptedException e) {
-						experiment.counter = 0;
-						throw new AcquisitionException(simulationText.acquisition().experimentInterrupted(), e);
-					}
+			while (experiment == this.experiment) {
+				try {
+					acquiringLock.wait();
+				} catch (InterruptedException e) {
+					experiment.counter = 0;
+					throw new AcquisitionException(simulationText.acquisition().experimentInterrupted(), e);
 				}
+			}
 
-				if (experiment.exception != null) {
-					throw experiment.exception;
-				}
+			if (experiment.exception != null) {
+				throw experiment.exception;
 			}
 		}
 	}
@@ -498,6 +506,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 	@Override
 	public void setAcquisitionCount(int count) {
+		if (count <= 0) {
+			throw new AcquisitionException(simulationText.invalidAcquisitionCount(count));
+		}
 		acquisitionCount = count;
 	}
 

@@ -18,19 +18,18 @@
  */
 package uk.co.saiman.experiment;
 
-import static java.util.Optional.of;
+import static java.util.stream.Collectors.toList;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
 import uk.co.strangeskies.utilities.ObservableValue;
+import uk.co.strangeskies.utilities.collection.StreamUtilities;
 
 /**
  * A node in an experiment part tree.
@@ -49,11 +48,11 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 
 	/**
 	 * Experiment data root directories are defined hierarchically from the
-	 * {@link ExperimentWorkspace#getWorkspaceDataRoot() workspace root}.
+	 * {@link ExperimentWorkspace#getWorkspaceDataPath() workspace path}.
 	 * 
 	 * @return the data root of the experiment
 	 */
-	Path getExperimentDataRoot();
+	Path getExperimentDataPath();
 
 	/**
 	 * @return the current state object of the experiment node
@@ -75,8 +74,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	 * @return the node's index in its parent's list of children
 	 */
 	default int getIndex() {
-		return getParent().map(p -> p.getChildren().indexOf(this))
-				.orElse(getExperimentWorkspace().getRootExperiments().indexOf(this));
+		return getParent().map(p -> p.getChildren().collect(toList()).indexOf(this))
+				.orElse(getExperimentWorkspace().getRootExperiments().collect(toList()).indexOf(this));
 	}
 
 	/**
@@ -90,18 +89,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	 * @return a list of all ancestors, nearest first, inclusive of the node
 	 *         itself
 	 */
-	default List<ExperimentNode<?, ?>> getAncestors() {
-		List<ExperimentNode<?, ?>> ancestors = new ArrayList<>();
-
-		Optional<ExperimentNode<?, ?>> ancestor = of(this);
-
-		do {
-			ancestors.add(ancestor.get());
-
-			ancestor = ancestor.flatMap(ExperimentNode::getParent);
-		} while (ancestor.isPresent());
-
-		return ancestors;
+	default Stream<ExperimentNode<?, ?>> getAncestors() {
+		return StreamUtilities.<ExperimentNode<?, ?>> iterateOptional(this, ExperimentNode::getParent);
 	}
 
 	/**
@@ -115,7 +104,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	 */
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<U>> Optional<ExperimentNode<E, U>> getAncestor(E type) {
-		return getAncestors().stream().filter(a -> type.equals(a.getType())).findFirst().map(a -> (ExperimentNode<E, U>) a);
+		return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(a -> (ExperimentNode<E, U>) a);
 	}
 
 	/**
@@ -130,7 +119,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> getAncestor(
 			Collection<E> types) {
-		return getAncestors().stream().filter(a -> types.contains(a.getType())).findFirst()
+		return getAncestors().filter(a -> types.contains(a.getType())).findFirst()
 				.map(a -> (ExperimentNode<E, ? extends U>) a);
 	}
 
@@ -146,12 +135,12 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	 * 
 	 * @return An ordered list of all sequential child experiment parts
 	 */
-	List<ExperimentNode<?, ?>> getChildren();
+	Stream<ExperimentNode<?, ?>> getChildren();
 
 	/**
 	 * @return All known available child experiment types
 	 */
-	Set<ExperimentType<?>> getAvailableChildExperimentTypes();
+	Stream<ExperimentType<?>> getAvailableChildExperimentTypes();
 
 	/**
 	 * Add a child experiment node of the given type to this node.
@@ -191,4 +180,31 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	 * @return true if the processing was able to start, false otherwise
 	 */
 	boolean tryProcess();
+
+	/**
+	 * @return all results associated with this node
+	 */
+	Stream<ExperimentResult<S, ?>> getResults();
+
+	/**
+	 * Clear all the results associated with this node. Take care, as this will
+	 * also delete any result data from disk.
+	 */
+	void clearResults();
+
+	/**
+	 * @param resultType
+	 *          the result type to set the result data for
+	 * @param resultData
+	 *          the actual data to set for the given result type
+	 */
+	<U> void setResult(ExperimentResultType<? super S, U> resultType, U resultData);
+
+	/**
+	 * @param resultType
+	 *          the result type to set the result data for
+	 * @return an optional over result associated with this node for the given
+	 *         result type if it exists, otherwise an empty optional
+	 */
+	<U> ExperimentResult<S, U> getResult(ExperimentResultType<? super S, U> resultType);
 }

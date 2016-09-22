@@ -18,20 +18,19 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Collections.unmodifiableList;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
@@ -56,7 +55,9 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private final List<ExperimentNodeImpl<?, ?>> children;
 
 	private final ObservableProperty<ExperimentLifecycleState, ExperimentLifecycleState> lifecycleState;
-	private S state;
+	private final S state;
+
+	private HashMap<ExperimentResultType<? super S, ?>, ExperimentResultImpl<S, ?>> results;
 
 	/**
 	 * Try to create a new experiment node of the given type, and with the given
@@ -73,7 +74,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		if (!type.mayComeAfter(parent)) {
 			throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, this));
 		}
-		parent.ancestorsImpl().filter(a -> !a.type.mayComeBefore(parent, type)).forEach(a -> {
+		parent.getAncestorsImpl().filter(a -> !a.type.mayComeBefore(parent, type)).forEach(a -> {
 			throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, a));
 		});
 
@@ -93,10 +94,13 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 		lifecycleState = ObservablePropertyImpl.over(ExperimentLifecycleState.PREPARATION);
 		state = type.createState(this);
+
+		results = new HashMap<>();
+		getType().getResultTypes().forEach(r -> results.put(r, new ExperimentResultImpl<>(this, r)));
 	}
 
-	protected Stream<ExperimentNodeImpl<?, ?>> ancestorsImpl() {
-		return getAncestors().stream().map(a -> (ExperimentNodeImpl<?, ?>) a);
+	protected Stream<ExperimentNodeImpl<?, ?>> getAncestorsImpl() {
+		return getAncestors().map(a -> (ExperimentNodeImpl<?, ?>) a);
 	}
 
 	@Override
@@ -110,8 +114,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	@Override
-	public Path getExperimentDataRoot() {
-		return parent.getExperimentDataRoot().resolve(getIndex() + "_" + type.getName());
+	public Path getExperimentDataPath() {
+		return parent.getExperimentDataPath().resolve(getIndex() + "_" + type.getName());
 	}
 
 	@Override
@@ -163,18 +167,20 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<ExperimentNode<?, ?>> getChildren() {
-		return unmodifiableList(children);
+	public Stream<ExperimentNode<?, ?>> getChildren() {
+		return (Stream<ExperimentNode<?, ?>>) (Object) getChildrenImpl();
+	}
+
+	protected Stream<ExperimentNodeImpl<?, ?>> getChildrenImpl() {
+		return children.stream();
 	}
 
 	@Override
-	public Set<ExperimentType<?>> getAvailableChildExperimentTypes() {
-		Set<ExperimentType<?>> experimentTypes = new HashSet<>(workspace.getRegisteredExperimentTypes());
-
-		experimentTypes.removeIf(type -> !this.type.mayComeBefore(this, type) || !type.mayComeAfter(this));
-
-		return experimentTypes;
+	public Stream<ExperimentType<?>> getAvailableChildExperimentTypes() {
+		return workspace.getRegisteredExperimentTypes()
+				.filter(type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
 	}
 
 	@Override
@@ -218,5 +224,26 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 			return false;
 		}
+	}
+
+	@Override
+	public Stream<ExperimentResult<S, ?>> getResults() {
+		return results.values().stream().map(t -> (ExperimentResult<S, ?>) t);
+	}
+
+	@Override
+	public void clearResults() {
+		results.values().forEach(r -> r.setData(null));
+	}
+
+	@Override
+	public <U> void setResult(ExperimentResultType<? super S, U> resultType, U resultData) {
+		getResult(resultType).setData(resultData);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <U> ExperimentResultImpl<S, U> getResult(ExperimentResultType<? super S, U> resultType) {
+		return (ExperimentResultImpl<S, U>) results.get(resultType);
 	}
 }

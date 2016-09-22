@@ -29,14 +29,16 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.spectrum.SpectraProperties;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.simulation.experiment.SampleExperimentSimulationType;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
+import uk.co.strangeskies.text.properties.PropertyLoader;
 
 @Component(service = { ExperimentType.class, SpectrumExperimentType.class })
-public class SpectrumExperimentSimulationType implements SpectrumExperimentType<SpectrumConfiguration> {
+public class SpectrumExperimentSimulationType extends SpectrumExperimentType<SpectrumConfiguration> {
 	final Set<SampleExperimentSimulationType<?>> sampleExperiments = synchronizedSet(new HashSet<>());
 	@Reference
 	SimulatedAcquisitionDevice acquisitionSimulation;
@@ -50,14 +52,19 @@ public class SpectrumExperimentSimulationType implements SpectrumExperimentType<
 		sampleExperiments.remove(sampleExperiment);
 	}
 
+	@Reference
+	public void setPropertyLoader(PropertyLoader propertyLoader) {
+		super.setProperties(propertyLoader.getProperties(SpectraProperties.class));
+	}
+
+	@Override
+	public SimulatedAcquisitionDevice getAcquisitionDevice() {
+		return acquisitionSimulation;
+	}
+
 	@Override
 	public SpectrumConfiguration createState(ExperimentNode<?, ? extends SpectrumConfiguration> forNode) {
-		return new SpectrumConfiguration() {
-			@Override
-			public String getSpectrumName() {
-				return "Untitled Spectrum";
-			}
-		};
+		return createStateImpl(forNode);
 	}
 
 	@Override
@@ -65,7 +72,7 @@ public class SpectrumExperimentSimulationType implements SpectrumExperimentType<
 		SimulatedSampleDevice sample = node.getAncestor(sampleExperiments).get().getType().device();
 		acquisitionSimulation.setSample(sample);
 
-		acquisitionSimulation.startAcquisition();
+		super.execute(node);
 	}
 
 	@Override

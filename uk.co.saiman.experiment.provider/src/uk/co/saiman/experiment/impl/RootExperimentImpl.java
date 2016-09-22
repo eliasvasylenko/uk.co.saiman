@@ -62,7 +62,7 @@ public class RootExperimentImpl implements RootExperiment {
 
 				// TODO check name is valid (i.e. def valid in a path)
 
-				if (workspace.getRootExperiments().stream().anyMatch(e -> name.equals(e.getState().getName()))) {
+				if (workspace.getRootExperiments().anyMatch(e -> name.equals(e.getState().getName()))) {
 					// TODO already exists in workspace error!
 				}
 

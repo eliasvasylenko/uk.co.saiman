@@ -7,10 +7,13 @@ Export-Package: uk.co.saiman.experiment.spectrum
 
 -buildpath: \
 	${ss;utilities},\
+	${ss;text},\
 	${ss;mathematics},\
 	${ss;reflection},\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\
 	javax.measure.unit-api

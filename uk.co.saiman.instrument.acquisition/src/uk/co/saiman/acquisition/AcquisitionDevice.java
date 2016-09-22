@@ -18,6 +18,8 @@
  */
 package uk.co.saiman.acquisition;
 
+import java.util.function.Consumer;
+
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.strangeskies.utilities.Observable;
@@ -38,6 +40,19 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 *           If acquisition is already in progress.
 	 */
 	void startAcquisition();
+
+	/**
+	 * Begin an acquisition experiment with the current configuration, and wait
+	 * until it is complete.
+	 * <p>
+	 * The given consumer will be invoked directly before the acquisition begins.
+	 * 
+	 * @param nextAcquisitionDataEvents
+	 *          a consumer over the result of {@link #nextAcquisitionDataEvents()}
+	 * @throws IllegalStateException
+	 *           If acquisition is already in progress.
+	 */
+	void startAcquisition(Consumer<Observable<SampledContinuousFunction>> nextAcquisitionDataEvents);
 
 	/**
 	 * Stop any acquisition experiment that may be in progress.

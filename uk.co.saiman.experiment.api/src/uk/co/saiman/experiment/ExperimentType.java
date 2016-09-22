@@ -20,6 +20,8 @@ package uk.co.saiman.experiment;
 
 import static uk.co.strangeskies.reflection.TypeToken.over;
 
+import java.util.stream.Stream;
+
 import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
@@ -56,6 +58,14 @@ public interface ExperimentType<S> extends Reified {
 	 *          the node to be processed
 	 */
 	void execute(ExperimentNode<?, ? extends S> node);
+
+	/**
+	 * @return a stream over the types of result published by an experiment of
+	 *         this type
+	 */
+	default Stream<ExperimentResultType<S, ?>> getResultTypes() {
+		return Stream.empty();
+	}
 
 	/**
 	 * Test whether a node of this type may follow from the given directly
