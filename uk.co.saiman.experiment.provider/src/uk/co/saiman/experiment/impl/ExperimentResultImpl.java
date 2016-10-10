@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.provider.
  *
@@ -18,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.ExperimentNode;
@@ -25,18 +35,27 @@ import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.strangeskies.utilities.ObservableImpl;
 
-public class ExperimentResultImpl<S, T> extends ObservableImpl<Optional<T>> implements ExperimentResult<S, T> {
-	private final ExperimentNode<?, S> node;
-	private final ExperimentResultType<S, T> resultType;
+public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>> implements ExperimentResult<T> {
+	private final ExperimentNode<?, ?> node;
+	private final ExperimentResultType<T> resultType;
 	private T data;
 
-	public ExperimentResultImpl(ExperimentNode<?, S> node, ExperimentResultType<S, T> type) {
+	public ExperimentResultImpl(ExperimentNode<?, ?> node, ExperimentResultType<T> type) {
 		this.node = node;
 		this.resultType = type;
 	}
 
+	public ExperimentNode<?, ?> getExperimentNode() {
+		return node;
+	}
+
 	@Override
-	public ExperimentResultType<S, T> getResultType() {
+	public Path getResultDataPath() {
+		return getExperimentNode().getExperimentDataPath();
+	}
+
+	@Override
+	public ExperimentResultType<T> getResultType() {
 		return resultType;
 	}
 

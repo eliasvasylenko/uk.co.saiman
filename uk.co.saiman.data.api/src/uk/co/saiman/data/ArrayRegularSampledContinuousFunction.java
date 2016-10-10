@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -20,14 +29,21 @@ package uk.co.saiman.data;
 
 import java.util.function.Consumer;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 /**
  * A mutable implementation conforming to the contract of
  * {@link RegularSampledContinuousFunction} and backed by an array.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class ArrayRegularSampledContinuousFunction extends LockingSampledContinuousFunction
-		implements RegularSampledContinuousFunction {
+public class ArrayRegularSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends LockingSampledContinuousFunction<UD, UR> implements RegularSampledContinuousFunction<UD, UR> {
 	private final double frequency;
 	private final double domainStart;
 	private final double[] intensities;
@@ -36,6 +52,10 @@ public class ArrayRegularSampledContinuousFunction extends LockingSampledContinu
 	 * Create an instance with the given frequency, intensities, and domain value
 	 * of first index.
 	 * 
+	 * @param unitDomain
+	 *          the units of measurement of values in the domain
+	 * @param unitRange
+	 *          the units of measurement of values in the range
 	 * @param frequency
 	 *          The frequency as per {@link #getFrequency()}
 	 * @param domainStart
@@ -43,7 +63,10 @@ public class ArrayRegularSampledContinuousFunction extends LockingSampledContinu
 	 * @param intensities
 	 *          The intensities of each sample in sequence
 	 */
-	public ArrayRegularSampledContinuousFunction(double frequency, double domainStart, double[] intensities) {
+	public ArrayRegularSampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange, double frequency,
+			double domainStart, double[] intensities) {
+		super(unitDomain, unitRange);
+
 		this.frequency = frequency;
 		this.domainStart = domainStart;
 
@@ -67,11 +90,11 @@ public class ArrayRegularSampledContinuousFunction extends LockingSampledContinu
 	 *          The mutation operation
 	 */
 	public void mutate(Consumer<double[]> mutation) {
-		getWriteLock().lock();
+		beginWrite();
 		try {
 			mutation.accept(intensities);
 		} finally {
-			getWriteLock().unlock();
+			endWrite();
 		}
 	}
 
@@ -91,12 +114,13 @@ public class ArrayRegularSampledContinuousFunction extends LockingSampledContinu
 	}
 
 	@Override
-	public ArrayRegularSampledContinuousFunction copy() {
-		return read(() -> new ArrayRegularSampledContinuousFunction(frequency, domainStart, intensities));
+	public ArrayRegularSampledContinuousFunction<UD, UR> copy() {
+		return read(() -> new ArrayRegularSampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), frequency,
+				domainStart, intensities));
 	}
 
 	@Override
-	public ContinuousFunction evaluate() {
+	public ContinuousFunction<UD, UR> evaluate() {
 		return this;
 	}
 }

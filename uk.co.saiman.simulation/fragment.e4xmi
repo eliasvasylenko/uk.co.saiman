@@ -7,6 +7,6 @@
     <elements xsi:type="commands:Handler" xmi:id="_64K14HBSEeaNPLS4ZZpYJQ" elementId="uk.co.saiman.simulation.msapex.handler.choosesimulatedsampleimage" contributionURI="bundleclass://uk.co.saiman.simulation.msapex/uk.co.saiman.simulation.msapex.ChooseSimulatedSampleImage" command="_-yVlYHBSEeaNPLS4ZZpYJQ"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_5sVtMHBYEeamhLyauWkpZg" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Category" xmi:id="_CXbOAHBZEeamhLyauWkpZg" elementId="uk.co.saiman.msapex.simulation.category" name="Simulation" description="Simulated instrument devices and experiments"/>
+    <elements xsi:type="commands:Category" xmi:id="_CXbOAHBZEeamhLyauWkpZg" elementId="uk.co.saiman.simulation.msapex.category" name="Simulation" description="Simulated instrument devices and experiments"/>
   </fragments>
 </fragment:ModelFragments>

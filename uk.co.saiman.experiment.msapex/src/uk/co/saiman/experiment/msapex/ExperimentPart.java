@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.msapex.
  *
@@ -18,28 +27,8 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import static uk.co.strangeskies.fx.FXMLLoadBuilder.buildWith;
-
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Named;
-
-import org.eclipse.e4.ui.internal.workbench.E4Workbench;
-import org.eclipse.fx.core.di.LocalInstance;
-import org.eclipse.osgi.service.datalocation.Location;
-import org.osgi.framework.Constants;
-
-import aQute.bnd.annotation.headers.RequireCapability;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.BorderPane;
 import uk.co.saiman.experiment.ExperimentWorkspace;
-import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
 import uk.co.strangeskies.eclipse.EclipseModularTreeController;
-import uk.co.strangeskies.reflection.TypeToken;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -51,43 +40,14 @@ import uk.co.strangeskies.reflection.TypeToken;
  * Specify a service capability requirement on the ExperimentWorkspaceFactory
  * injection via the bundle manifest.
  */
-@RequireCapability(ns = ExperimentPart.OSGI_SERVICE, filter = "(" + Constants.OBJECTCLASS
-		+ "=uk.co.saiman.experiment.ExperimentWorkspaceFactory)")
-public class ExperimentPart {
-	static final String OSGI_SERVICE = "osgi.service";
-
-	@FXML
-	private EclipseModularTreeController modularTreeController;
-	private ExperimentWorkspace workspace;
-
-	@PostConstruct
-	void initialise(BorderPane container, @LocalInstance FXMLLoader loader,
-			@Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation, ExperimentWorkspaceFactory workspaceFactory) {
-		container.setCenter(buildWith(loader).controller(this).loadRoot());
-
-		Path workspaceLocation;
-		try {
-			workspaceLocation = Paths.get(instanceLocation.getURL().toURI());
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-
-		workspace = workspaceFactory.openWorkspace(workspaceLocation);
-
-		modularTreeController.getTreeView().setRootData(new TypeToken<ExperimentWorkspace>() {}.typedObject(workspace));
-	}
-
+public interface ExperimentPart {
 	/**
 	 * @return the current experiment workspace
 	 */
-	public ExperimentWorkspace getExperimentWorkspace() {
-		return workspace;
-	}
+	ExperimentWorkspace getExperimentWorkspace();
 
 	/**
 	 * @return the controller for the experiment tree UI item
 	 */
-	public EclipseModularTreeController getExperimentTreeController() {
-		return modularTreeController;
-	}
+	EclipseModularTreeController getExperimentTreeController();
 }

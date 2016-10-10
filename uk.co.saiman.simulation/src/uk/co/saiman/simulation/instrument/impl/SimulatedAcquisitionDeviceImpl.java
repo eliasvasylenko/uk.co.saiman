@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -25,6 +34,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -33,6 +46,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
@@ -56,7 +70,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 		private final double resolution;
 		private final int depth;
 
-		private final BufferingListener<SampledContinuousFunction> listener;
+		private final BufferingListener<SampledContinuousFunction<Dimensionless, Time>> listener;
 
 		private int counter;
 
@@ -105,6 +119,11 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	public static final int DEFAULT_ACQUISITION_COUNT = 1000;
 
 	@Reference
+	Units units;
+	private Unit<Dimensionless> intensityUnits;
+	private Unit<Time> timeUnits;
+
+	@Reference
 	PropertyLoader loader;
 	private SimulationProperties simulationText;
 
@@ -115,9 +134,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 	private int acquisitionCount;
 
-	private SampledContinuousFunction acquisitionData;
-	private final BufferingListener<SampledContinuousFunction> acquisitionListeners;
-	private BufferingListener<SampledContinuousFunction> singleAcquisitionListeners;
+	private SampledContinuousFunction<Dimensionless, Time> acquisitionData;
+	private final BufferingListener<SampledContinuousFunction<Dimensionless, Time>> acquisitionListeners;
+	private BufferingListener<SampledContinuousFunction<Dimensionless, Time>> singleAcquisitionListeners;
 
 	private final Object acquiringLock = new Object();
 	private ExperimentConfiguration experiment;
@@ -164,6 +183,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	@Activate
 	void activate() {
 		simulationText = loader.getProperties(SimulationProperties.class);
+
+		intensityUnits = units.count().get();
+		timeUnits = units.second().get();
 
 		new Thread(this::acquire).start();
 	}
@@ -337,9 +359,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	@Override
-	public void startAcquisition(Consumer<Observable<SampledContinuousFunction>> nextAcquisitionDataEvents) {
+	public void startAcquisition(Consumer<AcquisitionDevice> nextAcquisitionDataEvents) {
 		synchronized (acquiringLock) {
-			nextAcquisitionDataEvents.accept(singleAcquisitionListeners);
+			nextAcquisitionDataEvents.accept(this);
 			startAcquisition();
 		}
 	}
@@ -402,7 +424,8 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 						depth = getAcquisitionDepth();
 					}
 
-					acquisitionData = detector.acquire(random, resolution, depth, sample.getNextSample());
+					acquisitionData = detector.acquire(getSampleIntensityUnits(), getSampleTimeUnits(), random, resolution, depth,
+							sample.getNextSample());
 
 					acquisitionListeners.accept(acquisitionData);
 					if (runningExperiment) {
@@ -455,17 +478,17 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	@Override
-	public SampledContinuousFunction getLastAcquisitionData() {
+	public SampledContinuousFunction<Dimensionless, Time> getLastAcquisitionData() {
 		return acquisitionData;
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction> nextAcquisitionDataEvents() {
+	public Observable<SampledContinuousFunction<Dimensionless, Time>> nextAcquisitionDataEvents() {
 		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction> dataEvents() {
+	public Observable<SampledContinuousFunction<Dimensionless, Time>> dataEvents() {
 		return acquisitionListeners;
 	}
 
@@ -515,5 +538,15 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	@Override
 	public int getAcquisitionCount() {
 		return acquisitionCount;
+	}
+
+	@Override
+	public Unit<Dimensionless> getSampleIntensityUnits() {
+		return intensityUnits;
+	}
+
+	@Override
+	public Unit<Time> getSampleTimeUnits() {
+		return timeUnits;
 	}
 }

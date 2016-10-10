@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.api.
  *
@@ -31,17 +40,15 @@ import uk.co.strangeskies.reflection.TypeToken;
  * 
  * @author Elias N Vasylenko
  *
- * @param <S>
- *          the type of the experiment state
  * @param <T>
  *          the type of the result data
  */
-public class ExperimentResultType<S, T> implements Reified {
+public class ExperimentResultType<T> implements Reified {
 	private final String name;
-	private final ExperimentType<S> experimentType;
+	private final ExperimentType<?> experimentType;
 	private final TypeToken<T> dataType;
 
-	public ExperimentResultType(String name, ExperimentType<S> experimentType, TypeToken<T> dataType) {
+	public ExperimentResultType(String name, ExperimentType<?> experimentType, TypeToken<T> dataType) {
 		this.name = name;
 		this.experimentType = experimentType;
 		this.dataType = dataType;
@@ -51,7 +58,7 @@ public class ExperimentResultType<S, T> implements Reified {
 		return name;
 	}
 
-	public ExperimentType<S> getExperimentType() {
+	public ExperimentType<?> getExperimentType() {
 		return experimentType;
 	}
 
@@ -60,8 +67,7 @@ public class ExperimentResultType<S, T> implements Reified {
 	}
 
 	@Override
-	public TypeToken<ExperimentResultType<S, T>> getThisType() {
-		return new TypeToken<ExperimentResultType<S, T>>() {}.withTypeArgument(new TypeParameter<T>() {}, getDataType())
-				.withTypeArgument(new TypeParameter<S>() {}, getExperimentType().getStateType());
+	public TypeToken<ExperimentResultType<T>> getThisType() {
+		return new TypeToken<ExperimentResultType<T>>() {}.withTypeArgument(new TypeParameter<T>() {}, getDataType());
 	}
 }

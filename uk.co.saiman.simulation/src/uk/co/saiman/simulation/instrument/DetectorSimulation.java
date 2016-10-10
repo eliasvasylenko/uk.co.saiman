@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -20,6 +29,10 @@ package uk.co.saiman.simulation.instrument;
 
 import java.util.Random;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
+
 import uk.co.saiman.data.SampledContinuousFunction;
 
 /**
@@ -29,5 +42,6 @@ import uk.co.saiman.data.SampledContinuousFunction;
  * @author Elias N Vasylenko
  */
 public interface DetectorSimulation {
-	public SampledContinuousFunction acquire(Random random, double resolution, int depth, SimulatedSample sample);
+	SampledContinuousFunction<Dimensionless, Time> acquire(Unit<Dimensionless> intensityUnits, Unit<Time> timeUnits,
+			Random random, double resolution, int depth, SimulatedSample sample);
 }

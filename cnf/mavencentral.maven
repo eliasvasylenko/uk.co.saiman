@@ -1,0 +1,6 @@
+javax.measure:unit-api:1.0
+si.uom:si-units-java8:0.5
+si.uom:si-quantity:0.5
+tec.uom:uom-se:1.0
+tec.uom.lib:uom-lib-common:1.0
+tec.units:unit-ri:1.0

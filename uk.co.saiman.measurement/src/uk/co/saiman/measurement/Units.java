@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.measurement.
  *
@@ -18,8 +27,34 @@
  */
 package uk.co.saiman.measurement;
 
+import java.text.NumberFormat;
+
+import javax.measure.Quantity;
+import javax.measure.Unit;
+import javax.measure.quantity.AmountOfSubstance;
+import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.Mass;
+import javax.measure.quantity.Time;
 
 public interface Units {
+	String format(Unit<?> quantity);
+
+	String format(Quantity<?> quantity);
+
+	String format(Quantity<?> quantity, NumberFormat format);
+
+	UnitBuilder<Dimensionless> count();
+
+	UnitBuilder<Dimensionless> percent();
+
+	UnitBuilder<Mass> dalton();
+
+	UnitBuilder<Mass> gram();
+
 	UnitBuilder<Length> metre();
+
+	UnitBuilder<Time> second();
+
+	UnitBuilder<AmountOfSubstance> mole();
 }

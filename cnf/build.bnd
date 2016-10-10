@@ -38,12 +38,25 @@ Import-Package:\
 
 ## To enable baselining, uncomment the following lines:
 # -baseline: *
+
+
+-plugin.MavenCentral = \
+\
+		aQute.bnd.deployer.repository.wrapper.Plugin; \
+			location			=		"${build}/cache/wrapper"; \
+			reindex				=		true, \
+\
+		aQute.bnd.repository.maven.provider.MavenBndRepository; \
+			releaseUrl			=		https://repo.maven.apache.org/maven2/; \
+			name				=		Maven Central; \
+			index				=		${.}/mavencentral.maven
+
 -plugin.Managed: \
 \
-        aQute.bnd.deployer.repository.LocalIndexedRepo; \
-            name                =       Managed ; \
-            pretty              =       true ; \
-            local               =       ${build}/local
+		aQute.bnd.deployer.repository.LocalIndexedRepo; \
+			name				=       Managed ; \
+			pretty				=       true ; \
+			local				=       ${build}/local
 
 -plugin.Local: \
 \

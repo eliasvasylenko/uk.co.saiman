@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.msapex.
  *
@@ -18,30 +27,24 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import java.net.URL;
-
-import org.eclipse.fx.ui.services.theme.Stylesheet;
-import org.eclipse.fx.ui.services.theme.Theme;
-import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Component;
+import javafx.scene.Node;
+import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.strangeskies.reflection.TypeToken;
 
 /**
- * Default stylesheet for experiment interface components.
+ * A result editor contribution is injected by an eclipse context. The
+ * {@link ExperimentResult} associated with the contribution is available in the
+ * context and so can also be injected.
  * 
  * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          the type of result data
  */
-@Component(property = Constants.SERVICE_RANKING + "=" + ExperimentPartStylesheet.RANKING)
-public class ExperimentPartStylesheet implements Stylesheet {
-	@SuppressWarnings("javadoc")
-	public static final int RANKING = 0;
+public interface ResultEditorContribution<T> {
+	String getName();
 
-	@Override
-	public boolean appliesToTheme(Theme t) {
-		return true;
-	}
+	TypeToken<T> getResultType();
 
-	@Override
-	public URL getURL(Theme t) {
-		return ExperimentPartStylesheet.class.getClassLoader().getResource("css/experiment.css");
-	}
+	Node getContent();
 }

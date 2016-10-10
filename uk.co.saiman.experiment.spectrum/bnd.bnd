@@ -2,8 +2,11 @@ Bundle-Name: SAI :: Experiment :: Spectrum
 
 Export-Package: uk.co.saiman.experiment.spectrum
 
--includeresource: \
+-includeresource:\
 	l10n
+
+-include:\
+	l10n/bundle.properties
 
 -buildpath: \
 	${ss;utilities},\

@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -18,6 +27,9 @@
  */
 package uk.co.saiman.data;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 import uk.co.strangeskies.mathematics.expression.LockingExpression;
 
 /**
@@ -26,18 +38,28 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  * wrapped can be changed via {@link #setComponent(ContinuousFunction)}, which
  * will notify listeners of the modification.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class ContinuousFunctionExpression extends LockingExpression<ContinuousFunction, ContinuousFunction>
-		implements ContinuousFunctionDecorator {
-	private ContinuousFunction component;
+public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends LockingExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
+		implements ContinuousFunctionDecorator<UD, UR> {
+	private ContinuousFunction<UD, UR> component;
 
 	/**
 	 * Create a default empty expression about the function
-	 * {@link ContinuousFunction#EMPTY}.
+	 * {@link ContinuousFunction#empty(Unit, Unit)}.
+	 * 
+	 * @param unitDomain
+	 *          the units of measurement of values in the domain
+	 * @param unitRange
+	 *          the units of measurement of values in the range
 	 */
-	public ContinuousFunctionExpression() {
-		this(ContinuousFunction.EMPTY);
+	public ContinuousFunctionExpression(Unit<UD> unitDomain, Unit<UR> unitRange) {
+		this(ContinuousFunction.empty(unitDomain, unitRange));
 	}
 
 	/**
@@ -46,12 +68,12 @@ public class ContinuousFunctionExpression extends LockingExpression<ContinuousFu
 	 * @param component
 	 *          The component to wrap
 	 */
-	public ContinuousFunctionExpression(ContinuousFunction component) {
+	public ContinuousFunctionExpression(ContinuousFunction<UD, UR> component) {
 		setComponent(component);
 	}
 
 	@Override
-	public ContinuousFunction getComponent() {
+	public ContinuousFunction<UD, UR> getComponent() {
 		getReadLock().lock();
 		try {
 			return component;
@@ -66,7 +88,7 @@ public class ContinuousFunctionExpression extends LockingExpression<ContinuousFu
 	 * @param component
 	 *          The continuous function we wish to wrap
 	 */
-	public void setComponent(ContinuousFunction component) {
+	public void setComponent(ContinuousFunction<UD, UR> component) {
 		beginWrite();
 
 		try {
@@ -79,12 +101,12 @@ public class ContinuousFunctionExpression extends LockingExpression<ContinuousFu
 	}
 
 	@Override
-	public ContinuousFunctionExpression copy() {
-		return new ContinuousFunctionExpression(getComponent().copy());
+	public ContinuousFunctionExpression<UD, UR> copy() {
+		return new ContinuousFunctionExpression<>(getComponent().copy());
 	}
 
 	@Override
-	protected ContinuousFunction evaluate() {
+	protected ContinuousFunction<UD, UR> evaluate() {
 		return this;
 	}
 }

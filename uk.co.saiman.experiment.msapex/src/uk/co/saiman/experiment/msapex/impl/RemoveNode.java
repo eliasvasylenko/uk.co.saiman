@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.msapex.
  *
@@ -16,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.msapex;
+package uk.co.saiman.experiment.msapex.impl;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -39,7 +48,7 @@ public class RemoveNode {
 
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
-		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
+		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
 		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
 
 		if (!(itemData instanceof ExperimentNode<?, ?>)) {

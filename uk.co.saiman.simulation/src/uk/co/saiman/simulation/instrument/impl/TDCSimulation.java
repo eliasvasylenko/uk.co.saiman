@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -20,6 +29,10 @@ package uk.co.saiman.simulation.instrument.impl;
 
 import java.util.Random;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
+
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.SampledContinuousFunction;
@@ -39,13 +52,15 @@ public class TDCSimulation implements DetectorSimulation {
 	private final double[] hitIntensities = new double[MAXIMUM_HITS];
 
 	@Override
-	public SampledContinuousFunction acquire(Random random, double resolution, int depth, SimulatedSample sample) {
+	public SampledContinuousFunction<Dimensionless, Time> acquire(Unit<Dimensionless> intensityUnits,
+			Unit<Time> timeUnits, Random random, double resolution, int depth, SimulatedSample sample) {
 		int hits = random.nextInt(MAXIMUM_HITS);
 
 		/*
 		 * TODO distribute "hits" number of hits
 		 */
 
-		return new SparseSampledContinuousFunction(1 / resolution, depth, hits, hitIndices, hitIntensities);
+		return new SparseSampledContinuousFunction<>(intensityUnits, timeUnits, 1 / resolution, depth, hits, hitIndices,
+				hitIntensities);
 	}
 }

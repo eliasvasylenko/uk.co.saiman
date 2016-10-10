@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.provider.
  *
@@ -18,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +45,6 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
 import uk.co.strangeskies.utilities.ObservableProperty;
-import uk.co.strangeskies.utilities.ObservablePropertyImpl;
 import uk.co.strangeskies.utilities.ObservableValue;
 
 /**
@@ -57,7 +66,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private final ObservableProperty<ExperimentLifecycleState, ExperimentLifecycleState> lifecycleState;
 	private final S state;
 
-	private HashMap<ExperimentResultType<? super S, ?>, ExperimentResultImpl<S, ?>> results;
+	private HashMap<ExperimentResultType<?>, ExperimentResultImpl<?>> results;
 
 	/**
 	 * Try to create a new experiment node of the given type, and with the given
@@ -92,7 +101,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 		children = new ArrayList<>();
 
-		lifecycleState = ObservablePropertyImpl.over(ExperimentLifecycleState.PREPARATION);
+		lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
 		state = type.createState(this);
 
 		results = new HashMap<>();
@@ -115,7 +124,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	@Override
 	public Path getExperimentDataPath() {
-		return parent.getExperimentDataPath().resolve(getIndex() + "_" + type.getName());
+		return getParent().map(p -> p.getExperimentDataPath().resolve(getIndex() + "_" + type.getName()))
+				.orElse(getExperimentWorkspace().getWorkspaceDataPath().resolve(getRoot().getState().getName()));
 	}
 
 	@Override
@@ -214,21 +224,21 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		lifecycleState.set(ExperimentLifecycleState.PROCESSING);
 
 		try {
+			Files.createDirectories(getExperimentDataPath());
+
 			getType().execute(this);
 
 			lifecycleState.set(ExperimentLifecycleState.COMPLETION);
-
 			return true;
 		} catch (Exception e) {
 			lifecycleState.set(ExperimentLifecycleState.FAILURE);
-
 			return false;
 		}
 	}
 
 	@Override
-	public Stream<ExperimentResult<S, ?>> getResults() {
-		return results.values().stream().map(t -> (ExperimentResult<S, ?>) t);
+	public Stream<ExperimentResult<?>> getResults() {
+		return results.values().stream().map(t -> (ExperimentResult<?>) t);
 	}
 
 	@Override
@@ -237,13 +247,15 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	@Override
-	public <U> void setResult(ExperimentResultType<? super S, U> resultType, U resultData) {
-		getResult(resultType).setData(resultData);
+	public <U> ExperimentResultImpl<U> setResult(ExperimentResultType<U> resultType, U resultData) {
+		ExperimentResultImpl<U> result = getResult(resultType);
+		result.setData(resultData);
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <U> ExperimentResultImpl<S, U> getResult(ExperimentResultType<? super S, U> resultType) {
-		return (ExperimentResultImpl<S, U>) results.get(resultType);
+	public <U> ExperimentResultImpl<U> getResult(ExperimentResultType<U> resultType) {
+		return (ExperimentResultImpl<U>) results.get(resultType);
 	}
 }

@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -22,6 +31,9 @@ import static uk.co.strangeskies.mathematics.Range.between;
 
 import java.util.Arrays;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
 
@@ -29,11 +41,18 @@ import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
  * A function described by a convolution operation over a given set of impulses,
  * or stick intensities, by a given peak shape.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<ContinuousFunction, ContinuousFunction>
-		implements ContinuousFunction {
+public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR extends Quantity<UR>> extends
+		ImmutableExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>> implements ContinuousFunction<UD, UR> {
 	private static final int TWEEN_STEPS = 5;
+
+	private final Unit<UD> unitDomain;
+	private final Unit<UR> unitRange;
 
 	private final int samples;
 	private final double[] values;
@@ -46,6 +65,10 @@ public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<Con
 	 * Define a new function by way of convolution of the given samples by the
 	 * given peak shape description.
 	 * 
+	 * @param unitDomain
+	 *          the units of measurement of values in the domain
+	 * @param unitRange
+	 *          the units of measurement of values in the range
 	 * @param samples
 	 *          the number of contributing samples
 	 * @param values
@@ -55,8 +78,11 @@ public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<Con
 	 * @param peakFunctionFactory
 	 *          the peak function by which to convolve
 	 */
-	public PeakShapeImpulseConvolutionFunction(int samples, double[] values, double[] intensities,
-			PeakShapeFunctionFactory peakFunctionFactory) {
+	public PeakShapeImpulseConvolutionFunction(Unit<UD> unitDomain, Unit<UR> unitRange, int samples, double[] values,
+			double[] intensities, PeakShapeFunctionFactory peakFunctionFactory) {
+		this.unitDomain = unitDomain;
+		this.unitRange = unitRange;
+
 		/*
 		 * TODO sort values
 		 */
@@ -74,12 +100,22 @@ public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<Con
 	}
 
 	@Override
-	public ContinuousFunction getValue() {
+	public Unit<UD> getDomainUnit() {
+		return unitDomain;
+	}
+
+	@Override
+	public Unit<UR> getRangeUnit() {
+		return unitRange;
+	}
+
+	@Override
+	public ContinuousFunction<UD, UR> getValue() {
 		return this;
 	}
 
 	@Override
-	public ContinuousFunction copy() {
+	public ContinuousFunction<UD, UR> copy() {
 		return this;
 	}
 
@@ -170,7 +206,7 @@ public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<Con
 	}
 
 	@Override
-	public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+	public SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
 		int maximumLength = resolvableUnits * 3 + 1;
 		double[] values = new double[maximumLength];
 		double[] intensities = new double[maximumLength];
@@ -195,6 +231,6 @@ public class PeakShapeImpulseConvolutionFunction extends ImmutableExpression<Con
 		values[sampleCount] = endX;
 		intensities[sampleCount] = sample(endX);
 
-		return new ArraySampledContinuousFunction(sampleCount, values, intensities);
+		return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), sampleCount, values, intensities);
 	}
 }

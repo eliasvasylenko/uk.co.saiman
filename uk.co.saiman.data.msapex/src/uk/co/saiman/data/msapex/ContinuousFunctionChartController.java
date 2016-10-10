@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.msapex.
  *
@@ -18,16 +27,26 @@
  */
 package uk.co.saiman.data.msapex;
 
+import static uk.co.strangeskies.mathematics.Range.between;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import javax.inject.Inject;
+import javax.measure.Unit;
+
+import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener.Change;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -35,10 +54,15 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.data.DataException;
+import uk.co.saiman.measurement.Units;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.utilities.collection.MultiHashMap;
+import uk.co.strangeskies.utilities.collection.MultiMap;
 
 /**
  * FXML controller for an annotatable data chart over a
@@ -56,17 +80,20 @@ public class ContinuousFunctionChartController {
 	@FXML
 	private LineChart<Number, Number> lineChart;
 
-	private ObservableSet<ContinuousFunction> continuousFunctions = FXCollections.observableSet(new LinkedHashSet<>());
-	private final Map<ContinuousFunction, ContinuousFunctionSeries> series = new HashMap<>();
+	private ObservableSet<ContinuousFunction<?, ?>> continuousFunctions;
+	private final Map<ContinuousFunction<?, ?>, ContinuousFunctionSeries> series;
 
 	private boolean zoomed;
-	private final Range<Double> domain = Range.between(0d, 100d);
-	private final Range<Double> range = Range.between(0d, 100d);
+	private final Range<Double> domain = between(0d, 100d);
+	private final Range<Double> range = between(0d, 100d);
 	private static final double ZOOM_STEP_PERCENTAGE = 20;
 	private static final double MAX_ZOOM_STEP = 0.5;
 	private static final double PIXEL_ZOOM_DAMP = 50;
 	private static final double MOVE_STEP_PERCENTAGE = 10;
-	private static final Range<Double> RANGE_FIT = Range.between(1.05d, 1.35d);
+	private static final Range<Double> RANGE_FIT = between(1.05d, 1.35d);
+
+	private static final int REPEAT_RATE = 4;
+	private final AnimationTimer refreshTimer;
 
 	/*
 	 * Annotations
@@ -74,10 +101,42 @@ public class ContinuousFunctionChartController {
 	@FXML
 	private AnchorPane annotationPane;
 
-	private ObservableSet<ChartAnnotation<?>> annotations = FXCollections.observableSet();
+	private ObservableSet<ChartAnnotation<?>> annotations;
 
-	private Map<TypeToken<?>, AnnotationHandler<?>> annotationHandlers = new HashMap<>();
-	private Map<ChartAnnotation<?>, Node> annotationNodes = new HashMap<>();
+	private Map<TypeToken<?>, AnnotationHandler<?>> annotationHandlers;
+	private Map<ChartAnnotation<?>, Node> annotationNodes;
+
+	@Inject
+	Units units;
+
+	public ContinuousFunctionChartController() {
+		continuousFunctions = FXCollections.observableSet(new LinkedHashSet<>());
+		series = new HashMap<>();
+
+		annotations = FXCollections.observableSet(new LinkedHashSet<>());
+		annotationHandlers = new HashMap<>();
+		annotationNodes = new HashMap<>();
+
+		refreshTimer = new AnimationTimer() {
+			int count = 0;
+
+			@Override
+			public void handle(long now) {
+				if (++count >= REPEAT_RATE) {
+					count = 0;
+
+					triggerRefresh();
+				}
+			}
+		};
+		refreshTimer.start();
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		refreshTimer.stop();
+		super.finalize();
+	}
 
 	/**
 	 * @return The root node of the chart
@@ -111,7 +170,7 @@ public class ContinuousFunctionChartController {
 	/**
 	 * @return The backing functions of the chart
 	 */
-	public ObservableSet<ContinuousFunction> getContinuousFunctions() {
+	public ObservableSet<ContinuousFunction<?, ?>> getContinuousFunctions() {
 		return continuousFunctions;
 	}
 
@@ -133,11 +192,20 @@ public class ContinuousFunctionChartController {
 		annotations.addListener(this::annotationsChanged);
 		continuousFunctions.addListener(this::continuousFunctionsChanged);
 
-		getXAxis().scaleProperty().addListener(num -> updateResolutionDomain());
+		getXAxis().scaleProperty().addListener(num -> updateAxis(getXAxis()));
+		getYAxis().scaleProperty().addListener(num -> updateAxis(getYAxis()));
 
 		resetZoomDomain();
-		updateResolutionDomain();
+		updateAxes();
 		updateAnnotations();
+	}
+
+	private Stream<ContinuousFunctionSeries> series() {
+		return series.values().stream();
+	}
+
+	private void makeDirty() {
+		series().forEach(ContinuousFunctionSeries::makeDirty);
 	}
 
 	/**
@@ -206,9 +274,9 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
-	private Range<Double> getMaxZoom(Function<ContinuousFunction, Range<Double>> continuousFunctionRange) {
+	private Range<Double> getMaxZoom(Function<ContinuousFunction<?, ?>, Range<Double>> continuousFunctionRange) {
 		synchronized (domain) {
-			return new ArrayList<>(continuousFunctions).stream().map(continuousFunctionRange)
+			return series().map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction).map(continuousFunctionRange)
 					.reduce(Range::getExtendedThrough).orElse(Range.between(0d, 100d));
 		}
 	}
@@ -269,14 +337,24 @@ public class ContinuousFunctionChartController {
 	 * functions.
 	 */
 	public void resetZoomDomain() {
+		resetZoomDomainImpl();
+	}
+
+	protected boolean resetZoomDomainImpl() {
+		boolean changed = false;
+
 		synchronized (domain) {
 			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
-			if (!maxZoom.equals(domain)) {
+
+			changed = !maxZoom.equals(domain);
+			if (changed) {
 				setDomainImpl(maxZoom.getFrom(), maxZoom.getTo());
 			}
 
 			zoomed = false;
 		}
+
+		return changed;
 	}
 
 	/**
@@ -294,18 +372,22 @@ public class ContinuousFunctionChartController {
 
 			if (maxZoom.getFrom() >= 0) {
 				range.setFrom(0d);
-			} else if (reset || maxZoom.getFrom() * RANGE_FIT.getTo() < range.getFrom()) {
-				range.setFrom(maxZoom.getFrom() * RANGE_FIT.getTo());
-			} else if (maxZoom.getFrom() * RANGE_FIT.getFrom() > range.getFrom()) {
+
+			} else if (range.getFrom() < maxZoom.getFrom() * RANGE_FIT.getFrom() || reset) {
 				range.setFrom(maxZoom.getFrom() * RANGE_FIT.getFrom());
+
+			} else if (range.getFrom() > maxZoom.getFrom() * RANGE_FIT.getTo()) {
+				range.setFrom(maxZoom.getFrom() * RANGE_FIT.getTo());
 			}
 
 			if (maxZoom.getTo() <= 0) {
 				range.setTo(0d);
-			} else if (reset || maxZoom.getTo() * RANGE_FIT.getTo() < range.getTo()) {
-				range.setTo(maxZoom.getTo() * RANGE_FIT.getTo());
-			} else if (maxZoom.getTo() * RANGE_FIT.getFrom() > range.getTo()) {
+
+			} else if (range.getTo() < maxZoom.getTo() * RANGE_FIT.getFrom() || reset) {
 				range.setTo(maxZoom.getTo() * RANGE_FIT.getFrom());
+
+			} else if (range.getTo() > maxZoom.getTo() * RANGE_FIT.getTo()) {
+				range.setTo(maxZoom.getTo() * RANGE_FIT.getTo());
 			}
 
 			getYAxis().setLowerBound(range.getFrom());
@@ -385,25 +467,10 @@ public class ContinuousFunctionChartController {
 			getXAxis().setLowerBound(from);
 			getXAxis().setUpperBound(to);
 
-			updateZoomDomain();
-
 			zoomed = true;
-
 			updateZoomRange(true);
-		}
-	}
 
-	private void updateZoomDomain() {
-		synchronized (this.domain) {
-			new ArrayList<>(continuousFunctions).stream().map(series::get).forEach(s -> s.setDomain(domain));
-		}
-	}
-
-	private void updateResolutionDomain() {
-		synchronized (this.domain) {
-			int from = (int) getXAxis().getDisplayPosition(domain.getFrom());
-			int to = (int) getXAxis().getDisplayPosition(domain.getTo());
-			new ArrayList<>(continuousFunctions).stream().map(series::get).forEach(s -> s.setResolution(to - from));
+			makeDirty();
 		}
 	}
 
@@ -425,36 +492,96 @@ public class ContinuousFunctionChartController {
 		updateAnnotations();
 	}
 
-	private void continuousFunctionModified(ContinuousFunction continuousFunction) {
-		synchronized (this.domain) {
-			if (!zoomed) {
-				resetZoomDomain();
-			} else {
-				updateZoomRange(false);
-			}
-		}
-	}
-
-	private void continuousFunctionsChanged(Change<? extends ContinuousFunction> d) {
+	private void continuousFunctionsChanged(Change<? extends ContinuousFunction<?, ?>> d) {
 		if (d.wasAdded()) {
-			ContinuousFunction continuousFunction = d.getElementAdded();
-
+			ContinuousFunction<?, ?> continuousFunction = d.getElementAdded();
 			ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(continuousFunction);
 
 			series.put(continuousFunction, continuousFunctionSeries);
 			lineChart.getData().add(continuousFunctionSeries.getSeries());
-
-			continuousFunction.addWeakObserver(this, o -> c -> o.continuousFunctionModified(c.getValue()));
-			continuousFunctionModified(continuousFunction);
 		} else if (d.wasRemoved()) {
-			ContinuousFunction continuousFunction = d.getElementRemoved();
+			ContinuousFunction<?, ?> continuousFunction = d.getElementRemoved();
+			ContinuousFunctionSeries continuousFunctionSeries;
 
-			lineChart.getData().remove(series.get(continuousFunction).getSeries());
+			continuousFunctionSeries = series.remove(continuousFunction);
+			lineChart.getData().remove(continuousFunctionSeries.getSeries());
 
-			continuousFunction.removeWeakObserver(this);
+			continuousFunction.removeOwnedObserver(this);
+
+			if (series.isEmpty()) {
+				zoomed = false;
+			}
 		}
 
 		updateAnnotations();
+	}
+
+	private void triggerRefresh() {
+		synchronized (this.domain) {
+			boolean refreshed = series().map(ContinuousFunctionSeries::refresh).reduce(false, (a, b) -> a || b);
+
+			if (refreshed) {
+				synchronized (this.domain) {
+					if (!zoomed) {
+						resetZoomDomainImpl();
+					}
+					updateZoomRange(false);
+				}
+
+				updateAxes();
+
+				series().forEach(s -> s.render(domain, getResolution(getXAxis())));
+			}
+		}
+	}
+
+	private int getResolution(NumberAxis axis) {
+		int xFrom = (int) axis.getDisplayPosition(domain.getFrom());
+		int xTo = (int) axis.getDisplayPosition(domain.getTo());
+		return xTo - xFrom;
+	}
+
+	NumberAxis extraY = new NumberAxis();
+	@FXML
+	HBox extraAxes;
+
+	private void updateAxes() {
+		if (!getContinuousFunctions().isEmpty()) {
+			Unit<?> xUnit = null;
+			MultiMap<Unit<?>, ContinuousFunction<?, ?>, Set<ContinuousFunction<?, ?>>> yUnits = new MultiHashMap<>(
+					HashSet::new);
+
+			for (ContinuousFunction<?, ?> function : getContinuousFunctions()) {
+				Unit<?> functionXUnit = function.getDomainUnit().getSystemUnit();
+
+				if (xUnit == null) {
+					xUnit = functionXUnit;
+				} else {
+					if (!xUnit.equals(functionXUnit)) {
+						Unit<?> xUnitFinal = xUnit;
+						throw new DataException(p -> p.incompatibleDomainUnits(xUnitFinal, functionXUnit));
+					}
+				}
+
+				yUnits.add(function.getRangeUnit().getSystemUnit(), function);
+			}
+
+			extraAxes.getChildren().clear();
+			extraY.setSide(Side.RIGHT);
+			extraAxes.getChildren().add(extraY);
+
+			updateAxis(getYAxis());
+			updateAxis(getXAxis());
+		}
+	}
+
+	private void updateAxis(NumberAxis axis) {
+		int resolutionEstimate = getResolution(axis);
+
+		/*
+		 * TODO set graph units
+		 */
+
 	}
 
 	private void updateAnnotations() {

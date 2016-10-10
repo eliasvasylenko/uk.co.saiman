@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -23,17 +32,28 @@ import static java.lang.Math.min;
 
 import java.util.Arrays;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
 
 /**
  * A (currently) immutable implementation of
- * {@link RegularSampledContinuousFunction} which optimises memory usage for
+ * {@link RegularSampledContinuousFunction} which optimizes memory usage for
  * sampled continua with mostly 0 sample values in the codomain.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class SparseSampledContinuousFunction extends ImmutableExpression<ContinuousFunction, ContinuousFunction>
-		implements RegularSampledContinuousFunction {
+public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends ImmutableExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
+		implements RegularSampledContinuousFunction<UD, UR> {
+	private final Unit<UD> unitDomain;
+	private final Unit<UR> unitRange;
+
 	private final double frequency;
 	private final int depth;
 
@@ -45,6 +65,10 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 	 * Samples at indices other than those given are assumed to be of intensity 0
 	 * in the codomain.
 	 * 
+	 * @param unitDomain
+	 *          the units of measurement of values in the domain
+	 * @param unitRange
+	 *          the units of measurement of values in the range
 	 * @param frequency
 	 *          The number of samples per unit in the domain
 	 * @param depth
@@ -56,8 +80,11 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 	 * @param intensities
 	 *          The intensities at the given non-zero sample indices
 	 */
-	public SparseSampledContinuousFunction(double frequency, int depth, int samples, int[] indices,
-			double[] intensities) {
+	public SparseSampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange, double frequency, int depth,
+			int samples, int[] indices, double[] intensities) {
+		this.unitDomain = unitDomain;
+		this.unitRange = unitRange;
+
 		this.frequency = frequency;
 		this.depth = depth;
 
@@ -73,12 +100,20 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 	 * Create a memory efficient view of the given array, with the given
 	 * frequency.
 	 * 
+	 * @param unitDomain
+	 *          the units of measurement of values in the domain
+	 * @param unitRange
+	 *          the units of measurement of values in the range
 	 * @param frequency
 	 *          The number of samples per unit in the domain
 	 * @param intensities
 	 *          The intensities as a sequence of samples at the given frequency
 	 */
-	public SparseSampledContinuousFunction(double frequency, double[] intensities) {
+	public SparseSampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange, double frequency,
+			double[] intensities) {
+		this.unitDomain = unitDomain;
+		this.unitRange = unitRange;
+
 		this.frequency = frequency;
 		int depth = 0;
 
@@ -102,6 +137,16 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 				index++;
 			}
 		}
+	}
+
+	@Override
+	public Unit<UD> getDomainUnit() {
+		return unitDomain;
+	}
+
+	@Override
+	public Unit<UR> getRangeUnit() {
+		return unitRange;
 	}
 
 	private int getIndexIndex(int index) {
@@ -155,17 +200,17 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 	}
 
 	@Override
-	public SparseSampledContinuousFunction copy() {
+	public SparseSampledContinuousFunction<UD, UR> copy() {
 		return this;
 	}
 
 	@Override
-	public ContinuousFunction getValue() {
+	public ContinuousFunction<UD, UR> getValue() {
 		return this;
 	}
 
 	@Override
-	public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+	public SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
 		int sourceSamples = indices.length;
 
 		/*
@@ -175,9 +220,11 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 			double from = max(startX, 0);
 			double to = min(endX, getRange().getTo());
 			if (to > from) {
-				return new ArraySampledContinuousFunction(2, new double[] { from, to }, new double[] { 0, 0 });
+				return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), 2, new double[] { from, to },
+						new double[] { 0, 0 });
 			} else {
-				return new ArraySampledContinuousFunction(2, new double[] { from }, new double[] { 0 });
+				return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), 2, new double[] { from },
+						new double[] { 0 });
 			}
 		}
 
@@ -218,7 +265,7 @@ public class SparseSampledContinuousFunction extends ImmutableExpression<Continu
 			sampleCount++;
 		}
 
-		return new ArraySampledContinuousFunction(sampleCount, positions, intensities).resample(startX, endX,
-				resolvableUnits);
+		return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), sampleCount, positions, intensities)
+				.resample(startX, endX, resolvableUnits);
 	}
 }

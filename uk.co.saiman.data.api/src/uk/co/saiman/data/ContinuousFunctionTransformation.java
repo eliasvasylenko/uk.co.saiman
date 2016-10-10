@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -20,6 +29,8 @@ package uk.co.saiman.data;
 
 import java.util.function.Function;
 
+import javax.measure.Quantity;
+
 import uk.co.strangeskies.mathematics.expression.DependentExpression;
 
 /**
@@ -31,11 +42,16 @@ import uk.co.strangeskies.mathematics.expression.DependentExpression;
  * forwarded to listeners, and the transformation will only be evaluated lazily,
  * as necessary.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class ContinuousFunctionTransformation extends DependentExpression<ContinuousFunction, ContinuousFunction>
-		implements ContinuousFunctionDecorator {
-	private final Function<ContinuousFunction, ContinuousFunction> transformation;
+public class ContinuousFunctionTransformation<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends DependentExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
+		implements ContinuousFunctionDecorator<UD, UR> {
+	private final Function<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>> transformation;
 
 	/**
 	 * Create a mapping from a given {@link ContinuousFunction} to a
@@ -48,25 +64,25 @@ public class ContinuousFunctionTransformation extends DependentExpression<Contin
 	 *          The transformation to apply to the backing function
 	 */
 	@SuppressWarnings("unchecked")
-	public <C extends ContinuousFunction> ContinuousFunctionTransformation(C dependency,
-			Function<C, ContinuousFunction> transformation) {
+	public <C extends ContinuousFunction<UD, UR>> ContinuousFunctionTransformation(C dependency,
+			Function<C, ContinuousFunction<UD, UR>> transformation) {
 		super(dependency);
 
-		this.transformation = (Function<ContinuousFunction, ContinuousFunction>) transformation;
+		this.transformation = (Function<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>) transformation;
 	}
 
 	@Override
-	public ContinuousFunction getComponent() {
+	public ContinuousFunction<UD, UR> getComponent() {
 		return getValue();
 	}
 
 	@Override
-	public ContinuousFunction copy() {
-		return new ContinuousFunctionTransformation(getComponent(), transformation);
+	public ContinuousFunction<UD, UR> copy() {
+		return new ContinuousFunctionTransformation<>(getComponent(), transformation);
 	}
 
 	@Override
-	protected ContinuousFunction evaluate() {
+	protected ContinuousFunction<UD, UR> evaluate() {
 		return this;
 	}
 }

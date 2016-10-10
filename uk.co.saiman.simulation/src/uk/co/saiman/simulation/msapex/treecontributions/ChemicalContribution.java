@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -20,13 +29,18 @@ package uk.co.saiman.simulation.msapex.treecontributions;
 
 import java.util.Objects;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
 
 @SuppressWarnings("javadoc")
-public class ChemicalContribution
-		implements PseudoClassTreeCellContribution<ChemicalColor>, TreeTextContribution<ChemicalColor> {
+@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
+public class ChemicalContribution implements EclipseTreeContribution<ChemicalColor>,
+		PseudoClassTreeCellContribution<ChemicalColor>, TreeTextContribution<ChemicalColor> {
 	@Override
 	public <U extends ChemicalColor> String getText(TreeItemData<U> data) {
 		return data.data().getName().toString();

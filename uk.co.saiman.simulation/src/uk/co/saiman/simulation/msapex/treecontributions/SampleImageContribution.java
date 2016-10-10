@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -22,17 +31,22 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+
 import javafx.scene.Node;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.msapex.ChooseSimulatedSampleImage;
 import uk.co.strangeskies.eclipse.CommandTreeCellContribution;
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
 
 @SuppressWarnings("javadoc")
+@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
 public class SampleImageContribution extends CommandTreeCellContribution<SimulatedSampleImage>
 		implements PseudoClassTreeCellContribution<SimulatedSampleImage>, TreeTextContribution<SimulatedSampleImage> {
 	@Inject

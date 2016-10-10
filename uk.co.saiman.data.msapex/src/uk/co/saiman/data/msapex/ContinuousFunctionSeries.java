@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.msapex.
  *
@@ -22,14 +31,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.strangeskies.fx.FXUtilities;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
 
@@ -48,8 +55,9 @@ public class ContinuousFunctionSeries {
 	/*
 	 * Continuous function data
 	 */
-	private final ContinuousFunction continuousFunction;
-	private final Consumer<Expression<ContinuousFunction, ContinuousFunction>> continuousFunctionObserver;
+	private final ContinuousFunction<?, ?> continuousFunction;
+	private final Consumer<Expression<? extends ContinuousFunction<?, ?>, ? extends ContinuousFunction<?, ?>>> continuousFunctionObserver;
+	private ContinuousFunction<?, ?> latestRenderedContinuousFunction = null;
 
 	/*
 	 * Series data
@@ -60,14 +68,8 @@ public class ContinuousFunctionSeries {
 	/*
 	 * Refresh handling
 	 */
-	private boolean refresh;
-	private AnimationTimer refreshTimer;
-
-	/*
-	 * View data
-	 */
-	private final Range<Double> domain = Range.between(0d, 100d);
-	private int resolution = 100;
+	private Object mutex;
+	private boolean dirty;
 
 	/**
 	 * Create a mapping from a given {@link ContinuousFunction} to a
@@ -76,24 +78,19 @@ public class ContinuousFunctionSeries {
 	 * @param continuousFunction
 	 *          The backing function
 	 */
-	public ContinuousFunctionSeries(ContinuousFunction continuousFunction) {
+	public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction) {
 		this.continuousFunction = continuousFunction;
-		continuousFunctionObserver = e -> refresh();
 
 		data = FXCollections.observableArrayList();
 		series = new Series<>(data);
 
-		continuousFunction.addObserver(continuousFunctionObserver);
-
-		refreshTimer = new AnimationTimer() {
-			@Override
-			public void handle(long now) {
-				refreshImpl();
-			}
-		};
-		refreshTimer.start();
-
+		mutex = new Object();
+		makeDirty();
 		refresh();
+		makeDirty();
+
+		continuousFunctionObserver = e -> makeDirty();
+		continuousFunction.addWeakObserver(this, s -> s.continuousFunctionObserver);
 	}
 
 	/**
@@ -105,68 +102,89 @@ public class ContinuousFunctionSeries {
 	 * @param name
 	 *          The name of the series
 	 */
-	public ContinuousFunctionSeries(ContinuousFunction continuousFunction, String name) {
+	public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction, String name) {
 		this(continuousFunction);
 
 		series.setName(name);
 	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		continuousFunction.removeObserver(continuousFunctionObserver);
-		refreshTimer.stop();
-		super.finalize();
-	}
-
-	private void refresh() {
-		synchronized (refreshTimer) {
-			refresh = true;
-		}
-	}
-
-	private ContinuousFunction getRefreshedContinuousFunction() {
-		synchronized (refreshTimer) {
-			if (refresh) {
-				refresh = false;
-
-				return this.continuousFunction.getValue().copy();
-			} else {
-				return null;
-			}
-		}
-	}
-
-	private void refreshImpl() {
-		ContinuousFunction continuousFunction = getRefreshedContinuousFunction();
-
-		if (continuousFunction != null) {
-			SampledContinuousFunction sampledContinuousFunction = continuousFunction.resample(domain.getFrom(),
-					domain.getTo(), resolution);
-
-			FXUtilities.runNow(() -> {
-				if (data.size() > sampledContinuousFunction.getDepth()) {
-					data.remove(sampledContinuousFunction.getDepth(), data.size());
-				}
-
-				for (int i = 0; i < data.size(); i++) {
-					data.get(i).setXValue(sampledContinuousFunction.getX(i));
-					data.get(i).setYValue(sampledContinuousFunction.getY(i));
-				}
-
-				List<Data<Number, Number>> dataTemp = new ArrayList<>(sampledContinuousFunction.getDepth() - data.size());
-				for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
-					dataTemp.add(new Data<>(sampledContinuousFunction.getX(i), sampledContinuousFunction.getY(i)));
-				}
-				data.addAll(dataTemp);
-			});
+	/**
+	 * Flag the series as out of date with respect to the rendering environment or
+	 * continuous function state.
+	 */
+	public void makeDirty() {
+		synchronized (mutex) {
+			dirty = true;
 		}
 	}
 
 	/**
-	 * @return The continuous function backing the series
+	 * Clear the dirty flag, if present, and ensure the
+	 * {@link #latestRenderedContinuousFunction latest continuous function for
+	 * rendering} is up to date.
+	 * 
+	 * @return true if the latest continuous function for rendering has changed,
+	 *         false otherwise
 	 */
-	public ContinuousFunction getContinuousFunction() {
+	public boolean refresh() {
+		boolean dirtied = false;
+		synchronized (mutex) {
+			if (dirty) {
+				dirtied = true;
+				dirty = false;
+
+				latestRenderedContinuousFunction = getBackingContinuousFunction().decoupleValue();
+			}
+		}
+
+		return dirtied;
+	}
+
+	/**
+	 * Render the {@link #latestRenderedContinuousFunction latest continuous
+	 * function} into the {@link #getSeries() series} for the given range and
+	 * resolution.
+	 * 
+	 * @param domain
+	 *          the range to render through in the domain
+	 * @param resolution
+	 *          the resolution to render at in the domain
+	 */
+	public void render(Range<Double> domain, int resolution) {
+		SampledContinuousFunction<?, ?> sampledContinuousFunction = latestRenderedContinuousFunction
+				.resample(domain.getFrom(), domain.getTo(), resolution);
+
+		if (data.size() > sampledContinuousFunction.getDepth()) {
+			data.remove(sampledContinuousFunction.getDepth(), data.size());
+		}
+
+		for (int i = 0; i < data.size(); i++) {
+			data.get(i).setXValue(sampledContinuousFunction.getX(i));
+			data.get(i).setYValue(sampledContinuousFunction.getY(i));
+		}
+
+		int remainingData = sampledContinuousFunction.getDepth() - data.size();
+		if (remainingData > 0) {
+			List<Data<Number, Number>> dataTemp = new ArrayList<>(remainingData);
+			for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
+				dataTemp.add(new Data<>(sampledContinuousFunction.getX(i), sampledContinuousFunction.getY(i)));
+			}
+			data.addAll(dataTemp);
+		}
+	}
+
+	/**
+	 * @return the continuous function backing the series
+	 */
+	public ContinuousFunction<?, ?> getBackingContinuousFunction() {
 		return continuousFunction;
+	}
+
+	/**
+	 * @return the latest continuous function prepared for rendering
+	 */
+	public ContinuousFunction<?, ?> getLatestRenderedContinuousFunction() {
+		return latestRenderedContinuousFunction;
 	}
 
 	/**
@@ -174,33 +192,5 @@ public class ContinuousFunctionSeries {
 	 */
 	public Series<Number, Number> getSeries() {
 		return series;
-	}
-
-	/**
-	 * Set the interval in the domain of the function we are interested in.
-	 * 
-	 * @param domain
-	 *          An AOI range in the domain of the function
-	 */
-	public void setDomain(Range<Double> domain) {
-		if (!this.domain.equals(domain)) {
-			this.domain.set(domain);
-			refresh();
-		}
-	}
-
-	/**
-	 * Set the resolution in the domain of the function to which we are
-	 * interested.
-	 * 
-	 * @param resolution
-	 *          The number of resolvable units across the domain interval we are
-	 *          interested in
-	 */
-	public void setResolution(int resolution) {
-		if (!(this.resolution == resolution)) {
-			this.resolution = resolution;
-			refresh();
-		}
 	}
 }

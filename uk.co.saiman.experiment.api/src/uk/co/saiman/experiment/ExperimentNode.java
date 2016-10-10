@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.api.
  *
@@ -184,7 +193,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	/**
 	 * @return all results associated with this node
 	 */
-	Stream<ExperimentResult<S, ?>> getResults();
+	Stream<ExperimentResult<?>> getResults();
 
 	/**
 	 * Clear all the results associated with this node. Take care, as this will
@@ -197,14 +206,14 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	 *          the result type to set the result data for
 	 * @param resultData
 	 *          the actual data to set for the given result type
+	 * @return the result associated with this node for the given result type
 	 */
-	<U> void setResult(ExperimentResultType<? super S, U> resultType, U resultData);
+	<U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData);
 
 	/**
 	 * @param resultType
 	 *          the result type to set the result data for
-	 * @return an optional over result associated with this node for the given
-	 *         result type if it exists, otherwise an empty optional
+	 * @return the result associated with this node for the given result type
 	 */
-	<U> ExperimentResult<S, U> getResult(ExperimentResultType<? super S, U> resultType);
+	<U> ExperimentResult<U> getResult(ExperimentResultType<U> resultType);
 }

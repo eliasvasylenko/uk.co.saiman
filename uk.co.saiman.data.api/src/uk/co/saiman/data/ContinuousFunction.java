@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -20,6 +29,9 @@ package uk.co.saiman.data;
 
 import java.util.function.Consumer;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.mathematics.expression.SelfExpression;
@@ -37,64 +49,26 @@ import uk.co.strangeskies.mathematics.expression.SelfExpression;
  * until Project Valhalla, for now will just use double.
  * 
  * @author Elias N Vasylenko
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  */
-public interface ContinuousFunction
-		extends SelfExpression<ContinuousFunction>, Expression<ContinuousFunction, ContinuousFunction> {
+public interface ContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>> extends
+		SelfExpression<ContinuousFunction<UD, UR>>, Expression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>> {
 	/**
-	 * A very simple, immutable implementation of a continuous function describing
-	 * a single point at 0 in both the domain and codomain.
+	 * @param unitDomain
+	 *          the units of the domain
+	 * @param unitRange
+	 *          the units of the range
+	 * @return a simple, immutable instance of a continuous function describing a
+	 *         single point at 0 in both the domain and codomain according to the
+	 *         given units
 	 */
-	public static final ContinuousFunction EMPTY = new SampledContinuousFunction() {
-		@Override
-		public SampledContinuousFunction copy() {
-			return this;
-		}
-
-		@Override
-		public boolean removeObserver(Consumer<? super ContinuousFunction> observer) {
-			return true;
-		}
-
-		@Override
-		public boolean addObserver(Consumer<? super ContinuousFunction> observer) {
-			return true;
-		}
-
-		@Override
-		public ContinuousFunction getValue() {
-			return this;
-		}
-
-		@Override
-		public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
-			return this;
-		}
-
-		@Override
-		public int getIndexBelow(double xValue) {
-			if (xValue >= 0)
-				return 0;
-			else
-				return -1;
-		}
-
-		@Override
-		public int getDepth() {
-			return 1;
-		}
-
-		@Override
-		public double getX(int index) {
-			if (index != 0)
-				throw new ArrayIndexOutOfBoundsException(index);
-			return 0;
-		}
-
-		@Override
-		public double getY(int index) {
-			return getX(index);
-		}
-	};
+	static <UD extends Quantity<UD>, UR extends Quantity<UR>> ContinuousFunction<UD, UR> empty(Unit<UD> unitDomain,
+			Unit<UR> unitRange) {
+		return new EmptyContinuousFunction<>(unitDomain, unitRange);
+	}
 
 	/**
 	 * Find the smallest interval containing all values in the domain of the
@@ -105,6 +79,11 @@ public interface ContinuousFunction
 	Range<Double> getDomain();
 
 	/**
+	 * @return the units of measurement of values in the domain
+	 */
+	Unit<UD> getDomainUnit();
+
+	/**
 	 * An interval containing all values in the codomain of the function. Some
 	 * implementations may not quickly be able to calculate the smallest such
 	 * interval, in which case they should return a close approximation
@@ -113,6 +92,11 @@ public interface ContinuousFunction
 	 * @return The extent of the codomain
 	 */
 	Range<Double> getRange();
+
+	/**
+	 * @return the units of measurement of values in the range
+	 */
+	Unit<UR> getRangeUnit();
 
 	/**
 	 * Find the interval between the smallest to the largest value of the codomain
@@ -137,10 +121,14 @@ public interface ContinuousFunction
 	double sample(double xPosition);
 
 	/**
-	 * Sometimes it is useful to linearise a continuous function in order to
+	 * Sometimes it is useful to linearize a continuous function in order to
 	 * perform complex processing, or for display purposes. This method provides a
 	 * linear view of any continuous function. Implementations may remove features
 	 * which are unresolvable at the given resolution.
+	 * <p>
+	 * Typically a good implementation should attempt to roughly indicate the
+	 * minimum and maximum within a resolvable unit area, such that thin peaks and
+	 * troughs don't disappear from visual representation at low resolution.
 	 * 
 	 * @param startX
 	 *          The start of the interval we wish to sample over
@@ -151,5 +139,76 @@ public interface ContinuousFunction
 	 * @return A new sampled, linear continuous function roughly equal to the
 	 *         receiver to the requested resolution
 	 */
-	SampledContinuousFunction resample(double startX, double endX, int resolvableUnits);
+	SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits);
 }
+
+class EmptyContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		implements SampledContinuousFunction<UD, UR> {
+	private final Unit<UD> unitDomain;
+	private final Unit<UR> unitRange;
+
+	public EmptyContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange) {
+		this.unitDomain = unitDomain;
+		this.unitRange = unitRange;
+	}
+
+	@Override
+	public SampledContinuousFunction<UD, UR> copy() {
+		return this;
+	}
+
+	@Override
+	public boolean removeExactObserver(Consumer<? super ContinuousFunction<UD, UR>> observer) {
+		return true;
+	}
+
+	@Override
+	public boolean addObserver(Consumer<? super ContinuousFunction<UD, UR>> observer) {
+		return true;
+	}
+
+	@Override
+	public ContinuousFunction<UD, UR> getValue() {
+		return this;
+	}
+
+	@Override
+	public SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
+		return this;
+	}
+
+	@Override
+	public int getIndexBelow(double xValue) {
+		if (xValue >= 0)
+			return 0;
+		else
+			return -1;
+	}
+
+	@Override
+	public int getDepth() {
+		return 1;
+	}
+
+	@Override
+	public double getX(int index) {
+		if (index != 0)
+			throw new ArrayIndexOutOfBoundsException(index);
+		return 0;
+	}
+
+	@Override
+	public double getY(int index) {
+		return getX(index);
+	}
+
+	@Override
+	public Unit<UD> getDomainUnit() {
+		return unitDomain;
+	}
+
+	@Override
+	public Unit<UR> getRangeUnit() {
+		return unitRange;
+	}
+};

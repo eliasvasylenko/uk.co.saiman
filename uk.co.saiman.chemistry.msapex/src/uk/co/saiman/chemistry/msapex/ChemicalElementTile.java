@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.chemistry.msapex.
  *
@@ -223,7 +232,7 @@ public class ChemicalElementTile extends BorderPane implements Observable<Chemic
 	}
 
 	@Override
-	public boolean removeObserver(Consumer<? super ChemicalElementTile> observer) {
+	public boolean removeExactObserver(Consumer<? super ChemicalElementTile> observer) {
 		return clickObservable.removeObserver(observer);
 	}
 }

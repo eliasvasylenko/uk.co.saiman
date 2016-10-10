@@ -14,8 +14,7 @@ runplatform: win64
 	com.ibm.icu;version='[56.1.0,56.1.1)',\
 	javax.annotation.jre;version='[1.2.0,1.2.1)',\
 	javax.inject;version='[1.0.0,1.0.1)',\
-	javax.measure.unit-api;version='[0.9.0,0.9.1)',\
-	tec.units.unit-ri;version='[0.9.0,0.9.1)',\
+	javax.measure:unit-api;version='[1.0.0,1.0.1)',\
 	org.apache.commons.jxpath;version='[1.3.0,1.3.1)',\
 	org.apache.commons.lang;version='[2.6.0,2.6.1)',\
 	org.apache.felix.configadmin;version='[1.8.6,1.8.7)',\
@@ -71,13 +70,13 @@ runplatform: win64
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.measurement.provider;version=snapshot,\
 	uk.co.saiman.msapex;version=snapshot,\
-	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
 	uk.co.saiman.chemistry.msapex;version=snapshot,\
 	uk.co.saiman.data.msapex;version=snapshot,\
 	uk.co.saiman.icons.fugue;version=snapshot,\

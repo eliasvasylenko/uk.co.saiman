@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -18,6 +27,9 @@
  */
 package uk.co.saiman.data;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.LockingExpression;
 
@@ -26,10 +38,39 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  * {@link SampledContinuousFunction} which ensures all default method
  * implementations lock for reading.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public abstract class LockingSampledContinuousFunction extends LockingExpression<ContinuousFunction, ContinuousFunction>
-		implements SampledContinuousFunction {
+public abstract class LockingSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends LockingExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
+		implements SampledContinuousFunction<UD, UR> {
+	private final Unit<UD> unitDomain;
+	private final Unit<UR> unitRange;
+
+	/**
+	 * @param unitDomain
+	 *          the units of measurement of values in the domain
+	 * @param unitRange
+	 *          the units of measurement of values in the range
+	 */
+	public LockingSampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange) {
+		this.unitDomain = unitDomain;
+		this.unitRange = unitRange;
+	}
+
+	@Override
+	public Unit<UD> getDomainUnit() {
+		return unitDomain;
+	}
+
+	@Override
+	public Unit<UR> getRangeUnit() {
+		return unitRange;
+	}
+
 	@Override
 	public Range<Double> getDomain() {
 		return read(SampledContinuousFunction.super::getDomain);
@@ -66,7 +107,12 @@ public abstract class LockingSampledContinuousFunction extends LockingExpression
 	}
 
 	@Override
-	public SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+	public SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
 		return read(() -> SampledContinuousFunction.super.resample(startX, endX, resolvableUnits));
+	}
+
+	@Override
+	public ContinuousFunction<UD, UR> decoupleValue() {
+		return getValue().copy();
 	}
 }

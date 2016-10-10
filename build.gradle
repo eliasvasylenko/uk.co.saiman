@@ -12,15 +12,15 @@ import aQute.bnd.osgi.Constants
 buildscript {
   repositories {
     jcenter()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
   }
   dependencies {
     classpath bndPlugin
     classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1'
-    classpath ('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
-      /* Resolve dependency conflict with aether: */
-      exclude group: 'org.apache.maven'
-    }
-    classpath ('org.ajoberstar:gradle-git:1.2.0') {
+    classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.13.1'
+    classpath ('org.ajoberstar:gradle-git:1.5.1') {
       /* Resolve dependency conflict with bndtools: */
       exclude group: 'org.apache.httpcomponents'
     }
@@ -54,6 +54,7 @@ configure(bndProjects()) {
 def copyrightProperties  = new Properties()
 rootProject.file('copyright.properties').withReader { reader ->
   copyrightProperties.load(reader)
+  println copyrightProperties.'copyright.holder.logo'
 }
 apply plugin: 'license'
 configure(bndProjects()) {
@@ -66,6 +67,9 @@ configure(bndProjects()) {
     ext.'copyright.year' = Calendar.getInstance().get(Calendar.YEAR)
     ext.'copyright.holder.name' = copyrightProperties.'copyright.holder.name'
     ext.'copyright.holder.email' = copyrightProperties.'copyright.holder.email'
+    ext.'copyright.holder.logo' = copyrightProperties.'copyright.holder.logo'
+
+    strictCheck true
 
     mapping {
       java = 'SLASHSTAR_STYLE'

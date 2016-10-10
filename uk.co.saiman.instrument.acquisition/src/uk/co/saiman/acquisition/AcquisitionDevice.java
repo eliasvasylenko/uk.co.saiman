@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.instrument.acquisition.
  *
@@ -19,6 +28,10 @@
 package uk.co.saiman.acquisition;
 
 import java.util.function.Consumer;
+
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.instrument.HardwareDevice;
@@ -45,14 +58,16 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * Begin an acquisition experiment with the current configuration, and wait
 	 * until it is complete.
 	 * <p>
-	 * The given consumer will be invoked directly before the acquisition begins.
+	 * The given consumer will be invoked directly before the acquisition begins,
+	 * such that the configuration of the acquisition device is set.
 	 * 
-	 * @param nextAcquisitionDataEvents
-	 *          a consumer over the result of {@link #nextAcquisitionDataEvents()}
+	 * @param acquisitionInitializer
+	 *          a runnable to invoked when the acquisition device is about to
+	 *          begin
 	 * @throws IllegalStateException
 	 *           If acquisition is already in progress.
 	 */
-	void startAcquisition(Consumer<Observable<SampledContinuousFunction>> nextAcquisitionDataEvents);
+	void startAcquisition(Consumer<AcquisitionDevice> acquisitionInitializer);
 
 	/**
 	 * Stop any acquisition experiment that may be in progress.
@@ -65,16 +80,26 @@ public interface AcquisitionDevice extends HardwareDevice {
 	}
 
 	/**
-	 * @return True if the module is currently in acquisition, false otherwise.
+	 * @return true if the module is currently in acquisition, false otherwise
 	 */
 	boolean isAcquiring();
+
+	/**
+	 * @return the units of measurement of sample intensities
+	 */
+	Unit<Dimensionless> getSampleIntensityUnits();
+
+	/**
+	 * @return the units of measurement of sample times
+	 */
+	Unit<Time> getSampleTimeUnits();
 
 	/**
 	 * @return The last acquired acquisition data. This leaves the format of the
 	 *         acquired data to the discretion of the implementing hardware
 	 *         module.
 	 */
-	SampledContinuousFunction getLastAcquisitionData();
+	SampledContinuousFunction<Dimensionless, Time> getLastAcquisitionData();
 
 	/**
 	 * Add or remove data event observers for the next acquisition experiment.
@@ -86,7 +111,7 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * @return An observable interface for registering single acquisition data
 	 *         event listeners.
 	 */
-	Observable<SampledContinuousFunction> nextAcquisitionDataEvents();
+	Observable<SampledContinuousFunction<Dimensionless, Time>> nextAcquisitionDataEvents();
 
 	/**
 	 * Add or remove data event observers.
@@ -97,7 +122,7 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * 
 	 * @return An observable interface for registering data event listeners.
 	 */
-	Observable<SampledContinuousFunction> dataEvents();
+	Observable<SampledContinuousFunction<Dimensionless, Time>> dataEvents();
 
 	/**
 	 * Set the total acquisition count for a single experiment.

@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.api.
  *
@@ -63,7 +72,7 @@ public interface ExperimentType<S> extends Reified {
 	 * @return a stream over the types of result published by an experiment of
 	 *         this type
 	 */
-	default Stream<ExperimentResultType<S, ?>> getResultTypes() {
+	default Stream<ExperimentResultType<?>> getResultTypes() {
 		return Stream.empty();
 	}
 

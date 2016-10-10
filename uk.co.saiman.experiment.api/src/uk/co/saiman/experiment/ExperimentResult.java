@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.api.
  *
@@ -18,20 +27,26 @@
  */
 package uk.co.saiman.experiment;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypeParameter;
 import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.utilities.Observable;
 
-public interface ExperimentResult<S, T> extends Reified {
-	ExperimentResultType<S, T> getResultType();
+public interface ExperimentResult<T> extends Observable<Optional<T>>, Reified {
+	ExperimentNode<?, ?> getExperimentNode();
+
+	Path getResultDataPath();
+
+	ExperimentResultType<T> getResultType();
 
 	Optional<T> getData();
 
 	@Override
 	default TypeToken<?> getThisType() {
-		return new TypeToken<ExperimentResult<S, T>>() {}.withTypeArgument(new TypeParameter<S>() {},
-				getResultType().getExperimentType().getStateType());
+		return new TypeToken<ExperimentResult<T>>() {}.withTypeArgument(new TypeParameter<T>() {},
+				getResultType().getDataType());
 	}
 }

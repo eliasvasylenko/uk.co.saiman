@@ -15,7 +15,8 @@
 		<ScrollPane
 			fx:id="experimentTreeScrollPane"
 			fitToWidth="true"
-			fitToHeight="true">
+			fitToHeight="true"
+			hbarPolicy="NEVER">
 
 			<content>
 				<fx:include

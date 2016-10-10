@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.instrument.acquisition.msapex.
  *
@@ -28,6 +37,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
 
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.fx.core.di.LocalInstance;
@@ -143,8 +154,9 @@ public class AcquisitionPart {
 		/*
 		 * Create continuous function view of latest data from module
 		 */
-		ContinuousFunctionExpression latestContinuousFunction = new ContinuousFunctionExpression();
-		acquisitionModule.dataEvents().addWeakObserver(latestContinuousFunction, l -> c -> l.setComponent(c));
+		ContinuousFunctionExpression<Dimensionless, Time> latestContinuousFunction = new ContinuousFunctionExpression<>(
+				acquisitionModule.getSampleIntensityUnits(), acquisitionModule.getSampleTimeUnits());
+		acquisitionModule.dataEvents().addWeakObserver(latestContinuousFunction, l -> l::setComponent);
 
 		/*
 		 * Add latest data to chart controller

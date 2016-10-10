@@ -1,6 +1,8 @@
 -buildpath: \
+	${ss;text},\
 	javax.measure.unit-api,\
-	tec.units.unit-ri,\
-	tec.uom.lib__uom-lib-common
+	tec.uom.se,\
+	tec.uom.lib:uom-lib-common,\
+	si.uom:si-units-java8
 
 -sub: *.bnd

@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -21,13 +30,20 @@ package uk.co.saiman.data;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 /**
  * A mutable, array backed implementation of {@link SampledContinuousFunction}.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class ArraySampledContinuousFunction extends LockingSampledContinuousFunction
-		implements SampledContinuousFunction {
+public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends LockingSampledContinuousFunction<UD, UR> implements SampledContinuousFunction<UD, UR> {
 	private final double[] values;
 	private final double[] intensities;
 
@@ -36,6 +52,10 @@ public class ArraySampledContinuousFunction extends LockingSampledContinuousFunc
 	 * Arrays are copied into the function, truncated to the sample length given,
 	 * or padded with 0s.
 	 * 
+	 * @param unitDomain
+	 *          the units of measurement of values in the domain
+	 * @param unitRange
+	 *          the units of measurement of values in the range
 	 * @param samples
 	 *          The number of samples in the function
 	 * @param values
@@ -43,7 +63,9 @@ public class ArraySampledContinuousFunction extends LockingSampledContinuousFunc
 	 * @param intensities
 	 *          The Y values of the samples, in the codomain
 	 */
-	public ArraySampledContinuousFunction(int samples, double[] values, double[] intensities) {
+	public ArraySampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange, int samples, double[] values,
+			double[] intensities) {
+		super(unitDomain, unitRange);
 		/*
 		 * TODO sort values
 		 */
@@ -122,12 +144,13 @@ public class ArraySampledContinuousFunction extends LockingSampledContinuousFunc
 	}
 
 	@Override
-	public ArraySampledContinuousFunction copy() {
-		return read(() -> new ArraySampledContinuousFunction(getDepth(), values, intensities));
+	public ArraySampledContinuousFunction<UD, UR> copy() {
+		return read(
+				() -> new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), getDepth(), values, intensities));
 	}
 
 	@Override
-	protected ContinuousFunction evaluate() {
+	protected ContinuousFunction<UD, UR> evaluate() {
 		return this;
 	}
 }

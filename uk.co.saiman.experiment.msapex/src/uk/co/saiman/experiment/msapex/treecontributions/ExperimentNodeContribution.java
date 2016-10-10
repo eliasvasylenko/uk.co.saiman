@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.msapex.
  *
@@ -16,16 +25,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.msapex;
-
-import static java.util.stream.Stream.concat;
+package uk.co.saiman.experiment.msapex.treecontributions;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
@@ -33,18 +40,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentResult;
-import uk.co.saiman.experiment.RootExperiment;
-import uk.co.strangeskies.eclipse.EclipseModularTreeContributor;
-import uk.co.strangeskies.eclipse.EclipseModularTreeContributorImpl;
-import uk.co.strangeskies.eclipse.Localize;
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.eclipse.MenuTreeCellContribution;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
-import uk.co.strangeskies.fx.TreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
@@ -52,75 +52,19 @@ import uk.co.strangeskies.reflection.Reified;
 import uk.co.strangeskies.reflection.TypedObject;
 
 /**
- * An implementation of {@link TreeCellContribution} which registers the
- * experiment tree pop-up menu from the experiment project model fragment.
- * 
- * @author Elias N Vasylenko
- */
-@Component(service = EclipseModularTreeContributor.class)
-public class ExperimentNodeContributor extends EclipseModularTreeContributorImpl {
-	@SuppressWarnings("javadoc")
-	public ExperimentNodeContributor() {
-		super(RootExperimentNodeContribution.class, ExperimentNodeContribution.class, ExperimentResultContribution.class);
-	}
-}
-
-/**
- * Contribution for root experiment nodes in the experiment tree
- * 
- * @author Elias N Vasylenko
- */
-class RootExperimentNodeContribution
-		implements TreeTextContribution<ExperimentNode<RootExperiment, ExperimentConfiguration>>,
-		PseudoClassTreeCellContribution<ExperimentNode<RootExperiment, ExperimentConfiguration>> {
-	@Inject
-	@Localize
-	ExperimentProperties text;
-
-	@Override
-	public <U extends ExperimentNode<RootExperiment, ExperimentConfiguration>> String getText(TreeItemData<U> data) {
-		return data.data().getState().getName();
-	}
-
-	@Override
-	public <U extends ExperimentNode<RootExperiment, ExperimentConfiguration>> String getSupplementalText(
-			TreeItemData<U> data) {
-		return "[" + text.lifecycleState(data.data().lifecycleState().get()) + "]";
-	}
-}
-
-/**
- * Contribution for root experiment nodes in the experiment tree
- * 
- * @author Elias N Vasylenko
- */
-class ExperimentResultContribution
-		implements TreeTextContribution<ExperimentResult<?, ?>>, PseudoClassTreeCellContribution<ExperimentResult<?, ?>> {
-	@Inject
-	@Localize
-	ExperimentProperties text;
-
-	@Override
-	public <U extends ExperimentResult<?, ?>> String getText(TreeItemData<U> data) {
-		return data.data().getResultType().getName();
-	}
-
-	@Override
-	public <U extends ExperimentResult<?, ?>> String getSupplementalText(TreeItemData<U> data) {
-		return "[" + data.data().getData() + "]";
-	}
-}
-
-/**
  * Contribution for all experiment nodes in the experiment tree
  * 
  * @author Elias N Vasylenko
  */
-class ExperimentNodeContribution extends MenuTreeCellContribution<ExperimentNode<?, ?>>
+@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
+public class ExperimentNodeContribution extends MenuTreeCellContribution<ExperimentNode<?, ?>>
 		implements PseudoClassTreeCellContribution<ExperimentNode<?, ?>>, TreeChildContribution<ExperimentNode<?, ?>>,
 		TreeTextContribution<ExperimentNode<?, ?>> {
 	private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.experiment.msapex.popupmenu.node";
 
+	/**
+	 * Create with experiment tree popup menu
+	 */
 	public ExperimentNodeContribution() {
 		super(EXPERIMENT_TREE_POPUP_MENU);
 	}
@@ -142,12 +86,13 @@ class ExperimentNodeContribution extends MenuTreeCellContribution<ExperimentNode
 		 * shift lifecycle label to the far right
 		 */
 		Region spacer = new Region();
-		HBox.setHgrow(spacer, Priority.ALWAYS);
-		spacer.setMinWidth(Region.USE_PREF_SIZE);
+		HBox.setHgrow(spacer, Priority.SOMETIMES);
 
-		content = new HBox(content, spacer, lifecycleIndicator);
+		HBox contentWrapper = new HBox(content, spacer, lifecycleIndicator);
+		contentWrapper.setMinWidth(0);
+		contentWrapper.prefWidth(0);
 
-		content = PseudoClassTreeCellContribution.super.configureCell(data, content);
+		content = PseudoClassTreeCellContribution.super.configureCell(data, contentWrapper);
 
 		return super.configureCell(data, content);
 	}
@@ -159,7 +104,7 @@ class ExperimentNodeContribution extends MenuTreeCellContribution<ExperimentNode
 
 	@Override
 	public <U extends ExperimentNode<?, ?>> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return concat(data.data().getChildren(), data.data().getResults()).map(Reified::asTypedObject)
+		return Stream.concat(data.data().getChildren(), data.data().getResults()).map(Reified::asTypedObject)
 				.collect(Collectors.toList());
 	}
 

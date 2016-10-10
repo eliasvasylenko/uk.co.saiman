@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -20,6 +29,10 @@ package uk.co.saiman.simulation.instrument.impl;
 
 import java.util.Random;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
+
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
@@ -37,7 +50,8 @@ public class ADCSimulation implements DetectorSimulation {
 	private double[] intensities = new double[0];
 
 	@Override
-	public SampledContinuousFunction acquire(Random random, double resolution, int depth, SimulatedSample sample) {
+	public SampledContinuousFunction<Dimensionless, Time> acquire(Unit<Dimensionless> intensityUnits,
+			Unit<Time> timeUnits, Random random, double resolution, int depth, SimulatedSample sample) {
 		if (this.intensities.length != depth) {
 			intensities = new double[depth];
 		}
@@ -46,11 +60,13 @@ public class ADCSimulation implements DetectorSimulation {
 
 		double scale = 0;
 		double scaleDelta = 1d / depth;
+
 		for (int j = 0; j < intensities.length; j++) {
-			intensities[j] = 0.5
-					+ (scale += scaleDelta) * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1)) * 20;
+			scale += scaleDelta;
+			intensities[j] = 0.01 + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
 		}
 
-		return new ArrayRegularSampledContinuousFunction(1 / (resolution * 1_000), 0, intensities);
+		return new ArrayRegularSampledContinuousFunction<>(intensityUnits, timeUnits, 1 / (resolution * 1_000), 0,
+				intensities);
 	}
 }

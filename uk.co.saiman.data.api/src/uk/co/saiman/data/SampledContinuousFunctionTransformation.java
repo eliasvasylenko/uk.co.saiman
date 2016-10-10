@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -20,6 +29,8 @@ package uk.co.saiman.data;
 
 import java.util.function.Function;
 
+import javax.measure.Quantity;
+
 import uk.co.strangeskies.mathematics.expression.DependentExpression;
 
 /**
@@ -31,11 +42,16 @@ import uk.co.strangeskies.mathematics.expression.DependentExpression;
  * forwarded to listeners, and the transformation will only be evaluated lazily,
  * as necessary.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class SampledContinuousFunctionTransformation extends DependentExpression<ContinuousFunction, ContinuousFunction>
-		implements SampledContinuousFunctionDecorator {
-	private final Function<ContinuousFunction, SampledContinuousFunction> transformation;
+public class SampledContinuousFunctionTransformation<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends DependentExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
+		implements SampledContinuousFunctionDecorator<UD, UR> {
+	private final Function<ContinuousFunction<UD, UR>, SampledContinuousFunction<UD, UR>> transformation;
 
 	/**
 	 * Create a mapping from a given {@link ContinuousFunction} to a
@@ -48,25 +64,25 @@ public class SampledContinuousFunctionTransformation extends DependentExpression
 	 *          The transformation to apply to the backing function
 	 */
 	@SuppressWarnings("unchecked")
-	public <C extends ContinuousFunction> SampledContinuousFunctionTransformation(C dependency,
-			Function<C, SampledContinuousFunction> transformation) {
+	public <C extends ContinuousFunction<UD, UR>> SampledContinuousFunctionTransformation(C dependency,
+			Function<C, SampledContinuousFunction<UD, UR>> transformation) {
 		super(dependency);
 
-		this.transformation = (Function<ContinuousFunction, SampledContinuousFunction>) transformation;
+		this.transformation = (Function<ContinuousFunction<UD, UR>, SampledContinuousFunction<UD, UR>>) transformation;
 	}
 
 	@Override
-	public SampledContinuousFunction getComponent() {
-		return (SampledContinuousFunction) getValue();
+	public SampledContinuousFunction<UD, UR> getComponent() {
+		return (SampledContinuousFunction<UD, UR>) getValue();
 	}
 
 	@Override
-	public SampledContinuousFunction copy() {
-		return new SampledContinuousFunctionTransformation(getComponent(), transformation);
+	public SampledContinuousFunction<UD, UR> copy() {
+		return new SampledContinuousFunctionTransformation<>(getComponent(), transformation);
 	}
 
 	@Override
-	protected ContinuousFunction evaluate() {
+	protected ContinuousFunction<UD, UR> evaluate() {
 		return this;
 	}
 }

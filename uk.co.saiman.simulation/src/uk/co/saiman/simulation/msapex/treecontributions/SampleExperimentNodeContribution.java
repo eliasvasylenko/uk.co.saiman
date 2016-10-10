@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -21,16 +30,22 @@ package uk.co.saiman.simulation.msapex.treecontributions;
 import java.util.Arrays;
 import java.util.List;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.simulation.experiment.SimulatedSampleImageConfiguration;
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.reflection.TypeToken;
 import uk.co.strangeskies.reflection.TypedObject;
 
 @SuppressWarnings("javadoc")
+@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
 public class SampleExperimentNodeContribution
-		implements TreeChildContribution<ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> {
+		implements EclipseTreeContribution<ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>>,
+		TreeChildContribution<ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> {
 	@Override
 	public <U extends ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> boolean hasChildren(
 			TreeItemData<U> data) {

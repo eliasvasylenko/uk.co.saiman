@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.instrument.acquisition.
  *
@@ -21,11 +30,28 @@ package uk.co.saiman.acquisition;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.LocalizedRuntimeException;
 
+/**
+ * This exception represents a problem with an acquisition device or process.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class AcquisitionException extends LocalizedRuntimeException {
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * @param message
+	 *          a description of the problem
+	 */
 	public AcquisitionException(Localized<String> message) {
 		super(message);
 	}
 
+	/**
+	 * @param message
+	 *          a description of the problem
+	 * @param cause
+	 *          the causing throwable
+	 */
 	public AcquisitionException(Localized<String> message, Throwable cause) {
 		super(message, cause);
 	}

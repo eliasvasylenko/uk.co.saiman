@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.measurement.
  *
@@ -18,60 +27,105 @@
  */
 package uk.co.saiman.measurement.impl;
 
-import java.util.function.Function;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
+import javax.measure.format.UnitFormat;
+import javax.measure.quantity.AmountOfSubstance;
+import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.Mass;
+import javax.measure.quantity.Time;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import tec.units.ri.quantity.Quantities;
-import tec.units.ri.unit.MetricPrefix;
-import tec.units.ri.unit.Units;
+import si.uom.SI;
+import tec.uom.se.format.LocalUnitFormat;
+import tec.uom.se.format.QuantityFormat;
 import uk.co.saiman.measurement.UnitBuilder;
+import uk.co.strangeskies.text.properties.LocaleProvider;
 
 @Component
 public class UnitsImpl implements uk.co.saiman.measurement.Units {
-	public class UnitBuilderImpl<T extends Quantity<T>> implements UnitBuilder<T> {
-		private final Unit<T> unit;
+	@Reference
+	LocaleProvider localeProvider;
+	private Locale locale;
+	private LocalUnitFormat unitFormat;
+	private QuantityFormat quantityFormat;
 
-		public UnitBuilderImpl(Unit<T> unit) {
-			this.unit = unit;
-		}
-
-		@Override
-		public UnitBuilder<?> multiply(Function<uk.co.saiman.measurement.Units, UnitBuilder<?>> unit) {
-			return new UnitBuilderImpl<>(this.unit.multiply(unit.apply(UnitsImpl.this).get()));
-		}
-
-		@Override
-		public UnitBuilder<?> divide(Function<uk.co.saiman.measurement.Units, UnitBuilder<?>> unit) {
-			return new UnitBuilderImpl<>(this.unit.divide(unit.apply(UnitsImpl.this).get()));
-		}
-
-		@Override
-		public UnitBuilder<T> milli() {
-			return new UnitBuilderImpl<>(MetricPrefix.MILLI(unit));
-		}
-
-		@Override
-		public Unit<T> get() {
-			return unit;
-		}
-
-		@Override
-		public Quantity<T> getQuantity(Number amount) {
-			return Quantities.getQuantity(amount, unit);
-		}
+	protected <T extends Quantity<T>> UnitBuilder<T> over(Unit<T> unit) {
+		return new UnitBuilderImpl<>(this, unit);
 	}
 
 	@Override
 	public UnitBuilder<Length> metre() {
-		return over(Units.METRE);
+		return over(SI.METRE);
 	}
 
-	protected <T extends Quantity<T>> UnitBuilder<T> over(Unit<T> unit) {
-		return new UnitBuilderImpl<>(unit);
+	@Override
+	public UnitBuilder<Dimensionless> count() {
+		return over(SI.ONE);
+	}
+
+	@Override
+	public UnitBuilder<Time> second() {
+		return over(SI.SECOND);
+	}
+
+	@Override
+	public UnitBuilder<Dimensionless> percent() {
+		return over(SI.PERCENT);
+	}
+
+	@Override
+	public UnitBuilder<Mass> dalton() {
+		return over(SI.UNIFIED_ATOMIC_MASS);
+	}
+
+	@Override
+	public UnitBuilder<AmountOfSubstance> mole() {
+		return over(SI.MOLE);
+	}
+
+	@Override
+	public UnitBuilder<Mass> gram() {
+		return over(SI.GRAM);
+	}
+
+	@Override
+	public String format(Unit<?> quantity) {
+		return getUnitFormat().format(quantity);
+	}
+
+	@Override
+	public String format(Quantity<?> quantity) {
+		return getQuantityFormat().format(quantity);
+	}
+
+	@Override
+	public String format(Quantity<?> quantity, NumberFormat format) {
+		return QuantityFormat.getInstance(format, getUnitFormat()).format(quantity);
+	}
+
+	private UnitFormat getUnitFormat() {
+		updateFormats();
+		return unitFormat;
+	}
+
+	private QuantityFormat getQuantityFormat() {
+		updateFormats();
+		return quantityFormat;
+	}
+
+	private void updateFormats() {
+		Locale locale = localeProvider.getLocale();
+		if (!locale.equals(this.locale)) {
+			this.locale = locale;
+			unitFormat = LocalUnitFormat.getInstance(locale);
+			quantityFormat = QuantityFormat.getInstance(NumberFormat.getInstance(), unitFormat);
+		}
 	}
 }

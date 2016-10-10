@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
  *
@@ -23,9 +32,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.experiment.SimulatedSampleImageConfiguration;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
+import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
@@ -35,8 +48,9 @@ import uk.co.strangeskies.reflection.TypeToken;
 import uk.co.strangeskies.reflection.TypedObject;
 
 @SuppressWarnings("javadoc")
-public class SampleImageConfigurationContribution implements TreeChildContribution<SimulatedSampleImageConfiguration>,
-		TreeTextContribution<SimulatedSampleImageConfiguration>,
+@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
+public class SampleImageConfigurationContribution implements EclipseTreeContribution<SimulatedSampleImageConfiguration>,
+		TreeChildContribution<SimulatedSampleImageConfiguration>, TreeTextContribution<SimulatedSampleImageConfiguration>,
 		PseudoClassTreeCellContribution<SimulatedSampleImageConfiguration> {
 	@Inject
 	@Localize

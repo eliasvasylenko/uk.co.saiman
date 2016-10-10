@@ -13,9 +13,11 @@ Bundle-Name: SAI :: MSApex :: Chemistry
 	${ss;fx},\
 	${ss;eclipse},\
 	${mdb;core.api},\
+	javax.measure.unit-api,\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\
 	uk.co.saiman.data.msapex;version=snapshot,\
+	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 
 Private-Package: uk.co.saiman.chemistry.msapex

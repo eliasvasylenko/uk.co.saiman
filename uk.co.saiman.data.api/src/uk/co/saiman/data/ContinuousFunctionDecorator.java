@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -18,19 +27,27 @@
  */
 package uk.co.saiman.data;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
+
 import uk.co.strangeskies.mathematics.Range;
 
 /**
  * A partial implementation of a {@link ContinuousFunction} decorator, to reduce
  * boilerplate for functions which are in some way mappings of other functions.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public interface ContinuousFunctionDecorator extends ContinuousFunction {
+public interface ContinuousFunctionDecorator<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends ContinuousFunction<UD, UR> {
 	/**
 	 * @return The {@link ContinuousFunction} backing this decorator
 	 */
-	ContinuousFunction getComponent();
+	ContinuousFunction<UD, UR> getComponent();
 
 	@Override
 	default Range<Double> getDomain() {
@@ -38,8 +55,18 @@ public interface ContinuousFunctionDecorator extends ContinuousFunction {
 	}
 
 	@Override
+	default Unit<UD> getDomainUnit() {
+		return getComponent().getDomainUnit();
+	}
+
+	@Override
 	default Range<Double> getRange() {
 		return getComponent().getRange();
+	}
+
+	@Override
+	default Unit<UR> getRangeUnit() {
+		return getComponent().getRangeUnit();
 	}
 
 	@Override
@@ -53,7 +80,13 @@ public interface ContinuousFunctionDecorator extends ContinuousFunction {
 	}
 
 	@Override
-	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+	default SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
 		return getComponent().resample(startX, endX, resolvableUnits);
 	}
+
+	@Override
+	default ContinuousFunction<UD, UR> decoupleValue() {
+		return getValue().copy();
+	}
+
 }

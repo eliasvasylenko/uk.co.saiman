@@ -17,7 +17,9 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\
 	uk.co.saiman.data.msapex;version=snapshot,\
-	uk.co.saiman.utilities;version=snapshot
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.measurement.api;version=snapshot,\
+	javax.measure.unit-api
 
 Private-Package: uk.co.saiman.instrument.acquisition.msapex
 

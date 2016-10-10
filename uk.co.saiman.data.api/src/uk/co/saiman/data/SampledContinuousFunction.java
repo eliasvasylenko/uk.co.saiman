@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.api.
  *
@@ -18,6 +27,8 @@
  */
 package uk.co.saiman.data;
 
+import javax.measure.Quantity;
+
 import uk.co.strangeskies.mathematics.Range;
 
 /**
@@ -25,9 +36,14 @@ import uk.co.strangeskies.mathematics.Range;
  * The model is as a sequence of (X, Y) points, with (X) increasing in the
  * domain with each index, starting at 0.
  * 
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public interface SampledContinuousFunction extends ContinuousFunction {
+public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends ContinuousFunction<UD, UR> {
 	@Override
 	default Range<Double> getDomain() {
 		return getDomain(0, getDepth() - 1);
@@ -186,10 +202,10 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 	}
 
 	@Override
-	SampledContinuousFunction copy();
+	SampledContinuousFunction<UD, UR> copy();
 
 	@Override
-	default SampledContinuousFunction resample(double startX, double endX, int resolvableUnits) {
+	default SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
 		if (getDepth() <= 2) {
 			return copy();
 		}
@@ -312,6 +328,6 @@ public interface SampledContinuousFunction extends ContinuousFunction {
 		/*
 		 * Prepare linearisation
 		 */
-		return new ArraySampledContinuousFunction(count, values, intensities);
+		return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), count, values, intensities);
 	}
 }

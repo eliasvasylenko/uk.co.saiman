@@ -1,5 +1,14 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,-========\     ,`===\    /========== \
+ *      /== \___/== \  ,`==.== \   \__/== \___\/
+ *     /==_/____\__\/,`==__|== |     /==  /
+ *     \========`. ,`========= |    /==  /
+ *   ___`-___)== ,`== \____|== |   /==  /
+ *  /== \__.-==,`==  ,`    |== '__/==  /_
+ *  \======== /==  ,`      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.spectrum.
  *
@@ -20,15 +29,23 @@ package uk.co.saiman.experiment.spectrum;
 
 import java.util.stream.Stream;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
+
 import org.osgi.service.component.annotations.Activate;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
 import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.data.ContinuousFunctionExpression;
+import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.strangeskies.reflection.TypeToken;
 import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.strangeskies.utilities.AggregatingListener;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -42,7 +59,7 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
 	private SpectraProperties properties;
-	private ExperimentResultType<T, ContinuousFunction> spectrumResult;
+	private ExperimentResultType<ContinuousFunction<Dimensionless, Time>> spectrumResult;
 
 	public SpectrumExperimentType() {
 		this(PropertyLoader.getDefaultProperties(SpectraProperties.class));
@@ -60,7 +77,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 	@Activate
 	public void activate() {
 		spectrumResult = new ExperimentResultType<>(properties.spectrumResultName().toString(), this,
-				new TypeToken<ContinuousFunction>() {});
+				new TypeToken<ContinuousFunction<Dimensionless, Time>>() {});
 	}
 
 	protected SpectrumConfiguration createStateImpl(ExperimentNode<?, ? extends T> forNode) {
@@ -85,19 +102,47 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 		return properties.spectrumExperimentName().toString();
 	}
 
+	public ExperimentResultType<ContinuousFunction<Dimensionless, Time>> getSpectrumResult() {
+		return spectrumResult;
+	}
+
 	protected abstract AcquisitionDevice getAcquisitionDevice();
 
 	@Override
 	public void execute(ExperimentNode<?, ? extends T> node) {
-		ContinuousFunction accumulation = ContinuousFunction.EMPTY;
+		Unit<Dimensionless> intensityUnits = getAcquisitionDevice().getSampleIntensityUnits();
+		Unit<Time> timeUnits = getAcquisitionDevice().getSampleTimeUnits();
 
-		getAcquisitionDevice().startAcquisition(o -> o.addObserver(System.out::println));
+		ContinuousFunctionExpression<Dimensionless, Time> result = new ContinuousFunctionExpression<>(intensityUnits,
+				timeUnits);
+		node.setResult(spectrumResult, result);
 
-		node.setResult(spectrumResult, accumulation);
+		getAcquisitionDevice().startAcquisition(device -> {
+
+			int depth = device.getAcquisitionDepth();
+			double frequency = 1 / device.getAcquisitionResolution();
+
+			ArrayRegularSampledContinuousFunction<Dimensionless, Time> accumulator = new ArrayRegularSampledContinuousFunction<>(
+					intensityUnits, timeUnits, frequency, 0, new double[depth]);
+
+			result.setComponent(accumulator);
+
+			AggregatingListener<SampledContinuousFunction<Dimensionless, Time>> aggregate = new AggregatingListener<>();
+			device.nextAcquisitionDataEvents().addObserver(aggregate);
+			aggregate.addObserver(a -> {
+				accumulator.mutate(data -> {
+					for (SampledContinuousFunction<Dimensionless, Time> c : a) {
+						for (int i = 0; i < depth; i++) {
+							data[i] += c.getY(i);
+						}
+					}
+				});
+			});
+		});
 	}
 
 	@Override
-	public Stream<ExperimentResultType<T, ?>> getResultTypes() {
+	public Stream<ExperimentResultType<?>> getResultTypes() {
 		return Stream.of(spectrumResult);
 	}
 }
