@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.experiment;
 
-import uk.co.strangeskies.reflection.Reified;
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.ReifiedToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * This class does not actually contain any result data, and instances are
@@ -43,7 +43,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @param <T>
  *          the type of the result data
  */
-public class ExperimentResultType<T> implements Reified {
+public class ExperimentResultType<T> implements ReifiedToken<ExperimentResultType<T>> {
 	private final String name;
 	private final ExperimentType<?> experimentType;
 	private final TypeToken<T> dataType;
@@ -67,7 +67,12 @@ public class ExperimentResultType<T> implements Reified {
 	}
 
 	@Override
-	public TypeToken<ExperimentResultType<T>> getThisType() {
+	public TypeToken<ExperimentResultType<T>> getThisTypeToken() {
 		return new TypeToken<ExperimentResultType<T>>() {}.withTypeArgument(new TypeParameter<T>() {}, getDataType());
+	}
+
+	@Override
+	public ExperimentResultType<T> copy() {
+		return this;
 	}
 }

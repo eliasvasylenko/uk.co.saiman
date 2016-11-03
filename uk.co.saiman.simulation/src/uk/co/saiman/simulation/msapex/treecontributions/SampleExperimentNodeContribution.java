@@ -38,8 +38,8 @@ import uk.co.saiman.simulation.experiment.SimulatedSampleImageConfiguration;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.reflection.TypeToken;
-import uk.co.strangeskies.reflection.TypedObject;
+import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.strangeskies.reflection.token.TypedObject;
 
 @SuppressWarnings("javadoc")
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)

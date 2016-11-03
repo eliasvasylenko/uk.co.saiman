@@ -47,8 +47,8 @@ import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
  *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR extends Quantity<UR>> extends
-		ImmutableExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>> implements ContinuousFunction<UD, UR> {
+public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends ImmutableExpression<ContinuousFunction<UD, UR>> implements ContinuousFunction<UD, UR> {
 	private static final int TWEEN_STEPS = 5;
 
 	private final Unit<UD> unitDomain;

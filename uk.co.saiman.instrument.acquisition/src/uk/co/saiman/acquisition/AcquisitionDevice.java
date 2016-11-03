@@ -99,7 +99,7 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 *         acquired data to the discretion of the implementing hardware
 	 *         module.
 	 */
-	SampledContinuousFunction<Dimensionless, Time> getLastAcquisitionData();
+	SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData();
 
 	/**
 	 * Add or remove data event observers for the next acquisition experiment.
@@ -111,7 +111,7 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * @return An observable interface for registering single acquisition data
 	 *         event listeners.
 	 */
-	Observable<SampledContinuousFunction<Dimensionless, Time>> nextAcquisitionDataEvents();
+	Observable<SampledContinuousFunction<Time, Dimensionless>> nextAcquisitionDataEvents();
 
 	/**
 	 * Add or remove data event observers.
@@ -122,7 +122,7 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * 
 	 * @return An observable interface for registering data event listeners.
 	 */
-	Observable<SampledContinuousFunction<Dimensionless, Time>> dataEvents();
+	Observable<SampledContinuousFunction<Time, Dimensionless>> dataEvents();
 
 	/**
 	 * Set the total acquisition count for a single experiment.

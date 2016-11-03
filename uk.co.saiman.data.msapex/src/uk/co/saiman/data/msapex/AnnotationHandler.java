@@ -28,7 +28,7 @@
 package uk.co.saiman.data.msapex;
 
 import javafx.scene.Node;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * An annotation handler applies to all annotation of its type. It translates a

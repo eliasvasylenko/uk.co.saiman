@@ -1,5 +1,6 @@
 -buildpath: \
-	${ss;text},\
+	uk.co.strangeskies.text;version=latest,\
+\
 	javax.measure.unit-api,\
 	tec.uom.se,\
 	tec.uom.lib:uom-lib-common,\

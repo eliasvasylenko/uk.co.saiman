@@ -18,7 +18,13 @@
 	onMousePressed="#onMousePressed">
 
 	<children>
+		<Label fx:id="noChartDataLabel" />
+
 		<BorderPane>
+			<left>
+				<HBox fx:id="extraAxesContainer" />
+			</left>
+
 			<center>
 				<LineChart
 					GridPane.hgrow="ALWAYS"
@@ -30,8 +36,7 @@
 						<NumberAxis
 							side="BOTTOM"
 							autoRanging="false"
-							tickUnit="1">
-						</NumberAxis>
+							tickUnit="1" />
 					</xAxis>
 					<yAxis>
 						<NumberAxis
@@ -41,11 +46,6 @@
 					</yAxis>
 				</LineChart>
 			</center>
-
-			<right>
-				<HBox fx:id="extraAxes">
-				</HBox>
-			</right>
 		</BorderPane>
 
 		<AnchorPane fx:id="annotationPane" />

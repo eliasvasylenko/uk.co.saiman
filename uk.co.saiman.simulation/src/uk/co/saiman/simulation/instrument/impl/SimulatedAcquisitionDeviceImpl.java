@@ -70,7 +70,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 		private final double resolution;
 		private final int depth;
 
-		private final BufferingListener<SampledContinuousFunction<Dimensionless, Time>> listener;
+		private final BufferingListener<SampledContinuousFunction<Time, Dimensionless>> listener;
 
 		private int counter;
 
@@ -134,9 +134,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 	private int acquisitionCount;
 
-	private SampledContinuousFunction<Dimensionless, Time> acquisitionData;
-	private final BufferingListener<SampledContinuousFunction<Dimensionless, Time>> acquisitionListeners;
-	private BufferingListener<SampledContinuousFunction<Dimensionless, Time>> singleAcquisitionListeners;
+	private SampledContinuousFunction<Time, Dimensionless> acquisitionData;
+	private final BufferingListener<SampledContinuousFunction<Time, Dimensionless>> acquisitionListeners;
+	private BufferingListener<SampledContinuousFunction<Time, Dimensionless>> singleAcquisitionListeners;
 
 	private final Object acquiringLock = new Object();
 	private ExperimentConfiguration experiment;
@@ -427,9 +427,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 					acquisitionData = detector.acquire(getSampleIntensityUnits(), getSampleTimeUnits(), random, resolution, depth,
 							sample.getNextSample());
 
-					acquisitionListeners.accept(acquisitionData);
+					acquisitionListeners.notify(acquisitionData);
 					if (runningExperiment) {
-						experiment.listener.accept(acquisitionData);
+						experiment.listener.notify(acquisitionData);
 					}
 				} catch (Exception e) {
 					throw new AcquisitionException(simulationText.acquisition().unexpectedException(), e);
@@ -478,17 +478,17 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	@Override
-	public SampledContinuousFunction<Dimensionless, Time> getLastAcquisitionData() {
+	public SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData() {
 		return acquisitionData;
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction<Dimensionless, Time>> nextAcquisitionDataEvents() {
+	public Observable<SampledContinuousFunction<Time, Dimensionless>> nextAcquisitionDataEvents() {
 		return singleAcquisitionListeners;
 	}
 
 	@Override
-	public Observable<SampledContinuousFunction<Dimensionless, Time>> dataEvents() {
+	public Observable<SampledContinuousFunction<Time, Dimensionless>> dataEvents() {
 		return acquisitionListeners;
 	}
 

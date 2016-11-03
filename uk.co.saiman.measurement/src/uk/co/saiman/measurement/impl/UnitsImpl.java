@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.measurement.
@@ -96,8 +96,8 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 	}
 
 	@Override
-	public String format(Unit<?> quantity) {
-		return getUnitFormat().format(quantity);
+	public String format(Unit<?> unit) {
+		return getUnitFormat().format(unit);
 	}
 
 	@Override
@@ -125,6 +125,10 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 		if (!locale.equals(this.locale)) {
 			this.locale = locale;
 			unitFormat = LocalUnitFormat.getInstance(locale);
+
+			Unit<?> Da = dalton().get();
+			unitFormat.label(Da, "Da");
+
 			quantityFormat = QuantityFormat.getInstance(NumberFormat.getInstance(), unitFormat);
 		}
 	}

@@ -45,8 +45,7 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  * @author Elias N Vasylenko
  */
 public abstract class LockingSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends LockingExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
-		implements SampledContinuousFunction<UD, UR> {
+		extends LockingExpression<ContinuousFunction<UD, UR>> implements SampledContinuousFunction<UD, UR> {
 	private final Unit<UD> unitDomain;
 	private final Unit<UR> unitRange;
 

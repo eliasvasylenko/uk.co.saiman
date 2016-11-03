@@ -32,7 +32,6 @@ import static uk.co.saiman.chemistry.msapex.ChemicalElementTile.Size.SMALL;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
@@ -50,6 +49,7 @@ import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
 import uk.co.strangeskies.utilities.Observable;
 import uk.co.strangeskies.utilities.ObservableImpl;
+import uk.co.strangeskies.utilities.Observer;
 
 /**
  * A clickable UI node for displaying a chemical element. Typically for use in a
@@ -227,12 +227,12 @@ public class ChemicalElementTile extends BorderPane implements Observable<Chemic
 	}
 
 	@Override
-	public boolean addObserver(Consumer<? super ChemicalElementTile> observer) {
+	public boolean addObserver(Observer<? super ChemicalElementTile> observer) {
 		return clickObservable.addObserver(observer);
 	}
 
 	@Override
-	public boolean removeExactObserver(Consumer<? super ChemicalElementTile> observer) {
+	public boolean removeObserver(Observer<? super ChemicalElementTile> observer) {
 		return clickObservable.removeObserver(observer);
 	}
 }

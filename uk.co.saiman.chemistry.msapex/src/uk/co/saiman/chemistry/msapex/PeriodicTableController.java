@@ -35,7 +35,6 @@ import static uk.co.saiman.chemistry.msapex.ChemicalElementTile.Size.SMALL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -49,6 +48,7 @@ import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.chemistry.msapex.ChemicalElementTile.Size;
 import uk.co.strangeskies.utilities.Observable;
 import uk.co.strangeskies.utilities.ObservableImpl;
+import uk.co.strangeskies.utilities.Observer;
 
 /**
  * A JavaFX UI component for display of a {@link PeriodicTable}.
@@ -250,12 +250,12 @@ public class PeriodicTableController implements Observable<ChemicalElementTile> 
 	}
 
 	@Override
-	public boolean addObserver(Consumer<? super ChemicalElementTile> observer) {
+	public boolean addObserver(Observer<? super ChemicalElementTile> observer) {
 		return selectionObservable.addObserver(observer);
 	}
 
 	@Override
-	public boolean removeExactObserver(Consumer<? super ChemicalElementTile> observer) {
-		return selectionObservable.removeExactObserver(observer);
+	public boolean removeObserver(Observer<? super ChemicalElementTile> observer) {
+		return selectionObservable.removeObserver(observer);
 	}
 }

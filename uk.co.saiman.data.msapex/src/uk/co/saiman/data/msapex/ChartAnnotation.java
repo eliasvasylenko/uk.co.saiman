@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.data.msapex;
 
-import uk.co.strangeskies.reflection.ReifiedSelf;
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.ReifiedToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * A typed data annotation on a chart at a specific location.
@@ -39,7 +39,7 @@ import uk.co.strangeskies.reflection.TypeToken;
  * @param <T>
  *          The type of the data of the annotation
  */
-public interface ChartAnnotation<T> extends ReifiedSelf<ChartAnnotation<T>> {
+public interface ChartAnnotation<T> extends ReifiedToken<ChartAnnotation<T>> {
 	/**
 	 * @return The data of the annotation
 	 */
@@ -51,7 +51,7 @@ public interface ChartAnnotation<T> extends ReifiedSelf<ChartAnnotation<T>> {
 	TypeToken<T> getDataType();
 
 	@Override
-	default TypeToken<ChartAnnotation<T>> getThisType() {
+	default TypeToken<ChartAnnotation<T>> getThisTypeToken() {
 		return new TypeToken<ChartAnnotation<T>>() {}.withTypeArgument(new TypeParameter<T>() {}, getDataType());
 	}
 

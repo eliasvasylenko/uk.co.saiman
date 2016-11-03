@@ -1,9 +1,11 @@
 Bundle-Name: SAI :: Instrument :: Provider
 
--buildpath: \
-	${ss;utilities},\
-	${ss;reflection},\
+-buildpath:\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 
-Private-Package: uk.co.saiman.instrument.impl
+Private-Package:\
+	uk.co.saiman.instrument.impl

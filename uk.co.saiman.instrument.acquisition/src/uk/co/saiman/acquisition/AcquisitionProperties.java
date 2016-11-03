@@ -58,4 +58,6 @@ public interface AcquisitionProperties extends Properties<AcquisitionProperties>
 	Localized<String> countMustBePositive();
 
 	Localized<String> noSignal();
+
+	Localized<String> noAcquisitionModules();
 }

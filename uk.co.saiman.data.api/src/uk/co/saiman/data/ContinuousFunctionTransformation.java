@@ -49,8 +49,7 @@ import uk.co.strangeskies.mathematics.expression.DependentExpression;
  * @author Elias N Vasylenko
  */
 public class ContinuousFunctionTransformation<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends DependentExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
-		implements ContinuousFunctionDecorator<UD, UR> {
+		extends DependentExpression<ContinuousFunction<UD, UR>> implements ContinuousFunctionDecorator<UD, UR> {
 	private final Function<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>> transformation;
 
 	/**

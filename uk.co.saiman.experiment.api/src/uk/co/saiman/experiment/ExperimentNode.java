@@ -34,9 +34,9 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.strangeskies.reflection.Reified;
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.ReifiedToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.utilities.ObservableValue;
 import uk.co.strangeskies.utilities.collection.StreamUtilities;
 
@@ -49,7 +49,7 @@ import uk.co.strangeskies.utilities.collection.StreamUtilities;
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified {
+public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedToken<ExperimentNode<T, S>> {
 	/**
 	 * @return the experiment workspace containing this experiment
 	 */
@@ -166,7 +166,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends Reified 
 	ObservableValue<ExperimentLifecycleState> lifecycleState();
 
 	@Override
-	default TypeToken<?> getThisType() {
+	default TypeToken<ExperimentNode<T, S>> getThisTypeToken() {
 		@SuppressWarnings("unchecked")
 		TypeToken<T> typeType = (TypeToken<T>) getType().getThisType();
 

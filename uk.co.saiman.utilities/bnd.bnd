@@ -1,10 +1,10 @@
 Bundle-Name: SAI :: Utilities
 
 -buildpath: \
-	${mdb;core.api},\
-	${ss;reflection},\
-	${ss;utilities},\
-	${ss;text}
+	uk.co.strangeskies.modabi.core.api;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest
 
 Export-Package: \
 	uk.co.saiman,\

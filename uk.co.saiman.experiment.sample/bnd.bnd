@@ -6,12 +6,14 @@ Export-Package: uk.co.saiman.experiment.sample
 	l10n
 
 -buildpath:\
-	${ss;utilities},\
-	${ss;mathematics},\
-	${ss;reflection},\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\
+\
 	javax.measure.unit-api

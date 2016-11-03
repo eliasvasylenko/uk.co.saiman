@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.processing;
 
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * Conceptually, a configurable {@link Processor}. This interface consumes a
@@ -57,7 +57,7 @@ public interface ConfigurableProcessor<C, T, R> {
 	 * @return The exact generic type of the processing target
 	 */
 	default TypeToken<T> getTargetType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
+		return TypeToken.overType(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
 				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
 	}
 
@@ -65,7 +65,7 @@ public interface ConfigurableProcessor<C, T, R> {
 	 * @return The exact generic type of the processing result
 	 */
 	default TypeToken<R> getResultType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
+		return TypeToken.overType(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
 				.resolveTypeArgument(new TypeParameter<R>() {}).infer();
 	}
 
@@ -73,7 +73,7 @@ public interface ConfigurableProcessor<C, T, R> {
 	 * @return The exact generic type of the configuration interface
 	 */
 	default TypeToken<C> getConfigurationType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
+		return TypeToken.overType(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
 				.resolveTypeArgument(new TypeParameter<C>() {}).infer();
 	}
 }

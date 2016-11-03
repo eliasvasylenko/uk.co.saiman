@@ -30,12 +30,12 @@ package uk.co.saiman.experiment;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import uk.co.strangeskies.reflection.Reified;
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.ReifiedToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.utilities.Observable;
 
-public interface ExperimentResult<T> extends Observable<Optional<T>>, Reified {
+public interface ExperimentResult<T> extends Observable<Optional<T>>, ReifiedToken<ExperimentResult<T>> {
 	ExperimentNode<?, ?> getExperimentNode();
 
 	Path getResultDataPath();
@@ -45,7 +45,7 @@ public interface ExperimentResult<T> extends Observable<Optional<T>>, Reified {
 	Optional<T> getData();
 
 	@Override
-	default TypeToken<?> getThisType() {
+	default TypeToken<ExperimentResult<T>> getThisTypeToken() {
 		return new TypeToken<ExperimentResult<T>>() {}.withTypeArgument(new TypeParameter<T>() {},
 				getResultType().getDataType());
 	}

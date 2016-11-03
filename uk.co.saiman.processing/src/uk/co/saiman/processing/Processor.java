@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.processing;
 
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import static uk.co.strangeskies.reflection.token.TypeToken.overType;
+
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * A process to be applied to a target to create a result.
@@ -63,7 +65,7 @@ public interface Processor<T, R> {
 	 * @return The exact generic type of the processing target
 	 */
 	default TypeToken<T> getTargetType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(Processor.class)
+		return overType(getClass()).resolveSupertypeParameters(Processor.class)
 				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
 	}
 
@@ -71,7 +73,7 @@ public interface Processor<T, R> {
 	 * @return The exact generic type of the processing result
 	 */
 	default TypeToken<R> getResultType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(Processor.class)
+		return overType(getClass()).resolveSupertypeParameters(Processor.class)
 				.resolveTypeArgument(new TypeParameter<R>() {}).infer();
 	}
 }

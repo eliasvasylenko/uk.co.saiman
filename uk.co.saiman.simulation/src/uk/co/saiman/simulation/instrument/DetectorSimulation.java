@@ -42,6 +42,6 @@ import uk.co.saiman.data.SampledContinuousFunction;
  * @author Elias N Vasylenko
  */
 public interface DetectorSimulation {
-	SampledContinuousFunction<Dimensionless, Time> acquire(Unit<Dimensionless> intensityUnits, Unit<Time> timeUnits,
+	SampledContinuousFunction<Time, Dimensionless> acquire(Unit<Dimensionless> intensityUnits, Unit<Time> timeUnits,
 			Random random, double resolution, int depth, SimulatedSample sample);
 }

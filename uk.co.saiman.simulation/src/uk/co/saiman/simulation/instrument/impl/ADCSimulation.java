@@ -50,7 +50,7 @@ public class ADCSimulation implements DetectorSimulation {
 	private double[] intensities = new double[0];
 
 	@Override
-	public SampledContinuousFunction<Dimensionless, Time> acquire(Unit<Dimensionless> intensityUnits,
+	public SampledContinuousFunction<Time, Dimensionless> acquire(Unit<Dimensionless> intensityUnits,
 			Unit<Time> timeUnits, Random random, double resolution, int depth, SimulatedSample sample) {
 		if (this.intensities.length != depth) {
 			intensities = new double[depth];
@@ -66,7 +66,7 @@ public class ADCSimulation implements DetectorSimulation {
 			intensities[j] = 0.01 + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
 		}
 
-		return new ArrayRegularSampledContinuousFunction<>(intensityUnits, timeUnits, 1 / (resolution * 1_000), 0,
+		return new ArrayRegularSampledContinuousFunction<>(timeUnits, intensityUnits, 1 / (resolution * 1_000), 0,
 				intensities);
 	}
 }

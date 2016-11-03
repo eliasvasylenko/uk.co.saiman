@@ -27,10 +27,12 @@
  */
 package uk.co.saiman.instrument;
 
+import static uk.co.strangeskies.reflection.token.TypeToken.overType;
+
 import java.util.Set;
 
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * @author Elias N Vasylenko
@@ -55,7 +57,7 @@ public interface Readback<T> {
 	Set<String> getStatus();
 
 	default TypeToken<T> getDataType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(Readback.class)
+		return overType(getClass()).resolveSupertypeParameters(Readback.class)
 				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
 	}
 }

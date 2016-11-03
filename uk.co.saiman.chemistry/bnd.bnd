@@ -1,12 +1,13 @@
 Bundle-Name: SAI :: Chemistry
 
 -buildpath: \
-	${mdb;core.api},\
-	${ss;reflection},\
-	${ss;utilities},\
-	${ss;mathematics},\
-	uk.co.saiman.utilities,\
-	uk.co.saiman.data.api
+	uk.co.strangeskies.modabi.core.api;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data.api;version=snapshot
 
 Export-Package: \
 	uk.co.saiman.chemistry.analysis,\

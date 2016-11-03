@@ -29,8 +29,8 @@ package uk.co.saiman.utilities;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * @author Elias N Vasylenko
@@ -51,7 +51,7 @@ public interface StatefulConfigurable<C, S> extends Configurable<C> {
 	 * @return The exact generic type of the state interface
 	 */
 	default TypeToken<S> getStateType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(StatefulConfigurable.class)
+		return TypeToken.overType(getClass()).resolveSupertypeParameters(StatefulConfigurable.class)
 				.resolveTypeArgument(new TypeParameter<S>() {}).infer();
 	}
 }

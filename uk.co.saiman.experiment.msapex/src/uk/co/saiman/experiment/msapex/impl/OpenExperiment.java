@@ -39,7 +39,7 @@ import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeItemImpl;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * Add an experiment to the workspace.

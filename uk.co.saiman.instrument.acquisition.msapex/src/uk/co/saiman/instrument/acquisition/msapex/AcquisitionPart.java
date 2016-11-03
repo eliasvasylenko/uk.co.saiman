@@ -28,6 +28,7 @@
 package uk.co.saiman.instrument.acquisition.msapex;
 
 import static uk.co.strangeskies.fx.FXMLLoadBuilder.buildWith;
+import static uk.co.strangeskies.fx.FXUtilities.wrap;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +41,6 @@ import javax.inject.Inject;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
-import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.collections.FXCollections;
@@ -125,26 +125,35 @@ public class AcquisitionPart {
 		return new HashSet<>(selectedModules);
 	}
 
+	@Inject
+	@LocalInstance
+	FXMLLoader loaderProvider;
+
 	@PostConstruct
-	void initialise(BorderPane container, @LocalInstance FXMLLoader loader) {
-		container.setCenter(buildWith(loader).controller(this).loadRoot());
+	void postConstruct(BorderPane container) {
+		container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
 		selectedModules.addListener((SetChangeListener.Change<? extends AcquisitionDevice> change) -> {
 			if (change.wasAdded()) {
-				selectAcquisitionModule(loader, change.getElementAdded());
+				selectAcquisitionModule(change.getElementAdded());
 			} else if (change.wasRemoved()) {
 				deselectAcquisitionModule(change.getElementRemoved());
 			}
 		});
 	}
 
-	private void selectAcquisitionModule(FXMLLoader loader, AcquisitionDevice acquisitionModule) {
+	@FXML
+	void initialize() {
+		noSelectionLabel.textProperty().bind(wrap(text.noAcquisitionModules()));
+	}
+
+	private void selectAcquisitionModule(AcquisitionDevice acquisitionModule) {
 		noSelectionLabel.setVisible(false);
 
 		/*
 		 * New chart controller for module
 		 */
-		ContinuousFunctionChartController chartController = buildWith(loader)
+		ContinuousFunctionChartController chartController = buildWith(loaderProvider)
 				.controller(ContinuousFunctionChartController.class).loadController();
 		chartController.setTitle(acquisitionModule.getName());
 		controllers.put(acquisitionModule, chartController);
@@ -154,9 +163,9 @@ public class AcquisitionPart {
 		/*
 		 * Create continuous function view of latest data from module
 		 */
-		ContinuousFunctionExpression<Dimensionless, Time> latestContinuousFunction = new ContinuousFunctionExpression<>(
-				acquisitionModule.getSampleIntensityUnits(), acquisitionModule.getSampleTimeUnits());
-		acquisitionModule.dataEvents().addWeakObserver(latestContinuousFunction, l -> l::setComponent);
+		ContinuousFunctionExpression<Time, Dimensionless> latestContinuousFunction = new ContinuousFunctionExpression<>(
+				acquisitionModule.getSampleTimeUnits(), acquisitionModule.getSampleIntensityUnits());
+		acquisitionModule.dataEvents().addWeakObserver(latestContinuousFunction, l -> c -> l.setComponent(c));
 
 		/*
 		 * Add latest data to chart controller
@@ -171,7 +180,4 @@ public class AcquisitionPart {
 
 		noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
 	}
-
-	@Focus
-	void focus() {}
 }

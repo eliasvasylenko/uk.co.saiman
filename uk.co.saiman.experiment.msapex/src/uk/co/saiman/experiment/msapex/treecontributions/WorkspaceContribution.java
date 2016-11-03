@@ -41,8 +41,8 @@ import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.TreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.reflection.TypeToken;
-import uk.co.strangeskies.reflection.TypedObject;
+import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.strangeskies.reflection.token.TypedObject;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the

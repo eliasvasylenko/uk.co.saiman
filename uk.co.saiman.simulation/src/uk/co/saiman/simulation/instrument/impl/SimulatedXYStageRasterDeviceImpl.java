@@ -50,11 +50,11 @@ import uk.co.saiman.instrument.raster.RasterPattern;
 import uk.co.saiman.instrument.raster.RasterPosition;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.simulation.SimulationProperties;
-import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
-import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
-import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
+import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
+import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
+import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 import uk.co.strangeskies.utilities.BufferingListener;
 import uk.co.strangeskies.utilities.Observable;
@@ -201,8 +201,8 @@ public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, Simulated
 			rasterPosition = new RasterPosition(0, 0, 0);
 		} else if (rasterCounter++ % rasterDwell == 0) {
 			rasterPosition = rasterOperation.next();
-			rasterListeners.accept(rasterPosition);
-			singleRasterListeners.accept(rasterPosition);
+			rasterListeners.notify(rasterPosition);
+			singleRasterListeners.notify(rasterPosition);
 
 			if (!rasterOperation.hasNext()) {
 				if (rasterCounter == 0) {

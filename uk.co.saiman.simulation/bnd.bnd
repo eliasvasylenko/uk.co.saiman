@@ -4,13 +4,14 @@
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
-	${ss;utilities},\
-	${ss;text},\
-	${ss;mathematics},\
-	${ss;reflection},\
-	${ss;reflection.resource},\
-	${ss;fx},\
-	${ss;eclipse},\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.resource;version=latest,\
+	uk.co.strangeskies.fx;version=latest,\
+	uk.co.strangeskies.eclipse;version=latest,\
+\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.experiment.msapex;version=snapshot,\

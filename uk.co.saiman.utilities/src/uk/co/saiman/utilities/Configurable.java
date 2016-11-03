@@ -29,8 +29,8 @@ package uk.co.saiman.utilities;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * Implementation of this API designates a class which is configurable by a
@@ -60,7 +60,7 @@ public interface Configurable<C> {
 	 * @return The exact generic type of the configuration interface
 	 */
 	default TypeToken<C> getConfigurationType() {
-		return TypeToken.over(getClass()).resolveSupertypeParameters(Configurable.class)
+		return TypeToken.overType(getClass()).resolveSupertypeParameters(Configurable.class)
 				.resolveTypeArgument(new TypeParameter<C>() {}).infer();
 	}
 }

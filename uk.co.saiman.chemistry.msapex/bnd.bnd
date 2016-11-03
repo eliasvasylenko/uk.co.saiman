@@ -7,12 +7,12 @@ Bundle-Name: SAI :: MSApex :: Chemistry
 	${build}/include/fugue.icons.bnd
 
 -buildpath: \
-	${ss;utilities},\
-	${ss;mathematics},\
-	${ss;reflection},\
-	${ss;fx},\
-	${ss;eclipse},\
-	${mdb;core.api},\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.fx;version=latest,\
+	uk.co.strangeskies.eclipse;version=latest,\
+	uk.co.strangeskies.modabi.core.api;version=latest,\
 	javax.measure.unit-api,\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\

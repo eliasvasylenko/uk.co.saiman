@@ -91,8 +91,9 @@ runplatform: win64
 	uk.co.strangeskies.modabi.core.api;version='[1.0.0,1.0.1)',\
 	uk.co.strangeskies.osgi.api;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.osgi.provider;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.reflection.resource;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.reflection;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.reflection.codegen;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.reflection.resource;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.text;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.utilities;version='[1.0.13,1.0.14)',\
 	org.eclipse.core.commands;version='[3.8.0,3.8.1)',\

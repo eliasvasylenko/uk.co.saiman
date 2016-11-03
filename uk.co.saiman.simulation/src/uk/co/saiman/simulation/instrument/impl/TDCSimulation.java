@@ -52,7 +52,7 @@ public class TDCSimulation implements DetectorSimulation {
 	private final double[] hitIntensities = new double[MAXIMUM_HITS];
 
 	@Override
-	public SampledContinuousFunction<Dimensionless, Time> acquire(Unit<Dimensionless> intensityUnits,
+	public SampledContinuousFunction<Time, Dimensionless> acquire(Unit<Dimensionless> intensityUnits,
 			Unit<Time> timeUnits, Random random, double resolution, int depth, SimulatedSample sample) {
 		int hits = random.nextInt(MAXIMUM_HITS);
 
@@ -60,7 +60,7 @@ public class TDCSimulation implements DetectorSimulation {
 		 * TODO distribute "hits" number of hits
 		 */
 
-		return new SparseSampledContinuousFunction<>(intensityUnits, timeUnits, 1 / resolution, depth, hits, hitIndices,
+		return new SparseSampledContinuousFunction<>(timeUnits, intensityUnits, 1 / resolution, depth, hits, hitIndices,
 				hitIntensities);
 	}
 }

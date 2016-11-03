@@ -49,8 +49,7 @@ import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
  * @author Elias N Vasylenko
  */
 public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends ImmutableExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
-		implements RegularSampledContinuousFunction<UD, UR> {
+		extends ImmutableExpression<ContinuousFunction<UD, UR>> implements RegularSampledContinuousFunction<UD, UR> {
 	private final Unit<UD> unitDomain;
 	private final Unit<UR> unitRange;
 

@@ -43,7 +43,7 @@ import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 import uk.co.strangeskies.utilities.AggregatingListener;
 
@@ -59,7 +59,7 @@ import uk.co.strangeskies.utilities.AggregatingListener;
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
 	private SpectraProperties properties;
-	private ExperimentResultType<ContinuousFunction<Dimensionless, Time>> spectrumResult;
+	private ExperimentResultType<ContinuousFunction<Time, Dimensionless>> spectrumResult;
 
 	public SpectrumExperimentType() {
 		this(PropertyLoader.getDefaultProperties(SpectraProperties.class));
@@ -77,7 +77,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 	@Activate
 	public void activate() {
 		spectrumResult = new ExperimentResultType<>(properties.spectrumResultName().toString(), this,
-				new TypeToken<ContinuousFunction<Dimensionless, Time>>() {});
+				new TypeToken<ContinuousFunction<Time, Dimensionless>>() {});
 	}
 
 	protected SpectrumConfiguration createStateImpl(ExperimentNode<?, ? extends T> forNode) {
@@ -102,7 +102,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 		return properties.spectrumExperimentName().toString();
 	}
 
-	public ExperimentResultType<ContinuousFunction<Dimensionless, Time>> getSpectrumResult() {
+	public ExperimentResultType<ContinuousFunction<Time, Dimensionless>> getSpectrumResult() {
 		return spectrumResult;
 	}
 
@@ -113,8 +113,8 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 		Unit<Dimensionless> intensityUnits = getAcquisitionDevice().getSampleIntensityUnits();
 		Unit<Time> timeUnits = getAcquisitionDevice().getSampleTimeUnits();
 
-		ContinuousFunctionExpression<Dimensionless, Time> result = new ContinuousFunctionExpression<>(intensityUnits,
-				timeUnits);
+		ContinuousFunctionExpression<Time, Dimensionless> result = new ContinuousFunctionExpression<>(timeUnits,
+				intensityUnits);
 		node.setResult(spectrumResult, result);
 
 		getAcquisitionDevice().startAcquisition(device -> {
@@ -122,16 +122,16 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 			int depth = device.getAcquisitionDepth();
 			double frequency = 1 / device.getAcquisitionResolution();
 
-			ArrayRegularSampledContinuousFunction<Dimensionless, Time> accumulator = new ArrayRegularSampledContinuousFunction<>(
-					intensityUnits, timeUnits, frequency, 0, new double[depth]);
+			ArrayRegularSampledContinuousFunction<Time, Dimensionless> accumulator = new ArrayRegularSampledContinuousFunction<>(
+					timeUnits, intensityUnits, frequency, 0, new double[depth]);
 
 			result.setComponent(accumulator);
 
-			AggregatingListener<SampledContinuousFunction<Dimensionless, Time>> aggregate = new AggregatingListener<>();
+			AggregatingListener<SampledContinuousFunction<Time, Dimensionless>> aggregate = new AggregatingListener<>();
 			device.nextAcquisitionDataEvents().addObserver(aggregate);
 			aggregate.addObserver(a -> {
 				accumulator.mutate(data -> {
-					for (SampledContinuousFunction<Dimensionless, Time> c : a) {
+					for (SampledContinuousFunction<Time, Dimensionless> c : a) {
 						for (int i = 0; i < depth; i++) {
 							data[i] += c.getY(i);
 						}

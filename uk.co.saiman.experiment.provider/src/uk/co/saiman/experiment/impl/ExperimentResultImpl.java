@@ -45,6 +45,7 @@ public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>> impleme
 		this.resultType = type;
 	}
 
+	@Override
 	public ExperimentNode<?, ?> getExperimentNode() {
 		return node;
 	}
@@ -67,5 +68,10 @@ public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>> impleme
 	@Override
 	public Optional<T> getData() {
 		return Optional.ofNullable(data);
+	}
+
+	@Override
+	public ExperimentResult<T> copy() {
+		return this;
 	}
 }

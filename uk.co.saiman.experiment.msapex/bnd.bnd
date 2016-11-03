@@ -7,12 +7,13 @@ Bundle-Name: SAI :: Experiment :: MSApex
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
-	${ss;utilities},\
-	${ss;text},\
-	${ss;mathematics},\
-	${ss;reflection},\
-	${ss;fx},\
-	${ss;eclipse},\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.fx;version=latest,\
+	uk.co.strangeskies.eclipse;version=latest,\
+\
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\
 	uk.co.saiman.data.msapex;version=snapshot,\
@@ -22,6 +23,7 @@ Bundle-Name: SAI :: Experiment :: MSApex
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
+\
 	javax.measure.unit-api
 
 Export-Package:\

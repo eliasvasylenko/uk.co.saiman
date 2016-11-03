@@ -45,8 +45,7 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  * @author Elias N Vasylenko
  */
 public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends LockingExpression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>>
-		implements ContinuousFunctionDecorator<UD, UR> {
+		extends LockingExpression<ContinuousFunction<UD, UR>> implements ContinuousFunctionDecorator<UD, UR> {
 	private ContinuousFunction<UD, UR> component;
 
 	/**
@@ -92,9 +91,13 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
 		beginWrite();
 
 		try {
+			ContinuousFunction<UD, UR> previousComponent = this.component;
 			this.component = component;
-			getDependencies().clear();
-			getDependencies().add(component);
+
+			addDependency(component);
+			if (previousComponent != component) {
+				removeDependency(previousComponent);
+			}
 		} finally {
 			endWrite();
 		}
@@ -107,6 +110,7 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
 
 	@Override
 	protected ContinuousFunction<UD, UR> evaluate() {
+		component.getValue();
 		return this;
 	}
 }

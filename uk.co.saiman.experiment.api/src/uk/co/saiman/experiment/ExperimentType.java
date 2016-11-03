@@ -27,13 +27,14 @@
  */
 package uk.co.saiman.experiment;
 
-import static uk.co.strangeskies.reflection.TypeToken.over;
+import static uk.co.strangeskies.reflection.token.TypeToken.overType;
 
+import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
 import uk.co.strangeskies.reflection.Reified;
-import uk.co.strangeskies.reflection.TypeParameter;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * A type of experiment which may be available to be executed on a particular
@@ -108,12 +109,12 @@ public interface ExperimentType<S> extends Reified {
 	 * @return the exact generic type of the configuration interface
 	 */
 	default TypeToken<S> getStateType() {
-		return getThisType().resolveSupertypeParameters(ExperimentType.class)
+		return overType(getThisType()).resolveSupertypeParameters(ExperimentType.class)
 				.resolveTypeArgument(new TypeParameter<S>() {});
 	}
 
 	@Override
-	default TypeToken<?> getThisType() {
-		return over(getClass());
+	default Type getThisType() {
+		return getClass();
 	}
 }

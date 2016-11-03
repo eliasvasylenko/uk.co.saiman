@@ -258,4 +258,9 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	public <U> ExperimentResultImpl<U> getResult(ExperimentResultType<U> resultType) {
 		return (ExperimentResultImpl<U>) results.get(resultType);
 	}
+
+	@Override
+	public ExperimentNode<T, S> copy() {
+		return this;
+	}
 }

@@ -1,9 +1,10 @@
 Bundle-Name: SAI :: Experiment
 
 -buildpath: \
-	${ss;utilities},\
-	${ss;reflection},\
-	${ss;text},\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.processing;version=snapshot
 

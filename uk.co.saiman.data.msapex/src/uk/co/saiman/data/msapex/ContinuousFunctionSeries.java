@@ -29,7 +29,6 @@ package uk.co.saiman.data.msapex;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -39,6 +38,7 @@ import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
+import uk.co.strangeskies.utilities.Observer;
 
 /**
  * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series
@@ -56,7 +56,7 @@ public class ContinuousFunctionSeries {
 	 * Continuous function data
 	 */
 	private final ContinuousFunction<?, ?> continuousFunction;
-	private final Consumer<Expression<? extends ContinuousFunction<?, ?>, ? extends ContinuousFunction<?, ?>>> continuousFunctionObserver;
+	private final Observer<Expression<? extends ContinuousFunction<?, ?>>> continuousFunctionObserver;
 	private ContinuousFunction<?, ?> latestRenderedContinuousFunction = null;
 
 	/*
@@ -133,7 +133,7 @@ public class ContinuousFunctionSeries {
 				dirtied = true;
 				dirty = false;
 
-				latestRenderedContinuousFunction = getBackingContinuousFunction().decoupleValue();
+				latestRenderedContinuousFunction = continuousFunction.decoupleValue();
 			}
 		}
 

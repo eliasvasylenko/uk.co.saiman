@@ -50,11 +50,11 @@ import uk.co.saiman.experiment.msapex.ResultEditorContribution;
 import uk.co.saiman.experiment.spectrum.SpectraProperties;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.FXMLLoadBuilder;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 @Component(scope = ServiceScope.PROTOTYPE)
 public class SpectrumGraphEditorContribution
-		implements ResultEditorContribution<ContinuousFunction<Dimensionless, Time>> {
+		implements ResultEditorContribution<ContinuousFunction<Time, Dimensionless>> {
 	@Inject
 	@Localize
 	SpectraProperties properties;
@@ -63,7 +63,7 @@ public class SpectrumGraphEditorContribution
 	MDirtyable dirty;
 
 	@Inject
-	ExperimentResult<ContinuousFunction<Dimensionless, Time>> result;
+	ExperimentResult<ContinuousFunction<Time, Dimensionless>> result;
 
 	@FXML
 	private ContinuousFunctionChartController spectrumGraphController;
@@ -77,7 +77,7 @@ public class SpectrumGraphEditorContribution
 		setResultData(result.getData());
 	}
 
-	private void setResultData(Optional<ContinuousFunction<Dimensionless, Time>> data) {
+	private void setResultData(Optional<ContinuousFunction<Time, Dimensionless>> data) {
 		Platform.runLater(() -> {
 			spectrumGraphController.getContinuousFunctions().clear();
 			data.ifPresent(d -> spectrumGraphController.getContinuousFunctions().add(d));
@@ -87,8 +87,8 @@ public class SpectrumGraphEditorContribution
 	}
 
 	@Override
-	public TypeToken<ContinuousFunction<Dimensionless, Time>> getResultType() {
-		return new TypeToken<ContinuousFunction<Dimensionless, Time>>() {};
+	public TypeToken<ContinuousFunction<Time, Dimensionless>> getResultType() {
+		return new TypeToken<ContinuousFunction<Time, Dimensionless>>() {};
 	}
 
 	@Override

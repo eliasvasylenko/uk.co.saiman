@@ -48,8 +48,8 @@ import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
-import uk.co.strangeskies.reflection.Reified;
-import uk.co.strangeskies.reflection.TypedObject;
+import uk.co.strangeskies.reflection.token.ReifiedToken;
+import uk.co.strangeskies.reflection.token.TypedObject;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -104,7 +104,7 @@ public class ExperimentNodeContribution extends MenuTreeCellContribution<Experim
 
 	@Override
 	public <U extends ExperimentNode<?, ?>> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return Stream.concat(data.data().getChildren(), data.data().getResults()).map(Reified::asTypedObject)
+		return Stream.concat(data.data().getChildren(), data.data().getResults()).map(ReifiedToken::asTypedObject)
 				.collect(Collectors.toList());
 	}
 

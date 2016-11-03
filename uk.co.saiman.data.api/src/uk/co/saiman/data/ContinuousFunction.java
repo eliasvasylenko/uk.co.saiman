@@ -27,14 +27,13 @@
  */
 package uk.co.saiman.data;
 
-import java.util.function.Consumer;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.mathematics.expression.SelfExpression;
+import uk.co.strangeskies.utilities.Observer;
 
 /**
  * A set of domain values (X) mapped via some continuous function to a
@@ -54,8 +53,8 @@ import uk.co.strangeskies.mathematics.expression.SelfExpression;
  * @param <UR>
  *          the type of the units of measurement of values in the range
  */
-public interface ContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>> extends
-		SelfExpression<ContinuousFunction<UD, UR>>, Expression<ContinuousFunction<UD, UR>, ContinuousFunction<UD, UR>> {
+public interface ContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+		extends SelfExpression<ContinuousFunction<UD, UR>>, Expression<ContinuousFunction<UD, UR>> {
 	/**
 	 * @param unitDomain
 	 *          the units of the domain
@@ -158,12 +157,12 @@ class EmptyContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
 	}
 
 	@Override
-	public boolean removeExactObserver(Consumer<? super ContinuousFunction<UD, UR>> observer) {
+	public boolean removeObserver(Observer<? super Expression<? extends ContinuousFunction<UD, UR>>> observer) {
 		return true;
 	}
 
 	@Override
-	public boolean addObserver(Consumer<? super ContinuousFunction<UD, UR>> observer) {
+	public boolean addObserver(Observer<? super Expression<? extends ContinuousFunction<UD, UR>>> observer) {
 		return true;
 	}
 

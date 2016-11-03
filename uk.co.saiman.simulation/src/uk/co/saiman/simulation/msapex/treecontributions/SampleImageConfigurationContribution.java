@@ -44,8 +44,8 @@ import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
-import uk.co.strangeskies.reflection.TypeToken;
-import uk.co.strangeskies.reflection.TypedObject;
+import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.strangeskies.reflection.token.TypedObject;
 
 @SuppressWarnings("javadoc")
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)

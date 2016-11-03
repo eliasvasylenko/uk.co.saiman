@@ -6,10 +6,11 @@ Export-Package: uk.co.saiman.acquisition
 	l10n
 
 -buildpath: \
-	${ss;utilities},\
-	${ss;text},\
-	${ss;mathematics},\
-	${ss;reflection},\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\

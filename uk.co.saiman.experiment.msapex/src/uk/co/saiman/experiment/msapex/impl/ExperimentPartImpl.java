@@ -49,7 +49,7 @@ import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
 import uk.co.saiman.experiment.msapex.ExperimentPart;
 import uk.co.strangeskies.eclipse.EclipseModularTreeController;
-import uk.co.strangeskies.reflection.TypeToken;
+import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
