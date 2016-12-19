@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 
 /**
@@ -48,7 +48,7 @@ public interface XYStageExperimentType<T extends XYStageConfiguration> extends S
 	XYStageDevice device();
 
 	@Override
-	default void execute(ExperimentNode<?, ? extends T> node) {
-		device().requestStageOffset(node.getState().getX(), node.getState().getY());
+	default void execute(ExperimentExecutionContext<T> context) {
+		device().requestStageOffset(context.node().getState().getX(), context.node().getState().getY());
 	}
 }

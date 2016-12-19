@@ -27,15 +27,19 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
-import static uk.co.strangeskies.fx.FXMLLoadBuilder.buildWith;
+import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.strangeskies.reflection.token.TypedObject.typedObject;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.ui.internal.workbench.E4Workbench;
 import org.eclipse.fx.core.di.LocalInstance;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -49,7 +53,6 @@ import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
 import uk.co.saiman.experiment.msapex.ExperimentPart;
 import uk.co.strangeskies.eclipse.EclipseModularTreeController;
-import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -70,9 +73,16 @@ public class ExperimentPartImpl implements ExperimentPart {
 	private EclipseModularTreeController modularTreeController;
 	private ExperimentWorkspace workspace;
 
+	@Inject
+	private IAdapterManager adapterManager;
+	private ExperimentNodeAdapterFactory adapterFactory;
+
 	@PostConstruct
-	void initialize(BorderPane container, @LocalInstance FXMLLoader loader,
-			@Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation, ExperimentWorkspaceFactory workspaceFactory) {
+	void initialize(
+			BorderPane container,
+			@LocalInstance FXMLLoader loader,
+			@Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation,
+			ExperimentWorkspaceFactory workspaceFactory) {
 		container.setCenter(buildWith(loader).controller(ExperimentPart.class, this).loadRoot());
 
 		Path workspaceLocation;
@@ -84,7 +94,14 @@ public class ExperimentPartImpl implements ExperimentPart {
 
 		workspace = workspaceFactory.openWorkspace(workspaceLocation);
 
-		modularTreeController.getTreeView().setRootData(new TypeToken<ExperimentWorkspace>() {}.typedObject(workspace));
+		modularTreeController.getTreeView().setRootData(typedObject(workspace, ExperimentWorkspace.class));
+
+		adapterFactory = new ExperimentNodeAdapterFactory(adapterManager, workspace);
+	}
+
+	@PreDestroy
+	void destroy() {
+		adapterFactory.unregister();
 	}
 
 	@Override

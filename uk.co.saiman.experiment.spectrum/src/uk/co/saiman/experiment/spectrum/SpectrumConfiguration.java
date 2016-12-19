@@ -27,11 +27,17 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import uk.co.saiman.acquisition.AcquisitionDevice;
+
 /**
  * TODO
  * 
  * @author Elias N Vasylenko
  */
 public interface SpectrumConfiguration {
-	public String getSpectrumName();
+	String getSpectrumName();
+
+	void setSpectrumName(String name);
+
+	AcquisitionDevice getAcquisitionDevice();
 }

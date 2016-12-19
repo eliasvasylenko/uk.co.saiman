@@ -60,6 +60,6 @@ public interface ExperimentConfiguration {
 		final String ALPHANUMERIC = "[a-zA-Z0-9]+";
 		final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
 
-		return name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
+		return name != null && name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
 	}
 }

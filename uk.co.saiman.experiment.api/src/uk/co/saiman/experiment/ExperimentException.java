@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment;
 
-import java.util.function.Function;
-
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.LocalizedRuntimeException;
 import uk.co.strangeskies.text.properties.PropertyLoader;
@@ -40,24 +38,6 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  */
 public class ExperimentException extends LocalizedRuntimeException {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * @param message
-	 *          a function from a localized text interface to a {@link Localized}
-	 * @param cause
-	 *          the exception cause
-	 */
-	public ExperimentException(Function<ExperimentProperties, Localized<String>> message, Throwable cause) {
-		super(message.apply(getText()), cause);
-	}
-
-	/**
-	 * @param message
-	 *          a function from a localized text interface to a {@link Localized}
-	 */
-	public ExperimentException(Function<ExperimentProperties, Localized<String>> message) {
-		this(message, null);
-	}
 
 	/**
 	 * @param message

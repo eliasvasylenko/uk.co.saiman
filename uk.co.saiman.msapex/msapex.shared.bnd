@@ -4,16 +4,23 @@
 	${include.ss}/eclipse.platform.neon.bndrun,\
 	${include.ss}/eclipse.fx.2.4.0.bndrun
 
-req: osgi.identity;filter:='(&(osgi.identity=${1})(version${if;${is;${2};null};>=0;${2}}))'
+-augment.org.eclipse.fx.ui.services:\
+	org.eclipse.fx.ui.services;\
+		capability:='org.eclipse.fx.ui.services;\
+			version=1.2.0'
 
 -runrequires.msapex:\
-	${req;uk.co.saiman.msapex},\
+	${req;org.apache.felix.configadmin},\
+	${req;uk.co.saiman.chemistry.msapex},\
 	${req;uk.co.saiman.experiment.msapex},\
-	${req;uk.co.saiman.instrument.acquisition.msapex},\
-	${req;uk.co.saiman.instrument.acquisition},\
-	${req;uk.co.saiman.simulation.provider},\
 	${req;uk.co.saiman.icons.fugue},\
-	${req;uk.co.saiman.chemistry.msapex}
+	${req;uk.co.saiman.instrument.acquisition.msapex},\
+	${req;uk.co.saiman.instrument.provider},\
+	${req;uk.co.saiman.instrument.stage.msapex},\
+	${req;uk.co.saiman.msapex},\
+	${req;uk.co.saiman.msapex.camera},\
+	${req;uk.co.saiman.simulation.msapex},\
+	${req;uk.co.saiman.simulation.provider}
 
 -runvm.msapex:\
 	-Xmx1024m

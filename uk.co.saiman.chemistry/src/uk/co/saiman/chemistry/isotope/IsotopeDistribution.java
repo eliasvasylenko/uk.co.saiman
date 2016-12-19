@@ -46,6 +46,7 @@ import javax.swing.event.EventListenerList;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.chemistry.Element;
+import uk.co.saiman.chemistry.Isotope;
 import uk.co.strangeskies.mathematics.Range;
 
 public class IsotopeDistribution {
@@ -75,9 +76,9 @@ public class IsotopeDistribution {
 	private double percentDone;
 
 	public IsotopeDistribution() {
-		data = new TreeSet<MassAbundance>();
+		data = new TreeSet<>();
 		listenerList = new EventListenerList();
-		molecule = new ChemicalComposition();
+		molecule = ChemicalComposition.nothing();
 	}
 
 	public IsotopeDistribution(IsotopeDistribution isotopeDistribution) {
@@ -89,7 +90,7 @@ public class IsotopeDistribution {
 		}
 		mass = isotopeDistribution.mass;
 		if (isotopeDistribution.data != null) {
-			data = new TreeSet<MassAbundance>();
+			data = new TreeSet<>();
 
 			Iterator<MassAbundance> dataIterator = isotopeDistribution.data.iterator();
 			MassAbundance massAbundance;
@@ -174,7 +175,10 @@ public class IsotopeDistribution {
 	 * @param maxMasses
 	 *          maximum number of masses to report (highest abundances only)
 	 */
-	public void calculateForMolecule(ChemicalComposition molecule, int maxMasses, boolean lowPrecision,
+	public void calculateForMolecule(
+			ChemicalComposition molecule,
+			int maxMasses,
+			boolean lowPrecision,
 			double minimumAbundance) {
 		this.molecule = molecule;
 		if (lowPrecision) {
@@ -213,7 +217,10 @@ public class IsotopeDistribution {
 	 *          maximum resolvable distance between output masses (merge closer),
 	 *          with no limit of distribution size (number of masses in output)
 	 */
-	public void calculateForMolecule(ChemicalComposition molecule, int maxMasses, double mergeDistance,
+	public void calculateForMolecule(
+			ChemicalComposition molecule,
+			int maxMasses,
+			double mergeDistance,
 			double minimumAbundance) {
 		this.molecule = molecule;
 		if (mergeDistance < 0) {
@@ -229,7 +236,7 @@ public class IsotopeDistribution {
 	 *          the file to be read
 	 */
 	public void loadFromFile(File file) {
-		dataHash = new HashSet<MassAbundance>();
+		dataHash = new HashSet<>();
 		molecule = null;
 
 		String[] splitName = file.getName().split("\\.");
@@ -251,7 +258,7 @@ public class IsotopeDistribution {
 			new IsotopeDistributionException(exception);
 		}
 
-		data = new TreeSet<MassAbundance>(dataHash);
+		data = new TreeSet<>(dataHash);
 
 		dataChangedInternal(true);
 	}
@@ -337,15 +344,15 @@ public class IsotopeDistribution {
 		// keep old data in case of interrupt
 		TreeSet<MassAbundance> oldData = null;
 		if (data != null) {
-			oldData = new TreeSet<MassAbundance>(data);
+			oldData = new TreeSet<>(data);
 		}
 
 		if (molecule.getElements().isEmpty() && molecule.getIsotopes().isEmpty()) {
-			data = new TreeSet<MassAbundance>();
+			data = new TreeSet<>();
 			return;
 		}
 
-		dataHash = new HashSet<MassAbundance>();
+		dataHash = new HashSet<>();
 		if (maxStates < 0) {
 			maxStates = 0;
 		}
@@ -368,7 +375,7 @@ public class IsotopeDistribution {
 		}
 
 		// working variables for next state (sorted so pruning is quick as possible)
-		TreeSet<MassAbundance> nextState = new TreeSet<MassAbundance>();
+		TreeSet<MassAbundance> nextState = new TreeSet<>();
 		MassAbundance nextMassAbundance;
 
 		// initial state
@@ -555,8 +562,9 @@ public class IsotopeDistribution {
 					if (nextState.contains(nextMassAbundance)) {
 						MassAbundance existing = nextState.floor(nextMassAbundance);
 						nextState.remove(existing);
-						nextState.add(existing.withAbundance(
-								existing.getAbundance() + nextMassAbundance.getAbundance() + dataMassAbundance.getAbundance()));
+						nextState.add(
+								existing.withAbundance(
+										existing.getAbundance() + nextMassAbundance.getAbundance() + dataMassAbundance.getAbundance()));
 					} else {
 						nextState.add(nextMassAbundance);
 					}
@@ -596,7 +604,7 @@ public class IsotopeDistribution {
 		}
 
 		// make data map sorted
-		data = new TreeSet<MassAbundance>();
+		data = new TreeSet<>();
 		data.addAll(dataHash);
 
 		// notify of change
@@ -784,8 +792,9 @@ public class IsotopeDistribution {
 	}
 
 	public SortedSet<MassAbundance> dataFromRange(Range<Double> range) {
-		return data.tailSet(new MassAbundance(range.getFrom(), 0), range.isFromInclusive())
-				.headSet(new MassAbundance(range.getTo(), 0), range.isToInclusive());
+		return data.tailSet(new MassAbundance(range.getFrom(), 0), range.isFromInclusive()).headSet(
+				new MassAbundance(range.getTo(), 0),
+				range.isToInclusive());
 	}
 
 	public IsotopeDistribution extractedFromRange(Range<Double> range) {
@@ -801,7 +810,7 @@ public class IsotopeDistribution {
 		}
 
 		if (data == null) {
-			data = new TreeSet<MassAbundance>(isotopeDistribution.getData());
+			data = new TreeSet<>(isotopeDistribution.getData());
 			relativeAbundance = isotopeDistribution.relativeAbundance;
 		} else {
 			double relativeAbundanceRatio = relativeAbundance / isotopeDistribution.relativeAbundance;
@@ -838,7 +847,7 @@ public class IsotopeDistribution {
 	}
 
 	public void clipToRange(Range<Double> range) {
-		data = new TreeSet<MassAbundance>(dataFromRange(range));
+		data = new TreeSet<>(dataFromRange(range));
 
 		setRelativeAbundance(getLargestAbundance().getAbundance() * relativeAbundance);
 
@@ -861,7 +870,7 @@ public class IsotopeDistribution {
 	}
 
 	public void removeMassAbundances(int[] indices) {
-		Set<MassAbundance> massAbundancesForRemoval = new HashSet<MassAbundance>();
+		Set<MassAbundance> massAbundancesForRemoval = new HashSet<>();
 		for (int index : indices) {
 			massAbundancesForRemoval.add((MassAbundance) data.toArray()[index]);
 		}

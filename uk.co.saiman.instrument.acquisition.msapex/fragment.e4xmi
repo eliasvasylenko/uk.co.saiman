@@ -4,9 +4,9 @@
     <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.instrument.acquisition.msapex.part" containerData="" contributionURI="bundleclass://uk.co.saiman.instrument.acquisition.msapex/uk.co.saiman.instrument.acquisition.msapex.AcquisitionPart" label="Acquisition" iconURI="${fugue.icon.runtime}/size16/compile.png">
       <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.instrument.acquisition.msapex.toolbar">
-        <children xsi:type="menu:DirectToolItem" xmi:id="_HMHsEKNFEeWE1fWzNHjQjQ" elementId="uk.co.saiman.instrument.acquisition.msapex.directtoolitem.devices" label="Devices" contributionURI="bundleclass://uk.co.saiman.instrument.acquisition.msapex/uk.co.saiman.instrument.acquisition.msapex.DevicesMenu">
+        <children xsi:type="menu:DirectToolItem" xmi:id="_HMHsEKNFEeWE1fWzNHjQjQ" elementId="uk.co.saiman.instrument.acquisition.msapex.directtoolitem.devices" label="Devices" contributionURI="bundleclass://uk.co.saiman.instrument.acquisition.msapex/uk.co.saiman.instrument.acquisition.msapex.AcquisitionDevicesButton">
           <menu xmi:id="_iZiDIKNGEeWE1fWzNHjQjQ" elementId="uk.co.saiman.instrument.acquisition.msapex.toolbar.devices.menu">
-            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_UlN-sKNGEeWE1fWzNHjQjQ" elementId="uk.co.saiman.instrument.acquisition.msapex.toolbar.devices.menu.contribution" contributionURI="bundleclass://uk.co.saiman.instrument.acquisition.msapex/uk.co.saiman.instrument.acquisition.msapex.DevicesMenu"/>
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_UlN-sKNGEeWE1fWzNHjQjQ" elementId="uk.co.saiman.instrument.acquisition.msapex.toolbar.devices.menu.contribution" contributionURI="bundleclass://uk.co.saiman.instrument.acquisition.msapex/uk.co.saiman.instrument.acquisition.msapex.AcquisitionDevicesMenu"/>
           </menu>
         </children>
       </toolbar>

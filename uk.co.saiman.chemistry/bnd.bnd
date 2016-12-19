@@ -7,15 +7,14 @@ Bundle-Name: SAI :: Chemistry
 	uk.co.strangeskies.mathematics;version=latest,\
 \
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.data.api;version=snapshot
+	uk.co.saiman.data.api;version=snapshot,\
+\
+	javax.measure.unit-api
 
 Export-Package: \
 	uk.co.saiman.chemistry.analysis,\
 	uk.co.saiman.chemistry.isotope,\
 	uk.co.saiman.chemistry
-
--includeresource: \
-	META-INF/schemata=schemata
 
 #-pluginpath: \
 #	${pluginpath.modabi;xml}

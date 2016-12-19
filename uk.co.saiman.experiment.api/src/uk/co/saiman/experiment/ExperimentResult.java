@@ -46,7 +46,7 @@ public interface ExperimentResult<T> extends Observable<Optional<T>>, ReifiedTok
 
 	@Override
 	default TypeToken<ExperimentResult<T>> getThisTypeToken() {
-		return new TypeToken<ExperimentResult<T>>() {}.withTypeArgument(new TypeParameter<T>() {},
-				getResultType().getDataType());
+		return new TypeToken<ExperimentResult<T>>() {}
+				.withTypeArgument(new TypeParameter<T>() {}, getResultType().getDataType());
 	}
 }

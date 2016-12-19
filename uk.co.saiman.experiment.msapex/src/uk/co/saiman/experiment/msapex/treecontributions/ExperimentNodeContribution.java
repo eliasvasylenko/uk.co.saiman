@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.msapex.treecontributions;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
@@ -103,9 +101,8 @@ public class ExperimentNodeContribution extends MenuTreeCellContribution<Experim
 	}
 
 	@Override
-	public <U extends ExperimentNode<?, ?>> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return Stream.concat(data.data().getChildren(), data.data().getResults()).map(ReifiedToken::asTypedObject)
-				.collect(Collectors.toList());
+	public <U extends ExperimentNode<?, ?>> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
+		return Stream.concat(data.data().getChildren(), data.data().getResults()).map(ReifiedToken::asTypedObject);
 	}
 
 	@Override

@@ -27,15 +27,11 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
-import static uk.co.strangeskies.fx.FXUtilities.wrap;
+import java.nio.file.Path;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextInputDialog;
-import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.strangeskies.eclipse.Localize;
 
@@ -52,27 +48,21 @@ public class AddExperiment {
 
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
+		System.out.println(part);
+		System.out.println(part.getLabel());
+		System.out.println(part.getObject());
+
 		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
 
-		TextInputDialog nameDialog = new TextInputDialog();
-		nameDialog.titleProperty().bind(wrap(text.newExperiment()));
-		nameDialog.headerTextProperty().bind(wrap(text.newExperimentName()));
+		RenameExperiment
+				.requestExperimentNameDialog(experimentPart, text.newExperiment(), text.newExperimentName())
+				.ifPresent(name -> {
+					Path newLocation = experimentPart.getExperimentWorkspace().getWorkspaceDataPath().resolve(name);
 
-		Button okButton = (Button) nameDialog.getDialogPane().lookupButton(ButtonType.OK);
-		okButton.setDisable(true);
-		nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+					RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
 
-			boolean exists = experimentPart.getExperimentWorkspace().getRootExperiments()
-					.anyMatch(e -> e.getState().getName().equals(newValue));
-
-			boolean isValid = ExperimentConfiguration.isNameValid(newValue);
-
-			okButton.setDisable(!isValid || exists);
-		});
-
-		nameDialog.showAndWait().ifPresent(name -> {
-			experimentPart.getExperimentWorkspace().addRootExperiment(name);
-			experimentPart.getExperimentTreeController().getTreeView().refresh();
-		});
+					experimentPart.getExperimentWorkspace().addRootExperiment(name);
+					experimentPart.getExperimentTreeController().getTreeView().refresh();
+				});
 	}
 }

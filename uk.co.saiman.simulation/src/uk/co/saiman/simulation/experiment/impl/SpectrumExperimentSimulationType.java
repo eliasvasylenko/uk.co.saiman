@@ -29,6 +29,7 @@ package uk.co.saiman.simulation.experiment.impl;
 
 import static java.util.Collections.synchronizedSet;
 
+import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +37,9 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
+import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.experiment.ExperimentConfigurationContext;
+import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectraProperties;
@@ -72,16 +76,35 @@ public class SpectrumExperimentSimulationType extends SpectrumExperimentType<Spe
 	}
 
 	@Override
-	public SpectrumConfiguration createState(ExperimentNode<?, ? extends SpectrumConfiguration> forNode) {
-		return createStateImpl(forNode);
+	public SpectrumConfiguration createState(ExperimentConfigurationContext<SpectrumConfiguration> forNode) {
+		return new SpectrumConfiguration() {
+			private String name;
+
+			@Override
+			public String getSpectrumName() {
+				return name;
+			}
+
+			@Override
+			public void setSpectrumName(String name) {
+				forNode.setId(getName() + " - " + name);
+
+				this.name = name;
+			}
+
+			@Override
+			public AcquisitionDevice getAcquisitionDevice() {
+				return acquisitionSimulation;
+			}
+		};
 	}
 
 	@Override
-	public void execute(ExperimentNode<?, ? extends SpectrumConfiguration> node) {
-		SimulatedSampleDevice sample = node.getAncestor(sampleExperiments).get().getType().device();
+	public void execute(ExperimentExecutionContext<SpectrumConfiguration> context) {
+		SimulatedSampleDevice sample = context.node().getAncestor(sampleExperiments).get().getType().device();
 		acquisitionSimulation.setSample(sample);
 
-		super.execute(node);
+		super.execute(context);
 	}
 
 	@Override
@@ -92,5 +115,10 @@ public class SpectrumExperimentSimulationType extends SpectrumExperimentType<Spe
 	@Override
 	public boolean mayComeBefore(ExperimentNode<?, ?> penultimateDescendantNode, ExperimentType<?> descendantNodeType) {
 		return descendantNodeType != this;
+	}
+
+	@Override
+	public Type getThisType() {
+		return SpectrumExperimentSimulationType.class;
 	}
 }

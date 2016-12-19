@@ -27,7 +27,8 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
-import static uk.co.strangeskies.fx.FXMLLoadBuilder.buildWith;
+import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.strangeskies.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,7 +95,9 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
 
 	@SuppressWarnings("unchecked")
 	protected void contribute(ResultEditorContribution<?> contribution) {
-		if (contribution.getResultType().isAssignableFrom(data.getResultType().getDataType())) {
+		if (contribution
+				.getResultType()
+				.satisfiesConstraintFrom(LOOSE_COMPATIBILILTY, data.getResultType().getDataType())) {
 			addContribution((ResultEditorContribution<? super T>) contribution);
 		}
 	}
@@ -156,7 +159,8 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
 	public void setData(ExperimentResult<T> data) {
 		this.data = data;
 		data.getExperimentNode().lifecycleState().addObserver(s -> System.out.println("? ok >"));
-		data.getExperimentNode().lifecycleState().changes().addWeakObserver(this,
+		data.getExperimentNode().lifecycleState().changes().addWeakObserver(
+				this,
 				p -> c -> p.updateExperimentState(c.previousValue(), c.newValue()));
 		for (ResultEditorContribution<?> contribution : editorContributions) {
 			contribute(contribution);

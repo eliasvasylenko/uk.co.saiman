@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static uk.co.strangeskies.utilities.collection.StreamUtilities.upcastStream;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,6 +46,7 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
 import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.strangeskies.utilities.Log;
 import uk.co.strangeskies.utilities.collection.StreamUtilities;
 
 /**
@@ -58,11 +61,11 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
 
 	private final RootExperiment rootExperimentType = new RootExperimentImpl(this);
-	private final List<ExperimentNode<RootExperiment, ExperimentConfiguration>> rootExperiments = new ArrayList<>();
+	private final List<ExperimentNodeImpl<RootExperiment, ExperimentConfiguration>> rootExperiments = new ArrayList<>();
 
 	private final ExperimentProperties text;
 
-	private final List<ExperimentNode<?, ?>> processingStack = new ArrayList<>();
+	private final List<ExperimentNodeImpl<?, ?>> processingStack = new ArrayList<>();
 	private final Lock processingLock = new ReentrantLock();
 
 	/**
@@ -87,11 +90,17 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	 * @param text
 	 *          a localized text accessor implementation
 	 */
-	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot,
+	public ExperimentWorkspaceImpl(
+			ExperimentWorkspaceFactoryImpl factory,
+			Path workspaceRoot,
 			ExperimentProperties text) {
 		this.factory = factory;
 		this.dataRoot = workspaceRoot;
 		this.text = text;
+	}
+
+	Log getLog() {
+		return factory.getLog();
 	}
 
 	ExperimentProperties getText() {
@@ -105,7 +114,7 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 
 	@Override
 	public Stream<ExperimentNode<?, ?>> processingState() {
-		return processingStack.stream();
+		return upcastStream(processingStack.stream());
 	}
 
 	/*
@@ -119,17 +128,22 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 
 	@Override
 	public Stream<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments() {
+		return upcastStream(rootExperiments.stream());
+	}
+
+	protected Stream<ExperimentNodeImpl<RootExperiment, ExperimentConfiguration>> getRootExperimentsImpl() {
 		return rootExperiments.stream();
 	}
 
 	@Override
 	public ExperimentNode<RootExperiment, ExperimentConfiguration> addRootExperiment(String name) {
 		if (!ExperimentConfiguration.isNameValid(name)) {
-			throw new ExperimentException(t -> t.exception().invalidExperimentName(name));
+			throw new ExperimentException(text.exception().invalidExperimentName(name));
 		}
 
-		ExperimentNode<RootExperiment, ExperimentConfiguration> rootExperiment = new ExperimentNodeImpl<>(
-				rootExperimentType, this);
+		ExperimentNodeImpl<RootExperiment, ExperimentConfiguration> rootExperiment = new ExperimentNodeImpl<>(
+				rootExperimentType,
+				this);
 		rootExperiment.getState().setName(name);
 
 		rootExperiments.add(rootExperiment);
@@ -162,7 +176,7 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 
 	protected void process(ExperimentNodeImpl<?, ?> node) {
 		if (!tryProcess(node)) {
-			throw new ExperimentException(t -> t.exception().cannotProcessExperimentConcurrently(node.getRoot()));
+			throw new ExperimentException(text.exception().cannotProcessExperimentConcurrently(node.getRoot()));
 		}
 	}
 

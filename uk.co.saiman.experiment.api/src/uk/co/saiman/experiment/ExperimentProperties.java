@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment;
 
+import java.nio.file.Path;
+
 import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
@@ -91,4 +93,28 @@ public interface ExperimentProperties extends Properties<ExperimentProperties> {
 	Localized<String> configuration();
 
 	Localized<String> missingResult();
+
+	Localized<String> invalidExperimentName(String name);
+
+	Localized<String> duplicateExperimentName(String name);
+
+	Localized<String> experimentRoot();
+
+	Localized<String> cannotDelete(Path newLocation);
+
+	Localized<String> cannotMove(Path oldLocation, Path newLocation);
+
+	Localized<String> cannotCreate(Path newLocation);
+
+	Localized<String> overwriteData();
+
+	Localized<String> overwriteDataConfirmation(Path newLocation);
+
+	Localized<String> userCancelledSetExperimentName();
+
+	Localized<String> dataAlreadyExists(Path newLocation);
+
+	Localized<String> renameExperiment();
+
+	Localized<String> renameExperimentName(String name);
 }

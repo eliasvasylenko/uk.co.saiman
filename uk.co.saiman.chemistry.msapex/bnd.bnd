@@ -20,7 +20,9 @@ Bundle-Name: SAI :: MSApex :: Chemistry
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 
-Private-Package: uk.co.saiman.chemistry.msapex
+Private-Package: uk.co.saiman.chemistry.msapex.impl
+
+Export-Package: uk.co.saiman.chemistry.msapex
 
 -includeresource: \
 	{fragment.e4xmi},\

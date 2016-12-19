@@ -34,9 +34,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import uk.co.saiman.chemistry.isotope.Isotope;
-
 public class ChemicalComposition {
+	private static final ChemicalComposition NOTHING = new ChemicalComposition();
+
 	// elements of unspecified isotope in this molecule
 	private final TreeMap<Element, Integer> elements;
 	// elements of specified isotope in this molecule
@@ -44,15 +44,13 @@ public class ChemicalComposition {
 
 	private final int charge;
 
-	// create an empty molecule
-	public ChemicalComposition() {
+	private ChemicalComposition() {
 		this(1);
 	}
 
-	// create an empty molecule
-	public ChemicalComposition(int charge) {
-		elements = new TreeMap<Element, Integer>();
-		isotopes = new TreeMap<Isotope, Integer>();
+	private ChemicalComposition(int charge) {
+		this.elements = new TreeMap<>();
+		this.isotopes = new TreeMap<>();
 		this.charge = charge;
 	}
 
@@ -60,6 +58,10 @@ public class ChemicalComposition {
 		elements = new TreeMap<>(molecule.elements);
 		isotopes = new TreeMap<>(molecule.isotopes);
 		charge = molecule.charge;
+	}
+
+	public static ChemicalComposition nothing() {
+		return NOTHING;
 	}
 
 	private ChemicalComposition copy() {
@@ -279,25 +281,25 @@ public class ChemicalComposition {
 	}
 
 	public SortedMap<Element, Integer> getElementCounts() {
-		SortedMap<Element, Integer> elements = new TreeMap<Element, Integer>();
+		SortedMap<Element, Integer> elements = new TreeMap<>();
 		elements.putAll(this.elements);
 		return elements;
 	}
 
 	public SortedMap<Isotope, Integer> getIsotopeCounts() {
-		SortedMap<Isotope, Integer> isotopes = new TreeMap<Isotope, Integer>();
+		SortedMap<Isotope, Integer> isotopes = new TreeMap<>();
 		isotopes.putAll(this.isotopes);
 		return isotopes;
 	}
 
 	public TreeSet<Element> getElements() {
-		TreeSet<Element> elements = new TreeSet<Element>();
+		TreeSet<Element> elements = new TreeSet<>();
 		elements.addAll(this.elements.keySet());
 		return elements;
 	}
 
 	public TreeSet<Isotope> getIsotopes() {
-		TreeSet<Isotope> isotopes = new TreeSet<Isotope>();
+		TreeSet<Isotope> isotopes = new TreeSet<>();
 		isotopes.addAll(this.isotopes.keySet());
 		return isotopes;
 	}

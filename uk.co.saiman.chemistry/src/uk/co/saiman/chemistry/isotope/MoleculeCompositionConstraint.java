@@ -37,6 +37,7 @@ import java.util.TreeSet;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.chemistry.Element;
+import uk.co.saiman.chemistry.Isotope;
 import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.strangeskies.mathematics.Range;
 
@@ -112,12 +113,12 @@ public class MoleculeCompositionConstraint {
 	}
 
 	private void initialise() {
-		elementConstraints = new TreeMap<Element, Range<Integer>>();
-		isotopeConstraints = new TreeMap<Isotope, Range<Integer>>();
+		elementConstraints = new TreeMap<>();
+		isotopeConstraints = new TreeMap<>();
 		unknownConstraint = Range.between(0, 0);
 		averageMassConstraint = Range.<Double> between(null, null);
 		monoisotopicMassConstraint = Range.<Double> between(null, null);
-		elementsHeaviestFirst = new TreeSet<Element>(new Comparator<Element>() {
+		elementsHeaviestFirst = new TreeSet<>(new Comparator<Element>() {
 			@Override
 			public int compare(Element first, Element second) {
 				if (first.getMonoisotopicMass() == second.getMonoisotopicMass()) {
@@ -140,7 +141,7 @@ public class MoleculeCompositionConstraint {
 			monoisotopicMassConstraint = Range.<Double> between(null, null);
 		}
 
-		ChemicalComposition molecule = new ChemicalComposition();
+		ChemicalComposition molecule = ChemicalComposition.nothing();
 
 		Iterator<Element> elementIterator = elementConstraints.keySet().iterator();
 		Element element;
@@ -158,11 +159,11 @@ public class MoleculeCompositionConstraint {
 				if (elementMinimum > 0) {
 					molecule.withElement(element, elementMinimum);
 					if (averageMassConstraint.isValueBelow(molecule.getAverageMass())) {
-						return new HashSet<ChemicalComposition>();
+						return new HashSet<>();
 					}
 					if (monoisotopicMassConstraint.isValueBelow(molecule.getMonoisotopicMass())) {
 						System.out.println("min: " + elementMinimum);
-						return new HashSet<ChemicalComposition>();
+						return new HashSet<>();
 					}
 				}
 			}
@@ -190,11 +191,14 @@ public class MoleculeCompositionConstraint {
 		return conformingMoleculeRecursion(molecule, 0, null, 0);
 	}
 
-	private Set<ChemicalComposition> conformingMoleculeRecursion(ChemicalComposition molecule, int unknown, Element previousElement,
+	private Set<ChemicalComposition> conformingMoleculeRecursion(
+			ChemicalComposition molecule,
+			int unknown,
+			Element previousElement,
 			int previousIsotope) {
 		ChemicalComposition nextMolecule;
 
-		Set<ChemicalComposition> possibleMoleculesSet = new HashSet<ChemicalComposition>();
+		Set<ChemicalComposition> possibleMoleculesSet = new HashSet<>();
 
 		if (averageMassConstraint.isValueBelow(molecule.getAverageMass())) {
 			return possibleMoleculesSet;
@@ -243,7 +247,8 @@ public class MoleculeCompositionConstraint {
 				isotopeIterator = ((SortedSet<Isotope>) getIsotopeConstraints().keySet()).iterator();
 			} else {
 				isotopeIterator = ((SortedSet<Isotope>) getIsotopeConstraints().keySet())
-						.tailSet(previousElement.getIsotope(previousIsotope)).iterator();
+						.tailSet(previousElement.getIsotope(previousIsotope))
+						.iterator();
 			}
 			Isotope isotope;
 			while (isotopeIterator.hasNext()) {

@@ -1,0 +1,4 @@
+[{ 
+    "service.pid": "uk.co.strangeskies.console.log",
+    "enabled": true
+}]

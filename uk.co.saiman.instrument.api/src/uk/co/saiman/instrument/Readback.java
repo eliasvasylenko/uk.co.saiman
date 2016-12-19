@@ -57,7 +57,6 @@ public interface Readback<T> {
 	Set<String> getStatus();
 
 	default TypeToken<T> getDataType() {
-		return overType(getClass()).resolveSupertypeParameters(Readback.class)
-				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
+		return overType(getClass()).resolveSupertype(Readback.class).resolveTypeArgument(new TypeParameter<T>() {}).infer();
 	}
 }

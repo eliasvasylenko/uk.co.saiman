@@ -32,6 +32,8 @@ import java.util.Objects;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
+import uk.co.saiman.simulation.msapex.ChooseSimulatedSampleChemical;
+import uk.co.strangeskies.eclipse.CommandTreeCellContribution;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeItemData;
@@ -39,8 +41,12 @@ import uk.co.strangeskies.fx.TreeTextContribution;
 
 @SuppressWarnings("javadoc")
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
-public class ChemicalContribution implements EclipseTreeContribution<ChemicalColor>,
-		PseudoClassTreeCellContribution<ChemicalColor>, TreeTextContribution<ChemicalColor> {
+public class ChemicalContribution extends CommandTreeCellContribution<ChemicalColor>
+		implements PseudoClassTreeCellContribution<ChemicalColor>, TreeTextContribution<ChemicalColor> {
+	public ChemicalContribution() {
+		super(ChooseSimulatedSampleChemical.COMMAND_ID);
+	}
+
 	@Override
 	public <U extends ChemicalColor> String getText(TreeItemData<U> data) {
 		return data.data().getName().toString();

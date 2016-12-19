@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import uk.co.saiman.chemistry.isotope.Isotope;
 import uk.co.strangeskies.mathematics.values.DoubleValue;
 
 public class Element implements Comparable<Element> {
@@ -50,9 +49,17 @@ public class Element implements Comparable<Element> {
 	 */
 	@SuppressWarnings("javadoc")
 	public enum Group {
-		NONE("None"), ALKALI("Alkali"), ALKALINE("Alkaline"), LANTHANIDE("Lanthanide"), ACTINIDE("Actinide"), TRANSITION(
-				"Transition"), POOR_METAL(
-						"Poor Metal"), METALLOID("Metalloid"), NONMETAL("Nonmetal"), HALOGEN("Halogen"), NOBLE_GAS("Noble Gas");
+		NONE("None"),
+		ALKALI("Alkali"),
+		ALKALINE("Alkaline"),
+		LANTHANIDE("Lanthanide"),
+		ACTINIDE("Actinide"),
+		TRANSITION("Transition"),
+		POOR_METAL("Poor Metal"),
+		METALLOID("Metalloid"),
+		NONMETAL("Nonmetal"),
+		HALOGEN("Halogen"),
+		NOBLE_GAS("Noble Gas");
 
 		private final String name;
 
@@ -85,30 +92,26 @@ public class Element implements Comparable<Element> {
 		}
 	}
 
-	public Element(double mass) {
+	public Element() {
 		name = "Unknown element";
 		symbol = "Uk";
 		atomicNumber = 0;
 		group = Element.Group.NONE;
 		isotopes = new TreeSet<>();
+	}
+
+	public Element(double mass) {
+		this();
 		isotopes.add(new Isotope((int) mass, mass, 1, this));
 	}
 
-	public Element(Element element) {
-		this.atomicNumber = element.atomicNumber;
-		this.name = element.name;
-		this.symbol = element.symbol;
-		this.isotopes = new TreeSet<Isotope>(element.isotopes);
-		this.group = element.group;
-	}
-
-	public Element(int atomicNumber, String name, String symbol, Collection<? extends Isotope> isotopes, Group group) {
+	private Element(int atomicNumber, String name, String symbol, Collection<? extends Isotope> isotopes, Group group) {
 		this.atomicNumber = atomicNumber;
 		this.name = name;
 		this.symbol = symbol;
 		this.isotopes = new TreeSet<>();
 		for (Isotope isotope : isotopes) {
-			this.isotopes.add(new Isotope(isotope.getMassNumber(), isotope.getMass(), isotope.getAbundance(), this));
+			this.isotopes.add(isotope.withElement(this));
 		}
 		this.group = group;
 	}
@@ -164,7 +167,7 @@ public class Element implements Comparable<Element> {
 	}
 
 	public TreeSet<Isotope> getIsotopes() {
-		TreeSet<Isotope> isotopes = new TreeSet<Isotope>(this.isotopes);
+		TreeSet<Isotope> isotopes = new TreeSet<>(this.isotopes);
 		return isotopes;
 	}
 
@@ -199,7 +202,7 @@ public class Element implements Comparable<Element> {
 	}
 
 	public TreeSet<Isotope> getNaturallyOccuringIsotopes() {
-		TreeSet<Isotope> isotopes = new TreeSet<Isotope>();
+		TreeSet<Isotope> isotopes = new TreeSet<>();
 		Iterator<Isotope> isotopeIterator = this.isotopes.iterator();
 		Isotope isotope;
 		while (isotopeIterator.hasNext()) {
@@ -227,14 +230,10 @@ public class Element implements Comparable<Element> {
 		return new Element(atomicNumber, name, symbol, isotopes, group);
 	}
 
-	public Element withIsotopes(Collection<? extends Isotope> isotopes) {
-		return new Element(atomicNumber, name, symbol, isotopes, group);
-	}
-
-	public Element withIsotope(Isotope isotope) {
+	public Element withIsotope(int massNumber, double mass, double abundance) {
 		Set<Isotope> isotopes = new HashSet<>(this.isotopes);
-		isotopes.add(isotope);
-		return withIsotopes(isotopes);
+		isotopes.add(new Isotope(massNumber, mass, abundance, this));
+		return new Element(atomicNumber, name, symbol, isotopes, group);
 	}
 
 	public Element withGroup(Group group) {
@@ -300,8 +299,8 @@ public class Element implements Comparable<Element> {
 		String newLine = System.getProperty("line.separator");
 
 		string += "Element: " + name + newLine;
-		string += "  atomic number: " + atomicNumber + newLine;
-		string += "  symbol: " + symbol + newLine;
+		string += "   - atomic number: " + atomicNumber + newLine;
+		string += "   - symbol: " + symbol + newLine;
 
 		Iterator<Isotope> isotopeIterator = isotopes.iterator();
 		while (isotopeIterator.hasNext()) {

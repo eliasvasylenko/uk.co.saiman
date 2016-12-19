@@ -43,36 +43,26 @@ import uk.co.strangeskies.reflection.token.TypeToken;
  * @param <T>
  *          the type of the result data
  */
-public class ExperimentResultType<T> implements ReifiedToken<ExperimentResultType<T>> {
-	private final String name;
-	private final ExperimentType<?> experimentType;
-	private final TypeToken<T> dataType;
+public interface ExperimentResultType<T> extends ReifiedToken<ExperimentResultType<T>> {
+	/**
+	 * A human readable name for the experiment result.
+	 * 
+	 * @return the result type name
+	 */
+	String getName();
 
-	public ExperimentResultType(String name, ExperimentType<?> experimentType, TypeToken<T> dataType) {
-		this.name = name;
-		this.experimentType = experimentType;
-		this.dataType = dataType;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public ExperimentType<?> getExperimentType() {
-		return experimentType;
-	}
-
-	public TypeToken<T> getDataType() {
-		return dataType;
-	}
+	/**
+	 * @return the exact static type of the experiment result data
+	 */
+	TypeToken<T> getDataType();
 
 	@Override
-	public TypeToken<ExperimentResultType<T>> getThisTypeToken() {
+	default TypeToken<ExperimentResultType<T>> getThisTypeToken() {
 		return new TypeToken<ExperimentResultType<T>>() {}.withTypeArgument(new TypeParameter<T>() {}, getDataType());
 	}
 
 	@Override
-	public ExperimentResultType<T> copy() {
+	default ExperimentResultType<T> copy() {
 		return this;
 	}
 }

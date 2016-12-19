@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.GridPane?>
+<?import uk.co.saiman.chemistry.msapex.impl.ChemicalElementTile?>
+
+<GridPane
+	fx:id="elementGrid"
+	xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml"
+	fx:controller="uk.co.saiman.chemistry.msapex.impl.PeriodicTableController"
+	hgap="2"
+	vgap="2">
+
+	<children>
+		<!-- Row 1 -->
+		<ChemicalElementTile
+			GridPane.columnIndex="0"
+			GridPane.rowIndex="0" />
+		<ChemicalElementTile
+			GridPane.columnIndex="17"
+			GridPane.rowIndex="0" />
+
+		<!-- Row 2 -->
+		<ChemicalElementTile
+			GridPane.columnIndex="0"
+			GridPane.rowIndex="1" />
+		<ChemicalElementTile
+			GridPane.columnIndex="1"
+			GridPane.rowIndex="1" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="1" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="1" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="1" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="1" />
+		<ChemicalElementTile
+			GridPane.columnIndex="16"
+			GridPane.rowIndex="1" />
+		<ChemicalElementTile
+			GridPane.columnIndex="17"
+			GridPane.rowIndex="1" />
+
+		<!-- Row 3 -->
+		<ChemicalElementTile
+			GridPane.columnIndex="0"
+			GridPane.rowIndex="2" />
+		<ChemicalElementTile
+			GridPane.columnIndex="1"
+			GridPane.rowIndex="2" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="2" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="2" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="2" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="2" />
+		<ChemicalElementTile
+			GridPane.columnIndex="16"
+			GridPane.rowIndex="2" />
+		<ChemicalElementTile
+			GridPane.columnIndex="17"
+			GridPane.rowIndex="2" />
+
+		<!-- Row 4 -->
+		<ChemicalElementTile
+			GridPane.columnIndex="0"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="1"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="2"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="3"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="4"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="5"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="6"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="7"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="8"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="9"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="10"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="11"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="16"
+			GridPane.rowIndex="3" />
+		<ChemicalElementTile
+			GridPane.columnIndex="17"
+			GridPane.rowIndex="3" />
+
+		<!-- Row 5 -->
+		<ChemicalElementTile
+			GridPane.columnIndex="0"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="1"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="2"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="3"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="4"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="5"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="6"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="7"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="8"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="9"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="10"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="11"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="16"
+			GridPane.rowIndex="4" />
+		<ChemicalElementTile
+			GridPane.columnIndex="17"
+			GridPane.rowIndex="4" />
+
+		<!-- Row 6 Start -->
+		<ChemicalElementTile
+			GridPane.columnIndex="0"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="1"
+			GridPane.rowIndex="5" />
+
+		<!-- Lanthanides -->
+		<ChemicalElementTile
+			GridPane.columnIndex="2"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="3"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="4"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="5"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="6"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="7"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="8"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="9"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="10"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="11"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="8" />
+		<ChemicalElementTile
+			GridPane.columnIndex="2"
+			GridPane.rowIndex="5" />
+
+		<!-- Row 6 End -->
+		<ChemicalElementTile
+			GridPane.columnIndex="3"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="4"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="5"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="6"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="7"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="8"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="9"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="10"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="11"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="16"
+			GridPane.rowIndex="5" />
+		<ChemicalElementTile
+			GridPane.columnIndex="17"
+			GridPane.rowIndex="5" />
+
+		<!-- Row 7 Start -->
+		<ChemicalElementTile
+			GridPane.columnIndex="0"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="1"
+			GridPane.rowIndex="6" />
+
+		<!-- Actinides -->
+		<ChemicalElementTile
+			GridPane.columnIndex="2"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="3"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="4"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="5"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="6"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="7"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="8"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="9"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="10"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="11"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="9" />
+		<ChemicalElementTile
+			GridPane.columnIndex="2"
+			GridPane.rowIndex="6" />
+
+		<!-- Row 7 End -->
+		<ChemicalElementTile
+			GridPane.columnIndex="3"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="4"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="5"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="6"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="7"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="8"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="9"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="10"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="11"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="12"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="13"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="14"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="15"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="16"
+			GridPane.rowIndex="6" />
+		<ChemicalElementTile
+			GridPane.columnIndex="17"
+			GridPane.rowIndex="6" />
+	</children>
+</GridPane>

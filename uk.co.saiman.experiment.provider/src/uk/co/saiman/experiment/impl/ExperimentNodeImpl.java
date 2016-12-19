@@ -27,16 +27,22 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static uk.co.strangeskies.utilities.collection.StreamUtilities.upcastStream;
+
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
+import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentResult;
@@ -67,6 +73,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private final S state;
 
 	private HashMap<ExperimentResultType<?>, ExperimentResultImpl<?>> results;
+
+	private String id;
 
 	/**
 	 * Try to create a new experiment node of the given type, and with the given
@@ -102,10 +110,14 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		children = new ArrayList<>();
 
 		lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
-		state = type.createState(this);
+		state = type.createState(createConfigurationContext());
 
 		results = new HashMap<>();
 		getType().getResultTypes().forEach(r -> results.put(r, new ExperimentResultImpl<>(this, r)));
+	}
+
+	protected String getid() {
+		return id;
 	}
 
 	protected Stream<ExperimentNodeImpl<?, ?>> getAncestorsImpl() {
@@ -124,8 +136,15 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	@Override
 	public Path getExperimentDataPath() {
-		return getParent().map(p -> p.getExperimentDataPath().resolve(getIndex() + "_" + type.getName()))
-				.orElse(getExperimentWorkspace().getWorkspaceDataPath().resolve(getRoot().getState().getName()));
+		return getParentDataPath().resolve(id);
+	}
+
+	private Path getParentDataPath() {
+		return getParent().map(p -> p.getExperimentDataPath()).orElse(getExperimentWorkspace().getWorkspaceDataPath());
+	}
+
+	private Stream<? extends ExperimentNodeImpl<?, ?>> getSiblings() {
+		return getParentImpl().map(p -> p.getChildrenImpl()).orElse(upcastStream(workspace.getRootExperimentsImpl()));
 	}
 
 	@Override
@@ -189,7 +208,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	@Override
 	public Stream<ExperimentType<?>> getAvailableChildExperimentTypes() {
-		return workspace.getRegisteredExperimentTypes()
+		return workspace
+				.getRegisteredExperimentTypes()
 				.filter(type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
 	}
 
@@ -226,7 +246,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		try {
 			Files.createDirectories(getExperimentDataPath());
 
-			getType().execute(this);
+			getType().execute(createExecutionContext());
 
 			lifecycleState.set(ExperimentLifecycleState.COMPLETION);
 			return true;
@@ -234,6 +254,76 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			lifecycleState.set(ExperimentLifecycleState.FAILURE);
 			return false;
 		}
+	}
+
+	private ExperimentExecutionContext<S> createExecutionContext() {
+		return new ExperimentExecutionContext<S>() {
+			@Override
+			public ExperimentNodeImpl<?, S> node() {
+				return ExperimentNodeImpl.this;
+			}
+
+			@Override
+			public <U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData) {
+				return node().setResult(resultType, resultData);
+			}
+		};
+	}
+
+	private ExperimentConfigurationContext<S> createConfigurationContext() {
+		return new ExperimentConfigurationContext<S>() {
+			@Override
+			public ExperimentNodeImpl<?, S> node() {
+				return ExperimentNodeImpl.this;
+			}
+
+			@Override
+			public <U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData) {
+				return node().setResult(resultType, resultData);
+			}
+
+			@Override
+			public void setId(String id) {
+				if (Objects.equals(id, ExperimentNodeImpl.this.id)) {
+					return;
+
+				} else if (!ExperimentConfiguration.isNameValid(id)) {
+					throw new ExperimentException(workspace.getText().invalidExperimentName(id));
+
+				} else if (getSiblings().anyMatch(s -> id.equals(s.getid()))) {
+					throw new ExperimentException(workspace.getText().duplicateExperimentName(id));
+
+				} else {
+					Path newLocation = getParentDataPath().resolve(id);
+
+					if (Files.exists(newLocation)) {
+						throw new ExperimentException(workspace.getText().dataAlreadyExists(newLocation));
+					}
+
+					if (ExperimentNodeImpl.this.id != null) {
+						Path oldLocation = getParentDataPath().resolve(ExperimentNodeImpl.this.id);
+						try {
+							Files.move(oldLocation, newLocation);
+						} catch (IOException e) {
+							throw new ExperimentException(workspace.getText().cannotMove(oldLocation, newLocation));
+						}
+					} else {
+						try {
+							Files.createDirectories(newLocation);
+						} catch (IOException e) {
+							throw new ExperimentException(workspace.getText().cannotCreate(newLocation));
+						}
+					}
+
+					ExperimentNodeImpl.this.id = id;
+				}
+			}
+
+			@Override
+			public String getId() {
+				return id;
+			}
+		};
 	}
 
 	@Override
@@ -246,8 +336,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		results.values().forEach(r -> r.setData(null));
 	}
 
-	@Override
-	public <U> ExperimentResultImpl<U> setResult(ExperimentResultType<U> resultType, U resultData) {
+	protected <U> ExperimentResultImpl<U> setResult(ExperimentResultType<U> resultType, U resultData) {
 		ExperimentResultImpl<U> result = getResult(resultType);
 		result.setData(resultData);
 		return result;

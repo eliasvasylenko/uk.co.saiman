@@ -57,7 +57,7 @@ public interface ChemicalMeasurement {
 	}
 
 	static ChemicalMeasurement unknownComposition(double mass, double intensity, boolean monoisotopic) {
-		ChemicalComposition composition = new ChemicalComposition().withElement(new Element(mass));
+		ChemicalComposition composition = ChemicalComposition.nothing().withElement(new Element(mass));
 
 		return new ChemicalMeasurement() {
 			@Override

@@ -29,16 +29,15 @@ package uk.co.saiman.simulation.msapex.treecontributions;
 
 import java.util.function.Consumer;
 
-import uk.co.saiman.chemistry.ChemicalComposition;
+import uk.co.saiman.chemistry.Chemical;
 import uk.co.strangeskies.text.properties.Localized;
 
-class ChemicalColor {
+public class ChemicalColor {
 	private final Localized<String> name;
-	private ChemicalComposition chemical;
-	private final Consumer<ChemicalComposition> setChemical;
+	private Chemical chemical;
+	private final Consumer<Chemical> setChemical;
 
-	public ChemicalColor(Localized<String> name, ChemicalComposition chemical,
-			Consumer<ChemicalComposition> setChemical) {
+	public ChemicalColor(Localized<String> name, Chemical chemical, Consumer<Chemical> setChemical) {
 		this.name = name;
 		this.chemical = chemical;
 		this.setChemical = setChemical;
@@ -48,11 +47,11 @@ class ChemicalColor {
 		return name;
 	}
 
-	public ChemicalComposition getChemical() {
+	public Chemical getChemical() {
 		return chemical;
 	}
 
-	public void getChemical(ChemicalComposition chemical) {
+	public void setChemical(Chemical chemical) {
 		setChemical.accept(chemical);
 		this.chemical = chemical;
 	}

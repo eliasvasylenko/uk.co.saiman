@@ -60,7 +60,10 @@ public interface Configurable<C> {
 	 * @return The exact generic type of the configuration interface
 	 */
 	default TypeToken<C> getConfigurationType() {
-		return TypeToken.overType(getClass()).resolveSupertypeParameters(Configurable.class)
-				.resolveTypeArgument(new TypeParameter<C>() {}).infer();
+		return TypeToken
+				.overType(getClass())
+				.resolveSupertype(Configurable.class)
+				.resolveTypeArgument(new TypeParameter<C>() {})
+				.infer();
 	}
 }

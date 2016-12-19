@@ -30,9 +30,7 @@ package uk.co.saiman.instrument.stage;
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.instrument.HardwareDevice;
-
-public interface XYStageDevice extends HardwareDevice {
+public interface XYStageDevice extends StageDevice {
 	Quantity<Length> getStageWidth();
 
 	Quantity<Length> getStageHeight();

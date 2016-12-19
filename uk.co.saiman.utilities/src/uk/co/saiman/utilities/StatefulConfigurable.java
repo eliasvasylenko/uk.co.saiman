@@ -51,7 +51,10 @@ public interface StatefulConfigurable<C, S> extends Configurable<C> {
 	 * @return The exact generic type of the state interface
 	 */
 	default TypeToken<S> getStateType() {
-		return TypeToken.overType(getClass()).resolveSupertypeParameters(StatefulConfigurable.class)
-				.resolveTypeArgument(new TypeParameter<S>() {}).infer();
+		return TypeToken
+				.overType(getClass())
+				.resolveSupertype(StatefulConfigurable.class)
+				.resolveTypeArgument(new TypeParameter<S>() {})
+				.infer();
 	}
 }

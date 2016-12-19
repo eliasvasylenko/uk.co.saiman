@@ -424,7 +424,12 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 						depth = getAcquisitionDepth();
 					}
 
-					acquisitionData = detector.acquire(getSampleIntensityUnits(), getSampleTimeUnits(), random, resolution, depth,
+					acquisitionData = detector.acquire(
+							getSampleIntensityUnits(),
+							getSampleTimeUnits(),
+							random,
+							resolution,
+							depth,
 							sample.getNextSample());
 
 					acquisitionListeners.notify(acquisitionData);
@@ -548,5 +553,10 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	@Override
 	public Unit<Time> getSampleTimeUnits() {
 		return timeUnits;
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

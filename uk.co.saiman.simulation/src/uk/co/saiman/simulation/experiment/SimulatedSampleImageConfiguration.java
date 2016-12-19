@@ -27,14 +27,14 @@
  */
 package uk.co.saiman.simulation.experiment;
 
-import uk.co.saiman.chemistry.ChemicalComposition;
+import uk.co.saiman.chemistry.Chemical;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 
 public class SimulatedSampleImageConfiguration {
 	private SimulatedSampleImage image;
-	private ChemicalComposition red;
-	private ChemicalComposition green;
-	private ChemicalComposition blue;
+	private Chemical red;
+	private Chemical green;
+	private Chemical blue;
 
 	public SimulatedSampleImageConfiguration() {
 		image = new SimulatedSampleImage() {
@@ -78,27 +78,27 @@ public class SimulatedSampleImageConfiguration {
 		this.image = image;
 	}
 
-	public ChemicalComposition getRedChemical() {
+	public Chemical getRedChemical() {
 		return red;
 	}
 
-	public void setRedChemical(ChemicalComposition red) {
+	public void setRedChemical(Chemical red) {
 		this.red = red;
 	}
 
-	public ChemicalComposition getGreenChemical() {
+	public Chemical getGreenChemical() {
 		return green;
 	}
 
-	public void setGreenChemical(ChemicalComposition green) {
+	public void setGreenChemical(Chemical green) {
 		this.green = green;
 	}
 
-	public ChemicalComposition getBlueChemical() {
+	public Chemical getBlueChemical() {
 		return blue;
 	}
 
-	public void setBlueChemical(ChemicalComposition blue) {
+	public void setBlueChemical(Chemical blue) {
 		this.blue = blue;
 	}
 }

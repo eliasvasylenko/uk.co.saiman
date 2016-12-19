@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
+import static uk.co.strangeskies.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
+
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
@@ -61,7 +63,9 @@ public class RunExperiment {
 
 		TreeItemData<?> experimentItem = item.getData();
 
-		while (!experimentItem.type().isAssignableTo(new TypeToken<ExperimentNode<?, ?>>() {})) {
+		while (!experimentItem
+				.type()
+				.satisfiesConstraintTo(LOOSE_COMPATIBILILTY, new TypeToken<ExperimentNode<?, ?>>() {})) {
 			experimentItem = experimentItem.parent().orElseThrow(
 					() -> new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, item.getData())));
 		}

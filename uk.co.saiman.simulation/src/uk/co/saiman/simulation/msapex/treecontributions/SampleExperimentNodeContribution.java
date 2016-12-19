@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.simulation.msapex.treecontributions;
 
-import java.util.Arrays;
-import java.util.List;
+import static java.util.stream.Stream.of;
+import static uk.co.strangeskies.reflection.token.TypedObject.typedObject;
+
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
@@ -38,7 +40,6 @@ import uk.co.saiman.simulation.experiment.SimulatedSampleImageConfiguration;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.reflection.token.TypedObject;
 
 @SuppressWarnings("javadoc")
@@ -53,8 +54,8 @@ public class SampleExperimentNodeContribution
 	}
 
 	@Override
-	public <U extends ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> List<TypedObject<?>> getChildren(
+	public <U extends ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> Stream<TypedObject<?>> getChildren(
 			TreeItemData<U> data) {
-		return Arrays.asList(new TypeToken<SimulatedSampleImageConfiguration>() {}.typedObject(data.data().getState()));
+		return of(typedObject(data.data().getState(), SimulatedSampleImageConfiguration.class));
 	}
 }

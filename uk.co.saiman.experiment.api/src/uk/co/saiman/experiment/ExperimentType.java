@@ -29,7 +29,6 @@ package uk.co.saiman.experiment;
 
 import static uk.co.strangeskies.reflection.token.TypeToken.overType;
 
-import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
 import uk.co.strangeskies.reflection.Reified;
@@ -58,16 +57,15 @@ public interface ExperimentType<S> extends Reified {
 	 * @return a new state object suitable for an instance of
 	 *         {@link ExperimentNode} over this type.
 	 */
-	S createState(ExperimentNode<?, ? extends S> forNode);
+	S createState(ExperimentConfigurationContext<S> forNode);
 
 	/**
-	 * Execute this experiment type for a given node. The node may not necessarily
-	 * be of this exact type, and may be of a derived type instead.
+	 * Execute this experiment type for a given node.
 	 * 
-	 * @param node
-	 *          the node to be processed
+	 * @param context
+	 *          the execution context
 	 */
-	void execute(ExperimentNode<?, ? extends S> node);
+	void execute(ExperimentExecutionContext<S> context);
 
 	/**
 	 * @return a stream over the types of result published by an experiment of
@@ -109,12 +107,8 @@ public interface ExperimentType<S> extends Reified {
 	 * @return the exact generic type of the configuration interface
 	 */
 	default TypeToken<S> getStateType() {
-		return overType(getThisType()).resolveSupertypeParameters(ExperimentType.class)
+		return overType(getThisType())
+				.resolveSupertype(ExperimentType.class)
 				.resolveTypeArgument(new TypeParameter<S>() {});
-	}
-
-	@Override
-	default Type getThisType() {
-		return getClass();
 	}
 }

@@ -42,6 +42,7 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
 import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.strangeskies.utilities.Log;
 
 /**
  * Reference implementation of {@link ExperimentWorkspaceFactory}.
@@ -50,6 +51,9 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  */
 @Component
 public class ExperimentWorkspaceFactoryImpl implements ExperimentWorkspaceFactory {
+	@Reference
+	Log log;
+
 	@Reference
 	PropertyLoader loader;
 
@@ -71,5 +75,9 @@ public class ExperimentWorkspaceFactoryImpl implements ExperimentWorkspaceFactor
 	@Override
 	public ExperimentWorkspace openWorkspace(Path location) {
 		return new ExperimentWorkspaceImpl(this, location, loader.getProperties(ExperimentProperties.class));
+	}
+
+	public Log getLog() {
+		return log;
 	}
 }

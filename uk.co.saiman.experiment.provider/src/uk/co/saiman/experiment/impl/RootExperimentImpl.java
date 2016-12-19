@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import java.util.Objects;
-
 import uk.co.saiman.experiment.ExperimentConfiguration;
+import uk.co.saiman.experiment.ExperimentConfigurationContext;
+import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.RootExperiment;
@@ -48,40 +48,22 @@ public class RootExperimentImpl implements RootExperiment {
 
 	@Override
 	public String getName() {
-		return "Experiment root";
+		return workspace.getText().experimentRoot().toString();
 	}
 
 	@Override
-	public ExperimentConfiguration createState(ExperimentNode<?, ? extends ExperimentConfiguration> forNode) {
+	public ExperimentConfiguration createState(ExperimentConfigurationContext<ExperimentConfiguration> forNode) {
 		return new ExperimentConfiguration() {
-			private String name;
 			private String notes;
 
 			@Override
-			public void setNotes(String notes) {
-				this.notes = notes;
+			public String getName() {
+				return forNode.getId();
 			}
 
 			@Override
 			public void setName(String name) {
-				if (name == null)
-					throw new IllegalArgumentException("Experiment name must be non-null");
-				if (Objects.equals(name, this.name))
-					return;
-
-				// TODO check name is valid (i.e. def valid in a path)
-
-				if (workspace.getRootExperiments().anyMatch(e -> name.equals(e.getState().getName()))) {
-					// TODO already exists in workspace error!
-				}
-
-				// TODO if data already exists on disk
-
-				if (this.name != null) {
-					// TODO move from old location
-				}
-
-				this.name = name;
+				forNode.setId(name);
 			}
 
 			@Override
@@ -90,14 +72,14 @@ public class RootExperimentImpl implements RootExperiment {
 			}
 
 			@Override
-			public String getName() {
-				return name;
+			public void setNotes(String notes) {
+				this.notes = notes;
 			}
 		};
 	}
 
 	@Override
-	public void execute(ExperimentNode<?, ? extends ExperimentConfiguration> node) {
+	public void execute(ExperimentExecutionContext<ExperimentConfiguration> context) {
 		// TODO create location
 	}
 

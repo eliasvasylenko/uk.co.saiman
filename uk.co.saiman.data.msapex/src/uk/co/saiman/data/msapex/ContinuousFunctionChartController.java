@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.data.msapex;
 
-import static uk.co.strangeskies.fx.FXUtilities.wrap;
+import static uk.co.strangeskies.fx.FxUtilities.wrap;
 import static uk.co.strangeskies.mathematics.Range.between;
 
 import java.util.ArrayList;
@@ -597,6 +597,22 @@ public class ContinuousFunctionChartController {
 
 		/*
 		 * TODO set graph units
+		 * 
+		 * 
+		 * 
+		 * 
+		 * 
+		 * 
+		 * from now on all members of the graph must use the same units. it's just
+		 * simpler that way. have conversion functions between continuous functions
+		 * to facilitate this.
+		 * 
+		 * 
+		 * 
+		 * 
+		 * 
+		 * 
+		 * 
 		 */
 
 	}

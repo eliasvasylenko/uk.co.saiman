@@ -30,6 +30,8 @@ package uk.co.saiman.experiment.sample;
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
+import uk.co.saiman.instrument.stage.XYStageDevice;
+
 /**
  * A simple Cartesian coordinate stage configuration.
  * 
@@ -51,4 +53,6 @@ public interface XYStageConfiguration extends SampleConfiguration {
 	Quantity<Length> getY();
 
 	void setY(Quantity<Length> offset);
+
+	XYStageDevice stageDevice();
 }

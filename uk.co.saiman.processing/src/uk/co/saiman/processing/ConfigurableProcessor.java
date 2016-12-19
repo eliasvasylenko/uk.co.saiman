@@ -57,23 +57,32 @@ public interface ConfigurableProcessor<C, T, R> {
 	 * @return The exact generic type of the processing target
 	 */
 	default TypeToken<T> getTargetType() {
-		return TypeToken.overType(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
-				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
+		return TypeToken
+				.overType(getClass())
+				.resolveSupertype(ConfigurableProcessor.class)
+				.resolveTypeArgument(new TypeParameter<T>() {})
+				.infer();
 	}
 
 	/**
 	 * @return The exact generic type of the processing result
 	 */
 	default TypeToken<R> getResultType() {
-		return TypeToken.overType(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
-				.resolveTypeArgument(new TypeParameter<R>() {}).infer();
+		return TypeToken
+				.overType(getClass())
+				.resolveSupertype(ConfigurableProcessor.class)
+				.resolveTypeArgument(new TypeParameter<R>() {})
+				.infer();
 	}
 
 	/**
 	 * @return The exact generic type of the configuration interface
 	 */
 	default TypeToken<C> getConfigurationType() {
-		return TypeToken.overType(getClass()).resolveSupertypeParameters(ConfigurableProcessor.class)
-				.resolveTypeArgument(new TypeParameter<C>() {}).infer();
+		return TypeToken
+				.overType(getClass())
+				.resolveSupertype(ConfigurableProcessor.class)
+				.resolveTypeArgument(new TypeParameter<C>() {})
+				.infer();
 	}
 }

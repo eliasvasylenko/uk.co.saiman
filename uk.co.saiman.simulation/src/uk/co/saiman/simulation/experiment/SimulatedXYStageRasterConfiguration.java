@@ -30,18 +30,28 @@ package uk.co.saiman.simulation.experiment;
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
+import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.sample.XYStageConfiguration;
+import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.measurement.Units;
+import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
 
 public class SimulatedXYStageRasterConfiguration extends SimulatedSampleImageConfiguration
 		implements XYStageConfiguration {
+	private final ExperimentConfigurationContext<SimulatedXYStageRasterConfiguration> forNode;
+	private final SimulatedSampleImageDevice stageSimulation;
 	private final Units units;
 
 	private String name;
 	private Quantity<Length> x;
 	private Quantity<Length> y;
 
-	public SimulatedXYStageRasterConfiguration(Units units) {
+	public SimulatedXYStageRasterConfiguration(
+			ExperimentConfigurationContext<SimulatedXYStageRasterConfiguration> forNode,
+			SimulatedSampleImageDevice stageSimulation,
+			Units units) {
+		this.forNode = forNode;
+		this.stageSimulation = stageSimulation;
 		this.units = units;
 	}
 
@@ -105,5 +115,10 @@ public class SimulatedXYStageRasterConfiguration extends SimulatedSampleImageCon
 	@Override
 	public String toString() {
 		return "[" + x + ", " + y + "]";
+	}
+
+	@Override
+	public XYStageDevice stageDevice() {
+		return stageSimulation;
 	}
 }

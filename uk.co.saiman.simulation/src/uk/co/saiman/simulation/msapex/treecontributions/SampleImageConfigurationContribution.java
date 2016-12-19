@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.simulation.msapex.treecontributions;
 
-import java.util.Arrays;
-import java.util.List;
+import static java.util.stream.Stream.of;
+import static uk.co.strangeskies.reflection.token.TypedObject.typedObject;
+
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -44,7 +46,6 @@ import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
 import uk.co.strangeskies.fx.TreeItemData;
 import uk.co.strangeskies.fx.TreeTextContribution;
-import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.reflection.token.TypedObject;
 
 @SuppressWarnings("javadoc")
@@ -62,21 +63,21 @@ public class SampleImageConfigurationContribution implements EclipseTreeContribu
 	}
 
 	@Override
-	public <U extends SimulatedSampleImageConfiguration> List<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return Arrays.asList(
-
-				new TypeToken<SimulatedSampleImage>() {}.typedObject(data.data().getSampleImage()),
-
-				new TypeToken<ChemicalColor>() {}.typedObject(
-						new ChemicalColor(properties.redChemical(), data.data().getRedChemical(), data.data()::setRedChemical)),
-
-				new TypeToken<ChemicalColor>() {}.typedObject(new ChemicalColor(properties.greenChemical(),
-						data.data().getGreenChemical(), data.data()::setGreenChemical)),
-
-				new TypeToken<ChemicalColor>() {}.typedObject(
-						new ChemicalColor(properties.blueChemical(), data.data().getBlueChemical(), data.data()::setBlueChemical))
-
-		);
+	public <U extends SimulatedSampleImageConfiguration> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
+		return of(
+				typedObject(data.data().getSampleImage(), SimulatedSampleImage.class),
+				typedObject(
+						new ChemicalColor(properties.redChemical(), data.data().getRedChemical(), data.data()::setRedChemical),
+						ChemicalColor.class),
+				typedObject(
+						new ChemicalColor(
+								properties.greenChemical(),
+								data.data().getGreenChemical(),
+								data.data()::setGreenChemical),
+						ChemicalColor.class),
+				typedObject(
+						new ChemicalColor(properties.blueChemical(), data.data().getBlueChemical(), data.data()::setBlueChemical),
+						ChemicalColor.class));
 	}
 
 	@Override

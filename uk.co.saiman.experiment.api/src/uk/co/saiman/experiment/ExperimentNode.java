@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.strangeskies.reflection.token.TypeToken.overType;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -83,8 +84,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	 * @return the node's index in its parent's list of children
 	 */
 	default int getIndex() {
-		return getParent().map(p -> p.getChildren().collect(toList()).indexOf(this))
-				.orElse(getExperimentWorkspace().getRootExperiments().collect(toList()).indexOf(this));
+		return getParent().map(p -> p.getChildren().collect(toList()).indexOf(this)).orElse(
+				getExperimentWorkspace().getRootExperiments().collect(toList()).indexOf(this));
 	}
 
 	/**
@@ -128,7 +129,9 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> getAncestor(
 			Collection<E> types) {
-		return getAncestors().filter(a -> types.contains(a.getType())).findFirst()
+		return getAncestors()
+				.filter(a -> types.contains(a.getType()))
+				.findFirst()
 				.map(a -> (ExperimentNode<E, ? extends U>) a);
 	}
 
@@ -168,9 +171,10 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	@Override
 	default TypeToken<ExperimentNode<T, S>> getThisTypeToken() {
 		@SuppressWarnings("unchecked")
-		TypeToken<T> typeType = (TypeToken<T>) getType().getThisType();
+		TypeToken<T> typeType = (TypeToken<T>) overType(getType().getThisType());
 
-		return new TypeToken<ExperimentNode<T, S>>() {}.withTypeArgument(new TypeParameter<T>() {}, typeType)
+		return new TypeToken<ExperimentNode<T, S>>() {}
+				.withTypeArgument(new TypeParameter<T>() {}, typeType)
 				.withTypeArgument(new TypeParameter<S>() {}, getType().getStateType());
 	}
 
@@ -200,15 +204,6 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	 * also delete any result data from disk.
 	 */
 	void clearResults();
-
-	/**
-	 * @param resultType
-	 *          the result type to set the result data for
-	 * @param resultData
-	 *          the actual data to set for the given result type
-	 * @return the result associated with this node for the given result type
-	 */
-	<U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData);
 
 	/**
 	 * @param resultType

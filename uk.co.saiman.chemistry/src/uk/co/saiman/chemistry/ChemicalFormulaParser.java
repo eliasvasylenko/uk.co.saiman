@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.chemistry;
 
+import static uk.co.saiman.chemistry.ChemicalComposition.nothing;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -35,8 +37,6 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
-
-import uk.co.saiman.chemistry.isotope.Isotope;
 
 /**
  * Parser for molecular formulae given a periodic table. Currently supports 2
@@ -76,17 +76,17 @@ public class ChemicalFormulaParser {
 
 		if (molecularFormula.isEmpty()) {
 			warningConsumer.accept(new ChemicalFormulaParserException("Formula string is empty."));
-			return new ChemicalComposition();
+			return ChemicalComposition.nothing();
 		}
 
-		Vector<Character> alreadyWarned = new Vector<Character>();
+		Vector<Character> alreadyWarned = new Vector<>();
 		/*
 		 * stack to hold current series' of consecutively encountered elements
 		 * between brackets. Top of stack to be expanded after bracket closed then
 		 * multiplied by any following number and added to lower level.
 		 */
-		Stack<ChemicalComposition> moleculeStack = new Stack<ChemicalComposition>();
-		moleculeStack.push(new ChemicalComposition());
+		Stack<ChemicalComposition> moleculeStack = new Stack<>();
+		moleculeStack.push(ChemicalComposition.nothing());
 		// currently processing molecule on stack
 		ChemicalComposition currentMolecule;
 
@@ -94,7 +94,7 @@ public class ChemicalFormulaParser {
 		Integer isotopeSpecifier = null;
 
 		// current bracket stack (to check [] {} () match up properly)
-		Stack<Character> bracketStack = new Stack<Character>();
+		Stack<Character> bracketStack = new Stack<>();
 
 		// charge of molecule
 		int charge = 0;
@@ -113,7 +113,9 @@ public class ChemicalFormulaParser {
 				}
 				// parse consecutive letters
 				Vector<Element> consecutiveElements;
-				consecutiveElements = parseConsecutiveElements(molecularFormula, consecutiveElementString.toString(),
+				consecutiveElements = parseConsecutiveElements(
+						molecularFormula,
+						consecutiveElementString.toString(),
 						warningConsumer);
 
 				Isotope isotope = null;
@@ -123,8 +125,9 @@ public class ChemicalFormulaParser {
 					consecutiveElements.remove(0);
 					isotope = firstElement.getIsotope(isotopeSpecifier);
 					if (isotope == null) {
-						throw new ChemicalFormulaParserException("Unknown isotope specified: \"" + firstElement.getName() + "-"
-								+ isotopeSpecifier.toString() + "\" in \"" + molecularFormula + "\".");
+						throw new ChemicalFormulaParserException(
+								"Unknown isotope specified: \"" + firstElement.getName() + "-" + isotopeSpecifier.toString()
+										+ "\" in \"" + molecularFormula + "\".");
 					}
 				}
 
@@ -146,24 +149,22 @@ public class ChemicalFormulaParser {
 						// if elements is now empty we have specified an isotope to apply
 						// this
 						// amount to
-						subMolecule = new ChemicalComposition();
-						subMolecule.withIsotope(isotope, count);
+						subMolecule = nothing().withIsotope(isotope, count);
 					} else {
 						// factor out last element and apply amount to it
 						Element lastElement = consecutiveElements.remove(consecutiveElements.size() - 1);
-						subMolecule = new ChemicalComposition().withElements(consecutiveElements);
-						subMolecule.withElement(lastElement, count);
+						subMolecule = nothing().withElements(consecutiveElements).withElement(lastElement, count);
 						// add isotope if one was specified for first element
 						if (isotope != null) {
-							subMolecule.withIsotope(isotope);
+							subMolecule = subMolecule.withIsotope(isotope);
 						}
 					}
 				} else {
 					// add parsed elements to top of molecule stack.
-					subMolecule = new ChemicalComposition().withElements(consecutiveElements);
+					subMolecule = nothing().withElements(consecutiveElements);
 					// add isotope if one was specified for first element
 					if (isotope != null) {
-						subMolecule.withIsotope(isotope);
+						subMolecule = subMolecule.withIsotope(isotope);
 					}
 				}
 				isotopeSpecifier = null;
@@ -175,7 +176,7 @@ public class ChemicalFormulaParser {
 					throw new ChemicalFormulaParserException(
 							"Unexpected character \"" + currentChar + "\" in \"" + molecularFormula + "\".");
 				}
-				moleculeStack.push(new ChemicalComposition());
+				moleculeStack.push(nothing());
 			} else if (')' == currentChar || '}' == currentChar || ']' == currentChar) {
 				if (bracketStack.isEmpty()) {
 					throw new ChemicalFormulaParserException(
@@ -192,8 +193,9 @@ public class ChemicalFormulaParser {
 					break;
 				}
 				if (closing != currentChar) {
-					warningConsumer.accept(new ChemicalFormulaParserException(
-							"Mismatched Brackets - \"" + opening + " " + currentChar + "\" - in \"" + molecularFormula + "\"."));
+					warningConsumer.accept(
+							new ChemicalFormulaParserException(
+									"Mismatched Brackets - \"" + opening + " " + currentChar + "\" - in \"" + molecularFormula + "\"."));
 				}
 				currentMolecule = moleculeStack.pop();
 
@@ -206,7 +208,7 @@ public class ChemicalFormulaParser {
 					}
 
 					count = Integer.parseInt(valueString);
-					currentMolecule.withMultipliedCounts(count);
+					currentMolecule = currentMolecule.withMultipliedCounts(count);
 				}
 
 				moleculeStack.push(moleculeStack.pop().withMolecule(currentMolecule));
@@ -312,8 +314,9 @@ public class ChemicalFormulaParser {
 		}
 
 		while (moleculeStack.size() > 1) {
-			warningConsumer.accept(new ChemicalFormulaParserException(
-					"Mismatched Brackets (expecting closing bracket) in \"" + molecularFormula + "\"."));
+			warningConsumer.accept(
+					new ChemicalFormulaParserException(
+							"Mismatched Brackets (expecting closing bracket) in \"" + molecularFormula + "\"."));
 
 			currentMolecule = moleculeStack.pop();
 			moleculeStack.push(moleculeStack.pop().withMolecule(currentMolecule));
@@ -330,13 +333,15 @@ public class ChemicalFormulaParser {
 	 *         consecutiveElementString based on capitalisation and using sensible
 	 *         fall-backs when proper capitalisation gives invalid input
 	 */
-	private Vector<Element> parseConsecutiveElements(String molecularFormula, String consecutiveElementString,
+	private Vector<Element> parseConsecutiveElements(
+			String molecularFormula,
+			String consecutiveElementString,
 			Consumer<Exception> warningConsumer) throws ChemicalFormulaParserException {
 		/*
 		 * for only 1 character long.
 		 */
 		if (consecutiveElementString.length() == 1) {
-			Vector<Element> consecutiveElements = new Vector<Element>();
+			Vector<Element> consecutiveElements = new Vector<>();
 
 			Iterator<? extends Element> elementIterator = elements.iterator();
 			Element element;
@@ -348,9 +353,10 @@ public class ChemicalFormulaParser {
 
 				if (symbol.toLowerCase().equals(consecutiveElementString.toLowerCase())) {
 					if (Character.isLowerCase(consecutiveElementString.charAt(0))) {
-						warningConsumer
-								.accept(new ChemicalFormulaParserException("Proceding with invalid capitalisation of symbol \""
-										+ element.getSymbol() + "\" in \"" + molecularFormula + "\"."));
+						warningConsumer.accept(
+								new ChemicalFormulaParserException(
+										"Proceding with invalid capitalisation of symbol \"" + element.getSymbol() + "\" in \""
+												+ molecularFormula + "\"."));
 					}
 					consecutiveElements.add(element);
 					return consecutiveElements;
@@ -364,7 +370,7 @@ public class ChemicalFormulaParser {
 		 * for only 2 characters long.
 		 */
 		if (consecutiveElementString.length() == 2) {
-			Vector<Element> consecutiveElements = new Vector<Element>();
+			Vector<Element> consecutiveElements = new Vector<>();
 
 			Iterator<? extends Element> elementIterator = elements.iterator();
 			Element element;
@@ -386,9 +392,10 @@ public class ChemicalFormulaParser {
 					if (symbol.length() == 2 && symbol.toLowerCase().equals(consecutiveElementString.toLowerCase())) {
 
 						if (Character.isLowerCase(consecutiveElementString.charAt(0))) {
-							warningConsumer
-									.accept(new ChemicalFormulaParserException("Proceding with invalid capitalisation of symbol \""
-											+ element.getSymbol() + "\" in \"" + molecularFormula + "\"."));
+							warningConsumer.accept(
+									new ChemicalFormulaParserException(
+											"Proceding with invalid capitalisation of symbol \"" + element.getSymbol() + "\" in \""
+													+ molecularFormula + "\"."));
 						}
 						consecutiveElements.add(element);
 						return consecutiveElements;
@@ -397,12 +404,12 @@ public class ChemicalFormulaParser {
 					// if first / second character only matches symbol then keep match
 					// for if 2 character symbol match fails.
 					if (symbol.length() == 1) {
-						if (firstElement == null && symbol.toLowerCase()
-								.equals((Character.toString(Character.toLowerCase(consecutiveElementString.charAt(0)))))) {
+						if (firstElement == null && symbol.toLowerCase().equals(
+								(Character.toString(Character.toLowerCase(consecutiveElementString.charAt(0)))))) {
 							firstElement = element;
 						}
-						if (secondElement == null && symbol.toLowerCase()
-								.equals((Character.toString(Character.toLowerCase(consecutiveElementString.charAt(1)))))) {
+						if (secondElement == null && symbol.toLowerCase().equals(
+								(Character.toString(Character.toLowerCase(consecutiveElementString.charAt(1)))))) {
 							secondElement = element;
 						}
 					}
@@ -413,13 +420,16 @@ public class ChemicalFormulaParser {
 					throw new ChemicalFormulaParserException("Symbols cannot be matched in \"" + molecularFormula + "\".");
 
 				if (Character.isLowerCase(consecutiveElementString.charAt(0))) {
-					warningConsumer
-							.accept(new ChemicalFormulaParserException("Proceding with invalid capitalisation for symbol \""
-									+ firstElement.getSymbol() + "\" in \"" + molecularFormula + "\"."));
+					warningConsumer.accept(
+							new ChemicalFormulaParserException(
+									"Proceding with invalid capitalisation for symbol \"" + firstElement.getSymbol() + "\" in \""
+											+ molecularFormula + "\"."));
 				}
 				consecutiveElements.add(firstElement);
-				warningConsumer.accept(new ChemicalFormulaParserException("Proceding with invalid capitalisation for symbol \""
-						+ secondElement.getSymbol() + "\" in \"" + molecularFormula + "\"."));
+				warningConsumer.accept(
+						new ChemicalFormulaParserException(
+								"Proceding with invalid capitalisation for symbol \"" + secondElement.getSymbol() + "\" in \""
+										+ molecularFormula + "\"."));
 				consecutiveElements.add(secondElement);
 				return consecutiveElements;
 
@@ -439,20 +449,21 @@ public class ChemicalFormulaParser {
 					// if first / second character only matches symbol then keep match
 					// until found both, then return pair as element list.
 					if (symbol.length() == 1) {
-						if (firstElement == null && symbol.toLowerCase()
-								.equals((Character.toString(Character.toLowerCase(consecutiveElementString.charAt(0)))))) {
+						if (firstElement == null && symbol.toLowerCase().equals(
+								(Character.toString(Character.toLowerCase(consecutiveElementString.charAt(0)))))) {
 							firstElement = element;
 						}
-						if (secondElement == null && symbol.toLowerCase()
-								.equals((Character.toString(Character.toLowerCase(consecutiveElementString.charAt(1)))))) {
+						if (secondElement == null && symbol.toLowerCase().equals(
+								(Character.toString(Character.toLowerCase(consecutiveElementString.charAt(1)))))) {
 							secondElement = element;
 						}
 						// found both now! return them
 						if (firstElement != null && secondElement != null) {
 							if (Character.isLowerCase(consecutiveElementString.charAt(0))) {
-								warningConsumer
-										.accept(new ChemicalFormulaParserException("Proceding with invalid capitalisation for symbol \""
-												+ firstElement.getSymbol() + "\" in \"" + molecularFormula + "\"."));
+								warningConsumer.accept(
+										new ChemicalFormulaParserException(
+												"Proceding with invalid capitalisation for symbol \"" + firstElement.getSymbol() + "\" in \""
+														+ molecularFormula + "\"."));
 							}
 							consecutiveElements.add(firstElement);
 							consecutiveElements.add(secondElement);
@@ -470,8 +481,10 @@ public class ChemicalFormulaParser {
 				if (twoCharacterElement == null)
 					throw new ChemicalFormulaParserException("Symbols cannot be matched in \"" + molecularFormula + "\".");
 
-				warningConsumer.accept(new ChemicalFormulaParserException("Proceding with invalid capitalisation for symbol \""
-						+ twoCharacterElement.getSymbol() + "\" in \"" + molecularFormula + "\"."));
+				warningConsumer.accept(
+						new ChemicalFormulaParserException(
+								"Proceding with invalid capitalisation for symbol \"" + twoCharacterElement.getSymbol() + "\" in \""
+										+ molecularFormula + "\"."));
 				consecutiveElements.add(twoCharacterElement);
 				return consecutiveElements;
 			}
@@ -491,16 +504,19 @@ public class ChemicalFormulaParser {
 		 */
 
 		// consecutive elements found so far
-		Vector<Element> consecutiveElements = new Vector<Element>();
+		Vector<Element> consecutiveElements = new Vector<>();
 		// keep track of invalid capitalisations
-		Vector<Boolean> invalidCapitalisation = new Vector<Boolean>();
+		Vector<Boolean> invalidCapitalisation = new Vector<>();
 		// known indices of failure for matching single character elements in
 		// string
-		Set<Integer> oneCharacterFail = new TreeSet<Integer>();
+		Set<Integer> oneCharacterFail = new TreeSet<>();
 		// known indices of failure for matching two character elements in string
-		Set<Integer> twoCharacterFail = new TreeSet<Integer>();
+		Set<Integer> twoCharacterFail = new TreeSet<>();
 		// last character pre-fail
-		twoCharacterFailAtIndex(molecularFormula, consecutiveElementString.length() - 1, oneCharacterFail,
+		twoCharacterFailAtIndex(
+				molecularFormula,
+				consecutiveElementString.length() - 1,
+				oneCharacterFail,
 				twoCharacterFail);
 
 		Iterator<? extends Element> elementIterator;
@@ -535,8 +551,9 @@ public class ChemicalFormulaParser {
 					// element to list
 					if (symbol.length() == 2
 							&& symbol.toLowerCase().equals(consecutiveElementString.substring(index, index + 2).toLowerCase())) {
-						invalidCapitalisation.add(Character.isLowerCase(consecutiveElementString.charAt(index))
-								|| Character.isUpperCase(consecutiveElementString.charAt(index + 1)));
+						invalidCapitalisation.add(
+								Character.isLowerCase(consecutiveElementString.charAt(index))
+										|| Character.isUpperCase(consecutiveElementString.charAt(index + 1)));
 						consecutiveElements.add(element);
 						index += 2;
 						found = true;
@@ -544,8 +561,8 @@ public class ChemicalFormulaParser {
 						// if one character only matches symbol then keep match
 						// for if 2 character symbol match fails.
 					} else if (symbol.length() == 1 && oneCharacterElement == null) {
-						if (symbol.toLowerCase()
-								.equals(Character.toString(Character.toLowerCase(consecutiveElementString.charAt(index))))) {
+						if (symbol.toLowerCase().equals(
+								Character.toString(Character.toLowerCase(consecutiveElementString.charAt(index))))) {
 							oneCharacterElement = element;
 						}
 					}
@@ -581,8 +598,8 @@ public class ChemicalFormulaParser {
 					symbol = element.getSymbol();
 
 					// if one character only matches symbol then match element.
-					if (symbol.length() == 1 && symbol.toLowerCase()
-							.equals((Character.toString(Character.toLowerCase(consecutiveElementString.charAt(index)))))) {
+					if (symbol.length() == 1 && symbol.toLowerCase().equals(
+							(Character.toString(Character.toLowerCase(consecutiveElementString.charAt(index)))))) {
 						invalidCapitalisation.add(Character.isLowerCase(consecutiveElementString.charAt(index)));
 						consecutiveElements.add(element);
 						index++;
@@ -608,8 +625,9 @@ public class ChemicalFormulaParser {
 						invalidCapitalisation.removeElementAt(consecutiveElements.size() - 1);
 						consecutiveElements.removeElementAt(consecutiveElements.size() - 1);
 					} else {
-						invalidCapitalisation.add(Character.isLowerCase(consecutiveElementString.charAt(index))
-								|| Character.isUpperCase(consecutiveElementString.charAt(index + 1)));
+						invalidCapitalisation.add(
+								Character.isLowerCase(consecutiveElementString.charAt(index))
+										|| Character.isUpperCase(consecutiveElementString.charAt(index + 1)));
 						consecutiveElements.add(twoCharacterElement);
 						index += 2;
 						found = true;
@@ -623,8 +641,10 @@ public class ChemicalFormulaParser {
 		while (invalidCapitalisationIterator.hasNext()) {
 			element = elementIterator.next();
 			if (invalidCapitalisationIterator.next()) {
-				warningConsumer.accept(new ChemicalFormulaParserException("Proceding with invalid capitalisation for symbol \""
-						+ element.getSymbol() + "\" in \"" + molecularFormula + "\"."));
+				warningConsumer.accept(
+						new ChemicalFormulaParserException(
+								"Proceding with invalid capitalisation for symbol \"" + element.getSymbol() + "\" in \""
+										+ molecularFormula + "\"."));
 			}
 		}
 		return consecutiveElements;
@@ -632,7 +652,10 @@ public class ChemicalFormulaParser {
 
 	// note failure at finding single character symbol at index, and check if
 	// parse has become impossible
-	private void oneCharacterFailAtIndex(String molecularFormula, int index, Set<Integer> oneCharacterFail,
+	private void oneCharacterFailAtIndex(
+			String molecularFormula,
+			int index,
+			Set<Integer> oneCharacterFail,
 			Set<Integer> twoCharacterFail) throws ChemicalFormulaParserException {
 		if (!oneCharacterFail.contains(index)) {
 			oneCharacterFail.add(index);
@@ -652,7 +675,10 @@ public class ChemicalFormulaParser {
 
 	// note failure at finding two character symbol at index, and check if
 	// parse has become impossible
-	private void twoCharacterFailAtIndex(String molecularFormula, int index, Set<Integer> oneCharacterFail,
+	private void twoCharacterFailAtIndex(
+			String molecularFormula,
+			int index,
+			Set<Integer> oneCharacterFail,
 			Set<Integer> twoCharacterFail) throws ChemicalFormulaParserException {
 		if (!twoCharacterFail.contains(index)) {
 			twoCharacterFail.add(index);

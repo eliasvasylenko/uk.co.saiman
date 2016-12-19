@@ -49,7 +49,7 @@ import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.msapex.ResultEditorContribution;
 import uk.co.saiman.experiment.spectrum.SpectraProperties;
 import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.fx.FXMLLoadBuilder;
+import uk.co.strangeskies.fx.FxmlLoadBuilder;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
 @Component(scope = ServiceScope.PROTOTYPE)
@@ -71,7 +71,7 @@ public class SpectrumGraphEditorContribution
 
 	@PostConstruct
 	public void initialize(@LocalInstance FXMLLoader loader) {
-		content = FXMLLoadBuilder.buildWith(loader).controller(this).loadRoot();
+		content = FxmlLoadBuilder.buildWith(loader).controller(this).loadRoot();
 
 		result.addWeakObserver(this, c -> n -> c.setResultData(n));
 		setResultData(result.getData());

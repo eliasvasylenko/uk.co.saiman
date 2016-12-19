@@ -33,14 +33,12 @@ import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
-import org.osgi.service.component.annotations.Activate;
-
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
 import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.strangeskies.reflection.token.TypeToken;
@@ -59,7 +57,7 @@ import uk.co.strangeskies.utilities.AggregatingListener;
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
 	private SpectraProperties properties;
-	private ExperimentResultType<ContinuousFunction<Time, Dimensionless>> spectrumResult;
+	private final ExperimentResultType<ContinuousFunction<Time, Dimensionless>> spectrumResult;
 
 	public SpectrumExperimentType() {
 		this(PropertyLoader.getDefaultProperties(SpectraProperties.class));
@@ -67,6 +65,17 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 
 	public SpectrumExperimentType(SpectraProperties properties) {
 		this.properties = properties;
+		spectrumResult = new ExperimentResultType<ContinuousFunction<Time, Dimensionless>>() {
+			@Override
+			public String getName() {
+				return properties.spectrumResultName().toString();
+			}
+
+			@Override
+			public TypeToken<ContinuousFunction<Time, Dimensionless>> getDataType() {
+				return new TypeToken<ContinuousFunction<Time, Dimensionless>>() {};
+			}
+		};
 	}
 
 	/*
@@ -74,21 +83,6 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 	 * and 'spectrumResult' fields should both be final ... hurry up OSGi r7 to
 	 * sort this mess out
 	 */
-	@Activate
-	public void activate() {
-		spectrumResult = new ExperimentResultType<>(properties.spectrumResultName().toString(), this,
-				new TypeToken<ContinuousFunction<Time, Dimensionless>>() {});
-	}
-
-	protected SpectrumConfiguration createStateImpl(ExperimentNode<?, ? extends T> forNode) {
-		return new SpectrumConfiguration() {
-			@Override
-			public String getSpectrumName() {
-				return getProperties().defaultSpectrumName().toString();
-			}
-		};
-	}
-
 	protected void setProperties(SpectraProperties properties) {
 		this.properties = properties;
 	}
@@ -109,13 +103,14 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 	protected abstract AcquisitionDevice getAcquisitionDevice();
 
 	@Override
-	public void execute(ExperimentNode<?, ? extends T> node) {
+	public void execute(ExperimentExecutionContext<T> context) {
 		Unit<Dimensionless> intensityUnits = getAcquisitionDevice().getSampleIntensityUnits();
 		Unit<Time> timeUnits = getAcquisitionDevice().getSampleTimeUnits();
 
-		ContinuousFunctionExpression<Time, Dimensionless> result = new ContinuousFunctionExpression<>(timeUnits,
+		ContinuousFunctionExpression<Time, Dimensionless> result = new ContinuousFunctionExpression<>(
+				timeUnits,
 				intensityUnits);
-		node.setResult(spectrumResult, result);
+		context.setResult(spectrumResult, result);
 
 		getAcquisitionDevice().startAcquisition(device -> {
 
@@ -123,7 +118,11 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 			double frequency = 1 / device.getAcquisitionResolution();
 
 			ArrayRegularSampledContinuousFunction<Time, Dimensionless> accumulator = new ArrayRegularSampledContinuousFunction<>(
-					timeUnits, intensityUnits, frequency, 0, new double[depth]);
+					timeUnits,
+					intensityUnits,
+					frequency,
+					0,
+					new double[depth]);
 
 			result.setComponent(accumulator);
 

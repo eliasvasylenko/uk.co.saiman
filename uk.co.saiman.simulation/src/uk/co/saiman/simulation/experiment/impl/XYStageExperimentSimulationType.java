@@ -27,10 +27,13 @@
  */
 package uk.co.saiman.simulation.experiment.impl;
 
+import java.lang.reflect.Type;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentConfigurationContext;
+import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.SampleExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
@@ -52,20 +55,23 @@ public class XYStageExperimentSimulationType implements XYStageExperimentType<Si
 	private static final String DEFAULT_NAME = "XY Sample";
 
 	@Reference
-	SimulatedSampleImageDevice rasterSimulation;
+	SimulatedSampleImageDevice stageSimulation;
 
 	@Reference
 	Units units;
 
 	@Override
 	public SimulatedSampleImageDevice device() {
-		return rasterSimulation;
+		return stageSimulation;
 	}
 
 	@Override
 	public SimulatedXYStageRasterConfiguration createState(
-			ExperimentNode<?, ? extends SimulatedXYStageRasterConfiguration> forNode) {
-		SimulatedXYStageRasterConfiguration configuration = new SimulatedXYStageRasterConfiguration(units);
+			ExperimentConfigurationContext<SimulatedXYStageRasterConfiguration> forNode) {
+		SimulatedXYStageRasterConfiguration configuration = new SimulatedXYStageRasterConfiguration(
+				forNode,
+				stageSimulation,
+				units);
 
 		configuration.setName(DEFAULT_NAME);
 
@@ -76,13 +82,18 @@ public class XYStageExperimentSimulationType implements XYStageExperimentType<Si
 	}
 
 	@Override
-	public void execute(ExperimentNode<?, ? extends SimulatedXYStageRasterConfiguration> node) {
-		XYStageExperimentType.super.execute(node);
+	public void execute(ExperimentExecutionContext<SimulatedXYStageRasterConfiguration> context) {
+		XYStageExperimentType.super.execute(context);
 
-		rasterSimulation.setSampleImage(node.getState().getSampleImage());
+		stageSimulation.setSampleImage(context.node().getState().getSampleImage());
 
-		rasterSimulation.setRedChemical(node.getState().getRedChemical());
-		rasterSimulation.setGreenChemical(node.getState().getGreenChemical());
-		rasterSimulation.setBlueChemical(node.getState().getBlueChemical());
+		stageSimulation.setRedChemical(context.node().getState().getRedChemical().composition());
+		stageSimulation.setGreenChemical(context.node().getState().getGreenChemical().composition());
+		stageSimulation.setBlueChemical(context.node().getState().getBlueChemical().composition());
+	}
+
+	@Override
+	public Type getThisType() {
+		return XYStageExperimentSimulationType.class;
 	}
 }

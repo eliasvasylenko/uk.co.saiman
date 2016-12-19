@@ -56,16 +56,16 @@ import uk.co.strangeskies.reflection.resource.Jar;
  * @author Elias N Vasylenko
  */
 public class ChooseSimulatedSampleImage {
+	/**
+	 * The ID of the command in the e4 model fragment.
+	 */
+	public static final String COMMAND_ID = "uk.co.saiman.simulation.msapex.command.choosesimulatedsampleimage";
+
 	@Inject
 	@Localize
 	SimulationProperties text;
 
 	private Path tempDirectory;
-
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String COMMAND_ID = "uk.co.saiman.simulation.msapex.command.choosesimulatedsampleimage";
 
 	private static final String SAMPLE_IMAGES_DIRECTORY = "Sample-Images";
 	private static final String PNG = ".png";
@@ -80,8 +80,9 @@ public class ChooseSimulatedSampleImage {
 					text.experiment().exception().illegalCommandForSelection(COMMAND_ID, itemData.data()));
 		}
 
-		TreeItemData<?> parentData = itemData.parent().orElseThrow(() -> new ExperimentException(
-				text.experiment().exception().illegalCommandForSelection(COMMAND_ID, itemData.data())));
+		TreeItemData<?> parentData = itemData.parent().orElseThrow(
+				() -> new ExperimentException(
+						text.experiment().exception().illegalCommandForSelection(COMMAND_ID, itemData.data())));
 
 		if (!(parentData.data() instanceof SimulatedSampleImageConfiguration)) {
 			throw new ExperimentException(
@@ -92,7 +93,8 @@ public class ChooseSimulatedSampleImage {
 
 		Path imageDirectory = getImageDirectory();
 
-		Path imagePath = chooseImageFile(imageDirectory,
+		Path imagePath = chooseImageFile(
+				imageDirectory,
 				experimentPart.getExperimentTreeController().getTreeView().getScene().getWindow());
 
 		if (imagePath != null) {
@@ -146,7 +148,8 @@ public class ChooseSimulatedSampleImage {
 		fileChooser.setInitialDirectory(imageDirectory.toFile());
 
 		FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter(
-				text.imageFileFilterTitle().toString(), text.imageFileFilter());
+				text.imageFileFilterTitle().toString(),
+				text.imageFileFilter());
 		fileChooser.getExtensionFilters().add(extensionFilter);
 
 		File file = fileChooser.showOpenDialog(scene);

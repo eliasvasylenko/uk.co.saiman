@@ -59,5 +59,5 @@ public interface AcquisitionProperties extends Properties<AcquisitionProperties>
 
 	Localized<String> noSignal();
 
-	Localized<String> noAcquisitionModules();
+	Localized<String> noAcquisitionDevices();
 }

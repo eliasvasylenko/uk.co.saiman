@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
+import static uk.co.strangeskies.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
+
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -64,8 +66,9 @@ public class OpenExperiment {
 
 		TreeItemData<?> experimentItem = item.getData();
 
-		return experimentItem.type()
-				.isAssignableTo(new TypeToken<ExperimentNode<? extends SpectrumExperimentType<?>, ?>>() {});
+		return experimentItem.type().satisfiesConstraintTo(
+				LOOSE_COMPATIBILILTY,
+				new TypeToken<ExperimentNode<? extends SpectrumExperimentType<?>, ?>>() {});
 	}
 
 	@Execute

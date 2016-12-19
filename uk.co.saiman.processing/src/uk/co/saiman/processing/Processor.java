@@ -65,15 +65,19 @@ public interface Processor<T, R> {
 	 * @return The exact generic type of the processing target
 	 */
 	default TypeToken<T> getTargetType() {
-		return overType(getClass()).resolveSupertypeParameters(Processor.class)
-				.resolveTypeArgument(new TypeParameter<T>() {}).infer();
+		return overType(getClass())
+				.resolveSupertype(Processor.class)
+				.resolveTypeArgument(new TypeParameter<T>() {})
+				.infer();
 	}
 
 	/**
 	 * @return The exact generic type of the processing result
 	 */
 	default TypeToken<R> getResultType() {
-		return overType(getClass()).resolveSupertypeParameters(Processor.class)
-				.resolveTypeArgument(new TypeParameter<R>() {}).infer();
+		return overType(getClass())
+				.resolveSupertype(Processor.class)
+				.resolveTypeArgument(new TypeParameter<R>() {})
+				.infer();
 	}
 }

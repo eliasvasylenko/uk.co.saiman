@@ -52,7 +52,7 @@ public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>> impleme
 
 	@Override
 	public Path getResultDataPath() {
-		return getExperimentNode().getExperimentDataPath();
+		return getExperimentNode().getExperimentDataPath().resolve(getResultType().getName());
 	}
 
 	@Override

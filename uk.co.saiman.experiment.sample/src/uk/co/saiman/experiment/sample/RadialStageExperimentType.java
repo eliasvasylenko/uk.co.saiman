@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.instrument.stage.RadialStageDevice;
 
 /**
@@ -48,7 +48,7 @@ public interface RadialStageExperimentType<T extends RadialStageConfiguration> e
 	RadialStageDevice device();
 
 	@Override
-	default void execute(ExperimentNode<?, ? extends T> node) {
-		device().requestStageOffset(node.getState().getRadius(), node.getState().getTheta());
+	default void execute(ExperimentExecutionContext<T> context) {
+		device().requestStageOffset(context.node().getState().getRadius(), context.node().getState().getTheta());
 	}
 }

@@ -31,9 +31,7 @@ import javax.measure.Quantity;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.instrument.HardwareDevice;
-
-public interface RadialStageDevice extends HardwareDevice {
+public interface RadialStageDevice extends StageDevice {
 	Quantity<Length> getStageRadius();
 
 	void requestStageOffset(Quantity<Length> radius, Quantity<Angle> theta);

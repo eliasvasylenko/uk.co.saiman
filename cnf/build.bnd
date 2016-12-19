@@ -9,8 +9,6 @@ javac.target: 1.8
 ## Bnd Options
 -sources: true
 
-bnd-release = https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact
-
 -include: ${workspace}/copyright.properties
 copyright.work.name = ${project.name}
 copyright.year = ${tstamp;yyyy}
@@ -39,57 +37,46 @@ Import-Package:\
 ## To enable baselining, uncomment the following lines:
 # -baseline: *
 
-
--plugin.MavenCentral = \
-\
-		aQute.bnd.deployer.repository.wrapper.Plugin; \
-			location			=		"${build}/cache/wrapper"; \
-			reindex				=		true, \
-\
-		aQute.bnd.repository.maven.provider.MavenBndRepository; \
-			releaseUrl			=		https://repo.maven.apache.org/maven2/; \
-			name				=		Maven Central; \
-			index				=		${.}/mavencentral.maven
-
--plugin.Managed: \
-\
-		aQute.bnd.deployer.repository.LocalIndexedRepo; \
-			name				=       Managed ; \
-			pretty				=       true ; \
-			local				=       ${build}/local
-
--plugin.Local: \
-\
-		aQute.bnd.repository.maven.provider.MavenBndRepository; \
-			name				=		Local; \
-			index				=		${.}/local.maven
-
--plugin.StrangeSkies: \
-\
-		aQute.bnd.repository.maven.provider.MavenBndRepository; \
-			name				=		StrangeSkies; \
-			index				=		${.}/strangeskies.maven; \
-			releaseUrl			=		https://oss.jfrog.org/libs-snapshot/
-
--plugin.Modabi: \
-\
-		aQute.bnd.repository.maven.provider.MavenBndRepository; \
-			name				=		Modabi; \
-			index				=		${.}/modabi.maven; \
-			releaseUrl			=		https://oss.jfrog.org/libs-snapshot/
-
--plugin.Release: \
-\
-		aQute.bnd.repository.maven.provider.MavenBndRepository; \
-			name				=		Saiman; \
-			index				=		${.}/saiman.maven; \
-			snapshotUrl			=		https://oss.jfrog.org/artifactory/oss-snapshot-local/
-			releaseUrl			=		https://oss.jfrog.org/artifactory/oss-release-local/
-
--buildrepo: Local
+-buildrepo: Build
 -releaserepo: Saiman
 -pom: true,\
 		version = ${versionmask;===;${@version}}-SNAPSHOT
+
+-plugin.Local:\
+\
+        aQute.bnd.deployer.repository.LocalIndexedRepo;\
+            name                =       Local;\
+            pretty              =       true;\
+            local               =       ${build}/local
+
+-plugin.Build:\
+\
+		aQute.bnd.repository.maven.provider.MavenBndRepository;\
+			name				=		Build;\
+			index				=		${.}/local.maven
+
+-plugin.Release:\
+\
+		aQute.bnd.repository.maven.provider.MavenBndRepository;\
+			name				=		Saiman;\
+			index				=		${.}/saiman.maven;\
+			releaseUrl			=		http://oss.jfrog.org/libs-snapshot/
+
+-plugin.StrangeSkies:\
+\
+		aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
+			name				=		StrangeSkies;\
+			pom					=		${build}/strangeskies.xml;\
+			location			=		${build}/cache/strangeskies.xml;\
+			releaseUrl			=		https://oss.jfrog.org/libs-snapshot/
+
+-plugin.Modabi:\
+\
+		aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
+			name				=		Modabi;\
+			pom					=		${build}/modabi.xml;\
+			location			=		${build}/cache/modabi.xml;\
+			releaseUrl			=		https://oss.jfrog.org/libs-snapshot/
 
 ## Deployment configuration:
 
@@ -120,7 +107,7 @@ Git-SHA: ${system-allow-fail;git rev-list -1 HEAD}
 -testpath.base=\
 	osgi.enroute.junit.wrapper,\
 	osgi.enroute.hamcrest.wrapper,\
-	org.hamcrest__java-hamcrest
+	org.hamcrest:java-hamcrest
 
 ## Fix warnings
 -fixupmessages.res: "Bndtools: Found source folder 'res' that is not on bnd's source path 'src'"
