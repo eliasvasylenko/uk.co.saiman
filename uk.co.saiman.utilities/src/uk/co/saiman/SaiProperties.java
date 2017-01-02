@@ -29,7 +29,6 @@ package uk.co.saiman;
 
 import java.time.LocalDate;
 
-import uk.co.strangeskies.modabi.Namespace;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
@@ -46,9 +45,11 @@ public interface SaiProperties extends Properties<SaiProperties> {
 	/**
 	 * The root namespace associated with Scientific Analysis Instruments products
 	 */
+	/*-
 	default Namespace getNamespace() {
 		return new Namespace(getNamespacePackage(), getNamespaceDate());
 	}
+	 */
 
 	Package getNamespacePackage();
 

@@ -48,10 +48,6 @@ public class AddExperiment {
 
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
-		System.out.println(part);
-		System.out.println(part.getLabel());
-		System.out.println(part.getObject());
-
 		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
 
 		RenameExperiment

@@ -12,7 +12,6 @@ Bundle-Name: SAI :: MSApex :: Chemistry
 	uk.co.strangeskies.reflection;version=latest,\
 	uk.co.strangeskies.fx;version=latest,\
 	uk.co.strangeskies.eclipse;version=latest,\
-	uk.co.strangeskies.modabi.core.api;version=latest,\
 	javax.measure.unit-api,\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\

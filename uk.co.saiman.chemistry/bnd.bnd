@@ -1,7 +1,6 @@
 Bundle-Name: SAI :: Chemistry
 
 -buildpath: \
-	uk.co.strangeskies.modabi.core.api;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\

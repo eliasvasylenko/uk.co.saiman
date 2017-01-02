@@ -43,6 +43,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.fx.core.di.LocalInstance;
 
@@ -72,7 +73,7 @@ import uk.co.strangeskies.eclipse.ObservableService;
 public class AcquisitionPart {
 	@Localize
 	@Inject
-	AcquisitionProperties text;
+	private AcquisitionProperties text;
 
 	@FXML
 	private Pane chartPane;
@@ -81,10 +82,17 @@ public class AcquisitionPart {
 
 	@Inject
 	@ObservableService
-	ObservableSet<AcquisitionDevice> availableDevices;
+	private ObservableSet<AcquisitionDevice> availableDevices;
 
 	private ObservableSet<AcquisitionDevice> selectedDevices = FXCollections.observableSet();
 	private Map<AcquisitionDevice, ContinuousFunctionChartController> controllers = new HashMap<>();
+
+	@Inject
+	@LocalInstance
+	private FXMLLoader loaderProvider;
+	
+	@Inject
+	private MPart part;
 
 	/**
 	 * Get the visible acquisition devices.
@@ -100,7 +108,7 @@ public class AcquisitionPart {
 	 * made visible, and all others will be removed.
 	 * 
 	 * @param selectedDevices
-	 *          The acquisition devices to show
+	 *            The acquisition devices to show
 	 * @return True if the device selection changes as a result of this
 	 *         invocation, false otherwise
 	 */
@@ -109,11 +117,11 @@ public class AcquisitionPart {
 	}
 
 	/**
-	 * Set an acquisition device to be visible. All currently visible devices will
-	 * remain so.
+	 * Set an acquisition device to be visible. All currently visible devices
+	 * will remain so.
 	 * 
 	 * @param device
-	 *          The acquisition device to show
+	 *            The acquisition device to show
 	 * @return True if the device selection changes as a result of this
 	 *         invocation, false otherwise
 	 */
@@ -126,7 +134,7 @@ public class AcquisitionPart {
 	 * devices will remain so.
 	 * 
 	 * @param device
-	 *          The acquisition device to not show
+	 *            The acquisition device to not show
 	 * @return True if the device selection changes as a result of this
 	 *         invocation, false otherwise
 	 */
@@ -140,10 +148,6 @@ public class AcquisitionPart {
 	public ObservableSet<AcquisitionDevice> getAvailableAcquisitionDevices() {
 		return availableDevices;
 	}
-
-	@Inject
-	@LocalInstance
-	FXMLLoader loaderProvider;
 
 	@PostConstruct
 	void postConstruct(BorderPane container) {
@@ -170,8 +174,7 @@ public class AcquisitionPart {
 		 * New chart controller for device
 		 */
 		ContinuousFunctionChartController chartController = buildWith(loaderProvider)
-				.controller(ContinuousFunctionChartController.class)
-				.loadController();
+				.controller(ContinuousFunctionChartController.class).loadController();
 		chartController.setTitle(acquisitionDevice.getName());
 		controllers.put(acquisitionDevice, chartController);
 		chartPane.getChildren().add(chartController.getRoot());
@@ -181,8 +184,7 @@ public class AcquisitionPart {
 		 * Create continuous function view of latest data from device
 		 */
 		ContinuousFunctionExpression<Time, Dimensionless> latestContinuousFunction = new ContinuousFunctionExpression<>(
-				acquisitionDevice.getSampleTimeUnits(),
-				acquisitionDevice.getSampleIntensityUnits());
+				acquisitionDevice.getSampleTimeUnits(), acquisitionDevice.getSampleIntensityUnits());
 		acquisitionDevice.dataEvents().addWeakObserver(latestContinuousFunction, l -> c -> l.setComponent(c));
 
 		/*
@@ -201,8 +203,10 @@ public class AcquisitionPart {
 
 	@Inject
 	synchronized void setSelection(@Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) AcquisitionDevice device) {
+		part.getContext().activate();
 		if (device != null && !selectedDevices.contains(device)) {
 			setSelectedAcquisitionDevices(asList(device));
+			part.getContext().activate();
 		}
 	}
 }

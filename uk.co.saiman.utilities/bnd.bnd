@@ -1,7 +1,6 @@
 Bundle-Name: SAI :: Utilities
 
 -buildpath: \
-	uk.co.strangeskies.modabi.core.api;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest
