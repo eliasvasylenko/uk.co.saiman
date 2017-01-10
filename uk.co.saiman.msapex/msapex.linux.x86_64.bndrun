@@ -6,10 +6,6 @@ runplatform: linux64
 	osgi.os=linux,\
 	osgi.arch=x86_64
 
--runblacklist: \
-	osgi.identity;filter:='(&(osgi.identity=org.eclipse.equinox.common)(!(version>=3.8.0)))',\
-	osgi.identity;filter:='(&(osgi.identity=org.eclipse.emf.common)(!(version>=2.12.0)))'
-
 -runbundles: \
 	bndtools.runtime.eclipse.applaunch;version='[0.1.0,0.1.1)',\
 	com.google.guava;version='[15.0.0,15.0.1)',\

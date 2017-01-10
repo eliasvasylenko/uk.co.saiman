@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.instrument.acquisition.
@@ -29,6 +29,7 @@ package uk.co.saiman.acquisition;
 
 import java.util.function.Consumer;
 
+import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
@@ -146,7 +147,9 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * 
 	 * @return The acquisition resolution in milliseconds
 	 */
-	double getAcquisitionResolution();
+	Quantity<Time> getSampleResolution();
+
+	double getSampleFrequency();
 
 	/**
 	 * Set the active sampling duration for a single data acquisition event. This
@@ -156,14 +159,14 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * @param time
 	 *          The time an acquisition will last in milliseconds
 	 */
-	void setAcquisitionTime(double time);
+	void setAcquisitionTime(Quantity<Time> time);
 
 	/**
 	 * Get the active sampling duration for a single data acquisition event.
 	 * 
 	 * @return the time an acquisition will last in milliseconds
 	 */
-	double getAcquisitionTime();
+	Quantity<Time> getAcquisitionTime();
 
 	/**
 	 * Set the number of samples in an acquired sampled continuous function. This
@@ -173,12 +176,12 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * @param depth
 	 *          the sample depth for an acquired data array
 	 */
-	void setAcquisitionDepth(int depth);
+	void setSampleDepth(int depth);
 
 	/**
 	 * Get the number of samples in an acquired sampled continuous function.
 	 * 
 	 * @return the sample depth for an acquired data array
 	 */
-	int getAcquisitionDepth();
+	int getSampleDepth();
 }

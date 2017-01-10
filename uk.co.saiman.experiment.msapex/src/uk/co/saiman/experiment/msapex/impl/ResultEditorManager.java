@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.msapex.
@@ -58,8 +58,8 @@ public class ResultEditorManager {
 
 	public synchronized <T> ResultEditorPart<T> openEditor(ExperimentResult<T> result) {
 		@SuppressWarnings("unchecked")
-		ResultEditorPart<T> editorPart = (ResultEditorPart<T>) editorParts.computeIfAbsent(result,
-				r -> createEditor(result));
+		ResultEditorPart<T> editorPart = (ResultEditorPart<T>) editorParts
+				.computeIfAbsent(result, r -> createEditor(result));
 		partService.activate(editorPart.getPart());
 
 		return editorPart;
@@ -69,7 +69,7 @@ public class ResultEditorManager {
 	@Optional
 	private synchronized void subscribeTopicTodoUpdated(
 			@UIEventTopic(UIEvents.UIElement.TOPIC_TOBERENDERED) Map<String, ?> data) {
-		if (data.get(UIEvents.EventTags.NEW_VALUE).equals(Boolean.FALSE)) {
+		if (Boolean.FALSE.equals(data.get(UIEvents.EventTags.NEW_VALUE))) {
 			Object element = data.get(UIEvents.EventTags.ELEMENT);
 
 			if (element instanceof MPart) {

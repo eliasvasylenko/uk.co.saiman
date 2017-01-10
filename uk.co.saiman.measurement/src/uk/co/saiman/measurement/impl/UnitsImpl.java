@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.measurement.impl;
 
+import java.lang.reflect.Method;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -43,8 +44,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import si.uom.SI;
+import tec.uom.se.AbstractUnit;
 import tec.uom.se.format.LocalUnitFormat;
+import tec.uom.se.format.PatchedNumberSpaceQuantityFormat;
 import tec.uom.se.format.QuantityFormat;
+import tec.uom.se.format.SimpleUnitFormat;
+import tec.uom.se.format.SymbolMap;
 import uk.co.saiman.measurement.UnitBuilder;
 import uk.co.strangeskies.text.properties.LocaleProvider;
 
@@ -53,8 +58,10 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 	@Reference
 	LocaleProvider localeProvider;
 	private Locale locale;
-	private LocalUnitFormat unitFormat;
+	private UnitFormat unitFormat;
 	private QuantityFormat quantityFormat;
+
+	private static final Unit<Dimensionless> COUNT = AbstractUnit.ONE;
 
 	protected <T extends Quantity<T>> UnitBuilder<T> over(Unit<T> unit) {
 		return new UnitBuilderImpl<>(this, unit);
@@ -67,7 +74,7 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 
 	@Override
 	public UnitBuilder<Dimensionless> count() {
-		return over(SI.ONE);
+		return over(COUNT);
 	}
 
 	@Override
@@ -96,17 +103,27 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 	}
 
 	@Override
-	public String format(Unit<?> unit) {
+	public Unit<?> parseUnit(String unit) {
+		return getUnitFormat().parse(unit);
+	}
+
+	@Override
+	public String formatUnit(Unit<?> unit) {
 		return getUnitFormat().format(unit);
 	}
 
 	@Override
-	public String format(Quantity<?> quantity) {
+	public Quantity<?> parseQuantity(String unit) {
+		return getQuantityFormat().parse(unit);
+	}
+
+	@Override
+	public String formatQuantity(Quantity<?> quantity) {
 		return getQuantityFormat().format(quantity);
 	}
 
 	@Override
-	public String format(Quantity<?> quantity, NumberFormat format) {
+	public String formatQuantity(Quantity<?> quantity, NumberFormat format) {
 		return QuantityFormat.getInstance(format, getUnitFormat()).format(quantity);
 	}
 
@@ -122,14 +139,43 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 
 	private void updateFormats() {
 		Locale locale = localeProvider.getLocale();
+		if (this.locale == null) {
+			this.locale = locale;
+
+			unitFormat = addLabels(SimpleUnitFormat.getInstance());
+			quantityFormat = new PatchedNumberSpaceQuantityFormat(NumberFormat.getInstance(), unitFormat);
+		}
+	}
+
+	private SimpleUnitFormat addLabels(SimpleUnitFormat instance) {
+		Unit<?> Da = dalton().get();
+		instance.label(Da, "Da");
+
+		return instance;
+	}
+
+	private void updateFormatsLocal() {
+		Locale locale = localeProvider.getLocale();
 		if (!locale.equals(this.locale)) {
 			this.locale = locale;
-			unitFormat = LocalUnitFormat.getInstance(locale);
+
+			unitFormat = addLabels(LocalUnitFormat.getInstance(locale));
+			quantityFormat = QuantityFormat.getInstance(NumberFormat.getInstance(locale), unitFormat);
+		}
+	}
+
+	private LocalUnitFormat addLabels(LocalUnitFormat instance) {
+		try {
+			Method getSymbolsMethod = instance.getClass().getDeclaredMethod("getSymbols");
+			getSymbolsMethod.setAccessible(true);
+			SymbolMap symbolMap = (SymbolMap) getSymbolsMethod.invoke(instance);
 
 			Unit<?> Da = dalton().get();
-			unitFormat.label(Da, "Da");
+			symbolMap.label(Da, "Da");
 
-			quantityFormat = QuantityFormat.getInstance(NumberFormat.getInstance(), unitFormat);
+			return instance;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

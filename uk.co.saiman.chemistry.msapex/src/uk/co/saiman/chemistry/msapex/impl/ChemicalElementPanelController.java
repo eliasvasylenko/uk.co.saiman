@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.chemistry.msapex.
@@ -44,8 +44,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import uk.co.saiman.chemistry.Element;
-import uk.co.saiman.chemistry.Isotope;
 import uk.co.saiman.chemistry.Element.Group;
+import uk.co.saiman.chemistry.Isotope;
 import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.data.GaussianFunctionFactory;
@@ -83,7 +83,7 @@ public class ChemicalElementPanelController {
 	private TableColumn<Isotope, Double> abundanceColumn;
 
 	private PeakShapeFunctionFactory peakFunction;
-	private ContinuousFunctionExpression<Dimensionless, Mass> isotopeFunction;
+	private ContinuousFunctionExpression<Mass, Dimensionless> isotopeFunction;
 	private Unit<Dimensionless> abundanceUnit;
 	private Unit<Mass> massUnit;
 
@@ -101,7 +101,7 @@ public class ChemicalElementPanelController {
 		abundanceUnit = units.percent().get();
 		massUnit = units.dalton().get();
 
-		isotopeFunction = new ContinuousFunctionExpression<>(abundanceUnit, massUnit);
+		isotopeFunction = new ContinuousFunctionExpression<>(massUnit, abundanceUnit);
 	}
 
 	/**
@@ -127,8 +127,14 @@ public class ChemicalElementPanelController {
 				}
 			}
 
-			isotopeFunction.setComponent(new PeakShapeImpulseConvolutionFunction<>(abundanceUnit, massUnit, isotopeCount,
-					values, intensities, peakFunction));
+			isotopeFunction.setComponent(
+					new PeakShapeImpulseConvolutionFunction<>(
+							massUnit,
+							abundanceUnit,
+							isotopeCount,
+							values,
+							intensities,
+							peakFunction));
 		}
 
 		isotopeTable.setItems(observableArrayList(element != null ? element.getIsotopes() : emptySet()));

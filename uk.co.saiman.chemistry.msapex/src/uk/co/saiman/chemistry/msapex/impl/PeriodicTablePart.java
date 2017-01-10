@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.chemistry.msapex.
@@ -64,8 +64,22 @@ public class PeriodicTablePart {
 	@FXML
 	private ScrollPane periodicTableScrollPane;
 
+	public PeriodicTablePart() {
+		System.out.println("PeriodicTablePart()");
+		System.out.println("PeriodicTablePart()");
+		System.out.println("PeriodicTablePart()");
+		System.out.println("PeriodicTablePart()");
+		System.out.println("PeriodicTablePart()");
+	}
+
 	@PostConstruct
 	void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
+		System.out.println("PeriodicTablePart.initialize()");
+		System.out.println("PeriodicTablePart.initialize()");
+		System.out.println("PeriodicTablePart.initialize()");
+		System.out.println("PeriodicTablePart.initialize()");
+		System.out.println("PeriodicTablePart.initialize()");
+
 		try {
 			container.setCenter(buildWith(loader).controller(this).loadRoot());
 			periodicTableController.addObserver(this::setElementTile);
@@ -73,7 +87,7 @@ public class PeriodicTablePart {
 
 			periodicTables.periodicTable().addWeakObserver(this, o -> p -> o.setPeriodicTable(p));
 			setPeriodicTable(periodicTables.periodicTable().get());
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			throw e;
 		}
@@ -83,6 +97,8 @@ public class PeriodicTablePart {
 		periodicTableController.setPeriodicTable(table);
 		if (table != null) {
 			chemicalElementPanelController.setElement(table.getElement(1));
+		} else {
+			chemicalElementPanelController.setElement(null);
 		}
 	}
 

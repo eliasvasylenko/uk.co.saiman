@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.spectrum.
@@ -56,14 +56,14 @@ import uk.co.strangeskies.utilities.AggregatingListener;
  *          the type of sample configuration for the instrument
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
-	private SpectraProperties properties;
+	private SpectrumProperties properties;
 	private final ExperimentResultType<ContinuousFunction<Time, Dimensionless>> spectrumResult;
 
 	public SpectrumExperimentType() {
-		this(PropertyLoader.getDefaultProperties(SpectraProperties.class));
+		this(PropertyLoader.getDefaultProperties(SpectrumProperties.class));
 	}
 
-	public SpectrumExperimentType(SpectraProperties properties) {
+	public SpectrumExperimentType(SpectrumProperties properties) {
 		this.properties = properties;
 		spectrumResult = new ExperimentResultType<ContinuousFunction<Time, Dimensionless>>() {
 			@Override
@@ -83,11 +83,11 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 	 * and 'spectrumResult' fields should both be final ... hurry up OSGi r7 to
 	 * sort this mess out
 	 */
-	protected void setProperties(SpectraProperties properties) {
+	protected void setProperties(SpectrumProperties properties) {
 		this.properties = properties;
 	}
 
-	protected SpectraProperties getProperties() {
+	protected SpectrumProperties getProperties() {
 		return properties;
 	}
 
@@ -114,8 +114,8 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 
 		getAcquisitionDevice().startAcquisition(device -> {
 
-			int depth = device.getAcquisitionDepth();
-			double frequency = 1 / device.getAcquisitionResolution();
+			int depth = device.getSampleDepth();
+			double frequency = device.getSampleFrequency();
 
 			ArrayRegularSampledContinuousFunction<Time, Dimensionless> accumulator = new ArrayRegularSampledContinuousFunction<>(
 					timeUnits,

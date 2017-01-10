@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.simulation.instrument;
 
-import java.util.Random;
-
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
@@ -42,6 +40,12 @@ import uk.co.saiman.data.SampledContinuousFunction;
  * @author Elias N Vasylenko
  */
 public interface DetectorSimulation {
-	SampledContinuousFunction<Time, Dimensionless> acquire(Unit<Dimensionless> intensityUnits, Unit<Time> timeUnits,
-			Random random, double resolution, int depth, SimulatedSample sample);
+	String getId();
+
+	SampledContinuousFunction<Time, Dimensionless> acquire(
+			Unit<Time> timeUnits,
+			Unit<Dimensionless> intensityUnits,
+			double frequency,
+			int depth,
+			SimulatedSample sample);
 }

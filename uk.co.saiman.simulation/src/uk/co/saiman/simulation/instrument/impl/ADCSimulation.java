@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
@@ -34,6 +34,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.Designate;
 
 import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
@@ -45,13 +46,27 @@ import uk.co.saiman.simulation.instrument.SimulatedSample;
  * 
  * @author Elias N Vasylenko
  */
-@Component
+@Designate(ocd = ADCSimulationConfiguration.class)
+@Component(configurationPid = ADCSimulation.CONFIGURATION_PID)
 public class ADCSimulation implements DetectorSimulation {
+	static final String CONFIGURATION_PID = "uk.co.saiman.simulation.adc";
+
 	private double[] intensities = new double[0];
 
+	private final Random random = new Random();
+
 	@Override
-	public SampledContinuousFunction<Time, Dimensionless> acquire(Unit<Dimensionless> intensityUnits,
-			Unit<Time> timeUnits, Random random, double resolution, int depth, SimulatedSample sample) {
+	public String getId() {
+		return CONFIGURATION_PID;
+	}
+
+	@Override
+	public SampledContinuousFunction<Time, Dimensionless> acquire(
+			Unit<Time> timeUnits,
+			Unit<Dimensionless> intensityUnits,
+			double frequency,
+			int depth,
+			SimulatedSample sample) {
 		if (this.intensities.length != depth) {
 			intensities = new double[depth];
 		}
@@ -66,7 +81,6 @@ public class ADCSimulation implements DetectorSimulation {
 			intensities[j] = 0.01 + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
 		}
 
-		return new ArrayRegularSampledContinuousFunction<>(timeUnits, intensityUnits, 1 / (resolution * 1_000), 0,
-				intensities);
+		return new ArrayRegularSampledContinuousFunction<>(timeUnits, intensityUnits, frequency, 0, intensities);
 	}
 }

@@ -1,9 +1,10 @@
 -buildpath: \
 	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.utilities;version=latest,\
 \
-	javax.measure.unit-api,\
-	tec.uom.se,\
-	tec.uom.lib:uom-lib-common,\
-	si.uom:si-units-java8
+	javax.measure.unit-api;version=latest,\
+	tec.uom.se;version=latest,\
+	tec.uom.lib.uom-lib-common;version=latest,\
+	si.uom:si-units-java8;version=latest
 
 -sub: *.bnd

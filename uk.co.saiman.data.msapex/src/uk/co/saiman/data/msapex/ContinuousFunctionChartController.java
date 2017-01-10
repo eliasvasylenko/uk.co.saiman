@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.data.msapex.
@@ -237,7 +237,8 @@ public class ContinuousFunctionChartController {
 
 	@FXML
 	void onScroll(ScrollEvent event) {
-		double xPosition = getXAxis().getValueForDisplay(event.getSceneX() - getXAxis().localToScene(0, 0).getX())
+		double xPosition = getXAxis()
+				.getValueForDisplay(event.getSceneX() - getXAxis().localToScene(0, 0).getX())
 				.doubleValue();
 
 		double delta = event.getDeltaY();
@@ -292,8 +293,11 @@ public class ContinuousFunctionChartController {
 
 	private Range<Double> getMaxZoom(Function<ContinuousFunction<?, ?>, Range<Double>> continuousFunctionRange) {
 		synchronized (domain) {
-			return series().map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction).map(continuousFunctionRange)
-					.reduce(Range::getExtendedThrough).orElse(Range.between(0d, 100d));
+			return series()
+					.map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction)
+					.map(continuousFunctionRange)
+					.reduce(Range::getExtendedThrough)
+					.orElse(Range.between(0d, 100d));
 		}
 	}
 
@@ -567,7 +571,7 @@ public class ContinuousFunctionChartController {
 
 				group.addContinuousFunction(series.get(function));
 			}
-			getXAxis().setLabel(units.format(xUnit));
+			getXAxis().setLabel(units.formatUnit(xUnit));
 
 			rangeGroups.keySet().retainAll(yUnits);
 

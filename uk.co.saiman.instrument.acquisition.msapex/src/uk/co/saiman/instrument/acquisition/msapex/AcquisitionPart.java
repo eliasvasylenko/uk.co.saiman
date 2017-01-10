@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.instrument.acquisition.msapex.
@@ -61,6 +61,7 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.data.msapex.ContinuousFunctionChartController;
+import uk.co.saiman.measurement.Units;
 import uk.co.strangeskies.eclipse.AdaptNamed;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.eclipse.ObservableService;
@@ -90,9 +91,12 @@ public class AcquisitionPart {
 	@Inject
 	@LocalInstance
 	private FXMLLoader loaderProvider;
-	
+
 	@Inject
 	private MPart part;
+
+	@Inject
+	private Units units;
 
 	/**
 	 * Get the visible acquisition devices.
@@ -108,7 +112,7 @@ public class AcquisitionPart {
 	 * made visible, and all others will be removed.
 	 * 
 	 * @param selectedDevices
-	 *            The acquisition devices to show
+	 *          The acquisition devices to show
 	 * @return True if the device selection changes as a result of this
 	 *         invocation, false otherwise
 	 */
@@ -117,11 +121,11 @@ public class AcquisitionPart {
 	}
 
 	/**
-	 * Set an acquisition device to be visible. All currently visible devices
-	 * will remain so.
+	 * Set an acquisition device to be visible. All currently visible devices will
+	 * remain so.
 	 * 
 	 * @param device
-	 *            The acquisition device to show
+	 *          The acquisition device to show
 	 * @return True if the device selection changes as a result of this
 	 *         invocation, false otherwise
 	 */
@@ -134,7 +138,7 @@ public class AcquisitionPart {
 	 * devices will remain so.
 	 * 
 	 * @param device
-	 *            The acquisition device to not show
+	 *          The acquisition device to not show
 	 * @return True if the device selection changes as a result of this
 	 *         invocation, false otherwise
 	 */
@@ -174,7 +178,8 @@ public class AcquisitionPart {
 		 * New chart controller for device
 		 */
 		ContinuousFunctionChartController chartController = buildWith(loaderProvider)
-				.controller(ContinuousFunctionChartController.class).loadController();
+				.controller(ContinuousFunctionChartController.class)
+				.loadController();
 		chartController.setTitle(acquisitionDevice.getName());
 		controllers.put(acquisitionDevice, chartController);
 		chartPane.getChildren().add(chartController.getRoot());
@@ -184,7 +189,8 @@ public class AcquisitionPart {
 		 * Create continuous function view of latest data from device
 		 */
 		ContinuousFunctionExpression<Time, Dimensionless> latestContinuousFunction = new ContinuousFunctionExpression<>(
-				acquisitionDevice.getSampleTimeUnits(), acquisitionDevice.getSampleIntensityUnits());
+				units.second().get(),
+				units.count().get());
 		acquisitionDevice.dataEvents().addWeakObserver(latestContinuousFunction, l -> c -> l.setComponent(c));
 
 		/*
@@ -203,10 +209,12 @@ public class AcquisitionPart {
 
 	@Inject
 	synchronized void setSelection(@Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) AcquisitionDevice device) {
-		part.getContext().activate();
-		if (device != null && !selectedDevices.contains(device)) {
-			setSelectedAcquisitionDevices(asList(device));
+		if (device != null) {
 			part.getContext().activate();
+
+			if (!selectedDevices.contains(device)) {
+				setSelectedAcquisitionDevices(asList(device));
+			}
 		}
 	}
 }

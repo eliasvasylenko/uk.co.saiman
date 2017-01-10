@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
@@ -28,10 +28,12 @@
 package uk.co.saiman.simulation;
 
 import java.util.List;
+import java.util.Set;
 
 import uk.co.saiman.SaiProperties;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Properties;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
@@ -65,4 +67,6 @@ public interface SimulationProperties extends Properties<SimulationProperties> {
 	List<String> imageFileFilter();
 
 	Localized<String> invalidAcquisitionCount(int count);
+
+	Localized<String> cannotFindDetector(String detectorName, Set<DetectorSimulation> availableDetectors);
 }

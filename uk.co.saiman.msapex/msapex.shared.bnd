@@ -4,6 +4,11 @@
 	${include.ss}/eclipse.platform.neon.bndrun,\
 	${include.ss}/eclipse.fx.2.4.0.bndrun
 
+-runblacklist.msapex: \
+	osgi.identity;filter:='(&(osgi.identity=org.eclipse.equinox.common)(!(version>=3.8.0)))',\
+	osgi.identity;filter:='(&(osgi.identity=org.eclipse.emf.common)(!(version>=2.12.0)))',\
+	osgi.identity;filter:='(osgi.identity=javax.annotation-api)'
+
 -runrequires.msapex:\
 	${req;org.apache.felix.configadmin},\
 	${req;uk.co.saiman.chemistry.msapex},\
@@ -26,6 +31,5 @@
 -runee.msapex:\
 	JavaSE-1.8
 
-runproperties.eclipse.clean: true
 -runproperties.msapex:\
 	eclipse.product=uk.co.saiman.msapex.product

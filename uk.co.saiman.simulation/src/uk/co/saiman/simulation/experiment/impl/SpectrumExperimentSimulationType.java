@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
@@ -42,7 +42,7 @@ import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.spectrum.SpectraProperties;
+import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.simulation.experiment.SampleExperimentSimulationType;
@@ -67,7 +67,7 @@ public class SpectrumExperimentSimulationType extends SpectrumExperimentType<Spe
 
 	@Reference
 	public void setPropertyLoader(PropertyLoader propertyLoader) {
-		super.setProperties(propertyLoader.getProperties(SpectraProperties.class));
+		super.setProperties(propertyLoader.getProperties(SpectrumProperties.class));
 	}
 
 	@Override

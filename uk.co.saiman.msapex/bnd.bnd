@@ -4,6 +4,9 @@ Bundle-SymbolicName: ${p};singleton:=true
 Export-Package:\
 	uk.co.saiman.msapex
 
+-buildpath:\
+	org.apache.felix.configadmin;version=latest
+
 -include:\
 	${include.ss}/eclipse.platform.neon.bnd,\
 	${include.ss}/eclipse.fx.2.4.0.bnd

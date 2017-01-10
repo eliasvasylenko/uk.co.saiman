@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.measurement.
@@ -38,11 +38,15 @@ import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 public interface Units {
-	String format(Unit<?> quantity);
+	Unit<?> parseUnit(String unit);
 
-	String format(Quantity<?> quantity);
+	String formatUnit(Unit<?> unit);
 
-	String format(Quantity<?> quantity, NumberFormat format);
+	Quantity<?> parseQuantity(String quantity);
+
+	String formatQuantity(Quantity<?> quantity);
+
+	String formatQuantity(Quantity<?> quantity, NumberFormat format);
 
 	UnitBuilder<Dimensionless> count();
 

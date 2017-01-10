@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.experiment.msapex.
@@ -47,7 +47,7 @@ import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.msapex.ContinuousFunctionChartController;
 import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.msapex.ResultEditorContribution;
-import uk.co.saiman.experiment.spectrum.SpectraProperties;
+import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.FxmlLoadBuilder;
 import uk.co.strangeskies.reflection.token.TypeToken;
@@ -57,7 +57,7 @@ public class SpectrumGraphEditorContribution
 		implements ResultEditorContribution<ContinuousFunction<Time, Dimensionless>> {
 	@Inject
 	@Localize
-	SpectraProperties properties;
+	SpectrumProperties properties;
 
 	@Inject
 	MDirtyable dirty;

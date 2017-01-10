@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2016 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
- *       ,-========\     ,`===\    /========== \
- *      /== \___/== \  ,`==.== \   \__/== \___\/
- *     /==_/____\__\/,`==__|== |     /==  /
- *     \========`. ,`========= |    /==  /
- *   ___`-___)== ,`== \____|== |   /==  /
- *  /== \__.-==,`==  ,`    |== '__/==  /_
- *  \======== /==  ,`      |== ========= \
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
  * This file is part of uk.co.saiman.simulation.
@@ -33,7 +33,10 @@ import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SparseSampledContinuousFunction;
@@ -45,22 +48,61 @@ import uk.co.saiman.simulation.instrument.SimulatedSample;
  * 
  * @author Elias N Vasylenko
  */
-@Component
+@Designate(ocd = TDCSimulationConfiguration.class)
+@Component(configurationPid = TDCSimulation.CONFIGURATION_PID)
 public class TDCSimulation implements DetectorSimulation {
-	private static final int MAXIMUM_HITS = 10;
-	private final int[] hitIndices = new int[MAXIMUM_HITS];
-	private final double[] hitIntensities = new double[MAXIMUM_HITS];
+	static final String CONFIGURATION_PID = "uk.co.saiman.simulation.tdc";
+
+	private int maximumHits = 10;
+	private int[] hitIndices;
+	private double[] hitIntensities;
+
+	private final Random random = new Random();
 
 	@Override
-	public SampledContinuousFunction<Time, Dimensionless> acquire(Unit<Dimensionless> intensityUnits,
-			Unit<Time> timeUnits, Random random, double resolution, int depth, SimulatedSample sample) {
-		int hits = random.nextInt(MAXIMUM_HITS);
+	public String getId() {
+		return CONFIGURATION_PID;
+	}
+
+	@Activate
+	@Modified
+	void updated(TDCSimulationConfiguration configuration) {
+		maximumHits = configuration.maximumHitsPerSpectrum();
+	}
+
+	private int updateMaximumHitsPerSpectrum() {
+		int currentMaximumHits = hitIndices.length;
+
+		if (currentMaximumHits != maximumHits) {
+			currentMaximumHits = maximumHits;
+
+			hitIndices = new int[currentMaximumHits];
+			hitIntensities = new double[currentMaximumHits];
+		}
+
+		return currentMaximumHits;
+	}
+
+	@Override
+	public SampledContinuousFunction<Time, Dimensionless> acquire(
+			Unit<Time> timeUnits,
+			Unit<Dimensionless> intensityUnits,
+			double frequency,
+			int depth,
+			SimulatedSample sample) {
+		int hits = random.nextInt(updateMaximumHitsPerSpectrum());
 
 		/*
 		 * TODO distribute "hits" number of hits
 		 */
 
-		return new SparseSampledContinuousFunction<>(timeUnits, intensityUnits, 1 / resolution, depth, hits, hitIndices,
+		return new SparseSampledContinuousFunction<>(
+				timeUnits,
+				intensityUnits,
+				frequency,
+				depth,
+				hits,
+				hitIndices,
 				hitIntensities);
 	}
 }
