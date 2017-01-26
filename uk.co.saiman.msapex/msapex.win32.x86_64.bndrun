@@ -66,6 +66,9 @@ runplatform: win64
 	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.experiment.spectrum.msapex;version=snapshot,\
+	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
+	uk.co.saiman.experiment.chemicalmap.msapex;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\

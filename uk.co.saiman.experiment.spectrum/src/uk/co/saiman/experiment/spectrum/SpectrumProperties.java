@@ -28,12 +28,11 @@
 package uk.co.saiman.experiment.spectrum;
 
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Properties;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface SpectrumProperties extends Properties<SpectrumProperties> {
+public interface SpectrumProperties {
 	Localized<String> spectrumExperimentName();
 
 	Localized<String> spectrumResultName();

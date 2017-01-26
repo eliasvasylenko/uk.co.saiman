@@ -25,16 +25,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.msapex.treecontributions;
+package uk.co.saiman.experiment.chemicalmap.msapex;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.Node;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.msapex.impl.OpenExperiment;
-import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
-import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
+import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
+import uk.co.saiman.experiment.chemicalmap.ChemicalMapExperimentType;
+import uk.co.saiman.experiment.msapex.ExperimentPart;
 import uk.co.strangeskies.eclipse.CommandTreeCellContribution;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
@@ -49,33 +49,34 @@ import uk.co.strangeskies.fx.TreeTextContribution;
  * @author Elias N Vasylenko
  */
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
-public class SpectrumExperimentNodeContribution extends
-		CommandTreeCellContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>>
+public class ChemicalMapExperimentNodeContribution extends
+		CommandTreeCellContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>>
 		implements
-		TreeTextContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>>,
-		PseudoClassTreeCellContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> {
+		TreeTextContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>>,
+		PseudoClassTreeCellContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> {
 	/**
 	 * Create over open command
 	 */
-	public SpectrumExperimentNodeContribution() {
-		super(OpenExperiment.COMMAND_ID);
+	public ChemicalMapExperimentNodeContribution() {
+		super(ExperimentPart.OPEN_EXPERIMENT_COMMAND);
 	}
 
 	@Override
-	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getText(
+	public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getText(
 			TreeItemData<U> data) {
 		return data.data().getType().getName();
 	}
 
 	@Override
-	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getSupplementalText(
+	public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getSupplementalText(
 			TreeItemData<U> data) {
-		return data.data().getState().getSpectrumName();
+		return data.data().getState().getChemicalMapName();
 	}
 
 	@Override
-	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> Node configureCell(
-			TreeItemData<U> data, Node content) {
+	public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> Node configureCell(
+			TreeItemData<U> data,
+			Node content) {
 		super.configureCell(data, content);
 		return PseudoClassTreeCellContribution.super.configureCell(data, content);
 	}

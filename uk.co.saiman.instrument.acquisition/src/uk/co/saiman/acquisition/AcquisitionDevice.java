@@ -27,14 +27,15 @@
  */
 package uk.co.saiman.acquisition;
 
-import java.util.function.Consumer;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
+import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.strangeskies.utilities.Observable;
 
@@ -51,24 +52,9 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * until it is complete.
 	 * 
 	 * @throws IllegalStateException
-	 *           If acquisition is already in progress.
+	 *           if acquisition is already in progress
 	 */
 	void startAcquisition();
-
-	/**
-	 * Begin an acquisition experiment with the current configuration, and wait
-	 * until it is complete.
-	 * <p>
-	 * The given consumer will be invoked directly before the acquisition begins,
-	 * such that the configuration of the acquisition device is set.
-	 * 
-	 * @param acquisitionInitializer
-	 *          a runnable to invoked when the acquisition device is about to
-	 *          begin
-	 * @throws IllegalStateException
-	 *           If acquisition is already in progress.
-	 */
-	void startAcquisition(Consumer<AcquisitionDevice> acquisitionInitializer);
 
 	/**
 	 * Stop any acquisition experiment that may be in progress.
@@ -103,40 +89,41 @@ public interface AcquisitionDevice extends HardwareDevice {
 	SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData();
 
 	/**
-	 * Add or remove data event observers for the next acquisition experiment.
-	 * <p>
-	 * The observers will not be triggered until the start of an experiment via
-	 * {@link #startAcquisition()}, and will be removed after the experiment is
-	 * complete.
-	 * 
-	 * @return An observable interface for registering single acquisition data
-	 *         event listeners.
-	 */
-	Observable<SampledContinuousFunction<Time, Dimensionless>> nextAcquisitionDataEvents();
-
-	/**
 	 * Add or remove data event observers.
 	 * <p>
 	 * The observers may be triggered with data events that happen outside the
 	 * scope of an actual acquisition experiment, in the case of an "always on"
-	 * instrument setup.
+	 * instrument setup. In this case, the {@link #isAcquiring()} method will
+	 * indicate whether the event is related to an experiment if invoked by a
+	 * listener to a data event.
 	 * 
-	 * @return An observable interface for registering data event listeners.
+	 * @return an observable interface for registering data event listeners
 	 */
 	Observable<SampledContinuousFunction<Time, Dimensionless>> dataEvents();
+
+	/**
+	 * Listener for experiment start events.
+	 * <p>
+	 * During listener invocation for a start event, the device state is
+	 * guaranteed to reflect the configuration of the starting experiment, e.g.
+	 * {@link #getAcquisitionCount()}, {@link #getSampleDepth()}, etc.
+	 * 
+	 * @return an observable interface for registering start event listeners
+	 */
+	Observable<AcquisitionDevice> startEvents();
 
 	/**
 	 * Set the total acquisition count for a single experiment.
 	 * 
 	 * @param count
-	 *          The number of continua to acquire for a single experiment
+	 *          the number of continua to acquire for a single experiment
 	 */
 	void setAcquisitionCount(int count);
 
 	/**
 	 * Get the total acquisition count for a single experiment.
 	 * 
-	 * @return The number of continua to acquire for a single experiment
+	 * @return the number of continua to acquire for a single experiment
 	 */
 	int getAcquisitionCount();
 
@@ -145,11 +132,18 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * continuous function. Unless otherwise specified by a subclass this may be
 	 * considered to be a constant.
 	 * 
-	 * @return The acquisition resolution in milliseconds
+	 * @return the sample resolution in milliseconds
 	 */
 	Quantity<Time> getSampleResolution();
 
-	double getSampleFrequency();
+	/**
+	 * Get the sample frequency in the acquired sampled continuous function.
+	 * Unless otherwise specified by a subclass this may be considered to be a
+	 * constant.
+	 * 
+	 * @return the sample frequency
+	 */
+	Quantity<Frequency> getSampleFrequency();
 
 	/**
 	 * Set the active sampling duration for a single data acquisition event. This
@@ -157,7 +151,7 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * acquisition resolution.
 	 * 
 	 * @param time
-	 *          The time an acquisition will last in milliseconds
+	 *          the time an acquisition will last in milliseconds
 	 */
 	void setAcquisitionTime(Quantity<Time> time);
 
@@ -184,4 +178,12 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 * @return the sample depth for an acquired data array
 	 */
 	int getSampleDepth();
+
+	default SampledDomain<Time> getSampleDomain() {
+		return new RegularSampledDomain<>(
+				getSampleTimeUnits(),
+				getSampleDepth(),
+				getSampleFrequency().to(getSampleTimeUnits().inverse().asType(Frequency.class)).getValue().doubleValue(),
+				0);
+	}
 }

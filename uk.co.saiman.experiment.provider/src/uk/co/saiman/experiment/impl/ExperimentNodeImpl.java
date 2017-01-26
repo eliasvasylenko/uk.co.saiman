@@ -50,6 +50,7 @@ import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
+import uk.co.strangeskies.utilities.Log.Level;
 import uk.co.strangeskies.utilities.ObservableProperty;
 import uk.co.strangeskies.utilities.ObservableValue;
 
@@ -244,6 +245,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		lifecycleState.set(ExperimentLifecycleState.PROCESSING);
 
 		try {
+			validate();
+
 			Files.createDirectories(getExperimentDataPath());
 
 			getType().execute(createExecutionContext());
@@ -251,8 +254,17 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			lifecycleState.set(ExperimentLifecycleState.COMPLETION);
 			return true;
 		} catch (Exception e) {
+			workspace
+					.getLog()
+					.log(Level.ERROR, new ExperimentException(workspace.getText().failedExperimentExecution(this), e));
 			lifecycleState.set(ExperimentLifecycleState.FAILURE);
 			return false;
+		}
+	}
+
+	private void validate() {
+		if (id == null) {
+			throw new ExperimentException(workspace.getText().invalidExperimentName(null));
 		}
 	}
 
@@ -261,6 +273,11 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			@Override
 			public ExperimentNodeImpl<?, S> node() {
 				return ExperimentNodeImpl.this;
+			}
+
+			@Override
+			public <U> ExperimentResult<U> getResult(ExperimentResultType<U> resultType) {
+				return node().getResult(resultType);
 			}
 
 			@Override

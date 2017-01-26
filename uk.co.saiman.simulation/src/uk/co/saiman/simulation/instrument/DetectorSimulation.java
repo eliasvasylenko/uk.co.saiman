@@ -32,6 +32,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SampledDomain;
 
 /**
  * A simulation of a signal function derived from a given resolution, depth, and
@@ -43,9 +44,7 @@ public interface DetectorSimulation {
 	String getId();
 
 	SampledContinuousFunction<Time, Dimensionless> acquire(
-			Unit<Time> timeUnits,
+			SampledDomain<Time> domain,
 			Unit<Dimensionless> intensityUnits,
-			double frequency,
-			int depth,
-			SimulatedSample sample);
+			SimulatedSample nextSample);
 }

@@ -48,8 +48,9 @@ import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = { XYStageExperimentType.class, SampleExperimentType.class, SampleExperimentSimulationType.class,
-		ExperimentType.class })
+@Component(
+		service = { XYStageExperimentType.class, SampleExperimentType.class, SampleExperimentSimulationType.class,
+				ExperimentType.class })
 public class XYStageExperimentSimulationType implements XYStageExperimentType<SimulatedXYStageRasterConfiguration>,
 		SampleExperimentSimulationType<SimulatedXYStageRasterConfiguration> {
 	private static final String DEFAULT_NAME = "XY Sample";

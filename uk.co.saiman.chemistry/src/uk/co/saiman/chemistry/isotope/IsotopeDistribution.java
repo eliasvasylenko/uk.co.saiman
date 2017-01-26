@@ -174,6 +174,10 @@ public class IsotopeDistribution {
 	 *          molecule to calculate for
 	 * @param maxMasses
 	 *          maximum number of masses to report (highest abundances only)
+	 * @param lowPrecision
+	 *          use only mass numbers?
+	 * @param minimumAbundance
+	 *          minimum relative abundance to be considered
 	 */
 	public void calculateForMolecule(
 			ChemicalComposition molecule,

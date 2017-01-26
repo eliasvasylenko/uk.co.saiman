@@ -29,12 +29,13 @@ package uk.co.saiman.experiment;
 
 import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.Nested;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface ExperimentExceptionProperties extends Properties<ExperimentExceptionProperties> {
+public interface ExperimentExceptionProperties {
+	@Nested
 	SaiProperties sai();
 
 	/**

@@ -30,10 +30,7 @@ package uk.co.saiman.data;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.Range;
-import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.mathematics.expression.SelfExpression;
-import uk.co.strangeskies.utilities.Observer;
 
 /**
  * A set of domain values (X) mapped via some continuous function to a
@@ -54,7 +51,7 @@ import uk.co.strangeskies.utilities.Observer;
  *          the type of the units of measurement of values in the range
  */
 public interface ContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends SelfExpression<ContinuousFunction<UD, UR>>, Expression<ContinuousFunction<UD, UR>> {
+		extends SelfExpression<ContinuousFunction<UD, UR>> {
 	/**
 	 * @param unitDomain
 	 *          the units of the domain
@@ -64,150 +61,43 @@ public interface ContinuousFunction<UD extends Quantity<UD>, UR extends Quantity
 	 *         single point at 0 in both the domain and codomain according to the
 	 *         given units
 	 */
-	static <UD extends Quantity<UD>, UR extends Quantity<UR>> ContinuousFunction<UD, UR> empty(Unit<UD> unitDomain,
+	static <UD extends Quantity<UD>, UR extends Quantity<UR>> ContinuousFunction<UD, UR> empty(
+			Unit<UD> unitDomain,
 			Unit<UR> unitRange) {
 		return new EmptyContinuousFunction<>(unitDomain, unitRange);
 	}
 
-	/**
-	 * Find the smallest interval containing all values in the domain of the
-	 * function.
-	 * 
-	 * @return The extent of the domain
-	 */
-	Range<Double> getDomain();
+	Domain<UD> domain();
 
-	/**
-	 * @return the units of measurement of values in the domain
-	 */
-	Unit<UD> getDomainUnit();
-
-	/**
-	 * An interval containing all values in the codomain of the function. Some
-	 * implementations may not quickly be able to calculate the smallest such
-	 * interval, in which case they should return a close approximation
-	 * guaranteed, to contain the exact smallest interval.
-	 * 
-	 * @return The extent of the codomain
-	 */
-	Range<Double> getRange();
-
-	/**
-	 * @return the units of measurement of values in the range
-	 */
-	Unit<UR> getRangeUnit();
-
-	/**
-	 * Find the interval between the smallest to the largest value of the codomain
-	 * of the function within the given domain interval.
-	 * 
-	 * @param startX
-	 *          The start of the domain interval whose range we wish to determine
-	 * @param endX
-	 *          The end of the domain interval whose range we wish to determine
-	 * @return The range from the smallest to the largest value of the codomain of
-	 *         the function within the given interval
-	 */
-	Range<Double> getRangeBetween(double startX, double endX);
+	Range<UR> range();
 
 	/**
 	 * Find the resulting Y value of the function for a given X.
 	 * 
-	 * @param xPosition
+	 * @param domainPosition
 	 *          The X value to resolve
 	 * @return The Y value for the given X
 	 */
-	double sample(double xPosition);
+	double sample(double domainPosition);
 
 	/**
 	 * Sometimes it is useful to linearize a continuous function in order to
 	 * perform complex processing, or for display purposes. This method provides a
 	 * linear view of any continuous function. Implementations may remove features
 	 * which are unresolvable at the given resolution.
-	 * <p>
-	 * Typically a good implementation should attempt to roughly indicate the
-	 * minimum and maximum within a resolvable unit area, such that thin peaks and
-	 * troughs don't disappear from visual representation at low resolution.
 	 * 
-	 * @param startX
-	 *          The start of the interval we wish to sample over
-	 * @param endX
-	 *          The end of the interval we wish to sample over
-	 * @param resolvableUnits
-	 *          The minimum resolvable units within the given interval
-	 * @return A new sampled, linear continuous function roughly equal to the
+	 * <p>
+	 * Note that the parameter only represents the <em>resolvable</em> domain and
+	 * the contained samples may not be exactly represented in the domain of the
+	 * output. For example an implementation may retain some sub-resolution
+	 * features to indicate maxima and minima within a resolvable interval, such
+	 * that thin peaks and troughs don't disappear from visual representation at
+	 * low resolution.
+	 * 
+	 * @param resolvableSampleDomain
+	 *          a representation of the resolvable sample domain
+	 * @return a new sampled, linear continuous function roughly equal to the
 	 *         receiver to the requested resolution
 	 */
-	SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits);
+	SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain);
 }
-
-class EmptyContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		implements SampledContinuousFunction<UD, UR> {
-	private final Unit<UD> unitDomain;
-	private final Unit<UR> unitRange;
-
-	public EmptyContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange) {
-		this.unitDomain = unitDomain;
-		this.unitRange = unitRange;
-	}
-
-	@Override
-	public SampledContinuousFunction<UD, UR> copy() {
-		return this;
-	}
-
-	@Override
-	public boolean removeObserver(Observer<? super Expression<? extends ContinuousFunction<UD, UR>>> observer) {
-		return true;
-	}
-
-	@Override
-	public boolean addObserver(Observer<? super Expression<? extends ContinuousFunction<UD, UR>>> observer) {
-		return true;
-	}
-
-	@Override
-	public ContinuousFunction<UD, UR> getValue() {
-		return this;
-	}
-
-	@Override
-	public SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
-		return this;
-	}
-
-	@Override
-	public int getIndexBelow(double xValue) {
-		if (xValue >= 0)
-			return 0;
-		else
-			return -1;
-	}
-
-	@Override
-	public int getDepth() {
-		return 1;
-	}
-
-	@Override
-	public double getX(int index) {
-		if (index != 0)
-			throw new ArrayIndexOutOfBoundsException(index);
-		return 0;
-	}
-
-	@Override
-	public double getY(int index) {
-		return getX(index);
-	}
-
-	@Override
-	public Unit<UD> getDomainUnit() {
-		return unitDomain;
-	}
-
-	@Override
-	public Unit<UR> getRangeUnit() {
-		return unitRange;
-	}
-};

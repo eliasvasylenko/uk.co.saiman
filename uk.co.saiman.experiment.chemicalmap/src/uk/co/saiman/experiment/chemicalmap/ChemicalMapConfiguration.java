@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment.chemicalmap;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**
  * TODO
@@ -35,9 +36,11 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
  * @author Elias N Vasylenko
  */
 public interface ChemicalMapConfiguration {
-	String getSpectrumName();
+	String getChemicalMapName();
 
-	void setSpectrumName(String name);
+	void setChemicalMapName(String name);
+
+	RasterDevice getRasterDevice();
 
 	AcquisitionDevice getAcquisitionDevice();
 }

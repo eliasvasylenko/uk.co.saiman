@@ -31,19 +31,23 @@ import java.nio.file.Path;
 
 import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.Nested;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 /**
- * {@link Properties} interface for texts relating to experiments.
+ * Properties interface for texts relating to experiments.
  * 
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface ExperimentProperties extends Properties<ExperimentProperties> {
+public interface ExperimentProperties {
+	@Nested
 	SaiProperties sai();
+
+	@Nested
+	ExperimentExceptionProperties exception();
 
 	Localized<String> newExperiment();
 
@@ -88,8 +92,6 @@ public interface ExperimentProperties extends Properties<ExperimentProperties> {
 
 	Localized<String> lifecycleStateWaiting();
 
-	ExperimentExceptionProperties exception();
-
 	Localized<String> configuration();
 
 	Localized<String> missingResult();
@@ -117,4 +119,6 @@ public interface ExperimentProperties extends Properties<ExperimentProperties> {
 	Localized<String> renameExperiment();
 
 	Localized<String> renameExperimentName(String name);
+
+	Localized<String> failedExperimentExecution(ExperimentNode<?, ?> experimentNodeImpl);
 }

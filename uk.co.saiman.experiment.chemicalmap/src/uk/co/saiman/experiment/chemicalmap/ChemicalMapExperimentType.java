@@ -27,23 +27,17 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
+import static uk.co.strangeskies.utilities.Observable.Observation.TERMINATE;
+
 import java.util.stream.Stream;
 
-import javax.measure.Unit;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Time;
-
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
-import uk.co.saiman.data.ContinuousFunction;
-import uk.co.saiman.data.ContinuousFunctionExpression;
-import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.text.properties.PropertyLoader;
-import uk.co.strangeskies.utilities.AggregatingListener;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -57,7 +51,7 @@ import uk.co.strangeskies.utilities.AggregatingListener;
  */
 public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfiguration> implements ExperimentType<T> {
 	private ChemicalMapProperties properties;
-	private final ExperimentResultType<ContinuousFunction<Time, Dimensionless>> spectrumResult;
+	private final ExperimentResultType<ChemicalMap> chemicalMapResult;
 
 	public ChemicalMapExperimentType() {
 		this(PropertyLoader.getDefaultProperties(ChemicalMapProperties.class));
@@ -65,15 +59,15 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 
 	public ChemicalMapExperimentType(ChemicalMapProperties properties) {
 		this.properties = properties;
-		spectrumResult = new ExperimentResultType<ContinuousFunction<Time, Dimensionless>>() {
+		this.chemicalMapResult = new ExperimentResultType<ChemicalMap>() {
 			@Override
 			public String getName() {
-				return properties.spectrumResultName().toString();
+				return properties.chemicalMapResultName().toString();
 			}
 
 			@Override
-			public TypeToken<ContinuousFunction<Time, Dimensionless>> getDataType() {
-				return new TypeToken<ContinuousFunction<Time, Dimensionless>>() {};
+			public TypeToken<ChemicalMap> getDataType() {
+				return new TypeToken<ChemicalMap>() {};
 			}
 		};
 	}
@@ -93,55 +87,44 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 
 	@Override
 	public String getName() {
-		return properties.spectrumExperimentName().toString();
+		return properties.chemicalMapExperimentName().toString();
 	}
 
-	public ExperimentResultType<ContinuousFunction<Time, Dimensionless>> getSpectrumResult() {
-		return spectrumResult;
+	public ExperimentResultType<ChemicalMap> getChemicalMapResult() {
+		return chemicalMapResult;
 	}
+
+	protected abstract RasterDevice getRasterDevice();
 
 	protected abstract AcquisitionDevice getAcquisitionDevice();
 
 	@Override
 	public void execute(ExperimentExecutionContext<T> context) {
-		Unit<Dimensionless> intensityUnits = getAcquisitionDevice().getSampleIntensityUnits();
-		Unit<Time> timeUnits = getAcquisitionDevice().getSampleTimeUnits();
-
-		ContinuousFunctionExpression<Time, Dimensionless> result = new ContinuousFunctionExpression<>(
-				timeUnits,
-				intensityUnits);
-		context.setResult(spectrumResult, result);
-
-		getAcquisitionDevice().startAcquisition(device -> {
-
-			int depth = device.getSampleDepth();
-			double frequency = device.getSampleFrequency();
-
-			ArrayRegularSampledContinuousFunction<Time, Dimensionless> accumulator = new ArrayRegularSampledContinuousFunction<>(
-					timeUnits,
-					intensityUnits,
-					frequency,
-					0,
-					new double[depth]);
-
-			result.setComponent(accumulator);
-
-			AggregatingListener<SampledContinuousFunction<Time, Dimensionless>> aggregate = new AggregatingListener<>();
-			device.nextAcquisitionDataEvents().addObserver(aggregate);
-			aggregate.addObserver(a -> {
-				accumulator.mutate(data -> {
-					for (SampledContinuousFunction<Time, Dimensionless> c : a) {
-						for (int i = 0; i < depth; i++) {
-							data[i] += c.getY(i);
-						}
-					}
-				});
-			});
+		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
+			startAcquisition(context, device);
+			return TERMINATE;
 		});
+		getRasterDevice().startEvents().addTerminatingObserver(device -> {
+			startRaster(context, device);
+			new Thread(() -> getAcquisitionDevice().startAcquisition()).start();
+			return TERMINATE;
+		});
+
+		getRasterDevice().startRasterOperation();
+
+		context.getResult(chemicalMapResult).getData().get().save();
+	}
+
+	private void startRaster(ExperimentExecutionContext<T> context, RasterDevice device) {
+
+	}
+
+	public void startAcquisition(ExperimentExecutionContext<T> context, AcquisitionDevice device) {
+
 	}
 
 	@Override
 	public Stream<ExperimentResultType<?>> getResultTypes() {
-		return Stream.of(spectrumResult);
+		return Stream.of(chemicalMapResult);
 	}
 }

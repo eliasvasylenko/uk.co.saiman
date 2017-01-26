@@ -364,7 +364,7 @@ public class ContinuousFunctionChartController {
 		boolean changed = false;
 
 		synchronized (domain) {
-			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
+			Range<Double> maxZoom = getMaxZoom(f -> f.domain().getExtent());
 
 			changed = !maxZoom.equals(domain);
 			if (changed) {
@@ -424,7 +424,7 @@ public class ContinuousFunctionChartController {
 	 */
 	public void setDomain(double from, double to) {
 		synchronized (this.domain) {
-			Range<Double> maxZoom = getMaxZoom(ContinuousFunction::getDomain);
+			Range<Double> maxZoom = getMaxZoom(f -> f.domain().getExtent());
 
 			if ((to - from) > (maxZoom.getTo() - maxZoom.getFrom())) {
 				resetZoomDomain();
@@ -554,8 +554,8 @@ public class ContinuousFunctionChartController {
 			}
 
 			for (ContinuousFunction<?, ?> function : getContinuousFunctions()) {
-				Unit<?> functionXUnit = function.getDomainUnit();
-				Unit<?> functionYUnit = function.getRangeUnit();
+				Unit<?> functionXUnit = function.domain().getUnit();
+				Unit<?> functionYUnit = function.range().getUnit();
 
 				if (xUnit == null) {
 					xUnit = functionXUnit;

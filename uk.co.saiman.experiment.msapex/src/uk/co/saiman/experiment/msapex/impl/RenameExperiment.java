@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
+import static java.util.Comparator.reverseOrder;
 import static uk.co.strangeskies.fx.FxUtilities.wrap;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -128,9 +130,9 @@ public class RenameExperiment {
 
 			if (success) {
 				try {
-					Files.delete(newLocation);
+					Files.walk(newLocation).sorted(reverseOrder()).map(Path::toFile).forEach(File::delete);
 				} catch (IOException e) {
-					throw new ExperimentException(text.cannotDelete(newLocation));
+					throw new ExperimentException(text.cannotDelete(newLocation), e);
 				}
 			} else {
 				throw new ExperimentException(text.userCancelledSetExperimentName());

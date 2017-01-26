@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.instrument.raster;
 
+import static java.util.Objects.hash;
+
 public class RasterPosition {
 	private final int index;
 
@@ -50,5 +52,22 @@ public class RasterPosition {
 
 	public int getY() {
 		return y;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this)
+			return true;
+		if (!(obj instanceof RasterPosition))
+			return false;
+
+		RasterPosition that = (RasterPosition) obj;
+
+		return (this.index == that.index) && (this.x == that.x) && (this.y == that.y);
+	}
+
+	@Override
+	public int hashCode() {
+		return hash(index, x, y);
 	}
 }

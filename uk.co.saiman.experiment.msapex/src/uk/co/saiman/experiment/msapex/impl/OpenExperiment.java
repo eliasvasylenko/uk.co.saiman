@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
+import static uk.co.saiman.experiment.msapex.ExperimentPart.OPEN_EXPERIMENT_COMMAND;
 import static uk.co.strangeskies.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
@@ -49,11 +50,6 @@ import uk.co.strangeskies.reflection.token.TypeToken;
  * @author Elias N Vasylenko
  */
 public class OpenExperiment {
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String COMMAND_ID = "uk.co.saiman.msapex.command.open";
-
 	@CanExecute
 	boolean canExecute(MPart part, @Localize ExperimentProperties text) {
 		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
@@ -61,7 +57,7 @@ public class OpenExperiment {
 		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
 
 		if (item == null) {
-			new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, null));
+			new ExperimentException(text.exception().illegalCommandForSelection(OPEN_EXPERIMENT_COMMAND, null));
 		}
 
 		TreeItemData<?> experimentItem = item.getData();

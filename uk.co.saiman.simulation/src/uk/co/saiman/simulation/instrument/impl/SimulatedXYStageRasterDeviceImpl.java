@@ -51,6 +51,7 @@ import uk.co.saiman.instrument.raster.RasterPosition;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
+import uk.co.saiman.simulation.instrument.SimulatedRasterDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
@@ -61,8 +62,8 @@ import uk.co.strangeskies.utilities.Observable;
 import uk.co.strangeskies.utilities.ObservableImpl;
 
 @Component
-public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, SimulatedSampleImageDevice, XYStageDevice,
-		HardwareDevice, SimulatedSampleDevice, SimulatedDevice {
+public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, SimulatedRasterDevice,
+		SimulatedSampleImageDevice, XYStageDevice, HardwareDevice, SimulatedSampleDevice, SimulatedDevice {
 	@Reference
 	PropertyLoader loader;
 	SimulationProperties text;
@@ -77,7 +78,7 @@ public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, Simulated
 	private int rasterWidth;
 	private int rasterHeight;
 	private int rasterDwell;
-	private final BufferingListener<RasterPosition> singleRasterListeners;
+	private final BufferingListener<RasterDevice> startListeners;
 	private final BufferingListener<RasterPosition> rasterListeners;
 
 	private ChemicalComposition redChemical;
@@ -94,7 +95,7 @@ public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, Simulated
 		rasterWidth = 1;
 		rasterHeight = 1;
 
-		singleRasterListeners = new BufferingListener<>();
+		startListeners = new BufferingListener<>();
 		rasterListeners = new BufferingListener<>();
 
 		signalSample = new SimulatedSample() {
@@ -188,6 +189,7 @@ public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, Simulated
 
 	@Override
 	public void startRasterOperation() {
+		startListeners.notify(this);
 		rasterOperation = rasterMode.getPositionIterator(rasterWidth, rasterHeight);
 	}
 
@@ -202,13 +204,6 @@ public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, Simulated
 		} else if (rasterCounter++ % rasterDwell == 0) {
 			rasterPosition = rasterOperation.next();
 			rasterListeners.notify(rasterPosition);
-			singleRasterListeners.notify(rasterPosition);
-
-			if (!rasterOperation.hasNext()) {
-				if (rasterCounter == 0) {
-					singleRasterListeners.clearObservers();
-				}
-			}
 
 			if (rasterCounter == rasterWidth * rasterHeight * rasterDwell) {
 				rasterOperation = null;
@@ -217,8 +212,13 @@ public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, Simulated
 	}
 
 	@Override
-	public Observable<RasterPosition> nextOperationRasterPositionEvents() {
-		return singleRasterListeners;
+	public boolean isOperating() {
+		return rasterOperation != null;
+	}
+
+	@Override
+	public Observable<RasterDevice> startEvents() {
+		return startListeners;
 	}
 
 	@Override
@@ -283,5 +283,22 @@ public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, Simulated
 	@Override
 	public int getRasterDwell() {
 		return rasterDwell;
+	}
+
+	@Override
+	public SimulatedSampleDevice getSampleDevice() {
+		return this;
+	}
+
+	@Override
+	public boolean isConnected() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+
 	}
 }

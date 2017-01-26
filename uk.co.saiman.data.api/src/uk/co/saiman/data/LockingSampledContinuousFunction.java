@@ -30,7 +30,6 @@ package uk.co.saiman.data;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.LockingExpression;
 
 /**
@@ -46,38 +45,17 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  */
 public abstract class LockingSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
 		extends LockingExpression<ContinuousFunction<UD, UR>> implements SampledContinuousFunction<UD, UR> {
-	private final Unit<UD> unitDomain;
-	private final Unit<UR> unitRange;
+	private final SampledDomain<UD> domain;
+	private final Unit<UR> rangeUnit;
 
-	/**
-	 * @param unitDomain
-	 *          the units of measurement of values in the domain
-	 * @param unitRange
-	 *          the units of measurement of values in the range
-	 */
-	public LockingSampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange) {
-		this.unitDomain = unitDomain;
-		this.unitRange = unitRange;
+	public LockingSampledContinuousFunction(SampledDomain<UD> domain, Unit<UR> range) {
+		this.domain = domain;
+		this.rangeUnit = range;
 	}
 
 	@Override
-	public Unit<UD> getDomainUnit() {
-		return unitDomain;
-	}
-
-	@Override
-	public Unit<UR> getRangeUnit() {
-		return unitRange;
-	}
-
-	@Override
-	public Range<Double> getDomain() {
-		return read(SampledContinuousFunction.super::getDomain);
-	}
-
-	@Override
-	public Range<Double> getDomain(int startIndex, int endIndex) {
-		return read(() -> SampledContinuousFunction.super.getDomain(startIndex, endIndex));
+	public SampledDomain<UD> domain() {
+		return domain;
 	}
 
 	@Override
@@ -85,33 +63,22 @@ public abstract class LockingSampledContinuousFunction<UD extends Quantity<UD>, 
 		return read(() -> SampledContinuousFunction.super.sample(xPosition));
 	}
 
-	@Override
-	public int getIndexAbove(double xValue) {
-		return read(() -> SampledContinuousFunction.super.getIndexAbove(xValue));
+	protected Unit<UR> getRangeUnit() {
+		return rangeUnit;
 	}
 
 	@Override
-	public Range<Double> getRange() {
-		return read(SampledContinuousFunction.super::getRange);
-	}
-
-	@Override
-	public Range<Double> getRangeBetween(double startX, double endX) {
-		return read(() -> SampledContinuousFunction.super.getRangeBetween(startX, endX));
-	}
-
-	@Override
-	public Range<Double> getRangeBetween(int startIndex, int endIndex) {
-		return read(() -> SampledContinuousFunction.super.getRangeBetween(startIndex, endIndex));
-	}
-
-	@Override
-	public SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
-		return read(() -> SampledContinuousFunction.super.resample(startX, endX, resolvableUnits));
+	public SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
+		return read(() -> SampledContinuousFunction.super.resample(resolvableSampleDomain));
 	}
 
 	@Override
 	public ContinuousFunction<UD, UR> decoupleValue() {
 		return getValue().copy();
+	}
+
+	@Override
+	protected ContinuousFunction<UD, UR> evaluate() {
+		return this;
 	}
 }

@@ -29,8 +29,6 @@ package uk.co.saiman.data;
 
 import javax.measure.Quantity;
 
-import uk.co.strangeskies.mathematics.Range;
-
 /**
  * A partial-implementation of {@link ContinuousFunction} for sampled continua.
  * The model is as a sequence of (X, Y) points, with (X) increasing in the
@@ -45,107 +43,10 @@ import uk.co.strangeskies.mathematics.Range;
 public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
 		extends ContinuousFunction<UD, UR> {
 	@Override
-	default Range<Double> getDomain() {
-		return getDomain(0, getDepth() - 1);
-	}
-
-	/**
-	 * Find the interval in the domain described by the given sample indices.
-	 * 
-	 * @param startIndex
-	 *          The index of the sample at the beginning of the interval
-	 * @param endIndex
-	 *          The index of the sample at the end of the interval
-	 * @return The extent of the samples between those given
-	 */
-	default Range<Double> getDomain(int startIndex, int endIndex) {
-		return Range.between(getX(0), getX(getDepth() - 1));
-	}
+	SampledDomain<UD> domain();
 
 	@Override
-	default Range<Double> getRange() {
-		if (getDepth() == 0)
-			return Range.between(0d, 0d).setInclusive(false, false);
-		return getRangeBetween(0, getDepth() - 1);
-	}
-
-	/**
-	 * Find the interval between the smallest to the largest value of the codomain
-	 * of the function within the interval in the domain described by the given
-	 * sample indices.
-	 * 
-	 * @param startIndex
-	 *          The index of the sample at the beginning of the domain interval
-	 *          whose range we wish to determine
-	 * @param endIndex
-	 *          The index of the sample at the end of the domain interval whose
-	 *          range we wish to determine
-	 * @return The range from the smallest to the largest value of the codomain of
-	 *         the function within the given interval
-	 */
-	default Range<Double> getRangeBetween(int startIndex, int endIndex) {
-		if (startIndex < 0)
-			startIndex = 0;
-		if (endIndex >= getDepth())
-			endIndex = getDepth() - 1;
-
-		Range<Double> yRange = Range.between(getY(startIndex), getY(endIndex));
-
-		for (int i = startIndex; i < endIndex; i++)
-			yRange.extendThrough(getY(i), true);
-
-		return yRange;
-	}
-
-	@Override
-	default Range<Double> getRangeBetween(double startX, double endX) {
-		if (getDepth() == 0) {
-			return Range.between(0d, 0d);
-		}
-
-		double startSample = sample(startX);
-		double endSample = sample(endX);
-
-		Range<Double> yRange;
-		if (getDepth() > 2) {
-			yRange = getRangeBetween(getIndexAbove(startX), getIndexBelow(endX));
-		} else {
-			yRange = Range.between(startSample, startSample);
-		}
-
-		yRange.extendThrough(startSample, true);
-		yRange.extendThrough(endSample, true);
-
-		return yRange;
-	}
-
-	/**
-	 * Find the nearest index with a value on the domain above the value given.
-	 * 
-	 * @param xValue
-	 *          The value we wish to find the nearest greater sampled neighbour
-	 *          to.
-	 * @return The index of the sample adjacent and above the given value, or -1
-	 *         if no such sample exists.
-	 */
-	default int getIndexAbove(double xValue) {
-		int index = getIndexBelow(xValue) + 1;
-		if (index >= getDepth()) {
-			index = -1;
-		}
-		return index;
-	}
-
-	/**
-	 * Find the nearest index with a value on the domain below, or equal to, the
-	 * value given.
-	 * 
-	 * @param xValue
-	 *          The value we wish to find the nearest lower sampled neighbour to.
-	 * @return The index of the sample adjacent and below the given value, or -1
-	 *         if no such sample exists.
-	 */
-	int getIndexBelow(double xValue);
+	SampledRange<UR> range();
 
 	/**
 	 * Find the number of samples in the continuum.
@@ -154,30 +55,12 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 	 */
 	int getDepth();
 
-	/**
-	 * The value in the domain at the given index.
-	 * 
-	 * @param index
-	 *          The sample index.
-	 * @return The X value of the sample at the given index.
-	 */
-	double getX(int index);
-
-	/**
-	 * The value in the codomain at the given index.
-	 * 
-	 * @param index
-	 *          The sample index.
-	 * @return The Y value of the sample at the given index.
-	 */
-	double getY(int index);
-
 	@Override
 	default double sample(double xPosition) {
-		xPosition = getDomain().getConfined(xPosition);
+		xPosition = domain().getExtent().getConfined(xPosition);
 
-		int indexBelow = getIndexBelow(xPosition);
-		int indexAbove = getIndexAbove(xPosition);
+		int indexBelow = domain().getIndexBelow(xPosition);
+		int indexAbove = domain().getIndexAbove(xPosition);
 
 		if (indexBelow < 0)
 			indexBelow = 0;
@@ -188,11 +71,11 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 		if (indexAbove >= getDepth())
 			indexAbove = getDepth() - 1;
 
-		double yBelow = getY(indexBelow);
-		double yAbove = getY(indexAbove);
+		double yBelow = range().getSample(indexBelow);
+		double yAbove = range().getSample(indexAbove);
 
-		double xBelow = getX(indexBelow);
-		double xAbove = getX(indexAbove);
+		double xBelow = domain().getSample(indexBelow);
+		double xAbove = domain().getSample(indexAbove);
 
 		if (xBelow == xAbove || xPosition == xBelow) {
 			return yBelow;
@@ -205,7 +88,7 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 	SampledContinuousFunction<UD, UR> copy();
 
 	@Override
-	default SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
+	default SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
 		if (getDepth() <= 2) {
 			return copy();
 		}
@@ -218,15 +101,14 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 		/*
 		 * Prepare significant indices
 		 */
-		double xRange = endX - startX;
-		indices = new int[resolvableUnits * 4 + 8];
+		indices = new int[resolvableSampleDomain.getDepth() * 4 + 8];
 		count = 0;
 
-		int indexFrom = getIndexBelow(startX);
+		int indexFrom = domain().getIndexBelow(resolvableSampleDomain.getExtent().getFrom());
 		if (indexFrom < 0) {
 			indexFrom = 0;
 		}
-		int indexTo = getIndexAbove(endX);
+		int indexTo = domain().getIndexAbove(resolvableSampleDomain.getExtent().getTo());
 		if (indexTo >= getDepth() || indexTo < 0) {
 			indexTo = getDepth() - 1;
 		}
@@ -234,9 +116,7 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 		indices[count++] = indexFrom;
 
 		int resolvedUnit = 0;
-		double resolvableUnitLength = xRange / resolvableUnits;
-		double resolvableUnitFrequency = resolvableUnits / xRange;
-		double resolvedUnitX = startX;
+		double resolvedUnitX = resolvableSampleDomain.getExtent().getFrom();
 
 		int lastIndex;
 		int minIndex;
@@ -244,13 +124,13 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 		int maxIndex;
 		double maxY;
 		lastIndex = minIndex = maxIndex = indexFrom;
-		minY = maxY = getY(lastIndex);
+		minY = maxY = range().getSample(lastIndex);
 		for (int index = indexFrom + 1; index < indexTo; index++) {
 			/*
 			 * Get sample location at index
 			 */
-			double sampleX = getX(index);
-			double sampleY = getY(index);
+			double sampleX = domain().getSample(index);
+			double sampleY = range().getSample(index);
 
 			/*
 			 * Check if passed resolution boundary (or last position)
@@ -259,8 +139,11 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 				/*
 				 * Move to next resolution boundary
 				 */
-				resolvedUnit = (int) ((sampleX - startX) * resolvableUnitFrequency) + 1;
-				resolvedUnitX = startX + resolvedUnit * resolvableUnitLength;
+
+				do {
+					resolvedUnit++;
+					resolvedUnitX = resolvableSampleDomain.getSample(resolvedUnit);
+				} while (resolvedUnitX < sampleX);
 
 				/*
 				 * Add indices of minimum and maximum y encountered in boundary span
@@ -314,7 +197,7 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 		 */
 		values = new double[count];
 		for (int i = 0; i < count; i++) {
-			values[i] = getX(indices[i]);
+			values[i] = domain().getSample(indices[i]);
 		}
 
 		/*
@@ -322,12 +205,15 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
 		 */
 		intensities = new double[count];
 		for (int i = 0; i < count; i++) {
-			intensities[i] = getY(indices[i]);
+			intensities[i] = range().getSample(indices[i]);
 		}
 
 		/*
 		 * Prepare linearisation
 		 */
-		return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), count, values, intensities);
+		return new ArraySampledContinuousFunction<>(
+				new IrregularSampledDomain<>(domain().getUnit(), values),
+				range().getUnit(),
+				intensities);
 	}
 }

@@ -30,12 +30,16 @@ package uk.co.saiman.data.msapex;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.Quantity;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SampledDomain;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.utilities.Observer;
@@ -151,26 +155,44 @@ public class ContinuousFunctionSeries {
 	 *          the resolution to render at in the domain
 	 */
 	public void render(Range<Double> domain, int resolution) {
-		SampledContinuousFunction<?, ?> sampledContinuousFunction = latestRenderedContinuousFunction
-				.resample(domain.getFrom(), domain.getTo(), resolution);
+		SampledContinuousFunction<?, ?> sampledContinuousFunction = resampleLastRendered(
+				latestRenderedContinuousFunction,
+				domain,
+				resolution);
 
 		if (data.size() > sampledContinuousFunction.getDepth()) {
 			data.remove(sampledContinuousFunction.getDepth(), data.size());
 		}
 
 		for (int i = 0; i < data.size(); i++) {
-			data.get(i).setXValue(sampledContinuousFunction.getX(i));
-			data.get(i).setYValue(sampledContinuousFunction.getY(i));
+			data.get(i).setXValue(sampledContinuousFunction.domain().getSample(i));
+			data.get(i).setYValue(sampledContinuousFunction.range().getSample(i));
 		}
 
 		int remainingData = sampledContinuousFunction.getDepth() - data.size();
 		if (remainingData > 0) {
 			List<Data<Number, Number>> dataTemp = new ArrayList<>(remainingData);
 			for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
-				dataTemp.add(new Data<>(sampledContinuousFunction.getX(i), sampledContinuousFunction.getY(i)));
+				dataTemp.add(
+						new Data<>(
+								sampledContinuousFunction.domain().getSample(i),
+								sampledContinuousFunction.range().getSample(i)));
 			}
 			data.addAll(dataTemp);
 		}
+	}
+
+	private <U extends Quantity<U>> SampledContinuousFunction<U, ?> resampleLastRendered(
+			ContinuousFunction<U, ?> latestRenderedContinuousFunction,
+			Range<Double> domain,
+			int resolution) {
+		SampledDomain<U> resolvableDomain = new RegularSampledDomain<>(
+				latestRenderedContinuousFunction.domain().getUnit(),
+				resolution,
+				resolution / (domain.getTo() - domain.getFrom()),
+				domain.getFrom());
+
+		return latestRenderedContinuousFunction.resample(resolvableDomain);
 	}
 
 	/**

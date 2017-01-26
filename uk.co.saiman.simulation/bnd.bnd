@@ -15,6 +15,7 @@
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.chemistry.msapex;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
+	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\

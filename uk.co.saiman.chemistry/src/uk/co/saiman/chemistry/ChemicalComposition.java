@@ -308,7 +308,11 @@ public class ChemicalComposition {
 		return getAverageMassEffectiveAtCharge(1);
 	}
 
-	public double getAverageMassEffectiveAtCharge(int charge) {
+	public double getAverageMassEffectiveAtCharge() {
+		return getAverageMassEffectiveAtCharge(charge);
+	}
+
+	private double getAverageMassEffectiveAtCharge(int charge) {
 		double mass = 0;
 
 		Iterator<Element> elementIterator = elements.keySet().iterator();
@@ -338,7 +342,11 @@ public class ChemicalComposition {
 		return getMonoisotopicMassEffectiveAtCharge(1);
 	}
 
-	public double getMonoisotopicMassEffectiveAtCharge(int charge) {
+	public double getMonoisotopicMassEffectiveAtCharge() {
+		return getMonoisotopicMassEffectiveAtCharge(charge);
+	}
+
+	private double getMonoisotopicMassEffectiveAtCharge(int charge) {
 		double mass = 0;
 
 		Iterator<Element> elementIterator = elements.keySet().iterator();

@@ -29,7 +29,7 @@ package uk.co.saiman.acquisition;
 
 import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.Nested;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
@@ -40,7 +40,8 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
  */
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface AcquisitionProperties extends Properties<AcquisitionProperties> {
+public interface AcquisitionProperties {
+	@Nested
 	SaiProperties sai();
 
 	Localized<String> device();

@@ -61,6 +61,7 @@ public class SimulatedXYStageRasterConfiguration extends SimulatedSampleImageCon
 	}
 
 	public void setName(String name) {
+		forNode.setId(name);
 		this.name = name;
 	}
 

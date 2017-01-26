@@ -28,17 +28,16 @@
 package uk.co.saiman.experiment.chemicalmap;
 
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Properties;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface ChemicalMapProperties extends Properties<ChemicalMapProperties> {
-	Localized<String> spectrumExperimentName();
+public interface ChemicalMapProperties {
+	Localized<String> chemicalMapExperimentName();
 
-	Localized<String> spectrumResultName();
+	Localized<String> chemicalMapResultName();
 
-	Localized<String> defaultSpectrumName();
+	Localized<String> defaultChemicalMapName();
 
-	Localized<String> spectrumGraphEditor();
+	Localized<String> chemicalMapGraphEditor();
 }

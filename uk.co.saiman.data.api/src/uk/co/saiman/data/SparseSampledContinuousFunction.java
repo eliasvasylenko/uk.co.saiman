@@ -31,16 +31,17 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
+import uk.co.strangeskies.mathematics.Range;
 
 /**
- * A (currently) immutable implementation of
- * {@link RegularSampledContinuousFunction} which optimizes memory usage for
- * sampled continua with mostly 0 sample values in the codomain.
+ * A (currently) immutable implementation of {@link RegularSampledDomain} which
+ * optimizes memory usage for sampled continua with mostly 0 sample values in
+ * the codomain.
  * 
  * @param <UD>
  *          the type of the units of measurement of values in the domain
@@ -49,29 +50,20 @@ import uk.co.strangeskies.mathematics.expression.ImmutableExpression;
  * @author Elias N Vasylenko
  */
 public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends ImmutableExpression<ContinuousFunction<UD, UR>> implements RegularSampledContinuousFunction<UD, UR> {
-	private final Unit<UD> unitDomain;
-	private final Unit<UR> unitRange;
-
-	private final double frequency;
-	private final int depth;
-
-	private final int[] indices;
+		extends LockingSampledContinuousFunction<UD, UR> {
+	private final int[] intensityIndices;
 	private final double[] intensities;
+	private final SampledRange<UR> range;
 
 	/**
 	 * Instantiate based on the given significant sample indices and intensities.
 	 * Samples at indices other than those given are assumed to be of intensity 0
 	 * in the codomain.
 	 * 
-	 * @param unitDomain
-	 *          the units of measurement of values in the domain
+	 * @param domain
+	 *          the domain of the function
 	 * @param unitRange
 	 *          the units of measurement of values in the range
-	 * @param frequency
-	 *          The number of samples per unit in the domain
-	 * @param depth
-	 *          The number of conceptual samples, starting from 0
 	 * @param samples
 	 *          The number of non-zero samples
 	 * @param indices
@@ -79,95 +71,118 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
 	 * @param intensities
 	 *          The intensities at the given non-zero sample indices
 	 */
-	public SparseSampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange, double frequency, int depth,
-			int samples, int[] indices, double[] intensities) {
-		this.unitDomain = unitDomain;
-		this.unitRange = unitRange;
-
-		this.frequency = frequency;
-		this.depth = depth;
-
+	public SparseSampledContinuousFunction(
+			SampledDomain<UD> domain,
+			Unit<UR> unitRange,
+			int samples,
+			int[] indices,
+			double[] intensities) {
+		super(domain, unitRange);
 		/*
 		 * TODO sort the indices & intensities here
 		 */
-
-		this.indices = Arrays.copyOf(indices, samples);
+		this.intensityIndices = Arrays.copyOf(indices, samples);
 		this.intensities = Arrays.copyOf(intensities, samples);
+		this.range = createDefaultRange(i -> intensities[i]);
 	}
 
 	/**
 	 * Create a memory efficient view of the given array, with the given
 	 * frequency.
 	 * 
-	 * @param unitDomain
-	 *          the units of measurement of values in the domain
+	 * @param domain
+	 *          the domain of the function
 	 * @param unitRange
 	 *          the units of measurement of values in the range
-	 * @param frequency
-	 *          The number of samples per unit in the domain
 	 * @param intensities
 	 *          The intensities as a sequence of samples at the given frequency
 	 */
-	public SparseSampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange, double frequency,
-			double[] intensities) {
-		this.unitDomain = unitDomain;
-		this.unitRange = unitRange;
+	public SparseSampledContinuousFunction(SampledDomain<UD> domain, Unit<UR> unitRange, double[] intensities) {
+		super(domain, unitRange);
 
-		this.frequency = frequency;
 		int depth = 0;
-
 		for (double intensity : intensities) {
 			if (intensity != 0) {
 				depth++;
 			}
 		}
 
-		this.depth = depth;
-
-		this.indices = new int[depth];
+		this.intensityIndices = new int[depth];
 		this.intensities = new double[depth];
 
 		int index = 0;
 		for (int i = 0; i < intensities.length; i++) {
 			if (intensities[i] != 0) {
-				indices[index] = i;
+				intensityIndices[index] = i;
 				this.intensities[index] = intensities[i];
 
 				index++;
 			}
 		}
+
+		this.range = createDefaultRange(i -> intensities[i]);
 	}
 
-	@Override
-	public Unit<UD> getDomainUnit() {
-		return unitDomain;
-	}
+	protected SampledRange<UR> createDefaultRange(Function<Integer, Double> intensityAtIndex) {
+		return new SampledRange<UR>(this) {
+			@Override
+			public Unit<UR> getUnit() {
+				return getRangeUnit();
+			}
 
-	@Override
-	public Unit<UR> getRangeUnit() {
-		return unitRange;
+			@Override
+			public int getDepth() {
+				return domain().getDepth();
+			}
+
+			@Override
+			public double getSample(int index) {
+				int indexIndex = getIndexIndex(index);
+				if (indexIndex < 0) {
+					return 0;
+				} else {
+					return read(() -> intensityAtIndex.apply(index));
+				}
+			}
+
+			@Override
+			public Range<Double> getExtent() {
+				return read(() -> super.getExtent());
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				return read(() -> super.equals(obj));
+			}
+
+			@Override
+			public int hashCode() {
+				return read(() -> super.hashCode());
+			}
+
+		};
 	}
 
 	private int getIndexIndex(int index) {
 		int from = 0;
-		int to = indices.length - 1;
+		int to = intensityIndices.length - 1;
 
 		if (to < 0) {
 			return -1;
 		}
 
 		do {
-			if (indices[to] < index) {
+			if (intensityIndices[to] < index) {
 				return -1;
-			} else if (indices[to] == index) {
+			} else if (intensityIndices[to] == index) {
 				return to;
-			} else if (indices[from] > index) {
+			} else if (intensityIndices[from] > index) {
 				return -1;
-			} else if (indices[from] == index) {
+			} else if (intensityIndices[from] == index) {
 				return from;
 			} else {
 				int mid = (to + from) / 2;
-				if (indices[mid] > index) {
+				if (intensityIndices[mid] > index) {
 					to = mid;
 				} else {
 					from = mid;
@@ -179,50 +194,41 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
 	}
 
 	@Override
+	public SampledRange<UR> range() {
+		return range;
+	}
+
+	@Override
 	public int getDepth() {
-		return depth;
+		return domain().getDepth();
 	}
 
 	@Override
-	public double getY(int index) {
-		int indexIndex = getIndexIndex(index);
-		if (indexIndex < 0) {
-			return 0;
-		} else {
-			return intensities[indexIndex];
-		}
+	public SampledContinuousFunction<UD, UR> copy() {
+		return new SparseSampledContinuousFunction<>(domain(), getRangeUnit(), intensities);
 	}
 
 	@Override
-	public double getFrequency() {
-		return frequency;
-	}
-
-	@Override
-	public SparseSampledContinuousFunction<UD, UR> copy() {
-		return this;
-	}
-
-	@Override
-	public ContinuousFunction<UD, UR> getValue() {
-		return this;
-	}
-
-	@Override
-	public SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
-		int sourceSamples = indices.length;
+	public SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
+		int sourceSamples = intensityIndices.length;
 
 		/*
 		 * shortcut for empty
 		 */
-		if (sourceSamples == 0 || getX(indices[sourceSamples - 1]) < startX || getX(indices[0]) > endX) {
-			double from = max(startX, 0);
-			double to = min(endX, getRange().getTo());
+		if (sourceSamples == 0
+				|| domain().getSample(intensityIndices[sourceSamples - 1]) < resolvableSampleDomain.getExtent().getFrom()
+				|| domain().getSample(intensityIndices[0]) > resolvableSampleDomain.getExtent().getTo()) {
+			double from = max(resolvableSampleDomain.getExtent().getFrom(), 0);
+			double to = min(resolvableSampleDomain.getExtent().getTo(), domain().getExtent().getTo());
 			if (to > from) {
-				return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), 2, new double[] { from, to },
+				return new ArraySampledContinuousFunction<>(
+						new IrregularSampledDomain<>(domain().getUnit(), new double[] { from, to }),
+						getRangeUnit(),
 						new double[] { 0, 0 });
 			} else {
-				return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), 2, new double[] { from },
+				return new ArraySampledContinuousFunction<>(
+						new IrregularSampledDomain<>(domain().getUnit(), new double[] { from }),
+						getRangeUnit(),
 						new double[] { 0 });
 			}
 		}
@@ -236,22 +242,22 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
 		double[] intensities = new double[maximumSampleCount];
 
 		int lastSampleIndex = -1;
-		for (int i = 0; i < indices.length; i++) {
-			int sampleIndex = indices[i];
+		for (int i = 0; i < intensityIndices.length; i++) {
+			int sampleIndex = intensityIndices[i];
 
 			if (sampleIndex > lastSampleIndex + 1) {
 				if (sampleIndex > lastSampleIndex + 2) {
-					positions[sampleCount] = getX(lastSampleIndex + 1);
+					positions[sampleCount] = domain().getSample(lastSampleIndex + 1);
 					intensities[sampleCount] = 0;
 					sampleCount++;
 				}
 
-				positions[sampleCount] = getX(sampleIndex - 1);
+				positions[sampleCount] = domain().getSample(sampleIndex - 1);
 				intensities[sampleCount] = 0;
 				sampleCount++;
 			}
 
-			positions[sampleCount] = getX(sampleIndex);
+			positions[sampleCount] = domain().getSample(sampleIndex);
 			intensities[sampleCount] = this.intensities[i];
 			sampleCount++;
 
@@ -259,12 +265,14 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
 		}
 
 		if (lastSampleIndex < getDepth() - 1) {
-			positions[sampleCount] = getX(getDepth() - 1);
+			positions[sampleCount] = domain().getSample(getDepth() - 1);
 			intensities[sampleCount] = 0;
 			sampleCount++;
 		}
 
-		return new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), sampleCount, positions, intensities)
-				.resample(startX, endX, resolvableUnits);
+		return new ArraySampledContinuousFunction<>(
+				new IrregularSampledDomain<>(domain().getUnit(), positions),
+				getRangeUnit(),
+				intensities).resample(resolvableSampleDomain);
 	}
 }

@@ -136,6 +136,20 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	}
 
 	/**
+	 * Get the ancestor nodes of the processing experiment node which are of one
+	 * of the given {@link ExperimentType experiment types}.
+	 * 
+	 * @param types
+	 *          the possible types of the ancestor we wish to inspect
+	 * @return a stream of ancestor nodes of the given type, from the nearest
+	 */
+	@SuppressWarnings("unchecked")
+	default <U, E extends ExperimentType<? extends U>> Stream<ExperimentNode<E, ? extends U>> getAncestors(
+			Collection<E> types) {
+		return getAncestors().filter(a -> types.contains(a.getType())).map(a -> (ExperimentNode<E, ? extends U>) a);
+	}
+
+	/**
 	 * Remove this part from its parent, or from the containing manager if it is
 	 * the root part.
 	 */

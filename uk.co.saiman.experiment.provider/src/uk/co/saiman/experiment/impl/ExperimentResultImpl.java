@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.ExperimentNode;
@@ -48,11 +47,6 @@ public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>> impleme
 	@Override
 	public ExperimentNode<?, ?> getExperimentNode() {
 		return node;
-	}
-
-	@Override
-	public Path getResultDataPath() {
-		return getExperimentNode().getExperimentDataPath().resolve(getResultType().getName());
 	}
 
 	@Override

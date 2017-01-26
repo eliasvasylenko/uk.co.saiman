@@ -64,22 +64,8 @@ public class PeriodicTablePart {
 	@FXML
 	private ScrollPane periodicTableScrollPane;
 
-	public PeriodicTablePart() {
-		System.out.println("PeriodicTablePart()");
-		System.out.println("PeriodicTablePart()");
-		System.out.println("PeriodicTablePart()");
-		System.out.println("PeriodicTablePart()");
-		System.out.println("PeriodicTablePart()");
-	}
-
 	@PostConstruct
 	void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
-		System.out.println("PeriodicTablePart.initialize()");
-		System.out.println("PeriodicTablePart.initialize()");
-		System.out.println("PeriodicTablePart.initialize()");
-		System.out.println("PeriodicTablePart.initialize()");
-		System.out.println("PeriodicTablePart.initialize()");
-
 		try {
 			container.setCenter(buildWith(loader).controller(this).loadRoot());
 			periodicTableController.addObserver(this::setElementTile);

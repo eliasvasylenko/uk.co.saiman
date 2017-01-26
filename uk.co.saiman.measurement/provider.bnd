@@ -7,8 +7,7 @@ Bundle-Name: SAI :: Measurement :: Provider
 	@${repo;tec.uom.lib:uom-lib-common}
 
 Private-Package:\
-	uk.co.saiman.measurement.impl,\
-	tec.units.ri.*
+	uk.co.saiman.measurement.impl
 
 Export-Package:\
 	si.uom.*,\

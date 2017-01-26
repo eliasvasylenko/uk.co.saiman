@@ -42,9 +42,9 @@ import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
+import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.simulation.experiment.SampleExperimentSimulationType;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
@@ -67,7 +67,7 @@ public class SpectrumExperimentSimulationType extends SpectrumExperimentType<Spe
 
 	@Reference
 	public void setPropertyLoader(PropertyLoader propertyLoader) {
-		super.setProperties(propertyLoader.getProperties(SpectrumProperties.class));
+		setProperties(propertyLoader.getProperties(SpectrumProperties.class));
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class SpectrumExperimentSimulationType extends SpectrumExperimentType<Spe
 
 	@Override
 	public SpectrumConfiguration createState(ExperimentConfigurationContext<SpectrumConfiguration> forNode) {
-		return new SpectrumConfiguration() {
+		SpectrumConfiguration configuration = new SpectrumConfiguration() {
 			private String name;
 
 			@Override
@@ -88,7 +88,6 @@ public class SpectrumExperimentSimulationType extends SpectrumExperimentType<Spe
 			@Override
 			public void setSpectrumName(String name) {
 				forNode.setId(getName() + " - " + name);
-
 				this.name = name;
 			}
 
@@ -97,6 +96,10 @@ public class SpectrumExperimentSimulationType extends SpectrumExperimentType<Spe
 				return acquisitionSimulation;
 			}
 		};
+
+		configuration.setSpectrumName(getProperties().defaultSpectrumName().toString());
+
+		return configuration;
 	}
 
 	@Override

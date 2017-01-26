@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
@@ -41,13 +41,7 @@ public interface ResultEditorPart<T> {
 
 	ExperimentResult<T> getData();
 
-	void setData(ExperimentResult<T> data);
-
 	MPart getPart();
 
-	boolean addContribution(ResultEditorContribution<? super T> contribution);
-
-	boolean removeContribution(ResultEditorContribution<? super T> contribution);
-
-	List<ResultEditorContribution<? super T>> getContributions();
+	Stream<ResultEditorContribution<? super T>> getContributions();
 }

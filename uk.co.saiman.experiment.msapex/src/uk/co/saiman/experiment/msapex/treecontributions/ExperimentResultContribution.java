@@ -63,7 +63,11 @@ public class ExperimentResultContribution implements EclipseTreeContribution<Exp
 
 	@Override
 	public <U extends ExperimentResult<?>> String getSupplementalText(TreeItemData<U> data) {
-		return "[" + data.data().getData().map(d -> Objects.toString(data.data().getResultDataPath())).map(Object::toString)
+		return "[" + data
+				.data()
+				.getData()
+				.map(d -> Objects.toString(data.data().getExperimentNode().getExperimentDataPath()))
+				.map(Object::toString)
 				.orElse(text.missingResult().toString()) + "]";
 	}
 

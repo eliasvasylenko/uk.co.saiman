@@ -85,12 +85,12 @@ public class StagePart {
 		noSelectionLabel.textProperty().bind(wrap(text.noStageDevices()));
 	}
 
-	private void selectStageDevice(StageDevice stageDevice) {
+	protected void selectStageDevice(StageDevice stageDevice) {
 		noSelectionLabel.setVisible(false);
 		selectedDevice = stageDevice;
 	}
 
-	private void deselectStageDevice() {
+	protected void deselectStageDevice() {
 		noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
 		selectedDevice = null;
 	}

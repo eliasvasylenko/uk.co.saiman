@@ -28,9 +28,6 @@
 package uk.co.saiman.data;
 
 import javax.measure.Quantity;
-import javax.measure.Unit;
-
-import uk.co.strangeskies.mathematics.Range;
 
 /**
  * A partial implementation of a {@link ContinuousFunction} decorator, to reduce
@@ -50,23 +47,13 @@ public interface ContinuousFunctionDecorator<UD extends Quantity<UD>, UR extends
 	ContinuousFunction<UD, UR> getComponent();
 
 	@Override
-	default Range<Double> getDomain() {
-		return getComponent().getDomain();
+	default Domain<UD> domain() {
+		return getComponent().domain();
 	}
 
 	@Override
-	default Unit<UD> getDomainUnit() {
-		return getComponent().getDomainUnit();
-	}
-
-	@Override
-	default Range<Double> getRange() {
-		return getComponent().getRange();
-	}
-
-	@Override
-	default Unit<UR> getRangeUnit() {
-		return getComponent().getRangeUnit();
+	default Range<UR> range() {
+		return getComponent().range();
 	}
 
 	@Override
@@ -75,13 +62,8 @@ public interface ContinuousFunctionDecorator<UD extends Quantity<UD>, UR extends
 	}
 
 	@Override
-	default Range<Double> getRangeBetween(double startX, double endX) {
-		return getComponent().getRangeBetween(startX, endX);
-	}
-
-	@Override
-	default SampledContinuousFunction<UD, UR> resample(double startX, double endX, int resolvableUnits) {
-		return getComponent().resample(startX, endX, resolvableUnits);
+	default SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
+		return getComponent().resample(resolvableSampleDomain);
 	}
 
 	@Override

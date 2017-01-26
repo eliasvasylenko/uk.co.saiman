@@ -103,22 +103,28 @@ class RangeGroup {
 	 */
 	public void updateRangeZoom(Range<Double> domain, boolean reset) {
 		// the total range of all the data
-		Range<Double> totalDataRange = continuousFunctions.stream()
-				.map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction).map(c -> c.getRange())
-				.reduce(Range::getExtendedThrough).orElse(between(0d, 100d));
+		Range<Double> totalDataRange = continuousFunctions
+				.stream()
+				.map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction)
+				.map(c -> c.range().getExtent())
+				.reduce(Range::getExtendedThrough)
+				.orElse(between(0d, 100d));
 
 		// the zoom over all data
 		updateRangeZoom(reset, totalDataRange, totalZoomRange);
 
-		if (continuousFunctions.stream()
-				.allMatch(c -> domain.contains(c.getLatestRenderedContinuousFunction().getDomain()))) {
+		if (continuousFunctions
+				.stream()
+				.allMatch(c -> domain.contains(c.getLatestRenderedContinuousFunction().domain().getExtent()))) {
 
 			visibleZoomRange.set(totalZoomRange);
 		} else {
 			// the total range of visible data
-			Range<Double> visibleDataRange = continuousFunctions.stream()
+			Range<Double> visibleDataRange = continuousFunctions
+					.stream()
 					.map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction)
-					.map(c -> c.getRangeBetween(domain.getFrom(), domain.getTo())).reduce(Range::getExtendedThrough)
+					.map(c -> c.range().between(domain.getFrom(), domain.getTo()).getExtent())
+					.reduce(Range::getExtendedThrough)
 					.orElse(between(0d, 100d));
 
 			// the zoom over visible data

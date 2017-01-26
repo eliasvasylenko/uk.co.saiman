@@ -27,23 +27,19 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static uk.co.strangeskies.utilities.Observable.Observation.CONTINUE;
+import static uk.co.strangeskies.utilities.Observable.Observation.TERMINATE;
+
 import java.util.stream.Stream;
 
-import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
-import uk.co.saiman.data.ContinuousFunction;
-import uk.co.saiman.data.ContinuousFunctionExpression;
-import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.text.properties.PropertyLoader;
-import uk.co.strangeskies.utilities.AggregatingListener;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -57,32 +53,21 @@ import uk.co.strangeskies.utilities.AggregatingListener;
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
 	private SpectrumProperties properties;
-	private final ExperimentResultType<ContinuousFunction<Time, Dimensionless>> spectrumResult;
+	private final ExperimentResultType<DefaultFileSpectrum> spectrumResult;
 
 	public SpectrumExperimentType() {
 		this(PropertyLoader.getDefaultProperties(SpectrumProperties.class));
 	}
 
+	/*
+	 * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to
+	 * make this possible...
+	 */
 	public SpectrumExperimentType(SpectrumProperties properties) {
 		this.properties = properties;
-		spectrumResult = new ExperimentResultType<ContinuousFunction<Time, Dimensionless>>() {
-			@Override
-			public String getName() {
-				return properties.spectrumResultName().toString();
-			}
-
-			@Override
-			public TypeToken<ContinuousFunction<Time, Dimensionless>> getDataType() {
-				return new TypeToken<ContinuousFunction<Time, Dimensionless>>() {};
-			}
-		};
+		spectrumResult = new FileSpectrumExperimentResultType<T>(this);
 	}
 
-	/*
-	 * TODO this really should be moved to the constructor, and the 'properties'
-	 * and 'spectrumResult' fields should both be final ... hurry up OSGi r7 to
-	 * sort this mess out
-	 */
 	protected void setProperties(SpectrumProperties properties) {
 		this.properties = properties;
 	}
@@ -96,7 +81,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 		return properties.spectrumExperimentName().toString();
 	}
 
-	public ExperimentResultType<ContinuousFunction<Time, Dimensionless>> getSpectrumResult() {
+	public ExperimentResultType<? extends Spectrum> getSpectrumResult() {
 		return spectrumResult;
 	}
 
@@ -104,40 +89,30 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 
 	@Override
 	public void execute(ExperimentExecutionContext<T> context) {
-		Unit<Dimensionless> intensityUnits = getAcquisitionDevice().getSampleIntensityUnits();
-		Unit<Time> timeUnits = getAcquisitionDevice().getSampleTimeUnits();
-
-		ContinuousFunctionExpression<Time, Dimensionless> result = new ContinuousFunctionExpression<>(
-				timeUnits,
-				intensityUnits);
-		context.setResult(spectrumResult, result);
-
-		getAcquisitionDevice().startAcquisition(device -> {
-
-			int depth = device.getSampleDepth();
-			double frequency = device.getSampleFrequency();
-
-			ArrayRegularSampledContinuousFunction<Time, Dimensionless> accumulator = new ArrayRegularSampledContinuousFunction<>(
-					timeUnits,
-					intensityUnits,
-					frequency,
-					0,
-					new double[depth]);
-
-			result.setComponent(accumulator);
-
-			AggregatingListener<SampledContinuousFunction<Time, Dimensionless>> aggregate = new AggregatingListener<>();
-			device.nextAcquisitionDataEvents().addObserver(aggregate);
-			aggregate.addObserver(a -> {
-				accumulator.mutate(data -> {
-					for (SampledContinuousFunction<Time, Dimensionless> c : a) {
-						for (int i = 0; i < depth; i++) {
-							data[i] += c.getY(i);
-						}
-					}
-				});
-			});
+		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
+			startAcquisition(context, device);
+			return TERMINATE;
 		});
+		getAcquisitionDevice().startAcquisition();
+
+		context.getResult(spectrumResult).getData().get().save();
+	}
+
+	public void startAcquisition(ExperimentExecutionContext<T> context, AcquisitionDevice device) {
+		int count = device.getAcquisitionCount();
+
+		AccumulatingContinuousFunction<Time, Dimensionless> accumulator = new AccumulatingContinuousFunction<>(
+				device.getSampleDomain(),
+				device.getSampleIntensityUnits());
+
+		DefaultFileSpectrum fileSpectrum = new DefaultFileSpectrum(
+				accumulator,
+				context.node().getExperimentDataPath().resolve("data.spectrum"));
+
+		context.setResult(spectrumResult, fileSpectrum);
+
+		device.dataEvents().addTerminatingObserver(
+				a -> (device.isAcquiring() && accumulator.accumulate(a) == count) ? TERMINATE : CONTINUE);
 	}
 
 	@Override

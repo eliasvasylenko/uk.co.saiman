@@ -27,20 +27,17 @@
  */
 package uk.co.saiman.experiment.msapex.impl;
 
+import static java.util.stream.Collectors.toList;
 import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
 import static uk.co.strangeskies.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.commands.ECommandService;
-import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.di.Focus;
@@ -63,76 +60,69 @@ import uk.co.saiman.experiment.msapex.ResultEditorPart;
 import uk.co.strangeskies.eclipse.ObservableService;
 
 public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
-	@Inject
-	IEclipseContext context;
-	@Inject
-	MPart part;
-	@Inject
-	MDirtyable dirty;
-	@Inject
-	ECommandService commandService;
-	@Inject
-	EHandlerService handlerService;
+	private static final String PROTOTYPE_SERVICE = "(" + Constants.SERVICE_SCOPE + "=" + Constants.SCOPE_PROTOTYPE + ")";
 
 	@Inject
-	@ObservableService(target = "(" + Constants.SERVICE_SCOPE + "=" + Constants.SCOPE_PROTOTYPE + ")")
-	ObservableList<ResultEditorContribution<?>> editorContributions;
+	private IEclipseContext context;
+	@Inject
+	private MPart part;
+	@Inject
+	private MDirtyable dirty;
 
 	@FXML
 	private TabPane tabPane;
 
-	private ExperimentResult<T> data;
-	private final Map<ResultEditorContribution<? super T>, Tab> contributions;
+	private final ExperimentResult<T> data;
+	private final List<ResultEditorContribution<? super T>> contributions;
 
-	public ResultEditorPartImpl() {
-		contributions = new LinkedHashMap<>();
+	@SuppressWarnings("unchecked")
+	@Inject
+	public ResultEditorPartImpl(
+			ExperimentResult<T> data,
+			@ObservableService(target = PROTOTYPE_SERVICE) ObservableList<ResultEditorContribution<?>> editorContributions) {
+		this.data = data;
+		this.contributions = editorContributions
+				.stream()
+				.filter(
+						contribution -> contribution
+								.getResultType()
+								.satisfiesConstraintFrom(LOOSE_COMPATIBILILTY, data.getResultType().getDataType()))
+				.map(contribution -> (ResultEditorContribution<? super T>) contribution)
+				.collect(toList());
+
+		attachToLifecycle();
+	}
+
+	private void attachToLifecycle() {
+		data.getExperimentNode().lifecycleState().changes().addWeakObserver(
+				this,
+				part -> c -> part.updateExperimentState(c.previousValue(), c.newValue()));
 	}
 
 	@PostConstruct
-	public void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
+	protected void buildInterface(BorderPane container, @LocalInstance FXMLLoader loader) {
 		container.setCenter(buildWith(loader).controller(ResultEditorPart.class, this).loadRoot());
+
+		initializeContributions();
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void contribute(ResultEditorContribution<?> contribution) {
-		if (contribution
-				.getResultType()
-				.satisfiesConstraintFrom(LOOSE_COMPATIBILILTY, data.getResultType().getDataType())) {
-			addContribution((ResultEditorContribution<? super T>) contribution);
-		}
-	}
-
-	@Override
-	public boolean addContribution(ResultEditorContribution<? super T> contribution) {
-		boolean added = !contributions.containsKey(contribution);
-
-		if (added) {
-			context.set(ExperimentResult.class, data);
+	/*
+	 * Let's not bother making this dynamic unless we find a reason, since Eclipse
+	 * applications can't be properly dynamic anyway.
+	 */
+	private void initializeContributions() {
+		for (ResultEditorContribution<? super T> contribution : contributions) {
 			ContextInjectionFactory.inject(contribution, context);
 
 			Tab tab = new Tab(contribution.getName(), contribution.getContent());
 			tab.setClosable(false);
-			contributions.put(contribution, tab);
 			tabPane.getTabs().add(tab);
 		}
-
-		return added;
 	}
 
 	@Override
-	public boolean removeContribution(ResultEditorContribution<? super T> contribution) {
-		Tab removed = contributions.remove(contribution);
-
-		if (removed != null) {
-			tabPane.getTabs().remove(removed);
-		}
-
-		return removed != null;
-	}
-
-	@Override
-	public List<ResultEditorContribution<? super T>> getContributions() {
-		return Collections.unmodifiableList(new ArrayList<>(contributions.keySet()));
+	public Stream<ResultEditorContribution<? super T>> getContributions() {
+		return contributions.stream();
 	}
 
 	@Override
@@ -155,18 +145,6 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
 		return data;
 	}
 
-	@Override
-	public void setData(ExperimentResult<T> data) {
-		this.data = data;
-		data.getExperimentNode().lifecycleState().addObserver(s -> System.out.println("? ok >"));
-		data.getExperimentNode().lifecycleState().changes().addWeakObserver(
-				this,
-				p -> c -> p.updateExperimentState(c.previousValue(), c.newValue()));
-		for (ResultEditorContribution<?> contribution : editorContributions) {
-			contribute(contribution);
-		}
-	}
-
 	protected void updateExperimentState(ExperimentLifecycleState previousState, ExperimentLifecycleState newState) {
 		System.out.println(previousState + "    ->    " + newState);
 	}
@@ -174,5 +152,10 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
 	@Override
 	public MPart getPart() {
 		return part;
+	}
+
+	@PreDestroy
+	public void dispose(ResultEditorManager manager) {
+		manager.removeEditor(this);
 	}
 }

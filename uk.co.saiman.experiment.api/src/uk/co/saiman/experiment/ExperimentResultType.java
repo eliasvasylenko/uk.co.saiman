@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment;
 
-import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypeParameter;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
@@ -43,7 +41,7 @@ import uk.co.strangeskies.reflection.token.TypeToken;
  * @param <T>
  *          the type of the result data
  */
-public interface ExperimentResultType<T> extends ReifiedToken<ExperimentResultType<T>> {
+public interface ExperimentResultType<T> {
 	/**
 	 * A human readable name for the experiment result.
 	 * 
@@ -55,14 +53,4 @@ public interface ExperimentResultType<T> extends ReifiedToken<ExperimentResultTy
 	 * @return the exact static type of the experiment result data
 	 */
 	TypeToken<T> getDataType();
-
-	@Override
-	default TypeToken<ExperimentResultType<T>> getThisTypeToken() {
-		return new TypeToken<ExperimentResultType<T>>() {}.withTypeArgument(new TypeParameter<T>() {}, getDataType());
-	}
-
-	@Override
-	default ExperimentResultType<T> copy() {
-		return this;
-	}
 }

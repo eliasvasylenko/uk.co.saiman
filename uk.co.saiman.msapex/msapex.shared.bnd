@@ -12,7 +12,8 @@
 -runrequires.msapex:\
 	${req;org.apache.felix.configadmin},\
 	${req;uk.co.saiman.chemistry.msapex},\
-	${req;uk.co.saiman.experiment.msapex},\
+	${req;uk.co.saiman.experiment.spectrum.msapex},\
+	${req;uk.co.saiman.experiment.chemicalmap.msapex},\
 	${req;uk.co.saiman.icons.fugue},\
 	${req;uk.co.saiman.instrument.acquisition.msapex},\
 	${req;uk.co.saiman.instrument.provider},\

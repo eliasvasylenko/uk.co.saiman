@@ -36,8 +36,9 @@ import javax.measure.quantity.Time;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.Designate;
 
-import uk.co.saiman.data.ArrayRegularSampledContinuousFunction;
+import uk.co.saiman.data.ArraySampledContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 
@@ -62,25 +63,23 @@ public class ADCSimulation implements DetectorSimulation {
 
 	@Override
 	public SampledContinuousFunction<Time, Dimensionless> acquire(
-			Unit<Time> timeUnits,
+			SampledDomain<Time> domain,
 			Unit<Dimensionless> intensityUnits,
-			double frequency,
-			int depth,
-			SimulatedSample sample) {
-		if (this.intensities.length != depth) {
-			intensities = new double[depth];
+			SimulatedSample nextSample) {
+		if (this.intensities.length != domain.getDepth()) {
+			intensities = new double[domain.getDepth()];
 		}
 
 		double[] intensities = this.intensities;
 
 		double scale = 0;
-		double scaleDelta = 1d / depth;
+		double scaleDelta = 1d / domain.getDepth();
 
 		for (int j = 0; j < intensities.length; j++) {
 			scale += scaleDelta;
 			intensities[j] = 0.01 + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
 		}
 
-		return new ArrayRegularSampledContinuousFunction<>(timeUnits, intensityUnits, frequency, 0, intensities);
+		return new ArraySampledContinuousFunction<>(domain, intensityUnits, intensities);
 	}
 }

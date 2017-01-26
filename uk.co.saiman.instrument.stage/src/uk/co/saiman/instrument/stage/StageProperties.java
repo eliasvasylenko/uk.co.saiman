@@ -29,7 +29,6 @@ package uk.co.saiman.instrument.stage;
 
 import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Properties;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
@@ -40,7 +39,7 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
  */
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface StageProperties extends Properties<StageProperties> {
+public interface StageProperties {
 	SaiProperties sai();
 
 	Localized<String> noStageDevices();

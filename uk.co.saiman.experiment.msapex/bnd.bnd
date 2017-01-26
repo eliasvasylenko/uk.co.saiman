@@ -14,7 +14,6 @@ Bundle-Name: SAI :: Experiment :: MSApex
 	uk.co.strangeskies.fx;version=latest,\
 	uk.co.strangeskies.eclipse;version=latest,\
 \
-	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\
 	uk.co.saiman.data.msapex;version=snapshot,\
 	uk.co.saiman.experiment.api;version=snapshot,\
@@ -22,6 +21,7 @@ Bundle-Name: SAI :: Experiment :: MSApex
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 \

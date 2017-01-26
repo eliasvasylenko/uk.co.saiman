@@ -30,13 +30,14 @@ package uk.co.saiman.data;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
+import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.mathematics.expression.LockingExpression;
 
 /**
  * A basic wrapper around another continuous function which reflects all changes
  * in that function, and propagates events to listeners. The function which is
- * wrapped can be changed via {@link #setComponent(ContinuousFunction)}, which
- * will notify listeners of the modification.
+ * wrapped can be changed via {@link #setComponent(Expression)}, which will
+ * notify listeners of the modification.
  * 
  * @param <UD>
  *          the type of the units of measurement of values in the domain
@@ -46,7 +47,7 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  */
 public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Quantity<UR>>
 		extends LockingExpression<ContinuousFunction<UD, UR>> implements ContinuousFunctionDecorator<UD, UR> {
-	private ContinuousFunction<UD, UR> component;
+	private Expression<? extends ContinuousFunction<UD, UR>> component;
 
 	/**
 	 * Create a default empty expression about the function
@@ -75,7 +76,7 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
 	public ContinuousFunction<UD, UR> getComponent() {
 		getReadLock().lock();
 		try {
-			return component;
+			return component.getValue();
 		} finally {
 			getReadLock().unlock();
 		}
@@ -87,11 +88,11 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
 	 * @param component
 	 *          The continuous function we wish to wrap
 	 */
-	public void setComponent(ContinuousFunction<UD, UR> component) {
+	public void setComponent(Expression<? extends ContinuousFunction<UD, UR>> component) {
 		beginWrite();
 
 		try {
-			ContinuousFunction<UD, UR> previousComponent = this.component;
+			Expression<? extends ContinuousFunction<UD, UR>> previousComponent = this.component;
 			this.component = component;
 
 			addDependency(component);

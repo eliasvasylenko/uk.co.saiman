@@ -39,6 +39,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.Designate;
 
 import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.data.SparseSampledContinuousFunction;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
@@ -85,24 +86,15 @@ public class TDCSimulation implements DetectorSimulation {
 
 	@Override
 	public SampledContinuousFunction<Time, Dimensionless> acquire(
-			Unit<Time> timeUnits,
+			SampledDomain<Time> domain,
 			Unit<Dimensionless> intensityUnits,
-			double frequency,
-			int depth,
-			SimulatedSample sample) {
+			SimulatedSample nextSample) {
 		int hits = random.nextInt(updateMaximumHitsPerSpectrum());
 
 		/*
 		 * TODO distribute "hits" number of hits
 		 */
 
-		return new SparseSampledContinuousFunction<>(
-				timeUnits,
-				intensityUnits,
-				frequency,
-				depth,
-				hits,
-				hitIndices,
-				hitIntensities);
+		return new SparseSampledContinuousFunction<>(domain, intensityUnits, hits, hitIndices, hitIntensities);
 	}
 }

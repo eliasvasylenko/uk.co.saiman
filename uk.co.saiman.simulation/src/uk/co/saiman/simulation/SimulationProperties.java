@@ -35,21 +35,24 @@ import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Properties;
+import uk.co.strangeskies.text.properties.Nested;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface SimulationProperties extends Properties<SimulationProperties> {
+public interface SimulationProperties {
 	Localized<String> xyRasterStageSimulationDeviceName();
 
 	Localized<String> acquisitionSimulationDeviceName();
 
+	@Nested
 	AcquisitionProperties acquisition();
 
+	@Nested
 	ExperimentProperties experiment();
 
+	@Nested
 	SaiProperties sai();
 
 	Localized<String> sampleImage();

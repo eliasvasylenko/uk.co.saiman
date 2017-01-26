@@ -42,6 +42,16 @@ import uk.co.strangeskies.eclipse.EclipseModularTreeController;
  */
 public interface ExperimentPart {
 	/**
+	 * The ID of the command in the e4 model fragment.
+	 */
+	public static final String ADD_EXPERIMENT_COMMAND = "uk.co.saiman.experiment.msapex.command.addexperiment";
+
+	/**
+	 * The ID of the command in the e4 model fragment.
+	 */
+	public static final String OPEN_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.command.open";
+
+	/**
 	 * @return the current experiment workspace
 	 */
 	ExperimentWorkspace getExperimentWorkspace();

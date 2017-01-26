@@ -30,12 +30,13 @@ package uk.co.saiman.simulation.instrument.impl;
 import static java.util.Collections.unmodifiableSet;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
 import org.osgi.service.component.annotations.Activate;
@@ -49,6 +50,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
@@ -74,23 +76,16 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	static final String CONFIGURATION_PID = "uk.co.saiman.simulation.instrument.acquisition";
 
 	private class ExperimentConfiguration {
-		private final DetectorSimulation signal;
+		private final DetectorSimulation detector;
 		private final SimulatedSampleDevice sample;
-		private final double frequency;
-		private final int depth;
-
-		private final BufferingListener<SampledContinuousFunction<Time, Dimensionless>> listener;
+		private final SampledDomain<Time> domain;
 
 		private int counter;
 
 		private AcquisitionException exception;
 
 		public ExperimentConfiguration() {
-			frequency = getSampleFrequency();
-			depth = getSampleDepth();
-
-			listener = singleAcquisitionListeners;
-			singleAcquisitionListeners = new BufferingListener<>();
+			domain = getSampleDomain();
 
 			counter = getAcquisitionCount();
 			if (counter <= 0) {
@@ -98,8 +93,8 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 			}
 
 			synchronized (detectors) {
-				signal = getDetector();
-				if (signal == null) {
+				detector = getDetector();
+				if (detector == null) {
 					throw new AcquisitionException(simulationText.acquisition().noSignal());
 				}
 				detectors.notifyAll();
@@ -111,6 +106,26 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 		public void setException(AcquisitionException exception) {
 			this.exception = exception;
 			counter = 0;
+		}
+	}
+
+	private class Acquisition {
+		private final Optional<ExperimentConfiguration> experiment;
+		private final SampledContinuousFunction<Time, Dimensionless> data;
+
+		public Acquisition(
+				Optional<ExperimentConfiguration> experiment,
+				SampledContinuousFunction<Time, Dimensionless> data) {
+			this.experiment = experiment;
+			this.data = data;
+		}
+
+		public Optional<ExperimentConfiguration> getExperiment() {
+			return experiment;
+		}
+
+		public SampledContinuousFunction<Time, Dimensionless> getData() {
+			return data;
 		}
 	}
 
@@ -127,6 +142,8 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	 */
 	public static final int DEFAULT_ACQUISITION_COUNT = 1000;
 
+	private boolean finalised = false;
+
 	@Reference
 	Units units;
 	private Unit<Dimensionless> intensityUnits;
@@ -136,18 +153,12 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	PropertyLoader loader;
 	private SimulationProperties simulationText;
 
-	private final ObservableImpl<Exception> errors;
-
+	/*
+	 * Instrument Configuration
+	 */
 	private Quantity<Time> acquisitionResolution;
 	private int acquisitionDepth;
 	private int acquisitionCount;
-
-	private SampledContinuousFunction<Time, Dimensionless> acquisitionData;
-	private final BufferingListener<SampledContinuousFunction<Time, Dimensionless>> acquisitionListeners;
-	private BufferingListener<SampledContinuousFunction<Time, Dimensionless>> singleAcquisitionListeners;
-
-	private final Object acquiringLock = new Object();
-	private ExperimentConfiguration experiment;
 
 	private Set<DetectorSimulation> detectors = new HashSet<>();
 	private DetectorSimulation detector;
@@ -155,13 +166,33 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	private Set<SimulatedSampleDevice> samples = new HashSet<>();
 	private SimulatedSampleDevice sample;
 
-	private boolean finalised = false;
+	/*
+	 * External Acquisition State
+	 */
+	private final ObservableImpl<Exception> errors;
+	private final ObservableImpl<SampledContinuousFunction<Time, Dimensionless>> acquisitionListeners;
+	private final ObservableImpl<AcquisitionDevice> startListeners;
+
+	private boolean acquiring;
+	private SampledContinuousFunction<Time, Dimensionless> acquisitionData;
+
+	/*
+	 * Internal Acquisition State
+	 */
+	private final BufferingListener<Acquisition> acquisitionBuffer;
+	// make sure state remains consistent during start:
+	private final Object startingLock = new Object();
+	private final Object acquiringLock = new Object();
+	private Optional<ExperimentConfiguration> experiment;
 
 	public SimulatedAcquisitionDeviceImpl() {
 		errors = new ObservableImpl<>();
+		acquisitionBuffer = new BufferingListener<>();
+		acquisitionListeners = new ObservableImpl<>();
+		startListeners = new ObservableImpl<>();
 
-		singleAcquisitionListeners = new BufferingListener<>();
-		acquisitionListeners = new BufferingListener<>();
+		acquiring = false;
+		experiment = Optional.empty();
 	}
 
 	@Activate
@@ -176,6 +207,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 		setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
 		new Thread(this::acquire).start();
+		acquisitionBuffer.addObserver(this::acquired);
 	}
 
 	@Modified
@@ -189,7 +221,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 					.stream()
 					.filter(d -> d.getId().equals(configuration.detectorSimulation()))
 					.findAny()
-					.<AcquisitionException>orElseThrow(() -> {
+					.<AcquisitionException> orElseThrow(() -> {
 						throw new AcquisitionException(
 								simulationText.cannotFindDetector(configuration.detectorSimulation(), detectors));
 					});
@@ -367,30 +399,44 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	@Override
-	public void startAcquisition(Consumer<AcquisitionDevice> nextAcquisitionDataEvents) {
-		synchronized (acquiringLock) {
-			nextAcquisitionDataEvents.accept(this);
-			startAcquisition();
-		}
-	}
-
-	@Override
 	public void startAcquisition() {
 		synchronized (acquiringLock) {
-			if (experiment != null) {
-				singleAcquisitionListeners = new BufferingListener<>();
-				throw new AcquisitionException(simulationText.acquisition().alreadyAcquiring());
-			}
+			ExperimentConfiguration experiment = null;
 
-			ExperimentConfiguration experiment = this.experiment = new ExperimentConfiguration();
+			try {
+				synchronized (startingLock) {
+					this.experiment.ifPresent(e -> {
+						throw new AcquisitionException(simulationText.acquisition().alreadyAcquiring());
+					});
 
-			while (experiment == this.experiment) {
-				try {
-					acquiringLock.wait();
-				} catch (InterruptedException e) {
-					experiment.counter = 0;
-					throw new AcquisitionException(simulationText.acquisition().experimentInterrupted(), e);
+					// wait any previous experiment to flush from the buffer
+					System.out.println("wait any previous experiment to flush from the buffer");
+					while (acquiring) {
+						acquiringLock.wait();
+					}
+
+					// prepare a new experiment
+					System.out.println("prepare a new experiment");
+					startListeners.fire(this);
+					this.experiment = Optional.of(new ExperimentConfiguration());
+
+					// wait for the new experiment to reach the end of the buffer
+					System.out.println("wait for the new experiment to reach the end of the buffer");
+					while (!acquiring) {
+						acquiringLock.wait();
+					}
 				}
+
+				experiment = this.experiment.get();
+
+				do {
+					acquiringLock.wait();
+				} while (this.experiment.isPresent() && this.experiment.get() == experiment);
+			} catch (InterruptedException e) {
+				if (this.experiment.isPresent() && this.experiment.get() == experiment) {
+					this.experiment = Optional.empty();
+				}
+				throw new AcquisitionException(simulationText.acquisition().experimentInterrupted(), e);
 			}
 
 			if (experiment.exception != null) {
@@ -399,63 +445,49 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 		}
 	}
 
+	private void acquired(Acquisition acquisition) {
+		synchronized (acquiringLock) {
+			acquiring = acquisition.experiment.isPresent();
+			acquisitionListeners.fire(acquisition.data);
+			acquiringLock.notifyAll();
+		}
+	}
+
 	private void acquire() {
 		while (!finalised) {
 			SimulatedSampleDevice sample;
 			DetectorSimulation detector;
-			double frequency;
-			int depth;
-
-			boolean runningExperiment;
-			synchronized (acquiringLock) {
-				runningExperiment = experiment != null && experiment.counter-- > 0;
-			}
+			SampledDomain<Time> domain;
 
 			try {
-				try {
-					if (runningExperiment) {
-						detector = experiment.signal;
-						sample = experiment.sample;
-						frequency = experiment.frequency;
-						depth = experiment.depth;
-					} else {
-						/*
-						 * This may remain blocking after an attempt to start an experiment,
-						 * but this is okay as the experiment should have failed anyway if
-						 * this is blocked:
-						 */
-						detector = waitForDetector();
-						sample = waitForSample();
-						frequency = getSampleFrequency();
-						depth = getSampleDepth();
-					}
+				Optional<ExperimentConfiguration> experiment;
+				synchronized (acquiringLock) {
+					experiment = this.experiment;
+				}
 
-					acquisitionData = detector.acquire(timeUnits, intensityUnits, frequency, depth, sample.getNextSample());
+				/*
+				 * These may remain blocking after an attempt to start an experiment,
+				 * but this is okay as the experiment should have failed anyway if this
+				 * is blocked:
+				 */
+				detector = experiment.map(e -> e.detector).orElse(waitForDetector());
+				sample = experiment.map(e -> e.sample).orElse(waitForSample());
+				domain = experiment.map(e -> e.domain).orElse(getSampleDomain());
 
-					acquisitionListeners.notify(acquisitionData);
-					if (runningExperiment) {
-						experiment.listener.notify(acquisitionData);
+				SampledContinuousFunction<Time, Dimensionless> acquisitionData = detector
+						.acquire(domain, intensityUnits, sample.getNextSample());
+				acquisitionBuffer.notify(new Acquisition(experiment, acquisitionData));
+
+				synchronized (acquiringLock) {
+					if (experiment.map(e -> --e.counter == 0).orElse(false)) {
+						this.experiment = Optional.empty();
+						acquiringLock.notifyAll();
 					}
-				} catch (Exception e) {
-					throw new AcquisitionException(simulationText.acquisition().unexpectedException(), e);
 				}
 			} catch (AcquisitionException e) {
-				detector = null;
-				if (runningExperiment) {
-					experiment.setException(e);
-				} else {
-					/*
-					 * TODO logging from this class...
-					 */
-					e.printStackTrace();
-				}
-			}
-
-			synchronized (acquiringLock) {
-				if (runningExperiment && experiment.counter <= 0) {
-					experiment = null;
-					acquiringLock.notifyAll();
-				}
+				exception(e);
+			} catch (Exception e) {
+				exception(new AcquisitionException(simulationText.acquisition().unexpectedException(), e));
 			}
 
 			try {
@@ -468,28 +500,32 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 		stopAcquisition();
 	}
 
+	private void exception(AcquisitionException exception) {
+		experiment.ifPresent(e -> e.setException(exception));
+		/*
+		 * TODO logging from this class...
+		 */
+		exception.printStackTrace();
+	}
+
 	@Override
 	public void stopAcquisition() {
 		synchronized (acquiringLock) {
-			if (experiment != null) {
-				experiment.counter = 0;
+			if (experiment.isPresent()) {
+				experiment = Optional.empty();
+				acquiringLock.notifyAll();
 			}
 		}
 	}
 
 	@Override
 	public boolean isAcquiring() {
-		return experiment != null;
+		return acquiring;
 	}
 
 	@Override
 	public SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData() {
 		return acquisitionData;
-	}
-
-	@Override
-	public Observable<SampledContinuousFunction<Time, Dimensionless>> nextAcquisitionDataEvents() {
-		return singleAcquisitionListeners;
 	}
 
 	@Override
@@ -504,7 +540,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	 *          The acquisition resolution in milliseconds
 	 */
 	public void setAcquisitionResolution(Quantity<Time> resolution) {
-		acquisitionResolution = resolution;
+		synchronized (startingLock) {
+			acquisitionResolution = resolution;
+		}
 	}
 
 	@Override
@@ -513,13 +551,15 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	@Override
-	public double getSampleFrequency() {
-		return units.second().getQuantity(1).divide(getSampleResolution()).getValue().doubleValue();
+	public Quantity<Frequency> getSampleFrequency() {
+		return getSampleResolution().inverse().asType(Frequency.class);
 	}
 
 	@Override
 	public void setAcquisitionTime(Quantity<Time> time) {
-		acquisitionDepth = time.divide(getSampleResolution()).getValue().intValue();
+		synchronized (startingLock) {
+			acquisitionDepth = time.divide(getSampleResolution()).getValue().intValue();
+		}
 	}
 
 	@Override
@@ -529,7 +569,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 	@Override
 	public void setSampleDepth(int depth) {
-		acquisitionDepth = depth;
+		synchronized (startingLock) {
+			acquisitionDepth = depth;
+		}
 	}
 
 	@Override
@@ -563,5 +605,10 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	@Override
+	public Observable<AcquisitionDevice> startEvents() {
+		return startListeners;
 	}
 }

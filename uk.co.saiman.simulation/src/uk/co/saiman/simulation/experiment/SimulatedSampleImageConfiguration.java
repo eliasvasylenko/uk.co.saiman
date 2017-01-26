@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.simulation.experiment;
 
+import static uk.co.saiman.chemistry.Chemical.unknownChemical;
+
 import uk.co.saiman.chemistry.Chemical;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 
@@ -68,6 +70,9 @@ public class SimulatedSampleImageConfiguration {
 				return "empty image...";
 			}
 		};
+		red = unknownChemical();
+		green = unknownChemical();
+		blue = unknownChemical();
 	}
 
 	public SimulatedSampleImage getSampleImage() {

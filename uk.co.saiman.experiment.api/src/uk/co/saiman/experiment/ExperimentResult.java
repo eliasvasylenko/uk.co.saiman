@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.experiment;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
 import uk.co.strangeskies.reflection.token.ReifiedToken;
@@ -37,8 +36,6 @@ import uk.co.strangeskies.utilities.Observable;
 
 public interface ExperimentResult<T> extends Observable<Optional<T>>, ReifiedToken<ExperimentResult<T>> {
 	ExperimentNode<?, ?> getExperimentNode();
-
-	Path getResultDataPath();
 
 	ExperimentResultType<T> getResultType();
 

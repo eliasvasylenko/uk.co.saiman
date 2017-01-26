@@ -29,9 +29,12 @@ package uk.co.saiman.data;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
+
+import uk.co.strangeskies.mathematics.Range;
 
 /**
  * A mutable, array backed implementation of {@link SampledContinuousFunction}.
@@ -43,110 +46,89 @@ import javax.measure.Unit;
  * @author Elias N Vasylenko
  */
 public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends LockingSampledContinuousFunction<UD, UR> implements SampledContinuousFunction<UD, UR> {
-	private final double[] values;
+		extends LockingSampledContinuousFunction<UD, UR> {
 	private final double[] intensities;
+	private final SampledRange<UR> range;
 
 	/**
 	 * Instantiate with the given number of samples, values, and intensities.
 	 * Arrays are copied into the function, truncated to the sample length given,
 	 * or padded with 0s.
 	 * 
-	 * @param unitDomain
-	 *          the units of measurement of values in the domain
+	 * @param domain
+	 *          the domain of the function
 	 * @param unitRange
 	 *          the units of measurement of values in the range
-	 * @param samples
-	 *          The number of samples in the function
-	 * @param values
-	 *          The X values of the samples, in the domain
 	 * @param intensities
 	 *          The Y values of the samples, in the codomain
 	 */
-	public ArraySampledContinuousFunction(Unit<UD> unitDomain, Unit<UR> unitRange, int samples, double[] values,
-			double[] intensities) {
-		super(unitDomain, unitRange);
+	public ArraySampledContinuousFunction(SampledDomain<UD> domain, Unit<UR> unitRange, double[] intensities) {
+		super(domain, unitRange);
 		/*
 		 * TODO sort values
 		 */
-		this.values = Arrays.copyOf(values, samples);
-		this.intensities = Arrays.copyOf(intensities, samples);
+		this.intensities = Arrays.copyOf(intensities, domain.getDepth());
+		this.range = createDefaultRange(i -> intensities[i]);
+	}
+
+	protected SampledRange<UR> createDefaultRange(Function<Integer, Double> intensityAtIndex) {
+		return new SampledRange<UR>(this) {
+			@Override
+			public Unit<UR> getUnit() {
+				return getRangeUnit();
+			}
+
+			@Override
+			public int getDepth() {
+				return domain().getDepth();
+			}
+
+			@Override
+			public double getSample(int index) {
+				return read(() -> intensityAtIndex.apply(index));
+			}
+
+			@Override
+			public Range<Double> getExtent() {
+				return read(() -> super.getExtent());
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				return read(() -> super.equals(obj));
+			}
+
+			@Override
+			public int hashCode() {
+				return read(() -> super.hashCode());
+			}
+		};
+	}
+
+	@Override
+	public SampledRange<UR> range() {
+		return range;
 	}
 
 	/**
 	 * Safely modify the data of this sampled continuous function.
 	 * 
-	 * @param valueMutation
-	 *          The mutation operation on the values of the samples, i.e. the X
-	 *          values, in the domain
 	 * @param intensityMutation
 	 *          The mutation operation on the intensities of the samples, i.e. the
 	 *          Y values, in the codomain
 	 */
-	public void mutateIntensities(Consumer<double[]> valueMutation, Consumer<double[]> intensityMutation) {
-		getWriteLock().lock();
-		try {
-			valueMutation.accept(values);
-			intensityMutation.accept(intensities);
-		} finally {
-			getWriteLock().unlock();
-		}
+	public void mutate(Consumer<double[]> intensityMutation) {
+		write(() -> intensityMutation.accept(intensities));
 	}
 
 	@Override
 	public int getDepth() {
-		return read(() -> values.length);
-	}
-
-	@Override
-	public int getIndexBelow(double xValue) {
-		getReadLock().lock();
-
-		try {
-			int from = 0;
-			int to = values.length - 1;
-
-			if (to < 0) {
-				return -1;
-			}
-
-			do {
-				if (values[to] <= xValue) {
-					return to;
-				} else if (values[from] > xValue) {
-					return -1;
-				} else if (values[from] == xValue) {
-					return from;
-				} else {
-					int mid = (to + from) / 2;
-					if (values[mid] > xValue) {
-						to = mid;
-					} else {
-						from = mid;
-					}
-				}
-			} while (to - from > 1);
-
-			return from;
-		} finally {
-			getReadLock().unlock();
-		}
-	}
-
-	@Override
-	public double getX(int index) {
-		return read(() -> values[index]);
-	}
-
-	@Override
-	public double getY(int index) {
-		return read(() -> intensities[index]);
+		return domain().getDepth();
 	}
 
 	@Override
 	public ArraySampledContinuousFunction<UD, UR> copy() {
-		return read(
-				() -> new ArraySampledContinuousFunction<>(getDomainUnit(), getRangeUnit(), getDepth(), values, intensities));
+		return read(() -> new ArraySampledContinuousFunction<>(domain(), getRangeUnit(), intensities));
 	}
 
 	@Override

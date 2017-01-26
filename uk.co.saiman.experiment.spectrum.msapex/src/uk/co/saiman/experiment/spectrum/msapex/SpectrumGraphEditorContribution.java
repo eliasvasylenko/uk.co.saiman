@@ -25,14 +25,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.msapex.impl;
+package uk.co.saiman.experiment.spectrum.msapex;
 
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Time;
 
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
 import org.eclipse.fx.core.di.LocalInstance;
@@ -43,18 +41,17 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.msapex.ContinuousFunctionChartController;
 import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.msapex.ResultEditorContribution;
+import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.FxmlLoadBuilder;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
 @Component(scope = ServiceScope.PROTOTYPE)
-public class SpectrumGraphEditorContribution
-		implements ResultEditorContribution<ContinuousFunction<Time, Dimensionless>> {
+public class SpectrumGraphEditorContribution implements ResultEditorContribution<Spectrum> {
 	@Inject
 	@Localize
 	SpectrumProperties properties;
@@ -63,7 +60,7 @@ public class SpectrumGraphEditorContribution
 	MDirtyable dirty;
 
 	@Inject
-	ExperimentResult<ContinuousFunction<Time, Dimensionless>> result;
+	ExperimentResult<Spectrum> result;
 
 	@FXML
 	private ContinuousFunctionChartController spectrumGraphController;
@@ -77,18 +74,18 @@ public class SpectrumGraphEditorContribution
 		setResultData(result.getData());
 	}
 
-	private void setResultData(Optional<ContinuousFunction<Time, Dimensionless>> data) {
+	private void setResultData(Optional<Spectrum> data) {
 		Platform.runLater(() -> {
 			spectrumGraphController.getContinuousFunctions().clear();
-			data.ifPresent(d -> spectrumGraphController.getContinuousFunctions().add(d));
+			data.ifPresent(d -> spectrumGraphController.getContinuousFunctions().add(d.getRawData()));
 		});
 
 		dirty.setDirty(true);
 	}
 
 	@Override
-	public TypeToken<ContinuousFunction<Time, Dimensionless>> getResultType() {
-		return new TypeToken<ContinuousFunction<Time, Dimensionless>>() {};
+	public TypeToken<Spectrum> getResultType() {
+		return new TypeToken<Spectrum>() {};
 	}
 
 	@Override

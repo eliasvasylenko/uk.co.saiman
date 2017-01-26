@@ -5,10 +5,7 @@ Export-Package: uk.co.saiman.experiment.chemicalmap
 -includeresource:\
 	l10n
 
--include:\
-	l10n/bundle.properties
-
--buildpath: \
+-buildpath:\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
@@ -16,8 +13,10 @@ Export-Package: uk.co.saiman.experiment.chemicalmap
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot,\

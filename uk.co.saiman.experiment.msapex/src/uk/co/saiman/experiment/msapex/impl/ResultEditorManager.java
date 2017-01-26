@@ -33,13 +33,17 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
+import org.osgi.service.event.Event;
 
 import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.msapex.ResultEditorPart;
@@ -49,10 +53,14 @@ import uk.co.saiman.experiment.msapex.ResultEditorPart;
 public class ResultEditorManager {
 	@Inject
 	public EPartService partService;
+	@Inject
+	public IEventBroker eventBroker;
 
+	private Map<MPart, ExperimentResult<?>> partResults;
 	private Map<ExperimentResult<?>, ResultEditorPart<?>> editorParts;
 
 	public ResultEditorManager() {
+		partResults = new HashMap<>();
 		editorParts = new HashMap<>();
 	}
 
@@ -67,33 +75,35 @@ public class ResultEditorManager {
 
 	@Inject
 	@Optional
-	private synchronized void subscribeTopicTodoUpdated(
-			@UIEventTopic(UIEvents.UIElement.TOPIC_TOBERENDERED) Map<String, ?> data) {
-		if (Boolean.FALSE.equals(data.get(UIEvents.EventTags.NEW_VALUE))) {
-			Object element = data.get(UIEvents.EventTags.ELEMENT);
+	private synchronized void initializeEditorContext(@UIEventTopic(UIEvents.Context.TOPIC_CONTEXT) Event event) {
+		Object origin = event.getProperty(UIEvents.EventTags.ELEMENT);
+		Object value = event.getProperty(UIEvents.EventTags.NEW_VALUE);
 
-			if (element instanceof MPart) {
-				Object controller = ((MPart) element).getObject();
+		if (origin instanceof MHandlerContainer && value instanceof IEclipseContext
+				&& UIEvents.EventTypes.SET.equals(event.getProperty(UIEvents.EventTags.TYPE))) {
+			IEclipseContext context = (IEclipseContext) value;
+			MPart part = context.get(MPart.class);
 
-				if (controller instanceof ResultEditorPart<?>) {
-					removeEditor((ResultEditorPart<?>) controller);
-				}
+			ExperimentResult<?> result = partResults.get(part);
+			if (result != null) {
+				context.set(ExperimentResult.class, result);
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> ResultEditorPart<T> createEditor(ExperimentResult<T> data) {
+	protected <T> ResultEditorPart<T> createEditor(ExperimentResult<T> data) {
 		MPart editorPart = partService.createPart(ResultEditorPartImpl.PART_ID);
+		partResults.put(editorPart, data);
 		partService.showPart(editorPart, PartState.ACTIVATE);
 
 		ResultEditorPart<T> controller = (ResultEditorPart<T>) editorPart.getObject();
-		controller.setData(data);
 
 		return controller;
 	}
 
-	private void removeEditor(ResultEditorPart<?> controller) {
+	protected void removeEditor(ResultEditorPart<?> controller) {
 		editorParts.remove(controller.getData());
+		partResults.remove(controller.getPart());
 	}
 }

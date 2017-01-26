@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+    <requires>
+		<import plugin="org.eclipse.core.expressions"/>
+	</requires>
+
+	<extension
+		id="modelContribution"
+    	point="org.eclipse.e4.workbench.model">
+
+		<fragment
+			uri="fragment.e4xmi" />
+    </extension>
+
+	<extension
+		point="org.eclipse.core.expressions.definitions">
+	
+		<definition
+			id="uk.co.strangeskies.expressions.selection.child">
+			
+			<with
+				variable="myactivePartId">
+				
+				<equals
+					value="com.example.e4.rcp.todo.part.todooverview">
+				</equals>
+			</with>
+		</definition>
+	</extension>
+
+</plugin> 

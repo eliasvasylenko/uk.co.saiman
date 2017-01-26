@@ -1,0 +1,35 @@
+Bundle-Name: SAI :: Experiment :: Spectrum :: MSApex
+
+-include:\
+	${include.ss}/eclipse.plugin.bnd,\
+	${include.ss}/eclipse.platform.neon.bnd,\
+	${include.ss}/eclipse.fx.2.4.0.bnd,\
+	${build}/include/fugue.icons.bnd
+
+-buildpath:\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.fx;version=latest,\
+	uk.co.strangeskies.eclipse;version=latest,\
+\
+	uk.co.saiman.data.api;version=snapshot,\
+	uk.co.saiman.data.msapex;version=snapshot,\
+	uk.co.saiman.experiment.api;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
+	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.measurement.api;version=snapshot,\
+\
+	javax.measure.unit-api
+
+Export-Package: uk.co.saiman.experiment.spectrum.msapex
+
+-includeresource:\
+	{css=css},\
+	res,\
+	{fragment.e4xmi}
