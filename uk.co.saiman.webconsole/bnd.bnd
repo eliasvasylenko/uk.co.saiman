@@ -1,0 +1,15 @@
+Bundle-Name: SAI :: Web Console
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot,\
+\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+\
+	org.apache.felix.webconsole
+
+Private-Package: \
+	uk.co.saiman.webconsole
+
+-includeresource: \
+	static=res/static

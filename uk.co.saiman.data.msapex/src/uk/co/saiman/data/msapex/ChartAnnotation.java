@@ -28,7 +28,7 @@
 package uk.co.saiman.data.msapex;
 
 import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeArgument;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
@@ -52,7 +52,7 @@ public interface ChartAnnotation<T> extends ReifiedToken<ChartAnnotation<T>> {
 
 	@Override
 	default TypeToken<ChartAnnotation<T>> getThisTypeToken() {
-		return new TypeToken<ChartAnnotation<T>>() {}.withTypeArgument(new TypeParameter<T>() {}, getDataType());
+		return new TypeToken<ChartAnnotation<T>>() {}.withTypeArguments(new TypeArgument<T>(getDataType()) {});
 	}
 
 	@Override

@@ -30,7 +30,7 @@ package uk.co.saiman.experiment;
 import java.util.Optional;
 
 import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeArgument;
 import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.utilities.Observable;
 
@@ -44,6 +44,6 @@ public interface ExperimentResult<T> extends Observable<Optional<T>>, ReifiedTok
 	@Override
 	default TypeToken<ExperimentResult<T>> getThisTypeToken() {
 		return new TypeToken<ExperimentResult<T>>() {}
-				.withTypeArgument(new TypeParameter<T>() {}, getResultType().getDataType());
+				.withTypeArguments(new TypeArgument<T>(getResultType().getDataType()) {});
 	}
 }

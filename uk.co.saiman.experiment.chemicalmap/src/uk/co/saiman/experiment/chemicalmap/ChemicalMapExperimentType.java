@@ -27,8 +27,7 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
-import static uk.co.strangeskies.utilities.Observable.Observation.TERMINATE;
-
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
@@ -100,17 +99,15 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 
 	@Override
 	public void execute(ExperimentExecutionContext<T> context) {
-		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
-			startAcquisition(context, device);
-			return TERMINATE;
-		});
-		getRasterDevice().startEvents().addTerminatingObserver(device -> {
-			startRaster(context, device);
-			new Thread(() -> getAcquisitionDevice().startAcquisition()).start();
-			return TERMINATE;
-		});
+		CountDownLatch latch = new CountDownLatch(1);
+
+		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> startAcquisition(context, device));
+		getRasterDevice().startEvents().addTerminatingObserver(device -> startRaster(context, device));
+
+		getAcquisitionDevice().endEvents().addTerminatingObserver(exception -> latch.countDown());
 
 		getRasterDevice().startRasterOperation();
+		getAcquisitionDevice().startAcquisition();
 
 		context.getResult(chemicalMapResult).getData().get().save();
 	}

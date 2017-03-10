@@ -1,5 +1,7 @@
 package uk.co.saiman.experiment.spectrum;
 
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.measure.Quantity;
@@ -38,7 +40,8 @@ public class AccumulatingContinuousFunction<UD extends Quantity<UD>, UR extends 
 	public AccumulatingContinuousFunction(SampledDomain<UD> domain, Unit<UR> unitRange) {
 		super(domain, unitRange, new double[domain.getDepth()]);
 
-		AggregatingListener<SampledContinuousFunction<?, UR>> aggregator = new AggregatingListener<>();
+		AggregatingListener<SampledContinuousFunction<?, UR>> aggregator = new AggregatingListener<>(
+				newSingleThreadExecutor());
 		aggregator.addObserver(a -> {
 			mutate(data -> {
 				for (SampledContinuousFunction<?, UR> c : a) {

@@ -1,6 +1,9 @@
 package uk.co.saiman.experiment;
 
+import static java.util.Objects.requireNonNull;
+
 import java.lang.ref.SoftReference;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -16,25 +19,53 @@ public class CachingResource<T> {
 		this.save = save;
 	}
 
-	public void save() {
-		if (requiresSave()) {
+	public boolean save() {
+		boolean requiresSave = isDirty();
+
+		if (requiresSave) {
 			save.accept(data);
 
-			data = null;
+			this.data = null;
 		}
+
+		return requiresSave;
 	}
 
-	public boolean requiresSave() {
+	/**
+	 * @return true if the resource has been changed since it was last saved,
+	 *         false otherwise
+	 */
+	public boolean isDirty() {
 		return data != null;
 	}
 
-	public void invalidate() {
-		this.data = dataReference.get();
+	/**
+	 * Mark the data as inconsistent with the previously saved state.
+	 */
+	public boolean makeDirty() {
+		boolean requiresDirty = !isDirty();
+
+		T data = dataReference.get();
+		requireNonNull(data);
+
+		if (requiresDirty) {
+			this.data = data;
+		}
+
+		return requiresDirty;
 	}
 
-	public void setData(T data) {
-		this.dataReference = new SoftReference<>(data);
-		this.data = data;
+	public boolean setData(T data) {
+		requireNonNull(data);
+
+		boolean requiresSet = !data.equals(this.data);
+
+		if (requiresSet) {
+			this.data = data;
+			this.dataReference = new SoftReference<>(data);
+		}
+
+		return requiresSet;
 	}
 
 	/**
@@ -52,5 +83,9 @@ public class CachingResource<T> {
 		}
 
 		return data;
+	}
+
+	public Optional<T> tryGetData() {
+		return Optional.of(dataReference.get());
 	}
 }

@@ -33,4 +33,5 @@
 	JavaSE-1.8
 
 -runproperties.msapex:\
-	eclipse.product=uk.co.saiman.msapex.product
+	eclipse.product=uk.co.saiman.msapex.product,\
+	uk.co.strangeskies.configadmin.persistence=~/.saiman/config

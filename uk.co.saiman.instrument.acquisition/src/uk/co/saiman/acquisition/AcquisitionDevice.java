@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.acquisition;
 
+import java.util.Optional;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
@@ -35,7 +37,6 @@ import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.strangeskies.utilities.Observable;
 
@@ -112,6 +113,11 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 */
 	Observable<AcquisitionDevice> startEvents();
 
+	Observable<Optional<AcquisitionException>> endEvents();
+
+	@Override
+	Observable<AcquisitionException> errors();
+
 	/**
 	 * Set the total acquisition count for a single experiment.
 	 * 
@@ -179,7 +185,7 @@ public interface AcquisitionDevice extends HardwareDevice {
 	 */
 	int getSampleDepth();
 
-	default SampledDomain<Time> getSampleDomain() {
+	default RegularSampledDomain<Time> getSampleDomain() {
 		return new RegularSampledDomain<>(
 				getSampleTimeUnits(),
 				getSampleDepth(),

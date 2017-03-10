@@ -35,6 +35,8 @@ package uk.co.saiman.instrument;
  * @author Elias N Vasylenko
  */
 public interface Instrument {
+	public static final String INSTRUMENT_CATEGORY = "Instrument";
+
 	boolean operate();
 
 	void standby();

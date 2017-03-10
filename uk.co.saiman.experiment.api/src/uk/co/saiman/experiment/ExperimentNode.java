@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.strangeskies.reflection.token.TypeToken.overType;
+import static uk.co.strangeskies.reflection.token.TypeToken.forType;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypeParameter;
+import uk.co.strangeskies.reflection.token.TypeArgument;
 import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.utilities.ObservableValue;
 import uk.co.strangeskies.utilities.collection.StreamUtilities;
@@ -185,11 +185,10 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	@Override
 	default TypeToken<ExperimentNode<T, S>> getThisTypeToken() {
 		@SuppressWarnings("unchecked")
-		TypeToken<T> typeType = (TypeToken<T>) overType(getType().getThisType());
+		TypeToken<T> typeType = (TypeToken<T>) forType(getType().getThisType());
 
 		return new TypeToken<ExperimentNode<T, S>>() {}
-				.withTypeArgument(new TypeParameter<T>() {}, typeType)
-				.withTypeArgument(new TypeParameter<S>() {}, getType().getStateType());
+				.withTypeArguments(new TypeArgument<T>(typeType) {}, new TypeArgument<S>(getType().getStateType()) {});
 	}
 
 	/**

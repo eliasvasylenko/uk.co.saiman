@@ -12,11 +12,17 @@ import uk.co.saiman.data.RegularSampledDomain;
 
 public class RegularSampledDomainByteFormat<U extends Quantity<U>> implements ByteFormat<RegularSampledDomain<U>> {
 	private static final int SIZE = Double.BYTES * 2 + Integer.BYTES;
+	private static final String MASS_SPECTRUM_DOMAIN_EXTENSION = "msd";
 
 	private final Unit<U> domainUnit;
 
 	public RegularSampledDomainByteFormat(Unit<U> domainUnit) {
 		this.domainUnit = domainUnit;
+	}
+
+	@Override
+	public String getPathExtension() {
+		return MASS_SPECTRUM_DOMAIN_EXTENSION;
 	}
 
 	@Override

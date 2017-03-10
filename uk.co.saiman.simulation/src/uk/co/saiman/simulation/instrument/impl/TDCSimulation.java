@@ -67,7 +67,7 @@ public class TDCSimulation implements DetectorSimulation {
 
 	@Activate
 	@Modified
-	void updated(TDCSimulationConfiguration configuration) {
+	void configure(TDCSimulationConfiguration configuration) {
 		maximumHits = configuration.maximumHitsPerSpectrum();
 	}
 

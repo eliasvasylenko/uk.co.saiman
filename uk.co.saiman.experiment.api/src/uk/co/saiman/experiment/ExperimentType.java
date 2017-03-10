@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment;
 
-import static uk.co.strangeskies.reflection.token.TypeToken.overType;
+import static uk.co.strangeskies.reflection.token.TypeToken.forType;
 
 import java.util.stream.Stream;
 
@@ -107,8 +107,9 @@ public interface ExperimentType<S> extends Reified {
 	 * @return the exact generic type of the configuration interface
 	 */
 	default TypeToken<S> getStateType() {
-		return overType(getThisType())
+		return forType(getThisType())
 				.resolveSupertype(ExperimentType.class)
-				.resolveTypeArgument(new TypeParameter<S>() {});
+				.resolveTypeArgument(new TypeParameter<S>() {})
+				.getTypeToken();
 	}
 }

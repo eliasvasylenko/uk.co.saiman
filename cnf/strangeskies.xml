@@ -28,6 +28,12 @@
 
 		<dependency>
 		    <groupId>uk.co.strangeskies</groupId>
+		    <artifactId>uk.co.strangeskies.configadmin.persistence</artifactId>
+		    <version>${strangeskies.version}</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>uk.co.strangeskies</groupId>
 		    <artifactId>uk.co.strangeskies.eclipse</artifactId>
 		    <version>${strangeskies.version}</version>
 		</dependency>
@@ -41,6 +47,12 @@
 		<dependency>
 		    <groupId>uk.co.strangeskies</groupId>
 		    <artifactId>uk.co.strangeskies.fx</artifactId>
+		    <version>${strangeskies.version}</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>uk.co.strangeskies</groupId>
+		    <artifactId>uk.co.strangeskies.jetty.logger</artifactId>
 		    <version>${strangeskies.version}</version>
 		</dependency>
 

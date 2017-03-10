@@ -30,12 +30,14 @@ package uk.co.saiman.experiment.spectrum;
 import static uk.co.strangeskies.utilities.Observable.Observation.CONTINUE;
 import static uk.co.strangeskies.utilities.Observable.Observation.TERMINATE;
 
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Time;
-
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.acquisition.AcquisitionException;
+import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
@@ -52,8 +54,10 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  *          the type of sample configuration for the instrument
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
+	private static final String SPECTRUM_DATA_NAME = "spectrum";
+
 	private SpectrumProperties properties;
-	private final ExperimentResultType<DefaultFileSpectrum> spectrumResult;
+	private final ExperimentResultType<AccumulatingFileSpectrum> spectrumResult;
 
 	public SpectrumExperimentType() {
 		this(PropertyLoader.getDefaultProperties(SpectrumProperties.class));
@@ -61,7 +65,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 
 	/*
 	 * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to
-	 * make this possible...
+	 * make this possible ...
 	 */
 	public SpectrumExperimentType(SpectrumProperties properties) {
 		this.properties = properties;
@@ -89,30 +93,40 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 
 	@Override
 	public void execute(ExperimentExecutionContext<T> context) {
-		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
-			startAcquisition(context, device);
-			return TERMINATE;
+		CompletableFuture<Optional<AcquisitionException>> end = new CompletableFuture<>();
+
+		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> prepareAcquisition(context, device));
+		getAcquisitionDevice().endEvents().addTerminatingObserver(exception -> {
+			end.complete(exception);
 		});
+
 		getAcquisitionDevice().startAcquisition();
 
-		context.getResult(spectrumResult).getData().get().save();
+		try {
+			end.get().ifPresent(e -> {
+				context.setResult(spectrumResult, null);
+				throw e;
+			});
+		} catch (InterruptedException | ExecutionException e) {
+			throw new ExperimentException(properties.experimentInterrupted(), e);
+		}
+
+		context.getResult(spectrumResult).getData().get().complete();
 	}
 
-	public void startAcquisition(ExperimentExecutionContext<T> context, AcquisitionDevice device) {
+	public void prepareAcquisition(ExperimentExecutionContext<T> context, AcquisitionDevice device) {
 		int count = device.getAcquisitionCount();
 
-		AccumulatingContinuousFunction<Time, Dimensionless> accumulator = new AccumulatingContinuousFunction<>(
+		AccumulatingFileSpectrum fileSpectrum = new AccumulatingFileSpectrum(
+				context.node().getExperimentDataPath(),
+				SPECTRUM_DATA_NAME,
 				device.getSampleDomain(),
 				device.getSampleIntensityUnits());
-
-		DefaultFileSpectrum fileSpectrum = new DefaultFileSpectrum(
-				accumulator,
-				context.node().getExperimentDataPath().resolve("data.spectrum"));
 
 		context.setResult(spectrumResult, fileSpectrum);
 
 		device.dataEvents().addTerminatingObserver(
-				a -> (device.isAcquiring() && accumulator.accumulate(a) == count) ? TERMINATE : CONTINUE);
+				a -> (device.isAcquiring() && fileSpectrum.accumulate(a) == count) ? TERMINATE : CONTINUE);
 	}
 
 	@Override

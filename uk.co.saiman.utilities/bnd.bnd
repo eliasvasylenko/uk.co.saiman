@@ -1,17 +1,15 @@
 Bundle-Name: SAI :: Utilities
 
 -buildpath: \
-	uk.co.strangeskies.reflection;version=latest,\
+	org.apache.felix.configadmin;version=latest,\
+\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest
 
 Export-Package: \
-	uk.co.saiman,\
-	uk.co.saiman.utilities
+	uk.co.saiman.utilities,\
+	uk.co.saiman
 
 -includeresource: \
 	META-INF/schemata=schemata,\
 	{bundle.properties}
-
-#-plugin: \
-#	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin

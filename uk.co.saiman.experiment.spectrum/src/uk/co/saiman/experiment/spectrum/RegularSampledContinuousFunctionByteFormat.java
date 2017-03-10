@@ -25,12 +25,20 @@ import uk.co.saiman.data.SampledContinuousFunction;
  */
 public class RegularSampledContinuousFunctionByteFormat<UD extends Quantity<UD>, UR extends Quantity<UR>>
 		implements ByteFormat<SampledContinuousFunction<UD, UR>> {
+	private static final String MASS_SPECTRUM_RANGE_EXTENSION = "msr";
+	private static final String MASS_SPECTRUM_FUNCTION_EXTENSION = "msf";
+
 	private final RegularSampledDomain<UD> domain;
 	private final Unit<UR> rangeUnit;
 
 	protected RegularSampledContinuousFunctionByteFormat(RegularSampledDomain<UD> domain, Unit<UR> rangeUnit) {
 		this.domain = domain;
 		this.rangeUnit = rangeUnit;
+	}
+
+	@Override
+	public String getPathExtension() {
+		return MASS_SPECTRUM_RANGE_EXTENSION;
 	}
 
 	/**
@@ -59,6 +67,11 @@ public class RegularSampledContinuousFunctionByteFormat<UD extends Quantity<UD>,
 			Unit<UD> domainUnit,
 			Unit<UR> rangeUnit) {
 		return new ByteFormat<SampledContinuousFunction<UD, UR>>() {
+			@Override
+			public String getPathExtension() {
+				return MASS_SPECTRUM_FUNCTION_EXTENSION;
+			}
+
 			@Override
 			public SampledContinuousFunction<UD, UR> load(ReadableByteChannel inputChannel) throws IOException {
 				RegularSampledDomain<UD> domain = new RegularSampledDomainByteFormat<>(domainUnit).load(inputChannel);

@@ -1,0 +1,13 @@
+Bundle-Name: SAI :: Comms :: SAINT
+
+-buildpath:\
+	uk.co.saiman.comms;version=snapshot,\
+\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest
+
+Private-Package:\
+	uk.co.saiman.comms.saint.impl
+
+Export-Package:\
+	uk.co.saiman.comms.saint

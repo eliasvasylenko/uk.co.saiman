@@ -62,6 +62,6 @@ public class WorkspaceContribution
 	@Override
 	public <U extends ExperimentWorkspace> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
 		return data.data().getRootExperiments().map(
-				c -> typedObject(c, new TypeToken<ExperimentNode<RootExperiment, ExperimentConfiguration>>() {}));
+				c -> typedObject(new TypeToken<ExperimentNode<RootExperiment, ExperimentConfiguration>>() {}, c));
 	}
 }

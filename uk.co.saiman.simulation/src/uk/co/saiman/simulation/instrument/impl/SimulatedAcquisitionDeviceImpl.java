@@ -59,6 +59,8 @@ import uk.co.saiman.simulation.instrument.SimulatedDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 import uk.co.strangeskies.utilities.BufferingListener;
+import uk.co.strangeskies.utilities.Log;
+import uk.co.strangeskies.utilities.Log.Level;
 import uk.co.strangeskies.utilities.Observable;
 import uk.co.strangeskies.utilities.ObservableImpl;
 
@@ -82,8 +84,6 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 		private int counter;
 
-		private AcquisitionException exception;
-
 		public ExperimentConfiguration() {
 			domain = getSampleDomain();
 
@@ -102,26 +102,23 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 			sample = SimulatedAcquisitionDeviceImpl.this.sample;
 		}
-
-		public void setException(AcquisitionException exception) {
-			this.exception = exception;
-			counter = 0;
-		}
 	}
 
 	private class Acquisition {
-		private final Optional<ExperimentConfiguration> experiment;
+		private final int remaining;
 		private final SampledContinuousFunction<Time, Dimensionless> data;
 
-		public Acquisition(
-				Optional<ExperimentConfiguration> experiment,
-				SampledContinuousFunction<Time, Dimensionless> data) {
-			this.experiment = experiment;
+		public Acquisition(int remaining, SampledContinuousFunction<Time, Dimensionless> data) {
+			this.remaining = remaining;
 			this.data = data;
 		}
 
-		public Optional<ExperimentConfiguration> getExperiment() {
-			return experiment;
+		/**
+		 * @return the number of spectra remaining after this one in the current
+		 *         experiment, or -1 if the spectra does not belong to an experiment
+		 */
+		public int getRemaining() {
+			return remaining;
 		}
 
 		public SampledContinuousFunction<Time, Dimensionless> getData() {
@@ -143,6 +140,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	public static final int DEFAULT_ACQUISITION_COUNT = 1000;
 
 	private boolean finalised = false;
+
+	@Reference
+	Log log;
 
 	@Reference
 	Units units;
@@ -169,10 +169,12 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	/*
 	 * External Acquisition State
 	 */
-	private final ObservableImpl<Exception> errors;
+	private final ObservableImpl<AcquisitionException> exceptionListeners;
 	private final ObservableImpl<SampledContinuousFunction<Time, Dimensionless>> acquisitionListeners;
 	private final ObservableImpl<AcquisitionDevice> startListeners;
+	private final ObservableImpl<Optional<AcquisitionException>> endListeners;
 
+	private AcquisitionException exception;
 	private boolean acquiring;
 	private SampledContinuousFunction<Time, Dimensionless> acquisitionData;
 
@@ -180,18 +182,19 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	 * Internal Acquisition State
 	 */
 	private final BufferingListener<Acquisition> acquisitionBuffer;
-	// make sure state remains consistent during start:
 	private final Object startingLock = new Object();
 	private final Object acquiringLock = new Object();
 	private Optional<ExperimentConfiguration> experiment;
 
 	public SimulatedAcquisitionDeviceImpl() {
-		errors = new ObservableImpl<>();
-		acquisitionBuffer = new BufferingListener<>();
+		exceptionListeners = new ObservableImpl<>();
 		acquisitionListeners = new ObservableImpl<>();
 		startListeners = new ObservableImpl<>();
-
+		endListeners = new ObservableImpl<>();
+		exception = null;
 		acquiring = false;
+
+		acquisitionBuffer = new BufferingListener<>();
 		experiment = Optional.empty();
 	}
 
@@ -394,15 +397,13 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	@Override
-	public Observable<Exception> errors() {
-		return errors;
+	public Observable<AcquisitionException> errors() {
+		return exceptionListeners;
 	}
 
 	@Override
 	public void startAcquisition() {
 		synchronized (acquiringLock) {
-			ExperimentConfiguration experiment = null;
-
 			try {
 				synchronized (startingLock) {
 					this.experiment.ifPresent(e -> {
@@ -410,45 +411,37 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 					});
 
 					// wait any previous experiment to flush from the buffer
-					System.out.println("wait any previous experiment to flush from the buffer");
 					while (acquiring) {
 						acquiringLock.wait();
 					}
 
 					// prepare a new experiment
-					System.out.println("prepare a new experiment");
+					exception = null;
 					startListeners.fire(this);
 					this.experiment = Optional.of(new ExperimentConfiguration());
 
 					// wait for the new experiment to reach the end of the buffer
-					System.out.println("wait for the new experiment to reach the end of the buffer");
 					while (!acquiring) {
 						acquiringLock.wait();
 					}
 				}
-
-				experiment = this.experiment.get();
-
-				do {
-					acquiringLock.wait();
-				} while (this.experiment.isPresent() && this.experiment.get() == experiment);
 			} catch (InterruptedException e) {
-				if (this.experiment.isPresent() && this.experiment.get() == experiment) {
-					this.experiment = Optional.empty();
-				}
+				this.experiment = Optional.empty();
 				throw new AcquisitionException(simulationText.acquisition().experimentInterrupted(), e);
-			}
-
-			if (experiment.exception != null) {
-				throw experiment.exception;
 			}
 		}
 	}
 
 	private void acquired(Acquisition acquisition) {
 		synchronized (acquiringLock) {
-			acquiring = acquisition.experiment.isPresent();
-			acquisitionListeners.fire(acquisition.data);
+			acquiring = acquisition.getRemaining() >= 0;
+			acquisitionListeners.fire(acquisition.getData());
+
+			if (acquisition.getRemaining() == 0) {
+				acquiring = false;
+				endListeners.fire(Optional.ofNullable(exception));
+			}
+
 			acquiringLock.notifyAll();
 		}
 	}
@@ -458,13 +451,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 			SimulatedSampleDevice sample;
 			DetectorSimulation detector;
 			SampledDomain<Time> domain;
+			int counter;
 
 			try {
-				Optional<ExperimentConfiguration> experiment;
-				synchronized (acquiringLock) {
-					experiment = this.experiment;
-				}
-
 				/*
 				 * These may remain blocking after an attempt to start an experiment,
 				 * but this is okay as the experiment should have failed anyway if this
@@ -473,13 +462,14 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 				detector = experiment.map(e -> e.detector).orElse(waitForDetector());
 				sample = experiment.map(e -> e.sample).orElse(waitForSample());
 				domain = experiment.map(e -> e.domain).orElse(getSampleDomain());
+				counter = experiment.map(e -> --e.counter).orElse(-1);
 
 				SampledContinuousFunction<Time, Dimensionless> acquisitionData = detector
 						.acquire(domain, intensityUnits, sample.getNextSample());
-				acquisitionBuffer.notify(new Acquisition(experiment, acquisitionData));
+				acquisitionBuffer.notify(new Acquisition(counter, acquisitionData));
 
 				synchronized (acquiringLock) {
-					if (experiment.map(e -> --e.counter == 0).orElse(false)) {
+					if (counter == 0) {
 						this.experiment = Optional.empty();
 						acquiringLock.notifyAll();
 					}
@@ -501,11 +491,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	}
 
 	private void exception(AcquisitionException exception) {
-		experiment.ifPresent(e -> e.setException(exception));
-		/*
-		 * TODO logging from this class...
-		 */
-		exception.printStackTrace();
+		this.exception = exception;
+		exceptionListeners.fire(exception);
+		log.log(Level.ERROR, exception);
 	}
 
 	@Override
@@ -610,5 +598,10 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	@Override
 	public Observable<AcquisitionDevice> startEvents() {
 		return startListeners;
+	}
+
+	@Override
+	public Observable<Optional<AcquisitionException>> endEvents() {
+		return endListeners;
 	}
 }

@@ -25,45 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.utilities;
-
-import org.osgi.service.component.annotations.Component;
-
-import uk.co.strangeskies.reflection.token.TypeParameter;
-import uk.co.strangeskies.reflection.token.TypeToken;
-
-/**
- * Implementation of this API designates a class which is configurable by a
- * given configuration interface type.
- * 
- * @author Elias N Vasylenko
- *
- * @param <C>
- *          The configuration interface type
- */
-@Component
-public interface Configurable<C> {
-	/**
-	 * @return The current configuration object.
-	 */
-	C configuration();
-
-	/**
-	 * Update the configuration.
-	 * 
-	 * @param configuration
-	 *          The new configuration to adopt
-	 */
-	void configure(C configuration);
-
-	/**
-	 * @return The exact generic type of the configuration interface
-	 */
-	default TypeToken<C> getConfigurationType() {
-		return TypeToken
-				.overType(getClass())
-				.resolveSupertype(Configurable.class)
-				.resolveTypeArgument(new TypeParameter<C>() {})
-				.infer();
-	}
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.comms.serial;

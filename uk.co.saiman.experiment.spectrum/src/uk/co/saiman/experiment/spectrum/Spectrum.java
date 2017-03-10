@@ -7,7 +7,7 @@ import javax.measure.quantity.Time;
 import uk.co.saiman.data.ContinuousFunction;
 
 public interface Spectrum {
-	void save();
+	void complete();
 
 	ContinuousFunction<Time, Dimensionless> getRawData();
 

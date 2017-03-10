@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: Jetty Logger
+
+-buildpath: \
+	org.apache.felix.http.jetty
+
+Private-Package: \
+	uk.co.saiman.jetty.logger,\
+	org.apache.felix.http.base.internal.logger
+
+-includeresource: \
+	res
+
+Fragment-Host: \
+	org.apache.felix.http.jetty

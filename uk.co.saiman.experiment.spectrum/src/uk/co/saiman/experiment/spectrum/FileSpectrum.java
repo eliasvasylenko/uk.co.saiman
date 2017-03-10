@@ -1,13 +1,8 @@
 package uk.co.saiman.experiment.spectrum;
 
-import static java.nio.file.Files.newByteChannel;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.READ;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.util.function.Function.identity;
 
 import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
 
 import javax.measure.quantity.Dimensionless;
@@ -15,6 +10,7 @@ import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.experiment.CachingObservableResource;
 import uk.co.saiman.experiment.CachingResource;
 
 public class FileSpectrum<C extends ContinuousFunction<Time, Dimensionless>> implements Spectrum {
@@ -23,12 +19,13 @@ public class FileSpectrum<C extends ContinuousFunction<Time, Dimensionless>> imp
 	private final Path location;
 	private final ByteFormat<C> format;
 
-	protected FileSpectrum(C data, Path location, ByteFormat<C> format) {
-		this.data = new CachingResource<>(this::load, this::save);
-		this.data.setData(data);
+	protected FileSpectrum(Path location, String name, C data, ByteFormat<C> format) {
+		this.data = new CachingObservableResource<>(this::load, this::save, identity());
 
-		this.location = location;
+		this.location = location.resolve(name + "." + format.getPathExtension());
 		this.format = format;
+
+		this.data.setData(data);
 	}
 
 	public Path getLocation() {
@@ -36,21 +33,21 @@ public class FileSpectrum<C extends ContinuousFunction<Time, Dimensionless>> imp
 	}
 
 	@Override
-	public void save() {
+	public void complete() {
 		data.save();
 	}
 
 	protected C load() {
-		try (ReadableByteChannel inputChannel = newByteChannel(location, READ)) {
-			return format.load(inputChannel);
+		try {
+			return format.load(location);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	protected void save(C data) {
-		try (WritableByteChannel outputChannel = newByteChannel(location, WRITE, CREATE)) {
-			format.save(outputChannel, data);
+		try {
+			format.save(location, data);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

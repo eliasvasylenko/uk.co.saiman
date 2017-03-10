@@ -64,7 +64,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
 			return (T) node.getType();
 		}
 
-		if (adapterType == node.getType().getStateType().getRawType()) {
+		if (adapterType == node.getType().getStateType().getErasedType()) {
 			return (T) node.getState();
 		}
 
@@ -77,7 +77,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
 				of(ExperimentType.class),
 				workspace
 						.getRegisteredExperimentTypes()
-						.map(type -> type.getStateType().getRawType())
+						.map(type -> type.getStateType().getErasedType())
 						.flatMap(this::getTransitive)).toArray(Class<?>[]::new);
 	}
 

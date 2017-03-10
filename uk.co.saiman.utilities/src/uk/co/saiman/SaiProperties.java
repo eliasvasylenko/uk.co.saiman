@@ -42,6 +42,11 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SaiProperties {
 	/**
+	 * Namespace for GoGo commands.
+	 */
+	public static String SAI_COMMAND_SCOPE = "sai";
+
+	/**
 	 * The root namespace associated with Scientific Analysis Instruments products
 	 */
 	/*-

@@ -94,7 +94,7 @@ public class ExperimentPartImpl implements ExperimentPart {
 
 		workspace = workspaceFactory.openWorkspace(workspaceLocation);
 
-		modularTreeController.getTreeView().setRootData(typedObject(workspace, ExperimentWorkspace.class));
+		modularTreeController.getTreeView().setRootData(typedObject(ExperimentWorkspace.class, workspace));
 
 		adapterFactory = new ExperimentNodeAdapterFactory(adapterManager, workspace);
 	}

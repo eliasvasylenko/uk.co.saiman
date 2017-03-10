@@ -47,5 +47,5 @@ public interface HardwareDevice {
 	 */
 	void abortOperation();
 
-	Observable<Exception> errors();
+	Observable<? extends Exception> errors();
 }

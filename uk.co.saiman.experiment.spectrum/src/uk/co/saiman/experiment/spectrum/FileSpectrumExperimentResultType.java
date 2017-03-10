@@ -3,7 +3,7 @@ package uk.co.saiman.experiment.spectrum;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
-public class FileSpectrumExperimentResultType<T> implements ExperimentResultType<DefaultFileSpectrum> {
+public class FileSpectrumExperimentResultType<T> implements ExperimentResultType<AccumulatingFileSpectrum> {
 	private final SpectrumExperimentType<?> type;
 
 	FileSpectrumExperimentResultType(SpectrumExperimentType<?> type) {
@@ -16,7 +16,7 @@ public class FileSpectrumExperimentResultType<T> implements ExperimentResultType
 	}
 
 	@Override
-	public TypeToken<DefaultFileSpectrum> getDataType() {
-		return new TypeToken<DefaultFileSpectrum>() {};
+	public TypeToken<AccumulatingFileSpectrum> getDataType() {
+		return new TypeToken<AccumulatingFileSpectrum>() {};
 	}
 }

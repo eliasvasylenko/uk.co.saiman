@@ -29,7 +29,6 @@ package uk.co.saiman.experiment;
 
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.LocalizedRuntimeException;
-import uk.co.strangeskies.text.properties.PropertyLoader;
 
 /**
  * A problem with experiment configuration or processing.
@@ -55,9 +54,5 @@ public class ExperimentException extends LocalizedRuntimeException {
 	 */
 	public ExperimentException(Localized<String> message) {
 		this(message, null);
-	}
-
-	protected static ExperimentProperties getText() {
-		return PropertyLoader.getDefaultPropertyLoader().getProperties(ExperimentProperties.class);
 	}
 }
