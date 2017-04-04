@@ -23,7 +23,7 @@ install:
   #- envsubst < .travis/maven-settings.xml > ~/.m2/settings.xml
 
 script:
-  - bash -c "while true; do echo \$(date) - building ...; sleep 30s; done"
+  - bash -c "while true; do echo \$(date) - building ...; sleep 30s; done" &
   - ./gradlew license >> /dev/null
   #- ./gradlew build jacocoTestReport --stacktrace --continue
 
