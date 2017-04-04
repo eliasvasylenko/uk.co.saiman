@@ -48,7 +48,8 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfiguration> implements ExperimentType<T> {
+public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfiguration>
+		implements ExperimentType<T> {
 	private ChemicalMapProperties properties;
 	private final ExperimentResultType<ChemicalMap> chemicalMapResult;
 
@@ -101,10 +102,16 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 	public void execute(ExperimentExecutionContext<T> context) {
 		CountDownLatch latch = new CountDownLatch(1);
 
-		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> startAcquisition(context, device));
-		getRasterDevice().startEvents().addTerminatingObserver(device -> startRaster(context, device));
+		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
+			startAcquisition(context, device);
+		});
+		getRasterDevice().startEvents().addTerminatingObserver(device -> {
+			startRaster(context, device);
+		});
 
-		getAcquisitionDevice().endEvents().addTerminatingObserver(exception -> latch.countDown());
+		getAcquisitionDevice().endEvents().addTerminatingObserver(exception -> {
+			latch.countDown();
+		});
 
 		getRasterDevice().startRasterOperation();
 		getAcquisitionDevice().startAcquisition();
