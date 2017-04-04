@@ -50,6 +50,34 @@ configure(bndProjects()) {
   plugins.apply 'biz.aQute.bnd'
 }
 
+/* Test Configuration */
+
+configure(bndProjects()) {
+
+  apply plugin: 'jacoco'
+
+
+  repositories {
+
+    mavenCentral()
+
+  }
+
+
+  jacocoTestReport {
+
+    reports {
+
+      xml.enabled true
+
+      html.enabled false
+
+    }
+
+  }
+
+}
+
 /* Source License Generation */
 def copyrightProperties  = new Properties()
 rootProject.file('copyright.properties').withReader { reader ->
