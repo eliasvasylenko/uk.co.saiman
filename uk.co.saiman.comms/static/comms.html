@@ -1,154 +1,88 @@
+<script type="text/javascript"
+	src="${appRoot}/res/lib/jquery.multifile-1.4.6.js"></script>
+<script type="text/javascript" src="${pluginRoot}/static/sai/comms.js"></script>
 <script type="text/javascript">
-// <![CDATA[
+	// <![CDATA[
+	var i18n = {
+		pollStop : '${comms.poll.stop}',
+		pollStart : '${comms.poll.start}'
+	}
 
-	var rest_endpoint = "/comms/commandSetInfo";
-	
-	$(document).ready(() => {
-		var command_set_table_body = document.querySelector("#command_set_table tbody");
-		var command_set_template = document.querySelector("#command_set");
-		var command_set_detail_template = document.querySelector("#command_set_detail");
-
-		var command_table = document.querySelector("#command_table");
-		var command_table_body = document.querySelector("#command_table tbody");
-		var command_template = document.querySelector("#command");
-
-		function clearCommandSetInfo(detail) {
-			while (command_set_table_body.firstChild) {
-				command_set_table_body.removeChild(command_set_table_body.firstChild);
-			}
-			while (command_table_body.firstChild) {
-				command_table_body.removeChild(command_table_body.firstChild);
-			}
-		}
-
-		function renderCommandSetInfo() {
-			var command_set_name = unescape(location.pathname.substring(pluginRoot.length + 1));
-
-			if (command_set_name) {
-				renderSingleCommandSetInfo(command_set_name);
-			} else {
-				renderAllCommandSetInfo();
-			}
-		}
-
-		function renderSingleCommandSetInfo(command_set_name) {
-			$.getJSON(rest_endpoint + '/' + command_set_name, command_set => {
-				clearCommandSetInfo();
-
-				addCommandSetInfo(command_set, command_set_detail_template, pluginRoot);
-
-				command_set.commands.forEach(command => {
-					addCommandInfo(command, command_template);
-				});
-				
-				initStaticWidgets();
-			});
-		}
-
-		function renderAllCommandSetInfo() {
-			$.getJSON(rest_endpoint, command_sets => {
-				clearCommandSetInfo();
-				command_table.style.display = 'none';
-
-				command_sets.forEach(command_set => {
-					addCommandSetInfo(command_set, command_set_template, pluginRoot + "/" + command_set.name);
-				});
-
-				initStaticWidgets();
-			});
-		}
-
-		function addCommandSetInfo(commandSet, template, link) {
-			var node = document.importNode(template.content, true);
-
-			node.querySelector("#name").innerHTML += commandSet.name;
-			node.querySelector("#name").href = link;
-			node.querySelector("#status").innerText = commandSet.status;
-			node.querySelector("#channel").innerText = commandSet.channel;
-			node.querySelector("#class").innerText = commandSet.commandIdClass;
-			node.querySelector("#bundle").innerText = commandSet.registeringBundle.bundleName;
-			node.querySelector("#bundle").href = appRoot  + "/bundles/" + commandSet.registeringBundle.bundleId;
-
-			command_set_table_body.appendChild(node);
-		}
-
-		function addCommandInfo(command, template) {
-			var node = document.importNode(template.content, true);
-
-			node.querySelector("#id").innerHTML += command;
-
-			command_table_body.appendChild(node);
-		}
-
-		$('.reloadButton').click(renderCommandSetInfo);
-		renderCommandSetInfo();
-	});
-
-// ]]>
+	//]]>
 </script>
 
-<!-- status line -->
+<!-- command set table -->
 <p class="statline">&nbsp;</p>
 
-<!-- top header -->
-<form method="post" enctype="multipart/form-data" action=""
-	class="filterForm">
-	<div class="ui-widget-header ui-corner-top buttonGroup">
-		<div class="filterBox">
-			<input class="filter" value="" title="${bundles.filter.help}" /> <span
-				class="filterClear ui-icon ui-icon-close"
-				title="${bundles.filter.clear}">&nbsp;</span>
-			<button class="filterApply" title="${bundles.filter.help}">${bundles.filter.apply}</button>
-		</div>
-		<button class="reloadButton" type="button">${reload}</button>
-	</div>
-</form>
+<div class="ui-widget-header ui-corner-top buttonGroup">
+	<button class="pollButton" type="button"></button>
+	<button class="reloadButton" type="button">${reload}</button>
+</div>
 
-<table id="command_set_table" class="tablesorter nicetable ui-widget">
+<table id="command_set_table" class="tablesorter nicetable noauto">
 	<thead>
 		<tr>
 			<th class="col_Name">${comms.name}</th>
 			<th class="col_Status">${comms.status}</th>
 			<th class="col_Channel">${comms.channel}</th>
-			<th class="col_Id_Class">${comms.id.class}</th>
-			<th class="col_Channel">${comms.bundle}</th>
+			<th class="col_Bundle">${comms.bundle}</th>
 		</tr>
 	</thead>
 	<tbody>
 	</tbody>
 </table>
 
-<table id="command_table" class="tablesorter nicetable ui-widget">
-	<thead>
-		<tr>
-			<th class="col_Id">${comms.command.id}</th>
-			<th class="col_Input_Type">${comms.command.input}</th>
-			<th class="col_Output_Type">${comms.command.output}</th>
-			<th class="col_Expected_Input_Bytes">${comms.command.input.bytes}</th>
-		</tr>
-	</thead>
-	<tbody>
-	</tbody>
-</table>
+<!-- commands table -->
+<div id="commands_container">
+	<span>&nbsp;</span>
+
+	<div id="filter_container" class="ui-widget-header ui-corner-top buttonGroup">
+		<input
+			class="filter"
+			value=""
+			title="${comms.filter.help}" />
+		<span
+			class="filterClear ui-icon ui-icon-close"
+			title="${comms.filter.clear}">
+		</span>
+		<button
+			class="filterButton"
+			type="button"
+			title="${comms.filter.help}">
+			${comms.filter.apply}
+		</button>
+	</div>
+
+	<table id="command_table" class="tablesorter nicetable noauto">
+		<thead>
+			<tr>
+				<th class="col_Id">${comms.command.id}</th>
+				<th class="col_Output">${comms.command.output}</th>
+				<th class="col_Input">${comms.command.input}</th>
+				<th class="col_Actions">${comms.command.actions}</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</div>
 
 <template id="command_set">
 <tr>
-	<td><a id="name"><span
-			class="bIcon ui-icon ui-icon-triangle-1-e" title="Show Details"></span></a></td>
+	<td><a id="name" title="Show Details"><span
+			class="bIcon ui-icon ui-icon-triangle-1-e"></span></a></td>
 	<td id="status" />
 	<td id="channel" />
-	<td id="class" />
 	<td><a id="bundle"></a></td>
 </tr>
 </template>
 
 <template id="command_set_detail">
 <tr>
-	<td><a id="name"><span
-			class="bIcon ui-icon ui-icon-triangle-1-w" title="Show Details"></span></a></td>
+	<td><a id="name" title="Show Details"><span
+			class="bIcon ui-icon ui-icon-triangle-1-w"></span></a></td>
 	<td id="status" />
 	<td id="channel" />
-	<td id="class" />
 	<td><a id="bundle"></a></td>
 </tr>
 </template>
@@ -156,8 +90,13 @@
 <template id="command">
 <tr>
 	<td id="id" />
-	<td id="input" />
 	<td id="output" />
-	<td id="input_bytes" />
+	<td id="input" />
+	<td id="actions">
+		<ul class="icons ui-widget">
+			<li title="${comms.command.execute}" class="dynhover"><span
+				id="execute" class="ui-icon ui-icon-play"></span></li>
+		</ul>
+	</td>
 </tr>
 </template>

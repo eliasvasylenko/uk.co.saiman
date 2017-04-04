@@ -111,13 +111,15 @@ public class FileChemicalMap<D extends SampledDomain<Time>, C extends Continuous
 	public CachingResource<Image> createMassImageData(int index) {
 		Path location = getImageDataLocation(index);
 
-		CachingResource<Image> data = new CachingResource<>(() -> loadImage(location), i -> saveImage(location, i));
+		CachingResource<Image> data = new CachingResource<>(
+				() -> loadImage(location),
+				i -> saveImage(location, i));
 		return data;
 	}
 
 	protected Image loadImage(Path location) {
 		try (ReadableByteChannel inputChannel = newByteChannel(location, READ)) {
-			return imageFormat.load(inputChannel);
+			return null; // TODO imageFormat.load(inputChannel);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -125,7 +127,7 @@ public class FileChemicalMap<D extends SampledDomain<Time>, C extends Continuous
 
 	protected void saveImage(Path location, Image data) {
 		try (WritableByteChannel outputChannel = newByteChannel(location, WRITE, CREATE)) {
-			imageFormat.save(outputChannel, data);
+			// TODO imageFormat.save(outputChannel, data);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -141,7 +143,7 @@ public class FileChemicalMap<D extends SampledDomain<Time>, C extends Continuous
 
 	@Override
 	public void save() {
-		data.complete();
+		// TODO data.complete();
 	}
 
 	public void setPixel(int x, int y, C spectrum) {

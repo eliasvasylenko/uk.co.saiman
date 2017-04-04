@@ -1,10 +1,8 @@
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.CommandId;
-
-public class SaintCommandId implements CommandId {
+public class SaintCommandId {
 	public enum SaintCommandType {
-		INPUT(0xA0), OUTPUT(0xAF);
+		PING(0x00), INPUT(0xA0), OUTPUT(0xAF);
 
 		private final byte type;
 
@@ -18,6 +16,8 @@ public class SaintCommandId implements CommandId {
 	}
 
 	public enum SaintCommandAddress {
+		NULL(0x00, 0x00, 0x00, 0x00),
+
 		LED_LAT(0x11),
 		LED_PORT(0x12),
 
@@ -30,17 +30,23 @@ public class SaintCommandId implements CommandId {
 		STAGE_LAT(0x41),
 		STAGE_PORT(0x42),
 
-		HV_DAC_1_LSB(0x80),
-		HV_DAC_1_MSB(0x81);
+		HV_DAC_1(0x80, 0x81);
 
-		private final byte address;
+		private final byte[] address;
 
-		private SaintCommandAddress(int address) {
-			this.address = (byte) address;
+		private SaintCommandAddress(int... address) {
+			this.address = new byte[address.length];
+			for (int i = 0; i < address.length; i++) {
+				this.address[i] = (byte) address[i];
+			}
 		}
 
-		public byte getByte() {
+		public byte[] getBytes() {
 			return address;
+		}
+
+		public int getSize() {
+			return address.length;
 		}
 	}
 
@@ -65,10 +71,5 @@ public class SaintCommandId implements CommandId {
 	@Override
 	public String toString() {
 		return address + SPLIT_CHARACTER + type;
-	}
-
-	@Override
-	public byte[] getBytes() {
-		return new byte[] { type.getByte(), address.getByte() };
 	}
 }

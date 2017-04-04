@@ -1,16 +1,18 @@
 package uk.co.saiman.webconsole;
 
 import org.apache.felix.webconsole.BrandingPlugin;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
-@Component
+@Component(property = Constants.SERVICE_RANKING + ":Integer=" + 2000)
 public class SaiBrandingPlugin implements BrandingPlugin {
-	private static final String RESOURCE_ALIAS_PATH = "/system/console/sai/";
-	private static final String RESOURCE_NAME_PATH = "/static/sai/";
+	private static final String APP_ROOT_PATH = "/system/console";
+	private static final String RESOURCE_ALIAS_PATH = "/sai-res";
+	private static final String RESOURCE_NAME_PATH = "/res";
 
 	private static final String VENDOR_NAME = "Scientific Analysis Instruments";
 	private static final String VENDOR_URL = "http://saiman.co.uk/";
@@ -20,13 +22,7 @@ public class SaiBrandingPlugin implements BrandingPlugin {
 
 	@Activate
 	void activate() throws NamespaceException {
-		registerResource("sai-logo.svg");
-		registerResource("sai-web-console.css");
-		registerResource("favicon.png");
-	}
-
-	private void registerResource(String resource) throws NamespaceException {
-		service.registerResources(RESOURCE_ALIAS_PATH + resource, RESOURCE_NAME_PATH + resource, null);
+		service.registerResources(APP_ROOT_PATH + RESOURCE_ALIAS_PATH, RESOURCE_NAME_PATH, null);
 	}
 
 	@Override
@@ -36,17 +32,17 @@ public class SaiBrandingPlugin implements BrandingPlugin {
 
 	@Override
 	public String getFavIcon() {
-		return "/sai/favicon.png";
+		return RESOURCE_ALIAS_PATH + "/favicon.png";
 	}
 
 	@Override
 	public String getMainStyleSheet() {
-		return "/sai/sai-web-console.css";
+		return RESOURCE_ALIAS_PATH + "/sai-web-console.css";
 	}
 
 	@Override
 	public String getProductImage() {
-		return "/sai/sai-logo.svg";
+		return RESOURCE_ALIAS_PATH + "/sai-logo.svg";
 	}
 
 	@Override
@@ -61,7 +57,7 @@ public class SaiBrandingPlugin implements BrandingPlugin {
 
 	@Override
 	public String getVendorImage() {
-		return "/sai/sai-logo.svg";
+		return RESOURCE_ALIAS_PATH + "/sai-logo.svg";
 	}
 
 	@Override

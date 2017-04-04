@@ -2,14 +2,20 @@ package uk.co.saiman.comms;
 
 import java.util.stream.Stream;
 
-public interface CommandSet<T extends CommandId> {
+public interface CommandSet<T> {
 	String getName();
+
+	boolean isOpen();
+
+	boolean open();
+
+	boolean close();
 
 	Class<T> getCommandIdClass();
 
 	Stream<T> getCommands();
 
-	CommandDefinition<T, ?, ?> getCommand(T id);
+	Command<T, ?, ?> getCommand(T id);
 
-	CommsChannel getChannel();
+	Comms getChannel();
 }

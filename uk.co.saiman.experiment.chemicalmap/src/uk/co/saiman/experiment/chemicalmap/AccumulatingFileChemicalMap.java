@@ -11,7 +11,8 @@ import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.experiment.spectrum.RegularSampledContinuousFunctionByteFormat;
 import uk.co.saiman.experiment.spectrum.RegularSampledDomainByteFormat;
 
-public class AccumulatingFileChemicalMap extends FileChemicalMap<SampledContinuousFunction<Time, Dimensionless>> {
+public class AccumulatingFileChemicalMap extends
+		FileChemicalMap<RegularSampledDomain<Time>, SampledContinuousFunction<Time, Dimensionless>> {
 	public AccumulatingFileChemicalMap(
 			Path location,
 			String name,

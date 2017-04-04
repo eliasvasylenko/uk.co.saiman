@@ -8,6 +8,9 @@ public class CommsException extends RuntimeException {
 	}
 
 	public CommsException(String message, Exception exception) {
-		super(message, exception);
+		super(
+				message + ": " + (exception.getMessage() != null ? exception.getMessage()
+						: exception.getClass().getName()),
+				exception);
 	}
 }

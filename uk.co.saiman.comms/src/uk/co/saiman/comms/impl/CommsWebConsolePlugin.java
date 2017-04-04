@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,6 +20,7 @@ import org.osgi.service.component.annotations.Deactivate;
 		name = "osgi.enroute.examples.webconsole",
 		service = Servlet.class,
 		property = "felix.webconsole.label=" + CommsWebConsolePlugin.PLUGIN)
+@MultipartConfig(location = "/tmp/comms")
 public class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
 	private static final long serialVersionUID = 1L;
 
@@ -48,5 +50,11 @@ public class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
 	protected void renderContent(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.getWriter().append(template);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		System.out.println(req.getParts());
 	}
 }

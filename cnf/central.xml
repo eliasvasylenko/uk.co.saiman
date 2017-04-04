@@ -12,6 +12,24 @@
 
 	<dependencies>
 		<dependency>
+		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>react</artifactId>
+		    <version>15.4.2</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>react-dom</artifactId>
+		    <version>15.4.2</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.apache.felix</groupId>
+		    <artifactId>org.apache.felix.webconsole</artifactId>
+		    <version>4.3.0</version>
+		</dependency>
+
+		<dependency>
 			<groupId>javax.measure</groupId>
 			<artifactId>unit-api</artifactId>
 			<version>1.0</version>

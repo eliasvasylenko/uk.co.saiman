@@ -7,7 +7,7 @@ import java.util.stream.Stream;
  * 
  * @author Elias N Vasylenko
  */
-public interface SerialComms {
+public interface SerialPorts {
 	/**
 	 * Get all known serial ports available on the system.
 	 * 

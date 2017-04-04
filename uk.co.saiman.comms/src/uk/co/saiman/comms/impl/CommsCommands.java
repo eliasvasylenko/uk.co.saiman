@@ -9,7 +9,6 @@ import static uk.co.saiman.SaiProperties.SAI_COMMAND_SCOPE;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +17,9 @@ import org.apache.felix.service.command.Descriptor;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.serial.SerialComms;
+import uk.co.saiman.comms.serial.SerialPorts;
 import uk.co.saiman.comms.serial.SerialPort;
 
 /**
@@ -40,10 +40,10 @@ import uk.co.saiman.comms.serial.SerialPort;
 				COMMAND_FUNCTION + "=inspectPort" })
 public class CommsCommands {
 	private SerialPort openPort;
-	private ByteChannel openChannel;
+	private CommsChannel openChannel;
 
 	@Reference(cardinality = OPTIONAL, policyOption = GREEDY)
-	SerialComms comms;
+	SerialPorts comms;
 
 	void deactivate() throws IOException {
 		if (openPort != null) {
@@ -80,7 +80,8 @@ public class CommsCommands {
 		assertCommsAvailable();
 
 		if (openPort != null) {
-			throw new CommsException("Port already open " + openPort.getSystemName() + " - " + openPort.getDescriptiveName());
+			throw new CommsException(
+					"Port already open " + openPort.getSystemName() + " - " + openPort.getDescriptiveName());
 		}
 
 		SerialPort port = comms.getPort(portName);
@@ -100,7 +101,7 @@ public class CommsCommands {
 	public void closePort() throws IOException {
 		assertPortAvailable();
 		openPort = null;
-		ByteChannel channel = openChannel;
+		CommsChannel channel = openChannel;
 		openChannel = null;
 		channel.close();
 	}
@@ -141,7 +142,7 @@ public class CommsCommands {
 	public ByteBuffer readPort() throws IOException {
 		assertPortAvailable();
 
-		ByteBuffer buffer = ByteBuffer.allocate(openPort.bytesAvailable());
+		ByteBuffer buffer = ByteBuffer.allocate(openChannel.availableBytes().get());
 		openChannel.read(buffer);
 		buffer.flip();
 

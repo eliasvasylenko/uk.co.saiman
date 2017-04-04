@@ -1,13 +1,15 @@
 package uk.co.saiman.comms.saint;
 
 import uk.co.saiman.comms.CommandSet;
+import uk.co.saiman.comms.NamedBits;
+import uk.co.saiman.comms.NumberedBits;
 
 public interface SaintComms extends CommandSet<SaintCommandId> {
 	String ID = "SAINT Comms";
-	
-	InOutBlock<StatusLedBits> led();
 
-	InOutBlock<VacuumBits> vacuum();
+	InOutBlock<NumberedBits> led();
 
-	OutBlock<HighVoltageBits> highVoltage();
+	InOutBlock<NamedBits<VacuumBit>> vacuum();
+
+	OutBlock<NamedBits<HighVoltageBit>> highVoltage();
 }

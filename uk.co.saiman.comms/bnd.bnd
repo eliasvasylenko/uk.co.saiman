@@ -34,4 +34,5 @@ Private-Package: \
 
 Export-Package: \
 	uk.co.saiman.comms,\
-	uk.co.saiman.comms.serial
+	uk.co.saiman.comms.serial,\
+	uk.co.saiman.comms.rest

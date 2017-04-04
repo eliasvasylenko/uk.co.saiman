@@ -1,9 +1,7 @@
 package uk.co.saiman.comms.serial;
 
-import uk.co.saiman.comms.CommsChannel;
+import uk.co.saiman.comms.Comms;
 
-public interface SerialPort extends CommsChannel {
+public interface SerialPort extends Comms {
 	String getSystemName();
-
-	int bytesAvailable();
 }

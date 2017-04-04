@@ -1,5 +1,11 @@
 Bundle-Name: SAI :: Web Console
 
+Bundle-Description: \
+	Provides a web console for SAI system administration
+
+EnRoute-Application: \
+	system/console
+
 -buildpath: \
 	uk.co.saiman.utilities;version=snapshot,\
 \
@@ -8,8 +14,11 @@ Bundle-Name: SAI :: Web Console
 \
 	org.apache.felix.webconsole
 
+Import-Package: \
+	*
+
 Private-Package: \
 	uk.co.saiman.webconsole
 
 -includeresource: \
-	static=res/static
+	res=res

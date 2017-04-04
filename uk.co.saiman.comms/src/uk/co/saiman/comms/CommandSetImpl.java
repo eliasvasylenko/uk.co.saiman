@@ -1,40 +1,65 @@
 package uk.co.saiman.comms;
 
-import static java.nio.ByteBuffer.allocate;
+import static uk.co.saiman.comms.Comms.CommsStatus.FAULT;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * A simple immutable class defining named addresses for pushing and requesting
- * bytes to and from a {@link CommsChannel comms channel}.
- * 
- * <p>
- * A command definition comprises of a {@link CommandId command id} followed by
- * a number of input and output bytes. The {@link CommandId#getBytes() command
- * id bytes} are sent down the comms channel, then a number of further bytes are
- * sent and received through the channel according to the shape of the command.
+ * bytes to and from a {@link Comms comms channel}.
  * 
  * @author Elias N Vasylenko
  * @param <T>
  *          The command identifier type. This may typically consist of an
  *          address and an operation type.
  */
-public abstract class CommandSetImpl<T extends CommandId> implements CommandSet<T> {
+public abstract class CommandSetImpl<T> implements CommandSet<T> {
+	public class CommandImpl<I, O> implements Command<T, I, O> {
+		private final T id;
+		private final CommandFunction<I, O> definition;
+		private final Supplier<O> prototype;
+
+		protected CommandImpl(T id, CommandFunction<I, O> definition, Supplier<O> prototype) {
+			this.id = id;
+			this.definition = definition;
+			this.prototype = prototype;
+		}
+
+		@Override
+		public T getId() {
+			return id;
+		}
+
+		@Override
+		public I invoke(O argument) {
+			return useChannel(channel -> {
+				try {
+					I lastInput = definition.execute(argument, channel);
+					return lastInput;
+				} catch (Exception e) {
+					throw new CommsException("Problem transferring data for command " + id, e);
+				}
+			});
+		}
+
+		@Override
+		public O prototype() {
+			return prototype.get();
+		}
+	}
+
 	private final String name;
 	private final Class<T> idClass;
-	private final Map<T, CommandDefinition<T, ?, ?>> commands;
+	private final Map<T, Command<T, ?, ?>> commands;
 
-	private CommsChannel commsChannel;
-	private ByteChannel byteChannel;
-
-	private final Object commsChannelLock = new Object();
+	private Comms comms;
+	private CommsChannel channel;
 
 	/**
 	 * Initialize an empty address space.
@@ -55,38 +80,90 @@ public abstract class CommandSetImpl<T extends CommandId> implements CommandSet<
 		return idClass;
 	}
 
-	protected void setChannel(CommsChannel channel) {
-		synchronized (commsChannelLock) {
-			commsChannel = channel;
+	protected abstract void checkComms();
+
+	private synchronized void performCheck() {
+		try {
+			if (comms.status().get() == FAULT) {
+				comms.reset();
+				open();
+			}
+			checkComms();
+		} catch (CommsException e) {
+			comms.setFault(e);
+		} catch (Exception e) {
+			comms.setFault(new CommsException("Problem checking comms", e));
+		}
+	}
+
+	protected synchronized void unsetComms() throws IOException {
+		close();
+		this.comms = null;
+	}
+
+	protected synchronized void setComms(Comms comms) throws IOException {
+		boolean wasOpen = close();
+		this.comms = comms;
+		if (wasOpen && open()) {
+			performCheck();
 		}
 	}
 
 	@Override
-	public CommsChannel getChannel() {
-		return commsChannel;
+	public synchronized boolean isOpen() {
+		return channel != null;
 	}
 
-	protected synchronized void useChannel(Consumer<ByteChannel> action) {
-		/*
-		 * TODO timeout byte channel being open ...
-		 */
-		try (ByteChannel byteChannel = getChannel().openChannel()) {
-			action.accept(byteChannel);
-		} catch (IOException e) {
-			throw new CommsException("Problem opening comms channel");
+	@Override
+	public synchronized boolean open() {
+		if (!isOpen()) {
+			try {
+				channel = comms.openChannel();
+				return true;
+			} catch (CommsException e) {
+				comms.setFault(e);
+				return false;
+			}
+		} else {
+			if (comms.status().get() == FAULT) {
+				performCheck();
+			}
+			return false;
 		}
 	}
 
-	protected synchronized <T> T useChannel(Function<ByteChannel, T> action) {
-		try (ByteChannel byteChannel = getChannel().openChannel()) {
-			return action.apply(byteChannel);
-		} catch (IOException e) {
-			throw new CommsException("Problem opening comms channel");
+	@Override
+	public synchronized boolean close() {
+		if (isOpen()) {
+			try {
+				channel.close();
+			} catch (CommsException e) {
+				comms.setFault(e);
+			}
+			channel = null;
+			return true;
+		} else {
+			return false;
 		}
 	}
 
-	public <I, O> CommandDefinition<T, I, O> addCommand(T id, InputPayload<I> input, OutputPayload<O> output) {
-		CommandDefinition<T, I, O> command = new CommandDefinition<>(this, id, input, output);
+	@Override
+	public Comms getChannel() {
+		return comms;
+	}
+
+	protected synchronized <U> U useChannel(Function<ByteChannel, U> action) {
+		if (open()) {
+			performCheck();
+		}
+		return action.apply(channel);
+	}
+
+	protected <I, O> Command<T, I, O> addCommand(
+			T id,
+			CommandFunction<I, O> definition,
+			Supplier<O> prototype) {
+		Command<T, I, O> command = new CommandImpl<>(id, definition, prototype);
 		commands.put(id, command);
 
 		return command;
@@ -98,42 +175,13 @@ public abstract class CommandSetImpl<T extends CommandId> implements CommandSet<
 	}
 
 	@Override
-	public CommandDefinition<T, ?, ?> getCommand(T id) {
-		CommandDefinition<T, ?, ?> command = commands.get(id);
+	public Command<T, ?, ?> getCommand(T id) {
+		Command<T, ?, ?> command = commands.get(id);
 
 		if (command == null) {
 			throw new CommsException("Command undefined " + id);
 		}
 
 		return command;
-	}
-
-	void sendBytes(ByteBuffer outputBuffer) {
-		useChannel(channel -> {
-			try {
-				channel.write(outputBuffer);
-			} catch (IOException e) {
-				throw new CommsException("Problem sending output bytes");
-			}
-		});
-	}
-
-	ByteBuffer receiveBytes(int expectedBytes) {
-		return useChannel(channel -> {
-			ByteBuffer inputBuffer = allocate(expectedBytes);
-			int read;
-
-			try {
-				read = channel.read(inputBuffer);
-			} catch (IOException e) {
-				throw new CommsException("Problem receiving input bytes");
-			}
-
-			if (read != expectedBytes) {
-				throw new CommsException("Input byte count does not match expected");
-			}
-
-			return inputBuffer;
-		});
 	}
 }
