@@ -50,8 +50,10 @@ import uk.co.strangeskies.reflection.token.TypedObject;
 
 @SuppressWarnings("javadoc")
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
-public class SampleImageConfigurationContribution implements EclipseTreeContribution<SimulatedSampleImageConfiguration>,
-		TreeChildContribution<SimulatedSampleImageConfiguration>, TreeTextContribution<SimulatedSampleImageConfiguration>,
+public class SampleImageConfigurationContribution
+		implements EclipseTreeContribution<SimulatedSampleImageConfiguration>,
+		TreeChildContribution<SimulatedSampleImageConfiguration>,
+		TreeTextContribution<SimulatedSampleImageConfiguration>,
 		PseudoClassTreeCellContribution<SimulatedSampleImageConfiguration> {
 	@Inject
 	@Localize
@@ -63,21 +65,28 @@ public class SampleImageConfigurationContribution implements EclipseTreeContribu
 	}
 
 	@Override
-	public <U extends SimulatedSampleImageConfiguration> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
+	public <U extends SimulatedSampleImageConfiguration> Stream<TypedObject<?>> getChildren(
+			TreeItemData<U> data) {
 		return of(
-				typedObject(data.data().getSampleImage(), SimulatedSampleImage.class),
+				typedObject(SimulatedSampleImage.class, data.data().getSampleImage()),
 				typedObject(
-						new ChemicalColor(properties.redChemical(), data.data().getRedChemical(), data.data()::setRedChemical),
-						ChemicalColor.class),
+						ChemicalColor.class,
+						new ChemicalColor(
+								properties.redChemical(),
+								data.data().getRedChemical(),
+								data.data()::setRedChemical)),
 				typedObject(
+						ChemicalColor.class,
 						new ChemicalColor(
 								properties.greenChemical(),
 								data.data().getGreenChemical(),
-								data.data()::setGreenChemical),
-						ChemicalColor.class),
+								data.data()::setGreenChemical)),
 				typedObject(
-						new ChemicalColor(properties.blueChemical(), data.data().getBlueChemical(), data.data()::setBlueChemical),
-						ChemicalColor.class));
+						ChemicalColor.class,
+						new ChemicalColor(
+								properties.blueChemical(),
+								data.data().getBlueChemical(),
+								data.data()::setBlueChemical)));
 	}
 
 	@Override
@@ -86,7 +95,8 @@ public class SampleImageConfigurationContribution implements EclipseTreeContribu
 	}
 
 	@Override
-	public <U extends SimulatedSampleImageConfiguration> String getSupplementalText(TreeItemData<U> data) {
+	public <U extends SimulatedSampleImageConfiguration> String getSupplementalText(
+			TreeItemData<U> data) {
 		return null;
 	}
 }

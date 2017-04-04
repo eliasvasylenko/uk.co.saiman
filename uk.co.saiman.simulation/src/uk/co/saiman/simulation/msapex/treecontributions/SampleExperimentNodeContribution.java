@@ -44,8 +44,8 @@ import uk.co.strangeskies.reflection.token.TypedObject;
 
 @SuppressWarnings("javadoc")
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
-public class SampleExperimentNodeContribution
-		implements EclipseTreeContribution<ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>>,
+public class SampleExperimentNodeContribution implements
+		EclipseTreeContribution<ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>>,
 		TreeChildContribution<ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> {
 	@Override
 	public <U extends ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> boolean hasChildren(
@@ -56,6 +56,6 @@ public class SampleExperimentNodeContribution
 	@Override
 	public <U extends ExperimentNode<?, ? extends SimulatedSampleImageConfiguration>> Stream<TypedObject<?>> getChildren(
 			TreeItemData<U> data) {
-		return of(typedObject(data.data().getState(), SimulatedSampleImageConfiguration.class));
+		return of(typedObject(SimulatedSampleImageConfiguration.class, data.data().getState()));
 	}
 }
