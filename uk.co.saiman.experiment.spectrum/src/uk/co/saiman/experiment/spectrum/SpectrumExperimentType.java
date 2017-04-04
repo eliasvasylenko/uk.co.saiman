@@ -53,7 +53,8 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> implements ExperimentType<T> {
+public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
+		implements ExperimentType<T> {
 	private static final String SPECTRUM_DATA_NAME = "spectrum";
 
 	private SpectrumProperties properties;
@@ -95,7 +96,9 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration> im
 	public void execute(ExperimentExecutionContext<T> context) {
 		CompletableFuture<Optional<AcquisitionException>> end = new CompletableFuture<>();
 
-		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> prepareAcquisition(context, device));
+		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
+			prepareAcquisition(context, device);
+		});
 		getAcquisitionDevice().endEvents().addTerminatingObserver(exception -> {
 			end.complete(exception);
 		});
