@@ -19,15 +19,16 @@ env:
 install:
   - ./gradlew --version
 
-before_script:
-  - envsubst < .travis/maven-settings.xml > ~/.m2/settings.xml
+#before_script:
+  #- envsubst < .travis/maven-settings.xml > ~/.m2/settings.xml
 
 script:
-  - ./gradlew build jacocoTestReport --stacktrace --continue
+  - ./gradlew license >> /dev/null
+  #- ./gradlew build jacocoTestReport --stacktrace --continue
 
-after_success:
-  - ./gradlew release publishGhPages --stacktrace -PgithubUser="${GITHUB_TOKEN}" -PgithubPassword=""
-  - bash <(curl -s https://codecov.io/bash)
+#after_success:
+  #- ./gradlew release publishGhPages --stacktrace -PgithubUser="${GITHUB_TOKEN}" -PgithubPassword=""
+  #- bash <(curl -s https://codecov.io/bash)
 
 cache:
   directories:
