@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.comms;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -64,7 +65,8 @@ public class NamedBits<T extends Enum<T>> {
 	}
 
 	public byte[] getBytes() {
-		return bits.toByteArray();
+		int byteCount = (int) Math.ceil(enumClass.getEnumConstants().length / (double) Byte.SIZE);
+		return Arrays.copyOf(bits.toByteArray(), byteCount);
 	}
 
 	public Map<T, Boolean> toMap() {

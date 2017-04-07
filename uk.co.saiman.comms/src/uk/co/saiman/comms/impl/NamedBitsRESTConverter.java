@@ -57,7 +57,9 @@ public class NamedBitsRESTConverter implements CommandRESTConverter {
 			NamedBits<T> object,
 			String item,
 			Map<String, Object> output) {
-		return object.withSet(valueOf(object.getBitClass(), item), (Boolean) output.get(item));
+		T element = valueOf(object.getBitClass(), item);
+		boolean data = (Boolean) output.get(item);
+		return object.withSet(element, data);
 	}
 
 	@Override

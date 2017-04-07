@@ -93,10 +93,10 @@ function setFilter(filter_text) {
 }
 
 function applyFilter() {
-	for (command_id in command_map) {
+	for (var command_id in command_map) {
 		var visible = !filter || command_id.toLowerCase().indexOf(filter) !== -1;
 		var node = $(command_map[command_id].node);
-		
+
 		if (visible) {
 			node.show();
 		} else {
@@ -143,7 +143,7 @@ function poll() {
 	if (polling) {
 		updateCommandSets();
 		updateCommands();
-		
+
 		setTimeout(() => {
 			poll();
 		}, 1000);
@@ -167,7 +167,7 @@ function loadCommandSets() {
 function loadSingleCommandSet(command_set_id) {
 	$.get(command_set_rest_endpoint + '/' + command_set_id, command_set => {
 		selected_command_set = command_set;
-		
+
 		$.get(command_info_rest_endpoint + '/' + command_set_id, commands => {
 			command_set.link = pluginRoot;
 			command_set.template = command_set_detail_template.get(0);
@@ -179,7 +179,7 @@ function loadSingleCommandSet(command_set_id) {
 			command_set.commands.forEach(command_id => {
 				commands[command_id].template = command_template.get(0);
 			});
-	
+
 			renderCommandSets();
 		}, 'json');
 	}, 'json');
@@ -208,13 +208,13 @@ function renderCommandSets() {
 	command_set_table_body.empty();
 	command_table_body.empty();
 
-	for (command_set_id in command_set_map) {
-		renderCommandSetInfo(command_set_map[command_set_id]);
+	for (var command_set_id in command_set_map) {
+    renderCommandSetInfo(command_set_map[command_set_id]);
 	}
 
 	if (command_map) {
-		for (command_id in command_map) {
-			renderCommandInfo(command_map[command_id]);
+		for (var command_id in command_map) {
+	    renderCommandInfo(command_map[command_id]);
 		}
 	} else {
 		commands_container.hide();
@@ -249,7 +249,7 @@ function renderCommandInfo(command) {
 
 	command.node = node;
 	fillCommandInfo(command);
-	
+
 	command_table_body.append(node);
 	command.node = command_table_body.children().last()[0];
 }
@@ -258,10 +258,14 @@ function clickFunction(command) {
 	return () => {
 		executeCommand(command);
 		updateCommandSets();
-	}
+	};
 }
 
 function executeCommand(command) {
+	$(command.node).find('#output tbody tr').each((i, row) => {
+    inputDataValue(command.output, row);
+	});
+
 	$.ajax({
 		url: command_invocation_rest_endpoint + '/' + selected_command_set.id + '/' + command.id,
 		contentType: 'application/json',
@@ -291,10 +295,10 @@ function updateCommandSets() {
 			command_set_updates[command_set.id] = command_set;
 		});
 
-		for (command_set_id in command_set_map) {
+		for (var command_set_id in command_set_map) {
 			var command_set = command_set_map[command_set_id];
 			var command_set_update = command_set_updates[command_set_id];
-			
+
 			if (command_set_updates) {
 				command_set.status.code = command_set_update.status.code;
 				command_set.status.fault = command_set_update.status.fault;
@@ -309,7 +313,7 @@ function updateCommandSets() {
 }
 
 function updateCommands() {
-	for (command_id in command_map) {
+	for (var command_id in command_map) {
 		var command = command_map[command_id];
 		if (Object.keys(command.output).length === 0) {
 			executeCommand(command);
@@ -330,50 +334,85 @@ function fillCommandSetInfo(command_set) {
 function fillCommandInfo(command) {
 	var node = command.node;
 
-	renderData(command.input, node.querySelector('#input'));
-	renderData(command.output, node.querySelector('#output'));
+	renderData(command.input, node.querySelector('#input'), false);
+	renderData(command.output, node.querySelector('#output'), true);
 }
 
-function renderData(data, node) {
+function renderData(data, node, enabled) {
 	$(node).empty();
 
 	var container = document.createElement('div');
 	container.className = 'dataTable';
 	var body = container.appendChild(document.createElement('table')).appendChild(document.createElement('tbody'));
 
-	for (data_item in data) {
+	for (var data_item in data) {
 		data_value = data[data_item];
 
 		var row = body.appendChild(document.createElement('tr'));
-		row.appendChild(document.createElement('td')).innerText = data_item;
-
-		var value = row.appendChild(document.createElement('td'));
-		renderDataValue(data_value, value);
+		renderDataValue(data_item, data_value, row, enabled);
 	}
 
 	node.appendChild(container);
 }
 
-function renderDataValue(value, node) {
+function renderDataValue(item, value, row, enabled) {
+	var item_cell = row.appendChild(document.createElement('td'));
+	var value_cell = row.appendChild(document.createElement('td'));
+
+	item_cell.innerText = item;
+
 	if (value != null) {
 
-		if (value instanceof Boolean || typeof value == "boolean") {
-			var input = node.appendChild(document.createElement('input'));
-			input.setAttribute("type", "checkbox");
+		if (value instanceof Boolean || typeof value == 'boolean') {
+			var input = value_cell.appendChild(document.createElement('input'));
+			//input.disabled = !enabled;
+			input.setAttribute('type', 'checkbox');
 			input.checked = value;
 
-		} else if (value instanceof String || typeof value == "string") {
-			var input = node.appendChild(document.createElement('input'));
-			input.setAttribute("type", "text");
+		} else if (value instanceof String || typeof value == 'string') {
+			var input = value_cell.appendChild(document.createElement('input'));
+			//input.disabled = !enabled;
+			input.setAttribute('type', 'text');
 			input.value = value;
 
-		} else if (value instanceof Number || typeof value == "number") {
-			var input = node.appendChild(document.createElement('input'));
-			input.setAttribute("type", "number ");
+		} else if (value instanceof Number || typeof value == 'number') {
+			var input = value_cell.appendChild(document.createElement('input'));
+			//input.disabled = !enabled;
+			input.setAttribute('type', 'number');
 			input.value = value;
 
 		} else {
-			node.innerText = 'unknown';
+			value_cell.innerText = 'unknown';
+		}
+	}
+}
+
+function inputDataValue(object, row) {
+	var cells = $(row).find('td');
+
+	var item_cell = cells[0];
+	var value_cell = cells[1];
+
+	if (item_cell && value_cell) {
+		var input = value_cell.children.length > 0 ? value_cell.children[0] : null;
+
+		var value = null;
+
+		if (input && input.getAttribute('type') == 'checkbox') {
+			value = input.checked;
+
+		} else if (input && input.getAttribute('type') == 'text') {
+			value = input.value;
+
+		} else if (input && input.getAttribute('type') == 'number') {
+			value = parseInt(input.value);
+
+		} else if (value_cell.innerText == 'unknown') {
+			// value = null;
+		}
+
+		if (value != null) {
+			object[item_cell.innerText] = value;
 		}
 	}
 }

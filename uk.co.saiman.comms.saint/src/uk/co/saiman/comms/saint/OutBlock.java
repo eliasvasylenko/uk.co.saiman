@@ -54,23 +54,4 @@ public interface OutBlock<T> {
 
 		};
 	}
-
-	static <T> OutBlock<T> bufferedOutBlock(Consumer<T> request, Supplier<T> getRequested) {
-		return new OutBlock<T>() {
-			private T data = getRequested.get();
-
-			@Override
-			public void request(T data) {
-				if (!this.data.equals(data)) {
-					this.data = data;
-					request.accept(data);
-				}
-			}
-
-			@Override
-			public T getRequested() {
-				return data;
-			}
-		};
-	}
 }

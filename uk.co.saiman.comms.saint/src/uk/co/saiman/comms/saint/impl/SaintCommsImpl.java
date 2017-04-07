@@ -27,9 +27,18 @@
  */
 package uk.co.saiman.comms.saint.impl;
 
+import static java.lang.Byte.BYTES;
+import static java.lang.Long.reverse;
+import static java.lang.Math.ceil;
+import static java.nio.ByteBuffer.allocate;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.saint.InOutBlock.inOutBlock;
+import static uk.co.saiman.comms.saint.OutBlock.outBlock;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_1;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_2;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_3;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_4;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_LAT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_PORT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.LED_LAT;
@@ -83,7 +92,12 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 		implements SaintComms, CommandSet<SaintCommandId> {
 	public static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint";
 	public static final int MESSAGE_SIZE = 4;
-	private static final String STATUS_LED_PREFIX = "STATUS_LED_";
+
+	private static final String LED_PREFIX = "STATUS_LED_";
+	private static final int LED_COUNT = 8;
+
+	private static final int HV_DAC_PAD = 4;
+	private static final int HV_DAC_BITS = 12;
 
 	@SuppressWarnings("javadoc")
 	@ObjectClassDefinition(
@@ -104,6 +118,9 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 	private InOutBlock<NamedBits<HighVoltageBit>> highVoltageStatus;
 
 	private OutBlock<Integer> highVoltageDAC1;
+	private OutBlock<Integer> highVoltageDAC2;
+	private OutBlock<Integer> highVoltageDAC3;
+	private OutBlock<Integer> highVoltageDAC4;
 
 	public SaintCommsImpl() {
 		super(SaintComms.ID, SaintCommandId.class);
@@ -114,37 +131,32 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 		configure(configuration);
 
 		ledStatus = inOutBlock(
-				addOutput(LED_LAT, () -> new NumberedBits(STATUS_LED_PREFIX, 8), b -> b.getBytes()[0]),
-				addInput(LED_LAT, b -> new NumberedBits(STATUS_LED_PREFIX, 8, new byte[] { b })),
-				addInput(LED_PORT, b -> new NumberedBits(STATUS_LED_PREFIX, 8, new byte[] { b })));
+				addOutput(LED_LAT, () -> new NumberedBits(LED_PREFIX, LED_COUNT), NumberedBits::getBytes),
+				addInput(LED_LAT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)),
+				addInput(LED_PORT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)));
 
 		vacuumStatus = inOutBlock(
-				addOutput(VACUUM_LAT, () -> new NamedBits<>(VacuumBit.class), b -> b.getBytes()[0]),
-				addInput(VACUUM_LAT, b -> new NamedBits<>(VacuumBit.class, new byte[] { b })),
-				addInput(VACUUM_PORT, b -> new NamedBits<>(VacuumBit.class, new byte[] { b })));
+				addOutput(VACUUM_LAT, () -> new NamedBits<>(VacuumBit.class), NamedBits::getBytes),
+				addInput(VACUUM_LAT, b -> new NamedBits<>(VacuumBit.class, b)),
+				addInput(VACUUM_PORT, b -> new NamedBits<>(VacuumBit.class, b)));
 
 		highVoltageStatus = inOutBlock(
-				addOutput(HV_LAT, () -> new NamedBits<>(HighVoltageBit.class), b -> b.getBytes()[0]),
-				addInput(HV_LAT, b -> new NamedBits<>(HighVoltageBit.class, new byte[] { b })),
-				addInput(HV_PORT, b -> new NamedBits<>(HighVoltageBit.class, new byte[] { b })));
+				addOutput(HV_LAT, () -> new NamedBits<>(HighVoltageBit.class), NamedBits::getBytes),
+				addInput(HV_LAT, b -> new NamedBits<>(HighVoltageBit.class, b)),
+				addInput(HV_PORT, b -> new NamedBits<>(HighVoltageBit.class, b)));
 
-		/*-
-		highVoltageDAC1LSB = saintOutBlock(
-				commandSpace,
-				new SaintCommandId(OUTPUT, HV_DAC_1_LSB),
-				new SaintCommandId(INPUT, HV_DAC_1_LSB),
-				new CommandBytes<byte[]>(byte[]::clone, byte[]::clone, 1));
-		highVoltageDAC1MSB = saintOutBlock(
-				commandSpace,
-				new SaintCommandId(OUTPUT, HV_DAC_1_MSB),
-				new SaintCommandId(INPUT, HV_DAC_1_MSB),
-				new CommandBytes<byte[]>(byte[]::clone, byte[]::clone, 1));
-		highVoltageDAC1 = outBlock(data -> {
-			byte[] bytes = allocate(4).putInt(reverse(data)).array();
-			highVoltageDAC1LSB.request(new byte[] { (byte) (bytes[0] >> 4) });
-			highVoltageDAC1MSB.request(new byte[] { (byte) (bytes[0] << 4 | bytes[1] >> 4) });
-		}, () -> reverse(highVoltageDAC1LSB.getRequested()[0] << 4 | highVoltageDAC1MSB.getRequested()[0] >> 4));
-		*/
+		highVoltageDAC1 = outBlock(
+				addOutput(HV_DAC_1, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+				addInput(HV_DAC_1, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+		highVoltageDAC2 = outBlock(
+				addOutput(HV_DAC_2, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+				addInput(HV_DAC_2, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+		highVoltageDAC3 = outBlock(
+				addOutput(HV_DAC_3, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+				addInput(HV_DAC_3, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+		highVoltageDAC4 = outBlock(
+				addOutput(HV_DAC_4, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+				addInput(HV_DAC_4, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
 	}
 
 	@Modified
@@ -173,6 +185,25 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 		return highVoltageStatus;
 	}
 
+	private byte[] intToBytes(long integer, int bitPad, int bitCount) {
+		int padBytes = (int) ceil(bitPad / (double) BYTES);
+		int byteCount = (int) ceil((padBytes + bitCount) / (double) BYTES);
+
+		byte[] bytes = allocate(8).putLong(reverse(integer)).array();
+		byte[] result = new byte[byteCount];
+
+		result[0] = (byte) (bytes[0] >> bitPad);
+		for (int i = 1; i < byteCount; i++) {
+			result[i] = (byte) (bytes[i - 1] << 4 | bytes[i] >> 4);
+		}
+
+		return result;
+	}
+
+	private long bytesToInt(byte[] bytes, int bitPad, int bitCount) {
+		return reverse(bytes[0] << 4 | bytes[1] >> 4);
+	}
+
 	@Override
 	protected void checkComms() {
 		ping();
@@ -183,13 +214,7 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 				channel -> executeSaintCommand(PING, NULL, channel, new byte[NULL.getBytes().length]));
 	}
 
-	private <T> Supplier<T> addInput(SaintCommandAddress address, Function<Byte, T> inputFunction) {
-		return addMultiInput(address, b -> inputFunction.apply(b[0]));
-	}
-
-	private <T> Supplier<T> addMultiInput(
-			SaintCommandAddress address,
-			Function<byte[], T> inputFunction) {
+	private <T> Supplier<T> addInput(SaintCommandAddress address, Function<byte[], T> inputFunction) {
 		Command<SaintCommandId, T, Void> inputCommand = addCommand(
 				new SaintCommandId(INPUT, address),
 				(output, channel) -> {
@@ -202,13 +227,6 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 	}
 
 	private <T> Consumer<T> addOutput(
-			SaintCommandAddress address,
-			Supplier<T> prototype,
-			Function<T, Byte> outputFunction) {
-		return addMultiOutput(address, prototype, b -> new byte[] { outputFunction.apply(b) });
-	}
-
-	private <T> Consumer<T> addMultiOutput(
 			SaintCommandAddress address,
 			Supplier<T> prototype,
 			Function<T, byte[]> outputFunction) {

@@ -27,29 +27,13 @@
  */
 package uk.co.saiman.comms.saint;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-public interface InOutBlock<T> extends InBlock<T>, OutBlock<T> {
-	static <T> InOutBlock<T> inOutBlock(
-			Consumer<T> request,
-			Supplier<T> getRequested,
-			Supplier<T> getActual) {
-		return new InOutBlock<T>() {
-			@Override
-			public void request(T data) {
-				request.accept(data);
-			}
-
-			@Override
-			public T getRequested() {
-				return getRequested.get();
-			}
-
-			@Override
-			public T getActual() {
-				return getActual.get();
-			}
-		};
-	}
+public enum MotorBit {
+	LOCK_MOTOR_BREAK,
+	LOCK_MOTOR_PHASE,
+	LOCK_MOTOR_MODE,
+	LOCK_MOTOR_ENABLE,
+	LOCK_FULLY_OPEN,
+	LOCK_FULLY_CLOSED,
+	LOCK_OPEN,
+	LOCK_CLOSE
 }
