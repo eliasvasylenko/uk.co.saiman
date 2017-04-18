@@ -56,14 +56,15 @@ import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
+import uk.co.strangeskies.collection.observable.BufferingListener;
+import uk.co.strangeskies.observable.Observable;
+import uk.co.strangeskies.observable.ObservableImpl;
 import uk.co.strangeskies.text.properties.PropertyLoader;
-import uk.co.strangeskies.utilities.BufferingListener;
-import uk.co.strangeskies.utilities.Observable;
-import uk.co.strangeskies.utilities.ObservableImpl;
 
 @Component
-public class SimulatedXYStageRasterDeviceImpl implements RasterDevice, SimulatedRasterDevice,
-		SimulatedSampleImageDevice, XYStageDevice, HardwareDevice, SimulatedSampleDevice, SimulatedDevice {
+public class SimulatedXYStageRasterDeviceImpl
+		implements RasterDevice, SimulatedRasterDevice, SimulatedSampleImageDevice, XYStageDevice,
+		HardwareDevice, SimulatedSampleDevice, SimulatedDevice {
 	@Reference
 	PropertyLoader loader;
 	SimulationProperties text;

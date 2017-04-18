@@ -5,6 +5,7 @@ Bundle-Name: SAI :: Comms :: SAINT
 \
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	org.eclipse.equinox.metatype
 	
 

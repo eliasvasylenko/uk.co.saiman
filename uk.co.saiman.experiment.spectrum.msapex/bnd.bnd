@@ -7,10 +7,13 @@ Bundle-Name: SAI :: Experiment :: Spectrum :: MSApex
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
+	uk.co.strangeskies.collections;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
 	uk.co.strangeskies.fx;version=latest,\
 	uk.co.strangeskies.eclipse;version=latest,\
 \

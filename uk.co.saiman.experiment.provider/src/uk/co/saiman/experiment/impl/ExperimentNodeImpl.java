@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static uk.co.strangeskies.utilities.collection.StreamUtilities.upcastStream;
+import static uk.co.strangeskies.collection.stream.StreamUtilities.upcastStream;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -50,9 +50,9 @@ import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
-import uk.co.strangeskies.utilities.Log.Level;
-import uk.co.strangeskies.utilities.ObservableProperty;
-import uk.co.strangeskies.utilities.ObservableValue;
+import uk.co.strangeskies.observable.ObservableProperty;
+import uk.co.strangeskies.observable.ObservableValue;
+import uk.co.strangeskies.utility.Log.Level;
 
 /**
  * Reference implementation of {@link ExperimentNode}.
@@ -103,7 +103,10 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		this(type, workspace, null);
 	}
 
-	private ExperimentNodeImpl(T type, ExperimentWorkspaceImpl workspace, ExperimentNodeImpl<?, ?> parent) {
+	private ExperimentNodeImpl(
+			T type,
+			ExperimentWorkspaceImpl workspace,
+			ExperimentNodeImpl<?, ?> parent) {
 		this.workspace = workspace;
 		this.type = type;
 		this.parent = parent;
@@ -141,11 +144,13 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	private Path getParentDataPath() {
-		return getParent().map(p -> p.getExperimentDataPath()).orElse(getExperimentWorkspace().getWorkspaceDataPath());
+		return getParent().map(p -> p.getExperimentDataPath()).orElse(
+				getExperimentWorkspace().getWorkspaceDataPath());
 	}
 
 	private Stream<? extends ExperimentNodeImpl<?, ?>> getSiblings() {
-		return getParentImpl().map(p -> p.getChildrenImpl()).orElse(upcastStream(workspace.getRootExperimentsImpl()));
+		return getParentImpl().map(p -> p.getChildrenImpl()).orElse(
+				upcastStream(workspace.getRootExperimentsImpl()));
 	}
 
 	@Override
@@ -209,9 +214,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	@Override
 	public Stream<ExperimentType<?>> getAvailableChildExperimentTypes() {
-		return workspace
-				.getRegisteredExperimentTypes()
-				.filter(type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
+		return workspace.getRegisteredExperimentTypes().filter(
+				type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
 	}
 
 	@Override
@@ -254,9 +258,9 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			lifecycleState.set(ExperimentLifecycleState.COMPLETION);
 			return true;
 		} catch (Exception e) {
-			workspace
-					.getLog()
-					.log(Level.ERROR, new ExperimentException(workspace.getText().failedExperimentExecution(this), e));
+			workspace.getLog().log(
+					Level.ERROR,
+					new ExperimentException(workspace.getText().failedExperimentExecution(this), e));
 			lifecycleState.set(ExperimentLifecycleState.FAILURE);
 			return false;
 		}
@@ -322,7 +326,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 						try {
 							Files.move(oldLocation, newLocation);
 						} catch (IOException e) {
-							throw new ExperimentException(workspace.getText().cannotMove(oldLocation, newLocation));
+							throw new ExperimentException(
+									workspace.getText().cannotMove(oldLocation, newLocation));
 						}
 					} else {
 						try {
@@ -353,7 +358,9 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		results.values().forEach(r -> r.setData(null));
 	}
 
-	protected <U> ExperimentResultImpl<U> setResult(ExperimentResultType<U> resultType, U resultData) {
+	protected <U> ExperimentResultImpl<U> setResult(
+			ExperimentResultType<U> resultType,
+			U resultData) {
 		ExperimentResultImpl<U> result = getResult(resultType);
 		result.setData(resultData);
 		return result;

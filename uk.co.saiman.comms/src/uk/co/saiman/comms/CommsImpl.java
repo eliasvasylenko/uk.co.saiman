@@ -28,25 +28,31 @@
 package uk.co.saiman.comms;
 
 import static uk.co.saiman.comms.Comms.CommsStatus.FAULT;
+import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
+import static uk.co.saiman.comms.Comms.CommsStatus.READY;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import uk.co.strangeskies.observable.ObservableProperty;
+import uk.co.strangeskies.observable.ObservableValue;
+
 /**
  * A simple immutable class defining named addresses for pushing and requesting
- * bytes to and from a {@link Comms comms channel}.
+ * bytes to and from a {@link CommsPort comms channel}.
  * 
  * @author Elias N Vasylenko
  * @param <T>
  *          The command identifier type. This may typically consist of an
  *          address and an operation type.
  */
-public abstract class CommandSetImpl<T> implements CommandSet<T> {
+public abstract class CommsImpl<T> implements Comms<T> {
 	public class CommandImpl<I, O> implements Command<T, I, O> {
 		private final T id;
 		private final CommandFunction<I, O> definition;
@@ -85,16 +91,21 @@ public abstract class CommandSetImpl<T> implements CommandSet<T> {
 	private final Class<T> idClass;
 	private final Map<T, Command<T, ?, ?>> commands;
 
-	private Comms comms;
+	private CommsPort comms;
 	private CommsChannel channel;
+
+	private final ObservableProperty<CommsStatus, CommsStatus> status;
+	private CommsException lastFault;
 
 	/**
 	 * Initialize an empty address space.
 	 */
-	public CommandSetImpl(String name, Class<T> idClass) {
+	public CommsImpl(String name, Class<T> idClass) {
 		this.name = name;
 		this.idClass = idClass;
 		this.commands = new HashMap<>();
+
+		status = ObservableProperty.over(READY);
 	}
 
 	@Override
@@ -107,82 +118,98 @@ public abstract class CommandSetImpl<T> implements CommandSet<T> {
 		return idClass;
 	}
 
+	@Override
+	public ObservableValue<CommsStatus> status() {
+		return status;
+	}
+
+	@Override
+	public synchronized Optional<CommsException> fault() {
+		return status.get() == FAULT ? Optional.of(lastFault) : Optional.empty();
+	}
+
+	protected synchronized CommsException setFault(CommsException commsException) {
+		status.set(FAULT);
+		this.lastFault = commsException;
+		return commsException;
+	}
+
 	protected abstract void checkComms();
 
-	private synchronized void performCheck() {
-		try {
-			if (comms.status().get() == FAULT) {
-				comms.reset();
-				open();
-			}
-			checkComms();
-		} catch (CommsException e) {
-			comms.setFault(e);
-		} catch (Exception e) {
-			comms.setFault(new CommsException("Problem checking comms", e));
-		}
-	}
-
 	protected synchronized void unsetComms() throws IOException {
-		close();
+		try {
+			reset();
+		} catch (Exception e) {}
 		this.comms = null;
+		setFault(new CommsException("No port configured"));
 	}
 
-	protected synchronized void setComms(Comms comms) throws IOException {
-		boolean wasOpen = close();
+	protected synchronized void setComms(CommsPort comms) throws IOException {
+		try {
+			reset();
+		} catch (Exception e) {}
 		this.comms = comms;
-		if (wasOpen && open()) {
-			performCheck();
-		}
+		status.set(READY);
 	}
 
 	@Override
-	public synchronized boolean isOpen() {
-		return channel != null;
-	}
+	public synchronized void open() {
+		switch (status().get()) {
+		case OPEN:
+			break;
 
-	@Override
-	public synchronized boolean open() {
-		if (!isOpen()) {
+		case FAULT:
+			reset();
+		case READY:
 			try {
 				channel = comms.openChannel();
-				return true;
+				status.set(OPEN);
+				checkComms();
 			} catch (CommsException e) {
-				comms.setFault(e);
-				return false;
+				throw setFault(e);
+			} catch (Exception e) {
+				setFault(new CommsException("Problem opening comms", e));
 			}
-		} else {
-			if (comms.status().get() == FAULT) {
-				performCheck();
-			}
-			return false;
 		}
 	}
 
 	@Override
-	public synchronized boolean close() {
-		if (isOpen()) {
+	public synchronized void reset() {
+		switch (status().get()) {
+		case READY:
+			break;
+
+		case FAULT:
+		case OPEN:
 			try {
-				channel.close();
+				comms.close();
+				status.set(READY);
 			} catch (CommsException e) {
-				comms.setFault(e);
+				throw setFault(e);
+			} catch (Exception e) {
+				setFault(new CommsException("Problem closing comms", e));
 			}
-			channel = null;
-			return true;
-		} else {
-			return false;
+			break;
 		}
 	}
 
 	@Override
-	public Comms getChannel() {
+	public CommsPort getPort() {
 		return comms;
 	}
 
 	protected synchronized <U> U useChannel(Function<ByteChannel, U> action) {
-		if (open()) {
-			performCheck();
+		switch (status().get()) {
+		case OPEN:
+			return action.apply(channel);
+
+		case READY:
+			throw new CommsException("Port is closed");
+
+		case FAULT:
+			throw fault().get();
 		}
+
 		return action.apply(channel);
 	}
 

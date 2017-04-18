@@ -11,21 +11,21 @@
 	//]]>
 </script>
 
-<!-- command set table -->
+<!-- comms table -->
 <p class="statline">&nbsp;</p>
 
 <div class="ui-widget-header ui-corner-top buttonGroup">
-	<button class="pollButton" type="button"></button>
 	<button class="reloadButton" type="button">${reload}</button>
 </div>
 
-<table id="command_set_table" class="tablesorter nicetable noauto">
+<table id="comms_interface_table" class="tablesorter nicetable noauto">
 	<thead>
 		<tr>
 			<th class="col_Name">${comms.name}</th>
 			<th class="col_Status">${comms.status}</th>
 			<th class="col_Channel">${comms.channel}</th>
 			<th class="col_Bundle">${comms.bundle}</th>
+			<th class="col_Actions">${comms.actions}</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -36,21 +36,15 @@
 <div id="commands_container">
 	<span>&nbsp;</span>
 
-	<div id="filter_container" class="ui-widget-header ui-corner-top buttonGroup">
-		<input
-			class="filter"
-			value=""
-			title="${comms.filter.help}" />
-		<span
+	<div id="filter_container"
+		class="ui-widget-header ui-corner-top buttonGroup">
+		<input class="filter" value="" title="${comms.filter.help}" /> <span
 			class="filterClear ui-icon ui-icon-close"
-			title="${comms.filter.clear}">
-		</span>
-		<button
-			class="filterButton"
-			type="button"
-			title="${comms.filter.help}">
-			${comms.filter.apply}
-		</button>
+			title="${comms.filter.clear}"> </span>
+		<button class="filterButton" type="button"
+			title="${comms.filter.help}">${comms.filter.apply}</button>
+
+		<button class="pollButton" type="button"></button>
 	</div>
 
 	<table id="command_table" class="tablesorter nicetable noauto">
@@ -67,23 +61,29 @@
 	</table>
 </div>
 
-<template id="command_set">
-<tr>
-	<td><a id="name" title="Show Details"><span
-			class="bIcon ui-icon ui-icon-triangle-1-e"></span></a></td>
-	<td id="status" />
-	<td id="channel" />
-	<td><a id="bundle"></a></td>
-</tr>
+<template id="command_parameter">
+<p id="parameter">
+	<label id="label" for="value"></label><input id="value">
+</p>
 </template>
 
-<template id="command_set_detail">
+<template id="comms_interface">
 <tr>
 	<td><a id="name" title="Show Details"><span
-			class="bIcon ui-icon ui-icon-triangle-1-w"></span></a></td>
+			class="bIcon ui-icon"></span></a></td>
 	<td id="status" />
 	<td id="channel" />
 	<td><a id="bundle"></a></td>
+	<td id="actions">
+		<ul class="icons ui-widget">
+			<li title="${comms.action.open}" class="dynhover"><span id="open"
+				class="ui-icon ui-icon-play"></span></li>
+		</ul>
+		<ul class="icons ui-widget">
+			<li title="${comms.action.reset}" class="dynhover"><span id="reset"
+				class="ui-icon ui-icon-stop"></span></li>
+		</ul>
+	</td>
 </tr>
 </template>
 
@@ -94,7 +94,7 @@
 	<td id="input" />
 	<td id="actions">
 		<ul class="icons ui-widget">
-			<li title="${comms.command.execute}" class="dynhover"><span
+			<li title="${comms.command.action.execute}" class="dynhover"><span
 				id="execute" class="ui-icon ui-icon-play"></span></li>
 		</ul>
 	</td>

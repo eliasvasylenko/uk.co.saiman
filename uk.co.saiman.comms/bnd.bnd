@@ -5,6 +5,7 @@ Bundle-Name: SAI :: Comms
 	uk.co.saiman.instrument.api;version=snapshot,\
 \
 	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 \

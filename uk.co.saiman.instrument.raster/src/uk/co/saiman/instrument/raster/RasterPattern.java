@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.instrument.raster;
 
-import static uk.co.strangeskies.utilities.Enumeration.readableName;
+import static uk.co.strangeskies.utility.Enumeration.readableName;
 
 import java.util.Iterator;
 

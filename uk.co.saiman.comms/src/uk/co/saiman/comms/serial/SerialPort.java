@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.comms.serial;
 
-import uk.co.saiman.comms.Comms;
+import uk.co.saiman.comms.CommsPort;
 
-public interface SerialPort extends Comms {
-	String getSystemName();
-}
+public interface SerialPort extends CommsPort {}

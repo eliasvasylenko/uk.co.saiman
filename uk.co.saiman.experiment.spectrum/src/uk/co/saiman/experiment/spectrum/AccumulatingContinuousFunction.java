@@ -38,8 +38,8 @@ import javax.measure.UnitConverter;
 import uk.co.saiman.data.ArraySampledContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
-import uk.co.strangeskies.utilities.AggregatingListener;
-import uk.co.strangeskies.utilities.Observer;
+import uk.co.strangeskies.collection.observable.AggregatingListener;
+import uk.co.strangeskies.observable.Observer;
 
 /**
  * A continuous function to accumulate the sum of input continuous functions.

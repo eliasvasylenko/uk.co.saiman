@@ -27,16 +27,54 @@
  */
 package uk.co.saiman.comms;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface CommandSet<T> {
+import uk.co.strangeskies.observable.ObservableValue;
+
+public interface Comms<T> {
+	/**
+	 * A description of the status of a comms channel.
+	 * 
+	 * @author Elias N Vasylenko
+	 */
+	enum CommsStatus {
+		/**
+		 * The byte channel is currently open. Subsequent invocations of
+		 * {@link CommsPort#openChannel()} will fail until the previously opened
+		 * byte channel is closed.
+		 */
+		OPEN,
+
+		/**
+		 * The byte channel is ready to be opened. This does not guarantee that a
+		 * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
+		 * simply indicates that it is expected to succeed. If invocation fails, the
+		 * comms channel will enter the {@link #FAULT} state.
+		 */
+		READY,
+
+		/**
+		 * There is a problem with the comms channel. If a comms channel is in the
+		 * {@link #FAULT} state, then invocation of {@link CommsPort#openChannel()}
+		 * should either clear the fault or throw an exception describing the fault.
+		 */
+		FAULT
+	}
+
 	String getName();
 
-	boolean isOpen();
+	ObservableValue<CommsStatus> status();
 
-	boolean open();
+	/**
+	 * @return if the comms object is in a fault state an optional containing the
+	 *         cause of the fault, otherwise an empty optional
+	 */
+	Optional<CommsException> fault();
 
-	boolean close();
+	void open();
+
+	void reset();
 
 	Class<T> getCommandIdClass();
 
@@ -44,5 +82,5 @@ public interface CommandSet<T> {
 
 	Command<T, ?, ?> getCommand(T id);
 
-	Comms getChannel();
+	CommsPort getPort();
 }

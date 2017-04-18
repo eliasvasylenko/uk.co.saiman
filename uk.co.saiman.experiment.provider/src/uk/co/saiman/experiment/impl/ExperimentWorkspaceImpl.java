@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static uk.co.strangeskies.utilities.collection.StreamUtilities.upcastStream;
+import static uk.co.strangeskies.collection.stream.StreamUtilities.upcastStream;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -45,9 +45,9 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
+import uk.co.strangeskies.collection.stream.StreamUtilities;
 import uk.co.strangeskies.text.properties.PropertyLoader;
-import uk.co.strangeskies.utilities.Log;
-import uk.co.strangeskies.utilities.collection.StreamUtilities;
+import uk.co.strangeskies.utility.Log;
 
 /**
  * Reference implementation of {@link ExperimentWorkspace}.
@@ -77,7 +77,10 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	 *          the path of the workspace data
 	 */
 	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot) {
-		this(factory, workspaceRoot, PropertyLoader.getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
+		this(
+				factory,
+				workspaceRoot,
+				PropertyLoader.getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
 	}
 
 	/**
@@ -176,7 +179,8 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 
 	protected void process(ExperimentNodeImpl<?, ?> node) {
 		if (!tryProcess(node)) {
-			throw new ExperimentException(text.exception().cannotProcessExperimentConcurrently(node.getRoot()));
+			throw new ExperimentException(
+					text.exception().cannotProcessExperimentConcurrently(node.getRoot()));
 		}
 	}
 
@@ -193,7 +197,10 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	}
 
 	private void tryProcessImpl(ExperimentNodeImpl<?, ?> node) {
-		boolean success = StreamUtilities.reverse(node.getAncestorsImpl()).filter(ExperimentNodeImpl::execute).count() > 0;
+		boolean success = StreamUtilities
+				.reverse(node.getAncestorsImpl())
+				.filter(ExperimentNodeImpl::execute)
+				.count() > 0;
 
 		if (success) {
 			processChildren(node);

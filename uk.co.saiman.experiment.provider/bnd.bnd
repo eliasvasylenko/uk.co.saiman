@@ -1,9 +1,12 @@
 Bundle-Name: SAI :: Experiment :: Provider
 
 -buildpath: \
+	uk.co.strangeskies.collections;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot

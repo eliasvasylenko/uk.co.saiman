@@ -1,16 +1,16 @@
 /*
  * REST Endpoints
  */
-var comms_rest_endpoint = '/comms';
-var command_set_rest_endpoint = '/comms/commandSetInfo';
+var open_comms_rest_endpoint = '/comms/OpenCommsInterface';
+var reset_comms_rest_endpoint = '/comms/ResetCommsInterface';
+var comms_interface_rest_endpoint = '/comms/CommsInterfaceInfo';
 var command_info_rest_endpoint = '/comms/commandInfo';
 var command_invocation_rest_endpoint = '/comms/commandInvocation';
 /*
- * Command Set Table
+ * comms_interface Table
  */
-var command_set_table_body;
-var command_set_template;
-var command_set_detail_template;
+var comms_interface_table_body;
+var comms_interface_template;
 
 /*
  * Command Table
@@ -18,13 +18,14 @@ var command_set_detail_template;
 var command_table;
 var command_table_body;
 var command_template;
+var command_parameter_template;
 
 /*
  * Data
  */
-var selected_command_set;
-var command_set_map = {};
-var command_map = {};
+var selected_comms_interface;
+var comms_interface_map;
+var command_map;
 
 /*
  * State
@@ -40,19 +41,19 @@ var filter;
 $(document).ready(() => {
 	statline = $('.statline');
 
-	command_set_table = $('#command_set_table');
-	command_set_table_body = command_set_table.find('tbody');
-	command_set_template = $('#command_set');
-	command_set_detail_template = $('#command_set_detail');
+	comms_interface_table = $('#comms_interface_table');
+	comms_interface_table_body = comms_interface_table.find('tbody');
+	comms_interface_template = $('#comms_interface');
 
-	command_set_table = initializeSorting(
-			command_set_table,
-			'command_set_table');
+	comms_interface_table = initializeSorting(
+			comms_interface_table,
+			'comms_interface_table');
 
 	commands_container = $('#commands_container');
 	command_table = commands_container.find('#command_table');
 	command_table_body = command_table.find('tbody');
 	command_template = $('#command');
+	command_parameter_template = $('#command_parameter');
 
 	command_table = initializeSorting(
 			command_table,
@@ -63,11 +64,9 @@ $(document).ready(() => {
 				3: { sorter: false }
 			});
 
-	$('.reloadButton').click(loadCommandSets);
+	$('.reloadButton').click(loadCommsInterfaces);
 	$('.pollButton').click(switchPolling);
-
 	setPolling(false);
-	loadCommandSets();
 
 	$('.filterButton').click(() => setFilter());
 	$('.filterClear').click(() => setFilter(''));
@@ -76,6 +75,8 @@ $(document).ready(() => {
 		if(e.keyCode == 13)
 			setFilter();
 	});
+
+	loadCommsInterfaces();
 });
 
 function setFilter(filter_text) {
@@ -141,75 +142,111 @@ function setPolling(polling) {
 
 function poll() {
 	if (polling) {
-		updateCommandSets();
-		updateCommands();
-
-		setTimeout(() => {
-			poll();
-		}, 1000);
+		updateCommsInterfaces();
+		updateCommands(() => {
+			setTimeout(() => {
+				poll();
+			}, 1000);
+		});
 	}
 }
 
 /*
  * Loading And Rendering
  */
-function loadCommandSets() {
-	selected_command_set = null;
-	var command_set_id = unescape(location.pathname.substring(pluginRoot.length + 1));
+function loadCommsInterfaces() {
+	selected_comms_interface = null;
+	var comms_interface_id = unescape(location.pathname.substring(pluginRoot.length + 1));
 
-	if (command_set_id) {
-		loadSingleCommandSet(command_set_id);
+	if (comms_interface_id) {
+		loadSingleCommsInterface(comms_interface_id);
 	} else {
-		loadAllCommandSets();
+		loadAllCommsInterfaces();
 	}
 }
 
-function loadSingleCommandSet(command_set_id) {
-	$.get(command_set_rest_endpoint + '/' + command_set_id, command_set => {
-		selected_command_set = command_set;
+function loadSingleCommsInterface(comms_interface_id) {
+	$.get(comms_interface_rest_endpoint + '/' + comms_interface_id, comms_interface => {
+		selected_comms_interface = comms_interface;
 
-		$.get(command_info_rest_endpoint + '/' + command_set_id, commands => {
-			command_set.link = pluginRoot;
-			command_set.template = command_set_detail_template.get(0);
-			command_set_map = {
-					[command_set.id]: command_set
+		$.get(command_info_rest_endpoint + '/' + comms_interface_id, commands => {
+			comms_interface.link = pluginRoot;
+			comms_interface.icon = 'ui-icon-triangle-1-w';
+			comms_interface_map = {
+					[comms_interface.id]: comms_interface
 			}
 
-			command_map = commands;
-			command_set.commands.forEach(command_id => {
-				commands[command_id].template = command_template.get(0);
+			command_map = {};
+			comms_interface.commands.forEach(command_id => {
+				var command = commands[command_id];
+				command_map[command_id] = command;
+				
+				command.template = command_template.get(0);
+
+				command.input = loadArguments(command.input);
+				command.output = loadArguments(command.output);
 			});
 
-			renderCommandSets();
+			renderCommsInterfaces();
 		}, 'json');
 	}, 'json');
 }
 
-function loadAllCommandSets() {
-	$.get(command_set_rest_endpoint, command_sets => {
-		command_set_map = {};
-		command_sets.forEach(command_set => {
-			command_set.link = pluginRoot + '/' + command_set.id;
-			command_set.template = command_set_template.get(0);
+function loadArguments(argument) {
+	if (argument) {
+		var argument_map = {};
 
-			command_set_map[command_set.id] = command_set;
+		Object.keys(argument).map((key, index) => {
+			argument_map[key] = {
+				value: argument[key],
+			};
+		});
+
+		return argument_map;
+	} else {
+		return null;
+	}
+}
+
+function unloadArguments(argument) {
+	if (argument) {
+		var argument_map = {};
+
+		Object.keys(argument).map((key, index) => {
+			argument_map[key] = argument[key].value;
+		});
+
+		return argument_map;
+	} else {
+		return null;
+	}
+}
+
+function loadAllCommsInterfaces() {
+	$.get(comms_interface_rest_endpoint, comms_interfaces => {
+		comms_interface_map = {};
+		comms_interfaces.forEach(comms_interface => {
+			comms_interface.link = pluginRoot + '/' + comms_interface.id;
+			comms_interface.icon = 'ui-icon-triangle-1-e';
+
+			comms_interface_map[comms_interface.id] = comms_interface;
 		});
 
 		command_map = null;
 
-		renderCommandSets();
+		renderCommsInterfaces();
 	}, 'json');
 }
 
 /*
  * Rendering Static Data
  */
-function renderCommandSets() {
-	command_set_table_body.empty();
+function renderCommsInterfaces() {
+	comms_interface_table_body.empty();
 	command_table_body.empty();
 
-	for (var command_set_id in command_set_map) {
-    renderCommandSetInfo(command_set_map[command_set_id]);
+	for (var comms_interface_id in comms_interface_map) {
+    renderCommsInterfaceInfo(comms_interface_map[comms_interface_id]);
 	}
 
 	if (command_map) {
@@ -220,32 +257,62 @@ function renderCommandSets() {
 		commands_container.hide();
 	}
 
-	initStaticWidgets();
-
-	refreshSorting(command_set_table, 'command_set_table');
+	refreshSorting(comms_interface_table, 'comms_interface_table');
 	refreshSorting(command_table, 'command_table');
+
+	initStaticWidgets();
 }
 
-function renderCommandSetInfo(command_set) {
-	var node = document.importNode(command_set.template.content, true);
+function renderCommsInterfaceInfo(comms_interface) {
+	var node = document.importNode(comms_interface_template.get(0).content, true);
 
-	node.querySelector('#name').innerHTML += command_set.name;
-	node.querySelector('#name').href = command_set.link;
-	node.querySelector('#bundle').innerText = command_set.registeringBundle.bundleName;
-	node.querySelector('#bundle').href = appRoot  + '/bundles/' + command_set.registeringBundle.bundleId;
+	node.querySelector('#name').innerHTML += comms_interface.name;
+	node.querySelector('#name').href = comms_interface.link;
+	node.querySelector('#name span').className += ' ' + comms_interface.icon;
+	node.querySelector('#bundle').innerText = comms_interface.registeringBundle.bundleName;
+	node.querySelector('#bundle').href = appRoot  + '/bundles/' + comms_interface.registeringBundle.bundleId;
 
-	command_set.node = node;
-	fillCommandSetInfo(command_set);
+	node.querySelector('#actions #open').onclick = openResetClickFunction(comms_interface, true);
+	node.querySelector('#actions #reset').onclick = openResetClickFunction(comms_interface, false);
 
-	command_set_table_body.append(node);
-	command_set.node = command_set_table_body.children().last()[0];
+	comms_interface.node = node;
+	fillCommsInterfaceInfo(comms_interface);
+
+	comms_interface_table_body.append(node);
+	comms_interface.node = comms_interface_table_body.children().last()[0];
+}
+
+function openResetClickFunction(comms_interface, open) {
+	var rest_endpoint;
+
+	if (open) {
+		rest_endpoint = open_comms_rest_endpoint;
+	} else {
+		rest_endpoint = reset_comms_rest_endpoint;
+	}
+
+	return () => {
+		$.ajax({
+			url: rest_endpoint,
+			contentType: 'application/json',
+			type: 'POST',
+			data: JSON.stringify(comms_interface.id),
+			success: () => {
+				updateCommsInterfaces();
+			},
+			error: () => {
+				updateCommsInterfaces();
+			}
+		});
+	};
 }
 
 function renderCommandInfo(command) {
 	var node = document.importNode(command.template.content, true);
 
 	node.querySelector('#id').innerText = command.id;
-	node.querySelector('#actions #execute').onclick = clickFunction(command);
+
+	node.querySelector('#actions #execute').onclick = executeClickFunction(command);
 
 	command.node = node;
 	fillCommandInfo(command);
@@ -254,33 +321,47 @@ function renderCommandInfo(command) {
 	command.node = command_table_body.children().last()[0];
 }
 
-function clickFunction(command) {
+function executeClickFunction(command) {
 	return () => {
 		executeCommand(command);
-		updateCommandSets();
 	};
 }
 
-function executeCommand(command) {
-	$(command.node).find('#output tbody tr').each((i, row) => {
-    inputDataValue(command.output, row);
-	});
+function executeCommand(command, success, error) {
+	executeCommands([command], success, error);
+}
+
+function executeCommands(commands, success, error) {
+	if (commands.length == 0) {
+		if (success)
+			success();
+		updateCommsInterfaces();
+		return;
+	}
+
+	command = commands.splice(commands.length - 1, 1)[0];
+
+	derenderData(command.output);
 
 	$.ajax({
-		url: command_invocation_rest_endpoint + '/' + selected_command_set.id + '/' + command.id,
+		url: command_invocation_rest_endpoint + '/' + selected_comms_interface.id + '/' + command.id,
 		contentType: 'application/json',
-		type: 'PUT',
-		data: JSON.stringify(command.output),
+		type: 'POST',
+		data: JSON.stringify(unloadArguments(command.output)),
 		success: command_result => {
-			command.input = command_result;
+			command.input = loadArguments(command_result);
 			fillCommandInfo(command);
-			initStaticWidgets();
+			executeCommands(commands, success, error);
 		},
 		error: (request, msg, error) => {
 			command.input = {
 				error: msg,
 				trace: error
 			};
+			fillCommandInfo(command)
+			if (error)
+				error();
+			updateCommsInterfaces();
 		}
 	});
 }
@@ -288,47 +369,51 @@ function executeCommand(command) {
 /*
  * Updating Dynamic Data
  */
-function updateCommandSets() {
-	$.get(command_set_rest_endpoint, command_sets => {
-		command_set_updates = {};
-		command_sets.forEach(command_set => {
-			command_set_updates[command_set.id] = command_set;
+function updateCommsInterfaces() {
+	$.get(comms_interface_rest_endpoint, comms_interfaces => {
+		comms_interface_updates = {};
+		comms_interfaces.forEach(comms_interface => {
+			comms_interface_updates[comms_interface.id] = comms_interface;
 		});
 
-		for (var command_set_id in command_set_map) {
-			var command_set = command_set_map[command_set_id];
-			var command_set_update = command_set_updates[command_set_id];
+		for (var comms_interface_id in comms_interface_map) {
+			var comms_interface = comms_interface_map[comms_interface_id];
+			var comms_interface_update = comms_interface_updates[comms_interface_id];
 
-			if (command_set_updates) {
-				command_set.status.code = command_set_update.status.code;
-				command_set.status.fault = command_set_update.status.fault;
+			if (comms_interface_updates) {
+				comms_interface.status.code = comms_interface_update.status.code;
+				comms_interface.status.fault = comms_interface_update.status.fault;
 
-				fillCommandSetInfo(command_set);
+				fillCommsInterfaceInfo(comms_interface);
 			} else {
-				command_table_body.remove(command_set.node);
-				command_set_map[command_set_id] = null;
+				command_table_body.remove(comms_interface.node);
+				comms_interface_map[comms_interface_id] = null;
 			}
 		}
+
+		initStaticWidgets();
 	});
 }
 
-function updateCommands() {
-	for (var command_id in command_map) {
-		var command = command_map[command_id];
-		if (Object.keys(command.output).length === 0) {
-			executeCommand(command);
-		}
-	}
+function updateCommands(success, error) {
+	var commands = Object.values(command_map).filter(command => {
+		return (command.output == null || Object.keys(command.output).length == 0)
+						&& command.node.style.display != "none";
+	});
+
+	executeCommands(commands, success, error);
 }
 
-function fillCommandSetInfo(command_set) {
-	var node = command_set.node;
+function fillCommsInterfaceInfo(comms_interface) {
+	var node = comms_interface.node;
 
-	node.querySelector('#status').innerText = command_set.status.code;
-	if (command_set.status.fault) {
-		node.querySelector('#status').title = command_set.status.fault;
+	node.querySelector('#status').innerText = comms_interface.status.code;
+	if (comms_interface.status.fault) {
+		node.querySelector('#status').title = comms_interface.status.fault;
 	}
-	node.querySelector('#channel').innerText = command_set.channel;
+	node.querySelector('#channel').innerText = comms_interface.channel;
+
+	initStaticWidgets();
 }
 
 function fillCommandInfo(command) {
@@ -336,83 +421,89 @@ function fillCommandInfo(command) {
 
 	renderData(command.input, node.querySelector('#input'), false);
 	renderData(command.output, node.querySelector('#output'), true);
+
+	initStaticWidgets();
 }
 
 function renderData(data, node, enabled) {
+	if (!data)
+		return;
+	
 	$(node).empty();
 
-	var container = document.createElement('div');
-	container.className = 'dataTable';
-	var body = container.appendChild(document.createElement('table')).appendChild(document.createElement('tbody'));
+	var parameters = node.appendChild(document.createElement('div'));
+	parameters.id = 'command_parameters';
 
-	for (var data_item in data) {
-		data_value = data[data_item];
+	for (var data_item_key in data) {
+		var data_item = data[data_item_key];
 
-		var row = body.appendChild(document.createElement('tr'));
-		renderDataValue(data_item, data_value, row, enabled);
+		var parameter = document.importNode(command_parameter_template.get(0).content, true);
+		data_item.node = parameter;
+		
+		renderDataValue(data_item_key, data_item, enabled);
+
+		parameters.appendChild(parameter);
+		data_item.node = $(parameters).children().last()[0];
 	}
-
-	node.appendChild(container);
 }
 
-function renderDataValue(item, value, row, enabled) {
-	var item_cell = row.appendChild(document.createElement('td'));
-	var value_cell = row.appendChild(document.createElement('td'));
+function renderDataValue(key, item, enabled) {
+	var label_node = item.node.querySelector('#label')
+	var value_node = item.node.querySelector('#value')
 
-	item_cell.innerText = item;
+	label_node.innerText = key;
+
+	var type = 'text';
+
+	if (item.value instanceof Boolean || typeof item.value == 'boolean') {
+		// input.disabled = !enabled;
+		type = 'checkbox';
+		value_node.checked = item.value;
+
+	} else if (item.value instanceof String || typeof item.value == 'string') {
+		// input.disabled = !enabled;
+		value_node.value = item.value;
+
+	} else if (item.value instanceof Number || typeof item.value == 'number') {
+		// input.disabled = !enabled;
+		type = 'number';
+		value_node.value = item.value;
+
+	} else {
+		value_node.value = 'unknown';
+	}
+
+	value_node.setAttribute('type', type);
+}
+
+function derenderData(data) {
+	if (!data)
+		return;
+
+	for (var data_item_key in data) {
+		data_item = data[data_item_key];
+
+		derenderDataValue(data_item);
+	}
+}
+
+function derenderDataValue(item) {
+	var value_node = item.node.querySelector('#value');
+
+	var value = null;
+
+	if (value_node.getAttribute('type') == 'checkbox') {
+		value = value_node.checked;
+
+	} else if (value_node.getAttribute('type') == 'text') {
+		value = value_node.value;
+
+	} else if (value_node.getAttribute('type') == 'number') {
+		value = parseInt(value_node.value);
+
+	}
 
 	if (value != null) {
-
-		if (value instanceof Boolean || typeof value == 'boolean') {
-			var input = value_cell.appendChild(document.createElement('input'));
-			//input.disabled = !enabled;
-			input.setAttribute('type', 'checkbox');
-			input.checked = value;
-
-		} else if (value instanceof String || typeof value == 'string') {
-			var input = value_cell.appendChild(document.createElement('input'));
-			//input.disabled = !enabled;
-			input.setAttribute('type', 'text');
-			input.value = value;
-
-		} else if (value instanceof Number || typeof value == 'number') {
-			var input = value_cell.appendChild(document.createElement('input'));
-			//input.disabled = !enabled;
-			input.setAttribute('type', 'number');
-			input.value = value;
-
-		} else {
-			value_cell.innerText = 'unknown';
-		}
-	}
-}
-
-function inputDataValue(object, row) {
-	var cells = $(row).find('td');
-
-	var item_cell = cells[0];
-	var value_cell = cells[1];
-
-	if (item_cell && value_cell) {
-		var input = value_cell.children.length > 0 ? value_cell.children[0] : null;
-
-		var value = null;
-
-		if (input && input.getAttribute('type') == 'checkbox') {
-			value = input.checked;
-
-		} else if (input && input.getAttribute('type') == 'text') {
-			value = input.value;
-
-		} else if (input && input.getAttribute('type') == 'number') {
-			value = parseInt(input.value);
-
-		} else if (value_cell.innerText == 'unknown') {
-			// value = null;
-		}
-
-		if (value != null) {
-			object[item_cell.innerText] = value;
-		}
+		item.value = value;
 	}
 }

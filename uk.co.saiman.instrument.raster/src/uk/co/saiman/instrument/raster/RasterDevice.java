@@ -30,7 +30,7 @@ package uk.co.saiman.instrument.raster;
 import java.util.Set;
 
 import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.strangeskies.utilities.Observable;
+import uk.co.strangeskies.observable.Observable;
 
 public interface RasterDevice extends HardwareDevice {
 	Set<RasterPattern> availableRasterModes();

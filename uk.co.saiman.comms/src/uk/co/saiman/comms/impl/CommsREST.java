@@ -28,7 +28,6 @@
 package uk.co.saiman.comms.impl;
 
 import static java.util.Collections.unmodifiableMap;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
@@ -59,30 +58,30 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import osgi.enroute.rest.api.REST;
 import osgi.enroute.rest.api.RequireRestImplementation;
 import uk.co.saiman.comms.Command;
-import uk.co.saiman.comms.CommandSet;
+import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.CommandRESTConverter;
 
 @RequireRestImplementation
 @Component(property = REST.ENDPOINT + "=/comms/*")
-public class CommandSetREST implements REST {
-	private class CommandSetRegistration {
-		private final CommandSet<?> commandSet;
-		private final String uid;
+public class CommsREST implements REST {
+	private class CommsRegistration {
+		private final Comms<?> comms;
 		private final Bundle bundle;
 
-		public CommandSetRegistration(CommandSet<?> commandSet, Bundle bundle, String uid) {
-			this.commandSet = commandSet;
-			this.uid = uid;
+		public CommsRegistration(Comms<?> comms, Bundle bundle) {
+			this.comms = comms;
 			this.bundle = bundle;
 		}
 
-		public CommandSet<?> commandSet() {
-			return commandSet;
+		public Comms<?> comms() {
+			return comms;
 		}
 
 		public String uid() {
-			return uid;
+			return (comms.getName() + "-" + comms.getPort().getName())
+					.replace(' ', '-')
+					.replace('/', '-');
 		}
 
 		public Bundle bundle() {
@@ -116,10 +115,9 @@ public class CommandSetREST implements REST {
 
 	private Configuration config;
 
-	private Map<CommandSet<?>, CommandSetRegistration> commandSets;
-	private Map<String, CommandSetRegistration> commandSetIds;
+	private Map<Comms<?>, CommsRegistration> commsInterfaces;
 	@SuppressWarnings("rawtypes")
-	private ServiceTracker<CommandSet, CommandSet> commandSetTracker;
+	private ServiceTracker<Comms, Comms> commsInterfaceTracker;
 
 	@Reference(cardinality = MULTIPLE, policyOption = GREEDY)
 	private List<CommandRESTConverter> converters = new CopyOnWriteArrayList<>();
@@ -129,37 +127,36 @@ public class CommandSetREST implements REST {
 	void activate(Configuration config, BundleContext context) {
 		modified(config);
 
-		commandSets = new LinkedHashMap<>();
-		commandSetIds = new HashMap<>();
+		commsInterfaces = new LinkedHashMap<>();
 
-		commandSetTracker = new ServiceTracker<>(
+		commsInterfaceTracker = new ServiceTracker<>(
 				context,
-				CommandSet.class,
-				new ServiceTrackerCustomizer<CommandSet, CommandSet>() {
+				Comms.class,
+				new ServiceTrackerCustomizer<Comms, Comms>() {
 					@Override
-					public CommandSet<?> addingService(ServiceReference<CommandSet> reference) {
-						refreshCommandSets(context);
+					public Comms<?> addingService(ServiceReference<Comms> reference) {
+						refreshCommsInterfaces(context);
 						return context.getService(reference);
 					}
 
 					@Override
-					public void modifiedService(ServiceReference<CommandSet> reference, CommandSet service) {
-						refreshCommandSets(context);
+					public void modifiedService(ServiceReference<Comms> reference, Comms service) {
+						refreshCommsInterfaces(context);
 					}
 
 					@Override
-					public void removedService(ServiceReference<CommandSet> reference, CommandSet service) {
-						refreshCommandSets(context);
+					public void removedService(ServiceReference<Comms> reference, Comms service) {
+						refreshCommsInterfaces(context);
 					}
 				});
-		commandSetTracker.open();
+		commsInterfaceTracker.open();
 
-		refreshCommandSets(context);
+		refreshCommsInterfaces(context);
 	}
 
 	@Deactivate
 	void deactivate() {
-		commandSetTracker.close();
+		commsInterfaceTracker.close();
 	}
 
 	@Modified
@@ -168,71 +165,76 @@ public class CommandSetREST implements REST {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private synchronized void refreshCommandSets(BundleContext context) {
-		commandSets.clear();
-		Map<CommandSet<?>, Bundle> commandSetBundles = new HashMap<>();
+	private synchronized void refreshCommsInterfaces(BundleContext context) {
+		commsInterfaces.clear();
+		Map<Comms<?>, Bundle> commsInterfaceBundles = new HashMap<>();
 
 		try {
-			for (ServiceReference<CommandSet> commandSetReference : context
-					.getServiceReferences(CommandSet.class, null)) {
-				commandSetBundles
-						.put(context.getService(commandSetReference), commandSetReference.getBundle());
+			for (ServiceReference<Comms> commsReference : context
+					.getServiceReferences(Comms.class, null)) {
+				commsInterfaceBundles.put(context.getService(commsReference), commsReference.getBundle());
 			}
 		} catch (InvalidSyntaxException e) {
 			throw new AssertionError();
 		}
 
-		commandSetIds.values().retainAll(commandSetBundles.keySet());
-
-		for (CommandSet<?> commandSet : commandSetBundles.keySet()) {
-			String uid = commandSet.getName().replace(' ', '-');
-			int i = 1;
-			while (commandSetIds.containsKey(uid)) {
-				uid = commandSet.getName().replace(' ', '-') + "-" + ++i;
-			}
-
-			CommandSetRegistration registration = new CommandSetRegistration(
-					commandSet,
-					commandSetBundles.get(commandSet),
-					uid);
-			commandSetIds.put(uid, registration);
-			commandSets.put(commandSet, registration);
+		for (Comms<?> comms : commsInterfaceBundles.keySet()) {
+			CommsRegistration registration = new CommsRegistration(
+					comms,
+					commsInterfaceBundles.get(comms));
+			commsInterfaces.put(comms, registration);
 		}
 	}
 
-	public List<String> getCommandSets() {
-		return commandSets.values().stream().map(CommandSetRegistration::uid).collect(toList());
+	public List<String> getCommsInterfaces() {
+		return commsInterfaces.values().stream().map(CommsRegistration::uid).collect(toList());
 	}
 
-	public List<Map<String, Object>> getCommandSetInfo() {
-		return commandSets.values().stream().map(this::getCommandSetInfoImpl).collect(toList());
+	public List<Map<String, Object>> getCommsInterfaceInfo() {
+		return commsInterfaces.values().stream().map(this::getCommsInterfaceInfoImpl).collect(toList());
 	}
 
-	public Map<String, Object> getCommandSetInfo(String name) {
-		return getCommandSetInfoImpl(getNamedCommandSet(name));
+	public Map<String, Object> getCommsInterfaceInfo(String name) {
+		return getCommsInterfaceInfoImpl(getNamedComms(name));
 	}
 
-	private <T> Map<String, Object> getCommandSetInfoImpl(CommandSetRegistration commandSet) {
+	public Map<String, String> postOpenCommsInterface(String name) {
+		Comms<?> comms = getNamedComms(name).comms();
+		comms.open();
+		Map<String, String> map = new HashMap<>();
+		map.put(STATUS_CODE_KEY, comms.status().get().toString());
+		return map;
+	}
+
+	public Map<String, String> postResetCommsInterface(String name) {
+		Comms<?> comms = getNamedComms(name).comms();
+		comms.reset();
+		Map<String, String> map = new HashMap<>();
+		map.put(STATUS_CODE_KEY, comms.status().get().toString());
+		return map;
+	}
+
+	private <T> Map<String, Object> getCommsInterfaceInfoImpl(CommsRegistration commsRegistration) {
 		Map<String, Object> info = new HashMap<>();
 
-		info.put(NAME_KEY, commandSet.commandSet().getName());
-		info.put(ID_KEY, commandSet.uid());
-		info.put(COMMAND_ID_CLASS_KEY, commandSet.commandSet().getCommandIdClass().toString());
-		info.put(STATUS_KEY, getStatus(commandSet.commandSet()));
-		info.put(CHANNEL_KEY, commandSet.commandSet().getChannel().getDescriptiveName());
-		info.put(BUNDLE_KEY, getBundleInfoImpl(commandSet.bundle()));
+		info.put(NAME_KEY, commsRegistration.comms().getName());
+		info.put(ID_KEY, commsRegistration.uid());
+		info.put(COMMAND_ID_CLASS_KEY, commsRegistration.comms().getCommandIdClass().toString());
+		info.put(STATUS_KEY, getStatus(commsRegistration.comms()));
+		info.put(CHANNEL_KEY, commsRegistration.comms().getPort().toString());
+		info.put(BUNDLE_KEY, getBundleInfoImpl(commsRegistration.bundle()));
 		info.put(
 				COMMANDS_KEY,
-				commandSet.commandSet().getCommands().map(Objects::toString).collect(toList()));
+				commsRegistration.comms().getCommands().map(Objects::toString).collect(toList()));
 
 		return info;
 	}
 
-	private Map<String, Object> getStatus(CommandSet<?> commandSet) {
+	private Map<String, Object> getStatus(Comms<?> comms) {
 		Map<String, Object> info = new HashMap<>();
 
-		info.put(STATUS_CODE_KEY, commandSet.getChannel().status().get());
-		commandSet.getChannel().getFault().ifPresent(fault -> info.put(STATUS_FAULT_KEY, fault));
+		info.put(STATUS_CODE_KEY, comms.status().get());
+		comms.fault().ifPresent(fault -> info.put(STATUS_FAULT_KEY, fault));
 
 		return info;
 	}
@@ -248,45 +250,38 @@ public class CommandSetREST implements REST {
 	}
 
 	public List<String> getCommands(String name) {
-		return getNamedCommandSet(name)
-				.commandSet()
-				.getCommands()
-				.map(Objects::toString)
-				.collect(toList());
+		return getNamedComms(name).comms().getCommands().map(Objects::toString).collect(toList());
 	}
 
-	public Map<String, Map<String, Object>> getCommandInfo(String commandSetName) {
-		return getCommandInfoImpl(getNamedCommandSet(commandSetName).commandSet());
+	public Map<String, Map<String, Object>> getCommandInfo(String commsName) {
+		return getCommandInfoImpl(getNamedComms(commsName).comms());
 	}
 
-	private <T> Map<String, Map<String, Object>> getCommandInfoImpl(CommandSet<T> commandSet) {
-		return commandSet.getCommands().collect(
-				toMap(Objects::toString, c -> getCommandInfoImpl(commandSet.getCommand(c))));
+	private <T> Map<String, Map<String, Object>> getCommandInfoImpl(Comms<T> comms) {
+		return comms.getCommands().collect(
+				toMap(Objects::toString, c -> getCommandInfoImpl(comms.getCommand(c))));
 	}
 
-	public Map<String, Object> getCommandInfo(String commandSetName, String commandName) {
-		CommandSet<?> commandSet = getNamedCommandSet(commandSetName).commandSet();
+	public Map<String, Object> getCommandInfo(String commsName, String commandName) {
+		Comms<?> comms = getNamedComms(commsName).comms();
 
-		return getCommandInfoImpl(getCommand(commandSet, commandName));
+		return getCommandInfoImpl(getCommand(comms, commandName));
 	}
 
-	private Command<?, ?, ?> getCommand(String commandSetName, String commandName) {
-		CommandSet<?> commandSet = getNamedCommandSet(commandSetName).commandSet();
+	private Command<?, ?, ?> getCommand(String commsName, String commandName) {
+		Comms<?> comms = getNamedComms(commsName).comms();
 
-		return getCommand(commandSet, commandName);
+		return getCommand(comms, commandName);
 	}
 
-	private <T> Command<T, ?, ?> getCommand(CommandSet<T> commandSet, String commandName) {
-		return commandSet.getCommand(
-				commandSet
-						.getCommands()
-						.filter(c -> c.toString().equals(commandName))
-						.findAny()
-						.orElseThrow(() -> commandNotFound(commandSet.getName(), commandName)));
+	private <T> Command<T, ?, ?> getCommand(Comms<T> comms, String commandName) {
+		return comms.getCommand(
+				comms.getCommands().filter(c -> c.toString().equals(commandName)).findAny().orElseThrow(
+						() -> commandNotFound(comms.getName(), commandName)));
 	}
 
-	private RuntimeException commandNotFound(String commandSetName, String commandName) {
-		return new CommsException("Command not found " + commandSetName + ": " + commandName);
+	private RuntimeException commandNotFound(String commsName, String commandName) {
+		return new CommsException("Command not found " + commsName + ": " + commandName);
 	}
 
 	private Map<String, Object> getCommandInfoImpl(Command<?, ?, ?> command) {
@@ -298,16 +293,20 @@ public class CommandSetREST implements REST {
 		return info;
 	}
 
-	private CommandSetRegistration getNamedCommandSet(String name) {
-		return ofNullable(commandSetIds.get(name))
-				.orElseThrow(() -> new CommsException("Command set not found " + name));
+	private CommsRegistration getNamedComms(String name) {
+		return commsInterfaces
+				.values()
+				.stream()
+				.filter(c -> c.uid().equals(name))
+				.findAny()
+				.orElseThrow(() -> new CommsException("Comms interface not found " + name));
 	}
 
-	public Map<String, ? extends Object> putCommandInvocation(
+	public Map<String, ? extends Object> postCommandInvocation(
 			Map<String, Object> output,
-			String commandSetName,
+			String commsName,
 			String commandName) {
-		Command<?, ?, ?> command = getCommand(commandSetName, commandName);
+		Command<?, ?, ?> command = getCommand(commsName, commandName);
 
 		try {
 			return invokeCommand(command, output);

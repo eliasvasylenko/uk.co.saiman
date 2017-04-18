@@ -32,9 +32,10 @@ import java.util.Optional;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.ExperimentResultType;
-import uk.co.strangeskies.utilities.ObservableImpl;
+import uk.co.strangeskies.observable.ObservableImpl;
 
-public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>> implements ExperimentResult<T> {
+public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>>
+		implements ExperimentResult<T> {
 	private final ExperimentNode<?, ?> node;
 	private final ExperimentResultType<T> resultType;
 	private T data;

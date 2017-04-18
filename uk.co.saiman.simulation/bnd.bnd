@@ -4,13 +4,16 @@
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
-	uk.co.strangeskies.utilities;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.collections.observable;version=latest,\
+	uk.co.strangeskies.eclipse;version=latest,\
+	uk.co.strangeskies.fx;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
 	uk.co.strangeskies.reflection.resource;version=latest,\
-	uk.co.strangeskies.fx;version=latest,\
-	uk.co.strangeskies.eclipse;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.utilities;version=latest,\
 \
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.chemistry.msapex;version=snapshot,\

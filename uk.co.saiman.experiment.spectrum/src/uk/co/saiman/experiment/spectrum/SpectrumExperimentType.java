@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.strangeskies.utilities.Observable.Observation.CONTINUE;
-import static uk.co.strangeskies.utilities.Observable.Observation.TERMINATE;
+import static uk.co.strangeskies.observable.Observable.Observation.CONTINUE;
+import static uk.co.strangeskies.observable.Observable.Observation.TERMINATE;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

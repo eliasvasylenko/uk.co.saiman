@@ -31,17 +31,31 @@ import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
 
+import uk.co.saiman.comms.NumberedBits;
 import uk.co.saiman.comms.rest.CommandRESTConverter;
 
 @Component
 public class NumberedBitsRESTConverter implements CommandRESTConverter {
 	@Override
 	public Object convertOutput(Object target, Map<String, Object> output) {
+		if (target instanceof NumberedBits) {
+			NumberedBits object = (NumberedBits) target;
+			int i = 0;
+			for (String item : output.keySet()) {
+				object = object.withSet(i++, (boolean) output.get(item));
+			}
+			return object;
+		}
+
 		return null;
 	}
 
 	@Override
 	public Map<String, Boolean> convertInput(Object input) {
+		if (input instanceof NumberedBits) {
+			return ((NumberedBits) input).toMap();
+		}
+
 		return null;
 	}
 }

@@ -67,9 +67,9 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.Command;
-import uk.co.saiman.comms.CommandSet;
-import uk.co.saiman.comms.CommandSetImpl;
+import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsImpl;
 import uk.co.saiman.comms.NamedBits;
 import uk.co.saiman.comms.NumberedBits;
 import uk.co.saiman.comms.saint.HighVoltageBit;
@@ -88,12 +88,12 @@ import uk.co.saiman.comms.serial.SerialPorts;
 @Component(
 		name = SaintCommsImpl.CONFIGURATION_PID,
 		configurationPid = SaintCommsImpl.CONFIGURATION_PID)
-public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
-		implements SaintComms, CommandSet<SaintCommandId> {
+public class SaintCommsImpl extends CommsImpl<SaintCommandId>
+		implements SaintComms, Comms<SaintCommandId> {
 	public static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint";
 	public static final int MESSAGE_SIZE = 4;
 
-	private static final String LED_PREFIX = "STATUS_LED_";
+	private static final String LED_PREFIX = "STATUS_LED";
 	private static final int LED_COUNT = 8;
 
 	private static final int HV_DAC_PAD = 4;
@@ -128,41 +128,48 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 
 	@Activate
 	void activate(SaintCommsConfiguration configuration) throws IOException {
-		configure(configuration);
+		try {
+			configure(configuration);
 
-		ledStatus = inOutBlock(
-				addOutput(LED_LAT, () -> new NumberedBits(LED_PREFIX, LED_COUNT), NumberedBits::getBytes),
-				addInput(LED_LAT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)),
-				addInput(LED_PORT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)));
+			ledStatus = inOutBlock(
+					addOutput(LED_LAT, () -> new NumberedBits(LED_PREFIX, LED_COUNT), NumberedBits::getBytes),
+					addInput(LED_LAT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)),
+					addInput(LED_PORT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)));
 
-		vacuumStatus = inOutBlock(
-				addOutput(VACUUM_LAT, () -> new NamedBits<>(VacuumBit.class), NamedBits::getBytes),
-				addInput(VACUUM_LAT, b -> new NamedBits<>(VacuumBit.class, b)),
-				addInput(VACUUM_PORT, b -> new NamedBits<>(VacuumBit.class, b)));
+			vacuumStatus = inOutBlock(
+					addOutput(VACUUM_LAT, () -> new NamedBits<>(VacuumBit.class), NamedBits::getBytes),
+					addInput(VACUUM_LAT, b -> new NamedBits<>(VacuumBit.class, b)),
+					addInput(VACUUM_PORT, b -> new NamedBits<>(VacuumBit.class, b)));
 
-		highVoltageStatus = inOutBlock(
-				addOutput(HV_LAT, () -> new NamedBits<>(HighVoltageBit.class), NamedBits::getBytes),
-				addInput(HV_LAT, b -> new NamedBits<>(HighVoltageBit.class, b)),
-				addInput(HV_PORT, b -> new NamedBits<>(HighVoltageBit.class, b)));
+			highVoltageStatus = inOutBlock(
+					addOutput(HV_LAT, () -> new NamedBits<>(HighVoltageBit.class), NamedBits::getBytes),
+					addInput(HV_LAT, b -> new NamedBits<>(HighVoltageBit.class, b)),
+					addInput(HV_PORT, b -> new NamedBits<>(HighVoltageBit.class, b)));
 
-		highVoltageDAC1 = outBlock(
-				addOutput(HV_DAC_1, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-				addInput(HV_DAC_1, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
-		highVoltageDAC2 = outBlock(
-				addOutput(HV_DAC_2, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-				addInput(HV_DAC_2, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
-		highVoltageDAC3 = outBlock(
-				addOutput(HV_DAC_3, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-				addInput(HV_DAC_3, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
-		highVoltageDAC4 = outBlock(
-				addOutput(HV_DAC_4, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-				addInput(HV_DAC_4, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+			highVoltageDAC1 = outBlock(
+					addOutput(HV_DAC_1, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+					addInput(HV_DAC_1, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+			highVoltageDAC2 = outBlock(
+					addOutput(HV_DAC_2, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+					addInput(HV_DAC_2, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+			highVoltageDAC3 = outBlock(
+					addOutput(HV_DAC_3, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+					addInput(HV_DAC_3, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+			highVoltageDAC4 = outBlock(
+					addOutput(HV_DAC_4, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
+					addInput(HV_DAC_4, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Modified
-	void configure(SaintCommsConfiguration configuration) throws IOException {
+	void configure(SaintCommsConfiguration configuration) throws IOException {try {
 		port = comms.getPort(configuration.serialPort());
 		setComms(port);
+	} catch (Throwable e) {
+		e.printStackTrace();
+	}
 	}
 
 	@Deactivate
@@ -246,41 +253,46 @@ public class SaintCommsImpl extends CommandSetImpl<SaintCommandId>
 			SaintCommandAddress address,
 			ByteChannel channel,
 			byte[] output) {
-		ByteBuffer buffer;
+		ByteBuffer message_buffer = ByteBuffer.allocate(MESSAGE_SIZE);
 
 		int addressSize = address.getSize();
 		byte[] addressBytes = address.getBytes();
-		buffer = ByteBuffer.allocate(MESSAGE_SIZE * addressSize);
-		for (int i = 0; i < addressSize; i++) {
-			buffer.put(command.getByte());
-			buffer.put(addressBytes[i]);
-			buffer.put((byte) 0);
-			buffer.put(output[i]);
-		}
-		try {
-			buffer.flip();
-			channel.write(buffer);
-		} catch (IOException e) {
-			throw port.setFault(new CommsException("Problem dispatching command"));
-		}
-
-		int inputRead;
 		byte[] inputBytes = new byte[addressSize];
-		buffer = ByteBuffer.allocate(MESSAGE_SIZE * addressSize);
-		try {
-			inputRead = channel.read(buffer);
-			buffer.flip();
-		} catch (IOException e) {
-			throw port.setFault(new CommsException("Problem receiving command response"));
-		}
-		if (inputRead != MESSAGE_SIZE * addressSize) {
-			throw port.setFault(new CommsException("Response too short " + inputRead));
-		}
+
 		for (int i = 0; i < addressSize; i++) {
-			inputBytes[i] = buffer.get();
-			buffer.get();
-			buffer.get();
-			buffer.get();
+			// output to buffer
+			message_buffer.clear();
+
+			message_buffer.put(command.getByte());
+			message_buffer.put(addressBytes[i]);
+			message_buffer.put((byte) 0);
+			message_buffer.put(output[i]);
+
+			try {
+				message_buffer.flip();
+				channel.write(message_buffer);
+			} catch (IOException e) {
+				throw setFault(new CommsException("Problem dispatching command"));
+			}
+
+			// input from buffer
+			message_buffer.clear();
+
+			int inputRead;
+			try {
+				inputRead = channel.read(message_buffer);
+				message_buffer.flip();
+			} catch (IOException e) {
+				throw setFault(new CommsException("Problem receiving command response"));
+			}
+			if (inputRead != MESSAGE_SIZE) {
+				throw setFault(new CommsException("Response too short " + inputRead));
+			}
+
+			inputBytes[i] = message_buffer.get();
+			message_buffer.get();
+			message_buffer.get();
+			message_buffer.get();
 		}
 
 		return inputBytes;

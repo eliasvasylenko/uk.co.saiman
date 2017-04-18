@@ -6,10 +6,14 @@ Export-Package: uk.co.saiman.experiment.spectrum
 	l10n
 
 -buildpath: \
+	uk.co.strangeskies.collections;version=latest,\
+	uk.co.strangeskies.collections.observable;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\

@@ -42,7 +42,7 @@ import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.strangeskies.mathematics.Range;
 import uk.co.strangeskies.mathematics.expression.Expression;
-import uk.co.strangeskies.utilities.Observer;
+import uk.co.strangeskies.observable.Observer;
 
 /**
  * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series

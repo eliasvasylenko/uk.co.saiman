@@ -11,6 +11,7 @@ Bundle-Name: SAI :: Experiment :: Chemical Map :: MSApex
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
 	uk.co.strangeskies.fx;version=latest,\
 	uk.co.strangeskies.eclipse;version=latest,\
 \

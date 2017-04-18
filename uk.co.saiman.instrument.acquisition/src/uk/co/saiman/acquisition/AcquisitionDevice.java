@@ -38,7 +38,7 @@ import javax.measure.quantity.Time;
 import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.strangeskies.utilities.Observable;
+import uk.co.strangeskies.observable.Observable;
 
 /**
  * Software module for acquisition of {@link SampledContinuousFunction} data
@@ -189,7 +189,10 @@ public interface AcquisitionDevice extends HardwareDevice {
 		return new RegularSampledDomain<>(
 				getSampleTimeUnits(),
 				getSampleDepth(),
-				getSampleFrequency().to(getSampleTimeUnits().inverse().asType(Frequency.class)).getValue().doubleValue(),
+				getSampleFrequency()
+						.to(getSampleTimeUnits().inverse().asType(Frequency.class))
+						.getValue()
+						.doubleValue(),
 				0);
 	}
 }

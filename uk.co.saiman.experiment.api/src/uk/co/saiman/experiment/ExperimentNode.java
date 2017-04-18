@@ -35,11 +35,11 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import uk.co.strangeskies.collection.stream.StreamUtilities;
+import uk.co.strangeskies.observable.ObservableValue;
 import uk.co.strangeskies.reflection.token.ReifiedToken;
 import uk.co.strangeskies.reflection.token.TypeArgument;
 import uk.co.strangeskies.reflection.token.TypeToken;
-import uk.co.strangeskies.utilities.ObservableValue;
-import uk.co.strangeskies.utilities.collection.StreamUtilities;
 
 /**
  * A node in an experiment part tree.
@@ -50,7 +50,8 @@ import uk.co.strangeskies.utilities.collection.StreamUtilities;
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedToken<ExperimentNode<T, S>> {
+public interface ExperimentNode<T extends ExperimentType<S>, S>
+		extends ReifiedToken<ExperimentNode<T, S>> {
 	/**
 	 * @return the experiment workspace containing this experiment
 	 */
@@ -114,7 +115,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	 */
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<U>> Optional<ExperimentNode<E, U>> getAncestor(E type) {
-		return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(a -> (ExperimentNode<E, U>) a);
+		return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(
+				a -> (ExperimentNode<E, U>) a);
 	}
 
 	/**
@@ -129,10 +131,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> getAncestor(
 			Collection<E> types) {
-		return getAncestors()
-				.filter(a -> types.contains(a.getType()))
-				.findFirst()
-				.map(a -> (ExperimentNode<E, ? extends U>) a);
+		return getAncestors().filter(a -> types.contains(a.getType())).findFirst().map(
+				a -> (ExperimentNode<E, ? extends U>) a);
 	}
 
 	/**
@@ -146,7 +146,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<? extends U>> Stream<ExperimentNode<E, ? extends U>> getAncestors(
 			Collection<E> types) {
-		return getAncestors().filter(a -> types.contains(a.getType())).map(a -> (ExperimentNode<E, ? extends U>) a);
+		return getAncestors().filter(a -> types.contains(a.getType())).map(
+				a -> (ExperimentNode<E, ? extends U>) a);
 	}
 
 	/**
@@ -187,8 +188,9 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 		@SuppressWarnings("unchecked")
 		TypeToken<T> typeType = (TypeToken<T>) forType(getType().getThisType());
 
-		return new TypeToken<ExperimentNode<T, S>>() {}
-				.withTypeArguments(new TypeArgument<T>(typeType) {}, new TypeArgument<S>(getType().getStateType()) {});
+		return new TypeToken<ExperimentNode<T, S>>() {}.withTypeArguments(
+				new TypeArgument<T>(typeType) {},
+				new TypeArgument<S>(getType().getStateType()) {});
 	}
 
 	/**

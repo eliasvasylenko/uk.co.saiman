@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.comms.saint.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.fromByte;
@@ -51,6 +52,8 @@ import uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType;
 import uk.co.saiman.comms.saint.impl.SaintHardwareSimulation.SaintHardwareSimulationConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
+import uk.co.strangeskies.utility.Log;
+import uk.co.strangeskies.utility.Log.Level;
 
 @Designate(ocd = SaintHardwareSimulationConfiguration.class, factory = true)
 @Component(
@@ -59,6 +62,9 @@ import uk.co.saiman.comms.serial.SerialPorts;
 		immediate = true)
 public class SaintHardwareSimulation {
 	static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint.simulation";
+
+	@Reference(cardinality = OPTIONAL)
+	Log log;
 
 	@SuppressWarnings("javadoc")
 	@ObjectClassDefinition(
@@ -160,7 +166,7 @@ public class SaintHardwareSimulation {
 			responseBuffer.flip();
 			stream.write(responseBuffer);
 		} catch (IOException e) {
-			throw port.setFault(new CommsException("Unable to send simulated hardware response", e));
+			log.log(Level.ERROR, new CommsException("Unable to send simulated hardware response", e));
 		}
 	}
 }
