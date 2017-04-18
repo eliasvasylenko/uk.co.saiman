@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.comms;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class NumberedBits {
 	}
 
 	public byte[] getBytes() {
-		return bits.toByteArray();
+		return Arrays.copyOf(bits.toByteArray(), (int) Math.ceil(size / (double) Byte.SIZE));
 	}
 
 	public int getCount() {
