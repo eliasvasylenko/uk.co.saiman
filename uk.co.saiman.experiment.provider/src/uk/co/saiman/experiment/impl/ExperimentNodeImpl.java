@@ -50,9 +50,9 @@ import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
+import uk.co.strangeskies.log.Log.Level;
 import uk.co.strangeskies.observable.ObservableProperty;
 import uk.co.strangeskies.observable.ObservableValue;
-import uk.co.strangeskies.utility.Log.Level;
 
 /**
  * Reference implementation of {@link ExperimentNode}.

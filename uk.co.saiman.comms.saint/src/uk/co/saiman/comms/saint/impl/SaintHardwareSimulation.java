@@ -52,8 +52,8 @@ import uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType;
 import uk.co.saiman.comms.saint.impl.SaintHardwareSimulation.SaintHardwareSimulationConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
-import uk.co.strangeskies.utility.Log;
-import uk.co.strangeskies.utility.Log.Level;
+import uk.co.strangeskies.log.Log;
+import uk.co.strangeskies.log.Log.Level;
 
 @Designate(ocd = SaintHardwareSimulationConfiguration.class, factory = true)
 @Component(

@@ -28,7 +28,7 @@
 package uk.co.saiman.simulation.instrument.impl;
 
 import static java.util.Collections.unmodifiableSet;
-import static uk.co.strangeskies.utility.Log.Level.ERROR;
+import static uk.co.strangeskies.log.Log.Level.ERROR;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -59,10 +59,10 @@ import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.strangeskies.collection.observable.BufferingListener;
+import uk.co.strangeskies.log.Log;
 import uk.co.strangeskies.observable.Observable;
 import uk.co.strangeskies.observable.ObservableImpl;
 import uk.co.strangeskies.text.properties.PropertyLoader;
-import uk.co.strangeskies.utility.Log;
 
 /**
  * Partial implementation of a simulation of an acquisition device.

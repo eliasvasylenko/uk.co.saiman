@@ -46,8 +46,8 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
 import uk.co.saiman.experiment.RootExperiment;
 import uk.co.strangeskies.collection.stream.StreamUtilities;
+import uk.co.strangeskies.log.Log;
 import uk.co.strangeskies.text.properties.PropertyLoader;
-import uk.co.strangeskies.utility.Log;
 
 /**
  * Reference implementation of {@link ExperimentWorkspace}.
