@@ -1,11 +1,11 @@
 /*
  * REST Endpoints
  */
-var open_comms_rest_endpoint = '/comms/OpenCommsInterface';
-var reset_comms_rest_endpoint = '/comms/ResetCommsInterface';
-var comms_interface_rest_endpoint = '/comms/CommsInterfaceInfo';
-var command_info_rest_endpoint = '/comms/commandInfo';
-var command_invocation_rest_endpoint = '/comms/commandInvocation';
+var open_comms_rest_endpoint = '/api/comms/OpenCommsInterface';
+var reset_comms_rest_endpoint = '/api/comms/ResetCommsInterface';
+var comms_interface_rest_endpoint = '/api/comms/CommsInterfaceInfo';
+var command_info_rest_endpoint = '/api/comms/commandInfo';
+var command_invocation_rest_endpoint = '/api/comms/commandInvocation';
 /*
  * comms_interface Table
  */
@@ -448,32 +448,41 @@ function renderData(data, node, enabled) {
 }
 
 function renderDataValue(key, item, enabled) {
-	var label_node = item.node.querySelector('#label')
-	var value_node = item.node.querySelector('#value')
+	var label_node = item.node.querySelector('#label');
+	var value_node = item.node.querySelector('#value');
 
 	label_node.innerText = key;
 
-	var type = 'text';
+	if (Array.isArray(item.value)) {
+		item.value.forEach(value => renderDataValueElement(value_node, value));
+	} else {
+		renderDataValueElement(value_node, item.value);
+	}
+}
 
-	if (item.value instanceof Boolean || typeof item.value == 'boolean') {
+function renderDataValueElement(value_node, value) {
+	var type = 'text';
+	var input_node = value_node.appendChild(document.createElement('input'));
+
+	if (value instanceof Boolean || typeof value == 'boolean') {
 		// input.disabled = !enabled;
 		type = 'checkbox';
-		value_node.checked = item.value;
+		input_node.checked = value;
 
-	} else if (item.value instanceof String || typeof item.value == 'string') {
+	} else if (value instanceof String || typeof value == 'string') {
 		// input.disabled = !enabled;
-		value_node.value = item.value;
+		input_node.value = value;
 
-	} else if (item.value instanceof Number || typeof item.value == 'number') {
+	} else if (value instanceof Number || typeof value == 'number') {
 		// input.disabled = !enabled;
 		type = 'number';
-		value_node.value = item.value;
+		input_node.value = value;
 
 	} else {
-		value_node.value = 'unknown';
+		input_node.value = 'unknown';
 	}
 
-	value_node.setAttribute('type', type);
+	input_node.setAttribute('type', type);
 }
 
 function derenderData(data) {
@@ -488,22 +497,30 @@ function derenderData(data) {
 }
 
 function derenderDataValue(item) {
-	var value_node = item.node.querySelector('#value');
+	var value_node_elements = $(item.node).find('#value').children();
 
-	var value = null;
+	if (Array.isArray(item.value)) {
+		for (var i = 0; i < value_node_elements.length; i++) {
+			item.value[i] = derenderDataValueElement(value_node_elements.get(i));
+		}
+	} else {
+		item.value = derenderDataValueElement(value_node_elements.get(0));
+	}
+}
 
-	if (value_node.getAttribute('type') == 'checkbox') {
-		value = value_node.checked;
+function derenderDataValueElement(node) {
+	var value;
 
-	} else if (value_node.getAttribute('type') == 'text') {
-		value = value_node.value;
+	if (node.getAttribute('type') == 'checkbox') {
+		value = node.checked;
 
-	} else if (value_node.getAttribute('type') == 'number') {
-		value = parseInt(value_node.value);
+	} else if (node.getAttribute('type') == 'text') {
+		value = node.value;
+
+	} else if (node.getAttribute('type') == 'number') {
+		value = parseInt(node.value);
 
 	}
 
-	if (value != null) {
-		item.value = value;
-	}
+	return value;
 }

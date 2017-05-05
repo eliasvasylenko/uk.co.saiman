@@ -157,10 +157,10 @@ public class SaintHardwareSimulation {
 		}
 
 		ByteBuffer responseBuffer = ByteBuffer.allocate(4);
-		responseBuffer.put(data);
+		responseBuffer.put((byte) 0);
+		responseBuffer.put((byte) 0);
 		responseBuffer.put(checksum);
-		responseBuffer.put((byte) 0);
-		responseBuffer.put((byte) 0);
+		responseBuffer.put(data);
 
 		try {
 			responseBuffer.flip();

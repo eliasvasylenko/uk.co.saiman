@@ -27,6 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-public enum VacuumBit {
-	INTERMEDIATE, BACKING, INLET, VENT, DIAPHRAGM, MAG_ON, MAG_TRIP, PIRANI_TRIP
+import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.BitsConversion;
+
+public class VacuumReadback {
+	@Bits(0)
+	public boolean pirani;
+	@Bits(1)
+	public boolean magnetron;
+	@BitsConversion(size = 4)
+	@Bits(value = 2)
+	public byte spare;
 }

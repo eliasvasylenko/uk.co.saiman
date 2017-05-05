@@ -27,11 +27,8 @@
  */
 package uk.co.saiman.comms.impl;
 
-import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -40,7 +37,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -55,15 +51,15 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import osgi.enroute.dto.api.DTOs;
 import osgi.enroute.rest.api.REST;
 import osgi.enroute.rest.api.RequireRestImplementation;
 import uk.co.saiman.comms.Command;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.rest.CommandRESTConverter;
 
 @RequireRestImplementation
-@Component(property = REST.ENDPOINT + "=/comms/*")
+@Component(property = REST.ENDPOINT + "=/api/comms/*")
 public class CommsREST implements REST {
 	private class CommsRegistration {
 		private final Comms<?> comms;
@@ -106,12 +102,9 @@ public class CommsREST implements REST {
 	public static final String BUNDLE_ID_KEY = "bundleId";
 
 	public static final String COMMAND_ID_KEY = "id";
-	private static final String COMMAND_INPUT_KEY = "input";
 	private static final String COMMAND_OUTPUT_KEY = "output";
 	private static final String ERROR_KEY = "error";
 	private static final String TRACE_KEY = "trace";
-
-	private static final String VALUE_KEY = "value";
 
 	private Configuration config;
 
@@ -119,8 +112,8 @@ public class CommsREST implements REST {
 	@SuppressWarnings("rawtypes")
 	private ServiceTracker<Comms, Comms> commsInterfaceTracker;
 
-	@Reference(cardinality = MULTIPLE, policyOption = GREEDY)
-	private List<CommandRESTConverter> converters = new CopyOnWriteArrayList<>();
+	@Reference
+	private DTOs dtos;
 
 	@SuppressWarnings("rawtypes")
 	@Activate
@@ -339,17 +332,13 @@ public class CommsREST implements REST {
 		if (output.isEmpty())
 			return null;
 
-		O convertedOutput = null;
+		O convertedOutput;
 
-		for (CommandRESTConverter converter : converters) {
-			convertedOutput = (O) converter.convertOutput(prototype, output);
-
-			if (convertedOutput != null)
-				break;
-		}
-
-		if (convertedOutput == null) {
-			convertedOutput = (O) output.get(VALUE_KEY);
+		try {
+			convertedOutput = (O) dtos.convert(output).to(prototype.getClass());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CommsException("Cannot convert to DTO", e);
 		}
 
 		return convertedOutput;
@@ -359,20 +348,13 @@ public class CommsREST implements REST {
 		if (input == null)
 			return new HashMap<>();
 
-		Map<String, Object> convertedInput = null;
+		Map<String, Object> convertedInput;
 
-		for (CommandRESTConverter converter : converters) {
-			Map<String, ?> converted = converter.convertInput(input);
-
-			if (converted != null) {
-				convertedInput = unmodifiableMap(converted);
-				break;
-			}
-		}
-
-		if (convertedInput == null) {
-			convertedInput = new HashMap<>();
-			convertedInput.put(VALUE_KEY, input);
+		try {
+			convertedInput = dtos.asMap(input);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CommsException("Cannot convert from DTO", e);
 		}
 
 		return convertedInput;

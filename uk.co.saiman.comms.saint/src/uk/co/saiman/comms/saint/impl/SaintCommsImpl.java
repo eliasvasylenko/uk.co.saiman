@@ -33,19 +33,23 @@ import static java.lang.Math.ceil;
 import static java.nio.ByteBuffer.allocate;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
-import static uk.co.saiman.comms.saint.InOutBlock.inOutBlock;
-import static uk.co.saiman.comms.saint.OutBlock.outBlock;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_1;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_2;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_3;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_4;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_LAT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_RB_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_RB_PORT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.LED_LAT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.LED_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.MOTOR_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.MOTOR_PORT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.NULL;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_LAT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_RB_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_RB_PORT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.INPUT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.OUTPUT;
 import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.PING;
@@ -66,20 +70,24 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.Command;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsImpl;
-import uk.co.saiman.comms.NamedBits;
-import uk.co.saiman.comms.NumberedBits;
-import uk.co.saiman.comms.saint.HighVoltageBit;
+import uk.co.saiman.comms.saint.HighVoltageReadback;
+import uk.co.saiman.comms.saint.HighVoltageStatus;
+import uk.co.saiman.comms.saint.I2C;
 import uk.co.saiman.comms.saint.InOutBlock;
+import uk.co.saiman.comms.saint.LEDStatus;
+import uk.co.saiman.comms.saint.MotorStatus;
 import uk.co.saiman.comms.saint.OutBlock;
 import uk.co.saiman.comms.saint.SaintCommandId;
 import uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress;
 import uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType;
 import uk.co.saiman.comms.saint.SaintComms;
-import uk.co.saiman.comms.saint.VacuumBit;
+import uk.co.saiman.comms.saint.VacuumReadback;
+import uk.co.saiman.comms.saint.VacuumStatus;
 import uk.co.saiman.comms.saint.impl.SaintCommsImpl.SaintCommsConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
@@ -92,12 +100,6 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 		implements SaintComms, Comms<SaintCommandId> {
 	public static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint";
 	public static final int MESSAGE_SIZE = 4;
-
-	private static final String LED_PREFIX = "STATUS_LED";
-	private static final int LED_COUNT = 8;
-
-	private static final int HV_DAC_PAD = 4;
-	private static final int HV_DAC_BITS = 12;
 
 	@SuppressWarnings("javadoc")
 	@ObjectClassDefinition(
@@ -113,17 +115,52 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 	SerialPorts comms;
 	private SerialPort port;
 
-	private InOutBlock<NumberedBits> ledStatus;
-	private InOutBlock<NamedBits<VacuumBit>> vacuumStatus;
-	private InOutBlock<NamedBits<HighVoltageBit>> highVoltageStatus;
+	private InOutBlock<LEDStatus> ledStatus;
+	private InOutBlock<VacuumStatus> vacuumStatus;
+	private InOutBlock<HighVoltageStatus> highVoltageStatus;
+	private InOutBlock<MotorStatus> motorStatus;
+	private InOutBlock<VacuumReadback> vacuumReadback;
+	private InOutBlock<HighVoltageReadback> highVoltageReadback;
 
-	private OutBlock<Integer> highVoltageDAC1;
-	private OutBlock<Integer> highVoltageDAC2;
-	private OutBlock<Integer> highVoltageDAC3;
-	private OutBlock<Integer> highVoltageDAC4;
+	private OutBlock<I2C> highVoltageDAC1;
+	private OutBlock<I2C> highVoltageDAC2;
+	private OutBlock<I2C> highVoltageDAC3;
+	private OutBlock<I2C> highVoltageDAC4;
+	private OutBlock<I2C> cmosRef;
+	private OutBlock<I2C> laserDetectRef;
+
+	@Reference
+	ByteConverters converters;
 
 	public SaintCommsImpl() {
 		super(SaintComms.ID, SaintCommandId.class);
+	}
+
+	private <T> InOutBlock<T> inOutBlock(
+			Class<T> type,
+			SaintCommandAddress in,
+			SaintCommandAddress out) {
+		if (in.getSize() != out.getSize()) {
+			throw new CommsException(
+					"Mismatch between input and output address sizes: " + in + ", " + out);
+		}
+
+		return InOutBlock.inOutBlock(
+				addOutput(
+						out,
+						() -> converters.getConverter(type).create(),
+						o -> converters.getConverter(type).toBytes(o)),
+				addInput(out, b -> converters.getConverter(type).fromBytes(b)),
+				addInput(in, b -> converters.getConverter(type).fromBytes(b)));
+	}
+
+	private <T> OutBlock<T> outBlock(Class<T> type, SaintCommandAddress out) {
+		return OutBlock.outBlock(
+				addOutput(
+						out,
+						() -> converters.getConverter(type).create(),
+						o -> converters.getConverter(type).toBytes(o)),
+				addInput(out, b -> converters.getConverter(type).fromBytes(b)));
 	}
 
 	@Activate
@@ -131,45 +168,32 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 		try {
 			configure(configuration);
 
-			ledStatus = inOutBlock(
-					addOutput(LED_LAT, () -> new NumberedBits(LED_PREFIX, LED_COUNT), NumberedBits::getBytes),
-					addInput(LED_LAT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)),
-					addInput(LED_PORT, b -> new NumberedBits(LED_PREFIX, LED_COUNT, b)));
+			ledStatus = inOutBlock(LEDStatus.class, LED_PORT, LED_LAT);
+			vacuumStatus = inOutBlock(VacuumStatus.class, VACUUM_PORT, VACUUM_LAT);
+			highVoltageStatus = inOutBlock(HighVoltageStatus.class, HV_PORT, HV_LAT);
+			motorStatus = inOutBlock(MotorStatus.class, MOTOR_PORT, MOTOR_LAT);
+			vacuumReadback = inOutBlock(VacuumReadback.class, VACUUM_RB_PORT, VACUUM_RB_LAT);
+			highVoltageReadback = inOutBlock(HighVoltageReadback.class, HV_RB_PORT, HV_RB_LAT);
 
-			vacuumStatus = inOutBlock(
-					addOutput(VACUUM_LAT, () -> new NamedBits<>(VacuumBit.class), NamedBits::getBytes),
-					addInput(VACUUM_LAT, b -> new NamedBits<>(VacuumBit.class, b)),
-					addInput(VACUUM_PORT, b -> new NamedBits<>(VacuumBit.class, b)));
-
-			highVoltageStatus = inOutBlock(
-					addOutput(HV_LAT, () -> new NamedBits<>(HighVoltageBit.class), NamedBits::getBytes),
-					addInput(HV_LAT, b -> new NamedBits<>(HighVoltageBit.class, b)),
-					addInput(HV_PORT, b -> new NamedBits<>(HighVoltageBit.class, b)));
-
-			highVoltageDAC1 = outBlock(
-					addOutput(HV_DAC_1, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-					addInput(HV_DAC_1, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
-			highVoltageDAC2 = outBlock(
-					addOutput(HV_DAC_2, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-					addInput(HV_DAC_2, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
-			highVoltageDAC3 = outBlock(
-					addOutput(HV_DAC_3, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-					addInput(HV_DAC_3, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
-			highVoltageDAC4 = outBlock(
-					addOutput(HV_DAC_4, () -> 0, i -> intToBytes(i, HV_DAC_PAD, HV_DAC_BITS)),
-					addInput(HV_DAC_4, b -> (int) bytesToInt(b, HV_DAC_PAD, HV_DAC_BITS)));
+			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_1);
+			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_2);
+			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_3);
+			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_4);
+			cmosRef = outBlock(I2C.class, SaintCommandAddress.CMOS_REF);
+			laserDetectRef = outBlock(I2C.class, SaintCommandAddress.LASER_DETECT_REF);
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Modified
-	void configure(SaintCommsConfiguration configuration) throws IOException {try {
-		port = comms.getPort(configuration.serialPort());
-		setComms(port);
-	} catch (Throwable e) {
-		e.printStackTrace();
-	}
+	void configure(SaintCommsConfiguration configuration) throws IOException {
+		try {
+			port = comms.getPort(configuration.serialPort());
+			setComms(port);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Deactivate
@@ -178,17 +202,17 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 	}
 
 	@Override
-	public InOutBlock<NumberedBits> led() {
+	public InOutBlock<LEDStatus> led() {
 		return ledStatus;
 	}
 
 	@Override
-	public InOutBlock<NamedBits<VacuumBit>> vacuum() {
+	public InOutBlock<VacuumStatus> vacuum() {
 		return vacuumStatus;
 	}
 
 	@Override
-	public OutBlock<NamedBits<HighVoltageBit>> highVoltage() {
+	public OutBlock<HighVoltageStatus> highVoltage() {
 		return highVoltageStatus;
 	}
 
@@ -289,10 +313,10 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 				throw setFault(new CommsException("Response too short " + inputRead));
 			}
 
+			message_buffer.get();
+			message_buffer.get();
+			message_buffer.get();
 			inputBytes[i] = message_buffer.get();
-			message_buffer.get();
-			message_buffer.get();
-			message_buffer.get();
 		}
 
 		return inputBytes;

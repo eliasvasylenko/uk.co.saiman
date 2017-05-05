@@ -8,11 +8,6 @@ base.version = 15.4.2
 
 path = static${name}/${base.version}
 
--extract: @${repo;org.webjars.npm:react}
-
-ExTrAcT: ${extract;${repo;org.webjars.npm:react}}
-ExTrAc2T: ${unzip;${repo;org.webjars.npm:react}}
-
 -includeresource: \
 	@${repo;org.webjars.npm:react}!/META-INF/resources/*,\
 	@${repo;org.webjars.npm:react-dom}!/META-INF/resources/*

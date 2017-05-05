@@ -27,13 +27,23 @@
  */
 package uk.co.saiman.comms.saint;
 
-public enum MotorBit {
-	LOCK_MOTOR_BREAK,
-	LOCK_MOTOR_PHASE,
-	LOCK_MOTOR_MODE,
-	LOCK_MOTOR_ENABLE,
-	LOCK_FULLY_OPEN,
-	LOCK_FULLY_CLOSED,
-	LOCK_OPEN,
-	LOCK_CLOSE
+import java.util.Arrays;
+
+import uk.co.saiman.comms.Bits;
+
+public class LEDStatus {
+	@Bits(0)
+	@Bits(1)
+	@Bits(2)
+	@Bits(3)
+	@Bits(4)
+	@Bits(5)
+	@Bits(6)
+	@Bits(7)
+	public boolean[] led;
+
+	@Override
+	public String toString() {
+		return Arrays.toString(led);
+	}
 }

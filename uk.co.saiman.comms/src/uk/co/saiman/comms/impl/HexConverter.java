@@ -44,7 +44,7 @@ public class HexConverter implements Converter {
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
 	@Override
-	public Object convert(Class<?> type, Object object) throws Exception {
+	public Object convert(Class<?> type, Object object) {
 		if (type.isAssignableFrom(ByteBuffer.class)) {
 			if (object instanceof CharSequence) {
 				String hexString = object.toString().trim();
@@ -59,7 +59,8 @@ public class HexConverter implements Converter {
 				byte[] data = new byte[len / 2];
 				for (int i = 0; i < data.length; i++) {
 					int j = i + i;
-					data[i] = (byte) ((digit(hexString.charAt(j), 16) << 4) + digit(hexString.charAt(j + 1), 16));
+					data[i] = (byte) ((digit(hexString.charAt(j), 16) << 4)
+							+ digit(hexString.charAt(j + 1), 16));
 				}
 
 				return ByteBuffer.wrap(data);
@@ -70,7 +71,7 @@ public class HexConverter implements Converter {
 	}
 
 	@Override
-	public CharSequence format(Object object, int p1, Converter p2) throws Exception {
+	public CharSequence format(Object object, int p1, Converter p2) {
 		if (object instanceof ByteBuffer) {
 			ByteBuffer buffer = (ByteBuffer) object;
 			byte[] bytes = new byte[buffer.remaining()];

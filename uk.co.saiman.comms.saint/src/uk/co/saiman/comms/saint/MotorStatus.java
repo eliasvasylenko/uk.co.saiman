@@ -27,14 +27,41 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Comms;
+import java.util.HashMap;
 
-public interface SaintComms extends Comms<SaintCommandId> {
-	String ID = "SAINT Comms";
+import uk.co.saiman.comms.Bits;
 
-	InOutBlock<LEDStatus> led();
+public class MotorStatus {
+	@Bits(0)
+	public boolean lockMotorBreak;
+	@Bits(1)
+	public boolean lockMotorPhase;
+	@Bits(2)
+	public boolean lockMotorMode;
+	@Bits(3)
+	public boolean lockMotorEnable;
+	@Bits(4)
+	public boolean lockFullyOpen;
+	@Bits(5)
+	public boolean lockFullyClosed;
+	@Bits(6)
+	public boolean lockOpen;
+	@Bits(7)
+	public boolean lockClose;
 
-	InOutBlock<VacuumStatus> vacuum();
-
-	OutBlock<HighVoltageStatus> highVoltage();
+	@Override
+	public String toString() {
+		return new HashMap<String, Boolean>() {
+			{
+				put("lockMotorBreak", lockMotorBreak);
+				put("lockMotorPhase", lockMotorPhase);
+				put("lockMotorMode", lockMotorMode);
+				put("lockMotorEnable", lockMotorEnable);
+				put("lockFullyOpen", lockFullyOpen);
+				put("lockFullyClosed", lockFullyClosed);
+				put("lockOpen", lockOpen);
+				put("lockClose", lockClose);
+			}
+		}.toString();
+	}
 }

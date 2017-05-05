@@ -27,6 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-public enum HighVoltageBit {
-	HV_24_SWITCHED, HV_ENABLE_1, HV_ENABLE_2, HV_ENABLE_3, HV_ENABLE_4
+import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.BitsConversion;
+
+public class I2C {
+	@BitsConversion(size = 4)
+	@Bits(value = 20)
+	public byte command;
+
+	@BitsConversion(size = 12)
+	@Bits(value = 4)
+	public int value;
 }

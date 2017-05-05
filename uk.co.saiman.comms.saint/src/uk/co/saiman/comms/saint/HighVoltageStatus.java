@@ -27,13 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-public enum VacuumReadbackBit {
-	LOCK_MOTOR_BREAK,
-	LOCK_MOTOR_PHASE,
-	LOCK_MOTOR_MODE,
-	LOCK_MOTOR_ENABLE,
-	LOCK_FULLY_OPEN,
-	LOCK_FULLY_CLOSED,
-	LOCK_OPEN,
-	LOCK_CLOSE
+import uk.co.saiman.comms.Bits;
+
+public class HighVoltageStatus {
+	@Bits(0)
+	public boolean switched24;
+
+	@Bits(1)
+	@Bits(2)
+	@Bits(3)
+	@Bits(4)
+	public boolean[] enable;
 }
