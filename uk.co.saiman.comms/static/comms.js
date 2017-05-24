@@ -257,6 +257,7 @@ function renderCommsInterfaces() {
 		commands_container.hide();
 	}
 
+	setFilter();
 	refreshSorting(comms_interface_table, 'comms_interface_table');
 	refreshSorting(command_table, 'command_table');
 
@@ -465,16 +466,13 @@ function renderDataValueElement(value_node, value) {
 	var input_node = value_node.appendChild(document.createElement('input'));
 
 	if (value instanceof Boolean || typeof value == 'boolean') {
-		// input.disabled = !enabled;
 		type = 'checkbox';
 		input_node.checked = value;
 
 	} else if (value instanceof String || typeof value == 'string') {
-		// input.disabled = !enabled;
 		input_node.value = value;
 
 	} else if (value instanceof Number || typeof value == 'number') {
-		// input.disabled = !enabled;
 		type = 'number';
 		input_node.value = value;
 

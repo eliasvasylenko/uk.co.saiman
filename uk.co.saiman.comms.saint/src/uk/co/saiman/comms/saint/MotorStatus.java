@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.comms.saint;
 
-import java.util.HashMap;
-
 import uk.co.saiman.comms.Bits;
 
 public class MotorStatus {
@@ -48,20 +46,4 @@ public class MotorStatus {
 	public boolean lockOpen;
 	@Bits(7)
 	public boolean lockClose;
-
-	@Override
-	public String toString() {
-		return new HashMap<String, Boolean>() {
-			{
-				put("lockMotorBreak", lockMotorBreak);
-				put("lockMotorPhase", lockMotorPhase);
-				put("lockMotorMode", lockMotorMode);
-				put("lockMotorEnable", lockMotorEnable);
-				put("lockFullyOpen", lockFullyOpen);
-				put("lockFullyClosed", lockFullyClosed);
-				put("lockOpen", lockOpen);
-				put("lockClose", lockClose);
-			}
-		}.toString();
-	}
 }

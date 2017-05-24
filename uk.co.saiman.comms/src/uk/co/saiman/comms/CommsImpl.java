@@ -88,7 +88,6 @@ public abstract class CommsImpl<T> implements Comms<T> {
 	}
 
 	private final String name;
-	private final Class<T> idClass;
 	private final Map<T, Command<T, ?, ?>> commands;
 
 	private CommsPort comms;
@@ -100,9 +99,8 @@ public abstract class CommsImpl<T> implements Comms<T> {
 	/**
 	 * Initialize an empty address space.
 	 */
-	public CommsImpl(String name, Class<T> idClass) {
+	public CommsImpl(String name) {
 		this.name = name;
-		this.idClass = idClass;
 		this.commands = new HashMap<>();
 
 		status = ObservableProperty.over(READY);
@@ -111,11 +109,6 @@ public abstract class CommsImpl<T> implements Comms<T> {
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	@Override
-	public Class<T> getCommandIdClass() {
-		return idClass;
 	}
 
 	@Override

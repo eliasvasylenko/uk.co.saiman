@@ -168,7 +168,7 @@ public class CommsCommands {
 	public ByteBuffer readPort() throws IOException {
 		assertPortAvailable();
 
-		ByteBuffer buffer = ByteBuffer.allocate(openChannel.availableBytes().get());
+		ByteBuffer buffer = ByteBuffer.allocate(openChannel.bytesAvailable());
 		openChannel.read(buffer);
 		buffer.flip();
 

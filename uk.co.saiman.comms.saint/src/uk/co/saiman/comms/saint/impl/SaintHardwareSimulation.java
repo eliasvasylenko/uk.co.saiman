@@ -30,7 +30,7 @@ package uk.co.saiman.comms.saint.impl;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.fromByte;
+import static uk.co.saiman.comms.saint.SaintCommandType.fromByte;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,7 +48,8 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
-import uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType;
+import uk.co.saiman.comms.saint.SaintCommandType;
+import uk.co.saiman.comms.saint.SaintComms;
 import uk.co.saiman.comms.saint.impl.SaintHardwareSimulation.SaintHardwareSimulationConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
@@ -63,9 +64,6 @@ import uk.co.strangeskies.log.Log.Level;
 public class SaintHardwareSimulation {
 	static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint.simulation";
 
-	@Reference(cardinality = OPTIONAL)
-	Log log;
-
 	@SuppressWarnings("javadoc")
 	@ObjectClassDefinition(
 			id = CONFIGURATION_PID,
@@ -77,6 +75,9 @@ public class SaintHardwareSimulation {
 				description = "The serial port for the hardware simulation")
 		String serialPort();
 	}
+
+	@Reference(cardinality = OPTIONAL)
+	Log log;
 
 	@Reference(policy = STATIC, policyOption = GREEDY)
 	SerialPorts serialPorts;
@@ -107,9 +108,9 @@ public class SaintHardwareSimulation {
 	}
 
 	private synchronized void openPort() {
-		ByteBuffer messageBuffer = ByteBuffer.allocate(4);
+		ByteBuffer messageBuffer = ByteBuffer.allocate(SaintComms.MESSAGE_SIZE);
 
-		stream = port.openStream(SaintCommsImpl.MESSAGE_SIZE);
+		stream = port.openStream(SaintComms.MESSAGE_SIZE);
 		stream.addObserver(buffer -> {
 			do {
 				boolean filled = false;

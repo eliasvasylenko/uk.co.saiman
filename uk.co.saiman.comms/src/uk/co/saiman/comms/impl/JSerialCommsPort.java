@@ -34,7 +34,6 @@ import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_WRITE_BLOCKING;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
@@ -45,8 +44,6 @@ import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
 import uk.co.strangeskies.observable.ObservableImpl;
-import uk.co.strangeskies.observable.ObservableProperty;
-import uk.co.strangeskies.observable.ObservableValue;
 import uk.co.strangeskies.observable.Observer;
 
 /**
@@ -106,13 +103,12 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 			throw new CommsException("Cannot open port " + this);
 		}
 
-		ObservableProperty<Integer, Integer> availableObservable = ObservableProperty
-				.over((a, c) -> a, Objects::equals, serialPort.bytesAvailable());
+		ObservableImpl<CommsChannel> availableObservable = new ObservableImpl<>();
 
 		setPortListener(new SerialPortDataListener() {
 			@Override
 			public void serialEvent(SerialPortEvent event) {
-				availableObservable.set(serialPort.bytesAvailable());
+				availableObservable.fire(openChannel);
 			}
 
 			@Override
@@ -125,9 +121,9 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 			private boolean open = true;
 
 			@Override
-			public ObservableValue<Integer> availableBytes() {
+			public int bytesAvailable() {
 				assertOpen();
-				return availableObservable;
+				return serialPort.bytesAvailable();
 			}
 
 			@Override
@@ -168,6 +164,16 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 					closeChannel();
 				}
 			}
+
+			@Override
+			public boolean addObserver(Observer<? super CommsChannel> observer) {
+				return availableObservable.addObserver(observer);
+			}
+
+			@Override
+			public boolean removeObserver(Observer<? super CommsChannel> observer) {
+				return availableObservable.removeObserver(observer);
+			}
 		};
 
 		return openChannel;
@@ -179,8 +185,8 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 		ObservableImpl<ByteBuffer> byteObservable = new ObservableImpl<>();
 
 		if (packetSize <= 0) {
-			channel.availableBytes().addObserver(b -> {
-				byte[] bytes = new byte[serialPort.bytesAvailable()];
+			channel.addObserver(c -> {
+				byte[] bytes = new byte[c.bytesAvailable()];
 				serialPort.readBytes(bytes, bytes.length);
 				byteObservable.fire(ByteBuffer.wrap(bytes));
 			});
@@ -227,6 +233,7 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 			@Override
 			public void close() throws IOException {
 				serialPort.removeDataListener();
+				byteObservable.clearObservers();
 				channel.close();
 			}
 		};

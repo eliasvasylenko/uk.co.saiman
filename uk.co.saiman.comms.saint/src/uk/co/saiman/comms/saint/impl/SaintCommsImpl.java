@@ -27,32 +27,46 @@
  */
 package uk.co.saiman.comms.saint.impl;
 
-import static java.lang.Byte.BYTES;
-import static java.lang.Long.reverse;
-import static java.lang.Math.ceil;
-import static java.nio.ByteBuffer.allocate;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_1;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_2;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_3;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_DAC_4;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_LAT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_PORT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_RB_LAT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.HV_RB_PORT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.LED_LAT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.LED_PORT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.MOTOR_LAT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.MOTOR_PORT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.NULL;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_LAT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_PORT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_RB_LAT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress.VACUUM_RB_PORT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.INPUT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.OUTPUT;
-import static uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType.PING;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.CMOS_REF;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_1_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_2_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_3_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_4_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_DAC_1;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_DAC_2;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_DAC_3;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_DAC_4;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_RB_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_RB_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.LASER_DETECT_REF;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.LED_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.LED_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.MAGNETRON_READBACK_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.MOTOR_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.MOTOR_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.NULL;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.PIRANI_READBACK_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.SPARE_MON_1_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.SPARE_MON_2_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.SPARE_MON_3_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.SPARE_MON_4_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.TURBO_CONTROL;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.TURBO_READBACKS;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VACUUM_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VACUUM_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VACUUM_RB_LAT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VACUUM_RB_PORT;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VOLTAGE_READBACK_1_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VOLTAGE_READBACK_2_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VOLTAGE_READBACK_3_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandAddress.VOLTAGE_READBACK_4_ADC;
+import static uk.co.saiman.comms.saint.SaintCommandType.INPUT;
+import static uk.co.saiman.comms.saint.SaintCommandType.OUTPUT;
+import static uk.co.saiman.comms.saint.SaintCommandType.PING;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -75,19 +89,23 @@ import uk.co.saiman.comms.Command;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsImpl;
+import uk.co.saiman.comms.InBlock;
+import uk.co.saiman.comms.InOutBlock;
+import uk.co.saiman.comms.OutBlock;
+import uk.co.saiman.comms.saint.ADC;
 import uk.co.saiman.comms.saint.HighVoltageReadback;
 import uk.co.saiman.comms.saint.HighVoltageStatus;
 import uk.co.saiman.comms.saint.I2C;
-import uk.co.saiman.comms.saint.InOutBlock;
 import uk.co.saiman.comms.saint.LEDStatus;
 import uk.co.saiman.comms.saint.MotorStatus;
-import uk.co.saiman.comms.saint.OutBlock;
-import uk.co.saiman.comms.saint.SaintCommandId;
-import uk.co.saiman.comms.saint.SaintCommandId.SaintCommandAddress;
-import uk.co.saiman.comms.saint.SaintCommandId.SaintCommandType;
+import uk.co.saiman.comms.saint.SaintCommand;
+import uk.co.saiman.comms.saint.SaintCommandAddress;
+import uk.co.saiman.comms.saint.SaintCommandType;
 import uk.co.saiman.comms.saint.SaintComms;
+import uk.co.saiman.comms.saint.TurboControl;
+import uk.co.saiman.comms.saint.TurboReadbacks;
+import uk.co.saiman.comms.saint.VacuumControl;
 import uk.co.saiman.comms.saint.VacuumReadback;
-import uk.co.saiman.comms.saint.VacuumStatus;
 import uk.co.saiman.comms.saint.impl.SaintCommsImpl.SaintCommsConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
@@ -96,10 +114,9 @@ import uk.co.saiman.comms.serial.SerialPorts;
 @Component(
 		name = SaintCommsImpl.CONFIGURATION_PID,
 		configurationPid = SaintCommsImpl.CONFIGURATION_PID)
-public class SaintCommsImpl extends CommsImpl<SaintCommandId>
-		implements SaintComms, Comms<SaintCommandId> {
+public class SaintCommsImpl extends CommsImpl<SaintCommand>
+		implements SaintComms, Comms<SaintCommand> {
 	public static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint";
-	public static final int MESSAGE_SIZE = 4;
 
 	@SuppressWarnings("javadoc")
 	@ObjectClassDefinition(
@@ -115,8 +132,11 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 	SerialPorts comms;
 	private SerialPort port;
 
+	@Reference
+	ByteConverters converters;
+
 	private InOutBlock<LEDStatus> ledStatus;
-	private InOutBlock<VacuumStatus> vacuumStatus;
+	private InOutBlock<VacuumControl> vacuumStatus;
 	private InOutBlock<HighVoltageStatus> highVoltageStatus;
 	private InOutBlock<MotorStatus> motorStatus;
 	private InOutBlock<VacuumReadback> vacuumReadback;
@@ -129,11 +149,26 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 	private OutBlock<I2C> cmosRef;
 	private OutBlock<I2C> laserDetectRef;
 
-	@Reference
-	ByteConverters converters;
+	private InBlock<ADC> piraniReadback;
+	private InBlock<ADC> magnetronReadback;
+	private InBlock<ADC> spareMon1;
+	private InBlock<ADC> spareMon2;
+	private InBlock<ADC> spareMon3;
+	private InBlock<ADC> spareMon4;
+	private InBlock<ADC> currentReadback1;
+	private InBlock<ADC> currentReadback2;
+	private InBlock<ADC> currentReadback3;
+	private InBlock<ADC> currentReadback4;
+	private InBlock<ADC> voltageReadback1;
+	private InBlock<ADC> voltageReadback2;
+	private InBlock<ADC> voltageReadback3;
+	private InBlock<ADC> voltageReadback4;
+
+	private OutBlock<TurboControl> turboControl;
+	private InBlock<TurboReadbacks> turboReadbacks;
 
 	public SaintCommsImpl() {
-		super(SaintComms.ID, SaintCommandId.class);
+		super(SaintComms.ID);
 	}
 
 	private <T> InOutBlock<T> inOutBlock(
@@ -163,37 +198,53 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 				addInput(out, b -> converters.getConverter(type).fromBytes(b)));
 	}
 
+	private <T> InBlock<T> inBlock(Class<T> type, SaintCommandAddress in) {
+		return InBlock.inBlock(addInput(in, b -> converters.getConverter(type).fromBytes(b)));
+	}
+
 	@Activate
 	void activate(SaintCommsConfiguration configuration) throws IOException {
-		try {
-			configure(configuration);
+		configure(configuration);
 
-			ledStatus = inOutBlock(LEDStatus.class, LED_PORT, LED_LAT);
-			vacuumStatus = inOutBlock(VacuumStatus.class, VACUUM_PORT, VACUUM_LAT);
-			highVoltageStatus = inOutBlock(HighVoltageStatus.class, HV_PORT, HV_LAT);
-			motorStatus = inOutBlock(MotorStatus.class, MOTOR_PORT, MOTOR_LAT);
-			vacuumReadback = inOutBlock(VacuumReadback.class, VACUUM_RB_PORT, VACUUM_RB_LAT);
-			highVoltageReadback = inOutBlock(HighVoltageReadback.class, HV_RB_PORT, HV_RB_LAT);
+		ledStatus = inOutBlock(LEDStatus.class, LED_PORT, LED_LAT);
+		vacuumStatus = inOutBlock(VacuumControl.class, VACUUM_PORT, VACUUM_LAT);
+		highVoltageStatus = inOutBlock(HighVoltageStatus.class, HV_PORT, HV_LAT);
+		motorStatus = inOutBlock(MotorStatus.class, MOTOR_PORT, MOTOR_LAT);
+		vacuumReadback = inOutBlock(VacuumReadback.class, VACUUM_RB_PORT, VACUUM_RB_LAT);
+		highVoltageReadback = inOutBlock(HighVoltageReadback.class, HV_RB_PORT, HV_RB_LAT);
 
-			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_1);
-			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_2);
-			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_3);
-			highVoltageDAC1 = outBlock(I2C.class, HV_DAC_4);
-			cmosRef = outBlock(I2C.class, SaintCommandAddress.CMOS_REF);
-			laserDetectRef = outBlock(I2C.class, SaintCommandAddress.LASER_DETECT_REF);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_1);
+		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_2);
+		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_3);
+		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_4);
+		cmosRef = outBlock(I2C.class, CMOS_REF);
+		laserDetectRef = outBlock(I2C.class, LASER_DETECT_REF);
+
+		piraniReadback = inBlock(ADC.class, PIRANI_READBACK_ADC);
+		magnetronReadback = inBlock(ADC.class, MAGNETRON_READBACK_ADC);
+
+		spareMon1 = inBlock(ADC.class, SPARE_MON_1_ADC);
+		spareMon2 = inBlock(ADC.class, SPARE_MON_2_ADC);
+		spareMon3 = inBlock(ADC.class, SPARE_MON_3_ADC);
+		spareMon4 = inBlock(ADC.class, SPARE_MON_4_ADC);
+
+		currentReadback1 = inBlock(ADC.class, CURRENT_READBACK_1_ADC);
+		currentReadback2 = inBlock(ADC.class, CURRENT_READBACK_2_ADC);
+		currentReadback3 = inBlock(ADC.class, CURRENT_READBACK_3_ADC);
+		currentReadback4 = inBlock(ADC.class, CURRENT_READBACK_4_ADC);
+		voltageReadback1 = inBlock(ADC.class, VOLTAGE_READBACK_1_ADC);
+		voltageReadback2 = inBlock(ADC.class, VOLTAGE_READBACK_2_ADC);
+		voltageReadback3 = inBlock(ADC.class, VOLTAGE_READBACK_3_ADC);
+		voltageReadback4 = inBlock(ADC.class, VOLTAGE_READBACK_4_ADC);
+
+		turboControl = outBlock(TurboControl.class, TURBO_CONTROL);
+		turboReadbacks = inBlock(TurboReadbacks.class, TURBO_READBACKS);
 	}
 
 	@Modified
 	void configure(SaintCommsConfiguration configuration) throws IOException {
-		try {
-			port = comms.getPort(configuration.serialPort());
-			setComms(port);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		port = comms.getPort(configuration.serialPort());
+		setComms(port);
 	}
 
 	@Deactivate
@@ -207,32 +258,13 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 	}
 
 	@Override
-	public InOutBlock<VacuumStatus> vacuum() {
+	public InOutBlock<VacuumControl> vacuum() {
 		return vacuumStatus;
 	}
 
 	@Override
 	public OutBlock<HighVoltageStatus> highVoltage() {
 		return highVoltageStatus;
-	}
-
-	private byte[] intToBytes(long integer, int bitPad, int bitCount) {
-		int padBytes = (int) ceil(bitPad / (double) BYTES);
-		int byteCount = (int) ceil((padBytes + bitCount) / (double) BYTES);
-
-		byte[] bytes = allocate(8).putLong(reverse(integer)).array();
-		byte[] result = new byte[byteCount];
-
-		result[0] = (byte) (bytes[0] >> bitPad);
-		for (int i = 1; i < byteCount; i++) {
-			result[i] = (byte) (bytes[i - 1] << 4 | bytes[i] >> 4);
-		}
-
-		return result;
-	}
-
-	private long bytesToInt(byte[] bytes, int bitPad, int bitCount) {
-		return reverse(bytes[0] << 4 | bytes[1] >> 4);
 	}
 
 	@Override
@@ -246,8 +278,8 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 	}
 
 	private <T> Supplier<T> addInput(SaintCommandAddress address, Function<byte[], T> inputFunction) {
-		Command<SaintCommandId, T, Void> inputCommand = addCommand(
-				new SaintCommandId(INPUT, address),
+		Command<SaintCommand, T, Void> inputCommand = addCommand(
+				new SaintCommand(INPUT, address),
 				(output, channel) -> {
 					byte[] outputBytes = new byte[address.getBytes().length];
 					byte[] inputBytes = executeSaintCommand(INPUT, address, channel, outputBytes);
@@ -261,8 +293,8 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 			SaintCommandAddress address,
 			Supplier<T> prototype,
 			Function<T, byte[]> outputFunction) {
-		Command<SaintCommandId, Void, T> outputCommand = addCommand(
-				new SaintCommandId(OUTPUT, address),
+		Command<SaintCommand, Void, T> outputCommand = addCommand(
+				new SaintCommand(OUTPUT, address),
 				(output, channel) -> {
 					byte[] outputBytes = outputFunction.apply(output);
 					executeSaintCommand(OUTPUT, address, channel, outputBytes);
@@ -302,15 +334,13 @@ public class SaintCommsImpl extends CommsImpl<SaintCommandId>
 			// input from buffer
 			message_buffer.clear();
 
-			int inputRead;
 			try {
-				inputRead = channel.read(message_buffer);
+				if (channel.read(message_buffer) != message_buffer.limit()) {
+					throw setFault(new CommsException("Response too short " + message_buffer.limit()));
+				}
 				message_buffer.flip();
 			} catch (IOException e) {
 				throw setFault(new CommsException("Problem receiving command response"));
-			}
-			if (inputRead != MESSAGE_SIZE) {
-				throw setFault(new CommsException("Response too short " + inputRead));
 			}
 
 			message_buffer.get();

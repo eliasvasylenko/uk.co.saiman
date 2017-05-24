@@ -27,31 +27,27 @@
  */
 package uk.co.saiman.comms.saint;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+public class SaintCommand {
+	private static final String SPLIT_CHARACTERS = "::";
 
-public interface OutBlock<T> {
-	T getRequested();
+	private final SaintCommandType type;
+	private final SaintCommandAddress address;
 
-	void request(T data);
-
-	default void modifyRequest(Function<T, T> data) {
-		request(data.apply(getRequested()));
+	public SaintCommand(SaintCommandType type, SaintCommandAddress address) {
+		this.type = type;
+		this.address = address;
 	}
 
-	static <T> OutBlock<T> outBlock(Consumer<T> request, Supplier<T> getRequested) {
-		return new OutBlock<T>() {
-			@Override
-			public void request(T data) {
-				request.accept(data);
-			}
+	public SaintCommandType getType() {
+		return type;
+	}
 
-			@Override
-			public T getRequested() {
-				return getRequested.get();
-			}
+	public SaintCommandAddress getAddress() {
+		return address;
+	}
 
-		};
+	@Override
+	public String toString() {
+		return address + SPLIT_CHARACTERS + type;
 	}
 }

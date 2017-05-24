@@ -42,4 +42,9 @@
 #command_parameters { display: table; }
 #command_parameters #parameter { display: table-row; }
 #command_parameters #label { display: table-cell; }
-#command_parameters #value { display: table-cell; }
+#command_parameters #value {
+	display: table-cell;
+	width: 100%;
+	padding-left: 1em;
+}
+#command_parameters #value input[type="text"] { width: 100%; }

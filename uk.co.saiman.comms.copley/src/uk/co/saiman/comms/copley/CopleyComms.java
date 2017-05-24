@@ -25,25 +25,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms.saint;
+package uk.co.saiman.comms.copley;
 
-import uk.co.saiman.comms.Bits;
+import java.util.stream.Stream;
 
-public class VacuumStatus {
-	@Bits(0)
-	public boolean intermediate;
-	@Bits(1)
-	public boolean backing;
-	@Bits(2)
-	public boolean inlet;
-	@Bits(3)
-	public boolean vent;
-	@Bits(4)
-	public boolean diaphragm;
-	@Bits(5)
-	public boolean magnatron;
-	@Bits(6)
-	public boolean magnatronTrip;
-	@Bits(7)
-	public boolean piraniTrip;
+import uk.co.saiman.comms.Comms;
+
+public interface CopleyComms<T extends Enum<T>> extends Comms<CopleyCommand> {
+	String ID = "Copley Comms";
+	int HEADER_SIZE = 4;
+
+	Class<T> getAxisClass();
+
+	Stream<CopleyAxisInterface<T>> getAxes();
+
+	CopleyAxisInterface<T> getAxis(T axis);
+
+	default CopleyAxisInterface<T> getAxis(int axis) {
+		return getAxis(getAxisClass().getEnumConstants()[axis]);
+	}
 }

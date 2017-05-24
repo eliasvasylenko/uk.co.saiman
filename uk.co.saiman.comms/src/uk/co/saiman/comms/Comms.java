@@ -76,8 +76,6 @@ public interface Comms<T> {
 
 	void reset();
 
-	Class<T> getCommandIdClass();
-
 	Stream<T> getCommands();
 
 	Command<T, ?, ?> getCommand(T id);

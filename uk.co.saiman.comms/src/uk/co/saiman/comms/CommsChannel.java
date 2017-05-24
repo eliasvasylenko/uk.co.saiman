@@ -29,10 +29,10 @@ package uk.co.saiman.comms;
 
 import java.nio.channels.ByteChannel;
 
-import uk.co.strangeskies.observable.ObservableValue;
+import uk.co.strangeskies.observable.Observable;
 
-public interface CommsChannel extends ByteChannel {
-	ObservableValue<Integer> availableBytes();
+public interface CommsChannel extends ByteChannel, Observable<CommsChannel> {
+	int bytesAvailable();
 
 	@Override
 	void close();

@@ -89,7 +89,6 @@ public class CommsREST implements REST {
 
 	public static final String NAME_KEY = "name";
 	public static final String ID_KEY = "id";
-	public static final String COMMAND_ID_CLASS_KEY = "commandIdClass";
 	public static final String STATUS_KEY = "status";
 	public static final String STATUS_CODE_KEY = "code";
 	public static final String STATUS_FAULT_KEY = "fault";
@@ -212,7 +211,6 @@ public class CommsREST implements REST {
 
 		info.put(NAME_KEY, commsRegistration.comms().getName());
 		info.put(ID_KEY, commsRegistration.uid());
-		info.put(COMMAND_ID_CLASS_KEY, commsRegistration.comms().getCommandIdClass().toString());
 		info.put(STATUS_KEY, getStatus(commsRegistration.comms()));
 		info.put(CHANNEL_KEY, commsRegistration.comms().getPort().toString());
 		info.put(BUNDLE_KEY, getBundleInfoImpl(commsRegistration.bundle()));
@@ -320,9 +318,13 @@ public class CommsREST implements REST {
 	private <I, O> Map<String, Object> invokeCommand(
 			Command<?, I, O> command,
 			Map<String, Object> output) {
+		System.out.println(convertOutput(command.prototype(), output) + " ->");
+
 		O argument = convertOutput(command.prototype(), output);
 
 		I result = command.invoke(argument);
+
+		System.out.println("<- " + convertInput(result));
 
 		return convertInput(result);
 	}
