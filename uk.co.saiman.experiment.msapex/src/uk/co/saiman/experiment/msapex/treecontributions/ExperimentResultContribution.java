@@ -49,7 +49,8 @@ import uk.co.strangeskies.fx.TreeTextContribution;
  */
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
 public class ExperimentResultContribution implements EclipseTreeContribution<ExperimentResult<?>>,
-		TreeTextContribution<ExperimentResult<?>>, PseudoClassTreeCellContribution<ExperimentResult<?>> {
+		TreeTextContribution<ExperimentResult<?>>,
+		PseudoClassTreeCellContribution<ExperimentResult<?>> {
 	private static final String RESULT_PRESENT = "Present";
 
 	@Inject
@@ -66,7 +67,7 @@ public class ExperimentResultContribution implements EclipseTreeContribution<Exp
 		return "[" + data
 				.data()
 				.getData()
-				.map(d -> Objects.toString(data.data().getExperimentNode().getExperimentDataPath()))
+				.map(d -> Objects.toString(data.data().getResultDataPath()))
 				.map(Object::toString)
 				.orElse(text.missingResult().toString()) + "]";
 	}

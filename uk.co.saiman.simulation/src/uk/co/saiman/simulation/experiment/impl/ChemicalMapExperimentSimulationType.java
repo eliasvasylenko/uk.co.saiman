@@ -52,7 +52,10 @@ import uk.co.saiman.simulation.instrument.SimulatedRasterDevice;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 
 @Component(service = { ExperimentType.class, ChemicalMapExperimentType.class })
-public class ChemicalMapExperimentSimulationType extends ChemicalMapExperimentType<ChemicalMapConfiguration> {
+public class ChemicalMapExperimentSimulationType
+		extends ChemicalMapExperimentType<ChemicalMapConfiguration> {
+	private static final String ID = "uk.co.saiman.simulation.chemicalmap";
+
 	final Set<SampleExperimentSimulationType<?>> sampleExperiments = synchronizedSet(new HashSet<>());
 
 	@Reference
@@ -80,11 +83,18 @@ public class ChemicalMapExperimentSimulationType extends ChemicalMapExperimentTy
 	}
 
 	@Override
-	public ChemicalMapConfiguration createState(ExperimentConfigurationContext<ChemicalMapConfiguration> forNode) {
-//		forNode.node().getAncestors(sampleExperiments).filter(sampleExperiment -> {
-			// sampleExperiment.getState().
-	//	});
-		
+	public String getID() {
+		return ID;
+	}
+
+	@Override
+	public ChemicalMapConfiguration createState(
+			ExperimentConfigurationContext<ChemicalMapConfiguration> forNode) {
+		// forNode.node().getAncestors(sampleExperiments).filter(sampleExperiment ->
+		// {
+		// sampleExperiment.getState().
+		// });
+
 		return new ChemicalMapConfiguration() {
 			private String name;
 
@@ -95,7 +105,7 @@ public class ChemicalMapExperimentSimulationType extends ChemicalMapExperimentTy
 
 			@Override
 			public void setChemicalMapName(String name) {
-				forNode.setId(getName() + " - " + name);
+				forNode.setID(getName() + " - " + name);
 
 				this.name = name;
 			}
@@ -114,8 +124,8 @@ public class ChemicalMapExperimentSimulationType extends ChemicalMapExperimentTy
 
 	@Override
 	public void execute(ExperimentExecutionContext<ChemicalMapConfiguration> context) {
-	//	SimulatedSampleDevice sample = .get().getType().device();
-	//	acquisitionSimulation.setSample(sample);
+		// SimulatedSampleDevice sample = .get().getType().device();
+		// acquisitionSimulation.setSample(sample);
 
 		super.execute(context);
 	}
@@ -126,7 +136,9 @@ public class ChemicalMapExperimentSimulationType extends ChemicalMapExperimentTy
 	}
 
 	@Override
-	public boolean mayComeBefore(ExperimentNode<?, ?> penultimateDescendantNode, ExperimentType<?> descendantNodeType) {
+	public boolean mayComeBefore(
+			ExperimentNode<?, ?> penultimateDescendantNode,
+			ExperimentType<?> descendantNodeType) {
 		return descendantNodeType != this;
 	}
 

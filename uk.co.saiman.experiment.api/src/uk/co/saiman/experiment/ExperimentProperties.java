@@ -120,5 +120,7 @@ public interface ExperimentProperties {
 
 	Localized<String> renameExperimentName(String name);
 
-	Localized<String> failedExperimentExecution(ExperimentNode<?, ?> experimentNodeImpl);
+	Localized<String> failedExperimentExecution(ExperimentNode<?, ?> experimentNode);
+
+	Localized<String> cannotCreateWorkspace(ExperimentWorkspace experimentWorkspace);
 }

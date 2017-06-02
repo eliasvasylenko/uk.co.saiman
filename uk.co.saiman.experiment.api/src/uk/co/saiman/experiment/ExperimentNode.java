@@ -30,7 +30,6 @@ package uk.co.saiman.experiment;
 import static java.util.stream.Collectors.toList;
 import static uk.co.strangeskies.reflection.token.TypeToken.forType;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -42,7 +41,13 @@ import uk.co.strangeskies.reflection.token.TypeArgument;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
- * A node in an experiment part tree.
+ * This class provides a common interface for manipulating, inspecting, and
+ * reflecting over the constituent nodes of an experiment. Each node is
+ * associated with an implementation of {@link ExperimentType}.
+ * <p>
+ * Instances of {@link ExperimentNode} are constructed internally by a
+ * {@link ExperimentWorkspace workspace} according to their
+ * {@link ExperimentType type}.
  * 
  * @author Elias N Vasylenko
  * @param <T>
@@ -53,17 +58,16 @@ import uk.co.strangeskies.reflection.token.TypeToken;
 public interface ExperimentNode<T extends ExperimentType<S>, S>
 		extends ReifiedToken<ExperimentNode<T, S>> {
 	/**
+	 * @return The ID of the node, as configured via
+	 *         {@link ExperimentConfigurationContext}. The ID should be unique
+	 *         amongst the children of a node's parent.
+	 */
+	String getID();
+
+	/**
 	 * @return the experiment workspace containing this experiment
 	 */
 	ExperimentWorkspace getExperimentWorkspace();
-
-	/**
-	 * Experiment data root directories are defined hierarchically from the
-	 * {@link ExperimentWorkspace#getWorkspaceDataPath() workspace path}.
-	 * 
-	 * @return the data root of the experiment
-	 */
-	Path getExperimentDataPath();
 
 	/**
 	 * @return the current state object of the experiment node
@@ -86,14 +90,14 @@ public interface ExperimentNode<T extends ExperimentType<S>, S>
 	 */
 	default int getIndex() {
 		return getParent().map(p -> p.getChildren().collect(toList()).indexOf(this)).orElse(
-				getExperimentWorkspace().getRootExperiments().collect(toList()).indexOf(this));
+				getExperimentWorkspace().getExperiments().collect(toList()).indexOf(this));
 	}
 
 	/**
 	 * @return the root part of the experiment tree this part occurs in
 	 */
-	default ExperimentNode<RootExperiment, ExperimentConfiguration> getRoot() {
-		return getAncestor(getExperimentWorkspace().getRootExperimentType()).get();
+	default Experiment getRoot() {
+		return (Experiment) getAncestor(getExperimentWorkspace().getExperimentRootType()).get();
 	}
 
 	/**
@@ -195,19 +199,11 @@ public interface ExperimentNode<T extends ExperimentType<S>, S>
 
 	/**
 	 * Process this experiment node. The request will be passed down to the root
-	 * experiment node and executed within the workspace. Only one experiment may
-	 * be processed at a time for a workspace, and if an experiment is already in
-	 * progress then invocation of this method should throw.
+	 * experiment node and processing will proceed back down the ancestor
+	 * hierarchy to this node. If the experiment is already in progress then
+	 * invocation of this method should fail.
 	 */
 	void process();
-
-	/**
-	 * Attempt to process according to {@link #process()}. If an experiment is
-	 * already in progress then return false.
-	 * 
-	 * @return true if the processing was able to start, false otherwise
-	 */
-	boolean tryProcess();
 
 	/**
 	 * @return all results associated with this node

@@ -49,10 +49,16 @@ import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
  * @author Elias N Vasylenko
  */
 @Component(
-		service = { XYStageExperimentType.class, SampleExperimentType.class, SampleExperimentSimulationType.class,
+		service = {
+				XYStageExperimentType.class,
+				SampleExperimentType.class,
+				SampleExperimentSimulationType.class,
 				ExperimentType.class })
-public class XYStageExperimentSimulationType implements XYStageExperimentType<SimulatedXYStageRasterConfiguration>,
+public class XYStageExperimentSimulationType
+		implements XYStageExperimentType<SimulatedXYStageRasterConfiguration>,
 		SampleExperimentSimulationType<SimulatedXYStageRasterConfiguration> {
+	private static final String ID = "uk.co.saiman.simulation.xystage";
+
 	private static final String DEFAULT_NAME = "XY Sample";
 
 	@Reference
@@ -64,6 +70,11 @@ public class XYStageExperimentSimulationType implements XYStageExperimentType<Si
 	@Override
 	public SimulatedSampleImageDevice device() {
 		return stageSimulation;
+	}
+
+	@Override
+	public String getID() {
+		return ID;
 	}
 
 	@Override

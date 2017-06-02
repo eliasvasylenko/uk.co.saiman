@@ -85,19 +85,6 @@ public class PeriodicTableService {
 	@Activate
 	public void activate(BundleContext context)
 			throws SAXException, IOException, ParserConfigurationException, XPathExpressionException {
-		/*- TODO
-		new Thread(() -> {
-			try {
-				PeriodicTable periodicTable = manager.bindInput().with(PeriodicTable.class)
-						.from(getClass().getResource("PeriodicTable.xml")).resolve(2000);
-		
-				context.registerService(PeriodicTable.class, periodicTable, new Hashtable<>());
-			} catch (Throwable e) {
-				throw e;
-			}
-		});.start();
-		 */
-
 		Document document = DocumentBuilderFactory
 				.newInstance()
 				.newDocumentBuilder()

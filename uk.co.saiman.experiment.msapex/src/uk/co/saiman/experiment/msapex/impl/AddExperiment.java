@@ -52,7 +52,7 @@ public class AddExperiment {
 
 					RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
 
-					experimentPart.getExperimentWorkspace().addRootExperiment(name);
+					experimentPart.getExperimentWorkspace().addExperiment(name);
 					experimentPart.getExperimentTreeController().getTreeView().refresh();
 				});
 	}

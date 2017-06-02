@@ -46,10 +46,11 @@ import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.ExperimentResultManager;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
-import uk.co.saiman.experiment.RootExperiment;
+import uk.co.saiman.experiment.PersistedState;
 import uk.co.strangeskies.log.Log.Level;
 import uk.co.strangeskies.observable.ObservableProperty;
 import uk.co.strangeskies.observable.ObservableValue;
@@ -76,6 +77,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private HashMap<ExperimentResultType<?>, ExperimentResultImpl<?>> results;
 
 	private String id;
+	private PersistedState persistedState;
 
 	/**
 	 * Try to create a new experiment node of the given type, and with the given
@@ -86,8 +88,11 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	 * @param parent
 	 *          the parent of the experiment
 	 */
-	protected ExperimentNodeImpl(T type, ExperimentNodeImpl<?, ?> parent) {
-		this(type, parent.workspace, parent);
+	protected ExperimentNodeImpl(
+			T type,
+			ExperimentNodeImpl<?, ?> parent,
+			PersistedStateImpl persistedState) {
+		this(type, parent.workspace, parent, persistedState);
 
 		if (!type.mayComeAfter(parent)) {
 			throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, this));
@@ -97,30 +102,38 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		});
 
 		parent.children.add(this);
+
+		saveExperiment();
 	}
 
-	protected ExperimentNodeImpl(T type, ExperimentWorkspaceImpl workspace) {
-		this(type, workspace, null);
+	protected ExperimentNodeImpl(
+			T type,
+			ExperimentWorkspaceImpl workspace,
+			PersistedStateImpl persistedState) {
+		this(type, workspace, null, persistedState);
 	}
 
 	private ExperimentNodeImpl(
 			T type,
 			ExperimentWorkspaceImpl workspace,
-			ExperimentNodeImpl<?, ?> parent) {
+			ExperimentNodeImpl<?, ?> parent,
+			PersistedStateImpl persistedState) {
 		this.workspace = workspace;
 		this.type = type;
 		this.parent = parent;
+		this.children = new ArrayList<>();
 
-		children = new ArrayList<>();
-
-		lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
-		state = type.createState(createConfigurationContext());
-
-		results = new HashMap<>();
+		this.results = new HashMap<>();
 		getType().getResultTypes().forEach(r -> results.put(r, new ExperimentResultImpl<>(this, r)));
+
+		this.lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
+		this.persistedState = persistedState;
+		persistedState.addObserver(s -> saveExperiment());
+		this.state = type.createState(createConfigurationContext());
 	}
 
-	protected String getid() {
+	@Override
+	public String getID() {
 		return id;
 	}
 
@@ -138,19 +151,25 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		return workspace;
 	}
 
-	@Override
-	public Path getExperimentDataPath() {
+	protected Path getResultDataPath() {
 		return getParentDataPath().resolve(id);
 	}
 
+	protected PersistedState persistedState() {
+		return persistedState;
+	}
+
+	protected void saveExperiment() {
+		workspace.saveExperiment(getRootImpl());
+	}
+
 	private Path getParentDataPath() {
-		return getParent().map(p -> p.getExperimentDataPath()).orElse(
-				getExperimentWorkspace().getWorkspaceDataPath());
+		return getParentImpl().map(p -> p.getResultDataPath()).orElse(workspace.getWorkspaceDataPath());
 	}
 
 	private Stream<? extends ExperimentNodeImpl<?, ?>> getSiblings() {
 		return getParentImpl().map(p -> p.getChildrenImpl()).orElse(
-				upcastStream(workspace.getRootExperimentsImpl()));
+				upcastStream(workspace.getExperimentsImpl()));
 	}
 
 	@Override
@@ -167,11 +186,10 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		return Optional.ofNullable(parent);
 	}
 
-	protected ExperimentNodeImpl<RootExperiment, ExperimentConfiguration> getRootImpl() {
-		return (ExperimentNodeImpl<RootExperiment, ExperimentConfiguration>) ExperimentNode.super.getRoot();
+	protected ExperimentImpl getRootImpl() {
+		return (ExperimentImpl) ExperimentNode.super.getRoot();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void remove() {
 		assertAvailable();
@@ -181,7 +199,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 				throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
 			}
 		} else {
-			if (!workspace.removeRootExperiment((ExperimentNode<?, ExperimentConfiguration>) this)) {
+			if (!workspace.removeExperiment(getRoot())) {
 				throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
 			}
 		}
@@ -220,9 +238,14 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	@Override
 	public <U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType) {
-		assertAvailable();
+		return loadChild(childType, new PersistedStateImpl());
+	}
 
-		return new ExperimentNodeImpl<>(childType, this);
+	protected <U, E extends ExperimentType<U>> ExperimentNode<E, U> loadChild(
+			E childType,
+			PersistedStateImpl persistedState) {
+		assertAvailable();
+		return new ExperimentNodeImpl<>(childType, this, persistedState);
 	}
 
 	@Override
@@ -240,18 +263,13 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		workspace.process(this);
 	}
 
-	@Override
-	public boolean tryProcess() {
-		return workspace.tryProcess(this);
-	}
-
 	protected boolean execute() {
 		lifecycleState.set(ExperimentLifecycleState.PROCESSING);
 
 		try {
 			validate();
 
-			Files.createDirectories(getExperimentDataPath());
+			Files.createDirectories(getResultDataPath());
 
 			getType().execute(createExecutionContext());
 
@@ -272,22 +290,37 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		}
 	}
 
+	private ExperimentResultManager createResultManager() {
+		return new ExperimentResultManager() {
+			@Override
+			public <U> ExperimentResult<U> get(ExperimentResultType<U> resultType) {
+				return ExperimentNodeImpl.this.getResult(resultType);
+			}
+
+			@Override
+			public <U> ExperimentResult<U> set(ExperimentResultType<U> resultType, U resultData) {
+				return ExperimentNodeImpl.this.setResult(resultType, resultData);
+			}
+
+			@Override
+			public Path dataPath() {
+				return ExperimentNodeImpl.this.getResultDataPath();
+			}
+		};
+	}
+
 	private ExperimentExecutionContext<S> createExecutionContext() {
 		return new ExperimentExecutionContext<S>() {
+			@Override
+			public ExperimentResultManager results() {
+				return createResultManager();
+			}
+
 			@Override
 			public ExperimentNodeImpl<?, S> node() {
 				return ExperimentNodeImpl.this;
 			}
 
-			@Override
-			public <U> ExperimentResult<U> getResult(ExperimentResultType<U> resultType) {
-				return node().getResult(resultType);
-			}
-
-			@Override
-			public <U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData) {
-				return node().setResult(resultType, resultData);
-			}
 		};
 	}
 
@@ -299,19 +332,24 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			}
 
 			@Override
-			public <U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData) {
-				return node().setResult(resultType, resultData);
+			public ExperimentResultManager results() {
+				return createResultManager();
 			}
 
 			@Override
-			public void setId(String id) {
+			public PersistedState persistedState() {
+				return ExperimentNodeImpl.this.persistedState();
+			}
+
+			@Override
+			public void setID(String id) {
 				if (Objects.equals(id, ExperimentNodeImpl.this.id)) {
 					return;
 
 				} else if (!ExperimentConfiguration.isNameValid(id)) {
 					throw new ExperimentException(workspace.getText().invalidExperimentName(id));
 
-				} else if (getSiblings().anyMatch(s -> id.equals(s.getid()))) {
+				} else if (getSiblings().anyMatch(s -> id.equals(s.getID()))) {
 					throw new ExperimentException(workspace.getText().duplicateExperimentName(id));
 
 				} else {
@@ -333,17 +371,12 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 						try {
 							Files.createDirectories(newLocation);
 						} catch (IOException e) {
-							throw new ExperimentException(workspace.getText().cannotCreate(newLocation));
+							throw new ExperimentException(workspace.getText().cannotCreate(newLocation), e);
 						}
 					}
 
 					ExperimentNodeImpl.this.id = id;
 				}
-			}
-
-			@Override
-			public String getId() {
-				return id;
 			}
 		};
 	}

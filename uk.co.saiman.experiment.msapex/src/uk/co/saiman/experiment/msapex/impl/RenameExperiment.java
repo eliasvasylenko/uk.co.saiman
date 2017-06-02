@@ -50,7 +50,7 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.RootExperiment;
+import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.text.properties.Localized;
 
@@ -71,7 +71,7 @@ public class RenameExperiment {
 		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
 
 		if (!(itemData instanceof ExperimentNode<?, ?>
-				&& ((ExperimentNode<?, ?>) itemData).getType() instanceof RootExperiment)) {
+				&& ((ExperimentNode<?, ?>) itemData).getType() instanceof ExperimentRoot)) {
 			throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
 		}
 
@@ -109,7 +109,7 @@ public class RenameExperiment {
 
 			boolean exists = experimentPart
 					.getExperimentWorkspace()
-					.getRootExperiments()
+					.getExperiments()
 					.anyMatch(e -> e.getState().getName().equals(newValue));
 
 			boolean isValid = ExperimentConfiguration.isNameValid(newValue);

@@ -27,9 +27,16 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static java.nio.file.Files.newByteChannel;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.function.Function.identity;
 
 import java.io.IOException;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
 
 import javax.measure.quantity.Dimensionless;
@@ -39,24 +46,40 @@ import javax.measure.quantity.Time;
 import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.experiment.CachingObservableResource;
 import uk.co.saiman.experiment.CachingResource;
+import uk.co.strangeskies.function.ThrowingSupplier;
 
-public class FileSpectrum<C extends ContinuousFunction<Time, Dimensionless>> implements Spectrum {
+public class ByteFormatSpectrum<C extends ContinuousFunction<Time, Dimensionless>>
+		implements Spectrum {
 	private final CachingResource<C> data;
 
-	private final Path location;
+	private final ThrowingSupplier<ReadableByteChannel, IOException> readChannel;
+	private final ThrowingSupplier<WritableByteChannel, IOException> writeChannel;
 	private final ByteFormat<C> format;
 
-	protected FileSpectrum(Path location, String name, C data, ByteFormat<C> format) {
-		this.data = new CachingObservableResource<>(this::load, this::save, identity());
-
-		this.location = location.resolve(name + "." + format.getPathExtension());
-		this.format = format;
-
-		this.data.setData(data);
+	protected ByteFormatSpectrum(Path location, String name, C data, ByteFormat<C> format) {
+		this(location.resolve(name + "." + format.getPathExtension()), data, format);
 	}
 
-	public Path getLocation() {
-		return location;
+	protected ByteFormatSpectrum(Path location, C data, ByteFormat<C> format) {
+		this(
+				() -> newByteChannel(location, READ),
+				() -> newByteChannel(location, WRITE, CREATE, TRUNCATE_EXISTING),
+				data,
+				format);
+	}
+
+	protected ByteFormatSpectrum(
+			ThrowingSupplier<ReadableByteChannel, IOException> readChannel,
+			ThrowingSupplier<WritableByteChannel, IOException> writeChannel,
+			C data,
+			ByteFormat<C> format) {
+		this.readChannel = readChannel;
+		this.writeChannel = writeChannel;
+
+		this.data = new CachingObservableResource<>(this::load, this::save, identity());
+		this.data.setData(data);
+
+		this.format = format;
 	}
 
 	@Override
@@ -65,16 +88,16 @@ public class FileSpectrum<C extends ContinuousFunction<Time, Dimensionless>> imp
 	}
 
 	protected C load() {
-		try {
-			return format.load(location);
+		try (ReadableByteChannel readChannel = this.readChannel.get()) {
+			return format.load(readChannel);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	protected void save(C data) {
-		try {
-			format.save(location, data);
+		try (WritableByteChannel writeChannel = this.writeChannel.get()) {
+			format.save(writeChannel, data);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

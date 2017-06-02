@@ -32,14 +32,14 @@ import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.RootExperiment;
+import uk.co.saiman.experiment.ExperimentRoot;
 
 /**
  * The root experiment type implementation for {@link ExperimentWorkspaceImpl}.
  * 
  * @author Elias N Vasylenko
  */
-public class RootExperimentImpl implements RootExperiment {
+public class RootExperimentImpl implements ExperimentRoot {
 	private final ExperimentWorkspaceImpl workspace;
 
 	protected RootExperimentImpl(ExperimentWorkspaceImpl workspace) {
@@ -52,18 +52,24 @@ public class RootExperimentImpl implements RootExperiment {
 	}
 
 	@Override
-	public ExperimentConfiguration createState(ExperimentConfigurationContext<ExperimentConfiguration> forNode) {
+	public String getID() {
+		return ExperimentRoot.class.getName();
+	}
+
+	@Override
+	public ExperimentConfiguration createState(
+			ExperimentConfigurationContext<ExperimentConfiguration> configuration) {
 		return new ExperimentConfiguration() {
-			private String notes;
+			private String notes = configuration.persistedState().getString("notes");
 
 			@Override
 			public String getName() {
-				return forNode.getId();
+				return configuration.node().getID();
 			}
 
 			@Override
 			public void setName(String name) {
-				forNode.setId(name);
+				configuration.setID(name);
 			}
 
 			@Override
@@ -74,14 +80,13 @@ public class RootExperimentImpl implements RootExperiment {
 			@Override
 			public void setNotes(String notes) {
 				this.notes = notes;
+				configuration.persistedState().putString("notes", notes);
 			}
 		};
 	}
 
 	@Override
-	public void execute(ExperimentExecutionContext<ExperimentConfiguration> context) {
-		// TODO create location
-	}
+	public void execute(ExperimentExecutionContext<ExperimentConfiguration> context) {}
 
 	@Override
 	public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
@@ -89,7 +94,9 @@ public class RootExperimentImpl implements RootExperiment {
 	}
 
 	@Override
-	public boolean mayComeBefore(ExperimentNode<?, ?> penultimateDescendantNode, ExperimentType<?> descendantNodeType) {
+	public boolean mayComeBefore(
+			ExperimentNode<?, ?> penultimateDescendantNode,
+			ExperimentType<?> descendantNodeType) {
 		return true;
 	}
 }

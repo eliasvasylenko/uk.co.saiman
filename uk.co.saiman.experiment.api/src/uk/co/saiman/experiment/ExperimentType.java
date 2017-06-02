@@ -36,8 +36,14 @@ import uk.co.strangeskies.reflection.token.TypeParameter;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
- * A type of experiment which may be available to be executed on a particular
- * instrument.
+ * An implementation of this interface represents a type of experiment node
+ * which can appear in an experiment, for example "Spectrum", "Chemical Map",
+ * "Stage Position", etc. Only one instance of such an implementation typically
+ * needs to be registered with any given workspace.
+ * 
+ * <p>
+ * The experiment type instance contains methods for managing the state and
+ * processing of nodes of its type.
  * 
  * @author Elias N Vasylenko
  *
@@ -46,6 +52,11 @@ import uk.co.strangeskies.reflection.token.TypeToken;
  *          configuration and results
  */
 public interface ExperimentType<S> extends Reified {
+	/**
+	 * @return the unique and persistent ID of the experiment type
+	 */
+	String getID();
+
 	/**
 	 * @return the human readable name of the experiment type
 	 */
@@ -101,7 +112,9 @@ public interface ExperimentType<S> extends Reified {
 	 * @return true if a node of the given type may be added as a child of the
 	 *         given node, false otherwise
 	 */
-	boolean mayComeBefore(ExperimentNode<?, ?> penultimateDescendantNode, ExperimentType<?> descendantNodeType);
+	boolean mayComeBefore(
+			ExperimentNode<?, ?> penultimateDescendantNode,
+			ExperimentType<?> descendantNodeType);
 
 	/**
 	 * @return the exact generic type of the configuration interface
