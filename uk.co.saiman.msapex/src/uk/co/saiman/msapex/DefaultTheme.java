@@ -38,10 +38,13 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(service = Theme.class)
 public class DefaultTheme extends AbstractTheme {
-	/**
-	 * Instantiate from default theme file.
-	 */
-	public DefaultTheme() {
-		super("theme.default", "Default theme", DefaultTheme.class.getClassLoader().getResource("css/default.css"));
-	}
+  /**
+   * Instantiate from default theme file.
+   */
+  public DefaultTheme() {
+    super(
+        "theme.default",
+        "Default theme",
+        DefaultTheme.class.getClassLoader().getResource("css/default.css"));
+  }
 }
