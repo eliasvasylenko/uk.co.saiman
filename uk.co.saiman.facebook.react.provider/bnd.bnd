@@ -3,19 +3,26 @@ Bundle-Name: SAI :: React :: Provider
 Bundle-Description: \
 	Provides web resources for React applications
 
-name = /facebook/react
+name.react = /facebook/react
+name.react.dom = /facebook/react-dom
 base.version = 15.4.2
 
-path = static${name}/${base.version}
+path = META-INF/resources/webjars
 
 -includeresource: \
 	@${repo;org.webjars.npm:react}!/META-INF/resources/*,\
 	@${repo;org.webjars.npm:react-dom}!/META-INF/resources/*
 
 Provide-Capability: \
+\
 	osgi.enroute.webresource; \
-		osgi.enroute.webresource=${name}; \
+		osgi.enroute.webresource=${name.react}; \
 		version:Version=${base.version}; \
-		root=${path}
+		root=${path}/react/${base.version},\
+\
+	osgi.enroute.webresource; \
+		osgi.enroute.webresource=${name.react.dom}; \
+		version:Version=${base.version}; \
+		root=${path}/react-dom/${base.version}
 
 Export-Package: uk.co.saiman.facebook.react
