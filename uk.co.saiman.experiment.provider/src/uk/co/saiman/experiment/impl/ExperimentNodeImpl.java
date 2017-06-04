@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static uk.co.strangeskies.utilities.collection.StreamUtilities.upcastStream;
+import static uk.co.strangeskies.collection.stream.StreamUtilities.upcastStream;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,13 +46,14 @@ import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.ExperimentResultManager;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
-import uk.co.saiman.experiment.RootExperiment;
-import uk.co.strangeskies.utilities.Log.Level;
-import uk.co.strangeskies.utilities.ObservableProperty;
-import uk.co.strangeskies.utilities.ObservableValue;
+import uk.co.saiman.experiment.PersistedState;
+import uk.co.strangeskies.log.Log.Level;
+import uk.co.strangeskies.observable.ObservableProperty;
+import uk.co.strangeskies.observable.ObservableValue;
 
 /**
  * Reference implementation of {@link ExperimentNode}.
@@ -64,309 +65,361 @@ import uk.co.strangeskies.utilities.ObservableValue;
  *          the type of the data describing the experiment configuration
  */
 public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements ExperimentNode<T, S> {
-	private final ExperimentWorkspaceImpl workspace;
-	private final T type;
-	private final ExperimentNodeImpl<?, ?> parent;
+  private final ExperimentWorkspaceImpl workspace;
+  private final T type;
+  private final ExperimentNodeImpl<?, ?> parent;
 
-	private final List<ExperimentNodeImpl<?, ?>> children;
+  private final List<ExperimentNodeImpl<?, ?>> children;
 
-	private final ObservableProperty<ExperimentLifecycleState, ExperimentLifecycleState> lifecycleState;
-	private final S state;
+  private final ObservableProperty<ExperimentLifecycleState, ExperimentLifecycleState> lifecycleState;
+  private final S state;
 
-	private HashMap<ExperimentResultType<?>, ExperimentResultImpl<?>> results;
+  private HashMap<ExperimentResultType<?>, ExperimentResultImpl<?>> results;
 
-	private String id;
+  private String id;
+  private PersistedStateImpl persistedState;
 
-	/**
-	 * Try to create a new experiment node of the given type, and with the given
-	 * parent.
-	 * 
-	 * @param type
-	 *          the type of the experiment
-	 * @param parent
-	 *          the parent of the experiment
-	 */
-	protected ExperimentNodeImpl(T type, ExperimentNodeImpl<?, ?> parent) {
-		this(type, parent.workspace, parent);
+  /**
+   * Try to create a new experiment node of the given type, and with the given
+   * parent.
+   * 
+   * @param type
+   *          the type of the experiment
+   * @param parent
+   *          the parent of the experiment
+   */
+  protected ExperimentNodeImpl(
+      T type,
+      String id,
+      ExperimentNodeImpl<?, ?> parent,
+      PersistedStateImpl persistedState) {
+    this(type, id, parent.workspace, parent, persistedState);
 
-		if (!type.mayComeAfter(parent)) {
-			throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, this));
-		}
-		parent.getAncestorsImpl().filter(a -> !a.type.mayComeBefore(parent, type)).forEach(a -> {
-			throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, a));
-		});
+    if (!type.mayComeAfter(parent)) {
+      throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, this));
+    }
+    parent.getAncestorsImpl().filter(a -> !a.type.mayComeBefore(parent, type)).forEach(a -> {
+      throw new ExperimentException(workspace.getText().exception().typeMayNotSucceed(type, a));
+    });
 
-		parent.children.add(this);
-	}
+    parent.children.add(this);
 
-	protected ExperimentNodeImpl(T type, ExperimentWorkspaceImpl workspace) {
-		this(type, workspace, null);
-	}
+    saveExperiment();
+  }
 
-	private ExperimentNodeImpl(T type, ExperimentWorkspaceImpl workspace, ExperimentNodeImpl<?, ?> parent) {
-		this.workspace = workspace;
-		this.type = type;
-		this.parent = parent;
+  protected ExperimentNodeImpl(
+      T type,
+      String id,
+      ExperimentWorkspaceImpl workspace,
+      PersistedStateImpl persistedState) {
+    this(type, id, workspace, null, persistedState);
+    saveExperiment();
+  }
 
-		children = new ArrayList<>();
+  private ExperimentNodeImpl(
+      T type,
+      String id,
+      ExperimentWorkspaceImpl workspace,
+      ExperimentNodeImpl<?, ?> parent,
+      PersistedStateImpl persistedState) {
+    this.type = type;
+    this.workspace = workspace;
+    this.parent = parent;
+    this.children = new ArrayList<>();
+    setID(id);
 
-		lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
-		state = type.createState(createConfigurationContext());
+    this.results = new HashMap<>();
+    getType().getResultTypes().forEach(r -> results.put(r, new ExperimentResultImpl<>(this, r)));
 
-		results = new HashMap<>();
-		getType().getResultTypes().forEach(r -> results.put(r, new ExperimentResultImpl<>(this, r)));
-	}
+    this.lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
+    this.persistedState = persistedState;
+    persistedState.addObserver(s -> saveExperiment());
+    this.state = type.createState(createConfigurationContext());
 
-	protected String getid() {
-		return id;
-	}
+    if (getID() == null) {
+      throw new ExperimentException(workspace.getText().exception().invalidExperimentName(null));
+    }
+  }
 
-	protected Stream<ExperimentNodeImpl<?, ?>> getAncestorsImpl() {
-		return getAncestors().map(a -> (ExperimentNodeImpl<?, ?>) a);
-	}
+  @Override
+  public String getID() {
+    return id;
+  }
 
-	@Override
-	public S getState() {
-		return state;
-	}
+  protected Stream<ExperimentNodeImpl<?, ?>> getAncestorsImpl() {
+    return getAncestors().map(a -> (ExperimentNodeImpl<?, ?>) a);
+  }
 
-	@Override
-	public ExperimentWorkspace getExperimentWorkspace() {
-		return workspace;
-	}
+  @Override
+  public S getState() {
+    return state;
+  }
 
-	@Override
-	public Path getExperimentDataPath() {
-		return getParentDataPath().resolve(id);
-	}
+  @Override
+  public ExperimentWorkspace getExperimentWorkspace() {
+    return workspace;
+  }
 
-	private Path getParentDataPath() {
-		return getParent().map(p -> p.getExperimentDataPath()).orElse(getExperimentWorkspace().getWorkspaceDataPath());
-	}
+  protected Path getResultDataPath() {
+    return getParentDataPath().resolve(id);
+  }
 
-	private Stream<? extends ExperimentNodeImpl<?, ?>> getSiblings() {
-		return getParentImpl().map(p -> p.getChildrenImpl()).orElse(upcastStream(workspace.getRootExperimentsImpl()));
-	}
+  protected PersistedStateImpl persistedState() {
+    return persistedState;
+  }
 
-	@Override
-	public T getType() {
-		return type;
-	}
+  protected void saveExperiment() {
+    workspace.saveExperiment(getRootImpl());
+  }
 
-	protected Optional<ExperimentNodeImpl<?, ?>> getParentImpl() {
-		return Optional.ofNullable(parent);
-	}
+  private Path getParentDataPath() {
+    return getParentImpl().map(p -> p.getResultDataPath()).orElse(workspace.getWorkspaceDataPath());
+  }
 
-	@Override
-	public Optional<ExperimentNode<?, ?>> getParent() {
-		return Optional.ofNullable(parent);
-	}
+  private Stream<? extends ExperimentNodeImpl<?, ?>> getSiblings() {
+    return getParentImpl().map(p -> p.getChildrenImpl()).orElse(
+        upcastStream(workspace.getExperimentsImpl()));
+  }
 
-	protected ExperimentNodeImpl<RootExperiment, ExperimentConfiguration> getRootImpl() {
-		return (ExperimentNodeImpl<RootExperiment, ExperimentConfiguration>) ExperimentNode.super.getRoot();
-	}
+  @Override
+  public T getType() {
+    return type;
+  }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void remove() {
-		assertAvailable();
+  protected Optional<ExperimentNodeImpl<?, ?>> getParentImpl() {
+    return Optional.ofNullable(parent);
+  }
 
-		if (parent != null) {
-			if (!parent.children.remove(this)) {
-				throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
-			}
-		} else {
-			if (!workspace.removeRootExperiment((ExperimentNode<?, ExperimentConfiguration>) this)) {
-				throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
-			}
-		}
+  @Override
+  public Optional<ExperimentNode<?, ?>> getParent() {
+    return Optional.ofNullable(parent);
+  }
 
-		setDisposed();
-	}
+  protected ExperimentImpl getRootImpl() {
+    return (ExperimentImpl) ExperimentNode.super.getRoot();
+  }
 
-	private void setDisposed() {
-		lifecycleState.set(ExperimentLifecycleState.DISPOSED);
-		for (ExperimentNodeImpl<?, ?> child : children) {
-			child.setDisposed();
-		}
-	}
+  @Override
+  public void remove() {
+    assertAvailable();
 
-	protected void assertAvailable() {
-		if (lifecycleState.get() == ExperimentLifecycleState.DISPOSED) {
-			throw new ExperimentException(workspace.getText().exception().experimentIsDisposed(this));
-		}
-	}
+    if (parent != null) {
+      if (!parent.children.remove(this)) {
+        throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
+      }
+    } else {
+      if (!workspace.removeExperiment(getRoot())) {
+        throw new ExperimentException(workspace.getText().exception().experimentDoesNotExist(this));
+      }
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Stream<ExperimentNode<?, ?>> getChildren() {
-		return (Stream<ExperimentNode<?, ?>>) (Object) getChildrenImpl();
-	}
+    saveExperiment();
+    setDisposed();
+  }
 
-	protected Stream<ExperimentNodeImpl<?, ?>> getChildrenImpl() {
-		return children.stream();
-	}
+  private void setDisposed() {
+    lifecycleState.set(ExperimentLifecycleState.DISPOSED);
+    for (ExperimentNodeImpl<?, ?> child : children) {
+      child.setDisposed();
+    }
+  }
 
-	@Override
-	public Stream<ExperimentType<?>> getAvailableChildExperimentTypes() {
-		return workspace
-				.getRegisteredExperimentTypes()
-				.filter(type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
-	}
+  protected void assertAvailable() {
+    if (lifecycleState.get() == ExperimentLifecycleState.DISPOSED) {
+      throw new ExperimentException(workspace.getText().exception().experimentIsDisposed(this));
+    }
+  }
 
-	@Override
-	public <U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType) {
-		assertAvailable();
+  @SuppressWarnings("unchecked")
+  @Override
+  public Stream<ExperimentNode<?, ?>> getChildren() {
+    return (Stream<ExperimentNode<?, ?>>) (Object) getChildrenImpl();
+  }
 
-		return new ExperimentNodeImpl<>(childType, this);
-	}
+  protected Stream<ExperimentNodeImpl<?, ?>> getChildrenImpl() {
+    return children.stream();
+  }
 
-	@Override
-	public ObservableValue<ExperimentLifecycleState> lifecycleState() {
-		return lifecycleState;
-	}
+  @Override
+  public Stream<ExperimentType<?>> getAvailableChildExperimentTypes() {
+    return workspace.getRegisteredExperimentTypes().filter(
+        type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
+  }
 
-	@Override
-	public String toString() {
-		return type.getName() + " [" + lifecycleState + "]";
-	}
+  @Override
+  public <U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType) {
+    return loadChild(childType, null, new PersistedStateImpl());
+  }
 
-	@Override
-	public void process() {
-		workspace.process(this);
-	}
+  protected <U, E extends ExperimentType<U>> ExperimentNodeImpl<E, U> loadChild(
+      E childType,
+      String id,
+      PersistedStateImpl persistedState) {
+    assertAvailable();
+    return new ExperimentNodeImpl<>(childType, id, this, persistedState);
+  }
 
-	@Override
-	public boolean tryProcess() {
-		return workspace.tryProcess(this);
-	}
+  @Override
+  public ObservableValue<ExperimentLifecycleState> lifecycleState() {
+    return lifecycleState;
+  }
 
-	protected boolean execute() {
-		lifecycleState.set(ExperimentLifecycleState.PROCESSING);
+  @Override
+  public String toString() {
+    return getID() + " : " + type.getName() + " [" + lifecycleState.get() + "]";
+  }
 
-		try {
-			validate();
+  @Override
+  public void process() {
+    workspace.process(this);
+  }
 
-			Files.createDirectories(getExperimentDataPath());
+  protected boolean execute() {
+    lifecycleState.set(ExperimentLifecycleState.PROCESSING);
 
-			getType().execute(createExecutionContext());
+    try {
+      validate();
 
-			lifecycleState.set(ExperimentLifecycleState.COMPLETION);
-			return true;
-		} catch (Exception e) {
-			workspace
-					.getLog()
-					.log(Level.ERROR, new ExperimentException(workspace.getText().failedExperimentExecution(this), e));
-			lifecycleState.set(ExperimentLifecycleState.FAILURE);
-			return false;
-		}
-	}
+      Files.createDirectories(getResultDataPath());
 
-	private void validate() {
-		if (id == null) {
-			throw new ExperimentException(workspace.getText().invalidExperimentName(null));
-		}
-	}
+      getType().execute(createExecutionContext());
 
-	private ExperimentExecutionContext<S> createExecutionContext() {
-		return new ExperimentExecutionContext<S>() {
-			@Override
-			public ExperimentNodeImpl<?, S> node() {
-				return ExperimentNodeImpl.this;
-			}
+      lifecycleState.set(ExperimentLifecycleState.COMPLETION);
+      return true;
+    } catch (Exception e) {
+      workspace.getLog().log(
+          Level.ERROR,
+          new ExperimentException(workspace.getText().failedExperimentExecution(this), e));
+      lifecycleState.set(ExperimentLifecycleState.FAILURE);
+      return false;
+    }
+  }
 
-			@Override
-			public <U> ExperimentResult<U> getResult(ExperimentResultType<U> resultType) {
-				return node().getResult(resultType);
-			}
+  private void validate() {
+    if (id == null) {
+      throw new ExperimentException(workspace.getText().invalidExperimentName(null));
+    }
+  }
 
-			@Override
-			public <U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData) {
-				return node().setResult(resultType, resultData);
-			}
-		};
-	}
+  private ExperimentResultManager createResultManager() {
+    return new ExperimentResultManager() {
+      @Override
+      public <U> ExperimentResult<U> get(ExperimentResultType<U> resultType) {
+        return ExperimentNodeImpl.this.getResult(resultType);
+      }
 
-	private ExperimentConfigurationContext<S> createConfigurationContext() {
-		return new ExperimentConfigurationContext<S>() {
-			@Override
-			public ExperimentNodeImpl<?, S> node() {
-				return ExperimentNodeImpl.this;
-			}
+      @Override
+      public <U> ExperimentResult<U> set(ExperimentResultType<U> resultType, U resultData) {
+        return ExperimentNodeImpl.this.setResult(resultType, resultData);
+      }
 
-			@Override
-			public <U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData) {
-				return node().setResult(resultType, resultData);
-			}
+      @Override
+      public Path dataPath() {
+        return ExperimentNodeImpl.this.getResultDataPath();
+      }
+    };
+  }
 
-			@Override
-			public void setId(String id) {
-				if (Objects.equals(id, ExperimentNodeImpl.this.id)) {
-					return;
+  private ExperimentExecutionContext<S> createExecutionContext() {
+    return new ExperimentExecutionContext<S>() {
+      @Override
+      public ExperimentResultManager results() {
+        return createResultManager();
+      }
 
-				} else if (!ExperimentConfiguration.isNameValid(id)) {
-					throw new ExperimentException(workspace.getText().invalidExperimentName(id));
+      @Override
+      public ExperimentNodeImpl<?, S> node() {
+        return ExperimentNodeImpl.this;
+      }
+    };
+  }
 
-				} else if (getSiblings().anyMatch(s -> id.equals(s.getid()))) {
-					throw new ExperimentException(workspace.getText().duplicateExperimentName(id));
+  private ExperimentConfigurationContext<S> createConfigurationContext() {
+    return new ExperimentConfigurationContext<S>() {
+      @Override
+      public ExperimentNodeImpl<?, S> node() {
+        return ExperimentNodeImpl.this;
+      }
 
-				} else {
-					Path newLocation = getParentDataPath().resolve(id);
+      @Override
+      public ExperimentResultManager results() {
+        return createResultManager();
+      }
 
-					if (Files.exists(newLocation)) {
-						throw new ExperimentException(workspace.getText().dataAlreadyExists(newLocation));
-					}
+      @Override
+      public PersistedState persistedState() {
+        return ExperimentNodeImpl.this.persistedState();
+      }
 
-					if (ExperimentNodeImpl.this.id != null) {
-						Path oldLocation = getParentDataPath().resolve(ExperimentNodeImpl.this.id);
-						try {
-							Files.move(oldLocation, newLocation);
-						} catch (IOException e) {
-							throw new ExperimentException(workspace.getText().cannotMove(oldLocation, newLocation));
-						}
-					} else {
-						try {
-							Files.createDirectories(newLocation);
-						} catch (IOException e) {
-							throw new ExperimentException(workspace.getText().cannotCreate(newLocation));
-						}
-					}
+      @Override
+      public void setID(String id) {
+        ExperimentNodeImpl.this.setID(id);
+      }
+    };
+  }
 
-					ExperimentNodeImpl.this.id = id;
-				}
-			}
+  protected void setID(String id) {
+    if (Objects.equals(id, this.id)) {
+      return;
 
-			@Override
-			public String getId() {
-				return id;
-			}
-		};
-	}
+    } else if (!ExperimentConfiguration.isNameValid(id)) {
+      throw new ExperimentException(workspace.getText().invalidExperimentName(id));
 
-	@Override
-	public Stream<ExperimentResult<?>> getResults() {
-		return results.values().stream().map(t -> (ExperimentResult<?>) t);
-	}
+    } else if (getSiblings().anyMatch(s -> id.equals(s.getID()))) {
+      throw new ExperimentException(workspace.getText().duplicateExperimentName(id));
 
-	@Override
-	public void clearResults() {
-		results.values().forEach(r -> r.setData(null));
-	}
+    } else {
+      Path newLocation = getParentDataPath().resolve(id);
 
-	protected <U> ExperimentResultImpl<U> setResult(ExperimentResultType<U> resultType, U resultData) {
-		ExperimentResultImpl<U> result = getResult(resultType);
-		result.setData(resultData);
-		return result;
-	}
+      if (this.id != null) {
+        if (Files.exists(newLocation)) {
+          throw new ExperimentException(workspace.getText().dataAlreadyExists(newLocation));
+        }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <U> ExperimentResultImpl<U> getResult(ExperimentResultType<U> resultType) {
-		return (ExperimentResultImpl<U>) results.get(resultType);
-	}
+        Path oldLocation = getParentDataPath().resolve(this.id);
+        try {
+          Files.move(oldLocation, newLocation);
+        } catch (IOException e) {
+          throw new ExperimentException(workspace.getText().cannotMove(oldLocation, newLocation));
+        }
+      } else {
+        try {
+          Files.createDirectories(newLocation);
+        } catch (IOException e) {
+          throw new ExperimentException(workspace.getText().cannotCreate(newLocation), e);
+        }
+      }
 
-	@Override
-	public ExperimentNode<T, S> copy() {
-		return this;
-	}
+      this.id = id;
+    }
+  }
+
+  @Override
+  public Stream<ExperimentResult<?>> getResults() {
+    return results.values().stream().map(t -> (ExperimentResult<?>) t);
+  }
+
+  @Override
+  public void clearResults() {
+    results.values().forEach(r -> r.setData(null));
+  }
+
+  protected <U> ExperimentResultImpl<U> setResult(
+      ExperimentResultType<U> resultType,
+      U resultData) {
+    ExperimentResultImpl<U> result = getResult(resultType);
+    result.setData(resultData);
+    return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <U> ExperimentResultImpl<U> getResult(ExperimentResultType<U> resultType) {
+    return (ExperimentResultImpl<U>) results.get(resultType);
+  }
+
+  @Override
+  public ExperimentNode<T, S> copy() {
+    return this;
+  }
 }

@@ -16,13 +16,19 @@
 	<dependencies>
 		<dependency>
 		    <groupId>uk.co.strangeskies</groupId>
-		    <artifactId>uk.co.strangeskies.bnd</artifactId>
+		    <artifactId>uk.co.strangeskies.build</artifactId>
 		    <version>${strangeskies.version}</version>
 		</dependency>
 
 		<dependency>
 		    <groupId>uk.co.strangeskies</groupId>
-		    <artifactId>uk.co.strangeskies.build</artifactId>
+		    <artifactId>uk.co.strangeskies.collections</artifactId>
+		    <version>${strangeskies.version}</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>uk.co.strangeskies</groupId>
+		    <artifactId>uk.co.strangeskies.collections.observable</artifactId>
 		    <version>${strangeskies.version}</version>
 		</dependency>
 
@@ -70,6 +76,12 @@
 
 		<dependency>
 		    <groupId>uk.co.strangeskies</groupId>
+		    <artifactId>uk.co.strangeskies.observable</artifactId>
+		    <version>${strangeskies.version}</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>uk.co.strangeskies</groupId>
 		    <artifactId>uk.co.strangeskies.osgi.api</artifactId>
 		    <version>${strangeskies.version}</version>
 		</dependency>
@@ -88,6 +100,12 @@
 
 		<dependency>
 		    <groupId>uk.co.strangeskies</groupId>
+		    <artifactId>uk.co.strangeskies.reflection.token</artifactId>
+		    <version>${strangeskies.version}</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>uk.co.strangeskies</groupId>
 		    <artifactId>uk.co.strangeskies.reflection.codegen</artifactId>
 		    <version>${strangeskies.version}</version>
 		</dependency>
@@ -95,18 +113,6 @@
 		<dependency>
 		    <groupId>uk.co.strangeskies</groupId>
 		    <artifactId>uk.co.strangeskies.reflection.resource</artifactId>
-		    <version>${strangeskies.version}</version>
-		</dependency>
-
-		<dependency>
-		    <groupId>uk.co.strangeskies</groupId>
-		    <artifactId>uk.co.strangeskies.scripting.engine.javascript</artifactId>
-		    <version>${strangeskies.version}</version>
-		</dependency>
-
-		<dependency>
-		    <groupId>uk.co.strangeskies</groupId>
-		    <artifactId>uk.co.strangeskies.scripting</artifactId>
 		    <version>${strangeskies.version}</version>
 		</dependency>
 

@@ -29,8 +29,8 @@ package uk.co.saiman.experiment.msapex.impl;
 
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static uk.co.strangeskies.utilities.collection.StreamUtilities.streamOptional;
-import static uk.co.strangeskies.utilities.collection.StreamUtilities.tryOptional;
+import static uk.co.strangeskies.collection.stream.StreamUtilities.streamOptional;
+import static uk.co.strangeskies.collection.stream.StreamUtilities.tryOptional;
 
 import java.util.stream.Stream;
 
@@ -45,7 +45,9 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
 	private final IAdapterManager adapterManager;
 	private final ExperimentWorkspace workspace;
 
-	public ExperimentNodeAdapterFactory(IAdapterManager adapterManager, ExperimentWorkspace workspace) {
+	public ExperimentNodeAdapterFactory(
+			IAdapterManager adapterManager,
+			ExperimentWorkspace workspace) {
 		this.adapterManager = adapterManager;
 		this.workspace = workspace;
 		adapterManager.registerAdapters(this, ExperimentNode.class);
@@ -85,6 +87,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
 		return concat(
 				of(adapterType),
 				of(adapterManager.computeAdapterTypes(adapterType)).distinct().flatMap(
-						typeName -> streamOptional(tryOptional(() -> getClass().getClassLoader().loadClass(typeName)))));
+						typeName -> streamOptional(
+								tryOptional(() -> getClass().getClassLoader().loadClass(typeName)))));
 	}
 }

@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.chemistry.msapex.PeriodicTableService;
-import uk.co.strangeskies.utilities.ObservableProperty;
+import uk.co.strangeskies.observable.ObservableProperty;
 
 @SuppressWarnings("javadoc")
 @Component(property = IContextFunction.SERVICE_CONTEXT_KEY + "=uk.co.saiman.chemistry.msapex.PeriodicTableService")

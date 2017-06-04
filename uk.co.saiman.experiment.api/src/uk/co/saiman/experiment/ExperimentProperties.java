@@ -43,82 +43,88 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface ExperimentProperties {
-	@Nested
-	SaiProperties sai();
+  @Nested
+  SaiProperties sai();
 
-	@Nested
-	ExperimentExceptionProperties exception();
+  @Nested
+  ExperimentExceptionProperties exception();
 
-	Localized<String> newExperiment();
+  Localized<String> newExperiment();
 
-	Localized<String> newExperimentName();
+  Localized<String> newExperimentName();
 
-	/**
-	 * @param state
-	 *          the state to localize
-	 * @return localized name of the state
-	 */
-	default Localized<String> lifecycleState(ExperimentLifecycleState state) {
-		switch (state) {
-		case COMPLETION:
-			return lifecycleStateCompletion();
-		case CONFIGURATION:
-			return lifecycleStateConfiguration();
-		case DISPOSED:
-			return lifecycleStateDisposed();
-		case FAILURE:
-			return lifecycleStatefailure();
-		case PREPARATION:
-			return lifecycleStatePreparation();
-		case PROCESSING:
-			return lifecycleStateProcessing();
-		case WAITING:
-			return lifecycleStateWaiting();
-		}
-		throw new AssertionError();
-	}
+  /**
+   * @param state
+   *          the state to localize
+   * @return localized name of the state
+   */
+  default Localized<String> lifecycleState(ExperimentLifecycleState state) {
+    switch (state) {
+    case COMPLETION:
+      return lifecycleStateCompletion();
+    case CONFIGURATION:
+      return lifecycleStateConfiguration();
+    case DISPOSED:
+      return lifecycleStateDisposed();
+    case FAILURE:
+      return lifecycleStatefailure();
+    case PREPARATION:
+      return lifecycleStatePreparation();
+    case PROCESSING:
+      return lifecycleStateProcessing();
+    case WAITING:
+      return lifecycleStateWaiting();
+    }
+    throw new AssertionError();
+  }
 
-	Localized<String> lifecycleStateCompletion();
+  Localized<String> lifecycleStateCompletion();
 
-	Localized<String> lifecycleStateConfiguration();
+  Localized<String> lifecycleStateConfiguration();
 
-	Localized<String> lifecycleStateDisposed();
+  Localized<String> lifecycleStateDisposed();
 
-	Localized<String> lifecycleStatefailure();
+  Localized<String> lifecycleStatefailure();
 
-	Localized<String> lifecycleStatePreparation();
+  Localized<String> lifecycleStatePreparation();
 
-	Localized<String> lifecycleStateProcessing();
+  Localized<String> lifecycleStateProcessing();
 
-	Localized<String> lifecycleStateWaiting();
+  Localized<String> lifecycleStateWaiting();
 
-	Localized<String> configuration();
+  Localized<String> configuration();
 
-	Localized<String> missingResult();
+  Localized<String> missingResult();
 
-	Localized<String> invalidExperimentName(String name);
+  Localized<String> invalidExperimentName(String name);
 
-	Localized<String> duplicateExperimentName(String name);
+  Localized<String> duplicateExperimentName(String name);
 
-	Localized<String> experimentRoot();
+  Localized<String> missingExperimentType(String id);
 
-	Localized<String> cannotDelete(Path newLocation);
+  Localized<String> cannotExecuteMissingExperimentType(String id);
 
-	Localized<String> cannotMove(Path oldLocation, Path newLocation);
+  Localized<String> experimentRoot();
 
-	Localized<String> cannotCreate(Path newLocation);
+  Localized<String> cannotDelete(Path newLocation);
 
-	Localized<String> overwriteData();
+  Localized<String> cannotMove(Path oldLocation, Path newLocation);
 
-	Localized<String> overwriteDataConfirmation(Path newLocation);
+  Localized<String> cannotCreate(Path newLocation);
 
-	Localized<String> userCancelledSetExperimentName();
+  Localized<String> overwriteData();
 
-	Localized<String> dataAlreadyExists(Path newLocation);
+  Localized<String> overwriteDataConfirmation(Path newLocation);
 
-	Localized<String> renameExperiment();
+  Localized<String> userCancelledSetExperimentName();
 
-	Localized<String> renameExperimentName(String name);
+  Localized<String> dataAlreadyExists(Path newLocation);
 
-	Localized<String> failedExperimentExecution(ExperimentNode<?, ?> experimentNodeImpl);
+  Localized<String> renameExperiment();
+
+  Localized<String> renameExperimentName(String name);
+
+  Localized<String> failedExperimentExecution(ExperimentNode<?, ?> experimentNode);
+
+  Localized<String> cannotCreateWorkspace(ExperimentWorkspace experimentWorkspace);
 }

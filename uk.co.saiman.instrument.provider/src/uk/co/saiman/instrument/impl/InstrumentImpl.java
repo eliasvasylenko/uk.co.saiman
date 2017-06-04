@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleParticipant;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
-import uk.co.strangeskies.utilities.IdentityProperty;
+import uk.co.strangeskies.utility.IdentityProperty;
 
 /**
  * Reference implementation of {@link Instrument}, as an OSGi service.
@@ -64,13 +64,15 @@ public class InstrumentImpl implements Instrument {
 
 	@Override
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE)
-	public synchronized void registerLifecycleParticipant(InstrumentLifecycleParticipant participant) {
+	public synchronized void registerLifecycleParticipant(
+			InstrumentLifecycleParticipant participant) {
 		participants.add(participant);
 		participant.initialise(this);
 	}
 
 	@Override
-	public synchronized void unregisterLifecycleParticipant(InstrumentLifecycleParticipant participant) {
+	public synchronized void unregisterLifecycleParticipant(
+			InstrumentLifecycleParticipant participant) {
 		participants.remove(participant);
 	}
 

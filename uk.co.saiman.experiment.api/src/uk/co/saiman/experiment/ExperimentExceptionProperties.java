@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment;
 
+import java.nio.file.Path;
+
 import uk.co.saiman.SaiProperties;
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.Nested;
@@ -45,7 +47,9 @@ public interface ExperimentExceptionProperties {
 	 *          an ancestor of the candidate node
 	 * @return a node of the given type may not be a descendant of the given node
 	 */
-	Localized<String> typeMayNotSucceed(ExperimentType<?> descendantType, ExperimentNode<?, ?> ancestorNode);
+	Localized<String> typeMayNotSucceed(
+			ExperimentType<?> descendantType,
+			ExperimentNode<?, ?> ancestorNode);
 
 	Localized<String> experimentIsDisposed(ExperimentNode<?, ?> experimentNode);
 
@@ -57,5 +61,11 @@ public interface ExperimentExceptionProperties {
 
 	Localized<String> invalidExperimentName(String name);
 
-	Localized<String> cannotProcessExperimentConcurrently(ExperimentNode<RootExperiment, ExperimentConfiguration> root);
+	Localized<String> cannotProcessExperimentConcurrently(Experiment experiment);
+
+	Localized<String> cannotPersistState(Experiment experiment);
+
+	Localized<String> cannotCreateWorkspace(ExperimentWorkspace experimentWorkspace);
+
+	Localized<String> cannotLoadExperiment(Path path);
 }

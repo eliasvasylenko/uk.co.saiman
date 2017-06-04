@@ -6,6 +6,7 @@ Export-Package: uk.co.saiman.instrument.raster
 	l10n
 
 -buildpath: \
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\

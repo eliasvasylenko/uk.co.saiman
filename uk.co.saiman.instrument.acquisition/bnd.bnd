@@ -6,6 +6,7 @@ Export-Package: uk.co.saiman.acquisition
 	l10n
 
 -buildpath: \
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\

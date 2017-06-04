@@ -27,16 +27,24 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.CommandSet;
-import uk.co.saiman.comms.NamedBits;
-import uk.co.saiman.comms.NumberedBits;
+import uk.co.saiman.comms.Comms;
+import uk.co.saiman.comms.InOutBlock;
+import uk.co.saiman.comms.OutBlock;
 
-public interface SaintComms extends CommandSet<SaintCommandId> {
+public interface SaintComms extends Comms<SaintCommand> {
+	/**
+	 * The id of the SAINT comms interface.
+	 */
 	String ID = "SAINT Comms";
+	/**
+	 * The message size in bytes for the SAINT comms interface, for both sending
+	 * and receiving messages.
+	 */
+	int MESSAGE_SIZE = 4;
 
-	InOutBlock<NumberedBits> led();
+	InOutBlock<LEDStatus> led();
 
-	InOutBlock<NamedBits<VacuumBit>> vacuum();
+	InOutBlock<VacuumControl> vacuum();
 
-	OutBlock<NamedBits<HighVoltageBit>> highVoltage();
+	OutBlock<HighVoltageStatus> highVoltage();
 }

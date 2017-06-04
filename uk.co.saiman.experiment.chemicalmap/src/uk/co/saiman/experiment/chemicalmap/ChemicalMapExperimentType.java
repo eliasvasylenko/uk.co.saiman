@@ -116,7 +116,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 		getRasterDevice().startRasterOperation();
 		getAcquisitionDevice().startAcquisition();
 
-		context.getResult(chemicalMapResult).getData().get().save();
+		context.results().get(chemicalMapResult).getData().get().save();
 	}
 
 	private void startRaster(ExperimentExecutionContext<T> context, RasterDevice device) {

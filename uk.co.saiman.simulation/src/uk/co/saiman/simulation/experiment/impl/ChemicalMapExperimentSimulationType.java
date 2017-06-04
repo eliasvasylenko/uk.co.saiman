@@ -52,92 +52,107 @@ import uk.co.saiman.simulation.instrument.SimulatedRasterDevice;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 
 @Component(service = { ExperimentType.class, ChemicalMapExperimentType.class })
-public class ChemicalMapExperimentSimulationType extends ChemicalMapExperimentType<ChemicalMapConfiguration> {
-	final Set<SampleExperimentSimulationType<?>> sampleExperiments = synchronizedSet(new HashSet<>());
+public class ChemicalMapExperimentSimulationType
+    extends ChemicalMapExperimentType<ChemicalMapConfiguration> {
+  private static final String ID = "uk.co.saiman.simulation.chemicalmap";
 
-	@Reference
-	SimulatedAcquisitionDevice acquisitionSimulation;
-	@Reference
-	SimulatedRasterDevice rasterSimulation;
+  final Set<SampleExperimentSimulationType<?>> sampleExperiments = synchronizedSet(new HashSet<>());
 
-	@Reference(policy = ReferencePolicy.DYNAMIC)
-	public void addSampleExperiment(SampleExperimentSimulationType<?> sampleExperiment) {
-		sampleExperiments.add(sampleExperiment);
-	}
+  @Reference
+  SimulatedAcquisitionDevice acquisitionSimulation;
+  @Reference
+  SimulatedRasterDevice rasterSimulation;
 
-	public void removeSampleExperiment(SampleExperimentSimulationType<?> sampleExperiment) {
-		sampleExperiments.remove(sampleExperiment);
-	}
+  @Reference(policy = ReferencePolicy.DYNAMIC)
+  public void addSampleExperiment(SampleExperimentSimulationType<?> sampleExperiment) {
+    sampleExperiments.add(sampleExperiment);
+  }
 
-	@Reference
-	public void setPropertyLoader(PropertyLoader propertyLoader) {
-		super.setProperties(propertyLoader.getProperties(ChemicalMapProperties.class));
-	}
+  public void removeSampleExperiment(SampleExperimentSimulationType<?> sampleExperiment) {
+    sampleExperiments.remove(sampleExperiment);
+  }
 
-	@Override
-	public SimulatedAcquisitionDevice getAcquisitionDevice() {
-		return acquisitionSimulation;
-	}
+  @Reference
+  public void setPropertyLoader(PropertyLoader propertyLoader) {
+    super.setProperties(propertyLoader.getProperties(ChemicalMapProperties.class));
+  }
 
-	@Override
-	public ChemicalMapConfiguration createState(ExperimentConfigurationContext<ChemicalMapConfiguration> forNode) {
-//		forNode.node().getAncestors(sampleExperiments).filter(sampleExperiment -> {
-			// sampleExperiment.getState().
-	//	});
-		
-		return new ChemicalMapConfiguration() {
-			private String name;
+  @Override
+  public SimulatedAcquisitionDevice getAcquisitionDevice() {
+    return acquisitionSimulation;
+  }
 
-			@Override
-			public String getChemicalMapName() {
-				return name;
-			}
+  @Override
+  public String getID() {
+    return ID;
+  }
 
-			@Override
-			public void setChemicalMapName(String name) {
-				forNode.setId(getName() + " - " + name);
+  @Override
+  public ChemicalMapConfiguration createState(
+      ExperimentConfigurationContext<ChemicalMapConfiguration> forNode) {
+    // forNode.node().getAncestors(sampleExperiments).filter(sampleExperiment ->
+    // {
+    // sampleExperiment.getState().
+    // });
 
-				this.name = name;
-			}
+    ChemicalMapConfiguration configuration = new ChemicalMapConfiguration() {
+      private String name;
 
-			@Override
-			public AcquisitionDevice getAcquisitionDevice() {
-				return acquisitionSimulation;
-			}
+      @Override
+      public String getChemicalMapName() {
+        return name;
+      }
 
-			@Override
-			public RasterDevice getRasterDevice() {
-				return rasterSimulation;
-			}
-		};
-	}
+      @Override
+      public void setChemicalMapName(String name) {
+        forNode.setID(getName() + " - " + name);
 
-	@Override
-	public void execute(ExperimentExecutionContext<ChemicalMapConfiguration> context) {
-	//	SimulatedSampleDevice sample = .get().getType().device();
-	//	acquisitionSimulation.setSample(sample);
+        this.name = name;
+      }
 
-		super.execute(context);
-	}
+      @Override
+      public AcquisitionDevice getAcquisitionDevice() {
+        return acquisitionSimulation;
+      }
 
-	@Override
-	public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-		return parentNode.getAncestor(sampleExperiments).isPresent();
-	}
+      @Override
+      public RasterDevice getRasterDevice() {
+        return rasterSimulation;
+      }
+    };
 
-	@Override
-	public boolean mayComeBefore(ExperimentNode<?, ?> penultimateDescendantNode, ExperimentType<?> descendantNodeType) {
-		return descendantNodeType != this;
-	}
+    configuration.setChemicalMapName(getProperties().defaultChemicalMapName().toString());
 
-	@Override
-	public Type getThisType() {
-		return ChemicalMapExperimentSimulationType.class;
-	}
+    return configuration;
+  }
 
-	@Override
-	protected RasterDevice getRasterDevice() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public void execute(ExperimentExecutionContext<ChemicalMapConfiguration> context) {
+    // SimulatedSampleDevice sample = .get().getType().device();
+    // acquisitionSimulation.setSample(sample);
+
+    super.execute(context);
+  }
+
+  @Override
+  public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
+    return parentNode.getAncestor(sampleExperiments).isPresent();
+  }
+
+  @Override
+  public boolean mayComeBefore(
+      ExperimentNode<?, ?> penultimateDescendantNode,
+      ExperimentType<?> descendantNodeType) {
+    return descendantNodeType != this;
+  }
+
+  @Override
+  public Type getThisType() {
+    return ChemicalMapExperimentSimulationType.class;
+  }
+
+  @Override
+  protected RasterDevice getRasterDevice() {
+    return rasterSimulation;
+  }
 }

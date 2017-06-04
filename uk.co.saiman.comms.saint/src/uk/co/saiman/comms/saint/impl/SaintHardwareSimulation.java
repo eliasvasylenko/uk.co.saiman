@@ -27,11 +27,15 @@
  */
 package uk.co.saiman.comms.saint.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
+import static uk.co.saiman.comms.saint.SaintCommandType.fromByte;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -44,9 +48,13 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
+import uk.co.saiman.comms.saint.SaintCommandType;
+import uk.co.saiman.comms.saint.SaintComms;
 import uk.co.saiman.comms.saint.impl.SaintHardwareSimulation.SaintHardwareSimulationConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
+import uk.co.strangeskies.log.Log;
+import uk.co.strangeskies.log.Log.Level;
 
 @Designate(ocd = SaintHardwareSimulationConfiguration.class, factory = true)
 @Component(
@@ -68,15 +76,18 @@ public class SaintHardwareSimulation {
 		String serialPort();
 	}
 
+	@Reference(cardinality = OPTIONAL)
+	Log log;
+
 	@Reference(policy = STATIC, policyOption = GREEDY)
 	SerialPorts serialPorts;
 	private SerialPort port;
 	private CommsStream stream;
-	private ByteBuffer buffer;
+
+	private List<Byte> memory = new ArrayList<>();
 
 	@Activate
 	void activate(SaintHardwareSimulationConfiguration configuration) throws IOException {
-		buffer = ByteBuffer.allocate(4);
 		configure(configuration);
 	}
 
@@ -97,19 +108,21 @@ public class SaintHardwareSimulation {
 	}
 
 	private synchronized void openPort() {
-		stream = port.openStream(SaintCommsImpl.MESSAGE_SIZE);
+		ByteBuffer messageBuffer = ByteBuffer.allocate(SaintComms.MESSAGE_SIZE);
+
+		stream = port.openStream(SaintComms.MESSAGE_SIZE);
 		stream.addObserver(buffer -> {
 			do {
 				boolean filled = false;
 				do {
-					this.buffer.put(buffer.get());
-					filled = !this.buffer.hasRemaining();
+					messageBuffer.put(buffer.get());
+					filled = !messageBuffer.hasRemaining();
 				} while (!filled && buffer.hasRemaining());
 
 				if (filled) {
-					this.buffer.flip();
-					receiveMessage();
-					this.buffer.clear();
+					messageBuffer.flip();
+					receiveMessage(messageBuffer);
+					messageBuffer.clear();
 				}
 			} while (buffer.hasRemaining());
 		});
@@ -122,11 +135,39 @@ public class SaintHardwareSimulation {
 		}
 	}
 
-	private void receiveMessage() {
+	private void receiveMessage(ByteBuffer messageBuffer) {
+		SaintCommandType command = fromByte(messageBuffer.get());
+		int address = messageBuffer.get() & 0xFF;
+		byte checksum = messageBuffer.get();
+		byte data = messageBuffer.get();
+
+		while (address >= memory.size()) {
+			memory.add((byte) 0);
+		}
+
+		switch (command) {
+		case INPUT:
+			data = memory.get(address);
+			break;
+
+		case OUTPUT:
+			memory.set(address, data);
+			break;
+
+		default:
+		}
+
+		ByteBuffer responseBuffer = ByteBuffer.allocate(4);
+		responseBuffer.put((byte) 0);
+		responseBuffer.put((byte) 0);
+		responseBuffer.put(checksum);
+		responseBuffer.put(data);
+
 		try {
-			stream.write(buffer);
+			responseBuffer.flip();
+			stream.write(responseBuffer);
 		} catch (IOException e) {
-			throw port.setFault(new CommsException("Unable to send simulated hardware response", e));
+			log.log(Level.ERROR, new CommsException("Unable to send simulated hardware response", e));
 		}
 	}
 }

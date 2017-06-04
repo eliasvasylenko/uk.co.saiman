@@ -3,6 +3,7 @@ Bundle-Name: SAI :: Chemistry
 -buildpath: \
 	uk.co.strangeskies.reflection;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
 \
 	uk.co.saiman.utilities;version=snapshot,\

@@ -1,10 +1,13 @@
 Bundle-Name: SAI :: Instrument
 
 -buildpath: \
+	uk.co.strangeskies.collections;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
 	uk.co.strangeskies.mathematics.geometry;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
 \
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot

@@ -46,8 +46,8 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.serial.SerialPorts;
 import uk.co.saiman.comms.serial.SerialPort;
+import uk.co.saiman.comms.serial.SerialPorts;
 
 /**
  * Provide commands to the GoGo shell for interacting with comms.
@@ -107,8 +107,7 @@ public class CommsCommands {
 		assertCommsAvailable();
 
 		if (openPort != null) {
-			throw new CommsException(
-					"Port already open " + openPort.getSystemName() + " - " + openPort.getDescriptiveName());
+			throw new CommsException("Port already open " + openPort);
 		}
 
 		SerialPort port = comms.getPort(portName);
@@ -169,7 +168,7 @@ public class CommsCommands {
 	public ByteBuffer readPort() throws IOException {
 		assertPortAvailable();
 
-		ByteBuffer buffer = ByteBuffer.allocate(openChannel.availableBytes().get());
+		ByteBuffer buffer = ByteBuffer.allocate(openChannel.bytesAvailable());
 		openChannel.read(buffer);
 		buffer.flip();
 
@@ -207,8 +206,8 @@ public class CommsCommands {
 
 		return comms
 				.getPorts()
-				.map(SerialPort::getSystemName)
-				.map(n -> n + (openPort != null && openPort.getSystemName().equals(n) ? "*" : ""))
+				.map(SerialPort::getName)
+				.map(n -> n + (openPort != null && openPort.getName().equals(n) ? "*" : ""))
 				.collect(toList());
 	}
 
@@ -229,8 +228,8 @@ public class CommsCommands {
 
 		Map<String, String> properties = new LinkedHashMap<>();
 
-		properties.put("System Name", port.getSystemName());
-		properties.put("Descriptive Name", port.getDescriptiveName());
+		properties.put("Name", port.getName());
+		properties.put("Description", port.toString());
 
 		return properties;
 	}

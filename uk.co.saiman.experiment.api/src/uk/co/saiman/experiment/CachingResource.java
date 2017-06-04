@@ -44,6 +44,8 @@ public class CachingResource<T> {
 	public CachingResource(Supplier<T> load, Consumer<T> save) {
 		this.load = load;
 		this.save = save;
+
+		this.dataReference = new SoftReference<>(null);
 	}
 
 	public boolean save() {
@@ -113,6 +115,6 @@ public class CachingResource<T> {
 	}
 
 	public Optional<T> tryGetData() {
-		return Optional.of(dataReference.get());
+		return Optional.ofNullable(dataReference.get());
 	}
 }

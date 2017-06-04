@@ -27,21 +27,28 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentResult;
 import uk.co.saiman.experiment.ExperimentResultType;
-import uk.co.strangeskies.utilities.ObservableImpl;
+import uk.co.strangeskies.observable.ObservableImpl;
 
-public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>> implements ExperimentResult<T> {
-	private final ExperimentNode<?, ?> node;
+public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>>
+		implements ExperimentResult<T> {
+	private final ExperimentNodeImpl<?, ?> node;
 	private final ExperimentResultType<T> resultType;
 	private T data;
 
-	public ExperimentResultImpl(ExperimentNode<?, ?> node, ExperimentResultType<T> type) {
+	public ExperimentResultImpl(ExperimentNodeImpl<?, ?> node, ExperimentResultType<T> type) {
 		this.node = node;
 		this.resultType = type;
+	}
+
+	@Override
+	public Path getResultDataPath() {
+		return node.getResultDataPath();
 	}
 
 	@Override

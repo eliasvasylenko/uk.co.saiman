@@ -85,28 +85,15 @@ public class PeriodicTableService {
 	@Activate
 	public void activate(BundleContext context)
 			throws SAXException, IOException, ParserConfigurationException, XPathExpressionException {
-		/*- TODO
-		new Thread(() -> {
-			try {
-				PeriodicTable periodicTable = manager.bindInput().with(PeriodicTable.class)
-						.from(getClass().getResource("PeriodicTable.xml")).resolve(2000);
-		
-				context.registerService(PeriodicTable.class, periodicTable, new Hashtable<>());
-			} catch (Throwable e) {
-				throw e;
-			}
-		});.start();
-		 */
-
 		Document document = DocumentBuilderFactory
 				.newInstance()
 				.newDocumentBuilder()
 				.parse(getClass().getResourceAsStream("PeriodicTable.xml"));
-		XPath xpath = XPathFactory.newInstance().newXPath();
+		XPath xPath = XPathFactory.newInstance().newXPath();
 
 		List<Element> elements = new ArrayList<>();
 
-		NodeList elementNodes = (NodeList) xpath
+		NodeList elementNodes = (NodeList) xPath
 				.evaluate("/" + PERIODIC_TABLE + "/" + ELEMENT, document, XPathConstants.NODESET);
 
 		for (int i = 0; i < elementNodes.getLength(); i++) {
@@ -118,7 +105,7 @@ public class PeriodicTableService {
 					.withAtomicNumber(getInt(elementNode, ATOMIC_NUMBER))
 					.withGroup(Group.valueOf(getString(elementNode, GROUP)));
 
-			NodeList isotopeNodes = (NodeList) xpath.evaluate(ISOTOPE, elementNode, XPathConstants.NODESET);
+			NodeList isotopeNodes = (NodeList) xPath.evaluate(ISOTOPE, elementNode, XPathConstants.NODESET);
 
 			for (int j = 0; j < isotopeNodes.getLength(); j++) {
 				Node isotopeNode = isotopeNodes.item(j);

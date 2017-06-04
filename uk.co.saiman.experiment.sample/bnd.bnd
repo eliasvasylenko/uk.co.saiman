@@ -9,6 +9,7 @@ Export-Package: uk.co.saiman.experiment.sample
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.mathematics;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\

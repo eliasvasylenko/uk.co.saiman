@@ -31,14 +31,9 @@ import static com.fazecast.jSerialComm.SerialPort.NO_PARITY;
 import static com.fazecast.jSerialComm.SerialPort.ONE_STOP_BIT;
 import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_READ_BLOCKING;
 import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_WRITE_BLOCKING;
-import static uk.co.saiman.comms.Comms.CommsStatus.FAULT;
-import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
-import static uk.co.saiman.comms.Comms.CommsStatus.READY;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
-import java.util.Optional;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
@@ -48,10 +43,8 @@ import com.fazecast.jSerialComm.SerialPortPacketListener;
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
-import uk.co.strangeskies.utilities.ObservableImpl;
-import uk.co.strangeskies.utilities.ObservableProperty;
-import uk.co.strangeskies.utilities.ObservableValue;
-import uk.co.strangeskies.utilities.Observer;
+import uk.co.strangeskies.observable.ObservableImpl;
+import uk.co.strangeskies.observable.Observer;
 
 /**
  * A {@link uk.co.saiman.comms.serial.SerialPort serial port} implementation
@@ -64,94 +57,58 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 
 	private CommsChannel openChannel;
 
-	private final ObservableProperty<CommsStatus, CommsStatus> status;
-	private CommsException lastFault;
-
 	protected JSerialCommsPort(SerialPort serialPort) {
 		this.serialPort = serialPort;
-		status = ObservableProperty.over(READY);
 
-		if (isPortValid(false)) {
-			serialPort.setNumDataBits(Byte.SIZE);
-			serialPort.setNumStopBits(ONE_STOP_BIT);
-			serialPort.setParity(NO_PARITY);
-			serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 1000, 1000);
-		}
+		serialPort.setNumDataBits(Byte.SIZE);
+		serialPort.setBaudRate(9600);
+		serialPort.setNumStopBits(ONE_STOP_BIT);
+		serialPort.setParity(NO_PARITY);
+		serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 1000, 1000);
 	}
 
 	@Override
-	public synchronized void reset() {
-		try {
-			closeChannel();
-		} catch (Exception e) {}
-		status.set(READY);
-		isPortValid(false);
+	public synchronized void close() {
+		closeChannel();
 	}
 
 	@Override
-	public synchronized ObservableValue<CommsStatus> status() {
-		return status;
+	public synchronized boolean isOpen() {
+		return openChannel != null;
 	}
 
 	@Override
-	public synchronized Optional<CommsException> getFault() {
-		return status.get() == FAULT ? Optional.of(lastFault) : Optional.empty();
-	}
-
-	@Override
-	public synchronized CommsException setFault(CommsException commsException) {
-		status.set(FAULT);
-		this.lastFault = commsException;
-		return commsException;
-	}
-
-	private boolean isPortValid(boolean throwing) {
-		if (serialPort.getSystemPortName().equals("/dev/null")) {
-			CommsException fault = setFault(
-					new CommsException(
-							"Port is not valid " + getSystemName() + " - " + getDescriptiveName()));
-			if (throwing) {
-				throw fault;
-			}
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	@Override
-	public String getSystemName() {
+	public String getName() {
 		return serialPort.getSystemPortName();
 	}
 
 	@Override
-	public String getDescriptiveName() {
+	public String toString() {
 		return serialPort.getDescriptivePortName() + " " + serialPort.getSystemPortName();
 	}
 
 	@Override
 	public synchronized CommsChannel openChannel() {
-		isPortValid(true);
+		if (serialPort.getSystemPortName().equals("/dev/null")) {
+			throw new CommsException("Port is not valid " + this);
+		}
 
-		if (openChannel != null) {
-			throw new CommsException(
-					"Port already in use " + getSystemName() + " - " + getDescriptiveName());
+		if (isOpen()) {
+			throw new CommsException("Port already in use " + this);
 		}
 
 		closeChannel();
 
 		if (!serialPort.openPort()) {
-			throw setFault(
-					new CommsException("Cannot open port " + getSystemName() + " - " + getDescriptiveName()));
+			throw new CommsException("Cannot open port " + this);
 		}
 
-		ObservableProperty<Integer, Integer> availableObservable = ObservableProperty
-				.over((a, c) -> a, Objects::equals, serialPort.bytesAvailable());
+		ObservableImpl<CommsChannel> availableObservable = new ObservableImpl<>();
 
 		setPortListener(new SerialPortDataListener() {
 			@Override
 			public void serialEvent(SerialPortEvent event) {
-				availableObservable.set(serialPort.bytesAvailable());
+				availableObservable.fire(openChannel);
 			}
 
 			@Override
@@ -164,36 +121,30 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 			private boolean open = true;
 
 			@Override
-			public ObservableValue<Integer> availableBytes() {
+			public int bytesAvailable() {
 				assertOpen();
-				return availableObservable;
+				return serialPort.bytesAvailable();
 			}
 
 			@Override
 			public int write(ByteBuffer src) throws IOException {
 				assertOpen();
-				try {
-					byte[] bytes = new byte[src.remaining()];
-					src.get(bytes);
-					return serialPort.writeBytes(bytes, bytes.length);
-				} catch (Exception e) {
-					setFault(new CommsException("Problem writing to comms channel", e));
-					throw e;
-				}
+				byte[] bytes = new byte[src.remaining()];
+				src.get(bytes);
+				return serialPort.writeBytes(bytes, bytes.length);
 			}
 
 			@Override
 			public int read(ByteBuffer dst) throws IOException {
 				assertOpen();
-				try {
-					byte[] bytes = new byte[dst.remaining()];
-					int read = serialPort.readBytes(bytes, bytes.length);
-					dst.put(bytes, 0, read);
-					return read;
-				} catch (Exception e) {
-					setFault(new CommsException("Problem reading from comms channel", e));
-					throw e;
-				}
+				byte[] bytes = new byte[dst.remaining()];
+				int read = serialPort.readBytes(bytes, bytes.length);
+
+				if (read < 0)
+					throw new CommsException("Unknown port error " + read);
+
+				dst.put(bytes, 0, read);
+				return read;
 			}
 
 			private void assertOpen() {
@@ -213,9 +164,17 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 					closeChannel();
 				}
 			}
-		};
 
-		status.set(OPEN);
+			@Override
+			public boolean addObserver(Observer<? super CommsChannel> observer) {
+				return availableObservable.addObserver(observer);
+			}
+
+			@Override
+			public boolean removeObserver(Observer<? super CommsChannel> observer) {
+				return availableObservable.removeObserver(observer);
+			}
+		};
 
 		return openChannel;
 	}
@@ -226,8 +185,8 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 		ObservableImpl<ByteBuffer> byteObservable = new ObservableImpl<>();
 
 		if (packetSize <= 0) {
-			channel.availableBytes().addObserver(b -> {
-				byte[] bytes = new byte[serialPort.bytesAvailable()];
+			channel.addObserver(c -> {
+				byte[] bytes = new byte[c.bytesAvailable()];
 				serialPort.readBytes(bytes, bytes.length);
 				byteObservable.fire(ByteBuffer.wrap(bytes));
 			});
@@ -274,6 +233,7 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 			@Override
 			public void close() throws IOException {
 				serialPort.removeDataListener();
+				byteObservable.clearObservers();
 				channel.close();
 			}
 		};
@@ -282,20 +242,15 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 	private synchronized void closeChannel() {
 		openChannel = null;
 		if (!serialPort.closePort()) {
-			throw setFault(
-					new CommsException(
-							"Cannot close port " + getSystemName() + " - " + getDescriptiveName()));
+			throw new CommsException("Cannot close port " + this);
 		}
-		status.set(READY);
 	}
 
 	private void setPortListener(SerialPortDataListener listener) {
 		serialPort.removeDataListener();
 		if (!serialPort.addDataListener(listener)) {
 			closeChannel();
-			throw setFault(
-					new CommsException(
-							"Cannot add listener to port " + getSystemName() + " - " + getDescriptiveName()));
+			throw new CommsException("Cannot add listener to port " + this);
 		}
 	}
 }

@@ -27,8 +27,9 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.strangeskies.utilities.Observable.Observation.CONTINUE;
-import static uk.co.strangeskies.utilities.Observable.Observation.TERMINATE;
+import static uk.co.strangeskies.observable.Observable.Observation.CONTINUE;
+import static uk.co.strangeskies.observable.Observable.Observation.TERMINATE;
+import static uk.co.strangeskies.text.properties.PropertyLoader.getDefaultProperties;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +42,6 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentResultType;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.strangeskies.text.properties.PropertyLoader;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -61,7 +61,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 	private final ExperimentResultType<AccumulatingFileSpectrum> spectrumResult;
 
 	public SpectrumExperimentType() {
-		this(PropertyLoader.getDefaultProperties(SpectrumProperties.class));
+		this(getDefaultProperties(SpectrumProperties.class));
 	}
 
 	/*
@@ -107,26 +107,26 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 
 		try {
 			end.get().ifPresent(e -> {
-				context.setResult(spectrumResult, null);
+				context.results().set(spectrumResult, null);
 				throw e;
 			});
 		} catch (InterruptedException | ExecutionException e) {
 			throw new ExperimentException(properties.experimentInterrupted(), e);
 		}
 
-		context.getResult(spectrumResult).getData().get().complete();
+		context.results().get(spectrumResult).getData().get().complete();
 	}
 
 	public void prepareAcquisition(ExperimentExecutionContext<T> context, AcquisitionDevice device) {
 		int count = device.getAcquisitionCount();
 
 		AccumulatingFileSpectrum fileSpectrum = new AccumulatingFileSpectrum(
-				context.node().getExperimentDataPath(),
+				context.results().dataPath(),
 				SPECTRUM_DATA_NAME,
 				device.getSampleDomain(),
 				device.getSampleIntensityUnits());
 
-		context.setResult(spectrumResult, fileSpectrum);
+		context.results().set(spectrumResult, fileSpectrum);
 
 		device.dataEvents().addTerminatingObserver(
 				a -> (device.isAcquiring() && fileSpectrum.accumulate(a) == count) ? TERMINATE : CONTINUE);

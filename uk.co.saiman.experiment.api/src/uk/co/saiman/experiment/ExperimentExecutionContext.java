@@ -39,24 +39,7 @@ public interface ExperimentExecutionContext<T> {
 	/**
 	 * @return the currently executing experiment node
 	 */
-	ExperimentNode<?, T> node();
+	ExperimentNode<? extends ExperimentType<T>, T> node();
 
-	/**
-	 * @param resultType
-	 *          the type of result
-	 * @return the result object now registered to the executing node
-	 */
-	public <U> ExperimentResult<U> getResult(ExperimentResultType<U> resultType);
-
-	/**
-	 * This method provides a target for the submission of results during
-	 * execution of an experiment node.
-	 * 
-	 * @param resultType
-	 *          the type of result
-	 * @param resultData
-	 *          the result
-	 * @return the result object now registered to the executing node
-	 */
-	public <U> ExperimentResult<U> setResult(ExperimentResultType<U> resultType, U resultData);
+	ExperimentResultManager results();
 }

@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentWorkspace;
-import uk.co.saiman.experiment.RootExperiment;
+import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.fx.TreeCellContribution;
 import uk.co.strangeskies.fx.TreeChildContribution;
@@ -56,12 +56,12 @@ public class WorkspaceContribution
 		implements EclipseTreeContribution<ExperimentWorkspace>, TreeChildContribution<ExperimentWorkspace> {
 	@Override
 	public <U extends ExperimentWorkspace> boolean hasChildren(TreeItemData<U> data) {
-		return data.data().getRootExperiments().findAny().isPresent();
+		return data.data().getExperiments().findAny().isPresent();
 	}
 
 	@Override
 	public <U extends ExperimentWorkspace> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return data.data().getRootExperiments().map(
-				c -> typedObject(new TypeToken<ExperimentNode<RootExperiment, ExperimentConfiguration>>() {}, c));
+		return data.data().getExperiments().map(
+				c -> typedObject(new TypeToken<ExperimentNode<ExperimentRoot, ExperimentConfiguration>>() {}, c));
 	}
 }

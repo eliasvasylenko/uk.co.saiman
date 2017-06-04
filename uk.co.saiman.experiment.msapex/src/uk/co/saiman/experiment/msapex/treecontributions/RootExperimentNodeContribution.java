@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.RootExperiment;
+import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
@@ -49,20 +49,20 @@ import uk.co.strangeskies.fx.TreeTextContribution;
  */
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
 public class RootExperimentNodeContribution
-		implements EclipseTreeContribution<ExperimentNode<RootExperiment, ExperimentConfiguration>>,
-		TreeTextContribution<ExperimentNode<RootExperiment, ExperimentConfiguration>>,
-		PseudoClassTreeCellContribution<ExperimentNode<RootExperiment, ExperimentConfiguration>> {
+		implements EclipseTreeContribution<ExperimentNode<ExperimentRoot, ExperimentConfiguration>>,
+		TreeTextContribution<ExperimentNode<ExperimentRoot, ExperimentConfiguration>>,
+		PseudoClassTreeCellContribution<ExperimentNode<ExperimentRoot, ExperimentConfiguration>> {
 	@Inject
 	@Localize
 	ExperimentProperties text;
 
 	@Override
-	public <U extends ExperimentNode<RootExperiment, ExperimentConfiguration>> String getText(TreeItemData<U> data) {
+	public <U extends ExperimentNode<ExperimentRoot, ExperimentConfiguration>> String getText(TreeItemData<U> data) {
 		return data.data().getState().getName();
 	}
 
 	@Override
-	public <U extends ExperimentNode<RootExperiment, ExperimentConfiguration>> String getSupplementalText(
+	public <U extends ExperimentNode<ExperimentRoot, ExperimentConfiguration>> String getSupplementalText(
 			TreeItemData<U> data) {
 		return "[" + text.lifecycleState(data.data().lifecycleState().get()) + "]";
 	}

@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: Comms :: Copley
+
+-buildpath:\
+	uk.co.saiman.comms;version=snapshot,\
+\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
+	org.eclipse.equinox.metatype
+	
+
+Private-Package: uk.co.saiman.comms.copley.impl
+
+Export-Package: uk.co.saiman.comms.copley

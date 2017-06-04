@@ -5,13 +5,13 @@
 
 .filterClear {
 	display: inline-block;
-	vertical-align: middle
+	vertical-align: middle;
 }
 .bIcon, .bName {
-	display: inline-block
+	display: inline-block;
 }
 .bIcon {
-	float: left
+	float: left;
 }
 
 .ui-state-info-text {
@@ -33,4 +33,18 @@
 #filter_container {
 	text-align: left;
 	padding-left: 1em;
+	padding-right: 1em;
 }
+#filter_container .pollButton {
+	float: right;
+}
+
+#command_parameters { display: table; }
+#command_parameters #parameter { display: table-row; }
+#command_parameters #label { display: table-cell; }
+#command_parameters #value {
+	display: table-cell;
+	width: 100%;
+	padding-left: 1em;
+}
+#command_parameters #value input[type="text"] { width: 100%; }

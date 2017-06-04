@@ -56,62 +56,65 @@ import uk.co.strangeskies.reflection.token.TypedObject;
  */
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
 public class ExperimentNodeContribution extends MenuTreeCellContribution<ExperimentNode<?, ?>>
-		implements PseudoClassTreeCellContribution<ExperimentNode<?, ?>>, TreeChildContribution<ExperimentNode<?, ?>>,
-		TreeTextContribution<ExperimentNode<?, ?>> {
-	private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.experiment.msapex.popupmenu.node";
+    implements PseudoClassTreeCellContribution<ExperimentNode<?, ?>>,
+    TreeChildContribution<ExperimentNode<?, ?>>, TreeTextContribution<ExperimentNode<?, ?>> {
+  private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.experiment.msapex.popupmenu.node";
 
-	/**
-	 * Create with experiment tree popup menu
-	 */
-	public ExperimentNodeContribution() {
-		super(EXPERIMENT_TREE_POPUP_MENU);
-	}
+  /**
+   * Create with experiment tree popup menu
+   */
+  public ExperimentNodeContribution() {
+    super(EXPERIMENT_TREE_POPUP_MENU);
+  }
 
-	@Override
-	public <U extends ExperimentNode<?, ?>> Node configureCell(TreeItemData<U> data, Node content) {
-		data.data().lifecycleState().addWeakObserver(data, d -> s -> d.refresh(false));
+  @Override
+  public <U extends ExperimentNode<?, ?>> Node configureCell(TreeItemData<U> data, Node content) {
+    data.data().lifecycleState().addWeakObserver(data, d -> s -> d.refresh(false));
 
-		/*
-		 * label to show lifecycle state icon
-		 */
-		Label lifecycleIndicator = new Label();
-		lifecycleIndicator.pseudoClassStateChanged(
-				PseudoClass.getPseudoClass(
-						ExperimentLifecycleState.class.getSimpleName() + "-" + data.data().lifecycleState().get().toString()),
-				true);
+    /*
+     * label to show lifecycle state icon
+     */
+    Label lifecycleIndicator = new Label();
+    lifecycleIndicator.pseudoClassStateChanged(
+        PseudoClass.getPseudoClass(
+            ExperimentLifecycleState.class.getSimpleName() + "-"
+                + data.data().lifecycleState().get().toString()),
+        true);
 
-		/*
-		 * shift lifecycle label to the far right
-		 */
-		Region spacer = new Region();
-		HBox.setHgrow(spacer, Priority.SOMETIMES);
+    /*
+     * shift lifecycle label to the far right
+     */
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.SOMETIMES);
 
-		HBox contentWrapper = new HBox(content, spacer, lifecycleIndicator);
-		contentWrapper.setMinWidth(0);
-		contentWrapper.prefWidth(0);
+    HBox contentWrapper = new HBox(content, spacer, lifecycleIndicator);
+    contentWrapper.setMinWidth(0);
+    contentWrapper.prefWidth(0);
 
-		content = PseudoClassTreeCellContribution.super.configureCell(data, contentWrapper);
+    content = PseudoClassTreeCellContribution.super.configureCell(data, contentWrapper);
 
-		return super.configureCell(data, content);
-	}
+    return super.configureCell(data, content);
+  }
 
-	@Override
-	public <U extends ExperimentNode<?, ?>> boolean hasChildren(TreeItemData<U> data) {
-		return data.data().getChildren().findAny().isPresent() || data.data().getResults().findAny().isPresent();
-	}
+  @Override
+  public <U extends ExperimentNode<?, ?>> boolean hasChildren(TreeItemData<U> data) {
+    return data.data().getChildren().findAny().isPresent()
+        || data.data().getResults().findAny().isPresent();
+  }
 
-	@Override
-	public <U extends ExperimentNode<?, ?>> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return Stream.concat(data.data().getChildren(), data.data().getResults()).map(ReifiedToken::asTypedObject);
-	}
+  @Override
+  public <U extends ExperimentNode<?, ?>> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
+    return Stream.concat(data.data().getChildren(), data.data().getResults()).map(
+        ReifiedToken::asTypedObject);
+  }
 
-	@Override
-	public <U extends ExperimentNode<?, ?>> String getText(TreeItemData<U> data) {
-		return data.data().getType().getName();
-	}
+  @Override
+  public <U extends ExperimentNode<?, ?>> String getText(TreeItemData<U> data) {
+    return data.data().getID();
+  }
 
-	@Override
-	public <U extends ExperimentNode<?, ?>> String getSupplementalText(TreeItemData<U> data) {
-		return data.data().toString();
-	}
+  @Override
+  public <U extends ExperimentNode<?, ?>> String getSupplementalText(TreeItemData<U> data) {
+    return data.data().getType().getName() + " [" + data.data().lifecycleState().get() + "]";
+  }
 }

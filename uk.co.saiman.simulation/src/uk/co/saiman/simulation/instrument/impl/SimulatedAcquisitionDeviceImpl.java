@@ -28,6 +28,7 @@
 package uk.co.saiman.simulation.instrument.impl;
 
 import static java.util.Collections.unmodifiableSet;
+import static uk.co.strangeskies.log.Log.Level.ERROR;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -57,12 +58,11 @@ import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
+import uk.co.strangeskies.collection.observable.BufferingListener;
+import uk.co.strangeskies.log.Log;
+import uk.co.strangeskies.observable.Observable;
+import uk.co.strangeskies.observable.ObservableImpl;
 import uk.co.strangeskies.text.properties.PropertyLoader;
-import uk.co.strangeskies.utilities.BufferingListener;
-import uk.co.strangeskies.utilities.Log;
-import uk.co.strangeskies.utilities.Log.Level;
-import uk.co.strangeskies.utilities.Observable;
-import uk.co.strangeskies.utilities.ObservableImpl;
 
 /**
  * Partial implementation of a simulation of an acquisition device.
@@ -215,7 +215,8 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 	@Modified
 	void updated(SimulatedAcquisitionDeviceConfiguration configuration) {
-		Quantity<Time> resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(Time.class);
+		Quantity<Time> resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(
+				Time.class);
 
 		setAcquisitionResolution(resolution);
 
@@ -493,7 +494,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 	private void exception(AcquisitionException exception) {
 		this.exception = exception;
 		exceptionListeners.fire(exception);
-		log.log(Level.ERROR, exception);
+		log.log(ERROR, exception);
 	}
 
 	@Override

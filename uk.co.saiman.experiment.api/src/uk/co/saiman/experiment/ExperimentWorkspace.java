@@ -31,25 +31,22 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 /**
- * API for experiment management, i.e. registration and discovery of experiment
- * types, and registration of root experiment parts such that experiment part
- * trees can be built.
+ * The concept of an experiment in a {@link ExperimentWorkspace workspace} is
+ * represented by a hierarchy of nodes. The workspace provides an interface for
+ * managing those experiments.
+ * <p>
+ * A workspace contains a register of {@link ExperimentType experiment types}.
+ * Experiment nodes can be created according to these types.
  * 
  * @author Elias N Vasylenko
  */
 public interface ExperimentWorkspace {
 	/**
+	 * The root path for the workspace data persistence.
+	 * 
 	 * @return the data root of the workspace
 	 */
 	Path getWorkspaceDataPath();
-
-	/**
-	 * Get the current processing state of the experiment manager.
-	 * 
-	 * @return the current state, in the form of the stack of all currently
-	 *         executing experiment parts
-	 */
-	Stream<ExperimentNode<?, ?>> processingState();
 
 	/*
 	 * Root experiment types
@@ -58,15 +55,15 @@ public interface ExperimentWorkspace {
 	/**
 	 * @return the root experiment type
 	 */
-	RootExperiment getRootExperimentType();
+	ExperimentRoot getExperimentRootType();
 
 	/**
-	 * Get all experiments of the {@link #getRootExperiments() root experiment
+	 * Get all experiments of the {@link #getExperiments() root experiment
 	 * type}.
 	 * 
 	 * @return all registered root experiment parts
 	 */
-	Stream<ExperimentNode<RootExperiment, ExperimentConfiguration>> getRootExperiments();
+	Stream<Experiment> getExperiments();
 
 	/**
 	 * Add a root experiment node to management.
@@ -75,7 +72,7 @@ public interface ExperimentWorkspace {
 	 *          the name of the new experiment
 	 * @return a new root experiment part of the root type
 	 */
-	ExperimentNode<RootExperiment, ExperimentConfiguration> addRootExperiment(String name);
+	Experiment addExperiment(String name);
 
 	/*
 	 * Child experiment types

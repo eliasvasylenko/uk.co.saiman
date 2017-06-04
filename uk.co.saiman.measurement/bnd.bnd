@@ -1,4 +1,5 @@
 -buildpath: \
+	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 \

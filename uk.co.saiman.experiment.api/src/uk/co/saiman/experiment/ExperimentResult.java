@@ -27,15 +27,25 @@
  */
 package uk.co.saiman.experiment;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
+import uk.co.strangeskies.observable.Observable;
 import uk.co.strangeskies.reflection.token.ReifiedToken;
 import uk.co.strangeskies.reflection.token.TypeArgument;
 import uk.co.strangeskies.reflection.token.TypeToken;
-import uk.co.strangeskies.utilities.Observable;
 
-public interface ExperimentResult<T> extends Observable<Optional<T>>, ReifiedToken<ExperimentResult<T>> {
+public interface ExperimentResult<T>
+		extends Observable<Optional<T>>, ReifiedToken<ExperimentResult<T>> {
 	ExperimentNode<?, ?> getExperimentNode();
+
+	/**
+	 * Experiment data root directories are defined hierarchically from the
+	 * {@link ExperimentWorkspace#getWorkspaceDataPath() workspace path}.
+	 * 
+	 * @return the data root of the experiment
+	 */
+	Path getResultDataPath();
 
 	ExperimentResultType<T> getResultType();
 

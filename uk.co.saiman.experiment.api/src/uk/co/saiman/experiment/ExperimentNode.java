@@ -30,19 +30,24 @@ package uk.co.saiman.experiment;
 import static java.util.stream.Collectors.toList;
 import static uk.co.strangeskies.reflection.token.TypeToken.forType;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import uk.co.strangeskies.collection.stream.StreamUtilities;
+import uk.co.strangeskies.observable.ObservableValue;
 import uk.co.strangeskies.reflection.token.ReifiedToken;
 import uk.co.strangeskies.reflection.token.TypeArgument;
 import uk.co.strangeskies.reflection.token.TypeToken;
-import uk.co.strangeskies.utilities.ObservableValue;
-import uk.co.strangeskies.utilities.collection.StreamUtilities;
 
 /**
- * A node in an experiment part tree.
+ * This class provides a common interface for manipulating, inspecting, and
+ * reflecting over the constituent nodes of an experiment. Each node is
+ * associated with an implementation of {@link ExperimentType}.
+ * <p>
+ * Instances of {@link ExperimentNode} are constructed internally by a
+ * {@link ExperimentWorkspace workspace} according to their
+ * {@link ExperimentType type}.
  * 
  * @author Elias N Vasylenko
  * @param <T>
@@ -50,19 +55,19 @@ import uk.co.strangeskies.utilities.collection.StreamUtilities;
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedToken<ExperimentNode<T, S>> {
+public interface ExperimentNode<T extends ExperimentType<S>, S>
+		extends ReifiedToken<ExperimentNode<T, S>> {
+	/**
+	 * @return The ID of the node, as configured via
+	 *         {@link ExperimentConfigurationContext}. The ID should be unique
+	 *         amongst the children of a node's parent.
+	 */
+	String getID();
+
 	/**
 	 * @return the experiment workspace containing this experiment
 	 */
 	ExperimentWorkspace getExperimentWorkspace();
-
-	/**
-	 * Experiment data root directories are defined hierarchically from the
-	 * {@link ExperimentWorkspace#getWorkspaceDataPath() workspace path}.
-	 * 
-	 * @return the data root of the experiment
-	 */
-	Path getExperimentDataPath();
 
 	/**
 	 * @return the current state object of the experiment node
@@ -85,14 +90,14 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	 */
 	default int getIndex() {
 		return getParent().map(p -> p.getChildren().collect(toList()).indexOf(this)).orElse(
-				getExperimentWorkspace().getRootExperiments().collect(toList()).indexOf(this));
+				getExperimentWorkspace().getExperiments().collect(toList()).indexOf(this));
 	}
 
 	/**
 	 * @return the root part of the experiment tree this part occurs in
 	 */
-	default ExperimentNode<RootExperiment, ExperimentConfiguration> getRoot() {
-		return getAncestor(getExperimentWorkspace().getRootExperimentType()).get();
+	default Experiment getRoot() {
+		return (Experiment) getAncestor(getExperimentWorkspace().getExperimentRootType()).get();
 	}
 
 	/**
@@ -114,7 +119,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	 */
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<U>> Optional<ExperimentNode<E, U>> getAncestor(E type) {
-		return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(a -> (ExperimentNode<E, U>) a);
+		return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(
+				a -> (ExperimentNode<E, U>) a);
 	}
 
 	/**
@@ -129,10 +135,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> getAncestor(
 			Collection<E> types) {
-		return getAncestors()
-				.filter(a -> types.contains(a.getType()))
-				.findFirst()
-				.map(a -> (ExperimentNode<E, ? extends U>) a);
+		return getAncestors().filter(a -> types.contains(a.getType())).findFirst().map(
+				a -> (ExperimentNode<E, ? extends U>) a);
 	}
 
 	/**
@@ -146,7 +150,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 	@SuppressWarnings("unchecked")
 	default <U, E extends ExperimentType<? extends U>> Stream<ExperimentNode<E, ? extends U>> getAncestors(
 			Collection<E> types) {
-		return getAncestors().filter(a -> types.contains(a.getType())).map(a -> (ExperimentNode<E, ? extends U>) a);
+		return getAncestors().filter(a -> types.contains(a.getType())).map(
+				a -> (ExperimentNode<E, ? extends U>) a);
 	}
 
 	/**
@@ -187,25 +192,18 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> extends ReifiedT
 		@SuppressWarnings("unchecked")
 		TypeToken<T> typeType = (TypeToken<T>) forType(getType().getThisType());
 
-		return new TypeToken<ExperimentNode<T, S>>() {}
-				.withTypeArguments(new TypeArgument<T>(typeType) {}, new TypeArgument<S>(getType().getStateType()) {});
+		return new TypeToken<ExperimentNode<T, S>>() {}.withTypeArguments(
+				new TypeArgument<T>(typeType) {},
+				new TypeArgument<S>(getType().getStateType()) {});
 	}
 
 	/**
 	 * Process this experiment node. The request will be passed down to the root
-	 * experiment node and executed within the workspace. Only one experiment may
-	 * be processed at a time for a workspace, and if an experiment is already in
-	 * progress then invocation of this method should throw.
+	 * experiment node and processing will proceed back down the ancestor
+	 * hierarchy to this node. If the experiment is already in progress then
+	 * invocation of this method should fail.
 	 */
 	void process();
-
-	/**
-	 * Attempt to process according to {@link #process()}. If an experiment is
-	 * already in progress then return false.
-	 * 
-	 * @return true if the processing was able to start, false otherwise
-	 */
-	boolean tryProcess();
 
 	/**
 	 * @return all results associated with this node
