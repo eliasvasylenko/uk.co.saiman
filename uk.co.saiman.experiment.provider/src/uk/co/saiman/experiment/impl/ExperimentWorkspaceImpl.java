@@ -35,6 +35,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
+import static javax.xml.xpath.XPathConstants.NODESET;
 import static uk.co.strangeskies.collection.stream.StreamUtilities.upcastStream;
 import static uk.co.strangeskies.text.properties.PropertyLoader.getDefaultProperties;
 
@@ -58,12 +59,13 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
@@ -72,7 +74,6 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ExperimentWorkspace;
-import uk.co.saiman.experiment.PersistedState;
 import uk.co.strangeskies.collection.stream.StreamUtilities;
 import uk.co.strangeskies.log.Log;
 
@@ -82,245 +83,253 @@ import uk.co.strangeskies.log.Log;
  * @author Elias N Vasylenko
  */
 public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
-	private static final String EXPERIMENT_EXTENSION = ".exml";
+  private static final String EXPERIMENT_EXTENSION = ".exml";
 
-	private static final String EXPERIMENT_ELEMENT = "experiment";
-	private static final String NODE_ELEMENT = "node";
-	private static final String TYPE_ATTRIBUTE = "type";
-	private static final String ID_ATTRIBUTE = "id";
-	private static final String CONFIGURATION_ELEMENT = "configuration";
+  private static final String EXPERIMENT_ELEMENT = "experiment";
+  private static final String NODE_ELEMENT = "node";
+  private static final String TYPE_ATTRIBUTE = "type";
+  private static final String ID_ATTRIBUTE = "id";
 
-	private final ExperimentWorkspaceFactoryImpl factory;
-	private final Path dataRoot;
+  private final ExperimentWorkspaceFactoryImpl factory;
+  private final Path dataRoot;
 
-	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
+  private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
 
-	private final ExperimentRoot experimentRootType = new RootExperimentImpl(this);
-	private final List<ExperimentImpl> experiments = new ArrayList<>();
+  private final ExperimentRoot experimentRootType = new ExperimentRootImpl(this);
+  private final List<ExperimentImpl> experiments = new ArrayList<>();
 
-	private final ExperimentProperties text;
+  private final ExperimentProperties text;
 
-	private final Lock processingLock = new ReentrantLock();
+  private final Lock processingLock = new ReentrantLock();
 
-	/**
-	 * Try to create a new experiment workspace over the given root path
-	 * 
-	 * @param factory
-	 *          the factory which produces the workspace
-	 * @param workspaceRoot
-	 *          the path of the workspace data
-	 */
-	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot) {
-		this(factory, workspaceRoot, getDefaultProperties(ExperimentProperties.class));
-	}
+  /**
+   * Try to create a new experiment workspace over the given root path
+   * 
+   * @param factory
+   *          the factory which produces the workspace
+   * @param workspaceRoot
+   *          the path of the workspace data
+   */
+  public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot) {
+    this(factory, workspaceRoot, getDefaultProperties(ExperimentProperties.class));
+  }
 
-	/**
-	 * Try to create a new experiment workspace over the given root path
-	 * 
-	 * @param factory
-	 *          the factory which produces the workspace
-	 * @param workspaceRoot
-	 *          the path of the workspace data
-	 * @param text
-	 *          a localized text accessor implementation
-	 */
-	public ExperimentWorkspaceImpl(
-			ExperimentWorkspaceFactoryImpl factory,
-			Path workspaceRoot,
-			ExperimentProperties text) {
-		this.factory = factory;
-		this.dataRoot = workspaceRoot;
-		this.text = text;
+  /**
+   * Try to create a new experiment workspace over the given root path
+   * 
+   * @param factory
+   *          the factory which produces the workspace
+   * @param workspaceRoot
+   *          the path of the workspace data
+   * @param text
+   *          a localized text accessor implementation
+   */
+  public ExperimentWorkspaceImpl(
+      ExperimentWorkspaceFactoryImpl factory,
+      Path workspaceRoot,
+      ExperimentProperties text) {
+    this.factory = factory;
+    this.dataRoot = workspaceRoot;
+    this.text = text;
 
-		loadExperiments();
-	}
+    loadExperiments();
+  }
 
-	private void loadExperiments() {
-		PathMatcher filter = dataRoot.getFileSystem().getPathMatcher("glob:*" + EXPERIMENT_EXTENSION);
+  private void loadExperiments() {
+    PathMatcher filter = dataRoot.getFileSystem().getPathMatcher(
+        "glob:**/*" + EXPERIMENT_EXTENSION);
 
-		try (DirectoryStream<Path> stream = newDirectoryStream(
-				dataRoot,
-				file -> isRegularFile(file) && filter.matches(file))) {
-			for (Path path : stream) {
-				loadExperiment(path);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    try (DirectoryStream<Path> stream = newDirectoryStream(
+        dataRoot,
+        file -> isRegularFile(file) && filter.matches(file))) {
+      for (Path path : stream) {
+        loadExperiment(path);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	Log getLog() {
-		return factory.getLog();
-	}
+  Log getLog() {
+    return factory.getLog();
+  }
 
-	ExperimentProperties getText() {
-		return text;
-	}
+  ExperimentProperties getText() {
+    return text;
+  }
 
-	@Override
-	public Path getWorkspaceDataPath() {
-		return dataRoot;
-	}
+  @Override
+  public Path getWorkspaceDataPath() {
+    return dataRoot;
+  }
 
-	/*
-	 * Root experiment types
-	 */
+  /*
+   * Root experiment types
+   */
 
-	@Override
-	public ExperimentRoot getExperimentRootType() {
-		return experimentRootType;
-	}
+  @Override
+  public ExperimentRoot getExperimentRootType() {
+    return experimentRootType;
+  }
 
-	@Override
-	public Stream<Experiment> getExperiments() {
-		return upcastStream(experiments.stream());
-	}
+  @Override
+  public Stream<Experiment> getExperiments() {
+    return upcastStream(experiments.stream());
+  }
 
-	protected Stream<ExperimentImpl> getExperimentsImpl() {
-		return experiments.stream();
-	}
+  protected Stream<ExperimentImpl> getExperimentsImpl() {
+    return experiments.stream();
+  }
 
-	@Override
-	public Experiment addExperiment(String name) {
-		return addExperiment(name, new PersistedStateImpl());
-	}
+  @Override
+  public Experiment addExperiment(String name) {
+    return addExperiment(name, new PersistedStateImpl());
+  }
 
-	protected ExperimentImpl addExperiment(String name, PersistedStateImpl persistedState) {
-		if (!ExperimentConfiguration.isNameValid(name)) {
-			throw new ExperimentException(text.exception().invalidExperimentName(name));
-		}
+  protected ExperimentImpl addExperiment(String name, PersistedStateImpl persistedState) {
+    if (!ExperimentConfiguration.isNameValid(name)) {
+      throw new ExperimentException(text.exception().invalidExperimentName(name));
+    }
 
-		ExperimentImpl experiment = new ExperimentImpl(experimentRootType, this, persistedState);
-		experiments.add(experiment);
-		experiment.getState().setName(name);
-		experiment.saveExperiment();
+    ExperimentImpl experiment = new ExperimentImpl(experimentRootType, name, this, persistedState);
+    experiments.add(experiment);
+    return experiment;
+  }
 
-		return experiment;
-	}
+  protected boolean removeExperiment(Experiment experiment) {
+    return experiments.remove(experiment);
+  }
 
-	protected boolean removeExperiment(Experiment experiment) {
-		return experiments.remove(experiment);
-	}
+  /*
+   * Child experiment types
+   */
 
-	/*
-	 * Child experiment types
-	 */
+  @Override
+  public boolean registerExperimentType(ExperimentType<?> experimentType) {
+    return experimentTypes.add(experimentType);
+  }
 
-	@Override
-	public boolean registerExperimentType(ExperimentType<?> experimentType) {
-		return experimentTypes.add(experimentType);
-	}
+  @Override
+  public boolean unregisterExperimentType(ExperimentType<?> experimentType) {
+    return experimentTypes.remove(experimentType);
+  }
 
-	@Override
-	public boolean unregisterExperimentType(ExperimentType<?> experimentType) {
-		return experimentTypes.remove(experimentType);
-	}
+  @Override
+  public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
+    return Stream.concat(factory.getRegisteredExperimentTypes(), experimentTypes.stream());
+  }
 
-	@Override
-	public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
-		return Stream.concat(factory.getRegisteredExperimentTypes(), experimentTypes.stream());
-	}
+  protected void process(ExperimentNodeImpl<?, ?> node) {
+    if (processingLock.tryLock()) {
+      try {
+        processImpl(node);
+      } finally {
+        processingLock.unlock();
+      }
+    } else {
+      throw new ExperimentException(
+          text.exception().cannotProcessExperimentConcurrently(node.getRoot()));
+    }
+  }
 
-	protected void process(ExperimentNodeImpl<?, ?> node) {
-		if (processingLock.tryLock()) {
-			try {
-				processImpl(node);
-			} finally {
-				processingLock.unlock();
-			}
-		} else {
-			throw new ExperimentException(
-					text.exception().cannotProcessExperimentConcurrently(node.getRoot()));
-		}
-	}
+  private boolean processImpl(ExperimentNodeImpl<?, ?> node) {
+    boolean success = StreamUtilities
+        .reverse(node.getAncestorsImpl())
+        .filter(ExperimentNodeImpl::execute)
+        .count() > 0;
 
-	private boolean processImpl(ExperimentNodeImpl<?, ?> node) {
-		boolean success = StreamUtilities
-				.reverse(node.getAncestorsImpl())
-				.filter(ExperimentNodeImpl::execute)
-				.count() > 0;
+    if (success) {
+      processChildren(node);
+    }
 
-		if (success) {
-			processChildren(node);
-		}
+    return success;
+  }
 
-		return success;
-	}
+  private void processChildren(ExperimentNodeImpl<?, ?> node) {
+    node.getChildrenImpl().filter(ExperimentNodeImpl::execute).forEach(this::processChildren);
+  }
 
-	private void processChildren(ExperimentNodeImpl<?, ?> node) {
-		node.getChildrenImpl().filter(ExperimentNodeImpl::execute).forEach(this::processChildren);
-	}
+  protected Path saveExperiment(ExperimentImpl experiment) {
+    Path location = getWorkspaceDataPath().resolve(experiment.getID() + EXPERIMENT_EXTENSION);
 
-	protected Path saveExperiment(ExperimentImpl experiment) {
-		Path location = getWorkspaceDataPath().resolve(experiment.getID() + EXPERIMENT_EXTENSION);
+    try (OutputStream output = newOutputStream(location, CREATE, TRUNCATE_EXISTING, WRITE)) {
+      Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      Element element = document.createElement(EXPERIMENT_ELEMENT);
+      saveExperimentNode(element, experiment);
+      document.appendChild(element);
 
-		try (OutputStream output = newOutputStream(location, CREATE, TRUNCATE_EXISTING, WRITE)) {
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-			Element element = document.createElement(EXPERIMENT_ELEMENT);
-			saveExperimentNode(document, element, experiment);
-			document.appendChild(element);
+      Transformer tr = TransformerFactory.newInstance().newTransformer();
+      tr.setOutputProperty(OutputKeys.INDENT, "yes");
+      tr.setOutputProperty(OutputKeys.METHOD, "xml");
+      tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+      tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+      tr.transform(new DOMSource(document), new StreamResult(output));
 
-			Transformer tr = TransformerFactory.newInstance().newTransformer();
-			tr.setOutputProperty(OutputKeys.INDENT, "yes");
-			tr.setOutputProperty(OutputKeys.METHOD, "xml");
-			tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-			tr.transform(new DOMSource(document), new StreamResult(output));
+      return location;
+    } catch (Exception e) {
+      throw new ExperimentException(text.exception().cannotPersistState(experiment), e);
+    }
+  }
 
-			return location;
-		} catch (Exception e) {
-			throw new ExperimentException(text.exception().cannotPersistState(experiment), e);
-		}
-	}
+  private void saveExperimentNode(Element element, ExperimentNodeImpl<?, ?> node) {
+    element.setAttribute(TYPE_ATTRIBUTE, node.getType().getID());
+    element.setAttribute(ID_ATTRIBUTE, node.getID());
 
-	private void saveExperimentNode(Document document, Node parent, ExperimentNodeImpl<?, ?> node) {
-		Element element = document.createElement(NODE_ELEMENT);
+    node.persistedState().save(element);
 
-		element.setAttribute(TYPE_ATTRIBUTE, node.getType().getID());
-		element.setAttribute(ID_ATTRIBUTE, node.getID());
+    node.getChildrenImpl().forEach(
+        child -> saveExperimentNode(
+            (Element) element.appendChild(element.getOwnerDocument().createElement(NODE_ELEMENT)),
+            child));
+  }
 
-		savePersistedState(element, node.persistedState());
+  protected ExperimentImpl loadExperiment(String name) {
+    return loadExperiment(dataRoot.resolve(name + EXPERIMENT_EXTENSION));
+  }
 
-		node.getChildrenImpl().forEach(child -> saveExperimentNode(document, element, child));
+  private ExperimentImpl loadExperiment(Path path) {
+    try (InputStream input = newInputStream(path, READ)) {
+      Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input);
+      XPath xPath = XPathFactory.newInstance().newXPath();
 
-		parent.appendChild(element);
-	}
+      Element root = document.getDocumentElement();
+      ExperimentImpl experiment = addExperiment(
+          root.getAttribute(ID_ATTRIBUTE),
+          PersistedStateImpl.load(root, xPath));
 
-	private void savePersistedState(Element parent, PersistedState persistedState) {
-		Element configuration = parent.getOwnerDocument().createElement(CONFIGURATION_ELEMENT);
-		parent.appendChild(configuration);
-		persistedState.getStrings().forEach(key -> {
-			configuration.setAttribute(key, persistedState.getString(key));
-		});
-	}
+      loadExperimentNodes(experiment, root, xPath);
 
-	protected ExperimentImpl loadExperiment(String name) {
-		return loadExperiment(dataRoot.resolve(name + EXPERIMENT_EXTENSION));
-	}
+      return experiment;
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new ExperimentException(text.exception().cannotLoadExperiment(path), e);
+    }
+  }
 
-	private ExperimentImpl loadExperiment(Path path) {
-		try (InputStream input = newInputStream(path, READ)) {
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input);
+  private void loadExperimentNodes(
+      ExperimentNodeImpl<?, ?> parentNode,
+      Element parentElement,
+      XPath xPath) throws XPathExpressionException {
+    NodeList nodes = (NodeList) xPath.evaluate("/" + NODE_ELEMENT, parentElement, NODESET);
+    for (int i = 0; i < nodes.getLength(); i++) {
+      loadExperimentNode(parentNode, (Element) nodes.item(i), xPath);
+    }
+  }
 
-			Element root = document.getDocumentElement();
-			String id = root.getAttribute(ID_ATTRIBUTE);
-			PersistedStateImpl persistedState = loadPersistedState(root);
-			ExperimentImpl experiment = addExperiment(id, persistedState);
+  private void loadExperimentNode(ExperimentNodeImpl<?, ?> parentNode, Element element, XPath xPath)
+      throws XPathExpressionException {
+    String experimentID = element.getAttribute(ID_ATTRIBUTE);
+    String experimentTypeID = element.getAttribute(TYPE_ATTRIBUTE);
 
-			return experiment;
-		} catch (Exception e) {
-			throw new ExperimentException(text.exception().cannotLoadExperiment(path), e);
-		}
-	}
+    ExperimentType<?> experimentType = parentNode
+        .getAvailableChildExperimentTypes()
+        .filter(e -> e.getID().equals(experimentTypeID))
+        .findAny()
+        .orElseGet(() -> new MissingExperimentTypeImpl(this, experimentTypeID));
 
-	private PersistedStateImpl loadPersistedState(Element parent) {
-		Element configuration = (Element) parent.getElementsByTagName(CONFIGURATION_ELEMENT).item(0);
-		PersistedStateImpl persistedState = new PersistedStateImpl();
-		NamedNodeMap attributes = configuration.getAttributes();
-		for (int i = 0; i < attributes.getLength(); i++) {
-			Attr attribute = (Attr) attributes.item(i);
-			persistedState.putString(attribute.getName(), attribute.getValue());
-		}
-		return persistedState;
-	}
+    ExperimentNodeImpl<?, ?> node = parentNode
+        .loadChild(experimentType, experimentID, PersistedStateImpl.load(element, xPath));
+
+    loadExperimentNodes(node, element, xPath);
+  }
 }

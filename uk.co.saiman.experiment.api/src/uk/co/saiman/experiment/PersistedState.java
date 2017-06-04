@@ -1,15 +1,16 @@
 package uk.co.saiman.experiment;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface PersistedState {
-	Stream<String> getStrings();
+  Stream<String> getStrings();
 
-	void removeKey(String key);
+  Optional<String> removeString(String key);
 
-	void clear();
+  void clear();
 
-	String getString(String key);
+  Optional<String> getString(String key);
 
-	String putString(String key, String value);
+  Optional<String> putString(String key, String value);
 }

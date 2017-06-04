@@ -89,11 +89,11 @@ public class PeriodicTableService {
 				.newInstance()
 				.newDocumentBuilder()
 				.parse(getClass().getResourceAsStream("PeriodicTable.xml"));
-		XPath xpath = XPathFactory.newInstance().newXPath();
+		XPath xPath = XPathFactory.newInstance().newXPath();
 
 		List<Element> elements = new ArrayList<>();
 
-		NodeList elementNodes = (NodeList) xpath
+		NodeList elementNodes = (NodeList) xPath
 				.evaluate("/" + PERIODIC_TABLE + "/" + ELEMENT, document, XPathConstants.NODESET);
 
 		for (int i = 0; i < elementNodes.getLength(); i++) {
@@ -105,7 +105,7 @@ public class PeriodicTableService {
 					.withAtomicNumber(getInt(elementNode, ATOMIC_NUMBER))
 					.withGroup(Group.valueOf(getString(elementNode, GROUP)));
 
-			NodeList isotopeNodes = (NodeList) xpath.evaluate(ISOTOPE, elementNode, XPathConstants.NODESET);
+			NodeList isotopeNodes = (NodeList) xPath.evaluate(ISOTOPE, elementNode, XPathConstants.NODESET);
 
 			for (int j = 0; j < isotopeNodes.getLength(); j++) {
 				Node isotopeNode = isotopeNodes.item(j);

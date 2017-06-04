@@ -30,8 +30,13 @@ package uk.co.saiman.experiment;
 import java.lang.reflect.Type;
 
 public interface ExperimentRoot extends ExperimentType<ExperimentConfiguration> {
-	@Override
-	default Type getThisType() {
-		return ExperimentRoot.class;
-	}
+  @Override
+  default Type getThisType() {
+    return ExperimentRoot.class;
+  }
+
+  @Override
+  default String getID() {
+    return ExperimentRoot.class.getName();
+  }
 }

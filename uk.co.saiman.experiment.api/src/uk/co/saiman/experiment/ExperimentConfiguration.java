@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.Optional;
+
 /**
  * General configuration interface for experiment root nodes, as created via
  * {@link ExperimentWorkspace#addExperiment(String)}
@@ -34,32 +36,38 @@ package uk.co.saiman.experiment;
  * @author Elias N Vasylenko
  */
 public interface ExperimentConfiguration {
-	/**
-	 * @return the name of the experiment
-	 */
-	String getName();
+  /**
+   * @return the name of the experiment
+   */
+  String getName();
 
-	/**
-	 * @param name
-	 *          the new name for the experiment
-	 */
-	void setName(String name);
+  /**
+   * @param name
+   *          the new name for the experiment
+   */
+  void setName(String name);
 
-	/**
-	 * @return the notes of the experiment
-	 */
-	String getNotes();
+  /**
+   * @return the notes of the experiment
+   */
+  Optional<String> getNotes();
 
-	/**
-	 * @param notes
-	 *          the new notes for the experiment
-	 */
-	void setNotes(String notes);
+  /**
+   * @param notes
+   *          the new notes for the experiment
+   */
+  void setNotes(String notes);
 
-	public static boolean isNameValid(String name) {
-		final String ALPHANUMERIC = "[a-zA-Z0-9]+";
-		final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
+  /**
+   * Remove the notes for the experiment
+   */
+  void clearNotes();
 
-		return name != null && name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
-	}
+  public static boolean isNameValid(String name) {
+    final String ALPHANUMERIC = "[a-zA-Z0-9]+";
+    final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
+
+    return name != null
+        && name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
+  }
 }

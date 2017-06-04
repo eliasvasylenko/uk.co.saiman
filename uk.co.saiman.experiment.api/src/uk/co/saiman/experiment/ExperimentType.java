@@ -68,7 +68,7 @@ public interface ExperimentType<S> extends Reified {
 	 * @return a new state object suitable for an instance of
 	 *         {@link ExperimentNode} over this type.
 	 */
-	S createState(ExperimentConfigurationContext<S> forNode);
+	S createState(ExperimentConfigurationContext<S> context);
 
 	/**
 	 * Execute this experiment type for a given node.
