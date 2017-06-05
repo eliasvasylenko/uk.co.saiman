@@ -63,7 +63,7 @@ public interface ExperimentType<S> extends Reified {
 	String getName();
 
 	/**
-	 * @param forNode
+	 * @param context
 	 *          the node which the configuration is being requested for
 	 * @return a new state object suitable for an instance of
 	 *         {@link ExperimentNode} over this type.
