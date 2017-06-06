@@ -14,29 +14,35 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.saint.SaintComms;
+import uk.co.strangeskies.text.properties.PropertyLoader;
 
 @Component
 public class SaintCommsRESTManager {
-	private final Map<SaintComms, ServiceRegistration<CommsREST>> restServices = new HashMap<>();
-	private BundleContext context;
+  private final Map<SaintComms, ServiceRegistration<CommsREST>> restServices = new HashMap<>();
+  private BundleContext context;
 
-	@Activate
-	void activate(BundleContext context) {
-		this.context = context;
-	}
+  @Reference
+  PropertyLoader properties;
 
-	@Reference(policy = DYNAMIC, policyOption = GREEDY)
-	void addComms(SaintComms comms) {
-		CommsREST restService = new SaintCommsREST(comms, null);
+  @Activate
+  void activate(BundleContext context) {
+    this.context = context;
+  }
 
-		ServiceRegistration<CommsREST> registration = context
-				.registerService(CommsREST.class, restService, null);
+  @Reference(policy = DYNAMIC, policyOption = GREEDY)
+  void addComms(SaintComms comms) {
+    CommsREST restService = new SaintCommsREST(
+        comms,
+        properties.getProperties(SaintProperties.class));
 
-		restServices.put(comms, registration);
-	}
+    ServiceRegistration<CommsREST> registration = context
+        .registerService(CommsREST.class, restService, null);
 
-	void removeComms(SaintComms comms) {
-		ServiceRegistration<CommsREST> restService = restServices.remove(comms);
-		restService.unregister();
-	}
+    restServices.put(comms, registration);
+  }
+
+  void removeComms(SaintComms comms) {
+    ServiceRegistration<CommsREST> restService = restServices.remove(comms);
+    restService.unregister();
+  }
 }
