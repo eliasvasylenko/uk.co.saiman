@@ -25,31 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms;
-
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-public interface InOutBlock<T> extends InBlock<T>, OutBlock<T> {
-	static <T> InOutBlock<T> inOutBlock(
-			Consumer<T> request,
-			Supplier<T> getRequested,
-			Supplier<T> getActual) {
-		return new InOutBlock<T>() {
-			@Override
-			public void request(T data) {
-				request.accept(data);
-			}
-
-			@Override
-			public T getRequested() {
-				return getRequested.get();
-			}
-
-			@Override
-			public T getActual() {
-				return getActual.get();
-			}
-		};
-	}
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.comms.rest;

@@ -25,17 +25,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms;
+package uk.co.saiman.comms.saint;
 
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public interface CommsRESTItem {
-	Map<String, Object> invokeInputAction();
+public interface InOutBlock<T> extends InBlock<T>, OutBlock<T> {
+	static <T> InOutBlock<T> inOutBlock(
+			Consumer<T> request,
+			Supplier<T> getRequested,
+			Supplier<T> getActual) {
+		return new InOutBlock<T>() {
+			@Override
+			public void request(T data) {
+				request.accept(data);
+			}
 
-	Map<String, Object> getOutputObject();
+			@Override
+			public T getRequested() {
+				return getRequested.get();
+			}
 
-	Stream<String> getActions();
-
-	void invokeAction(String action);
+			@Override
+			public T getActual() {
+				return getActual.get();
+			}
+		};
+	}
 }

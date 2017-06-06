@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.comms.saint.
+ * This file is part of uk.co.saiman.comms.
  *
- * uk.co.saiman.comms.saint is free software: you can redistribute it and/or modify
+ * uk.co.saiman.comms is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.comms.saint is distributed in the hope that it will be useful,
+ * uk.co.saiman.comms is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,22 +27,12 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Comms;
+import java.util.function.Supplier;
 
-public interface SaintComms extends Comms<SaintCommand> {
-	/**
-	 * The id of the SAINT comms interface.
-	 */
-	String ID = "SAINT Comms";
-	/**
-	 * The message size in bytes for the SAINT comms interface, for both sending
-	 * and receiving messages.
-	 */
-	int MESSAGE_SIZE = 4;
+public interface InBlock<T> {
+	T getActual();
 
-	InOutBlock<LEDStatus> led();
-
-	InOutBlock<VacuumControl> vacuum();
-
-	OutBlock<HighVoltageStatus> highVoltage();
+	static <T> InBlock<T> inBlock(Supplier<T> getActual) {
+		return getActual::get;
+	}
 }

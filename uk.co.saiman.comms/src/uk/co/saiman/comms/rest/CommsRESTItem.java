@@ -25,14 +25,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms;
+package uk.co.saiman.comms.rest;
 
-import java.util.function.Supplier;
+import java.util.Map;
+import java.util.stream.Stream;
 
-public interface InBlock<T> {
-	T getActual();
+public interface CommsRESTItem {
+	boolean isPollable();
 
-	static <T> InBlock<T> inBlock(Supplier<T> getActual) {
-		return getActual::get;
-	}
+	Stream<String> getActions();
+
+	String getInputAction();
+
+	Map<String, Object> getInputData();
+
+	String getRefreshOutputAction();
+
+	String getOutputAction();
+
+	Map<String, Object> getOutputData();
+
+	void invokeAction(String action);
 }

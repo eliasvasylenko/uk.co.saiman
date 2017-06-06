@@ -25,12 +25,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms;
+package uk.co.saiman.comms.saint;
 
-import java.util.stream.Stream;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-public interface CommsREST {
-	Stream<String> getItems();
+public interface OutBlock<T> {
+	T getRequested();
 
-	CommsRESTItem getItem(String item);
+	void request(T data);
+
+	default void modifyRequest(Function<T, T> data) {
+		request(data.apply(getRequested()));
+	}
+
+	static <T> OutBlock<T> outBlock(Consumer<T> request, Supplier<T> getRequested) {
+		return new OutBlock<T>() {
+			@Override
+			public void request(T data) {
+				request.accept(data);
+			}
+
+			@Override
+			public T getRequested() {
+				return getRequested.get();
+			}
+
+		};
+	}
 }

@@ -30,11 +30,10 @@ Import-Package: \
 
 Private-Package: \
 	uk.co.saiman.comms.impl,\
-	uk.co.saiman.comms.serial.impl,\
 \
 	com.fazecast.jSerialComm
 
 Export-Package: \
 	uk.co.saiman.comms,\
-	uk.co.saiman.comms.serial,\
-	uk.co.saiman.comms.rest
+	uk.co.saiman.comms.rest,\
+	uk.co.saiman.comms.serial
