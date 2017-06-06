@@ -65,7 +65,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentRoot, Experimen
 	protected ExperimentImpl(
 			ExperimentRoot type,
 			String id,
-			ExperimentWorkspaceImpl workspace,
+			WorkspaceImpl workspace,
 			PersistedStateImpl persistedState) {
 		super(type, id, workspace, persistedState);
 	}
@@ -93,11 +93,11 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentRoot, Experimen
 		}
 	}
 
-	protected static ExperimentImpl load(ExperimentWorkspaceImpl workspace, String name) {
+	protected static ExperimentImpl load(WorkspaceImpl workspace, String name) {
 		return load(workspace, workspace.getWorkspaceDataPath().resolve(name + EXPERIMENT_EXTENSION));
 	}
 
-	static ExperimentImpl load(ExperimentWorkspaceImpl workspace, Path path) {
+	static ExperimentImpl load(WorkspaceImpl workspace, Path path) {
 		try (InputStream input = newInputStream(path, READ)) {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input);
 			XPath xPath = XPathFactory.newInstance().newXPath();

@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import uk.co.saiman.experiment.ExperimentResultType;
+import uk.co.saiman.experiment.ResultType;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
-public class FileSpectrumExperimentResultType<T> implements ExperimentResultType<AccumulatingFileSpectrum> {
+public class FileSpectrumExperimentResultType<T> implements ResultType<AccumulatingFileSpectrum> {
 	private final SpectrumExperimentType<?> type;
 
 	FileSpectrumExperimentResultType(SpectrumExperimentType<?> type) {

@@ -28,12 +28,12 @@
 package uk.co.saiman.experiment.msapex;
 
 import javafx.scene.Node;
-import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.Result;
 import uk.co.strangeskies.reflection.token.TypeToken;
 
 /**
  * A result editor contribution is injected by an eclipse context. The
- * {@link ExperimentResult} associated with the contribution is available in the
+ * {@link Result} associated with the contribution is available in the
  * context and so can also be injected.
  * 
  * @author Elias N Vasylenko

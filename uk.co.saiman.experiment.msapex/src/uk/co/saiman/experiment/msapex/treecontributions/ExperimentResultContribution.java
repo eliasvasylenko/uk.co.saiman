@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.Result;
 import uk.co.strangeskies.eclipse.EclipseTreeContribution;
 import uk.co.strangeskies.eclipse.Localize;
 import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
@@ -48,9 +48,9 @@ import uk.co.strangeskies.fx.TreeTextContribution;
  * @author Elias N Vasylenko
  */
 @Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
-public class ExperimentResultContribution implements EclipseTreeContribution<ExperimentResult<?>>,
-		TreeTextContribution<ExperimentResult<?>>,
-		PseudoClassTreeCellContribution<ExperimentResult<?>> {
+public class ExperimentResultContribution implements EclipseTreeContribution<Result<?>>,
+		TreeTextContribution<Result<?>>,
+		PseudoClassTreeCellContribution<Result<?>> {
 	private static final String RESULT_PRESENT = "Present";
 
 	@Inject
@@ -58,12 +58,12 @@ public class ExperimentResultContribution implements EclipseTreeContribution<Exp
 	ExperimentProperties text;
 
 	@Override
-	public <U extends ExperimentResult<?>> String getText(TreeItemData<U> data) {
+	public <U extends Result<?>> String getText(TreeItemData<U> data) {
 		return data.data().getResultType().getName();
 	}
 
 	@Override
-	public <U extends ExperimentResult<?>> String getSupplementalText(TreeItemData<U> data) {
+	public <U extends Result<?>> String getSupplementalText(TreeItemData<U> data) {
 		return "[" + data
 				.data()
 				.getData()
@@ -73,7 +73,7 @@ public class ExperimentResultContribution implements EclipseTreeContribution<Exp
 	}
 
 	@Override
-	public <U extends ExperimentResult<?>> String getPseudoClassName(TreeItemData<U> data) {
+	public <U extends Result<?>> String getPseudoClassName(TreeItemData<U> data) {
 		return PseudoClassTreeCellContribution.super.getPseudoClassName(data)
 				+ (data.data().getData().isPresent() ? RESULT_PRESENT : "");
 	}

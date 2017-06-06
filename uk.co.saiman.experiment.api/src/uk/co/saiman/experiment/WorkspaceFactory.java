@@ -28,32 +28,21 @@
 package uk.co.saiman.experiment;
 
 import java.nio.file.Path;
-import java.util.Optional;
 
-import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypeArgument;
-import uk.co.strangeskies.reflection.token.TypeToken;
-
-public interface ExperimentResult<T>
-		extends Observable<Optional<T>>, ReifiedToken<ExperimentResult<T>> {
-	ExperimentNode<?, ?> getExperimentNode();
-
+/**
+ * A factory interface for opening an experiment workspace at a given
+ * {@link Path location}.
+ * 
+ * @author Elias N Vasylenko
+ */
+public interface WorkspaceFactory {
 	/**
-	 * Experiment data root directories are defined hierarchically from the
-	 * {@link ExperimentWorkspace#getWorkspaceDataPath() workspace path}.
+	 * Create an {@link Workspace workspace} instance over the given
+	 * location.
 	 * 
-	 * @return the data root of the experiment
+	 * @param location
+	 *          the location of the workspace data
+	 * @return an experiment workspace interface
 	 */
-	Path getResultDataPath();
-
-	ExperimentResultType<T> getResultType();
-
-	Optional<T> getData();
-
-	@Override
-	default TypeToken<ExperimentResult<T>> getThisTypeToken() {
-		return new TypeToken<ExperimentResult<T>>() {}
-				.withTypeArguments(new TypeArgument<T>(getResultType().getDataType()) {});
-	}
+	Workspace openWorkspace(Path location);
 }

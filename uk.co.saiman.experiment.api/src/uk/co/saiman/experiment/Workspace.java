@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 /**
- * The concept of an experiment in a {@link ExperimentWorkspace workspace} is
+ * The concept of an experiment in a {@link Workspace workspace} is
  * represented by a hierarchy of nodes. The workspace provides an interface for
  * managing those experiments.
  * <p>
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
  * 
  * @author Elias N Vasylenko
  */
-public interface ExperimentWorkspace {
+public interface Workspace {
 	/**
 	 * The root path for the workspace data persistence.
 	 * 

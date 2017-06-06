@@ -54,7 +54,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.msapex.ResultEditorContribution;
 import uk.co.saiman.experiment.msapex.ResultEditorPart;
 import uk.co.strangeskies.eclipse.ObservableService;
@@ -72,13 +72,13 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
 	@FXML
 	private TabPane tabPane;
 
-	private final ExperimentResult<T> data;
+	private final Result<T> data;
 	private final List<ResultEditorContribution<? super T>> contributions;
 
 	@SuppressWarnings("unchecked")
 	@Inject
 	public ResultEditorPartImpl(
-			ExperimentResult<T> data,
+			Result<T> data,
 			@ObservableService(target = PROTOTYPE_SERVICE) ObservableList<ResultEditorContribution<?>> editorContributions) {
 		this.data = data;
 		this.contributions = editorContributions
@@ -141,7 +141,7 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
 	}
 
 	@Override
-	public ExperimentResult<T> getData() {
+	public Result<T> getData() {
 		return data;
 	}
 

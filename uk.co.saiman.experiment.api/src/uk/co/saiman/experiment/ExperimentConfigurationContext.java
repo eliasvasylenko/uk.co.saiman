@@ -48,7 +48,7 @@ public interface ExperimentConfigurationContext<T> {
 	 */
 	ExperimentNode<?, T> node();
 
-	ExperimentResultManager results();
+	ResultManager results();
 
 	/**
 	 * This map represents the state of the experiment node associated with this

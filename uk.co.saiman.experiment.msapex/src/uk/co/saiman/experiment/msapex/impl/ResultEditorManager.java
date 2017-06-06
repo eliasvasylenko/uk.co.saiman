@@ -45,7 +45,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.osgi.service.event.Event;
 
-import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.msapex.ResultEditorPart;
 
 @Creatable
@@ -56,15 +56,15 @@ public class ResultEditorManager {
 	@Inject
 	public IEventBroker eventBroker;
 
-	private Map<MPart, ExperimentResult<?>> partResults;
-	private Map<ExperimentResult<?>, ResultEditorPart<?>> editorParts;
+	private Map<MPart, Result<?>> partResults;
+	private Map<Result<?>, ResultEditorPart<?>> editorParts;
 
 	public ResultEditorManager() {
 		partResults = new HashMap<>();
 		editorParts = new HashMap<>();
 	}
 
-	public synchronized <T> ResultEditorPart<T> openEditor(ExperimentResult<T> result) {
+	public synchronized <T> ResultEditorPart<T> openEditor(Result<T> result) {
 		@SuppressWarnings("unchecked")
 		ResultEditorPart<T> editorPart = (ResultEditorPart<T>) editorParts
 				.computeIfAbsent(result, r -> createEditor(result));
@@ -84,15 +84,15 @@ public class ResultEditorManager {
 			IEclipseContext context = (IEclipseContext) value;
 			MPart part = context.get(MPart.class);
 
-			ExperimentResult<?> result = partResults.get(part);
+			Result<?> result = partResults.get(part);
 			if (result != null) {
-				context.set(ExperimentResult.class, result);
+				context.set(Result.class, result);
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> ResultEditorPart<T> createEditor(ExperimentResult<T> data) {
+	protected <T> ResultEditorPart<T> createEditor(Result<T> data) {
 		MPart editorPart = partService.createPart(ResultEditorPartImpl.PART_ID);
 		partResults.put(editorPart, data);
 		partService.showPart(editorPart, PartState.ACTIVATE);

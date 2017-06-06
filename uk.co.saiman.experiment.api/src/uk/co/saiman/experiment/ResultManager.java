@@ -29,20 +29,31 @@ package uk.co.saiman.experiment;
 
 import java.nio.file.Path;
 
-/**
- * A factory interface for opening an experiment workspace at a given
- * {@link Path location}.
- * 
- * @author Elias N Vasylenko
- */
-public interface ExperimentWorkspaceFactory {
+public interface ResultManager {
 	/**
-	 * Create an {@link ExperimentWorkspace workspace} instance over the given
-	 * location.
+	 * Experiment data root directories are defined hierarchically from the
+	 * {@link Workspace#getWorkspaceDataPath() workspace path}.
 	 * 
-	 * @param location
-	 *          the location of the workspace data
-	 * @return an experiment workspace interface
+	 * @return the data root of the experiment
 	 */
-	ExperimentWorkspace openWorkspace(Path location);
+	Path dataPath();
+
+	/**
+	 * @param resultType
+	 *          the type of result
+	 * @return the result object now registered to the executing node
+	 */
+	public <U> Result<U> get(ResultType<U> resultType);
+
+	/**
+	 * This method provides a target for the submission of results during
+	 * execution of an experiment node.
+	 * 
+	 * @param resultType
+	 *          the type of result
+	 * @param resultData
+	 *          the result
+	 * @return the result object now registered to the executing node
+	 */
+	public <U> Result<U> set(ResultType<U> resultType, U resultData);
 }

@@ -46,7 +46,7 @@ import uk.co.strangeskies.reflection.token.TypeToken;
  * associated with an implementation of {@link ExperimentType}.
  * <p>
  * Instances of {@link ExperimentNode} are constructed internally by a
- * {@link ExperimentWorkspace workspace} according to their
+ * {@link Workspace workspace} according to their
  * {@link ExperimentType type}.
  * 
  * @author Elias N Vasylenko
@@ -67,7 +67,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S>
 	/**
 	 * @return the experiment workspace containing this experiment
 	 */
-	ExperimentWorkspace getExperimentWorkspace();
+	Workspace getExperimentWorkspace();
 
 	/**
 	 * @return the current state object of the experiment node
@@ -208,7 +208,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S>
 	/**
 	 * @return all results associated with this node
 	 */
-	Stream<ExperimentResult<?>> getResults();
+	Stream<Result<?>> getResults();
 
 	/**
 	 * Clear all the results associated with this node. Take care, as this will
@@ -221,5 +221,5 @@ public interface ExperimentNode<T extends ExperimentType<S>, S>
 	 *          the result type to set the result data for
 	 * @return the result associated with this node for the given result type
 	 */
-	<U> ExperimentResult<U> getResult(ExperimentResultType<U> resultType);
+	<U> Result<U> getResult(ResultType<U> resultType);
 }

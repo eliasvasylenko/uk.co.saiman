@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.experiment.ExperimentResultType;
+import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.strangeskies.reflection.token.TypeToken;
@@ -51,7 +51,7 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
 public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfiguration>
 		implements ExperimentType<T> {
 	private ChemicalMapProperties properties;
-	private final ExperimentResultType<ChemicalMap> chemicalMapResult;
+	private final ResultType<ChemicalMap> chemicalMapResult;
 
 	public ChemicalMapExperimentType() {
 		this(PropertyLoader.getDefaultProperties(ChemicalMapProperties.class));
@@ -59,7 +59,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 
 	public ChemicalMapExperimentType(ChemicalMapProperties properties) {
 		this.properties = properties;
-		this.chemicalMapResult = new ExperimentResultType<ChemicalMap>() {
+		this.chemicalMapResult = new ResultType<ChemicalMap>() {
 			@Override
 			public String getName() {
 				return properties.chemicalMapResultName().toString();
@@ -90,7 +90,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 		return properties.chemicalMapExperimentName().toString();
 	}
 
-	public ExperimentResultType<ChemicalMap> getChemicalMapResult() {
+	public ResultType<ChemicalMap> getChemicalMapResult() {
 		return chemicalMapResult;
 	}
 
@@ -128,7 +128,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 	}
 
 	@Override
-	public Stream<ExperimentResultType<?>> getResultTypes() {
+	public Stream<ResultType<?>> getResultTypes() {
 		return Stream.of(chemicalMapResult);
 	}
 }

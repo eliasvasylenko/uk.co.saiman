@@ -49,8 +49,8 @@ import aQute.bnd.annotation.headers.RequireCapability;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.experiment.ExperimentWorkspace;
-import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
+import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceFactory;
 import uk.co.saiman.experiment.msapex.ExperimentPart;
 import uk.co.strangeskies.eclipse.EclipseModularTreeController;
 
@@ -71,7 +71,7 @@ public class ExperimentPartImpl implements ExperimentPart {
 
 	@FXML
 	private EclipseModularTreeController modularTreeController;
-	private ExperimentWorkspace workspace;
+	private Workspace workspace;
 
 	@Inject
 	private IAdapterManager adapterManager;
@@ -82,7 +82,7 @@ public class ExperimentPartImpl implements ExperimentPart {
 			BorderPane container,
 			@LocalInstance FXMLLoader loader,
 			@Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation,
-			ExperimentWorkspaceFactory workspaceFactory) {
+			WorkspaceFactory workspaceFactory) {
 		container.setCenter(buildWith(loader).controller(ExperimentPart.class, this).loadRoot());
 
 		Path workspaceLocation;
@@ -94,7 +94,7 @@ public class ExperimentPartImpl implements ExperimentPart {
 
 		workspace = workspaceFactory.openWorkspace(workspaceLocation);
 
-		modularTreeController.getTreeView().setRootData(typedObject(ExperimentWorkspace.class, workspace));
+		modularTreeController.getTreeView().setRootData(typedObject(Workspace.class, workspace));
 
 		adapterFactory = new ExperimentNodeAdapterFactory(adapterManager, workspace);
 	}
@@ -105,7 +105,7 @@ public class ExperimentPartImpl implements ExperimentPart {
 	}
 
 	@Override
-	public ExperimentWorkspace getExperimentWorkspace() {
+	public Workspace getExperimentWorkspace() {
 		return workspace;
 	}
 

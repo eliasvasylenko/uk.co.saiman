@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.saiman.experiment.Workspace;
 import uk.co.strangeskies.eclipse.EclipseModularTreeController;
 
 /**
@@ -54,7 +54,7 @@ public interface ExperimentPart {
 	/**
 	 * @return the current experiment workspace
 	 */
-	ExperimentWorkspace getExperimentWorkspace();
+	Workspace getExperimentWorkspace();
 
 	/**
 	 * @return the controller for the experiment tree UI item

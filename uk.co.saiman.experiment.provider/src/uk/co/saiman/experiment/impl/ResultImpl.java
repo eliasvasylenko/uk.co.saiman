@@ -31,17 +31,17 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentResult;
-import uk.co.saiman.experiment.ExperimentResultType;
+import uk.co.saiman.experiment.Result;
+import uk.co.saiman.experiment.ResultType;
 import uk.co.strangeskies.observable.ObservableImpl;
 
-public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>>
-		implements ExperimentResult<T> {
+public class ResultImpl<T> extends ObservableImpl<Optional<T>>
+		implements Result<T> {
 	private final ExperimentNodeImpl<?, ?> node;
-	private final ExperimentResultType<T> resultType;
+	private final ResultType<T> resultType;
 	private T data;
 
-	public ExperimentResultImpl(ExperimentNodeImpl<?, ?> node, ExperimentResultType<T> type) {
+	public ResultImpl(ExperimentNodeImpl<?, ?> node, ResultType<T> type) {
 		this.node = node;
 		this.resultType = type;
 	}
@@ -57,7 +57,7 @@ public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>>
 	}
 
 	@Override
-	public ExperimentResultType<T> getResultType() {
+	public ResultType<T> getResultType() {
 		return resultType;
 	}
 
@@ -72,7 +72,7 @@ public class ExperimentResultImpl<T> extends ObservableImpl<Optional<T>>
 	}
 
 	@Override
-	public ExperimentResult<T> copy() {
+	public Result<T> copy() {
 		return this;
 	}
 }

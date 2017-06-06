@@ -42,7 +42,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import uk.co.saiman.data.msapex.ContinuousFunctionChartController;
-import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.msapex.ResultEditorContribution;
 import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
@@ -60,7 +60,7 @@ public class SpectrumGraphEditorContribution implements ResultEditorContribution
 	MDirtyable dirty;
 
 	@Inject
-	ExperimentResult<Spectrum> result;
+	Result<Spectrum> result;
 
 	@FXML
 	private ContinuousFunctionChartController spectrumGraphController;

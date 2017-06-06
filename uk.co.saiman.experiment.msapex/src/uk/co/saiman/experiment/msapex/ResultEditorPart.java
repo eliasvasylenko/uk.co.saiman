@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-import uk.co.saiman.experiment.ExperimentResult;
+import uk.co.saiman.experiment.Result;
 
 public interface ResultEditorPart<T> {
 	String EDITOR_DATA = "uk.co.saiman.experiment.msapex.data.editor";
@@ -39,7 +39,7 @@ public interface ResultEditorPart<T> {
 
 	void save();
 
-	ExperimentResult<T> getData();
+	Result<T> getData();
 
 	MPart getPart();
 

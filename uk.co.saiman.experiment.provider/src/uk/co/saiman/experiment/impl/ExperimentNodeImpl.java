@@ -53,11 +53,11 @@ import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentResult;
-import uk.co.saiman.experiment.ExperimentResultManager;
-import uk.co.saiman.experiment.ExperimentResultType;
+import uk.co.saiman.experiment.Result;
+import uk.co.saiman.experiment.ResultManager;
+import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.PersistedState;
 import uk.co.strangeskies.log.Log.Level;
 import uk.co.strangeskies.observable.ObservableProperty;
@@ -77,7 +77,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private static final String TYPE_ATTRIBUTE = "type";
 	private static final String ID_ATTRIBUTE = "id";
 
-	private final ExperimentWorkspaceImpl workspace;
+	private final WorkspaceImpl workspace;
 	private final T type;
 	private final ExperimentNodeImpl<?, ?> parent;
 
@@ -86,7 +86,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private final ObservableProperty<ExperimentLifecycleState, ExperimentLifecycleState> lifecycleState;
 	private final S state;
 
-	private HashMap<ExperimentResultType<?>, ExperimentResultImpl<?>> results;
+	private HashMap<ResultType<?>, ResultImpl<?>> results;
 
 	private String id;
 	private PersistedStateImpl persistedState;
@@ -120,7 +120,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	protected ExperimentNodeImpl(
 			T type,
 			String id,
-			ExperimentWorkspaceImpl workspace,
+			WorkspaceImpl workspace,
 			PersistedStateImpl persistedState) {
 		this(type, id, workspace, null, persistedState);
 	}
@@ -128,7 +128,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private ExperimentNodeImpl(
 			T type,
 			String id,
-			ExperimentWorkspaceImpl workspace,
+			WorkspaceImpl workspace,
 			ExperimentNodeImpl<?, ?> parent,
 			PersistedStateImpl persistedState) {
 		this.type = type;
@@ -138,7 +138,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		setID(id);
 
 		this.results = new HashMap<>();
-		getType().getResultTypes().forEach(r -> results.put(r, new ExperimentResultImpl<>(this, r)));
+		getType().getResultTypes().forEach(r -> results.put(r, new ResultImpl<>(this, r)));
 
 		this.lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
 		this.persistedState = persistedState;
@@ -169,7 +169,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	@Override
-	public ExperimentWorkspace getExperimentWorkspace() {
+	public Workspace getExperimentWorkspace() {
 		return workspace;
 	}
 
@@ -312,15 +312,15 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		}
 	}
 
-	private ExperimentResultManager createResultManager() {
-		return new ExperimentResultManager() {
+	private ResultManager createResultManager() {
+		return new ResultManager() {
 			@Override
-			public <U> ExperimentResult<U> get(ExperimentResultType<U> resultType) {
+			public <U> Result<U> get(ResultType<U> resultType) {
 				return ExperimentNodeImpl.this.getResult(resultType);
 			}
 
 			@Override
-			public <U> ExperimentResult<U> set(ExperimentResultType<U> resultType, U resultData) {
+			public <U> Result<U> set(ResultType<U> resultType, U resultData) {
 				return ExperimentNodeImpl.this.setResult(resultType, resultData);
 			}
 
@@ -334,7 +334,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	private ExperimentExecutionContext<S> createExecutionContext() {
 		return new ExperimentExecutionContext<S>() {
 			@Override
-			public ExperimentResultManager results() {
+			public ResultManager results() {
 				return createResultManager();
 			}
 
@@ -353,7 +353,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			}
 
 			@Override
-			public ExperimentResultManager results() {
+			public ResultManager results() {
 				return createResultManager();
 			}
 
@@ -406,8 +406,8 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 	}
 
 	@Override
-	public Stream<ExperimentResult<?>> getResults() {
-		return results.values().stream().map(t -> (ExperimentResult<?>) t);
+	public Stream<Result<?>> getResults() {
+		return results.values().stream().map(t -> (Result<?>) t);
 	}
 
 	@Override
@@ -415,18 +415,18 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		results.values().forEach(r -> r.setData(null));
 	}
 
-	protected <U> ExperimentResultImpl<U> setResult(
-			ExperimentResultType<U> resultType,
+	protected <U> ResultImpl<U> setResult(
+			ResultType<U> resultType,
 			U resultData) {
-		ExperimentResultImpl<U> result = getResult(resultType);
+		ResultImpl<U> result = getResult(resultType);
 		result.setData(resultData);
 		return result;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <U> ExperimentResultImpl<U> getResult(ExperimentResultType<U> resultType) {
-		return (ExperimentResultImpl<U>) results.get(resultType);
+	public <U> ResultImpl<U> getResult(ResultType<U> resultType) {
+		return (ResultImpl<U>) results.get(resultType);
 	}
 
 	@Override

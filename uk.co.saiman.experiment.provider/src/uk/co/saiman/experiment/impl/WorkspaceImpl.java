@@ -50,17 +50,17 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.saiman.experiment.Workspace;
 import uk.co.strangeskies.collection.stream.StreamUtilities;
 import uk.co.strangeskies.log.Log;
 
 /**
- * Reference implementation of {@link ExperimentWorkspace}.
+ * Reference implementation of {@link Workspace}.
  * 
  * @author Elias N Vasylenko
  */
-public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
-	private final ExperimentWorkspaceFactoryImpl factory;
+public class WorkspaceImpl implements Workspace {
+	private final WorkspaceFactoryImpl factory;
 	private final Path dataRoot;
 
 	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
@@ -80,7 +80,7 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	 * @param workspaceRoot
 	 *          the path of the workspace data
 	 */
-	public ExperimentWorkspaceImpl(ExperimentWorkspaceFactoryImpl factory, Path workspaceRoot) {
+	public WorkspaceImpl(WorkspaceFactoryImpl factory, Path workspaceRoot) {
 		this(factory, workspaceRoot, getDefaultProperties(ExperimentProperties.class));
 	}
 
@@ -94,8 +94,8 @@ public class ExperimentWorkspaceImpl implements ExperimentWorkspace {
 	 * @param text
 	 *          a localized text accessor implementation
 	 */
-	public ExperimentWorkspaceImpl(
-			ExperimentWorkspaceFactoryImpl factory,
+	public WorkspaceImpl(
+			WorkspaceFactoryImpl factory,
 			Path workspaceRoot,
 			ExperimentProperties text) {
 		this.factory = factory;

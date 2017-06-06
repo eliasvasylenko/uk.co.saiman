@@ -82,7 +82,7 @@ public interface ExperimentType<S> extends Reified {
 	 * @return a stream over the types of result published by an experiment of
 	 *         this type
 	 */
-	default Stream<ExperimentResultType<?>> getResultTypes() {
+	default Stream<ResultType<?>> getResultTypes() {
 		return Stream.empty();
 	}
 

@@ -41,7 +41,7 @@ import uk.co.strangeskies.reflection.token.TypeToken;
  * @param <T>
  *          the type of the result data
  */
-public interface ExperimentResultType<T> {
+public interface ResultType<T> {
 	/**
 	 * A human readable name for the experiment result.
 	 * 

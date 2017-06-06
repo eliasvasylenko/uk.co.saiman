@@ -39,18 +39,18 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.ExperimentWorkspace;
-import uk.co.saiman.experiment.ExperimentWorkspaceFactory;
+import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceFactory;
 import uk.co.strangeskies.log.Log;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 
 /**
- * Reference implementation of {@link ExperimentWorkspaceFactory}.
+ * Reference implementation of {@link WorkspaceFactory}.
  * 
  * @author Elias N Vasylenko
  */
 @Component
-public class ExperimentWorkspaceFactoryImpl implements ExperimentWorkspaceFactory {
+public class WorkspaceFactoryImpl implements WorkspaceFactory {
 	@Reference
 	Log log;
 
@@ -73,8 +73,8 @@ public class ExperimentWorkspaceFactoryImpl implements ExperimentWorkspaceFactor
 	}
 
 	@Override
-	public ExperimentWorkspace openWorkspace(Path location) {
-		return new ExperimentWorkspaceImpl(
+	public Workspace openWorkspace(Path location) {
+		return new WorkspaceImpl(
 				this,
 				location,
 				loader.getProperties(ExperimentProperties.class));

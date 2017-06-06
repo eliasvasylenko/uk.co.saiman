@@ -41,5 +41,5 @@ public interface ExperimentExecutionContext<T> {
 	 */
 	ExperimentNode<? extends ExperimentType<T>, T> node();
 
-	ExperimentResultManager results();
+	ResultManager results();
 }

@@ -40,7 +40,7 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.experiment.ExperimentResultType;
+import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.ExperimentType;
 
 /**
@@ -58,7 +58,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 	private static final String SPECTRUM_DATA_NAME = "spectrum";
 
 	private SpectrumProperties properties;
-	private final ExperimentResultType<AccumulatingFileSpectrum> spectrumResult;
+	private final ResultType<AccumulatingFileSpectrum> spectrumResult;
 
 	public SpectrumExperimentType() {
 		this(getDefaultProperties(SpectrumProperties.class));
@@ -86,7 +86,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 		return properties.spectrumExperimentName().toString();
 	}
 
-	public ExperimentResultType<? extends Spectrum> getSpectrumResult() {
+	public ResultType<? extends Spectrum> getSpectrumResult() {
 		return spectrumResult;
 	}
 
@@ -133,7 +133,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 	}
 
 	@Override
-	public Stream<ExperimentResultType<?>> getResultTypes() {
+	public Stream<ResultType<?>> getResultTypes() {
 		return Stream.of(spectrumResult);
 	}
 }

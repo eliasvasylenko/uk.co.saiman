@@ -40,14 +40,14 @@ import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 
 /**
- * The root experiment type implementation for {@link ExperimentWorkspaceImpl}.
+ * The root experiment type implementation for {@link WorkspaceImpl}.
  * 
  * @author Elias N Vasylenko
  */
 public class ExperimentRootImpl implements ExperimentRoot {
-  private final ExperimentWorkspaceImpl workspace;
+  private final WorkspaceImpl workspace;
 
-  protected ExperimentRootImpl(ExperimentWorkspaceImpl workspace) {
+  protected ExperimentRootImpl(WorkspaceImpl workspace) {
     this.workspace = workspace;
   }
 

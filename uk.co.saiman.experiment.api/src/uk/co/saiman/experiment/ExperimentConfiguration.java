@@ -31,7 +31,7 @@ import java.util.Optional;
 
 /**
  * General configuration interface for experiment root nodes, as created via
- * {@link ExperimentWorkspace#addExperiment(String)}
+ * {@link Workspace#addExperiment(String)}
  * 
  * @author Elias N Vasylenko
  */

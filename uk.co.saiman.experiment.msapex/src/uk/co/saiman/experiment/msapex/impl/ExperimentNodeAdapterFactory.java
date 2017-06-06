@@ -39,15 +39,15 @@ import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.ExperimentWorkspace;
+import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
 	private final IAdapterManager adapterManager;
-	private final ExperimentWorkspace workspace;
+	private final Workspace workspace;
 
 	public ExperimentNodeAdapterFactory(
 			IAdapterManager adapterManager,
-			ExperimentWorkspace workspace) {
+			Workspace workspace) {
 		this.adapterManager = adapterManager;
 		this.workspace = workspace;
 		adapterManager.registerAdapters(this, ExperimentNode.class);

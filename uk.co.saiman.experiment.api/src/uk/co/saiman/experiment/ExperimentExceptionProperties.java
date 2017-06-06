@@ -65,7 +65,7 @@ public interface ExperimentExceptionProperties {
 
 	Localized<String> cannotPersistState(Experiment experiment);
 
-	Localized<String> cannotCreateWorkspace(ExperimentWorkspace experimentWorkspace);
+	Localized<String> cannotCreateWorkspace(Workspace experimentWorkspace);
 
 	Localized<String> cannotLoadExperiment(Path path);
 }

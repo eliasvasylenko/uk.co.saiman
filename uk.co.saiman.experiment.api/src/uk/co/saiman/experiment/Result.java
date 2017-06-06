@@ -28,32 +28,32 @@
 package uk.co.saiman.experiment;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
-public interface ExperimentResultManager {
+import uk.co.strangeskies.observable.Observable;
+import uk.co.strangeskies.reflection.token.ReifiedToken;
+import uk.co.strangeskies.reflection.token.TypeArgument;
+import uk.co.strangeskies.reflection.token.TypeToken;
+
+public interface Result<T>
+		extends Observable<Optional<T>>, ReifiedToken<Result<T>> {
+	ExperimentNode<?, ?> getExperimentNode();
+
 	/**
 	 * Experiment data root directories are defined hierarchically from the
-	 * {@link ExperimentWorkspace#getWorkspaceDataPath() workspace path}.
+	 * {@link Workspace#getWorkspaceDataPath() workspace path}.
 	 * 
 	 * @return the data root of the experiment
 	 */
-	Path dataPath();
+	Path getResultDataPath();
 
-	/**
-	 * @param resultType
-	 *          the type of result
-	 * @return the result object now registered to the executing node
-	 */
-	public <U> ExperimentResult<U> get(ExperimentResultType<U> resultType);
+	ResultType<T> getResultType();
 
-	/**
-	 * This method provides a target for the submission of results during
-	 * execution of an experiment node.
-	 * 
-	 * @param resultType
-	 *          the type of result
-	 * @param resultData
-	 *          the result
-	 * @return the result object now registered to the executing node
-	 */
-	public <U> ExperimentResult<U> set(ExperimentResultType<U> resultType, U resultData);
+	Optional<T> getData();
+
+	@Override
+	default TypeToken<Result<T>> getThisTypeToken() {
+		return new TypeToken<Result<T>>() {}
+				.withTypeArguments(new TypeArgument<T>(getResultType().getDataType()) {});
+	}
 }
