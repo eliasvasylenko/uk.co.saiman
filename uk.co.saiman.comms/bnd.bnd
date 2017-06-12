@@ -1,14 +1,15 @@
 Bundle-Name: SAI :: Comms
 
 -buildpath: \
-	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.facebook.react.webresource;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
 \
 	uk.co.strangeskies.collections;version=latest,\
-	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.observable;version=latest,\
 	uk.co.strangeskies.reflection;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.utilities;version=latest,\
 \
 	com.fazecast:jSerialComm,\
 	org.apache.felix.gogo.command,\
@@ -23,7 +24,7 @@ Bundle-Name: SAI :: Comms
 	@${repo;com.fazecast:jSerialComm}!/OSX/*,\
 	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
 	l10n,\
-	static/sai=static
+	{static/sai=static}
 
 Import-Package: \
 	*

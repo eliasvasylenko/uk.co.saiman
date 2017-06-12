@@ -8,7 +8,3 @@ Bundle-Name: SAI :: Maldi
 \
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data.api;version=snapshot
-
-
--includeresource: \
-	META-INF/modabi=modabi/instruments

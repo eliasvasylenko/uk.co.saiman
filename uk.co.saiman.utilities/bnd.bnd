@@ -11,5 +11,4 @@ Export-Package: \
 	uk.co.saiman
 
 -includeresource: \
-	META-INF/schemata=schemata,\
 	{bundle.properties}

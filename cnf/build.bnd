@@ -86,14 +86,6 @@ Import-Package:\
 		releaseUrls			=	https://oss.jfrog.org/artifactory/libs-release;\
 		snapshotUrls		=	https://oss.jfrog.org/artifactory/libs-snapshot
 
--plugin.Modabi:\
-\
-		aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
-			name				=	"Modabi";\
-			pom					=	${build}/modabi.xml;\
-			releaseUrls			=	https://oss.jfrog.org/artifactory/libs-release;\
-			snapshotUrls		=	https://oss.jfrog.org/artifactory/libs-snapshot
-
 ## Run requirement groups:
 -runrequires.base:\
 	osgi.identity;filter:='(&(osgi.identity=osgi.enroute.logger.simple.provider)(version>=0))'

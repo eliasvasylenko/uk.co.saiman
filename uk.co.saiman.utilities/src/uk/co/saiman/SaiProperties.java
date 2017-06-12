@@ -27,8 +27,6 @@
  */
 package uk.co.saiman;
 
-import java.time.LocalDate;
-
 import uk.co.strangeskies.text.properties.Localized;
 import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
@@ -45,19 +43,6 @@ public interface SaiProperties {
 	 * Namespace for GoGo commands.
 	 */
 	public static String SAI_COMMAND_SCOPE = "sai";
-
-	/**
-	 * The root namespace associated with Scientific Analysis Instruments products
-	 */
-	/*-
-	default Namespace getNamespace() {
-		return new Namespace(getNamespacePackage(), getNamespaceDate());
-	}
-	 */
-
-	Package getNamespacePackage();
-
-	LocalDate getNamespaceDate();
 
 	String copyrightHolderName();
 

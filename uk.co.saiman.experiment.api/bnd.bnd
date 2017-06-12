@@ -14,12 +14,4 @@ Bundle-Name: SAI :: Experiment
 Export-Package: uk.co.saiman.experiment
 
 -includeresource: \
-	META-INF/schemata=schemata,\
-	res,\
 	l10n
-
-#-pluginpath: \
-#	${pluginpath.modabi;xml}
-
-#-plugin: \
-#	uk.co.strangeskies.modabi.bnd.xml.ModabiXmlBndPlugin
