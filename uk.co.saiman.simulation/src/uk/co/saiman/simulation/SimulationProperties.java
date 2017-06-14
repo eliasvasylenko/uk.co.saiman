@@ -69,7 +69,7 @@ public interface SimulationProperties {
 
 	List<String> imageFileFilter();
 
-	Localized<String> invalidAcquisitionCount(int count);
+	String invalidAcquisitionCount(int count);
 
-	Localized<String> cannotFindDetector(String detectorName, Set<DetectorSimulation> availableDetectors);
+	String cannotFindDetector(String detectorName, Set<DetectorSimulation> availableDetectors);
 }

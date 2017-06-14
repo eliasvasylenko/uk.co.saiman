@@ -44,17 +44,14 @@ public interface AcquisitionProperties {
 	@Nested
 	SaiProperties sai();
 
+	@Nested
+	AcquisitionExceptionProperties exceptions();
+
 	Localized<String> device();
 
 	Localized<String> devices();
 
 	Localized<String> noDevices();
-
-	Localized<String> alreadyAcquiring();
-
-	Localized<String> experimentInterrupted();
-
-	Localized<String> unexpectedException();
 
 	Localized<String> countMustBePositive();
 

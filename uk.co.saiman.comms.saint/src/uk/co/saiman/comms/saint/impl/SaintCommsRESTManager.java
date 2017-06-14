@@ -12,37 +12,43 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.saint.SaintComms;
-import uk.co.strangeskies.text.properties.PropertyLoader;
 
 @Component
 public class SaintCommsRESTManager {
-  private final Map<SaintComms, ServiceRegistration<CommsREST>> restServices = new HashMap<>();
-  private BundleContext context;
+	private final Map<SaintComms, CommsREST> restClasses = new HashMap<>();
+	private final Map<CommsREST, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
+	private BundleContext context;
 
-  @Reference
-  PropertyLoader properties;
+	@Reference
+	private DTOs dtos;
 
-  @Activate
-  void activate(BundleContext context) {
-    this.context = context;
-  }
+	@Activate
+	synchronized void activate(BundleContext context) {
+		this.context = context;
+		restClasses.entrySet().stream().forEach(e -> register(e.getKey(), e.getValue()));
+	}
 
-  @Reference(policy = DYNAMIC, policyOption = GREEDY)
-  void addComms(SaintComms comms) {
-    CommsREST restService = new SaintCommsREST(
-        comms,
-        properties.getProperties(SaintProperties.class));
+	void register(SaintComms comms, CommsREST rest) {
+		serviceRegistrations.put(rest, context.registerService(CommsREST.class, rest, null));
+	}
 
-    ServiceRegistration<CommsREST> registration = context
-        .registerService(CommsREST.class, restService, null);
+	@Reference(policy = DYNAMIC, policyOption = GREEDY)
+	synchronized void addComms(SaintComms comms) {
+		CommsREST restService = new SaintCommsREST(comms, dtos);
+		restClasses.put(comms, restService);
 
-    restServices.put(comms, registration);
-  }
+		if (context != null) {
+			register(comms, restService);
+		}
+	}
 
-  void removeComms(SaintComms comms) {
-    ServiceRegistration<CommsREST> restService = restServices.remove(comms);
-    restService.unregister();
-  }
+	synchronized void removeComms(SaintComms comms) {
+		ServiceRegistration<?> restService = serviceRegistrations.remove(restClasses.remove(comms));
+		if (restService != null) {
+			restService.unregister();
+		}
+	}
 }

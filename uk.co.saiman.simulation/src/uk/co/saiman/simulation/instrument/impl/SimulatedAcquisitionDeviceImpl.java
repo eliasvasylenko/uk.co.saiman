@@ -89,13 +89,14 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
 			counter = getAcquisitionCount();
 			if (counter <= 0) {
-				throw new AcquisitionException(simulationText.acquisition().countMustBePositive());
+				throw new AcquisitionException(
+						simulationText.acquisition().exceptions().countMustBePositive());
 			}
 
 			synchronized (detectors) {
 				detector = getDetector();
 				if (detector == null) {
-					throw new AcquisitionException(simulationText.acquisition().noSignal());
+					throw new AcquisitionException(simulationText.acquisition().exceptions().noSignal());
 				}
 				detectors.notifyAll();
 			}
@@ -408,7 +409,8 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 			try {
 				synchronized (startingLock) {
 					this.experiment.ifPresent(e -> {
-						throw new AcquisitionException(simulationText.acquisition().alreadyAcquiring());
+						throw new AcquisitionException(
+								simulationText.acquisition().exceptions().alreadyAcquiring());
 					});
 
 					// wait any previous experiment to flush from the buffer
@@ -428,7 +430,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 				}
 			} catch (InterruptedException e) {
 				this.experiment = Optional.empty();
-				throw new AcquisitionException(simulationText.acquisition().experimentInterrupted(), e);
+				throw new AcquisitionException(
+						simulationText.acquisition().exceptions().experimentInterrupted(),
+						e);
 			}
 		}
 	}
@@ -478,7 +482,10 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 			} catch (AcquisitionException e) {
 				exception(e);
 			} catch (Exception e) {
-				exception(new AcquisitionException(simulationText.acquisition().unexpectedException(), e));
+				exception(
+						new AcquisitionException(
+								simulationText.acquisition().exceptions().unexpectedException(),
+								e));
 			}
 
 			try {

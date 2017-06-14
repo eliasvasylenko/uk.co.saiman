@@ -53,12 +53,12 @@ import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.PersistedState;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultManager;
 import uk.co.saiman.experiment.ResultType;
-import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.PersistedState;
 import uk.co.strangeskies.log.Log.Level;
 import uk.co.strangeskies.observable.ObservableProperty;
 import uk.co.strangeskies.observable.ObservableValue;
@@ -298,9 +298,9 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			lifecycleState.set(ExperimentLifecycleState.COMPLETION);
 			return true;
 		} catch (Exception e) {
-			workspace
-					.getLog()
-					.log(Level.ERROR, new ExperimentException(getText().failedExperimentExecution(this), e));
+			workspace.getLog().log(
+					Level.ERROR,
+					new ExperimentException(getText().exception().failedExperimentExecution(this), e));
 			lifecycleState.set(ExperimentLifecycleState.FAILURE);
 			return false;
 		}
@@ -308,7 +308,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	private void validate() {
 		if (id == null) {
-			throw new ExperimentException(getText().invalidExperimentName(null));
+			throw new ExperimentException(getText().exception().invalidExperimentName(null));
 		}
 	}
 
@@ -374,30 +374,30 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 			return;
 
 		} else if (!ExperimentConfiguration.isNameValid(id)) {
-			throw new ExperimentException(getText().invalidExperimentName(id));
+			throw new ExperimentException(getText().exception().invalidExperimentName(id));
 
 		} else if (getSiblings().anyMatch(s -> id.equals(s.getID()))) {
-			throw new ExperimentException(getText().duplicateExperimentName(id));
+			throw new ExperimentException(getText().exception().duplicateExperimentName(id));
 
 		} else {
 			Path newLocation = getParentDataPath().resolve(id);
 
 			if (this.id != null) {
 				if (Files.exists(newLocation)) {
-					throw new ExperimentException(getText().dataAlreadyExists(newLocation));
+					throw new ExperimentException(getText().exception().dataAlreadyExists(newLocation));
 				}
 
 				Path oldLocation = getParentDataPath().resolve(this.id);
 				try {
 					Files.move(oldLocation, newLocation);
 				} catch (IOException e) {
-					throw new ExperimentException(getText().cannotMove(oldLocation, newLocation));
+					throw new ExperimentException(getText().exception().cannotMove(oldLocation, newLocation));
 				}
 			} else {
 				try {
 					Files.createDirectories(newLocation);
 				} catch (IOException e) {
-					throw new ExperimentException(getText().cannotCreate(newLocation), e);
+					throw new ExperimentException(getText().exception().cannotCreate(newLocation), e);
 				}
 			}
 
@@ -415,9 +415,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 		results.values().forEach(r -> r.setData(null));
 	}
 
-	protected <U> ResultImpl<U> setResult(
-			ResultType<U> resultType,
-			U resultData) {
+	protected <U> ResultImpl<U> setResult(ResultType<U> resultType, U resultData) {
 		ResultImpl<U> result = getResult(resultType);
 		result.setData(resultData);
 		return result;

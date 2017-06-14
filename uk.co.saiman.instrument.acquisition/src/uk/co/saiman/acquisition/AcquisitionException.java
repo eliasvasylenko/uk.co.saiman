@@ -27,22 +27,19 @@
  */
 package uk.co.saiman.acquisition;
 
-import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.LocalizedRuntimeException;
-
 /**
  * This exception represents a problem with an acquisition device or process.
  * 
  * @author Elias N Vasylenko
  */
-public class AcquisitionException extends LocalizedRuntimeException {
+public class AcquisitionException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * @param message
 	 *          a description of the problem
 	 */
-	public AcquisitionException(Localized<String> message) {
+	public AcquisitionException(String message) {
 		super(message);
 	}
 
@@ -52,7 +49,7 @@ public class AcquisitionException extends LocalizedRuntimeException {
 	 * @param cause
 	 *          the causing throwable
 	 */
-	public AcquisitionException(Localized<String> message, Throwable cause) {
+	public AcquisitionException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

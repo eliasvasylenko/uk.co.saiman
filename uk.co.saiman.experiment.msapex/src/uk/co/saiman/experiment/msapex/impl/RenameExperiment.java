@@ -72,7 +72,8 @@ public class RenameExperiment {
 
 		if (!(itemData instanceof ExperimentNode<?, ?>
 				&& ((ExperimentNode<?, ?>) itemData).getType() instanceof ExperimentRoot)) {
-			throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
+			throw new ExperimentException(
+					text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
 		}
 
 		@SuppressWarnings("unchecked")
@@ -82,7 +83,8 @@ public class RenameExperiment {
 				experimentPart,
 				text.renameExperiment(),
 				text.renameExperimentName(selectedNode.getState().getName())).ifPresent(name -> {
-					Path newLocation = experimentPart.getExperimentWorkspace().getWorkspaceDataPath().resolve(name);
+					Path newLocation = experimentPart.getExperimentWorkspace().getWorkspaceDataPath().resolve(
+							name);
 
 					RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
 
@@ -107,10 +109,8 @@ public class RenameExperiment {
 		okButton.setDisable(true);
 		nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
 
-			boolean exists = experimentPart
-					.getExperimentWorkspace()
-					.getExperiments()
-					.anyMatch(e -> e.getState().getName().equals(newValue));
+			boolean exists = experimentPart.getExperimentWorkspace().getExperiments().anyMatch(
+					e -> e.getState().getName().equals(newValue));
 
 			boolean isValid = ExperimentConfiguration.isNameValid(newValue);
 
@@ -132,10 +132,10 @@ public class RenameExperiment {
 				try {
 					Files.walk(newLocation).sorted(reverseOrder()).map(Path::toFile).forEach(File::delete);
 				} catch (IOException e) {
-					throw new ExperimentException(text.cannotDelete(newLocation), e);
+					throw new ExperimentException(text.exception().cannotDelete(newLocation), e);
 				}
 			} else {
-				throw new ExperimentException(text.userCancelledSetExperimentName());
+				throw new ExperimentException(text.exception().userCancelledSetExperimentName());
 			}
 		}
 	}

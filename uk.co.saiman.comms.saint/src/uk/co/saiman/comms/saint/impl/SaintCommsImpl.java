@@ -71,9 +71,9 @@ import static uk.co.saiman.comms.saint.SaintCommandType.PING;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -85,7 +85,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.ByteConverters;
-import uk.co.saiman.comms.Command;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsImpl;
@@ -93,12 +92,8 @@ import uk.co.saiman.comms.saint.ADC;
 import uk.co.saiman.comms.saint.HighVoltageReadback;
 import uk.co.saiman.comms.saint.HighVoltageStatus;
 import uk.co.saiman.comms.saint.I2C;
-import uk.co.saiman.comms.saint.InBlock;
-import uk.co.saiman.comms.saint.InOutBlock;
 import uk.co.saiman.comms.saint.LEDStatus;
 import uk.co.saiman.comms.saint.MotorStatus;
-import uk.co.saiman.comms.saint.OutBlock;
-import uk.co.saiman.comms.saint.SaintCommand;
 import uk.co.saiman.comms.saint.SaintCommandAddress;
 import uk.co.saiman.comms.saint.SaintCommandType;
 import uk.co.saiman.comms.saint.SaintComms;
@@ -106,6 +101,9 @@ import uk.co.saiman.comms.saint.TurboControl;
 import uk.co.saiman.comms.saint.TurboReadbacks;
 import uk.co.saiman.comms.saint.VacuumControl;
 import uk.co.saiman.comms.saint.VacuumReadback;
+import uk.co.saiman.comms.saint.Value;
+import uk.co.saiman.comms.saint.ValueReadback;
+import uk.co.saiman.comms.saint.ValueRequest;
 import uk.co.saiman.comms.saint.impl.SaintCommsImpl.SaintCommsConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
@@ -114,9 +112,65 @@ import uk.co.saiman.comms.serial.SerialPorts;
 @Component(
 		name = SaintCommsImpl.CONFIGURATION_PID,
 		configurationPid = SaintCommsImpl.CONFIGURATION_PID)
-public class SaintCommsImpl extends CommsImpl<SaintCommand>
-		implements SaintComms, Comms<SaintCommand> {
+public class SaintCommsImpl extends CommsImpl implements SaintComms, Comms {
 	public static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint";
+
+	class ValueImpl<T> implements Value<T> {
+		private final Class<T> type;
+		private final SaintCommandAddress actualValue;
+		private final SaintCommandAddress requestedValue;
+
+		public ValueImpl(
+				Class<T> type,
+				SaintCommandAddress actualValue,
+				SaintCommandAddress requestedValue) {
+			this.type = type;
+			this.actualValue = actualValue;
+			this.requestedValue = requestedValue;
+		}
+
+		@Override
+		public Class<T> getType() {
+			return type;
+		}
+
+		@Override
+		public SaintCommandAddress getActualValueAddress() {
+			return actualValue;
+		}
+
+		@Override
+		public T getActual() {
+			return getValue(actualValue);
+		}
+
+		@Override
+		public SaintCommandAddress getRequestedValueAddress() {
+			return requestedValue;
+		}
+
+		@Override
+		public T getRequested() {
+			return getValue(requestedValue);
+		}
+
+		private T getValue(SaintCommandAddress address) {
+			return useChannel(channel -> {
+				byte[] outputBytes = new byte[address.getBytes().length];
+				byte[] inputBytes = executeSaintCommand(INPUT, address, channel, outputBytes);
+				return converters.getConverter(type).fromBytes(inputBytes);
+			});
+		}
+
+		@Override
+		public void request(T data) {
+			useChannel(channel -> {
+				byte[] outputBytes = converters.getConverter(type).toBytes(data);
+				executeSaintCommand(OUTPUT, actualValue, channel, outputBytes);
+				return null;
+			});
+		}
+	}
 
 	@SuppressWarnings("javadoc")
 	@ObjectClassDefinition(
@@ -135,71 +189,61 @@ public class SaintCommsImpl extends CommsImpl<SaintCommand>
 	@Reference
 	ByteConverters converters;
 
-	private InOutBlock<LEDStatus> ledStatus;
-	private InOutBlock<VacuumControl> vacuumStatus;
-	private InOutBlock<HighVoltageStatus> highVoltageStatus;
-	private InOutBlock<MotorStatus> motorStatus;
-	private InOutBlock<VacuumReadback> vacuumReadback;
-	private InOutBlock<HighVoltageReadback> highVoltageReadback;
+	private final Set<Value<?>> values = new HashSet<>();
+	private Value<LEDStatus> ledStatus;
+	private Value<VacuumControl> vacuumStatus;
+	private Value<HighVoltageStatus> highVoltageStatus;
+	private Value<MotorStatus> motorStatus;
+	private Value<VacuumReadback> vacuumReadback;
+	private Value<HighVoltageReadback> highVoltageReadback;
 
-	private OutBlock<I2C> highVoltageDAC1;
-	private OutBlock<I2C> highVoltageDAC2;
-	private OutBlock<I2C> highVoltageDAC3;
-	private OutBlock<I2C> highVoltageDAC4;
-	private OutBlock<I2C> cmosRef;
-	private OutBlock<I2C> laserDetectRef;
+	private final Set<ValueRequest<?>> valueRequests = new HashSet<>();
+	private ValueRequest<I2C> highVoltageDAC1;
+	private ValueRequest<I2C> highVoltageDAC2;
+	private ValueRequest<I2C> highVoltageDAC3;
+	private ValueRequest<I2C> highVoltageDAC4;
+	private ValueRequest<I2C> cmosRef;
+	private ValueRequest<I2C> laserDetectRef;
 
-	private InBlock<ADC> piraniReadback;
-	private InBlock<ADC> magnetronReadback;
-	private InBlock<ADC> spareMon1;
-	private InBlock<ADC> spareMon2;
-	private InBlock<ADC> spareMon3;
-	private InBlock<ADC> spareMon4;
-	private InBlock<ADC> currentReadback1;
-	private InBlock<ADC> currentReadback2;
-	private InBlock<ADC> currentReadback3;
-	private InBlock<ADC> currentReadback4;
-	private InBlock<ADC> voltageReadback1;
-	private InBlock<ADC> voltageReadback2;
-	private InBlock<ADC> voltageReadback3;
-	private InBlock<ADC> voltageReadback4;
+	private final Set<ValueReadback<?>> valueReadbacks = new HashSet<>();
+	private ValueReadback<ADC> piraniReadback;
+	private ValueReadback<ADC> magnetronReadback;
+	private ValueReadback<ADC> spareMon1;
+	private ValueReadback<ADC> spareMon2;
+	private ValueReadback<ADC> spareMon3;
+	private ValueReadback<ADC> spareMon4;
+	private ValueReadback<ADC> currentReadback1;
+	private ValueReadback<ADC> currentReadback2;
+	private ValueReadback<ADC> currentReadback3;
+	private ValueReadback<ADC> currentReadback4;
+	private ValueReadback<ADC> voltageReadback1;
+	private ValueReadback<ADC> voltageReadback2;
+	private ValueReadback<ADC> voltageReadback3;
+	private ValueReadback<ADC> voltageReadback4;
 
-	private OutBlock<TurboControl> turboControl;
-	private InBlock<TurboReadbacks> turboReadbacks;
+	private ValueRequest<TurboControl> turboControl;
+	private ValueReadback<TurboReadbacks> turboReadbacks;
 
 	public SaintCommsImpl() {
 		super(SaintComms.ID);
 	}
 
-	private <T> InOutBlock<T> inOutBlock(
-			Class<T> type,
-			SaintCommandAddress in,
-			SaintCommandAddress out) {
-		if (in.getSize() != out.getSize()) {
-			throw new CommsException(
-					"Mismatch between input and output address sizes: " + in + ", " + out);
-		}
-
-		return InOutBlock.inOutBlock(
-				addOutput(
-						out,
-						() -> converters.getConverter(type).create(),
-						o -> converters.getConverter(type).toBytes(o)),
-				addInput(out, b -> converters.getConverter(type).fromBytes(b)),
-				addInput(in, b -> converters.getConverter(type).fromBytes(b)));
+	<T> ValueReadback<T> inBlock(Class<T> type, SaintCommandAddress address) {
+		ValueReadback<T> readback = new ValueImpl<>(type, address, null);
+		valueReadbacks.add(readback);
+		return readback;
 	}
 
-	private <T> OutBlock<T> outBlock(Class<T> type, SaintCommandAddress out) {
-		return OutBlock.outBlock(
-				addOutput(
-						out,
-						() -> converters.getConverter(type).create(),
-						o -> converters.getConverter(type).toBytes(o)),
-				addInput(out, b -> converters.getConverter(type).fromBytes(b)));
+	<T> ValueRequest<T> outBlock(Class<T> type, SaintCommandAddress address) {
+		ValueRequest<T> request = new ValueImpl<>(type, null, address);
+		valueRequests.add(request);
+		return request;
 	}
 
-	private <T> InBlock<T> inBlock(Class<T> type, SaintCommandAddress in) {
-		return InBlock.inBlock(addInput(in, b -> converters.getConverter(type).fromBytes(b)));
+	<T> Value<T> inOutBlock(Class<T> type, SaintCommandAddress actual, SaintCommandAddress request) {
+		Value<T> value = new ValueImpl<>(type, actual, request);
+		values.add(value);
+		return value;
 	}
 
 	@Activate
@@ -253,17 +297,32 @@ public class SaintCommsImpl extends CommsImpl<SaintCommand>
 	}
 
 	@Override
-	public InOutBlock<LEDStatus> led() {
+	public Stream<Value<?>> values() {
+		return values.stream();
+	}
+
+	@Override
+	public Stream<ValueRequest<?>> valueRequests() {
+		return valueRequests.stream();
+	}
+
+	@Override
+	public Stream<ValueReadback<?>> valueReadbacks() {
+		return valueReadbacks.stream();
+	}
+
+	@Override
+	public Value<LEDStatus> led() {
 		return ledStatus;
 	}
 
 	@Override
-	public InOutBlock<VacuumControl> vacuum() {
+	public Value<VacuumControl> vacuum() {
 		return vacuumStatus;
 	}
 
 	@Override
-	public OutBlock<HighVoltageStatus> highVoltage() {
+	public ValueRequest<HighVoltageStatus> highVoltage() {
 		return highVoltageStatus;
 	}
 
@@ -275,33 +334,6 @@ public class SaintCommsImpl extends CommsImpl<SaintCommand>
 	private void ping() {
 		useChannel(
 				channel -> executeSaintCommand(PING, NULL, channel, new byte[NULL.getBytes().length]));
-	}
-
-	private <T> Supplier<T> addInput(SaintCommandAddress address, Function<byte[], T> inputFunction) {
-		Command<SaintCommand, T, Void> inputCommand = addCommand(
-				new SaintCommand(INPUT, address),
-				(output, channel) -> {
-					byte[] outputBytes = new byte[address.getBytes().length];
-					byte[] inputBytes = executeSaintCommand(INPUT, address, channel, outputBytes);
-					return inputFunction.apply(inputBytes);
-				},
-				() -> null);
-		return () -> inputCommand.invoke((Void) null);
-	}
-
-	private <T> Consumer<T> addOutput(
-			SaintCommandAddress address,
-			Supplier<T> prototype,
-			Function<T, byte[]> outputFunction) {
-		Command<SaintCommand, Void, T> outputCommand = addCommand(
-				new SaintCommand(OUTPUT, address),
-				(output, channel) -> {
-					byte[] outputBytes = outputFunction.apply(output);
-					executeSaintCommand(OUTPUT, address, channel, outputBytes);
-					return null;
-				},
-				prototype);
-		return outputCommand::invoke;
 	}
 
 	private byte[] executeSaintCommand(

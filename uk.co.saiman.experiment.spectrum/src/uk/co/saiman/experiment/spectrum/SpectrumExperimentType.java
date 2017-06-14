@@ -40,8 +40,8 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ResultType;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -111,7 +111,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 				throw e;
 			});
 		} catch (InterruptedException | ExecutionException e) {
-			throw new ExperimentException(properties.experimentInterrupted(), e);
+			throw new ExperimentException(properties.exception().experimentInterrupted(), e);
 		}
 
 		context.results().get(spectrumResult).getData().get().complete();

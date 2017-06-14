@@ -33,13 +33,9 @@ import static uk.co.saiman.comms.Comms.CommsStatus.READY;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
+import uk.co.strangeskies.function.ThrowingFunction;
 import uk.co.strangeskies.observable.ObservableProperty;
 import uk.co.strangeskies.observable.ObservableValue;
 
@@ -48,47 +44,9 @@ import uk.co.strangeskies.observable.ObservableValue;
  * bytes to and from a {@link CommsPort comms channel}.
  * 
  * @author Elias N Vasylenko
- * @param <T>
- *          The command identifier type. This may typically consist of an
- *          address and an operation type.
  */
-public abstract class CommsImpl<T> implements Comms<T> {
-	public class CommandImpl<I, O> implements Command<T, I, O> {
-		private final T id;
-		private final CommandFunction<I, O> definition;
-		private final Supplier<O> prototype;
-
-		protected CommandImpl(T id, CommandFunction<I, O> definition, Supplier<O> prototype) {
-			this.id = id;
-			this.definition = definition;
-			this.prototype = prototype;
-		}
-
-		@Override
-		public T getId() {
-			return id;
-		}
-
-		@Override
-		public I invoke(O argument) {
-			return useChannel(channel -> {
-				try {
-					I lastInput = definition.execute(argument, channel);
-					return lastInput;
-				} catch (Exception e) {
-					throw new CommsException("Problem transferring data for command " + id, e);
-				}
-			});
-		}
-
-		@Override
-		public O prototype() {
-			return prototype.get();
-		}
-	}
-
+public abstract class CommsImpl implements Comms {
 	private final String name;
-	private final Map<T, Command<T, ?, ?>> commands;
 
 	private CommsPort comms;
 	private CommsChannel channel;
@@ -101,7 +59,6 @@ public abstract class CommsImpl<T> implements Comms<T> {
 	 */
 	public CommsImpl(String name) {
 		this.name = name;
-		this.commands = new HashMap<>();
 
 		status = ObservableProperty.over(READY);
 	}
@@ -191,44 +148,22 @@ public abstract class CommsImpl<T> implements Comms<T> {
 		return comms;
 	}
 
-	protected synchronized <U> U useChannel(Function<ByteChannel, U> action) {
-		switch (status().get()) {
-		case OPEN:
+	protected synchronized <U> U useChannel(ThrowingFunction<ByteChannel, U, Exception> action) {
+		try {
+			switch (status().get()) {
+			case OPEN:
+				return action.apply(channel);
+
+			case READY:
+				throw new CommsException("Port is closed");
+
+			case FAULT:
+				throw fault().get();
+			}
+
 			return action.apply(channel);
-
-		case READY:
-			throw new CommsException("Port is closed");
-
-		case FAULT:
-			throw fault().get();
+		} catch (Exception e) {
+			throw new CommsException("Problem transferring data", e);
 		}
-
-		return action.apply(channel);
-	}
-
-	protected <I, O> Command<T, I, O> addCommand(
-			T id,
-			CommandFunction<I, O> definition,
-			Supplier<O> prototype) {
-		Command<T, I, O> command = new CommandImpl<>(id, definition, prototype);
-		commands.put(id, command);
-
-		return command;
-	}
-
-	@Override
-	public Stream<T> getCommands() {
-		return commands.keySet().stream();
-	}
-
-	@Override
-	public Command<T, ?, ?> getCommand(T id) {
-		Command<T, ?, ?> command = commands.get(id);
-
-		if (command == null) {
-			throw new CommsException("Command undefined " + id);
-		}
-
-		return command;
 	}
 }

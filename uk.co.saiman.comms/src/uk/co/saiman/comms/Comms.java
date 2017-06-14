@@ -28,11 +28,10 @@
 package uk.co.saiman.comms;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import uk.co.strangeskies.observable.ObservableValue;
 
-public interface Comms<T> {
+public interface Comms {
 	/**
 	 * A description of the status of a comms channel.
 	 * 
@@ -75,10 +74,6 @@ public interface Comms<T> {
 	void open();
 
 	void reset();
-
-	Stream<T> getCommands();
-
-	Command<T, ?, ?> getCommand(T id);
 
 	CommsPort getPort();
 }

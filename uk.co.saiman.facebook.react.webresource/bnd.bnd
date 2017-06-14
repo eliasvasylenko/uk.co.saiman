@@ -6,6 +6,9 @@ Bundle-Description: \
 base.version = 15.4.2
 path = /META-INF/resources/webjars
 
+-buildpath: \
+	osgi.enroute.web.simple.provider
+
 -includeresource: \
 	@${repo;org.webjars.npm:react;15.4.2}!/META-INF/resources/*,\
 	@${repo;org.webjars.npm:react-dom;15.4.2}!/META-INF/resources/*
@@ -23,3 +26,5 @@ Provide-Capability: \
 		root=${path}/react-dom/${base.version}
 
 Export-Package: uk.co.saiman.facebook.react
+
+Private-Package: uk.co.saiman.facebook.react.impl

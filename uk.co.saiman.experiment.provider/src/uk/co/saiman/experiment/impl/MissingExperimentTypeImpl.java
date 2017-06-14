@@ -72,7 +72,7 @@ public class MissingExperimentTypeImpl implements MissingExperimentType {
 
 	@Override
 	public void execute(ExperimentExecutionContext<Map<String, String>> context) {
-		throw new ExperimentException(text.cannotExecuteMissingExperimentType(id));
+		throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
 	}
 
 	@Override

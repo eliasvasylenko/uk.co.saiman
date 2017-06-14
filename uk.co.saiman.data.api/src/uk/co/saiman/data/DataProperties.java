@@ -32,7 +32,7 @@ import javax.measure.Unit;
 import uk.co.strangeskies.text.properties.Localized;
 
 public interface DataProperties {
-	Localized<String> incompatibleDomainUnits(Unit<?> first, Unit<?> second);
+	String incompatibleDomainUnits(Unit<?> first, Unit<?> second);
 
 	Localized<String> noChartData();
 }

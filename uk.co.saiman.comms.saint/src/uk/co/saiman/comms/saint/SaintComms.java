@@ -27,9 +27,11 @@
  */
 package uk.co.saiman.comms.saint;
 
+import java.util.stream.Stream;
+
 import uk.co.saiman.comms.Comms;
 
-public interface SaintComms extends Comms<SaintCommand> {
+public interface SaintComms extends Comms {
 	/**
 	 * The id of the SAINT comms interface.
 	 */
@@ -40,9 +42,15 @@ public interface SaintComms extends Comms<SaintCommand> {
 	 */
 	int MESSAGE_SIZE = 4;
 
-	InOutBlock<LEDStatus> led();
+	Stream<Value<?>> values();
 
-	InOutBlock<VacuumControl> vacuum();
+	Stream<ValueRequest<?>> valueRequests();
 
-	OutBlock<HighVoltageStatus> highVoltage();
+	Stream<ValueReadback<?>> valueReadbacks();
+
+	Value<LEDStatus> led();
+
+	Value<VacuumControl> vacuum();
+
+	ValueRequest<HighVoltageStatus> highVoltage();
 }

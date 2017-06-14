@@ -29,6 +29,10 @@ package uk.co.saiman.comms.impl;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
+import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.POLLABLE;
+import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.RECEIVES_INPUT_DATA;
+import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.SENDS_OUTPUT_DATA;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -36,7 +40,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -46,7 +49,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -54,90 +56,66 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import osgi.enroute.dto.api.DTOs;
 import osgi.enroute.rest.api.REST;
 import osgi.enroute.rest.api.RequireRestImplementation;
-import uk.co.saiman.comms.Command;
-import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.rest.CommsREST;
+import uk.co.saiman.comms.rest.CommsRESTAction;
+import uk.co.saiman.comms.rest.CommsRESTEntry;
 
 @RequireRestImplementation
 @Component(property = REST.ENDPOINT + "=/api/comms/*")
 public class CommsRESTProvider implements REST {
-	private class CommsRegistration {
-		private final Comms<?> comms;
-		private final Bundle bundle;
+	private static final String NAME_KEY = "name";
+	private static final String STATUS_KEY = "status";
+	private static final String STATUS_CODE_KEY = "code";
+	private static final String STATUS_FAULT_KEY = "fault";
+	private static final String CHANNEL_KEY = "channel";
+	private static final String BUNDLE_KEY = "registeringBundle";
+	private static final String ENTRIES_KEY = "entries";
 
-		public CommsRegistration(Comms<?> comms, Bundle bundle) {
-			this.comms = comms;
-			this.bundle = bundle;
-		}
+	private static final String BUNDLE_SYMBOLIC_NAME_KEY = "bundleSymbolicName";
+	private static final String BUNDLE_NAME_KEY = "bundleName";
+	private static final String BUNDLE_ID_KEY = "bundleId";
 
-		public Comms<?> comms() {
-			return comms;
-		}
+	private static final String ENTRY_ID_KEY = "id";
+	private static final String ENTRY_ACTIONS_KEY = "actions";
+	private static final String ENTRY_OUTPUT_KEY = "output";
 
-		public String uid() {
-			return (comms.getName() + "-" + comms.getPort().getName())
-					.replace(' ', '-')
-					.replace('/', '-');
-		}
+	private static final String ACTION_ID_KEY = "id";
+	private static final String ACTION_POLLABLE_KEY = "pollable";
+	private static final String ACTION_RECEIVES_INPUT_KEY = "receivesInput";
+	private static final String ACTION_SENDS_OUTPUT_KEY = "sendsOutput";
+	private static final String ACTION_MODIFIES_OUTPUT_KEY = "modifiesOutput";
 
-		public Bundle bundle() {
-			return bundle;
-		}
-	}
-
-	@interface Configuration {}
-
-	public static final String NAME_KEY = "name";
-	public static final String ID_KEY = "id";
-	public static final String STATUS_KEY = "status";
-	public static final String STATUS_CODE_KEY = "code";
-	public static final String STATUS_FAULT_KEY = "fault";
-	public static final String CHANNEL_KEY = "channel";
-	public static final String BUNDLE_KEY = "registeringBundle";
-	public static final String COMMANDS_KEY = "commands";
-
-	public static final String BUNDLE_SYMBOLIC_NAME_KEY = "bundleSymbolicName";
-	public static final String BUNDLE_NAME_KEY = "bundleName";
-	public static final String BUNDLE_ID_KEY = "bundleId";
-
-	public static final String COMMAND_ID_KEY = "id";
-	private static final String COMMAND_OUTPUT_KEY = "output";
 	private static final String ERROR_KEY = "error";
 	private static final String TRACE_KEY = "trace";
 
-	private Configuration config;
-
-	private Map<Comms<?>, CommsRegistration> commsInterfaces;
-	@SuppressWarnings("rawtypes")
-	private ServiceTracker<Comms, Comms> commsInterfaceTracker;
+	private Map<CommsREST, Bundle> commsInterfaces;
+	private ServiceTracker<CommsREST, CommsREST> commsInterfaceTracker;
 
 	@Reference
 	private DTOs dtos;
 
-	@SuppressWarnings("rawtypes")
 	@Activate
-	void activate(Configuration config, BundleContext context) {
-		modified(config);
-
+	void activate(BundleContext context) {
 		commsInterfaces = new LinkedHashMap<>();
 
 		commsInterfaceTracker = new ServiceTracker<>(
 				context,
-				Comms.class,
-				new ServiceTrackerCustomizer<Comms, Comms>() {
+				CommsREST.class,
+				new ServiceTrackerCustomizer<CommsREST, CommsREST>() {
 					@Override
-					public Comms<?> addingService(ServiceReference<Comms> reference) {
+					public CommsREST addingService(ServiceReference<CommsREST> reference) {
 						refreshCommsInterfaces(context);
 						return context.getService(reference);
 					}
 
 					@Override
-					public void modifiedService(ServiceReference<Comms> reference, Comms service) {
+					public void modifiedService(ServiceReference<CommsREST> reference, CommsREST service) {
 						refreshCommsInterfaces(context);
 					}
 
 					@Override
-					public void removedService(ServiceReference<Comms> reference, Comms service) {
+					public void removedService(ServiceReference<CommsREST> reference, CommsREST service) {
 						refreshCommsInterfaces(context);
 					}
 				});
@@ -151,39 +129,33 @@ public class CommsRESTProvider implements REST {
 		commsInterfaceTracker.close();
 	}
 
-	@Modified
-	void modified(Configuration config) {
-		this.config = config;
-	}
-
-	@SuppressWarnings("rawtypes")
 	private synchronized void refreshCommsInterfaces(BundleContext context) {
 		commsInterfaces.clear();
-		Map<Comms<?>, Bundle> commsInterfaceBundles = new HashMap<>();
-
 		try {
-			for (ServiceReference<Comms> commsReference : context
-					.getServiceReferences(Comms.class, null)) {
-				commsInterfaceBundles.put(context.getService(commsReference), commsReference.getBundle());
+			for (ServiceReference<CommsREST> commsReference : context
+					.getServiceReferences(CommsREST.class, null)) {
+				commsInterfaces.put(context.getService(commsReference), commsReference.getBundle());
 			}
 		} catch (InvalidSyntaxException e) {
 			throw new AssertionError();
 		}
+	}
 
-		for (Comms<?> comms : commsInterfaceBundles.keySet()) {
-			CommsRegistration registration = new CommsRegistration(
-					comms,
-					commsInterfaceBundles.get(comms));
-			commsInterfaces.put(comms, registration);
-		}
+	private CommsREST getNamedComms(String name) {
+		return commsInterfaces
+				.keySet()
+				.stream()
+				.filter(c -> c.getID().equals(name))
+				.findAny()
+				.orElseThrow(() -> new CommsException("Comms interface not found " + name));
 	}
 
 	public List<String> getCommsInterfaces() {
-		return commsInterfaces.values().stream().map(CommsRegistration::uid).collect(toList());
+		return commsInterfaces.keySet().stream().map(CommsREST::getID).collect(toList());
 	}
 
 	public List<Map<String, Object>> getCommsInterfaceInfo() {
-		return commsInterfaces.values().stream().map(this::getCommsInterfaceInfoImpl).collect(toList());
+		return commsInterfaces.keySet().stream().map(this::getCommsInterfaceInfoImpl).collect(toList());
 	}
 
 	public Map<String, Object> getCommsInterfaceInfo(String name) {
@@ -191,41 +163,38 @@ public class CommsRESTProvider implements REST {
 	}
 
 	public Map<String, String> postOpenCommsInterface(String name) {
-		Comms<?> comms = getNamedComms(name).comms();
+		CommsREST comms = getNamedComms(name);
 		comms.open();
 		Map<String, String> map = new HashMap<>();
-		map.put(STATUS_CODE_KEY, comms.status().get().toString());
+		map.put(STATUS_CODE_KEY, comms.getStatus());
 		return map;
 	}
 
 	public Map<String, String> postResetCommsInterface(String name) {
-		Comms<?> comms = getNamedComms(name).comms();
+		CommsREST comms = getNamedComms(name);
 		comms.reset();
 		Map<String, String> map = new HashMap<>();
-		map.put(STATUS_CODE_KEY, comms.status().get().toString());
+		map.put(STATUS_CODE_KEY, comms.getStatus());
 		return map;
 	}
 
-	private <T> Map<String, Object> getCommsInterfaceInfoImpl(CommsRegistration commsRegistration) {
+	private <T> Map<String, Object> getCommsInterfaceInfoImpl(CommsREST comms) {
 		Map<String, Object> info = new HashMap<>();
 
-		info.put(NAME_KEY, commsRegistration.comms().getName());
-		info.put(ID_KEY, commsRegistration.uid());
-		info.put(STATUS_KEY, getStatus(commsRegistration.comms()));
-		info.put(CHANNEL_KEY, commsRegistration.comms().getPort().toString());
-		info.put(BUNDLE_KEY, getBundleInfoImpl(commsRegistration.bundle()));
-		info.put(
-				COMMANDS_KEY,
-				commsRegistration.comms().getCommands().map(Objects::toString).collect(toList()));
+		info.put(NAME_KEY, comms.getID());
+		info.put(STATUS_KEY, getStatus(comms));
+		info.put(CHANNEL_KEY, comms.getPort());
+		info.put(BUNDLE_KEY, getBundleInfoImpl(commsInterfaces.get(comms)));
+		info.put(ENTRIES_KEY, comms.getEntries().collect(toList()));
 
 		return info;
 	}
 
-	private Map<String, Object> getStatus(Comms<?> comms) {
+	private Map<String, Object> getStatus(CommsREST comms) {
 		Map<String, Object> info = new HashMap<>();
 
-		info.put(STATUS_CODE_KEY, comms.status().get());
-		comms.fault().ifPresent(fault -> info.put(STATUS_FAULT_KEY, fault));
+		info.put(STATUS_CODE_KEY, comms.getStatus());
+		comms.getFaultText().ifPresent(fault -> info.put(STATUS_FAULT_KEY, fault));
 
 		return info;
 	}
@@ -240,69 +209,59 @@ public class CommsRESTProvider implements REST {
 		return info;
 	}
 
-	public List<String> getCommands(String name) {
-		return getNamedComms(name).comms().getCommands().map(Objects::toString).collect(toList());
+	public List<String> getEntries(String name) {
+		return getNamedComms(name).getEntries().map(CommsRESTEntry::getID).collect(toList());
 	}
 
-	public Map<String, Map<String, Object>> getCommandInfo(String commsName) {
-		return getCommandInfoImpl(getNamedComms(commsName).comms());
+	public Map<String, Map<String, Object>> getEntriesInfo(String commsName) {
+		CommsREST comms = getNamedComms(commsName);
+		return comms.getEntries().collect(toMap(c -> c.getID(), c -> getEntryInfoImpl(c)));
 	}
 
-	private <T> Map<String, Map<String, Object>> getCommandInfoImpl(Comms<T> comms) {
-		return comms.getCommands().collect(
-				toMap(Objects::toString, c -> getCommandInfoImpl(comms.getCommand(c))));
+	public Map<String, Object> getEntryInfo(String commsName, String commandName) {
+		CommsREST comms = getNamedComms(commsName);
+
+		return getEntryInfoImpl(comms.getEntry(commandName).get());
 	}
 
-	public Map<String, Object> getCommandInfo(String commsName, String commandName) {
-		Comms<?> comms = getNamedComms(commsName).comms();
-
-		return getCommandInfoImpl(getCommand(comms, commandName));
-	}
-
-	private Command<?, ?, ?> getCommand(String commsName, String commandName) {
-		Comms<?> comms = getNamedComms(commsName).comms();
-
-		return getCommand(comms, commandName);
-	}
-
-	private <T> Command<T, ?, ?> getCommand(Comms<T> comms, String commandName) {
-		return comms.getCommand(
-				comms.getCommands().filter(c -> c.toString().equals(commandName)).findAny().orElseThrow(
-						() -> commandNotFound(comms.getName(), commandName)));
-	}
-
-	private RuntimeException commandNotFound(String commsName, String commandName) {
-		return new CommsException("Command not found " + commsName + ": " + commandName);
-	}
-
-	private Map<String, Object> getCommandInfoImpl(Command<?, ?, ?> command) {
+	private Map<String, Object> getEntryInfoImpl(CommsRESTEntry entry) {
 		Map<String, Object> info = new HashMap<>();
 
-		info.put(COMMAND_ID_KEY, command.getId().toString());
-		info.put(COMMAND_OUTPUT_KEY, convertInput(command.prototype()));
+		info.put(ENTRY_ID_KEY, entry.getID());
+		info.put(ENTRY_OUTPUT_KEY, entry.getOutputData());
+		info.put(
+				ENTRY_ACTIONS_KEY,
+				entry.getActions().collect(toMap(CommsRESTAction::getID, this::getActionInfoImpl)));
 
 		return info;
 	}
 
-	private CommsRegistration getNamedComms(String name) {
-		return commsInterfaces
-				.values()
-				.stream()
-				.filter(c -> c.uid().equals(name))
-				.findAny()
-				.orElseThrow(() -> new CommsException("Comms interface not found " + name));
+	private Map<String, Object> getActionInfoImpl(CommsRESTAction action) {
+		Map<String, Object> info = new HashMap<>();
+
+		info.put(ACTION_ID_KEY, action.getID());
+		info.put(ACTION_POLLABLE_KEY, action.hasBehaviour(POLLABLE));
+		info.put(ACTION_RECEIVES_INPUT_KEY, action.hasBehaviour(RECEIVES_INPUT_DATA));
+		info.put(ACTION_SENDS_OUTPUT_KEY, action.hasBehaviour(SENDS_OUTPUT_DATA));
+		info.put(ACTION_MODIFIES_OUTPUT_KEY, action.hasBehaviour(MODIFIES_OUTPUT_DATA));
+
+		return info;
 	}
 
-	public Map<String, ? extends Object> postCommandInvocation(
+	public Map<String, Object> postActionInvocation(
 			Map<String, Object> output,
-			String commsName,
-			String commandName) {
-		Command<?, ?, ?> command = getCommand(commsName, commandName);
+			String commsID,
+			String entryID,
+			String actionID) {
+		CommsRESTEntry entry = getNamedComms(commsID).getEntry(entryID).get();
 
 		try {
-			return invokeCommand(command, output);
+			entry.getOutputData().clear();
+			entry.getOutputData().putAll(output);
+			entry.getAction(actionID).get().invoke();
+			return entry.getInputData();
 		} catch (Exception e) {
-			Map<String, String> errorMap = new HashMap<>();
+			Map<String, Object> errorMap = new HashMap<>();
 
 			String message = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
 			errorMap.put(ERROR_KEY, message);
@@ -313,52 +272,5 @@ public class CommsRESTProvider implements REST {
 
 			return errorMap;
 		}
-	}
-
-	private <I, O> Map<String, Object> invokeCommand(
-			Command<?, I, O> command,
-			Map<String, Object> output) {
-		System.out.println(convertOutput(command.prototype(), output) + " ->");
-
-		O argument = convertOutput(command.prototype(), output);
-
-		I result = command.invoke(argument);
-
-		System.out.println("<- " + convertInput(result));
-
-		return convertInput(result);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <O> O convertOutput(O prototype, Map<String, Object> output) {
-		if (output.isEmpty())
-			return null;
-
-		O convertedOutput;
-
-		try {
-			convertedOutput = (O) dtos.convert(output).to(prototype.getClass());
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new CommsException("Cannot convert to DTO", e);
-		}
-
-		return convertedOutput;
-	}
-
-	private <I> Map<String, Object> convertInput(I input) {
-		if (input == null)
-			return new HashMap<>();
-
-		Map<String, Object> convertedInput;
-
-		try {
-			convertedInput = dtos.asMap(input);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new CommsException("Cannot convert from DTO", e);
-		}
-
-		return convertedInput;
 	}
 }

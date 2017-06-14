@@ -33,6 +33,8 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SpectrumProperties {
+	SpectrumExceptionProperties exception();
+
 	Localized<String> spectrumExperimentName();
 
 	Localized<String> spectrumResultName();
@@ -40,6 +42,4 @@ public interface SpectrumProperties {
 	Localized<String> defaultSpectrumName();
 
 	Localized<String> spectrumGraphEditor();
-
-	Localized<String> experimentInterrupted();
 }

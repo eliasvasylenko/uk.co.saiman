@@ -28,14 +28,13 @@
 package uk.co.saiman.experiment;
 
 import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.LocalizedRuntimeException;
 
 /**
  * A problem with experiment configuration or processing.
  * 
  * @author Elias N Vasylenko
  */
-public class ExperimentException extends LocalizedRuntimeException {
+public class ExperimentException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -44,7 +43,7 @@ public class ExperimentException extends LocalizedRuntimeException {
 	 * @param cause
 	 *          the exception cause
 	 */
-	public ExperimentException(Localized<String> message, Throwable cause) {
+	public ExperimentException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -52,7 +51,7 @@ public class ExperimentException extends LocalizedRuntimeException {
 	 * @param message
 	 *          a {@link Localized} describing the exception
 	 */
-	public ExperimentException(Localized<String> message) {
-		this(message, null);
+	public ExperimentException(String message) {
+		super(message);
 	}
 }

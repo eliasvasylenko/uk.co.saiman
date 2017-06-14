@@ -28,12 +28,27 @@
 package uk.co.saiman.comms.rest;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface CommsREST {
-	Stream<String> getItems();
+	String getID();
 
-	CommsRESTItem getItem(String item);
+	void open();
 
-	String getText(String key, Locale locale);
+	void reset();
+
+	Stream<CommsRESTEntry> getEntries();
+
+	default Optional<CommsRESTEntry> getEntry(String entry) {
+		return getEntries().filter(e -> e.getID().equals(entry)).findAny();
+	}
+
+	String getStatus();
+
+	Optional<String> getFaultText();
+
+	String getPort();
+
+	String getLocalisedText(String key, Locale locale);
 }

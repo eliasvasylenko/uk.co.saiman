@@ -38,5 +38,5 @@ import java.lang.annotation.Target;
 public @interface Bytes {
 	int count() default 1;
 
-	Class<? extends BitConverter> converter() default BitConverter.class;
+	Class<? extends BitConverter<?>> converter() default DefaultBitConverter.class;
 }

@@ -291,7 +291,8 @@ public class ContinuousFunctionChartController {
 		}
 	}
 
-	private Range<Double> getMaxZoom(Function<ContinuousFunction<?, ?>, Range<Double>> continuousFunctionRange) {
+	private Range<Double> getMaxZoom(
+			Function<ContinuousFunction<?, ?>, Range<Double>> continuousFunctionRange) {
 		synchronized (domain) {
 			return series()
 					.map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction)
@@ -348,7 +349,9 @@ public class ContinuousFunctionChartController {
 
 			double scaleFactor = (1 / zoomAmount - 1) / 2;
 
-			setDomain(getDomain().getFrom() - scaleFactor * zoomLeft, getDomain().getTo() + scaleFactor * zoomRight);
+			setDomain(
+					getDomain().getFrom() - scaleFactor * zoomLeft,
+					getDomain().getTo() + scaleFactor * zoomRight);
 		}
 	}
 
@@ -477,7 +480,8 @@ public class ContinuousFunctionChartController {
 			ChartAnnotation<?> annotation = c.getElementAdded();
 
 			@SuppressWarnings("unchecked")
-			AnnotationHandler<Object> handler = (AnnotationHandler<Object>) annotationHandlers.get(annotation.getDataType());
+			AnnotationHandler<Object> handler = (AnnotationHandler<Object>) annotationHandlers
+					.get(annotation.getDataType());
 			Node annotationNode = handler.handle(annotation.getData());
 
 			annotationNodes.put(annotation, annotationNode);
@@ -493,7 +497,8 @@ public class ContinuousFunctionChartController {
 	private void continuousFunctionsChanged(Change<? extends ContinuousFunction<?, ?>> d) {
 		if (d.wasAdded()) {
 			ContinuousFunction<?, ?> continuousFunction = d.getElementAdded();
-			ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(continuousFunction);
+			ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(
+					continuousFunction);
 
 			series.put(continuousFunction, continuousFunctionSeries);
 			lineChart.getData().add(continuousFunctionSeries.getSeries());
@@ -518,7 +523,9 @@ public class ContinuousFunctionChartController {
 
 	private void triggerRefresh() {
 		synchronized (this.domain) {
-			boolean refreshed = series().map(ContinuousFunctionSeries::refresh).reduce(false, (a, b) -> a || b);
+			boolean refreshed = series()
+					.map(ContinuousFunctionSeries::refresh)
+					.reduce(false, (a, b) -> a || b);
 
 			if (refreshed) {
 				if (!zoomed) {
@@ -562,12 +569,13 @@ public class ContinuousFunctionChartController {
 				} else {
 					if (!xUnit.equals(functionXUnit)) {
 						Unit<?> xUnitFinal = xUnit;
-						throw new DataException(p -> p.incompatibleDomainUnits(xUnitFinal, functionXUnit));
+						throw new DataException(properties.incompatibleDomainUnits(xUnitFinal, functionXUnit));
 					}
 				}
 				yUnits.add(functionYUnit);
 
-				RangeGroup group = rangeGroups.computeIfAbsent(functionYUnit, u -> new RangeGroup(units, functionYUnit));
+				RangeGroup group = rangeGroups
+						.computeIfAbsent(functionYUnit, u -> new RangeGroup(units, functionYUnit));
 
 				group.addContinuousFunction(series.get(function));
 			}
@@ -625,10 +633,12 @@ public class ContinuousFunctionChartController {
 		for (ChartAnnotation<?> annotation : new ArrayList<>(annotations)) {
 			Node node = annotationNodes.get(annotation);
 
-			double x = getXAxis().localToParent(getXAxis().getDisplayPosition(annotation.getX()), 0).getX()
-					+ lineChart.getPadding().getLeft();
-			double y = getYAxis().localToParent(0, getYAxis().getDisplayPosition(annotation.getY())).getY()
-					+ lineChart.getPadding().getTop();
+			double x = getXAxis()
+					.localToParent(getXAxis().getDisplayPosition(annotation.getX()), 0)
+					.getX() + lineChart.getPadding().getLeft();
+			double y = getYAxis()
+					.localToParent(0, getYAxis().getDisplayPosition(annotation.getY()))
+					.getY() + lineChart.getPadding().getTop();
 
 			node.autosize();
 			node.setLayoutX(x);

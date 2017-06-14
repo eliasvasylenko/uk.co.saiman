@@ -36,6 +36,7 @@
 	osgi.enroute.rest.simple.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.web.simple.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.webconsole.xray.provider;version='[2.0.0,2.0.1)',\
+	osgi.enroute.webconsole.xray.provider;version='[2.0.0,2.0.1)',\
 	uk.co.strangeskies.jetty.logger;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.text;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.observable;version='[1.0.13,1.0.14)',\
@@ -47,6 +48,7 @@
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
+	uk.co.saiman.facebook.react.webresource;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webconsole;version=snapshot
 
