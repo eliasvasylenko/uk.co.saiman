@@ -49,6 +49,11 @@ public class SaintCommsREST implements CommsREST {
 	}
 
 	@Override
+	public String getName() {
+		return comms.getName() + " " + comms.getPort().getName();
+	}
+
+	@Override
 	public Stream<CommsRESTEntry> getEntries() {
 		return entries.values().stream();
 	}

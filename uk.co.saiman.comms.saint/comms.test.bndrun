@@ -48,6 +48,7 @@
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
+	uk.co.saiman.babel.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.webresource;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webconsole;version=snapshot

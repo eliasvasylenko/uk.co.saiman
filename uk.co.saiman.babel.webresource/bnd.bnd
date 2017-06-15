@@ -1,0 +1,33 @@
+Bundle-Name: SAI :: Babel :: Web Resource
+
+Bundle-Description: \
+	Provides web resources for Babel applications
+
+core.version = 6.24.1
+standalone.version = 6.24.0
+path = /META-INF/resources/webjars
+
+-buildpath: \
+	osgi.enroute.web.simple.provider
+
+-includeresource: \
+	@${repo;org.webjars.npm:babel-core;${core.version}}!/META-INF/resources/*,\
+	@${repo;org.webjars.npm:babel-standalone;${standalone.version}}!/META-INF/resources/*
+
+Provide-Capability: \
+\
+	osgi.enroute.webresource; \
+		osgi.enroute.webresource=/babel/core; \
+		version:Version=${core.version}; \
+		root=${path}/babel-core/${core.version},\
+\
+	osgi.enroute.webresource; \
+		osgi.enroute.webresource=/babel/standalone; \
+		version:Version=${standalone.version}; \
+		root=${path}/babel-standalone/${standalone.version}
+
+Export-Package: \
+	uk.co.saiman.babel.core,\
+	uk.co.saiman.babel.standalone
+
+Private-Package: uk.co.saiman.babel.impl

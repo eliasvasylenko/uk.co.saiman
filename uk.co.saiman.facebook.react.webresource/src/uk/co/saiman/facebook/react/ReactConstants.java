@@ -29,6 +29,5 @@ package uk.co.saiman.facebook.react;
 
 public interface ReactConstants {
   final String REACT_WEB_RESOURCE_NAME = "/facebook/react";
-  final String REACT_DOM_WEB_RESOURCE_NAME = "/facebook/react-dom";
-	final String REACT_WEB_RESOURCE_VERSION = "15.4.2";
+	final String REACT_WEB_RESOURCE_VERSION = "15.5.4";
 }

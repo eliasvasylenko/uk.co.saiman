@@ -29,54 +29,72 @@ package uk.co.saiman.comms.impl;
 
 import static uk.co.saiman.instrument.Instrument.INSTRUMENT_CATEGORY;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.framework.Version;
 
-import uk.co.saiman.facebook.react.RequireReactWebResource;
+import osgi.enroute.namespace.WebResourceNamespace;
+import uk.co.saiman.comms.rest.CommsREST;
 
-@RequireReactWebResource
-@Component(
-		name = "osgi.enroute.examples.webconsole",
-		service = Servlet.class,
-		property = "felix.webconsole.label=" + CommsWebConsolePlugin.PLUGIN)
-public class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
+class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
 	private static final long serialVersionUID = 1L;
 
-	final static String PLUGIN = "comms";
-	final static String TITLE = "Comms";
-
+	private final CommsREST rest;
 	private final String template;
 
-	public CommsWebConsolePlugin() {
-		super(PLUGIN, TITLE, INSTRUMENT_CATEGORY, new String[] { "/comms/static/sai/comms.css" });
-		template = this.readTemplateFile("/static/sai/comms.html");
+	private String bundleName;
+	private Version bundleVersion;
+
+	public CommsWebConsolePlugin(CommsREST rest) {
+		super(
+				rest.getID(),
+				rest.getName(),
+				INSTRUMENT_CATEGORY,
+				new String[] { "${pluginRoot}/static/sai/comms.css" });
+		this.rest = rest;
+		this.template = this.readTemplateFile("/static/sai/comms.html");
 	}
 
-	@Activate
 	@Override
 	public void activate(BundleContext bundleContext) {
 		super.activate(bundleContext);
-	}
-
-	@Override
-	@Deactivate
-	public void deactivate() {
-		super.deactivate();
+		this.bundleName = bundleContext.getBundle().getSymbolicName();
+		this.bundleVersion = bundleContext.getBundle().getVersion();
 	}
 
 	@Override
 	protected void renderContent(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String protocol = request.getProtocol().substring(0, request.getProtocol().indexOf('/'));
+		URL local = new URL(
+				protocol,
+				request.getLocalName(),
+				request.getLocalPort(),
+				"/" + WebResourceNamespace.NS + "/" + bundleName + "/" + bundleVersion + "/react.js");
+
+		System.out.println(local);
+
+		try (InputStream input = local.openStream()) {
+			ByteArrayOutputStream result = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = input.read(buffer)) != -1) {
+				result.write(buffer, 0, length);
+			}
+			System.out.println(result.toString("UTF-8"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		response.getWriter().append(template);
 	}
 

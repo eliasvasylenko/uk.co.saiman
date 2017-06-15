@@ -1,102 +1,17 @@
-<script type="text/javascript"
-	src="${appRoot}/res/lib/jquery.multifile-1.4.6.js"></script>
-<script type="text/javascript" src="${pluginRoot}/static/sai/comms.js"></script>
+<script src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/*.js"></script>
 <script type="text/javascript">
 	// <![CDATA[
 	var i18n = {
-		pollStop : '${comms.poll.stop}',
-		pollStart : '${comms.poll.start}'
+		command_id: '${comms.command.id}',
+		command_output : '${comms.command.output}',
+		command_input : '${comms.command.input}',
+		command_actions: '${comms.command.actions}',
+		poll_stop : '${comms.poll.stop}',
+		poll_start : '${comms.poll.start}'
 	}
-
 	//]]>
 </script>
+<script type="text/babel" src="${pluginRoot}/static/sai/comms.tsx"></script>
 
 <!-- comms table -->
-<p class="statline">&nbsp;</p>
-
-<div class="ui-widget-header ui-corner-top buttonGroup">
-	<button class="reloadButton" type="button">${reload}</button>
-</div>
-
-<table id="comms_interface_table" class="tablesorter nicetable noauto">
-	<thead>
-		<tr>
-			<th class="col_Name">${comms.name}</th>
-			<th class="col_Status">${comms.status}</th>
-			<th class="col_Channel">${comms.channel}</th>
-			<th class="col_Bundle">${comms.bundle}</th>
-			<th class="col_Actions">${comms.actions}</th>
-		</tr>
-	</thead>
-	<tbody>
-	</tbody>
-</table>
-
-<!-- commands table -->
-<div id="commands_container">
-	<span>&nbsp;</span>
-
-	<div id="filter_container"
-		class="ui-widget-header ui-corner-top buttonGroup">
-		<input class="filter" value="" title="${comms.filter.help}" /> <span
-			class="filterClear ui-icon ui-icon-close"
-			title="${comms.filter.clear}"> </span>
-		<button class="filterButton" type="button"
-			title="${comms.filter.help}">${comms.filter.apply}</button>
-
-		<button class="pollButton" type="button"></button>
-	</div>
-
-	<table id="command_table" class="tablesorter nicetable noauto">
-		<thead>
-			<tr>
-				<th class="col_Id">${comms.command.id}</th>
-				<th class="col_Output">${comms.command.output}</th>
-				<th class="col_Input">${comms.command.input}</th>
-				<th class="col_Actions">${comms.command.actions}</th>
-			</tr>
-		</thead>
-		<tbody>
-		</tbody>
-	</table>
-</div>
-
-<template id="command_parameter">
-<p id="parameter">
-	<label id="label" for="value"></label><span id="value"></span>
-</p>
-</template>
-
-<template id="comms_interface">
-<tr>
-	<td><a id="name" title="Show Details"><span
-			class="bIcon ui-icon"></span></a></td>
-	<td id="status" />
-	<td id="channel" />
-	<td><a id="bundle"></a></td>
-	<td id="actions">
-		<ul class="icons ui-widget">
-			<li title="${comms.action.open}" class="dynhover"><span id="open"
-				class="ui-icon ui-icon-play"></span></li>
-		</ul>
-		<ul class="icons ui-widget">
-			<li title="${comms.action.reset}" class="dynhover"><span id="reset"
-				class="ui-icon ui-icon-stop"></span></li>
-		</ul>
-	</td>
-</tr>
-</template>
-
-<template id="command">
-<tr>
-	<td id="id" />
-	<td id="output" />
-	<td id="input" />
-	<td id="actions">
-		<ul class="icons ui-widget">
-			<li title="${comms.command.action.execute}" class="dynhover"><span
-				id="execute" class="ui-icon ui-icon-play"></span></li>
-		</ul>
-	</td>
-</tr>
-</template>
+<div id="comms_container"></div>

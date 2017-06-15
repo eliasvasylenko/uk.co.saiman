@@ -13,14 +13,32 @@
 	<dependencies>
 		<dependency>
 		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>babel-core</artifactId>
+		    <version>6.24.1</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>babel-standalone</artifactId>
+		    <version>6.24.0</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>create-react-class</artifactId>
+		    <version>15.5.3</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>react</artifactId>
-		    <version>15.4.2</version>
+		    <version>15.5.4</version>
 		</dependency>
 
 		<dependency>
 		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>react-dom</artifactId>
-		    <version>15.4.2</version>
+		    <version>15.5.4</version>
 		</dependency>
 
 		<dependency>

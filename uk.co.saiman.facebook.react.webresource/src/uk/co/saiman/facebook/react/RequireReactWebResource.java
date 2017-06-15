@@ -45,7 +45,7 @@ import osgi.enroute.namespace.WebResourceNamespace;
 				+ REACT_WEB_RESOURCE_VERSION + "})")
 @Retention(RetentionPolicy.CLASS)
 public @interface RequireReactWebResource {
-	String[] resource() default { "react.js", "react-dom.js" };
+	String[] resource() default "dist/react.min.js";
 
-	int priority() default 1000;
+	int priority() default 500;
 }

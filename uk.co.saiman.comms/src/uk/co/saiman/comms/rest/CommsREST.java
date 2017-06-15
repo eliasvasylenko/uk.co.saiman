@@ -34,6 +34,8 @@ import java.util.stream.Stream;
 public interface CommsREST {
 	String getID();
 
+	String getName();
+
 	void open();
 
 	void reset();
