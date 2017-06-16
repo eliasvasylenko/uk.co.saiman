@@ -102,3 +102,8 @@ Import-Package:\
 ## Fix warnings
 -fixupmessages.res: "Bndtools: Found source folder 'res' that is not on bnd's source path 'src'"
 -fixupmessages.sub: "Eclipse: The Bundle Symbolic * is a sub-bundle *.bnd but uses the project name"
+
+# Once a baseline release has been made this should point to it, and the local repo copy removed
+-pluginpath ${build}/local/uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar;
+-plugin uk.co.saiman.babel.transpiler.MakeTranspiled
+-make: (*).js; type=transpile; source="$1.tsx"; presets="react"

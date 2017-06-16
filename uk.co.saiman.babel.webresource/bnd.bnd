@@ -29,5 +29,3 @@ Provide-Capability: \
 Export-Package: \
 	uk.co.saiman.babel.core,\
 	uk.co.saiman.babel.standalone
-
-Private-Package: uk.co.saiman.babel.impl

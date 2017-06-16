@@ -21,4 +21,5 @@ Private-Package: \
 	uk.co.saiman.webconsole
 
 -includeresource: \
-	res=res
+	res=res,\
+	res/sai-web-console.js=res-transpile/sai-web-console.js

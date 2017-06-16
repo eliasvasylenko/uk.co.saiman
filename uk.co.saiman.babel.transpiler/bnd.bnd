@@ -1,0 +1,19 @@
+Bundle-Name: SAI :: Babel :: Transpiler
+
+-buildpath: \
+	uk.co.saiman.babel.webresource,\
+	biz.aQute.bndlib;version=latest
+
+-dependson: \
+	uk.co.saiman.babel.webresource
+-includeresource: \
+	@${repo;uk.co.saiman.babel.webresource;snapshot}!/META-INF/resources/webjars/babel-standalone/*
+
+Private-Package: \
+	uk.co.saiman.babel.standalone
+
+Import-Package: \
+	*
+
+Export-Package: \
+	uk.co.saiman.babel.transpiler

@@ -38,7 +38,7 @@ import org.osgi.service.http.NamespaceException;
 @Component(property = Constants.SERVICE_RANKING + ":Integer=" + 2000)
 public class SaiBrandingPlugin implements BrandingPlugin {
 	private static final String APP_ROOT_PATH = "/system/console";
-	private static final String RESOURCE_ALIAS_PATH = "/sai-res";
+	private static final String RESOURCE_ALIAS_PATH = "/res/sai";
 	private static final String RESOURCE_NAME_PATH = "/res";
 
 	private static final String VENDOR_NAME = "Scientific Analysis Instruments";

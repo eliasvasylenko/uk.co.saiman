@@ -29,10 +29,7 @@ package uk.co.saiman.comms.impl;
 
 import static uk.co.saiman.instrument.Instrument.INSTRUMENT_CATEGORY;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +39,6 @@ import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 
-import osgi.enroute.namespace.WebResourceNamespace;
 import uk.co.saiman.comms.rest.CommsREST;
 
 class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
@@ -59,9 +55,9 @@ class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
 				rest.getID(),
 				rest.getName(),
 				INSTRUMENT_CATEGORY,
-				new String[] { "${pluginRoot}/static/sai/comms.css" });
+				new String[] { "${pluginRoot}/res/sai/comms.css" });
 		this.rest = rest;
-		this.template = this.readTemplateFile("/static/sai/comms.html");
+		this.template = this.readTemplateFile("/res/sai/comms.html");
 	}
 
 	@Override
@@ -74,27 +70,6 @@ class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
 	@Override
 	protected void renderContent(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String protocol = request.getProtocol().substring(0, request.getProtocol().indexOf('/'));
-		URL local = new URL(
-				protocol,
-				request.getLocalName(),
-				request.getLocalPort(),
-				"/" + WebResourceNamespace.NS + "/" + bundleName + "/" + bundleVersion + "/react.js");
-
-		System.out.println(local);
-
-		try (InputStream input = local.openStream()) {
-			ByteArrayOutputStream result = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int length;
-			while ((length = input.read(buffer)) != -1) {
-				result.write(buffer, 0, length);
-			}
-			System.out.println(result.toString("UTF-8"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		response.getWriter().append(template);
 	}
 

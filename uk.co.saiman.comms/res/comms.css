@@ -1,0 +1,50 @@
+#optionalData {
+	margin: 0;
+	padding: 0;
+}
+
+.filterClear {
+	display: inline-block;
+	vertical-align: middle;
+}
+.bIcon, .bName {
+	display: inline-block;
+}
+.bIcon {
+	float: left;
+}
+
+.ui-state-info-text {
+	color: grey;
+}
+
+.dataTable table {
+	width: 100%;
+}
+.dataTable input[type="text"] {
+	width: 100%;
+}
+
+.filterClear {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+#filter_container {
+	text-align: left;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+#filter_container .pollButton {
+	float: right;
+}
+
+#command_parameters { display: table; }
+#command_parameters #parameter { display: table-row; }
+#command_parameters #label { display: table-cell; }
+#command_parameters #value {
+	display: table-cell;
+	width: 100%;
+	padding-left: 1em;
+}
+#command_parameters #value input[type="text"] { width: 100%; }

@@ -25,7 +25,8 @@ Bundle-Name: SAI :: Comms
 	@${repo;com.fazecast:jSerialComm}!/OSX/*,\
 	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
 	l10n,\
-	{static/sai=static}
+	{res/sai=res},\
+	res/sai/comms.js=res-transpile/comms.js
 
 Import-Package: \
 	*
