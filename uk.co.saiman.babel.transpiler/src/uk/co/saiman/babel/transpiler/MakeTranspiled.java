@@ -89,8 +89,8 @@ public class MakeTranspiled implements MakePlugin {
 
 		return transpile(
 				builder.getFile(source).toPath(),
-				plugins == null ? new String[] {} : plugins.split(","),
-				presets == null ? new String[] {} : presets.split(","));
+				plugins == null ? new String[] {} : plugins.trim().split("\\s*,\\s*"),
+				presets == null ? new String[] {} : presets.trim().split("\\s*,\\s*"));
 	}
 
 	private Resource transpile(Path source, String[] plugins, String[] presets) throws Exception {
