@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.comms.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -43,63 +43,63 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.babel.standalone.RequireBabelStandaloneWebResource;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.facebook.react.RequireReactWebResource;
 import uk.co.saiman.facebook.react.createclass.RequireReactCreateClassWebResource;
 import uk.co.saiman.facebook.react.dom.RequireReactDOMWebResource;
+import uk.co.saiman.requirejs.RequireRequireJSWebResource;
 
+@RequireRequireJSWebResource
 @RequireReactWebResource
 @RequireReactDOMWebResource
 @RequireReactCreateClassWebResource
-@RequireBabelStandaloneWebResource
 @Component
 public class CommsWebConsolePluginManager {
-	static final String WEBCONSOLE_LABEL = "felix.webconsole.label";
+  static final String WEBCONSOLE_LABEL = "felix.webconsole.label";
 
-	private final Map<CommsREST, CommsWebConsolePlugin> restClasses = new HashMap<>();
-	private final Map<Servlet, ServiceRegistration<Servlet>> serviceRegistrations = new HashMap<>();
-	private BundleContext context;
+  private final Map<CommsREST, CommsWebConsolePlugin> restClasses = new HashMap<>();
+  private final Map<Servlet, ServiceRegistration<Servlet>> serviceRegistrations = new HashMap<>();
+  private BundleContext context;
 
-	@Activate
-	synchronized void activate(BundleContext context) {
-		this.context = context;
-		restClasses.entrySet().stream().forEach(e -> register(e.getKey(), e.getValue()));
-	}
+  @Activate
+  synchronized void activate(BundleContext context) {
+    this.context = context;
+    restClasses.entrySet().stream().forEach(e -> register(e.getKey(), e.getValue()));
+  }
 
-	void register(CommsREST comms, CommsWebConsolePlugin plugin) {
-		Dictionary<String, Object> properties = new Hashtable<>();
-		properties.put(WEBCONSOLE_LABEL, comms.getID());
+  void register(CommsREST comms, CommsWebConsolePlugin plugin) {
+    Dictionary<String, Object> properties = new Hashtable<>();
+    properties.put(WEBCONSOLE_LABEL, comms.getID());
 
-		ServiceRegistration<Servlet> registration = context
-				.registerService(Servlet.class, plugin, properties);
-		plugin.activate(context);
+    ServiceRegistration<Servlet> registration = context
+        .registerService(Servlet.class, plugin, properties);
+    plugin.activate(context);
 
-		serviceRegistrations.put(plugin, registration);
-	}
+    serviceRegistrations.put(plugin, registration);
+  }
 
-	@Reference(policy = DYNAMIC, policyOption = GREEDY)
-	synchronized void addComms(CommsREST comms) {
-		try {
-			CommsWebConsolePlugin restService = new CommsWebConsolePlugin(comms);
-			restClasses.put(comms, restService);
+  @Reference(policy = DYNAMIC, cardinality = MULTIPLE)
+  synchronized void addComms(CommsREST comms) {
+    try {
+      CommsWebConsolePlugin restService = new CommsWebConsolePlugin(comms);
+      restClasses.put(comms, restService);
 
-			if (context != null) {
-				register(comms, restService);
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-			throw t;
-		}
-	}
+      if (context != null) {
+        register(comms, restService);
+      }
+    } catch (Throwable t) {
+      t.printStackTrace();
+      throw t;
+    }
+  }
 
-	synchronized void removeComms(CommsREST comms) {
-		CommsWebConsolePlugin plugin = restClasses.remove(comms);
-		ServiceRegistration<?> registration = serviceRegistrations.remove(plugin);
+  synchronized void removeComms(CommsREST comms) {
+    CommsWebConsolePlugin plugin = restClasses.remove(comms);
+    ServiceRegistration<?> registration = serviceRegistrations.remove(plugin);
 
-		if (registration != null) {
-			registration.unregister();
-			plugin.deactivate();
-		}
-	}
+    if (registration != null) {
+      registration.unregister();
+      plugin.deactivate();
+    }
+  }
 }

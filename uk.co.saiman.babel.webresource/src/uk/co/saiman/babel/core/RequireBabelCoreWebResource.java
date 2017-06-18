@@ -28,6 +28,7 @@
 package uk.co.saiman.babel.core;
 
 import static uk.co.saiman.babel.core.BabelCoreConstants.BABEL_CORE_WEB_RESOURCE_NAME;
+import static uk.co.saiman.babel.core.BabelCoreConstants.BABEL_CORE_WEB_RESOURCE_VERSION;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,12 +40,12 @@ import osgi.enroute.namespace.WebResourceNamespace;
  * A Web Resource that provides Babel Core javascript files.
  */
 @RequireCapability(
-		ns = WebResourceNamespace.NS,
-		filter = "(&(" + WebResourceNamespace.NS + "=" + BABEL_CORE_WEB_RESOURCE_NAME + ")${frange;"
-				+ BabelCoreConstants.BABEL_CORE_WEB_RESOURCE_VERSION + "})")
+    ns = WebResourceNamespace.NS,
+    filter = "(&(" + WebResourceNamespace.NS + "=" + BABEL_CORE_WEB_RESOURCE_NAME + ")${frange;"
+        + BABEL_CORE_WEB_RESOURCE_VERSION + "})")
 @Retention(RetentionPolicy.CLASS)
 public @interface RequireBabelCoreWebResource {
-	String[] resource() default {};
+  String[] resource() default {};
 
-	int priority() default 1000;
+  int priority() default 1000;
 }

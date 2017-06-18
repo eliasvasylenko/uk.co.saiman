@@ -27,9 +27,18 @@
  */
 package uk.co.saiman.facebook.react.dom;
 
-import uk.co.saiman.facebook.react.ReactConstants;
+import static uk.co.saiman.facebook.react.dom.ReactDOMConstants.REACT_DOM_WEB_RESOURCE_NAME;
+import static uk.co.saiman.facebook.react.dom.ReactDOMConstants.REACT_DOM_WEB_RESOURCE_VERSION;
 
+import aQute.bnd.annotation.headers.ProvideCapability;
+import osgi.enroute.namespace.WebResourceNamespace;
+
+@ProvideCapability(
+    ns = WebResourceNamespace.NS,
+    version = REACT_DOM_WEB_RESOURCE_VERSION,
+    value = ("root=/META-INF/resources/webjars/react-dom/" + REACT_DOM_WEB_RESOURCE_VERSION) + ";"
+        + (WebResourceNamespace.NS + "=" + REACT_DOM_WEB_RESOURCE_NAME))
 public interface ReactDOMConstants {
-	final String REACT_DOM_WEB_RESOURCE_NAME = "/facebook/react-dom";
-	final String REACT_DOM_WEB_RESOURCE_VERSION = ReactConstants.REACT_WEB_RESOURCE_VERSION;
+  final String REACT_DOM_WEB_RESOURCE_NAME = "/facebook/react-dom";
+  final String REACT_DOM_WEB_RESOURCE_VERSION = "15.5.4";
 }

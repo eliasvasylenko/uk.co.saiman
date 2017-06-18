@@ -42,40 +42,40 @@ import org.osgi.framework.Version;
 import uk.co.saiman.comms.rest.CommsREST;
 
 class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private final CommsREST rest;
-	private final String template;
+  private final CommsREST rest;
+  private final String template;
 
-	private String bundleName;
-	private Version bundleVersion;
+  private String bundleName;
+  private Version bundleVersion;
 
-	public CommsWebConsolePlugin(CommsREST rest) {
-		super(
-				rest.getID(),
-				rest.getName(),
-				INSTRUMENT_CATEGORY,
-				new String[] { "${pluginRoot}/res/sai/comms.css" });
-		this.rest = rest;
-		this.template = this.readTemplateFile("/res/sai/comms.html");
-	}
+  public CommsWebConsolePlugin(CommsREST rest) {
+    super(
+        rest.getID(),
+        rest.getName(),
+        INSTRUMENT_CATEGORY,
+        new String[] { "${pluginRoot}/res/sai/comms.css" });
+    this.rest = rest;
+    this.template = this.readTemplateFile("/res/sai/comms.html");
+  }
 
-	@Override
-	public void activate(BundleContext bundleContext) {
-		super.activate(bundleContext);
-		this.bundleName = bundleContext.getBundle().getSymbolicName();
-		this.bundleVersion = bundleContext.getBundle().getVersion();
-	}
+  @Override
+  public void activate(BundleContext bundleContext) {
+    super.activate(bundleContext);
+    this.bundleName = bundleContext.getBundle().getSymbolicName();
+    this.bundleVersion = bundleContext.getBundle().getVersion();
+  }
 
-	@Override
-	protected void renderContent(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		response.getWriter().append(template);
-	}
+  @Override
+  protected void renderContent(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    response.getWriter().append(template);
+  }
 
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		System.out.println(req.getParts());
-	}
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    System.out.println(req.getParts());
+  }
 }

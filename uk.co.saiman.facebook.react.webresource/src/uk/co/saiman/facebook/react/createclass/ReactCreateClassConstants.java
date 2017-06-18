@@ -27,7 +27,19 @@
  */
 package uk.co.saiman.facebook.react.createclass;
 
+import static uk.co.saiman.facebook.react.createclass.ReactCreateClassConstants.REACT_CREATE_CLASS_WEB_RESOURCE_NAME;
+import static uk.co.saiman.facebook.react.createclass.ReactCreateClassConstants.REACT_CREATE_CLASS_WEB_RESOURCE_VERSION;
+
+import aQute.bnd.annotation.headers.ProvideCapability;
+import osgi.enroute.namespace.WebResourceNamespace;
+
+@ProvideCapability(
+    ns = WebResourceNamespace.NS,
+    version = REACT_CREATE_CLASS_WEB_RESOURCE_VERSION,
+    value = ("root=/META-INF/resources/webjars/create-react-class/"
+        + REACT_CREATE_CLASS_WEB_RESOURCE_VERSION) + ";"
+        + (WebResourceNamespace.NS + "=" + REACT_CREATE_CLASS_WEB_RESOURCE_NAME))
 public interface ReactCreateClassConstants {
-	final String REACT_CREATE_CLASS_WEB_RESOURCE_NAME = "/facebook/create-react-class";
-	final String REACT_CREATE_CLASS_WEB_RESOURCE_VERSION = "15.5.3";
+  final String REACT_CREATE_CLASS_WEB_RESOURCE_NAME = "/facebook/create-react-class";
+  final String REACT_CREATE_CLASS_WEB_RESOURCE_VERSION = "15.5.3";
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<repository increment="1497624254855" name="Local Index" xmlns="http://www.osgi.org/xmlns/repository/v1.0.0">
+<repository increment="1497791121000" name="Local Index" xmlns="http://www.osgi.org/xmlns/repository/v1.0.0">
   <resource>
     <capability namespace="osgi.identity">
       <attribute name="osgi.identity" value="bndtools.runtime.eclipse.applaunch"/>
@@ -34,27 +34,27 @@
     <capability namespace="osgi.identity">
       <attribute name="osgi.identity" value="uk.co.saiman.babel.transpiler"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" type="Version" value="1.0.0.201706161444"/>
+      <attribute name="version" type="Version" value="1.0.0.201706181304"/>
     </capability>
     <capability namespace="osgi.content">
-      <attribute name="osgi.content" value="a41bf984b4c24bdc5b3a44a8b236b87fb92a4b9ae53713eb0e78563fba4bcadc"/>
+      <attribute name="osgi.content" value="8b9a0ee73a4305a5817d3c55ce10725ea94729464b5aae8374dd84b0b9cfba4d"/>
       <attribute name="url" value="uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar"/>
-      <attribute name="size" type="Long" value="629210"/>
+      <attribute name="size" type="Long" value="629186"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
       <attribute name="osgi.wiring.bundle" value="uk.co.saiman.babel.transpiler"/>
-      <attribute name="bundle-version" type="Version" value="1.0.0.201706161444"/>
+      <attribute name="bundle-version" type="Version" value="1.0.0.201706181304"/>
     </capability>
     <capability namespace="osgi.wiring.host">
       <attribute name="osgi.wiring.host" value="uk.co.saiman.babel.transpiler"/>
-      <attribute name="bundle-version" type="Version" value="1.0.0.201706161444"/>
+      <attribute name="bundle-version" type="Version" value="1.0.0.201706181304"/>
     </capability>
     <capability namespace="osgi.wiring.package">
       <attribute name="osgi.wiring.package" value="uk.co.saiman.babel.transpiler"/>
       <attribute name="version" type="Version" value="1.0.0"/>
       <attribute name="bundle-symbolic-name" value="uk.co.saiman.babel.transpiler"/>
-      <attribute name="bundle-version" type="Version" value="1.0.0.201706161444"/>
+      <attribute name="bundle-version" type="Version" value="1.0.0.201706181304"/>
       <directive name="uses" value="aQute.bnd.osgi,aQute.bnd.service"/>
     </capability>
     <requirement namespace="osgi.wiring.package">

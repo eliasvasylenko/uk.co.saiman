@@ -27,7 +27,18 @@
  */
 package uk.co.saiman.facebook.react;
 
+import static uk.co.saiman.facebook.react.ReactConstants.REACT_WEB_RESOURCE_NAME;
+import static uk.co.saiman.facebook.react.ReactConstants.REACT_WEB_RESOURCE_VERSION;
+
+import aQute.bnd.annotation.headers.ProvideCapability;
+import osgi.enroute.namespace.WebResourceNamespace;
+
+@ProvideCapability(
+    ns = WebResourceNamespace.NS,
+    version = REACT_WEB_RESOURCE_VERSION,
+    value = ("root=/META-INF/resources/webjars/react/" + REACT_WEB_RESOURCE_VERSION) + ";"
+        + (WebResourceNamespace.NS + "=" + REACT_WEB_RESOURCE_NAME))
 public interface ReactConstants {
   final String REACT_WEB_RESOURCE_NAME = "/facebook/react";
-	final String REACT_WEB_RESOURCE_VERSION = "15.5.4";
+  final String REACT_WEB_RESOURCE_VERSION = "15.5.4";
 }

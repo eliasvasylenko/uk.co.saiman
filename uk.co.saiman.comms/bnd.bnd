@@ -1,9 +1,9 @@
 Bundle-Name: SAI :: Comms
 
 -buildpath: \
-	uk.co.saiman.babel.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.webresource;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.requirejs.webresource;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 \
 	uk.co.strangeskies.collections;version=latest,\
@@ -26,7 +26,10 @@ Bundle-Name: SAI :: Comms
 	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
 	l10n,\
 	{res/sai=res},\
-	res/sai/comms.js=res-transpile/comms.js
+	res/sai/comms.js=res-transpile/comms.js,\
+	res/sai/actions.js=res-transpile/actions.js,\
+	res/sai/reducers.js=res-transpile/reducers.js,\
+	res/sai/ui.js=res-transpile/ui.js
 
 Import-Package: \
 	*

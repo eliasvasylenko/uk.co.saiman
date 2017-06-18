@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.comms.saint.impl;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
@@ -58,116 +59,116 @@ import uk.co.strangeskies.log.Log.Level;
 
 @Designate(ocd = SaintHardwareSimulationConfiguration.class, factory = true)
 @Component(
-		name = SaintHardwareSimulation.CONFIGURATION_PID,
-		configurationPid = SaintHardwareSimulation.CONFIGURATION_PID,
-		immediate = true)
+    name = SaintHardwareSimulation.CONFIGURATION_PID,
+    configurationPid = SaintHardwareSimulation.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
 public class SaintHardwareSimulation {
-	static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint.simulation";
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint.simulation";
 
-	@SuppressWarnings("javadoc")
-	@ObjectClassDefinition(
-			id = CONFIGURATION_PID,
-			name = "SAINT Comms Hardware Simulation Configuration",
-			description = "A configuration for a simulation of the SAINT instrument comms board")
-	public @interface SaintHardwareSimulationConfiguration {
-		@AttributeDefinition(
-				name = "Serial Port",
-				description = "The serial port for the hardware simulation")
-		String serialPort();
-	}
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "SAINT Comms Hardware Simulation Configuration",
+      description = "A configuration for a simulation of the SAINT instrument comms board")
+  public @interface SaintHardwareSimulationConfiguration {
+    @AttributeDefinition(
+        name = "Serial Port",
+        description = "The serial port for the hardware simulation")
+    String serialPort();
+  }
 
-	@Reference(cardinality = OPTIONAL)
-	Log log;
+  @Reference(cardinality = OPTIONAL)
+  Log log;
 
-	@Reference(policy = STATIC, policyOption = GREEDY)
-	SerialPorts serialPorts;
-	private SerialPort port;
-	private CommsStream stream;
+  @Reference(policy = STATIC, policyOption = GREEDY)
+  SerialPorts serialPorts;
+  private SerialPort port;
+  private CommsStream stream;
 
-	private List<Byte> memory = new ArrayList<>();
+  private List<Byte> memory = new ArrayList<>();
 
-	@Activate
-	void activate(SaintHardwareSimulationConfiguration configuration) throws IOException {
-		configure(configuration);
-	}
+  @Activate
+  void activate(SaintHardwareSimulationConfiguration configuration) throws IOException {
+    configure(configuration);
+  }
 
-	@Modified
-	void configure(SaintHardwareSimulationConfiguration configuration) throws IOException {
-		setPort(configuration.serialPort());
-	}
+  @Modified
+  void configure(SaintHardwareSimulationConfiguration configuration) throws IOException {
+    setPort(configuration.serialPort());
+  }
 
-	@Deactivate
-	void deactivate() throws IOException {
-		closePort();
-	}
+  @Deactivate
+  void deactivate() throws IOException {
+    closePort();
+  }
 
-	private synchronized void setPort(String serialPort) throws IOException {
-		closePort();
-		port = serialPorts.getPort(serialPort);
-		openPort();
-	}
+  private synchronized void setPort(String serialPort) throws IOException {
+    closePort();
+    port = serialPorts.getPort(serialPort);
+    openPort();
+  }
 
-	private synchronized void openPort() {
-		ByteBuffer messageBuffer = ByteBuffer.allocate(SaintComms.MESSAGE_SIZE);
+  private synchronized void openPort() {
+    ByteBuffer messageBuffer = ByteBuffer.allocate(SaintComms.MESSAGE_SIZE);
 
-		stream = port.openStream(SaintComms.MESSAGE_SIZE);
-		stream.addObserver(buffer -> {
-			do {
-				boolean filled = false;
-				do {
-					messageBuffer.put(buffer.get());
-					filled = !messageBuffer.hasRemaining();
-				} while (!filled && buffer.hasRemaining());
+    stream = port.openStream(SaintComms.MESSAGE_SIZE);
+    stream.addObserver(buffer -> {
+      do {
+        boolean filled = false;
+        do {
+          messageBuffer.put(buffer.get());
+          filled = !messageBuffer.hasRemaining();
+        } while (!filled && buffer.hasRemaining());
 
-				if (filled) {
-					messageBuffer.flip();
-					receiveMessage(messageBuffer);
-					messageBuffer.clear();
-				}
-			} while (buffer.hasRemaining());
-		});
-	}
+        if (filled) {
+          messageBuffer.flip();
+          receiveMessage(messageBuffer);
+          messageBuffer.clear();
+        }
+      } while (buffer.hasRemaining());
+    });
+  }
 
-	private synchronized void closePort() throws IOException {
-		if (stream != null) {
-			stream.close();
-			stream = null;
-		}
-	}
+  private synchronized void closePort() throws IOException {
+    if (stream != null) {
+      stream.close();
+      stream = null;
+    }
+  }
 
-	private void receiveMessage(ByteBuffer messageBuffer) {
-		SaintCommandType command = fromByte(messageBuffer.get());
-		int address = messageBuffer.get() & 0xFF;
-		byte checksum = messageBuffer.get();
-		byte data = messageBuffer.get();
+  private void receiveMessage(ByteBuffer messageBuffer) {
+    SaintCommandType command = fromByte(messageBuffer.get());
+    int address = messageBuffer.get() & 0xFF;
+    byte checksum = messageBuffer.get();
+    byte data = messageBuffer.get();
 
-		while (address >= memory.size()) {
-			memory.add((byte) 0);
-		}
+    while (address >= memory.size()) {
+      memory.add((byte) 0);
+    }
 
-		switch (command) {
-		case INPUT:
-			data = memory.get(address);
-			break;
+    switch (command) {
+    case INPUT:
+      data = memory.get(address);
+      break;
 
-		case OUTPUT:
-			memory.set(address, data);
-			break;
+    case OUTPUT:
+      memory.set(address, data);
+      break;
 
-		default:
-		}
+    default:
+    }
 
-		ByteBuffer responseBuffer = ByteBuffer.allocate(4);
-		responseBuffer.put((byte) 0);
-		responseBuffer.put((byte) 0);
-		responseBuffer.put(checksum);
-		responseBuffer.put(data);
+    ByteBuffer responseBuffer = ByteBuffer.allocate(4);
+    responseBuffer.put((byte) 0);
+    responseBuffer.put((byte) 0);
+    responseBuffer.put(checksum);
+    responseBuffer.put(data);
 
-		try {
-			responseBuffer.flip();
-			stream.write(responseBuffer);
-		} catch (IOException e) {
-			log.log(Level.ERROR, new CommsException("Unable to send simulated hardware response", e));
-		}
-	}
+    try {
+      responseBuffer.flip();
+      stream.write(responseBuffer);
+    } catch (IOException e) {
+      log.log(Level.ERROR, new CommsException("Unable to send simulated hardware response", e));
+    }
+  }
 }

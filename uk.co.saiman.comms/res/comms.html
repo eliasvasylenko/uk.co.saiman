@@ -1,14 +1,26 @@
-<script src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/*.js"></script>
-<script type="text/javascript">
-	// <![CDATA[
-	var i18n = {
-		command_id: '\${comms.command.id}',
-		command_output : '\${comms.command.output}',
-		command_input : '\${comms.command.input}',
-		command_actions: '\${comms.command.actions}',
-		poll_stop : '\${comms.poll.stop}',
-		poll_start : '\${comms.poll.start}'
-	}
-	//]]>
+<script data-main="comms"
+  src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/require.js"></script>
+<script>
+  var i18n = {
+    info_header : '\${comms.info.header}',
+    name : '\${comms.name}',
+    status : '\${comms.status}',
+    channel : '\${comms.channel}',
+    bundle : '\${comms.bundle}',
+    actions : '\${comms.actions}',
+    command_id : '\${command.id}',
+    command_output : '\${command.output}',
+    command_input : '\${command.input}',
+    command_actions : '\${command.actions}',
+    poll_stop : '\${command.poll.stop}',
+    poll_start : '\${command.poll.start}'
+  };
+  require.config({
+    baseUrl : "${pluginRoot}/res/sai",
+    paths : {
+      "app" : "${appRoot}/res/sai",
+      "react" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react.min",
+      "react-dom" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react-dom.min"
+    },
+  });
 </script>
-<script type="text/javascript" src="${pluginRoot}/res/sai/comms.js"></script>

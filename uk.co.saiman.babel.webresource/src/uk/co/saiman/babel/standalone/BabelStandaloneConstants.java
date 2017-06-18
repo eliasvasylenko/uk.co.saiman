@@ -27,7 +27,19 @@
  */
 package uk.co.saiman.babel.standalone;
 
+import static uk.co.saiman.babel.standalone.BabelStandaloneConstants.BABEL_STANDALONE_WEB_RESOURCE_NAME;
+import static uk.co.saiman.babel.standalone.BabelStandaloneConstants.BABEL_STANDALONE_WEB_RESOURCE_VERSION;
+
+import aQute.bnd.annotation.headers.ProvideCapability;
+import osgi.enroute.namespace.WebResourceNamespace;
+
+@ProvideCapability(
+    ns = WebResourceNamespace.NS,
+    version = BABEL_STANDALONE_WEB_RESOURCE_VERSION,
+    value = ("root=/META-INF/resources/webjars/babel-standalone/"
+        + BABEL_STANDALONE_WEB_RESOURCE_VERSION) + ";"
+        + (WebResourceNamespace.NS + "=" + BABEL_STANDALONE_WEB_RESOURCE_NAME))
 public interface BabelStandaloneConstants {
   final String BABEL_STANDALONE_WEB_RESOURCE_NAME = "/babel/standalone";
-	final String BABEL_STANDALONE_WEB_RESOURCE_VERSION = "6.24.0";
+  final String BABEL_STANDALONE_WEB_RESOURCE_VERSION = "6.24.0";
 }

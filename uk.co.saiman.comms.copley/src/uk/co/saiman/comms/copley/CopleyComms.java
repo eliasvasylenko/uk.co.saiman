@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.comms.Comms;
 
-public interface CopleyComms<T extends Enum<T>> extends Comms<CopleyCommand> {
+public interface CopleyComms<T extends Enum<T>> extends Comms {
 	String ID = "Copley Comms";
 	int HEADER_SIZE = 4;
 

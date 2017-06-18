@@ -26,26 +26,25 @@ copyright = Copyright (c) ${copyright.holder.name} (2015, ${copyright.year}). Al
 saiman-version:					1.0.0
 saiman-version-ceiling:			2.0.0
 Bundle-Version:					${saiman-version}.${tstamp}
+Bundle-Localization:			bundle
 
 Bundle-Vendor:					Scientific Analysis Instruments Limited http://www.saiman.co.uk/
 Bundle-Copyright:				${copyright}
-Bundle-License:\
-	GPL;\
-	link					=	http://www.gnu.org/licenses/
 Bundle-DocURL:					https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki
+Bundle-License:\
+	GPL; \
+	link = http://www.gnu.org/licenses/
 Bundle-SCM:\
-	url						=	https://github.com/Scientific-Analysis-Instruments/uk.co.saiman, \
-	connection				=	scm:git:https://github.com/Scientific-Analysis-Instruments/uk.co.saiman.git, \
-	developerConnection		=	scm:git:git@github.com:Scientific-Analysis-Instruments/uk.co.saiman.git
+	url = https://github.com/Scientific-Analysis-Instruments/uk.co.saiman, \
+	connection = scm:git:https://github.com/Scientific-Analysis-Instruments/uk.co.saiman.git, \
+	developerConnection = scm:git:git@github.com:Scientific-Analysis-Instruments/uk.co.saiman.git
 Bundle-Developers:\
 	eliasvasylenko;\
-		email				=	eliasvasylenko@gmail.com; \
-		name				=	"Elias N Vasylenko"; \
-		organization		=	"${copyright.holder.name}"; \
-		organizationUrl		=	http://www.saiman.co.uk; \
-		roles				=	"architect,developer"
-
-Bundle-Localization:			bundle
+		email = eliasvasylenko@gmail.com; \
+		name = "Elias N Vasylenko"; \
+		organization = "${copyright.holder.name}"; \
+		organizationUrl = http://www.saiman.co.uk; \
+		roles = "architect,developer"
 
 # Disable ALL Eclipse split package attributes, to ensure we import from the "aggregator" bundle(s).
 Import-Package:\
@@ -106,4 +105,9 @@ Import-Package:\
 # Once a baseline release has been made this should point to it, and the local repo copy removed
 -pluginpath ${build}/local/uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar;
 -plugin uk.co.saiman.babel.transpiler.MakeTranspiled
--make: (*).js; type=transpile; source="$1.tsx"; presets="react"
+-make:\
+	(*).js;\
+		type=transpile;\
+		source="$1.tsx";\
+		presets="react, es2015";\
+		plugins="transform-es2015-modules-amd, transform-object-rest-spread"

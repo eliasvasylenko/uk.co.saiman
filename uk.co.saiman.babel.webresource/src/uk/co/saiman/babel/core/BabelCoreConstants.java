@@ -27,7 +27,18 @@
  */
 package uk.co.saiman.babel.core;
 
+import static uk.co.saiman.babel.core.BabelCoreConstants.BABEL_CORE_WEB_RESOURCE_NAME;
+import static uk.co.saiman.babel.core.BabelCoreConstants.BABEL_CORE_WEB_RESOURCE_VERSION;
+
+import aQute.bnd.annotation.headers.ProvideCapability;
+import osgi.enroute.namespace.WebResourceNamespace;
+
+@ProvideCapability(
+    ns = WebResourceNamespace.NS,
+    version = BABEL_CORE_WEB_RESOURCE_VERSION,
+    value = ("root=/META-INF/resources/webjars/babel-core/" + BABEL_CORE_WEB_RESOURCE_VERSION) + ";"
+        + (WebResourceNamespace.NS + "=" + BABEL_CORE_WEB_RESOURCE_NAME))
 public interface BabelCoreConstants {
   final String BABEL_CORE_WEB_RESOURCE_NAME = "/babel/core";
-	final String BABEL_CORE_WEB_RESOURCE_VERSION = "6.24.1";
+  final String BABEL_CORE_WEB_RESOURCE_VERSION = "6.24.1";
 }
