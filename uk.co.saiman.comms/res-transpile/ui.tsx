@@ -13,7 +13,12 @@ export class CommsInformation extends ConsoleComponent {
       name: "new",
       status: "3",
       channel: "hello there mate",
-      bundle: "ok",
+      bundle: (
+        <a href="/system/console/bundles/{this.props.bundle.id}">
+          {this.props.bundle.name}
+          <span className="symName">{this.props.bundle.symbolicName}</span>
+        </a>
+      ),
       actions: (
         <span>
           <button>start_polling</button>
@@ -78,7 +83,7 @@ export class Comms extends ConsoleComponent {
   render() {
     return (
       <div id="comms">
-        <CommsInformation />
+        <CommsInformation bundle={props.bundle} />
         <Statline />
         <CommsTable />
       </div>

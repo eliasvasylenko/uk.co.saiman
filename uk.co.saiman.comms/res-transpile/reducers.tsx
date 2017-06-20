@@ -4,7 +4,11 @@ const initialState = {
   name: "...",
   status: "...",
   channel: "...",
-  bundle: "...",
+  bundle: {
+    name: "...",
+    symbolicName: "...",
+    id: -1
+  },
   commandFilter: "",
   commands: [],
   commandsById: {}
