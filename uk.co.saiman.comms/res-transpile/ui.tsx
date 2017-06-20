@@ -1,34 +1,32 @@
 import * as React from 'react';
-import { ConsoleComponent, MapTable, ArrayTable } from 'app/sai-web-console';
+import { ConsoleComponent, MapTable, ArrayTable, StatLine } from 'app/sai-web-console';
 
-export class Statline extends React.Component {
-  render() {
-    return <p export className="statline">React is working!!!</p>
-  }
-}
-
-export class CommsInformation extends ConsoleComponent {
-  render() {
-    var entries = {
-      name: "new",
-      status: "3",
-      channel: "hello there mate",
-      bundle: (
-        <a href="/system/console/bundles/{this.props.bundle.id}">
-          {this.props.bundle.name}
-          <span className="symName">{this.props.bundle.symbolicName}</span>
-        </a>
-      ),
-      actions: (
-        <span>
-          <button>start_polling</button>
-          <button>open_connection</button>
-          <button>close_connection</button>
-        </span>
-      )
-    };
-    return <MapTable header="info_header" entries={entries} />
-  }
+export const CommsInformation = ({name, connection, bundle}) => {
+  var entries = {
+    name,
+    status: connection.status,
+    channel: connection.channel,
+    bundle: (
+      <a href="/system/console/bundles/{this.props.bundle.id}">
+        {bundle.name}
+        <span className="symName">{bundle.symbolicName}</span>
+      </a>
+    ),
+    actions: (
+      <span>
+        <button>start_polling</button>
+        <button>stop_polling</button>
+        <button>open_connection</button>
+        <button>close_connection</button>
+      </span>
+    )
+  };
+  return (
+    <div id="comms_information_container">
+      <Statline status="status" />
+      <MapTable header="info_header" entries={entries} />
+    </div>
+  );
 }
 
 export class CommsTableControls extends ConsoleComponent {
@@ -44,49 +42,36 @@ export class CommsTableControls extends ConsoleComponent {
   }
 }
 
-export class CommsTableHeader extends ConsoleComponent {
-  render() {
-    return <th export className="comms_header" id={this.props.id} >{this.props.id}</th>;
-  }
-}
+export const CommsTable = ({commands}) => (
+  <div id="comms_table_container">
+    <Statline status="status" />
+    <TableControls
+      left = {
+        <FilterBox />
+      }
+      right = {
+        <button>Start polling</button>
+      } />
+    <ArrayTable
+      columns={[
+        "command_id",
+        "command_output",
+        "command_input",
+        "command_actions"
+      ]}
+      rows={commands} />
+  </div>
+)
 
-export class CommsTable extends ConsoleComponent {
-  render() {
-    return (
-      <div id="comms_table_container">
-        <CommsTableControls />
-        <ArrayTable
-          columns={[
-            "command_id",
-            "command_output",
-            "command_input",
-            "command_actions"
-          ]}
-          rows={[
-            {
-              command_id: "first",
-              command_output: "f_out",
-              command_input: "f_in"
-            },
-            {
-              command_id: "second",
-              command_output: "f_out",
-              command_actions: "actions!"
-            }
-          ]} />
-      </div>
-    );
-  }
-}
+export const Comms = ({bundle, commands}) => (
+  <div id="comms">
+    <CommsInformation bundle />
+    <CommsTable commands />
+  </div>
+)
 
-export class Comms extends ConsoleComponent {
+export class CommsContainer extends ConsoleComponent {
   render() {
-    return (
-      <div id="comms">
-        <CommsInformation bundle={props.bundle} />
-        <Statline />
-        <CommsTable />
-      </div>
-    )
+    return <Comms bundle={state.bundle} commands={state.commands} />
   }
 }

@@ -2,8 +2,10 @@ import * as actions from 'actions';
 
 const initialState = {
   name: "...",
-  status: "...",
-  channel: "...",
+  connection: {
+    channel: "...",
+    status: "..."
+  },
   bundle: {
     name: "...",
     symbolicName: "...",
