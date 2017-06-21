@@ -11,6 +11,18 @@
 	<dependencies>
 		<dependency>
 		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>redux</artifactId>
+		    <version>3.7.0</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>react-redux</artifactId>
+		    <version>5.0.5</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>requirejs</artifactId>
 		    <version>2.3.3</version>
 		</dependency>

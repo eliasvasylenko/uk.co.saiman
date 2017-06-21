@@ -25,5 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-@org.osgi.annotation.versioning.Version(uk.co.saiman.facebook.react.createclass.ReactCreateClassConstants.REACT_CREATE_CLASS_WEB_RESOURCE_VERSION)
-package uk.co.saiman.facebook.react.createclass;
+@org.osgi.annotation.versioning.Version(uk.co.saiman.redux.ReduxConstants.REDUX_WEB_RESOURCE_VERSION)
+package uk.co.saiman.redux;

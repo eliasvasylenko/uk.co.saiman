@@ -5,17 +5,14 @@ Bundle-Description: \
 
 react.version = 15.5.4
 react-dom.version = 15.5.4
-create-react-class.version = 15.5.3
 
 -buildpath: \
 	osgi.enroute.web.simple.provider
 
 -includeresource: \
 	@${repo;org.webjars.npm:react;${react.version}}!/META-INF/resources/*,\
-	@${repo;org.webjars.npm:react-dom;${react-dom.version}}!/META-INF/resources/*,\
-	@${repo;org.webjars.npm:create-react-class;${create-react-class.version}}!/META-INF/resources/*
+	@${repo;org.webjars.npm:react-dom;${react-dom.version}}!/META-INF/resources/*
 
 Export-Package:\
 	uk.co.saiman.facebook.react,\
-	uk.co.saiman.facebook.react.dom,\
-	uk.co.saiman.facebook.react.createclass
+	uk.co.saiman.facebook.react.dom

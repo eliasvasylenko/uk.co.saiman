@@ -25,27 +25,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.facebook.react.createclass;
+package uk.co.saiman.facebook.react.redux;
 
-import static uk.co.saiman.facebook.react.createclass.ReactCreateClassConstants.REACT_CREATE_CLASS_WEB_RESOURCE_NAME;
-import static uk.co.saiman.facebook.react.createclass.ReactCreateClassConstants.REACT_CREATE_CLASS_WEB_RESOURCE_VERSION;
+import static uk.co.saiman.facebook.react.redux.ReactReduxConstants.REACT_REDUX_WEB_RESOURCE_NAME;
+import static uk.co.saiman.facebook.react.redux.ReactReduxConstants.REACT_REDUX_WEB_RESOURCE_VERSION;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import aQute.bnd.annotation.headers.RequireCapability;
+import aQute.bnd.annotation.headers.ProvideCapability;
 import osgi.enroute.namespace.WebResourceNamespace;
+import uk.co.saiman.facebook.react.RequireReactWebResource;
+import uk.co.saiman.redux.RequireReduxWebResource;
 
-/**
- * A Web Resource that provides Facebook's React create-react-class dropin.
- */
-@RequireCapability(
+@RequireReactWebResource
+@RequireReduxWebResource
+@ProvideCapability(
 		ns = WebResourceNamespace.NS,
-		filter = "(&(" + WebResourceNamespace.NS + "=" + REACT_CREATE_CLASS_WEB_RESOURCE_NAME
-				+ ")${frange;" + REACT_CREATE_CLASS_WEB_RESOURCE_VERSION + "})")
-@Retention(RetentionPolicy.CLASS)
-public @interface RequireReactCreateClassWebResource {
-	String[] resource() default "create-react-class.min.js";
-
-	int priority() default 495;
+		version = REACT_REDUX_WEB_RESOURCE_VERSION,
+		value = ("root=/META-INF/resources/webjars/react-redux/" + REACT_REDUX_WEB_RESOURCE_VERSION)
+				+ ";" + (WebResourceNamespace.NS + "=" + REACT_REDUX_WEB_RESOURCE_NAME))
+public interface ReactReduxConstants {
+	final String REACT_REDUX_WEB_RESOURCE_NAME = "/facebook/react-redux";
+	final String REACT_REDUX_WEB_RESOURCE_VERSION = "5.0.5";
 }

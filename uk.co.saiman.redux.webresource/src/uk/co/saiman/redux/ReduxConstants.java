@@ -25,21 +25,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.facebook.react.createclass;
+package uk.co.saiman.redux;
 
-import static uk.co.saiman.facebook.react.createclass.ReactCreateClassConstants.REACT_CREATE_CLASS_WEB_RESOURCE_NAME;
-import static uk.co.saiman.facebook.react.createclass.ReactCreateClassConstants.REACT_CREATE_CLASS_WEB_RESOURCE_VERSION;
+import static uk.co.saiman.redux.ReduxConstants.REDUX_WEB_RESOURCE_NAME;
+import static uk.co.saiman.redux.ReduxConstants.REDUX_WEB_RESOURCE_VERSION;
 
 import aQute.bnd.annotation.headers.ProvideCapability;
 import osgi.enroute.namespace.WebResourceNamespace;
 
 @ProvideCapability(
-    ns = WebResourceNamespace.NS,
-    version = REACT_CREATE_CLASS_WEB_RESOURCE_VERSION,
-    value = ("root=/META-INF/resources/webjars/create-react-class/"
-        + REACT_CREATE_CLASS_WEB_RESOURCE_VERSION) + ";"
-        + (WebResourceNamespace.NS + "=" + REACT_CREATE_CLASS_WEB_RESOURCE_NAME))
-public interface ReactCreateClassConstants {
-  final String REACT_CREATE_CLASS_WEB_RESOURCE_NAME = "/facebook/create-react-class";
-  final String REACT_CREATE_CLASS_WEB_RESOURCE_VERSION = "15.5.3";
+		ns = WebResourceNamespace.NS,
+		version = REDUX_WEB_RESOURCE_VERSION,
+		value = ("root=/META-INF/resources/webjars/redux/" + REDUX_WEB_RESOURCE_VERSION) + ";"
+				+ (WebResourceNamespace.NS + "=" + REDUX_WEB_RESOURCE_NAME))
+public interface ReduxConstants {
+	final String REDUX_WEB_RESOURCE_NAME = "/redux/redux";
+	final String REDUX_WEB_RESOURCE_VERSION = "3.7.0";
 }

@@ -1,4 +1,4 @@
-import * as actions from 'actions';
+import * as actions from './actions';
 
 const initialState = {
   name: "...",
@@ -28,9 +28,9 @@ function executeCommand(state = {}, action) {
 
 function commsApp(state = initialState, action) {
   switch (action.type) {
-    case SET_COMMAND_FILTER:
+    case actions.SET_COMMAND_FILTER:
       return { ...state, commandFilter: action.payload}
-    case EXECUTE_COMMAND:
+    case actions.EXECUTE_COMMAND:
       return { ...state, commandsById: executeCommand(state.commandsById, action)}
     default:
       return state
