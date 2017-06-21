@@ -4,6 +4,7 @@
 
 export const SET_COMMAND_FILTER = 'SET_COMMAND_FILTER'
 export const EXECUTE_COMMAND = 'EXECUTE_COMMAND'
+export const SET_POLLING = 'SET_POLLING'
 
 /*
  * other constants
@@ -28,4 +29,8 @@ export function clearFilter() {
 
 export function executeCommand(entry, action, payload) {
   return { type: EXECUTE_COMMAND, entry, action, payload }
+}
+
+export function setPolling(polling) {
+  return { type: SET_POLLING, payload: text }
 }

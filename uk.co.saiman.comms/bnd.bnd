@@ -31,7 +31,7 @@ Bundle-Name: SAI :: Comms
 	res/sai/comms.js=res-transpile/comms.js,\
 	res/sai/actions.js=res-transpile/actions.js,\
 	res/sai/reducers.js=res-transpile/reducers.js,\
-	res/sai/comms-table.js=res-transpile/comms-table.js
+	res/sai/comms-table.js=res-transpile/comms-table.js,\
 	res/sai/comms-info.js=res-transpile/comms-info.js
 
 Import-Package: \

@@ -1,6 +1,9 @@
 import * as actions from './actions';
 
 const initialState = {
+  /*
+   * Info
+   */
   name: "...",
   connection: {
     channel: "...",
@@ -11,6 +14,11 @@ const initialState = {
     symbolicName: "...",
     id: -1
   },
+  
+  /*
+   * Commands
+   */
+  isPolling: false,
   commandFilter: "",
   commands: [],
   commandsById: {}

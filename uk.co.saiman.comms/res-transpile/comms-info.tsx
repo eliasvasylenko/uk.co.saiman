@@ -24,7 +24,7 @@ const CommsInformation = ({name, connection, bundle}) => {
   };
   return (
     <div id="comms_information_container">
-      <Statline status="status" />
+      <StatLine status="status" />
       <MapTable header="info_header" entries={entries} />
     </div>
   );
@@ -32,15 +32,20 @@ const CommsInformation = ({name, connection, bundle}) => {
 
 const mapStateToProps = state => {
   return {
-    
+    connection: state.connection,
+    bundle: state.bundle
   }
 }
 
 const mapDispatchToProps = dispatch => {
-  
+  return {
+    
+  }
 }
 
-export default CommsInformationController = connect(
+const CommsInformationController = connect(
   mapStateToProps,
   mapDispatchToProps
 )(CommsInformation)
+
+export default CommsInformationController
