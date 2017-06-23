@@ -49,7 +49,9 @@ import uk.co.saiman.facebook.react.dom.RequireReactDOMWebResource;
 import uk.co.saiman.facebook.react.redux.RequireReactReduxWebResource;
 import uk.co.saiman.redux.RequireReduxWebResource;
 import uk.co.saiman.requirejs.RequireRequireJSWebResource;
+import uk.co.saiman.webconsole.RequireSAIWebConsoleWebResource;
 
+@RequireSAIWebConsoleWebResource
 @RequireReactWebResource
 @RequireReduxWebResource
 @RequireRequireJSWebResource
@@ -83,7 +85,7 @@ public class CommsWebConsolePluginManager {
 	@Reference(policy = DYNAMIC, cardinality = MULTIPLE)
 	synchronized void addComms(CommsREST comms) {
 		try {
-			CommsWebConsolePlugin restService = new CommsWebConsolePlugin(comms);
+			CommsWebConsolePlugin restService = new CommsWebConsolePlugin(comms.getID(), comms.getName());
 			restClasses.put(comms, restService);
 
 			if (context != null) {

@@ -1,24 +1,27 @@
 <script data-main="comms"
   src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/require.js"></script>
 <script>
+  const commsRestID = "\${comms.rest.id}"
+  const commsRestName = "\${comms.rest.name}"
   var i18n = {
-    info_header : '\${comms.info.header}',
-    name : '\${comms.name}',
-    status : '\${comms.status}',
-    channel : '\${comms.channel}',
-    bundle : '\${comms.bundle}',
-    actions : '\${comms.actions}',
-    command_id : '\${command.id}',
-    command_output : '\${command.output}',
-    command_input : '\${command.input}',
-    command_actions : '\${command.actions}',
-    poll_stop : '\${command.poll.stop}',
-    poll_start : '\${command.poll.start}'
+    infoHeader : "\${comms.info.header}",
+    name : "\${comms.name}",
+    status : "\${comms.status}",
+    channel : "\${comms.channel}",
+    bundle : "\${comms.bundle}",
+    commandID : "\${command.id}",
+    commandOutput : "\${command.output}",
+    commandInput : "\${command.input}",
+    commandActions : "\${command.actions}",
+    pollStop : "\${command.poll.stop}",
+    pollStart : "\${command.poll.start}",
+    connectionOpen : "\${comms.action.open}",
+    connectionClose : "\${comms.action.close}"
   };
   require.config({
-    baseUrl : "${pluginRoot}/res/sai",
+    baseUrl : "\${pluginRoot}/res/sai",
     paths : {
-      "app" : "${appRoot}/res/sai",
+      "app" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}",
       "react" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react",
       "react-dom" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react-dom",
       "react-redux" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react-redux",

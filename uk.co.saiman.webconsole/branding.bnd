@@ -1,0 +1,15 @@
+Bundle-Name: SAI :: Web Console
+Bundle-SymbolicName: uk.co.saiman.webconsole
+
+Bundle-Description: \
+	Provides a web console for SAI system administration
+
+Fragment-Host: \
+	org.apache.felix.webconsole
+
+EnRoute-Application: \
+	system/console
+
+-includeresource: \
+	res=res,\
+	/META-INF/webconsole.properties=properties/webconsole.properties

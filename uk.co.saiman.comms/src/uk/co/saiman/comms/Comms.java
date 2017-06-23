@@ -51,12 +51,13 @@ public interface Comms {
 		 * simply indicates that it is expected to succeed. If invocation fails, the
 		 * comms channel will enter the {@link #FAULT} state.
 		 */
-		READY,
+		CLOSED,
 
 		/**
 		 * There is a problem with the comms channel. If a comms channel is in the
-		 * {@link #FAULT} state, then invocation of {@link CommsPort#openChannel()}
-		 * should either clear the fault or throw an exception describing the fault.
+		 * {@link #FAULT} state, then invocation of {@link Comms#open()} should
+		 * either clear the fault or throw an exception describing the fault,
+		 * whereas invocation of {@link Comms#reset()} should complete normally.
 		 */
 		FAULT
 	}

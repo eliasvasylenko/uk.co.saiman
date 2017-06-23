@@ -3,7 +3,7 @@ import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 
-import { ConsoleComponent } from 'app/sai-web-console'
+import { ConsoleComponent } from 'app/sai-webconsole'
 
 import commsApp from './reducers'
 import CommsInformationController from './comms-info'

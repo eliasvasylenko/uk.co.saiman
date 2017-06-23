@@ -1,0 +1,13 @@
+Bundle-Name: SAI :: Web Console :: Utilities
+
+Bundle-Description: \
+	Provides web console components and utilities for SAI system administration
+
+root: /static/sai/webconsole
+
+-includeresource: \
+	${root}/sai-webconsole.js=static/sai-webconsole.js,\
+	/META-INF/webconsole.components.properties=properties/webconsole.components.properties
+
+Export-Package: \
+	uk.co.saiman.webconsole

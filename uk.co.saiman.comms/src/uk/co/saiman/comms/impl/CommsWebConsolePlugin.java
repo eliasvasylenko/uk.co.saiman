@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.comms.impl;
 
+import static org.apache.felix.webconsole.WebConsoleUtil.getVariableResolver;
 import static uk.co.saiman.instrument.Instrument.INSTRUMENT_CATEGORY;
 
 import java.io.IOException;
@@ -35,47 +36,31 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Version;
-
-import uk.co.saiman.comms.rest.CommsREST;
 
 class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  private final CommsREST rest;
-  private final String template;
+	private static final String REST_ID = "comms.rest.id";
+	private static final String REST_NAME = "comms.rest.name";
 
-  private String bundleName;
-  private Version bundleVersion;
+	private final String template;
 
-  public CommsWebConsolePlugin(CommsREST rest) {
-    super(
-        rest.getID(),
-        rest.getName(),
-        INSTRUMENT_CATEGORY,
-        new String[] { "${pluginRoot}/res/sai/comms.css" });
-    this.rest = rest;
-    this.template = this.readTemplateFile("/res/sai/comms.html");
-  }
+	public CommsWebConsolePlugin(String id, String name) {
+		super(id, name, INSTRUMENT_CATEGORY, new String[] { "${pluginRoot}/res/sai/comms.css" });
+		this.template = this.readTemplateFile("/res/sai/comms.html");
+	}
 
-  @Override
-  public void activate(BundleContext bundleContext) {
-    super.activate(bundleContext);
-    this.bundleName = bundleContext.getBundle().getSymbolicName();
-    this.bundleVersion = bundleContext.getBundle().getVersion();
-  }
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void renderContent(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
-  @Override
-  protected void renderContent(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    response.getWriter().append(template);
-  }
+		DefaultVariableResolver component = (DefaultVariableResolver) getVariableResolver(request);
+		component.put(REST_ID, getLabel());
+		component.put(REST_NAME, getTitle());
 
-  @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    System.out.println(req.getParts());
-  }
+		response.getWriter().append(template);
+	}
 }

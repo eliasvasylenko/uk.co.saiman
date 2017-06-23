@@ -29,7 +29,7 @@ package uk.co.saiman.comms;
 
 import static uk.co.saiman.comms.Comms.CommsStatus.FAULT;
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
-import static uk.co.saiman.comms.Comms.CommsStatus.READY;
+import static uk.co.saiman.comms.Comms.CommsStatus.CLOSED;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
@@ -60,7 +60,7 @@ public abstract class CommsImpl implements Comms {
 	public CommsImpl(String name) {
 		this.name = name;
 
-		status = ObservableProperty.over(READY);
+		status = ObservableProperty.over(CLOSED);
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public abstract class CommsImpl implements Comms {
 			reset();
 		} catch (Exception e) {}
 		this.comms = comms;
-		status.set(READY);
+		status.set(CLOSED);
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public abstract class CommsImpl implements Comms {
 
 		case FAULT:
 			reset();
-		case READY:
+		case CLOSED:
 			try {
 				channel = comms.openChannel();
 				status.set(OPEN);
@@ -126,14 +126,14 @@ public abstract class CommsImpl implements Comms {
 	@Override
 	public synchronized void reset() {
 		switch (status().get()) {
-		case READY:
+		case CLOSED:
 			break;
 
 		case FAULT:
 		case OPEN:
 			try {
 				comms.close();
-				status.set(READY);
+				status.set(CLOSED);
 			} catch (CommsException e) {
 				throw setFault(e);
 			} catch (Exception e) {
@@ -154,7 +154,7 @@ public abstract class CommsImpl implements Comms {
 			case OPEN:
 				return action.apply(channel);
 
-			case READY:
+			case CLOSED:
 				throw new CommsException("Port is closed");
 
 			case FAULT:

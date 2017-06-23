@@ -1,47 +1,49 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { ConsoleComponent, MapTable, StatLine } from 'app/sai-web-console'
 
-const CommsInformation = ({name, connection, bundle}) => {
+import { ConsoleComponent, MapTable, StatLine } from 'app/sai-webconsole'
+
+import { openConnection, closeConnection, CONNECTION_STATES } from './actions'
+
+const CommsInformation = ({ name, connection, bundle, setConnectionOpen }) => {
   var entries = {
     name,
-    status: connection.status,
+    status: (
+      <span>
+        {connection.status}
+        {connection.status != CONNECTION_STATES.OPEN &&
+          <button onClick={e => setConnectionOpen(true)}>{i18n.connectionOpen}</button>
+        }
+        {connection.status != CONNECTION_STATES.CLOSED &&
+          <button onClick={e => setConnectionOpen(false)}>{i18n.connectionClose}</button>
+        }
+      </span>
+    ),
     channel: connection.channel,
     bundle: (
-      <a href="/system/console/bundles/{bundle.id}">
+      <a href={"/system/console/bundles/" + bundle.id}>
         {bundle.name}
         <span className="symName">{bundle.symbolicName}</span>
       </a>
-    ),
-    actions: (
-      <span>
-        <button>start_polling</button>
-        <button>stop_polling</button>
-        <button>open_connection</button>
-        <button>close_connection</button>
-      </span>
     )
-  };
+  }
   return (
-    <div id="comms_information_container">
+    <div id="commsInformationContainer">
       <StatLine status="status" />
-      <MapTable header="info_header" entries={entries} />
+      <MapTable header="infoHeader" entries={entries} />
     </div>
-  );
+  )
 }
 
-const mapStateToProps = state => {
-  return {
-    connection: state.connection,
-    bundle: state.bundle
-  }
-}
+const mapStateToProps = state => ({
+  name: state.name,
+  connection: state.connection,
+  bundle: state.bundle
+})
 
-const mapDispatchToProps = dispatch => {
-  return {
-    
-  }
-}
+const mapDispatchToProps = dispatch => ({
+  setConnectionOpen: (connectionState) => dispatch(connectionState ? openConnection() : closeConnection())
+})
 
 const CommsInformationController = connect(
   mapStateToProps,
