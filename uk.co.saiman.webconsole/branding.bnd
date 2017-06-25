@@ -1,14 +1,10 @@
-Bundle-Name: SAI :: Web Console
-Bundle-SymbolicName: uk.co.saiman.webconsole
+Bundle-Name: SAI :: Web Console :: Branding
 
 Bundle-Description: \
-	Provides a web console for SAI system administration
+	Provides web console branding for SAI system administration
 
 Fragment-Host: \
 	org.apache.felix.webconsole
-
-EnRoute-Application: \
-	system/console
 
 -includeresource: \
 	res=res,\

@@ -55,7 +55,7 @@
 	uk.co.saiman.redux.webresource;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webconsole;version=snapshot,\
-	uk.co.saiman.webconsole.utilities;version=snapshot
+	uk.co.saiman.webconsole.branding;version=snapshot
 
 -runproperties:\
 	uk.co.strangeskies.configadmin.persistence=~/.saiman/config

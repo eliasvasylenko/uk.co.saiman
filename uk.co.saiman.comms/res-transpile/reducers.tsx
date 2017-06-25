@@ -1,4 +1,14 @@
-import { SET_COMMAND_FILTER, SET_POLLING_ENABLED, EXECUTE_COMMAND, CONNECTION_STATES } from './actions';
+import {
+  CONNECTION_STATES,
+  REQUEST_CONNECTION_STATE,
+  CONNECTION_STATE_CHANGED,
+  
+  SET_COMMAND_FILTER,
+  
+  SET_POLLING_ENABLED,
+  SEND_EXECUTION_REQUEST,
+  RECEIVE_EXECUTION_RESPONSE
+} from './actions'
 
 const initialState = {
   /*
@@ -25,10 +35,10 @@ const initialState = {
   commandsById: {}
 }
 
-function executeCommand(state = {}, { entry, action, payload }) {
-  console.log(state[entry] + ", " + action)
+function executeCommand(commandState = {}, { entry, action, payload }) {
+  console.log(commandState[entry] + ", " + action)
   return {
-    ...state,
+    ...commandState,
     [entry]: {
       ...state[entry],
       [action]: {
@@ -39,12 +49,12 @@ function executeCommand(state = {}, { entry, action, payload }) {
   }
 }
 
-function setConnection({ channel, status, waiting } = {}, requestedStatus) {
-  if (waiting || requestedStatus == status)
-    return state
+function setConnection(connectionState = {}, requestedStatus) {
+  if (connectionState.waiting || requestedStatus == connectionState.status)
+    return connectionState
   
   return {
-    ...state,
+    ...connectionState,
     waiting: true
   }
 }
