@@ -2,6 +2,7 @@ Bundle-Name: SAI :: Comms
 
 -buildpath: \
 	uk.co.saiman.facebook.react.webresource;version=snapshot,\
+	uk.co.saiman.facebook.react.dom.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.redux.webresource;version=snapshot,\
 	uk.co.saiman.redux.webresource;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\

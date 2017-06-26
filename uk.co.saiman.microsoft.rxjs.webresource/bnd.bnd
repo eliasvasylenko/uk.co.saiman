@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: RXJS :: Web Resource
+
+Bundle-Description: \
+	Provides web resources for RXJS applications
+
+rxjs.version = 5.4.0
+
+-buildpath: \
+	osgi.enroute.web.simple.provider
+
+-includeresource: \
+	@${repo;org.webjars.npm:rxjs;${rxjs.version}}!/META-INF/resources/*
+
+Export-Package: uk.co.saiman.microsoft.rxjs
