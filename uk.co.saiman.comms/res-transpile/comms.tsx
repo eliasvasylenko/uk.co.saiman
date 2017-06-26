@@ -1,7 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
+import { epicMiddleware } from 'redux-observable'
 
 import { ConsoleComponent } from 'app/sai-webconsole'
 
@@ -9,7 +10,7 @@ import commsApp from './reducers'
 import CommsInformationController from './comms-info'
 import CommsTableController from './comms-table'
 
-let store = createStore(commsApp)
+let store = createStore(commsApp, applyMiddleware(epicMiddleware))
 
 class CommsApp extends ConsoleComponent {
   render() {

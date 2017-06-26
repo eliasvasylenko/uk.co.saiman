@@ -1,0 +1,12 @@
+Bundle-Name: SAI :: React DOM :: Web Resource
+
+Bundle-Description: \
+	Provides DOM web resources for React applications
+
+version = 15.5.4
+
+-includeresource: \
+	@${repo;org.webjars.npm:react-dom;${version}}!/META-INF/resources/*
+
+Export-Package:\
+	uk.co.saiman.facebook.react.dom

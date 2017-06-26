@@ -1,0 +1,12 @@
+Bundle-Name: SAI :: React Redux :: Web Resource
+
+Bundle-Description: \
+	Provides web resources for React Redux applications
+
+version = 5.0.5
+
+-includeresource: \
+	@${repo;org.webjars.npm:react-redux;${version}}!/META-INF/resources/*
+
+Export-Package:\
+	uk.co.saiman.facebook.react.redux

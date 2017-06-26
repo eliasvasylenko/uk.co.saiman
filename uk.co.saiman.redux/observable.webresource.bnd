@@ -1,0 +1,12 @@
+Bundle-Name: SAI :: Redux Observable :: Web Resource
+
+Bundle-Description: \
+	Provides Observable middleware web resources for Redux applications
+
+version = 0.14.1
+
+-includeresource: \
+	@${repo;org.webjars.npm:redux-observable;${version}}!/META-INF/resources/*
+
+Export-Package: \
+	uk.co.saiman.redux.observable

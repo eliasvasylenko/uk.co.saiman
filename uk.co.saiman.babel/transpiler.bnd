@@ -1,0 +1,13 @@
+Bundle-Name: SAI :: Babel :: Transpiler
+
+-includeresource: \
+	@${repo;org.webjars.npm:babel-standalone;${standalone.version}}!/META-INF/resources/*
+
+Private-Package: \
+	uk.co.saiman.babel.standalone
+
+Import-Package: \
+	*
+
+Export-Package: \
+	uk.co.saiman.babel.transpiler

@@ -17,6 +17,12 @@
 
 		<dependency>
 		    <groupId>org.webjars.npm</groupId>
+		    <artifactId>redux-observable</artifactId>
+		    <version>0.14.1</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>react-redux</artifactId>
 		    <version>5.0.5</version>
 		</dependency>

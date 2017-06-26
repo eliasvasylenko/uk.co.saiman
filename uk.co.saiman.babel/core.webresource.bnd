@@ -1,0 +1,10 @@
+Bundle-Name: SAI :: Babel :: Web Resource
+
+Bundle-Description: \
+	Provides core web resources for Babel applications
+
+-includeresource: \
+	@${repo;org.webjars.npm:babel-core;${core.version}}!/META-INF/resources/*,\
+
+Export-Package: \
+	uk.co.saiman.babel.core

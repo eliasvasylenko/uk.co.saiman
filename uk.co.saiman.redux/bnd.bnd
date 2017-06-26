@@ -1,0 +1,4 @@
+-buildpath: \
+	osgi.enroute.web.simple.provider
+
+-sub: *.bnd

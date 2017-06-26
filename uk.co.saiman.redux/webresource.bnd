@@ -1,0 +1,13 @@
+Bundle-Name: SAI :: Redux :: Web Resource
+Bundle-SymbolicName: uk.co.saiman.redux.webresource
+
+Bundle-Description: \
+	Provides web resources for Redux applications
+
+version = 3.7.0
+
+-includeresource: \
+	@${repo;org.webjars.npm:redux;${version}}!/META-INF/resources/*
+
+Export-Package: \
+	uk.co.saiman.redux
