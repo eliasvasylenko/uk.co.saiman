@@ -1,8 +1,7 @@
 Bundle-Name: SAI :: Web Console
-Bundle-SymbolicName: uk.co.saiman.webconsole
 
 Bundle-Description: \
-	Provides a web console for SAI system administration.
+	Provides web console console utilities for SAI system administration.
 
 root: /static/sai/webconsole
 
@@ -10,7 +9,7 @@ EnRoute-Application: \
 	system/console
 
 -includeresource: \
-	${root}/sai-webconsole.js=static/sai-webconsole.js,\
+	${root}=static,\
 	/META-INF/webconsole.components.properties=properties/webconsole.components.properties
 
 Import-Package: \
