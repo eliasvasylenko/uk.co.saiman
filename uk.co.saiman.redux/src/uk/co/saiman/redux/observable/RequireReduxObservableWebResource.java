@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.redux.observable;
 
-import static uk.co.saiman.redux.ReduxConstants.REDUX_WEB_RESOURCE_NAME;
-import static uk.co.saiman.redux.ReduxConstants.REDUX_WEB_RESOURCE_VERSION;
+import static uk.co.saiman.redux.observable.ReduxObservableConstants.REDUX_OBSERVABLE_WEB_RESOURCE_NAME;
+import static uk.co.saiman.redux.observable.ReduxObservableConstants.REDUX_OBSERVABLE_WEB_RESOURCE_VERSION;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,8 +41,8 @@ import osgi.enroute.namespace.WebResourceNamespace;
  */
 @RequireCapability(
 		ns = WebResourceNamespace.NS,
-		filter = "(&(" + WebResourceNamespace.NS + "=" + REDUX_WEB_RESOURCE_NAME + ")${frange;"
-				+ REDUX_WEB_RESOURCE_VERSION + "})")
+		filter = "(&(" + WebResourceNamespace.NS + "=" + REDUX_OBSERVABLE_WEB_RESOURCE_NAME
+				+ ")${frange;" + REDUX_OBSERVABLE_WEB_RESOURCE_VERSION + "})")
 @Retention(RetentionPolicy.CLASS)
 public @interface RequireReduxObservableWebResource {
 	String[] resource() default "dist/redux-observable.js";

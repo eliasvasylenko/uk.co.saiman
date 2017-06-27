@@ -25,27 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.redux;
-
-import static uk.co.saiman.redux.ReduxConstants.REDUX_WEB_RESOURCE_NAME;
-import static uk.co.saiman.redux.ReduxConstants.REDUX_WEB_RESOURCE_VERSION;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import aQute.bnd.annotation.headers.RequireCapability;
-import osgi.enroute.namespace.WebResourceNamespace;
-
-/**
- * A Web Resource that provides Facebook's React javascript files.
- */
-@RequireCapability(
-		ns = WebResourceNamespace.NS,
-		filter = "(&(" + WebResourceNamespace.NS + "=" + REDUX_WEB_RESOURCE_NAME + ")${frange;"
-				+ REDUX_WEB_RESOURCE_VERSION + "})")
-@Retention(RetentionPolicy.CLASS)
-public @interface RequireReduxWebResource {
-	String[] resource() default "dist/redux.js";
-
-	int priority() default 470;
-}
+@org.osgi.annotation.versioning.Version(uk.co.saiman.redux.thunk.ReduxThunkConstants.REDUX_THUNK_WEB_RESOURCE_VERSION)
+package uk.co.saiman.redux.thunk;
