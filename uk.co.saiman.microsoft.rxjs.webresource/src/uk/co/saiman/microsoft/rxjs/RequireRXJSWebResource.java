@@ -45,7 +45,7 @@ import osgi.enroute.namespace.WebResourceNamespace;
         + RXJS_WEB_RESOURCE_VERSION + "})")
 @Retention(RetentionPolicy.CLASS)
 public @interface RequireRXJSWebResource {
-  String[] resource() default "require.js";
+  String[] resource() default "dist/global/Rx.js";
 
   int priority() default 5000;
 }

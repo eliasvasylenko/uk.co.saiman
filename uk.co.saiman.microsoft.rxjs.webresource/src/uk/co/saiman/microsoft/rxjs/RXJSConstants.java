@@ -36,7 +36,7 @@ import osgi.enroute.namespace.WebResourceNamespace;
 @ProvideCapability(
     ns = WebResourceNamespace.NS,
     version = RXJS_WEB_RESOURCE_VERSION,
-    value = ("root=/META-INF/resources/webjars/rxjs/" + RXJS_WEB_RESOURCE_VERSION) + ";"
+    value = ("root=/META-INF/resources/webjars/reactivex__rxjs/" + RXJS_WEB_RESOURCE_VERSION) + ";"
         + (WebResourceNamespace.NS + "=" + RXJS_WEB_RESOURCE_NAME))
 public interface RXJSConstants {
   final String RXJS_WEB_RESOURCE_NAME = "/microsoft/rxjs";
