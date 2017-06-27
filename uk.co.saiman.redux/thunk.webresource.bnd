@@ -1,0 +1,12 @@
+Bundle-Name: SAI :: Redux Thunk :: Web Resource
+
+Bundle-Description: \
+	Provides Thunk middleware web resources for Redux applications
+
+version = 2.1.0
+
+-includeresource: \
+	@${repo;org.webjars.npm:redux-thunk;${version}}!/META-INF/resources/*
+
+Export-Package: \
+	uk.co.saiman.redux.thunk
