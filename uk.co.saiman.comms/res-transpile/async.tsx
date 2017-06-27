@@ -1,3 +1,5 @@
+import ReduxThunk from 'redux-thunk'
+
 import {
   CONNECTION_STATES,
   REQUEST_CONNECTION_STATE,
@@ -10,8 +12,11 @@ import {
   RECEIVE_EXECUTION_RESPONSE
 } from './actions'
 
-
-const pingEpic = action$ =>
+const updateConnectionState = action$ =>
   action$.ofType(REQUEST_CONNECTION_STATE)
     .delay(1000) // Asynchronously wait 1000ms then continue
-    .mapTo({ type: CONNECTION_STATE_CHANGED });
+    .mapTo({ type: CONNECTION_STATE_CHANGED })
+
+const epicMiddleware = createEpicMiddleware(updateConnectionState)
+
+export default epicMiddleware

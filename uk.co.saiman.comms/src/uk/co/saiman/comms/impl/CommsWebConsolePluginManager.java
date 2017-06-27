@@ -48,12 +48,14 @@ import uk.co.saiman.facebook.react.RequireReactWebResource;
 import uk.co.saiman.facebook.react.dom.RequireReactDOMWebResource;
 import uk.co.saiman.facebook.react.redux.RequireReactReduxWebResource;
 import uk.co.saiman.redux.RequireReduxWebResource;
+import uk.co.saiman.redux.thunk.RequireReduxThunkWebResource;
 import uk.co.saiman.requirejs.RequireRequireJSWebResource;
 import uk.co.saiman.webconsole.RequireSAIWebConsoleWebResource;
 
 @RequireSAIWebConsoleWebResource
 @RequireReactWebResource
 @RequireReduxWebResource
+@RequireReduxThunkWebResource
 @RequireRequireJSWebResource
 @RequireReactDOMWebResource
 @RequireReactReduxWebResource

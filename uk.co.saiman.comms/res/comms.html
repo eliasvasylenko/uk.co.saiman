@@ -1,4 +1,4 @@
-<script data-main="comms"
+<script
   src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/require.js"></script>
 <script>
   const commsRestID = "\${comms.rest.id}"
@@ -17,15 +17,23 @@
     pollStart : "\${command.poll.start}",
     connectionOpen : "\${comms.action.open}",
     connectionClose : "\${comms.action.close}"
-  };
+  }
   require.config({
-    baseUrl : "\${pluginRoot}/res/sai",
+    baseUrl : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/",
     paths : {
-      "app" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}",
-      "react" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react",
-      "react-dom" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react-dom",
-      "react-redux" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/react-redux",
-      "redux" : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/redux"
-    },
-  });
+      "app" : "\${pluginRoot}/res/sai",
+      "rxjs" : ".."
+    }
+  })
+  require([
+    "rxjs/util/isFunction",
+    "rxjs/util/root",
+    "rxjs/util/toSubscriber",
+    "rxjs/Observable",
+    "rxjs/Subscriber"
+  ], c => {
+    require([
+      "app/comms"
+    ])
+  })
 </script>

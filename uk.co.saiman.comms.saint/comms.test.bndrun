@@ -48,13 +48,16 @@
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
-	uk.co.saiman.babel.webresource;version=snapshot,\
+	uk.co.saiman.babel.core.webresource;version=snapshot,\
 	uk.co.saiman.requirejs.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.redux.webresource;version=snapshot,\
+	uk.co.saiman.facebook.react.dom.webresource;version=snapshot,\
 	uk.co.saiman.redux.webresource;version=snapshot,\
+	uk.co.saiman.redux.observable.webresource;version=snapshot,\
+	uk.co.saiman.microsoft.rxjs.webresource;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.webconsole;version=snapshot,\
+	uk.co.saiman.webconsole.webresource;version=snapshot,\
 	uk.co.saiman.webconsole.branding;version=snapshot
 
 -runproperties:\

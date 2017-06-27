@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 
-import { ConsoleComponent, FilterBox, TableControls, ArrayTable, StatLine } from 'app/sai-webconsole'
+import { ConsoleComponent, FilterBox, TableControls, ArrayTable, StatLine } from 'sai-webconsole'
 
 import { setFilter, clearFilter, setPollingEnabled  } from './actions'
 
