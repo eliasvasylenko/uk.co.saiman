@@ -43,20 +43,24 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.axios.RequireAxiosWebResource;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.facebook.react.RequireReactWebResource;
 import uk.co.saiman.facebook.react.dom.RequireReactDOMWebResource;
+import uk.co.saiman.facebook.react.proptypes.RequirePropTypesWebResource;
 import uk.co.saiman.facebook.react.redux.RequireReactReduxWebResource;
 import uk.co.saiman.redux.RequireReduxWebResource;
 import uk.co.saiman.redux.thunk.RequireReduxThunkWebResource;
 import uk.co.saiman.requirejs.RequireRequireJSWebResource;
 import uk.co.saiman.webconsole.RequireSAIWebConsoleWebResource;
 
+@RequirePropTypesWebResource
 @RequireSAIWebConsoleWebResource
-@RequireReactWebResource
 @RequireReduxWebResource
+@RequireAxiosWebResource
 @RequireReduxThunkWebResource
 @RequireRequireJSWebResource
+@RequireReactWebResource
 @RequireReactDOMWebResource
 @RequireReactReduxWebResource
 @Component

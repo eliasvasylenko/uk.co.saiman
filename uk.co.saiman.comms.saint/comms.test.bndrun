@@ -52,9 +52,11 @@
 	uk.co.saiman.requirejs.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.redux.webresource;version=snapshot,\
+	uk.co.saiman.facebook.react.proptypes.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.dom.webresource;version=snapshot,\
 	uk.co.saiman.redux.webresource;version=snapshot,\
-	uk.co.saiman.redux.observable.webresource;version=snapshot,\
+	uk.co.saiman.redux.thunk.webresource;version=snapshot,\
+	uk.co.saiman.axios.webresource;version=snapshot,\
 	uk.co.saiman.microsoft.rxjs.webresource;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webconsole.webresource;version=snapshot,\

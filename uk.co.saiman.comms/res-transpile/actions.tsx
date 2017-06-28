@@ -1,6 +1,10 @@
+import axios from 'axios'
+
 /*
  * action types
  */
+export const REQUEST_INFO = 'REQUEST_INFO'
+export const RECEIVE_INFO = 'RECEIVE_INFO'
 
 export const REQUEST_CONNECTION_STATE = 'REQUEST_CONNECTION_STATE'
 export const CONNECTION_STATE_CHANGED = 'CONNECTION_STATE_CHANGED'
@@ -25,27 +29,76 @@ export const CONNECTION_STATES = {
  * action creators
  */
 
-export var openConnection = () => ({ type: REQUEST_CONNECTION_STATE, payload: CONNECTION_STATES.OPEN })
+export const requestInfo = () => (dispatch) => {
+  dispatch({ type: REQUEST_INFO })
 
-export var closeConnection = () => ({ type: REQUEST_CONNECTION_STATE, payload: CONNECTION_STATES.CLOSED })
+  Promise.all([
+    axios.get("/api/comms/commsInterfaceInfo/" + commsRestID),
+    axios.get("/api/comms/entries/" + commsRestID),
+    axios.get("/api/comms/entriesInfo/" + commsRestID)
+  ])
+    .then(data => {
+      dispatch({
+        type: RECEIVE_INFO,
+        payload: {
+          ...data[0].data,
+          entries: data[1].data,
+          entriesByID: data[2].data
+        }
+      })
+    })
+    .catch(error => {
+      dispatch({
+        type: RECEIVE_INFO,
+        error
+      })
+    })
+}
 
-export var setFilter = (text) => ({ type: SET_COMMAND_FILTER, payload: text })
+export const changeConnection = (requestedState) => (dispatch) => {
+  dispatch({ type: REQUEST_CONNECTION_STATE, payload: requestedState })
 
-export var clearFilter = () => setFilter("")
+  const request = {
+    url : (requestedState == CONNECTION_STATES.OPEN)
+      ? "/api/comms/openCommsInterface"
+      : "/api/comms/resetCommsInterface",
+    method: "POST",
+    data: JSON.stringify(commsRestID)
+  }
 
-export var setPollingEnabled = (pollingEnabled) => ({
+  axios(request)
+    .then(data => {
+      dispatch({
+        type: CONNECTION_STATE_CHANGED,
+        payload: data.data
+      })
+    })
+    .catch(error => {
+      dispatch({
+        type: CONNECTION_STATE_CHANGED,
+        error
+      })
+    })
+}
+
+export const openConnection = () => changeConnection(CONNECTION_STATES.OPEN)
+export const closeConnection = () => changeConnection(CONNECTION_STATES.CLOSED)
+
+export const setFilter = (text) => ({ type: SET_COMMAND_FILTER, payload: text })
+export const clearFilter = () => setFilter("")
+
+export const setPollingEnabled = (pollingEnabled) => ({
   type: SET_POLLING_ENABLED,
   payload: pollingEnabled
 })
 
-export var sendExecutionRequest = (entry, action, payload) => ({
+export const sendExecutionRequest = (entry, action, payload) => ({
   type: SEND_EXECUTION_REQUEST,
   entry,
   action,
   payload
 })
-
-export var receiveExecutionResponse = (entry, action, data) => ({
+export const receiveExecutionResponse = (entry, action, data) => ({
   type: RECEIVE_EXECUTION_RESPONSE,
   entry,
   action,

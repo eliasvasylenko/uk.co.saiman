@@ -13,14 +13,14 @@ export class ConsoleComponent extends React.Component {
 export const StatLine = ({ status }) => <p className="statline">{status}</p>
 
 export const MapTableEntry = ({item, value}) => (
-  <tr id="comms_table_container">
+  <tr>
     <td id="item">{i18n[item]}</td>
     <td id="value">{value}</td>
   </tr>
 )
 
 export const MapTable = ({ header, entries }) => (
-  <table id={header} className="tablesorter nicetable noauto">
+  <table id={header} className="maptable tablesorter nicetable noauto">
     <thead>
       <tr><th colSpan={2} className="ui-widget-header">{i18n[header]}:</th></tr>
     </thead>
@@ -46,23 +46,23 @@ export const ArrayTableHeader = ({ columns }) => (
   </thead>
 )
 
-export const ArrayTableRow = ({ cell_data, columns }) => (
+export const ArrayTableRow = ({ data, columns }) => (
   <tr>
     {
-      columns.map(column => (
-        <td id={column} key={column}>{cell_data[column]}</td>
-      ))
+      columns.map(column => { return (
+        <td id={column} key={column}>{data[column]}</td>
+      )})
     }
   </tr>
 )
 
-export const ArrayTable = ({ rows, columns }) => (
-  <table id="comms_table" className="tablesorter nicetable noauto">
+export const ArrayTable = ({ rows, columns, keyColumn }) => (
+  <table className="array_table tablesorter nicetable noauto">
     <ArrayTableHeader columns={columns} />
     <tbody>
       {
         rows.map(row => (
-          <ArrayTableRow data={row} columns />
+          <ArrayTableRow data={row} columns={columns} key={row[keyColumn]} />
         ))
       }
     </tbody>
@@ -70,7 +70,7 @@ export const ArrayTable = ({ rows, columns }) => (
 )
 
 export const TableControls = ({ left, right }) => (
-  <div id="table_controls" className="ui-widget-header ui-corner-top buttonGroup">
+  <div className="table_controls ui-widget-header ui-corner-top buttonGroup">
     <span className="table_controls_left">{left}</span>
     <span className="table_controls_right">{right}</span>
   </div>

@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.redux.thunk;
 
-import static uk.co.saiman.redux.observable.ReduxObservableConstants.REDUX_OBSERVABLE_WEB_RESOURCE_NAME;
-import static uk.co.saiman.redux.observable.ReduxObservableConstants.REDUX_OBSERVABLE_WEB_RESOURCE_VERSION;
+import static uk.co.saiman.redux.thunk.ReduxThunkConstants.REDUX_THUNK_WEB_RESOURCE_NAME;
+import static uk.co.saiman.redux.thunk.ReduxThunkConstants.REDUX_THUNK_WEB_RESOURCE_VERSION;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,11 +41,11 @@ import osgi.enroute.namespace.WebResourceNamespace;
  */
 @RequireCapability(
 		ns = WebResourceNamespace.NS,
-		filter = "(&(" + WebResourceNamespace.NS + "=" + REDUX_OBSERVABLE_WEB_RESOURCE_NAME
-				+ ")${frange;" + REDUX_OBSERVABLE_WEB_RESOURCE_VERSION + "})")
+		filter = "(&(" + WebResourceNamespace.NS + "=" + REDUX_THUNK_WEB_RESOURCE_NAME + ")${frange;"
+				+ REDUX_THUNK_WEB_RESOURCE_VERSION + "})")
 @Retention(RetentionPolicy.CLASS)
 public @interface RequireReduxThunkWebResource {
-	String[] resource() default "dist/redux-observable.js";
+	String[] resource() default "dist/redux-thunk.js";
 
 	int priority() default 450;
 }

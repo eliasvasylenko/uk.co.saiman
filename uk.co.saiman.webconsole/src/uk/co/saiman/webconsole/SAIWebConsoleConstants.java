@@ -45,7 +45,7 @@ import osgi.enroute.namespace.WebResourceNamespace;
 @ProvideCapability(
 		ns = WebResourceNamespace.NS,
 		version = SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION,
-		value = ("root=static" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME) + ";"
+		value = ("root=/static" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME) + ";"
 				+ (WebResourceNamespace.NS + "=" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME))
 public interface SAIWebConsoleConstants {
 	final String SAI_WEB_CONSOLE_WEB_RESOURCE_NAME = "/sai/webconsole";

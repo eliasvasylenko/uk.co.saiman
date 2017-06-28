@@ -1,9 +1,11 @@
 Bundle-Name: SAI :: Comms
 
 -buildpath: \
+	uk.co.saiman.facebook.react.proptypes.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.dom.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.redux.webresource;version=snapshot,\
+	uk.co.saiman.axios.webresource;version=snapshot,\
 	uk.co.saiman.redux.webresource;version=snapshot,\
 	uk.co.saiman.redux.thunk.webresource;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
@@ -36,8 +38,7 @@ Bundle-Name: SAI :: Comms
 	res/sai/actions.js=res-transpile/actions.js,\
 	res/sai/reducers.js=res-transpile/reducers.js,\
 	res/sai/comms-table.js=res-transpile/comms-table.js,\
-	res/sai/comms-info.js=res-transpile/comms-info.js,\
-	res/sai/async.js=res-transpile/async.js
+	res/sai/comms-info.js=res-transpile/comms-info.js
 
 Import-Package: \
 	*

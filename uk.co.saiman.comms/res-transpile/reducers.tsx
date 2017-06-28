@@ -1,4 +1,8 @@
+import Thunk from "redux-thunk"
 import {
+  REQUEST_INFO,
+  RECEIVE_INFO,
+  
   CONNECTION_STATES,
   REQUEST_CONNECTION_STATE,
   CONNECTION_STATE_CHANGED,
@@ -8,8 +12,9 @@ import {
   SET_POLLING_ENABLED,
   SEND_EXECUTION_REQUEST,
   RECEIVE_EXECUTION_RESPONSE
-} from './actions'
+} from "./actions"
 
+const UNKNOWN_TEXT = "..."
 const initialState = {
   /*
    * Info
@@ -17,32 +22,31 @@ const initialState = {
   id: commsRestID,
   name: commsRestName,
   connection: {
-    channel: "...",
+    channel: UNKNOWN_TEXT,
     status: CONNECTION_STATES.CLOSED
   },
   bundle: {
     id: -1,
-    name: "...",
-    symbolicName: "..."
+    name: UNKNOWN_TEXT,
+    symbolicName: UNKNOWN_TEXT
   },
 
   /*
    * Commands
    */
   pollingEnabled: false,
-  commandFilter: "",
-  commands: [],
-  commandsById: {}
+  entriesFilter: "",
+  entries: [],
+  entriesByID: {}
 }
 
 function executeCommand(commandState = {}, { entry, action, payload }) {
-  console.log(commandState[entry] + ", " + action)
   return {
     ...commandState,
     [entry]: {
-      ...state[entry],
+      ...commandState[entry],
       [action]: {
-        ...state[entry][action],
+        ...commandState[entry][action],
         waiting: true
       }
     }
@@ -59,26 +63,60 @@ function setConnection(connectionState = {}, requestedStatus) {
   }
 }
 
-function commsApp(state = initialState, action) {
-  switch (action.type) {
-  case REQUEST_CONNECTION_STATE:
-    return { ...state, connection: setConnection(state.connection, action.payload) }
-  case CONNECTION_STATE_CHANGED:
-    return { ...state }
+function changeConnection(connectionState = {}, { channel, status, fault} ) {
+  delete connectionState.waiting
   
+  return {
+    ...connectionState,
+    channel,
+    ...(status) && { status },
+    ...(fault) && { fault }
+  }
+}
+
+function commsApp(state = initialState, action) {
+  if (action.error) {
+    return { ...state, connection : { ...state.connection, fault : action.error } }
+  }
+
+  if (state.connection.fault) {
+    state = { ...state }
+    delete state.connection.fault
+  }
+
+  switch (action.type) {
+  case REQUEST_INFO:
+    state = { ...state, waiting: true }
+    break
+  case RECEIVE_INFO:
+    state = { ...state, ...action.payload }
+    break
+
+  case REQUEST_CONNECTION_STATE:
+    state = { ...state, connection: setConnection(state.connection, action.payload) }
+    break
+  case CONNECTION_STATE_CHANGED:
+    state = { ...state, connection: changeConnection(state.connection, action.payload) }
+    break
+
   case SET_COMMAND_FILTER:
-    return { ...state, commandFilter: action.payload }
+    state = { ...state, entriesFilter: action.payload }
+    break
 
   case SET_POLLING_ENABLED:
-    return { ...state, pollingEnabled: action.payload }
+    state = { ...state, pollingEnabled: action.payload }
+    break
   case SEND_EXECUTION_REQUEST:
-    return { ...state, commandsById: executeCommand(state.commandsById, action) }
+    state = { ...state, entriesById: executeCommand(state.entriesById, action) }
+    break
   case RECEIVE_EXECUTION_RESPONSE:
-    return { ...state }
+    state = { ...state } // TODO
+    break
 
   default:
-    return state
   }
+
+  return state
 }
 
 export default commsApp

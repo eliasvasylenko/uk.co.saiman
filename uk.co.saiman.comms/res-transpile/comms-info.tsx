@@ -6,25 +6,31 @@ import { ConsoleComponent, MapTable, StatLine } from 'sai-webconsole'
 import { openConnection, closeConnection, CONNECTION_STATES } from './actions'
 
 const CommsInformation = ({ name, connection, bundle, setConnectionOpen }) => {
-  var entries = {
+  const entries = {
     name,
     status: (
       <span>
         {connection.status}
         {connection.status != CONNECTION_STATES.OPEN &&
-          <button onClick={e => setConnectionOpen(true)}>{i18n.connectionOpen}</button>
+          <button onClick={e => setConnectionOpen(true)} disabled={connection.waiting}>
+            {i18n.connectionOpen}
+          </button>
         }
         {connection.status != CONNECTION_STATES.CLOSED &&
-          <button onClick={e => setConnectionOpen(false)}>{i18n.connectionClose}</button>
+          <button onClick={e => setConnectionOpen(false)} disabled={connection.waiting}>
+            {i18n.connectionClose}
+          </button>
         }
       </span>
     ),
     channel: connection.channel,
     bundle: (
-      <a href={"/system/console/bundles/" + bundle.id}>
-        {bundle.name}
-        <span className="symName">{bundle.symbolicName}</span>
-      </a>
+      <div className="bName">
+        <a href={appRoot + "/bundles/" + bundle.id}>
+          {bundle.name}
+          <span className="symName">{bundle.symbolicName}</span>
+        </a>
+      </div>
     )
   }
   return (

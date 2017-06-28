@@ -65,16 +65,16 @@ import uk.co.saiman.comms.rest.CommsRESTEntry;
 @Component(property = REST.ENDPOINT + "=/api/comms/*")
 public class CommsRESTProvider implements REST {
 	private static final String NAME_KEY = "name";
+	private static final String CONNECTION_KEY = "connection";
 	private static final String STATUS_KEY = "status";
-	private static final String STATUS_CODE_KEY = "code";
 	private static final String STATUS_FAULT_KEY = "fault";
 	private static final String CHANNEL_KEY = "channel";
-	private static final String BUNDLE_KEY = "registeringBundle";
+	private static final String BUNDLE_KEY = "bundle";
 	private static final String ENTRIES_KEY = "entries";
 
-	private static final String BUNDLE_SYMBOLIC_NAME_KEY = "bundleSymbolicName";
-	private static final String BUNDLE_NAME_KEY = "bundleName";
-	private static final String BUNDLE_ID_KEY = "bundleId";
+	private static final String BUNDLE_SYMBOLIC_NAME_KEY = "symbolicName";
+	private static final String BUNDLE_NAME_KEY = "name";
+	private static final String BUNDLE_ID_KEY = "id";
 
 	private static final String ENTRY_ID_KEY = "id";
 	private static final String ENTRY_ACTIONS_KEY = "actions";
@@ -162,38 +162,34 @@ public class CommsRESTProvider implements REST {
 		return getCommsInterfaceInfoImpl(getNamedComms(name));
 	}
 
-	public Map<String, String> postOpenCommsInterface(String name) {
+	public Map<String, Object> postOpenCommsInterface(String name) {
 		CommsREST comms = getNamedComms(name);
 		comms.open();
-		Map<String, String> map = new HashMap<>();
-		map.put(STATUS_CODE_KEY, comms.getStatus());
-		return map;
+		return getConnectionInfo(comms);
 	}
 
-	public Map<String, String> postResetCommsInterface(String name) {
+	public Map<String, Object> postResetCommsInterface(String name) {
 		CommsREST comms = getNamedComms(name);
 		comms.reset();
-		Map<String, String> map = new HashMap<>();
-		map.put(STATUS_CODE_KEY, comms.getStatus());
-		return map;
+		return getConnectionInfo(comms);
 	}
 
 	private <T> Map<String, Object> getCommsInterfaceInfoImpl(CommsREST comms) {
 		Map<String, Object> info = new HashMap<>();
 
-		info.put(NAME_KEY, comms.getID());
-		info.put(STATUS_KEY, getStatus(comms));
-		info.put(CHANNEL_KEY, comms.getPort());
+		info.put(NAME_KEY, comms.getName());
+		info.put(CONNECTION_KEY, getConnectionInfo(comms));
 		info.put(BUNDLE_KEY, getBundleInfoImpl(commsInterfaces.get(comms)));
 		info.put(ENTRIES_KEY, comms.getEntries().collect(toList()));
 
 		return info;
 	}
 
-	private Map<String, Object> getStatus(CommsREST comms) {
+	private Map<String, Object> getConnectionInfo(CommsREST comms) {
 		Map<String, Object> info = new HashMap<>();
 
-		info.put(STATUS_CODE_KEY, comms.getStatus());
+		info.put(STATUS_KEY, comms.getStatus());
+		info.put(CHANNEL_KEY, comms.getPort());
 		comms.getFaultText().ifPresent(fault -> info.put(STATUS_FAULT_KEY, fault));
 
 		return info;

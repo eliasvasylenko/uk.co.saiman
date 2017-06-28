@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.comms;
 
+import static uk.co.saiman.comms.Comms.CommsStatus.CLOSED;
 import static uk.co.saiman.comms.Comms.CommsStatus.FAULT;
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
-import static uk.co.saiman.comms.Comms.CommsStatus.CLOSED;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
@@ -91,7 +91,7 @@ public abstract class CommsImpl implements Comms {
 			reset();
 		} catch (Exception e) {}
 		this.comms = null;
-		setFault(new CommsException("No port configured"));
+		throw setFault(new CommsException("No port configured"));
 	}
 
 	protected synchronized void setComms(CommsPort comms) throws IOException {
@@ -118,7 +118,7 @@ public abstract class CommsImpl implements Comms {
 			} catch (CommsException e) {
 				throw setFault(e);
 			} catch (Exception e) {
-				setFault(new CommsException("Problem opening comms", e));
+				throw setFault(new CommsException("Problem opening comms", e));
 			}
 		}
 	}
@@ -137,7 +137,7 @@ public abstract class CommsImpl implements Comms {
 			} catch (CommsException e) {
 				throw setFault(e);
 			} catch (Exception e) {
-				setFault(new CommsException("Problem closing comms", e));
+				throw setFault(new CommsException("Problem closing comms", e));
 			}
 			break;
 		}

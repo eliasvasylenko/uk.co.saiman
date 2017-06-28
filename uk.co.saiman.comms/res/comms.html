@@ -3,37 +3,30 @@
 <script>
   const commsRestID = "\${comms.rest.id}"
   const commsRestName = "\${comms.rest.name}"
+  const appRoot = "\${appRoot}"
+  const pluginRoot = "\${pluginRoot}"
   var i18n = {
     infoHeader : "\${comms.info.header}",
     name : "\${comms.name}",
     status : "\${comms.status}",
     channel : "\${comms.channel}",
     bundle : "\${comms.bundle}",
-    commandID : "\${command.id}",
-    commandOutput : "\${command.output}",
-    commandInput : "\${command.input}",
-    commandActions : "\${command.actions}",
-    pollStop : "\${command.poll.stop}",
-    pollStart : "\${command.poll.start}",
+    entryID : "\${entry.id}",
+    entryOutput : "\${entry.output}",
+    entryInput : "\${entry.input}",
+    entryActions : "\${entry.actions}",
+    pollStop : "\${entry.poll.stop}",
+    pollStart : "\${entry.poll.start}",
     connectionOpen : "\${comms.action.open}",
     connectionClose : "\${comms.action.close}"
   }
   require.config({
     baseUrl : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/",
     paths : {
-      "app" : "\${pluginRoot}/res/sai",
-      "rxjs" : ".."
+      "app" : "\${pluginRoot}/res/sai"
     }
   })
   require([
-    "rxjs/util/isFunction",
-    "rxjs/util/root",
-    "rxjs/util/toSubscriber",
-    "rxjs/Observable",
-    "rxjs/Subscriber"
-  ], c => {
-    require([
-      "app/comms"
-    ])
-  })
+    "app/comms"
+  ])
 </script>

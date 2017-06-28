@@ -35,6 +35,8 @@ import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.POLLABLE;
 import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.RECEIVES_INPUT_DATA;
 import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.SENDS_OUTPUT_DATA;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -43,6 +45,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import osgi.enroute.dto.api.DTOs;
+import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.rest.CommsRESTAction;
 import uk.co.saiman.comms.rest.CommsRESTEntry;
@@ -52,9 +55,9 @@ import uk.co.saiman.comms.saint.ValueReadback;
 import uk.co.saiman.comms.saint.ValueRequest;
 
 public class SaintCommsREST implements CommsREST {
-	private static final String GET_ACTUAL_VALUE = "getActualValue";
-	private static final String SET_REQUESTED_VALUE = "setRequestedValue";
-	private static final String GET_REQUESTED_VALUE = "getRequestedValue";
+	private static final String GET_ACTUAL_VALUE = "getActual";
+	private static final String SET_REQUESTED_VALUE = "setRequested";
+	private static final String GET_REQUESTED_VALUE = "getRequested";
 
 	private final SaintComms comms;
 	private final DTOs dtos;
@@ -65,9 +68,28 @@ public class SaintCommsREST implements CommsREST {
 		this.dtos = dtos;
 		this.entries = new LinkedHashMap<>();
 
-		comms.values().forEach(this::createItem);
-		comms.valueReadbacks().forEach(r -> createItem(r, null));
-		comms.valueRequests().forEach(r -> createItem(null, r));
+		/*
+		 * It's a bit naff to use reflection for this, but it keeps the API tidy and
+		 * makes evolution easier so sue me
+		 */
+
+		try {
+			for (Method method : SaintComms.class.getDeclaredMethods()) {
+				String name = method.getName();
+
+				if (method.getReturnType() == Value.class) {
+					createItem(name, (Value<?>) method.invoke(comms));
+
+				} else if (method.getReturnType() == ValueReadback.class) {
+					createItem(name, (ValueReadback<?>) method.invoke(comms), null);
+
+				} else if (method.getReturnType() == ValueRequest.class) {
+					createItem(name, null, (ValueRequest<?>) method.invoke(comms));
+				}
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new CommsException("Problem initialising REST interface for " + comms.getName(), e);
+		}
 	}
 
 	@Override
@@ -85,18 +107,18 @@ public class SaintCommsREST implements CommsREST {
 		return entries.values().stream();
 	}
 
-	private <T> void createItem(Value<T> value) {
-		createItem(value, value);
+	private <T> void createItem(String name, Value<T> value) {
+		createItem(name, value, value);
 	}
 
-	private <T> void createItem(ValueReadback<T> readback, ValueRequest<T> request) {
+	private <T> void createItem(String name, ValueReadback<T> readback, ValueRequest<T> request) {
 		CommsRESTEntry item = new CommsRESTEntry() {
 			private final Map<String, Object> inputData = new HashMap<>();
 			private final Map<String, Object> outputData = new HashMap<>();
 
 			@Override
 			public String getID() {
-				return null; // TODO
+				return name;
 			}
 
 			@Override
@@ -200,13 +222,11 @@ public class SaintCommsREST implements CommsREST {
 
 	@Override
 	public void open() {
-		// TODO Auto-generated method stub
-
+		comms.open();
 	}
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-
+		comms.reset();
 	}
 }
