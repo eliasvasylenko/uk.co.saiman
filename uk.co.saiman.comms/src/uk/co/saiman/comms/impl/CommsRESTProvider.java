@@ -78,13 +78,14 @@ public class CommsRESTProvider implements REST {
 
 	private static final String ENTRY_ID_KEY = "id";
 	private static final String ENTRY_ACTIONS_KEY = "actions";
-	private static final String ENTRY_OUTPUT_KEY = "output";
 
 	private static final String ACTION_ID_KEY = "id";
 	private static final String ACTION_POLLABLE_KEY = "pollable";
 	private static final String ACTION_RECEIVES_INPUT_KEY = "receivesInput";
 	private static final String ACTION_SENDS_OUTPUT_KEY = "sendsOutput";
 	private static final String ACTION_MODIFIES_OUTPUT_KEY = "modifiesOutput";
+	private static final String ACTION_INPUT_KEY = "input";
+	private static final String ACTION_OUTPUT_KEY = "output";
 
 	private static final String ERROR_KEY = "error";
 	private static final String TRACE_KEY = "trace";
@@ -224,12 +225,19 @@ public class CommsRESTProvider implements REST {
 		Map<String, Object> info = new HashMap<>();
 
 		info.put(ENTRY_ID_KEY, entry.getID());
-		info.put(ENTRY_OUTPUT_KEY, entry.getOutputData());
-		info.put(
-				ENTRY_ACTIONS_KEY,
-				entry.getActions().collect(toMap(CommsRESTAction::getID, this::getActionInfoImpl)));
+		info.put(ACTION_OUTPUT_KEY, entry.getOutputData());
+		info.put(ENTRY_ACTIONS_KEY, entry.getActions().collect(toList()));
 
 		return info;
+	}
+
+	public List<String> getActions(String name) {
+		return getNamedComms(name).getActions().map(CommsRESTAction::getID).collect(toList());
+	}
+
+	public Map<String, Map<String, Object>> getActionsInfo(String commsName) {
+		CommsREST comms = getNamedComms(commsName);
+		return comms.getActions().collect(toMap(c -> c.getID(), c -> getActionInfoImpl(c)));
 	}
 
 	private Map<String, Object> getActionInfoImpl(CommsRESTAction action) {
@@ -249,13 +257,22 @@ public class CommsRESTProvider implements REST {
 			String commsID,
 			String entryID,
 			String actionID) {
-		CommsRESTEntry entry = getNamedComms(commsID).getEntry(entryID).get();
+		CommsREST comms = getNamedComms(commsID);
+		CommsRESTEntry entry = comms.getEntry(entryID).get();
+		CommsRESTAction action = comms.getAction(actionID).get();
 
 		try {
 			entry.getOutputData().clear();
 			entry.getOutputData().putAll(output);
-			entry.getAction(actionID).get().invoke();
-			return entry.getInputData();
+			action.invoke(entryID);
+
+			Map<String, Object> result = new HashMap<>();
+			if (action.hasBehaviour(RECEIVES_INPUT_DATA))
+				result.put(ACTION_INPUT_KEY, entry.getInputData());
+			if (action.hasBehaviour(MODIFIES_OUTPUT_DATA))
+				result.put(ACTION_OUTPUT_KEY, entry.getOutputData());
+
+			return result;
 		} catch (Exception e) {
 			Map<String, Object> errorMap = new HashMap<>();
 

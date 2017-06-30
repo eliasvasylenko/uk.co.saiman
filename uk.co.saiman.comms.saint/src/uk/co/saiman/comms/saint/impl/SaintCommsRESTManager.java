@@ -27,11 +27,14 @@
  */
 package uk.co.saiman.comms.saint.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.MANDATORY;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -45,41 +48,41 @@ import uk.co.saiman.comms.saint.SaintComms;
 
 @Component
 public class SaintCommsRESTManager {
-  private final Map<SaintComms, CommsREST> restClasses = new HashMap<>();
-  private final Map<CommsREST, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
-  private BundleContext context;
+	private final Set<SaintComms> comms = new HashSet<>();
+	private final Map<SaintComms, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
+	private BundleContext context;
 
-  @Reference
-  private DTOs dtos;
+	@Reference(cardinality = MANDATORY)
+	private DTOs dtos;
 
-  @Activate
-  synchronized void activate(BundleContext context) {
-    this.context = context;
-    restClasses.entrySet().stream().forEach(e -> register(e.getKey(), e.getValue()));
-  }
+	@Activate
+	synchronized void activate(BundleContext context) {
+		this.context = context;
+		comms.stream().forEach(e -> register(e, new SaintCommsREST(e, dtos)));
+	}
 
-  void register(SaintComms comms, CommsREST rest) {
-    serviceRegistrations.put(rest, context.registerService(CommsREST.class, rest, null));
-  }
+	void register(SaintComms comms, CommsREST rest) {
+		serviceRegistrations.put(comms, context.registerService(CommsREST.class, rest, null));
+	}
 
-  @Reference(policy = DYNAMIC, cardinality = MULTIPLE)
-  synchronized void addComms(SaintComms comms) {
-    try {
-      CommsREST restService = new SaintCommsREST(comms, dtos);
-      restClasses.put(comms, restService);
+	@Reference(policy = DYNAMIC, cardinality = MULTIPLE)
+	synchronized void addComms(SaintComms comms) {
+		try {
+			this.comms.add(comms);
 
-      if (context != null) {
-        register(comms, restService);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+			if (context != null) {
+				register(comms, new SaintCommsREST(comms, dtos));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-  synchronized void removeComms(SaintComms comms) {
-    ServiceRegistration<?> restService = serviceRegistrations.remove(restClasses.remove(comms));
-    if (restService != null) {
-      restService.unregister();
-    }
-  }
+	synchronized void removeComms(SaintComms comms) {
+		this.comms.remove(comms);
+		ServiceRegistration<?> restService = serviceRegistrations.remove(comms);
+		if (restService != null) {
+			restService.unregister();
+		}
+	}
 }

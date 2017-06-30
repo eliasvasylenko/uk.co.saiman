@@ -60,5 +60,5 @@ public interface CommsRESTAction {
 
 	boolean hasBehaviour(Behaviour behaviour);
 
-	void invoke() throws Exception;
+	void invoke(String entry) throws Exception;
 }

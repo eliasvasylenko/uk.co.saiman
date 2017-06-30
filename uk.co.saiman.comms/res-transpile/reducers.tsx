@@ -37,33 +37,53 @@ const initialState = {
   pollingEnabled: false,
   entriesFilter: "",
   entries: [],
-  entriesByID: {}
+  entriesByID: {},
+  actions: [],
+  actionsByID: {}
 }
 
-function executeCommand(commandState = {}, { entry, action, payload }) {
+function executionRequest(entriesByID = {}, { entry, action, payload }) {
+  if (typeof entriesByID[entry].waiting !== typeof undefined)
+    return entriesByID
+  
   return {
-    ...commandState,
+    ...entriesByID,
     [entry]: {
-      ...commandState[entry],
-      [action]: {
-        ...commandState[entry][action],
-        waiting: true
-      }
+      ...entriesByID[entry],
+      waitingFor: action
+    }
+  }
+}
+
+function executionResponse(entriesByID = {}, actionsByID = {}, { entry, action, payload }) {
+  entriesByID = { ...entriesByID }
+  
+  delete entriesByID[entry].waiting
+  
+  console.log(JSON.stringify(payload))
+  
+  return {
+    ...entriesByID,
+    [entry]: {
+      ...entriesByID[entry],
+      ...payload
     }
   }
 }
 
 function setConnection(connectionState = {}, requestedStatus) {
-  if (connectionState.waiting || requestedStatus == connectionState.status)
+  if (typeof connectionState.waiting !== typeof undefined || requestedStatus == connectionState.status)
     return connectionState
   
   return {
     ...connectionState,
-    waiting: true
+    waitingFor: requestedStatus
   }
 }
 
-function changeConnection(connectionState = {}, { channel, status, fault} ) {
+function changeConnection(connectionState = {}, { channel, status, fault } ) {
+  connectionState = { ...connectionState }
+  
   delete connectionState.waiting
   
   return {
@@ -76,7 +96,7 @@ function changeConnection(connectionState = {}, { channel, status, fault} ) {
 
 function commsApp(state = initialState, action) {
   if (action.error) {
-    return { ...state, connection : { ...state.connection, fault : action.error } }
+    return handleError(state, action)
   }
 
   if (state.connection.fault) {
@@ -107,16 +127,32 @@ function commsApp(state = initialState, action) {
     state = { ...state, pollingEnabled: action.payload }
     break
   case SEND_EXECUTION_REQUEST:
-    state = { ...state, entriesById: executeCommand(state.entriesById, action) }
+    state = { ...state, entriesByID: executionRequest(state.entriesByID, action) }
     break
   case RECEIVE_EXECUTION_RESPONSE:
-    state = { ...state } // TODO
+    state = { ...state, entriesByID: executionResponse(state.entriesByID, state.actionsByID, action) }
     break
 
   default:
   }
 
   return state
+}
+
+function handleError(state, action) {
+  switch (action.type) {
+  case REQUEST_INFO:
+  case RECEIVE_INFO:
+  case REQUEST_CONNECTION_STATE:
+  case CONNECTION_STATE_CHANGED:
+  case SET_COMMAND_FILTER:
+  case SET_POLLING_ENABLED:
+  case SEND_EXECUTION_REQUEST:
+  case RECEIVE_EXECUTION_RESPONSE:
+  default:
+  }
+  
+  return { ...state, connection : { ...state.connection, fault : action.error } }
 }
 
 export default commsApp

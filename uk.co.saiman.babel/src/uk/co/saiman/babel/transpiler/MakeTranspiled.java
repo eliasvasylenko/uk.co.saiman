@@ -32,8 +32,10 @@ import static java.nio.file.Files.readAllBytes;
 import static java.util.Arrays.asList;
 import static uk.co.saiman.babel.standalone.BabelStandaloneConstants.BABEL_STANDALONE_WEB_RESOURCE_VERSION;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -67,7 +69,9 @@ public class MakeTranspiled implements MakePlugin {
 	private static final String TRANSFORM_SCRIPT = "Babel.transform(input, { plugins: plugins, presets: presets }).code";
 
 	private static final String NO_SOURCE_ERROR = "No 'source' field in transpile %s";
+	private static final String INVALID_SOURCE_ERROR = "Source file %s is invalid in transpile";
 	private static final String NO_PLUGINS_ERROR = "No 'plugins' or 'presets' field in transpile %s";
+	private static final String ERROR_TRANSPILING = "Error transpiling %s";
 
 	private static ScriptEngine ENGINE;
 	private static Bindings BINDINGS;
@@ -79,43 +83,81 @@ public class MakeTranspiled implements MakePlugin {
 			return null;
 
 		String source = arguments.get(SOURCE_KEY);
-		if (source == null)
-			throw new IllegalArgumentException(format(NO_SOURCE_ERROR, arguments));
+		if (source == null) {
+			builder.error(NO_SOURCE_ERROR, arguments);
+			return null;
+		}
+
+		Path sourceFile = builder.getFile(source).toPath();
+		if (!Files.isRegularFile(sourceFile)) {
+			builder.error(INVALID_SOURCE_ERROR, sourceFile);
+			return null;
+		}
 
 		String plugins = arguments.get(PLUGINS_KEY);
 		String presets = arguments.get(PRESETS_KEY);
-		if (plugins == null && presets == null)
-			throw new IllegalArgumentException(format(NO_PLUGINS_ERROR, arguments));
+		if (plugins == null && presets == null) {
+			builder.error(NO_PLUGINS_ERROR, arguments);
+			return null;
+		}
 
 		return transpile(
-				builder.getFile(source).toPath(),
+				builder,
+				sourceFile,
 				plugins == null ? new String[] {} : plugins.trim().split("\\s*,\\s*"),
 				presets == null ? new String[] {} : presets.trim().split("\\s*,\\s*"));
 	}
 
-	private Resource transpile(Path source, String[] plugins, String[] presets) throws Exception {
-		return new EmbeddedResource(transpile(new String(readAllBytes(source)), plugins, presets), 0);
-	}
-
-	private synchronized String transpile(String source, String[] plugins, String[] presets)
-			throws Exception {
+	private static synchronized Resource transpile(
+			Builder builder,
+			Path source,
+			String[] plugins,
+			String[] presets) throws ScriptException, IOException {
 		if (ENGINE == null) {
-			try (InputStream babelScript = getClass().getResourceAsStream(BABEL_SCRIPT)) {
+			try (InputStream babelScript = MakeTranspiled.class.getResourceAsStream(BABEL_SCRIPT)) {
 				ENGINE = new ScriptEngineManager().getEngineByMimeType(ENGINE_MIME_TYPE);
 				BINDINGS = new SimpleBindings();
 				ENGINE.eval(new InputStreamReader(babelScript), BINDINGS);
 			}
 		}
 
-		BINDINGS.put(INPUT_KEY, source);
-		putArray(PLUGINS_KEY, plugins);
-		putArray(PRESETS_KEY, presets);
-		return ENGINE.eval(TRANSFORM_SCRIPT, BINDINGS).toString();
+		String sourceString;
+		try {
+			sourceString = new String(readAllBytes(source));
+		} catch (IOException e) {
+			builder.error(INVALID_SOURCE_ERROR, e, source);
+			return null;
+		}
+
+		String result;
+		try {
+			result = transpile(ENGINE, BINDINGS, sourceString, plugins, presets);
+		} catch (Exception e) {
+			builder.error(ERROR_TRANSPILING, e);
+			return null;
+		}
+
+		return new EmbeddedResource(result, 0);
 	}
 
-	private void putArray(String name, String[] array) throws ScriptException {
-		BINDINGS.put(TEMP_ARRAY, asList(array));
-		ENGINE.eval(format(ASSIGN_FROM_TEMP_ARRAY, name), BINDINGS);
-		BINDINGS.remove(TEMP_ARRAY);
+	private static String transpile(
+			ScriptEngine engine,
+			Bindings bindings,
+			String source,
+			String[] plugins,
+			String[] presets) throws Exception {
+		bindings.clear();
+		bindings.put(INPUT_KEY, source);
+		putArray(engine, bindings, PLUGINS_KEY, plugins);
+		putArray(engine, bindings, PRESETS_KEY, presets);
+
+		return engine.eval(TRANSFORM_SCRIPT, bindings).toString();
+	}
+
+	private static void putArray(ScriptEngine engine, Bindings bindings, String name, String[] array)
+			throws ScriptException {
+		bindings.put(TEMP_ARRAY, asList(array));
+		engine.eval(format(ASSIGN_FROM_TEMP_ARRAY, name), bindings);
+		bindings.remove(TEMP_ARRAY);
 	}
 }

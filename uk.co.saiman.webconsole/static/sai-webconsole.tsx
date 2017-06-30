@@ -76,10 +76,9 @@ export const TableControls = ({ left, right }) => (
   </div>
 )
 
-export const FilterBox = ({ filter, setFilter }) => (
+export const FilterBox = ({ filter, setFilter, clearFilter }) => (
   <span>
-    <input className="filter" value="" title="{i18n.filter_help}"></input>
-    <span className="filterClear ui-icon ui-icon-close" title="{i18n.filter_clear}"></span>
-    <button className="filterButton" type="button" title="{i18n.filter_help}">{i18n.filter_apply}</button>
+    <input className="filter" value={filter} title={i18n.filter_help} onChange={e => setFilter(e.target.value)}></input>
+    <span className="filterClear ui-icon ui-icon-close" title={i18n.filter_clear} onClick={e => clearFilter()}></span>
   </span>
 )

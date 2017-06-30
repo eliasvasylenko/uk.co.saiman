@@ -11,7 +11,7 @@ import commsApp from './reducers'
 import CommsInformationController from './comms-info'
 import CommsTableController from './comms-table'
 
-let store = createStore(commsApp, applyMiddleware(thunk))
+const store = createStore(commsApp, applyMiddleware(thunk))
 store.dispatch(requestInfo())
 
 class CommsApp extends ConsoleComponent {

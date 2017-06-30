@@ -3,6 +3,7 @@ Bundle-Name: SAI :: Comms :: SAINT
 -buildpath:\
 	uk.co.saiman.comms;version=snapshot,\
 \
+	uk.co.strangeskies.collections;version=latest,\
 	uk.co.strangeskies.utilities;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.observable;version=latest,\

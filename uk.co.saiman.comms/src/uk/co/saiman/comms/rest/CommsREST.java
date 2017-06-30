@@ -46,6 +46,12 @@ public interface CommsREST {
 		return getEntries().filter(e -> e.getID().equals(entry)).findAny();
 	}
 
+	Stream<CommsRESTAction> getActions();
+
+	default Optional<CommsRESTAction> getAction(String action) {
+		return getActions().filter(a -> a.getID().equals(action)).findAny();
+	}
+
 	String getStatus();
 
 	Optional<String> getFaultText();

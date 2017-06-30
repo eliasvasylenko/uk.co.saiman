@@ -12,13 +12,13 @@ class CommsTable extends ConsoleComponent {
 
   render() { return this.renderImpl(this.props) }
 
-  renderImpl({ entries, filter, setFilter, pollingEnabled, setPollingEnabled, execute }) {
+  renderImpl({ entries, filter, setFilter, clearFilter, pollingEnabled, setPollingEnabled, execute }) {
     return (
       <div id="commsTableContainer">
         <StatLine status="status" />
         <TableControls
           left={
-            <FilterBox filter setFilter />
+            <FilterBox filter={filter} setFilter={setFilter} clearFilter={clearFilter} />
           }
           right={
             pollingEnabled
@@ -33,39 +33,64 @@ class CommsTable extends ConsoleComponent {
             "entryActions"
           ]}
           rows={
-            entries.map(entry => ({
-              entryID: entry.id,
-              entryOutput: this.renderOutput(entry.output),
-              entryInput: this.renderInput(entry.input),
-              entryActions: this.renderActions(entry, execute)
-            }))
+            entries
+              .filter(entry => entry.id.toLowerCase().includes(filter.toLowerCase()))
+              .map(entry => ({
+                entryID: entry.id,
+                entryOutput: this.renderItems(entry.output),
+                entryInput: this.renderItems(entry.input),
+                entryActions: this.renderActions(entry, execute)
+              }))
           }
           keyColumn="entryID" />
       </div>
     )
   }
 
-  renderOutput(output) {
+  renderItems(items = {}) {
     return (
       <div>
         {
-          Object.keys(output).map(item => (
-            <input key={item}>{item}</input>
-          ))
+          Object.keys(items).map(item => this.renderItem(item, items[item]))
         }
       </div>
     )
   }
 
-  renderInput(input) {
-    return <div></div>
+  renderItem(item, value) {
+    return (
+      <div key={item}>
+        <span>
+          <label>{item}</label>
+          {
+            (typeof value === typeof [])
+              ? this.renderValues(value)
+              : this.renderValue(value)
+          }
+        </span>
+      </div>
+    )
+  }
+
+  renderValues(values) {
+    return (
+      <span>
+        {values.map(this.renderValue)}
+      </span>
+    )
+  }
+
+  renderValue(value, index) {
+    return (
+      <input key={index} value={JSON.stringify(value)} />
+    )
   }
 
   renderActions({ id, actions }, execute) {
     return (
       <div>
         {
-          Object.keys(actions).map(action => (
+          actions.map(action => (
             <button key={action} onClick={e => execute(id, action, {})}>{action}</button>
           ))
         }
@@ -82,6 +107,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   setFilter: (filterText) => dispatch(setFilter(filterText)),
+  clearFilter: () => dispatch(clearFilter()),
   setPollingEnabled: (pollingState) => dispatch(setPollingEnabled(pollingState)),
   execute: (entry, action, payload) => dispatch(sendExecutionRequest(entry, action, payload))
 })

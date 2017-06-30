@@ -28,17 +28,12 @@
 package uk.co.saiman.comms.rest;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface CommsRESTEntry {
 	String getID();
 
-	Stream<CommsRESTAction> getActions();
-
-	default Optional<CommsRESTAction> getAction(String action) {
-		return getActions().filter(a -> a.getID().equals(action)).findAny();
-	}
+	Stream<String> getActions();
 
 	/**
 	 * @return the user readable map of data which actions have received through
