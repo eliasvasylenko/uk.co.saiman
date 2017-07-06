@@ -41,7 +41,7 @@ public interface CopleyComms<T extends Enum<T>> extends Comms {
 
 	CopleyAxisInterface<T> getAxis(T axis);
 
-	default CopleyAxisInterface<T> getAxis(int axis) {
+	default CopleyAxisInterface<?> getAxis(int axis) {
 		return getAxis(getAxisClass().getEnumConstants()[axis]);
 	}
 }

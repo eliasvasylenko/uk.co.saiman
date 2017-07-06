@@ -91,7 +91,7 @@ public abstract class CommsImpl implements Comms {
 			reset();
 		} catch (Exception e) {}
 		this.comms = null;
-		throw setFault(new CommsException("No port configured"));
+		setFault(new CommsException("No port configured"));
 	}
 
 	protected synchronized void setComms(CommsPort comms) throws IOException {

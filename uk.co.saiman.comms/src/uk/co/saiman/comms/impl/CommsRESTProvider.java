@@ -71,6 +71,7 @@ public class CommsRESTProvider implements REST {
 	private static final String CHANNEL_KEY = "channel";
 	private static final String BUNDLE_KEY = "bundle";
 	private static final String ENTRIES_KEY = "entries";
+	private static final String ACTIONS_KEY = "actions";
 
 	private static final String BUNDLE_SYMBOLIC_NAME_KEY = "symbolicName";
 	private static final String BUNDLE_NAME_KEY = "name";
@@ -181,7 +182,8 @@ public class CommsRESTProvider implements REST {
 		info.put(NAME_KEY, comms.getName());
 		info.put(CONNECTION_KEY, getConnectionInfo(comms));
 		info.put(BUNDLE_KEY, getBundleInfoImpl(commsInterfaces.get(comms)));
-		info.put(ENTRIES_KEY, comms.getEntries().collect(toList()));
+		info.put(ENTRIES_KEY, comms.getEntries().map(CommsRESTEntry::getID).collect(toList()));
+		info.put(ACTIONS_KEY, comms.getActions().map(CommsRESTAction::getID).collect(toList()));
 
 		return info;
 	}
@@ -206,19 +208,9 @@ public class CommsRESTProvider implements REST {
 		return info;
 	}
 
-	public List<String> getEntries(String name) {
-		return getNamedComms(name).getEntries().map(CommsRESTEntry::getID).collect(toList());
-	}
-
 	public Map<String, Map<String, Object>> getEntriesInfo(String commsName) {
 		CommsREST comms = getNamedComms(commsName);
 		return comms.getEntries().collect(toMap(c -> c.getID(), c -> getEntryInfoImpl(c)));
-	}
-
-	public Map<String, Object> getEntryInfo(String commsName, String commandName) {
-		CommsREST comms = getNamedComms(commsName);
-
-		return getEntryInfoImpl(comms.getEntry(commandName).get());
 	}
 
 	private Map<String, Object> getEntryInfoImpl(CommsRESTEntry entry) {
@@ -229,10 +221,6 @@ public class CommsRESTProvider implements REST {
 		info.put(ENTRY_ACTIONS_KEY, entry.getActions().collect(toList()));
 
 		return info;
-	}
-
-	public List<String> getActions(String name) {
-		return getNamedComms(name).getActions().map(CommsRESTAction::getID).collect(toList());
 	}
 
 	public Map<String, Map<String, Object>> getActionsInfo(String commsName) {
@@ -262,8 +250,7 @@ public class CommsRESTProvider implements REST {
 		CommsRESTAction action = comms.getAction(actionID).get();
 
 		try {
-			entry.getOutputData().clear();
-			entry.getOutputData().putAll(output);
+			entry.getOutputData().replaceAll((key, value) -> output.get(key));
 			action.invoke(entryID);
 
 			Map<String, Object> result = new HashMap<>();

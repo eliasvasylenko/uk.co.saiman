@@ -41,9 +41,9 @@ public class VacuumControl {
 	@Bits(4)
 	public boolean diaphragm;
 	@Bits(5)
-	public boolean magnatron;
+	public boolean magnetron;
 	@Bits(6)
-	public boolean magnatronTrip;
+	public boolean magnetronTrip;
 	@Bits(7)
 	public boolean piraniTrip;
 }

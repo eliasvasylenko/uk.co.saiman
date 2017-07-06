@@ -35,7 +35,7 @@ const CommsInformation = ({ name, connection, bundle, setConnectionOpen }) => {
   }
   return (
     <div id="commsInformationContainer">
-      <StatLine status="status" />
+      <StatLine status={connection.fault ? connection.fault.message : "Status OK"} />
       <MapTable header="infoHeader" entries={entries} />
     </div>
   )

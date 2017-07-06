@@ -27,20 +27,18 @@
  */
 package uk.co.saiman.comms.copley;
 
-public interface VariableInterface<T, U> {
-	U getForAxis(T axis);
+public interface VariableInterface<T extends Enum<T>, U> {
+	CopleyAxisInterface<T> getAxis();
 
-	VariableInterface<T, U> setForAxis(T axis, U value);
+	U getActive();
 
-	VariableInterface<T, U> getActive();
+	void setActive(U value);
 
-	VariableInterface<T, U> setActive();
+	U getDefault();
 
-	VariableInterface<T, U> getDefault();
+	void setDefault(U value);
 
-	VariableInterface<T, U> setDefault();
+	void loadDefault();
 
-	VariableInterface<T, U> loadDefault();
-
-	VariableInterface<T, U> saveDefault();
+	void saveDefault();
 }

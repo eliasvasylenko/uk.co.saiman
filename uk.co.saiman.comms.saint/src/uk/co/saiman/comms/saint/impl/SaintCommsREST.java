@@ -38,24 +38,26 @@ import static uk.co.strangeskies.collection.stream.StreamUtilities.upcastStream;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.rest.CommsRESTAction;
 import uk.co.saiman.comms.rest.CommsRESTEntry;
+import uk.co.saiman.comms.rest.SimpleCommsREST;
 import uk.co.saiman.comms.saint.SaintComms;
 import uk.co.saiman.comms.saint.Value;
 import uk.co.saiman.comms.saint.ValueReadback;
 import uk.co.saiman.comms.saint.ValueRequest;
 
-public class SaintCommsREST implements CommsREST {
+public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
 	private class CommsRESTEntryImpl implements CommsRESTEntry {
 		private final Map<String, Object> inputData = new HashMap<>();
 		private final Map<String, Object> outputData = new HashMap<>();
@@ -68,8 +70,6 @@ public class SaintCommsREST implements CommsREST {
 			this.id = name;
 			this.readback = readback;
 			this.request = request;
-
-			entries.put(id, this);
 		}
 
 		@Override
@@ -80,8 +80,8 @@ public class SaintCommsREST implements CommsREST {
 		@Override
 		public Stream<String> getActions() {
 			return concat(
-					readback != null ? of(GET_ACTUAL_VALUE) : empty(),
-					request != null ? of(SET_REQUESTED_VALUE, GET_REQUESTED_VALUE) : empty());
+					request != null ? of(SET_REQUESTED_VALUE, GET_REQUESTED_VALUE) : empty(),
+					readback != null ? of(GET_ACTUAL_VALUE) : empty());
 		}
 
 		@Override
@@ -91,25 +91,46 @@ public class SaintCommsREST implements CommsREST {
 
 		@Override
 		public Map<String, Object> getOutputData() {
-			return new HashMap<>(outputData);
+			return outputData;
 		}
 
-		public void getActualValue() throws Exception {
-			inputData.clear();
-			inputData.putAll(dtos.asMap(readback.getActual()));
-		}
-
-		public void setRequestedValue() throws Exception {
+		public void setRequestedValue() {
 			setRequestedValue(request);
 		}
 
-		private <T> void setRequestedValue(ValueRequest<T> request) throws Exception {
-			request.request(dtos.convert(outputData).to(request.getType()));
+		private <T> void setRequestedValue(ValueRequest<T> request) {
+			T value;
+			try {
+				value = dtos.convert(outputData).to(request.getType());
+			} catch (Exception e) {
+				throw new CommsException(
+						"Cannot convert output data map to " + request.getType().getSimpleName());
+			}
+			request.request(value);
 		}
 
-		public void getRequestedValue() throws Exception {
-			outputData.clear();
-			outputData.putAll(dtos.asMap(request.getRequested()));
+		public void getRequestedValue() {
+			Object requested = request.getRequested();
+			Map<String, Object> outputData;
+			try {
+				outputData = dtos.asMap(requested);
+			} catch (Exception e) {
+				throw new CommsException("Cannot convert " + requested + " to map");
+			}
+			this.outputData.clear();
+			this.outputData.putAll(outputData);
+		}
+
+		public void getActualValue() {
+			Object actual = readback.getActual();
+			Map<String, Object> inputData;
+			try {
+				inputData = dtos.asMap(actual);
+			} catch (Exception e) {
+				throw new CommsException("Cannot convert " + actual + " to map");
+			}
+			this.inputData.clear();
+			this.inputData.putAll(inputData);
 		}
 	}
 
@@ -117,12 +138,12 @@ public class SaintCommsREST implements CommsREST {
 	private static final String SET_REQUESTED_VALUE = "setRequested";
 	private static final String GET_REQUESTED_VALUE = "getRequested";
 
-	private final SaintComms comms;
 	private final DTOs dtos;
 	private final Map<String, CommsRESTEntryImpl> entries;
 
 	public SaintCommsREST(SaintComms comms, DTOs dtos) {
-		this.comms = comms;
+		super(comms);
+
 		this.dtos = dtos;
 		this.entries = new LinkedHashMap<>();
 
@@ -131,34 +152,32 @@ public class SaintCommsREST implements CommsREST {
 		 * makes evolution easier so sue me
 		 */
 
+		Set<CommsRESTEntryImpl> entries = new TreeSet<>(
+				Comparator.comparing(
+						e -> 0xFF & (e.request != null
+								? e.request.getRequestedValueAddress()
+								: e.readback.getActualValueAddress()).getBytes()[0]));
+
 		try {
 			for (Method method : SaintComms.class.getDeclaredMethods()) {
 				String name = method.getName();
 
 				if (method.getReturnType() == Value.class) {
 					Value<?> value = (Value<?>) method.invoke(comms);
-					new CommsRESTEntryImpl(name, value, value);
+					entries.add(new CommsRESTEntryImpl(name, value, value));
 
 				} else if (method.getReturnType() == ValueReadback.class) {
-					new CommsRESTEntryImpl(name, (ValueReadback<?>) method.invoke(comms), null);
+					entries.add(new CommsRESTEntryImpl(name, (ValueReadback<?>) method.invoke(comms), null));
 
 				} else if (method.getReturnType() == ValueRequest.class) {
-					new CommsRESTEntryImpl(name, null, (ValueRequest<?>) method.invoke(comms));
+					entries.add(new CommsRESTEntryImpl(name, null, (ValueRequest<?>) method.invoke(comms)));
 				}
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new CommsException("Problem initialising REST interface for " + comms.getName(), e);
 		}
-	}
 
-	@Override
-	public String getID() {
-		return (comms.getName() + "-" + comms.getPort().getName()).replace(' ', '-').replace('/', '-');
-	}
-
-	@Override
-	public String getName() {
-		return comms.getName() + " " + comms.getPort().getName();
+		entries.forEach(e -> this.entries.put(e.getID(), e));
 	}
 
 	@Override
@@ -234,27 +253,9 @@ public class SaintCommsREST implements CommsREST {
 	}
 
 	@Override
-	public String getStatus() {
-		return comms.status().get().toString();
-	}
-
-	@Override
-	public String getPort() {
-		return comms.getPort().getName();
-	}
-
-	@Override
-	public Optional<String> getFaultText() {
-		return comms.fault().map(f -> f.getMessage());
-	}
-
-	@Override
 	public void open() {
-		comms.open();
-	}
-
-	@Override
-	public void reset() {
-		comms.reset();
+		super.open();
+		entries.values().stream().filter(e -> e.request != null).forEach(
+				CommsRESTEntryImpl::getRequestedValue);
 	}
 }

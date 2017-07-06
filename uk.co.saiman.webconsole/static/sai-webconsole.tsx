@@ -46,8 +46,8 @@ export const ArrayTableHeader = ({ columns }) => (
   </thead>
 )
 
-export const ArrayTableRow = ({ data, columns }) => (
-  <tr>
+export const ArrayTableRow = ({ data, columns, id }) => (
+  <tr id={id}>
     {
       columns.map(column => { return (
         <td id={column} key={column}>{data[column]}</td>
@@ -57,12 +57,12 @@ export const ArrayTableRow = ({ data, columns }) => (
 )
 
 export const ArrayTable = ({ rows, columns, keyColumn }) => (
-  <table className="array_table tablesorter nicetable noauto">
+  <table className="arrayTable tablesorter nicetable noauto">
     <ArrayTableHeader columns={columns} />
     <tbody>
       {
         rows.map(row => (
-          <ArrayTableRow data={row} columns={columns} key={row[keyColumn]} />
+          <ArrayTableRow data={row} columns={columns} key={row[keyColumn]} id={row[keyColumn]} />
         ))
       }
     </tbody>
@@ -70,9 +70,9 @@ export const ArrayTable = ({ rows, columns, keyColumn }) => (
 )
 
 export const TableControls = ({ left, right }) => (
-  <div className="table_controls ui-widget-header ui-corner-top buttonGroup">
-    <span className="table_controls_left">{left}</span>
-    <span className="table_controls_right">{right}</span>
+  <div className="tableControls ui-widget-header ui-corner-top buttonGroup">
+    <span className="tableControlsLeft">{left}</span>
+    <span className="tableControlsRight">{right}</span>
   </div>
 )
 

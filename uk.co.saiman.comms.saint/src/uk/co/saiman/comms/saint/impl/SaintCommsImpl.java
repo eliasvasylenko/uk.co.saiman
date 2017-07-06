@@ -171,7 +171,7 @@ public class SaintCommsImpl extends CommsImpl implements SaintComms, Comms {
 		public void request(T data) {
 			useChannel(channel -> {
 				byte[] outputBytes = converters.getConverter(type).toBytes(data);
-				executeSaintCommand(OUTPUT, actualValue, channel, outputBytes);
+				executeSaintCommand(OUTPUT, requestedValue, channel, outputBytes);
 				return null;
 			});
 		}
@@ -244,9 +244,9 @@ public class SaintCommsImpl extends CommsImpl implements SaintComms, Comms {
 		highVoltageReadback = inOutBlock(HighVoltageReadback.class, HV_RB_PORT, HV_RB_LAT);
 
 		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_1);
-		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_2);
-		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_3);
-		highVoltageDAC1 = outBlock(I2C.class, HV_DAC_4);
+		highVoltageDAC2 = outBlock(I2C.class, HV_DAC_2);
+		highVoltageDAC3 = outBlock(I2C.class, HV_DAC_3);
+		highVoltageDAC4 = outBlock(I2C.class, HV_DAC_4);
 		cmosRef = outBlock(I2C.class, CMOS_REF);
 		laserDetectRef = outBlock(I2C.class, LASER_DETECT_REF);
 
@@ -280,21 +280,6 @@ public class SaintCommsImpl extends CommsImpl implements SaintComms, Comms {
 	@Deactivate
 	void deactivate() throws IOException {
 		unsetComms();
-	}
-
-	@Override
-	public Value<LEDStatus> statusLED() {
-		return ledStatus;
-	}
-
-	@Override
-	public Value<VacuumControl> vacuum() {
-		return vacuumStatus;
-	}
-
-	@Override
-	public ValueRequest<HighVoltageStatus> highVoltage() {
-		return highVoltageStatus;
 	}
 
 	@Override
@@ -353,5 +338,145 @@ public class SaintCommsImpl extends CommsImpl implements SaintComms, Comms {
 		}
 
 		return inputBytes;
+	}
+
+	@Override
+	public Value<LEDStatus> statusLED() {
+		return ledStatus;
+	}
+
+	@Override
+	public Value<VacuumControl> vacuum() {
+		return vacuumStatus;
+	}
+
+	@Override
+	public ValueRequest<HighVoltageStatus> highVoltage() {
+		return highVoltageStatus;
+	}
+
+	@Override
+	public Value<MotorStatus> motorStatus() {
+		return motorStatus;
+	}
+
+	@Override
+	public Value<VacuumReadback> vacuumReadback() {
+		return vacuumReadback;
+	}
+
+	@Override
+	public Value<HighVoltageReadback> highVoltageReadback() {
+		return highVoltageReadback;
+	}
+
+	@Override
+	public ValueRequest<I2C> highVoltageDAC1() {
+		return highVoltageDAC1;
+	}
+
+	@Override
+	public ValueRequest<I2C> highVoltageDAC2() {
+		return highVoltageDAC2;
+	}
+
+	@Override
+	public ValueRequest<I2C> highVoltageDAC3() {
+		return highVoltageDAC3;
+	}
+
+	@Override
+	public ValueRequest<I2C> highVoltageDAC4() {
+		return highVoltageDAC4;
+	}
+
+	@Override
+	public ValueRequest<I2C> cmosRef() {
+		return cmosRef;
+	}
+
+	@Override
+	public ValueRequest<I2C> laserDetectRef() {
+		return laserDetectRef;
+	}
+
+	@Override
+	public ValueReadback<ADC> piraniReadback() {
+		return piraniReadback;
+	}
+
+	@Override
+	public ValueReadback<ADC> magnetronReadback() {
+		return magnetronReadback;
+	}
+
+	@Override
+	public ValueReadback<ADC> spareMon1() {
+		return spareMon1;
+	}
+
+	@Override
+	public ValueReadback<ADC> spareMon2() {
+		return spareMon2;
+	}
+
+	@Override
+	public ValueReadback<ADC> spareMon3() {
+		return spareMon3;
+	}
+
+	@Override
+	public ValueReadback<ADC> spareMon4() {
+		return spareMon4;
+	}
+
+	@Override
+	public ValueReadback<ADC> currentReadback1() {
+		return currentReadback1;
+	}
+
+	@Override
+	public ValueReadback<ADC> currentReadback2() {
+		return currentReadback2;
+	}
+
+	@Override
+	public ValueReadback<ADC> currentReadback3() {
+		return currentReadback3;
+	}
+
+	@Override
+	public ValueReadback<ADC> currentReadback4() {
+		return currentReadback4;
+	}
+
+	@Override
+	public ValueReadback<ADC> voltageReadback1() {
+		return voltageReadback1;
+	}
+
+	@Override
+	public ValueReadback<ADC> voltageReadback2() {
+		return voltageReadback2;
+	}
+
+	@Override
+	public ValueReadback<ADC> voltageReadback3() {
+		return voltageReadback3;
+	}
+
+	@Override
+	public ValueReadback<ADC> voltageReadback4() {
+		return voltageReadback4;
+	}
+
+	@Override
+	public ValueRequest<TurboControl> turboControl() {
+		return turboControl;
+	}
+
+	@Override
+	public ValueReadback<TurboReadbacks> turboReadbacks() {
+		return turboReadbacks;
 	}
 }
