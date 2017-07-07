@@ -58,7 +58,128 @@ import uk.co.saiman.comms.saint.ValueReadback;
 import uk.co.saiman.comms.saint.ValueRequest;
 
 public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
-	private class CommsRESTEntryImpl implements CommsRESTEntry {
+	private static final String GET_ACTUAL_VALUE = "getActual";
+	private static final String SET_REQUESTED_VALUE = "setRequested";
+	private static final String GET_REQUESTED_VALUE = "getRequested";
+
+	private final DTOs dtos;
+	private final Map<String, SAINTCommsRESTEntry> entries;
+
+	private final CommsRESTAction getActual;
+	private final CommsRESTAction setRequested;
+	private final CommsRESTAction getRequested;
+
+	public SaintCommsREST(SaintComms comms, DTOs dtos) {
+		super(comms);
+
+		this.dtos = dtos;
+		this.entries = new LinkedHashMap<>();
+
+		/*
+		 * It's a bit naff to use reflection for this, but it keeps the API tidy and
+		 * makes evolution easier so sue me
+		 */
+
+		Set<SAINTCommsRESTEntry> entries = new TreeSet<>(
+				Comparator.comparing(
+						e -> 0xFF & (e.request != null
+								? e.request.getRequestedValueAddress()
+								: e.readback.getActualValueAddress()).getBytes()[0]));
+
+		try {
+			for (Method method : SaintComms.class.getDeclaredMethods()) {
+				String name = method.getName();
+
+				if (method.getReturnType() == Value.class) {
+					Value<?> value = (Value<?>) method.invoke(comms);
+					entries.add(new SAINTCommsRESTEntry(name, value, value));
+
+				} else if (method.getReturnType() == ValueReadback.class) {
+					entries.add(new SAINTCommsRESTEntry(name, (ValueReadback<?>) method.invoke(comms), null));
+
+				} else if (method.getReturnType() == ValueRequest.class) {
+					entries.add(new SAINTCommsRESTEntry(name, null, (ValueRequest<?>) method.invoke(comms)));
+				}
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new CommsException("Problem initialising REST interface for " + comms.getName(), e);
+		}
+
+		entries.forEach(e -> this.entries.put(e.getID(), e));
+
+		getActual = new CommsRESTAction() {
+			@Override
+			public boolean hasBehaviour(Behaviour behaviour) {
+				return behaviour == POLLABLE || behaviour == RECEIVES_INPUT_DATA;
+			}
+
+			@Override
+			public void invoke(String entry) throws Exception {
+				SaintCommsREST.this.entries.get(entry).getActualValue();
+			}
+
+			@Override
+			public String getID() {
+				return GET_ACTUAL_VALUE;
+			}
+		};
+		setRequested = new CommsRESTAction() {
+			@Override
+			public boolean hasBehaviour(Behaviour behaviour) {
+				return behaviour == SENDS_OUTPUT_DATA;
+			}
+
+			@Override
+			public void invoke(String entry) throws Exception {
+				SaintCommsREST.this.entries.get(entry).setRequestedValue();
+			}
+
+			@Override
+			public String getID() {
+				return SET_REQUESTED_VALUE;
+			}
+		};
+		getRequested = new CommsRESTAction() {
+			@Override
+			public boolean hasBehaviour(Behaviour behaviour) {
+				return behaviour == MODIFIES_OUTPUT_DATA;
+			}
+
+			@Override
+			public void invoke(String entry) throws Exception {
+				SaintCommsREST.this.entries.get(entry).getRequestedValue();
+			}
+
+			@Override
+			public String getID() {
+				return GET_REQUESTED_VALUE;
+			}
+		};
+	}
+
+	@Override
+	public Stream<CommsRESTEntry> getEntries() {
+		return upcastStream(entries.values().stream());
+	}
+
+	@Override
+	public Stream<CommsRESTAction> getActions() {
+		return of(getRequested, setRequested, getActual);
+	}
+
+	@Override
+	public String getLocalisedText(String key, Locale locale) {
+		return key;
+	}
+
+	@Override
+	public void open() {
+		super.open();
+		entries.values().stream().filter(e -> e.request != null).forEach(
+				SAINTCommsRESTEntry::getRequestedValue);
+	}
+
+	private class SAINTCommsRESTEntry implements CommsRESTEntry {
 		private final Map<String, Object> inputData = new HashMap<>();
 		private final Map<String, Object> outputData = new HashMap<>();
 
@@ -66,7 +187,7 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
 		private final ValueReadback<?> readback;
 		private final ValueRequest<?> request;
 
-		public CommsRESTEntryImpl(String name, ValueReadback<?> readback, ValueRequest<?> request) {
+		public SAINTCommsRESTEntry(String name, ValueReadback<?> readback, ValueRequest<?> request) {
 			this.id = name;
 			this.readback = readback;
 			this.request = request;
@@ -132,130 +253,5 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
 			this.inputData.clear();
 			this.inputData.putAll(inputData);
 		}
-	}
-
-	private static final String GET_ACTUAL_VALUE = "getActual";
-	private static final String SET_REQUESTED_VALUE = "setRequested";
-	private static final String GET_REQUESTED_VALUE = "getRequested";
-
-	private final DTOs dtos;
-	private final Map<String, CommsRESTEntryImpl> entries;
-
-	public SaintCommsREST(SaintComms comms, DTOs dtos) {
-		super(comms);
-
-		this.dtos = dtos;
-		this.entries = new LinkedHashMap<>();
-
-		/*
-		 * It's a bit naff to use reflection for this, but it keeps the API tidy and
-		 * makes evolution easier so sue me
-		 */
-
-		Set<CommsRESTEntryImpl> entries = new TreeSet<>(
-				Comparator.comparing(
-						e -> 0xFF & (e.request != null
-								? e.request.getRequestedValueAddress()
-								: e.readback.getActualValueAddress()).getBytes()[0]));
-
-		try {
-			for (Method method : SaintComms.class.getDeclaredMethods()) {
-				String name = method.getName();
-
-				if (method.getReturnType() == Value.class) {
-					Value<?> value = (Value<?>) method.invoke(comms);
-					entries.add(new CommsRESTEntryImpl(name, value, value));
-
-				} else if (method.getReturnType() == ValueReadback.class) {
-					entries.add(new CommsRESTEntryImpl(name, (ValueReadback<?>) method.invoke(comms), null));
-
-				} else if (method.getReturnType() == ValueRequest.class) {
-					entries.add(new CommsRESTEntryImpl(name, null, (ValueRequest<?>) method.invoke(comms)));
-				}
-			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new CommsException("Problem initialising REST interface for " + comms.getName(), e);
-		}
-
-		entries.forEach(e -> this.entries.put(e.getID(), e));
-	}
-
-	@Override
-	public Stream<CommsRESTEntry> getEntries() {
-		return upcastStream(entries.values().stream());
-	}
-
-	@Override
-	public Stream<CommsRESTAction> getActions() {
-		return of(getActualValueAction(), setRequestedValueAction(), getRequestedValueAction());
-	}
-
-	private CommsRESTAction getActualValueAction() {
-		return new CommsRESTAction() {
-			@Override
-			public boolean hasBehaviour(Behaviour behaviour) {
-				return behaviour == POLLABLE || behaviour == RECEIVES_INPUT_DATA;
-			}
-
-			@Override
-			public void invoke(String entry) throws Exception {
-				entries.get(entry).getActualValue();
-			}
-
-			@Override
-			public String getID() {
-				return GET_ACTUAL_VALUE;
-			}
-		};
-	}
-
-	private CommsRESTAction setRequestedValueAction() {
-		return new CommsRESTAction() {
-			@Override
-			public boolean hasBehaviour(Behaviour behaviour) {
-				return behaviour == SENDS_OUTPUT_DATA;
-			}
-
-			@Override
-			public void invoke(String entry) throws Exception {
-				entries.get(entry).setRequestedValue();
-			}
-
-			@Override
-			public String getID() {
-				return SET_REQUESTED_VALUE;
-			}
-		};
-	}
-
-	private CommsRESTAction getRequestedValueAction() {
-		return new CommsRESTAction() {
-			@Override
-			public boolean hasBehaviour(Behaviour behaviour) {
-				return behaviour == MODIFIES_OUTPUT_DATA;
-			}
-
-			@Override
-			public void invoke(String entry) throws Exception {
-				entries.get(entry).getRequestedValue();
-			}
-
-			@Override
-			public String getID() {
-				return GET_REQUESTED_VALUE;
-			}
-		};
-	}
-
-	@Override
-	public String getLocalisedText(String key, Locale locale) {
-		return key;
-	}
-
-	@Override
-	public void open() {
-		super.open();
-		entries.values().stream().filter(e -> e.request != null).forEach(
-				CommsRESTEntryImpl::getRequestedValue);
 	}
 }

@@ -27,18 +27,24 @@
  */
 package uk.co.saiman.comms.copley;
 
-public interface VariableInterface<T extends Enum<T>, U> {
-	CopleyAxisInterface<T> getAxis();
+import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
-	U getActive();
+import java.util.Optional;
 
-	void setActive(U value);
+public interface WritableVariable<T extends Enum<T>, U> extends Variable<T, U> {
+	void set(T axis, U value);
 
-	U getDefault();
+	default void set(int axis, U value) {
+		set(getComms().getAxis(axis), value);
+	}
 
-	void setDefault(U value);
+	@Override
+	Optional<WritableVariable<T, U>> trySwitchBank(VariableBank bank);
 
-	void loadDefault();
+	@Override
+	default Optional<WritableVariable<T, U>> trySwitchBank() {
+		return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
+	}
 
-	void saveDefault();
 }

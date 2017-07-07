@@ -27,21 +27,29 @@
  */
 package uk.co.saiman.comms.copley;
 
-import java.util.stream.Stream;
+public enum CopleyVariableID {
+	DRIVE_EVENT_STATUS(0xA1),
+	LATCHED_EVENT_STATUS(0xA1),
+	TRAJECTORY_PROFILE_MODE(0xC8),
+	TRAJECTORY_POSITION_COUNTS(0xCA),
+	AMPLIFIER_STATE(0x24),
+	ACTUAL_POSITION(0x17);
 
-import uk.co.saiman.comms.Comms;
+	private final int code;
 
-public interface CopleyComms<T extends Enum<T>> extends Comms {
-	String ID = "Copley Comms";
-	int HEADER_SIZE = 4;
-
-	Class<T> getAxisClass();
-
-	Stream<T> getAxes();
-
-	default T getAxis(int axis) {
-		return getAxisClass().getEnumConstants()[axis];
+	private CopleyVariableID(int code) {
+		this.code = code;
 	}
 
-	Variable<T, ?> getVariable(CopleyVariableID id);
+	public int getCode() {
+		return code;
+	}
+
+	public static CopleyVariableID forCode(byte code) {
+		for (CopleyVariableID variable : values())
+			if (variable.getCode() == code)
+				return variable;
+
+		throw new IllegalArgumentException();
+	}
 }

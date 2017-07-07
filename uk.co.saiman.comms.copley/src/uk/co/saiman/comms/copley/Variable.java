@@ -27,30 +27,29 @@
  */
 package uk.co.saiman.comms.copley;
 
-public enum CopleyVariable {
-	LATCHED_FAULT_REGISTER(0xA1),
-	TRAJECTORY_PROFILE_MODE(0xC8),
-	POSITION_COMMAND(0xCA),
-	AMPLIFIER_STATE(0x24),
-	START_MOVE(0x01),
-	START_HOMING(0x02),
-	ACTUAL_POSITION(0x17);
+import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
-	private final int code;
+import java.util.Optional;
 
-	private CopleyVariable(int code) {
-		this.code = code;
+public interface Variable<T extends Enum<T>, U> {
+	CopleyComms<T> getComms();
+
+	CopleyVariableID getID();
+
+	VariableBank getBank();
+
+	Class<U> getType();
+
+	Optional<? extends Variable<T, U>> trySwitchBank(VariableBank bank);
+
+	default Optional<? extends Variable<T, U>> trySwitchBank() {
+		return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
 	}
 
-	public int getCode() {
-		return code;
-	}
+	U get(T axis);
 
-	public static CopleyVariable forCode(byte code) {
-		for (CopleyVariable variable : values())
-			if (variable.getCode() == code)
-				return variable;
-
-		throw new IllegalArgumentException();
+	default U get(int axis) {
+		return get(getComms().getAxis(axis));
 	}
 }

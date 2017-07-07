@@ -27,21 +27,24 @@
  */
 package uk.co.saiman.comms.copley;
 
-import java.util.stream.Stream;
+public enum TrajectoryProfileMode {
+	TRAPEZOIDAL_PROFILE(0), S_CURVE_PROFILE(1), VELOCITY(2), PVT_PROFILE(3);
 
-import uk.co.saiman.comms.Comms;
+	private final int code;
 
-public interface CopleyComms<T extends Enum<T>> extends Comms {
-	String ID = "Copley Comms";
-	int HEADER_SIZE = 4;
-
-	Class<T> getAxisClass();
-
-	Stream<T> getAxes();
-
-	default T getAxis(int axis) {
-		return getAxisClass().getEnumConstants()[axis];
+	private TrajectoryProfileMode(int code) {
+		this.code = code;
 	}
 
-	Variable<T, ?> getVariable(CopleyVariableID id);
+	public int getCode() {
+		return code;
+	}
+
+	public static TrajectoryProfileMode forCode(byte code) {
+		for (TrajectoryProfileMode command : values())
+			if (command.getCode() == code)
+				return command;
+
+		throw new IllegalArgumentException();
+	}
 }

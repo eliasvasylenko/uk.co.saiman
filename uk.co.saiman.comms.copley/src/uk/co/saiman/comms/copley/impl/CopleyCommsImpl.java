@@ -30,17 +30,21 @@ package uk.co.saiman.comms.copley.impl;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
-import static uk.co.saiman.comms.copley.CopleyOperation.COPY_VARIABLE;
-import static uk.co.saiman.comms.copley.CopleyOperation.GET_VARIABLE;
-import static uk.co.saiman.comms.copley.CopleyOperation.NO_OP;
-import static uk.co.saiman.comms.copley.CopleyOperation.SET_VARIABLE;
+import static uk.co.saiman.comms.copley.CopleyOperationID.NO_OP;
+import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
+import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
-import static uk.co.saiman.comms.copley.VariableBank.DEFAULT;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Activate;
@@ -56,14 +60,12 @@ import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsImpl;
-import uk.co.saiman.comms.copley.CopleyAxisInterface;
 import uk.co.saiman.comms.copley.CopleyComms;
-import uk.co.saiman.comms.copley.CopleyOperation;
-import uk.co.saiman.comms.copley.CopleyVariable;
+import uk.co.saiman.comms.copley.CopleyOperationID;
+import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.SingleMotorAxis;
+import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;
-import uk.co.saiman.comms.copley.VariableIdentifier;
-import uk.co.saiman.comms.copley.VariableInterface;
 import uk.co.saiman.comms.copley.impl.CopleyCommsImpl.CopleyCommsConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
@@ -111,95 +113,14 @@ public class CopleyCommsImpl<T extends Enum<T>> extends CommsImpl implements Cop
 	@Reference
 	ByteConverters converters;
 
-	private class VariableInterfaceImpl<U> implements VariableInterface<T, U> {
-		private final CopleyVariable variable;
-		private final Class<U> variableClass;
-		private final CopleyAxisInterface<T> axis;
+	private Map<CopleyVariableID, VariableImpl<T, ?>> variables;
 
-		public VariableInterfaceImpl(CopleyVariable variable, Class<U> variableClass, T axis) {
-			this.variable = variable;
-			this.variableClass = variableClass;
-			this.axis = CopleyCommsImpl.this.getAxis(axis);
-		}
-
-		@Override
-		public CopleyAxisInterface<T> getAxis() {
-			return axis;
-		}
-
-		@Override
-		public U getActive() {
-			return invokeGetCommand(variable, ACTIVE);
-		}
-
-		@Override
-		public void setActive(U value) {
-			invokeSetCommand(value, variable, ACTIVE);
-		}
-
-		@Override
-		public U getDefault() {
-			return invokeGetCommand(variable, DEFAULT);
-		}
-
-		@Override
-		public void setDefault(U value) {
-			invokeSetCommand(value, variable, DEFAULT);
-		}
-
-		@Override
-		public void loadDefault() {
-			invokeCopyCommand(variable, ACTIVE);
-		}
-
-		@Override
-		public void saveDefault() {
-			invokeCopyCommand(variable, DEFAULT);
-		}
-
-		private VariableIdentifier getVariableID(CopleyVariable variable, T axis, VariableBank bank) {
-			VariableIdentifier identifier = new VariableIdentifier();
-			identifier.axis = (byte) axis.ordinal();
-			identifier.variableID = (byte) variable.getCode();
-			identifier.bank = bank.getBit();
-			return identifier;
-		}
-
-		private byte[] concat(byte[] left, byte[] right) {
-			byte[] bytes = new byte[left.length + right.length];
-			System.arraycopy(left, 0, bytes, 0, left.length);
-			System.arraycopy(right, 0, bytes, left.length, right.length);
-			return bytes;
-		}
-
-		private U invokeGetCommand(CopleyVariable variable, VariableBank bank) {
-			VariableIdentifier variableID = getVariableID(variable, axis.getID(), bank);
-
-			byte[] outputBytes = converters.getConverter(VariableIdentifier.class).toBytes(variableID);
-
-			byte[] inputBytes = executeCopleyCommand(GET_VARIABLE, outputBytes);
-
-			return converters.getConverter(variableClass).fromBytes(inputBytes);
-		}
-
-		private void invokeCopyCommand(CopleyVariable variable, VariableBank bank) {
-			VariableIdentifier variableID = getVariableID(variable, axis.getID(), bank);
-
-			byte[] outputBytes = converters.getConverter(VariableIdentifier.class).toBytes(variableID);
-
-			executeCopleyCommand(COPY_VARIABLE, outputBytes);
-		}
-
-		private void invokeSetCommand(U output, CopleyVariable variable, VariableBank bank) {
-			VariableIdentifier variableID = getVariableID(variable, axis.getID(), bank);
-
-			byte[] outputBytes = concat(
-					converters.getConverter(VariableIdentifier.class).toBytes(variableID),
-					converters.getConverter(variableClass).toBytes(output));
-
-			executeCopleyCommand(SET_VARIABLE, outputBytes);
-		}
-	}
+	private VariableImpl<T, EventStatusRegister> driveEventStatus;
+	private WritableVariableImpl<T, EventStatusRegister> latchedEventStatus;
+	private BankedVariableImpl<T, TrajectoryProfile> trajectoryProfile;
+	private BankedVariableImpl<T, Int32> trajectoryPosition;
+	private BankedVariableImpl<T, AmplifierState> amplifierState;
+	private WritableVariableImpl<T, Int32> actualPosition;
 
 	public CopleyCommsImpl() {
 		super(CopleyComms.ID);
@@ -209,7 +130,16 @@ public class CopleyCommsImpl<T extends Enum<T>> extends CommsImpl implements Cop
 	void activate(CopleyCommsConfiguration configuration) throws IOException {
 		configure(configuration);
 
-		// addVariable(ACTUAL_POSITION, Int16.class);
+		variables = new LinkedHashMap<>();
+		driveEventStatus = addVariable(DRIVE_EVENT_STATUS, EventStatusRegister.class, ACTIVE);
+		latchedEventStatus = addWritableVariable(
+				LATCHED_EVENT_STATUS,
+				EventStatusRegister.class,
+				ACTIVE);
+		trajectoryProfile = addBankedVariable(TRAJECTORY_PROFILE_MODE, TrajectoryProfile.class);
+		trajectoryPosition = addBankedVariable(TRAJECTORY_POSITION_COUNTS, Int32.class);
+		amplifierState = addBankedVariable(AMPLIFIER_STATE, AmplifierState.class);
+		actualPosition = addWritableVariable(ACTUAL_POSITION, Int32.class, ACTIVE);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -235,6 +165,39 @@ public class CopleyCommsImpl<T extends Enum<T>> extends CommsImpl implements Cop
 		unsetComms();
 	}
 
+	ByteConverters getConverters() {
+		return converters;
+	}
+
+	private <U> BankedVariableImpl<T, U> addBankedVariable(CopleyVariableID id, Class<U> type) {
+		BankedVariableImpl<T, U> variable = new BankedVariableImpl<>(this, id, type);
+		variables.put(id, variable);
+		return variable;
+	}
+
+	private <U> WritableVariableImpl<T, U> addWritableVariable(
+			CopleyVariableID id,
+			Class<U> type,
+			VariableBank bank) {
+		WritableVariableImpl<T, U> variable = new WritableVariableImpl<>(this, id, type, bank);
+		variables.put(id, variable);
+		return variable;
+	}
+
+	private <U> VariableImpl<T, U> addVariable(
+			CopleyVariableID id,
+			Class<U> type,
+			VariableBank bank) {
+		VariableImpl<T, U> variable = new VariableImpl<>(this, id, type, bank);
+		variables.put(id, variable);
+		return variable;
+	}
+
+	@Override
+	public Variable<T, ?> getVariable(CopleyVariableID id) {
+		return variables.get(id);
+	}
+
 	@Override
 	protected void checkComms() {
 		if (checkNodeId())
@@ -251,33 +214,28 @@ public class CopleyCommsImpl<T extends Enum<T>> extends CommsImpl implements Cop
 	}
 
 	@Override
-	public Stream<CopleyAxisInterface<T>> getAxes() {
-		return Arrays.stream(getAxisClass().getEnumConstants()).map(this::getAxis);
+	public Stream<T> getAxes() {
+		return Arrays.stream(getAxisClass().getEnumConstants());
 	}
 
-	@Override
-	public CopleyAxisInterface<T> getAxis(T axis) {
-		if (axis.getDeclaringClass() != getAxisClass())
+	void validateAxis(T axis) {
+		validateAxisClass(axis.getDeclaringClass());
+	}
+
+	void validateAxisClass(Class<? extends Enum<?>> axis) {
+		if (axis != getAxisClass())
 			throw new CopleyCommsException(
-					"Unexpected requested axis class " + axis.getDeclaringClass() + " for configured class "
-							+ axisClass);
-
-		return new CopleyAxisInterface<T>() {
-			@Override
-			public T getID() {
-				return axis;
-			}
-		};
+					"Unexpected requested axis class " + axis + " for configured class " + axisClass);
 	}
 
-	private byte[] executeCopleyCommand(CopleyOperation operation, byte[] output) {
+	byte[] executeCopleyCommand(CopleyOperationID operation, byte[] output) {
 		return useChannel(channel -> {
 			sendCopleyCommand(operation, channel, output);
 			return receiveCopleyCommand(channel);
 		});
 	}
 
-	private void sendCopleyCommand(CopleyOperation operation, ByteChannel channel, byte[] output) {
+	private void sendCopleyCommand(CopleyOperationID operation, ByteChannel channel, byte[] output) {
 		byte id = (byte) (nodeID == 0 ? nodeID : (nodeID | NODE_ID_MARK));
 		byte size = (byte) (output.length / WORD_SIZE);
 		byte opCode = operation.getCode();

@@ -27,21 +27,23 @@
  */
 package uk.co.saiman.comms.copley;
 
-import java.util.stream.Stream;
+import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
-import uk.co.saiman.comms.Comms;
+public interface BankedVariable<T extends Enum<T>, U> extends WritableVariable<T, U> {
+	BankedVariable<T, U> switchBank(VariableBank bank);
 
-public interface CopleyComms<T extends Enum<T>> extends Comms {
-	String ID = "Copley Comms";
-	int HEADER_SIZE = 4;
-
-	Class<T> getAxisClass();
-
-	Stream<T> getAxes();
-
-	default T getAxis(int axis) {
-		return getAxisClass().getEnumConstants()[axis];
+	default BankedVariable<T, U> switchBank() {
+		return switchBank(getBank() == STORED ? ACTIVE : STORED);
 	}
 
-	Variable<T, ?> getVariable(CopleyVariableID id);
+	default void copyToBank() {
+		getComms().getAxes().forEach(this::copyToBank);
+	}
+
+	void copyToBank(T axis);
+
+	default void set(int axis) {
+		copyToBank(getComms().getAxis(axis));
+	}
 }

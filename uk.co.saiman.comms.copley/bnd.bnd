@@ -4,6 +4,7 @@ Bundle-Name: SAI :: Comms :: Copley
 	uk.co.saiman.comms;version=snapshot,\
 \
 	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.collections;version=latest,\
 	uk.co.strangeskies.text;version=latest,\
 	uk.co.strangeskies.observable;version=latest,\
 	org.eclipse.equinox.metatype
