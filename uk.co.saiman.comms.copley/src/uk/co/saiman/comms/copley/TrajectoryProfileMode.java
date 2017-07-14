@@ -40,7 +40,7 @@ public enum TrajectoryProfileMode {
 		return code;
 	}
 
-	public static TrajectoryProfileMode forCode(byte code) {
+	public static TrajectoryProfileMode forCode(int code) {
 		for (TrajectoryProfileMode command : values())
 			if (command.getCode() == code)
 				return command;

@@ -28,14 +28,13 @@
 package uk.co.saiman.comms.impl;
 
 import static java.util.stream.Collectors.toList;
-import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.strangeskies.collection.stream.StreamUtilities.throwingMerger;
-import static uk.co.strangeskies.reflection.Types.unwrapPrimitive;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,21 +42,23 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.comms.Bit;
 import uk.co.saiman.comms.BitArray;
 import uk.co.saiman.comms.BitConverter;
+import uk.co.saiman.comms.BitConverterFactory;
 import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.BitsConversion;
-import uk.co.saiman.comms.BitsElements;
 import uk.co.saiman.comms.ByteConverter;
 import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.Bytes;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.ElementBits;
+import uk.co.saiman.comms.EnumBitConverters;
+import uk.co.saiman.comms.PrimitiveBitConverters;
 import uk.co.strangeskies.collection.stream.StreamUtilities;
 
 @Component
@@ -71,8 +72,12 @@ public class DTOByteConverters implements ByteConverters {
 		return (DTOByteConverter<T>) byteConverters.computeIfAbsent(type, DTOByteConverter::new);
 	}
 
-	@Reference(cardinality = MULTIPLE, policyOption = GREEDY)
-	private List<BitConverter<?>> bitConverters = new CopyOnWriteArrayList<>();
+	private final List<BitConverterFactory> bitConverterFactories = new ArrayList<>();
+
+	public DTOByteConverters() {
+		bitConverterFactories.add(new PrimitiveBitConverters());
+		bitConverterFactories.add(new EnumBitConverters());
+	}
 
 	class DTOByteConverter<T> implements ByteConverter<T> {
 		private class FieldBitConverter {
@@ -134,7 +139,7 @@ public class DTOByteConverters implements ByteConverters {
 			int maxByte = (int) Math.ceil(maxBit / (double) Byte.SIZE);
 
 			if (type.isAnnotationPresent(Bytes.class)) {
-				int specifiedBytes = type.getAnnotation(Bytes.class).count();
+				int specifiedBytes = type.getAnnotation(Bytes.class).value();
 				if (specifiedBytes < maxByte) {
 					throw new CommsException(
 							"Converter for " + type + " exceeds specified byte count " + specifiedBytes);
@@ -259,16 +264,16 @@ public class DTOByteConverters implements ByteConverters {
 		private List<FieldBitConverter> createConverters(Field field) {
 			Type type = field.getGenericType();
 
-			BitsConversion conversion = field.getAnnotation(BitsConversion.class);
+			Bits conversion = field.getAnnotation(Bits.class);
 
-			if (field.isAnnotationPresent(BitsElements.class)) {
+			if (field.isAnnotationPresent(ElementBits.class)) {
 				return Arrays
-						.stream(field.getAnnotation(BitsElements.class).value())
+						.stream(field.getAnnotation(ElementBits.class).value())
 						.map(b -> createElementConverter(getElementType(type), b, conversion))
 						.collect(toList());
 			} else {
 				return Arrays
-						.asList(createElementConverter(type, field.getAnnotation(Bits.class), conversion));
+						.asList(createElementConverter(type, field.getAnnotation(Bit.class), conversion));
 			}
 		}
 
@@ -281,39 +286,36 @@ public class DTOByteConverters implements ByteConverters {
 			throw new CommsException("Field with multiple bits annotions must be array type");
 		}
 
-		private FieldBitConverter createElementConverter(
-				Type type,
-				Bits bits,
-				BitsConversion conversion) {
-			@SuppressWarnings("rawtypes")
-			Class<? extends BitConverter> converterClass = (bits
-					.conversion()
-					.converter() != BitConverter.class)
-							? converterClass = bits.conversion().converter()
-							: conversion != null ? conversion.converter() : BitConverter.class;
+		private FieldBitConverter createElementConverter(Type type, Bit bits, Bits conversion) {
+			Class<? extends BitConverterFactory> converterClass = conversion != null
+					? conversion.converter()
+					: BitConverterFactory.class;
 			int converterPosition = bits.value();
-			int converterSize = (bits.conversion().size() >= 0)
-					? bits.conversion().size()
-					: conversion != null ? conversion.size() : -1;
+			int converterSize = conversion != null ? conversion.value() : -1;
 
-			Stream<BitConverter<?>> converterStream;
+			Stream<? extends BitConverter<?>> converterStream;
 			BitConverter<?> converter;
-			if (converterClass != BitConverter.class) {
+			if (converterClass != BitConverterFactory.class) {
 				try {
-					converter = converterClass.newInstance();
-				} catch (InstantiationException | IllegalAccessException e) {
+					Constructor<? extends BitConverterFactory> constructor = converterClass
+							.getDeclaredConstructor();
+					constructor.setAccessible(true);
+					converter = constructor.newInstance().getBitConverter(type);
+				} catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+						| SecurityException | IllegalArgumentException | InvocationTargetException e) {
 					throw new RuntimeException(e);
 				}
 				converterStream = Stream.of(converter);
 			} else {
-				converterStream = bitConverters.stream();
+				converterStream = bitConverterFactories.stream().map(f -> f.getBitConverter(type));
 			}
 
 			return converterStream
-					.filter(c -> unwrapPrimitive(c.getType()) == unwrapPrimitive(type))
+					.filter(Objects::nonNull)
 					.map(c -> new FieldBitConverter(c, converterPosition, converterSize))
 					.findFirst()
-					.get();
+					.orElseThrow(
+							() -> new CommsException("No bit converter available for DTO field type " + type));
 		}
 	}
 }

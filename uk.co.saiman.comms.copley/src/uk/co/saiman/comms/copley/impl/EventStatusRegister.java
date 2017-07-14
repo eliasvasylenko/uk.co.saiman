@@ -27,69 +27,69 @@
  */
 package uk.co.saiman.comms.copley.impl;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.Bit;
 
 public class EventStatusRegister {
-	@Bits(0)
+	@Bit(0)
 	public boolean shortCircuitDetected;
-	@Bits(1)
+	@Bit(1)
 	public boolean driveOverTemperature;
-	@Bits(2)
+	@Bit(2)
 	public boolean overVoltage;
-	@Bits(3)
+	@Bit(3)
 	public boolean underVoltage;
-	@Bits(4)
+	@Bit(4)
 	public boolean motorTemperatureSensorActive;
-	@Bits(5)
+	@Bit(5)
 	public boolean encoderFeedbackError;
-	@Bits(6)
+	@Bit(6)
 	public boolean motorPhasingError;
-	@Bits(7)
+	@Bit(7)
 	public boolean currentOutputLimited;
-	@Bits(8)
+	@Bit(8)
 	public boolean voltageOutputLimited;
-	@Bits(9)
+	@Bit(9)
 	public boolean positiveLimitSwitchActive;
-	@Bits(10)
+	@Bit(10)
 	public boolean negativeLimitSwitchActive;
-	@Bits(11)
+	@Bit(11)
 	public boolean enableInputNotActive;
-	@Bits(12)
+	@Bit(12)
 	public boolean driveDisabledBySoftware;
-	@Bits(13)
+	@Bit(13)
 	public boolean attemptingMotorStop;
-	@Bits(14)
+	@Bit(14)
 	public boolean motorBrakeActivated;
-	@Bits(15)
+	@Bit(15)
 	public boolean pwmOutputsDisabled;
-	@Bits(16)
+	@Bit(16)
 	public boolean positiveSoftwareLimit;
-	@Bits(17)
+	@Bit(17)
 	public boolean negativeSoftwareLimit;
-	@Bits(18)
+	@Bit(18)
 	public boolean trackingError;
-	@Bits(19)
+	@Bit(19)
 	public boolean trackingWarning;
-	@Bits(20)
+	@Bit(20)
 	public boolean driveResetCondition;
-	@Bits(21)
+	@Bit(21)
 	public boolean positionValueOverflow;
-	@Bits(22)
+	@Bit(22)
 	public boolean driveFault;
-	@Bits(23)
+	@Bit(23)
 	public boolean velocityLimit;
-	@Bits(24)
+	@Bit(24)
 	public boolean accelerationLimit;
-	@Bits(25)
+	@Bit(25)
 	public boolean trackingErrorExceedsBounds;
-	@Bits(26)
+	@Bit(26)
 	public boolean homeSwitchActive;
-	@Bits(27)
+	@Bit(27)
 	public boolean motionActive;
-	@Bits(28)
+	@Bit(28)
 	public boolean velocityErrorExceedsBounds;
-	@Bits(29)
+	@Bit(29)
 	public boolean phaseUninitialized;
-	@Bits(30)
+	@Bit(30)
 	public boolean commandFault;
 }

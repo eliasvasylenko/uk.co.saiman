@@ -31,14 +31,38 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * A view of a comms device to adapt its functionality over a common REST
+ * interface.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface CommsREST {
+	/**
+	 * @return the unique ID of the device
+	 */
 	String getID();
 
+	/**
+	 * @return the human-readable name of the device
+	 */
 	String getName();
 
+	/**
+	 * Open the comms device
+	 */
 	void open();
 
+	/**
+	 * Reset the comms device
+	 */
 	void reset();
+
+	/**
+	 * @return a list of enumeration types the REST consumer should be aware of
+	 *         when presenting entry data
+	 */
+	Stream<Class<? extends Enum<?>>> getEnums();
 
 	Stream<CommsRESTEntry> getEntries();
 

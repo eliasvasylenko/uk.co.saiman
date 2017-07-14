@@ -38,8 +38,8 @@ import uk.co.saiman.comms.impl.HexConverter;
  * TODO flatten into long array like BitSet. Shame the API for that is so awful
  * and it doesn't understand size.
  * 
- * In all conversion operations, bit 0 represents the smallest bit and all
- * representations are big endian with both bytes and bits.
+ * In all conversion operations, bit 0 represents the least significant bit and
+ * all representations are big endian with both bytes and bits.
  * 
  * @author Elias N Vasylenko
  */
@@ -47,6 +47,12 @@ public class BitArray {
 	byte[] bytes;
 	int length;
 
+	/**
+	 * Create a bit array of the given length, initialized with 0 fill
+	 * 
+	 * @param length
+	 *          the number of bits
+	 */
 	public BitArray(int length) {
 		this.bytes = new byte[minimumContainingBytes(length)];
 		this.length = length;
@@ -86,6 +92,9 @@ public class BitArray {
 		return Arrays.hashCode(bytes) ^ length;
 	}
 
+	/**
+	 * @return the number of bits
+	 */
 	public int length() {
 		return length;
 	}
@@ -103,6 +112,11 @@ public class BitArray {
 			throw new IndexOutOfBoundsException(Integer.toString(index));
 	}
 
+	/**
+	 * @param index
+	 *          the bit index, where 0 is the least significant bit
+	 * @return the value of the bit at the given index
+	 */
 	public boolean get(int index) {
 		validateIndex(index);
 		return (bytes[getByteIndex(index)] & getBitMask(index)) > 0;
@@ -117,10 +131,32 @@ public class BitArray {
 		return this;
 	}
 
+	/**
+	 * Derive a bit array from the receiver, whose contents are modified according
+	 * to the given value for the given bit index.
+	 * 
+	 * @param index
+	 *          the bit index, where 0 is the least significant bit
+	 * @param value
+	 *          the value for the bit in the derived array
+	 * @return the derived bit array
+	 */
 	public BitArray with(int index, boolean value) {
 		return new BitArray(this).set(index, value);
 	}
 
+	/**
+	 * Derive a new bit array of the given length.
+	 * <p>
+	 * If the given length is positive, changes are made by truncating from or
+	 * appending to the end of the most significant bit. If the given length is
+	 * negative, changes are made by truncating from or prepending to the least
+	 * significant bit.
+	 * 
+	 * @param length
+	 *          the new length
+	 * @return a derived bit array
+	 */
 	public BitArray resize(int length) {
 		boolean positive = length > 0;
 		length = positive ? length : -length;
@@ -141,6 +177,11 @@ public class BitArray {
 		}
 	}
 
+	/**
+	 * @param size
+	 *          the
+	 * @return a derived bit array, truncated or 0 filled to the new length
+	 */
 	public BitArray trim(int size) {
 		if (size < 0)
 			return resize(-length() - size);

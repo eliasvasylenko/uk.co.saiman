@@ -36,7 +36,7 @@ const initialState = {
     name: UNKNOWN_TEXT,
     symbolicName: UNKNOWN_TEXT
   },
-
+  
   /*
    * Commands
    */
@@ -45,7 +45,12 @@ const initialState = {
   entries: [],
   entriesByID: {},
   actions: [],
-  actionsByID: {}
+  actionsByID: {},
+
+  /*
+   * Supplemental
+   */
+  enums: {}
 }
 
 function setConnection(connectionState = {}, requestedStatus) {

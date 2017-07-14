@@ -27,15 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.Bit;
 
 public class HighVoltageStatus {
-	@Bits(0)
+	@Bit(0)
 	public boolean switched24;
 
-	@Bits(1)
-	@Bits(2)
-	@Bits(3)
-	@Bits(4)
+	@Bit(1)
+	@Bit(2)
+	@Bit(3)
+	@Bit(4)
 	public boolean[] enable;
 }

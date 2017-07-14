@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.comms.impl;
 
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
@@ -72,6 +73,7 @@ public class CommsRESTProvider implements REST {
 	private static final String BUNDLE_KEY = "bundle";
 	private static final String ENTRIES_KEY = "entries";
 	private static final String ACTIONS_KEY = "actions";
+	private static final String ENUMS_KEY = "enums";
 
 	private static final String BUNDLE_SYMBOLIC_NAME_KEY = "symbolicName";
 	private static final String BUNDLE_NAME_KEY = "name";
@@ -184,6 +186,12 @@ public class CommsRESTProvider implements REST {
 		info.put(BUNDLE_KEY, getBundleInfoImpl(commsInterfaces.get(comms)));
 		info.put(ENTRIES_KEY, comms.getEntries().map(CommsRESTEntry::getID).collect(toList()));
 		info.put(ACTIONS_KEY, comms.getActions().map(CommsRESTAction::getID).collect(toList()));
+		info.put(
+				ENUMS_KEY,
+				comms.getEnums().collect(
+						toMap(
+								Class::getName,
+								e -> stream(e.getEnumConstants()).map(Enum::name).collect(toList()))));
 
 		return info;
 	}

@@ -47,9 +47,9 @@ public enum CopleyVariableID {
 
 	public static CopleyVariableID forCode(byte code) {
 		for (CopleyVariableID variable : values())
-			if (variable.getCode() == code)
+			if (variable.getCode() == (0xFF & code))
 				return variable;
 
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException("No Copley variable matches code " + code);
 	}
 }

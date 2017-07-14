@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.Bit;
 
 public class TurboControl {
-	@Bits(0)
-	@Bits(1)
+	@Bit(0)
+	@Bit(1)
 	public boolean[] control;
 }

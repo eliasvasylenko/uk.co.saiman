@@ -18,31 +18,72 @@ import {
   POLLING_STATES
 } from './actions'
 
-const CommsData = (items = {}, changeValue = (item, index, value) => {}) =>
+const CommsData = (enums, items = {}, changeValue) =>
   <div className="commsData">
     {
-      Object.keys(items).map(item => CommsDataItem(item, items[item], (value, index) => changeValue(item, index, value)))
+      Object.keys(items).map(item => CommsDataItem(
+        enums,
+        item,
+        items[item],
+        changeValue
+          ? (value, index) => changeValue(item, index, value)
+          : undefined
+      ))
     }
   </div>
 
-const CommsDataItem = (item, value, changeValue) =>
+const CommsDataItem = (enums, item, value, changeValue) =>
   <div key={item} className="commsDataItem">
     <label>{item}</label>
     <span>
       {
         (typeof value === typeof [])
           ? value.map((value, index) => CommsDataValue(
+              enums,
               index,
               value,
-              newValue => changeValue(newValue, index)))
-          : CommsDataValue(-1, value, changeValue)
+              changeValue
+                ? newValue => changeValue(newValue, index)
+                : undefined
+            ))
+          : CommsDataValue(enums, -1, value, changeValue)
       }
     </span>
   </div>
 
-const CommsDataValue = (index, value, change) => {
+const CommsDataValue = (enums, index, value, change) => {
   const type = typeof value
-  
+
+  /*
+   * TODO this is a nasty hack to deal with the DTO to JSON serialization on
+   * the Java end being a bit inflexible.
+   * 
+   * Once we have the OSGi object converter API we can get rid of this string
+   * checking shit by having enums encoded as an object containing all the
+   * necessary information.
+   */
+  if (type === typeof "") {
+    for (let enumType in enums) {
+      if (enums[enumType].includes(value)) {
+        if (change) {
+          return (
+            <select key={index} value={value} onChange={event => change(event.target.value)}>
+              {
+                enums[enumType].map(e => (
+                  <option key={e} value={enumType + "." + e}>
+                    {e}
+                  </option>
+                ))
+              }
+            </select>
+          )
+        } else {
+          value = enums[enumType].filter(e => value.endsWith("." + e))[0]
+        }
+      }
+    }
+  }
+
   if (type === typeof "")
     return <input key={index} type="text" value={value} onChange={event => change(event.target.value)} />
 
@@ -62,7 +103,7 @@ class CommsTable extends ConsoleComponent {
 
   render() { return this.renderImpl(this.props) }
 
-  renderImpl({ fault, entries, filter, setFilter, clearFilter, pollingStatus, setPollingEnabled, execute, changeOutputValue }) {
+  renderImpl({ enums, fault, entries, filter, setFilter, clearFilter, pollingStatus, setPollingEnabled, execute, changeOutputValue }) {
     return (
       <div id="commsTableContainer">
         <StatLine status={fault ? fault.message : "Status OK"} />
@@ -87,8 +128,8 @@ class CommsTable extends ConsoleComponent {
               .filter(entry => entry.id.toLowerCase().includes(filter.toLowerCase()))
               .map(entry => ({
                 entryID: entry.id,
-                entryOutput: CommsData(entry.output, (item, index, value) => changeOutputValue(entry.id, item, index, value)),
-                entryInput: CommsData(entry.input),
+                entryOutput: CommsData(enums, entry.output, (item, index, value) => changeOutputValue(entry.id, item, index, value)),
+                entryInput: CommsData(enums, entry.input),
                 entryActions: this.renderActions(entry, execute)
               }))
           }
@@ -119,6 +160,7 @@ const mapStateToProps = state => ({
     ...state.entriesByID[entry],
     actions: state.entriesByID[entry].actions.map(action => state.actionsByID[action])
   })),
+  enums: state.enums,
   filter: state.entriesFilter,
   pollingStatus: state.pollingStatus
 })

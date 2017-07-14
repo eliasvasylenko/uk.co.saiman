@@ -27,23 +27,23 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.Bit;
 
 public class MotorStatus {
-	@Bits(0)
+	@Bit(0)
 	public boolean lockMotorBreak;
-	@Bits(1)
+	@Bit(1)
 	public boolean lockMotorPhase;
-	@Bits(2)
+	@Bit(2)
 	public boolean lockMotorMode;
-	@Bits(3)
+	@Bit(3)
 	public boolean lockMotorEnable;
-	@Bits(4)
+	@Bit(4)
 	public boolean lockFullyOpen;
-	@Bits(5)
+	@Bit(5)
 	public boolean lockFullyClosed;
-	@Bits(6)
+	@Bit(6)
 	public boolean lockOpen;
-	@Bits(7)
+	@Bit(7)
 	public boolean lockClose;
 }

@@ -13,7 +13,15 @@ class BankedVariableImpl<T extends Enum<T>, U> extends WritableVariableImpl<T, U
 			CopleyCommsImpl<T> copleyCommsImpl,
 			CopleyVariableID id,
 			Class<U> variableClass) {
-		super(copleyCommsImpl, id, variableClass, VariableBank.ACTIVE);
+		this(copleyCommsImpl, id, variableClass, VariableBank.ACTIVE);
+	}
+
+	private BankedVariableImpl(
+			CopleyCommsImpl<T> copleyCommsImpl,
+			CopleyVariableID id,
+			Class<U> variableClass,
+			VariableBank bank) {
+		super(copleyCommsImpl, id, variableClass, bank);
 	}
 
 	@Override
@@ -23,6 +31,6 @@ class BankedVariableImpl<T extends Enum<T>, U> extends WritableVariableImpl<T, U
 
 	@Override
 	public BankedVariable<T, U> switchBank(VariableBank bank) {
-		return new BankedVariableImpl<>(getComms(), getID(), getType());
+		return new BankedVariableImpl<>(getComms(), getID(), getType(), bank);
 	}
 }

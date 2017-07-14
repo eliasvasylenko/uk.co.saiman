@@ -27,12 +27,52 @@
  */
 package uk.co.saiman.comms;
 
-public interface BitConverter<T> {
-	Class<T> getType();
+import java.util.function.Function;
 
+public interface BitConverter<T> {
 	int getDefaultBits();
 
 	BitArray toBits(T object, int bits);
 
 	T toObject(BitArray bits);
+
+	default <U> BitConverter<U> map(Function<T, U> toObject, Function<U, T> toBits) {
+		BitConverter<T> base = BitConverter.this;
+		return new BitConverter<U>() {
+			@Override
+			public int getDefaultBits() {
+				return base.getDefaultBits();
+			}
+
+			@Override
+			public BitArray toBits(U object, int bits) {
+				return base.toBits(toBits.apply(object), bits);
+			}
+
+			@Override
+			public U toObject(BitArray bits) {
+				return toObject.apply(base.toObject(bits));
+			}
+		};
+	}
+
+	default BitConverter<T> withDefaultBits(int bits) {
+		BitConverter<T> base = BitConverter.this;
+		return new BitConverter<T>() {
+			@Override
+			public int getDefaultBits() {
+				return bits;
+			}
+
+			@Override
+			public BitArray toBits(T object, int bits) {
+				return base.toBits(object, bits);
+			}
+
+			@Override
+			public T toObject(BitArray bits) {
+				return base.toObject(bits);
+			}
+		};
+	}
 }

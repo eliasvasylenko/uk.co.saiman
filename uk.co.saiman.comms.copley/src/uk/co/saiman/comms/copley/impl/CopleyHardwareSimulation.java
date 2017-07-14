@@ -43,6 +43,7 @@ import static uk.co.strangeskies.log.Log.Level.ERROR;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +154,8 @@ public class CopleyHardwareSimulation {
 		}
 
 		public void set(int axis, VariableBank bank, byte[] value) {
+			System.out.println("axis: " + axis + " bank: " + bank + " value: " + Arrays.toString(value));
+
 			switch (bank) {
 			case ACTIVE:
 				active.set(axis, value);
@@ -261,6 +264,7 @@ public class CopleyHardwareSimulation {
 			try {
 				VariableIdentifier variable;
 				CopleyVariableID id;
+				System.out.println(operation);
 				switch (operation) {
 				case GET_VARIABLE:
 					variable = getVariableIdentifier();
@@ -272,6 +276,9 @@ public class CopleyHardwareSimulation {
 				case SET_VARIABLE:
 					variable = getVariableIdentifier();
 					id = CopleyVariableID.forCode(variable.variableID);
+					
+					System.out.println("setting: " + variable + " id: " + id);
+					
 					byte[] value = new byte[message.remaining()];
 					message.get(value);
 					variables
@@ -312,7 +319,7 @@ public class CopleyHardwareSimulation {
 				case TRAJECTORY:
 					break;
 				default:
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("Unexpected operation " + operation);
 				}
 
 				byte checksum = (byte) (CopleyCommsImpl.CHECKSUM ^ result.length);
@@ -330,7 +337,11 @@ public class CopleyHardwareSimulation {
 				stream.write(response);
 			} catch (Exception e) {
 				of(log).ifPresent(
-						l -> l.log(ERROR, new CommsException("Unable to send simulated hardware response", e)));
+						l -> l.log(
+								ERROR,
+								new CommsException(
+										"Unable to send simulated hardware response: " + e.getMessage(),
+										e)));
 			}
 		}
 

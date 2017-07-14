@@ -36,7 +36,5 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface Bytes {
-	int count() default 1;
-
-	Class<? extends BitConverter<?>> converter() default DefaultBitConverter.class;
+	int value() default 1;
 }

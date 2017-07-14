@@ -29,17 +29,17 @@ package uk.co.saiman.comms.saint;
 
 import java.util.Arrays;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.Bit;
 
 public class LEDStatus {
-	@Bits(0)
-	@Bits(1)
-	@Bits(2)
-	@Bits(3)
-	@Bits(4)
-	@Bits(5)
-	@Bits(6)
-	@Bits(7)
+	@Bit(0)
+	@Bit(1)
+	@Bit(2)
+	@Bit(3)
+	@Bit(4)
+	@Bit(5)
+	@Bit(6)
+	@Bit(7)
 	public boolean[] led;
 
 	@Override

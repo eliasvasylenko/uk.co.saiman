@@ -27,15 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
+import uk.co.saiman.comms.Bit;
 import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.BitsConversion;
 
 public class VacuumReadback {
-	@Bits(0)
+	@Bit(0)
 	public boolean pirani;
-	@Bits(1)
+	@Bit(1)
 	public boolean magnetron;
-	@BitsConversion(size = 4)
-	@Bits(value = 2)
+	@Bits(value = 4)
+	@Bit(value = 2)
 	public byte spare;
 }

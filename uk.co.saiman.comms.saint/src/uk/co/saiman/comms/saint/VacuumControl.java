@@ -27,23 +27,23 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.comms.Bit;
 
 public class VacuumControl {
-	@Bits(0)
+	@Bit(0)
 	public boolean intermediate;
-	@Bits(1)
+	@Bit(1)
 	public boolean backing;
-	@Bits(2)
+	@Bit(2)
 	public boolean inlet;
-	@Bits(3)
+	@Bit(3)
 	public boolean vent;
-	@Bits(4)
+	@Bit(4)
 	public boolean diaphragm;
-	@Bits(5)
+	@Bit(5)
 	public boolean magnetron;
-	@Bits(6)
+	@Bit(6)
 	public boolean magnetronTrip;
-	@Bits(7)
+	@Bit(7)
 	public boolean piraniTrip;
 }

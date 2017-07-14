@@ -65,7 +65,7 @@ public enum AmplifierMode {
 		return code;
 	}
 
-	public static AmplifierMode forCode(byte code) {
+	public static AmplifierMode forCode(int code) {
 		for (AmplifierMode command : values())
 			if (command.getCode() == code)
 				return command;

@@ -158,6 +158,11 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
 	}
 
 	@Override
+	public Stream<Class<? extends Enum<?>>> getEnums() {
+		return Stream.empty();
+	}
+
+	@Override
 	public Stream<CommsRESTEntry> getEntries() {
 		return upcastStream(entries.values().stream());
 	}
@@ -225,7 +230,8 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
 				value = dtos.convert(outputData).to(request.getType());
 			} catch (Exception e) {
 				throw new CommsException(
-						"Cannot convert output data map to " + request.getType().getSimpleName());
+						"Cannot convert output data map to " + request.getType().getSimpleName(),
+						e);
 			}
 			request.request(value);
 		}
@@ -236,7 +242,7 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
 			try {
 				outputData = dtos.asMap(requested);
 			} catch (Exception e) {
-				throw new CommsException("Cannot convert " + requested + " to map");
+				throw new CommsException("Cannot convert " + requested + " to map", e);
 			}
 			this.outputData.clear();
 			this.outputData.putAll(outputData);
@@ -248,7 +254,7 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms> {
 			try {
 				inputData = dtos.asMap(actual);
 			} catch (Exception e) {
-				throw new CommsException("Cannot convert " + actual + " to map");
+				throw new CommsException("Cannot convert " + actual + " to map", e);
 			}
 			this.inputData.clear();
 			this.inputData.putAll(inputData);
