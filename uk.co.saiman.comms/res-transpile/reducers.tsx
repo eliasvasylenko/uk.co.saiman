@@ -2,6 +2,8 @@ import Thunk from "redux-thunk"
 import {
   REQUEST_INFO,
   RECEIVE_INFO,
+  REQUEST_CONTROLLER_INFO,
+  RECEIVE_CONTROLLER_INFO,
   CLEAR_REQUESTED_VALUES,
   CHANGE_REQUESTED_VALUE,
   
@@ -192,11 +194,20 @@ function commsApp(state = initialState, action) {
     delete state.fault
   }
 
+  console.log(action.type)
+
   switch (action.type) {
   case REQUEST_INFO:
     state = { ...state, waiting: true }
     break
   case RECEIVE_INFO:
+    state = { ...state, ...action.payload }
+    break
+
+  case REQUEST_CONTROLLER_INFO:
+    state = { ...state, waiting: true }
+    break
+  case RECEIVE_CONTROLLER_INFO:
     state = { ...state, ...action.payload }
     break
 
@@ -249,6 +260,8 @@ function handleError(state, action) {
   switch (action.type) {
   case REQUEST_INFO:
   case RECEIVE_INFO:
+  case REQUEST_CONTROLLER_INFO:
+  case RECEIVE_CONTROLLER_INFO:
   case REQUEST_CONNECTION_STATE:
   case CONNECTION_STATE_CHANGED:
     state = { ...state, connection: { ...state.connection, fault: action.error } }

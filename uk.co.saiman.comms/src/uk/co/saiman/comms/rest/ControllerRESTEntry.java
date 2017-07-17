@@ -27,43 +27,23 @@
  */
 package uk.co.saiman.comms.rest;
 
-import java.util.Locale;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Stream;
 
-import uk.co.saiman.comms.Comms;
+public interface ControllerRESTEntry {
+	String getID();
 
-/**
- * A view of a comms device to adapt its functionality over a common REST
- * interface.
- * 
- * @author Elias N Vasylenko
- */
-public interface CommsREST {
-  /**
-   * @return the unique ID of the device
-   */
-  String getID();
+	Stream<String> getActions();
 
-  /**
-   * @return the human-readable name of the device
-   */
-  String getName();
+	/**
+	 * @return the user readable map of data which actions have received through
+	 *         the comms interface
+	 */
+	Map<String, Object> getInputData();
 
-  /**
-   * Open the comms device
-   */
-  ControllerREST openController();
-
-  /**
-   * Reset the comms device
-   */
-  void reset();
-
-  Comms.CommsStatus getStatus();
-
-  Optional<String> getFaultText();
-
-  String getPort();
-
-  String getLocalisedText(String key, Locale locale);
+	/**
+	 * @return the user editable map of data which actions can output through the
+	 *         comms interface
+	 */
+	Map<String, Object> getOutputData();
 }

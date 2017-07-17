@@ -30,20 +30,20 @@ package uk.co.saiman.comms.copley;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
-public interface BankedVariable<T extends Enum<T>, U> extends WritableVariable<T, U> {
-	BankedVariable<T, U> switchBank(VariableBank bank);
+public interface BankedVariable<U> extends WritableVariable<U> {
+  BankedVariable<U> switchBank(VariableBank bank);
 
-	default BankedVariable<T, U> switchBank() {
-		return switchBank(getBank() == STORED ? ACTIVE : STORED);
-	}
+  default BankedVariable<U> switchBank() {
+    return switchBank(getBank() == STORED ? ACTIVE : STORED);
+  }
 
-	default void copyToBank() {
-		getComms().getAxes().forEach(this::copyToBank);
-	}
+  default void copyToBank() {
+    getController().getAxes().forEach(this::copyToBank);
+  }
 
-	void copyToBank(T axis);
+  void copyToBank(MotorAxis axis);
 
-	default void set(int axis) {
-		copyToBank(getComms().getAxis(axis));
-	}
+  default void set(int axis) {
+    copyToBank(getController().getAxis(axis));
+  }
 }

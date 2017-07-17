@@ -27,38 +27,38 @@
  */
 package uk.co.saiman.comms.rest;
 
-public interface CommsRESTAction {
-	public enum Behaviour {
-		/**
-		 * Indicates that the action receives user-readable
-		 * {@link CommsRESTEntry#getInputData() input data} through the comms
-		 * interface.
-		 */
-		RECEIVES_INPUT_DATA,
+public interface ControllerRESTAction {
+  public enum Behaviour {
+    /**
+     * Indicates that the action receives user-readable
+     * {@link ControllerRESTEntry#getInputData() input data} through the comms
+     * interface.
+     */
+    RECEIVES_INPUT_DATA,
 
-		/**
-		 * Indicates that the action sends the user-editable
-		 * {@link CommsRESTEntry#getOutputData() output data} through the comms
-		 * interface.
-		 */
-		SENDS_OUTPUT_DATA,
+    /**
+     * Indicates that the action sends the user-editable
+     * {@link ControllerRESTEntry#getOutputData() output data} through the comms
+     * interface.
+     */
+    SENDS_OUTPUT_DATA,
 
-		/**
-		 * Indicates that the action modifies the user-editable
-		 * {@link CommsRESTEntry#getOutputData() output data} which may be sent
-		 * through the comms interface.
-		 */
-		MODIFIES_OUTPUT_DATA,
+    /**
+     * Indicates that the action modifies the user-editable
+     * {@link ControllerRESTEntry#getOutputData() output data} which may be sent
+     * through the comms interface.
+     */
+    MODIFIES_OUTPUT_DATA,
 
-		/**
-		 * Indicates that the action may be polled.
-		 */
-		POLLABLE
-	}
+    /**
+     * Indicates that the action may be polled.
+     */
+    POLLABLE
+  }
 
-	String getID();
+  String getID();
 
-	boolean hasBehaviour(Behaviour behaviour);
+  boolean hasBehaviour(Behaviour behaviour);
 
-	void invoke(String entry) throws Exception;
+  void invoke(String entry) throws Exception;
 }

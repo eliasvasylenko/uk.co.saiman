@@ -31,21 +31,10 @@ import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.copley.CopleyOperationID.NO_OP;
-import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
-import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
-import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
-import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
-import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
-import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
-import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -59,234 +48,173 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.CommsImpl;
+import uk.co.saiman.comms.SimpleComms;
+import uk.co.saiman.comms.SimpleController;
 import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.CopleyOperationID;
-import uk.co.saiman.comms.copley.CopleyVariableID;
-import uk.co.saiman.comms.copley.SingleMotorAxis;
-import uk.co.saiman.comms.copley.Variable;
-import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.copley.impl.CopleyCommsImpl.CopleyCommsConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
 
 @Designate(ocd = CopleyCommsConfiguration.class, factory = true)
 @Component(
-		name = CopleyCommsImpl.CONFIGURATION_PID,
-		configurationPid = CopleyCommsImpl.CONFIGURATION_PID,
-		configurationPolicy = REQUIRE)
-public class CopleyCommsImpl<T extends Enum<T>> extends CommsImpl implements CopleyComms<T>, Comms {
-	static final String CONFIGURATION_PID = "uk.co.saiman.comms.copley";
+    name = CopleyCommsImpl.CONFIGURATION_PID,
+    configurationPid = CopleyCommsImpl.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
+public class CopleyCommsImpl extends SimpleComms<CopleyController>
+    implements CopleyComms, Comms<CopleyController> {
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.copley";
 
-	static final int NODE_ID_MASK = 0x7F;
-	static final int NODE_ID_MARK = 0x80;
-	static final byte CHECKSUM = 0x5A;
-	static final int WORD_SIZE = 2;
+  static final int NODE_ID_MASK = 0x7F;
+  static final int NODE_ID_MARK = 0x80;
+  static final byte CHECKSUM = 0x5A;
+  static final int WORD_SIZE = 2;
 
-	@SuppressWarnings("javadoc")
-	@ObjectClassDefinition(
-			id = CONFIGURATION_PID,
-			name = "Copley Comms Configuration",
-			description = "The configuration for the underlying serial comms for a Copley motor control")
-	public @interface CopleyCommsConfiguration {
-		@AttributeDefinition(name = "Serial Port", description = "The serial port for comms")
-		String serialPort();
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "Copley Comms Configuration",
+      description = "The configuration for the underlying serial comms for a Copley motor control")
+  public @interface CopleyCommsConfiguration {
+    @AttributeDefinition(name = "Serial Port", description = "The serial port for comms")
+    String serialPort();
 
-		@AttributeDefinition(
-				name = "Node Number",
-				description = "The node number for multi-drop mode dispatch, or 0 for the directly connected node")
-		int node()
+    @AttributeDefinition(
+        name = "Node Number",
+        description = "The node number for multi-drop mode dispatch, or 0 for the directly connected node")
+    int node() default 0;
+  }
 
-		default 0;
+  @Reference(policy = STATIC, policyOption = GREEDY)
+  SerialPorts comms;
+  private SerialPort port;
+  private int nodeID;
+  private boolean nodeIDValid;
 
-		@AttributeDefinition(name = "Axes", description = "The names for the expected axes")
-		Class<? extends Enum<?>> axes() default SingleMotorAxis.class;
-	}
+  @Reference
+  ByteConverters converters;
 
-	@Reference(policy = STATIC, policyOption = GREEDY)
-	SerialPorts comms;
-	private SerialPort port;
-	private int nodeID;
-	private boolean nodeIDValid;
-	private Class<T> axisClass;
+  public CopleyCommsImpl() {
+    super(CopleyComms.ID);
+  }
 
-	@Reference
-	ByteConverters converters;
+  @Activate
+  void activate(CopleyCommsConfiguration configuration) throws IOException {
+    configure(configuration);
+  }
 
-	private Map<CopleyVariableID, VariableImpl<T, ?>> variables;
+  @Modified
+  void configure(CopleyCommsConfiguration configuration) throws IOException {
+    port = comms.getPort(configuration.serialPort());
+    nodeIDValid = (configuration.node() & NODE_ID_MASK) == configuration.node();
+    nodeID = configuration.node();
+    setComms(port);
+    checkNodeId();
+  }
 
-	private VariableImpl<T, EventStatusRegister> driveEventStatus;
-	private WritableVariableImpl<T, EventStatusRegister> latchedEventStatus;
-	private BankedVariableImpl<T, TrajectoryProfile> trajectoryProfile;
-	private BankedVariableImpl<T, Int32> trajectoryPosition;
-	private BankedVariableImpl<T, AmplifierState> amplifierState;
-	private WritableVariableImpl<T, Int32> actualPosition;
+  private boolean checkNodeId() {
+    if (!nodeIDValid)
+      setFault(new CommsException("Invalid node id number " + nodeID));
 
-	public CopleyCommsImpl() {
-		super(CopleyComms.ID);
-	}
+    return nodeIDValid;
+  }
 
-	@Activate
-	void activate(CopleyCommsConfiguration configuration) throws IOException {
-		configure(configuration);
+  @Deactivate
+  void deactivate() throws IOException {
+    unsetComms();
+  }
 
-		variables = new LinkedHashMap<>();
-		driveEventStatus = addVariable(DRIVE_EVENT_STATUS, EventStatusRegister.class, ACTIVE);
-		latchedEventStatus = addWritableVariable(
-				LATCHED_EVENT_STATUS,
-				EventStatusRegister.class,
-				ACTIVE);
-		trajectoryProfile = addBankedVariable(TRAJECTORY_PROFILE_MODE, TrajectoryProfile.class);
-		trajectoryPosition = addBankedVariable(TRAJECTORY_POSITION_COUNTS, Int32.class);
-		amplifierState = addBankedVariable(AMPLIFIER_STATE, AmplifierState.class);
-		actualPosition = addWritableVariable(ACTUAL_POSITION, Int32.class, ACTIVE);
-	}
+  @Override
+  protected SimpleController<CopleyController> createController() {
+    CopleyControllerImpl controller = new CopleyControllerImpl(this);
 
-	@SuppressWarnings("unchecked")
-	@Modified
-	void configure(CopleyCommsConfiguration configuration) throws IOException {
-		port = comms.getPort(configuration.serialPort());
-		nodeIDValid = (configuration.node() & NODE_ID_MASK) == configuration.node();
-		nodeID = configuration.node();
-		axisClass = (Class<T>) configuration.axes();
-		setComms(port);
-		checkNodeId();
-	}
+    return new SimpleController<CopleyController>() {
+      @Override
+      public CopleyController getController() {
+        return controller;
+      }
 
-	private boolean checkNodeId() {
-		if (!nodeIDValid)
-			setFault(new CommsException("Invalid node id number " + nodeID));
+      @Override
+      public void closeController() {
+        controller.close();
+      }
+    };
+  }
 
-		return nodeIDValid;
-	}
+  ByteConverters getConverters() {
+    return converters;
+  }
 
-	@Deactivate
-	void deactivate() throws IOException {
-		unsetComms();
-	}
+  @Override
+  protected void checkComms() {
+    if (checkNodeId())
+      ping();
+  }
 
-	ByteConverters getConverters() {
-		return converters;
-	}
+  private void ping() {
+    executeCopleyCommand(NO_OP, new byte[] {});
+  }
 
-	private <U> BankedVariableImpl<T, U> addBankedVariable(CopleyVariableID id, Class<U> type) {
-		BankedVariableImpl<T, U> variable = new BankedVariableImpl<>(this, id, type);
-		variables.put(id, variable);
-		return variable;
-	}
+  byte[] executeCopleyCommand(CopleyOperationID operation, byte[] output) {
+    return useChannel(channel -> {
+      sendCopleyCommand(operation, channel, output);
+      return receiveCopleyCommand(channel);
+    });
+  }
 
-	private <U> WritableVariableImpl<T, U> addWritableVariable(
-			CopleyVariableID id,
-			Class<U> type,
-			VariableBank bank) {
-		WritableVariableImpl<T, U> variable = new WritableVariableImpl<>(this, id, type, bank);
-		variables.put(id, variable);
-		return variable;
-	}
+  private void sendCopleyCommand(CopleyOperationID operation, ByteChannel channel, byte[] output) {
+    byte id = (byte) (nodeID == 0 ? nodeID : (nodeID | NODE_ID_MARK));
+    byte size = (byte) (output.length / WORD_SIZE);
+    byte opCode = operation.getCode();
+    byte checksum = (byte) (CHECKSUM ^ id ^ size ^ opCode);
+    for (byte outputByte : output)
+      checksum ^= outputByte;
 
-	private <U> VariableImpl<T, U> addVariable(
-			CopleyVariableID id,
-			Class<U> type,
-			VariableBank bank) {
-		VariableImpl<T, U> variable = new VariableImpl<>(this, id, type, bank);
-		variables.put(id, variable);
-		return variable;
-	}
+    ByteBuffer message_buffer = ByteBuffer.allocate(HEADER_SIZE + output.length);
+    message_buffer.put(id);
+    message_buffer.put(checksum);
+    message_buffer.put(size);
+    message_buffer.put(opCode);
+    message_buffer.put(output);
 
-	@Override
-	public Variable<T, ?> getVariable(CopleyVariableID id) {
-		return variables.get(id);
-	}
+    try {
+      message_buffer.flip();
+      channel.write(message_buffer);
+    } catch (IOException e) {
+      throw setFault(new CommsException("Problem dispatching command"));
+    }
+  }
 
-	@Override
-	protected void checkComms() {
-		if (checkNodeId())
-			ping();
-	}
+  private byte[] receiveCopleyCommand(ByteChannel channel) {
+    ByteBuffer message_buffer = ByteBuffer.allocate(HEADER_SIZE);
+    try {
+      if (channel.read(message_buffer) != message_buffer.limit()) {
+        throw setFault(new CommsException("Response too short " + message_buffer.limit()));
+      }
+      message_buffer.flip();
+    } catch (IOException e) {
+      throw setFault(new CommsException("Problem receiving command response"));
+    }
 
-	private void ping() {
-		executeCopleyCommand(NO_OP, new byte[] {});
-	}
+    message_buffer.get(); // reserved
+    byte checksum = message_buffer.get();
+    int size = message_buffer.get() * WORD_SIZE;
+    byte errorCode = message_buffer.get();
 
-	@Override
-	public Class<T> getAxisClass() {
-		return axisClass;
-	}
+    message_buffer = ByteBuffer.allocate(size);
+    try {
+      if (channel.read(message_buffer) != message_buffer.limit()) {
+        throw setFault(new CommsException("Response too short " + message_buffer.limit()));
+      }
+      message_buffer.flip();
+    } catch (IOException e) {
+      throw setFault(new CommsException("Problem receiving command response"));
+    }
 
-	@Override
-	public Stream<T> getAxes() {
-		return Arrays.stream(getAxisClass().getEnumConstants());
-	}
+    byte[] input = new byte[size];
+    message_buffer.get(input);
 
-	void validateAxis(T axis) {
-		validateAxisClass(axis.getDeclaringClass());
-	}
-
-	void validateAxisClass(Class<? extends Enum<?>> axis) {
-		if (axis != getAxisClass())
-			throw new CopleyCommsException(
-					"Unexpected requested axis class " + axis + " for configured class " + axisClass);
-	}
-
-	byte[] executeCopleyCommand(CopleyOperationID operation, byte[] output) {
-		return useChannel(channel -> {
-			sendCopleyCommand(operation, channel, output);
-			return receiveCopleyCommand(channel);
-		});
-	}
-
-	private void sendCopleyCommand(CopleyOperationID operation, ByteChannel channel, byte[] output) {
-		byte id = (byte) (nodeID == 0 ? nodeID : (nodeID | NODE_ID_MARK));
-		byte size = (byte) (output.length / WORD_SIZE);
-		byte opCode = operation.getCode();
-		byte checksum = (byte) (CHECKSUM ^ id ^ size ^ opCode);
-		for (byte outputByte : output)
-			checksum ^= outputByte;
-
-		ByteBuffer message_buffer = ByteBuffer.allocate(HEADER_SIZE + output.length);
-		message_buffer.put(id);
-		message_buffer.put(checksum);
-		message_buffer.put(size);
-		message_buffer.put(opCode);
-		message_buffer.put(output);
-
-		try {
-			message_buffer.flip();
-			channel.write(message_buffer);
-		} catch (IOException e) {
-			throw setFault(new CommsException("Problem dispatching command"));
-		}
-	}
-
-	private byte[] receiveCopleyCommand(ByteChannel channel) {
-		ByteBuffer message_buffer = ByteBuffer.allocate(HEADER_SIZE);
-		try {
-			if (channel.read(message_buffer) != message_buffer.limit()) {
-				throw setFault(new CommsException("Response too short " + message_buffer.limit()));
-			}
-			message_buffer.flip();
-		} catch (IOException e) {
-			throw setFault(new CommsException("Problem receiving command response"));
-		}
-
-		message_buffer.get(); // reserved
-		byte checksum = message_buffer.get();
-		int size = message_buffer.get() * WORD_SIZE;
-		byte errorCode = message_buffer.get();
-
-		message_buffer = ByteBuffer.allocate(size);
-		try {
-			if (channel.read(message_buffer) != message_buffer.limit()) {
-				throw setFault(new CommsException("Response too short " + message_buffer.limit()));
-			}
-			message_buffer.flip();
-		} catch (IOException e) {
-			throw setFault(new CommsException("Problem receiving command response"));
-		}
-
-		byte[] input = new byte[size];
-		message_buffer.get(input);
-
-		return input;
-	}
+    return input;
+  }
 }

@@ -32,24 +32,24 @@ import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
 import java.util.Optional;
 
-public interface Variable<T extends Enum<T>, U> {
-	CopleyComms<T> getComms();
+public interface Variable<U> {
+  CopleyController getController();
 
-	CopleyVariableID getID();
+  CopleyVariableID getID();
 
-	VariableBank getBank();
+  VariableBank getBank();
 
-	Class<U> getType();
+  Class<U> getType();
 
-	Optional<? extends Variable<T, U>> trySwitchBank(VariableBank bank);
+  Optional<? extends Variable<U>> trySwitchBank(VariableBank bank);
 
-	default Optional<? extends Variable<T, U>> trySwitchBank() {
-		return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
-	}
+  default Optional<? extends Variable<U>> trySwitchBank() {
+    return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
+  }
 
-	U get(T axis);
+  U get(MotorAxis axis);
 
-	default U get(int axis) {
-		return get(getComms().getAxis(axis));
-	}
+  default U get(int axis) {
+    return get(getController().getAxis(axis));
+  }
 }

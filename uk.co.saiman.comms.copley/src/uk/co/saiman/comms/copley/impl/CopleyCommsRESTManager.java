@@ -48,41 +48,41 @@ import uk.co.saiman.comms.rest.CommsREST;
 
 @Component
 public class CopleyCommsRESTManager {
-	private final Set<CopleyComms<?>> comms = new HashSet<>();
-	private final Map<CopleyComms<?>, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
-	private BundleContext context;
+  private final Set<CopleyComms> comms = new HashSet<>();
+  private final Map<CopleyComms, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
+  private BundleContext context;
 
-	@Reference(cardinality = MANDATORY)
-	private DTOs dtos;
+  @Reference(cardinality = MANDATORY)
+  private DTOs dtos;
 
-	@Activate
-	synchronized void activate(BundleContext context) {
-		this.context = context;
-		comms.stream().forEach(e -> register(e, new CopleyCommsREST(e, dtos)));
-	}
+  @Activate
+  synchronized void activate(BundleContext context) {
+    this.context = context;
+    comms.stream().forEach(e -> register(e, new CopleyCommsREST(e, dtos)));
+  }
 
-	void register(CopleyComms<?> comms, CommsREST rest) {
-		serviceRegistrations.put(comms, context.registerService(CommsREST.class, rest, null));
-	}
+  void register(CopleyComms comms, CommsREST rest) {
+    serviceRegistrations.put(comms, context.registerService(CommsREST.class, rest, null));
+  }
 
-	@Reference(policy = DYNAMIC, cardinality = MULTIPLE)
-	synchronized void addComms(CopleyComms<?> comms) {
-		try {
-			this.comms.add(comms);
+  @Reference(policy = DYNAMIC, cardinality = MULTIPLE)
+  synchronized void addComms(CopleyComms comms) {
+    try {
+      this.comms.add(comms);
 
-			if (context != null) {
-				register(comms, new CopleyCommsREST(comms, dtos));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+      if (context != null) {
+        register(comms, new CopleyCommsREST(comms, dtos));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
-	synchronized void removeComms(CopleyComms<?> comms) {
-		this.comms.remove(comms);
-		ServiceRegistration<?> restService = serviceRegistrations.remove(comms);
-		if (restService != null) {
-			restService.unregister();
-		}
-	}
+  synchronized void removeComms(CopleyComms comms) {
+    this.comms.remove(comms);
+    ServiceRegistration<?> restService = serviceRegistrations.remove(comms);
+    if (restService != null) {
+      restService.unregister();
+    }
+  }
 }

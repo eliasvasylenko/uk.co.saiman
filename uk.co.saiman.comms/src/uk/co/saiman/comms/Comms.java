@@ -31,50 +31,83 @@ import java.util.Optional;
 
 import uk.co.strangeskies.observable.ObservableValue;
 
-public interface Comms {
-	/**
-	 * A description of the status of a comms channel.
-	 * 
-	 * @author Elias N Vasylenko
-	 */
-	enum CommsStatus {
-		/**
-		 * The byte channel is currently open. Subsequent invocations of
-		 * {@link CommsPort#openChannel()} will fail until the previously opened
-		 * byte channel is closed.
-		 */
-		OPEN,
+/**
+ * An interface over a comms channel to a piece of hardware.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          the type of the controller
+ */
+public interface Comms<T> {
+  /**
+   * A description of the status of a comms channel.
+   * 
+   * @author Elias N Vasylenko
+   */
+  enum CommsStatus {
+    /**
+     * The byte channel is currently open. Subsequent invocations of
+     * {@link CommsPort#openChannel()} will fail until the previously opened
+     * byte channel is closed.
+     */
+    OPEN,
 
-		/**
-		 * The byte channel is ready to be opened. This does not guarantee that a
-		 * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
-		 * simply indicates that it is expected to succeed. If invocation fails, the
-		 * comms channel will enter the {@link #FAULT} state.
-		 */
-		CLOSED,
+    /**
+     * The byte channel is ready to be opened. This does not guarantee that a
+     * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
+     * simply indicates that it is expected to succeed. If invocation fails, the
+     * comms channel will enter the {@link #FAULT} state.
+     */
+    CLOSED,
 
-		/**
-		 * There is a problem with the comms channel. If a comms channel is in the
-		 * {@link #FAULT} state, then invocation of {@link Comms#open()} should
-		 * either clear the fault or throw an exception describing the fault,
-		 * whereas invocation of {@link Comms#reset()} should complete normally.
-		 */
-		FAULT
-	}
+    /**
+     * There is a problem with the comms channel. If a comms channel is in the
+     * {@link #FAULT} state, then invocation of {@link Comms#openController()}
+     * should either clear the fault or throw an exception describing the fault,
+     * whereas invocation of {@link Comms#reset()} should complete normally.
+     */
+    FAULT
+  }
 
-	String getName();
+  /**
+   * @return the human-readable name of the hardware interface
+   */
+  String getName();
 
-	ObservableValue<CommsStatus> status();
+  /**
+   * @return the current status of the hardware interface
+   */
+  ObservableValue<CommsStatus> status();
 
-	/**
-	 * @return if the comms object is in a fault state an optional containing the
-	 *         cause of the fault, otherwise an empty optional
-	 */
-	Optional<CommsException> fault();
+  /**
+   * @return if the comms object is in a fault state an optional containing the
+   *         cause of the fault, otherwise an empty optional
+   */
+  Optional<CommsException> fault();
 
-	void open();
+  /**
+   * @return the controller type for interacting with the comms interface
+   */
+  Class<T> getControllerClass();
 
-	void reset();
+  /**
+   * Open a controller over the comms interface if one is not already open.
+   * 
+   * @return If the controller was closed, return the newly opened controller,
+   *         else return the controller already open.
+   */
+  T openController();
 
-	CommsPort getPort();
+  /**
+   * Attempt to clear all faults and close the comms interface. Any controllers
+   * which are open will be made invalid, and will continue to be invalid even
+   * if another controller is opened at a later time.
+   */
+  void reset();
+
+  /**
+   * @return the serial port the comms interface is registered to
+   */
+  CommsPort getPort();
 }

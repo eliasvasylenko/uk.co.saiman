@@ -6,18 +6,17 @@ import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.copley.WritableVariable;
 
-class WritableVariableImpl<T extends Enum<T>, U> extends VariableImpl<T, U>
-		implements WritableVariable<T, U> {
-	public WritableVariableImpl(
-			CopleyCommsImpl<T> copleyCommsImpl,
-			CopleyVariableID id,
-			Class<U> variableClass,
-			VariableBank bank) {
-		super(copleyCommsImpl, id, variableClass, bank);
-	}
+class WritableVariableImpl<U> extends VariableImpl<U> implements WritableVariable<U> {
+  public WritableVariableImpl(
+      CopleyControllerImpl controller,
+      CopleyVariableID id,
+      Class<U> variableClass,
+      VariableBank bank) {
+    super(controller, id, variableClass, bank);
+  }
 
-	@Override
-	public Optional<WritableVariable<T, U>> trySwitchBank(VariableBank bank) {
-		return Optional.empty();
-	}
+  @Override
+  public Optional<WritableVariable<U>> trySwitchBank(VariableBank bank) {
+    return Optional.empty();
+  }
 }

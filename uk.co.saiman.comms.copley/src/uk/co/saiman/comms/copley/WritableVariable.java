@@ -32,19 +32,19 @@ import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
 import java.util.Optional;
 
-public interface WritableVariable<T extends Enum<T>, U> extends Variable<T, U> {
-	void set(T axis, U value);
+public interface WritableVariable<U> extends Variable<U> {
+  void set(MotorAxis axis, U value);
 
-	default void set(int axis, U value) {
-		set(getComms().getAxis(axis), value);
-	}
+  default void set(int axis, U value) {
+    set(getController().getAxis(axis), value);
+  }
 
-	@Override
-	Optional<WritableVariable<T, U>> trySwitchBank(VariableBank bank);
+  @Override
+  Optional<WritableVariable<U>> trySwitchBank(VariableBank bank);
 
-	@Override
-	default Optional<WritableVariable<T, U>> trySwitchBank() {
-		return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
-	}
+  @Override
+  default Optional<WritableVariable<U>> trySwitchBank() {
+    return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
+  }
 
 }

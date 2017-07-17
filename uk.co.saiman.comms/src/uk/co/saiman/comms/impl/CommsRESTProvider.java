@@ -30,10 +30,10 @@ package uk.co.saiman.comms.impl;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
-import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.POLLABLE;
-import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.RECEIVES_INPUT_DATA;
-import static uk.co.saiman.comms.rest.CommsRESTAction.Behaviour.SENDS_OUTPUT_DATA;
+import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
+import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.POLLABLE;
+import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.RECEIVES_INPUT_DATA;
+import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.SENDS_OUTPUT_DATA;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -57,10 +57,12 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import osgi.enroute.dto.api.DTOs;
 import osgi.enroute.rest.api.REST;
 import osgi.enroute.rest.api.RequireRestImplementation;
+import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.CommsREST;
-import uk.co.saiman.comms.rest.CommsRESTAction;
-import uk.co.saiman.comms.rest.CommsRESTEntry;
+import uk.co.saiman.comms.rest.ControllerREST;
+import uk.co.saiman.comms.rest.ControllerRESTAction;
+import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
 @RequireRestImplementation
 @Component(property = REST.ENDPOINT + "=/api/comms/*")
@@ -94,6 +96,7 @@ public class CommsRESTProvider implements REST {
   private static final String TRACE_KEY = "trace";
 
   private Map<CommsREST, Bundle> commsInterfaces;
+  private Map<CommsREST, ControllerREST> controllers;
   private ServiceTracker<CommsREST, CommsREST> commsInterfaceTracker;
 
   @Reference
@@ -102,6 +105,7 @@ public class CommsRESTProvider implements REST {
   @Activate
   void activate(BundleContext context) {
     commsInterfaces = new LinkedHashMap<>();
+    controllers = new HashMap<>();
 
     commsInterfaceTracker = new ServiceTracker<>(
         context,
@@ -154,41 +158,66 @@ public class CommsRESTProvider implements REST {
         .orElseThrow(() -> new CommsException("Comms interface not found " + name));
   }
 
-  public List<String> getCommsInterfaces() {
+  public List<String> getAvailableComms() {
     return commsInterfaces.keySet().stream().map(CommsREST::getID).collect(toList());
   }
 
-  public List<Map<String, Object>> getCommsInterfaceInfo() {
-    return commsInterfaces.keySet().stream().map(this::getCommsInterfaceInfoImpl).collect(toList());
+  public List<Map<String, Object>> getCommsInfo() {
+    return commsInterfaces.keySet().stream().map(this::getCommsInfoImpl).collect(toList());
   }
 
-  public Map<String, Object> getCommsInterfaceInfo(String name) {
-    return getCommsInterfaceInfoImpl(getNamedComms(name));
+  public Map<String, Object> getCommsInfo(String name) {
+    return getCommsInfoImpl(getNamedComms(name));
   }
 
-  public Map<String, Object> postOpenCommsInterface(String name) {
+  public Map<String, Object> postOpenComms(String name) {
     CommsREST comms = getNamedComms(name);
-    comms.open();
+    comms.openController();
+    getController(comms);
     return getConnectionInfo(comms);
   }
 
-  public Map<String, Object> postResetCommsInterface(String name) {
+  private ControllerREST getController(CommsREST comms) {
+    if (comms.getStatus() == Comms.CommsStatus.CLOSED)
+      throw new IllegalStateException(
+          "Cannot access controller while comms is closed " + comms.getName());
+
+    controllers.put(comms, comms.openController());
+    return controllers.get(comms);
+  }
+
+  public Map<String, Object> postResetComms(String name) {
     CommsREST comms = getNamedComms(name);
     comms.reset();
     return getConnectionInfo(comms);
   }
 
-  private <T> Map<String, Object> getCommsInterfaceInfoImpl(CommsREST comms) {
+  private Map<String, Object> getCommsInfoImpl(CommsREST comms) {
     Map<String, Object> info = new HashMap<>();
 
     info.put(NAME_KEY, comms.getName());
     info.put(CONNECTION_KEY, getConnectionInfo(comms));
     info.put(BUNDLE_KEY, getBundleInfoImpl(commsInterfaces.get(comms)));
-    info.put(ENTRIES_KEY, comms.getEntries().map(CommsRESTEntry::getID).collect(toList()));
-    info.put(ACTIONS_KEY, comms.getActions().map(CommsRESTAction::getID).collect(toList()));
+
+    return info;
+  }
+
+  public Map<String, Object> getControllerInfo(String commsName) {
+    return getControllerInfoImpl(getController(getNamedComms(commsName)));
+  }
+
+  private Map<String, Object> getControllerInfoImpl(ControllerREST controller) {
+    Map<String, Object> info = new HashMap<>();
+
+    info.put(
+        ENTRIES_KEY,
+        controller.getEntries().map(ControllerRESTEntry::getID).collect(toList()));
+    info.put(
+        ACTIONS_KEY,
+        controller.getActions().map(ControllerRESTAction::getID).collect(toList()));
     info.put(
         ENUMS_KEY,
-        comms.getEnums().collect(
+        controller.getEnums().collect(
             toMap(
                 Class::getName,
                 e -> stream(e.getEnumConstants()).map(Enum::name).collect(toList()))));
@@ -218,10 +247,11 @@ public class CommsRESTProvider implements REST {
 
   public Map<String, Map<String, Object>> getEntriesInfo(String commsName) {
     CommsREST comms = getNamedComms(commsName);
-    return comms.getEntries().collect(toMap(c -> c.getID(), c -> getEntryInfoImpl(c)));
+    return getController(comms).getEntries().collect(
+        toMap(c -> c.getID(), c -> getEntryInfoImpl(c)));
   }
 
-  private Map<String, Object> getEntryInfoImpl(CommsRESTEntry entry) {
+  private Map<String, Object> getEntryInfoImpl(ControllerRESTEntry entry) {
     Map<String, Object> info = new HashMap<>();
 
     info.put(ENTRY_ID_KEY, entry.getID());
@@ -233,10 +263,11 @@ public class CommsRESTProvider implements REST {
 
   public Map<String, Map<String, Object>> getActionsInfo(String commsName) {
     CommsREST comms = getNamedComms(commsName);
-    return comms.getActions().collect(toMap(c -> c.getID(), c -> getActionInfoImpl(c)));
+    return getController(comms).getActions().collect(
+        toMap(c -> c.getID(), c -> getActionInfoImpl(c)));
   }
 
-  private Map<String, Object> getActionInfoImpl(CommsRESTAction action) {
+  private Map<String, Object> getActionInfoImpl(ControllerRESTAction action) {
     Map<String, Object> info = new HashMap<>();
 
     info.put(ACTION_ID_KEY, action.getID());
@@ -254,8 +285,8 @@ public class CommsRESTProvider implements REST {
       String entryID,
       String actionID) {
     CommsREST comms = getNamedComms(commsID);
-    CommsRESTEntry entry = comms.getEntry(entryID).get();
-    CommsRESTAction action = comms.getAction(actionID).get();
+    ControllerRESTEntry entry = getController(comms).getEntry(entryID).get();
+    ControllerRESTAction action = getController(comms).getAction(actionID).get();
 
     try {
       if (action.hasBehaviour(SENDS_OUTPUT_DATA))

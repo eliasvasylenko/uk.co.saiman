@@ -27,21 +27,14 @@
  */
 package uk.co.saiman.comms.copley;
 
-import java.util.stream.Stream;
-
 import uk.co.saiman.comms.Comms;
 
-public interface CopleyComms<T extends Enum<T>> extends Comms {
-	String ID = "Copley Comms";
-	int HEADER_SIZE = 4;
+public interface CopleyComms extends Comms<CopleyController> {
+  String ID = "Copley Comms";
+  int HEADER_SIZE = 4;
 
-	Class<T> getAxisClass();
-
-	Stream<T> getAxes();
-
-	default T getAxis(int axis) {
-		return getAxisClass().getEnumConstants()[axis];
-	}
-
-	Variable<T, ?> getVariable(CopleyVariableID id);
+  @Override
+  default Class<CopleyController> getControllerClass() {
+    return CopleyController.class;
+  }
 }

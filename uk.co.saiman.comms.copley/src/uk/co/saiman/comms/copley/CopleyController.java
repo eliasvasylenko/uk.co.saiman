@@ -27,12 +27,14 @@
  */
 package uk.co.saiman.comms.copley;
 
-/**
- * A motor axis describes the range of motion of a motor. Each motor has one
- * axis.
- * 
- * @author Elias N Vasylenko
- */
-public enum XYMotorAxis {
-	X, Y
+import java.util.stream.Stream;
+
+public interface CopleyController {
+  Stream<MotorAxis> getAxes();
+
+  MotorAxis getAxis(int axis);
+
+  int getAxisCount();
+
+  Variable<?> getVariable(CopleyVariableID id);
 }

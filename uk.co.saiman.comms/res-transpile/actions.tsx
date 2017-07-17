@@ -5,10 +5,14 @@ import axios from 'axios'
  */
 export const REQUEST_INFO = 'REQUEST_INFO'
 export const RECEIVE_INFO = 'RECEIVE_INFO'
+export const REQUEST_CONTROLLER_INFO = 'REQUEST_CONTROLLER_INFO'
+export const RECEIVE_CONTROLLER_INFO = 'RECEIVE_CONTROLLER_INFO'
+
 export const CLEAR_REQUESTED_VALUES = 'CLEAR_REQUESTED_VALUES'
 export const CHANGE_REQUESTED_VALUE = 'CHANGE_REQUESTED_VALUE'
 
-export const REQUEST_CONNECTION_STATE = 'REQUEST_CONNECTION_STATE'
+export const REQUEST_OPEN_CONNECTION_STATE = 'REQUEST_OPEN_CONNECTION_STATE'
+export const REQUEST_CLOSED_CONNECTION_STATE = 'REQUEST_CLOSED_CONNECTION_STATE'
 export const CONNECTION_STATE_CHANGED = 'CONNECTION_STATE_CHANGED'
 
 export const SET_COMMAND_FILTER = 'SET_COMMAND_FILTER'
@@ -82,9 +86,6 @@ const createExecutionRequest = (entry, action) => ({
  * action creators
  */
 
-export const openConnection = () => changeConnection(CONNECTION_STATES.OPEN)
-export const closeConnection = () => changeConnection(CONNECTION_STATES.CLOSED)
-
 export const setFilter = (text) => ({ type: SET_COMMAND_FILTER, payload: text })
 export const clearFilter = () => setFilter("")
 
@@ -100,26 +101,42 @@ export const changeOutputValue = (entry, item, index, value) => ({
  * Thunk action creators
  */
 
-const commsInfoAPI = "/api/comms/commsInterfaceInfo/"
+const commsInfoAPI = "/api/comms/commsInfo/"
+const controllerInfoAPI = "/api/comms/controllerInfo/"
 const entriesInfoAPI = "/api/comms/entriesInfo/"
 const actionsInfoAPI = "/api/comms/actionsInfo/"
 
-const openCommsAPI = "/api/comms/openCommsInterface/"
-const closeCommsAPI = "/api/comms/resetCommsInterface/"
+const openCommsAPI = "/api/comms/openComms/"
+const closeCommsAPI = "/api/comms/resetComms/"
 
 const invokeActionAPI = "/api/comms/actionInvocation/"
 
 export const requestInfo = () => (dispatch) => {
   dispatch({ type: REQUEST_INFO })
 
+  axios.get(commsInfoAPI + commsRestID)
+    .then(data => {
+      dispatch({
+        type: RECEIVE_INFO,
+        payload: {
+          ...data.data
+        }
+      })
+    })
+    .catch(error => handleError(dispatch, RECEIVE_INFO, error))
+}
+
+export const requestControllerInfo = () => (dispatch) => {
+  dispatch({ type: REQUEST_CONTROLLER_INFO })
+
   Promise.all([
-    axios.get(commsInfoAPI + commsRestID),
+    axios.get(controllerInfoAPI + commsRestID),
     axios.get(entriesInfoAPI + commsRestID),
     axios.get(actionsInfoAPI + commsRestID)
   ])
     .then(data => {
       dispatch({
-        type: RECEIVE_INFO,
+        type: RECEIVE_CONTROLLER_INFO,
         payload: {
           ...data[0].data,
           entriesByID: data[1].data,
@@ -130,16 +147,11 @@ export const requestInfo = () => (dispatch) => {
     .catch(error => handleError(dispatch, RECEIVE_INFO, error))
 }
 
-export const changeConnection = (requestedState) => (dispatch, getState) => {
-  dispatch({ type: REQUEST_CONNECTION_STATE, payload: requestedState })
-
-  if (requestedState != CONNECTION_STATES.OPEN)
-    setPollingEnabled(false)(dispatch, getState)
+export const openConnection = () => (dispatch, getState) => {
+  dispatch({ type: REQUEST_OPEN_CONNECTION_STATE })
 
   const request = {
-    url : (requestedState == CONNECTION_STATES.OPEN)
-      ? openCommsAPI
-      : closeCommsAPI,
+    url : openCommsAPI,
     method: "POST",
     data: JSON.stringify(commsRestID)
   }
@@ -153,17 +165,32 @@ export const changeConnection = (requestedState) => (dispatch, getState) => {
         payload: data.data
       })
 
-      if (requestedState == CONNECTION_STATES.OPEN) {
-        axios.get(entriesInfoAPI + commsRestID)
-          .then(data => {
-            dispatch({
-              type: RECEIVE_INFO,
-              payload: { entriesByID: data.data }
-            })
-          })
-      } else {
-        dispatch({ type: CLEAR_REQUESTED_VALUES })
-      }
+      dispatch(requestControllerInfo())
+    })
+    .catch(error => handleError(dispatch, CONNECTION_STATE_CHANGED, error))
+}
+
+export const closeConnection = () => (dispatch, getState) => {
+  dispatch({ type: REQUEST_CLOSED_CONNECTION_STATE })
+
+  setPollingEnabled(false)(dispatch, getState)
+
+  const request = {
+    url : closeCommsAPI,
+    method: "POST",
+    data: JSON.stringify(commsRestID)
+  }
+
+  axios(request)
+    .then(data => {
+      if (typeof data.data.error !== typeof undefined)
+        throw data.data
+      dispatch({
+        type: CONNECTION_STATE_CHANGED,
+        payload: data.data
+      })
+
+      dispatch({ type: CLEAR_REQUESTED_VALUES })
     })
     .catch(error => handleError(dispatch, CONNECTION_STATE_CHANGED, error))
 }
