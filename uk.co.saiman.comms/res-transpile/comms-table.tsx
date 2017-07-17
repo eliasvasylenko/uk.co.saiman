@@ -32,8 +32,8 @@ const CommsData = (enums, items = {}, changeValue) =>
     }
   </div>
 
-const CommsDataItem = (enums, item, value, changeValue) =>
-  <div key={item} className="commsDataItem">
+const CommsDataItem = (enums, item, value, changeValue) => {
+  return <div key={item} className="commsDataItem">
     <label>{item}</label>
     <span>
       {
@@ -50,13 +50,17 @@ const CommsDataItem = (enums, item, value, changeValue) =>
       }
     </span>
   </div>
+}
 
 const CommsDataValue = (enums, index, value, change) => {
   const type = typeof value
 
   /*
-   * TODO this is a nasty hack to deal with the DTO to JSON serialization on
+   * TODO this is a HORRIBLE hack to deal with the DTO to JSON serialization on
    * the Java end being a bit inflexible.
+   * 
+   * Luckily no string values are used in any comms interfaces so far so the
+   * damage is minimized.
    * 
    * Once we have the OSGi object converter API we can get rid of this string
    * checking shit by having enums encoded as an object containing all the
@@ -70,15 +74,13 @@ const CommsDataValue = (enums, index, value, change) => {
             <select key={index} value={value} onChange={event => change(event.target.value)}>
               {
                 enums[enumType].map(e => (
-                  <option key={e} value={enumType + "." + e}>
+                  <option key={e} value={e}>
                     {e}
                   </option>
                 ))
               }
             </select>
           )
-        } else {
-          value = enums[enumType].filter(e => value.endsWith("." + e))[0]
         }
       }
     }

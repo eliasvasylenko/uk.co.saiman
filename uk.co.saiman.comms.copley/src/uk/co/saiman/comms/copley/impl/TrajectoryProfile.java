@@ -2,16 +2,16 @@ package uk.co.saiman.comms.copley.impl;
 
 import java.lang.reflect.Type;
 
+import uk.co.saiman.comms.Bit;
 import uk.co.saiman.comms.BitConverter;
 import uk.co.saiman.comms.BitConverterFactory;
-import uk.co.saiman.comms.Bit;
 import uk.co.saiman.comms.Bits;
 import uk.co.saiman.comms.PrimitiveBitConverters;
 import uk.co.saiman.comms.copley.TrajectoryProfileMode;
 
 public class TrajectoryProfile {
 	@Bit(0)
-	@Bits(value = 3)
+	@Bits(value = 3, converter = TrajectoryProfileModeConverter.class)
 	public TrajectoryProfileMode mode;
 
 	@Bit(8)
