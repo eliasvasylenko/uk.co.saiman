@@ -41,179 +41,179 @@ import javax.measure.Quantity;
  * @author Elias N Vasylenko
  */
 public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends ContinuousFunction<UD, UR> {
-	@Override
-	SampledDomain<UD> domain();
+    extends ContinuousFunction<UD, UR> {
+  @Override
+  SampledDomain<UD> domain();
 
-	@Override
-	SampledRange<UR> range();
+  @Override
+  SampledRange<UR> range();
 
-	/**
-	 * Find the number of samples in the continuum.
-	 * 
-	 * @return The depth of the sampled continuum.
-	 */
-	int getDepth();
+  /**
+   * Find the number of samples in the continuum.
+   * 
+   * @return The depth of the sampled continuum.
+   */
+  int getDepth();
 
-	@Override
-	default double sample(double xPosition) {
-		xPosition = domain().getExtent().getConfined(xPosition);
+  @Override
+  default double sample(double xPosition) {
+    xPosition = domain().getInterval().getConfined(xPosition);
 
-		int indexBelow = domain().getIndexBelow(xPosition);
-		int indexAbove = domain().getIndexAbove(xPosition);
+    int indexBelow = domain().getIndexBelow(xPosition);
+    int indexAbove = domain().getIndexAbove(xPosition);
 
-		if (indexBelow < 0)
-			indexBelow = 0;
-		if (indexAbove < 0)
-			indexAbove = 0;
-		if (indexBelow >= getDepth())
-			indexBelow = getDepth() - 1;
-		if (indexAbove >= getDepth())
-			indexAbove = getDepth() - 1;
+    if (indexBelow < 0)
+      indexBelow = 0;
+    if (indexAbove < 0)
+      indexAbove = 0;
+    if (indexBelow >= getDepth())
+      indexBelow = getDepth() - 1;
+    if (indexAbove >= getDepth())
+      indexAbove = getDepth() - 1;
 
-		double yBelow = range().getSample(indexBelow);
-		double yAbove = range().getSample(indexAbove);
+    double yBelow = range().getSample(indexBelow);
+    double yAbove = range().getSample(indexAbove);
 
-		double xBelow = domain().getSample(indexBelow);
-		double xAbove = domain().getSample(indexAbove);
+    double xBelow = domain().getSample(indexBelow);
+    double xAbove = domain().getSample(indexAbove);
 
-		if (xBelow == xAbove || xPosition == xBelow) {
-			return yBelow;
-		} else {
-			return yBelow + (yAbove - yBelow) * (xPosition - xBelow) / (xAbove - xBelow);
-		}
-	}
+    if (xBelow == xAbove || xPosition == xBelow) {
+      return yBelow;
+    } else {
+      return yBelow + (yAbove - yBelow) * (xPosition - xBelow) / (xAbove - xBelow);
+    }
+  }
 
-	@Override
-	SampledContinuousFunction<UD, UR> copy();
+  @Override
+  SampledContinuousFunction<UD, UR> copy();
 
-	@Override
-	default SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
-		if (getDepth() <= 2) {
-			return copy();
-		}
+  @Override
+  default SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
+    if (getDepth() <= 2) {
+      return copy();
+    }
 
-		int[] indices;
-		double[] values;
-		double[] intensities;
-		int count;
+    int[] indices;
+    double[] values;
+    double[] intensities;
+    int count;
 
-		/*
-		 * Prepare significant indices
-		 */
-		indices = new int[resolvableSampleDomain.getDepth() * 4 + 8];
-		count = 0;
+    /*
+     * Prepare significant indices
+     */
+    indices = new int[resolvableSampleDomain.getDepth() * 4 + 8];
+    count = 0;
 
-		int indexFrom = domain().getIndexBelow(resolvableSampleDomain.getExtent().getFrom());
-		if (indexFrom < 0) {
-			indexFrom = 0;
-		}
-		int indexTo = domain().getIndexAbove(resolvableSampleDomain.getExtent().getTo());
-		if (indexTo >= getDepth() || indexTo < 0) {
-			indexTo = getDepth() - 1;
-		}
+    int indexFrom = domain().getIndexBelow(resolvableSampleDomain.getInterval().getLeftEndpoint());
+    if (indexFrom < 0) {
+      indexFrom = 0;
+    }
+    int indexTo = domain().getIndexAbove(resolvableSampleDomain.getInterval().getRightEndpoint());
+    if (indexTo >= getDepth() || indexTo < 0) {
+      indexTo = getDepth() - 1;
+    }
 
-		indices[count++] = indexFrom;
+    indices[count++] = indexFrom;
 
-		int resolvedUnit = 0;
-		double resolvedUnitX = resolvableSampleDomain.getExtent().getFrom();
+    int resolvedUnit = 0;
+    double resolvedUnitX = resolvableSampleDomain.getInterval().getLeftEndpoint();
 
-		int lastIndex;
-		int minIndex;
-		double minY;
-		int maxIndex;
-		double maxY;
-		lastIndex = minIndex = maxIndex = indexFrom;
-		minY = maxY = range().getSample(lastIndex);
-		for (int index = indexFrom + 1; index < indexTo; index++) {
-			/*
-			 * Get sample location at index
-			 */
-			double sampleX = domain().getSample(index);
-			double sampleY = range().getSample(index);
+    int lastIndex;
+    int minIndex;
+    double minY;
+    int maxIndex;
+    double maxY;
+    lastIndex = minIndex = maxIndex = indexFrom;
+    minY = maxY = range().getSample(lastIndex);
+    for (int index = indexFrom + 1; index < indexTo; index++) {
+      /*
+       * Get sample location at index
+       */
+      double sampleX = domain().getSample(index);
+      double sampleY = range().getSample(index);
 
-			/*
-			 * Check if passed resolution boundary (or last position)
-			 */
-			if (sampleX > resolvedUnitX || index + 1 == indexTo) {
-				/*
-				 * Move to next resolution boundary
-				 */
+      /*
+       * Check if passed resolution boundary (or last position)
+       */
+      if (sampleX > resolvedUnitX || index + 1 == indexTo) {
+        /*
+         * Move to next resolution boundary
+         */
 
-				do {
-					resolvedUnit++;
-					resolvedUnitX = resolvableSampleDomain.getSample(resolvedUnit);
-				} while (resolvedUnitX < sampleX);
+        do {
+          resolvedUnit++;
+          resolvedUnitX = resolvableSampleDomain.getSample(resolvedUnit);
+        } while (resolvedUnitX < sampleX);
 
-				/*
-				 * Add indices of minimum and maximum y encountered in boundary span
-				 */
-				if (sampleY < minY) {
-					minIndex = -1;
-				} else if (sampleY > maxY) {
-					maxIndex = -1;
-				}
+        /*
+         * Add indices of minimum and maximum y encountered in boundary span
+         */
+        if (sampleY < minY) {
+          minIndex = -1;
+        } else if (sampleY > maxY) {
+          maxIndex = -1;
+        }
 
-				if (minIndex > 0) {
-					if (maxIndex > 0) {
-						if (maxIndex > minIndex) {
-							indices[count++] = minIndex;
-							indices[count++] = maxIndex;
-						} else {
-							indices[count++] = maxIndex;
-							indices[count++] = minIndex;
-						}
-					} else {
-						indices[count++] = minIndex;
-					}
-				} else if (maxIndex > 0) {
-					indices[count++] = maxIndex;
-				}
+        if (minIndex > 0) {
+          if (maxIndex > 0) {
+            if (maxIndex > minIndex) {
+              indices[count++] = minIndex;
+              indices[count++] = maxIndex;
+            } else {
+              indices[count++] = maxIndex;
+              indices[count++] = minIndex;
+            }
+          } else {
+            indices[count++] = minIndex;
+          }
+        } else if (maxIndex > 0) {
+          indices[count++] = maxIndex;
+        }
 
-				if (index > lastIndex) {
-					indices[count++] = index;
-				}
-				lastIndex = index + 1;
-				indices[count++] = lastIndex;
+        if (index > lastIndex) {
+          indices[count++] = index;
+        }
+        lastIndex = index + 1;
+        indices[count++] = lastIndex;
 
-				minIndex = -1;
-				maxIndex = -1;
-			} else if (index > lastIndex) {
-				/*
-				 * Check for Y range expansion
-				 */
-				if (maxIndex == -1 || sampleY > maxY) {
-					maxY = sampleY;
-					maxIndex = index;
-				} else if (minIndex == -1 || sampleY < minY) {
-					minY = sampleY;
-					minIndex = index;
-				}
-			}
-		}
+        minIndex = -1;
+        maxIndex = -1;
+      } else if (index > lastIndex) {
+        /*
+         * Check for Y range expansion
+         */
+        if (maxIndex == -1 || sampleY > maxY) {
+          maxY = sampleY;
+          maxIndex = index;
+        } else if (minIndex == -1 || sampleY < minY) {
+          minY = sampleY;
+          minIndex = index;
+        }
+      }
+    }
 
-		/*
-		 * Prepare significant values
-		 */
-		values = new double[count];
-		for (int i = 0; i < count; i++) {
-			values[i] = domain().getSample(indices[i]);
-		}
+    /*
+     * Prepare significant values
+     */
+    values = new double[count];
+    for (int i = 0; i < count; i++) {
+      values[i] = domain().getSample(indices[i]);
+    }
 
-		/*
-		 * Prepare significant intensities
-		 */
-		intensities = new double[count];
-		for (int i = 0; i < count; i++) {
-			intensities[i] = range().getSample(indices[i]);
-		}
+    /*
+     * Prepare significant intensities
+     */
+    intensities = new double[count];
+    for (int i = 0; i < count; i++) {
+      intensities[i] = range().getSample(indices[i]);
+    }
 
-		/*
-		 * Prepare linearisation
-		 */
-		return new ArraySampledContinuousFunction<>(
-				new IrregularSampledDomain<>(domain().getUnit(), values),
-				range().getUnit(),
-				intensities);
-	}
+    /*
+     * Prepare linearisation
+     */
+    return new ArraySampledContinuousFunction<>(
+        new IrregularSampledDomain<>(domain().getUnit(), values),
+        range().getUnit(),
+        intensities);
+  }
 }

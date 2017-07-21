@@ -27,13 +27,16 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ResultType;
+import uk.co.saiman.experiment.spectrum.AccumulatingFileSpectrum;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.strangeskies.reflection.token.TypeToken;
 import uk.co.strangeskies.text.properties.PropertyLoader;
@@ -49,86 +52,89 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  *          the type of sample configuration for the instrument
  */
 public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfiguration>
-		implements ExperimentType<T> {
-	private ChemicalMapProperties properties;
-	private final ResultType<ChemicalMap> chemicalMapResult;
+    implements ExperimentType<T> {
+  private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
 
-	public ChemicalMapExperimentType() {
-		this(PropertyLoader.getDefaultProperties(ChemicalMapProperties.class));
-	}
+  private ChemicalMapProperties properties;
+  private final ResultType<ChemicalMap> chemicalMapResult;
 
-	public ChemicalMapExperimentType(ChemicalMapProperties properties) {
-		this.properties = properties;
-		this.chemicalMapResult = new ResultType<ChemicalMap>() {
-			@Override
-			public String getName() {
-				return properties.chemicalMapResultName().toString();
-			}
+  public ChemicalMapExperimentType() {
+    this(PropertyLoader.getDefaultProperties(ChemicalMapProperties.class));
+  }
 
-			@Override
-			public TypeToken<ChemicalMap> getDataType() {
-				return new TypeToken<ChemicalMap>() {};
-			}
-		};
-	}
+  public ChemicalMapExperimentType(ChemicalMapProperties properties) {
+    this.properties = properties;
+    this.chemicalMapResult = new ResultType<ChemicalMap>() {
+      @Override
+      public String getName() {
+        return properties.chemicalMapResultName().toString();
+      }
 
-	/*
-	 * TODO this really should be moved to the constructor, and the 'properties'
-	 * and 'spectrumResult' fields should both be final ... hurry up OSGi r7 to
-	 * sort this mess out
-	 */
-	protected void setProperties(ChemicalMapProperties properties) {
-		this.properties = properties;
-	}
+      @Override
+      public TypeToken<ChemicalMap> getDataType() {
+        return new TypeToken<ChemicalMap>() {};
+      }
+    };
+  }
 
-	protected ChemicalMapProperties getProperties() {
-		return properties;
-	}
+  /*
+   * TODO this really should be moved to the constructor, and the 'properties'
+   * and 'spectrumResult' fields should both be final ... hurry up OSGi r7 to
+   * sort this mess out
+   */
+  protected void setProperties(ChemicalMapProperties properties) {
+    this.properties = properties;
+  }
 
-	@Override
-	public String getName() {
-		return properties.chemicalMapExperimentName().toString();
-	}
+  protected ChemicalMapProperties getProperties() {
+    return properties;
+  }
 
-	public ResultType<ChemicalMap> getChemicalMapResult() {
-		return chemicalMapResult;
-	}
+  @Override
+  public String getName() {
+    return properties.chemicalMapExperimentName().toString();
+  }
 
-	protected abstract RasterDevice getRasterDevice();
+  public ResultType<ChemicalMap> getChemicalMapResult() {
+    return chemicalMapResult;
+  }
 
-	protected abstract AcquisitionDevice getAcquisitionDevice();
+  protected abstract RasterDevice getRasterDevice();
 
-	@Override
-	public void execute(ExperimentExecutionContext<T> context) {
-		CountDownLatch latch = new CountDownLatch(1);
+  protected abstract AcquisitionDevice getAcquisitionDevice();
 
-		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
-			startAcquisition(context, device);
-		});
-		getRasterDevice().startEvents().addTerminatingObserver(device -> {
-			startRaster(context, device);
-		});
+  @Override
+  public void execute(ExperimentExecutionContext<T> context) {
+    AcquisitionDevice acquisitionDevice = getAcquisitionDevice();
+    RasterDevice rasterDevice = getRasterDevice();
 
-		getAcquisitionDevice().endEvents().addTerminatingObserver(exception -> {
-			latch.countDown();
-		});
+    Future<AccumulatingFileSpectrum> acquisition = acquisitionDevice.acquisitionDataEvents().reduce(
+        () -> new AccumulatingFileSpectrum(
+            context.results().dataPath(),
+            CHEMICAL_MAP_DATA_NAME,
+            acquisitionDevice.getSampleDomain(),
+            acquisitionDevice.getSampleIntensityUnits()),
+        (fileSpectrum, message) -> {
+          fileSpectrum.accumulate(message);
+          return fileSpectrum;
+        });
 
-		getRasterDevice().startRasterOperation();
-		getAcquisitionDevice().startAcquisition();
+    rasterDevice.startRasterOperation();
+    acquisitionDevice.startAcquisition();
 
-		context.results().get(chemicalMapResult).getData().get().save();
-	}
+    try {
+      acquisition.get();
+      // TODO convert this experiment to actual chemical map acquisition
+    } catch (InterruptedException | ExecutionException e) {
+      context.results().unset(chemicalMapResult);
+      throw new ExperimentException(properties.experiment().exception().experimentInterrupted(), e);
+    }
 
-	private void startRaster(ExperimentExecutionContext<T> context, RasterDevice device) {
+    context.results().get(chemicalMapResult).getData().get().save();
+  }
 
-	}
-
-	public void startAcquisition(ExperimentExecutionContext<T> context, AcquisitionDevice device) {
-
-	}
-
-	@Override
-	public Stream<ResultType<?>> getResultTypes() {
-		return Stream.of(chemicalMapResult);
-	}
+  @Override
+  public Stream<ResultType<?>> getResultTypes() {
+    return Stream.of(chemicalMapResult);
+  }
 }

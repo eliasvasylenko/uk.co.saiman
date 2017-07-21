@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.comms;
 
-import java.util.Optional;
-
 import uk.co.strangeskies.observable.ObservableValue;
 
 /**
@@ -57,17 +55,10 @@ public interface Comms<T> {
      * The byte channel is ready to be opened. This does not guarantee that a
      * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
      * simply indicates that it is expected to succeed. If invocation fails, the
-     * comms channel will enter the {@link #FAULT} state.
+     * comms channel will enter a failure state and rethrow when trying to
+     * resolve the value of {@link Comms#status()}.
      */
     CLOSED,
-
-    /**
-     * There is a problem with the comms channel. If a comms channel is in the
-     * {@link #FAULT} state, then invocation of {@link Comms#openController()}
-     * should either clear the fault or throw an exception describing the fault,
-     * whereas invocation of {@link Comms#reset()} should complete normally.
-     */
-    FAULT
   }
 
   /**
@@ -79,12 +70,6 @@ public interface Comms<T> {
    * @return the current status of the hardware interface
    */
   ObservableValue<CommsStatus> status();
-
-  /**
-   * @return if the comms object is in a fault state an optional containing the
-   *         cause of the fault, otherwise an empty optional
-   */
-  Optional<CommsException> fault();
 
   /**
    * @return the controller type for interacting with the comms interface

@@ -28,15 +28,14 @@
 package uk.co.saiman.comms;
 
 import static uk.co.saiman.comms.Comms.CommsStatus.CLOSED;
-import static uk.co.saiman.comms.Comms.CommsStatus.FAULT;
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
-import java.util.Optional;
 
 import uk.co.strangeskies.function.ThrowingFunction;
-import uk.co.strangeskies.observable.ObservableProperty;
+import uk.co.strangeskies.observable.MissingValueException;
+import uk.co.strangeskies.observable.ObservablePropertyImpl;
 import uk.co.strangeskies.observable.ObservableValue;
 
 /**
@@ -51,8 +50,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
   private CommsPort comms;
   private CommsChannel channel;
 
-  private final ObservableProperty<CommsStatus, CommsStatus> status;
-  private CommsException lastFault;
+  private final ObservablePropertyImpl<CommsStatus> status;
 
   private SimpleController<T> controller;
 
@@ -62,7 +60,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
   public SimpleComms(String name) {
     this.name = name;
 
-    status = ObservableProperty.over(CLOSED);
+    status = new ObservablePropertyImpl<>((r, t) -> r, (a, b) -> a == b, CLOSED);
   }
 
   @Override
@@ -75,14 +73,8 @@ public abstract class SimpleComms<T> implements Comms<T> {
     return status;
   }
 
-  @Override
-  public synchronized Optional<CommsException> fault() {
-    return status.get() == FAULT ? Optional.of(lastFault) : Optional.empty();
-  }
-
   protected synchronized CommsException setFault(CommsException commsException) {
-    status.set(FAULT);
-    this.lastFault = commsException;
+    status.fail(commsException);
     return commsException;
   }
 
@@ -106,12 +98,14 @@ public abstract class SimpleComms<T> implements Comms<T> {
 
   @Override
   public synchronized T openController() {
+    status().tryGetFailure().ifPresent(t -> {
+      reset();
+    });
+
     switch (status().get()) {
     case OPEN:
       break;
 
-    case FAULT:
-      reset();
     case CLOSED:
       try {
         channel = comms.openChannel();
@@ -133,12 +127,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
 
   @Override
   public synchronized void reset() {
-    switch (status().get()) {
-    case CLOSED:
-      break;
-
-    case FAULT:
-    case OPEN:
+    if (!status().isEqual(CLOSED)) {
       try {
         comms.close();
         controller.closeController();
@@ -149,7 +138,6 @@ public abstract class SimpleComms<T> implements Comms<T> {
       } catch (Exception e) {
         throw setFault(new CommsException("Problem closing comms", e));
       }
-      break;
     }
   }
 
@@ -166,12 +154,11 @@ public abstract class SimpleComms<T> implements Comms<T> {
 
       case CLOSED:
         throw new CommsException("Port is closed");
-
-      case FAULT:
-        throw fault().get();
       }
 
       return action.apply(channel);
+    } catch (MissingValueException e) {
+      throw new CommsException("Problem opening comms", e.getCause());
     } catch (Exception e) {
       throw new CommsException("Problem transferring data", e);
     }

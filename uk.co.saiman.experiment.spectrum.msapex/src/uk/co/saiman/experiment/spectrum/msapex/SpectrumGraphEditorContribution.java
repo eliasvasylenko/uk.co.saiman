@@ -52,49 +52,49 @@ import uk.co.strangeskies.reflection.token.TypeToken;
 
 @Component(scope = ServiceScope.PROTOTYPE)
 public class SpectrumGraphEditorContribution implements ResultEditorContribution<Spectrum> {
-	@Inject
-	@Localize
-	SpectrumProperties properties;
+  @Inject
+  @Localize
+  SpectrumProperties properties;
 
-	@Inject
-	MDirtyable dirty;
+  @Inject
+  MDirtyable dirty;
 
-	@Inject
-	Result<Spectrum> result;
+  @Inject
+  Result<Spectrum> result;
 
-	@FXML
-	private ContinuousFunctionChartController spectrumGraphController;
-	private Node content;
+  @FXML
+  private ContinuousFunctionChartController spectrumGraphController;
+  private Node content;
 
-	@PostConstruct
-	public void initialize(@LocalInstance FXMLLoader loader) {
-		content = FxmlLoadBuilder.buildWith(loader).controller(this).loadRoot();
+  @PostConstruct
+  public void initialize(@LocalInstance FXMLLoader loader) {
+    content = FxmlLoadBuilder.buildWith(loader).controller(this).loadRoot();
 
-		result.addWeakObserver(this, c -> n -> c.setResultData(n));
-		setResultData(result.getData());
-	}
+    result.weakReference(this).observe(m -> m.owner().setResultData(m.message()));
+    setResultData(result.getData());
+  }
 
-	private void setResultData(Optional<Spectrum> data) {
-		Platform.runLater(() -> {
-			spectrumGraphController.getContinuousFunctions().clear();
-			data.ifPresent(d -> spectrumGraphController.getContinuousFunctions().add(d.getRawData()));
-		});
+  private void setResultData(Optional<Spectrum> data) {
+    Platform.runLater(() -> {
+      spectrumGraphController.getContinuousFunctions().clear();
+      data.ifPresent(d -> spectrumGraphController.getContinuousFunctions().add(d.getRawData()));
+    });
 
-		dirty.setDirty(true);
-	}
+    dirty.setDirty(true);
+  }
 
-	@Override
-	public TypeToken<Spectrum> getResultType() {
-		return new TypeToken<Spectrum>() {};
-	}
+  @Override
+  public TypeToken<Spectrum> getResultType() {
+    return new TypeToken<Spectrum>() {};
+  }
 
-	@Override
-	public String getName() {
-		return properties.spectrumGraphEditor().toString();
-	}
+  @Override
+  public String getName() {
+    return properties.spectrumGraphEditor().toString();
+  }
 
-	@Override
-	public Node getContent() {
-		return content;
-	}
+  @Override
+  public Node getContent() {
+    return content;
+  }
 }

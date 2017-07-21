@@ -33,7 +33,7 @@ import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.strangeskies.observable.ObservableProperty;
 
 public interface PeriodicTableService {
-	ObservableProperty<PeriodicTable, PeriodicTable> periodicTable();
+  ObservableProperty<PeriodicTable> periodicTable();
 
-	Stream<PeriodicTable> periodicTables();
+  Stream<PeriodicTable> periodicTables();
 }

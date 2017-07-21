@@ -28,18 +28,18 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-
-import java.util.concurrent.atomic.AtomicLong;
+import static uk.co.strangeskies.observable.Observer.onObservation;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
 
 import uk.co.saiman.data.ArraySampledContinuousFunction;
+import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
-import uk.co.strangeskies.collection.observable.AggregatingListener;
-import uk.co.strangeskies.observable.Observer;
+import uk.co.strangeskies.observable.HotObservable;
+import uk.co.strangeskies.observable.Observable;
 
 /**
  * A continuous function to accumulate the sum of input continuous functions.
@@ -53,53 +53,71 @@ import uk.co.strangeskies.observable.Observer;
  * @param <UR>
  *          the type of the units of measurement of values in the range
  */
-public class AccumulatingContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends ArraySampledContinuousFunction<UD, UR> {
-	private AtomicLong count = new AtomicLong();
-	private final Observer<? super SampledContinuousFunction<?, UR>> aggregator;
+public abstract class AccumulatingContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
+    extends ArraySampledContinuousFunction<UD, UR> {
+  private long count;
 
-	/**
-	 * @param domain
-	 *          the domain of the accumulated function
-	 * @param unitRange
-	 *          the unit of the accumulation dimension
-	 */
-	public AccumulatingContinuousFunction(SampledDomain<UD> domain, Unit<UR> unitRange) {
-		super(domain, unitRange, new double[domain.getDepth()]);
+  public static <UD extends Quantity<UD>, UR extends Quantity<UR>> AccumulatingContinuousFunction<UD, UR> accumulate(
+      SampledDomain<UD> domain,
+      Unit<UR> unitRange) {
+    HotObservable<SampledContinuousFunction<UD, UR>> source = new HotObservable<>();
+    return new AccumulatingContinuousFunction<UD, UR>(source, domain, unitRange) {
+      @Override
+      public synchronized long accumulate(SampledContinuousFunction<UD, UR> accumulate) {
+        source.next(accumulate);
+        return getCount();
+      }
+    };
+  }
 
-		AggregatingListener<SampledContinuousFunction<?, UR>> aggregator = new AggregatingListener<>(
-				newSingleThreadExecutor());
-		aggregator.addObserver(a -> {
-			mutate(data -> {
-				for (SampledContinuousFunction<?, UR> c : a) {
-					UnitConverter converter = c.range().getUnit().getConverterTo(unitRange);
+  public static <UD extends Quantity<UD>, UR extends Quantity<UR>> ContinuousFunction<UD, UR> accumulateFrom(
+      Observable<SampledContinuousFunction<UD, UR>> source,
+      SampledDomain<UD> domain,
+      Unit<UR> unitRange) {
+    return new AccumulatingContinuousFunction<UD, UR>(source, domain, unitRange) {
+      @Override
+      public synchronized long accumulate(SampledContinuousFunction<UD, UR> accumulate) {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
 
-					for (int i = 0; i < domain.getDepth(); i++) {
-						data[i] += converter.convert(c.range().getSample(i));
-					}
-				}
-			});
-		});
+  /**
+   * @param domain
+   *          the domain of the accumulated function
+   * @param unitRange
+   *          the unit of the accumulation dimension
+   */
+  public AccumulatingContinuousFunction(
+      Observable<SampledContinuousFunction<UD, UR>> source,
+      SampledDomain<UD> domain,
+      Unit<UR> unitRange) {
+    super(domain, unitRange, new double[domain.getDepth()]);
 
-		this.aggregator = aggregator;
-	}
+    source
+        .then(m -> count++)
+        .executeOn(newSingleThreadExecutor())
+        .aggregateBackpressure()
+        .then(onObservation(o -> o.requestNext()))
+        .observe(a -> {
+          mutate(data -> {
+            for (SampledContinuousFunction<?, UR> c : a) {
+              UnitConverter converter = c.range().getUnit().getConverterTo(unitRange);
 
-	/**
-	 * Add the data from the given function to the accumulations
-	 * 
-	 * @param function
-	 *          the function to add
-	 * @return the accumulation count after the operation
-	 */
-	public synchronized long accumulate(SampledContinuousFunction<?, UR> function) {
-		aggregator.notify(function);
-		return count.incrementAndGet();
-	}
+              for (int i = 0; i < domain.getDepth(); i++) {
+                data[i] += converter.convert(c.range().getSample(i));
+              }
+            }
+          });
+        });
+  }
 
-	/**
-	 * @return the current number of accumulations
-	 */
-	public long getCount() {
-		return count.get();
-	}
+  /**
+   * @return the current number of accumulations
+   */
+  public long getCount() {
+    return count;
+  }
+
+  public abstract long accumulate(SampledContinuousFunction<UD, UR> accumulate);
 }

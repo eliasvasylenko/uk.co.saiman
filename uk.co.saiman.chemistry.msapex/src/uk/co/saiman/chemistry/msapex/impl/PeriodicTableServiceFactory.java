@@ -44,49 +44,51 @@ import uk.co.saiman.chemistry.msapex.PeriodicTableService;
 import uk.co.strangeskies.observable.ObservableProperty;
 
 @SuppressWarnings("javadoc")
-@Component(property = IContextFunction.SERVICE_CONTEXT_KEY + "=uk.co.saiman.chemistry.msapex.PeriodicTableService")
+@Component(
+    property = IContextFunction.SERVICE_CONTEXT_KEY
+        + "=uk.co.saiman.chemistry.msapex.PeriodicTableService")
 public class PeriodicTableServiceFactory implements IContextFunction {
-	private final List<PeriodicTable> periodicTables = new ArrayList<>();
-	private final ObservableProperty<PeriodicTable, PeriodicTable> periodicTable = ObservableProperty.over(null);
+  private final List<PeriodicTable> periodicTables = new ArrayList<>();
+  private final ObservableProperty<PeriodicTable> periodicTable = ObservableProperty.over(null);
 
-	public final class PeriodicTableServiceImpl implements PeriodicTableService {
-		public PeriodicTableServiceImpl() {}
+  public final class PeriodicTableServiceImpl implements PeriodicTableService {
+    public PeriodicTableServiceImpl() {}
 
-		@Override
-		public ObservableProperty<PeriodicTable, PeriodicTable> periodicTable() {
-			return periodicTable;
-		}
+    @Override
+    public ObservableProperty<PeriodicTable> periodicTable() {
+      return periodicTable;
+    }
 
-		/**
-		 * @return the available periodic tables
-		 */
-		@Override
-		public Stream<PeriodicTable> periodicTables() {
-			return periodicTables.stream();
-		}
-	}
+    /**
+     * @return the available periodic tables
+     */
+    @Override
+    public Stream<PeriodicTable> periodicTables() {
+      return periodicTables.stream();
+    }
+  }
 
-	@Reference(cardinality = MULTIPLE)
-	public synchronized void addPeriodicTable(PeriodicTable table) {
-		if (periodicTables.add(table) && periodicTable.get() == null) {
-			periodicTable.set(table);
-		}
-	}
+  @Reference(cardinality = MULTIPLE)
+  public synchronized void addPeriodicTable(PeriodicTable table) {
+    if (periodicTables.add(table) && periodicTable.get() == null) {
+      periodicTable.set(table);
+    }
+  }
 
-	public synchronized void removePeriodicTable(PeriodicTable table) {
-		if (periodicTables.remove(table) && periodicTable.get() == table) {
-			if (periodicTables.isEmpty()) {
-				periodicTable.set(null);
-			} else {
-				periodicTable.set(periodicTables.get(0));
-			}
-		}
-	}
+  public synchronized void removePeriodicTable(PeriodicTable table) {
+    if (periodicTables.remove(table) && periodicTable.get() == table) {
+      if (periodicTables.isEmpty()) {
+        periodicTable.set(null);
+      } else {
+        periodicTable.set(periodicTables.get(0));
+      }
+    }
+  }
 
-	@Override
-	public Object compute(IEclipseContext context, String contextKey) {
-		PeriodicTableService service = new PeriodicTableServiceImpl();
-		ContextInjectionFactory.inject(service, context);
-		return service;
-	}
+  @Override
+  public Object compute(IEclipseContext context, String contextKey) {
+    PeriodicTableService service = new PeriodicTableServiceImpl();
+    ContextInjectionFactory.inject(service, context);
+    return service;
+  }
 }

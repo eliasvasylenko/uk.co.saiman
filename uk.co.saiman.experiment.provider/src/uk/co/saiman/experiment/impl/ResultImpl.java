@@ -33,46 +33,45 @@ import java.util.Optional;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultType;
-import uk.co.strangeskies.observable.ObservableImpl;
+import uk.co.strangeskies.observable.HotObservable;
 
-public class ResultImpl<T> extends ObservableImpl<Optional<T>>
-		implements Result<T> {
-	private final ExperimentNodeImpl<?, ?> node;
-	private final ResultType<T> resultType;
-	private T data;
+public class ResultImpl<T> extends HotObservable<Optional<T>> implements Result<T> {
+  private final ExperimentNodeImpl<?, ?> node;
+  private final ResultType<T> resultType;
+  private T data;
 
-	public ResultImpl(ExperimentNodeImpl<?, ?> node, ResultType<T> type) {
-		this.node = node;
-		this.resultType = type;
-	}
+  public ResultImpl(ExperimentNodeImpl<?, ?> node, ResultType<T> type) {
+    this.node = node;
+    this.resultType = type;
+  }
 
-	@Override
-	public Path getResultDataPath() {
-		return node.getResultDataPath();
-	}
+  @Override
+  public Path getResultDataPath() {
+    return node.getResultDataPath();
+  }
 
-	@Override
-	public ExperimentNode<?, ?> getExperimentNode() {
-		return node;
-	}
+  @Override
+  public ExperimentNode<?, ?> getExperimentNode() {
+    return node;
+  }
 
-	@Override
-	public ResultType<T> getResultType() {
-		return resultType;
-	}
+  @Override
+  public ResultType<T> getResultType() {
+    return resultType;
+  }
 
-	protected void setData(T data) {
-		this.data = data;
-		fire(getData());
-	}
+  protected void setData(T data) {
+    this.data = data;
+    next(getData());
+  }
 
-	@Override
-	public Optional<T> getData() {
-		return Optional.ofNullable(data);
-	}
+  @Override
+  public Optional<T> getData() {
+    return Optional.ofNullable(data);
+  }
 
-	@Override
-	public Result<T> copy() {
-		return this;
-	}
+  @Override
+  public Result<T> copy() {
+    return this;
+  }
 }

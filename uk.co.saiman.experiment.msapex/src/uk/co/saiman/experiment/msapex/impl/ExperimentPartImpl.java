@@ -64,53 +64,54 @@ import uk.co.strangeskies.eclipse.EclipseModularTreeController;
  * Specify a service capability requirement on the ExperimentWorkspaceFactory
  * injection via the bundle manifest.
  */
-@RequireCapability(ns = ExperimentPartImpl.OSGI_SERVICE, filter = "(" + Constants.OBJECTCLASS
-		+ "=uk.co.saiman.experiment.ExperimentWorkspaceFactory)")
+@RequireCapability(
+    ns = ExperimentPartImpl.OSGI_SERVICE,
+    filter = "(" + Constants.OBJECTCLASS + "=uk.co.saiman.experiment.WorkspaceFactory)")
 public class ExperimentPartImpl implements ExperimentPart {
-	static final String OSGI_SERVICE = "osgi.service";
+  static final String OSGI_SERVICE = "osgi.service";
 
-	@FXML
-	private EclipseModularTreeController modularTreeController;
-	private Workspace workspace;
+  @FXML
+  private EclipseModularTreeController modularTreeController;
+  private Workspace workspace;
 
-	@Inject
-	private IAdapterManager adapterManager;
-	private ExperimentNodeAdapterFactory adapterFactory;
+  @Inject
+  private IAdapterManager adapterManager;
+  private ExperimentNodeAdapterFactory adapterFactory;
 
-	@PostConstruct
-	void initialize(
-			BorderPane container,
-			@LocalInstance FXMLLoader loader,
-			@Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation,
-			WorkspaceFactory workspaceFactory) {
-		container.setCenter(buildWith(loader).controller(ExperimentPart.class, this).loadRoot());
+  @PostConstruct
+  void initialize(
+      BorderPane container,
+      @LocalInstance FXMLLoader loader,
+      @Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation,
+      WorkspaceFactory workspaceFactory) {
+    container.setCenter(buildWith(loader).controller(ExperimentPart.class, this).loadRoot());
 
-		Path workspaceLocation;
-		try {
-			workspaceLocation = Paths.get(instanceLocation.getURL().toURI());
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+    Path workspaceLocation;
+    try {
+      workspaceLocation = Paths.get(instanceLocation.getURL().toURI());
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
 
-		workspace = workspaceFactory.openWorkspace(workspaceLocation);
+    workspace = workspaceFactory.openWorkspace(workspaceLocation);
 
-		modularTreeController.getTreeView().setRootData(typedObject(Workspace.class, workspace));
+    modularTreeController.getTreeView().setRootData(typedObject(Workspace.class, workspace));
 
-		adapterFactory = new ExperimentNodeAdapterFactory(adapterManager, workspace);
-	}
+    adapterFactory = new ExperimentNodeAdapterFactory(adapterManager, workspace);
+  }
 
-	@PreDestroy
-	void destroy() {
-		adapterFactory.unregister();
-	}
+  @PreDestroy
+  void destroy() {
+    adapterFactory.unregister();
+  }
 
-	@Override
-	public Workspace getExperimentWorkspace() {
-		return workspace;
-	}
+  @Override
+  public Workspace getExperimentWorkspace() {
+    return workspace;
+  }
 
-	@Override
-	public EclipseModularTreeController getExperimentTreeController() {
-		return modularTreeController;
-	}
+  @Override
+  public EclipseModularTreeController getExperimentTreeController() {
+    return modularTreeController;
+  }
 }

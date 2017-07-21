@@ -40,9 +40,8 @@ import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
-import uk.co.strangeskies.mathematics.Range;
-import uk.co.strangeskies.mathematics.expression.Expression;
-import uk.co.strangeskies.observable.Observer;
+import uk.co.strangeskies.mathematics.Interval;
+import uk.co.strangeskies.observable.Observation;
 
 /**
  * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series
@@ -56,163 +55,167 @@ import uk.co.strangeskies.observable.Observer;
  * @author Elias N Vasylenko
  */
 public class ContinuousFunctionSeries {
-	/*
-	 * Continuous function data
-	 */
-	private final ContinuousFunction<?, ?> continuousFunction;
-	private final Observer<Expression<? extends ContinuousFunction<?, ?>>> continuousFunctionObserver;
-	private ContinuousFunction<?, ?> latestRenderedContinuousFunction = null;
+  /*
+   * Continuous function data
+   */
+  private final ContinuousFunction<?, ?> continuousFunction;
+  private ContinuousFunction<?, ?> latestRenderedContinuousFunction = null;
 
-	/*
-	 * Series data
-	 */
-	private final ObservableList<Data<Number, Number>> data;
-	private final Series<Number, Number> series;
+  /*
+   * Series data
+   */
+  private final ObservableList<Data<Number, Number>> data;
+  private final Series<Number, Number> series;
 
-	/*
-	 * Refresh handling
-	 */
-	private Object mutex;
-	private boolean dirty;
+  /*
+   * Refresh handling
+   */
+  private Object mutex;
+  private boolean dirty;
+  private Observation observation;
 
-	/**
-	 * Create a mapping from a given {@link ContinuousFunction} to a
-	 * {@link Series}.
-	 * 
-	 * @param continuousFunction
-	 *          The backing function
-	 */
-	public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction) {
-		this.continuousFunction = continuousFunction;
+  /**
+   * Create a mapping from a given {@link ContinuousFunction} to a
+   * {@link Series}.
+   * 
+   * @param continuousFunction
+   *          The backing function
+   */
+  public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction) {
+    this.continuousFunction = continuousFunction;
 
-		data = FXCollections.observableArrayList();
-		series = new Series<>(data);
+    data = FXCollections.observableArrayList();
+    series = new Series<>(data);
 
-		mutex = new Object();
-		makeDirty();
-		refresh();
-		makeDirty();
+    mutex = new Object();
+    makeDirty();
+    refresh();
+    makeDirty();
 
-		continuousFunctionObserver = e -> makeDirty();
-		continuousFunction.addWeakObserver(this, s -> s.continuousFunctionObserver);
-	}
+    observation = continuousFunction.invalidations().weakReference(this).observe(
+        m -> m.owner().makeDirty());
+  }
 
-	/**
-	 * Create a mapping from a given {@link ContinuousFunction} to a
-	 * {@link Series}.
-	 * 
-	 * @param continuousFunction
-	 *          The backing function
-	 * @param name
-	 *          The name of the series
-	 */
-	public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction, String name) {
-		this(continuousFunction);
+  public void dispose() {
+    observation.dispose();
+  }
 
-		series.setName(name);
-	}
+  /**
+   * Create a mapping from a given {@link ContinuousFunction} to a
+   * {@link Series}.
+   * 
+   * @param continuousFunction
+   *          The backing function
+   * @param name
+   *          The name of the series
+   */
+  public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction, String name) {
+    this(continuousFunction);
 
-	/**
-	 * Flag the series as out of date with respect to the rendering environment or
-	 * continuous function state.
-	 */
-	public void makeDirty() {
-		synchronized (mutex) {
-			dirty = true;
-		}
-	}
+    series.setName(name);
+  }
 
-	/**
-	 * Clear the dirty flag, if present, and ensure the
-	 * {@link #latestRenderedContinuousFunction latest continuous function for
-	 * rendering} is up to date.
-	 * 
-	 * @return true if the latest continuous function for rendering has changed,
-	 *         false otherwise
-	 */
-	public boolean refresh() {
-		boolean dirtied = false;
-		synchronized (mutex) {
-			if (dirty) {
-				dirtied = true;
-				dirty = false;
+  /**
+   * Flag the series as out of date with respect to the rendering environment or
+   * continuous function state.
+   */
+  public void makeDirty() {
+    synchronized (mutex) {
+      dirty = true;
+    }
+  }
 
-				latestRenderedContinuousFunction = continuousFunction.decoupleValue();
-			}
-		}
+  /**
+   * Clear the dirty flag, if present, and ensure the
+   * {@link #latestRenderedContinuousFunction latest continuous function for
+   * rendering} is up to date.
+   * 
+   * @return true if the latest continuous function for rendering has changed,
+   *         false otherwise
+   */
+  public boolean refresh() {
+    boolean dirtied = false;
+    synchronized (mutex) {
+      if (dirty) {
+        dirtied = true;
+        dirty = false;
 
-		return dirtied;
-	}
+        latestRenderedContinuousFunction = continuousFunction.decoupleValue();
+      }
+    }
 
-	/**
-	 * Render the {@link #latestRenderedContinuousFunction latest continuous
-	 * function} into the {@link #getSeries() series} for the given range and
-	 * resolution.
-	 * 
-	 * @param domain
-	 *          the range to render through in the domain
-	 * @param resolution
-	 *          the resolution to render at in the domain
-	 */
-	public void render(Range<Double> domain, int resolution) {
-		SampledContinuousFunction<?, ?> sampledContinuousFunction = resampleLastRendered(
-				latestRenderedContinuousFunction,
-				domain,
-				resolution);
+    return dirtied;
+  }
 
-		if (data.size() > sampledContinuousFunction.getDepth()) {
-			data.remove(sampledContinuousFunction.getDepth(), data.size());
-		}
+  /**
+   * Render the {@link #latestRenderedContinuousFunction latest continuous
+   * function} into the {@link #getSeries() series} for the given range and
+   * resolution.
+   * 
+   * @param domain
+   *          the range to render through in the domain
+   * @param resolution
+   *          the resolution to render at in the domain
+   */
+  public void render(Interval<Double> domain, int resolution) {
+    SampledContinuousFunction<?, ?> sampledContinuousFunction = resampleLastRendered(
+        latestRenderedContinuousFunction,
+        domain,
+        resolution);
 
-		for (int i = 0; i < data.size(); i++) {
-			data.get(i).setXValue(sampledContinuousFunction.domain().getSample(i));
-			data.get(i).setYValue(sampledContinuousFunction.range().getSample(i));
-		}
+    if (data.size() > sampledContinuousFunction.getDepth()) {
+      data.remove(sampledContinuousFunction.getDepth(), data.size());
+    }
 
-		int remainingData = sampledContinuousFunction.getDepth() - data.size();
-		if (remainingData > 0) {
-			List<Data<Number, Number>> dataTemp = new ArrayList<>(remainingData);
-			for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
-				dataTemp.add(
-						new Data<>(
-								sampledContinuousFunction.domain().getSample(i),
-								sampledContinuousFunction.range().getSample(i)));
-			}
-			data.addAll(dataTemp);
-		}
-	}
+    for (int i = 0; i < data.size(); i++) {
+      data.get(i).setXValue(sampledContinuousFunction.domain().getSample(i));
+      data.get(i).setYValue(sampledContinuousFunction.range().getSample(i));
+    }
 
-	private <U extends Quantity<U>> SampledContinuousFunction<U, ?> resampleLastRendered(
-			ContinuousFunction<U, ?> latestRenderedContinuousFunction,
-			Range<Double> domain,
-			int resolution) {
-		SampledDomain<U> resolvableDomain = new RegularSampledDomain<>(
-				latestRenderedContinuousFunction.domain().getUnit(),
-				resolution,
-				resolution / (domain.getTo() - domain.getFrom()),
-				domain.getFrom());
+    int remainingData = sampledContinuousFunction.getDepth() - data.size();
+    if (remainingData > 0) {
+      List<Data<Number, Number>> dataTemp = new ArrayList<>(remainingData);
+      for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
+        dataTemp.add(
+            new Data<>(
+                sampledContinuousFunction.domain().getSample(i),
+                sampledContinuousFunction.range().getSample(i)));
+      }
+      data.addAll(dataTemp);
+    }
+  }
 
-		return latestRenderedContinuousFunction.resample(resolvableDomain);
-	}
+  private <U extends Quantity<U>> SampledContinuousFunction<U, ?> resampleLastRendered(
+      ContinuousFunction<U, ?> latestRenderedContinuousFunction,
+      Interval<Double> domain,
+      int resolution) {
+    SampledDomain<U> resolvableDomain = new RegularSampledDomain<>(
+        latestRenderedContinuousFunction.domain().getUnit(),
+        resolution,
+        resolution / (domain.getRightEndpoint() - domain.getLeftEndpoint()),
+        domain.getLeftEndpoint());
 
-	/**
-	 * @return the continuous function backing the series
-	 */
-	public ContinuousFunction<?, ?> getBackingContinuousFunction() {
-		return continuousFunction;
-	}
+    return latestRenderedContinuousFunction.resample(resolvableDomain);
+  }
 
-	/**
-	 * @return the latest continuous function prepared for rendering
-	 */
-	public ContinuousFunction<?, ?> getLatestRenderedContinuousFunction() {
-		return latestRenderedContinuousFunction;
-	}
+  /**
+   * @return the continuous function backing the series
+   */
+  public ContinuousFunction<?, ?> getBackingContinuousFunction() {
+    return continuousFunction;
+  }
 
-	/**
-	 * @return The series providing a view of the continuous function
-	 */
-	public Series<Number, Number> getSeries() {
-		return series;
-	}
+  /**
+   * @return the latest continuous function prepared for rendering
+   */
+  public ContinuousFunction<?, ?> getLatestRenderedContinuousFunction() {
+    return latestRenderedContinuousFunction;
+  }
+
+  /**
+   * @return The series providing a view of the continuous function
+   */
+  public Series<Number, Number> getSeries() {
+    return series;
+  }
 }

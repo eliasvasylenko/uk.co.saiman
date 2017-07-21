@@ -42,9 +42,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import uk.co.saiman.experiment.PersistedState;
-import uk.co.strangeskies.observable.ObservableImpl;
+import uk.co.strangeskies.observable.HotObservable;
 
-public class PersistedStateImpl extends ObservableImpl<PersistedState> implements PersistedState {
+public class PersistedStateImpl extends HotObservable<PersistedState> implements PersistedState {
   private static final String CONFIGURATION_ELEMENT = "configuration";
   private static final String CONFIGURATION_STRING_ELEMENT = "string";
   private static final String CONFIGURATION_KEY_ATTRIBUTE = "key";
@@ -53,7 +53,7 @@ public class PersistedStateImpl extends ObservableImpl<PersistedState> implement
   private final Map<String, String> strings = new HashMap<>();
 
   private void update() {
-    fire(this);
+    next(this);
   }
 
   @Override

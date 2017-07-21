@@ -34,14 +34,4 @@ import uk.co.saiman.instrument.HardwareDevice;
  * 
  * @author Elias N Vasylenko
  */
-public interface SimulatedDevice extends HardwareDevice {
-	@Override
-	default boolean isConnected() {
-		return true;
-	}
-
-	@Override
-	default void reset() {
-		abortOperation();
-	}
-}
+public interface SimulatedDevice extends HardwareDevice {}

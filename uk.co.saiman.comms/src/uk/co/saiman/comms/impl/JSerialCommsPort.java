@@ -43,7 +43,8 @@ import com.fazecast.jSerialComm.SerialPortPacketListener;
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
-import uk.co.strangeskies.observable.ObservableImpl;
+import uk.co.strangeskies.observable.HotObservable;
+import uk.co.strangeskies.observable.Observation;
 import uk.co.strangeskies.observable.Observer;
 
 /**
@@ -53,204 +54,194 @@ import uk.co.strangeskies.observable.Observer;
  * @author Elias N Vasylenko
  */
 public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
-	private final SerialPort serialPort;
+  private final SerialPort serialPort;
 
-	private CommsChannel openChannel;
+  private CommsChannel openChannel;
 
-	protected JSerialCommsPort(SerialPort serialPort) {
-		this.serialPort = serialPort;
+  protected JSerialCommsPort(SerialPort serialPort) {
+    this.serialPort = serialPort;
 
-		serialPort.setNumDataBits(Byte.SIZE);
-		serialPort.setBaudRate(9600);
-		serialPort.setNumStopBits(ONE_STOP_BIT);
-		serialPort.setParity(NO_PARITY);
-		serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 1000, 1000);
-	}
+    serialPort.setNumDataBits(Byte.SIZE);
+    serialPort.setBaudRate(9600);
+    serialPort.setNumStopBits(ONE_STOP_BIT);
+    serialPort.setParity(NO_PARITY);
+    serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 1000, 1000);
+  }
 
-	@Override
-	public synchronized void close() {
-		closeChannel();
-	}
+  @Override
+  public synchronized void close() {
+    closeChannel();
+  }
 
-	@Override
-	public synchronized boolean isOpen() {
-		return openChannel != null;
-	}
+  @Override
+  public synchronized boolean isOpen() {
+    return openChannel != null;
+  }
 
-	@Override
-	public String getName() {
-		return serialPort.getSystemPortName();
-	}
+  @Override
+  public String getName() {
+    return serialPort.getSystemPortName();
+  }
 
-	@Override
-	public String toString() {
-		return serialPort.getDescriptivePortName() + " " + serialPort.getSystemPortName();
-	}
+  @Override
+  public String toString() {
+    return serialPort.getDescriptivePortName() + " " + serialPort.getSystemPortName();
+  }
 
-	@Override
-	public synchronized CommsChannel openChannel() {
-		if (serialPort.getSystemPortName().equals("/dev/null")) {
-			throw new CommsException("Port is not valid " + this);
-		}
+  @Override
+  public synchronized CommsChannel openChannel() {
+    if (serialPort.getSystemPortName().equals("/dev/null")) {
+      throw new CommsException("Port is not valid " + this);
+    }
 
-		if (isOpen()) {
-			throw new CommsException("Port already in use " + this);
-		}
+    if (isOpen()) {
+      throw new CommsException("Port already in use " + this);
+    }
 
-		closeChannel();
+    closeChannel();
 
-		if (!serialPort.openPort()) {
-			throw new CommsException("Cannot open port " + this);
-		}
+    if (!serialPort.openPort()) {
+      throw new CommsException("Cannot open port " + this);
+    }
 
-		ObservableImpl<CommsChannel> availableObservable = new ObservableImpl<>();
+    HotObservable<CommsChannel> availableObservable = new HotObservable<>();
 
-		setPortListener(new SerialPortDataListener() {
-			@Override
-			public void serialEvent(SerialPortEvent event) {
-				availableObservable.fire(openChannel);
-			}
+    setPortListener(new SerialPortDataListener() {
+      @Override
+      public void serialEvent(SerialPortEvent event) {
+        availableObservable.next(openChannel);
+      }
 
-			@Override
-			public int getListeningEvents() {
-				return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-			}
-		});
+      @Override
+      public int getListeningEvents() {
+        return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
+      }
+    });
 
-		openChannel = new CommsChannel() {
-			private boolean open = true;
+    openChannel = new CommsChannel() {
+      private boolean open = true;
 
-			@Override
-			public int bytesAvailable() {
-				assertOpen();
-				return serialPort.bytesAvailable();
-			}
+      @Override
+      public int bytesAvailable() {
+        assertOpen();
+        return serialPort.bytesAvailable();
+      }
 
-			@Override
-			public int write(ByteBuffer src) throws IOException {
-				assertOpen();
-				byte[] bytes = new byte[src.remaining()];
-				src.get(bytes);
-				return serialPort.writeBytes(bytes, bytes.length);
-			}
+      @Override
+      public int write(ByteBuffer src) throws IOException {
+        assertOpen();
+        byte[] bytes = new byte[src.remaining()];
+        src.get(bytes);
+        return serialPort.writeBytes(bytes, bytes.length);
+      }
 
-			@Override
-			public int read(ByteBuffer dst) throws IOException {
-				assertOpen();
-				byte[] bytes = new byte[dst.remaining()];
-				int read = serialPort.readBytes(bytes, bytes.length);
+      @Override
+      public int read(ByteBuffer dst) throws IOException {
+        assertOpen();
+        byte[] bytes = new byte[dst.remaining()];
+        int read = serialPort.readBytes(bytes, bytes.length);
 
-				if (read < 0)
-					throw new CommsException("Unknown port error " + read);
+        if (read < 0)
+          throw new CommsException("Unknown port error " + read);
 
-				dst.put(bytes, 0, read);
-				return read;
-			}
+        dst.put(bytes, 0, read);
+        return read;
+      }
 
-			private void assertOpen() {
-				if (!isOpen())
-					throw new CommsException("Channel is closed");
-			}
+      private void assertOpen() {
+        if (!isOpen())
+          throw new CommsException("Channel is closed");
+      }
 
-			@Override
-			public boolean isOpen() {
-				return open;
-			}
+      @Override
+      public boolean isOpen() {
+        return open;
+      }
 
-			@Override
-			public void close() {
-				if (open) {
-					open = false;
-					closeChannel();
-				}
-			}
+      @Override
+      public void close() {
+        if (open) {
+          open = false;
+          closeChannel();
+        }
+      }
 
-			@Override
-			public boolean addObserver(Observer<? super CommsChannel> observer) {
-				return availableObservable.addObserver(observer);
-			}
+      @Override
+      public Observation observe(Observer<? super CommsChannel> observer) {
+        return availableObservable.observe(observer);
+      }
+    };
 
-			@Override
-			public boolean removeObserver(Observer<? super CommsChannel> observer) {
-				return availableObservable.removeObserver(observer);
-			}
-		};
+    return openChannel;
+  }
 
-		return openChannel;
-	}
+  @Override
+  public synchronized CommsStream openStream(int packetSize) {
+    CommsChannel channel = openChannel();
+    HotObservable<ByteBuffer> byteObservable = new HotObservable<>();
 
-	@Override
-	public synchronized CommsStream openStream(int packetSize) {
-		CommsChannel channel = openChannel();
-		ObservableImpl<ByteBuffer> byteObservable = new ObservableImpl<>();
+    if (packetSize <= 0) {
+      channel.observe(c -> {
+        byte[] bytes = new byte[c.bytesAvailable()];
+        serialPort.readBytes(bytes, bytes.length);
+        byteObservable.next(ByteBuffer.wrap(bytes));
+      });
+    } else {
+      setPortListener(new SerialPortPacketListener() {
+        @Override
+        public void serialEvent(SerialPortEvent event) {
+          byteObservable.next(ByteBuffer.wrap(event.getReceivedData()));
+        }
 
-		if (packetSize <= 0) {
-			channel.addObserver(c -> {
-				byte[] bytes = new byte[c.bytesAvailable()];
-				serialPort.readBytes(bytes, bytes.length);
-				byteObservable.fire(ByteBuffer.wrap(bytes));
-			});
-		} else {
-			setPortListener(new SerialPortPacketListener() {
-				@Override
-				public void serialEvent(SerialPortEvent event) {
-					byteObservable.fire(ByteBuffer.wrap(event.getReceivedData()));
-				}
+        @Override
+        public int getListeningEvents() {
+          return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
+        }
 
-				@Override
-				public int getListeningEvents() {
-					return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
-				}
+        @Override
+        public int getPacketSize() {
+          return packetSize;
+        }
+      });
+    }
 
-				@Override
-				public int getPacketSize() {
-					return packetSize;
-				}
-			});
-		}
+    return new CommsStream() {
+      @Override
+      public boolean isOpen() {
+        return channel.isOpen();
+      }
 
-		return new CommsStream() {
-			@Override
-			public boolean isOpen() {
-				return channel.isOpen();
-			}
+      @Override
+      public int write(ByteBuffer src) throws IOException {
+        return channel.write(src);
+      }
 
-			@Override
-			public int write(ByteBuffer src) throws IOException {
-				return channel.write(src);
-			}
+      @Override
+      public Observation observe(Observer<? super ByteBuffer> observer) {
+        return byteObservable.observe(observer);
+      }
 
-			@Override
-			public boolean removeObserver(Observer<? super ByteBuffer> observer) {
-				return byteObservable.removeObserver(observer);
-			}
+      @Override
+      public void close() throws IOException {
+        serialPort.removeDataListener();
+        byteObservable.complete();
+        channel.close();
+      }
+    };
+  }
 
-			@Override
-			public boolean addObserver(Observer<? super ByteBuffer> observer) {
-				return byteObservable.addObserver(observer);
-			}
+  private synchronized void closeChannel() {
+    openChannel = null;
+    if (!serialPort.closePort()) {
+      throw new CommsException("Cannot close port " + this);
+    }
+  }
 
-			@Override
-			public void close() throws IOException {
-				serialPort.removeDataListener();
-				byteObservable.clearObservers();
-				channel.close();
-			}
-		};
-	}
-
-	private synchronized void closeChannel() {
-		openChannel = null;
-		if (!serialPort.closePort()) {
-			throw new CommsException("Cannot close port " + this);
-		}
-	}
-
-	private void setPortListener(SerialPortDataListener listener) {
-		serialPort.removeDataListener();
-		if (!serialPort.addDataListener(listener)) {
-			closeChannel();
-			throw new CommsException("Cannot add listener to port " + this);
-		}
-	}
+  private void setPortListener(SerialPortDataListener listener) {
+    serialPort.removeDataListener();
+    if (!serialPort.addDataListener(listener)) {
+      closeChannel();
+      throw new CommsException("Cannot add listener to port " + this);
+    }
+  }
 }

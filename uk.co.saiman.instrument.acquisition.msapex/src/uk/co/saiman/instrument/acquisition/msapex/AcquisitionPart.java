@@ -72,149 +72,153 @@ import uk.co.strangeskies.eclipse.ObservableService;
  * @author Elias N Vasylenko
  */
 public class AcquisitionPart {
-	@Localize
-	@Inject
-	private AcquisitionProperties text;
+  @Localize
+  @Inject
+  private AcquisitionProperties text;
 
-	@FXML
-	private Pane chartPane;
-	@FXML
-	private Label noSelectionLabel;
+  @FXML
+  private Pane chartPane;
+  @FXML
+  private Label noSelectionLabel;
 
-	@Inject
-	@ObservableService
-	private ObservableSet<AcquisitionDevice> availableDevices;
+  @Inject
+  @ObservableService
+  private ObservableSet<AcquisitionDevice> availableDevices;
 
-	private ObservableSet<AcquisitionDevice> selectedDevices = FXCollections.observableSet();
-	private Map<AcquisitionDevice, ContinuousFunctionChartController> controllers = new HashMap<>();
+  private ObservableSet<AcquisitionDevice> selectedDevices = FXCollections.observableSet();
+  private Map<AcquisitionDevice, ContinuousFunctionChartController> controllers = new HashMap<>();
 
-	@Inject
-	@LocalInstance
-	private FXMLLoader loaderProvider;
+  @Inject
+  @LocalInstance
+  private FXMLLoader loaderProvider;
 
-	@Inject
-	private MPart part;
+  @Inject
+  private MPart part;
 
-	@Inject
-	private Units units;
+  @Inject
+  private Units units;
 
-	/**
-	 * Get the visible acquisition devices.
-	 * 
-	 * @return The set of all currently visible acquisition devices
-	 */
-	public synchronized Set<AcquisitionDevice> getSelectedAcquisitionDevices() {
-		return new HashSet<>(selectedDevices);
-	}
+  /**
+   * Get the visible acquisition devices.
+   * 
+   * @return The set of all currently visible acquisition devices
+   */
+  public synchronized Set<AcquisitionDevice> getSelectedAcquisitionDevices() {
+    return new HashSet<>(selectedDevices);
+  }
 
-	/**
-	 * Set the visible acquisition devices. All devices in the given set will be
-	 * made visible, and all others will be removed.
-	 * 
-	 * @param selectedDevices
-	 *          The acquisition devices to show
-	 * @return True if the device selection changes as a result of this
-	 *         invocation, false otherwise
-	 */
-	public synchronized boolean setSelectedAcquisitionDevices(Collection<? extends AcquisitionDevice> selectedDevices) {
-		return this.selectedDevices.retainAll(selectedDevices) | this.selectedDevices.addAll(selectedDevices);
-	}
+  /**
+   * Set the visible acquisition devices. All devices in the given set will be
+   * made visible, and all others will be removed.
+   * 
+   * @param selectedDevices
+   *          The acquisition devices to show
+   * @return True if the device selection changes as a result of this
+   *         invocation, false otherwise
+   */
+  public synchronized boolean setSelectedAcquisitionDevices(
+      Collection<? extends AcquisitionDevice> selectedDevices) {
+    return this.selectedDevices.retainAll(selectedDevices)
+        | this.selectedDevices.addAll(selectedDevices);
+  }
 
-	/**
-	 * Set an acquisition device to be visible. All currently visible devices will
-	 * remain so.
-	 * 
-	 * @param device
-	 *          The acquisition device to show
-	 * @return True if the device selection changes as a result of this
-	 *         invocation, false otherwise
-	 */
-	public synchronized boolean selectAcquisitionDevice(AcquisitionDevice device) {
-		return selectedDevices.add(device);
-	}
+  /**
+   * Set an acquisition device to be visible. All currently visible devices will
+   * remain so.
+   * 
+   * @param device
+   *          The acquisition device to show
+   * @return True if the device selection changes as a result of this
+   *         invocation, false otherwise
+   */
+  public synchronized boolean selectAcquisitionDevice(AcquisitionDevice device) {
+    return selectedDevices.add(device);
+  }
 
-	/**
-	 * Set an acquisition device to not be visible. All other currently visible
-	 * devices will remain so.
-	 * 
-	 * @param device
-	 *          The acquisition device to not show
-	 * @return True if the device selection changes as a result of this
-	 *         invocation, false otherwise
-	 */
-	public synchronized boolean deselectAcquisitionDevice(AcquisitionDevice device) {
-		return selectedDevices.remove(device);
-	}
+  /**
+   * Set an acquisition device to not be visible. All other currently visible
+   * devices will remain so.
+   * 
+   * @param device
+   *          The acquisition device to not show
+   * @return True if the device selection changes as a result of this
+   *         invocation, false otherwise
+   */
+  public synchronized boolean deselectAcquisitionDevice(AcquisitionDevice device) {
+    return selectedDevices.remove(device);
+  }
 
-	/**
-	 * @return the set of all known available acquisition devices
-	 */
-	public ObservableSet<AcquisitionDevice> getAvailableAcquisitionDevices() {
-		return availableDevices;
-	}
+  /**
+   * @return the set of all known available acquisition devices
+   */
+  public ObservableSet<AcquisitionDevice> getAvailableAcquisitionDevices() {
+    return availableDevices;
+  }
 
-	@PostConstruct
-	void postConstruct(BorderPane container) {
-		container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
+  @PostConstruct
+  void postConstruct(BorderPane container) {
+    container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
-		selectedDevices.addListener((SetChangeListener.Change<? extends AcquisitionDevice> change) -> {
-			if (change.wasAdded()) {
-				selectAcquisitionDeviceImpl(change.getElementAdded());
-			} else if (change.wasRemoved()) {
-				deselectAcquisitionDeviceImpl(change.getElementRemoved());
-			}
-		});
-	}
+    selectedDevices.addListener((SetChangeListener.Change<? extends AcquisitionDevice> change) -> {
+      if (change.wasAdded()) {
+        selectAcquisitionDeviceImpl(change.getElementAdded());
+      } else if (change.wasRemoved()) {
+        deselectAcquisitionDeviceImpl(change.getElementRemoved());
+      }
+    });
+  }
 
-	@FXML
-	void initialize() {
-		noSelectionLabel.textProperty().bind(wrap(text.noAcquisitionDevices()));
-	}
+  @FXML
+  void initialize() {
+    noSelectionLabel.textProperty().bind(wrap(text.noAcquisitionDevices()));
+  }
 
-	private void selectAcquisitionDeviceImpl(AcquisitionDevice acquisitionDevice) {
-		noSelectionLabel.setVisible(false);
+  private void selectAcquisitionDeviceImpl(AcquisitionDevice acquisitionDevice) {
+    noSelectionLabel.setVisible(false);
 
-		/*
-		 * New chart controller for device
-		 */
-		ContinuousFunctionChartController chartController = buildWith(loaderProvider)
-				.controller(ContinuousFunctionChartController.class)
-				.loadController();
-		chartController.setTitle(acquisitionDevice.getName());
-		controllers.put(acquisitionDevice, chartController);
-		chartPane.getChildren().add(chartController.getRoot());
-		HBox.setHgrow(chartController.getRoot(), Priority.ALWAYS);
+    /*
+     * New chart controller for device
+     */
+    ContinuousFunctionChartController chartController = buildWith(loaderProvider)
+        .controller(ContinuousFunctionChartController.class)
+        .loadController();
+    chartController.setTitle(acquisitionDevice.getName());
+    controllers.put(acquisitionDevice, chartController);
+    chartPane.getChildren().add(chartController.getRoot());
+    HBox.setHgrow(chartController.getRoot(), Priority.ALWAYS);
 
-		/*
-		 * Create continuous function view of latest data from device
-		 */
-		ContinuousFunctionExpression<Time, Dimensionless> latestContinuousFunction = new ContinuousFunctionExpression<>(
-				units.second().get(),
-				units.count().get());
-		acquisitionDevice.dataEvents().addWeakObserver(latestContinuousFunction, l -> c -> l.setComponent(c));
+    /*
+     * Create continuous function view of latest data from device
+     */
+    ContinuousFunctionExpression<Time, Dimensionless> latestContinuousFunction = new ContinuousFunctionExpression<>(
+        units.second().get(),
+        units.count().get());
+    acquisitionDevice.dataEvents().weakReference(latestContinuousFunction).observe(
+        m -> m.owner().setComponent(m.message()));
 
-		/*
-		 * Add latest data to chart controller
-		 */
-		chartController.getContinuousFunctions().add(latestContinuousFunction);
-	}
+    /*
+     * Add latest data to chart controller
+     */
+    chartController.getContinuousFunctions().add(latestContinuousFunction);
+  }
 
-	private void deselectAcquisitionDeviceImpl(AcquisitionDevice acquisitionDevice) {
-		ContinuousFunctionChartController controller = controllers.remove(acquisitionDevice);
+  private void deselectAcquisitionDeviceImpl(AcquisitionDevice acquisitionDevice) {
+    ContinuousFunctionChartController controller = controllers.remove(acquisitionDevice);
 
-		chartPane.getChildren().remove(controller.getRoot());
+    chartPane.getChildren().remove(controller.getRoot());
 
-		noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
-	}
+    noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
+  }
 
-	@Inject
-	synchronized void setSelection(@Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) AcquisitionDevice device) {
-		if (device != null) {
-			part.getContext().activate();
+  @Inject
+  synchronized void setSelection(
+      @Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) AcquisitionDevice device) {
+    if (device != null) {
+      part.getContext().activate();
 
-			if (!selectedDevices.contains(device)) {
-				setSelectedAcquisitionDevices(asList(device));
-			}
-		}
-	}
+      if (!selectedDevices.contains(device)) {
+        setSelectedAcquisitionDevices(asList(device));
+      }
+    }
+  }
 }

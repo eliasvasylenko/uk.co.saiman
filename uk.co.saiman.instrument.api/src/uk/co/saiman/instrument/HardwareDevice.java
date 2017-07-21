@@ -27,25 +27,10 @@
  */
 package uk.co.saiman.instrument;
 
-import uk.co.strangeskies.observable.Observable;
+import uk.co.strangeskies.observable.ObservableValue;
 
 public interface HardwareDevice {
-	String getName();
+  String getName();
 
-	/**
-	 * @return true if a communication link with the hardware properly
-	 *         established, false otherwise
-	 */
-	boolean isConnected();
-
-	void reset();
-
-	/**
-	 * If the hardware module is performing some sort of operation, e.g. a
-	 * currently running raster or acquisition card, that operation should be
-	 * aborted, or for high voltages they should be turned off if possible.
-	 */
-	void abortOperation();
-
-	Observable<? extends Exception> errors();
+  ObservableValue<HardwareConnection> connectionState();
 }

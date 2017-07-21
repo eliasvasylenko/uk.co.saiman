@@ -36,49 +36,51 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface ExperimentExceptionProperties {
-	@Nested
-	SaiProperties sai();
+  @Nested
+  SaiProperties sai();
 
-	/**
-	 * @param descendantType
-	 *          the type of the descendant we wish to add
-	 * @param ancestorNode
-	 *          an ancestor of the candidate node
-	 * @return a node of the given type may not be a descendant of the given node
-	 */
-	String typeMayNotSucceed(ExperimentType<?> descendantType, ExperimentNode<?, ?> ancestorNode);
+  String experimentInterrupted();
 
-	String experimentIsDisposed(ExperimentNode<?, ?> experimentNode);
+  /**
+   * @param descendantType
+   *          the type of the descendant we wish to add
+   * @param ancestorNode
+   *          an ancestor of the candidate node
+   * @return a node of the given type may not be a descendant of the given node
+   */
+  String typeMayNotSucceed(ExperimentType<?> descendantType, ExperimentNode<?, ?> ancestorNode);
 
-	String illegalCommandForSelection(String commandId, Object selection);
+  String experimentIsDisposed(ExperimentNode<?, ?> experimentNode);
 
-	String illegalMenuForSelection(String commandId, Object selection);
+  String illegalCommandForSelection(String commandId, Object selection);
 
-	String experimentDoesNotExist(ExperimentNode<?, ?> experimentNode);
+  String illegalMenuForSelection(String commandId, Object selection);
 
-	String invalidExperimentName(String name);
+  String experimentDoesNotExist(ExperimentNode<?, ?> experimentNode);
 
-	String cannotProcessExperimentConcurrently(Experiment experiment);
+  String invalidExperimentName(String name);
 
-	String cannotPersistState(Experiment experiment);
+  String cannotProcessExperimentConcurrently(Experiment experiment);
 
-	String cannotCreateWorkspace(Workspace experimentWorkspace);
+  String cannotPersistState(Experiment experiment);
 
-	String cannotLoadExperiment(Path path);
+  String cannotCreateWorkspace(Workspace experimentWorkspace);
 
-	String duplicateExperimentName(String name);
+  String cannotLoadExperiment(Path path);
 
-	String cannotExecuteMissingExperimentType(String id);
+  String duplicateExperimentName(String name);
 
-	String cannotMove(Path oldLocation, Path newLocation);
+  String cannotExecuteMissingExperimentType(String id);
 
-	String cannotCreate(Path newLocation);
+  String cannotMove(Path oldLocation, Path newLocation);
 
-	String dataAlreadyExists(Path newLocation);
+  String cannotCreate(Path newLocation);
 
-	String failedExperimentExecution(ExperimentNode<?, ?> experimentNode);
+  String dataAlreadyExists(Path newLocation);
 
-	String userCancelledSetExperimentName();
+  String failedExperimentExecution(ExperimentNode<?, ?> experimentNode);
 
-	String cannotDelete(Path newLocation);
+  String userCancelledSetExperimentName();
+
+  String cannotDelete(Path newLocation);
 }

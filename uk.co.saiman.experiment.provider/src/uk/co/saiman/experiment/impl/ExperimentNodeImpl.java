@@ -83,7 +83,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 	private final List<ExperimentNodeImpl<?, ?>> children;
 
-	private final ObservableProperty<ExperimentLifecycleState, ExperimentLifecycleState> lifecycleState;
+	private final ObservableProperty<ExperimentLifecycleState> lifecycleState;
 	private final S state;
 
 	private HashMap<ResultType<?>, ResultImpl<?>> results;
@@ -142,7 +142,7 @@ public class ExperimentNodeImpl<T extends ExperimentType<S>, S> implements Exper
 
 		this.lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
 		this.persistedState = persistedState;
-		persistedState.addObserver(s -> getRootImpl().save());
+		persistedState.observe(s -> getRootImpl().save());
 		this.state = type.createState(createConfigurationContext());
 
 		if (getID() == null) {

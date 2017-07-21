@@ -31,6 +31,7 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import uk.co.strangeskies.mathematics.expression.Expression;
+import uk.co.strangeskies.mathematics.expression.ExpressionDependency;
 import uk.co.strangeskies.mathematics.expression.LockingExpression;
 
 /**
@@ -45,73 +46,69 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends LockingExpression<ContinuousFunction<UD, UR>> implements ContinuousFunctionDecorator<UD, UR> {
-	private Expression<? extends ContinuousFunction<UD, UR>> component;
+public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Quantity<UR>> extends
+    LockingExpression<ContinuousFunction<UD, UR>> implements ContinuousFunctionDecorator<UD, UR> {
+  private ExpressionDependency<? extends ContinuousFunction<UD, UR>> component;
 
-	/**
-	 * Create a default empty expression about the function
-	 * {@link ContinuousFunction#empty(Unit, Unit)}.
-	 * 
-	 * @param unitDomain
-	 *          the units of measurement of values in the domain
-	 * @param unitRange
-	 *          the units of measurement of values in the range
-	 */
-	public ContinuousFunctionExpression(Unit<UD> unitDomain, Unit<UR> unitRange) {
-		this(ContinuousFunction.empty(unitDomain, unitRange));
-	}
+  /**
+   * Create a default empty expression about the function
+   * {@link ContinuousFunction#empty(Unit, Unit)}.
+   * 
+   * @param unitDomain
+   *          the units of measurement of values in the domain
+   * @param unitRange
+   *          the units of measurement of values in the range
+   */
+  public ContinuousFunctionExpression(Unit<UD> unitDomain, Unit<UR> unitRange) {
+    this(ContinuousFunction.empty(unitDomain, unitRange));
+  }
 
-	/**
-	 * Create an instance which is initially over the given component.
-	 * 
-	 * @param component
-	 *          The component to wrap
-	 */
-	public ContinuousFunctionExpression(ContinuousFunction<UD, UR> component) {
-		setComponent(component);
-	}
+  /**
+   * Create an instance which is initially over the given component.
+   * 
+   * @param component
+   *          The component to wrap
+   */
+  public ContinuousFunctionExpression(ContinuousFunction<UD, UR> component) {
+    setComponent(component);
+  }
 
-	@Override
-	public ContinuousFunction<UD, UR> getComponent() {
-		getReadLock().lock();
-		try {
-			return component.getValue();
-		} finally {
-			getReadLock().unlock();
-		}
-	}
+  @Override
+  public ContinuousFunction<UD, UR> getComponent() {
+    getReadLock().lock();
+    try {
+      return component.getExpression().getValue();
+    } finally {
+      getReadLock().unlock();
+    }
+  }
 
-	/**
-	 * Change the component to be wrapped by this function.
-	 * 
-	 * @param component
-	 *          The continuous function we wish to wrap
-	 */
-	public void setComponent(Expression<? extends ContinuousFunction<UD, UR>> component) {
-		beginWrite();
+  /**
+   * Change the component to be wrapped by this function.
+   * 
+   * @param component
+   *          The continuous function we wish to wrap
+   */
+  public void setComponent(Expression<? extends ContinuousFunction<UD, UR>> component) {
+    beginWrite();
 
-		try {
-			Expression<? extends ContinuousFunction<UD, UR>> previousComponent = this.component;
-			this.component = component;
+    try {
+      if (this.component != null)
+        this.component.dispose();
+      this.component = addDependency(component);
+    } finally {
+      endWrite();
+    }
+  }
 
-			addDependency(component);
-			if (previousComponent != component) {
-				removeDependency(previousComponent);
-			}
-		} finally {
-			endWrite();
-		}
-	}
+  @Override
+  public ContinuousFunctionExpression<UD, UR> copy() {
+    return new ContinuousFunctionExpression<>(getComponent().copy());
+  }
 
-	@Override
-	public ContinuousFunctionExpression<UD, UR> copy() {
-		return new ContinuousFunctionExpression<>(getComponent().copy());
-	}
-
-	@Override
-	protected ContinuousFunction<UD, UR> evaluate() {
-		component.getValue();
-		return this;
-	}
+  @Override
+  protected ContinuousFunction<UD, UR> evaluate() {
+    component.getExpression().getValue();
+    return this;
+  }
 }

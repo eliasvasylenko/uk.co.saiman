@@ -1,14 +1,18 @@
 package uk.co.saiman.comms.rest;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.Optional;
 
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.Comms.CommsStatus;
+import uk.co.saiman.comms.CommsException;
 
 public abstract class SimpleCommsREST<U extends Comms<T>, T> implements CommsREST {
   private final U comms;
   private T controller;
   private ControllerREST controllerREST;
+  private CommsException lastFault;
 
   public SimpleCommsREST(U comms) {
     this.comms = comms;
@@ -40,7 +44,7 @@ public abstract class SimpleCommsREST<U extends Comms<T>, T> implements CommsRES
 
   @Override
   public Optional<String> getFaultText() {
-    return comms.fault().map(f -> f.getMessage());
+    return ofNullable(lastFault).map(CommsException::getMessage);
   }
 
   @Override

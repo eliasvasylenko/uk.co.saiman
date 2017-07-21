@@ -27,17 +27,13 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.strangeskies.observable.Observable.Observation.CONTINUE;
-import static uk.co.strangeskies.observable.Observable.Observation.TERMINATE;
 import static uk.co.strangeskies.text.properties.PropertyLoader.getDefaultProperties;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
@@ -54,86 +50,82 @@ import uk.co.saiman.experiment.ResultType;
  *          the type of sample configuration for the instrument
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
-		implements ExperimentType<T> {
-	private static final String SPECTRUM_DATA_NAME = "spectrum";
+    implements ExperimentType<T> {
+  private static final String SPECTRUM_DATA_NAME = "spectrum";
 
-	private SpectrumProperties properties;
-	private final ResultType<AccumulatingFileSpectrum> spectrumResult;
+  private SpectrumProperties properties;
+  private final ResultType<AccumulatingFileSpectrum> spectrumResult;
 
-	public SpectrumExperimentType() {
-		this(getDefaultProperties(SpectrumProperties.class));
-	}
+  public SpectrumExperimentType() {
+    this(getDefaultProperties(SpectrumProperties.class));
+  }
 
-	/*
-	 * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to
-	 * make this possible ...
-	 */
-	public SpectrumExperimentType(SpectrumProperties properties) {
-		this.properties = properties;
-		spectrumResult = new FileSpectrumExperimentResultType<T>(this);
-	}
+  /*
+   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to
+   * make this possible ...
+   */
+  public SpectrumExperimentType(SpectrumProperties properties) {
+    this.properties = properties;
+    spectrumResult = new FileSpectrumExperimentResultType<T>(this);
+  }
 
-	protected void setProperties(SpectrumProperties properties) {
-		this.properties = properties;
-	}
+  protected void setProperties(SpectrumProperties properties) {
+    this.properties = properties;
+  }
 
-	protected SpectrumProperties getProperties() {
-		return properties;
-	}
+  protected SpectrumProperties getProperties() {
+    return properties;
+  }
 
-	@Override
-	public String getName() {
-		return properties.spectrumExperimentName().toString();
-	}
+  @Override
+  public String getName() {
+    return properties.spectrumExperimentName().toString();
+  }
 
-	public ResultType<? extends Spectrum> getSpectrumResult() {
-		return spectrumResult;
-	}
+  public ResultType<? extends Spectrum> getSpectrumResult() {
+    return spectrumResult;
+  }
 
-	protected abstract AcquisitionDevice getAcquisitionDevice();
+  protected abstract AcquisitionDevice getAcquisitionDevice();
 
-	@Override
-	public void execute(ExperimentExecutionContext<T> context) {
-		CompletableFuture<Optional<AcquisitionException>> end = new CompletableFuture<>();
+  @Override
+  public void execute(ExperimentExecutionContext<T> context) {
+    AcquisitionDevice device = getAcquisitionDevice();
 
-		getAcquisitionDevice().startEvents().addTerminatingObserver(device -> {
-			prepareAcquisition(context, device);
-		});
-		getAcquisitionDevice().endEvents().addTerminatingObserver(exception -> {
-			end.complete(exception);
-		});
+    Future<AccumulatingFileSpectrum> acquisition = device
+        .acquisitionDataEvents()
+        .reduce(() -> initializeResult(context, device), (fileSpectrum, message) -> {
+          fileSpectrum.accumulate(message);
+          return fileSpectrum;
+        });
 
-		getAcquisitionDevice().startAcquisition();
+    device.startAcquisition();
 
-		try {
-			end.get().ifPresent(e -> {
-				context.results().set(spectrumResult, null);
-				throw e;
-			});
-		} catch (InterruptedException | ExecutionException e) {
-			throw new ExperimentException(properties.exception().experimentInterrupted(), e);
-		}
+    try {
+      acquisition.get();
+      context.results().get(spectrumResult).getData().ifPresent(d -> d.complete());
+    } catch (InterruptedException | ExecutionException e) {
+      context.results().unset(spectrumResult);
+      throw new ExperimentException(properties.experiment().exception().experimentInterrupted(), e);
+    }
+  }
 
-		context.results().get(spectrumResult).getData().get().complete();
-	}
+  private AccumulatingFileSpectrum initializeResult(
+      ExperimentExecutionContext<T> context,
+      AcquisitionDevice device) {
+    AccumulatingFileSpectrum fileSpectrum = new AccumulatingFileSpectrum(
+        context.results().dataPath(),
+        SPECTRUM_DATA_NAME,
+        device.getSampleDomain(),
+        device.getSampleIntensityUnits());
 
-	public void prepareAcquisition(ExperimentExecutionContext<T> context, AcquisitionDevice device) {
-		int count = device.getAcquisitionCount();
+    context.results().set(spectrumResult, fileSpectrum);
 
-		AccumulatingFileSpectrum fileSpectrum = new AccumulatingFileSpectrum(
-				context.results().dataPath(),
-				SPECTRUM_DATA_NAME,
-				device.getSampleDomain(),
-				device.getSampleIntensityUnits());
+    return fileSpectrum;
+  }
 
-		context.results().set(spectrumResult, fileSpectrum);
-
-		device.dataEvents().addTerminatingObserver(
-				a -> (device.isAcquiring() && fileSpectrum.accumulate(a) == count) ? TERMINATE : CONTINUE);
-	}
-
-	@Override
-	public Stream<ResultType<?>> getResultTypes() {
-		return Stream.of(spectrumResult);
-	}
+  @Override
+  public Stream<ResultType<?>> getResultTypes() {
+    return Stream.of(spectrumResult);
+  }
 }

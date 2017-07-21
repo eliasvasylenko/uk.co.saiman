@@ -47,8 +47,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.converter.NumberStringConverter;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
+import uk.co.strangeskies.observable.HotObservable;
 import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.ObservableImpl;
+import uk.co.strangeskies.observable.Observation;
 import uk.co.strangeskies.observable.Observer;
 
 /**
@@ -59,180 +60,178 @@ import uk.co.strangeskies.observable.Observer;
  * @author Elias N Vasylenko
  */
 public class ChemicalElementTile extends BorderPane implements Observable<ChemicalElementTile> {
-	/**
-	 * The size of the tile. Smaller sizes may choose to present less information
-	 * in order to take less space.
-	 * 
-	 * @author Elias N Vasylenko
-	 */
-	public enum Size {
-		/**
-		 * Smaller, with less information.
-		 */
-		SMALL,
-		/**
-		 * Normal size.
-		 */
-		NORMAL,
-		/**
-		 * Larger, with more information.
-		 */
-		LARGE
-	}
+  /**
+   * The size of the tile. Smaller sizes may choose to present less information
+   * in order to take less space.
+   * 
+   * @author Elias N Vasylenko
+   */
+  public enum Size {
+    /**
+     * Smaller, with less information.
+     */
+    SMALL,
+    /**
+     * Normal size.
+     */
+    NORMAL,
+    /**
+     * Larger, with more information.
+     */
+    LARGE
+  }
 
-	private ObservableImpl<ChemicalElementTile> clickObservable = new ObservableImpl<>();
+  private HotObservable<ChemicalElementTile> clickObservable = new HotObservable<>();
 
-	private Element element;
+  private Element element;
 
-	@FXML
-	private Label atomicNumberText;
-	private IntegerProperty atomicNumber = new SimpleIntegerProperty();
+  @FXML
+  private Label atomicNumberText;
+  private IntegerProperty atomicNumber = new SimpleIntegerProperty();
 
-	@FXML
-	private Label symbolNameText;
+  @FXML
+  private Label symbolNameText;
 
-	@FXML
-	private Label nameText;
+  @FXML
+  private Label nameText;
 
-	private Property<Size> sizeProperty;
+  private Property<Size> sizeProperty;
 
-	/**
-	 * Create a chemical element tile with no element.
-	 */
-	public ChemicalElementTile() {
-		this(null);
-	}
+  /**
+   * Create a chemical element tile with no element.
+   */
+  public ChemicalElementTile() {
+    this(null);
+  }
 
-	/**
-	 * Create a chemical element tile for the given element.
-	 * 
-	 * @param element
-	 *          The element for the tile to display, or null for an empty tile
-	 */
-	public ChemicalElementTile(Element element) {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ChemicalElementTile.fxml"));
-		fxmlLoader.setRoot(this);
-		fxmlLoader.setController(this);
+  /**
+   * Create a chemical element tile for the given element.
+   * 
+   * @param element
+   *          The element for the tile to display, or null for an empty tile
+   */
+  public ChemicalElementTile(Element element) {
+    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ChemicalElementTile.fxml"));
+    fxmlLoader.setRoot(this);
+    fxmlLoader.setController(this);
 
-		try {
-			fxmlLoader.load();
-		} catch (IOException exception) {
-			throw new RuntimeException(exception);
-		}
+    try {
+      fxmlLoader.load();
+    } catch (IOException exception) {
+      throw new RuntimeException(exception);
+    }
 
-		Bindings.bindBidirectional(atomicNumberText.textProperty(), atomicNumber, new NumberStringConverter());
+    Bindings.bindBidirectional(
+        atomicNumberText.textProperty(),
+        atomicNumber,
+        new NumberStringConverter());
 
-		setElement(element);
+    setElement(element);
 
-		sizeProperty = new SimpleObjectProperty<>(SMALL);
-		sizeProperty.addListener(c -> {
-			pseudoClassStateChanged(PseudoClass.getPseudoClass(getSize().name()), true);
+    sizeProperty = new SimpleObjectProperty<>(SMALL);
+    sizeProperty.addListener(c -> {
+      pseudoClassStateChanged(PseudoClass.getPseudoClass(getSize().name()), true);
 
-			for (Size other : Size.values()) {
-				if (other != getSize()) {
-					pseudoClassStateChanged(PseudoClass.getPseudoClass(other.name()), false);
-				}
-			}
-		});
+      for (Size other : Size.values()) {
+        if (other != getSize()) {
+          pseudoClassStateChanged(PseudoClass.getPseudoClass(other.name()), false);
+        }
+      }
+    });
 
-		setSize(NORMAL);
-	}
+    setSize(NORMAL);
+  }
 
-	@Override
-	public void requestFocus() {
-		if (isFocusTraversable()) {
-			super.requestFocus();
-		}
-	}
+  @Override
+  public void requestFocus() {
+    if (isFocusTraversable()) {
+      super.requestFocus();
+    }
+  }
 
-	/**
-	 * @return the current size of the tile
-	 */
-	public Size getSize() {
-		return sizeProperty.getValue();
-	}
+  /**
+   * @return the current size of the tile
+   */
+  public Size getSize() {
+    return sizeProperty.getValue();
+  }
 
-	/**
-	 * @param size
-	 *          a new size for the tile
-	 */
-	public void setSize(Size size) {
-		this.sizeProperty.setValue(size);
-	}
+  /**
+   * @param size
+   *          a new size for the tile
+   */
+  public void setSize(Size size) {
+    this.sizeProperty.setValue(size);
+  }
 
-	/**
-	 * @return a property over the size of the tile
-	 */
-	public Property<Size> getSizeProperty() {
-		return sizeProperty;
-	}
+  /**
+   * @return a property over the size of the tile
+   */
+  public Property<Size> getSizeProperty() {
+    return sizeProperty;
+  }
 
-	/**
-	 * Change the element displayed by the tile.
-	 * 
-	 * @param element
-	 *          The element for the tile to display, or null for an empty tile
-	 */
-	public void setElement(Element element) {
-		if (element != null) {
-			setGroup(element.getGroup());
+  /**
+   * Change the element displayed by the tile.
+   * 
+   * @param element
+   *          The element for the tile to display, or null for an empty tile
+   */
+  public void setElement(Element element) {
+    if (element != null) {
+      setGroup(element.getGroup());
 
-			atomicNumber.set(element.getAtomicNumber());
-			symbolNameText.setText(element.getSymbol());
-			nameText.setText(element.getName());
-		} else {
-			setGroup(Group.NONE);
+      atomicNumber.set(element.getAtomicNumber());
+      symbolNameText.setText(element.getSymbol());
+      nameText.setText(element.getName());
+    } else {
+      setGroup(Group.NONE);
 
-			atomicNumberText.setText("");
-			symbolNameText.setText("?");
-			nameText.setText("Unknown");
-		}
+      atomicNumberText.setText("");
+      symbolNameText.setText("?");
+      nameText.setText("Unknown");
+    }
 
-		this.element = element;
-	}
+    this.element = element;
+  }
 
-	private void setGroup(Group group) {
-		if (this.element == null || !Objects.equals(this.element.getGroup(), group)) {
-			if (this.element != null) {
-				pseudoClassStateChanged(PseudoClass.getPseudoClass(this.element.getGroup().name()), false);
-			}
-			pseudoClassStateChanged(PseudoClass.getPseudoClass(group.name()), true);
-		}
-	}
+  private void setGroup(Group group) {
+    if (this.element == null || !Objects.equals(this.element.getGroup(), group)) {
+      if (this.element != null) {
+        pseudoClassStateChanged(PseudoClass.getPseudoClass(this.element.getGroup().name()), false);
+      }
+      pseudoClassStateChanged(PseudoClass.getPseudoClass(group.name()), true);
+    }
+  }
 
-	/**
-	 * @return The element displayed by the tile
-	 */
-	public Element getElement() {
-		return element;
-	}
+  /**
+   * @return The element displayed by the tile
+   */
+  public Element getElement() {
+    return element;
+  }
 
-	/**
-	 * Send a click event to the tile.
-	 * 
-	 * @param event
-	 *          The mouse event to apply to this tile
-	 */
-	public void onMousePressed(MouseEvent event) {
-		select();
-		event.consume();
-	}
+  /**
+   * Send a click event to the tile.
+   * 
+   * @param event
+   *          The mouse event to apply to this tile
+   */
+  public void onMousePressed(MouseEvent event) {
+    select();
+    event.consume();
+  }
 
-	/**
-	 * Select the tile, and focus if focusable
-	 */
-	public void select() {
-		requestFocus();
-		clickObservable.fire(this);
-	}
+  /**
+   * Select the tile, and focus if focusable
+   */
+  public void select() {
+    requestFocus();
+    clickObservable.next(this);
+  }
 
-	@Override
-	public boolean addObserver(Observer<? super ChemicalElementTile> observer) {
-		return clickObservable.addObserver(observer);
-	}
-
-	@Override
-	public boolean removeObserver(Observer<? super ChemicalElementTile> observer) {
-		return clickObservable.removeObserver(observer);
-	}
+  @Override
+  public Observation observe(Observer<? super ChemicalElementTile> observer) {
+    return clickObservable.observe(observer);
+  }
 }

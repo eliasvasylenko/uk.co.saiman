@@ -52,105 +52,107 @@ import uk.co.saiman.chemistry.msapex.PeriodicTableService;
  * @author Elias N Vasylenko
  */
 public class PeriodicTablePart {
-	@Inject
-	PeriodicTableService periodicTables;
+  @Inject
+  PeriodicTableService periodicTables;
 
-	@FXML
-	private PeriodicTableController periodicTableController;
+  @FXML
+  private PeriodicTableController periodicTableController;
 
-	@FXML
-	private ChemicalElementPanelController chemicalElementPanelController;
+  @FXML
+  private ChemicalElementPanelController chemicalElementPanelController;
 
-	@FXML
-	private ScrollPane periodicTableScrollPane;
+  @FXML
+  private ScrollPane periodicTableScrollPane;
 
-	@PostConstruct
-	void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
-		try {
-			container.setCenter(buildWith(loader).controller(this).loadRoot());
-			periodicTableController.addObserver(this::setElementTile);
-			periodicTableController.setTilesFocusTraversable(true);
+  @PostConstruct
+  void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
+    try {
+      container.setCenter(buildWith(loader).controller(this).loadRoot());
+      periodicTableController.weakReference(this).observe(
+          m -> m.owner().setElementTile(m.message()));
+      periodicTableController.setTilesFocusTraversable(true);
 
-			periodicTables.periodicTable().addWeakObserver(this, o -> p -> o.setPeriodicTable(p));
-			setPeriodicTable(periodicTables.periodicTable().get());
-		} catch (Throwable e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
+      periodicTables.periodicTable().weakReference(this).observe(
+          m -> m.owner().setPeriodicTable(m.message()));
+      setPeriodicTable(periodicTables.periodicTable().get());
+    } catch (Throwable e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
 
-	protected void setPeriodicTable(PeriodicTable table) {
-		periodicTableController.setPeriodicTable(table);
-		if (table != null) {
-			chemicalElementPanelController.setElement(table.getElement(1));
-		} else {
-			chemicalElementPanelController.setElement(null);
-		}
-	}
+  protected void setPeriodicTable(PeriodicTable table) {
+    periodicTableController.setPeriodicTable(table);
+    if (table != null) {
+      chemicalElementPanelController.setElement(table.getElement(1));
+    } else {
+      chemicalElementPanelController.setElement(null);
+    }
+  }
 
-	/**
-	 * @return The controller of the periodic table UI component
-	 */
-	public PeriodicTableController getPeriodicTableController() {
-		return periodicTableController;
-	}
+  /**
+   * @return The controller of the periodic table UI component
+   */
+  public PeriodicTableController getPeriodicTableController() {
+    return periodicTableController;
+  }
 
-	/**
-	 * Send a click event to the tile.
-	 * 
-	 * @param event
-	 *          The mouse event to apply to this tile
-	 */
-	public void onMousePressed(MouseEvent event) {
-		periodicTableScrollPane.requestFocus();
-		event.consume();
-	}
+  /**
+   * Send a click event to the tile.
+   * 
+   * @param event
+   *          The mouse event to apply to this tile
+   */
+  public void onMousePressed(MouseEvent event) {
+    periodicTableScrollPane.requestFocus();
+    event.consume();
+  }
 
-	private void setElementTile(ChemicalElementTile tile) {
-		Element element = tile.getElement();
+  private void setElementTile(ChemicalElementTile tile) {
+    Element element = tile.getElement();
 
-		double hPadding = 2;
-		double vPadding = 2;
+    double hPadding = 2;
+    double vPadding = 2;
 
-		chemicalElementPanelController.setElement(element);
+    chemicalElementPanelController.setElement(element);
 
-		Bounds contentBounds = periodicTableScrollPane.getContent().getBoundsInLocal();
-		Bounds viewportBounds = periodicTableScrollPane.getViewportBounds();
+    Bounds contentBounds = periodicTableScrollPane.getContent().getBoundsInLocal();
+    Bounds viewportBounds = periodicTableScrollPane.getViewportBounds();
 
-		Bounds location = tile.getBoundsInLocal();
-		Node parent = tile;
-		do {
-			location = parent.getLocalToParentTransform().transform(location);
-			parent = parent.getParent();
-		} while (parent != periodicTableScrollPane.getContent());
+    Bounds location = tile.getBoundsInLocal();
+    Node parent = tile;
+    do {
+      location = parent.getLocalToParentTransform().transform(location);
+      parent = parent.getParent();
+    } while (parent != periodicTableScrollPane.getContent());
 
-		double scrollableDistanceH = contentBounds.getWidth() - viewportBounds.getWidth();
-		double scrollableDistanceV = contentBounds.getHeight() - viewportBounds.getHeight();
+    double scrollableDistanceH = contentBounds.getWidth() - viewportBounds.getWidth();
+    double scrollableDistanceV = contentBounds.getHeight() - viewportBounds.getHeight();
 
-		viewportBounds = new BoundingBox(
-				scrollableDistanceH * periodicTableScrollPane.getHvalue(),
-				scrollableDistanceV * periodicTableScrollPane.getVvalue(),
-				viewportBounds.getWidth(),
-				viewportBounds.getHeight());
+    viewportBounds = new BoundingBox(
+        scrollableDistanceH * periodicTableScrollPane.getHvalue(),
+        scrollableDistanceV * periodicTableScrollPane.getVvalue(),
+        viewportBounds.getWidth(),
+        viewportBounds.getHeight());
 
-		double scrollPosition;
+    double scrollPosition;
 
-		if (location.getMinX() - hPadding < viewportBounds.getMinX()) {
-			scrollPosition = (location.getMinX() - hPadding);
-			periodicTableScrollPane.setHvalue(scrollPosition / scrollableDistanceH);
+    if (location.getMinX() - hPadding < viewportBounds.getMinX()) {
+      scrollPosition = (location.getMinX() - hPadding);
+      periodicTableScrollPane.setHvalue(scrollPosition / scrollableDistanceH);
 
-		} else if (location.getMaxX() > viewportBounds.getMaxX()) {
-			scrollPosition = (location.getMaxX() + hPadding - viewportBounds.getWidth());
-			periodicTableScrollPane.setHvalue(scrollPosition / scrollableDistanceH);
-		}
+    } else if (location.getMaxX() > viewportBounds.getMaxX()) {
+      scrollPosition = (location.getMaxX() + hPadding - viewportBounds.getWidth());
+      periodicTableScrollPane.setHvalue(scrollPosition / scrollableDistanceH);
+    }
 
-		if (location.getMinY() < viewportBounds.getMinY()) {
-			scrollPosition = (location.getMinY() - vPadding);
-			periodicTableScrollPane.setVvalue(scrollPosition / scrollableDistanceV);
+    if (location.getMinY() < viewportBounds.getMinY()) {
+      scrollPosition = (location.getMinY() - vPadding);
+      periodicTableScrollPane.setVvalue(scrollPosition / scrollableDistanceV);
 
-		} else if (location.getMaxY() > viewportBounds.getMaxY()) {
-			scrollPosition = (location.getMaxY() + vPadding - viewportBounds.getHeight());
-			periodicTableScrollPane.setVvalue(scrollPosition / scrollableDistanceV);
-		}
-	}
+    } else if (location.getMaxY() > viewportBounds.getMaxY()) {
+      scrollPosition = (location.getMaxY() + vPadding - viewportBounds.getHeight());
+      periodicTableScrollPane.setVvalue(scrollPosition / scrollableDistanceV);
+    }
+  }
 }

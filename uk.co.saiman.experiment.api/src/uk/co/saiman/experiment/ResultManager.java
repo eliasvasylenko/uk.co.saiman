@@ -30,30 +30,42 @@ package uk.co.saiman.experiment;
 import java.nio.file.Path;
 
 public interface ResultManager {
-	/**
-	 * Experiment data root directories are defined hierarchically from the
-	 * {@link Workspace#getWorkspaceDataPath() workspace path}.
-	 * 
-	 * @return the data root of the experiment
-	 */
-	Path dataPath();
+  /**
+   * Experiment data root directories are defined hierarchically from the
+   * {@link Workspace#getWorkspaceDataPath() workspace path}.
+   * 
+   * @return the data root of the experiment
+   */
+  Path dataPath();
 
-	/**
-	 * @param resultType
-	 *          the type of result
-	 * @return the result object now registered to the executing node
-	 */
-	public <U> Result<U> get(ResultType<U> resultType);
+  /**
+   * @param resultType
+   *          the type of result
+   * @return the result object now registered to the executing node
+   */
+  <U> Result<U> get(ResultType<U> resultType);
 
-	/**
-	 * This method provides a target for the submission of results during
-	 * execution of an experiment node.
-	 * 
-	 * @param resultType
-	 *          the type of result
-	 * @param resultData
-	 *          the result
-	 * @return the result object now registered to the executing node
-	 */
-	public <U> Result<U> set(ResultType<U> resultType, U resultData);
+  /**
+   * This method provides a target for the submission of results during
+   * execution of an experiment node.
+   * 
+   * @param resultType
+   *          the type of result
+   * @param resultData
+   *          the result
+   * @return the result object now registered to the executing node
+   */
+  <U> Result<U> set(ResultType<U> resultType, U resultData);
+
+  /**
+   * This method provides a target for the submission of results during
+   * execution of an experiment node.
+   * 
+   * @param resultType
+   *          the type of result
+   * @return the result object now registered to the executing node
+   */
+  default <U> Result<U> unset(ResultType<U> resultType) {
+    return set(resultType, null);
+  }
 }

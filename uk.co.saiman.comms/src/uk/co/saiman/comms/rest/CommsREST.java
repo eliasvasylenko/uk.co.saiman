@@ -30,7 +30,7 @@ package uk.co.saiman.comms.rest;
 import java.util.Locale;
 import java.util.Optional;
 
-import uk.co.saiman.comms.Comms;
+import uk.co.saiman.comms.Comms.CommsStatus;
 
 /**
  * A view of a comms device to adapt its functionality over a common REST
@@ -59,7 +59,7 @@ public interface CommsREST {
    */
   void reset();
 
-  Comms.CommsStatus getStatus();
+  CommsStatus getStatus();
 
   Optional<String> getFaultText();
 

@@ -60,102 +60,105 @@ import uk.co.saiman.experiment.msapex.ResultEditorPart;
 import uk.co.strangeskies.eclipse.ObservableService;
 
 public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
-	private static final String PROTOTYPE_SERVICE = "(" + Constants.SERVICE_SCOPE + "=" + Constants.SCOPE_PROTOTYPE + ")";
+  private static final String PROTOTYPE_SERVICE = "(" + Constants.SERVICE_SCOPE + "="
+      + Constants.SCOPE_PROTOTYPE + ")";
 
-	@Inject
-	private IEclipseContext context;
-	@Inject
-	private MPart part;
-	@Inject
-	private MDirtyable dirty;
+  @Inject
+  private IEclipseContext context;
+  @Inject
+  private MPart part;
+  @Inject
+  private MDirtyable dirty;
 
-	@FXML
-	private TabPane tabPane;
+  @FXML
+  private TabPane tabPane;
 
-	private final Result<T> data;
-	private final List<ResultEditorContribution<? super T>> contributions;
+  private final Result<T> data;
+  private final List<ResultEditorContribution<? super T>> contributions;
 
-	@SuppressWarnings("unchecked")
-	@Inject
-	public ResultEditorPartImpl(
-			Result<T> data,
-			@ObservableService(target = PROTOTYPE_SERVICE) ObservableList<ResultEditorContribution<?>> editorContributions) {
-		this.data = data;
-		this.contributions = editorContributions
-				.stream()
-				.filter(
-						contribution -> contribution
-								.getResultType()
-								.satisfiesConstraintFrom(LOOSE_COMPATIBILILTY, data.getResultType().getDataType()))
-				.map(contribution -> (ResultEditorContribution<? super T>) contribution)
-				.collect(toList());
+  @SuppressWarnings("unchecked")
+  @Inject
+  public ResultEditorPartImpl(
+      Result<T> data,
+      @ObservableService(
+          target = PROTOTYPE_SERVICE) ObservableList<ResultEditorContribution<?>> editorContributions) {
+    this.data = data;
+    this.contributions = editorContributions
+        .stream()
+        .filter(
+            contribution -> contribution
+                .getResultType()
+                .satisfiesConstraintFrom(LOOSE_COMPATIBILILTY, data.getResultType().getDataType()))
+        .map(contribution -> (ResultEditorContribution<? super T>) contribution)
+        .collect(toList());
 
-		attachToLifecycle();
-	}
+    attachToLifecycle();
+  }
 
-	private void attachToLifecycle() {
-		data.getExperimentNode().lifecycleState().changes().addWeakObserver(
-				this,
-				part -> c -> part.updateExperimentState(c.previousValue(), c.newValue()));
-	}
+  private void attachToLifecycle() {
+    data.getExperimentNode().lifecycleState().changes().weakReference(this).observe(
+        m -> m.owner().updateExperimentState(m.message().previousValue(), m.message().newValue()));
+  }
 
-	@PostConstruct
-	protected void buildInterface(BorderPane container, @LocalInstance FXMLLoader loader) {
-		container.setCenter(buildWith(loader).controller(ResultEditorPart.class, this).loadRoot());
+  @PostConstruct
+  protected void buildInterface(BorderPane container, @LocalInstance FXMLLoader loader) {
+    container.setCenter(buildWith(loader).controller(ResultEditorPart.class, this).loadRoot());
 
-		initializeContributions();
-	}
+    initializeContributions();
+  }
 
-	/*
-	 * Let's not bother making this dynamic unless we find a reason, since Eclipse
-	 * applications can't be properly dynamic anyway.
-	 */
-	private void initializeContributions() {
-		for (ResultEditorContribution<? super T> contribution : contributions) {
-			ContextInjectionFactory.inject(contribution, context);
+  /*
+   * Let's not bother making this dynamic unless we find a reason, since Eclipse
+   * applications can't be properly dynamic anyway.
+   */
+  private void initializeContributions() {
+    for (ResultEditorContribution<? super T> contribution : contributions) {
+      ContextInjectionFactory.inject(contribution, context);
 
-			Tab tab = new Tab(contribution.getName(), contribution.getContent());
-			tab.setClosable(false);
-			tabPane.getTabs().add(tab);
-		}
-	}
+      Tab tab = new Tab(contribution.getName(), contribution.getContent());
+      tab.setClosable(false);
+      tabPane.getTabs().add(tab);
+    }
+  }
 
-	@Override
-	public Stream<ResultEditorContribution<? super T>> getContributions() {
-		return contributions.stream();
-	}
+  @Override
+  public Stream<ResultEditorContribution<? super T>> getContributions() {
+    return contributions.stream();
+  }
 
-	@Override
-	@Persist
-	public void save() {
-		// model.saveTodo(todo);
-		dirty.setDirty(false);
-	}
+  @Override
+  @Persist
+  public void save() {
+    // model.saveTodo(todo);
+    dirty.setDirty(false);
+  }
 
-	@Focus
-	public void onFocus() {
-		// the following assumes that you have a Text field
-		// called summary
+  @Focus
+  public void onFocus() {
+    // the following assumes that you have a Text field
+    // called summary
 
-		// txtSummary.setFocus();
-	}
+    // txtSummary.setFocus();
+  }
 
-	@Override
-	public Result<T> getData() {
-		return data;
-	}
+  @Override
+  public Result<T> getData() {
+    return data;
+  }
 
-	protected void updateExperimentState(ExperimentLifecycleState previousState, ExperimentLifecycleState newState) {
-		System.out.println(previousState + "    ->    " + newState);
-	}
+  protected void updateExperimentState(
+      ExperimentLifecycleState previousState,
+      ExperimentLifecycleState newState) {
+    System.out.println(previousState + "    ->    " + newState);
+  }
 
-	@Override
-	public MPart getPart() {
-		return part;
-	}
+  @Override
+  public MPart getPart() {
+    return part;
+  }
 
-	@PreDestroy
-	public void dispose(ResultEditorManager manager) {
-		manager.removeEditor(this);
-	}
+  @PreDestroy
+  public void dispose(ResultEditorManager manager) {
+    manager.removeEditor(this);
+  }
 }

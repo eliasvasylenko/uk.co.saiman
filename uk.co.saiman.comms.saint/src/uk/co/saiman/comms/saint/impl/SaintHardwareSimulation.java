@@ -76,137 +76,137 @@ import uk.co.strangeskies.log.Log.Level;
 
 @Designate(ocd = SaintHardwareSimulationConfiguration.class, factory = true)
 @Component(
-		name = SaintHardwareSimulation.CONFIGURATION_PID,
-		configurationPid = SaintHardwareSimulation.CONFIGURATION_PID,
-		configurationPolicy = REQUIRE)
+    name = SaintHardwareSimulation.CONFIGURATION_PID,
+    configurationPid = SaintHardwareSimulation.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
 public class SaintHardwareSimulation {
-	static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint.simulation";
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint.simulation";
 
-	@SuppressWarnings("javadoc")
-	@ObjectClassDefinition(
-			id = CONFIGURATION_PID,
-			name = "SAINT Comms Hardware Simulation Configuration",
-			description = "A configuration for a simulation of the SAINT instrument comms board")
-	public @interface SaintHardwareSimulationConfiguration {
-		@AttributeDefinition(
-				name = "Serial Port",
-				description = "The serial port for the hardware simulation")
-		String serialPort();
-	}
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "SAINT Comms Hardware Simulation Configuration",
+      description = "A configuration for a simulation of the SAINT instrument comms board")
+  public @interface SaintHardwareSimulationConfiguration {
+    @AttributeDefinition(
+        name = "Serial Port",
+        description = "The serial port for the hardware simulation")
+    String serialPort();
+  }
 
-	@Reference(cardinality = OPTIONAL)
-	Log log;
+  @Reference(cardinality = OPTIONAL)
+  Log log;
 
-	@Reference(policy = STATIC, policyOption = GREEDY)
-	SerialPorts serialPorts;
-	private SerialPort port;
-	private CommsStream stream;
+  @Reference(policy = STATIC, policyOption = GREEDY)
+  SerialPorts serialPorts;
+  private SerialPort port;
+  private CommsStream stream;
 
-	private List<Byte> memory = new ArrayList<>();
+  private List<Byte> memory = new ArrayList<>();
 
-	private Map<Integer, Integer> actualToRequest = new HashMap<>();
+  private Map<Integer, Integer> actualToRequest = new HashMap<>();
 
-	public SaintHardwareSimulation() {
-		mapActualToRequest(LED_LAT, LED_PORT);
-		mapActualToRequest(VACUUM_LAT, VACUUM_PORT);
-		mapActualToRequest(HV_LAT, HV_PORT);
-		mapActualToRequest(MOTOR_LAT, MOTOR_PORT);
-		mapActualToRequest(VACUUM_RB_LAT, VACUUM_RB_PORT);
-		mapActualToRequest(HV_RB_LAT, HV_RB_PORT);
-		mapActualToRequest(SPARE_IO_LAT, SPARE_IO_PORT);
-	}
+  public SaintHardwareSimulation() {
+    mapActualToRequest(LED_LAT, LED_PORT);
+    mapActualToRequest(VACUUM_LAT, VACUUM_PORT);
+    mapActualToRequest(HV_LAT, HV_PORT);
+    mapActualToRequest(MOTOR_LAT, MOTOR_PORT);
+    mapActualToRequest(VACUUM_RB_LAT, VACUUM_RB_PORT);
+    mapActualToRequest(HV_RB_LAT, HV_RB_PORT);
+    mapActualToRequest(SPARE_IO_LAT, SPARE_IO_PORT);
+  }
 
-	private void mapActualToRequest(SaintCommandAddress request, SaintCommandAddress actual) {
-		for (int i = 0; i < request.getBytes().length; i++) {
-			actualToRequest.put((int) actual.getBytes()[i], (int) request.getBytes()[i]);
-		}
-	}
+  private void mapActualToRequest(SaintCommandAddress request, SaintCommandAddress actual) {
+    for (int i = 0; i < request.getBytes().length; i++) {
+      actualToRequest.put((int) actual.getBytes()[i], (int) request.getBytes()[i]);
+    }
+  }
 
-	@Activate
-	void activate(SaintHardwareSimulationConfiguration configuration) throws IOException {
-		configure(configuration);
-	}
+  @Activate
+  void activate(SaintHardwareSimulationConfiguration configuration) throws IOException {
+    configure(configuration);
+  }
 
-	@Modified
-	void configure(SaintHardwareSimulationConfiguration configuration) throws IOException {
-		setPort(configuration.serialPort());
-	}
+  @Modified
+  void configure(SaintHardwareSimulationConfiguration configuration) throws IOException {
+    setPort(configuration.serialPort());
+  }
 
-	@Deactivate
-	void deactivate() throws IOException {
-		closePort();
-	}
+  @Deactivate
+  void deactivate() throws IOException {
+    closePort();
+  }
 
-	private synchronized void setPort(String serialPort) throws IOException {
-		closePort();
-		port = serialPorts.getPort(serialPort);
-		openPort();
-	}
+  private synchronized void setPort(String serialPort) throws IOException {
+    closePort();
+    port = serialPorts.getPort(serialPort);
+    openPort();
+  }
 
-	private synchronized void openPort() {
-		ByteBuffer messageBuffer = ByteBuffer.allocate(SaintComms.MESSAGE_SIZE);
+  private synchronized void openPort() {
+    ByteBuffer messageBuffer = ByteBuffer.allocate(SaintComms.MESSAGE_SIZE);
 
-		stream = port.openStream(SaintComms.MESSAGE_SIZE);
-		stream.addObserver(buffer -> {
-			do {
-				boolean filled = false;
-				do {
-					messageBuffer.put(buffer.get());
-					filled = !messageBuffer.hasRemaining();
-				} while (!filled && buffer.hasRemaining());
+    stream = port.openStream(SaintComms.MESSAGE_SIZE);
+    stream.observe(buffer -> {
+      do {
+        boolean filled = false;
+        do {
+          messageBuffer.put(buffer.get());
+          filled = !messageBuffer.hasRemaining();
+        } while (!filled && buffer.hasRemaining());
 
-				if (filled) {
-					messageBuffer.flip();
-					receiveMessage(messageBuffer);
-					messageBuffer.clear();
-				}
-			} while (buffer.hasRemaining());
-		});
-	}
+        if (filled) {
+          messageBuffer.flip();
+          receiveMessage(messageBuffer);
+          messageBuffer.clear();
+        }
+      } while (buffer.hasRemaining());
+    });
+  }
 
-	private synchronized void closePort() throws IOException {
-		if (stream != null) {
-			stream.close();
-			stream = null;
-		}
-	}
+  private synchronized void closePort() throws IOException {
+    if (stream != null) {
+      stream.close();
+      stream = null;
+    }
+  }
 
-	private void receiveMessage(ByteBuffer messageBuffer) {
-		SaintCommandType command = fromByte(messageBuffer.get());
-		int address = messageBuffer.get() & 0xFF;
-		byte checksum = messageBuffer.get();
-		byte data = messageBuffer.get();
+  private void receiveMessage(ByteBuffer messageBuffer) {
+    SaintCommandType command = fromByte(messageBuffer.get());
+    int address = messageBuffer.get() & 0xFF;
+    byte checksum = messageBuffer.get();
+    byte data = messageBuffer.get();
 
-		if (actualToRequest.containsKey(address))
-			address = actualToRequest.get(address);
+    if (actualToRequest.containsKey(address))
+      address = actualToRequest.get(address);
 
-		while (address >= memory.size()) {
-			memory.add((byte) 0);
-		}
+    while (address >= memory.size()) {
+      memory.add((byte) 0);
+    }
 
-		switch (command) {
-		case INPUT:
-			data = memory.get(address);
-			break;
+    switch (command) {
+    case INPUT:
+      data = memory.get(address);
+      break;
 
-		case OUTPUT:
-			memory.set(address, data);
-			break;
+    case OUTPUT:
+      memory.set(address, data);
+      break;
 
-		default:
-		}
+    default:
+    }
 
-		ByteBuffer responseBuffer = ByteBuffer.allocate(4);
-		responseBuffer.put((byte) 0);
-		responseBuffer.put((byte) 0);
-		responseBuffer.put(checksum);
-		responseBuffer.put(data);
+    ByteBuffer responseBuffer = ByteBuffer.allocate(4);
+    responseBuffer.put((byte) 0);
+    responseBuffer.put((byte) 0);
+    responseBuffer.put(checksum);
+    responseBuffer.put(data);
 
-		try {
-			responseBuffer.flip();
-			stream.write(responseBuffer);
-		} catch (IOException e) {
-			log.log(Level.ERROR, new CommsException("Unable to send simulated hardware response", e));
-		}
-	}
+    try {
+      responseBuffer.flip();
+      stream.write(responseBuffer);
+    } catch (IOException e) {
+      log.log(Level.ERROR, new CommsException("Unable to send simulated hardware response", e));
+    }
+  }
 }

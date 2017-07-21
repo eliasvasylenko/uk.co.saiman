@@ -54,7 +54,7 @@ public class WorkspaceFactoryImpl implements WorkspaceFactory {
 	@Reference
 	Log log;
 
-	@Reference
+	//@Reference
 	PropertyLoader loader;
 
 	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();

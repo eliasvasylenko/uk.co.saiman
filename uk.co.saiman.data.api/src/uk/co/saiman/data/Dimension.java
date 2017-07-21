@@ -30,7 +30,7 @@ package uk.co.saiman.data;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.Range;
+import uk.co.strangeskies.mathematics.Interval;
 
 /**
  * This object represents the dimension of a {@link ContinuousFunction
@@ -49,7 +49,7 @@ public interface Dimension<U extends Quantity<U>> {
 	 * 
 	 * @return The extent of the dimension
 	 */
-	Range<Double> getExtent();
+	Interval<Double> getInterval();
 
 	/**
 	 * @return the unit of measurement of values in this dimension

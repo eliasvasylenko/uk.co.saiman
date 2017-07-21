@@ -215,7 +215,7 @@ public class CopleyHardwareSimulation {
 
   private synchronized void openPort() {
     stream = port.openStream();
-    stream.addObserver(buffer -> {
+    stream.observe(buffer -> {
       do {
         boolean onHeader = message == null;
         ByteBuffer currentBuffer = onHeader ? header : message;

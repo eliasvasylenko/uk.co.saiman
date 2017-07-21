@@ -27,83 +27,79 @@
  */
 package uk.co.saiman.experiment;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import uk.co.strangeskies.observable.Observable;
+import uk.co.strangeskies.observable.Observation;
 
 public class CachingObservableResource<T> extends CachingResource<T> {
-	private final Function<? super T, ? extends Observable<?>> observable;
+  private final Function<? super T, ? extends Observable<?>> observable;
+  private Observation observation;
 
-	public CachingObservableResource(
-			Supplier<T> load,
-			Consumer<T> save,
-			Function<? super T, ? extends Observable<?>> observable) {
-		super(load, save);
+  public CachingObservableResource(
+      Supplier<T> load,
+      Consumer<T> save,
+      Function<? super T, ? extends Observable<?>> observable) {
+    super(load, save);
 
-		this.observable = observable;
-	}
+    this.observable = observable;
+  }
 
-	private void addObserver(T data) {
-		observable.apply(data).addTerminatingObserver(this, (Object o) -> makeDirty());
-	}
+  private void addObserver(T data) {
+    observation = observable.apply(data).observe((Object o) -> makeDirty());
+  }
 
-	private void removeObserver(T data) {
-		observable.apply(data).removeTerminatingObserver(this);
-	}
+  @Override
+  public boolean save() {
+    boolean saved = super.save();
 
-	@Override
-	public boolean save() {
-		boolean saved = super.save();
+    if (saved) {
+      addObserver(getData());
+    }
 
-		if (saved) {
-			addObserver(getData());
-		}
+    return saved;
+  }
 
-		return saved;
-	}
+  /**
+   * Mark the data as inconsistent with the previously saved state.
+   */
+  @Override
+  public boolean makeDirty() {
+    boolean madeDirty = super.makeDirty();
 
-	/**
-	 * Mark the data as inconsistent with the previously saved state.
-	 */
-	@Override
-	public boolean makeDirty() {
-		boolean madeDirty = super.makeDirty();
+    if (observation != null) {
+      observation.dispose();
+    }
 
-		if (madeDirty) {
-			removeObserver(getData());
-		}
+    return madeDirty;
+  }
 
-		return madeDirty;
-	}
+  @Override
+  public boolean setData(T data) {
+    boolean dataSet = super.setData(data);
 
-	@Override
-	public boolean setData(T data) {
-		Optional<T> oldData = tryGetData();
+    if (dataSet) {
+      if (observation != null)
+        observation.dispose();
+      addObserver(getData());
+    }
 
-		boolean dataSet = super.setData(data);
+    return dataSet;
+  }
 
-		if (dataSet) {
-			oldData.ifPresent(this::removeObserver);
-			addObserver(getData());
-		}
+  /**
+   * Get the data, loading from the input channel if necessary.
+   * 
+   * @return the data
+   */
+  @Override
+  public T getData() {
+    T data = super.getData();
 
-		return dataSet;
-	}
+    addObserver(data);
 
-	/**
-	 * Get the data, loading from the input channel if necessary.
-	 * 
-	 * @return the data
-	 */
-	@Override
-	public T getData() {
-		T data = super.getData();
-
-		addObserver(data);
-
-		return data;
-	}
+    return data;
+  }
 }

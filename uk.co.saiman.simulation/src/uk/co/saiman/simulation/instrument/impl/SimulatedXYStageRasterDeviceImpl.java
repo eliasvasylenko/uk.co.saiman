@@ -28,7 +28,9 @@
 package uk.co.saiman.simulation.instrument.impl;
 
 import static java.util.Arrays.asList;
+import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
 import static uk.co.saiman.instrument.raster.RasterPattern.RasterPatterns.values;
+import static uk.co.strangeskies.observable.ObservableValue.immutableOver;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +46,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
+import uk.co.saiman.instrument.HardwareConnection;
 import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.instrument.raster.RasterPattern;
@@ -56,250 +59,219 @@ import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
-import uk.co.strangeskies.collection.observable.BufferingListener;
+import uk.co.strangeskies.observable.HotObservable;
 import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.ObservableImpl;
+import uk.co.strangeskies.observable.ObservableValue;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 
 @Component
 public class SimulatedXYStageRasterDeviceImpl
-		implements RasterDevice, SimulatedRasterDevice, SimulatedSampleImageDevice, XYStageDevice,
-		HardwareDevice, SimulatedSampleDevice, SimulatedDevice {
-	@Reference
-	PropertyLoader loader;
-	SimulationProperties text;
+    implements RasterDevice, SimulatedRasterDevice, SimulatedSampleImageDevice, XYStageDevice,
+    HardwareDevice, SimulatedSampleDevice, SimulatedDevice {
+  @Reference
+  PropertyLoader loader;
+  SimulationProperties text;
 
-	private final ObservableImpl<Exception> errors;
+  private final Set<RasterPattern> rasterModes;
+  private RasterPattern rasterMode;
+  private Iterator<RasterPosition> rasterOperation;
+  private int rasterCounter;
+  private RasterPosition rasterPosition;
+  private int rasterWidth;
+  private int rasterHeight;
+  private int rasterDwell;
+  private final HotObservable<RasterPosition> rasterListeners;
 
-	private final Set<RasterPattern> rasterModes;
-	private RasterPattern rasterMode;
-	private Iterator<RasterPosition> rasterOperation;
-	private int rasterCounter;
-	private RasterPosition rasterPosition;
-	private int rasterWidth;
-	private int rasterHeight;
-	private int rasterDwell;
-	private final BufferingListener<RasterDevice> startListeners;
-	private final BufferingListener<RasterPosition> rasterListeners;
+  private ChemicalComposition redChemical;
+  private ChemicalComposition greenChemical;
+  private ChemicalComposition blueChemical;
+  private SimulatedSampleImage sampleImage;
+  private SimulatedSample signalSample;
 
-	private ChemicalComposition redChemical;
-	private ChemicalComposition greenChemical;
-	private ChemicalComposition blueChemical;
-	private SimulatedSampleImage sampleImage;
-	private SimulatedSample signalSample;
+  public SimulatedXYStageRasterDeviceImpl() {
+    rasterModes = new HashSet<>(asList(values()));
 
-	public SimulatedXYStageRasterDeviceImpl() {
-		errors = new ObservableImpl<>();
+    rasterWidth = 1;
+    rasterHeight = 1;
 
-		rasterModes = new HashSet<>(asList(values()));
+    rasterListeners = new HotObservable<>();
 
-		rasterWidth = 1;
-		rasterHeight = 1;
+    signalSample = new SimulatedSample() {
+      @Override
+      public Map<ChemicalComposition, Double> chemicalIntensities() {
+        Map<ChemicalComposition, Double> sampleChemicals = new HashMap<>();
+        int x = rasterPosition.getX();
+        int y = rasterPosition.getY();
 
-		startListeners = new BufferingListener<>();
-		rasterListeners = new BufferingListener<>();
+        sampleChemicals.put(redChemical, sampleImage.getRed(x, y));
+        sampleChemicals.put(greenChemical, sampleImage.getGreen(x, y));
+        sampleChemicals.put(blueChemical, sampleImage.getBlue(x, y));
+        return sampleChemicals;
+      }
+    };
+  }
 
-		signalSample = new SimulatedSample() {
-			@Override
-			public Map<ChemicalComposition, Double> chemicalIntensities() {
-				Map<ChemicalComposition, Double> sampleChemicals = new HashMap<>();
-				int x = rasterPosition.getX();
-				int y = rasterPosition.getY();
+  @Override
+  public void setRedChemical(ChemicalComposition redChemical) {
+    this.redChemical = redChemical;
+  }
 
-				sampleChemicals.put(redChemical, sampleImage.getRed(x, y));
-				sampleChemicals.put(greenChemical, sampleImage.getGreen(x, y));
-				sampleChemicals.put(blueChemical, sampleImage.getBlue(x, y));
-				return sampleChemicals;
-			}
-		};
-	}
+  @Override
+  public void setGreenChemical(ChemicalComposition greenChemical) {
+    this.greenChemical = greenChemical;
+  }
 
-	@Override
-	public void setRedChemical(ChemicalComposition redChemical) {
-		this.redChemical = redChemical;
-	}
+  @Override
+  public void setBlueChemical(ChemicalComposition blueChemical) {
+    this.blueChemical = blueChemical;
+  }
 
-	@Override
-	public void setGreenChemical(ChemicalComposition greenChemical) {
-		this.greenChemical = greenChemical;
-	}
+  @Override
+  public void setSampleImage(SimulatedSampleImage sampleImage) {
+    this.sampleImage = sampleImage;
+  }
 
-	@Override
-	public void setBlueChemical(ChemicalComposition blueChemical) {
-		this.blueChemical = blueChemical;
-	}
+  @Activate
+  void activate() {
+    text = loader.getProperties(SimulationProperties.class);
+  }
 
-	@Override
-	public void setSampleImage(SimulatedSampleImage sampleImage) {
-		this.sampleImage = sampleImage;
-	}
+  @Override
+  public String getName() {
+    return text.xyRasterStageSimulationDeviceName().get();
+  }
 
-	@Activate
-	void activate() {
-		text = loader.getProperties(SimulationProperties.class);
-	}
+  @Override
+  public Set<RasterPattern> availableRasterModes() {
+    return rasterModes;
+  }
 
-	@Override
-	public String getName() {
-		return text.xyRasterStageSimulationDeviceName().get();
-	}
+  @Override
+  public RasterPattern getRasterPattern() {
+    return rasterMode;
+  }
 
-	@Override
-	public void abortOperation() {
-		// singleAcquisitionListeners.clearObservers();
+  @Override
+  public void setRasterPattern(RasterPattern mode) {
+    rasterModes.add(mode);
+    rasterMode = mode;
+  }
 
-		// acquiringCounter = 0;
-	}
+  @Override
+  public void setRasterSize(int width, int height) {
+    this.rasterWidth = width;
+    this.rasterHeight = height;
+  }
 
-	@Override
-	public Observable<Exception> errors() {
-		return errors;
-	}
+  @Override
+  public int getRasterWidth() {
+    return rasterWidth;
+  }
 
-	@Override
-	public Set<RasterPattern> availableRasterModes() {
-		return rasterModes;
-	}
+  @Override
+  public int getRasterHeight() {
+    return rasterHeight;
+  }
 
-	@Override
-	public RasterPattern getRasterPattern() {
-		return rasterMode;
-	}
+  @Override
+  public void startRasterOperation() {
+    rasterOperation = rasterMode.getPositionIterator(rasterWidth, rasterHeight);
+  }
 
-	@Override
-	public void setRasterPattern(RasterPattern mode) {
-		rasterModes.add(mode);
-		rasterMode = mode;
-	}
+  @Override
+  public RasterPosition getRasterPosition() {
+    return rasterPosition;
+  }
 
-	@Override
-	public void setRasterSize(int width, int height) {
-		this.rasterWidth = width;
-		this.rasterHeight = height;
-	}
+  protected void advanceRasterPosition() {
+    if (rasterOperation == null) {
+      rasterPosition = new RasterPosition(0, 0, 0);
+    } else if (rasterCounter++ % rasterDwell == 0) {
+      rasterPosition = rasterOperation.next();
+      rasterListeners.next(rasterPosition);
 
-	@Override
-	public int getRasterWidth() {
-		return rasterWidth;
-	}
+      if (rasterCounter == rasterWidth * rasterHeight * rasterDwell) {
+        rasterOperation = null;
+      }
+    }
+  }
 
-	@Override
-	public int getRasterHeight() {
-		return rasterHeight;
-	}
+  @Override
+  public boolean isOperating() {
+    return rasterOperation != null;
+  }
 
-	@Override
-	public void startRasterOperation() {
-		startListeners.notify(this);
-		rasterOperation = rasterMode.getPositionIterator(rasterWidth, rasterHeight);
-	}
+  @Override
+  public Observable<RasterPosition> rasterPositionEvents() {
+    return rasterListeners;
+  }
 
-	@Override
-	public RasterPosition getRasterPosition() {
-		return rasterPosition;
-	}
+  @Override
+  public Quantity<Length> getStageWidth() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	protected void advanceRasterPosition() {
-		if (rasterOperation == null) {
-			rasterPosition = new RasterPosition(0, 0, 0);
-		} else if (rasterCounter++ % rasterDwell == 0) {
-			rasterPosition = rasterOperation.next();
-			rasterListeners.notify(rasterPosition);
+  @Override
+  public Quantity<Length> getStageHeight() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-			if (rasterCounter == rasterWidth * rasterHeight * rasterDwell) {
-				rasterOperation = null;
-			}
-		}
-	}
+  @Override
+  public void requestStageOffset(Quantity<Length> x, Quantity<Length> y) {
+    // TODO Auto-generated method stub
 
-	@Override
-	public boolean isOperating() {
-		return rasterOperation != null;
-	}
+  }
 
-	@Override
-	public Observable<RasterDevice> startEvents() {
-		return startListeners;
-	}
+  @Override
+  public Quantity<Length> getRequestedStageX() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	@Override
-	public Observable<RasterPosition> rasterPositionEvents() {
-		return rasterListeners;
-	}
+  @Override
+  public Quantity<Length> getRequestedStageY() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	@Override
-	public Quantity<Length> getStageWidth() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public Quantity<Length> getActualStageX() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	@Override
-	public Quantity<Length> getStageHeight() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public Quantity<Length> getActualStageY() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	@Override
-	public void requestStageOffset(Quantity<Length> x, Quantity<Length> y) {
-		// TODO Auto-generated method stub
+  @Override
+  public SimulatedSample getNextSample() {
+    advanceRasterPosition();
 
-	}
+    return signalSample;
+  }
 
-	@Override
-	public Quantity<Length> getRequestedStageX() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public void setRasterDwell(int dwell) {
+    this.rasterDwell = dwell;
+  }
 
-	@Override
-	public Quantity<Length> getRequestedStageY() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public int getRasterDwell() {
+    return rasterDwell;
+  }
 
-	@Override
-	public Quantity<Length> getActualStageX() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public SimulatedSampleDevice getSampleDevice() {
+    return this;
+  }
 
-	@Override
-	public Quantity<Length> getActualStageY() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public SimulatedSample getNextSample() {
-		advanceRasterPosition();
-
-		return signalSample;
-	}
-
-	@Override
-	public void setRasterDwell(int dwell) {
-		this.rasterDwell = dwell;
-	}
-
-	@Override
-	public int getRasterDwell() {
-		return rasterDwell;
-	}
-
-	@Override
-	public SimulatedSampleDevice getSampleDevice() {
-		return this;
-	}
-
-	@Override
-	public boolean isConnected() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void reset() {
-		// TODO Auto-generated method stub
-
-	}
+  @Override
+  public ObservableValue<HardwareConnection> connectionState() {
+    return immutableOver(CONNECTED);
+  }
 }

@@ -69,7 +69,7 @@ public class ExperimentNodeContribution extends MenuTreeCellContribution<Experim
 
   @Override
   public <U extends ExperimentNode<?, ?>> Node configureCell(TreeItemData<U> data, Node content) {
-    data.data().lifecycleState().addWeakObserver(data, d -> s -> d.refresh(false));
+    data.data().lifecycleState().weakReference(data).observe(m -> m.owner().refresh(false));
 
     /*
      * label to show lifecycle state icon

@@ -31,6 +31,4 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration;
 import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface SpectrumExceptionProperties {
-	String experimentInterrupted();
-}
+public interface SpectrumExceptionProperties {}

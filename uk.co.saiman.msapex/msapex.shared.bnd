@@ -23,7 +23,8 @@
 	${req;uk.co.saiman.msapex.camera},\
 	${req;uk.co.saiman.simulation.msapex},\
 	${req;uk.co.saiman.simulation.provider},\
-	${req;uk.co.saiman.webconsole},\
+	${req;uk.co.saiman.webconsole.branding},\
+	${req;uk.co.saiman.webconsole.webresource},\
 	${req;uk.co.strangeskies.configadmin.persistence}
 
 -runvm.msapex:\

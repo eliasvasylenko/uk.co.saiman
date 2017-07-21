@@ -34,7 +34,7 @@ import java.util.function.Function;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.Range;
+import uk.co.strangeskies.mathematics.Interval;
 
 /**
  * A mutable, array backed implementation of {@link SampledContinuousFunction}.
@@ -89,8 +89,8 @@ public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends 
 			}
 
 			@Override
-			public Range<Double> getExtent() {
-				return read(() -> super.getExtent());
+			public Interval<Double> getInterval() {
+				return read(() -> super.getInterval());
 			}
 
 			@Override

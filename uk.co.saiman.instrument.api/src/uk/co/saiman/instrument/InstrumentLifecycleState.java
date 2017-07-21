@@ -36,23 +36,23 @@ package uk.co.saiman.instrument;
  *
  */
 public enum InstrumentLifecycleState {
-	/**
-	 * Instrument is in idle state.
-	 */
-	STANDBY,
+  /**
+   * Instrument is in idle state.
+   */
+  STANDBY,
 
-	/**
-	 * Make sure vacuum is ready and ramp up voltages, etc.
-	 */
-	BEGIN_OPERATION,
+  /**
+   * Make sure vacuum is ready and ramp up voltages, etc.
+   */
+  BEGIN_OPERATION,
 
-	/**
-	 * Whilst operating, experiments may be processed.
-	 */
-	OPERATING,
+  /**
+   * Whilst operating, experiments may be processed.
+   */
+  OPERATING,
 
-	/**
-	 * Ramp down voltages, disengage any operating hardware, etc.
-	 */
-	END_OPERATION
+  /**
+   * Ramp down voltages, disengage any operating hardware, etc.
+   */
+  END_OPERATION
 }

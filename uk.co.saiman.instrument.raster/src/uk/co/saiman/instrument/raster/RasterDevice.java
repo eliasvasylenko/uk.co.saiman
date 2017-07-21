@@ -33,33 +33,31 @@ import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.strangeskies.observable.Observable;
 
 public interface RasterDevice extends HardwareDevice {
-	Set<RasterPattern> availableRasterModes();
+  Set<RasterPattern> availableRasterModes();
 
-	RasterPattern getRasterPattern();
+  RasterPattern getRasterPattern();
 
-	void setRasterPattern(RasterPattern mode);
+  void setRasterPattern(RasterPattern mode);
 
-	void setRasterSize(int width, int height);
+  void setRasterSize(int width, int height);
 
-	int getRasterWidth();
+  int getRasterWidth();
 
-	int getRasterHeight();
+  int getRasterHeight();
 
-	default int getRasterLength() {
-		return getRasterHeight() * getRasterWidth();
-	}
+  default int getRasterLength() {
+    return getRasterHeight() * getRasterWidth();
+  }
 
-	void setRasterDwell(int dwell);
+  void setRasterDwell(int dwell);
 
-	int getRasterDwell();
+  int getRasterDwell();
 
-	void startRasterOperation();
+  void startRasterOperation();
 
-	boolean isOperating();
+  boolean isOperating();
 
-	RasterPosition getRasterPosition();
+  RasterPosition getRasterPosition();
 
-	Observable<RasterPosition> rasterPositionEvents();
-
-	Observable<RasterDevice> startEvents();
+  Observable<RasterPosition> rasterPositionEvents();
 }

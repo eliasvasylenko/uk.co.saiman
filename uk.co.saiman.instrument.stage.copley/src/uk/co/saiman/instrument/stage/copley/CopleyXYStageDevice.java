@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
+import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
+
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
@@ -34,10 +36,10 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.comms.Comms.CommsStatus;
 import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.instrument.HardwareConnection;
 import uk.co.saiman.instrument.stage.XYStageDevice;
-import uk.co.strangeskies.observable.Observable;
+import uk.co.strangeskies.observable.ObservableValue;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 
 @Component
@@ -59,25 +61,12 @@ public class CopleyXYStageDevice implements XYStageDevice {
     return properties.name().get();
   }
 
-  @Override
   public boolean isConnected() {
-    return comms.status().get() == CommsStatus.OPEN;
+    return comms.status().isEqual(OPEN);
   }
 
-  @Override
   public void reset() {
     comms.reset();
-  }
-
-  @Override
-  public void abortOperation() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public Observable<? extends Exception> errors() {
-    return null; // TODO
   }
 
   @Override
@@ -118,6 +107,12 @@ public class CopleyXYStageDevice implements XYStageDevice {
 
   @Override
   public Quantity<Length> getActualStageY() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ObservableValue<HardwareConnection> connectionState() {
     // TODO Auto-generated method stub
     return null;
   }

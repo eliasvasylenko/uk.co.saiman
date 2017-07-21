@@ -30,6 +30,7 @@ package uk.co.saiman.comms.impl;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static uk.co.saiman.comms.Comms.CommsStatus.CLOSED;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.POLLABLE;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.RECEIVES_INPUT_DATA;
@@ -57,7 +58,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import osgi.enroute.dto.api.DTOs;
 import osgi.enroute.rest.api.REST;
 import osgi.enroute.rest.api.RequireRestImplementation;
-import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.rest.ControllerREST;
@@ -178,7 +178,7 @@ public class CommsRESTProvider implements REST {
   }
 
   private ControllerREST getController(CommsREST comms) {
-    if (comms.getStatus() == Comms.CommsStatus.CLOSED)
+    if (comms.getStatus() == CLOSED)
       throw new IllegalStateException(
           "Cannot access controller while comms is closed " + comms.getName());
 

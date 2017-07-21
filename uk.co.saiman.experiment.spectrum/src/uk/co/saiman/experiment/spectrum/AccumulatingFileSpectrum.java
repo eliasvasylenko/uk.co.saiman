@@ -44,78 +44,78 @@ import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.strangeskies.function.ThrowingSupplier;
 
 public class AccumulatingFileSpectrum
-		extends ByteFormatSpectrum<SampledContinuousFunction<Time, Dimensionless>> {
-	private final AccumulatingContinuousFunction<Time, Dimensionless> accumulation;
+    extends ByteFormatSpectrum<SampledContinuousFunction<Time, Dimensionless>> {
+  private final AccumulatingContinuousFunction<Time, Dimensionless> accumulation;
 
-	public AccumulatingFileSpectrum(
-			Path location,
-			String name,
-			RegularSampledDomain<Time> sampleDomain,
-			Unit<Dimensionless> sampleIntensityUnits) {
-		this(
-				location,
-				name,
-				sampleDomain,
-				sampleIntensityUnits,
-				new AccumulatingContinuousFunction<>(sampleDomain, sampleIntensityUnits));
-	}
+  public AccumulatingFileSpectrum(
+      Path location,
+      String name,
+      RegularSampledDomain<Time> sampleDomain,
+      Unit<Dimensionless> sampleIntensityUnits) {
+    this(
+        location,
+        name,
+        sampleDomain,
+        sampleIntensityUnits,
+        AccumulatingContinuousFunction.accumulate(sampleDomain, sampleIntensityUnits));
+  }
 
-	private AccumulatingFileSpectrum(
-			Path location,
-			String name,
-			RegularSampledDomain<Time> sampleDomain,
-			Unit<Dimensionless> sampleIntensityUnits,
-			AccumulatingContinuousFunction<Time, Dimensionless> accumulation) {
-		super(
-				location,
-				name,
-				accumulation,
-				overEncodedDomain(sampleDomain.getUnit(), sampleIntensityUnits));
+  private AccumulatingFileSpectrum(
+      Path location,
+      String name,
+      RegularSampledDomain<Time> sampleDomain,
+      Unit<Dimensionless> sampleIntensityUnits,
+      AccumulatingContinuousFunction<Time, Dimensionless> accumulation) {
+    super(
+        location,
+        name,
+        accumulation,
+        overEncodedDomain(sampleDomain.getUnit(), sampleIntensityUnits));
 
-		this.accumulation = accumulation;
-	}
+    this.accumulation = accumulation;
+  }
 
-	public AccumulatingFileSpectrum(
-			Function<String, ThrowingSupplier<ReadableByteChannel, IOException>> readChannel,
-			Function<String, ThrowingSupplier<WritableByteChannel, IOException>> writeChannel,
-			RegularSampledDomain<Time> sampleDomain,
-			Unit<Dimensionless> sampleIntensityUnits) {
-		this(
-				readChannel,
-				writeChannel,
-				sampleDomain,
-				sampleIntensityUnits,
-				new AccumulatingContinuousFunction<>(sampleDomain, sampleIntensityUnits));
-	}
+  public AccumulatingFileSpectrum(
+      Function<String, ThrowingSupplier<ReadableByteChannel, IOException>> readChannel,
+      Function<String, ThrowingSupplier<WritableByteChannel, IOException>> writeChannel,
+      RegularSampledDomain<Time> sampleDomain,
+      Unit<Dimensionless> sampleIntensityUnits) {
+    this(
+        readChannel,
+        writeChannel,
+        sampleDomain,
+        sampleIntensityUnits,
+        AccumulatingContinuousFunction.accumulate(sampleDomain, sampleIntensityUnits));
+  }
 
-	private AccumulatingFileSpectrum(
-			Function<String, ThrowingSupplier<ReadableByteChannel, IOException>> readChannel,
-			Function<String, ThrowingSupplier<WritableByteChannel, IOException>> writeChannel,
-			RegularSampledDomain<Time> sampleDomain,
-			Unit<Dimensionless> sampleIntensityUnits,
-			AccumulatingContinuousFunction<Time, Dimensionless> accumulation) {
-		this(
-				readChannel,
-				writeChannel,
-				accumulation,
-				overEncodedDomain(sampleDomain.getUnit(), sampleIntensityUnits));
-	}
+  private AccumulatingFileSpectrum(
+      Function<String, ThrowingSupplier<ReadableByteChannel, IOException>> readChannel,
+      Function<String, ThrowingSupplier<WritableByteChannel, IOException>> writeChannel,
+      RegularSampledDomain<Time> sampleDomain,
+      Unit<Dimensionless> sampleIntensityUnits,
+      AccumulatingContinuousFunction<Time, Dimensionless> accumulation) {
+    this(
+        readChannel,
+        writeChannel,
+        accumulation,
+        overEncodedDomain(sampleDomain.getUnit(), sampleIntensityUnits));
+  }
 
-	private AccumulatingFileSpectrum(
-			Function<String, ThrowingSupplier<ReadableByteChannel, IOException>> readChannel,
-			Function<String, ThrowingSupplier<WritableByteChannel, IOException>> writeChannel,
-			AccumulatingContinuousFunction<Time, Dimensionless> accumulation,
-			ByteFormat<SampledContinuousFunction<Time, Dimensionless>> format) {
-		super(
-				readChannel.apply(format.getPathExtension()),
-				writeChannel.apply(format.getPathExtension()),
-				accumulation,
-				format);
+  private AccumulatingFileSpectrum(
+      Function<String, ThrowingSupplier<ReadableByteChannel, IOException>> readChannel,
+      Function<String, ThrowingSupplier<WritableByteChannel, IOException>> writeChannel,
+      AccumulatingContinuousFunction<Time, Dimensionless> accumulation,
+      ByteFormat<SampledContinuousFunction<Time, Dimensionless>> format) {
+    super(
+        readChannel.apply(format.getPathExtension()),
+        writeChannel.apply(format.getPathExtension()),
+        accumulation,
+        format);
 
-		this.accumulation = accumulation;
-	}
+    this.accumulation = accumulation;
+  }
 
-	public long accumulate(SampledContinuousFunction<Time, Dimensionless> accumulate) {
-		return accumulation.accumulate(accumulate);
-	}
+  public long accumulate(SampledContinuousFunction<Time, Dimensionless> accumulate) {
+    return accumulation.accumulate(accumulate);
+  }
 }
