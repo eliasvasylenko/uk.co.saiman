@@ -31,12 +31,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import uk.co.strangeskies.observable.Disposable;
 import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.Observation;
 
 public class CachingObservableResource<T> extends CachingResource<T> {
   private final Function<? super T, ? extends Observable<?>> observable;
-  private Observation observation;
+  private Disposable observation;
 
   public CachingObservableResource(
       Supplier<T> load,
@@ -70,7 +70,7 @@ public class CachingObservableResource<T> extends CachingResource<T> {
     boolean madeDirty = super.makeDirty();
 
     if (observation != null) {
-      observation.dispose();
+      observation.cancel();
     }
 
     return madeDirty;
@@ -82,7 +82,7 @@ public class CachingObservableResource<T> extends CachingResource<T> {
 
     if (dataSet) {
       if (observation != null)
-        observation.dispose();
+        observation.cancel();
       addObserver(getData());
     }
 

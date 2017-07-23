@@ -47,6 +47,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.converter.NumberStringConverter;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
+import uk.co.strangeskies.observable.Disposable;
 import uk.co.strangeskies.observable.HotObservable;
 import uk.co.strangeskies.observable.Observable;
 import uk.co.strangeskies.observable.Observation;
@@ -61,8 +62,8 @@ import uk.co.strangeskies.observable.Observer;
  */
 public class ChemicalElementTile extends BorderPane implements Observable<ChemicalElementTile> {
   /**
-   * The size of the tile. Smaller sizes may choose to present less information
-   * in order to take less space.
+   * The size of the tile. Smaller sizes may choose to present less information in
+   * order to take less space.
    * 
    * @author Elias N Vasylenko
    */
@@ -231,7 +232,7 @@ public class ChemicalElementTile extends BorderPane implements Observable<Chemic
   }
 
   @Override
-  public Observation observe(Observer<? super ChemicalElementTile> observer) {
+  public Disposable observe(Observer<? super ChemicalElementTile> observer) {
     return clickObservable.observe(observer);
   }
 }

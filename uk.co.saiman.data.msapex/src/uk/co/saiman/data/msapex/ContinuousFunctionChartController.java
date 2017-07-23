@@ -92,6 +92,7 @@ public class ContinuousFunctionChartController {
 
   private boolean zoomed;
   private Interval<Double> domain = Interval.bounded(0d, 100d);
+  private boolean dirtyDomain;
   private final Map<Unit<?>, RangeGroup> rangeGroups;
   private final List<NumberAxis> extraYAxes;
   private static final double ZOOM_STEP_PERCENTAGE = 20;
@@ -217,10 +218,6 @@ public class ContinuousFunctionChartController {
 
   private Stream<ContinuousFunctionSeries> series() {
     return series.values().stream();
-  }
-
-  private void makeDirty() {
-    series().forEach(ContinuousFunctionSeries::makeDirty);
   }
 
   /**
@@ -400,8 +397,8 @@ public class ContinuousFunctionChartController {
    * percentage.
    * 
    * @param percentage
-   *          A percentage of the full width of the view area by which to move
-   *          the chart
+   *          A percentage of the full width of the view area by which to move the
+   *          chart
    */
   public void moveDomain(double percentage) {
     synchronized (domain) {
@@ -416,8 +413,8 @@ public class ContinuousFunctionChartController {
   }
 
   /**
-   * Move the view of the domain to contain exactly the interval between the
-   * given values.
+   * Move the view of the domain to contain exactly the interval between the given
+   * values.
    * 
    * @param from
    *          The leftmost value in the domain to show in the view
@@ -453,7 +450,15 @@ public class ContinuousFunctionChartController {
       zoomed = true;
       updateZoomRange(true);
 
-      makeDirty();
+      dirtyDomain = true;
+    }
+  }
+
+  private boolean isDomainDirty() {
+    synchronized (this.domain) {
+      boolean dirty = dirtyDomain;
+      dirtyDomain = false;
+      return dirty;
     }
   }
 
@@ -521,11 +526,10 @@ public class ContinuousFunctionChartController {
 
   private void triggerRefresh() {
     synchronized (this.domain) {
-      boolean refreshed = series()
-          .map(ContinuousFunctionSeries::refresh)
-          .reduce(false, (a, b) -> a || b);
+      boolean dirty = isDomainDirty()
+          || series().map(ContinuousFunctionSeries::isDirty).reduce(false, (a, b) -> a || b);
 
-      if (refreshed) {
+      if (dirty) {
         if (!zoomed) {
           resetZoomDomainImpl();
         }
@@ -614,8 +618,8 @@ public class ContinuousFunctionChartController {
      * 
      * 
      * from now on all members of the graph must use the same units. it's just
-     * simpler that way. have conversion functions between continuous functions
-     * to facilitate this.
+     * simpler that way. have conversion functions between continuous functions to
+     * facilitate this.
      * 
      * 
      * 

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.data.msapex;
 
+import static uk.co.strangeskies.observable.Observer.onObservation;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +43,10 @@ import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.strangeskies.mathematics.Interval;
+import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.observable.Observation;
+import uk.co.strangeskies.utility.IdentityProperty;
+import uk.co.strangeskies.utility.Property;
 
 /**
  * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series
@@ -58,8 +63,10 @@ public class ContinuousFunctionSeries {
   /*
    * Continuous function data
    */
-  private final ContinuousFunction<?, ?> continuousFunction;
-  private ContinuousFunction<?, ?> latestRenderedContinuousFunction = null;
+  private final ContinuousFunction<?, ?> sourceContinuousFunction;
+  private final Observation observation;
+  private ContinuousFunction<?, ?> latestContinuousFunction;
+  private boolean dirty;
 
   /*
    * Series data
@@ -67,42 +74,36 @@ public class ContinuousFunctionSeries {
   private final ObservableList<Data<Number, Number>> data;
   private final Series<Number, Number> series;
 
-  /*
-   * Refresh handling
-   */
-  private Object mutex;
-  private boolean dirty;
-  private Observation observation;
-
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a
-   * {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
    * 
    * @param continuousFunction
    *          The backing function
    */
   public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction) {
-    this.continuousFunction = continuousFunction;
+    this.sourceContinuousFunction = continuousFunction;
 
     data = FXCollections.observableArrayList();
     series = new Series<>(data);
 
-    mutex = new Object();
-    makeDirty();
-    refresh();
-    makeDirty();
+    Property<Observation> observation = new IdentityProperty<>();
+    continuousFunction
+        .invalidations()
+        .weakReference(this)
+        .reduceBackpressure((a, b) -> b)
+        .then(onObservation(observation::set))
+        .observe(m -> m.owner().setValue(m.message()));
+    this.observation = observation.get();
 
-    observation = continuousFunction.invalidations().weakReference(this).observe(
-        m -> m.owner().makeDirty());
+    this.observation.requestNext();
   }
 
   public void dispose() {
-    observation.dispose();
+    observation.cancel();
   }
 
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a
-   * {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
    * 
    * @param continuousFunction
    *          The backing function
@@ -115,51 +116,35 @@ public class ContinuousFunctionSeries {
     series.setName(name);
   }
 
-  /**
-   * Flag the series as out of date with respect to the rendering environment or
-   * continuous function state.
-   */
-  public void makeDirty() {
-    synchronized (mutex) {
-      dirty = true;
+  public synchronized boolean isDirty() {
+    return dirty;
+  }
+
+  private synchronized void setValue(Expression<? extends ContinuousFunction<?, ?>> message) {
+    dirty = true;
+    latestContinuousFunction = message.decoupleValue();
+  }
+
+  private synchronized ContinuousFunction<?, ?> getNextValue() {
+    if (dirty) {
+      dirty = false;
+      observation.requestNext();
     }
+    return latestContinuousFunction;
   }
 
   /**
-   * Clear the dirty flag, if present, and ensure the
-   * {@link #latestRenderedContinuousFunction latest continuous function for
-   * rendering} is up to date.
-   * 
-   * @return true if the latest continuous function for rendering has changed,
-   *         false otherwise
-   */
-  public boolean refresh() {
-    boolean dirtied = false;
-    synchronized (mutex) {
-      if (dirty) {
-        dirtied = true;
-        dirty = false;
-
-        latestRenderedContinuousFunction = continuousFunction.decoupleValue();
-      }
-    }
-
-    return dirtied;
-  }
-
-  /**
-   * Render the {@link #latestRenderedContinuousFunction latest continuous
-   * function} into the {@link #getSeries() series} for the given range and
-   * resolution.
+   * Render the {@link #latestContinuousFunction latest continuous function} into
+   * the {@link #getSeries() series} for the given range and resolution.
    * 
    * @param domain
    *          the range to render through in the domain
    * @param resolution
    *          the resolution to render at in the domain
    */
-  public void render(Interval<Double> domain, int resolution) {
+  public synchronized void render(Interval<Double> domain, int resolution) {
     SampledContinuousFunction<?, ?> sampledContinuousFunction = resampleLastRendered(
-        latestRenderedContinuousFunction,
+        getNextValue(),
         domain,
         resolution);
 
@@ -202,14 +187,14 @@ public class ContinuousFunctionSeries {
    * @return the continuous function backing the series
    */
   public ContinuousFunction<?, ?> getBackingContinuousFunction() {
-    return continuousFunction;
+    return sourceContinuousFunction;
   }
 
   /**
    * @return the latest continuous function prepared for rendering
    */
   public ContinuousFunction<?, ?> getLatestRenderedContinuousFunction() {
-    return latestRenderedContinuousFunction;
+    return latestContinuousFunction;
   }
 
   /**

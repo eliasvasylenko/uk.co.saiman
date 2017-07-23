@@ -43,8 +43,8 @@ import com.fazecast.jSerialComm.SerialPortPacketListener;
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
+import uk.co.strangeskies.observable.Disposable;
 import uk.co.strangeskies.observable.HotObservable;
-import uk.co.strangeskies.observable.Observation;
 import uk.co.strangeskies.observable.Observer;
 
 /**
@@ -167,7 +167,7 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
       }
 
       @Override
-      public Observation observe(Observer<? super CommsChannel> observer) {
+      public Disposable observe(Observer<? super CommsChannel> observer) {
         return availableObservable.observe(observer);
       }
     };
@@ -217,7 +217,7 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
       }
 
       @Override
-      public Observation observe(Observer<? super ByteBuffer> observer) {
+      public Disposable observe(Observer<? super ByteBuffer> observer) {
         return byteObservable.observe(observer);
       }
 

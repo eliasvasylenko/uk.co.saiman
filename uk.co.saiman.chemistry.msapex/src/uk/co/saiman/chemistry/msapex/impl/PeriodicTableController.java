@@ -46,6 +46,7 @@ import javafx.scene.layout.GridPane;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.chemistry.msapex.impl.ChemicalElementTile.Size;
+import uk.co.strangeskies.observable.Disposable;
 import uk.co.strangeskies.observable.Observable;
 import uk.co.strangeskies.observable.Observation;
 import uk.co.strangeskies.observable.Observer;
@@ -118,9 +119,9 @@ public class PeriodicTableController implements Observable<ChemicalElementTile> 
   }
 
   /**
-   * @return Get the currently focused element in the table, or the last one to
-   *         be selected via {@link ChemicalElementTile#select()}, or clicking,
-   *         if focusing is not enabled for the table
+   * @return Get the currently focused element in the table, or the last one to be
+   *         selected via {@link ChemicalElementTile#select()}, or clicking, if
+   *         focusing is not enabled for the table
    */
   public Element getSelectedElement() {
     return getSelectedElementTile().getElement();
@@ -257,7 +258,7 @@ public class PeriodicTableController implements Observable<ChemicalElementTile> 
   }
 
   @Override
-  public Observation observe(Observer<? super ChemicalElementTile> observer) {
+  public Disposable observe(Observer<? super ChemicalElementTile> observer) {
     return selectionObservable.observe(observer);
   }
 }

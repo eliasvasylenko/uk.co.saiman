@@ -94,7 +94,7 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
 
     try {
       if (this.component != null)
-        this.component.dispose();
+        this.component.cancel();
       this.component = addDependency(component);
     } finally {
       endWrite();
