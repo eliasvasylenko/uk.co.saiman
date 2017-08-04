@@ -37,89 +37,61 @@ import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImageDevice;
 
 public class SimulatedXYStageRasterConfiguration extends SimulatedSampleImageConfiguration
-		implements XYStageConfiguration {
-	private final ExperimentConfigurationContext<SimulatedXYStageRasterConfiguration> forNode;
-	private final SimulatedSampleImageDevice stageSimulation;
-	private final Units units;
+    implements XYStageConfiguration {
+  private final ExperimentConfigurationContext<SimulatedXYStageRasterConfiguration> forNode;
+  private final SimulatedSampleImageDevice stageSimulation;
+  private final Units units;
 
-	private String name;
-	private Quantity<Length> x;
-	private Quantity<Length> y;
+  private String name;
+  private Quantity<Length> x;
+  private Quantity<Length> y;
 
-	public SimulatedXYStageRasterConfiguration(
-			ExperimentConfigurationContext<SimulatedXYStageRasterConfiguration> forNode,
-			SimulatedSampleImageDevice stageSimulation,
-			Units units) {
-		this.forNode = forNode;
-		this.stageSimulation = stageSimulation;
-		this.units = units;
-	}
+  public SimulatedXYStageRasterConfiguration(
+      ExperimentConfigurationContext<SimulatedXYStageRasterConfiguration> forNode,
+      SimulatedSampleImageDevice stageSimulation,
+      Units units) {
+    this.forNode = forNode;
+    this.stageSimulation = stageSimulation;
+    this.units = units;
+  }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+  @Override
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		forNode.setID(name);
-		this.name = name;
-	}
+  public void setName(String name) {
+    forNode.setID(name);
+    this.name = name;
+  }
 
-	@Override
-	public Quantity<Length> getMinimumX() {
-		return units.metre().milli().getQuantity(0);
-	}
+  @Override
+  public Quantity<Length> getX() {
+    return x;
+  }
 
-	@Override
-	public Quantity<Length> getMaximumX() {
-		if (getSampleImage() == null) {
-			return getMinimumX();
-		} else {
-			return units.metre().milli().getQuantity(getSampleImage().getWidth());
-		}
-	}
+  @Override
+  public void setX(Quantity<Length> offset) {
+    x = offset;
+  }
 
-	@Override
-	public Quantity<Length> getMinimumY() {
-		return units.metre().milli().getQuantity(0);
-	}
+  @Override
+  public Quantity<Length> getY() {
+    return y;
+  }
 
-	@Override
-	public Quantity<Length> getMaximumY() {
-		if (getSampleImage() == null) {
-			return getMinimumY();
-		} else {
-			return units.metre().milli().getQuantity(getSampleImage().getHeight());
-		}
-	}
+  @Override
+  public void setY(Quantity<Length> offset) {
+    y = offset;
+  }
 
-	@Override
-	public Quantity<Length> getX() {
-		return x;
-	}
+  @Override
+  public String toString() {
+    return "[" + x + ", " + y + "]";
+  }
 
-	@Override
-	public void setX(Quantity<Length> offset) {
-		x = offset;
-	}
-
-	@Override
-	public Quantity<Length> getY() {
-		return y;
-	}
-
-	@Override
-	public void setY(Quantity<Length> offset) {
-		y = offset;
-	}
-
-	@Override
-	public String toString() {
-		return "[" + x + ", " + y + "]";
-	}
-
-	@Override
-	public XYStageDevice stageDevice() {
-		return stageSimulation;
-	}
+  @Override
+  public XYStageDevice stageDevice() {
+    return stageSimulation;
+  }
 }

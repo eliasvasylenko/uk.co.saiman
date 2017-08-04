@@ -60,7 +60,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
   public SimpleComms(String name) {
     this.name = name;
 
-    status = new ObservablePropertyImpl<>((r, t) -> r, (a, b) -> a == b, CLOSED);
+    status = new ObservablePropertyImpl<>((a, b) -> a == b, CLOSED);
   }
 
   @Override
@@ -74,7 +74,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
   }
 
   protected synchronized CommsException setFault(CommsException commsException) {
-    status.fail(commsException);
+    status.setProblem(commsException);
     return commsException;
   }
 
@@ -98,7 +98,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
 
   @Override
   public synchronized T openController() {
-    status().tryGetFailure().ifPresent(t -> {
+    status().tryGetProblem().ifPresent(t -> {
       reset();
     });
 

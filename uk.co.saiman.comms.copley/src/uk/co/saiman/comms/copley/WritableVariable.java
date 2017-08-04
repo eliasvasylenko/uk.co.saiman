@@ -31,6 +31,7 @@ import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface WritableVariable<U> extends Variable<U> {
   void set(MotorAxis axis, U value);
@@ -47,4 +48,44 @@ public interface WritableVariable<U> extends Variable<U> {
     return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
   }
 
+  default <T> WritableVariable<T> map(Class<T> type, Function<U, T> out, Function<T, U> in) {
+    WritableVariable<U> base = this;
+
+    return new WritableVariable<T>() {
+      @Override
+      public CopleyController getController() {
+        return base.getController();
+      }
+
+      @Override
+      public CopleyVariableID getID() {
+        return base.getID();
+      }
+
+      @Override
+      public VariableBank getBank() {
+        return base.getBank();
+      }
+
+      @Override
+      public Class<T> getType() {
+        return type;
+      }
+
+      @Override
+      public Optional<WritableVariable<T>> trySwitchBank(VariableBank bank) {
+        return base.trySwitchBank().map(b -> b.map(type, out, in));
+      }
+
+      @Override
+      public T get(MotorAxis axis) {
+        return out.apply(base.get(axis));
+      }
+
+      @Override
+      public void set(MotorAxis axis, T value) {
+        base.set(axis, in.apply(value));
+      }
+    };
+  }
 }

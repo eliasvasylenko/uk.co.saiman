@@ -43,7 +43,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import uk.co.saiman.experiment.sample.XYStageConfiguration;
+import uk.co.saiman.experiment.sample.StageConfiguration;
 import uk.co.saiman.instrument.stage.StageDevice;
 import uk.co.saiman.instrument.stage.StageProperties;
 import uk.co.strangeskies.eclipse.AdaptNamed;
@@ -56,50 +56,46 @@ import uk.co.strangeskies.eclipse.ObservableService;
  * @author Elias N Vasylenko
  */
 public class StagePart {
-	@Localize
-	@Inject
-	StageProperties text;
+  @Localize
+  @Inject
+  StageProperties text;
 
-	@FXML
-	private Pane chartPane;
-	@FXML
-	private Label noSelectionLabel;
+  @FXML
+  private Pane chartPane;
+  @FXML
+  private Label noSelectionLabel;
 
-	@Inject
-	@ObservableService
-	ObservableSet<StageDevice> availableDevices;
+  @Inject
+  @ObservableService
+  ObservableSet<StageDevice> availableDevices;
 
-	private StageDevice selectedDevice;
+  private StageDevice selectedDevice;
 
-	@Inject
-	@LocalInstance
-	FXMLLoader loaderProvider;
+  @PostConstruct
+  void postConstruct(BorderPane container, @LocalInstance FXMLLoader loaderProvider) {
+    container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
+  }
 
-	@PostConstruct
-	void postConstruct(BorderPane container) {
-		container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
-	}
+  @FXML
+  void initialize() {
+    noSelectionLabel.textProperty().bind(wrap(text.noStageDevices()));
+  }
 
-	@FXML
-	void initialize() {
-		noSelectionLabel.textProperty().bind(wrap(text.noStageDevices()));
-	}
+  protected void selectStageDevice(StageDevice stageDevice) {
+    noSelectionLabel.setVisible(false);
+    selectedDevice = stageDevice;
+  }
 
-	protected void selectStageDevice(StageDevice stageDevice) {
-		noSelectionLabel.setVisible(false);
-		selectedDevice = stageDevice;
-	}
+  protected void deselectStageDevice() {
+    noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
+    selectedDevice = null;
+  }
 
-	protected void deselectStageDevice() {
-		noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
-		selectedDevice = null;
-	}
-
-	@Inject
-	synchronized void setSelection(
-			@Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) XYStageConfiguration configuration) {
-		if (configuration != null) {
-			selectStageDevice(configuration.stageDevice());
-		}
-	}
+  @Inject
+  synchronized void setSelection(
+      @Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) StageConfiguration configuration) {
+    if (configuration != null) {
+      selectStageDevice(configuration.stageDevice());
+    }
+  }
 }

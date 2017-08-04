@@ -50,7 +50,6 @@ import uk.co.saiman.experiment.CachingObservableResource;
 import uk.co.saiman.experiment.CachingResource;
 import uk.co.saiman.experiment.spectrum.ByteFormat;
 import uk.co.saiman.experiment.spectrum.Spectrum;
-import uk.co.strangeskies.mathematics.expression.Expression;
 
 public class FileChemicalMap<D extends SampledDomain<Time>, C extends ContinuousFunction<Time, Dimensionless>>
     implements ChemicalMap {
@@ -111,7 +110,7 @@ public class FileChemicalMap<D extends SampledDomain<Time>, C extends Continuous
     CachingResource<C> data = new CachingObservableResource<>(
         () -> loadPixel(location),
         s -> savePixel(location, s),
-        Expression::invalidations);
+        ContinuousFunction::changes);
     return data;
   }
 

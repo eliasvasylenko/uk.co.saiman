@@ -27,21 +27,17 @@
  */
 package uk.co.saiman.instrument.stage;
 
-import javax.measure.Quantity;
+import java.util.stream.Stream;
+
 import javax.measure.quantity.Length;
 
 public interface XYStageDevice extends StageDevice {
-	Quantity<Length> getStageWidth();
+  StageDimension<Length> getXAxis();
 
-	Quantity<Length> getStageHeight();
+  StageDimension<Length> getYAxis();
 
-	void requestStageOffset(Quantity<Length> x, Quantity<Length> y);
-
-	Quantity<Length> getRequestedStageX();
-
-	Quantity<Length> getRequestedStageY();
-
-	Quantity<Length> getActualStageX();
-
-	Quantity<Length> getActualStageY();
+  @Override
+  default Stream<StageDimension<?>> getDimensions() {
+    return Stream.of(getXAxis(), getYAxis());
+  }
 }

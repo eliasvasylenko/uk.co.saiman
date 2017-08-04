@@ -65,10 +65,4 @@ public interface ContinuousFunctionDecorator<UD extends Quantity<UD>, UR extends
 	default SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
 		return getComponent().resample(resolvableSampleDomain);
 	}
-
-	@Override
-	default ContinuousFunction<UD, UR> decoupleValue() {
-		return getValue().copy();
-	}
-
 }

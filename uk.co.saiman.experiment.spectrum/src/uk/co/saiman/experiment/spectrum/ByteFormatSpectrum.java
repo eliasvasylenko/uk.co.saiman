@@ -46,7 +46,6 @@ import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.experiment.CachingObservableResource;
 import uk.co.saiman.experiment.CachingResource;
 import uk.co.strangeskies.function.ThrowingSupplier;
-import uk.co.strangeskies.mathematics.expression.Expression;
 
 public class ByteFormatSpectrum<C extends ContinuousFunction<Time, Dimensionless>>
     implements Spectrum {
@@ -76,7 +75,10 @@ public class ByteFormatSpectrum<C extends ContinuousFunction<Time, Dimensionless
     this.readChannel = readChannel;
     this.writeChannel = writeChannel;
 
-    this.data = new CachingObservableResource<>(this::load, this::save, Expression::invalidations);
+    this.data = new CachingObservableResource<>(
+        this::load,
+        this::save,
+        ContinuousFunction::changes);
     this.data.setData(data);
 
     this.format = format;

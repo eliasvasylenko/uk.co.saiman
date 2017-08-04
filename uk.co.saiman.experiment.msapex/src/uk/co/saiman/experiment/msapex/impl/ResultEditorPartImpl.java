@@ -97,7 +97,9 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
 
   private void attachToLifecycle() {
     data.getExperimentNode().lifecycleState().changes().weakReference(this).observe(
-        m -> m.owner().updateExperimentState(m.message().previousValue(), m.message().newValue()));
+        m -> m.owner().updateExperimentState(
+            m.message().previousValue().get(),
+            m.message().newValue().get()));
   }
 
   @PostConstruct

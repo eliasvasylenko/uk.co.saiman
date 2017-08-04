@@ -38,7 +38,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Activate;
@@ -51,6 +50,7 @@ import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.instrument.raster.RasterPattern;
 import uk.co.saiman.instrument.raster.RasterPosition;
+import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.SimulatedDevice;
@@ -207,43 +207,13 @@ public class SimulatedXYStageRasterDeviceImpl
   }
 
   @Override
-  public Quantity<Length> getStageWidth() {
+  public StageDimension<Length> getXAxis() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public Quantity<Length> getStageHeight() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void requestStageOffset(Quantity<Length> x, Quantity<Length> y) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public Quantity<Length> getRequestedStageX() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Quantity<Length> getRequestedStageY() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Quantity<Length> getActualStageX() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Quantity<Length> getActualStageY() {
+  public StageDimension<Length> getYAxis() {
     // TODO Auto-generated method stub
     return null;
   }

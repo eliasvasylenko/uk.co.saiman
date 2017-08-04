@@ -40,6 +40,7 @@ import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.strangeskies.observable.HotObservable;
 import uk.co.strangeskies.observable.Observable;
+import uk.co.strangeskies.observable.Observer;
 
 /**
  * A continuous function to accumulate the sum of input continuous functions.
@@ -95,11 +96,24 @@ public abstract class AccumulatingContinuousFunction<UD extends Quantity<UD>, UR
     super(domain, unitRange, new double[domain.getDepth()]);
 
     source
-        .then(m -> count++)
+        .then(m -> System.out.println("!"))
+        .then(m -> System.out.println("?"))
         .executeOn(newSingleThreadExecutor())
         .aggregateBackpressure()
+        .executeOn(newSingleThreadExecutor())
         .then(onObservation(o -> o.requestNext()))
-        .observe(a -> {
+        .then(m -> System.out.println("*"))
+        .observe(Observer.singleUse(o -> m -> {
+          o.requestNext();
+          System.out.println(m.size());
+        }));
+
+    source
+        .then(m -> count++)
+        .aggregateBackpressure()
+        .executeOn(newSingleThreadExecutor())
+        .then(onObservation(o -> o.requestNext()))
+        .observe(Observer.singleUse(o -> a -> {
           mutate(data -> {
             for (SampledContinuousFunction<?, UR> c : a) {
               UnitConverter converter = c.range().getUnit().getConverterTo(unitRange);
@@ -109,7 +123,8 @@ public abstract class AccumulatingContinuousFunction<UD extends Quantity<UD>, UR
               }
             }
           });
-        });
+          o.requestNext();
+        }));
   }
 
   /**

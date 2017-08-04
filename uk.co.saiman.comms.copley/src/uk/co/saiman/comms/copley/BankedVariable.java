@@ -30,6 +30,9 @@ package uk.co.saiman.comms.copley;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 public interface BankedVariable<U> extends WritableVariable<U> {
   BankedVariable<U> switchBank(VariableBank bank);
 
@@ -45,5 +48,57 @@ public interface BankedVariable<U> extends WritableVariable<U> {
 
   default void set(int axis) {
     copyToBank(getController().getAxis(axis));
+  }
+
+  @Override
+  default <T> BankedVariable<T> map(Class<T> type, Function<U, T> out, Function<T, U> in) {
+    BankedVariable<U> base = this;
+
+    return new BankedVariable<T>() {
+      @Override
+      public CopleyController getController() {
+        return base.getController();
+      }
+
+      @Override
+      public CopleyVariableID getID() {
+        return base.getID();
+      }
+
+      @Override
+      public VariableBank getBank() {
+        return base.getBank();
+      }
+
+      @Override
+      public Class<T> getType() {
+        return type;
+      }
+
+      @Override
+      public Optional<WritableVariable<T>> trySwitchBank(VariableBank bank) {
+        return base.trySwitchBank().map(b -> b.map(type, out, in));
+      }
+
+      @Override
+      public T get(MotorAxis axis) {
+        return out.apply(base.get(axis));
+      }
+
+      @Override
+      public void set(MotorAxis axis, T value) {
+        base.set(axis, in.apply(value));
+      }
+
+      @Override
+      public BankedVariable<T> switchBank(VariableBank bank) {
+        return base.switchBank().map(type, out, in);
+      }
+
+      @Override
+      public void copyToBank(MotorAxis axis) {
+        base.copyToBank();
+      }
+    };
   }
 }

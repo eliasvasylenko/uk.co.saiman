@@ -27,10 +27,15 @@
  */
 package uk.co.saiman.data;
 
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.expression.LockingExpression;
+import uk.co.strangeskies.observable.HotObservable;
+import uk.co.strangeskies.observable.Observable;
 
 /**
  * A simple abstract partial implementation of a
@@ -44,41 +49,62 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  * @author Elias N Vasylenko
  */
 public abstract class LockingSampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends LockingExpression<ContinuousFunction<UD, UR>> implements SampledContinuousFunction<UD, UR> {
-	private final SampledDomain<UD> domain;
-	private final Unit<UR> rangeUnit;
+    implements SampledContinuousFunction<UD, UR> {
+  private final SampledDomain<UD> domain;
+  private final Unit<UR> rangeUnit;
+  private final ReadWriteLock lock;
+  private final HotObservable<SampledContinuousFunction<UD, UR>> changes;
 
-	public LockingSampledContinuousFunction(SampledDomain<UD> domain, Unit<UR> range) {
-		this.domain = domain;
-		this.rangeUnit = range;
-	}
+  public LockingSampledContinuousFunction(SampledDomain<UD> domain, Unit<UR> range) {
+    this.domain = domain;
+    this.rangeUnit = range;
+    this.lock = new ReentrantReadWriteLock();
+    this.changes = new HotObservable<>();
+  }
 
-	@Override
-	public SampledDomain<UD> domain() {
-		return domain;
-	}
+  @Override
+  public SampledDomain<UD> domain() {
+    return domain;
+  }
 
-	@Override
-	public double sample(double xPosition) {
-		return read(() -> SampledContinuousFunction.super.sample(xPosition));
-	}
+  @Override
+  public double sample(double xPosition) {
+    return read(() -> SampledContinuousFunction.super.sample(xPosition));
+  }
 
-	protected Unit<UR> getRangeUnit() {
-		return rangeUnit;
-	}
+  protected Unit<UR> getRangeUnit() {
+    return rangeUnit;
+  }
 
-	@Override
-	public SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
-		return read(() -> SampledContinuousFunction.super.resample(resolvableSampleDomain));
-	}
+  @Override
+  public SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
+    return read(() -> SampledContinuousFunction.super.resample(resolvableSampleDomain));
+  }
 
-	@Override
-	public ContinuousFunction<UD, UR> decoupleValue() {
-		return getValue().copy();
-	}
+  @Override
+  public Observable<SampledContinuousFunction<UD, UR>> changes() {
+    return changes;
+  }
 
-	@Override
-	protected ContinuousFunction<UD, UR> evaluate() {
-		return this;
-	}
+  protected <T> T read(Supplier<T> action) {
+    try {
+      lock.readLock().lock();
+      return action.get();
+    } finally {
+      lock.readLock().unlock();
+    }
+  }
+
+  protected void write(Runnable action) {
+    try {
+      lock.writeLock().lock();
+      lock.readLock().lock();
+      action.run();
+      lock.writeLock().unlock();
+      changes.next(this);
+    } finally {
+      lock.readLock().unlock();
+      lock.writeLock().unlock();
+    }
+  }
 }

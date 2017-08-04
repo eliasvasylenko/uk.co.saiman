@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
+
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,8 +38,6 @@ import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
@@ -51,36 +53,33 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
  */
 @Component
 public class WorkspaceFactoryImpl implements WorkspaceFactory {
-	@Reference
-	Log log;
+  @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
+  Log log;
 
-	//@Reference
-	PropertyLoader loader;
+  @Reference
+  PropertyLoader loader;
 
-	private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
+  private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
 
-	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	protected void registerExperimentType(ExperimentType<?> experimentType) {
-		experimentTypes.add(experimentType);
-	}
+  @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
+  protected void registerExperimentType(ExperimentType<?> experimentType) {
+    experimentTypes.add(experimentType);
+  }
 
-	protected void unregisterExperimentType(ExperimentType<?> experimentType) {
-		experimentTypes.remove(experimentType);
-	}
+  protected void unregisterExperimentType(ExperimentType<?> experimentType) {
+    experimentTypes.remove(experimentType);
+  }
 
-	public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
-		return experimentTypes.stream();
-	}
+  public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
+    return experimentTypes.stream();
+  }
 
-	@Override
-	public Workspace openWorkspace(Path location) {
-		return new WorkspaceImpl(
-				this,
-				location,
-				loader.getProperties(ExperimentProperties.class));
-	}
+  @Override
+  public Workspace openWorkspace(Path location) {
+    return new WorkspaceImpl(this, location, loader.getProperties(ExperimentProperties.class));
+  }
 
-	public Log getLog() {
-		return log;
-	}
+  public Log getLog() {
+    return Log.forwardingLog(() -> log);
+  }
 }

@@ -37,22 +37,15 @@ import uk.co.saiman.instrument.stage.XYStageDevice;
  * 
  * @author Elias N Vasylenko
  */
-public interface XYStageConfiguration extends SampleConfiguration {
-	Quantity<Length> getMinimumX();
+public interface XYStageConfiguration extends StageConfiguration {
+  Quantity<Length> getX();
 
-	Quantity<Length> getMaximumX();
+  void setX(Quantity<Length> offset);
 
-	Quantity<Length> getMinimumY();
+  Quantity<Length> getY();
 
-	Quantity<Length> getMaximumY();
+  void setY(Quantity<Length> offset);
 
-	Quantity<Length> getX();
-
-	void setX(Quantity<Length> offset);
-
-	Quantity<Length> getY();
-
-	void setY(Quantity<Length> offset);
-
-	XYStageDevice stageDevice();
+  @Override
+  XYStageDevice stageDevice();
 }

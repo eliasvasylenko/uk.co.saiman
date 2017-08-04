@@ -87,6 +87,7 @@ runplatform: win64
 	uk.co.strangeskies.eclipse;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.fx;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.mathematics;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.expressions;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.osgi.api;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.osgi.provider;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.reflection;version='[1.0.13,1.0.14)',\
@@ -179,5 +180,6 @@ runplatform: win64
 	uk.co.strangeskies.collections;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.collections.observable;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.jetty.logger;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.log.provider;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.observable;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.reflection.token;version='[1.0.13,1.0.14)'

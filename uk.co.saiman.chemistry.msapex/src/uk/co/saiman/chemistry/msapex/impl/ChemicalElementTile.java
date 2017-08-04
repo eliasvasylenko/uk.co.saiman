@@ -50,7 +50,6 @@ import uk.co.saiman.chemistry.Element.Group;
 import uk.co.strangeskies.observable.Disposable;
 import uk.co.strangeskies.observable.HotObservable;
 import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.Observation;
 import uk.co.strangeskies.observable.Observer;
 
 /**

@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.instrument.stage;
 
+import java.util.stream.Stream;
+
 import uk.co.saiman.instrument.HardwareDevice;
 
 public interface StageDevice extends HardwareDevice {
-
+  Stream<StageDimension<?>> getDimensions();
 }

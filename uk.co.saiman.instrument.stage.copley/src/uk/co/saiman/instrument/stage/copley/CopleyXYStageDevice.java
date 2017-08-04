@@ -29,7 +29,6 @@ package uk.co.saiman.instrument.stage.copley;
 
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
 
-import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Activate;
@@ -37,8 +36,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.instrument.HardwareConnection;
+import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
+import uk.co.saiman.measurement.Units;
 import uk.co.strangeskies.observable.ObservableValue;
 import uk.co.strangeskies.text.properties.PropertyLoader;
 
@@ -50,6 +52,10 @@ public class CopleyXYStageDevice implements XYStageDevice {
 
   @Reference
   private CopleyComms comms;
+  private CopleyController controller;
+
+  @Reference
+  private Units units;
 
   @Activate
   private void activate() {
@@ -67,53 +73,22 @@ public class CopleyXYStageDevice implements XYStageDevice {
 
   public void reset() {
     comms.reset();
+    controller = comms.openController();
   }
 
   @Override
-  public Quantity<Length> getStageWidth() {
-    // TODO Auto-generated method stub
-    return null;
+  public StageDimension<Length> getXAxis() {
+    return new CopleyLinearDimension(units, controller.getAxis(0), controller);
   }
 
   @Override
-  public Quantity<Length> getStageHeight() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void requestStageOffset(Quantity<Length> x, Quantity<Length> y) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public Quantity<Length> getRequestedStageX() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Quantity<Length> getRequestedStageY() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Quantity<Length> getActualStageX() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Quantity<Length> getActualStageY() {
-    // TODO Auto-generated method stub
-    return null;
+  public StageDimension<Length> getYAxis() {
+    return new CopleyLinearDimension(units, controller.getAxis(1), controller);
   }
 
   @Override
   public ObservableValue<HardwareConnection> connectionState() {
-    // TODO Auto-generated method stub
-    return null;
+    return null; // TODO comms.status().map(s -> s == OPEN ? CONNECTED :
+                 // DISCONNECTED).toValue();
   }
 }

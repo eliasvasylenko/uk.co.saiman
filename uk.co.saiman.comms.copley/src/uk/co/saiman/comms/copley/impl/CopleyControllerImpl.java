@@ -40,12 +40,17 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import uk.co.saiman.comms.ByteConverters;
+import uk.co.saiman.comms.copley.AmplifierState;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.CopleyOperationID;
 import uk.co.saiman.comms.copley.CopleyVariableID;
+import uk.co.saiman.comms.copley.EventStatusRegister;
+import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.comms.copley.MotorAxis;
+import uk.co.saiman.comms.copley.TrajectoryProfile;
 import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;
+import uk.co.saiman.comms.copley.WritableVariable;
 
 public class CopleyControllerImpl implements CopleyController {
   private CopleyCommsImpl comms;
@@ -126,6 +131,16 @@ public class CopleyControllerImpl implements CopleyController {
   public int getAxisCount() {
     // TODO Auto-generated method stub
     return 0;
+  }
+
+  @Override
+  public Variable<Int32> getActualPosition() {
+    return actualPosition;
+  }
+
+  @Override
+  public WritableVariable<Int32> getRequestedPosition() {
+    return trajectoryPosition;
   }
 
   byte[] executeCopleyCommand(CopleyOperationID operation, byte[] output) {

@@ -43,7 +43,6 @@ import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.strangeskies.mathematics.Interval;
-import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.observable.Observation;
 import uk.co.strangeskies.utility.IdentityProperty;
 import uk.co.strangeskies.utility.Property;
@@ -75,7 +74,8 @@ public class ContinuousFunctionSeries {
   private final Series<Number, Number> series;
 
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a
+   * {@link Series}.
    * 
    * @param continuousFunction
    *          The backing function
@@ -88,7 +88,7 @@ public class ContinuousFunctionSeries {
 
     Property<Observation> observation = new IdentityProperty<>();
     continuousFunction
-        .invalidations()
+        .changes()
         .weakReference(this)
         .reduceBackpressure((a, b) -> b)
         .then(onObservation(observation::set))
@@ -103,7 +103,8 @@ public class ContinuousFunctionSeries {
   }
 
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a
+   * {@link Series}.
    * 
    * @param continuousFunction
    *          The backing function
@@ -120,9 +121,9 @@ public class ContinuousFunctionSeries {
     return dirty;
   }
 
-  private synchronized void setValue(Expression<? extends ContinuousFunction<?, ?>> message) {
+  private synchronized void setValue(ContinuousFunction<?, ?> message) {
     dirty = true;
-    latestContinuousFunction = message.decoupleValue();
+    latestContinuousFunction = message.copy();
   }
 
   private synchronized ContinuousFunction<?, ?> getNextValue() {
@@ -134,8 +135,8 @@ public class ContinuousFunctionSeries {
   }
 
   /**
-   * Render the {@link #latestContinuousFunction latest continuous function} into
-   * the {@link #getSeries() series} for the given range and resolution.
+   * Render the {@link #latestContinuousFunction latest continuous function}
+   * into the {@link #getSeries() series} for the given range and resolution.
    * 
    * @param domain
    *          the range to render through in the domain

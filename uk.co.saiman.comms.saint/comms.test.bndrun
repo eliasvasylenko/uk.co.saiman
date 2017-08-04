@@ -39,6 +39,7 @@
 	osgi.enroute.webconsole.xray.provider;version='[2.0.0,2.0.1)',\
 	uk.co.strangeskies.jetty.logger;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.text;version='[1.0.13,1.0.14)',\
+	uk.co.strangeskies.text.provider;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.observable;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.osgi.api;version='[1.0.13,1.0.14)',\
 	uk.co.strangeskies.osgi.provider;version='[1.0.13,1.0.14)',\

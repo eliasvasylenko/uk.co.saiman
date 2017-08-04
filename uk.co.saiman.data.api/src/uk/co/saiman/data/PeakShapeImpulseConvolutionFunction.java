@@ -33,7 +33,6 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import uk.co.strangeskies.mathematics.Interval;
-import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.observable.ImmutableObservable;
 import uk.co.strangeskies.observable.Observable;
 
@@ -120,11 +119,6 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
   @Override
   public Range<UR> range() {
     return range;
-  }
-
-  @Override
-  public ContinuousFunction<UD, UR> getValue() {
-    return this;
   }
 
   @Override
@@ -269,7 +263,7 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
   }
 
   @Override
-  public Observable<Expression<? extends ContinuousFunction<UD, UR>>> invalidations() {
+  public Observable<ContinuousFunction<UD, UR>> changes() {
     return ImmutableObservable.instance();
   }
 }

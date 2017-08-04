@@ -48,7 +48,6 @@ import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.chemistry.msapex.impl.ChemicalElementTile.Size;
 import uk.co.strangeskies.observable.Disposable;
 import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.Observation;
 import uk.co.strangeskies.observable.Observer;
 
 /**

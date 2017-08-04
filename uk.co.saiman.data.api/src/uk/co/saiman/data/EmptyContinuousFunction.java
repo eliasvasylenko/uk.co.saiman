@@ -30,7 +30,6 @@ package uk.co.saiman.data;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.expression.Expression;
 import uk.co.strangeskies.observable.ImmutableObservable;
 import uk.co.strangeskies.observable.Observable;
 
@@ -60,11 +59,6 @@ class EmptyContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
   }
 
   @Override
-  public ContinuousFunction<UD, UR> getValue() {
-    return this;
-  }
-
-  @Override
   public SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
     return this;
   }
@@ -75,7 +69,7 @@ class EmptyContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
   }
 
   @Override
-  public Observable<Expression<? extends ContinuousFunction<UD, UR>>> invalidations() {
+  public Observable<ContinuousFunction<UD, UR>> changes() {
     return ImmutableObservable.instance();
   }
 }

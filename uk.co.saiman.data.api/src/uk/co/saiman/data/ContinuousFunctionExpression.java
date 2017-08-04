@@ -27,18 +27,21 @@
  */
 package uk.co.saiman.data;
 
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.expression.Expression;
-import uk.co.strangeskies.mathematics.expression.ExpressionDependency;
-import uk.co.strangeskies.mathematics.expression.LockingExpression;
+import uk.co.strangeskies.observable.Disposable;
+import uk.co.strangeskies.observable.HotObservable;
+import uk.co.strangeskies.observable.Observable;
 
 /**
  * A basic wrapper around another continuous function which reflects all changes
  * in that function, and propagates events to listeners. The function which is
- * wrapped can be changed via {@link #setComponent(Expression)}, which will
- * notify listeners of the modification.
+ * wrapped can be changed via {@link #setComponent(ContinuousFunction)}, which
+ * will notify listeners of the modification.
  * 
  * @param <UD>
  *          the type of the units of measurement of values in the domain
@@ -46,9 +49,12 @@ import uk.co.strangeskies.mathematics.expression.LockingExpression;
  *          the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
-public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Quantity<UR>> extends
-    LockingExpression<ContinuousFunction<UD, UR>> implements ContinuousFunctionDecorator<UD, UR> {
-  private ExpressionDependency<? extends ContinuousFunction<UD, UR>> component;
+public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Quantity<UR>>
+    implements ContinuousFunctionDecorator<UD, UR> {
+  private ContinuousFunction<UD, UR> component;
+  private Disposable componentDisposable;
+  private final ReadWriteLock lock = new ReentrantReadWriteLock();
+  private HotObservable<ContinuousFunction<UD, UR>> changes = new HotObservable<>();
 
   /**
    * Create a default empty expression about the function
@@ -75,11 +81,11 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
 
   @Override
   public ContinuousFunction<UD, UR> getComponent() {
-    getReadLock().lock();
     try {
-      return component.getExpression().getValue();
+      lock.readLock().lock();
+      return component;
     } finally {
-      getReadLock().unlock();
+      lock.readLock().unlock();
     }
   }
 
@@ -89,16 +95,18 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
    * @param component
    *          The continuous function we wish to wrap
    */
-  public void setComponent(Expression<? extends ContinuousFunction<UD, UR>> component) {
-    beginWrite();
-
+  public void setComponent(ContinuousFunction<UD, UR> component) {
     try {
-      if (this.component != null)
-        this.component.cancel();
-      this.component = addDependency(component);
+      lock.writeLock().lock();
+      if (this.componentDisposable != null)
+        this.componentDisposable.cancel();
+      this.component = component;
+      this.componentDisposable = component.changes().observe(m -> changes.next(this));
     } finally {
-      endWrite();
+      lock.writeLock().unlock();
     }
+
+    changes.next(this);
   }
 
   @Override
@@ -107,8 +115,7 @@ public class ContinuousFunctionExpression<UD extends Quantity<UD>, UR extends Qu
   }
 
   @Override
-  protected ContinuousFunction<UD, UR> evaluate() {
-    component.getExpression().getValue();
-    return this;
+  public Observable<? extends ContinuousFunction<UD, UR>> changes() {
+    return changes;
   }
 }

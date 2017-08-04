@@ -39,16 +39,18 @@ import uk.co.saiman.instrument.stage.XYStageDevice;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public interface XYStageExperimentType<T extends XYStageConfiguration> extends SampleExperimentType<T> {
-	@Override
-	default String getName() {
-		return "XY Sample Stage";
-	}
+public interface XYStageExperimentType<T extends XYStageConfiguration>
+    extends SampleExperimentType<T> {
+  @Override
+  default String getName() {
+    return "XY Sample Stage";
+  }
 
-	XYStageDevice device();
+  XYStageDevice device();
 
-	@Override
-	default void execute(ExperimentExecutionContext<T> context) {
-		device().requestStageOffset(context.node().getState().getX(), context.node().getState().getY());
-	}
+  @Override
+  default void execute(ExperimentExecutionContext<T> context) {
+    device().getXAxis().requestOffset(context.node().getState().getX());
+    device().getYAxis().requestOffset(context.node().getState().getY());
+  }
 }

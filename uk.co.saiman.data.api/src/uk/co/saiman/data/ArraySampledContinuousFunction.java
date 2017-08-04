@@ -46,93 +46,91 @@ import uk.co.strangeskies.mathematics.Interval;
  * @author Elias N Vasylenko
  */
 public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
-		extends LockingSampledContinuousFunction<UD, UR> {
-	private final double[] intensities;
-	private final SampledRange<UR> range;
+    extends LockingSampledContinuousFunction<UD, UR> {
+  private final double[] intensities;
+  private final SampledRange<UR> range;
 
-	/**
-	 * Instantiate with the given number of samples, values, and intensities.
-	 * Arrays are copied into the function, truncated to the sample length given,
-	 * or padded with 0s.
-	 * 
-	 * @param domain
-	 *          the domain of the function
-	 * @param unitRange
-	 *          the units of measurement of values in the range
-	 * @param intensities
-	 *          The Y values of the samples, in the codomain
-	 */
-	public ArraySampledContinuousFunction(SampledDomain<UD> domain, Unit<UR> unitRange, double[] intensities) {
-		super(domain, unitRange);
-		/*
-		 * TODO sort values
-		 */
-		this.intensities = Arrays.copyOf(intensities, domain.getDepth());
-		this.range = createDefaultRange(i -> intensities[i]);
-	}
+  /**
+   * Instantiate with the given number of samples, values, and intensities.
+   * Arrays are copied into the function, truncated to the sample length given,
+   * or padded with 0s.
+   * 
+   * @param domain
+   *          the domain of the function
+   * @param unitRange
+   *          the units of measurement of values in the range
+   * @param intensities
+   *          The Y values of the samples, in the codomain
+   */
+  public ArraySampledContinuousFunction(
+      SampledDomain<UD> domain,
+      Unit<UR> unitRange,
+      double[] intensities) {
+    super(domain, unitRange);
+    /*
+     * TODO sort values
+     */
+    this.intensities = Arrays.copyOf(intensities, domain.getDepth());
+    this.range = createDefaultRange(i -> intensities[i]);
+  }
 
-	protected SampledRange<UR> createDefaultRange(Function<Integer, Double> intensityAtIndex) {
-		return new SampledRange<UR>(this) {
-			@Override
-			public Unit<UR> getUnit() {
-				return getRangeUnit();
-			}
+  protected SampledRange<UR> createDefaultRange(Function<Integer, Double> intensityAtIndex) {
+    return new SampledRange<UR>(this) {
+      @Override
+      public Unit<UR> getUnit() {
+        return getRangeUnit();
+      }
 
-			@Override
-			public int getDepth() {
-				return domain().getDepth();
-			}
+      @Override
+      public int getDepth() {
+        return domain().getDepth();
+      }
 
-			@Override
-			public double getSample(int index) {
-				return read(() -> intensityAtIndex.apply(index));
-			}
+      @Override
+      public double getSample(int index) {
+        return read(() -> intensityAtIndex.apply(index));
+      }
 
-			@Override
-			public Interval<Double> getInterval() {
-				return read(() -> super.getInterval());
-			}
+      @Override
+      public Interval<Double> getInterval() {
+        return read(() -> super.getInterval());
+      }
 
-			@Override
-			public boolean equals(Object obj) {
-				return read(() -> super.equals(obj));
-			}
+      @Override
+      public boolean equals(Object obj) {
+        return read(() -> super.equals(obj));
+      }
 
-			@Override
-			public int hashCode() {
-				return read(() -> super.hashCode());
-			}
-		};
-	}
+      @Override
+      public int hashCode() {
+        return read(() -> super.hashCode());
+      }
+    };
+  }
 
-	@Override
-	public SampledRange<UR> range() {
-		return range;
-	}
+  @Override
+  public SampledRange<UR> range() {
+    return range;
+  }
 
-	/**
-	 * Safely modify the data of this sampled continuous function.
-	 * 
-	 * @param intensityMutation
-	 *          The mutation operation on the intensities of the samples, i.e. the
-	 *          Y values, in the codomain
-	 */
-	public void mutate(Consumer<double[]> intensityMutation) {
-		write(() -> intensityMutation.accept(intensities));
-	}
+  /**
+   * Safely modify the data of this sampled continuous function.
+   * 
+   * @param intensityMutation
+   *          The mutation operation on the intensities of the samples, i.e. the
+   *          Y values, in the codomain
+   */
+  public void mutate(Consumer<double[]> intensityMutation) {
+    write(() -> intensityMutation.accept(intensities));
+  }
 
-	@Override
-	public int getDepth() {
-		return domain().getDepth();
-	}
+  @Override
+  public int getDepth() {
+    return domain().getDepth();
+  }
 
-	@Override
-	public ArraySampledContinuousFunction<UD, UR> copy() {
-		return read(() -> new ArraySampledContinuousFunction<>(domain(), getRangeUnit(), intensities));
-	}
-
-	@Override
-	protected ContinuousFunction<UD, UR> evaluate() {
-		return this;
-	}
+  @Override
+  public ArraySampledContinuousFunction<UD, UR> copy() {
+    return read(() -> new ArraySampledContinuousFunction<>(domain(), getRangeUnit(), intensities));
+  }
 }
