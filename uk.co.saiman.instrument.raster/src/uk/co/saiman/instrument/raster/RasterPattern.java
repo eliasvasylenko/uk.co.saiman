@@ -27,49 +27,12 @@
  */
 package uk.co.saiman.instrument.raster;
 
-import static uk.co.strangeskies.utility.Enumeration.readableName;
-
 import java.util.Iterator;
 
 public interface RasterPattern {
-	enum RasterPatterns implements RasterPattern {
-		SNAKE {
-			@Override
-			public Iterator<RasterPosition> getPositionIterator(int width, int height) {
-				// TODO Auto-generated method stub
-				return null;
-			}
+  int getWidth();
 
-			@Override
-			public Iterator<RasterPosition> getReversePositionIterator(int width, int height) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		},
+  int getHeight();
 
-		SPIRAL {
-			@Override
-			public Iterator<RasterPosition> getPositionIterator(int width, int height) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public Iterator<RasterPosition> getReversePositionIterator(int width, int height) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		};
-
-		@Override
-		public String getName() {
-			return readableName(this);
-		}
-	}
-
-	String getName();
-
-	Iterator<RasterPosition> getPositionIterator(int width, int height);
-
-	Iterator<RasterPosition> getReversePositionIterator(int width, int height);
+  Iterator<RasterPosition> getPositionIterator();
 }

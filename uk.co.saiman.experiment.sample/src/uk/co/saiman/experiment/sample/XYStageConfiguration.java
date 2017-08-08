@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import java.util.stream.Stream;
+
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
@@ -48,4 +50,9 @@ public interface XYStageConfiguration extends StageConfiguration {
 
   @Override
   XYStageDevice stageDevice();
+
+  @Override
+  default Stream<Quantity<?>> coordinates() {
+    return Stream.of(getX(), getY());
+  }
 }

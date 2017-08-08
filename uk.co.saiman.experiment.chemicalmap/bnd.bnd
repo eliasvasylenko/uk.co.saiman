@@ -22,6 +22,6 @@ Export-Package: uk.co.saiman.experiment.chemicalmap
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
-	uk.co.saiman.data.api;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
 \
 	javax.measure.unit-api

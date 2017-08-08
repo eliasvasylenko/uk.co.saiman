@@ -42,8 +42,6 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SimulationProperties {
-	Localized<String> xyRasterStageSimulationDeviceName();
-
 	Localized<String> acquisitionSimulationDeviceName();
 
 	@Nested

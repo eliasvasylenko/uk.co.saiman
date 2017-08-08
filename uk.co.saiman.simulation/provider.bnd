@@ -1,5 +1,4 @@
 Bundle-Name: SAI :: Simulation :: Provider
 
 Private-Package: \
-	uk.co.saiman.simulation.experiment.impl,\
 	uk.co.saiman.simulation.instrument.impl

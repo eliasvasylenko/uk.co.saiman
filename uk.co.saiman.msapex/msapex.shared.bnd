@@ -11,17 +11,18 @@
 
 -runrequires.msapex:\
 	${req;org.apache.felix.configadmin},\
-	${req;uk.co.saiman.chemistry.msapex},\
+	${req;uk.co.saiman.msapex.chemistry},\
 	${req;uk.co.saiman.comms.saint},\
-	${req;uk.co.saiman.experiment.spectrum.msapex},\
-	${req;uk.co.saiman.experiment.chemicalmap.msapex},\
+	${req;uk.co.saiman.comms.copley},\
 	${req;uk.co.saiman.icons.fugue},\
-	${req;uk.co.saiman.instrument.acquisition.msapex},\
+	${req;uk.co.saiman.msapex.instrument.acquisition},\
 	${req;uk.co.saiman.instrument.provider},\
 	${req;uk.co.saiman.instrument.stage.msapex},\
 	${req;uk.co.saiman.msapex},\
 	${req;uk.co.saiman.msapex.camera},\
-	${req;uk.co.saiman.simulation.msapex},\
+	${req;uk.co.saiman.msapex.simulation},\
+	${req;uk.co.saiman.msapex.experiment.spectrum},\
+	${req;uk.co.saiman.msapex.experiment.chemicalmap},\
 	${req;uk.co.saiman.simulation.provider},\
 	${req;uk.co.saiman.webconsole.branding},\
 	${req;uk.co.saiman.webconsole.webresource},\

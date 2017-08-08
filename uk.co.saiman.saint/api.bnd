@@ -1,0 +1,5 @@
+Bundle-Name: SAI :: SAINT :: API
+
+Export-Package: \
+	uk.co.saiman.saint,\
+	uk.co.saiman.saint.simulation

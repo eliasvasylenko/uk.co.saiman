@@ -13,6 +13,6 @@ Export-Package: uk.co.saiman.instrument.stage
 \
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.data.api;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
 \
 	javax.measure.unit-api

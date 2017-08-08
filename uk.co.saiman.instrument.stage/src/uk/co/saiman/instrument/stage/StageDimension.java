@@ -30,16 +30,16 @@ package uk.co.saiman.instrument.stage;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
+import uk.co.strangeskies.mathematics.Interval;
+
 public interface StageDimension<T extends Quantity<T>> {
   Unit<T> getUnit();
 
-  Quantity<T> getMinimumOffset();
+  Interval<Quantity<T>> getBounds();
 
-  Quantity<T> getMaximumOffset();
+  void requestPosition(Quantity<T> offset);
 
-  void requestOffset(Quantity<T> offset);
+  Quantity<T> getRequestedPosition();
 
-  Quantity<T> getRequestedOffset();
-
-  Quantity<T> getActualOffset();
+  Quantity<T> getActualPosition();
 }

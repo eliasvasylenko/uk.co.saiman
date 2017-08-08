@@ -119,8 +119,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
           return fileSpectrum;
         });
 
-    rasterDevice.startRasterOperation();
-    acquisitionDevice.startAcquisition();
+    startAcquisition();
 
     try {
       acquisition.get();
@@ -132,6 +131,8 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 
     context.results().get(chemicalMapResult).getData().get().save();
   }
+
+  protected abstract void startAcquisition();
 
   @Override
   public Stream<ResultType<?>> getResultTypes() {

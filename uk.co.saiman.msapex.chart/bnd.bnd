@@ -1,0 +1,29 @@
+Bundle-Name: SAI :: Data :: MSApex
+
+-include:\
+	${include.ss}/eclipse.plugin.bnd,\
+	${include.ss}/eclipse.platform.neon.bnd,\
+	${include.ss}/eclipse.fx.2.4.0.bnd
+
+-buildpath: \
+	uk.co.strangeskies.collections;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.text;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.reflection.token;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.expressions;version=latest,\
+	uk.co.strangeskies.eclipse;version=latest,\
+	uk.co.strangeskies.fx;version=latest,\
+\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.measurement.api;version=snapshot,\
+\
+	javax.measure.unit-api
+
+Export-Package: uk.co.saiman.msapex.chart
+
+-includeresource: \
+	res,\
+	{css=css}

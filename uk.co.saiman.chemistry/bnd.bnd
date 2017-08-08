@@ -7,7 +7,7 @@ Bundle-Name: SAI :: Chemistry
 	uk.co.strangeskies.mathematics;version=latest,\
 \
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.data.api;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
 \
 	javax.measure.unit-api
 

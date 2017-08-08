@@ -2,8 +2,6 @@ Bundle-Name: SAI :: MSApex :: Camera
 
 Export-Package: uk.co.saiman.msapex.camera
 
-Private-Package: uk.co.saiman.msapex.camera.impl
-
 -include:\
 	${include.ss}/eclipse.plugin.bnd,\
 	${include.ss}/eclipse.platform.neon.bnd,\
@@ -11,6 +9,8 @@ Private-Package: uk.co.saiman.msapex.camera.impl
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
+	uk.co.saiman.camera;version=snapshot,\
+\
 	uk.co.strangeskies.eclipse;version=latest,\
 	uk.co.strangeskies.fx;version=latest,\
 	uk.co.strangeskies.observable;version=latest,\

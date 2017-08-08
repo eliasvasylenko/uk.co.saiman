@@ -27,20 +27,10 @@
  */
 package uk.co.saiman.instrument.raster;
 
-import java.util.Set;
-
 import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.strangeskies.observable.Observable;
 
 public interface RasterDevice extends HardwareDevice {
-  Set<RasterPattern> availableRasterModes();
-
-  RasterPattern getRasterPattern();
-
-  void setRasterPattern(RasterPattern mode);
-
-  void setRasterSize(int width, int height);
-
   int getRasterWidth();
 
   int getRasterHeight();
@@ -49,13 +39,7 @@ public interface RasterDevice extends HardwareDevice {
     return getRasterHeight() * getRasterWidth();
   }
 
-  void setRasterDwell(int dwell);
-
-  int getRasterDwell();
-
-  void startRasterOperation();
-
-  boolean isOperating();
+  boolean isRasterOperating();
 
   RasterPosition getRasterPosition();
 

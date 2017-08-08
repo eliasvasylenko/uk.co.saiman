@@ -1,0 +1,11 @@
+Bundle-Name: SAI :: MSApex :: SAINT
+
+-include: ${include.ss}/eclipse.plugin.bnd
+
+-includeresource:\
+	{css=css},\
+	res,\
+	fragment.e4xmi
+
+Private-Package: \
+	uk.co.saiman.simulation.saint.msapex

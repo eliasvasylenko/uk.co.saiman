@@ -28,6 +28,8 @@
 package uk.co.saiman.instrument.stage.copley;
 
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
+import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
+import static uk.co.saiman.instrument.HardwareConnection.DISCONNECTED;
 
 import javax.measure.quantity.Length;
 
@@ -88,7 +90,6 @@ public class CopleyXYStageDevice implements XYStageDevice {
 
   @Override
   public ObservableValue<HardwareConnection> connectionState() {
-    return null; // TODO comms.status().map(s -> s == OPEN ? CONNECTED :
-                 // DISCONNECTED).toValue();
+    return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
   }
 }

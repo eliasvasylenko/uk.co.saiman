@@ -1,4 +1,0 @@
-Bundle-Name: SAI :: Simulation :: SAINT
-
-Private-Package: \
-	uk.co.saiman.simulation.saint.impl

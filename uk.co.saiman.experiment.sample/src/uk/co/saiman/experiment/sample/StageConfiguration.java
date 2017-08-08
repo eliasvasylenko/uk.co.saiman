@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 import javax.measure.Quantity;
 
 import uk.co.saiman.instrument.stage.StageDevice;
-import uk.co.saiman.instrument.stage.msapex.StageDiagram;
 
 /**
  * A base interface for sample stage configuration.
@@ -41,15 +40,6 @@ import uk.co.saiman.instrument.stage.msapex.StageDiagram;
  */
 public interface StageConfiguration extends SampleConfiguration {
   StageDevice stageDevice();
-
-  /**
-   * The image corresponding to the {@link StageDiagram#getImage() image} of the
-   * {@link StageDevice#getDiagram() device diagram} at the time the experiment
-   * was executed. This is persisted as part of the configuration so that it can
-   * be visualized post-execution on systems where the original device interface
-   * is unavailable.
-   */
-  void stageImage(); // TODO actually return an image...
 
   Stream<Quantity<?>> coordinates();
 }

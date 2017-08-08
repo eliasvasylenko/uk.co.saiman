@@ -10,7 +10,7 @@ Bundle-Name: SAI :: Instrument
 	uk.co.strangeskies.reflection.token;version=latest,\
 \
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.data.api;version=snapshot
+	uk.co.saiman.data;version=snapshot
 
 Export-Package: \
 	uk.co.saiman.instrument

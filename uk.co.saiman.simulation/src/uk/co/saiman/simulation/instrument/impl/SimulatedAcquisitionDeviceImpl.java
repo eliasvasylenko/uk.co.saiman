@@ -55,12 +55,12 @@ import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.instrument.HardwareConnection;
+import uk.co.saiman.instrument.HardwareDevice;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
-import uk.co.saiman.simulation.instrument.SimulatedDevice;
-import uk.co.saiman.simulation.instrument.SimulatedSampleDevice;
+import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
 import uk.co.strangeskies.log.Log;
 import uk.co.strangeskies.observable.HotObservable;
 import uk.co.strangeskies.observable.Observable;
@@ -77,12 +77,12 @@ import uk.co.strangeskies.text.properties.PropertyLoader;
     configurationPid = SimulatedAcquisitionDeviceImpl.CONFIGURATION_PID,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { SimulatedAcquisitionDevice.class, AcquisitionDevice.class })
-public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, SimulatedAcquisitionDevice {
+public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, SimulatedAcquisitionDevice {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.instrument.acquisition";
 
   private class ExperimentConfiguration {
     private final DetectorSimulation detector;
-    private final SimulatedSampleDevice sample;
+    private final SimulatedSampleSource sample;
     private final SampledDomain<Time> domain;
 
     private int counter;
@@ -167,8 +167,8 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
   private Set<DetectorSimulation> detectors = new HashSet<>();
   private DetectorSimulation detector;
 
-  private Set<SimulatedSampleDevice> samples = new HashSet<>();
-  private SimulatedSampleDevice sample;
+  private Set<SimulatedSampleSource> samples = new HashSet<>();
+  private SimulatedSampleSource sample;
 
   /*
    * External Acquisition State
@@ -312,7 +312,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
    *          a new sample simulation option
    */
   @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
-  public void addSampleSimulation(SimulatedSampleDevice sample) {
+  public void addSampleSimulation(SimulatedSampleSource sample) {
     synchronized (samples) {
       if (samples.add(sample) && this.sample == null) {
         this.sample = sample;
@@ -325,7 +325,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
    * @param sample
    *          a sample simulation option to remove
    */
-  public void removeSampleSimulation(SimulatedSampleDevice sample) {
+  public void removeSampleSimulation(SimulatedSampleSource sample) {
     synchronized (samples) {
       if (samples.remove(sample) && this.sample == sample) {
         if (samples.isEmpty()) {
@@ -339,21 +339,21 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
   }
 
   @Override
-  public Set<SimulatedSampleDevice> getSamples() {
+  public Set<SimulatedSampleSource> getSamples() {
     synchronized (samples) {
       return unmodifiableSet(samples);
     }
   }
 
   @Override
-  public SimulatedSampleDevice getSample() {
+  public SimulatedSampleSource getSample() {
     synchronized (samples) {
       return sample;
     }
   }
 
   @Override
-  public void setSample(SimulatedSampleDevice sample) {
+  public void setSample(SimulatedSampleSource sample) {
     synchronized (samples) {
       if (this.sample != sample) {
         /*-
@@ -367,9 +367,9 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
     }
   }
 
-  private SimulatedSampleDevice waitForSample() throws InterruptedException {
+  private SimulatedSampleSource waitForSample() throws InterruptedException {
     synchronized (samples) {
-      SimulatedSampleDevice sample = getSample();
+      SimulatedSampleSource sample = getSample();
 
       while (sample == null) {
         samples.wait();
@@ -448,7 +448,7 @@ public class SimulatedAcquisitionDeviceImpl implements SimulatedDevice, Simulate
 
   private void acquire() {
     while (!finalised) {
-      SimulatedSampleDevice sample;
+      SimulatedSampleSource sample;
       DetectorSimulation detector;
       SampledDomain<Time> domain;
       int counter;

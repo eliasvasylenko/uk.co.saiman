@@ -1,0 +1,30 @@
+Bundle-Name: SAI :: MSApex :: Chemistry
+
+-include:\
+	${include.ss}/eclipse.plugin.bnd,\
+	${include.ss}/eclipse.platform.neon.bnd,\
+	${include.ss}/eclipse.fx.2.4.0.bnd,\
+	${build}/include/fugue.icons.bnd
+
+-buildpath: \
+	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.strangeskies.mathematics;version=latest,\
+	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.strangeskies.fx;version=latest,\
+	uk.co.strangeskies.eclipse;version=latest,\
+	uk.co.strangeskies.observable;version=latest,\
+	javax.measure.unit-api,\
+	uk.co.saiman.chemistry;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.msapex.chart;version=snapshot,\
+	uk.co.saiman.measurement.api;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
+
+Private-Package: uk.co.saiman.msapex.chemistry.impl
+
+Export-Package: uk.co.saiman.msapex.chemistry
+
+-includeresource: \
+	{fragment.e4xmi},\
+	res,\
+	{css=css}

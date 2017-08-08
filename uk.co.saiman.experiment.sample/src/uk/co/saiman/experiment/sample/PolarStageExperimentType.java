@@ -50,7 +50,7 @@ public interface PolarStageExperimentType<T extends PolarStageConfiguration>
 
   @Override
   default void execute(ExperimentExecutionContext<T> context) {
-    device().getRadius().requestOffset(context.node().getState().getRadius());
-    device().getAngle().requestOffset(context.node().getState().getAngle());
+    device().getRadius().requestPosition(context.node().getState().getRadius());
+    device().getAngle().requestPosition(context.node().getState().getAngle());
   }
 }

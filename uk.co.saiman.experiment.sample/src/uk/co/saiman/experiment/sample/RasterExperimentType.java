@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
@@ -47,9 +46,4 @@ public interface RasterExperimentType<T extends RasterConfiguration> extends Exp
 	}
 
 	RasterDevice device();
-
-	@Override
-	default void execute(ExperimentExecutionContext<T> context) {
-		device().setRasterSize(context.node().getState().getXSteps(), context.node().getState().getYSteps());
-	}
 }
