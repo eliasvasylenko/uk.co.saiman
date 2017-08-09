@@ -1,14 +1,13 @@
-Bundle-Name: SAI :: Utilities
-
--buildpath: \
-	org.apache.felix.configadmin;version=latest,\
-\
-	uk.co.strangeskies.utilities;version=latest,\
-	uk.co.strangeskies.text;version=latest
-
 Export-Package: \
-	uk.co.saiman.utilities,\
-	uk.co.saiman
+	uk.co.saiman.flowcontrol,\
+	uk.co.saiman.function,\
+	uk.co.saiman.log,\
+	uk.co.saiman.reflection.classloading,\
+	uk.co.saiman.utility,\
+	uk.co.saiman.utility.tuple
 
--includeresource: \
-	{bundle.properties}
+Bundle-Name: SAI :: Utilities
+Bundle-Description: \
+	Common Java utilities for SAI projects, including generic \
+	pseudo-enums, fast, in-memory caches, tuples, functional helpers, \
+	and more.

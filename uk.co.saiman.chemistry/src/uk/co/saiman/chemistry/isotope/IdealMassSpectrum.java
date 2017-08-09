@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.chemistry.isotope;
 
-import static uk.co.strangeskies.mathematics.Interval.bounded;
+import static uk.co.saiman.mathematics.Interval.bounded;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,7 +38,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 public class IdealMassSpectrum {
   // data

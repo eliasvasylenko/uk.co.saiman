@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.processing;
 
-import static uk.co.strangeskies.reflection.token.TypeToken.forClass;
+import static uk.co.saiman.reflection.token.TypeToken.forClass;
 
-import uk.co.strangeskies.reflection.token.TypeParameter;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypeParameter;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * A process to be applied to a target to create a result.

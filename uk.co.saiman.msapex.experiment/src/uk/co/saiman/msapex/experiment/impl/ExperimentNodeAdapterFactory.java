@@ -29,8 +29,8 @@ package uk.co.saiman.msapex.experiment.impl;
 
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static uk.co.strangeskies.collection.stream.StreamUtilities.streamOptional;
-import static uk.co.strangeskies.collection.stream.StreamUtilities.tryOptional;
+import static uk.co.saiman.collection.stream.StreamUtilities.streamOptional;
+import static uk.co.saiman.collection.stream.StreamUtilities.tryOptional;
 
 import java.util.stream.Stream;
 

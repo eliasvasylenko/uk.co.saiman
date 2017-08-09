@@ -1,7 +1,7 @@
 -buildpath: \
-	uk.co.strangeskies.observable;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
-	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
 \
 	javax.measure.unit-api;version=latest,\
 	tec.uom.se;version=latest,\

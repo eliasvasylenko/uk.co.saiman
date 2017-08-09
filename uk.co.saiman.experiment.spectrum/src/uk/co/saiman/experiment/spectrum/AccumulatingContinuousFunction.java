@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static uk.co.strangeskies.observable.Observer.onObservation;
+import static uk.co.saiman.observable.Observer.onObservation;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -38,9 +38,9 @@ import uk.co.saiman.data.ArraySampledContinuousFunction;
 import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
-import uk.co.strangeskies.observable.HotObservable;
-import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.Observer;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.Observer;
 
 /**
  * A continuous function to accumulate the sum of input continuous functions.

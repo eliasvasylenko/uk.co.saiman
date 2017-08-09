@@ -29,8 +29,8 @@ package uk.co.saiman.experiment.impl;
 
 import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.newDirectoryStream;
-import static uk.co.strangeskies.collection.stream.StreamUtilities.upcastStream;
-import static uk.co.strangeskies.text.properties.PropertyLoader.getDefaultProperties;
+import static uk.co.saiman.collection.stream.StreamUtilities.upcastStream;
+import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -51,8 +51,8 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.strangeskies.collection.stream.StreamUtilities;
-import uk.co.strangeskies.log.Log;
+import uk.co.saiman.collection.stream.StreamUtilities;
+import uk.co.saiman.log.Log;
 
 /**
  * Reference implementation of {@link Workspace}.

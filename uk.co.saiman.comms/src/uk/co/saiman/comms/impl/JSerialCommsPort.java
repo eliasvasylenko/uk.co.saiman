@@ -43,9 +43,9 @@ import com.fazecast.jSerialComm.SerialPortPacketListener;
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
-import uk.co.strangeskies.observable.Disposable;
-import uk.co.strangeskies.observable.HotObservable;
-import uk.co.strangeskies.observable.Observer;
+import uk.co.saiman.observable.Disposable;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observer;
 
 /**
  * A {@link uk.co.saiman.comms.serial.SerialPort serial port} implementation

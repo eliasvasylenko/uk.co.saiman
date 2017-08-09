@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.simulation.
+ * This file is part of uk.co.saiman.msapex.simulation.
  *
- * uk.co.saiman.simulation is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.simulation is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.simulation is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.simulation is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -38,7 +38,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
-import uk.co.strangeskies.reflection.resource.Jar;
+import uk.co.saiman.reflection.resource.Jar;
 
 /**
  * Add an experiment to the workspace

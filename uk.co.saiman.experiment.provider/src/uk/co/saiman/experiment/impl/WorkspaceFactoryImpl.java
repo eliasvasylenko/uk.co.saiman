@@ -43,8 +43,8 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.WorkspaceFactory;
-import uk.co.strangeskies.log.Log;
-import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
  * Reference implementation of {@link WorkspaceFactory}.

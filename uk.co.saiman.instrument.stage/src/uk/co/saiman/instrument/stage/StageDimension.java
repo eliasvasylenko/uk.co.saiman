@@ -30,7 +30,7 @@ package uk.co.saiman.instrument.stage;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 public interface StageDimension<T extends Quantity<T>> {
   Unit<T> getUnit();

@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment;
 
-import uk.co.strangeskies.text.properties.Localized;
+import uk.co.saiman.text.properties.Localized;
 
 /**
  * A problem with experiment configuration or processing.

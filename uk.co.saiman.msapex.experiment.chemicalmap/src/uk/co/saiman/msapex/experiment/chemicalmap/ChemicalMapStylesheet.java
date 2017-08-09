@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.experiment.chemicalmap.msapex.
+ * This file is part of uk.co.saiman.msapex.experiment.chemicalmap.
  *
- * uk.co.saiman.experiment.chemicalmap.msapex is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.experiment.chemicalmap is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.experiment.chemicalmap.msapex is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.experiment.chemicalmap is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.

@@ -29,11 +29,11 @@ package uk.co.saiman.experiment;
 
 import java.nio.file.Path;
 
-import uk.co.saiman.SaiProperties;
-import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Nested;
-import uk.co.strangeskies.text.properties.PropertyConfiguration;
-import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.text.properties.Localized;
+import uk.co.saiman.text.properties.Nested;
+import uk.co.saiman.text.properties.PropertyConfiguration;
+import uk.co.saiman.text.properties.SaiProperties;
+import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
 
 /**
  * Properties interface for texts relating to experiments.

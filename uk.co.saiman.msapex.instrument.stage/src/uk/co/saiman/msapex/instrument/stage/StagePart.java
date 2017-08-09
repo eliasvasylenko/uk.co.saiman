@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.instrument.stage.msapex.
+ * This file is part of uk.co.saiman.msapex.instrument.stage.
  *
- * uk.co.saiman.instrument.stage.msapex is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.instrument.stage is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.instrument.stage.msapex is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.instrument.stage is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.msapex.instrument.stage;
 
-import static uk.co.strangeskies.fx.FxUtilities.wrap;
-import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.saiman.fx.FxUtilities.wrap;
+import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -46,9 +46,9 @@ import javafx.scene.layout.Pane;
 import uk.co.saiman.experiment.sample.StageConfiguration;
 import uk.co.saiman.instrument.stage.StageDevice;
 import uk.co.saiman.instrument.stage.StageProperties;
-import uk.co.strangeskies.eclipse.AdaptNamed;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.eclipse.ObservableService;
+import uk.co.saiman.eclipse.AdaptNamed;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.ObservableService;
 
 /**
  * An Eclipse part for management and display of acquisition devices.

@@ -6,10 +6,10 @@ Export-Package: uk.co.saiman.instrument.stage
 	l10n
 
 -buildpath:\
-	uk.co.strangeskies.utilities;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
-	uk.co.strangeskies.mathematics;version=latest,\
-	uk.co.strangeskies.reflection;version=latest,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
 \
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

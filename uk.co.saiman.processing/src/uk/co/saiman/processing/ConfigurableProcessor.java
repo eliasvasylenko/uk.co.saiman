@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.processing;
 
-import static uk.co.strangeskies.reflection.token.TypeToken.forClass;
+import static uk.co.saiman.reflection.token.TypeToken.forClass;
 
-import uk.co.strangeskies.reflection.token.TypeParameter;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypeParameter;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * Conceptually, a configurable {@link Processor}. This interface consumes a

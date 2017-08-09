@@ -36,11 +36,11 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.strangeskies.eclipse.EclipseTreeContribution;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
-import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.fx.TreeTextContribution;
+import uk.co.saiman.eclipse.EclipseTreeContribution;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.fx.PseudoClassTreeCellContribution;
+import uk.co.saiman.fx.TreeItemData;
+import uk.co.saiman.fx.TreeTextContribution;
 
 /**
  * Contribution for root experiment nodes in the experiment tree

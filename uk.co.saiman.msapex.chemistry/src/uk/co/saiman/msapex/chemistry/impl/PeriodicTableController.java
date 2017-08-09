@@ -46,9 +46,9 @@ import javafx.scene.layout.GridPane;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.msapex.chemistry.impl.ChemicalElementTile.Size;
-import uk.co.strangeskies.observable.Disposable;
-import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.Observer;
+import uk.co.saiman.observable.Disposable;
+import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.Observer;
 
 /**
  * A JavaFX UI component for display of a {@link PeriodicTable}.

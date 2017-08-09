@@ -28,7 +28,7 @@
 package uk.co.saiman.comms;
 
 import static uk.co.saiman.comms.BitArray.fromInt;
-import static uk.co.strangeskies.reflection.Types.getErasedType;
+import static uk.co.saiman.reflection.Types.getErasedType;
 
 import java.lang.reflect.Type;
 

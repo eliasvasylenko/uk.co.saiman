@@ -33,11 +33,11 @@ import org.osgi.service.component.annotations.ServiceScope;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.sample.SampleConfiguration;
 import uk.co.saiman.experiment.sample.SampleExperimentType;
-import uk.co.strangeskies.eclipse.EclipseTreeContribution;
-import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
-import uk.co.strangeskies.fx.TreeCellContribution;
-import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.fx.TreeTextContribution;
+import uk.co.saiman.eclipse.EclipseTreeContribution;
+import uk.co.saiman.fx.PseudoClassTreeCellContribution;
+import uk.co.saiman.fx.TreeCellContribution;
+import uk.co.saiman.fx.TreeItemData;
+import uk.co.saiman.fx.TreeTextContribution;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the

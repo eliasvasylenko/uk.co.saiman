@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.simulation.
+ * This file is part of uk.co.saiman.saint.
  *
- * uk.co.saiman.simulation is free software: you can redistribute it and/or modify
+ * uk.co.saiman.saint is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.simulation is distributed in the hope that it will be useful,
+ * uk.co.saiman.saint is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -47,10 +47,10 @@ import uk.co.saiman.simulation.instrument.ImageSimulatedSampleSource;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
-import uk.co.strangeskies.mathematics.Interval;
-import uk.co.strangeskies.observable.HotObservable;
-import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
 public class CopleyXYStageSimulatedSampleSource

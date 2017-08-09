@@ -28,8 +28,8 @@
 package uk.co.saiman.msapex.camera;
 
 import static java.util.Collections.unmodifiableSet;
-import static uk.co.strangeskies.fx.FxUtilities.wrap;
-import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.saiman.fx.FxUtilities.wrap;
+import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import java.util.Set;
 
@@ -46,8 +46,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import uk.co.saiman.camera.CameraDevice;
 import uk.co.saiman.camera.CameraProperties;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.eclipse.ObservableService;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.ObservableService;
 
 /**
  * An Eclipse part for management and display of acquisition devices.

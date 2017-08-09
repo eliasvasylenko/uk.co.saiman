@@ -1,18 +1,18 @@
 -include:\
-	${include.ss}/felix.bndrun,\
-	${include.ss}/utilities.bnd
+	${build}/include/felix.bndrun,\
+	${build}/include/utilities.bnd
 
 -runrequires:\
 	${req;uk.co.saiman.comms.saint},\
 	${req;uk.co.saiman.comms.copley},\
 	${req;uk.co.saiman.utilities},\
 	${req;uk.co.saiman.webconsole},\
-	${req;uk.co.strangeskies.configadmin.persistence}
+	${req;uk.co.saiman.configadmin.persistence}
 
 -runbundles: \
 	org.apache.felix.scr;version='[2.0.2,2.0.3)',\
 	org.apache.felix.configadmin;version='[1.8.14,1.8.15)',\
-	uk.co.strangeskies.configadmin.persistence;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.configadmin.persistence;version='[1.0.13,1.0.14)',\
 	org.apache.felix.log;version='[1.0.1,1.0.2)',\
 	org.eclipse.osgi.services;version='[3.5.0,3.5.1)',\
 	org.eclipse.equinox.metatype;version='[1.4.100,1.4.101)',\
@@ -37,15 +37,15 @@
 	osgi.enroute.web.simple.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.webconsole.xray.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.webconsole.xray.provider;version='[2.0.0,2.0.1)',\
-	uk.co.strangeskies.jetty.logger;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.text;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.text.provider;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.observable;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.osgi.api;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.osgi.provider;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.collections;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.reflection;version='[1.0.13,1.0.14)',\
-	uk.co.strangeskies.utilities;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.jetty.logger;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.text;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.text.provider;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.observable;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.osgi.api;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.osgi.provider;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.collections;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.reflection;version='[1.0.13,1.0.14)',\
+	uk.co.saiman.utilities;version='[1.0.13,1.0.14)',\
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
@@ -64,7 +64,7 @@
 	uk.co.saiman.webconsole.branding;version=snapshot
 
 -runproperties:\
-	uk.co.strangeskies.configadmin.persistence=~/.saiman/config
+	uk.co.saiman.configadmin.persistence=~/.saiman/config
 
 Subsystem-SymbolicName: uk.co.saiman.comms.application
 Subsystem-Type: osgi.subsystem.application

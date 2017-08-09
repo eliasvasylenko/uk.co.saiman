@@ -40,14 +40,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.strangeskies.eclipse.EclipseTreeContribution;
-import uk.co.strangeskies.eclipse.MenuTreeCellContribution;
-import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
-import uk.co.strangeskies.fx.TreeChildContribution;
-import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.fx.TreeTextContribution;
-import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypedObject;
+import uk.co.saiman.eclipse.EclipseTreeContribution;
+import uk.co.saiman.eclipse.MenuTreeCellContribution;
+import uk.co.saiman.fx.PseudoClassTreeCellContribution;
+import uk.co.saiman.fx.TreeChildContribution;
+import uk.co.saiman.fx.TreeItemData;
+import uk.co.saiman.fx.TreeTextContribution;
+import uk.co.saiman.reflection.token.ReifiedToken;
+import uk.co.saiman.reflection.token.TypedObject;
 
 /**
  * Contribution for all experiment nodes in the experiment tree

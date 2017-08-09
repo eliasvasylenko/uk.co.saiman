@@ -31,6 +31,6 @@ import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-import uk.co.strangeskies.observable.Observable;
+import uk.co.saiman.observable.Observable;
 
 public interface CommsStream extends Closeable, Observable<ByteBuffer>, WritableByteChannel {}

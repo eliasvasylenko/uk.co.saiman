@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.data.api.
+ * This file is part of uk.co.saiman.data.
  *
- * uk.co.saiman.data.api is free software: you can redistribute it and/or modify
+ * uk.co.saiman.data is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.data.api is distributed in the hope that it will be useful,
+ * uk.co.saiman.data is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,7 +30,7 @@ package uk.co.saiman.data;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 public abstract class SampledRange<U extends Quantity<U>> implements Range<U>, SampledDimension<U> {
   private final SampledContinuousFunction<?, U> function;

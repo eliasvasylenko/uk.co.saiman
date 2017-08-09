@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
-import static uk.co.strangeskies.reflection.token.TypedObject.typedObject;
+import static uk.co.saiman.reflection.token.TypedObject.typedObject;
 
 import java.util.stream.Stream;
 
@@ -38,12 +38,12 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.strangeskies.eclipse.EclipseTreeContribution;
-import uk.co.strangeskies.fx.TreeCellContribution;
-import uk.co.strangeskies.fx.TreeChildContribution;
-import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.reflection.token.TypeToken;
-import uk.co.strangeskies.reflection.token.TypedObject;
+import uk.co.saiman.eclipse.EclipseTreeContribution;
+import uk.co.saiman.fx.TreeCellContribution;
+import uk.co.saiman.fx.TreeChildContribution;
+import uk.co.saiman.fx.TreeItemData;
+import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypedObject;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the

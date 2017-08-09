@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.comms;
 
-import uk.co.strangeskies.observable.ObservableValue;
+import uk.co.saiman.observable.ObservableValue;
 
 /**
  * An interface over a comms channel to a piece of hardware.

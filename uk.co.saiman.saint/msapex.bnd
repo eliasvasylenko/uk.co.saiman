@@ -1,6 +1,6 @@
 Bundle-Name: SAI :: MSApex :: SAINT
 
--include: ${include.ss}/eclipse.plugin.bnd
+-include: ${build}/include/eclipse.plugin.bnd
 
 -includeresource:\
 	{css=css},\

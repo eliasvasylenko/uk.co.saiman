@@ -1,0 +1,8 @@
+Bundle-Name: SAI :: OSGi Utilities :: API
+Bundle-Description: \
+	The API specification for a generic service interceptor \
+	and wrapper/decorator.
+
+Export-Package: \
+	uk.co.saiman.osgi,\
+	uk.co.saiman.osgi.servicewrapper

@@ -29,7 +29,7 @@ package uk.co.saiman.msapex.experiment;
 
 import javafx.scene.Node;
 import uk.co.saiman.experiment.Result;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * A result editor contribution is injected by an eclipse context. The

@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.experiment.spectrum.msapex.
+ * This file is part of uk.co.saiman.msapex.experiment.spectrum.
  *
- * uk.co.saiman.experiment.spectrum.msapex is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.experiment.spectrum is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.experiment.spectrum.msapex is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.experiment.spectrum is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -35,12 +35,12 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.msapex.experiment.ExperimentPart;
-import uk.co.strangeskies.eclipse.CommandTreeCellContribution;
-import uk.co.strangeskies.eclipse.EclipseTreeContribution;
-import uk.co.strangeskies.fx.PseudoClassTreeCellContribution;
-import uk.co.strangeskies.fx.TreeCellContribution;
-import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.fx.TreeTextContribution;
+import uk.co.saiman.eclipse.CommandTreeCellContribution;
+import uk.co.saiman.eclipse.EclipseTreeContribution;
+import uk.co.saiman.fx.PseudoClassTreeCellContribution;
+import uk.co.saiman.fx.TreeCellContribution;
+import uk.co.saiman.fx.TreeItemData;
+import uk.co.saiman.fx.TreeTextContribution;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the

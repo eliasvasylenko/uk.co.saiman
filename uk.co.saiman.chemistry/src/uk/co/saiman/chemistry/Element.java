@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import uk.co.strangeskies.mathematics.values.DoubleValue;
+import uk.co.saiman.mathematics.values.DoubleValue;
 
 public class Element implements Comparable<Element> {
 	private final int atomicNumber;

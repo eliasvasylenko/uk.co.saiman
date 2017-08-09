@@ -45,7 +45,7 @@ import javax.measure.quantity.Time;
 import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.experiment.CachingObservableResource;
 import uk.co.saiman.experiment.CachingResource;
-import uk.co.strangeskies.function.ThrowingSupplier;
+import uk.co.saiman.function.ThrowingSupplier;
 
 public class ByteFormatSpectrum<C extends ContinuousFunction<Time, Dimensionless>>
     implements Spectrum {

@@ -32,7 +32,7 @@ import java.util.Set;
 import javax.measure.Quantity;
 import javax.measure.quantity.Mass;
 
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 /**
  * An interface providing a view over some chemical database.

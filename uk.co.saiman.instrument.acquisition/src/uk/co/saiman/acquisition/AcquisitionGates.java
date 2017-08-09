@@ -29,7 +29,7 @@ package uk.co.saiman.acquisition;
 
 import java.util.Set;
 
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 /**
  * A configuration interface over a set of time ranges describing pass and fail

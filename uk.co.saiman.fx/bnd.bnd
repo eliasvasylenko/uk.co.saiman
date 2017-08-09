@@ -1,0 +1,11 @@
+Export-Package: uk.co.saiman.fx
+
+Bundle-Name: SAI :: FX
+
+-buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot

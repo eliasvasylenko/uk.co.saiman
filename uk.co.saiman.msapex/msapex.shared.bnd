@@ -1,8 +1,8 @@
 -include:\
-	${include.ss}/felix.bndrun,\
-	${include.ss}/utilities.bnd,\
-	${include.ss}/eclipse.platform.neon.bndrun,\
-	${include.ss}/eclipse.fx.2.4.0.bndrun
+	${build}/include/felix.bndrun,\
+	${build}/include/utilities.bnd,\
+	${build}/include/eclipse.platform.oxygen.bndrun,\
+	${build}/include/eclipse.fx.3.0.0.bndrun
 
 -runblacklist.msapex: \
 	osgi.identity;filter:='(&(osgi.identity=org.eclipse.equinox.common)(!(version>=3.8.0)))',\
@@ -17,7 +17,7 @@
 	${req;uk.co.saiman.icons.fugue},\
 	${req;uk.co.saiman.msapex.instrument.acquisition},\
 	${req;uk.co.saiman.instrument.provider},\
-	${req;uk.co.saiman.instrument.stage.msapex},\
+	${req;uk.co.saiman.msapex.instrument.stage},\
 	${req;uk.co.saiman.msapex},\
 	${req;uk.co.saiman.msapex.camera},\
 	${req;uk.co.saiman.msapex.simulation},\
@@ -26,7 +26,7 @@
 	${req;uk.co.saiman.simulation.provider},\
 	${req;uk.co.saiman.webconsole.branding},\
 	${req;uk.co.saiman.webconsole.webresource},\
-	${req;uk.co.strangeskies.configadmin.persistence}
+	${req;uk.co.saiman.configadmin.persistence}
 
 -runvm.msapex:\
 	-Xmx1024m
@@ -39,4 +39,4 @@
 
 -runproperties.msapex:\
 	eclipse.product=uk.co.saiman.msapex.product,\
-	uk.co.strangeskies.configadmin.persistence=~/.saiman/config
+	uk.co.saiman.configadmin.persistence=~/.saiman/config

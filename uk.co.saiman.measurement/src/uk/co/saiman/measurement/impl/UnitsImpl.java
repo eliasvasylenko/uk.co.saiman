@@ -51,7 +51,7 @@ import tec.uom.se.format.QuantityFormat;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.format.SymbolMap;
 import uk.co.saiman.measurement.UnitBuilder;
-import uk.co.strangeskies.text.properties.LocaleProvider;
+import uk.co.saiman.text.properties.LocaleProvider;
 
 @Component
 public class UnitsImpl implements uk.co.saiman.measurement.Units {

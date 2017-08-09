@@ -77,14 +77,6 @@ Import-Package:\
 		name				=	"JFrog OSS";\
 		snapshotUrl			=	http://oss.jfrog.org/oss-snapshot-local
 
--plugin.StrangeSkies:\
-\
-	aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
-		name				=	"Strange Skies";\
-		pom					=	${build}/strangeskies.xml;\
-		releaseUrls			=	https://oss.jfrog.org/artifactory/libs-release;\
-		snapshotUrls		=	https://oss.jfrog.org/artifactory/libs-snapshot
-
 ## Run requirement groups:
 -runrequires.base:\
 	osgi.identity;filter:='(&(osgi.identity=osgi.enroute.logger.simple.provider)(version>=0))'
@@ -94,6 +86,7 @@ Import-Package:\
 	osgi.enroute.base.api;version=latest
 
 -testpath.base=\
+	org.jmockit:jmockit,\
 	osgi.enroute.junit.wrapper,\
 	osgi.enroute.hamcrest.wrapper,\
 	org.hamcrest:java-hamcrest

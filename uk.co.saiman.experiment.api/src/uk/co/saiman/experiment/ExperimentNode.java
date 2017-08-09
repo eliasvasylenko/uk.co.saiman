@@ -28,17 +28,17 @@
 package uk.co.saiman.experiment;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.strangeskies.reflection.token.TypeToken.forType;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.strangeskies.collection.stream.StreamUtilities;
-import uk.co.strangeskies.observable.ObservableValue;
-import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypeArgument;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.collection.stream.StreamUtilities;
+import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.reflection.token.ReifiedToken;
+import uk.co.saiman.reflection.token.TypeArgument;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * This class provides a common interface for manipulating, inspecting, and

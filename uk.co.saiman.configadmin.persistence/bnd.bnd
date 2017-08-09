@@ -1,0 +1,6 @@
+Bundle-Name: SAI :: Configuration Admin :: File Persistence
+
+-buildpath: \
+	org.apache.felix.configadmin;version=latest,\
+
+Private-Package: uk.co.saiman.configadmin.persistence

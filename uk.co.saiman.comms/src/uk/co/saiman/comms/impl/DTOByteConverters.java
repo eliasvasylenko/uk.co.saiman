@@ -28,7 +28,7 @@
 package uk.co.saiman.comms.impl;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.strangeskies.collection.stream.StreamUtilities.throwingMerger;
+import static uk.co.saiman.collection.stream.StreamUtilities.throwingMerger;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -59,7 +59,7 @@ import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.ElementBits;
 import uk.co.saiman.comms.EnumBitConverters;
 import uk.co.saiman.comms.PrimitiveBitConverters;
-import uk.co.strangeskies.collection.stream.StreamUtilities;
+import uk.co.saiman.collection.stream.StreamUtilities;
 
 @Component
 public class DTOByteConverters implements ByteConverters {

@@ -47,7 +47,7 @@ import javax.swing.event.EventListenerList;
 import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Isotope;
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 public class IsotopeDistribution {
   // mass / probability

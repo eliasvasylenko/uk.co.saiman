@@ -1,0 +1,18 @@
+Export-Package: \
+	uk.co.saiman.text,\
+	uk.co.saiman.text.parsing,\
+	uk.co.saiman.text.properties,\
+	uk.co.saiman.text.properties.localization
+
+Bundle-Name: SAI :: Text
+
+Bundle-Description: \
+	Common Java utilities for dealing with text.
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot
+
+-includeresource: \
+	OSGI-INF/l10n=l10n

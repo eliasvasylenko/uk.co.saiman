@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.chemistry.impl;
 
-import static uk.co.strangeskies.utility.Enumeration.next;
+import static uk.co.saiman.utility.Enumeration.next;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +41,7 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 
 import uk.co.saiman.msapex.chemistry.impl.ChemicalElementTile.Size;
-import uk.co.strangeskies.utility.Enumeration;
+import uk.co.saiman.utility.Enumeration;
 
 /**
  * Toggle available size options for the periodic table

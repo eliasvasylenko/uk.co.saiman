@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.data.msapex.
+ * This file is part of uk.co.saiman.msapex.chart.
  *
- * uk.co.saiman.data.msapex is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.chart is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.data.msapex is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.chart is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.chart;
 
-import static uk.co.strangeskies.fx.FxUtilities.wrap;
+import static uk.co.saiman.fx.FxUtilities.wrap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,9 +61,9 @@ import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.DataException;
 import uk.co.saiman.data.DataProperties;
 import uk.co.saiman.measurement.Units;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.mathematics.Interval;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * FXML controller for an annotatable data chart over a

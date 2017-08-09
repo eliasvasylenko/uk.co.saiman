@@ -40,8 +40,8 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.fx.TreeItemImpl;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.fx.TreeItemImpl;
 
 /**
  * Track acquisition devices available through OSGi services and select which

@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import uk.co.saiman.experiment.PersistedState;
-import uk.co.strangeskies.observable.HotObservable;
+import uk.co.saiman.observable.HotObservable;
 
 public class PersistedStateImpl extends HotObservable<PersistedState> implements PersistedState {
   private static final String CONFIGURATION_ELEMENT = "configuration";

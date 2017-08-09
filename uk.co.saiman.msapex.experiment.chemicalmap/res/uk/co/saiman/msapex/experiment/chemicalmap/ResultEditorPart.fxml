@@ -4,8 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-<?import uk.co.strangeskies.fx.*?>
-<?import uk.co.strangeskies.eclipse.*?>
+<?import uk.co.saiman.fx.*?>
+<?import uk.co.saiman.eclipse.*?>
 
 <BorderPane
 	xmlns="http://javafx.com/javafx/8"

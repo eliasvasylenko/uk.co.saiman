@@ -47,10 +47,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.converter.NumberStringConverter;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
-import uk.co.strangeskies.observable.Disposable;
-import uk.co.strangeskies.observable.HotObservable;
-import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.Observer;
+import uk.co.saiman.observable.Disposable;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.Observer;
 
 /**
  * A clickable UI node for displaying a chemical element. Typically for use in a

@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 public class MassSpectrumIdentifier {
 	private final Vector<MoleculeCompositionConstraint> constraints;

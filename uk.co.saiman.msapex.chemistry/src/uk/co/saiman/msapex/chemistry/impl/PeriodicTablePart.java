@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.chemistry.impl;
 
-import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;

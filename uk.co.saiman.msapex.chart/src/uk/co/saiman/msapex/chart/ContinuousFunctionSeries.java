@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.data.msapex.
+ * This file is part of uk.co.saiman.msapex.chart.
  *
- * uk.co.saiman.data.msapex is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.chart is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.data.msapex is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.chart is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.chart;
 
-import static uk.co.strangeskies.observable.Observer.onObservation;
+import static uk.co.saiman.observable.Observer.onObservation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +42,10 @@ import uk.co.saiman.data.ContinuousFunction;
 import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
-import uk.co.strangeskies.mathematics.Interval;
-import uk.co.strangeskies.observable.Observation;
-import uk.co.strangeskies.utility.IdentityProperty;
-import uk.co.strangeskies.utility.Property;
+import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.observable.Observation;
+import uk.co.saiman.utility.IdentityProperty;
+import uk.co.saiman.utility.Property;
 
 /**
  * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series

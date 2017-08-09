@@ -33,10 +33,10 @@ import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
 
-import uk.co.strangeskies.function.ThrowingFunction;
-import uk.co.strangeskies.observable.MissingValueException;
-import uk.co.strangeskies.observable.ObservablePropertyImpl;
-import uk.co.strangeskies.observable.ObservableValue;
+import uk.co.saiman.function.ThrowingFunction;
+import uk.co.saiman.observable.MissingValueException;
+import uk.co.saiman.observable.ObservablePropertyImpl;
+import uk.co.saiman.observable.ObservableValue;
 
 /**
  * A simple immutable class defining named addresses for pushing and requesting

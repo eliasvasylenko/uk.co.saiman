@@ -30,10 +30,10 @@ package uk.co.saiman.experiment;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.reflection.token.ReifiedToken;
-import uk.co.strangeskies.reflection.token.TypeArgument;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.observable.Observable;
+import uk.co.saiman.reflection.token.ReifiedToken;
+import uk.co.saiman.reflection.token.TypeArgument;
+import uk.co.saiman.reflection.token.TypeToken;
 
 public interface Result<T>
 		extends Observable<Optional<T>>, ReifiedToken<Result<T>> {

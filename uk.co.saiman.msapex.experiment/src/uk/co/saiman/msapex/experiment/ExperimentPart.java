@@ -28,7 +28,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import uk.co.saiman.experiment.Workspace;
-import uk.co.strangeskies.eclipse.EclipseModularTreeController;
+import uk.co.saiman.eclipse.EclipseModularTreeController;
 
 /**
  * Experiment management view part. Manage experiments and their results in the

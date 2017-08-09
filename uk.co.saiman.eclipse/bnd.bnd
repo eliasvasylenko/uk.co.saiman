@@ -1,0 +1,35 @@
+Bundle-Name: SAI :: Eclipse
+
+-include: \
+	${build}/include/eclipse.platform.oxygen.bnd,\
+	${build}/include/eclipse.fx.3.0.0.bnd
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.osgi.api;version=snapshot,\
+	org.eclipse.osgi.compatibility.state
+
+Bundle-Description: \
+	Classes for working with Eclipse RCP and IDE projects with JavaFX.
+
+Export-Package: \
+	uk.co.saiman.eclipse
+
+Private-Package: \
+	org.eclipse.osgi.compatibility.state,\
+	org.eclipse.osgi.internal.container,\
+	org.eclipse.osgi.internal.module,\
+	org.eclipse.osgi.internal.resolver,\
+	org.eclipse.osgi.internal.util
+
+-includeresource: \
+	OSGI-INF/l10n=l10n,\
+	res
+
+Import-Package: \
+	*

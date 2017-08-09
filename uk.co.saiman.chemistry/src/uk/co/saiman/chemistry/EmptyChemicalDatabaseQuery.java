@@ -34,7 +34,7 @@ import java.util.Set;
 import javax.measure.Quantity;
 import javax.measure.quantity.Mass;
 
-import uk.co.strangeskies.mathematics.Interval;
+import uk.co.saiman.mathematics.Interval;
 
 public class EmptyChemicalDatabaseQuery implements ChemicalDatabaseQuery {
 	private static final ChemicalDatabaseQuery INSTANCE = new EmptyChemicalDatabaseQuery();

@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.experiment.spectrum.msapex.
+ * This file is part of uk.co.saiman.msapex.experiment.spectrum.
  *
- * uk.co.saiman.experiment.spectrum.msapex is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.experiment.spectrum is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.experiment.spectrum.msapex is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.experiment.spectrum is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -46,9 +46,9 @@ import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
 import uk.co.saiman.msapex.experiment.ResultEditorContribution;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.fx.FxmlLoadBuilder;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.fx.FxmlLoadBuilder;
+import uk.co.saiman.reflection.token.TypeToken;
 
 @Component(scope = ServiceScope.PROTOTYPE)
 public class SpectrumGraphEditorContribution implements ResultEditorContribution<Spectrum> {

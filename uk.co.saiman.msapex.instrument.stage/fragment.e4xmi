@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_U6ld4Hw8EeeOa_AYtsDDjA">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_X97TEHw8EeeOa_AYtsDDjA" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.status" positionInList="first"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_dboU0HzfEeeLpZ9wHq5Ynw">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_ecgjAHzfEeeLpZ9wHq5Ynw" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.status" positionInList="">
+    <elements xsi:type="basic:Part" xmi:id="_jPyEwHzfEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.instrument.stage.part" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.stage/uk.co.saiman.msapex.instrument.stage.StagePart" label="Stage" iconURI="${fugue.icon.runtime}/size16/target.png">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_q9LOQHzfEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.instrument.stage.toolbar"/>
+    </elements>
+  </fragments>
 </fragment:ModelFragments>

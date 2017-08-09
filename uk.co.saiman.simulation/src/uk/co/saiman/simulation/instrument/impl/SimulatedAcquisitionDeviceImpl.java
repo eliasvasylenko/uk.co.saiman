@@ -29,8 +29,8 @@ package uk.co.saiman.simulation.instrument.impl;
 
 import static java.util.Collections.unmodifiableSet;
 import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
-import static uk.co.strangeskies.log.Log.Level.ERROR;
-import static uk.co.strangeskies.observable.ObservableValue.immutableOver;
+import static uk.co.saiman.log.Log.Level.ERROR;
+import static uk.co.saiman.observable.ObservableValue.immutableOver;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -61,11 +61,11 @@ import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
-import uk.co.strangeskies.log.Log;
-import uk.co.strangeskies.observable.HotObservable;
-import uk.co.strangeskies.observable.Observable;
-import uk.co.strangeskies.observable.ObservableValue;
-import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
  * Partial implementation of a simulation of an acquisition device.

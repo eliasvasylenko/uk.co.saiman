@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:basic_1="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_vaQRoHl8EeWeCa5uXT_XfA">
-  <imports xsi:type="commands:Command" xmi:id="_oLv0IIS4Eea6IqETRGT-CQ" elementId="uk.co.saiman.msapex.command.open"/>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_2LXuMHl-EeWeCa5uXT_XfA" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.overview" positionInList="first">
-    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.experiment.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.ExperimentPartImpl" label="Experiments" iconURI="${fugue.icon.runtime}/size16/books.png">
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:basic_1="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_OHELUHzvEeeLpZ9wHq5Ynw">
+  <imports xsi:type="commands:Command" xmi:id="_jOJdUHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.command.open"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_caQkIHzvEeeLpZ9wHq5Ynw" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.overview" positionInList="first">
+    <elements xsi:type="basic:Part" xmi:id="_ga8yYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.part" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.ExperimentPartImpl" label="Experiments" iconURI="${fugue.icon.runtime}/size16/books.png">
       <tags>Part-Toolbar-FullSpan</tags>
-      <menus xsi:type="menu:PopupMenu" xmi:id="_OhHn0BbBEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.popupmenu.node" label="Experiment tree node">
-        <children xsi:type="menu:Menu" xmi:id="_nMptcBbBEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.menu.addnode" label="Add">
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_oveLEBbBEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.AddNodeMenu"/>
+      <menus xsi:type="menu:PopupMenu" xmi:id="_uaR-kHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.popupmenu.0">
+        <children xsi:type="menu:Menu" xmi:id="_vfBZEHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.menu.0">
+          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_3xHyIHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" label="" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.AddNodeMenu"/>
         </children>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_n5-Z8DlREea5o5gE5m5BIA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.removenode" label="Remove" command="_utdUkBdSEeam7aRU2m3oKA"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_exvpQHTdEeaXIO9wrEUEWA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.runexperiment" label="Run" command="_1Z_NQHQ0EeaXIO9wrEUEWA"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_v92DEHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.remove" label="Remove" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_wOGsoHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.run" label="Run" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
       </menus>
-      <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.experiment.toolbar">
-        <children xsi:type="menu:HandledToolItem" xmi:id="_tw_bkHQ0EeaXIO9wrEUEWA" elementId="uk.co.saiman.msapex.experiment.handledtoolitem.runexperiment" label="Run" command="_1Z_NQHQ0EeaXIO9wrEUEWA"/>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_9ygUUP_pEeWGgZ4SKxDvZg" elementId="uk.co.saiman.msapex.experiment.handledtoolitem.addexperiment" label="Add" command="_KtzIEP_UEeWa8e91zRTXJg"/>
+      <toolbar xmi:id="_iJzg4HzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.toolbar">
+        <children xsi:type="menu:HandledToolItem" xmi:id="_pq4FoHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledtoolitem.runexperiment" label="Run" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_pXCjoHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledtoolitem.addexperiment" label="Add" command="_zfCuYHzvEeeLpZ9wHq5Ynw"/>
       </toolbar>
     </elements>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_pvR4kP_TEeWa8e91zRTXJg" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Command" xmi:id="_KtzIEP_UEeWa8e91zRTXJg" elementId="uk.co.saiman.msapex.experiment.command.addexperiment" commandName="Add Experiment" description="Add a new experiment to the workspace" category="_Dyg7gP_VEeWa8e91zRTXJg"/>
-    <elements xsi:type="commands:Command" xmi:id="_1Z_NQHQ0EeaXIO9wrEUEWA" elementId="uk.co.saiman.msapex.experiment.command.runexperiment" commandName="Run Experiment" description="Run the selected experiment" category="_Dyg7gP_VEeWa8e91zRTXJg"/>
-    <elements xsi:type="commands:Command" xmi:id="_utdUkBdSEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.command.removenode" commandName="Remove Node" description="Remove an experiment node from the workspace" category="_Dyg7gP_VEeWa8e91zRTXJg"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_xM00IHzvEeeLpZ9wHq5Ynw" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Command" xmi:id="_zfCuYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.addexperiment" commandName="Add Experiment" description="Add a new experiment to the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Command" xmi:id="_RiIukHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.runexperiment" commandName="Run Experiment" description="Run the selected experiment" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Command" xmi:id="_VMhVoHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.removenode" commandName="Remove Node" description="Remove an experiment node from the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_AVrBMP_VEeWa8e91zRTXJg" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Handler" xmi:id="_C18lkP_VEeWa8e91zRTXJg" elementId="uk.co.saiman.msapex.experiment.handler.addexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.AddExperiment" command="_KtzIEP_UEeWa8e91zRTXJg"/>
-    <elements xsi:type="commands:Handler" xmi:id="_Aj8kQHQ1EeaXIO9wrEUEWA" elementId="uk.co.saiman.msapex.experiment.handler.runexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.RunExperiment" command="_1Z_NQHQ0EeaXIO9wrEUEWA"/>
-    <elements xsi:type="commands:Handler" xmi:id="_MnXtIBdfEeam7aRU2m3oKA" elementId="uk.co.saiman.msapex.experiment.handler.removenode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.RemoveNode" command="_utdUkBdSEeam7aRU2m3oKA"/>
-    <elements xsi:type="commands:Handler" xmi:id="_7zVRAISzEea6IqETRGT-CQ" elementId="uk.co.saiman.msapex.experiment.handler.open" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.OpenExperiment" command="_oLv0IIS4Eea6IqETRGT-CQ"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_KYYdoHzwEeeLpZ9wHq5Ynw" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Handler" xmi:id="_NQSe4HzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.addexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.AddExperiment" command="_zfCuYHzvEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Handler" xmi:id="_YSC8IHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.runexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.RunExperiment" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Handler" xmi:id="_ebj4EHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.removenode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.RemoveNode" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Handler" xmi:id="_gYFPIHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.open" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.OpenExperiment" command="_jOJdUHzwEeeLpZ9wHq5Ynw"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_DQiP0P_VEeWa8e91zRTXJg" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Category" xmi:id="_Dyg7gP_VEeWa8e91zRTXJg" elementId="uk.co.saiman.msapex.experiment.category" name="Experiments" description="Experiment definition and processing"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_4bs1oHzvEeeLpZ9wHq5Ynw" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Category" xmi:id="_6M4fYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.category" name="Experiments" description="Experiment definition and processing"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_fmNbUISwEea6IqETRGT-CQ" featurename="descriptors" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="basic_1:PartDescriptor" xmi:id="_rzKV0ISvEea6IqETRGT-CQ" elementId="uk.co.saiman.msapex.experiment.partdescriptor.resulteditor" label="Spectrum Data" iconURI="" allowMultiple="true" category="uk.co.saiman.msapex.partstack.editor" closeable="true" dirtyable="true" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.ResultEditorPartImpl">
-      <tags>Part-Toolbar-FullSpan</tags>
-      <toolbar xmi:id="_ENMbwISwEea6IqETRGT-CQ" elementId="uk.co.saiman.msapex.experiment.toolbar.0"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_Z0FhMHzxEeeLpZ9wHq5Ynw" featurename="descriptors" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="basic_1:PartDescriptor" xmi:id="_bPCcQHzxEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.partdescriptor.resulteditor" label="Result Data" allowMultiple="true" category="uk.co.saiman.msapex.partstack.editor" closeable="true" dirtyable="true" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.ResultEditorPartImpl">
+      <toolbar xmi:id="_eCQKwHzxEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.toolbar.0"/>
     </elements>
   </fragments>
 </fragment:ModelFragments>

@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.instrument;
 
-import uk.co.strangeskies.observable.ObservableValue;
+import uk.co.saiman.observable.ObservableValue;
 
 public interface HardwareDevice {
   String getName();

@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment;
 
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * This class does not actually contain any result data, and instances are

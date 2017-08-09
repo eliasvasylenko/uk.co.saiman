@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.acquisition;
 
-import uk.co.saiman.SaiProperties;
-import uk.co.strangeskies.text.properties.Nested;
-import uk.co.strangeskies.text.properties.PropertyConfiguration;
-import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.text.properties.Nested;
+import uk.co.saiman.text.properties.PropertyConfiguration;
+import uk.co.saiman.text.properties.SaiProperties;
+import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
 
 /**
  * Localized text resource accessor for acquisition engine items.

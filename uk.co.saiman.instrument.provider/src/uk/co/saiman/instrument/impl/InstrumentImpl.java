@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleParticipant;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
-import uk.co.strangeskies.utility.IdentityProperty;
+import uk.co.saiman.utility.IdentityProperty;
 
 /**
  * Reference implementation of {@link Instrument}, as an OSGi service.

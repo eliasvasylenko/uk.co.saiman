@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment.impl;
 
 import static javax.xml.xpath.XPathConstants.NODESET;
-import static uk.co.strangeskies.collection.stream.StreamUtilities.upcastStream;
+import static uk.co.saiman.collection.stream.StreamUtilities.upcastStream;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,9 +59,9 @@ import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultManager;
 import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.strangeskies.log.Log.Level;
-import uk.co.strangeskies.observable.ObservableProperty;
-import uk.co.strangeskies.observable.ObservableValue;
+import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.observable.ObservableProperty;
+import uk.co.saiman.observable.ObservableValue;
 
 /**
  * Reference implementation of {@link ExperimentNode}.

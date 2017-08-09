@@ -33,7 +33,7 @@ import java.util.Optional;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultType;
-import uk.co.strangeskies.observable.HotObservable;
+import uk.co.saiman.observable.HotObservable;
 
 public class ResultImpl<T> extends HotObservable<Optional<T>> implements Result<T> {
   private final ExperimentNodeImpl<?, ?> node;

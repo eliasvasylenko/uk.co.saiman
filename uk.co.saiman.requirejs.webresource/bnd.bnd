@@ -11,5 +11,4 @@ requirejs.version = 2.3.3
 -includeresource: \
 	@${repo;org.webjars.npm:requirejs;${requirejs.version}}!/META-INF/resources/*
 
-Export-Package: \
-	uk.co.saiman.requirejs
+Export-Package: uk.co.saiman.requirejs

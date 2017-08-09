@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.comms;
 
-import static uk.co.strangeskies.reflection.Types.getErasedType;
-import static uk.co.strangeskies.reflection.Types.unwrapPrimitive;
-import static uk.co.strangeskies.reflection.Types.wrapPrimitive;
+import static uk.co.saiman.reflection.Types.getErasedType;
+import static uk.co.saiman.reflection.Types.unwrapPrimitive;
+import static uk.co.saiman.reflection.Types.wrapPrimitive;
 
 import java.lang.reflect.Type;
 

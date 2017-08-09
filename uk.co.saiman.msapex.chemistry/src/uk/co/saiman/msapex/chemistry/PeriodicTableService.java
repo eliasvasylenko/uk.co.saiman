@@ -30,7 +30,7 @@ package uk.co.saiman.msapex.chemistry;
 import java.util.stream.Stream;
 
 import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.strangeskies.observable.ObservableProperty;
+import uk.co.saiman.observable.ObservableProperty;
 
 public interface PeriodicTableService {
   ObservableProperty<PeriodicTable> periodicTable();

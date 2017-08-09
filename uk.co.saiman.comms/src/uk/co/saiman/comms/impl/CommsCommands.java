@@ -32,7 +32,7 @@ import static org.osgi.service.component.annotations.ReferenceCardinality.OPTION
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static osgi.enroute.debug.api.Debug.COMMAND_FUNCTION;
 import static osgi.enroute.debug.api.Debug.COMMAND_SCOPE;
-import static uk.co.saiman.SaiProperties.SAI_COMMAND_SCOPE;
+import static uk.co.saiman.text.properties.SaiProperties.SAI_COMMAND_SCOPE;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

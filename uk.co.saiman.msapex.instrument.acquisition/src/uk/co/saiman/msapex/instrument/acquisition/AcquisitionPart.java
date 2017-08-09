@@ -28,8 +28,8 @@
 package uk.co.saiman.msapex.instrument.acquisition;
 
 import static java.util.Arrays.asList;
-import static uk.co.strangeskies.fx.FxUtilities.wrap;
-import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.saiman.fx.FxUtilities.wrap;
+import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,9 +62,9 @@ import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
-import uk.co.strangeskies.eclipse.AdaptNamed;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.eclipse.ObservableService;
+import uk.co.saiman.eclipse.AdaptNamed;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.ObservableService;
 
 /**
  * An Eclipse part for management and display of acquisition devices.

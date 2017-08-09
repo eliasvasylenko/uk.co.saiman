@@ -6,7 +6,7 @@
     	point="org.eclipse.e4.workbench.model">
 
 		<fragment
-			uri="fragment2.e4xmi" />
+			uri="fragment.e4xmi" />
     </extension>
 
 </plugin> 

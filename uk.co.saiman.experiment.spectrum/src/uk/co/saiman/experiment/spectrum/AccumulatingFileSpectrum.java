@@ -41,7 +41,7 @@ import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.strangeskies.function.ThrowingSupplier;
+import uk.co.saiman.function.ThrowingSupplier;
 
 public class AccumulatingFileSpectrum
     extends ByteFormatSpectrum<SampledContinuousFunction<Time, Dimensionless>> {

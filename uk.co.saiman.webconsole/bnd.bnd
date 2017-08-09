@@ -1,8 +1,6 @@
 -buildpath: \
 	uk.co.saiman.utilities;version=snapshot,\
-\
-	uk.co.strangeskies.utilities;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
+	uk.co.saiman.text;version=snapshot,\
 \
 	org.apache.felix.webconsole
 

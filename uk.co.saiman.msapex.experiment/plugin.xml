@@ -17,7 +17,7 @@
 		point="org.eclipse.core.expressions.definitions">
 	
 		<definition
-			id="uk.co.strangeskies.expressions.selection.child">
+			id="uk.co.saiman.expressions.selection.child">
 			
 			<with
 				variable="myactivePartId">

@@ -5,8 +5,8 @@ Export-Package:\
 	uk.co.saiman.msapex
 
 -include:\
-	${include.ss}/eclipse.platform.neon.bnd,\
-	${include.ss}/eclipse.fx.2.4.0.bnd
+	${build}/include/eclipse.platform.oxygen.bnd,\
+	${build}/include/eclipse.fx.3.0.0.bnd
 
 -includeresource:\
 	plugin.xml,\

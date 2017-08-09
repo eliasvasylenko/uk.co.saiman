@@ -38,8 +38,8 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.spectrum.AccumulatingFileSpectrum;
 import uk.co.saiman.instrument.raster.RasterDevice;
-import uk.co.strangeskies.reflection.token.TypeToken;
-import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most

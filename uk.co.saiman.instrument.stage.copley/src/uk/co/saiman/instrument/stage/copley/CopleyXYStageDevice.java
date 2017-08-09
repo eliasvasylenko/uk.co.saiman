@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.instrument.stage.
+ * This file is part of uk.co.saiman.instrument.stage.copley.
  *
- * uk.co.saiman.instrument.stage is free software: you can redistribute it and/or modify
+ * uk.co.saiman.instrument.stage.copley is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.instrument.stage is distributed in the hope that it will be useful,
+ * uk.co.saiman.instrument.stage.copley is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -43,8 +43,8 @@ import uk.co.saiman.instrument.HardwareConnection;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.measurement.Units;
-import uk.co.strangeskies.observable.ObservableValue;
-import uk.co.strangeskies.text.properties.PropertyLoader;
+import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
 public class CopleyXYStageDevice implements XYStageDevice {

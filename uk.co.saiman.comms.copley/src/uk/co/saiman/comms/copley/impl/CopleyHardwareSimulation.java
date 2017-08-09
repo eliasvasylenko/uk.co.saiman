@@ -38,7 +38,7 @@ import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
 import static uk.co.saiman.comms.copley.impl.CopleyCommsImpl.NODE_ID_MASK;
 import static uk.co.saiman.comms.copley.impl.CopleyCommsImpl.WORD_SIZE;
-import static uk.co.strangeskies.log.Log.Level.ERROR;
+import static uk.co.saiman.log.Log.Level.ERROR;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -66,7 +66,7 @@ import uk.co.saiman.comms.copley.VariableIdentifier;
 import uk.co.saiman.comms.copley.impl.CopleyHardwareSimulation.CopleyHardwareSimulationConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
-import uk.co.strangeskies.log.Log;
+import uk.co.saiman.log.Log;
 
 @Designate(ocd = CopleyHardwareSimulationConfiguration.class, factory = true)
 @Component(

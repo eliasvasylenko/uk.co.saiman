@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.strangeskies.text.properties.PropertyLoader.getDefaultProperties;
+import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

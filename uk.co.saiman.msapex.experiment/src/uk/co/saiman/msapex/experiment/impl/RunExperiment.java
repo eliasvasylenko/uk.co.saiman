@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment.impl;
 
-import static uk.co.strangeskies.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
+import static uk.co.saiman.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -35,10 +35,10 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.fx.TreeItemData;
-import uk.co.strangeskies.fx.TreeItemImpl;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.fx.TreeItemData;
+import uk.co.saiman.fx.TreeItemImpl;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * Add an experiment to the workspace.

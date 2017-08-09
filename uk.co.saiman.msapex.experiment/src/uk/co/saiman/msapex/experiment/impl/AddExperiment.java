@@ -33,7 +33,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.strangeskies.eclipse.Localize;
+import uk.co.saiman.eclipse.Localize;
 
 /**
  * Add an experiment to the workspace

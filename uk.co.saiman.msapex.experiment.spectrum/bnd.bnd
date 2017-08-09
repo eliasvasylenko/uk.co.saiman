@@ -1,21 +1,21 @@
 Bundle-Name: SAI :: Experiment :: Spectrum :: MSApex
 
 -include:\
-	${include.ss}/eclipse.plugin.bnd,\
-	${include.ss}/eclipse.platform.neon.bnd,\
-	${include.ss}/eclipse.fx.2.4.0.bnd,\
+	${build}/include/eclipse.plugin.bnd,\
+	${build}/include/eclipse.platform.oxygen.bnd,\
+	${build}/include/eclipse.fx.3.0.0.bnd,\
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
-	uk.co.strangeskies.collections;version=latest,\
-	uk.co.strangeskies.observable;version=latest,\
-	uk.co.strangeskies.utilities;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
-	uk.co.strangeskies.mathematics;version=latest,\
-	uk.co.strangeskies.reflection;version=latest,\
-	uk.co.strangeskies.reflection.token;version=latest,\
-	uk.co.strangeskies.fx;version=latest,\
-	uk.co.strangeskies.eclipse;version=latest,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.eclipse;version=snapshot,\
 \
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.experiment.api;version=snapshot,\

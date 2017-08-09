@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment.impl;
 
-import static uk.co.strangeskies.fx.FxmlLoadBuilder.buildWith;
-import static uk.co.strangeskies.reflection.token.TypedObject.typedObject;
+import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.saiman.reflection.token.TypedObject.typedObject;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -52,7 +52,7 @@ import javafx.scene.layout.BorderPane;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.WorkspaceFactory;
 import uk.co.saiman.msapex.experiment.ExperimentPart;
-import uk.co.strangeskies.eclipse.EclipseModularTreeController;
+import uk.co.saiman.eclipse.EclipseModularTreeController;
 
 /**
  * Experiment management view part. Manage experiments and their results in the

@@ -28,7 +28,7 @@
 package uk.co.saiman.instrument.raster;
 
 import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.strangeskies.observable.Observable;
+import uk.co.saiman.observable.Observable;
 
 public interface RasterDevice extends HardwareDevice {
   int getRasterWidth();

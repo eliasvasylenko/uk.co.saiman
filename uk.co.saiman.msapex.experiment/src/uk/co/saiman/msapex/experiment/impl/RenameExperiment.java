@@ -28,7 +28,7 @@
 package uk.co.saiman.msapex.experiment.impl;
 
 import static java.util.Comparator.reverseOrder;
-import static uk.co.strangeskies.fx.FxUtilities.wrap;
+import static uk.co.saiman.fx.FxUtilities.wrap;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,8 +51,8 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.strangeskies.eclipse.Localize;
-import uk.co.strangeskies.text.properties.Localized;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.text.properties.Localized;
 
 /**
  * Add an experiment to the workspace

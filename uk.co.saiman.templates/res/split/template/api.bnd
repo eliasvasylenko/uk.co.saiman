@@ -1,0 +1,5 @@
+Bundle-Name: SAI :: ? :: API
+Bundle-Description: \
+	?
+
+Export-Package: {{basePackageName}}

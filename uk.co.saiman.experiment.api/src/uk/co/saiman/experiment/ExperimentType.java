@@ -27,13 +27,13 @@
  */
 package uk.co.saiman.experiment;
 
-import static uk.co.strangeskies.reflection.token.TypeToken.forType;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.stream.Stream;
 
-import uk.co.strangeskies.reflection.Reified;
-import uk.co.strangeskies.reflection.token.TypeParameter;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.reflection.Reified;
+import uk.co.saiman.reflection.token.TypeParameter;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * An implementation of this interface represents a type of experiment node

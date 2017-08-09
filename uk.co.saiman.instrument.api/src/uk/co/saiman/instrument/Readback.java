@@ -27,12 +27,12 @@
  */
 package uk.co.saiman.instrument;
 
-import static uk.co.strangeskies.reflection.token.TypeToken.forClass;
+import static uk.co.saiman.reflection.token.TypeToken.forClass;
 
 import java.util.Set;
 
-import uk.co.strangeskies.reflection.token.TypeParameter;
-import uk.co.strangeskies.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypeParameter;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * @author Elias N Vasylenko

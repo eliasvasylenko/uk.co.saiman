@@ -31,8 +31,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import uk.co.strangeskies.observable.Disposable;
-import uk.co.strangeskies.observable.Observable;
+import uk.co.saiman.observable.Disposable;
+import uk.co.saiman.observable.Observable;
 
 public class CachingObservableResource<T> extends CachingResource<T> {
   private final Function<? super T, ? extends Observable<?>> observable;

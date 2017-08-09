@@ -36,7 +36,7 @@ import javax.measure.quantity.Time;
 import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.strangeskies.observable.Observable;
+import uk.co.saiman.observable.Observable;
 
 /**
  * Software module for acquisition of {@link SampledContinuousFunction} data
