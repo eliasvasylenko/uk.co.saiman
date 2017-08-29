@@ -34,8 +34,6 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uk.co.saiman.collection.stream.StreamUtilities;
-
 @SuppressWarnings("javadoc")
 public class StreamUtilitiesTest {
 	interface A {}

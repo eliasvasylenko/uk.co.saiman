@@ -8,18 +8,10 @@ Bundle-Description: \
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
-	uk.co.saiman.text;version=snapshot,\
-	uk.co.saiman.expressions;version=snapshot
-
-Private-Package:  \
-	uk.co.saiman.mathematics.graph.impl
+	uk.co.saiman.text;version=snapshot
 
 Export-Package: \
 	uk.co.saiman.mathematics,\
-	uk.co.saiman.mathematics.graph,\
-	uk.co.saiman.mathematics.graph.building,\
-	uk.co.saiman.mathematics.graph.processing,\
-	uk.co.saiman.mathematics.expressions.test,\
 	uk.co.saiman.mathematics.logic,\
 	uk.co.saiman.mathematics.operation,\
 	uk.co.saiman.mathematics.values,\

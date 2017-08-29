@@ -1,7 +1,0 @@
-Bundle-Name: SAI :: OSGi Utilities :: Provider
-Bundle-Description: \
-	The reference implementation for a generic service \
-	interceptor and wrapper/decorator.
-
-Private-Package: \
-	uk.co.saiman.osgi.servicewrapper.impl

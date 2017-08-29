@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.collection.stream;
+package uk.co.saiman.collection;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;

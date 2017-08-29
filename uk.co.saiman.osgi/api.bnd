@@ -4,5 +4,4 @@ Bundle-Description: \
 	and wrapper/decorator.
 
 Export-Package: \
-	uk.co.saiman.osgi,\
-	uk.co.saiman.osgi.servicewrapper
+	uk.co.saiman.osgi

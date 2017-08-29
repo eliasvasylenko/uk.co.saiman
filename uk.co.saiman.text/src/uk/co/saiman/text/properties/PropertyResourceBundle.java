@@ -31,16 +31,15 @@ import static java.util.Collections.list;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
-
-import uk.co.saiman.collection.multimap.MultiHashMap;
-import uk.co.saiman.collection.multimap.MultiMap;
 
 /**
  * A simple {@link PropertyResource} implementation backed by one or more
@@ -49,111 +48,119 @@ import uk.co.saiman.collection.multimap.MultiMap;
  * @author Elias N Vasylenko
  */
 public class PropertyResourceBundle implements PropertyResource {
-	private static final String PROPERTIES_POSTFIX = "Properties";
+  private static final String PROPERTIES_POSTFIX = "Properties";
 
-	private final PropertyResourceStrategy<?> strategy;
-	private final Class<?> accessor;
-	private final Set<ResourceBundleDescriptor> resources;
-	private final MultiMap<Locale, ResourceBundle, List<ResourceBundle>> localizedResourceBundles;
+  private final PropertyResourceStrategy<?> strategy;
+  private final Class<?> accessor;
+  private final Set<ResourceBundleDescriptor> resources;
+  private final Map<Locale, List<ResourceBundle>> localizedResourceBundles;
 
-	/**
-	 * Create a resource bundle with the given initial locale.
-	 * 
-	 * @param strategy
-	 *          the strategy responsible for initializing this resource from the
-	 *          appropriate {@link PropertyConfiguration}
-	 * @param accessor
-	 *          the accessor class type
-	 * @param resource
-	 *          the resource location setting from the appropriate
-	 *          {@link PropertyConfiguration}
-	 */
-	protected PropertyResourceBundle(PropertyResourceStrategy<?> strategy, Class<?> accessor, String resource) {
-		this.strategy = strategy;
-		this.accessor = accessor;
-		localizedResourceBundles = new MultiHashMap<>(ArrayList::new);
+  /**
+   * Create a resource bundle with the given initial locale.
+   * 
+   * @param strategy
+   *          the strategy responsible for initializing this resource from the
+   *          appropriate {@link PropertyConfiguration}
+   * @param accessor
+   *          the accessor class type
+   * @param resource
+   *          the resource location setting from the appropriate
+   *          {@link PropertyConfiguration}
+   */
+  protected PropertyResourceBundle(
+      PropertyResourceStrategy<?> strategy,
+      Class<?> accessor,
+      String resource) {
+    this.strategy = strategy;
+    this.accessor = accessor;
+    this.localizedResourceBundles = new HashMap<>();
+    this.resources = new LinkedHashSet<>(getResources(accessor, resource));
 
-		resources = new LinkedHashSet<>(getResources(accessor, resource));
+    if (getResourceBundles(Locale.ROOT).isEmpty()) {
+      throw new MissingResourceException(
+          "Cannot find resources for any of " + resources + " for " + accessor,
+          accessor.toString(),
+          "");
+    }
+  }
 
-		if (getResourceBundles(Locale.ROOT).isEmpty()) {
-			throw new MissingResourceException(
-					"Cannot find resources for any of " + resources + " for " + accessor,
-					accessor.toString(),
-					"");
-		}
-	}
+  @Override
+  public PropertyResourceStrategy<?> getStrategy() {
+    return strategy;
+  }
 
-	@Override
-	public PropertyResourceStrategy<?> getStrategy() {
-		return strategy;
-	}
+  @Override
+  public Class<?> getAccessor() {
+    return accessor;
+  }
 
-	@Override
-	public Class<?> getAccessor() {
-		return accessor;
-	}
+  @Override
+  public Set<String> getKeys(Locale locale) {
+    Set<String> keys = new LinkedHashSet<>();
 
-	@Override
-	public Set<String> getKeys(Locale locale) {
-		Set<String> keys = new LinkedHashSet<>();
+    for (ResourceBundle bundle : getResourceBundles(locale)) {
+      keys.addAll(list(bundle.getKeys()));
+    }
 
-		for (ResourceBundle bundle : getResourceBundles(locale)) {
-			keys.addAll(list(bundle.getKeys()));
-		}
+    return keys;
+  }
 
-		return keys;
-	}
+  @Override
+  public String getValue(String key, Locale locale) {
+    for (ResourceBundle bundle : getResourceBundles(locale)) {
+      try {
+        return bundle.getString(key);
+      } catch (MissingResourceException e) {}
+    }
 
-	@Override
-	public String getValue(String key, Locale locale) {
-		for (ResourceBundle bundle : getResourceBundles(locale)) {
-			try {
-				return bundle.getString(key);
-			} catch (MissingResourceException e) {}
-		}
+    throw new MissingResourceException(
+        "Cannot find resources for key " + key + " in locale " + locale + " in any of " + resources
+            + " for " + accessor,
+        accessor.toString(),
+        "");
+  }
 
-		throw new MissingResourceException(
-				"Cannot find resources for key " + key + " in locale " + locale + " in any of " + resources + " for "
-						+ accessor,
-				accessor.toString(),
-				"");
-	}
+  protected synchronized List<ResourceBundle> getResourceBundles(Locale locale) {
+    if (localizedResourceBundles.containsKey(locale)) {
+      return localizedResourceBundles.get(locale);
+    } else {
+      List<ResourceBundle> resourceBundles = localizedResourceBundles.get(locale);
 
-	protected synchronized List<ResourceBundle> getResourceBundles(Locale locale) {
-		if (localizedResourceBundles.containsKey(locale)) {
-			return localizedResourceBundles.get(locale);
-		} else {
-			List<ResourceBundle> resourceBundles = localizedResourceBundles.getCollection(locale);
+      if (resourceBundles == null) {
+        resourceBundles = new ArrayList<>();
+        localizedResourceBundles.put(locale, resourceBundles);
+      }
 
-			for (ResourceBundleDescriptor resource : resources) {
-				try {
-					resourceBundles.add(ResourceBundle.getBundle(resource.getLocation(), locale, resource.getClassLoader()));
-				} catch (MissingResourceException e) {}
-			}
+      for (ResourceBundleDescriptor resource : resources) {
+        try {
+          resourceBundles.add(
+              ResourceBundle.getBundle(resource.getLocation(), locale, resource.getClassLoader()));
+        } catch (MissingResourceException e) {}
+      }
 
-			return resourceBundles;
-		}
-	}
+      return resourceBundles;
+    }
+  }
 
-	protected <T> List<ResourceBundleDescriptor> getResources(Class<T> accessor, String resource) {
-		if (resource.equals(PropertyConfiguration.UNSPECIFIED_RESOURCE)) {
-			resource = removePropertiesPostfix(accessor.getName());
-		}
+  protected <T> List<ResourceBundleDescriptor> getResources(Class<T> accessor, String resource) {
+    if (resource.equals(PropertyConfiguration.UNSPECIFIED_RESOURCE)) {
+      resource = removePropertiesPostfix(accessor.getName());
+    }
 
-		return Arrays.asList(new ResourceBundleDescriptor(accessor.getClassLoader(), resource));
-	}
+    return Arrays.asList(new ResourceBundleDescriptor(accessor.getClassLoader(), resource));
+  }
 
-	/**
-	 * @param name
-	 *          the string to remove the postfix from
-	 * @return the given string, with the simple class name {@link Properties}
-	 *         removed from the end, if present.
-	 */
-	public static String removePropertiesPostfix(String name) {
-		if (name.endsWith(PROPERTIES_POSTFIX) && name.length() > PROPERTIES_POSTFIX.length()) {
-			name = name.substring(0, name.length() - PROPERTIES_POSTFIX.length());
-		}
+  /**
+   * @param name
+   *          the string to remove the postfix from
+   * @return the given string, with the simple class name {@link Properties}
+   *         removed from the end, if present.
+   */
+  public static String removePropertiesPostfix(String name) {
+    if (name.endsWith(PROPERTIES_POSTFIX) && name.length() > PROPERTIES_POSTFIX.length()) {
+      name = name.substring(0, name.length() - PROPERTIES_POSTFIX.length());
+    }
 
-		return name;
-	}
+    return name;
+  }
 }
