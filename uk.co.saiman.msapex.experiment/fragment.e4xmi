@@ -4,8 +4,8 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_caQkIHzvEeeLpZ9wHq5Ynw" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.overview" positionInList="first">
     <elements xsi:type="basic:Part" xmi:id="_ga8yYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.part" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.ExperimentPartImpl" label="Experiments" iconURI="${fugue.icon.runtime}/size16/books.png">
       <tags>Part-Toolbar-FullSpan</tags>
-      <menus xsi:type="menu:PopupMenu" xmi:id="_uaR-kHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.popupmenu.0">
-        <children xsi:type="menu:Menu" xmi:id="_vfBZEHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.menu.0">
+      <menus xsi:type="menu:PopupMenu" xmi:id="_uaR-kHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.popupmenu.node">
+        <children xsi:type="menu:Menu" xmi:id="_vfBZEHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.menu.add" label="Add">
           <children xsi:type="menu:DynamicMenuContribution" xmi:id="_3xHyIHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" label="" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.AddNodeMenu"/>
         </children>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_v92DEHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.remove" label="Remove" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>

@@ -28,7 +28,7 @@
 package uk.co.saiman.msapex.experiment.impl;
 
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
-import static uk.co.saiman.reflection.token.TypedObject.typedObject;
+import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

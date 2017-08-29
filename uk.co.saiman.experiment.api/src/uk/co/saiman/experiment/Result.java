@@ -31,29 +31,31 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.reflection.token.ReifiedToken;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypedReference;
 
-public interface Result<T>
-		extends Observable<Optional<T>>, ReifiedToken<Result<T>> {
-	ExperimentNode<?, ?> getExperimentNode();
+public interface Result<T> extends Observable<Optional<T>> {
+  ExperimentNode<?, ?> getExperimentNode();
 
-	/**
-	 * Experiment data root directories are defined hierarchically from the
-	 * {@link Workspace#getWorkspaceDataPath() workspace path}.
-	 * 
-	 * @return the data root of the experiment
-	 */
-	Path getResultDataPath();
+  /**
+   * Experiment data root directories are defined hierarchically from the
+   * {@link Workspace#getWorkspaceDataPath() workspace path}.
+   * 
+   * @return the data root of the experiment
+   */
+  Path getResultDataPath();
 
-	ResultType<T> getResultType();
+  ResultType<T> getResultType();
 
-	Optional<T> getData();
+  Optional<T> getData();
 
-	@Override
-	default TypeToken<Result<T>> getThisTypeToken() {
-		return new TypeToken<Result<T>>() {}
-				.withTypeArguments(new TypeArgument<T>(getResultType().getDataType()) {});
-	}
+  default TypeToken<Result<T>> getThisTypeToken() {
+    return new TypeToken<Result<T>>() {}
+        .withTypeArguments(new TypeArgument<T>(getResultType().getDataType()) {});
+  }
+
+  default TypedReference<Result<T>> asTypedObject() {
+    return TypedReference.typedObject(getThisTypeToken(), this);
+  }
 }

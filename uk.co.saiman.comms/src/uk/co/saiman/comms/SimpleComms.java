@@ -45,8 +45,6 @@ import uk.co.saiman.observable.ObservableValue;
  * @author Elias N Vasylenko
  */
 public abstract class SimpleComms<T> implements Comms<T> {
-  private final String name;
-
   private CommsPort comms;
   private CommsChannel channel;
 
@@ -57,15 +55,8 @@ public abstract class SimpleComms<T> implements Comms<T> {
   /**
    * Initialize an empty address space.
    */
-  public SimpleComms(String name) {
-    this.name = name;
-
+  public SimpleComms() {
     status = new ObservablePropertyImpl<>((a, b) -> a == b, CLOSED);
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

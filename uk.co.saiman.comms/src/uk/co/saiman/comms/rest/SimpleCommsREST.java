@@ -51,13 +51,17 @@ public abstract class SimpleCommsREST<U extends Comms<T>, T> implements CommsRES
 
   @Override
   public String getID() {
-    return (comms.getName() + "-" + comms.getPort().getName()).replace(' ', '-').replace('/', '-');
+    return (getCategoryName() + "-" + comms.getPort().getName())
+        .replace(' ', '-')
+        .replace('/', '-');
   }
 
   @Override
   public String getName() {
-    return comms.getName() + " " + comms.getPort().getName();
+    return getCategoryName() + " " + comms.getPort().getName();
   }
+
+  public abstract String getCategoryName();
 
   @Override
   public CommsStatus getStatus() {

@@ -58,10 +58,11 @@ public class CopleyCommsRESTManager {
   @Activate
   synchronized void activate(BundleContext context) {
     this.context = context;
-    comms.stream().forEach(e -> register(e, new CopleyCommsREST(e, dtos)));
+    comms.stream().forEach(e -> register(e));
   }
 
-  void register(CopleyComms comms, CommsREST rest) {
+  void register(CopleyComms comms) {
+    CommsREST rest = new CopleyCommsREST(comms, dtos);
     serviceRegistrations.put(comms, context.registerService(CommsREST.class, rest, null));
   }
 
@@ -71,7 +72,7 @@ public class CopleyCommsRESTManager {
       this.comms.add(comms);
 
       if (context != null) {
-        register(comms, new CopleyCommsREST(comms, dtos));
+        register(comms);
       }
     } catch (Exception e) {
       e.printStackTrace();

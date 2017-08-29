@@ -31,10 +31,6 @@ import uk.co.saiman.comms.Comms;
 
 public interface SaintComms extends Comms<SaintController> {
   /**
-   * The id of the SAINT comms interface.
-   */
-  String ID = "SAINT Comms";
-  /**
    * The message size in bytes for the SAINT comms interface, for both sending
    * and receiving messages.
    */

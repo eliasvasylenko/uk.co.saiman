@@ -29,7 +29,6 @@ package uk.co.saiman.msapex.experiment.impl;
 
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
-import static uk.co.saiman.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -53,11 +52,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import uk.co.saiman.eclipse.ObservableService;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.msapex.experiment.ResultEditorContribution;
 import uk.co.saiman.msapex.experiment.ResultEditorPart;
-import uk.co.saiman.eclipse.ObservableService;
 
 public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
   private static final String PROTOTYPE_SERVICE = "(" + Constants.SERVICE_SCOPE + "="
@@ -86,9 +85,8 @@ public class ResultEditorPartImpl<T> implements ResultEditorPart<T> {
     this.contributions = editorContributions
         .stream()
         .filter(
-            contribution -> contribution
-                .getResultType()
-                .satisfiesConstraintFrom(LOOSE_COMPATIBILILTY, data.getResultType().getDataType()))
+            contribution -> contribution.getResultType().isAssignableFrom(
+                data.getResultType().getDataType()))
         .map(contribution -> (ResultEditorContribution<? super T>) contribution)
         .collect(toList());
 

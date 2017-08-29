@@ -44,6 +44,11 @@ public class CopleyCommsREST extends SimpleCommsREST<CopleyComms, CopleyControll
   }
 
   @Override
+  public String getCategoryName() {
+    return "Copley Comms";
+  }
+
+  @Override
   public String getLocalisedText(String key, Locale locale) {
     return key;
   }

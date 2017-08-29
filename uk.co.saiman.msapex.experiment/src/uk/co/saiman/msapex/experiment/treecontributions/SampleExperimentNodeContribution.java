@@ -27,15 +27,16 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
+import javafx.scene.Node;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.sample.SampleConfiguration;
 import uk.co.saiman.experiment.sample.SampleExperimentType;
-import uk.co.saiman.eclipse.EclipseTreeContribution;
-import uk.co.saiman.fx.PseudoClassTreeCellContribution;
 import uk.co.saiman.fx.TreeCellContribution;
+import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeTextContribution;
 
@@ -45,20 +46,29 @@ import uk.co.saiman.fx.TreeTextContribution;
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
+@Component(
+    service = TreeContribution.class,
+    scope = ServiceScope.PROTOTYPE,
+    property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class SampleExperimentNodeContribution implements
-		EclipseTreeContribution<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>>,
-		TreeTextContribution<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>>,
-		PseudoClassTreeCellContribution<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> {
-	@Override
-	public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> String getText(
-			TreeItemData<U> data) {
-		return data.data().getState().getName();
-	}
+    TreeTextContribution<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>>,
+    TreeCellContribution<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> {
+  @Override
+  public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> String getText(
+      TreeItemData<U> data) {
+    return data.data().getState().getName();
+  }
 
-	@Override
-	public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> String getSupplementalText(
-			TreeItemData<U> data) {
-		return data.data().getState().toString();
-	}
+  @Override
+  public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> String getSupplementalText(
+      TreeItemData<U> data) {
+    return data.data().getState().toString();
+  }
+
+  @Override
+  public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> Node configureCell(
+      TreeItemData<U> data,
+      Node content) {
+    return configurePseudoClass(content);
+  }
 }

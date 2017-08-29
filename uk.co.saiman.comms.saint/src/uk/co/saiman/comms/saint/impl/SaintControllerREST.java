@@ -28,11 +28,11 @@
 package uk.co.saiman.comms.saint.impl;
 
 import static java.util.stream.Stream.of;
+import static uk.co.saiman.collection.StreamUtilities.upcastStream;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.POLLABLE;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.RECEIVES_INPUT_DATA;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.SENDS_OUTPUT_DATA;
-import static uk.co.saiman.collection.stream.StreamUtilities.upcastStream;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

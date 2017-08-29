@@ -47,9 +47,5 @@ public interface Variable<U> {
     return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
   }
 
-  U get(MotorAxis axis);
-
-  default U get(int axis) {
-    return get(getController().getAxis(axis));
-  }
+  U get(int axis);
 }

@@ -44,6 +44,11 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms, SaintController>
   }
 
   @Override
+  public String getCategoryName() {
+    return "SAINT Comms";
+  }
+
+  @Override
   public ControllerREST createControllerREST(SaintController controller) {
     return new SaintControllerREST(getName(), controller, dtos);
   }

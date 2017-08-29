@@ -28,20 +28,19 @@
 package uk.co.saiman.msapex.experiment.impl;
 
 import static uk.co.saiman.msapex.experiment.ExperimentPart.OPEN_EXPERIMENT_COMMAND;
-import static uk.co.saiman.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
+import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
-import uk.co.saiman.msapex.experiment.ExperimentPart;
-import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeItemImpl;
+import uk.co.saiman.msapex.experiment.ExperimentPart;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
@@ -50,35 +49,35 @@ import uk.co.saiman.reflection.token.TypeToken;
  * @author Elias N Vasylenko
  */
 public class OpenExperiment {
-	@CanExecute
-	boolean canExecute(MPart part, @Localize ExperimentProperties text) {
-		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
+  @CanExecute
+  boolean canExecute(MPart part, @Localize ExperimentProperties text) {
+    ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
 
-		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
+    TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
 
-		if (item == null) {
-			new ExperimentException(text.exception().illegalCommandForSelection(OPEN_EXPERIMENT_COMMAND, null));
-		}
+    if (item == null) {
+      new ExperimentException(
+          text.exception().illegalCommandForSelection(OPEN_EXPERIMENT_COMMAND, null));
+    }
 
-		TreeItemData<?> experimentItem = item.getData();
+    TreeItemData<?> experimentItem = item.getData();
 
-		return experimentItem.type().satisfiesConstraintTo(
-				LOOSE_COMPATIBILILTY,
-				new TypeToken<ExperimentNode<? extends SpectrumExperimentType<?>, ?>>() {});
-	}
+    return experimentItem.type().isAssignableTo(
+        new TypeToken<ExperimentNode<? extends SpectrumExperimentType<?>, ?>>() {});
+  }
 
-	@Execute
-	void execute(MPart part, ResultEditorManager editorManager) {
-		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
+  @Execute
+  void execute(MPart part, ResultEditorManager editorManager) {
+    ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 
-		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
+    TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
 
-		TreeItemData<?> experimentItem = item.getData();
+    TreeItemData<?> experimentItem = item.getData();
 
-		@SuppressWarnings("unchecked")
-		ExperimentNode<? extends SpectrumExperimentType<?>, ?> node = (ExperimentNode<? extends SpectrumExperimentType<?>, ?>) experimentItem
-				.data();
+    @SuppressWarnings("unchecked")
+    ExperimentNode<? extends SpectrumExperimentType<?>, ?> node = (ExperimentNode<? extends SpectrumExperimentType<?>, ?>) experimentItem
+        .data();
 
-		editorManager.openEditor(node.getResult(node.getType().getSpectrumResult()));
-	}
+    editorManager.openEditor(node.getResult(node.getType().getSpectrumResult()));
+  }
 }

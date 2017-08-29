@@ -27,20 +27,20 @@
  */
 package uk.co.saiman.msapex.experiment.chemicalmap;
 
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.Node;
+import uk.co.saiman.eclipse.CommandTreeCellContribution;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
 import uk.co.saiman.experiment.chemicalmap.ChemicalMapExperimentType;
-import uk.co.saiman.msapex.experiment.ExperimentPart;
-import uk.co.saiman.eclipse.CommandTreeCellContribution;
-import uk.co.saiman.eclipse.EclipseTreeContribution;
-import uk.co.saiman.fx.PseudoClassTreeCellContribution;
 import uk.co.saiman.fx.TreeCellContribution;
+import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeTextContribution;
+import uk.co.saiman.msapex.experiment.ExperimentPart;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the
@@ -48,36 +48,37 @@ import uk.co.saiman.fx.TreeTextContribution;
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
+@Component(
+    service = TreeContribution.class,
+    scope = ServiceScope.PROTOTYPE,
+    property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class ChemicalMapExperimentNodeContribution extends
-		CommandTreeCellContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>>
-		implements
-		TreeTextContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>>,
-		PseudoClassTreeCellContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> {
-	/**
-	 * Create over open command
-	 */
-	public ChemicalMapExperimentNodeContribution() {
-		super(ExperimentPart.OPEN_EXPERIMENT_COMMAND);
-	}
+    CommandTreeCellContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>>
+    implements
+    TreeTextContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> {
+  /**
+   * Create over open command
+   */
+  public ChemicalMapExperimentNodeContribution() {
+    super(ExperimentPart.OPEN_EXPERIMENT_COMMAND);
+  }
 
-	@Override
-	public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getText(
-			TreeItemData<U> data) {
-		return data.data().getType().getName();
-	}
+  @Override
+  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getText(
+      TreeItemData<U> data) {
+    return data.data().getType().getName();
+  }
 
-	@Override
-	public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getSupplementalText(
-			TreeItemData<U> data) {
-		return data.data().getState().getChemicalMapName();
-	}
+  @Override
+  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getSupplementalText(
+      TreeItemData<U> data) {
+    return data.data().getState().getChemicalMapName();
+  }
 
-	@Override
-	public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> Node configureCell(
-			TreeItemData<U> data,
-			Node content) {
-		super.configureCell(data, content);
-		return PseudoClassTreeCellContribution.super.configureCell(data, content);
-	}
+  @Override
+  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> Node configureCell(
+      TreeItemData<U> data,
+      Node content) {
+    return configurePseudoClass(super.configureCell(data, content));
+  }
 }

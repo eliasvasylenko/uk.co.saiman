@@ -84,20 +84,22 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
         name = "Node Number",
         description = "The node number for multi-drop mode dispatch, or 0 for the directly connected node")
     int node() default 0;
+
+    @AttributeDefinition(
+        name = "Axis Count",
+        description = "The number of axes expected to be supported by the drive")
+    int axes() default 1;
   }
 
   @Reference(policy = STATIC, policyOption = GREEDY)
   SerialPorts comms;
   private SerialPort port;
   private int nodeID;
+  private int axisCount;
   private boolean nodeIDValid;
 
   @Reference
   ByteConverters converters;
-
-  public CopleyCommsImpl() {
-    super(CopleyComms.ID);
-  }
 
   @Activate
   void activate(CopleyCommsConfiguration configuration) throws IOException {
@@ -109,6 +111,7 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
     port = comms.getPort(configuration.serialPort());
     nodeIDValid = (configuration.node() & NODE_ID_MASK) == configuration.node();
     nodeID = configuration.node();
+    axisCount = configuration.axes();
     setComms(port);
     checkNodeId();
   }
@@ -118,6 +121,10 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
       setFault(new CommsException("Invalid node id number " + nodeID));
 
     return nodeIDValid;
+  }
+
+  public int getAxisCount() {
+    return axisCount;
   }
 
   @Deactivate

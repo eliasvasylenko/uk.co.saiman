@@ -28,16 +28,14 @@
 package uk.co.saiman.simulation;
 
 import java.util.List;
-import java.util.Set;
 
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.text.properties.Localized;
 import uk.co.saiman.text.properties.Nested;
 import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.SaiProperties;
 import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.text.properties.SaiProperties;
 
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
@@ -68,6 +66,4 @@ public interface SimulationProperties {
 	List<String> imageFileFilter();
 
 	String invalidAcquisitionCount(int count);
-
-	String cannotFindDetector(String detectorName, Set<DetectorSimulation> availableDetectors);
 }

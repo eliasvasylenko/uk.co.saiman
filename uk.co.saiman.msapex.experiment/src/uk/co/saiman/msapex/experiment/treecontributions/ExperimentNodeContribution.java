@@ -29,6 +29,7 @@ package uk.co.saiman.msapex.experiment.treecontributions;
 
 import java.util.stream.Stream;
 
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
@@ -38,26 +39,28 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import uk.co.saiman.eclipse.MenuTreeCellContribution;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.eclipse.EclipseTreeContribution;
-import uk.co.saiman.eclipse.MenuTreeCellContribution;
-import uk.co.saiman.fx.PseudoClassTreeCellContribution;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.fx.TreeChildContribution;
+import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeTextContribution;
-import uk.co.saiman.reflection.token.ReifiedToken;
-import uk.co.saiman.reflection.token.TypedObject;
+import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
+@Component(
+    service = TreeContribution.class,
+    scope = ServiceScope.PROTOTYPE,
+    property = Constants.SERVICE_RANKING + ":Integer=" + -100)
 public class ExperimentNodeContribution extends MenuTreeCellContribution<ExperimentNode<?, ?>>
-    implements PseudoClassTreeCellContribution<ExperimentNode<?, ?>>,
-    TreeChildContribution<ExperimentNode<?, ?>>, TreeTextContribution<ExperimentNode<?, ?>> {
+    implements TreeChildContribution<ExperimentNode<?, ?>>,
+    TreeTextContribution<ExperimentNode<?, ?>> {
   private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
 
   /**
@@ -91,9 +94,7 @@ public class ExperimentNodeContribution extends MenuTreeCellContribution<Experim
     contentWrapper.setMinWidth(0);
     contentWrapper.prefWidth(0);
 
-    content = PseudoClassTreeCellContribution.super.configureCell(data, contentWrapper);
-
-    return super.configureCell(data, content);
+    return super.configureCell(data, configurePseudoClass(content));
   }
 
   @Override
@@ -103,9 +104,11 @@ public class ExperimentNodeContribution extends MenuTreeCellContribution<Experim
   }
 
   @Override
-  public <U extends ExperimentNode<?, ?>> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
-    return Stream.concat(data.data().getChildren(), data.data().getResults()).map(
-        ReifiedToken::asTypedObject);
+  public <U extends ExperimentNode<?, ?>> Stream<TypedReference<?>> getChildren(
+      TreeItemData<U> data) {
+    return Stream.concat(
+        data.data().getChildren().map(ExperimentNode::asTypedObject),
+        data.data().getResults().map(Result::asTypedObject));
   }
 
   @Override

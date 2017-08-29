@@ -37,7 +37,6 @@ import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.copley.AmplifierState;
@@ -46,7 +45,6 @@ import uk.co.saiman.comms.copley.CopleyOperationID;
 import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.EventStatusRegister;
 import uk.co.saiman.comms.copley.Int32;
-import uk.co.saiman.comms.copley.MotorAxis;
 import uk.co.saiman.comms.copley.TrajectoryProfile;
 import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;
@@ -116,21 +114,8 @@ public class CopleyControllerImpl implements CopleyController {
   }
 
   @Override
-  public Stream<MotorAxis> getAxes() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public MotorAxis getAxis(int axis) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public int getAxisCount() {
-    // TODO Auto-generated method stub
-    return 0;
+    return comms.getAxisCount();
   }
 
   @Override

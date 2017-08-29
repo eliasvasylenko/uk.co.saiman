@@ -27,69 +27,54 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
-import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
-import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
-import static uk.co.saiman.instrument.HardwareConnection.DISCONNECTED;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 
 import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.comms.copley.CopleyComms;
-import uk.co.saiman.comms.copley.CopleyController;
-import uk.co.saiman.instrument.HardwareConnection;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
-import uk.co.saiman.measurement.Units;
-import uk.co.saiman.observable.ObservableValue;
-import uk.co.saiman.text.properties.PropertyLoader;
+import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice.CopleyXYStageConfiguration;
 
-@Component
-public class CopleyXYStageDevice implements XYStageDevice {
-  @Reference
-  private PropertyLoader loader;
-  private CopleyStageProperties properties;
+@Designate(ocd = CopleyXYStageConfiguration.class, factory = true)
+@Component(configurationPid = CopleyXYStageDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDevice {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "Copley XY Stage Configuration",
+      description = "An implementation of an XY stage device interface based on copley motor hardware")
+  public @interface CopleyXYStageConfiguration {
 
-  @Reference
-  private CopleyComms comms;
-  private CopleyController controller;
+  }
 
-  @Reference
-  private Units units;
+  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.xy";
+
+  private StageDimension<Length> xAxis;
+  private StageDimension<Length> yAxis;
 
   @Activate
-  private void activate() {
-    properties = loader.getProperties(CopleyStageProperties.class);
+  void activate(CopleyXYStageConfiguration configuration) {
+    activate();
+    xAxis = new CopleyLinearDimension(getUnits(), 0, getController());
+    yAxis = new CopleyLinearDimension(getUnits(), 1, getController());
   }
 
   @Override
   public String getName() {
-    return properties.name().get();
-  }
-
-  public boolean isConnected() {
-    return comms.status().isEqual(OPEN);
-  }
-
-  public void reset() {
-    comms.reset();
-    controller = comms.openController();
+    return getProperties().copleyXYStageName().get();
   }
 
   @Override
   public StageDimension<Length> getXAxis() {
-    return new CopleyLinearDimension(units, controller.getAxis(0), controller);
+    return xAxis;
   }
 
   @Override
   public StageDimension<Length> getYAxis() {
-    return new CopleyLinearDimension(units, controller.getAxis(1), controller);
-  }
-
-  @Override
-  public ObservableValue<HardwareConnection> connectionState() {
-    return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
+    return yAxis;
   }
 }

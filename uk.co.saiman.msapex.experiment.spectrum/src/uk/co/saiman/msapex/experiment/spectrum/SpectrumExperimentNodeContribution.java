@@ -27,20 +27,20 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.Node;
+import uk.co.saiman.eclipse.CommandTreeCellContribution;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
-import uk.co.saiman.msapex.experiment.ExperimentPart;
-import uk.co.saiman.eclipse.CommandTreeCellContribution;
-import uk.co.saiman.eclipse.EclipseTreeContribution;
-import uk.co.saiman.fx.PseudoClassTreeCellContribution;
 import uk.co.saiman.fx.TreeCellContribution;
+import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeTextContribution;
+import uk.co.saiman.msapex.experiment.ExperimentPart;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the
@@ -48,36 +48,37 @@ import uk.co.saiman.fx.TreeTextContribution;
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
+@Component(
+    service = TreeContribution.class,
+    scope = ServiceScope.PROTOTYPE,
+    property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class SpectrumExperimentNodeContribution extends
-		CommandTreeCellContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>>
-		implements
-		TreeTextContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>>,
-		PseudoClassTreeCellContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> {
-	/**
-	 * Create over open command
-	 */
-	public SpectrumExperimentNodeContribution() {
-		super(ExperimentPart.OPEN_EXPERIMENT_COMMAND);
-	}
+    CommandTreeCellContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>>
+    implements
+    TreeTextContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> {
+  /**
+   * Create over open command
+   */
+  public SpectrumExperimentNodeContribution() {
+    super(ExperimentPart.OPEN_EXPERIMENT_COMMAND);
+  }
 
-	@Override
-	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getText(
-			TreeItemData<U> data) {
-		return data.data().getType().getName();
-	}
+  @Override
+  public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getText(
+      TreeItemData<U> data) {
+    return data.data().getType().getName();
+  }
 
-	@Override
-	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getSupplementalText(
-			TreeItemData<U> data) {
-		return data.data().getState().getSpectrumName();
-	}
+  @Override
+  public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> String getSupplementalText(
+      TreeItemData<U> data) {
+    return data.data().getState().getSpectrumName();
+  }
 
-	@Override
-	public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> Node configureCell(
-			TreeItemData<U> data,
-			Node content) {
-		super.configureCell(data, content);
-		return PseudoClassTreeCellContribution.super.configureCell(data, content);
-	}
+  @Override
+  public <U extends ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> Node configureCell(
+      TreeItemData<U> data,
+      Node content) {
+    return configurePseudoClass(super.configureCell(data, content));
+  }
 }

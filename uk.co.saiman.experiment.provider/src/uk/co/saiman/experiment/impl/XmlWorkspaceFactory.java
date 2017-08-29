@@ -52,9 +52,9 @@ import uk.co.saiman.text.properties.PropertyLoader;
  * @author Elias N Vasylenko
  */
 @Component
-public class WorkspaceFactoryImpl implements WorkspaceFactory {
+public class XmlWorkspaceFactory implements WorkspaceFactory {
   @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
-  Log log;
+  volatile Log log;
 
   @Reference
   PropertyLoader loader;
@@ -76,7 +76,7 @@ public class WorkspaceFactoryImpl implements WorkspaceFactory {
 
   @Override
   public Workspace openWorkspace(Path location) {
-    return new WorkspaceImpl(this, location, loader.getProperties(ExperimentProperties.class));
+    return new XmlWorkspace(this, location, loader.getProperties(ExperimentProperties.class));
   }
 
   public Log getLog() {

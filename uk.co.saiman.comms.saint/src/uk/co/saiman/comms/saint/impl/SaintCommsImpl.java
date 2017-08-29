@@ -219,10 +219,6 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
   private ValueRequest<TurboControl> turboControl;
   private ValueReadback<TurboReadbacks> turboReadbacks;
 
-  public SaintCommsImpl() {
-    super(SaintComms.ID);
-  }
-
   <T> ValueReadback<T> inBlock(Class<T> type, SaintCommandAddress address) {
     return new ValueImpl<>(type, address, null);
   }

@@ -4,7 +4,6 @@
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
-	uk.co.saiman.collections.observable;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\

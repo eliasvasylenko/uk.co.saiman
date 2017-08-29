@@ -27,13 +27,7 @@
  */
 package uk.co.saiman.comms.copley;
 
-import java.util.stream.Stream;
-
 public interface CopleyController {
-  Stream<MotorAxis> getAxes();
-
-  MotorAxis getAxis(int axis);
-
   int getAxisCount();
 
   Variable<?> getVariable(CopleyVariableID id);

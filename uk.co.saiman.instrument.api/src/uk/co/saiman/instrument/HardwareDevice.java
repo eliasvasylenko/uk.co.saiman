@@ -30,7 +30,19 @@ package uk.co.saiman.instrument;
 import uk.co.saiman.observable.ObservableValue;
 
 public interface HardwareDevice {
+  /**
+   * @return the human-readable and localized name of the device
+   */
   String getName();
 
+  /**
+   * Get an observable value over the state of the connection to the hardware
+   * device.
+   * <p>
+   * The value may be set to a {@link ObservableValue#getProblem() problem
+   * state}.
+   * 
+   * @return the connection state
+   */
   ObservableValue<HardwareConnection> connectionState();
 }

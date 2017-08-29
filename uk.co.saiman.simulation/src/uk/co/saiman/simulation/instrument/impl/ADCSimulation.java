@@ -27,59 +27,104 @@
  */
 package uk.co.saiman.simulation.instrument.impl;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+
 import java.util.Random;
 
+import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.data.ArraySampledContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
+import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
-import uk.co.saiman.simulation.instrument.SimulatedSample;
+import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
+import uk.co.saiman.simulation.instrument.impl.ADCSimulation.ADCSimulationConfiguration;
 
 /**
  * A simulation of an acquisition data signal from an ADC.
  * 
  * @author Elias N Vasylenko
  */
-@Designate(ocd = ADCSimulationConfiguration.class)
-@Component(configurationPid = ADCSimulation.CONFIGURATION_PID)
+@Designate(ocd = ADCSimulationConfiguration.class, factory = true)
+@Component(configurationPid = ADCSimulation.CONFIGURATION_PID, configurationPolicy = REQUIRE)
 public class ADCSimulation implements DetectorSimulation {
-	static final String CONFIGURATION_PID = "uk.co.saiman.simulation.adc";
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "ADC Simulation Configuration",
+      description = "The ADC simulation provides an implementation of a detector interface simulating an analogue-to-digital converter")
+  public @interface ADCSimulationConfiguration {
+    @AttributeDefinition(
+        name = "Sample Source",
+        description = "The OSGi reference target LDAP filter for the sample source")
+    String sampleSource_target() default "(objectClass=uk.co.saiman.simulation.instrument.SimulatedSampleSource)";
 
-	private double[] intensities = new double[0];
+    @AttributeDefinition(
+        name = "Acquisition Resolution",
+        description = "The minimum resolvable units of time for samples")
+    String acquisitionResolution() default SimulatedAcquisitionDevice.DEFAULT_ACQUISITION_RESOLUTION_SECONDS
+        + "s";
 
-	private final Random random = new Random();
+    @AttributeDefinition(name = "SNR", description = "Set the simulated signal-to-noise-ratio")
+    double signalToNoiseRatio() default 0.95;
+  }
 
-	@Override
-	public String getId() {
-		return CONFIGURATION_PID;
-	}
+  static final String CONFIGURATION_PID = "uk.co.saiman.simulation.adc";
 
-	@Override
-	public SampledContinuousFunction<Time, Dimensionless> acquire(
-			SampledDomain<Time> domain,
-			Unit<Dimensionless> intensityUnits,
-			SimulatedSample nextSample) {
-		if (this.intensities.length != domain.getDepth()) {
-			intensities = new double[domain.getDepth()];
-		}
+  @Reference
+  SimulatedSampleSource sampleSource;
 
-		double[] intensities = this.intensities;
+  @Reference
+  Units units;
 
-		double scale = 0;
-		double scaleDelta = 1d / domain.getDepth();
+  private double[] intensities = new double[0];
+  private double signalToNoise;
+  private Quantity<Time> resolution;
 
-		for (int j = 0; j < intensities.length; j++) {
-			scale += scaleDelta;
-			intensities[j] = 0.01 + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
-		}
+  private final Random random = new Random();
 
-		return new ArraySampledContinuousFunction<>(domain, intensityUnits, intensities);
-	}
+  @Activate
+  @Modified
+  void configure(ADCSimulationConfiguration configuration) {
+    signalToNoise = configuration.signalToNoiseRatio();
+    resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(Time.class);
+  }
+
+  @Override
+  public Quantity<Time> getSampleResolution() {
+    return resolution;
+  }
+
+  @Override
+  public SampledContinuousFunction<Time, Dimensionless> acquire(
+      SampledDomain<Time> domain,
+      Unit<Dimensionless> intensityUnits) {
+    if (this.intensities.length != domain.getDepth()) {
+      intensities = new double[domain.getDepth()];
+    }
+
+    double[] intensities = this.intensities;
+
+    double scale = 0;
+    double scaleDelta = 1d / domain.getDepth();
+
+    for (int j = 0; j < intensities.length; j++) {
+      scale += scaleDelta;
+      intensities[j] = 0.01
+          + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
+    }
+
+    return new ArraySampledContinuousFunction<>(domain, intensityUnits, intensities);
+  }
 }

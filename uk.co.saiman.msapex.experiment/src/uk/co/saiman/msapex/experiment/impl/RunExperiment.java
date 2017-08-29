@@ -27,15 +27,13 @@
  */
 package uk.co.saiman.msapex.experiment.impl;
 
-import static uk.co.saiman.reflection.ConstraintFormula.Kind.LOOSE_COMPATIBILILTY;
-
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
+import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeItemImpl;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -46,32 +44,31 @@ import uk.co.saiman.reflection.token.TypeToken;
  * @author Elias N Vasylenko
  */
 public class RunExperiment {
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.runexperiment";
+  /**
+   * The ID of the command in the e4 model fragment.
+   */
+  public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.runexperiment";
 
-	@Execute
-	void execute(MPart part, @Localize ExperimentProperties text) {
-		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
+  @Execute
+  void execute(MPart part, @Localize ExperimentProperties text) {
+    ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
 
-		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
+    TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
 
-		if (item == null) {
-			throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, null));
-		}
+    if (item == null) {
+      throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, null));
+    }
 
-		TreeItemData<?> experimentItem = item.getData();
+    TreeItemData<?> experimentItem = item.getData();
 
-		while (!experimentItem
-				.type()
-				.satisfiesConstraintTo(LOOSE_COMPATIBILILTY, new TypeToken<ExperimentNode<?, ?>>() {})) {
-			experimentItem = experimentItem.parent().orElseThrow(
-					() -> new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, item.getData())));
-		}
+    while (!experimentItem.type().isAssignableTo(new TypeToken<ExperimentNode<?, ?>>() {})) {
+      experimentItem = experimentItem.parent().orElseThrow(
+          () -> new ExperimentException(
+              text.exception().illegalCommandForSelection(COMMAND_ID, item.getData())));
+    }
 
-		ExperimentNode<?, ?> experimentNode = (ExperimentNode<?, ?>) experimentItem.data();
+    ExperimentNode<?, ?> experimentNode = (ExperimentNode<?, ?>) experimentItem.data();
 
-		new Thread(experimentNode::process).start();
-	}
+    new Thread(experimentNode::process).start();
+  }
 }

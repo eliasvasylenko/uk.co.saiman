@@ -35,12 +35,12 @@ import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.observable.HotObservable;
 
-public class ResultImpl<T> extends HotObservable<Optional<T>> implements Result<T> {
-  private final ExperimentNodeImpl<?, ?> node;
+public class XmlResult<T> extends HotObservable<Optional<T>> implements Result<T> {
+  private final XmlExperimentNode<?, ?> node;
   private final ResultType<T> resultType;
   private T data;
 
-  public ResultImpl(ExperimentNodeImpl<?, ?> node, ResultType<T> type) {
+  public XmlResult(XmlExperimentNode<?, ?> node, ResultType<T> type) {
     this.node = node;
     this.resultType = type;
   }
@@ -68,10 +68,5 @@ public class ResultImpl<T> extends HotObservable<Optional<T>> implements Result<
   @Override
   public Optional<T> getData() {
     return Optional.ofNullable(data);
-  }
-
-  @Override
-  public Result<T> copy() {
-    return this;
   }
 }

@@ -34,11 +34,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface WritableVariable<U> extends Variable<U> {
-  void set(MotorAxis axis, U value);
-
-  default void set(int axis, U value) {
-    set(getController().getAxis(axis), value);
-  }
+  void set(int axis, U value);
 
   @Override
   Optional<WritableVariable<U>> trySwitchBank(VariableBank bank);
@@ -78,12 +74,12 @@ public interface WritableVariable<U> extends Variable<U> {
       }
 
       @Override
-      public T get(MotorAxis axis) {
+      public T get(int axis) {
         return out.apply(base.get(axis));
       }
 
       @Override
-      public void set(MotorAxis axis, T value) {
+      public void set(int axis, T value) {
         base.set(axis, in.apply(value));
       }
     };

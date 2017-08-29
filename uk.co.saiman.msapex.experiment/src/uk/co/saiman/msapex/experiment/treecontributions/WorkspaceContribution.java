@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
-import static uk.co.saiman.reflection.token.TypedObject.typedObject;
+import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
 import java.util.stream.Stream;
 
@@ -36,14 +36,14 @@ import org.osgi.service.component.annotations.ServiceScope;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.saiman.eclipse.EclipseTreeContribution;
+import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.fx.TreeCellContribution;
 import uk.co.saiman.fx.TreeChildContribution;
+import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.reflection.token.TypeToken;
-import uk.co.saiman.reflection.token.TypedObject;
+import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the
@@ -51,17 +51,18 @@ import uk.co.saiman.reflection.token.TypedObject;
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = EclipseTreeContribution.class, scope = ServiceScope.PROTOTYPE)
-public class WorkspaceContribution
-		implements EclipseTreeContribution<Workspace>, TreeChildContribution<Workspace> {
-	@Override
-	public <U extends Workspace> boolean hasChildren(TreeItemData<U> data) {
-		return data.data().getExperiments().findAny().isPresent();
-	}
+@Component(service = TreeContribution.class, scope = ServiceScope.PROTOTYPE)
+public class WorkspaceContribution implements TreeChildContribution<Workspace> {
+  @Override
+  public <U extends Workspace> boolean hasChildren(TreeItemData<U> data) {
+    return data.data().getExperiments().findAny().isPresent();
+  }
 
-	@Override
-	public <U extends Workspace> Stream<TypedObject<?>> getChildren(TreeItemData<U> data) {
-		return data.data().getExperiments().map(
-				c -> typedObject(new TypeToken<ExperimentNode<ExperimentRoot, ExperimentConfiguration>>() {}, c));
-	}
+  @Override
+  public <U extends Workspace> Stream<TypedReference<?>> getChildren(TreeItemData<U> data) {
+    return data.data().getExperiments().map(
+        c -> typedObject(
+            new TypeToken<ExperimentNode<ExperimentRoot, ExperimentConfiguration>>() {},
+            c));
+  }
 }

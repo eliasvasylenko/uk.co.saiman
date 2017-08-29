@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.simulation.instrument;
 
+import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
@@ -41,10 +42,9 @@ import uk.co.saiman.data.SampledDomain;
  * @author Elias N Vasylenko
  */
 public interface DetectorSimulation {
-	String getId();
+  SampledContinuousFunction<Time, Dimensionless> acquire(
+      SampledDomain<Time> domain,
+      Unit<Dimensionless> intensityUnits);
 
-	SampledContinuousFunction<Time, Dimensionless> acquire(
-			SampledDomain<Time> domain,
-			Unit<Dimensionless> intensityUnits,
-			SimulatedSample nextSample);
+  Quantity<Time> getSampleResolution();
 }

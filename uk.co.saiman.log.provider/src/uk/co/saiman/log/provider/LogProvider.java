@@ -33,6 +33,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogService;
@@ -50,13 +51,15 @@ public class LogProvider implements Log {
   private Bundle usingBundle;
 
   private ServiceReference<LogService> logServiceReference;
-  private LogService logService;
+  @Reference
+  LogService logService;
 
   @Activate
   public void activate(ComponentContext context) {
     usingBundle = context.getUsingBundle();
     logServiceReference = usingBundle.getBundleContext().getServiceReference(LogService.class);
-    logService = usingBundle.getBundleContext().getService(logServiceReference);
+    if (logServiceReference != null)
+      logService = usingBundle.getBundleContext().getService(logServiceReference);
   }
 
   @Deactivate

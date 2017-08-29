@@ -41,49 +41,49 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.MissingExperimentType;
 
 public class MissingExperimentTypeImpl implements MissingExperimentType {
-	private final ExperimentProperties text;
-	private final String id;
+  private final ExperimentProperties text;
+  private final String id;
 
-	protected MissingExperimentTypeImpl(ExperimentProperties text, String id) {
-		this.text = text;
-		this.id = id;
-	}
+  protected MissingExperimentTypeImpl(ExperimentProperties text, String id) {
+    this.text = text;
+    this.id = id;
+  }
 
-	@Override
-	public String getName() {
-		return text.missingExperimentType(id).toString();
-	}
+  @Override
+  public String getName() {
+    return text.missingExperimentType(id).toString();
+  }
 
-	public String getMissingTypeID() {
-		return id;
-	}
+  public String getMissingTypeID() {
+    return id;
+  }
 
-	@Override
-	public Map<String, String> createState(
-			ExperimentConfigurationContext<Map<String, String>> context) {
-		Map<String, String> state = new HashMap<>();
+  @Override
+  public Map<String, String> createState(
+      ExperimentConfigurationContext<Map<String, String>> context) {
+    Map<String, String> state = new HashMap<>();
 
-		context.persistedState().putString(getID(), getMissingTypeID());
-		context.persistedState().getStrings().forEach(
-				string -> state.put(string, context.persistedState().getString(string).get()));
+    context.persistedState().putString(getID(), getMissingTypeID());
+    context.persistedState().getStrings().forEach(
+        string -> state.put(string, context.persistedState().getString(string).get()));
 
-		return unmodifiableMap(state);
-	}
+    return unmodifiableMap(state);
+  }
 
-	@Override
-	public void execute(ExperimentExecutionContext<Map<String, String>> context) {
-		throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
-	}
+  @Override
+  public void execute(ExperimentExecutionContext<Map<String, String>> context) {
+    throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
+  }
 
-	@Override
-	public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-		return true;
-	}
+  @Override
+  public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
+    return true;
+  }
 
-	@Override
-	public boolean mayComeBefore(
-			ExperimentNode<?, ?> penultimateDescendantNode,
-			ExperimentType<?> descendantNodeType) {
-		return true;
-	}
+  @Override
+  public boolean mayComeBefore(
+      ExperimentNode<?, ?> penultimateDescendantNode,
+      ExperimentType<?> descendantNodeType) {
+    return true;
+  }
 }

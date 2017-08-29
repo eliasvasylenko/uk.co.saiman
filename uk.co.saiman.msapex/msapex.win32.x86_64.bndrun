@@ -17,16 +17,26 @@ runplatform: win64
 
 should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	org.apache.felix.log;version='[1.0.1,1.0.2)',\
-	org.apache.felix.scr;version='[2.0.2,2.0.3)',\
+	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
 	org.apache.felix.configadmin;version='[1.8.14,1.8.15)',\
 	uk.co.saiman.configadmin.persistence;version=snapshot,\
-	org.eclipse.osgi.services;version='[3.5.100,3.5.101)',\
+	org.eclipse.osgi.services;version='[3.6.0,3.6.1)',\
 	org.eclipse.equinox.metatype;version='[1.4.300,1.4.301)',\
 	osgi.enroute.logger.simple.provider;version='[2.0.0,2.0.1)',\
 	uk.co.saiman.jetty.logger;version=snapshot,\
 	uk.co.saiman.log.provider;version=snapshot,\
 
 -runbundles: \
+	org.apache.felix.log;version='[1.0.1,1.0.2)',\
+	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
+	org.apache.felix.configadmin;version='[1.8.14,1.8.15)',\
+	uk.co.saiman.configadmin.persistence;version=snapshot,\
+	org.eclipse.osgi.services;version='[3.6.0,3.6.1)',\
+	org.eclipse.equinox.metatype;version='[1.4.300,1.4.301)',\
+	osgi.enroute.logger.simple.provider;version='[2.0.0,2.0.1)',\
+	uk.co.saiman.jetty.logger;version=snapshot,\
+	uk.co.saiman.log.provider;version=snapshot,\
+\
 	bndtools.runtime.eclipse.applaunch;version='[0.1.0,0.1.1)',\
 	com.google.guava;version='[21.0.0,21.0.1)',\
 	com.ibm.icu;version='[58.2.0,58.2.1)',\
@@ -36,14 +46,11 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	org.apache.commons.io;version='[2.5.0,2.5.1)',\
 	org.apache.commons.jxpath;version='[1.3.0,1.3.1)',\
 	org.apache.commons.lang;version='[2.6.0,2.6.1)',\
-	org.apache.felix.configadmin;version='[1.8.14,1.8.15)',\
 	org.apache.felix.gogo.command;version='[0.16.0,0.16.1)',\
 	org.apache.felix.gogo.runtime;version='[0.16.2,0.16.3)',\
 	org.apache.felix.gogo.shell;version='[0.10.0,0.10.1)',\
 	org.apache.felix.http.jetty;version='[3.2.0,3.2.1)',\
 	org.apache.felix.http.servlet-api;version='[1.1.2,1.1.3)',\
-	org.apache.felix.log;version='[1.0.1,1.0.2)',\
-	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
 	org.apache.felix.webconsole;version='[4.3.0,4.3.1)',\
 	org.eclipse.core.commands;version='[3.9.0,3.9.1)',\
 	org.eclipse.core.contenttype;version='[3.6.0,3.6.1)',\
@@ -119,7 +126,6 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	org.eclipse.fx.ui.workbench.renderers.base;version='[3.1.0,3.1.1)',\
 	org.eclipse.fx.ui.workbench.renderers.fx;version='[3.1.0,3.1.1)',\
 	org.eclipse.fx.ui.workbench.services;version='[3.1.0,3.1.1)',\
-	org.eclipse.osgi.services;version='[3.6.0,3.6.1)',\
 	org.eclipse.rap.jface;version='[3.2.0,3.2.1)',\
 	org.eclipse.rap.rwt;version='[3.2.0,3.2.1)',\
 	org.eclipse.swt;version='[3.106.0,3.106.1)',\
@@ -130,7 +136,6 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	osgi.enroute.configurer.simple.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.dtos.bndlib.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.executor.simple.provider;version='[2.0.0,2.0.1)',\
-	osgi.enroute.logger.simple.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.rest.simple.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.web.simple.provider;version='[2.0.0,2.0.1)',\
 	osgi.enroute.webconsole.xray.provider;version='[2.0.0,2.0.1)',\
@@ -150,7 +155,6 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
-	uk.co.saiman.expressions;version=snapshot,\
 	uk.co.saiman.facebook.react.dom.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.proptypes.webresource;version=snapshot,\
 	uk.co.saiman.facebook.react.redux.webresource;version=snapshot,\
@@ -162,8 +166,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.instrument.provider;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
-	uk.co.saiman.jetty.logger;version=snapshot,\
-	uk.co.saiman.log.provider;version=snapshot,\
+	uk.co.saiman.instrument.stage.copley;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.measurement.provider;version=snapshot,\
@@ -187,6 +190,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.requirejs.webresource;version=snapshot,\
 	uk.co.saiman.saint.api;version=snapshot,\
 	uk.co.saiman.saint.provider;version=snapshot,\
+	uk.co.saiman.saint.msapex;version=snapshot,\
 	uk.co.saiman.simulation.api;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\

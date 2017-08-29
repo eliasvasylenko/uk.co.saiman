@@ -27,14 +27,11 @@
  */
 package uk.co.saiman.simulation.instrument.impl;
 
-import static java.util.Collections.unmodifiableSet;
 import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
 import static uk.co.saiman.log.Log.Level.ERROR;
 import static uk.co.saiman.observable.ObservableValue.immutableOver;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -42,47 +39,25 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.metatype.annotations.Designate;
-
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.instrument.HardwareConnection;
-import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.saiman.measurement.Units;
-import uk.co.saiman.simulation.SimulationProperties;
-import uk.co.saiman.simulation.instrument.DetectorSimulation;
-import uk.co.saiman.simulation.instrument.SimulatedAcquisitionDevice;
-import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
-import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
-import uk.co.saiman.text.properties.PropertyLoader;
+import uk.co.saiman.simulation.instrument.DetectorSimulation;
 
 /**
  * Partial implementation of a simulation of an acquisition device.
  * 
  * @author Elias N Vasylenko
  */
-@Designate(ocd = SimulatedAcquisitionDeviceConfiguration.class)
-@Component(
-    configurationPid = SimulatedAcquisitionDeviceImpl.CONFIGURATION_PID,
-    configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { SimulatedAcquisitionDevice.class, AcquisitionDevice.class })
-public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, SimulatedAcquisitionDevice {
+public class SimulatedAcquisitionDevice implements AcquisitionDevice {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.instrument.acquisition";
 
   private class ExperimentConfiguration {
-    private final DetectorSimulation detector;
-    private final SimulatedSampleSource sample;
     private final SampledDomain<Time> domain;
 
     private int counter;
@@ -93,18 +68,8 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
       counter = getAcquisitionCount();
       if (counter <= 0) {
         throw new AcquisitionException(
-            simulationText.acquisition().exceptions().countMustBePositive());
+            manager.getText().acquisition().exceptions().countMustBePositive());
       }
-
-      synchronized (detectors) {
-        detector = getDetector();
-        if (detector == null) {
-          throw new AcquisitionException(simulationText.acquisition().exceptions().noSignal());
-        }
-        detectors.notifyAll();
-      }
-
-      sample = SimulatedAcquisitionDeviceImpl.this.sample;
     }
   }
 
@@ -145,30 +110,14 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
 
   private boolean finalised = false;
 
-  @Reference
-  Log log;
-
-  @Reference
-  Units units;
-  private Unit<Dimensionless> intensityUnits;
-  private Unit<Time> timeUnits;
-
-  @Reference
-  PropertyLoader loader;
-  private SimulationProperties simulationText;
-
   /*
    * Instrument Configuration
    */
-  private Quantity<Time> acquisitionResolution;
   private int acquisitionDepth;
   private int acquisitionCount;
 
-  private Set<DetectorSimulation> detectors = new HashSet<>();
-  private DetectorSimulation detector;
-
-  private Set<SimulatedSampleSource> samples = new HashSet<>();
-  private SimulatedSampleSource sample;
+  private final SimulatedAcquisitionDeviceManager manager;
+  private final DetectorSimulation detector;
 
   /*
    * External Acquisition State
@@ -187,202 +136,24 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
   private final Object acquiringLock = new Object();
   private Optional<ExperimentConfiguration> experiment;
 
-  public SimulatedAcquisitionDeviceImpl() {
+  public SimulatedAcquisitionDevice(
+      SimulatedAcquisitionDeviceManager manager,
+      DetectorSimulation detector) {
     acquisitionBuffer = new HotObservable<>();
     dataListeners = new HotObservable<>();
     acquisitionListeners = new HotObservable<>();
     acquisitionListeners.complete();
     acquiring = false;
-
     experiment = Optional.empty();
-  }
 
-  @Activate
-  void activate(SimulatedAcquisitionDeviceConfiguration configuration) {
-    simulationText = loader.getProperties(SimulationProperties.class);
+    this.manager = manager;
+    this.detector = detector;
 
-    intensityUnits = units.count().get();
-    timeUnits = units.second().get();
-
-    updated(configuration);
-    setAcquisitionTime(units.second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
+    setAcquisitionTime(manager.getUnits().second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
     setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
     acquisitionBuffer.observe(this::acquired);
     new Thread(this::acquire).start();
-  }
-
-  @Modified
-  void updated(SimulatedAcquisitionDeviceConfiguration configuration) {
-    Quantity<Time> resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(
-        Time.class);
-
-    setAcquisitionResolution(resolution);
-
-    if (!configuration.detectorSimulation().equals("")) {
-      DetectorSimulation detector = detectors
-          .stream()
-          .filter(d -> d.getId().equals(configuration.detectorSimulation()))
-          .findAny()
-          .<AcquisitionException> orElseThrow(() -> {
-            throw new AcquisitionException(
-                simulationText.cannotFindDetector(configuration.detectorSimulation(), detectors));
-          });
-
-      setDetector(detector);
-    }
-  }
-
-  /**
-   * @param detector
-   *          a new signal simulation option
-   */
-  @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
-  public void addDetectorSimulation(DetectorSimulation detector) {
-    synchronized (detectors) {
-      if (detectors.add(detector) && this.detector == null) {
-        this.detector = detector;
-        detectors.notifyAll();
-      }
-    }
-  }
-
-  /**
-   * @param detector
-   *          a signal simulation option to remove
-   */
-  public void removeDetectorSimulation(DetectorSimulation detector) {
-    synchronized (detectors) {
-      if (detectors.remove(detector) && this.detector == detector) {
-        if (detectors.isEmpty()) {
-          this.detector = null;
-        } else {
-          this.detector = detectors.iterator().next();
-          detectors.notifyAll();
-        }
-      }
-    }
-  }
-
-  @Override
-  public Set<DetectorSimulation> getDetectors() {
-    synchronized (detectors) {
-      return unmodifiableSet(detectors);
-    }
-  }
-
-  @Override
-  public DetectorSimulation getDetector() {
-    synchronized (detectors) {
-      return detector;
-    }
-  }
-
-  @Override
-  public void setDetector(DetectorSimulation detector) {
-    synchronized (detectors) {
-      if (this.detector != detector) {
-        /*-
-        if (!detectors.contains(detector)) {
-        	throw new IllegalArgumentException();
-        }
-         */
-        this.detector = detector;
-        detectors.notifyAll();
-      }
-    }
-  }
-
-  private DetectorSimulation waitForDetector() throws InterruptedException {
-    synchronized (detectors) {
-      DetectorSimulation detector = getDetector();
-
-      while (detector == null) {
-        detectors.wait();
-
-        detector = getDetector();
-      }
-
-      return detector;
-    }
-  }
-
-  /**
-   * @param sample
-   *          a new sample simulation option
-   */
-  @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
-  public void addSampleSimulation(SimulatedSampleSource sample) {
-    synchronized (samples) {
-      if (samples.add(sample) && this.sample == null) {
-        this.sample = sample;
-        samples.notifyAll();
-      }
-    }
-  }
-
-  /**
-   * @param sample
-   *          a sample simulation option to remove
-   */
-  public void removeSampleSimulation(SimulatedSampleSource sample) {
-    synchronized (samples) {
-      if (samples.remove(sample) && this.sample == sample) {
-        if (samples.isEmpty()) {
-          this.sample = null;
-        } else {
-          this.sample = samples.iterator().next();
-          samples.notifyAll();
-        }
-      }
-    }
-  }
-
-  @Override
-  public Set<SimulatedSampleSource> getSamples() {
-    synchronized (samples) {
-      return unmodifiableSet(samples);
-    }
-  }
-
-  @Override
-  public SimulatedSampleSource getSample() {
-    synchronized (samples) {
-      return sample;
-    }
-  }
-
-  @Override
-  public void setSample(SimulatedSampleSource sample) {
-    synchronized (samples) {
-      if (this.sample != sample) {
-        /*-
-        if (!samples.contains(sample)) {
-        	throw new IllegalArgumentException();
-        }
-         */
-        this.sample = sample;
-        samples.notifyAll();
-      }
-    }
-  }
-
-  private SimulatedSampleSource waitForSample() throws InterruptedException {
-    synchronized (samples) {
-      SimulatedSampleSource sample = getSample();
-
-      while (sample == null) {
-        samples.wait();
-
-        sample = getSample();
-      }
-
-      return sample;
-    }
-  }
-
-  protected SimulationProperties getText() {
-    return simulationText;
   }
 
   @Override
@@ -393,7 +164,7 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
 
   @Override
   public String getName() {
-    return simulationText.acquisitionSimulationDeviceName().toString();
+    return manager.getText().acquisitionSimulationDeviceName().toString();
   }
 
   @Override
@@ -403,7 +174,7 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
         synchronized (startingLock) {
           this.experiment.ifPresent(e -> {
             throw new AcquisitionException(
-                simulationText.acquisition().exceptions().alreadyAcquiring());
+                manager.getText().acquisition().exceptions().alreadyAcquiring());
           });
 
           // wait any previous experiment to flush from the buffer
@@ -424,7 +195,7 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
       } catch (InterruptedException e) {
         this.experiment = Optional.empty();
         throw new AcquisitionException(
-            simulationText.acquisition().exceptions().experimentInterrupted(),
+            manager.getText().acquisition().exceptions().experimentInterrupted(),
             e);
       }
     }
@@ -448,8 +219,6 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
 
   private void acquire() {
     while (!finalised) {
-      SimulatedSampleSource sample;
-      DetectorSimulation detector;
       SampledDomain<Time> domain;
       int counter;
 
@@ -459,13 +228,11 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
          * but this is okay as the experiment should have failed anyway if this
          * is blocked:
          */
-        detector = experiment.map(e -> e.detector).orElse(waitForDetector());
-        sample = experiment.map(e -> e.sample).orElse(waitForSample());
         domain = experiment.map(e -> e.domain).orElse(getSampleDomain());
         counter = experiment.map(e -> --e.counter).orElse(-1);
 
         SampledContinuousFunction<Time, Dimensionless> acquisitionData = detector
-            .acquire(domain, intensityUnits, sample.getNextSample());
+            .acquire(domain, getSampleIntensityUnits());
         acquisitionBuffer.next(new Acquisition(counter, acquisitionData));
 
         synchronized (acquiringLock) {
@@ -479,7 +246,7 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
       } catch (Exception e) {
         exception(
             new AcquisitionException(
-                simulationText.acquisition().exceptions().unexpectedException(),
+                manager.getText().acquisition().exceptions().unexpectedException(),
                 e));
       }
 
@@ -496,7 +263,7 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
   private void exception(AcquisitionException exception) {
     dataListeners.fail(exception);
     acquisitionListeners.fail(exception);
-    log.log(ERROR, exception);
+    manager.getLog().log(ERROR, exception);
   }
 
   @Override
@@ -529,21 +296,9 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
     return acquisitionListeners;
   }
 
-  /**
-   * Set the time resolution between each sample in the acquired data.
-   * 
-   * @param resolution
-   *          The acquisition resolution in milliseconds
-   */
-  public void setAcquisitionResolution(Quantity<Time> resolution) {
-    synchronized (startingLock) {
-      acquisitionResolution = resolution;
-    }
-  }
-
   @Override
   public Quantity<Time> getSampleResolution() {
-    return acquisitionResolution;
+    return detector.getSampleResolution();
   }
 
   @Override
@@ -578,7 +333,7 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
   @Override
   public void setAcquisitionCount(int count) {
     if (count <= 0) {
-      throw new AcquisitionException(simulationText.invalidAcquisitionCount(count));
+      throw new AcquisitionException(manager.getText().invalidAcquisitionCount(count));
     }
     acquisitionCount = count;
   }
@@ -590,12 +345,12 @@ public class SimulatedAcquisitionDeviceImpl implements HardwareDevice, Simulated
 
   @Override
   public Unit<Time> getSampleTimeUnits() {
-    return timeUnits;
+    return manager.getTimeUnits();
   }
 
   @Override
   public Unit<Dimensionless> getSampleIntensityUnits() {
-    return intensityUnits;
+    return manager.getIntensityUnits();
   }
 
   @Override

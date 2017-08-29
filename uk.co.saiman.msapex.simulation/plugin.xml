@@ -3,11 +3,12 @@
 
 	<extension
 		id="modelContribution"
-    	point="org.eclipse.e4.workbench.model">
+		point="org.eclipse.e4.workbench.model">
 
 		<fragment
-        uri="fragment.e4xmi">
-  </fragment>
-    </extension>
+			apply="initial"
+			uri="fragment.e4xmi">
+		</fragment>
+	</extension>
 
 </plugin> 

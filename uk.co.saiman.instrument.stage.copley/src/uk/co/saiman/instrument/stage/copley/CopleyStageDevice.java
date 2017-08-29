@@ -27,52 +27,64 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
-import javax.measure.Quantity;
-import javax.measure.Unit;
-import javax.measure.quantity.Length;
+import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
+import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
+import static uk.co.saiman.instrument.HardwareConnection.DISCONNECTED;
 
+import org.osgi.service.component.annotations.Reference;
+
+import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.comms.copley.CopleyController;
-import uk.co.saiman.comms.copley.Int32;
-import uk.co.saiman.instrument.stage.StageDimension;
-import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.instrument.HardwareConnection;
+import uk.co.saiman.instrument.stage.StageDevice;
 import uk.co.saiman.measurement.Units;
+import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.text.properties.PropertyLoader;
 
-public class CopleyLinearDimension implements StageDimension<Length> {
-  private final Units units;
-  private final int axis;
-  private final CopleyController controller;
+public abstract class CopleyStageDevice implements StageDevice {
+  @Reference
+  PropertyLoader loader;
+  private CopleyStageProperties properties;
 
-  public CopleyLinearDimension(Units units, int axis, CopleyController controller) {
-    this.units = units;
-    this.axis = axis;
-    this.controller = controller;
+  @Reference
+  CopleyComms comms;
+  private CopleyController controller;
+
+  @Reference
+  Units units;
+
+  void activate() {
+    properties = loader.getProperties(CopleyStageProperties.class);
+  }
+
+  public CopleyStageProperties getProperties() {
+    return properties;
+  }
+
+  public Units getUnits() {
+    return units;
+  }
+
+  public CopleyController getController() {
+    return controller;
   }
 
   @Override
-  public Unit<Length> getUnit() {
-    return units.metre().get();
+  public String getName() {
+    return properties.copleyXYStageName().get();
+  }
+
+  public boolean isConnected() {
+    return comms.status().isEqual(OPEN);
+  }
+
+  public void reset() {
+    comms.reset();
+    controller = comms.openController();
   }
 
   @Override
-  public Interval<Quantity<Length>> getBounds() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void requestPosition(Quantity<Length> offset) {
-    int micrometreOffset = offset.to(units.metre().micro().get()).getValue().intValue();
-
-    controller.getRequestedPosition().set(axis, new Int32(micrometreOffset));
-  }
-
-  @Override
-  public Quantity<Length> getRequestedPosition() {
-    return units.metre().micro().getQuantity(controller.getRequestedPosition().get(axis).value);
-  }
-
-  @Override
-  public Quantity<Length> getActualPosition() {
-    return units.metre().micro().getQuantity(controller.getActualPosition().get(axis).value);
+  public ObservableValue<HardwareConnection> connectionState() {
+    return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
   }
 }

@@ -90,7 +90,7 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
   public void readValue(boolean updateOutput) {
     Map<String, List<Object>> inputData = new LinkedHashMap<>();
 
-    variable.getController().getAxes().forEach(axis -> {
+    for (int axis = 0; axis < variable.getController().getAxisCount(); axis++) {
       Object value = variable.get(axis);
       try {
         dtos.asMap(value).entrySet().stream().forEach(
@@ -98,7 +98,7 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
       } catch (Exception e) {
         throw new CommsException("Cannot convert " + value + " to map", e);
       }
-    });
+    }
 
     if (updateOutput && variable instanceof WritableVariable<?>) {
       outputData.clear();
@@ -112,11 +112,12 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
   }
 
   public void writeValue() {
-    variable.getController().getAxes().forEach(axis -> {
+    for (int i = 0; i < variable.getController().getAxisCount(); i++) {
+      int axis = i;
       U value;
 
       Map<String, Object> axisOutput = outputData.entrySet().stream().collect(
-          toMap(Entry::getKey, e -> ((List<?>) e.getValue()).get(axis.axisNumber())));
+          toMap(Entry::getKey, e -> ((List<?>) e.getValue()).get(axis)));
 
       try {
         value = dtos.convert(axisOutput).to(variable.getType());
@@ -126,7 +127,7 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
             e);
       }
       ((WritableVariable<U>) variable).set(axis, value);
-    });
+    }
   }
 
   public void switchBank() {

@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import osgi.enroute.dto.api.DTOs;
+import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.comms.copley.AmplifierMode;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.CopleyVariableID;
@@ -48,7 +49,6 @@ import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.rest.ControllerREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
-import uk.co.saiman.collection.stream.StreamUtilities;
 
 public class CopleyControllerREST implements ControllerREST {
   static final String READ_VALUE = "readValue";

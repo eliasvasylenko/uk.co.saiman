@@ -27,16 +27,23 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Length;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.instrument.raster.RasterPattern;
 import uk.co.saiman.instrument.raster.RasterPosition;
 import uk.co.saiman.instrument.stage.StageDimension;
+import uk.co.saiman.instrument.stage.XYStageDevice;
+import uk.co.saiman.instrument.stage.copley.CopleyXYStageRasterDevice.CopleyXYStageRasterConfiguration;
 import uk.co.saiman.mathematics.Interval;
 import uk.co.saiman.observable.Observable;
 
@@ -54,12 +61,36 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-@Component
-public class CopleyXYStageRasterDevice extends CopleyXYStageDevice implements RasterDevice {
+@Designate(ocd = CopleyXYStageRasterConfiguration.class, factory = true)
+@Component(
+    configurationPid = CopleyXYStageRasterDevice.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
+public class CopleyXYStageRasterDevice extends CopleyStageDevice
+    implements RasterDevice, XYStageDevice {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "Copley XY Stage Raster Configuration",
+      description = "An implementation of a rastering XY stage device interface based on copley motor hardware")
+  public @interface CopleyXYStageRasterConfiguration {
+
+  }
+
+  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.xy.rastering";
+
+  private StageDimension<Length> xAxis;
+  private StageDimension<Length> yAxis;
+
   private RasterPattern rasterPattern;
   private RasterPosition rasterPosition;
   private Quantity<Length> rasterResolutionX;
   private Quantity<Length> rasterResolutionY;
+
+  @Activate
+  void activate(CopleyXYStageRasterConfiguration configuration) {
+    activate();
+    xAxis = new RasteringAxis(new CopleyLinearDimension(getUnits(), 0, getController()));
+    yAxis = new RasteringAxis(new CopleyLinearDimension(getUnits(), 1, getController()));
+  }
 
   public void setRasterPattern(RasterPattern mode) {
     rasterPattern = mode;
@@ -109,12 +140,12 @@ public class CopleyXYStageRasterDevice extends CopleyXYStageDevice implements Ra
 
   @Override
   public StageDimension<Length> getXAxis() {
-    return new RasteringAxis(super.getXAxis());
+    return xAxis;
   }
 
   @Override
   public StageDimension<Length> getYAxis() {
-    return new RasteringAxis(super.getYAxis());
+    return yAxis;
   }
 
   class RasteringAxis implements StageDimension<Length> {
@@ -131,8 +162,7 @@ public class CopleyXYStageRasterDevice extends CopleyXYStageDevice implements Ra
 
     @Override
     public Interval<Quantity<Length>> getBounds() {
-      // TODO Auto-generated method stub
-      return null;
+      return component.getBounds();
     }
 
     @Override

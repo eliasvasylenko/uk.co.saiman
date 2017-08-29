@@ -1,12 +1,6 @@
-Bundle-Name: SAI :: Stage :: Copley
-
--include:\
-	${build}/include/eclipse.fx.3.0.0.bnd,\
-	${build}/include/fugue.icons.bnd
+Bundle-Name: SAI :: Instrument :: Stage :: Copley
 
 -buildpath: \
-	uk.co.saiman.eclipse;version=snapshot,\
-	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\

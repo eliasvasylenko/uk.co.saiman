@@ -34,7 +34,6 @@ import static uk.co.saiman.comms.copley.CopleyOperationID.SET_VARIABLE;
 import java.util.Optional;
 
 import uk.co.saiman.comms.copley.CopleyVariableID;
-import uk.co.saiman.comms.copley.MotorAxis;
 import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.copley.VariableIdentifier;
@@ -71,12 +70,9 @@ class VariableImpl<U> implements Variable<U> {
     return variableClass;
   }
 
-  private VariableIdentifier getVariableID(
-      CopleyVariableID variable,
-      MotorAxis axis,
-      VariableBank bank) {
+  private VariableIdentifier getVariableID(CopleyVariableID variable, int axis, VariableBank bank) {
     VariableIdentifier identifier = new VariableIdentifier();
-    identifier.axis = (byte) axis.axisNumber();
+    identifier.axis = (byte) axis;
     identifier.variableID = (byte) variable.getCode();
     identifier.bank = bank.getBit();
     return identifier;
@@ -90,7 +86,7 @@ class VariableImpl<U> implements Variable<U> {
   }
 
   @Override
-  public U get(MotorAxis axis) {
+  public U get(int axis) {
     VariableIdentifier variableID = getVariableID(id, axis, bank);
 
     byte[] outputBytes = controller.getConverters().getConverter(VariableIdentifier.class).toBytes(
@@ -101,7 +97,7 @@ class VariableImpl<U> implements Variable<U> {
     return controller.getConverters().getConverter(variableClass).fromBytes(inputBytes);
   }
 
-  public void set(MotorAxis axis, U output) {
+  public void set(int axis, U output) {
     VariableIdentifier variableID = getVariableID(id, axis, bank);
 
     byte[] outputBytes = concat(
@@ -111,7 +107,7 @@ class VariableImpl<U> implements Variable<U> {
     controller.executeCopleyCommand(SET_VARIABLE, outputBytes);
   }
 
-  public void copyToBank(MotorAxis axis) {
+  public void copyToBank(int axis) {
     VariableIdentifier variableID = getVariableID(id, axis, bank);
 
     byte[] outputBytes = controller.getConverters().getConverter(VariableIdentifier.class).toBytes(

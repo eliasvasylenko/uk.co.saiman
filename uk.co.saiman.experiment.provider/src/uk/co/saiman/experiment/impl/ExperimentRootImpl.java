@@ -36,24 +36,25 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 
 /**
- * The root experiment type implementation for {@link WorkspaceImpl}.
+ * The root experiment type implementation for {@link XmlWorkspace}.
  * 
  * @author Elias N Vasylenko
  */
 public class ExperimentRootImpl implements ExperimentRoot {
-  private final WorkspaceImpl workspace;
+  private final ExperimentProperties text;
 
-  protected ExperimentRootImpl(WorkspaceImpl workspace) {
-    this.workspace = workspace;
+  protected ExperimentRootImpl(ExperimentProperties text) {
+    this.text = text;
   }
 
   @Override
   public String getName() {
-    return workspace.getText().experimentRoot().toString();
+    return text.experimentRoot().toString();
   }
 
   @Override

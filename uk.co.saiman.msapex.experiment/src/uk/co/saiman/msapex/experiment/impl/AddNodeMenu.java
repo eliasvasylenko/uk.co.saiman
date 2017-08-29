@@ -37,10 +37,10 @@ import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 
+import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.fx.TreeItemImpl;
 
 /**
@@ -53,7 +53,7 @@ public class AddNodeMenu {
 	/**
 	 * The ID of the command in the e4 model fragment.
 	 */
-	public static final String MENU_ID = "uk.co.saiman.msapex.experiment.menu.addnode";
+	public static final String MENU_ID = "uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode";
 
 	@AboutToShow
 	void aboutToShow(List<MMenuElement> items, @Localize ExperimentProperties text, MPart part) {

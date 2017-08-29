@@ -1,7 +1,7 @@
-#uk-co-saiman-experiment-msapex-handledtoolitem-addexperiment {
+#uk-co-saiman-msapex-experiment-handledtoolitem-addexperiment {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book--plus.png");
 }
-#uk-co-saiman-experiment-msapex-handledtoolitem-runexperiment {
+#uk-co-saiman-msapex-experiment-handledtoolitem-runexperiment {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open-next.png");
 }
 
@@ -13,24 +13,20 @@
 	-fx-graphic: url("${fugue.icon.runtime}/size16/node.png");
 }
 
-.ModularTreeCell :ExperimentNodeContribution * #text {
+.ModularTreeCell :ExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/document.png");
 }
 
-.ModularTreeCell :RootExperimentNodeContribution * #text {
+.ModularTreeCell :RootExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book.png");
 }
 
-.ModularTreeCell:expanded :RootExperimentNodeContribution * #text {
+.ModularTreeCell:expanded :RootExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open.png");
 }
 
-.ModularTreeCell :SampleExperimentNodeContribution * #text {
+.ModularTreeCell :SampleExperimentNodeContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/flask.png");
-}
-
-.ModularTreeCell :SpectrumExperimentNodeContribution * #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/spectrum.png");
 }
 
 .label:ExperimentLifecycleState-PROCESSING {

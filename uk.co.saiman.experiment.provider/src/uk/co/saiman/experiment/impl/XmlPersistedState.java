@@ -44,7 +44,7 @@ import org.w3c.dom.NodeList;
 import uk.co.saiman.experiment.PersistedState;
 import uk.co.saiman.observable.HotObservable;
 
-public class PersistedStateImpl extends HotObservable<PersistedState> implements PersistedState {
+public class XmlPersistedState extends HotObservable<PersistedState> implements PersistedState {
   private static final String CONFIGURATION_ELEMENT = "configuration";
   private static final String CONFIGURATION_STRING_ELEMENT = "string";
   private static final String CONFIGURATION_KEY_ATTRIBUTE = "key";
@@ -97,14 +97,12 @@ public class PersistedStateImpl extends HotObservable<PersistedState> implements
     });
   }
 
-  protected static PersistedStateImpl load(Element parent, XPath xPath)
+  protected static XmlPersistedState load(Element parent, XPath xPath)
       throws XPathExpressionException {
-    PersistedStateImpl persistedState = new PersistedStateImpl();
+    XmlPersistedState persistedState = new XmlPersistedState();
 
-    NodeList strings = (NodeList) xPath.evaluate(
-        "/" + CONFIGURATION_ELEMENT + "/" + CONFIGURATION_STRING_ELEMENT,
-        parent,
-        NODESET);
+    NodeList strings = (NodeList) xPath
+        .evaluate(CONFIGURATION_ELEMENT + "/" + CONFIGURATION_STRING_ELEMENT, parent, NODESET);
     for (int i = 0; i < strings.getLength(); i++) {
       Element string = (Element) strings.item(i);
       persistedState.putString(

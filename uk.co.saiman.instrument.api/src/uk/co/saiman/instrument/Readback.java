@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.instrument;
 
-import static uk.co.saiman.reflection.token.TypeToken.forClass;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.Set;
 
@@ -41,25 +41,25 @@ import uk.co.saiman.reflection.token.TypeToken;
  *          The type of the readback value
  */
 public interface Readback<T> {
-	/**
-	 * If the readback is not providing readings when it is not necessarily
-	 * expected to, such as when it is switched off, this method should return
-	 * null. If the readback is expected to be able to return values but something
-	 * has gone wrong, this method should throw an exception.
-	 * 
-	 * @return The current value of the readback.
-	 */
-	T getValue();
+  /**
+   * If the readback is not providing readings when it is not necessarily
+   * expected to, such as when it is switched off, this method should return
+   * null. If the readback is expected to be able to return values but something
+   * has gone wrong, this method should throw an exception.
+   * 
+   * @return The current value of the readback.
+   */
+  T getValue();
 
-	/**
-	 * @return A set of status descriptions
-	 */
-	Set<String> getStatus();
+  /**
+   * @return A set of status descriptions
+   */
+  Set<String> getStatus();
 
-	default TypeToken<T> getDataType() {
-		return forClass(getClass())
-				.resolveSupertype(Readback.class)
-				.resolveTypeArgument(new TypeParameter<T>() {})
-				.getTypeToken();
-	}
+  default TypeToken<T> getDataType() {
+    return forType(getClass())
+        .resolveSupertype(Readback.class)
+        .resolveTypeArgument(new TypeParameter<T>() {})
+        .getTypeToken();
+  }
 }

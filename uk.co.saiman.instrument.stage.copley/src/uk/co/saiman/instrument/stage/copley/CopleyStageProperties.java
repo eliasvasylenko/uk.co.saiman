@@ -33,5 +33,7 @@ import uk.co.saiman.text.properties.Localized;
 public interface CopleyStageProperties {
   StageProperties stage();
 
-  Localized<String> name();
+  Localized<String> copleyXYStageName();
+
+  Localized<String> copleyXYStageRasterName();
 }

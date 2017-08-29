@@ -62,11 +62,6 @@ public interface Comms<T> {
   }
 
   /**
-   * @return the human-readable name of the hardware interface
-   */
-  String getName();
-
-  /**
    * @return the current status of the hardware interface
    */
   ObservableValue<CommsStatus> status();

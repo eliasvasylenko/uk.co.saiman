@@ -28,7 +28,7 @@
 package uk.co.saiman.comms.impl;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.collection.stream.StreamUtilities.throwingMerger;
+import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -47,6 +47,7 @@ import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 
+import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.comms.Bit;
 import uk.co.saiman.comms.BitArray;
 import uk.co.saiman.comms.BitConverter;
@@ -59,7 +60,6 @@ import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.ElementBits;
 import uk.co.saiman.comms.EnumBitConverters;
 import uk.co.saiman.comms.PrimitiveBitConverters;
-import uk.co.saiman.collection.stream.StreamUtilities;
 
 @Component
 public class DTOByteConverters implements ByteConverters {

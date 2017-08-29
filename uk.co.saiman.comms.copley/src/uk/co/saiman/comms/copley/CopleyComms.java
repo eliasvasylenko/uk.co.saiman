@@ -30,7 +30,6 @@ package uk.co.saiman.comms.copley;
 import uk.co.saiman.comms.Comms;
 
 public interface CopleyComms extends Comms<CopleyController> {
-  String ID = "Copley Comms";
   int HEADER_SIZE = 4;
 
   @Override

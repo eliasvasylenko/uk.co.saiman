@@ -41,13 +41,14 @@ public interface BankedVariable<U> extends WritableVariable<U> {
   }
 
   default void copyToBank() {
-    getController().getAxes().forEach(this::copyToBank);
+    for (int i = 0; i < getController().getAxisCount(); i++)
+      copyToBank(i);
   }
 
-  void copyToBank(MotorAxis axis);
+  void copyToBank(int axis);
 
   default void set(int axis) {
-    copyToBank(getController().getAxis(axis));
+    copyToBank(axis);
   }
 
   @Override
@@ -81,12 +82,12 @@ public interface BankedVariable<U> extends WritableVariable<U> {
       }
 
       @Override
-      public T get(MotorAxis axis) {
+      public T get(int axis) {
         return out.apply(base.get(axis));
       }
 
       @Override
-      public void set(MotorAxis axis, T value) {
+      public void set(int axis, T value) {
         base.set(axis, in.apply(value));
       }
 
@@ -96,7 +97,7 @@ public interface BankedVariable<U> extends WritableVariable<U> {
       }
 
       @Override
-      public void copyToBank(MotorAxis axis) {
+      public void copyToBank(int axis) {
         base.copyToBank();
       }
     };
