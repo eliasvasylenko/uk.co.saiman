@@ -29,10 +29,18 @@ package uk.co.saiman.camera;
 
 import uk.co.saiman.observable.Observable;
 
+/**
+ * A connection to a {@link CameraDevice video camera device}.
+ *
+ * @author Elias N Vasylenko
+ *
+ */
 public interface CameraConnection {
   CameraDevice getDevice();
 
   void dispose();
+
+  boolean isDisposed();
 
   CameraImage getImage();
 

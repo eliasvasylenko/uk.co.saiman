@@ -30,7 +30,9 @@ package uk.co.saiman.camera;
 import uk.co.saiman.text.properties.Localized;
 
 public interface CameraProperties {
-	Localized<String> cameraDevice();
+  Localized<String> cameraDevice();
 
-	Localized<String> noCameraDevices();
+  Localized<String> noCameraDevices();
+
+  Localized<String> noCameraConnection();
 }

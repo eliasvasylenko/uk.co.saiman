@@ -27,8 +27,24 @@
  */
 package uk.co.saiman.camera;
 
+/**
+ * A camera device for real-time video input.
+ *
+ * @author Elias N Vasylenko
+ */
 public interface CameraDevice {
+  /**
+   * @return the name of the device
+   */
   String getName();
 
+  /**
+   * Open a connection to the camera. Multiple concurrent connections may be
+   * opened, and each is responsible for managing its own independent lifecycle.
+   * The implementation should likely share state between connections, and may
+   * wish to clean up resources when all connections are closed.
+   *
+   * @return a new connection for the camera device
+   */
   CameraConnection openConnection();
 }
