@@ -7,7 +7,6 @@ Export-Package: uk.co.saiman.experiment.spectrum
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
-	uk.co.saiman.collections.observable;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\

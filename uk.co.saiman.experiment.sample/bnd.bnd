@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: Instrument :: Stage
+Bundle-Name: SAI :: Experiment :: Sample
 
 Export-Package: uk.co.saiman.experiment.sample
 

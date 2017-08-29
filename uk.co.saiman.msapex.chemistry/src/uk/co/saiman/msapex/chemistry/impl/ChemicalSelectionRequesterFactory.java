@@ -40,8 +40,8 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.chemistry.Chemical;
+import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.msapex.chemistry.ChemicalSelectionRequester;
-import uk.co.saiman.msapex.chemistry.PeriodicTableService;
 
 @SuppressWarnings("javadoc")
 @Component(
@@ -49,7 +49,7 @@ import uk.co.saiman.msapex.chemistry.PeriodicTableService;
 public class ChemicalSelectionRequesterFactory implements IContextFunction {
 	static final class ChemicalSelectionRequesterImpl implements ChemicalSelectionRequester {
 		@Inject
-		PeriodicTableService periodicTables;
+		PeriodicTable periodicTables;
 
 		@Override
 		public Optional<Chemical> requestChemical() {

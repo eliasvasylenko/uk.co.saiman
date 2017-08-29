@@ -1,8 +1,8 @@
-#uk-co-saiman-chemistry-msapex-periodictable-handledtoolitem-size {
+#uk-co-saiman-msapex-chemistry-periodictable-handledtoolitem-size {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/magnifier.png");
 }
 
-#uk-co-saiman-chemistry-msapex-periodictable-directtoolitem-tables {
+#uk-co-saiman-msapex-chemistry-periodictable-directtoolitem-tables {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/application-table.png");
 }
 

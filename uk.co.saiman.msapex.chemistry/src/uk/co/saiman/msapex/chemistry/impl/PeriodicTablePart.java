@@ -32,6 +32,7 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
@@ -44,7 +45,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.saiman.msapex.chemistry.PeriodicTableService;
 
 /**
  * An Eclipse part for display of a periodic table.
@@ -53,7 +53,8 @@ import uk.co.saiman.msapex.chemistry.PeriodicTableService;
  */
 public class PeriodicTablePart {
   @Inject
-  PeriodicTableService periodicTables;
+  @Optional
+  PeriodicTable periodicTable;
 
   @FXML
   private PeriodicTableController periodicTableController;
@@ -66,19 +67,10 @@ public class PeriodicTablePart {
 
   @PostConstruct
   void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
-    try {
-      container.setCenter(buildWith(loader).controller(this).loadRoot());
-      periodicTableController.weakReference(this).observe(
-          m -> m.owner().setElementTile(m.message()));
-      periodicTableController.setTilesFocusTraversable(true);
-
-      periodicTables.periodicTable().weakReference(this).observe(
-          m -> m.owner().setPeriodicTable(m.message()));
-      setPeriodicTable(periodicTables.periodicTable().get());
-    } catch (Throwable e) {
-      e.printStackTrace();
-      throw e;
-    }
+    container.setCenter(buildWith(loader).controller(this).loadRoot());
+    periodicTableController.weakReference(this).observe(m -> m.owner().setElementTile(m.message()));
+    periodicTableController.setTilesFocusTraversable(true);
+    setPeriodicTable(periodicTable);
   }
 
   protected void setPeriodicTable(PeriodicTable table) {

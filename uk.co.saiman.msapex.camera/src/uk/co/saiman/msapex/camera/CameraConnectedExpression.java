@@ -27,13 +27,9 @@
  */
 package uk.co.saiman.msapex.camera;
 
-import javax.annotation.PostConstruct;
-
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import org.eclipse.e4.core.di.annotations.Evaluate;
+import org.eclipse.e4.core.di.annotations.Optional;
+import uk.co.saiman.camera.CameraConnection;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -41,16 +37,9 @@ import javafx.scene.control.Alert.AlertType;
  *
  * @author Elias N Vasylenko
  */
-public class CameraDevicesButton {
-	private CameraPart cameraPart;
-
-	@PostConstruct
-	void initialise(MPart part) {
-		cameraPart = (CameraPart) part.getObject();
-	}
-
-	@Execute
-	void execute() {
-		new Alert(AlertType.INFORMATION, "Hello there " + cameraPart).showAndWait();
-	}
+public class CameraConnectedExpression {
+  @Evaluate
+  boolean isConnected(@Optional CameraConnection connection) {
+    return connection != null && !connection.isDisposed();
+  }
 }

@@ -27,49 +27,32 @@
  */
 package uk.co.saiman.msapex.camera;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.di.AboutToShow;
-import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
-import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
-import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
-import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
-import org.eclipse.fx.core.di.Service;
+import org.eclipse.e4.core.di.annotations.Optional;
 
+import uk.co.saiman.camera.CameraConnection;
 import uk.co.saiman.camera.CameraDevice;
 
 /**
- * Track acquisition devices available through OSGi services and select which
- * device to display in the acquisition part.
+ * Open a connection to the selected camera device in the invoking eclipse
+ * context, after closing any existing connection.
  *
  * @author Elias N Vasylenko
  */
-public class CameraDevicesMenu {
-  @Inject
-  @Service
-  List<CameraDevice> availableDevices;
-  @Inject
-  IEclipseContext context;
+public class ConnectCameraHandler {
+  @Execute
+  void execute(
+      IEclipseContext context,
+      @Optional CameraDevice device,
+      @Optional CameraConnection connection) {
+    if (connection != null)
+      if (device != connection.getDevice())
+        connection.dispose();
+      else
+        return;
 
-  @AboutToShow
-  void aboutToShow(List<MMenuElement> items) {
-    for (CameraDevice module : new ArrayList<>(availableDevices)) {
-      MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-      moduleItem.setLabel(module.getName());
-      moduleItem.setType(ItemType.PUSH);
-      moduleItem.setObject(new Object() {
-        @Execute
-        public void execute() {
-          CameraSelectionHelper.selectCamera(context, module);
-        }
-      });
-
-      items.add(moduleItem);
-    }
+    if (device != null)
+      context.modify(CameraConnection.class, device.openConnection());
   }
 }

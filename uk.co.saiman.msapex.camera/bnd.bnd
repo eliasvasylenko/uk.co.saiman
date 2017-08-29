@@ -1,7 +1,5 @@
 Bundle-Name: SAI :: MSApex :: Camera
 
-Export-Package: uk.co.saiman.msapex.camera
-
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.oxygen.bnd,\
@@ -23,3 +21,5 @@ Export-Package: uk.co.saiman.msapex.camera
 	{fragment.e4xmi},\
 	res,\
 	{css=css}
+
+Private-Package: uk.co.saiman.msapex.camera

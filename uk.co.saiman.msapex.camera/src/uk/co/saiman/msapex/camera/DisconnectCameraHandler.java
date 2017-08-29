@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.msapex.chemistry.
+ * This file is part of uk.co.saiman.msapex.camera.
  *
- * uk.co.saiman.msapex.chemistry is free software: you can redistribute it and/or modify
+ * uk.co.saiman.msapex.camera is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.msapex.chemistry is distributed in the hope that it will be useful,
+ * uk.co.saiman.msapex.camera is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,34 +25,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.chemistry.impl;
+package uk.co.saiman.msapex.camera;
 
-import javax.inject.Inject;
-
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.saiman.msapex.chemistry.PeriodicTableService;
+import uk.co.saiman.camera.CameraConnection;
 
 /**
- * Track periodic tables available through OSGi services and select which table
- * to display in the periodic table part.
- * 
+ * Close any open camera connection in the invoking context.
+ *
  * @author Elias N Vasylenko
  */
-public class PeriodicTablesMenu {
-	@Inject
-	PeriodicTableService periodicTables;
-
-	@Execute
-	void execute() {
-		PeriodicTable periodicTable = periodicTables.periodicTable().get();
-		if (periodicTable == null) {
-			new Alert(AlertType.INFORMATION, "No Periodic Table").showAndWait();
-		} else {
-			new Alert(AlertType.INFORMATION, "Periodic Table: " + periodicTable.getName()).showAndWait();
-		}
-	}
+public class DisconnectCameraHandler {
+  @Execute
+  void execute(IEclipseContext context, @Optional CameraConnection connection) {
+    if (connection != null) {
+      context.modify(CameraConnection.class, null);
+      connection.dispose();
+    }
+  }
 }

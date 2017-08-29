@@ -47,10 +47,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.converter.NumberStringConverter;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
-import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.Observer;
 
 /**
  * A clickable UI node for displaying a chemical element. Typically for use in a
@@ -59,10 +57,10 @@ import uk.co.saiman.observable.Observer;
  * 
  * @author Elias N Vasylenko
  */
-public class ChemicalElementTile extends BorderPane implements Observable<ChemicalElementTile> {
+public class ChemicalElementTile extends BorderPane {
   /**
-   * The size of the tile. Smaller sizes may choose to present less information in
-   * order to take less space.
+   * The size of the tile. Smaller sizes may choose to present less information
+   * in order to take less space.
    * 
    * @author Elias N Vasylenko
    */
@@ -171,6 +169,10 @@ public class ChemicalElementTile extends BorderPane implements Observable<Chemic
     return sizeProperty;
   }
 
+  public Observable<ChemicalElementTile> getClickEvents() {
+    return clickObservable;
+  }
+
   /**
    * Change the element displayed by the tile.
    * 
@@ -228,10 +230,5 @@ public class ChemicalElementTile extends BorderPane implements Observable<Chemic
   public void select() {
     requestFocus();
     clickObservable.next(this);
-  }
-
-  @Override
-  public Disposable observe(Observer<? super ChemicalElementTile> observer) {
-    return clickObservable.observe(observer);
   }
 }

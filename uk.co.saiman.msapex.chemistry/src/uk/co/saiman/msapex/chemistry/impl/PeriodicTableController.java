@@ -75,7 +75,8 @@ public class PeriodicTableController implements Observable<ChemicalElementTile> 
     for (Node node : elementGrid.getChildren()) {
       elementTiles.add((ChemicalElementTile) node);
     }
-    selectionObservable = Observable.merge(elementTiles);
+    selectionObservable = Observable.of(elementTiles).mergeMap(ChemicalElementTile::getClickEvents);
+    selectionObservable.observe(this::setSelectedElementTile);
 
     tileSizeProperty = new SimpleObjectProperty<>(SMALL);
     tilesFocusableProperty = new SimpleBooleanProperty();
@@ -83,7 +84,6 @@ public class PeriodicTableController implements Observable<ChemicalElementTile> 
     for (ChemicalElementTile tile : elementTiles) {
       tile.getSizeProperty().bind(tileSizeProperty);
       tile.focusTraversableProperty().bind(tilesFocusableProperty);
-      tile.observe(c -> setSelectedElementTile(tile));
     }
 
     elementGrid.addEventHandler(KeyEvent.KEY_PRESSED, this::onKeyPressed);
@@ -118,9 +118,9 @@ public class PeriodicTableController implements Observable<ChemicalElementTile> 
   }
 
   /**
-   * @return Get the currently focused element in the table, or the last one to be
-   *         selected via {@link ChemicalElementTile#select()}, or clicking, if
-   *         focusing is not enabled for the table
+   * @return Get the currently focused element in the table, or the last one to
+   *         be selected via {@link ChemicalElementTile#select()}, or clicking,
+   *         if focusing is not enabled for the table
    */
   public Element getSelectedElement() {
     return getSelectedElementTile().getElement();
@@ -190,7 +190,6 @@ public class PeriodicTableController implements Observable<ChemicalElementTile> 
    *          The periodic table to be displayed
    */
   public void setPeriodicTable(PeriodicTable table) {
-
     int index = 1;
     for (ChemicalElementTile tile : elementTiles) {
       Element element;

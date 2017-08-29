@@ -34,42 +34,32 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.di.AboutToShow;
-import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
-import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
-import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
-import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 
 import uk.co.saiman.camera.CameraDevice;
 
 /**
- * Track acquisition devices available through OSGi services and select which
- * device to display in the acquisition part.
+ * Select the next camera device in the eclipse context, if another is
+ * available.
+ * <p>
+ * If the previous device was connected, disconnect it and connect the new one,
+ * setting the new connection in the eclipse context.
  *
  * @author Elias N Vasylenko
  */
-public class CameraDevicesMenu {
+public class SelectNextCameraHandler {
   @Inject
   @Service
   List<CameraDevice> availableDevices;
-  @Inject
-  IEclipseContext context;
 
-  @AboutToShow
-  void aboutToShow(List<MMenuElement> items) {
-    for (CameraDevice module : new ArrayList<>(availableDevices)) {
-      MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-      moduleItem.setLabel(module.getName());
-      moduleItem.setType(ItemType.PUSH);
-      moduleItem.setObject(new Object() {
-        @Execute
-        public void execute() {
-          CameraSelectionHelper.selectCamera(context, module);
-        }
-      });
+  @Execute
+  void execute(IEclipseContext context, @Optional CameraDevice selectedDevice) {
+    List<CameraDevice> devices = new ArrayList<>(availableDevices);
+    int index = devices.indexOf(selectedDevice);
+    if (++index == devices.size())
+      index = 0;
 
-      items.add(moduleItem);
-    }
+    CameraSelectionHelper.selectCamera(context, devices.get(index));
   }
 }
