@@ -68,5 +68,32 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
     return new ObservablePropertyImpl<>(initialValue);
   }
 
+  /**
+   * @param <T>
+   *          the type of event message to produce
+   * @param equality
+   *          an equivalence relation over the value space
+   * @param initialProblem
+   *          the initial problem
+   * @return an observable property with the given behavior and default value
+   */
+  static <T> ObservableProperty<T> over(BiPredicate<T, T> equality, Throwable initialProblem) {
+    return new ObservablePropertyImpl<>(equality, initialProblem);
+  }
+
+  /**
+   * Instantiate an observable property with identity assignment and identity
+   * equality.
+   * 
+   * @param <T>
+   *          the type of event message to produce and which we may assign from
+   * @param initialProblem
+   *          the initial problem
+   * @return an observable property with the given default value
+   */
+  static <T> ObservableProperty<T> over(Throwable initialProblem) {
+    return new ObservablePropertyImpl<>(initialProblem);
+  }
+
   void setProblem(Throwable t);
 }

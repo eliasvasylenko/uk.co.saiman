@@ -42,12 +42,12 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import uk.co.saiman.fx.TreeCellContribution;
+import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 
 /**
- * A tree cell contribution intended to be supplied via
- * {@link EclipseTreeContribution} so as to be injected according to an eclipse
- * context.
+ * A tree cell contribution intended to be supplied via {@link TreeContribution}
+ * so as to be injected according to an eclipse context.
  * <p>
  * This contribution registers an E4 command to the cell, which can be activated
  * via double click or the enter key.
@@ -57,53 +57,53 @@ import uk.co.saiman.fx.TreeItemData;
  * @param <T>
  *          the type of data of applicable nodes
  */
-public abstract class CommandTreeCellContribution<T> implements TreeCellContribution<T>, EclipseTreeContribution<T> {
-	@Inject
-	EHandlerService handlerService;
+public abstract class CommandTreeCellContribution<T> implements TreeCellContribution<T> {
+  @Inject
+  EHandlerService handlerService;
 
-	private final String commandId;
-	private ParameterizedCommand command;
+  private final String commandId;
+  private ParameterizedCommand command;
 
-	/**
-	 * @param commandId
-	 *          the ID of the command in the E4 model
-	 */
-	public CommandTreeCellContribution(String commandId) {
-		this.commandId = commandId;
-	}
+  /**
+   * @param commandId
+   *          the ID of the command in the E4 model
+   */
+  public CommandTreeCellContribution(String commandId) {
+    this.commandId = commandId;
+  }
 
-	@SuppressWarnings("javadoc")
-	@PostConstruct
-	public void configureCommand(ECommandService commandService) {
-		command = commandService.createCommand(commandId, emptyMap());
-	}
+  @SuppressWarnings("javadoc")
+  @PostConstruct
+  public void configureCommand(ECommandService commandService) {
+    command = commandService.createCommand(commandId, emptyMap());
+  }
 
-	@Override
-	public <U extends T> Node configureCell(TreeItemData<U> data, Node content) {
-		content.addEventHandler(MouseEvent.ANY, event -> {
-			if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
-				event.consume();
+  @Override
+  public <U extends T> Node configureCell(TreeItemData<U> data, Node content) {
+    content.addEventHandler(MouseEvent.ANY, event -> {
+      if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
+        event.consume();
 
-				if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-					executeCommand(data, content);
-				}
-			}
-		});
+        if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
+          executeCommand(data, content);
+        }
+      }
+    });
 
-		content.addEventHandler(KeyEvent.ANY, event -> {
-			if (event.getCode() == KeyCode.ENTER) {
-				event.consume();
+    content.addEventHandler(KeyEvent.ANY, event -> {
+      if (event.getCode() == KeyCode.ENTER) {
+        event.consume();
 
-				if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
-					executeCommand(data, content);
-				}
-			}
-		});
+        if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
+          executeCommand(data, content);
+        }
+      }
+    });
 
-		return content;
-	}
+    return content;
+  }
 
-	private void executeCommand(TreeItemData<?> data, Node node) {
-		handlerService.executeHandler(command);
-	}
+  private void executeCommand(TreeItemData<?> data, Node node) {
+    handlerService.executeHandler(command);
+  }
 }

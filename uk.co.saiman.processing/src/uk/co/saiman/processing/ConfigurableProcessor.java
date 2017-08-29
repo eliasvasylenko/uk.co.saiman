@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.processing;
 
-import static uk.co.saiman.reflection.token.TypeToken.forClass;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -46,42 +46,42 @@ import uk.co.saiman.reflection.token.TypeToken;
  *          The processing result type
  */
 public interface ConfigurableProcessor<C, T, R> {
-	/**
-	 * Provide a processor for the given configuration.
-	 * 
-	 * @param configuration
-	 *          The configuration of the requested processor
-	 * @return A configured processor
-	 */
-	Processor<T, R> configure(C configuration);
+  /**
+   * Provide a processor for the given configuration.
+   * 
+   * @param configuration
+   *          The configuration of the requested processor
+   * @return A configured processor
+   */
+  Processor<T, R> configure(C configuration);
 
-	/**
-	 * @return The exact generic type of the processing target
-	 */
-	default TypeToken<T> getTargetType() {
-		return forClass(getClass())
-				.resolveSupertype(ConfigurableProcessor.class)
-				.resolveTypeArgument(new TypeParameter<T>() {})
-				.getTypeToken();
-	}
+  /**
+   * @return The exact generic type of the processing target
+   */
+  default TypeToken<T> getTargetType() {
+    return forType(getClass())
+        .resolveSupertype(ConfigurableProcessor.class)
+        .resolveTypeArgument(new TypeParameter<T>() {})
+        .getTypeToken();
+  }
 
-	/**
-	 * @return The exact generic type of the processing result
-	 */
-	default TypeToken<R> getResultType() {
-		return forClass(getClass())
-				.resolveSupertype(ConfigurableProcessor.class)
-				.resolveTypeArgument(new TypeParameter<R>() {})
-				.getTypeToken();
-	}
+  /**
+   * @return The exact generic type of the processing result
+   */
+  default TypeToken<R> getResultType() {
+    return forType(getClass())
+        .resolveSupertype(ConfigurableProcessor.class)
+        .resolveTypeArgument(new TypeParameter<R>() {})
+        .getTypeToken();
+  }
 
-	/**
-	 * @return The exact generic type of the configuration interface
-	 */
-	default TypeToken<C> getConfigurationType() {
-		return forClass(getClass())
-				.resolveSupertype(ConfigurableProcessor.class)
-				.resolveTypeArgument(new TypeParameter<C>() {})
-				.getTypeToken();
-	}
+  /**
+   * @return The exact generic type of the configuration interface
+   */
+  default TypeToken<C> getConfigurationType() {
+    return forType(getClass())
+        .resolveSupertype(ConfigurableProcessor.class)
+        .resolveTypeArgument(new TypeParameter<C>() {})
+        .getTypeToken();
+  }
 }

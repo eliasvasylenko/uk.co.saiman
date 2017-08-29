@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import javafx.scene.control.TreeItem;
 import uk.co.saiman.reflection.token.TypeToken;
-import uk.co.saiman.reflection.token.TypedObject;
+import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * This interface defines the type of a {@link TreeItem} for a
@@ -49,7 +49,7 @@ public interface TreeItemData<T> {
 	/**
 	 * @return the typed data of a tree node
 	 */
-	TypedObject<T> typedData();
+	TypedReference<T> typedData();
 
 	/**
 	 * @return the actual data of a tree node

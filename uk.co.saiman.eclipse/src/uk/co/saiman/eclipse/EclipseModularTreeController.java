@@ -29,8 +29,6 @@ package uk.co.saiman.eclipse;
 
 import static java.util.Optional.ofNullable;
 
-import java.util.function.Predicate;
-
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
@@ -55,130 +53,121 @@ import uk.co.saiman.fx.TreeItemImpl;
  * an Eclipse RCP environment.
  * <p>
  * This class allows {@link TreeContribution tree contributions} to be
- * contributed via {@link EclipseTreeContribution contributors} so that the
+ * contributed via {@link TreeContribution contributors} so that the
  * contributions are instantiated according to an Eclipse injection context.
  * 
  * @author Elias N Vasylenko
  */
 public class EclipseModularTreeController {
-	private final StringProperty tableId = new SimpleStringProperty();
-	private final Predicate<String> filter;
+  private final StringProperty tableId = new SimpleStringProperty();
 
-	@FXML
-	private ModularTreeView modularTree;
+  @FXML
+  private ModularTreeView modularTree;
 
-	@Inject
-	private IEclipseContext context;
+  @Inject
+  private IEclipseContext context;
 
-	/*
-	 * As we are injecting into the contributions from the eclipse context of the
-	 * tree we may only accept prototype scope services.
-	 */
-	@Inject
-	@ObservableService(target = "(" + Constants.SERVICE_SCOPE + "=" + Constants.SCOPE_PROTOTYPE + ")")
-	private ObservableList<EclipseTreeContribution<?>> contributions;
+  /*
+   * As we are injecting into the contributions from the eclipse context of the
+   * tree we may only accept prototype scope services.
+   */
+  @Inject
+  @ObservableService(target = "(" + Constants.SERVICE_SCOPE + "=" + Constants.SCOPE_PROTOTYPE + ")")
+  private ObservableList<TreeContribution<?>> contributions;
 
-	@Inject
-	private ESelectionService selectionService;
+  @Inject
+  private ESelectionService selectionService;
 
-	/**
-	 * Instantiate a controller with the default id - the simple name of the class
-	 * - and no contribution filter.
-	 */
-	public EclipseModularTreeController() {
-		tableId.set(getClass().getName());
-		filter = null;
-	}
+  /**
+   * Instantiate a controller with the default id - the simple name of the class
+   * - and no contribution filter.
+   */
+  public EclipseModularTreeController() {
+    tableId.set(getClass().getName());
+  }
 
-	/**
-	 * @param id
-	 *          the {@link #getId() ID} of the controller to create
-	 */
-	public EclipseModularTreeController(String id) {
-		tableId.set(id);
-		this.filter = null;
-	}
+  /**
+   * @param id
+   *          the {@link #getId() ID} of the controller to create
+   */
+  public EclipseModularTreeController(String id) {
+    tableId.set(id);
+  }
 
-	/**
-	 * @param id
-	 *          the {@link #getId() ID} of the controller to create
-	 * @param filter
-	 *          a filter over the IDs of which {@link EclipseTreeContribution
-	 *          contributions} to accept contributions from
-	 */
-	public EclipseModularTreeController(String id, Predicate<String> filter) {
-		tableId.set(id);
-		this.filter = filter;
-	}
+  @FXML
+  void initialize() {
+    contributions.addListener((ListChangeListener<TreeContribution<?>>) change -> {
+      while (change.next())
+        if (change.wasAdded())
+          change.getAddedSubList().forEach(this::prepareContribution);
+      updateContributions();
+    });
+    contributions.stream().forEach(this::prepareContribution);
+    updateContributions();
 
-	@FXML
-	void initialize() {
-		contributions.addListener((ListChangeListener<EclipseTreeContribution<?>>) change -> {
-			while (change.next())
-				if (change.wasAdded())
-					change.getAddedSubList().forEach(this::contribute);
-		});
+    modularTree.getSelectionModel().selectedItemProperty().addListener(
+        (observable, oldValue, newValue) -> {
+          selectionService.setSelection(
+              ofNullable(newValue).map(TreeItem::getValue).map(TreeItemData::data).orElse(null));
+        });
+  }
 
-		contributions.stream().forEach(this::contribute);
+  @PreDestroy
+  void destroy() {}
 
-		modularTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			selectionService.setSelection(ofNullable(newValue).map(TreeItem::getValue).map(TreeItemData::data).orElse(null));
-		});
-	}
+  /**
+   * @return The ID property of the controller. This is used to allow
+   *         {@link TreeContribution contributions} to filter which controllers
+   *         they wish to contribute to.
+   */
+  public StringProperty getTableIdProperty() {
+    return tableId;
+  }
 
-	@PreDestroy
-	void destroy() {}
+  /**
+   * @return the current ID of the controller
+   */
+  public String getId() {
+    return tableId.get();
+  }
 
-	/**
-	 * @return The ID property of the controller. This is used to allow
-	 *         {@link EclipseTreeContribution contributions} to filter which
-	 *         controllers they wish to contribute to.
-	 */
-	public StringProperty getTableIdProperty() {
-		return tableId;
-	}
+  /**
+   * @param id
+   *          the new ID for the controller
+   */
+  public void setId(String id) {
+    tableId.set(id);
+  }
 
-	/**
-	 * @return the current ID of the controller
-	 */
-	public String getId() {
-		return tableId.get();
-	}
+  protected void prepareContribution(TreeContribution<?> contribution) {
+    context.set(EclipseModularTreeController.class, this);
+    ContextInjectionFactory.inject(contribution, context);
+  }
 
-	/**
-	 * @param id
-	 *          the new ID for the controller
-	 */
-	public void setId(String id) {
-		tableId.set(id);
-	}
+  protected void updateContributions() {
+    int ranking = 0;
+    for (TreeContribution<?> contribution : contributions)
+      modularTree.addContribution(contribution, ranking++);
+  }
 
-	protected void contribute(EclipseTreeContribution<?> contribution) {
-		if ((filter == null || filter.test(contribution.getContributionId())) && contribution.appliesToTree(getId())) {
-			context.set(EclipseModularTreeController.class, this);
-			ContextInjectionFactory.inject(contribution, context);
-			modularTree.addContribution(contribution);
-		}
-	}
+  /**
+   * @return the modular tree view instance
+   */
+  public ModularTreeView getTreeView() {
+    return modularTree;
+  }
 
-	/**
-	 * @return the modular tree view instance
-	 */
-	public ModularTreeView getTreeView() {
-		return modularTree;
-	}
+  /**
+   * @return the currently selected tree item
+   */
+  public TreeItemImpl<?> getSelection() {
+    return (TreeItemImpl<?>) modularTree.getSelectionModel().getSelectedItem();
+  }
 
-	/**
-	 * @return the currently selected tree item
-	 */
-	public TreeItemImpl<?> getSelection() {
-		return (TreeItemImpl<?>) modularTree.getSelectionModel().getSelectedItem();
-	}
-
-	/**
-	 * @return the currently selected tree item data
-	 */
-	public TreeItemData<?> getSelectionData() {
-		return getSelection().getValue();
-	}
+  /**
+   * @return the currently selected tree item data
+   */
+  public TreeItemData<?> getSelectionData() {
+    return getSelection().getValue();
+  }
 }

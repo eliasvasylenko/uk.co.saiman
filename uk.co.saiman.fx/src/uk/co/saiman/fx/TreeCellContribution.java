@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.fx;
 
+import static javafx.css.PseudoClass.getPseudoClass;
+
 import javafx.scene.Node;
 
 /**
@@ -40,19 +42,29 @@ import javafx.scene.Node;
  *          the type of the tree item data
  */
 public interface TreeCellContribution<T> extends TreeContribution<T> {
-	/**
-	 * Used to change the default cell configuration strategy.
-	 * <p>
-	 * Here is also a good place to mark a cell with a pseudo-class to flag for
-	 * custom css styling.
-	 * 
-	 * @param <U>
-	 *          the specific type of the tree item
-	 * @param data
-	 *          the data contents of the tree item
-	 * @param content
-	 *          the current cell content for the tree item
-	 * @return the new cell content for the tree item
-	 */
-	<U extends T> Node configureCell(TreeItemData<U> data, Node content);
+  /**
+   * Used to change the default cell configuration strategy.
+   * <p>
+   * Here is also a good place to mark a cell with a pseudo-class to flag for
+   * custom css styling.
+   * 
+   * @param <U>
+   *          the specific type of the tree item
+   * @param data
+   *          the data contents of the tree item
+   * @param content
+   *          the current cell content for the tree item
+   * @return the new cell content for the tree item
+   */
+  <U extends T> Node configureCell(TreeItemData<U> data, Node content);
+
+  default Node configurePseudoClass(Node content) {
+    return configurePseudoClass(content, getClass().getSimpleName());
+  }
+
+  default Node configurePseudoClass(Node content, String name) {
+    content.pseudoClassStateChanged(getPseudoClass(name), true);
+    return content;
+  }
+
 }

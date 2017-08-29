@@ -49,23 +49,23 @@ import uk.co.saiman.reflection.token.TypeToken;
 public interface TreeContribution<T> {
   /**
    * Get the type of item which the contribution applies to. It is possible to
-   * include wildcards in the type, and any tree item whose type is assignable to
-   * this type are suitable for application of this contribution.
+   * include wildcards in the type, and any tree item whose type is assignable
+   * to this type are suitable for application of this contribution.
    * 
    * @return the type of data item to apply to
    */
   default TypeToken<T> getDataType() {
     return TypeToken
-        .forClass(getClass())
+        .forType(getClass())
         .resolveSupertype(TreeContribution.class)
         .resolveTypeArgument(new TypeParameter<T>() {})
         .getTypeToken();
   }
 
   /**
-   * Determine whether the contribution should be applied to the given data item.
-   * This method will only be invoked <em>after</em> {@link #getDataType()} has
-   * checked against the exact item type.
+   * Determine whether the contribution should be applied to the given data
+   * item. This method will only be invoked <em>after</em>
+   * {@link #getDataType()} has checked against the exact item type.
    * 
    * @param <U>
    *          the specific type of the tree item

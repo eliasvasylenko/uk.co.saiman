@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.processing;
 
-import static uk.co.saiman.reflection.token.TypeToken.forClass;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -47,37 +47,37 @@ import uk.co.saiman.reflection.token.TypeToken;
  *          The type of the processing result.
  */
 public interface Processor<T, R> {
-	/**
-	 * @return The name of the process
-	 */
-	String name();
+  /**
+   * @return The name of the process
+   */
+  String name();
 
-	/**
-	 * Process a given target into a result.
-	 * 
-	 * @param target
-	 *          The target to be processed
-	 * @return The result of applying processing to the target
-	 */
-	R process(T target);
+  /**
+   * Process a given target into a result.
+   * 
+   * @param target
+   *          The target to be processed
+   * @return The result of applying processing to the target
+   */
+  R process(T target);
 
-	/**
-	 * @return The exact generic type of the processing target
-	 */
-	default TypeToken<T> getTargetType() {
-		return forClass(getClass())
-				.resolveSupertype(Processor.class)
-				.resolveTypeArgument(new TypeParameter<T>() {})
-				.getTypeToken();
-	}
+  /**
+   * @return The exact generic type of the processing target
+   */
+  default TypeToken<T> getTargetType() {
+    return forType(getClass())
+        .resolveSupertype(Processor.class)
+        .resolveTypeArgument(new TypeParameter<T>() {})
+        .getTypeToken();
+  }
 
-	/**
-	 * @return The exact generic type of the processing result
-	 */
-	default TypeToken<R> getResultType() {
-		return forClass(getClass())
-				.resolveSupertype(Processor.class)
-				.resolveTypeArgument(new TypeParameter<R>() {})
-				.getTypeToken();
-	}
+  /**
+   * @return The exact generic type of the processing result
+   */
+  default TypeToken<R> getResultType() {
+    return forType(getClass())
+        .resolveSupertype(Processor.class)
+        .resolveTypeArgument(new TypeParameter<R>() {})
+        .getTypeToken();
+  }
 }

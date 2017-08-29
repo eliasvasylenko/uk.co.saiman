@@ -36,10 +36,6 @@ import org.junit.Test;
 import mockit.Expectations;
 import mockit.FullVerificationsInOrder;
 import mockit.Mocked;
-import uk.co.saiman.observable.BackpressureReducingObserver;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.observable.Observer;
-import uk.co.saiman.observable.PassthroughObserver;
 
 @SuppressWarnings("javadoc")
 public class BackpressureReducingObserverTest {
@@ -195,13 +191,6 @@ public class BackpressureReducingObserverTest {
 
   @Test
   public void requestNextFromIdentity() {
-    new Expectations() {
-      {
-        identity.get();
-        result = "identity";
-      }
-    };
-
     PassthroughObserver<String, String> test = new BackpressureReducingObserver<>(
         downstreamObserver,
         identity,
@@ -214,8 +203,6 @@ public class BackpressureReducingObserverTest {
       {
         downstreamObserver.onObserve((Observation) any);
         upstreamObservation.requestUnbounded();
-        identity.get();
-        downstreamObserver.onNext("identity");
       }
     };
   }

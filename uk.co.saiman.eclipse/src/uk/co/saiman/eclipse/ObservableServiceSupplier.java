@@ -67,137 +67,139 @@ import uk.co.saiman.text.properties.PropertyLoader;
  *
  * @since 1.2
  */
-@Component(service = ExtendedObjectSupplier.class, property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.ObservableService")
+@Component(
+    service = ExtendedObjectSupplier.class,
+    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.ObservableService")
 public class ObservableServiceSupplier extends ExtendedObjectSupplier {
-	private class ServiceUpdateListener<T> implements ServiceListener {
-		private final BundleContext context;
-		private final ObservableList<ServiceReference<T>> references;
-		private final Map<ServiceReference<T>, T> serviceObjects;
-		private final Class<T> elementType;
-		private final String filter;
+  private class ServiceUpdateListener<T> implements ServiceListener {
+    private final BundleContext context;
+    private final ObservableList<ServiceReference<T>> references;
+    private final Map<ServiceReference<T>, T> serviceObjects;
+    private final Class<T> elementType;
+    private final String filter;
 
-		@SuppressWarnings("unchecked")
-		public ServiceUpdateListener(
-				BundleContext context,
-				Type elementType,
-				ObservableService annotation) throws InvalidSyntaxException {
-			this.context = context;
-			this.references = FXCollections.observableArrayList();
-			this.elementType = elementType instanceof ParameterizedType
-					? (Class<T>) ((ParameterizedType) elementType).getRawType()
-					: (Class<T>) elementType;
-			this.serviceObjects = new HashMap<>();
+    @SuppressWarnings("unchecked")
+    public ServiceUpdateListener(
+        BundleContext context,
+        Type elementType,
+        ObservableService annotation) throws InvalidSyntaxException {
+      this.context = context;
+      this.references = FXCollections.observableArrayList();
+      this.elementType = elementType instanceof ParameterizedType
+          ? (Class<T>) ((ParameterizedType) elementType).getRawType()
+          : (Class<T>) elementType;
+      this.serviceObjects = new HashMap<>();
 
-			synchronized (this) {
-				String filter = "(" + Constants.OBJECTCLASS + "=" + this.elementType.getName() + ")";
+      synchronized (this) {
+        String filter = "(" + Constants.OBJECTCLASS + "=" + this.elementType.getName() + ")";
 
-				if (!annotation.target().equals("")) {
-					filter = "(&" + annotation.target() + filter + ")";
-				}
+        if (!annotation.target().equals("")) {
+          filter = "(&" + annotation.target() + filter + ")";
+        }
 
-				this.filter = filter;
+        this.filter = filter;
 
-				context.addServiceListener(this, filter);
+        context.addServiceListener(this, filter);
 
-				refreshServices();
-			}
-		}
+        refreshServices();
+      }
+    }
 
-		@Override
-		public void serviceChanged(ServiceEvent event) {
-			refreshServices();
-		}
+    @Override
+    public void serviceChanged(ServiceEvent event) {
+      refreshServices();
+    }
 
-		private synchronized void refreshServices() {
-			try {
-				List<ServiceReference<T>> newReferences = new ArrayList<>(
-						context.getServiceReferences(elementType, filter));
-				Collections.sort(newReferences);
+    private synchronized void refreshServices() {
+      try {
+        List<ServiceReference<T>> newReferences = new ArrayList<>(
+            context.getServiceReferences(elementType, filter));
+        Collections.sort(newReferences);
 
-				for (Iterator<ServiceReference<T>> services = references.iterator(); services.hasNext();) {
-					ServiceReference<T> service = services.next();
+        for (Iterator<ServiceReference<T>> services = references.iterator(); services.hasNext();) {
+          ServiceReference<T> service = services.next();
 
-					if (!newReferences.contains(service)) {
-						services.remove();
-						context.getServiceObjects(service).ungetService(serviceObjects.remove(service));
-					}
-				}
+          if (!newReferences.contains(service)) {
+            services.remove();
+            context.getServiceObjects(service).ungetService(serviceObjects.remove(service));
+          }
+        }
 
-				int index = 0;
-				for (ServiceReference<T> newReference : newReferences) {
-					if (!references.contains(newReference)) {
-						references.add(index, newReference);
-						serviceObjects.put(newReference, context.getServiceObjects(newReference).getService());
-					}
-					index++;
-				}
-			} catch (InvalidSyntaxException e) {
-				throw new AssertionError();
-			}
-		}
+        int index = 0;
+        for (ServiceReference<T> newReference : newReferences) {
+          if (!references.contains(newReference)) {
+            references.add(index, newReference);
+            serviceObjects.put(newReference, context.getServiceObjects(newReference).getService());
+          }
+          index++;
+        }
+      } catch (InvalidSyntaxException e) {
+        throw new AssertionError();
+      }
+    }
 
-		public ObservableList<T> getServiceList() {
-			return FxUtilities.map(references, serviceObjects::get);
-		}
+    public ObservableList<T> getServiceList() {
+      return FxUtilities.map(references.sorted(), serviceObjects::get).filtered(t -> t != null);
+    }
 
-		public ObservableSet<T> getServiceSet() {
-			return FxUtilities.asSet(getServiceList());
-		}
+    public ObservableSet<T> getServiceSet() {
+      return FxUtilities.asSet(getServiceList());
+    }
 
-		public ObservableValue<T> getServiceValue() {
-			SimpleObjectProperty<T> value = new SimpleObjectProperty<>();
+    public ObservableValue<T> getServiceValue() {
+      SimpleObjectProperty<T> value = new SimpleObjectProperty<>();
 
-			references.addListener((ListChangeListener<ServiceReference<T>>) c -> {
-				value.set(context.getService(references.get(0)));
-			});
+      references.addListener((ListChangeListener<ServiceReference<T>>) c -> {
+        value.set(context.getService(references.get(0)));
+      });
 
-			return value;
-		}
-	}
+      return value;
+    }
+  }
 
-	@Reference
-	PropertyLoader generalLocalizer;
-	private ObservableServiceSupplierProperties text;
+  @Reference
+  PropertyLoader generalLocalizer;
+  private ObservableServiceSupplierProperties text;
 
-	@Activate
-	void activate() {
-		text = generalLocalizer.getProperties(ObservableServiceSupplierProperties.class);
-	}
+  @Activate
+  void activate() {
+    text = generalLocalizer.getProperties(ObservableServiceSupplierProperties.class);
+  }
 
-	@Override
-	public Object get(
-			IObjectDescriptor descriptor,
-			IRequestor requestor,
-			boolean track,
-			boolean group) {
-		try {
-			Type collectionType = descriptor.getDesiredType();
-			Bundle bundle = FrameworkUtil.getBundle(requestor.getRequestingObjectClass());
+  @Override
+  public Object get(
+      IObjectDescriptor descriptor,
+      IRequestor requestor,
+      boolean track,
+      boolean group) {
+    try {
+      Type collectionType = descriptor.getDesiredType();
+      Bundle bundle = FrameworkUtil.getBundle(requestor.getRequestingObjectClass());
 
-			if (collectionType instanceof ParameterizedType) {
-				ParameterizedType parameterizedType = (ParameterizedType) collectionType;
+      if (collectionType instanceof ParameterizedType) {
+        ParameterizedType parameterizedType = (ParameterizedType) collectionType;
 
-				ServiceUpdateListener<?> listener = new ServiceUpdateListener<>(
-						bundle.getBundleContext(),
-						parameterizedType.getActualTypeArguments()[0],
-						descriptor.getQualifier(ObservableService.class));
+        ServiceUpdateListener<?> listener = new ServiceUpdateListener<>(
+            bundle.getBundleContext(),
+            parameterizedType.getActualTypeArguments()[0],
+            descriptor.getQualifier(ObservableService.class));
 
-				if (parameterizedType.getRawType() == ObservableList.class) {
-					return listener.getServiceList();
-				}
-				if (parameterizedType.getRawType() == ObservableSet.class) {
-					return listener.getServiceSet();
-				}
-				if (parameterizedType.getRawType() == ObservableValue.class) {
-					return listener.getServiceValue();
-				}
-			}
+        if (parameterizedType.getRawType() == ObservableList.class) {
+          return listener.getServiceList();
+        }
+        if (parameterizedType.getRawType() == ObservableSet.class) {
+          return listener.getServiceSet();
+        }
+        if (parameterizedType.getRawType() == ObservableValue.class) {
+          return listener.getServiceValue();
+        }
+      }
 
-			throw new ServiceWiringException(text.illegalInjectionTarget());
-		} catch (ServiceWiringException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ServiceWiringException(text.unexpectedError(), e);
-		}
-	}
+      throw new ServiceWiringException(text.illegalInjectionTarget());
+    } catch (ServiceWiringException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ServiceWiringException(text.unexpectedError(), e);
+    }
+  }
 }

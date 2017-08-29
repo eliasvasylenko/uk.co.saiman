@@ -30,7 +30,7 @@ package uk.co.saiman.fx;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import uk.co.saiman.reflection.token.TypedObject;
+import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * A type of contribution for items in a {@link ModularTreeView}.
@@ -64,5 +64,5 @@ public interface TreeChildContribution<T> extends TreeContribution<T> {
 	 *          a data item in the tree
 	 * @return a list of children to be contributed
 	 */
-	<U extends T> Stream<TypedObject<?>> getChildren(TreeItemData<U> data);
+	<U extends T> Stream<TypedReference<?>> getChildren(TreeItemData<U> data);
 }

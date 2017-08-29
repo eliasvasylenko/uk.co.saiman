@@ -150,10 +150,10 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive a new observable by application of the given function. This gives the
-   * same result as just applying the function to the observable directly, and
-   * exists only to create a more natural fit into the fluent API by making the
-   * order of operations clearer in method chains.
+   * Derive a new observable by application of the given function. This gives
+   * the same result as just applying the function to the observable directly,
+   * and exists only to create a more natural fit into the fluent API by making
+   * the order of operations clearer in method chains.
    * 
    * @param <T>
    *          the type of the resulting observable
@@ -190,8 +190,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which passes events to the given observer directly after
-   * passing them downstream.
+   * Derive an observable which passes events to the given observer directly
+   * after passing them downstream.
    * 
    * @param action
    *          an observer representing the action to take
@@ -223,7 +223,7 @@ public interface Observable<M> {
 
   default ObservableValue<M> toValue(M initial) {
     initial = getNext().getNow(initial);
-    return new ObservablePropertyImpl<M>(initial);
+    return new ObservablePropertyImpl<>(initial);
   }
 
   default ObservableValue<M> toValue(Throwable initialProblem) {
@@ -236,8 +236,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after they are no longer weakly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after they are no longer weakly reachable.
    * 
    * @return the derived observable
    */
@@ -246,8 +246,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after the given owner is no longer weakly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after the given owner is no longer weakly reachable.
    * <p>
    * Care should be taken not to refer to the owner directly in any observer
    * logic, as this will create a strong reference to the owner, preventing it
@@ -266,8 +266,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after they are no longer softly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after they are no longer softly reachable.
    * 
    * @return the derived observable
    */
@@ -276,8 +276,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after the given owner is no longer softly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after the given owner is no longer softly reachable.
    * <p>
    * Care should be taken not to refer to the owner directly in any observer
    * logic, as this will create a strong reference to the owner, preventing it
@@ -364,9 +364,9 @@ public interface Observable<M> {
    * An unbounded request is made to the upstream observable, so it is not
    * required to support backpressure.
    * <p>
-   * The intermediate observables are not required to support backpressure, as an
-   * unbounded request will be made to them and the downstream observable will
-   * forward every message as soon as it is available. Because of this, The
+   * The intermediate observables are not required to support backpressure, as
+   * an unbounded request will be made to them and the downstream observable
+   * will forward every message as soon as it is available. Because of this, The
    * downstream observable does not support backpressure.
    * 
    * @param <T>
@@ -378,13 +378,13 @@ public interface Observable<M> {
    */
   default <T> Observable<T> mergeMap(
       Function<? super M, ? extends Observable<? extends T>> mapping) {
-    throw new UnsupportedOperationException(); // TODO
+    return observer -> observe(new MergingObserver<>(observer, mapping));
   }
 
   /**
-   * Introduce backpressure by mapping each message to an intermediate observable
-   * which supports backpressure and then interleaving these observables
-   * downstream.
+   * Introduce backpressure by mapping each message to an intermediate
+   * observable which supports backpressure and then interleaving these
+   * observables downstream.
    * <p>
    * An unbounded request is made to the upstream observable, so it is not
    * required to support backpressure.
@@ -407,12 +407,12 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which sequentially maps each message to an intermediate
-   * observable.
+   * Derive an observable which sequentially maps each message to an
+   * intermediate observable.
    * <p>
    * The intermediate accepts observations from downstream until it is complete,
-   * at which point the next message is requested from upstream and the process is
-   * repeated.
+   * at which point the next message is requested from upstream and the process
+   * is repeated.
    * <p>
    * The upstream and intermediate observables must both support backpressure.
    * 

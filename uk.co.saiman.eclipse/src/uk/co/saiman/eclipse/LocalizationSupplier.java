@@ -92,7 +92,10 @@ public class LocalizationSupplier extends ExtendedObjectSupplier {
 
       ServiceReference<PropertyLoader> localizerServiceRererence = context
           .getServiceReference(PropertyLoader.class);
-      PropertyLoader localizer = context.getService(localizerServiceRererence);
+
+      PropertyLoader localizer = localizerServiceRererence != null
+          ? context.getService(localizerServiceRererence)
+          : generalLocalizer;
 
       T localization = localizer.getProperties((Class<T>) accessor);
 

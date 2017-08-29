@@ -27,21 +27,22 @@
  */
 package uk.co.saiman.fx;
 
-import java.util.Collections;
-import java.util.Comparator;
+import static java.lang.Integer.compare;
+import static java.util.stream.Collectors.toList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.util.Pair;
-import uk.co.saiman.mathematics.graph.Graph;
-import uk.co.saiman.mathematics.graph.GraphListeners;
-import uk.co.saiman.mathematics.graph.processing.GraphProcessor;
-import uk.co.saiman.reflection.token.TypedObject;
+import javafx.scene.input.PickResult;
+import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * An implementation of {@link TreeView} which allows for modular and extensible
@@ -50,200 +51,140 @@ import uk.co.saiman.reflection.token.TypedObject;
  * @author Elias N Vasylenko
  */
 public class ModularTreeView extends TreeView<TreeItemData<?>> {
-	/*
-	 * Graph of subtype relations so we can more easily find which contributions
-	 * are the most specific.
-	 */
-	private final Graph<TreeContribution<?>, Object> contributions;
-	private final Map<TreeContribution<?>, Integer> contributionRankings;
-	private List<TreeContribution<?>> orderedContributions;
+  private final Map<TreeContribution<?>, Integer> contributionRankings;
+  private List<TreeContribution<?>> orderedContributions;
 
-	private Comparator<Pair<TreeContribution<?>, Integer>> precedence;
+  /**
+   * Instantiate an empty tree view containing the
+   * {@link DefaultTreeCellContribution default cell contribution} over a cell
+   * factory which instantiates an empty {@link TreeCellImpl}.
+   */
+  public ModularTreeView() {
+    FxmlLoadBuilder.build().object(this).load();
+    setCellFactory(v -> new TreeCellImpl(this));
 
-	private TreeCellImpl selectedCell;
+    contributionRankings = new HashMap<>();
 
-	/**
-	 * Instantiate an empty tree view containing the
-	 * {@link DefaultTreeCellContribution default cell contribution}, over a cell
-	 * factory which instantiates an empty {@link TreeCellImpl}, and according to
-	 * the {@link DefaultTreeContributionPrecedence default precedence}.
-	 */
-	public ModularTreeView() {
-		FxmlLoadBuilder.build().object(this).load();
-		setCellFactory(v -> new TreeCellImpl(this));
+    addContribution(new DefaultTreeCellContribution(), Integer.MIN_VALUE);
 
-		contributionRankings = new HashMap<>();
+    setMinWidth(0);
+    prefWidth(0);
 
-		contributions = Graph
-				.build()
-				.vertices(Collections.<TreeContribution<?>> emptySet())
-				.edgeFactory(Object::new)
-				.direction(this::compareDescending)
-				.addInternalListener(GraphListeners::vertexAdded, added -> {
-					for (TreeContribution<?> existingVertex : added.graph().vertices())
-						if (existingVertex != added.vertex())
-							added.graph().edges().add(added.vertex(), existingVertex);
+    addEventHandler(KeyEvent.ANY, event -> {
+      if (event.getCode() == KeyCode.CONTEXT_MENU) {
+        event.consume();
 
-				})
-				.create();
+        if (event.getEventType() == KeyEvent.KEY_RELEASED) {
+          Node selectionBounds = this;
 
-		setPrecedence(new DefaultTreeContributionPrecedence());
+          Bounds sceneBounds = selectionBounds.localToScene(selectionBounds.getLayoutBounds());
+          Bounds screenBounds = selectionBounds.localToScreen(selectionBounds.getLayoutBounds());
 
-		addContribution(new DefaultTreeCellContribution());
+          PickResult pickResult = new PickResult(
+              selectionBounds,
+              sceneBounds.getMaxX(),
+              sceneBounds.getMaxY());
 
-		addEventFilter(KeyEvent.ANY, this::filterCellKeyEvent);
+          fireEvent(
+              new ContextMenuEvent(
+                  ContextMenuEvent.CONTEXT_MENU_REQUESTED,
+                  sceneBounds.getMaxX(),
+                  sceneBounds.getMaxY(),
+                  screenBounds.getMaxX(),
+                  screenBounds.getMaxY(),
+                  true,
+                  pickResult));
+        }
+      }
+    });
+  }
 
-		setMinWidth(0);
-		prefWidth(0);
-	}
+  /**
+   * @param root
+   *          the root object supplemented with its exact generic type
+   */
+  public void setRootData(TypedReference<?> root) {
+    TreeItemImpl<?> rootItem = new TreeItemImpl<>(this, root);
+    rootItem.setExpanded(true);
+    setShowRoot(false);
 
-	protected synchronized void filterCellKeyEvent(KeyEvent event) {
-		if (selectedCell != null) {
-			Node target = selectedCell.getGraphic();
+    // add root
+    setRoot(rootItem);
 
-			if (target != null && event.getTarget() != target && !event.isConsumed()) {
-				target.fireEvent(event.copyFor(event.getSource(), target));
+    refresh();
+  }
 
-				event.consume();
-			}
-		}
-	}
+  protected final TreeItemImpl<?> getRootImpl() {
+    return (TreeItemImpl<?>) getRoot();
+  }
 
-	protected synchronized void fireCellKeyEvent(KeyEvent event) {
-		if (selectedCell != null) {
-			Node target = selectedCell.getGraphic();
+  /**
+   * As per {@link #addContribution(TreeContribution, int)} with a ranking of 0.
+   * 
+   * @param contribution
+   *          the contribution to add to the view
+   * @return true if the contribution was successfully added, false otherwise
+   */
+  public boolean addContribution(TreeContribution<?> contribution) {
+    return addContribution(contribution, 0);
+  }
 
-			if (target != null) {
+  /**
+   * If the contribution is not present in the tree, add it at the given
+   * ranking. If it is already present, modify the ranking to the given ranking.
+   * If it is already present at the given ranking, do nothing.
+   * 
+   * @param contribution
+   *          the contribution to add to the view
+   * @param ranking
+   *          the precedence ranking of the contribution
+   * @return true if the contribution was successfully added or modified, false
+   *         otherwise
+   */
+  public boolean addContribution(TreeContribution<?> contribution, int ranking) {
+    boolean added = !((Integer) ranking).equals(contributionRankings.put(contribution, ranking));
 
-				if (event.getTarget() == target) {
-					event.consume();
+    if (added) {
+      refreshContributions();
+    }
 
-				} else if (!event.isConsumed()) {
-					event = event.copyFor(event.getSource(), target);
-					target.fireEvent(event);
-				}
-			}
-		}
-	}
+    return added;
+  }
 
-	protected synchronized void setCellSelected(TreeCellImpl treeCellImpl, boolean selected) {
-		if (selected) {
-			selectedCell = treeCellImpl;
-		} else if (selectedCell == treeCellImpl) {
-			selectedCell = null;
-		}
-	}
+  /**
+   * @param contribution
+   *          the contribution to remove from the view
+   * @return true if the contribution was successfully removed, false otherwise
+   */
+  public boolean removeContribution(TreeContribution<?> contribution) {
+    boolean removed = contributionRankings.remove(contribution) != null;
 
-	private int compareDescending(TreeContribution<?> first, TreeContribution<?> second) {
-		return -getPrecedence().compare(rankedPair(first), rankedPair(second));
-	}
+    if (removed) {
+      refreshContributions();
+    }
 
-	private Pair<TreeContribution<?>, Integer> rankedPair(TreeContribution<?> contribution) {
-		return new Pair<>(contribution, contributionRankings.get(contribution));
-	}
+    return removed;
+  }
 
-	/**
-	 * @param precedence
-	 *          the precedence by which to order tree contributions
-	 */
-	public void setPrecedence(Comparator<Pair<TreeContribution<?>, Integer>> precedence) {
-		this.precedence = precedence;
+  private void refreshContributions() {
+    orderedContributions = contributionRankings
+        .entrySet()
+        .stream()
+        .sorted((a, b) -> compare(b.getValue(), a.getValue()))
+        .map(e -> e.getKey())
+        .collect(toList());
+  }
 
-		refreshContributions();
-	}
+  /**
+   * @return all contributions added to the view in order of from most to least
+   *         preferred
+   */
+  public Stream<TreeContribution<?>> getContributions() {
+    return orderedContributions.stream();
+  }
 
-	/**
-	 * @return the precedence by which tree contributions are ordered
-	 */
-	public Comparator<Pair<TreeContribution<?>, Integer>> getPrecedence() {
-		return precedence;
-	}
-
-	/**
-	 * @param root
-	 *          the root object supplemented with its exact generic type
-	 */
-	public void setRootData(TypedObject<?> root) {
-		TreeItemImpl<?> rootItem = new TreeItemImpl<>(this, root);
-		rootItem.setExpanded(true);
-		setShowRoot(false);
-
-		// add root
-		setRoot(rootItem);
-
-		refresh();
-	}
-
-	protected final TreeItemImpl<?> getRootImpl() {
-		return (TreeItemImpl<?>) getRoot();
-	}
-
-	/**
-	 * As per {@link #addContribution(TreeContribution, int)} with a ranking of 0.
-	 * 
-	 * @param contribution
-	 *          the contribution to add to the view
-	 * @return true if the contribution was successfully added, false otherwise
-	 */
-	public boolean addContribution(TreeContribution<?> contribution) {
-		return addContribution(contribution, 0);
-	}
-
-	/**
-	 * @param contribution
-	 *          the contribution to add to the view
-	 * @param ranking
-	 *          the precedence ranking of the contribution
-	 * @return true if the contribution was successfully added, false otherwise
-	 */
-	public boolean addContribution(TreeContribution<?> contribution, int ranking) {
-		boolean added;
-
-		if (contributionRankings.putIfAbsent(contribution, ranking) == null) {
-			added = contributions.vertices().add(contribution);
-
-			if (added) {
-				refreshContributions();
-			} else {
-				contributionRankings.remove(contribution);
-			}
-		} else {
-			added = false;
-		}
-
-		return added;
-	}
-
-	/**
-	 * @param contribution
-	 *          the contribution to remove from the view
-	 * @return true if the contribution was successfully removed, false otherwise
-	 */
-	public boolean removeContribution(TreeContribution<?> contribution) {
-		contributionRankings.remove(contribution);
-		boolean removed = contributions.vertices().remove(contribution);
-
-		if (removed) {
-			refreshContributions();
-		}
-
-		return removed;
-	}
-
-	private void refreshContributions() {
-		orderedContributions = GraphProcessor.over(contributions).processEager();
-	}
-
-	/**
-	 * @return all contributions added to the view in order of from most to least
-	 *         preferred
-	 */
-	public Stream<TreeContribution<?>> getContributions() {
-		return orderedContributions.stream();
-	}
-
-	@Override
-	public void refresh() {
-		getRootImpl().getData().refresh(true);
-	}
+  @Override
+  public void refresh() {
+    getRootImpl().getData().refresh(true);
+  }
 }
