@@ -40,46 +40,46 @@ import java.lang.reflect.TypeVariable;
  *          The type variable we wish to capture.
  */
 public class TypeParameter<T> extends TypeToken<T> {
-	/**
-	 * Capture the type variable provided as an argument to the type parameter of
-	 * this constructor. This should only ever be parameterized with an
-	 * uninstantiated type variable.
-	 */
-	protected TypeParameter() {
-		if (!(super.getType() instanceof TypeVariable))
-			throw new IllegalArgumentException();
-	}
+  /**
+   * Capture the type variable provided as an argument to the type parameter of
+   * this constructor. This should only ever be parameterized with an
+   * uninstantiated type variable.
+   */
+  protected TypeParameter() {
+    if (!(super.getType() instanceof TypeVariable))
+      throw new IllegalArgumentException();
+  }
 
-	private TypeParameter(TypeVariable<?> type) {
-		super(type);
-	}
+  private TypeParameter(TypeVariable<?> type) {
+    super(type);
+  }
 
-	@Override
-	public TypeVariable<?> getType() {
-		return (TypeVariable<?>) super.getType();
-	}
+  @Override
+  public TypeVariable<?> getType() {
+    return (TypeVariable<?>) super.getType();
+  }
 
-	/**
-	 * Capture the given type variable in a TypeToken.
-	 * 
-	 * @param type
-	 *          The type variable to capture.
-	 * @return A type token instance over the given type.
-	 */
-	public static TypeParameter<?> forTypeVariable(TypeVariable<?> type) {
-		return new TypeParameter<>(type);
-	}
+  /**
+   * Capture the given type variable in a TypeToken.
+   * 
+   * @param type
+   *          The type variable to capture.
+   * @return A type token instance over the given type.
+   */
+  public static TypeParameter<?> forTypeVariable(TypeVariable<?> type) {
+    return new TypeParameter<>(type);
+  }
 
-	public TypeArgument<T> asType(TypeToken<T> type) {
-		return new TypeArgument<T>(this, type) {};
-	}
+  public TypeArgument<T> asType(TypeToken<T> type) {
+    return new TypeArgument<T>(this, type) {};
+  }
 
-	public TypeArgument<T> asClass(Class<T> type) {
-		return new TypeArgument<T>(this, forClass(type)) {};
-	}
+  public TypeArgument<T> asClass(Class<T> type) {
+    return new TypeArgument<T>(this, forType(type)) {};
+  }
 
-	@SuppressWarnings("unchecked")
-	public TypeArgument<?> asType(Type type) {
-		return new TypeArgument<T>(this, (TypeToken<T>) TypeToken.forType(type)) {};
-	}
+  @SuppressWarnings("unchecked")
+  public TypeArgument<?> asType(Type type) {
+    return new TypeArgument<T>(this, (TypeToken<T>) TypeToken.forType(type)) {};
+  }
 }

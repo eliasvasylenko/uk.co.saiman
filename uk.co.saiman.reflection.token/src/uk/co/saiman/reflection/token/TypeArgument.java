@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.reflection.token;
 
-import static uk.co.saiman.reflection.token.TypeToken.forClass;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -36,44 +36,44 @@ import java.lang.reflect.TypeVariable;
 import uk.co.saiman.reflection.TypeHierarchy;
 
 public abstract class TypeArgument<T> {
-	private final TypeParameter<T> parameter;
-	private final TypeToken<T> type;
+  private final TypeParameter<T> parameter;
+  private final TypeToken<T> type;
 
-	public TypeArgument(TypeToken<T> type) {
-		this.parameter = resolveSupertypeParameter();
-		this.type = type;
-	}
+  public TypeArgument(TypeToken<T> type) {
+    this.parameter = resolveSupertypeParameter();
+    this.type = type;
+  }
 
-	public TypeArgument(Class<T> type) {
-		this.parameter = resolveSupertypeParameter();
-		this.type = forClass(type);
-	}
+  public TypeArgument(Class<T> type) {
+    this.parameter = resolveSupertypeParameter();
+    this.type = forType(type);
+  }
 
-	protected TypeArgument(TypeParameter<T> parameter, TypeToken<T> type) {
-		this.parameter = parameter;
-		this.type = type;
-	}
+  protected TypeArgument(TypeParameter<T> parameter, TypeToken<T> type) {
+    this.parameter = parameter;
+    this.type = type;
+  }
 
-	@SuppressWarnings("unchecked")
-	private TypeParameter<T> resolveSupertypeParameter() {
-		Type type = ((ParameterizedType) new TypeHierarchy(getClass().getGenericSuperclass())
-				.resolveSupertype(TypeArgument.class)).getActualTypeArguments()[0];
+  @SuppressWarnings("unchecked")
+  private TypeParameter<T> resolveSupertypeParameter() {
+    Type type = ((ParameterizedType) new TypeHierarchy(getClass().getGenericSuperclass())
+        .resolveSupertype(TypeArgument.class)).getActualTypeArguments()[0];
 
-		if (!(type instanceof TypeVariable<?>))
-			throw new IllegalArgumentException();
+    if (!(type instanceof TypeVariable<?>))
+      throw new IllegalArgumentException();
 
-		return (TypeParameter<T>) TypeParameter.forTypeVariable((TypeVariable<?>) type);
-	}
+    return (TypeParameter<T>) TypeParameter.forTypeVariable((TypeVariable<?>) type);
+  }
 
-	public TypeParameter<T> getParameter() {
-		return parameter;
-	}
+  public TypeParameter<T> getParameter() {
+    return parameter;
+  }
 
-	public TypeToken<T> getTypeToken() {
-		return type;
-	}
+  public TypeToken<T> getTypeToken() {
+    return type;
+  }
 
-	public Type getType() {
-		return type.getType();
-	}
+  public Type getType() {
+    return type.getType();
+  }
 }

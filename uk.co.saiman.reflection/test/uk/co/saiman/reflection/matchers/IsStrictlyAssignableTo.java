@@ -36,24 +36,24 @@ import org.hamcrest.Matcher;
 import uk.co.saiman.reflection.Types;
 
 public class IsStrictlyAssignableTo extends BaseMatcher<Type> {
-	private final Type assignmentTarget;
+  private final Type assignmentTarget;
 
-	private IsStrictlyAssignableTo(Type assignmentTarget) {
-		this.assignmentTarget = assignmentTarget;
-	}
+  private IsStrictlyAssignableTo(Type assignmentTarget) {
+    this.assignmentTarget = assignmentTarget;
+  }
 
-	public static Matcher<Type> isStrictlyAssignableTo(Type target) {
-		return new IsStrictlyAssignableTo(target);
-	}
+  public static Matcher<Type> isStrictlyAssignableTo(Type target) {
+    return new IsStrictlyAssignableTo(target);
+  }
 
-	@Override
-	public boolean matches(Object item) {
-		return (item == null || item instanceof Type)
-				&& Types.isStrictInvocationContextCompatible((Type) item, assignmentTarget);
-	}
+  @Override
+  public boolean matches(Object item) {
+    return (item == null || item instanceof Type)
+        && Types.isStrictInvocationContextCompatible((Type) item, assignmentTarget);
+  }
 
-	@Override
-	public void describeTo(Description description) {
-		description.appendText(" strictly assignable to " + Types.toString(assignmentTarget));
-	}
+  @Override
+  public void describeTo(Description description) {
+    description.appendText(" strictly assignable to " + assignmentTarget);
+  }
 }
