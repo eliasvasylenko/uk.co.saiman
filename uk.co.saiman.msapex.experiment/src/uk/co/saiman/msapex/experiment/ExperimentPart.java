@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import uk.co.saiman.eclipse.treeview.EclipseModularTreeController;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.eclipse.EclipseModularTreeController;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -41,23 +41,23 @@ import uk.co.saiman.eclipse.EclipseModularTreeController;
  * injection via the bundle manifest.
  */
 public interface ExperimentPart {
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String ADD_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.experiment.command.addexperiment";
+  /**
+   * The ID of the command in the e4 model fragment.
+   */
+  public static final String ADD_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.experiment.command.addexperiment";
 
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String OPEN_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.command.open";
+  /**
+   * The ID of the command in the e4 model fragment.
+   */
+  public static final String OPEN_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.command.open";
 
-	/**
-	 * @return the current experiment workspace
-	 */
-	Workspace getExperimentWorkspace();
+  /**
+   * @return the current experiment workspace
+   */
+  Workspace getExperimentWorkspace();
 
-	/**
-	 * @return the controller for the experiment tree UI item
-	 */
-	EclipseModularTreeController getExperimentTreeController();
+  /**
+   * @return the controller for the experiment tree UI item
+   */
+  EclipseModularTreeController getExperimentTreeController();
 }

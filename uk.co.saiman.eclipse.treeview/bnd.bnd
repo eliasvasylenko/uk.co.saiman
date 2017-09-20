@@ -1,10 +1,11 @@
-Bundle-Name: SAI :: Eclipse
+Bundle-Name: SAI :: Eclipse :: Tree View
 
 -include: \
 	${build}/include/eclipse.platform.oxygen.bnd,\
 	${build}/include/eclipse.fx.3.0.0.bnd
 
 -buildpath: \
+	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
@@ -15,19 +16,11 @@ Bundle-Name: SAI :: Eclipse
 	org.eclipse.osgi.compatibility.state
 
 Bundle-Description: \
-	Classes for working with Eclipse RCP and IDE projects with JavaFX.
+	Tree view extension to the e4 model
 
-Export-Package: uk.co.saiman.eclipse
-
-Private-Package: \
-	org.eclipse.osgi.compatibility.state,\
-	org.eclipse.osgi.internal.container,\
-	org.eclipse.osgi.internal.module,\
-	org.eclipse.osgi.internal.resolver,\
-	org.eclipse.osgi.internal.util
+Export-Package: \
+	uk.co.saiman.eclipse.treeview
 
 -includeresource: \
-	OSGI-INF/l10n=l10n
-
-Import-Package: \
-	*
+	OSGI-INF/l10n=l10n,\
+	res

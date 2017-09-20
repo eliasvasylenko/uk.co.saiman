@@ -30,8 +30,6 @@ package uk.co.saiman.msapex.camera;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
@@ -50,14 +48,11 @@ import uk.co.saiman.camera.CameraDevice;
  * @author Elias N Vasylenko
  */
 public class CameraDevicesMenu {
-  @Inject
-  @Service
-  List<CameraDevice> availableDevices;
-  @Inject
-  IEclipseContext context;
-
   @AboutToShow
-  void aboutToShow(List<MMenuElement> items) {
+  void aboutToShow(
+      List<MMenuElement> items,
+      IEclipseContext context,
+      @Service List<CameraDevice> availableDevices) {
     for (CameraDevice module : new ArrayList<>(availableDevices)) {
       MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
       moduleItem.setLabel(module.getName());

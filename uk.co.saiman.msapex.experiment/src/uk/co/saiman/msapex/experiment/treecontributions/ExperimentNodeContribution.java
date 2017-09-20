@@ -39,7 +39,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import uk.co.saiman.eclipse.MenuTreeCellContribution;
+import uk.co.saiman.eclipse.treeview.MenuTreeCellContribution;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Result;

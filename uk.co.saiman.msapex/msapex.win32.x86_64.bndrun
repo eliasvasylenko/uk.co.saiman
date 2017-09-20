@@ -150,6 +150,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.configadmin.persistence;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.treeview;version=snapshot,\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.provider;version=snapshot,\

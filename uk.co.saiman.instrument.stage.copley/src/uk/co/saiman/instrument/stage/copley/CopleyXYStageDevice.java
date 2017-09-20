@@ -27,40 +27,104 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
-import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import java.util.Optional;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
-import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice.CopleyXYStageConfiguration;
+import uk.co.saiman.measurement.Units;
 
-@Designate(ocd = CopleyXYStageConfiguration.class, factory = true)
-@Component(configurationPid = CopleyXYStageDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE)
 public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDevice {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "Copley XY Stage Configuration",
       description = "An implementation of an XY stage device interface based on copley motor hardware")
   public @interface CopleyXYStageConfiguration {
+    @AttributeDefinition(
+        name = "Copley Comms",
+        description = "The OSGi reference filter for the comms interface")
+    String comms_target() default "(objectClass=uk.co.saiman.comms.copley.CopleyComms)";
 
+    String lowerBoundX();
+
+    String lowerBoundY();
+
+    String upperBoundX();
+
+    String upperBoundY();
+
+    String homePositionX();
+
+    String homePositionY();
+
+    String exchangePositionX();
+
+    String exchangePositionY();
   }
 
-  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.xy";
+  private Instrument instrument;
+
+  private Quantity<Length> lowerBoundX;
+  private Quantity<Length> lowerBoundY;
+
+  private Quantity<Length> upperBoundX;
+  private Quantity<Length> upperBoundY;
+
+  private Quantity<Length> homeX;
+  private Quantity<Length> homeY;
+
+  private Quantity<Length> exchangeX;
+  private Quantity<Length> exchangeY;
 
   private StageDimension<Length> xAxis;
   private StageDimension<Length> yAxis;
 
-  @Activate
-  void activate(CopleyXYStageConfiguration configuration) {
-    activate();
-    xAxis = new CopleyLinearDimension(getUnits(), 0, getController());
-    yAxis = new CopleyLinearDimension(getUnits(), 1, getController());
+  void configure(CopleyXYStageConfiguration configuration, Units units) {
+    lowerBoundX = units.parseQuantity(configuration.lowerBoundX()).asType(Length.class);
+    lowerBoundY = units.parseQuantity(configuration.lowerBoundY()).asType(Length.class);
+
+    upperBoundX = units.parseQuantity(configuration.upperBoundX()).asType(Length.class);
+    upperBoundY = units.parseQuantity(configuration.upperBoundY()).asType(Length.class);
+
+    homeX = units.parseQuantity(configuration.homePositionX()).asType(Length.class);
+    homeY = units.parseQuantity(configuration.homePositionY()).asType(Length.class);
+
+    exchangeX = units.parseQuantity(configuration.exchangePositionX()).asType(Length.class);
+    exchangeY = units.parseQuantity(configuration.exchangePositionY()).asType(Length.class);
+
+    xAxis = new CopleyLinearDimension(
+        0,
+        units,
+        () -> getController().orElse(null),
+        lowerBoundX,
+        upperBoundX);
+    yAxis = new CopleyLinearDimension(
+        1,
+        units,
+        () -> getController().orElse(null),
+        lowerBoundY,
+        upperBoundY);
+  }
+
+  @Override
+  public Optional<Instrument> getInstrument() {
+    return Optional.ofNullable(instrument);
+  }
+
+  @Override
+  public void setInstrument(Instrument instrument) {
+    this.instrument = instrument;
+  }
+
+  @Override
+  public void unsetInstrument() {
+    this.instrument = null;
   }
 
   @Override
@@ -76,5 +140,17 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
   @Override
   public StageDimension<Length> getYAxis() {
     return yAxis;
+  }
+
+  public void moveToHome() {
+    xAxis.requestedPosition().set(homeX);
+    yAxis.requestedPosition().set(homeY);
+  }
+
+  public void moveToExchange() {
+    moveToHome();
+
+    xAxis.requestedPosition().set(exchangeX);
+    yAxis.requestedPosition().set(exchangeY);
   }
 }

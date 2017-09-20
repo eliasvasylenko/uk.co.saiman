@@ -37,6 +37,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -46,9 +49,8 @@ import uk.co.saiman.camera.CameraDevice;
 import uk.co.saiman.camera.CameraImage;
 import uk.co.saiman.camera.CameraResolution;
 import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.saiman.comms.copley.CopleyComms;
-import uk.co.saiman.comms.copley.CopleyController;
-import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.instrument.stage.StageDimension;
+import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.PassthroughObserver;
@@ -60,7 +62,7 @@ import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
 import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
-public class CopleyXYStageSimulatedSampleSource
+public class XYStageSimulatedSampleSource
     implements ImageSimulatedSampleSource, SimulatedSampleSource, CameraDevice {
   private static final int CAMERA_WIDTH = 640;
   private static final int CAMERA_HEIGHT = 480;
@@ -78,7 +80,7 @@ public class CopleyXYStageSimulatedSampleSource
 
     @Override
     public CameraDevice getCameraDevice() {
-      return CopleyXYStageSimulatedSampleSource.this;
+      return XYStageSimulatedSampleSource.this;
     }
 
     @Override
@@ -125,16 +127,12 @@ public class CopleyXYStageSimulatedSampleSource
   };
 
   @Reference
-  CopleyComms copleyComms;
-  private CopleyController copleyController;
+  XYStageDevice stageDevice;
 
   private ChemicalComposition redChemical;
   private ChemicalComposition greenChemical;
   private ChemicalComposition blueChemical;
   private SimulatedSampleImage sampleImage;
-
-  private Interval<Integer> stageBoundsX;
-  private Interval<Integer> stageBoundsY;
 
   @Reference
   PropertyLoader propertyLoader;
@@ -145,7 +143,6 @@ public class CopleyXYStageSimulatedSampleSource
 
   @Activate
   synchronized void activate() {
-    copleyController = copleyComms.openController();
     properties = propertyLoader.getProperties(SaintSimulationProperties.class);
 
     cameraConnections = new HashSet<>();
@@ -162,25 +159,12 @@ public class CopleyXYStageSimulatedSampleSource
           imageStream.next(getImage());
         });
 
-    resetStageBounds();
     resetSampleImage();
   }
 
   @Override
   public String getName() {
     return properties.copleyXYStageSimuatedSampleSourceName();
-  }
-
-  public void resetStageBounds() {
-    Interval<Integer> emptyBounds = Interval.bounded(0, 0);
-    setStageBounds(emptyBounds, emptyBounds);
-  }
-
-  public synchronized void setStageBounds(
-      Interval<Integer> stageBoundsX,
-      Interval<Integer> stageBoundsY) {
-    this.stageBoundsX = stageBoundsX;
-    this.stageBoundsY = stageBoundsY;
   }
 
   @Override
@@ -207,22 +191,18 @@ public class CopleyXYStageSimulatedSampleSource
     this.sampleImage = DEFAULT_SAMPLE_IMAGE;
   }
 
-  private double getSampleAreaPosition(int axis, Interval<Integer> stageBounds) {
-    int actualPosition = copleyController.getActualPosition().get(axis).value;
-
-    if (!stageBounds.contains(actualPosition))
-      return -1;
-
-    return actualPosition
-        / (double) (stageBounds.getRightEndpoint() - stageBounds.getLeftEndpoint());
+  private double getSampleAreaPosition(StageDimension<Length> stageDimension) {
+    Quantity<Length> range = stageDimension.getBounds().getRightEndpoint().subtract(
+        stageDimension.getBounds().getLeftEndpoint());
+    return stageDimension.actualPosition().get().divide(range).getValue().doubleValue();
   }
 
   private int getImageX() {
-    return (int) (sampleImage.getWidth() * getSampleAreaPosition(0, stageBoundsX));
+    return (int) (sampleImage.getWidth() * getSampleAreaPosition(stageDevice.getXAxis()));
   }
 
   private int getImageY() {
-    return (int) (sampleImage.getHeight() * getSampleAreaPosition(1, stageBoundsY));
+    return (int) (sampleImage.getHeight() * getSampleAreaPosition(stageDevice.getYAxis()));
   }
 
   @Override
@@ -324,12 +304,12 @@ public class CopleyXYStageSimulatedSampleSource
 
       @Override
       public CameraImage getImage() {
-        return CopleyXYStageSimulatedSampleSource.this.getImage();
+        return XYStageSimulatedSampleSource.this.getImage();
       }
 
       @Override
       public CameraDevice getDevice() {
-        return CopleyXYStageSimulatedSampleSource.this;
+        return XYStageSimulatedSampleSource.this;
       }
 
       @Override

@@ -30,43 +30,38 @@ package uk.co.saiman.instrument.stage.copley;
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
 import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
 import static uk.co.saiman.instrument.HardwareConnection.DISCONNECTED;
+import static uk.co.saiman.instrument.stage.StageState.POSITION_REACHED;
 
-import org.osgi.service.component.annotations.Reference;
+import java.util.Optional;
 
 import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.instrument.HardwareConnection;
 import uk.co.saiman.instrument.stage.StageDevice;
-import uk.co.saiman.measurement.Units;
+import uk.co.saiman.instrument.stage.StageState;
+import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.text.properties.PropertyLoader;
 
 public abstract class CopleyStageDevice implements StageDevice {
-  @Reference
-  PropertyLoader loader;
   private CopleyStageProperties properties;
+  private final ObservableValue<StageState> state = new ObservablePropertyImpl<>(POSITION_REACHED);
 
-  @Reference
-  CopleyComms comms;
+  private CopleyComms comms;
   private CopleyController controller;
 
-  @Reference
-  Units units;
-
-  void activate() {
-    properties = loader.getProperties(CopleyStageProperties.class);
+  void initialize(CopleyComms comms, PropertyLoader loader) {
+    this.comms = comms;
+    this.controller = comms.openController();
+    this.properties = loader.getProperties(CopleyStageProperties.class);
   }
 
   public CopleyStageProperties getProperties() {
     return properties;
   }
 
-  public Units getUnits() {
-    return units;
-  }
-
-  public CopleyController getController() {
-    return controller;
+  public Optional<CopleyController> getController() {
+    return Optional.ofNullable(controller);
   }
 
   @Override
@@ -86,5 +81,10 @@ public abstract class CopleyStageDevice implements StageDevice {
   @Override
   public ObservableValue<HardwareConnection> connectionState() {
     return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
+  }
+
+  @Override
+  public ObservableValue<StageState> state() {
+    return state;
   }
 }

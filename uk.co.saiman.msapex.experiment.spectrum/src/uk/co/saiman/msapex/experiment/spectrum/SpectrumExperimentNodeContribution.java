@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.Node;
-import uk.co.saiman.eclipse.CommandTreeCellContribution;
+import uk.co.saiman.eclipse.treeview.CommandTreeCellContribution;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;

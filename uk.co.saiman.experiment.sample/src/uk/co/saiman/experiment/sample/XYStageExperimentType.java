@@ -50,7 +50,7 @@ public interface XYStageExperimentType<T extends XYStageConfiguration>
 
   @Override
   default void execute(ExperimentExecutionContext<T> context) {
-    device().getXAxis().requestPosition(context.node().getState().getX());
-    device().getYAxis().requestPosition(context.node().getState().getY());
+    device().getXAxis().requestedPosition().set(context.node().getState().getX());
+    device().getYAxis().requestedPosition().set(context.node().getState().getY());
   }
 }

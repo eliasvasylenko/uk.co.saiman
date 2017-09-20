@@ -2,6 +2,7 @@ Bundle-Name: SAI :: Instrument :: Provider
 
 -buildpath:\
 	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 \
 	uk.co.saiman.instrument.api;version=snapshot,\

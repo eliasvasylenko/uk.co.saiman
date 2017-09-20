@@ -66,5 +66,4 @@ public interface TreeCellContribution<T> extends TreeContribution<T> {
     content.pseudoClassStateChanged(getPseudoClass(name), true);
     return content;
   }
-
 }

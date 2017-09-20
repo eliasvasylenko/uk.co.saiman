@@ -30,7 +30,10 @@ package uk.co.saiman.instrument.stage;
 import java.util.stream.Stream;
 
 import uk.co.saiman.instrument.HardwareDevice;
+import uk.co.saiman.observable.ObservableValue;
 
 public interface StageDevice extends HardwareDevice {
+  ObservableValue<StageState> state();
+
   Stream<StageDimension<?>> getDimensions();
 }

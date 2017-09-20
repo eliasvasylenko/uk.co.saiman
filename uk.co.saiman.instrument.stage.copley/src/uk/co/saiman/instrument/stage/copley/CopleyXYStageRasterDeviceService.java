@@ -35,50 +35,81 @@ import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.instrument.raster.RasterPattern;
 import uk.co.saiman.instrument.raster.RasterPosition;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
-import uk.co.saiman.instrument.stage.copley.CopleyXYStageRasterDevice.CopleyXYStageRasterConfiguration;
+import uk.co.saiman.instrument.stage.copley.CopleyXYStageRasterDeviceService.CopleyXYStageRasterConfiguration;
 import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.measurement.Units;
 import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.ObservableProperty;
+import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
  * A Copley motor XY stage which uses stage position offset as a rastering
  * mechanism.
  * <p>
  * The start position of the raster is taken from the
- * {@link StageDimension#getRequestedPosition() requested position} at the time
- * the raster begins. If a position is
- * {@link StageDimension#requestPosition(javax.measure.Quantity) manually
- * requested} during a raster operation, the operation fails and the
- * {@link #rasterPositionEvents() raster position observable} sends a terminal
- * failure event to its observers.
+ * {@link StageDimension#requestedPosition() requested position} at the time the
+ * raster begins. If a position is manually requested during a raster operation,
+ * the operation fails and the {@link #rasterPositionEvents() raster position
+ * observable} sends a terminal failure event to its observers.
  * 
  * @author Elias N Vasylenko
  */
 @Designate(ocd = CopleyXYStageRasterConfiguration.class, factory = true)
 @Component(
-    configurationPid = CopleyXYStageRasterDevice.CONFIGURATION_PID,
+    configurationPid = CopleyXYStageRasterDeviceService.CONFIGURATION_PID,
     configurationPolicy = REQUIRE)
-public class CopleyXYStageRasterDevice extends CopleyStageDevice
+public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
     implements RasterDevice, XYStageDevice {
+  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.xy.rastering";
+
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "Copley XY Stage Raster Configuration",
       description = "An implementation of a rastering XY stage device interface based on copley motor hardware")
   public @interface CopleyXYStageRasterConfiguration {
+    @AttributeDefinition(
+        name = "Copley Comms",
+        description = "The OSGi reference filter for the comms interface")
+    String comms_target() default "(objectClass=uk.co.saiman.comms.copley.CopleyComms)";
 
+    String lowerBoundX();
+
+    String lowerBoundY();
+
+    String upperBoundX();
+
+    String upperBoundY();
+
+    String homePositionX();
+
+    String homePositionY();
+
+    String exchangePositionX();
+
+    String exchangePositionY();
   }
 
-  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.xy.rastering";
+  @Reference
+  PropertyLoader loader;
 
-  private StageDimension<Length> xAxis;
-  private StageDimension<Length> yAxis;
+  @Reference
+  Units units;
+
+  @Reference
+  CopleyComms comms;
 
   private RasterPattern rasterPattern;
   private RasterPosition rasterPosition;
@@ -86,10 +117,18 @@ public class CopleyXYStageRasterDevice extends CopleyStageDevice
   private Quantity<Length> rasterResolutionY;
 
   @Activate
-  void activate(CopleyXYStageRasterConfiguration configuration) {
-    activate();
-    xAxis = new RasteringAxis(new CopleyLinearDimension(getUnits(), 0, getController()));
-    yAxis = new RasteringAxis(new CopleyLinearDimension(getUnits(), 1, getController()));
+  void activate(
+      CopleyXYStageRasterConfiguration rasterConfiguration,
+      CopleyXYStageConfiguration configuration) {
+    initialize(comms, loader);
+    configure(configuration, units);
+  }
+
+  @Modified
+  void modified(
+      CopleyXYStageRasterConfiguration rasterConfiguration,
+      CopleyXYStageConfiguration configuration) {
+    configure(configuration, units);
   }
 
   public void setRasterPattern(RasterPattern mode) {
@@ -138,16 +177,6 @@ public class CopleyXYStageRasterDevice extends CopleyStageDevice
     return null;
   }
 
-  @Override
-  public StageDimension<Length> getXAxis() {
-    return xAxis;
-  }
-
-  @Override
-  public StageDimension<Length> getYAxis() {
-    return yAxis;
-  }
-
   class RasteringAxis implements StageDimension<Length> {
     private final StageDimension<Length> component;
 
@@ -166,21 +195,13 @@ public class CopleyXYStageRasterDevice extends CopleyStageDevice
     }
 
     @Override
-    public void requestPosition(Quantity<Length> offset) {
-      // TODO Auto-generated method stub
-
+    public ObservableProperty<Quantity<Length>> requestedPosition() {
+      return component.requestedPosition();
     }
 
     @Override
-    public Quantity<Length> getRequestedPosition() {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public Quantity<Length> getActualPosition() {
-      // TODO Auto-generated method stub
-      return null;
+    public ObservableValue<Quantity<Length>> actualPosition() {
+      return component.actualPosition();
     }
   }
 }

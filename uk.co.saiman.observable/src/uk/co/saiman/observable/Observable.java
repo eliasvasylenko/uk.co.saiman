@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -173,7 +175,7 @@ public interface Observable<M> {
    *          the type of the observable
    * @return an observable over the given stream
    */
-  public static <M> Collector<M, ?, Observable<M>> toObservable() {
+  static <M> Collector<M, ?, Observable<M>> toObservable() {
     return collectingAndThen(toList(), Observable::of);
   }
 
@@ -535,21 +537,41 @@ public interface Observable<M> {
    * Static factories
    */
 
-  @SafeVarargs
-  public static <M> Observable<M> of(M... messages) {
+  static <M> Observable<M> from(Supplier<M> message) {
     return of(Arrays.asList(messages));
   }
 
-  public static <M> Observable<M> of(Collection<? extends M> messages) {
+  @SafeVarargs
+  static <M> Observable<M> of(M... messages) {
+    return of(Arrays.asList(messages));
+  }
+
+  static <M> Observable<M> of(Collection<? extends M> messages) {
     return new ColdObservable<>(messages);
   }
 
   @SafeVarargs
-  public static <M> Observable<M> merge(Observable<? extends M>... observables) {
+  static <M> Observable<M> merge(Observable<? extends M>... observables) {
     return merge(Arrays.asList(observables));
   }
 
-  public static <M> Observable<M> merge(Collection<? extends Observable<? extends M>> observables) {
+  static <M> Observable<M> merge(Collection<? extends Observable<? extends M>> observables) {
     return of(observables).mergeMap(identity());
+  }
+
+  static <M> Observable<M> fixedRate(int delay, int period) {
+    HotObservable<M> hot = new HotObservable<>();
+    new Timer().scheduleAtFixedRate(new TimerTask() {
+      @Override
+      public void run() {
+        hot.next(poll.get());
+      }
+    }, delay, period);
+    return hot;
+  }
+
+  static <M> Observable<M> failing(Throwable failure) {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

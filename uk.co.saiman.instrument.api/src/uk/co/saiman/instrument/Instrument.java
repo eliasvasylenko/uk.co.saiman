@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.instrument;
 
+import java.util.stream.Stream;
+
+import uk.co.saiman.observable.ObservableValue;
+
 /**
  * An instrument is essentially the aggregation of a collection of
  * {@link HardwareDevice}s, and is responsible for supervising their lifecycles
@@ -35,15 +39,21 @@ package uk.co.saiman.instrument;
  * @author Elias N Vasylenko
  */
 public interface Instrument {
-	public static final String INSTRUMENT_CATEGORY = "Instrument";
+  public static final String INSTRUMENT_CATEGORY = "Instrument";
 
-	boolean operate();
+  void operate();
 
-	void standby();
+  void standby();
 
-	InstrumentLifecycleState state();
+  Stream<HardwareDevice> getDevices();
 
-	void registerLifecycleParticipant(InstrumentLifecycleParticipant participant);
-
-	void unregisterLifecycleParticipant(InstrumentLifecycleParticipant participant);
+  /**
+   * Invoked by the controlling instrument upon transition into a different
+   * lifecycle state. If observers throw an exception from this invocation, the
+   * transition will fail. If any transition fails, the instrument will fall
+   * back to standby.
+   * 
+   * @return an observable over the state of the instrument
+   */
+  ObservableValue<InstrumentLifecycleState> lifecycleState();
 }

@@ -73,8 +73,9 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
 
   @Override
   public Observable<Change<T>> changes() {
-    return observer -> materialize().retrying(backingObservable.materialize()).observe(
-        new PassthroughObserver<ObservableValue<T>, Change<T>>(observer) {
+    return observer -> Observable
+        .merge(currentState().materialize(), backingObservable.materialize().retrying())
+        .observe(new PassthroughObserver<ObservableValue<T>, Change<T>>(observer) {
           private ObservableValue<T> previousValue;
 
           @Override
@@ -99,17 +100,17 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
         });
   }
 
+  public Observable<T> currentState() {
+    if (value != null) {
+      return Observable.of(value);
+    } else {
+      return Observable.failing(failure);
+    }
+  }
+
   @Override
   public Disposable observe(Observer<? super T> observer) {
-    Disposable disposable = backingObservable.observe(observer);
-
-    if (value != null) {
-      observer.onNext(value);
-    } else {
-      observer.onFail(failure);
-    }
-
-    return disposable;
+    return Observable.merge(currentState(), backingObservable).observe(observer);
   }
 
   @Override

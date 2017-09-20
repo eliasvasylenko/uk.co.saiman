@@ -49,10 +49,10 @@ import aQute.bnd.annotation.headers.RequireCapability;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
+import uk.co.saiman.eclipse.treeview.EclipseModularTreeController;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.WorkspaceFactory;
 import uk.co.saiman.msapex.experiment.ExperimentPart;
-import uk.co.saiman.eclipse.EclipseModularTreeController;
 
 /**
  * Experiment management view part. Manage experiments and their results in the

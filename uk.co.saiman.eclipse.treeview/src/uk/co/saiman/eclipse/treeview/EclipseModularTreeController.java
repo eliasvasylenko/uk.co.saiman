@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse;
+package uk.co.saiman.eclipse.treeview;
 
 import static java.util.Optional.ofNullable;
 
@@ -43,6 +43,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TreeItem;
+import uk.co.saiman.eclipse.ObservableService;
 import uk.co.saiman.fx.ModularTreeView;
 import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;

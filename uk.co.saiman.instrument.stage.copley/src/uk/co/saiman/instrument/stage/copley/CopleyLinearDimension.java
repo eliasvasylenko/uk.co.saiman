@@ -27,6 +27,11 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
+import static java.util.Comparator.comparing;
+import static uk.co.saiman.mathematics.Interval.bounded;
+
+import java.util.function.Supplier;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Length;
@@ -36,16 +41,38 @@ import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.mathematics.Interval;
 import uk.co.saiman.measurement.Units;
+import uk.co.saiman.observable.ObservableProperty;
+import uk.co.saiman.observable.ObservablePropertyImpl;
+import uk.co.saiman.observable.ObservableValue;
 
 public class CopleyLinearDimension implements StageDimension<Length> {
   private final Units units;
   private final int axis;
-  private final CopleyController controller;
+  private final Supplier<CopleyController> controller;
+  private Interval<Quantity<Length>> bounds;
+  private final ObservableProperty<Quantity<Length>> requestedPosition;
+  private final ObservableProperty<Quantity<Length>> actualPosition;
 
-  public CopleyLinearDimension(Units units, int axis, CopleyController controller) {
+  public CopleyLinearDimension(
+      int axis,
+      Units units,
+      Supplier<CopleyController> controller,
+      Quantity<Length> minimum,
+      Quantity<Length> maximum) {
     this.units = units;
     this.axis = axis;
     this.controller = controller;
+    this.bounds = bounded(minimum, maximum, comparing(q -> q.getValue().doubleValue()));
+    this.requestedPosition = new ObservablePropertyImpl<>(minimum);
+    this.actualPosition = new ObservablePropertyImpl<>(minimum);
+
+    this.requestedPosition.observe(this::positionRequested);
+  }
+
+  void positionRequested(Quantity<Length> position) {
+    CopleyController controller = this.controller.get();
+    if (controller != null)
+      controller.getRequestedPosition().set(axis, new Int32(getStepsFromLength(position)));
   }
 
   @Override
@@ -55,24 +82,25 @@ public class CopleyLinearDimension implements StageDimension<Length> {
 
   @Override
   public Interval<Quantity<Length>> getBounds() {
-    // TODO Auto-generated method stub
-    return null;
+    return bounds;
+  }
+
+  public int getStepsFromLength(Quantity<Length> length) {
+    return length.to(units.metre().micro().get()).getValue().intValue();
+  }
+
+  public Quantity<Length> getLengthFromSteps(int steps) {
+    return units.metre().micro().getQuantity(steps);
   }
 
   @Override
-  public void requestPosition(Quantity<Length> offset) {
-    int micrometreOffset = offset.to(units.metre().micro().get()).getValue().intValue();
-
-    controller.getRequestedPosition().set(axis, new Int32(micrometreOffset));
+  public ObservableProperty<Quantity<Length>> requestedPosition() {
+    return requestedPosition;
   }
 
   @Override
-  public Quantity<Length> getRequestedPosition() {
-    return units.metre().micro().getQuantity(controller.getRequestedPosition().get(axis).value);
-  }
-
-  @Override
-  public Quantity<Length> getActualPosition() {
-    return units.metre().micro().getQuantity(controller.getActualPosition().get(axis).value);
+  public ObservableValue<Quantity<Length>> actualPosition() {
+    getLengthFromSteps(controller.getActualPosition().get(axis).value);
+    return actualPosition;
   }
 }

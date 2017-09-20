@@ -24,7 +24,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_KYYdoHzwEeeLpZ9wHq5Ynw" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Handler" xmi:id="_NQSe4HzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.addexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.AddExperiment" command="_zfCuYHzvEeeLpZ9wHq5Ynw"/>
-    <elements xsi:type="commands:Handler" xmi:id="_YSC8IHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.runexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.RunExperiment" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Handler" xmi:id="_MlXv4JeaEee2AtH7-tuIcw" elementId="uk.co.saiman.msapex.experiment.handler.runexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.RunExperiment" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Handler" xmi:id="_ebj4EHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.removenode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.RemoveNode" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Handler" xmi:id="_gYFPIHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.open" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.impl.OpenExperiment" command="_jOJdUHzwEeeLpZ9wHq5Ynw"/>
   </fragments>

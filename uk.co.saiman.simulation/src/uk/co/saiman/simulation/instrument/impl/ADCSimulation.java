@@ -67,7 +67,7 @@ public class ADCSimulation implements DetectorSimulation {
   public @interface ADCSimulationConfiguration {
     @AttributeDefinition(
         name = "Sample Source",
-        description = "The OSGi reference target LDAP filter for the sample source")
+        description = "The OSGi reference filter for the sample source")
     String sampleSource_target() default "(objectClass=uk.co.saiman.simulation.instrument.SimulatedSampleSource)";
 
     @AttributeDefinition(
