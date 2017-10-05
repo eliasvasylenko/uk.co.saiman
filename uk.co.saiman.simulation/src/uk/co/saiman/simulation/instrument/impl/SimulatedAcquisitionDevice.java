@@ -27,9 +27,8 @@
  */
 package uk.co.saiman.simulation.instrument.impl;
 
-import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
+import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
 import static uk.co.saiman.log.Log.Level.ERROR;
-import static uk.co.saiman.observable.ObservableValue.immutableOver;
 
 import java.util.Optional;
 
@@ -43,7 +42,7 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
-import uk.co.saiman.instrument.HardwareConnection;
+import uk.co.saiman.instrument.DeviceConnection;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
@@ -359,7 +358,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
   }
 
   @Override
-  public ObservableValue<HardwareConnection> connectionState() {
-    return immutableOver(CONNECTED);
+  public ObservableValue<DeviceConnection> connectionState() {
+    return Observable.value(CONNECTED);
   }
 }
