@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.impl;
+package uk.co.saiman.msapex.experiment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +46,6 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.osgi.service.event.Event;
 
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.msapex.experiment.ResultEditorPart;
 
 @Creatable
 @Singleton
@@ -93,7 +92,7 @@ public class ResultEditorManager {
 
 	@SuppressWarnings("unchecked")
 	protected <T> ResultEditorPart<T> createEditor(Result<T> data) {
-		MPart editorPart = partService.createPart(ResultEditorPartImpl.PART_ID);
+		MPart editorPart = partService.createPart(ResultEditorPart.PART_ID);
 		partResults.put(editorPart, data);
 		partService.showPart(editorPart, PartState.ACTIVATE);
 

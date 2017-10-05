@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.impl;
+package uk.co.saiman.msapex.experiment;
 
 import java.util.List;
 
@@ -57,7 +57,7 @@ public class AddNodeMenu {
 
 	@AboutToShow
 	void aboutToShow(List<MMenuElement> items, @Localize ExperimentProperties text, MPart part) {
-		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
+		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
 		Object data = item.getValue().data();
 

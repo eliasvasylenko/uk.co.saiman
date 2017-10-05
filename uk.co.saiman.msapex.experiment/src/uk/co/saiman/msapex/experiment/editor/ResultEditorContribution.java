@@ -25,32 +25,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.impl;
+package uk.co.saiman.msapex.experiment.editor;
 
-import java.net.URL;
-
-import org.eclipse.fx.ui.services.theme.Stylesheet;
-import org.eclipse.fx.ui.services.theme.Theme;
-import org.osgi.framework.Constants;
-import org.osgi.service.component.annotations.Component;
+import javafx.scene.Node;
+import uk.co.saiman.experiment.Result;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
- * Default stylesheet for experiment interface components.
+ * A result editor contribution is injected by an eclipse context. The
+ * {@link Result} associated with the contribution is available in the
+ * context and so can also be injected.
  * 
  * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          the type of result data
  */
-@Component(property = Constants.SERVICE_RANKING + ":Integer=" + ExperimentPartStylesheet.RANKING)
-public class ExperimentPartStylesheet implements Stylesheet {
-	@SuppressWarnings("javadoc")
-	public static final int RANKING = 0;
+public interface ResultEditorContribution<T> {
+	String getName();
 
-	@Override
-	public boolean appliesToTheme(Theme t) {
-		return true;
-	}
+	TypeToken<T> getResultType();
 
-	@Override
-	public URL getURL(Theme t) {
-		return ExperimentPartStylesheet.class.getClassLoader().getResource("css/experiment.css");
-	}
+	Node getContent();
 }

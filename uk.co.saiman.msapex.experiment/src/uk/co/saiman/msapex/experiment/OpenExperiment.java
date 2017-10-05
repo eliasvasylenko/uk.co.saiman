@@ -25,9 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.impl;
-
-import static uk.co.saiman.msapex.experiment.ExperimentPart.OPEN_EXPERIMENT_COMMAND;
+package uk.co.saiman.msapex.experiment;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -40,7 +38,6 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeItemImpl;
-import uk.co.saiman.msapex.experiment.ExperimentPart;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
@@ -49,15 +46,16 @@ import uk.co.saiman.reflection.token.TypeToken;
  * @author Elias N Vasylenko
  */
 public class OpenExperiment {
+  static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.open";
+
   @CanExecute
   boolean canExecute(MPart part, @Localize ExperimentProperties text) {
-    ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
+    ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 
     TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
 
     if (item == null) {
-      new ExperimentException(
-          text.exception().illegalCommandForSelection(OPEN_EXPERIMENT_COMMAND, null));
+      new ExperimentException(text.exception().illegalCommandForSelection(OPEN_COMMAND, null));
     }
 
     TreeItemData<?> experimentItem = item.getData();

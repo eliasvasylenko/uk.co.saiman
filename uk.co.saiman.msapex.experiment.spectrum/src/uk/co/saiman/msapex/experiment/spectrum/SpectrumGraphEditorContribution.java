@@ -45,7 +45,7 @@ import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
-import uk.co.saiman.msapex.experiment.ResultEditorContribution;
+import uk.co.saiman.msapex.experiment.editor.ResultEditorContribution;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.fx.FxmlLoadBuilder;
 import uk.co.saiman.reflection.token.TypeToken;

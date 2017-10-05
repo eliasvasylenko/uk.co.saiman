@@ -31,10 +31,14 @@ Bundle-Name: SAI :: MSApex :: Experiment
 \
 	javax.measure.unit-api
 
-Export-Package: uk.co.saiman.msapex.experiment
+#Private-Package: \
+#	uk.co.saiman.msapex.experiment,\
+#	uk.co.saiman.msapex.experiment.treecontributions
 
-Private-Package: \
-	uk.co.saiman.msapex.experiment.impl,\
+Export-Package: \
+	uk.co.saiman.msapex.experiment.editor,\
+\
+	uk.co.saiman.msapex.experiment,\
 	uk.co.saiman.msapex.experiment.treecontributions
 
 -includeresource:\

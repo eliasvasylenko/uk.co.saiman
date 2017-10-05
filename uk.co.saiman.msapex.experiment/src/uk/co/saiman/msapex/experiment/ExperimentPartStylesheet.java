@@ -27,24 +27,30 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import javafx.scene.Node;
-import uk.co.saiman.experiment.Result;
-import uk.co.saiman.reflection.token.TypeToken;
+import java.net.URL;
+
+import org.eclipse.fx.ui.services.theme.Stylesheet;
+import org.eclipse.fx.ui.services.theme.Theme;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
 /**
- * A result editor contribution is injected by an eclipse context. The
- * {@link Result} associated with the contribution is available in the
- * context and so can also be injected.
+ * Default stylesheet for experiment interface components.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- *          the type of result data
  */
-public interface ResultEditorContribution<T> {
-	String getName();
+@Component(property = Constants.SERVICE_RANKING + ":Integer=" + ExperimentPartStylesheet.RANKING)
+public class ExperimentPartStylesheet implements Stylesheet {
+	@SuppressWarnings("javadoc")
+	public static final int RANKING = 0;
 
-	TypeToken<T> getResultType();
+	@Override
+	public boolean appliesToTheme(Theme t) {
+		return true;
+	}
 
-	Node getContent();
+	@Override
+	public URL getURL(Theme t) {
+		return ExperimentPartStylesheet.class.getClassLoader().getResource("css/experiment.css");
+	}
 }

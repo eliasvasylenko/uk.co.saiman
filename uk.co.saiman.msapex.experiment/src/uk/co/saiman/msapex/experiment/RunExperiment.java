@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.impl;
+package uk.co.saiman.msapex.experiment;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -51,7 +51,7 @@ public class RunExperiment {
 
   @Execute
   void execute(MPart part, @Localize ExperimentProperties text) {
-    ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
+    ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 
     TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
 

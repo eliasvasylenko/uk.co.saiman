@@ -40,7 +40,6 @@ import uk.co.saiman.fx.TreeCellContribution;
 import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeTextContribution;
-import uk.co.saiman.msapex.experiment.ExperimentPart;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the
@@ -56,11 +55,13 @@ public class SpectrumExperimentNodeContribution extends
     CommandTreeCellContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>>
     implements
     TreeTextContribution<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> {
+  static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.open";
+
   /**
    * Create over open command
    */
   public SpectrumExperimentNodeContribution() {
-    super(ExperimentPart.OPEN_EXPERIMENT_COMMAND);
+    super(OPEN_COMMAND);
   }
 
   @Override

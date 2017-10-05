@@ -40,7 +40,6 @@ import uk.co.saiman.fx.TreeCellContribution;
 import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.fx.TreeTextContribution;
-import uk.co.saiman.msapex.experiment.ExperimentPart;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the
@@ -56,11 +55,13 @@ public class ChemicalMapExperimentNodeContribution extends
     CommandTreeCellContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>>
     implements
     TreeTextContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> {
+  static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.open";
+
   /**
    * Create over open command
    */
   public ChemicalMapExperimentNodeContribution() {
-    super(ExperimentPart.OPEN_EXPERIMENT_COMMAND);
+    super(OPEN_COMMAND);
   }
 
   @Override

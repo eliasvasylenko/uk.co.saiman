@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.impl;
+package uk.co.saiman.msapex.experiment;
 
 import static java.util.Comparator.reverseOrder;
 import static uk.co.saiman.fx.FxUtilities.wrap;
@@ -67,7 +67,7 @@ public class RenameExperiment {
 
 	@Execute
 	void execute(MPart part, @Localize ExperimentProperties text) {
-		ExperimentPartImpl experimentPart = (ExperimentPartImpl) part.getObject();
+		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
 		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
 
 		if (!(itemData instanceof ExperimentNode<?, ?>
@@ -94,7 +94,7 @@ public class RenameExperiment {
 	}
 
 	static Optional<String> requestExperimentNameDialog(
-			ExperimentPartImpl experimentPart,
+			ExperimentPart experimentPart,
 			Localized<String> title,
 			Localized<String> header) {
 		TextInputDialog nameDialog = new TextInputDialog();

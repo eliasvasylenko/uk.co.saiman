@@ -15,7 +15,9 @@
 	${req;uk.co.saiman.comms.saint},\
 	${req;uk.co.saiman.comms.copley},\
 	${req;uk.co.saiman.icons.fugue},\
+	${req;uk.co.saiman.msapex.instrument},\
 	${req;uk.co.saiman.msapex.instrument.acquisition},\
+	${req;uk.co.saiman.msapex.instrument.stage},\
 	${req;uk.co.saiman.instrument.provider},\
 	${req;uk.co.saiman.msapex.instrument.stage},\
 	${req;uk.co.saiman.msapex},\

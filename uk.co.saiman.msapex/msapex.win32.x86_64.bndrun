@@ -178,6 +178,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.msapex.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.msapex.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.msapex.instrument;version=snapshot,\
 	uk.co.saiman.msapex.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
 	uk.co.saiman.msapex.simulation;version=snapshot,\
