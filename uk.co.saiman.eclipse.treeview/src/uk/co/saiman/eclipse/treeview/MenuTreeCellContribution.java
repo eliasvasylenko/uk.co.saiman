@@ -79,7 +79,10 @@ public abstract class MenuTreeCellContribution<T> implements TreeCellContributio
       menu = menuControl.getContextMenu();
       menu.addEventHandler(KeyEvent.ANY, Event::consume);
     } else {
-      throw new RuntimeException("Unable to register tree cell context menu " + menuId);
+      // TODO only works in an eclipse context which injects the MPart where the
+      // menu is defined...
+      // throw new RuntimeException("Unable to register tree cell context menu "
+      // + menuId);
     }
   }
 

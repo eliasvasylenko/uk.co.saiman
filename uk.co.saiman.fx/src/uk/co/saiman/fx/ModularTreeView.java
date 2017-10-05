@@ -114,6 +114,15 @@ public class ModularTreeView extends TreeView<TreeItemData<?>> {
     refresh();
   }
 
+  @SuppressWarnings("unchecked")
+  /**
+   * @param root
+   *          the root object
+   */
+  public void setRootData(Object root) {
+    setRootData(TypedReference.typedObject((Class<Object>) root.getClass(), root));
+  }
+
   protected final TreeItemImpl<?> getRootImpl() {
     return (TreeItemImpl<?>) getRoot();
   }
