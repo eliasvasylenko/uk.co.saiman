@@ -56,6 +56,11 @@ import java.util.function.Predicate;
  * to the observable should receive the last such event directly subsequent to
  * observation. This means that the {@link #get()} method inherited from
  * observable should never have to block.
+ * <p>
+ * Invocation of {@link #get()} should be idempotent and always reflect the
+ * current up-to-date state of the value. Invocation of
+ * {@link #observe(Observer)} should also be idempotent. This in turn means that
+ * implementations of {@link ObservableValue} should never support backpressure.
  * 
  * @author Elias N Vasylenko
  *
@@ -87,6 +92,21 @@ public interface ObservableValue<T> extends Observable<T> {
   @Override
   T get();
 
+  @Override
+  default ObservableValue<T> toValue() {
+    return this;
+  }
+
+  @Override
+  default ObservableValue<T> toValue(T initial) {
+    return this;
+  }
+
+  @Override
+  default ObservableValue<T> toValue(Throwable initialProblem) {
+    return this;
+  }
+
   /**
    * Immediately resolve the current value, if one exists.
    * 
@@ -111,19 +131,17 @@ public interface ObservableValue<T> extends Observable<T> {
   }
 
   default Throwable getProblem() {
-    try {
-      get();
-      throw new IllegalStateException();
-    } catch (MissingValueException e) {
-      return e.getCause();
-    }
+    return tryGetProblem().orElseThrow(() -> new IllegalStateException());
   }
 
   default Optional<Throwable> tryGetProblem() {
     try {
-      return Optional.of(getProblem());
-    } catch (IllegalStateException e) {
+      get();
       return Optional.empty();
+    } catch (MissingValueException e) {
+      return Optional.of(e.getCause() != null ? e.getCause() : e);
+    } catch (Throwable t) {
+      return Optional.of(t);
     }
   }
 
@@ -131,16 +149,4 @@ public interface ObservableValue<T> extends Observable<T> {
    * @return an observable over changes to the value
    */
   Observable<Change<T>> changes();
-
-  /**
-   * @param <T>
-   *          the type of the immutable value
-   * @param value
-   *          the immutable value to create an observable over
-   * @return an observable over the given value which never changes or fires
-   *         events
-   */
-  static <T> ObservableValue<T> immutableOver(T value) {
-    return (ImmutableObservableValue<T>) () -> value;
-  }
 }

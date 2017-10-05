@@ -27,22 +27,39 @@
  */
 package uk.co.saiman.observable;
 
-abstract class UnboundedObservationImpl<T> extends ObservationImpl<T> {
-  public UnboundedObservationImpl(Observer<? super T> observer) {
-    super(observer);
+public class FailingObservableValue<T> implements ObservableValue<T> {
+  private final Throwable failure;
+
+  public FailingObservableValue(Throwable failure) {
+    this.failure = failure;
   }
 
   @Override
-  public void onObserve() {
-    super.onObserve();
-    getObserver().getObservation().requestUnbounded();
+  public Disposable observe(Observer<? super T> observer) {
+    ObservationImpl<T> observation = new ObservationImpl<T>(observer) {
+      @Override
+      public synchronized void request(long count) {}
+
+      @Override
+      public synchronized long getPendingRequestCount() {
+        return Long.MAX_VALUE;
+      }
+
+      @Override
+      protected void cancelImpl() {}
+    };
+    observation.onObserve();
+    observation.onFail(failure);
+    return observation;
   }
 
   @Override
-  public void request(long count) {}
+  public T get() {
+    throw new MissingValueException(this, failure);
+  }
 
   @Override
-  public long getPendingRequestCount() {
-    return Long.MAX_VALUE;
+  public Observable<Change<T>> changes() {
+    return new EmptyObservable<>();
   }
 }

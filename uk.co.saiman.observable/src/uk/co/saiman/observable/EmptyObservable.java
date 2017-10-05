@@ -27,18 +27,27 @@
  */
 package uk.co.saiman.observable;
 
-public interface ImmutableObservable<T> extends Observable<T> {
-  @SuppressWarnings("unchecked")
-  static <T> Observable<T> instance() {
-    return (Observable<T>) INSTANCE;
-  }
-
-  static Observable<?> INSTANCE = new ImmutableObservable<Object>() {};
-
+public class EmptyObservable<T> implements Observable<T> {
   @Override
-  default Disposable observe(Observer<? super T> observer) {
-    UnboundedObservation observation = () -> {};
-    observer.onObserve(observation);
+  public Disposable observe(Observer<? super T> observer) {
+    ObservationImpl<T> observation = new ObservationImpl<T>(observer) {
+      RequestCount requests = new RequestCount();
+
+      @Override
+      public synchronized void request(long count) {
+        requests.request(count);
+      }
+
+      @Override
+      public synchronized long getPendingRequestCount() {
+        return requests.getCount();
+      }
+
+      @Override
+      protected void cancelImpl() {}
+    };
+    observation.onObserve();
+    observation.onComplete();
     return observation;
   }
 }

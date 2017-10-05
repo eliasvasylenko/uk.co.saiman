@@ -35,11 +35,6 @@ import org.junit.Test;
 
 import mockit.FullVerificationsInOrder;
 import mockit.Mocked;
-import uk.co.saiman.observable.MissingValueException;
-import uk.co.saiman.observable.ObservableProperty;
-import uk.co.saiman.observable.ObservablePropertyImpl;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.observable.Observer;
 import uk.co.saiman.observable.ObservableValue.Change;
 
 @SuppressWarnings("javadoc")
@@ -293,6 +288,29 @@ public class ObservablePropertyImplTest {
         changeObserver.onNext(change = withCapture());
         assertFalse(change.previousValue().isValid());
         assertFalse(change.newValue().isValid());
+      }
+    };
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void changeIsImmutableAfterFurtherChange() {
+    ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
+    observable.changes().observe(changeObserver);
+    observable.set("message");
+    observable.set("more");
+
+    new FullVerificationsInOrder() {
+      {
+        changeObserver.onObserve((Observation) any);
+        Change<String> change;
+        changeObserver.onNext(change = withCapture());
+        assertThat(change.previousValue().get(), equalTo("initial"));
+        assertThat(change.newValue().get(), equalTo("message"));
+
+        changeObserver.onNext((Change<String>) any);
+        assertThat(change.previousValue().get(), equalTo("initial"));
+        assertThat(change.newValue().get(), equalTo("message"));
       }
     };
   }

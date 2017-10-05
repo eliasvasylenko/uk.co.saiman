@@ -27,18 +27,26 @@
  */
 package uk.co.saiman.observable;
 
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
  * A simple implementation of {@link Observable} which maintains a list of
  * listeners to receive events fired with {@link #next(Object)}.
  * <p>
- * Addition and removal of observers, as well as the firing of events, are
- * synchronized on the implementation object.
+ * Addition and removal of observers, as well as the firing of events, can all
+ * be safely performed asynchronously. By default, these actions do however
+ * block until they have been completed. If effectively non-blocking behavior is
+ * required, it is necessary to introduce backpressure via e.g. a buffer.
  * <p>
  * This implementation does not support backpressure, so listeners which need to
  * control demand must compose the observable with e.g. a buffering or dropping
@@ -51,23 +59,42 @@ import java.util.function.Consumer;
 public class HotObservable<M> implements Observable<M> {
   private boolean live = true;
   private Set<ObservationImpl<M>> observations;
+  private final Executor executor;
+
+  public HotObservable(Executor executor) {
+    this.executor = requireNonNull(executor);
+  }
+
+  public HotObservable() {
+    this.executor = null;
+  }
 
   @Override
-  public Disposable observe(Observer<? super M> observer) {
-    ObservationImpl<M> observation = new UnboundedObservationImpl<M>(observer) {
+  public ObservationImpl<M> observe(Observer<? super M> observer) {
+    ObservationImpl<M> observation = new ObservationImpl<M>(observer) {
       @Override
       public void cancelImpl() {
         cancelObservation(this);
       }
+
+      @Override
+      public void request(long count) {}
+
+      @Override
+      public long getPendingRequestCount() {
+        return Long.MAX_VALUE;
+      }
     };
 
-    if (observations == null)
-      observations = new LinkedHashSet<>();
+    synchronized (this) {
+      if (observations == null)
+        observations = new LinkedHashSet<>();
+      observations.add(observation);
 
-    observations.add(observation);
-
-    if (isLive())
-      observation.onObserve();
+      if (isLive()) {
+        forObservers(singletonList(observation), ObservationImpl::onObserve);
+      }
+    }
 
     return observation;
   }
@@ -76,18 +103,38 @@ public class HotObservable<M> implements Observable<M> {
     return observations != null;
   }
 
-  void cancelObservation(Observation observer) {
+  synchronized void cancelObservation(Observation observer) {
     if (observations != null && observations.remove(observer) && observations.isEmpty()) {
       observations = null;
     }
   }
 
   private void forObservers(
-      Set<ObservationImpl<M>> observations,
+      List<ObservationImpl<M>> observations,
       Consumer<ObservationImpl<M>> action) {
     if (observations != null) {
-      for (ObservationImpl<M> observation : new ArrayList<>(observations)) {
-        action.accept(observation);
+      if (executor == null) {
+        for (ObservationImpl<M> observation : observations) {
+          action.accept(observation);
+        }
+      } else {
+        CountDownLatch latch = new CountDownLatch(observations.size());
+
+        for (ObservationImpl<M> observation : observations) {
+          executor.execute(() -> {
+            try {
+              action.accept(observation);
+            } finally {
+              latch.countDown();
+            }
+          });
+        }
+
+        try {
+          latch.await();
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
   }
@@ -106,10 +153,12 @@ public class HotObservable<M> implements Observable<M> {
       throw new IllegalStateException();
   }
 
-  public HotObservable<M> start() {
+  public synchronized HotObservable<M> start() {
     assertDead();
     live = true;
-    forObservers(observations, o -> o.onObserve());
+
+    forObservers(copyObservations(), o -> o.onObserve());
+
     return this;
   }
 
@@ -120,31 +169,41 @@ public class HotObservable<M> implements Observable<M> {
    *          the message event to send
    * @return the receiver for method chaining
    */
-  public HotObservable<M> next(M item) {
-    assertLive();
+  public synchronized HotObservable<M> next(M item) {
     Objects.requireNonNull(item);
-    forObservers(observations, o -> o.onNext(item));
+
+    assertLive();
+
+    forObservers(copyObservations(), o -> o.onNext(item));
+
     return this;
   }
 
-  public HotObservable<M> complete() {
+  public synchronized HotObservable<M> complete() {
     assertLive();
-    Set<ObservationImpl<M>> observations = this.observations;
-    this.observations = null;
     live = false;
 
+    List<ObservationImpl<M>> observations = copyObservations();
+    this.observations = null;
     forObservers(observations, o -> o.onComplete());
+
     return this;
   }
 
-  public HotObservable<M> fail(Throwable t) {
-    assertLive();
+  public synchronized HotObservable<M> fail(Throwable t) {
     Objects.requireNonNull(t);
-    Set<ObservationImpl<M>> observations = this.observations;
-    this.observations = null;
+
+    assertLive();
     live = false;
 
+    List<ObservationImpl<M>> observations = copyObservations();
+    this.observations = null;
     forObservers(observations, o -> o.onFail(t));
+
     return this;
+  }
+
+  private List<ObservationImpl<M>> copyObservations() {
+    return this.observations != null ? new ArrayList<>(this.observations) : null;
   }
 }

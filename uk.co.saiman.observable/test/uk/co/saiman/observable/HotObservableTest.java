@@ -34,9 +34,6 @@ import org.junit.Test;
 
 import mockit.FullVerificationsInOrder;
 import mockit.Mocked;
-import uk.co.saiman.observable.HotObservable;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.observable.Observer;
 
 @SuppressWarnings("javadoc")
 public class HotObservableTest {
@@ -111,7 +108,7 @@ public class HotObservableTest {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
     observable.complete();
-    observable.next(null);
+    observable.next("fail");
   }
 
   @Test(expected = IllegalStateException.class)
@@ -127,7 +124,7 @@ public class HotObservableTest {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
     observable.complete();
-    observable.fail(null);
+    observable.fail(new Exception());
   }
 
   @Test

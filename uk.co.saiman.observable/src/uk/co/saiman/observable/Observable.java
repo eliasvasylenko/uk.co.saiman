@@ -27,23 +27,27 @@
  */
 package uk.co.saiman.observable;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.observable.Observer.onCompletion;
 import static uk.co.saiman.observable.Observer.onObservation;
-import static uk.co.saiman.observable.Observer.singleUse;
+import static uk.co.saiman.observable.RequestAllocator.balanced;
+import static uk.co.saiman.observable.RequestAllocator.sequential;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -96,25 +100,51 @@ public interface Observable<M> {
    *           {@link AlreadyCompletedException}.
    */
   default CompletableFuture<M> getNext() {
-    CompletableFuture<M> result = new CompletableFuture<>();
+    return tryGetNext().thenApplyAsync(o -> o.orElseThrow(() -> new AlreadyCompletedException()));
+  }
 
-    thenAfter(onObservation(o -> o.requestUnbounded())).observe(singleUse(o -> new Observer<M>() {
+  /**
+   * Block until we either receive the next message event of the next failure
+   * event. In the case of the former, return it, and in the case of the latter,
+   * throw a {@link MissingValueException}.
+   * 
+   * @return the next value
+   * @throws MissingValueException
+   *           If a failure or completion event is received before the next
+   *           message event. In the former case the cause will be the failure
+   *           throwable, in the latter case an instance of
+   *           {@link AlreadyCompletedException}.
+   */
+  default CompletableFuture<Optional<M>> tryGetNext() {
+    CompletableFuture<Optional<M>> result = new CompletableFuture<>();
+
+    observe(new Observer<M>() {
+      Observation o;
+
+      @Override
+      public void onObserve(Observation observation) {
+        o = observation;
+        observation.requestUnbounded();
+      }
+
       @Override
       public void onComplete() {
-        result.completeExceptionally(new AlreadyCompletedException(o));
+        o.cancel();
+        result.complete(Optional.empty());
       }
 
       @Override
       public void onFail(Throwable t) {
+        o.cancel();
         result.completeExceptionally(t);
       }
 
       @Override
       public void onNext(M message) {
         o.cancel();
-        result.complete(message);
+        result.complete(Optional.of(message));
       }
-    }));
+    });
 
     return result;
   }
@@ -203,19 +233,32 @@ public interface Observable<M> {
     return observer -> observe(new MultiplePassthroughObserver<>(action, observer));
   }
 
+  default Observable<M> requestUnbounded() {
+    // return then(onObservation(o -> o.requestUnbounded()));
+
+    return then(new Observer<M>() {
+      @Override
+      public void onNext(M message) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void onObserve(Observation observation) {
+        observation.requestUnbounded();
+      }
+    });
+  }
+
   default Observable<M> retrying() {
     return observer -> observe(new RetryingObserver<>(observer, this));
   }
 
-  /*
-   * TODO refactor this so it works from an Observable<? extends Observable<?
-   * extends M>>
-   */
-  default Observable<M> retrying(Observable<? extends M> retryOn) {
-    return observer -> observe(new RetryingObserver<>(observer, retryOn));
+  default Observable<M> repeating() {
+    return observer -> observe(new RepeatingObserver<>(observer, this));
   }
 
-  default Observable<ObservableValue<M>> materialize() {
+  default Observable<Observable<M>> materialize() {
     return observer -> observe(new MaterializingObserver<>(observer));
   }
 
@@ -224,17 +267,45 @@ public interface Observable<M> {
   }
 
   default ObservableValue<M> toValue(M initial) {
-    initial = getNext().getNow(initial);
-    return new ObservablePropertyImpl<>(initial);
+    ObservableProperty<M> value = new ObservablePropertyImpl<>(initial);
+    observe(new Observer<M>() {
+      @Override
+      public void onObserve(Observation observation) {
+        observation.requestUnbounded();
+      }
+
+      @Override
+      public void onNext(M message) {
+        value.set(message);
+      }
+
+      @Override
+      public void onFail(Throwable t) {
+        value.setProblem(t);
+      }
+    });
+    return value;
   }
 
   default ObservableValue<M> toValue(Throwable initialProblem) {
-    M initial = getNext().getNow(null);
-    if (initial == null) {
-      return new ObservablePropertyImpl<>(initial);
-    } else {
-      return new ObservablePropertyImpl<>(initialProblem);
-    }
+    ObservableProperty<M> value = new ObservablePropertyImpl<>(initialProblem);
+    observe(new Observer<M>() {
+      @Override
+      public void onObserve(Observation observation) {
+        observation.requestUnbounded();
+      }
+
+      @Override
+      public void onNext(M message) {
+        value.set(message);
+      }
+
+      @Override
+      public void onFail(Throwable t) {
+        value.setProblem(t);
+      }
+    });
+    return value;
   }
 
   /**
@@ -358,10 +429,17 @@ public interface Observable<M> {
     return observer -> observe(new DropWhileObserver<>(observer, condition));
   }
 
+  default Observable<M> synchronize() {
+    return synchronize(new Object());
+  }
+
+  default Observable<M> synchronize(Object mutex) {
+    return observer -> observe(new SynchronizedObserver<>(observer, mutex));
+  }
+
   /**
-   * Derive an observable which maps each message to an intermediate observable,
-   * then merges the messages from the intermediate observables into a single
-   * source.
+   * A common case of {@link #flatMap(Function, RequestAllocator)} using
+   * {@link RequestAllocator#sequential() balanced request allocation}.
    * <p>
    * An unbounded request is made to the upstream observable, so it is not
    * required to support backpressure.
@@ -380,21 +458,12 @@ public interface Observable<M> {
    */
   default <T> Observable<T> mergeMap(
       Function<? super M, ? extends Observable<? extends T>> mapping) {
-    return observer -> observe(new MergingObserver<>(observer, mapping));
+    return requestUnbounded().flatMap(mapping.andThen(Observable::requestUnbounded), balanced());
   }
 
   /**
-   * Introduce backpressure by mapping each message to an intermediate
-   * observable which supports backpressure and then interleaving these
-   * observables downstream.
-   * <p>
-   * An unbounded request is made to the upstream observable, so it is not
-   * required to support backpressure.
-   * <p>
-   * The intermediate observables must support backpressure. Priority for
-   * forwarding requests to intermediate observables is determined as follows:
-   * fewest outstanding requests, then fewest total requests, then first taken
-   * from upstream.
+   * As {@link #flatMap(Function, RequestAllocator)} using
+   * {@link RequestAllocator#sequential() sequential request allocation}.
    * 
    * @param <T>
    *          the resulting observable message type
@@ -403,31 +472,40 @@ public interface Observable<M> {
    *          the terminating condition
    * @return the derived observable
    */
-  default <T> Observable<T> interleaveMap(
+  default <T> Observable<T> concatMap(
       Function<? super M, ? extends Observable<? extends T>> mapping) {
-    throw new UnsupportedOperationException(); // TODO
+    return flatMap(mapping, sequential());
   }
 
   /**
-   * Derive an observable which sequentially maps each message to an
-   * intermediate observable.
+   * Derive an observable which maps each message to an intermediate observable,
+   * then combines those intermediate observables into one.
+   * <P>
+   * The intermediate observables accept requests from downstream until they are
+   * complete. Requests are allocated to the intermediate observables by the
+   * given {@link RequestAllocator request allocation strategy}.
    * <p>
-   * The intermediate accepts observations from downstream until it is complete,
-   * at which point the next message is requested from upstream and the process
-   * is repeated.
+   * The upstream observable is not required to support backpressure. If a
+   * request is made downstream when there are no intermediate observables to
+   * fulfill that request, another message is requested from upstream.
    * <p>
-   * The upstream and intermediate observables must both support backpressure.
+   * The resulting observable supports backpressure if and only if the
+   * intermediate observables support backpressure.
    * 
    * @param <T>
    *          the resulting observable message type
    * 
    * @param mapping
    *          the terminating condition
+   * @param requestAllocator
+   *          the strategy for allocating downstream requests to upstream
+   *          observations
    * @return the derived observable
    */
   default <T> Observable<T> flatMap(
-      Function<? super M, ? extends Observable<? extends T>> mapping) {
-    throw new UnsupportedOperationException(); // TODO
+      Function<? super M, ? extends Observable<? extends T>> mapping,
+      RequestAllocator requestAllocator) {
+    return observer -> observe(new FlatMappingObserver<>(observer, mapping, requestAllocator));
   }
 
   default <R> CompletableFuture<R> reduce(
@@ -538,40 +616,58 @@ public interface Observable<M> {
    */
 
   static <M> Observable<M> from(Supplier<M> message) {
-    return of(Arrays.asList(messages));
+    return of(message).concatMap(m -> of(m.get()));
+  }
+
+  static <M> Observable<M> empty() {
+    return new EmptyObservable<>();
   }
 
   @SafeVarargs
   static <M> Observable<M> of(M... messages) {
-    return of(Arrays.asList(messages));
+    return of(asList(messages));
   }
 
   static <M> Observable<M> of(Collection<? extends M> messages) {
     return new ColdObservable<>(messages);
   }
 
+  static <M> Observable<M> of(Optional<? extends M> messages) {
+    return of(messages.map(Collections::singleton).orElse(emptySet()));
+  }
+
   @SafeVarargs
   static <M> Observable<M> merge(Observable<? extends M>... observables) {
-    return merge(Arrays.asList(observables));
+    return merge(asList(observables));
   }
 
   static <M> Observable<M> merge(Collection<? extends Observable<? extends M>> observables) {
     return of(observables).mergeMap(identity());
   }
 
-  static <M> Observable<M> fixedRate(int delay, int period) {
-    HotObservable<M> hot = new HotObservable<>();
-    new Timer().scheduleAtFixedRate(new TimerTask() {
-      @Override
-      public void run() {
-        hot.next(poll.get());
-      }
-    }, delay, period);
-    return hot;
+  @SafeVarargs
+  static <M> Observable<M> concat(Observable<? extends M>... observables) {
+    return concat(asList(observables));
   }
 
-  static <M> Observable<M> failing(Throwable failure) {
-    // TODO Auto-generated method stub
-    return null;
+  static <M> Observable<M> concat(Collection<? extends Observable<? extends M>> observables) {
+    return of(observables).concatMap(identity());
+  }
+
+  static <M> ObservableValue<M> failingValue(Throwable failure) {
+    return new FailingObservableValue<>(failure);
+  }
+
+  static <M> ObservableValue<M> value(M value) {
+    return new ImmutableObservableValue<>(value);
+  }
+
+  static Observable<Long> fixedRate(long delay, long period, TimeUnit time) {
+    HotObservable<Long> hot = new HotObservable<>();
+    AtomicLong count = new AtomicLong(0);
+    Executors
+        .newSingleThreadScheduledExecutor()
+        .scheduleAtFixedRate(() -> hot.next(count.getAndIncrement()), delay, period, time);
+    return hot;
   }
 }

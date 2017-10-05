@@ -31,12 +31,16 @@ public class RequestCount {
   private long requestCount;
 
   public long getCount() {
-    return requestCount;
+    return requestCount < 0 ? Long.MAX_VALUE : requestCount;
   }
 
   public synchronized void request(long count) {
-    if (count == Long.MAX_VALUE)
+    if (count < 0)
+      throw new IllegalArgumentException("Must request a positive number of messages " + count);
+
+    else if (count == Long.MAX_VALUE)
       requestCount = -1;
+
     else if (requestCount >= 0)
       requestCount += count;
   }
@@ -54,7 +58,11 @@ public class RequestCount {
     if (requestCount > 0) {
       requestCount--;
       return true;
-    } else
+
+    } else if (requestCount < 0)
+      return true;
+
+    else
       return false;
   }
 }

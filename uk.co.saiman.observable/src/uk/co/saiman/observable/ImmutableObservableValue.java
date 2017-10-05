@@ -27,9 +27,40 @@
  */
 package uk.co.saiman.observable;
 
-public interface ImmutableObservableValue<T> extends ImmutableObservable<T>, ObservableValue<T> {
+public class ImmutableObservableValue<T> implements ObservableValue<T> {
+  private final T value;
+
+  public ImmutableObservableValue(T value) {
+    this.value = value;
+  }
+
   @Override
-  default Observable<Change<T>> changes() {
-    return ImmutableObservable.instance();
+  public Disposable observe(Observer<? super T> observer) {
+    ObservationImpl<T> observation = new ObservationImpl<T>(observer) {
+      @Override
+      public synchronized void request(long count) {}
+
+      @Override
+      public synchronized long getPendingRequestCount() {
+        return Long.MAX_VALUE;
+      }
+
+      @Override
+      protected void cancelImpl() {}
+    };
+    observation.onObserve();
+    observation.onNext(value);
+    observation.onComplete();
+    return observation;
+  }
+
+  @Override
+  public T get() {
+    return value;
+  }
+
+  @Override
+  public Observable<Change<T>> changes() {
+    return new EmptyObservable<>();
   }
 }

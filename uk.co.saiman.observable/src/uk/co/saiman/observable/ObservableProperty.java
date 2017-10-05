@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.observable;
 
-import java.util.function.BiPredicate;
-
 import uk.co.saiman.utility.Property;
 
 /**
@@ -42,19 +40,6 @@ import uk.co.saiman.utility.Property;
  */
 public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
   /**
-   * @param <T>
-   *          the type of event message to produce
-   * @param equality
-   *          an equivalence relation over the value space
-   * @param initialValue
-   *          the initial value
-   * @return an observable property with the given behavior and default value
-   */
-  static <T> ObservableProperty<T> over(BiPredicate<T, T> equality, T initialValue) {
-    return new ObservablePropertyImpl<>(equality, initialValue);
-  }
-
-  /**
    * Instantiate an observable property with identity assignment and identity
    * equality.
    * 
@@ -66,19 +51,6 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
    */
   static <T> ObservableProperty<T> over(T initialValue) {
     return new ObservablePropertyImpl<>(initialValue);
-  }
-
-  /**
-   * @param <T>
-   *          the type of event message to produce
-   * @param equality
-   *          an equivalence relation over the value space
-   * @param initialProblem
-   *          the initial problem
-   * @return an observable property with the given behavior and default value
-   */
-  static <T> ObservableProperty<T> over(BiPredicate<T, T> equality, Throwable initialProblem) {
-    return new ObservablePropertyImpl<>(equality, initialProblem);
   }
 
   /**

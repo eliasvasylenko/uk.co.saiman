@@ -56,7 +56,13 @@ public abstract class PassthroughObserver<T, U> implements Observer<T> {
   private final Supplier<Observer<? super U>> downstreamObserver;
 
   public PassthroughObserver(Observer<? super U> downstreamObserver) {
-    this(() -> requireNonNull(downstreamObserver));
+    this(getSupplier(downstreamObserver));
+  }
+
+  private static <U> Supplier<Observer<? super U>> getSupplier(
+      Observer<? super U> downstreamObserver) {
+    requireNonNull(downstreamObserver);
+    return () -> downstreamObserver;
   }
 
   public PassthroughObserver(Supplier<Observer<? super U>> downstreamObserver) {
