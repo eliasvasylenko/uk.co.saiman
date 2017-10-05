@@ -37,7 +37,6 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import uk.co.saiman.mathematics.Interval;
-import uk.co.saiman.observable.ImmutableObservable;
 import uk.co.saiman.observable.Observable;
 
 /**
@@ -294,6 +293,6 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
 
   @Override
   public Observable<? extends ContinuousFunction<UD, UR>> changes() {
-    return ImmutableObservable.instance();
+    return Observable.empty();
   }
 }

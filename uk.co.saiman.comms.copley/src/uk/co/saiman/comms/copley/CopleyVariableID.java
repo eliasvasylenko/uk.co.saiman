@@ -28,28 +28,28 @@
 package uk.co.saiman.comms.copley;
 
 public enum CopleyVariableID {
-	DRIVE_EVENT_STATUS(0xA1),
-	LATCHED_EVENT_STATUS(0xA1),
-	TRAJECTORY_PROFILE_MODE(0xC8),
-	TRAJECTORY_POSITION_COUNTS(0xCA),
-	AMPLIFIER_STATE(0x24),
-	ACTUAL_POSITION(0x17);
+  DRIVE_EVENT_STATUS(0xA1),
+  LATCHED_EVENT_STATUS(0xA1),
+  TRAJECTORY_PROFILE_MODE(0xC8),
+  TRAJECTORY_POSITION_COUNTS(0xCA),
+  AMPLIFIER_STATE(0x24),
+  ACTUAL_POSITION(0x17);
 
-	private final int code;
+  private final int code;
 
-	private CopleyVariableID(int code) {
-		this.code = code;
-	}
+  private CopleyVariableID(int code) {
+    this.code = code;
+  }
 
-	public int getCode() {
-		return code;
-	}
+  public int getCode() {
+    return code;
+  }
 
-	public static CopleyVariableID forCode(byte code) {
-		for (CopleyVariableID variable : values())
-			if (variable.getCode() == (0xFF & code))
-				return variable;
+  public static CopleyVariableID forCode(byte code) {
+    for (CopleyVariableID variable : values())
+      if (variable.getCode() == (0xFF & code))
+        return variable;
 
-		throw new IllegalArgumentException("No Copley variable matches code " + code);
-	}
+    throw new IllegalArgumentException("No Copley variable matches code " + code);
+  }
 }

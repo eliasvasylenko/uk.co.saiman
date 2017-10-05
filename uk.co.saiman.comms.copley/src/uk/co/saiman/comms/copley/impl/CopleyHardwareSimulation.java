@@ -34,6 +34,12 @@ import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.copley.CopleyComms.HEADER_SIZE;
+import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
+import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
 import static uk.co.saiman.comms.copley.impl.CopleyCommsImpl.NODE_ID_MASK;
@@ -103,35 +109,19 @@ public class CopleyHardwareSimulation {
     int axes() default 1;
   }
 
-  private class VariableStorage {
+  private interface Variable {
+    public byte[] get(int axis, VariableBank bank);
+
+    public void set(int axis, VariableBank bank, byte[] value);
+
+    public void copy(byte axis, VariableBank bank);
+  }
+
+  private class StoredVariable implements Variable {
     private final List<byte[]> active;
     private final List<byte[]> defaults;
 
-    public VariableStorage(CopleyVariableID id) {
-      int words;
-      switch (id) {
-      case ACTUAL_POSITION:
-        words = 2;
-        break;
-      case AMPLIFIER_STATE:
-        words = 1;
-        break;
-      case DRIVE_EVENT_STATUS:
-        words = 2;
-        break;
-      case LATCHED_EVENT_STATUS:
-        words = 2;
-        break;
-      case TRAJECTORY_POSITION_COUNTS:
-        words = 2;
-        break;
-      case TRAJECTORY_PROFILE_MODE:
-        words = 1;
-        break;
-      default:
-        throw new IllegalArgumentException();
-      }
-
+    public StoredVariable(int words) {
       active = new ArrayList<>();
       defaults = new ArrayList<>();
       byte[] bytes = new byte[words * WORD_SIZE];
@@ -141,6 +131,7 @@ public class CopleyHardwareSimulation {
       }
     }
 
+    @Override
     public byte[] get(int axis, VariableBank bank) {
       switch (bank) {
       case ACTIVE:
@@ -152,6 +143,7 @@ public class CopleyHardwareSimulation {
       }
     }
 
+    @Override
     public void set(int axis, VariableBank bank, byte[] value) {
       switch (bank) {
       case ACTIVE:
@@ -165,6 +157,7 @@ public class CopleyHardwareSimulation {
       }
     }
 
+    @Override
     public void copy(byte axis, VariableBank bank) {
       set(axis, bank, get(axis, bank == ACTIVE ? STORED : ACTIVE));
     }
@@ -187,11 +180,18 @@ public class CopleyHardwareSimulation {
   private int node;
   private int axes;
 
-  private Map<CopleyVariableID, VariableStorage> variables = new HashMap<>();
+  private Map<CopleyVariableID, Variable> variables = new HashMap<>();
 
   @Activate
   void activate(CopleyHardwareSimulationConfiguration configuration) throws IOException {
     configure(configuration);
+
+    variables.put(ACTUAL_POSITION, new StoredVariable(2));
+    variables.put(DRIVE_EVENT_STATUS, new StoredVariable(2));
+    variables.put(LATCHED_EVENT_STATUS, new StoredVariable(2));
+    variables.put(TRAJECTORY_POSITION_COUNTS, new StoredVariable(2));
+    variables.put(AMPLIFIER_STATE, new StoredVariable(1));
+    variables.put(TRAJECTORY_PROFILE_MODE, new StoredVariable(1));
   }
 
   @Modified
@@ -265,9 +265,7 @@ public class CopleyHardwareSimulation {
         case GET_VARIABLE:
           variable = getVariableIdentifier();
           id = CopleyVariableID.forCode(variable.variableID);
-          result = variables
-              .computeIfAbsent(id, VariableStorage::new)
-              .get(variable.axis, variable.bank ? STORED : ACTIVE);
+          result = getVariable(id).get(variable.axis, variable.bank ? STORED : ACTIVE);
           break;
         case SET_VARIABLE:
           variable = getVariableIdentifier();
@@ -275,16 +273,12 @@ public class CopleyHardwareSimulation {
 
           byte[] value = new byte[message.remaining()];
           message.get(value);
-          variables
-              .computeIfAbsent(id, VariableStorage::new)
-              .set(variable.axis, variable.bank ? STORED : ACTIVE, value);
+          getVariable(id).set(variable.axis, variable.bank ? STORED : ACTIVE, value);
           break;
         case COPY_VARIABLE:
           variable = getVariableIdentifier();
           id = CopleyVariableID.forCode(variable.variableID);
-          variables
-              .computeIfAbsent(id, VariableStorage::new)
-              .copy(variable.axis, variable.bank ? STORED : ACTIVE);
+          getVariable(id).copy(variable.axis, variable.bank ? STORED : ACTIVE);
           break;
         case COPLEY_VIRTUAL_MACHINE:
           break;
@@ -340,6 +334,12 @@ public class CopleyHardwareSimulation {
     }
 
     message = null;
+  }
+
+  private Variable getVariable(CopleyVariableID id) {
+    if (!variables.containsKey(id))
+      throw new IllegalArgumentException();
+    return variables.get(id);
   }
 
   private VariableIdentifier getVariableIdentifier() {

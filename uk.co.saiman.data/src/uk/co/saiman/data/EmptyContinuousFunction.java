@@ -30,7 +30,6 @@ package uk.co.saiman.data;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import uk.co.saiman.observable.ImmutableObservable;
 import uk.co.saiman.observable.Observable;
 
 class EmptyContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
@@ -70,7 +69,7 @@ class EmptyContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
 
   @Override
   public Observable<ContinuousFunction<UD, UR>> changes() {
-    return ImmutableObservable.instance();
+    return Observable.empty();
   }
 }
 

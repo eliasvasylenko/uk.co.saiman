@@ -56,7 +56,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
    * Initialize an empty address space.
    */
   public SimpleComms() {
-    status = new ObservablePropertyImpl<>((a, b) -> a == b, CLOSED);
+    status = new ObservablePropertyImpl<>(CLOSED);
   }
 
   @Override
