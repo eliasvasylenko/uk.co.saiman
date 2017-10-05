@@ -28,15 +28,16 @@
 package uk.co.saiman.instrument.stage.copley;
 
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
-import static uk.co.saiman.instrument.HardwareConnection.CONNECTED;
-import static uk.co.saiman.instrument.HardwareConnection.DISCONNECTED;
+import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
+import static uk.co.saiman.instrument.DeviceConnection.DISCONNECTED;
 import static uk.co.saiman.instrument.stage.StageState.POSITION_REACHED;
 
 import java.util.Optional;
 
 import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.comms.copley.CopleyController;
-import uk.co.saiman.instrument.HardwareConnection;
+import uk.co.saiman.instrument.DeviceConnection;
+import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.StageDevice;
 import uk.co.saiman.instrument.stage.StageState;
 import uk.co.saiman.observable.ObservablePropertyImpl;
@@ -47,13 +48,21 @@ public abstract class CopleyStageDevice implements StageDevice {
   private CopleyStageProperties properties;
   private final ObservableValue<StageState> state = new ObservablePropertyImpl<>(POSITION_REACHED);
 
+  private Instrument instrument;
   private CopleyComms comms;
   private CopleyController controller;
 
-  void initialize(CopleyComms comms, PropertyLoader loader) {
+  void initialize(Instrument instrument, CopleyComms comms, PropertyLoader loader) {
+    this.instrument = instrument;
     this.comms = comms;
     this.controller = comms.openController();
     this.properties = loader.getProperties(CopleyStageProperties.class);
+
+    instrument.addDevice(this);
+  }
+
+  public Instrument getInstrument() {
+    return instrument;
   }
 
   public CopleyStageProperties getProperties() {
@@ -79,7 +88,7 @@ public abstract class CopleyStageDevice implements StageDevice {
   }
 
   @Override
-  public ObservableValue<HardwareConnection> connectionState() {
+  public ObservableValue<DeviceConnection> connectionState() {
     return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
   }
 

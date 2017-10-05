@@ -42,6 +42,4 @@ Bundle-Name: SAI :: MSApex :: Simulation
 	fragment.e4xmi
 
 Private-Package: \
-	uk.co.saiman.msapex.simulation,\
-	uk.co.saiman.msapex.simulation.treecontributions
-	
+	uk.co.saiman.msapex.simulation

@@ -36,6 +36,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 
 import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice.CopleyXYStageConfiguration;
 import uk.co.saiman.measurement.Units;
@@ -49,6 +50,9 @@ public class CopleyXYStageDeviceService extends CopleyXYStageDevice implements X
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.xy";
 
   @Reference
+  Instrument instrument;
+
+  @Reference
   PropertyLoader loader;
 
   @Reference
@@ -59,7 +63,7 @@ public class CopleyXYStageDeviceService extends CopleyXYStageDevice implements X
 
   @Activate
   void activate(CopleyXYStageConfiguration configuration) {
-    initialize(comms, loader);
+    initialize(instrument, comms, loader);
     configure(configuration, units);
   }
 

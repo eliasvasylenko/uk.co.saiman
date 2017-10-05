@@ -28,7 +28,9 @@
 package uk.co.saiman.instrument.stage.copley;
 
 import static java.util.Comparator.comparing;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static uk.co.saiman.mathematics.Interval.bounded;
+import static uk.co.saiman.observable.Observable.fixedRate;
 
 import java.util.function.Supplier;
 
@@ -67,12 +69,19 @@ public class CopleyLinearDimension implements StageDimension<Length> {
     this.actualPosition = new ObservablePropertyImpl<>(minimum);
 
     this.requestedPosition.observe(this::positionRequested);
+    fixedRate(0, 500, MILLISECONDS).observe(o -> updateActualPosition());
   }
 
   void positionRequested(Quantity<Length> position) {
     CopleyController controller = this.controller.get();
     if (controller != null)
       controller.getRequestedPosition().set(axis, new Int32(getStepsFromLength(position)));
+  }
+
+  void updateActualPosition() {
+    CopleyController controller = this.controller.get();
+    if (controller != null)
+      actualPosition.set(getLengthFromSteps(controller.getActualPosition().get(axis).value));
   }
 
   @Override
@@ -100,7 +109,6 @@ public class CopleyLinearDimension implements StageDimension<Length> {
 
   @Override
   public ObservableValue<Quantity<Length>> actualPosition() {
-    getLengthFromSteps(controller.getActualPosition().get(axis).value);
     return actualPosition;
   }
 }

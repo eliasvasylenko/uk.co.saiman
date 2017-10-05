@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 
-import uk.co.saiman.instrument.HardwareDevice;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
 import uk.co.saiman.observable.ObservableProperty;
@@ -58,7 +58,7 @@ import uk.co.saiman.observable.ObservableValue;
  */
 @Component
 public class InstrumentImpl implements Instrument {
-  private final Set<HardwareDevice> devices;
+  private final Set<Device> devices;
   private final ObservableProperty<InstrumentLifecycleState> state;
 
   /**
@@ -70,28 +70,23 @@ public class InstrumentImpl implements Instrument {
   }
 
   @Override
-  public ObservableValue<InstrumentLifecycleState> lifecycleState() {
-    return state;
-  }
-
-  @Override
-  public Stream<HardwareDevice> getDevices() {
+  public Stream<Device> getDevices() {
     return devices.stream();
   }
 
+  @Override
   @Reference(cardinality = ReferenceCardinality.MULTIPLE)
-  synchronized void addDevice(HardwareDevice participant) {
-    participant.setInstrument(this);
-    devices.add(participant);
-  }
-
-  synchronized void removeDevice(HardwareDevice participant) {
-    devices.remove(participant);
-    participant.unsetInstrument();
+  public synchronized void addDevice(Device device) {
+    devices.add(device);
   }
 
   @Override
-  public synchronized void operate() {
+  public synchronized void removeDevice(Device device) {
+    devices.remove(device);
+  }
+
+  @Override
+  public synchronized void requestOperation() {
     if (!state.isEqual(OPERATING))
       if (transitionToState(BEGIN_OPERATION))
         transitionToState(OPERATING);
@@ -100,7 +95,7 @@ public class InstrumentImpl implements Instrument {
   }
 
   @Override
-  public synchronized void standby() {
+  public synchronized void requestStandby() {
     if (state.isEqual(OPERATING))
       if (transitionToState(END_OPERATION))
         transitionToState(STANDBY);
@@ -109,5 +104,10 @@ public class InstrumentImpl implements Instrument {
   private synchronized boolean transitionToState(InstrumentLifecycleState state) {
     this.state.set(state);
     return this.state.isValid();
+  }
+
+  @Override
+  public ObservableValue<InstrumentLifecycleState> lifecycleState() {
+    return state;
   }
 }

@@ -46,7 +46,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.instrument.HardwareDevice;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.SimulationProperties;
@@ -115,7 +115,7 @@ public class SimulatedAcquisitionDeviceManager {
     serviceRegistrations.put(
         detector,
         context.registerService(
-            new String[] { AcquisitionDevice.class.getName(), HardwareDevice.class.getName() },
+            new String[] { AcquisitionDevice.class.getName(), Device.class.getName() },
             acquisitionDevice,
             null));
   }

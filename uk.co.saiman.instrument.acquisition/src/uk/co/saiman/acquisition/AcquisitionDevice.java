@@ -35,7 +35,7 @@ import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.RegularSampledDomain;
 import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.instrument.HardwareDevice;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.observable.Observable;
 
 /**
@@ -45,7 +45,7 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface AcquisitionDevice extends HardwareDevice {
+public interface AcquisitionDevice extends Device {
   /**
    * Begin an acquisition experiment with the current configuration.
    * 

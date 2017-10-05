@@ -27,40 +27,6 @@
  */
 package uk.co.saiman.instrument;
 
-import java.util.Optional;
-
-import uk.co.saiman.observable.ObservableValue;
-
-public interface HardwareDevice {
-  /**
-   * @return the human-readable and localized name of the device
-   */
-  String getName();
-
-  /**
-   * Invoked by the controlling instrument upon registration. If participants
-   * throw an exception from this invocation, the registration will fail.
-   * 
-   * @param instrument
-   *          The instrument to participate with.
-   */
-  void setInstrument(Instrument instrument);
-
-  /**
-   * Invoked by the controlling instrument upon deregistration.
-   */
-  void unsetInstrument();
-
-  Optional<Instrument> getInstrument();
-
-  /**
-   * Get an observable value over the state of the connection to the hardware
-   * device.
-   * <p>
-   * The value may be set to a {@link ObservableValue#getProblem() problem
-   * state}.
-   * 
-   * @return the connection state
-   */
-  ObservableValue<HardwareConnection> connectionState();
+public enum DeviceConnection {
+  DISCONNECTED, CONNECTED
 }

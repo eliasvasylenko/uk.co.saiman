@@ -42,6 +42,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.instrument.raster.RasterPattern;
 import uk.co.saiman.instrument.raster.RasterPosition;
@@ -103,6 +104,9 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
   }
 
   @Reference
+  Instrument instrument;
+
+  @Reference
   PropertyLoader loader;
 
   @Reference
@@ -120,7 +124,7 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
   void activate(
       CopleyXYStageRasterConfiguration rasterConfiguration,
       CopleyXYStageConfiguration configuration) {
-    initialize(comms, loader);
+    initialize(instrument, comms, loader);
     configure(configuration, units);
   }
 

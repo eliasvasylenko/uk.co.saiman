@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.instrument.raster;
 
-import uk.co.saiman.instrument.HardwareDevice;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.observable.Observable;
 
-public interface RasterDevice extends HardwareDevice {
+public interface RasterDevice extends Device {
   int getRasterWidth();
 
   int getRasterHeight();

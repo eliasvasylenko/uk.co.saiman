@@ -27,7 +27,8 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
-import java.util.Optional;
+import static uk.co.saiman.instrument.InstrumentLifecycleState.BEGIN_OPERATION;
+import static uk.co.saiman.observable.Observable.merge;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
@@ -35,10 +36,12 @@ import javax.measure.quantity.Length;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.measurement.Units;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDevice {
   @SuppressWarnings("javadoc")
@@ -68,8 +71,6 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
     String exchangePositionY();
   }
 
-  private Instrument instrument;
-
   private Quantity<Length> lowerBoundX;
   private Quantity<Length> lowerBoundY;
 
@@ -84,6 +85,15 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
 
   private StageDimension<Length> xAxis;
   private StageDimension<Length> yAxis;
+
+  private boolean atExchange;
+  private boolean atHome;
+
+  @Override
+  void initialize(Instrument instrument, CopleyComms comms, PropertyLoader loader) {
+    super.initialize(instrument, comms, loader);
+    instrument.lifecycleState().filter(BEGIN_OPERATION::equals).observe(o -> moveToHome());
+  }
 
   void configure(CopleyXYStageConfiguration configuration, Units units) {
     lowerBoundX = units.parseQuantity(configuration.lowerBoundX()).asType(Length.class);
@@ -110,21 +120,13 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
         () -> getController().orElse(null),
         lowerBoundY,
         upperBoundY);
-  }
 
-  @Override
-  public Optional<Instrument> getInstrument() {
-    return Optional.ofNullable(instrument);
-  }
-
-  @Override
-  public void setInstrument(Instrument instrument) {
-    this.instrument = instrument;
-  }
-
-  @Override
-  public void unsetInstrument() {
-    this.instrument = null;
+    merge(xAxis.requestedPosition(), yAxis.requestedPosition()).observe(p -> {
+      synchronized (CopleyXYStageDevice.this) {
+        atHome = false;
+        atExchange = false;
+      }
+    });
   }
 
   @Override
@@ -142,15 +144,34 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
     return yAxis;
   }
 
-  public void moveToHome() {
-    xAxis.requestedPosition().set(homeX);
-    yAxis.requestedPosition().set(homeY);
+  public synchronized void moveToHome() {
+    if (!atHome) {
+      System.out.println("moving home");
+
+      xAxis.requestedPosition().set(homeX);
+      yAxis.requestedPosition().set(homeY);
+
+      atExchange = false;
+      atHome = true;
+
+      // TODO wait for move
+    }
   }
 
-  public void moveToExchange() {
-    moveToHome();
+  public synchronized void moveToExchange() {
+    if (!atExchange) {
+      moveToHome();
+      getInstrument().requestStandby();
 
-    xAxis.requestedPosition().set(exchangeX);
-    yAxis.requestedPosition().set(exchangeY);
+      System.out.println("exhanging...");
+
+      xAxis.requestedPosition().set(exchangeX);
+      yAxis.requestedPosition().set(exchangeY);
+
+      atExchange = true;
+      atHome = false;
+
+      // TODO wait for move
+    }
   }
 }
