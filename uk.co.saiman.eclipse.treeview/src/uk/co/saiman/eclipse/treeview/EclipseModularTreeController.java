@@ -34,7 +34,6 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.adapter.Adapter;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
-import org.osgi.framework.Constants;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -66,17 +65,9 @@ public class EclipseModularTreeController {
   @Inject
   private IEclipseContext context;
 
-  /*
-   * As we are injecting into the contributions from the eclipse context of the
-   * tree we may only accept prototype scope services.
-   */
-  @Inject
-  @ObservableService(target = "(" + Constants.SERVICE_SCOPE + "=" + Constants.SCOPE_PROTOTYPE + ")")
-  private ObservableList<TreeContribution<?>> contributions;
-
   @Inject
   @ObservableService
-  private ObservableList<EclipseTreeContribution> contributions2;
+  private ObservableList<EclipseTreeContributor> contributors;
 
   @Inject
   private ESelectionService selectionService;
@@ -102,13 +93,13 @@ public class EclipseModularTreeController {
 
   @FXML
   void initialize() {
-    contributions.addListener((ListChangeListener<TreeContribution<?>>) change -> {
+    contributors.addListener((ListChangeListener<EclipseTreeContributor>) change -> {
       while (change.next())
         if (change.wasAdded())
           change.getAddedSubList().forEach(this::prepareContribution);
       updateContributions();
     });
-    contributions.stream().forEach(this::prepareContribution);
+    contributors.stream().forEach(this::prepareContribution);
     updateContributions();
 
     eclipseModularTree.getSelectionModel().selectedItemProperty().addListener(
@@ -117,6 +108,8 @@ public class EclipseModularTreeController {
         });
 
     eclipseModularTree.setAdapter(adapter);
+
+    eclipseModularTree.addContribution(new EclipseTreeContribution());
   }
 
   @PreDestroy
@@ -146,14 +139,14 @@ public class EclipseModularTreeController {
     tableId.set(id);
   }
 
-  protected void prepareContribution(TreeContribution<?> contribution) {
+  protected void prepareContribution(EclipseTreeContributor contribution) {
     context.set(EclipseModularTreeController.class, this);
     ContextInjectionFactory.inject(contribution, context);
   }
 
   protected void updateContributions() {
     int ranking = 0;
-    for (TreeContribution<?> contribution : contributions)
+    for (TreeContribution<?> contribution : contributors)
       eclipseModularTree.addContribution(contribution, ranking++);
   }
 
