@@ -98,12 +98,6 @@ public class ExperimentNodeContribution extends MenuTreeCellContribution<Experim
   }
 
   @Override
-  public <U extends ExperimentNode<?, ?>> boolean hasChildren(TreeItemData<U> data) {
-    return data.data().getChildren().findAny().isPresent()
-        || data.data().getResults().findAny().isPresent();
-  }
-
-  @Override
   public <U extends ExperimentNode<?, ?>> Stream<TypedReference<?>> getChildren(
       TreeItemData<U> data) {
     return Stream.concat(

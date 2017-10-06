@@ -5,6 +5,7 @@ Bundle-Name: SAI :: Eclipse :: Tree View
 	${build}/include/eclipse.fx.3.0.0.bnd
 
 -buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\

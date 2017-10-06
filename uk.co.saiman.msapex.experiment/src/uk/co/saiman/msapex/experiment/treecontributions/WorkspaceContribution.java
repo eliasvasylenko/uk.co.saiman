@@ -34,35 +34,17 @@ import java.util.stream.Stream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentRoot;
+import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.fx.TreeCellContribution;
 import uk.co.saiman.fx.TreeChildContribution;
 import uk.co.saiman.fx.TreeContribution;
 import uk.co.saiman.fx.TreeItemData;
-import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
 
-/**
- * An implementation of {@link TreeCellContribution} which registers the
- * experiment tree pop-up menu from the experiment project model fragment.
- * 
- * @author Elias N Vasylenko
- */
 @Component(service = TreeContribution.class, scope = ServiceScope.PROTOTYPE)
 public class WorkspaceContribution implements TreeChildContribution<Workspace> {
   @Override
-  public <U extends Workspace> boolean hasChildren(TreeItemData<U> data) {
-    return data.data().getExperiments().findAny().isPresent();
-  }
-
-  @Override
   public <U extends Workspace> Stream<TypedReference<?>> getChildren(TreeItemData<U> data) {
-    return data.data().getExperiments().map(
-        c -> typedObject(
-            new TypeToken<ExperimentNode<ExperimentRoot, ExperimentConfiguration>>() {},
-            c));
+    return data.data().getExperiments().map(c -> typedObject(Experiment.class, c));
   }
 }

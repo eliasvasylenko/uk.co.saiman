@@ -37,12 +37,11 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
+import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
@@ -75,14 +74,9 @@ public class InstrumentImpl implements Instrument {
   }
 
   @Override
-  @Reference(cardinality = ReferenceCardinality.MULTIPLE)
-  public synchronized void addDevice(Device device) {
+  public synchronized Disposable addDevice(Device device) {
     devices.add(device);
-  }
-
-  @Override
-  public synchronized void removeDevice(Device device) {
-    devices.remove(device);
+    return () -> devices.remove(device);
   }
 
   @Override

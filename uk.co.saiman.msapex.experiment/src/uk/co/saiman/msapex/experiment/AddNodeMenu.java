@@ -27,20 +27,19 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
+
 import java.util.List;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 
-import uk.co.saiman.eclipse.Localize;
-import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.eclipse.AdaptNamed;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.fx.TreeItemImpl;
 
 /**
@@ -50,37 +49,25 @@ import uk.co.saiman.fx.TreeItemImpl;
  * @author Elias N Vasylenko
  */
 public class AddNodeMenu {
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String MENU_ID = "uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode";
+  @AboutToShow
+  void aboutToShow(
+      List<MMenuElement> items,
+      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
+      @AdaptNamed(ACTIVE_SELECTION) TreeItemImpl<?> item) {
+    selectedNode.getAvailableChildExperimentTypes().forEach(childType -> {
+      MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
+      moduleItem.setLabel(childType.getName());
+      moduleItem.setType(ItemType.PUSH);
+      moduleItem.setObject(new Object() {
+        @Execute
+        public void execute() {
+          selectedNode.addChild(childType);
+          item.getData().refresh(true);
+          item.setExpanded(true);
+        }
+      });
 
-	@AboutToShow
-	void aboutToShow(List<MMenuElement> items, @Localize ExperimentProperties text, MPart part) {
-		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
-		TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
-		Object data = item.getValue().data();
-
-		if (!(data instanceof ExperimentNode<?, ?>)) {
-			throw new ExperimentException(text.exception().illegalMenuForSelection(MENU_ID, data));
-		}
-
-		ExperimentNode<?, ?> selectedNode = (ExperimentNode<?, ?>) data;
-
-		selectedNode.getAvailableChildExperimentTypes().forEach(childType -> {
-			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-			moduleItem.setLabel(childType.getName());
-			moduleItem.setType(ItemType.PUSH);
-			moduleItem.setObject(new Object() {
-				@Execute
-				public void execute() {
-					selectedNode.addChild(childType);
-					experimentPart.getExperimentTreeController().getTreeView().refresh();
-					item.setExpanded(true);
-				}
-			});
-
-			items.add(moduleItem);
-		});
-	}
+      items.add(moduleItem);
+    });
+  }
 }

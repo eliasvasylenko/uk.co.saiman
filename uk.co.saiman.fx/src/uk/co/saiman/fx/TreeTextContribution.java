@@ -41,20 +41,20 @@ public interface TreeTextContribution<T> extends TreeContribution<T> {
 	/**
 	 * @param <U>
 	 *          a capture of the exact type of the tree item data
-	 * @param data
+	 * @param item
 	 *          the data item we wish to retrieve the text for
 	 * @return the primary text representation for the given data item, or null if
 	 *         none is provided
 	 */
-	<U extends T> String getText(TreeItemData<U> data);
+	<U extends T> String getText(TreeItemData<U> item);
 
 	/**
 	 * @param <U>
 	 *          a capture of the exact type of the tree item data
-	 * @param data
+	 * @param item
 	 *          the data item we wish to retrieve the text for
 	 * @return any supplemental text information for the given data item, or null
 	 *         if none is provided
 	 */
-	<U extends T> String getSupplementalText(TreeItemData<U> data);
+  <U extends T> String getSupplementalText(TreeItemData<U> item);
 }

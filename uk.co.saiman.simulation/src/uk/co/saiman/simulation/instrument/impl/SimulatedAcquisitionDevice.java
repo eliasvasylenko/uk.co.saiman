@@ -43,13 +43,15 @@ import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.instrument.DeviceConnection;
+import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 
 /**
- * Partial implementation of a simulation of an acquisition device.
+ * Implementation of a simulation of an acquisition device.
  * 
  * @author Elias N Vasylenko
  */
@@ -107,7 +109,8 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
    */
   public static final int DEFAULT_ACQUISITION_COUNT = 1000;
 
-  private boolean finalised = false;
+  private boolean disposed;
+  private final Disposable instrumentSubscription;
 
   /*
    * Instrument Configuration
@@ -153,12 +156,18 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
 
     acquisitionBuffer.observe(this::acquired);
     new Thread(this::acquire).start();
+
+    instrumentSubscription = detector.getInstrument().addDevice(this);
+  }
+
+  public void dispose() {
+    disposed = true;
+    instrumentSubscription.cancel();
   }
 
   @Override
-  protected void finalize() throws Throwable {
-    finalised = true;
-    super.finalize();
+  public Instrument getInstrument() {
+    return detector.getInstrument();
   }
 
   @Override
@@ -217,7 +226,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
   }
 
   private void acquire() {
-    while (!finalised) {
+    while (!disposed) {
       SampledDomain<Time> domain;
       int counter;
 

@@ -30,7 +30,11 @@ package uk.co.saiman.eclipse.treeview;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.menu.MMenu;
 import org.eclipse.e4.ui.services.EMenuService;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import javafx.event.Event;
 import javafx.scene.Node;
@@ -56,11 +60,20 @@ import uk.co.saiman.fx.TreeItemData;
  *          the type of data of applicable nodes
  */
 public abstract class MenuTreeCellContribution<T> implements TreeCellContribution<T> {
+  private final String menuId;
+  private ContextMenu menu;
+
+  @Inject
+  EModelService modelService;
+
   @Inject
   EMenuService menuService;
 
-  private final String menuId;
-  private ContextMenu menu;
+  @Inject
+  MPart part;
+
+  @Inject
+  MApplication application;
 
   /**
    * @param menuId
@@ -70,19 +83,19 @@ public abstract class MenuTreeCellContribution<T> implements TreeCellContributio
     this.menuId = menuId;
   }
 
-  @SuppressWarnings("javadoc")
+  @SuppressWarnings({ "javadoc" })
   @PostConstruct
   public void configureMenu() {
     Control menuControl = new Control() {};
 
+    MMenu menu = (MMenu) modelService.cloneSnippet(application, menuId, null);
+    part.getMenus().add(menu);
+
     if (menuService.registerContextMenu(menuControl, menuId)) {
-      menu = menuControl.getContextMenu();
-      menu.addEventHandler(KeyEvent.ANY, Event::consume);
+      this.menu = menuControl.getContextMenu();
+      this.menu.addEventHandler(KeyEvent.ANY, Event::consume);
     } else {
-      // TODO only works in an eclipse context which injects the MPart where the
-      // menu is defined...
-      // throw new RuntimeException("Unable to register tree cell context menu "
-      // + menuId);
+      throw new RuntimeException("Unable to register tree cell context menu " + menuId);
     }
   }
 

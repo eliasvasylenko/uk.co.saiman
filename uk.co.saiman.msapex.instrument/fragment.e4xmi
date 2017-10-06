@@ -25,7 +25,10 @@
     <elements xsi:type="application:Addon" xmi:id="_QybzMKgiEeep8ofnuPrwwg" elementId="uk.co.saiman.msapex.instrument.addon" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentAddon"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_-sbYkKj8EeeJz7_eiWqRkg" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.overview">
-    <elements xsi:type="basic:Part" xmi:id="_P6VPAKj9EeeJz7_eiWqRkg" elementId="uk.co.saiman.msapex.instrument.part.instrument" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentPart" label="Instrument"/>
+    <elements xsi:type="basic:Part" xmi:id="_P6VPAKj9EeeJz7_eiWqRkg" elementId="uk.co.saiman.msapex.instrument.part.instrument" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentPart" label="Instrument">
+      <menus xsi:type="menu:PopupMenu" xmi:id="_7zpT4KnIEeeJz7_eiWqRkg" elementId="uk.co.saiman.msapex.instrument.popupmenu.device">
+        <tags>popup:uk.co.saiman.msapex.experiment.popupmenu.node</tags>
+      </menus>
+    </elements>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_fBFGQKmuEeeJz7_eiWqRkg"/>
 </fragment:ModelFragments>

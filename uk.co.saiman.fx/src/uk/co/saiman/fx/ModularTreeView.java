@@ -104,7 +104,7 @@ public class ModularTreeView extends TreeView<TreeItemData<?>> {
    *          the root object supplemented with its exact generic type
    */
   public void setRootData(TypedReference<?> root) {
-    TreeItemImpl<?> rootItem = new TreeItemImpl<>(this, root);
+    TreeItemImpl<?> rootItem = createRoot(root);
     rootItem.setExpanded(true);
     setShowRoot(false);
 
@@ -112,6 +112,10 @@ public class ModularTreeView extends TreeView<TreeItemData<?>> {
     setRoot(rootItem);
 
     refresh();
+  }
+
+  protected TreeItemImpl<?> createRoot(TypedReference<?> root) {
+    return new TreeItemImpl<>(root, this);
   }
 
   @SuppressWarnings("unchecked")

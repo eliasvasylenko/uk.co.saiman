@@ -27,13 +27,13 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
-import uk.co.saiman.experiment.ExperimentException;
+import org.eclipse.e4.core.di.annotations.Execute;
+
+import uk.co.saiman.eclipse.AdaptNamed;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.fx.TreeItemImpl;
 
 /**
  * Remove a node from an experiment in the workspace
@@ -41,23 +41,15 @@ import uk.co.saiman.eclipse.Localize;
  * @author Elias N Vasylenko
  */
 public class RemoveNode {
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.removenode";
-
-	@Execute
-	void execute(MPart part, @Localize ExperimentProperties text) {
-		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
-		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
-
-		if (!(itemData instanceof ExperimentNode<?, ?>)) {
-			throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
-		}
-
-		ExperimentNode<?, ?> selectedNode = (ExperimentNode<?, ?>) itemData;
-		selectedNode.remove();
-
-		experimentPart.getExperimentTreeController().getTreeView().refresh();
-	}
+  @Execute
+  void execute(
+      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
+      @AdaptNamed(ACTIVE_SELECTION) TreeItemImpl<?> item) {
+    /*
+     * TODO an "are you sure?" dialog. This is permanent!
+     */
+    
+    selectedNode.remove();
+    item.getData().parent().get().refresh(true);
+  }
 }

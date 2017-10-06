@@ -41,28 +41,30 @@ import uk.co.saiman.reflection.token.TypedReference;
  *          the type of the tree item data
  */
 public interface TreeChildContribution<T> extends TreeContribution<T> {
-	/**
-	 * Determine whether children should be contributed to the given data item.
-	 * This should given the same result as {@link Collection#isEmpty()} invoked
-	 * on the result of {@link #getChildren(TreeItemData)}, but may be more
-	 * efficient to implement.
-	 * 
-	 * @param <U>
-	 *          the specific type of the tree item
-	 * @param data
-	 *          a data item in the tree
-	 * @return true if children should be contributed, false otherwise
-	 */
-	<U extends T> boolean hasChildren(TreeItemData<U> data);
+  /**
+   * Determine whether children should be contributed to the given data item.
+   * This should given the same result as {@link Collection#isEmpty()} invoked
+   * on the result of {@link #getChildren(TreeItemData)}, but may be more
+   * efficient to implement.
+   * 
+   * @param <U>
+   *          the specific type of the tree item
+   * @param data
+   *          a data item in the tree
+   * @return true if children should be contributed, false otherwise
+   */
+  default <U extends T> boolean hasChildren(TreeItemData<U> data) {
+    return getChildren(data).findAny().isPresent();
+  }
 
-	/**
-	 * Determine which children should be contributed to the given data item.
-	 * 
-	 * @param <U>
-	 *          the specific type of the tree item
-	 * @param data
-	 *          a data item in the tree
-	 * @return a list of children to be contributed
-	 */
-	<U extends T> Stream<TypedReference<?>> getChildren(TreeItemData<U> data);
+  /**
+   * Determine which children should be contributed to the given data item.
+   * 
+   * @param <U>
+   *          the specific type of the tree item
+   * @param data
+   *          a data item in the tree
+   * @return a list of children to be contributed
+   */
+  <U extends T> Stream<TypedReference<?>> getChildren(TreeItemData<U> data);
 }

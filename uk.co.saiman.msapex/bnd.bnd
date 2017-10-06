@@ -6,10 +6,11 @@ Export-Package:\
 
 -include:\
 	${build}/include/eclipse.platform.oxygen.bnd,\
-	${build}/include/eclipse.fx.3.0.0.bnd
+	${build}/include/eclipse.fx.3.0.0.bnd,\
+	${build}/include/fugue.icons.bnd
 
 -includeresource:\
 	plugin.xml,\
 	{Application.e4xmi},\
-	css=css,\
+	{css=css},\
 	configuration=configuration

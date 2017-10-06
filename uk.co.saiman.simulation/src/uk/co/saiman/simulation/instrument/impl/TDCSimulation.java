@@ -47,6 +47,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.data.SparseSampledContinuousFunction;
+import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.impl.TDCSimulation.TDCSimulationConfiguration;
@@ -79,6 +80,9 @@ public class TDCSimulation implements DetectorSimulation {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.tdc";
 
   @Reference
+  Instrument instrument;
+
+  @Reference
   Units units;
 
   private int maximumHits = 10;
@@ -93,6 +97,11 @@ public class TDCSimulation implements DetectorSimulation {
   void configure(TDCSimulationConfiguration configuration) {
     maximumHits = configuration.maximumHitsPerSpectrum();
     resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(Time.class);
+  }
+
+  @Override
+  public Instrument getInstrument() {
+    return instrument;
   }
 
   @Override

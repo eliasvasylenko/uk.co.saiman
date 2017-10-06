@@ -27,13 +27,12 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
-import static java.util.Optional.ofNullable;
-
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.adapter.Adapter;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.osgi.framework.Constants;
 
@@ -42,7 +41,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.TreeItem;
 import uk.co.saiman.eclipse.ObservableService;
 import uk.co.saiman.fx.ModularTreeView;
 import uk.co.saiman.fx.TreeContribution;
@@ -63,7 +61,7 @@ public class EclipseModularTreeController {
   private final StringProperty tableId = new SimpleStringProperty();
 
   @FXML
-  private ModularTreeView modularTree;
+  private EclipseModularTreeView eclipseModularTree;
 
   @Inject
   private IEclipseContext context;
@@ -77,7 +75,14 @@ public class EclipseModularTreeController {
   private ObservableList<TreeContribution<?>> contributions;
 
   @Inject
+  @ObservableService
+  private ObservableList<EclipseTreeContribution> contributions2;
+
+  @Inject
   private ESelectionService selectionService;
+
+  @Inject
+  private Adapter adapter;
 
   /**
    * Instantiate a controller with the default id - the simple name of the class
@@ -106,11 +111,12 @@ public class EclipseModularTreeController {
     contributions.stream().forEach(this::prepareContribution);
     updateContributions();
 
-    modularTree.getSelectionModel().selectedItemProperty().addListener(
+    eclipseModularTree.getSelectionModel().selectedItemProperty().addListener(
         (observable, oldValue, newValue) -> {
-          selectionService.setSelection(
-              ofNullable(newValue).map(TreeItem::getValue).map(TreeItemData::data).orElse(null));
+          selectionService.setSelection(newValue);
         });
+
+    eclipseModularTree.setAdapter(adapter);
   }
 
   @PreDestroy
@@ -148,21 +154,21 @@ public class EclipseModularTreeController {
   protected void updateContributions() {
     int ranking = 0;
     for (TreeContribution<?> contribution : contributions)
-      modularTree.addContribution(contribution, ranking++);
+      eclipseModularTree.addContribution(contribution, ranking++);
   }
 
   /**
    * @return the modular tree view instance
    */
   public ModularTreeView getTreeView() {
-    return modularTree;
+    return eclipseModularTree;
   }
 
   /**
    * @return the currently selected tree item
    */
   public TreeItemImpl<?> getSelection() {
-    return (TreeItemImpl<?>) modularTree.getSelectionModel().getSelectedItem();
+    return (TreeItemImpl<?>) eclipseModularTree.getSelectionModel().getSelectedItem();
   }
 
   /**

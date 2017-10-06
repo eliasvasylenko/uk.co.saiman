@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: MSApex :: Stage
+Bundle-Name: SAI :: MSApex :: Instrument
 
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
@@ -19,6 +19,7 @@ Bundle-Name: SAI :: MSApex :: Stage
 	uk.co.saiman.eclipse.treeview;version=snapshot,\
 \
 	uk.co.saiman.msapex;version=snapshot,\
+	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
@@ -27,8 +28,9 @@ Bundle-Name: SAI :: MSApex :: Stage
 \
 	javax.measure.unit-api
 
-Import-Package: uk.co.saiman.experiment,uk.co.saiman.msapex.experiment,uk.co.saiman.msapex.experiment.treecontributions,*
-Export-Package: uk.co.saiman.msapex.instrument
+Private-Package: \
+	uk.co.saiman.msapex.instrument,\
+	uk.co.saiman.msapex.instrument.treecontributions
 
 -includeresource: \
 	{fragment.e4xmi},\

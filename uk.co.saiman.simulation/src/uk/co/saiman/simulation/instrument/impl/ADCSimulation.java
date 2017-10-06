@@ -47,6 +47,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.data.ArraySampledContinuousFunction;
 import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
+import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
@@ -83,6 +84,9 @@ public class ADCSimulation implements DetectorSimulation {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.adc";
 
   @Reference
+  Instrument instrument;
+
+  @Reference
   SimulatedSampleSource sampleSource;
 
   @Reference
@@ -99,6 +103,11 @@ public class ADCSimulation implements DetectorSimulation {
   void configure(ADCSimulationConfiguration configuration) {
     signalToNoise = configuration.signalToNoiseRatio();
     resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(Time.class);
+  }
+
+  @Override
+  public Instrument getInstrument() {
+    return instrument;
   }
 
   @Override

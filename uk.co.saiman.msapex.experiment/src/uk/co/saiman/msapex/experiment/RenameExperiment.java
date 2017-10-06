@@ -46,12 +46,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
+import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.text.properties.Localized;
 
 /**
@@ -60,83 +61,83 @@ import uk.co.saiman.text.properties.Localized;
  * @author Elias N Vasylenko
  */
 public class RenameExperiment {
-	/**
-	 * The ID of the command in the e4 model fragment.
-	 */
-	public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.addexperiment";
+  /**
+   * The ID of the command in the e4 model fragment.
+   */
+  public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.addexperiment";
 
-	@Execute
-	void execute(MPart part, @Localize ExperimentProperties text) {
-		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
-		Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
+  @Execute
+  void execute(MPart part, @Localize ExperimentProperties text) {
+    ExperimentPart experimentPart = (ExperimentPart) part.getObject();
+    Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
 
-		if (!(itemData instanceof ExperimentNode<?, ?>
-				&& ((ExperimentNode<?, ?>) itemData).getType() instanceof ExperimentRoot)) {
-			throw new ExperimentException(
-					text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
-		}
+    if (!(itemData instanceof ExperimentNode<?, ?>
+        && ((ExperimentNode<?, ?>) itemData).getType() instanceof ExperimentRoot)) {
+      throw new ExperimentException(
+          text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
+    }
 
-		@SuppressWarnings("unchecked")
-		ExperimentNode<?, ExperimentConfiguration> selectedNode = (ExperimentNode<?, ExperimentConfiguration>) itemData;
+    @SuppressWarnings("unchecked")
+    ExperimentNode<?, ExperimentConfiguration> selectedNode = (ExperimentNode<?, ExperimentConfiguration>) itemData;
 
-		requestExperimentNameDialog(
-				experimentPart,
-				text.renameExperiment(),
-				text.renameExperimentName(selectedNode.getState().getName())).ifPresent(name -> {
-					Path newLocation = experimentPart.getExperimentWorkspace().getWorkspaceDataPath().resolve(
-							name);
+    requestExperimentNameDialog(
+        experimentPart.getExperimentWorkspace(),
+        text.renameExperiment(),
+        text.renameExperimentName(selectedNode.getState().getName())).ifPresent(name -> {
+          Path newLocation = experimentPart.getExperimentWorkspace().getWorkspaceDataPath().resolve(
+              name);
 
-					RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
+          RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
 
-					selectedNode.getState().setName(name);
-					experimentPart.getExperimentTreeController().getTreeView().refresh();
-				});
-	}
+          selectedNode.getState().setName(name);
+          experimentPart.getExperimentTreeController().getTreeView().refresh();
+        });
+  }
 
-	static Optional<String> requestExperimentNameDialog(
-			ExperimentPart experimentPart,
-			Localized<String> title,
-			Localized<String> header) {
-		TextInputDialog nameDialog = new TextInputDialog();
-		nameDialog.titleProperty().bind(wrap(title));
-		nameDialog.headerTextProperty().bind(wrap(header));
-		GridPane content = (GridPane) nameDialog.getDialogPane().getContent();
-		content.add(new Label("This is where we need to put format error messages..."), 0, 0);
-		content.getChildren().remove(nameDialog.getEditor());
-		content.add(nameDialog.getEditor(), 0, 1);
+  static Optional<String> requestExperimentNameDialog(
+      Workspace workspace,
+      Localized<String> title,
+      Localized<String> header) {
+    TextInputDialog nameDialog = new TextInputDialog();
+    nameDialog.titleProperty().bind(wrap(title));
+    nameDialog.headerTextProperty().bind(wrap(header));
+    GridPane content = (GridPane) nameDialog.getDialogPane().getContent();
+    content.add(new Label("This is where we need to put format error messages..."), 0, 0);
+    content.getChildren().remove(nameDialog.getEditor());
+    content.add(nameDialog.getEditor(), 0, 1);
 
-		Button okButton = (Button) nameDialog.getDialogPane().lookupButton(ButtonType.OK);
-		okButton.setDisable(true);
-		nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+    Button okButton = (Button) nameDialog.getDialogPane().lookupButton(ButtonType.OK);
+    okButton.setDisable(true);
+    nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
 
-			boolean exists = experimentPart.getExperimentWorkspace().getExperiments().anyMatch(
-					e -> e.getState().getName().equals(newValue));
+      boolean exists = workspace.getExperiments().anyMatch(
+          e -> e.getState().getName().equals(newValue));
 
-			boolean isValid = ExperimentConfiguration.isNameValid(newValue);
+      boolean isValid = ExperimentConfiguration.isNameValid(newValue);
 
-			okButton.setDisable(!isValid || exists);
-		});
+      okButton.setDisable(!isValid || exists);
+    });
 
-		return nameDialog.showAndWait();
-	}
+    return nameDialog.showAndWait();
+  }
 
-	static void confirmOverwriteIfNecessary(Path newLocation, ExperimentProperties text) {
-		if (Files.exists(newLocation)) {
-			Alert alert = new Alert(AlertType.CONFIRMATION);
-			alert.titleProperty().bind(wrap(text.overwriteData()));
-			alert.headerTextProperty().bind(wrap(text.overwriteDataConfirmation(newLocation)));
+  static void confirmOverwriteIfNecessary(Path newLocation, ExperimentProperties text) {
+    if (Files.exists(newLocation)) {
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.titleProperty().bind(wrap(text.overwriteData()));
+      alert.headerTextProperty().bind(wrap(text.overwriteDataConfirmation(newLocation)));
 
-			boolean success = alert.showAndWait().map(ButtonType.OK::equals).orElse(false);
+      boolean success = alert.showAndWait().map(ButtonType.OK::equals).orElse(false);
 
-			if (success) {
-				try {
-					Files.walk(newLocation).sorted(reverseOrder()).map(Path::toFile).forEach(File::delete);
-				} catch (IOException e) {
-					throw new ExperimentException(text.exception().cannotDelete(newLocation), e);
-				}
-			} else {
-				throw new ExperimentException(text.exception().userCancelledSetExperimentName());
-			}
-		}
-	}
+      if (success) {
+        try {
+          Files.walk(newLocation).sorted(reverseOrder()).map(Path::toFile).forEach(File::delete);
+        } catch (IOException e) {
+          throw new ExperimentException(text.exception().cannotDelete(newLocation), e);
+        }
+      } else {
+        throw new ExperimentException(text.exception().userCancelledSetExperimentName());
+      }
+    }
+  }
 }

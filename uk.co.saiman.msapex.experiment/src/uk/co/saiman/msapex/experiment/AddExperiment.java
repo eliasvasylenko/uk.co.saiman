@@ -27,13 +27,16 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static uk.co.saiman.msapex.experiment.RenameExperiment.confirmOverwriteIfNecessary;
+import static uk.co.saiman.msapex.experiment.RenameExperiment.requestExperimentNameDialog;
+
 import java.nio.file.Path;
 
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.Workspace;
 
 /**
  * Add an experiment to the workspace
@@ -41,19 +44,15 @@ import uk.co.saiman.eclipse.Localize;
  * @author Elias N Vasylenko
  */
 public class AddExperiment {
-	@Execute
-	void execute(MPart part, @Localize ExperimentProperties text) {
-		ExperimentPart experimentPart = (ExperimentPart) part.getObject();
+  @Execute
+  void execute(Workspace workspace, @Localize ExperimentProperties text) {
+    requestExperimentNameDialog(workspace, text.newExperiment(), text.newExperimentName())
+        .ifPresent(name -> {
+          Path newLocation = workspace.getWorkspaceDataPath().resolve(name);
 
-		RenameExperiment
-				.requestExperimentNameDialog(experimentPart, text.newExperiment(), text.newExperimentName())
-				.ifPresent(name -> {
-					Path newLocation = experimentPart.getExperimentWorkspace().getWorkspaceDataPath().resolve(name);
+          confirmOverwriteIfNecessary(newLocation, text);
 
-					RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
-
-					experimentPart.getExperimentWorkspace().addExperiment(name);
-					experimentPart.getExperimentTreeController().getTreeView().refresh();
-				});
-	}
+          workspace.addExperiment(name);
+        });
+  }
 }

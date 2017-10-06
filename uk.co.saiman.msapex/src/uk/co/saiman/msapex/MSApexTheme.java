@@ -37,14 +37,14 @@ import org.osgi.service.component.annotations.Component;
  * @author Elias N Vasylenko
  */
 @Component(service = Theme.class)
-public class DefaultTheme extends AbstractTheme {
+public class MSApexTheme extends AbstractTheme {
   /**
    * Instantiate from default theme file.
    */
-  public DefaultTheme() {
+  public MSApexTheme() {
     super(
-        "theme.default",
-        "Default theme",
-        DefaultTheme.class.getClassLoader().getResource("css/default.css"));
+        "theme.msapex",
+        "MSApex theme",
+        MSApexTheme.class.getClassLoader().getResource("css/msapex.css"));
   }
 }

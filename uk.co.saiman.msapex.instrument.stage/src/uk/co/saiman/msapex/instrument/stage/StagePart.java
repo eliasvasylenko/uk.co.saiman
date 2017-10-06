@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.msapex.instrument.stage;
 
+import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
@@ -34,7 +35,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.collections.ObservableSet;
@@ -43,12 +44,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import uk.co.saiman.experiment.sample.StageConfiguration;
-import uk.co.saiman.instrument.stage.StageDevice;
-import uk.co.saiman.instrument.stage.StageProperties;
 import uk.co.saiman.eclipse.AdaptNamed;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.eclipse.ObservableService;
+import uk.co.saiman.experiment.sample.StageConfiguration;
+import uk.co.saiman.instrument.stage.StageDevice;
+import uk.co.saiman.instrument.stage.StageProperties;
 
 /**
  * An Eclipse part for management and display of acquisition devices.
@@ -93,9 +94,21 @@ public class StagePart {
 
   @Inject
   synchronized void setSelection(
-      @Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) StageConfiguration configuration) {
+      @Optional @AdaptNamed(ACTIVE_SELECTION) StageDevice device,
+      MPart part) {
+    if (device != null) {
+      part.getContext().activate();
+
+      selectStageDevice(device);
+    }
+  }
+
+  @Inject
+  synchronized void setSelection(
+      @Optional @AdaptNamed(ACTIVE_SELECTION) StageConfiguration configuration,
+      MPart part) {
     if (configuration != null) {
-      selectStageDevice(configuration.stageDevice());
+      setSelection(configuration.stageDevice(), part);
     }
   }
 }

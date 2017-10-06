@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:basic_1="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_OHELUHzvEeeLpZ9wHq5Ynw">
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:basic_1="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_OHELUHzvEeeLpZ9wHq5Ynw">
   <imports xsi:type="commands:Command" xmi:id="_jOJdUHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.command.open"/>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_caQkIHzvEeeLpZ9wHq5Ynw" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.overview" positionInList="first">
     <elements xsi:type="basic:Part" xmi:id="_ga8yYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.part" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentPart" label="Experiments" iconURI="${fugue.icon.runtime}/size16/books.png">
       <tags>Part-Toolbar-FullSpan</tags>
-      <menus xsi:type="menu:PopupMenu" xmi:id="_uaR-kHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.popupmenu.node">
-        <children xsi:type="menu:Menu" xmi:id="_vfBZEHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.menu.add" label="Add">
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_3xHyIHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" label="" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddNodeMenu"/>
-        </children>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_v92DEHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.remove" label="Remove" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_wOGsoHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.run" label="Run" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
-      </menus>
       <toolbar xmi:id="_iJzg4HzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.toolbar">
         <children xsi:type="menu:HandledToolItem" xmi:id="_pq4FoHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledtoolitem.runexperiment" label="Run" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
         <children xsi:type="menu:HandledToolItem" xmi:id="_pXCjoHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handledtoolitem.addexperiment" label="Add" command="_zfCuYHzvEeeLpZ9wHq5Ynw"/>
@@ -35,5 +28,17 @@
     <elements xsi:type="basic_1:PartDescriptor" xmi:id="_bPCcQHzxEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.partdescriptor.resulteditor" label="Result Data" allowMultiple="true" category="uk.co.saiman.msapex.partstack.editor" closeable="true" dirtyable="true" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ResultEditorPart">
       <toolbar xmi:id="_eCQKwHzxEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.toolbar.0"/>
     </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="__hYusKp9Eees7YDco-lLaA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="menu:PopupMenu" xmi:id="_lKZ2EKqMEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.popupmenu.node">
+      <children xsi:type="menu:Menu" xmi:id="_mkHbAKqMEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.menu.add" label="Add">
+        <children xsi:type="menu:DynamicMenuContribution" xmi:id="_nkhIEKqMEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnodes" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddNodeMenu"/>
+      </children>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_tOdMEKqMEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.remove" label="Remove" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_vUu8EKqMEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.run" label="Run" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_H5pqEKqSEees7YDco-lLaA" featurename="addons" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="application:Addon" xmi:id="_KwIH8KqSEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.addon.0" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentAddon"/>
   </fragments>
 </fragment:ModelFragments>

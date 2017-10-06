@@ -27,38 +27,46 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
-import org.eclipse.e4.core.di.annotations.CanExecute;
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.core.runtime.IAdapterManager;
 
-import uk.co.saiman.eclipse.AdaptNamed;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
 
-/**
- * Add an experiment to the workspace.
- * 
- * @author Elias N Vasylenko
- */
-public class OpenExperiment {
-  @CanExecute
-  boolean canExecute(
-      @Optional @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      @Localize ExperimentProperties text) {
-    System.out.println(
-        "has results? " + selectedNode != null
-            && selectedNode.getType().getResultTypes().findAny().isPresent());
+public class ExperimentAdapterFactory implements IAdapterFactory {
+  private final IAdapterManager adapterManager;
+  private final ExperimentNodeAdapterFactory experimentNodeAdapterFactory;
 
-    return selectedNode != null && selectedNode.getType().getResultTypes().findAny().isPresent();
+  public ExperimentAdapterFactory(
+      IAdapterManager adapterManager,
+      ExperimentNodeAdapterFactory experimentNodeAdapterFactory) {
+    this.adapterManager = adapterManager;
+    this.experimentNodeAdapterFactory = experimentNodeAdapterFactory;
+    adapterManager.registerAdapters(this, Experiment.class);
   }
 
-  @Execute
-  void execute(
-      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      ResultEditorManager editorManager) {
-    editorManager.openEditor(selectedNode.getResults().findFirst().get());
+  public void unregister() {
+    adapterManager.unregisterAdapters(this);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+    Experiment experiment = (Experiment) adaptableObject;
+
+    if (adapterType == ExperimentNode.class) {
+      return (T) experiment;
+    }
+
+    return experimentNodeAdapterFactory.getAdapter(adaptableObject, adapterType);
+  }
+
+  @Override
+  public Class<?>[] getAdapterList() {
+    return concat(of(ExperimentNode.class), of(experimentNodeAdapterFactory.getAdapterList()))
+        .toArray(Class[]::new);
   }
 }

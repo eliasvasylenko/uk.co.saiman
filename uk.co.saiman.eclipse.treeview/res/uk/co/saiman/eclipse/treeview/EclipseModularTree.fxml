@@ -5,10 +5,11 @@
 <?import javafx.scene.layout.*?>
 <?import uk.co.saiman.fx.*?>
 <?import uk.co.saiman.eclipse.*?>
+<?import uk.co.saiman.eclipse.treeview.*?>
 
-<ModularTreeView
-	fx:id="modularTree"
+<EclipseModularTreeView
+	fx:id="eclipseModularTree"
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml"
 	fx:controller="uk.co.saiman.eclipse.treeview.EclipseModularTreeController">
-</ModularTreeView>
+</EclipseModularTreeView>

@@ -28,6 +28,7 @@
 package uk.co.saiman.msapex.instrument.acquisition;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
@@ -44,7 +45,6 @@ import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.collections.FXCollections;
@@ -60,11 +60,11 @@ import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.data.ContinuousFunctionExpression;
-import uk.co.saiman.measurement.Units;
-import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
 import uk.co.saiman.eclipse.AdaptNamed;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.eclipse.ObservableService;
+import uk.co.saiman.measurement.Units;
+import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
 
 /**
  * An Eclipse part for management and display of acquisition devices.
@@ -91,9 +91,6 @@ public class AcquisitionPart {
   @Inject
   @LocalInstance
   private FXMLLoader loaderProvider;
-
-  @Inject
-  private MPart part;
 
   @Inject
   private Units units;
@@ -212,7 +209,8 @@ public class AcquisitionPart {
 
   @Inject
   synchronized void setSelection(
-      @Optional @AdaptNamed(IServiceConstants.ACTIVE_SELECTION) AcquisitionDevice device) {
+      @Optional @AdaptNamed(ACTIVE_SELECTION) AcquisitionDevice device,
+      MPart part) {
     if (device != null) {
       part.getContext().activate();
 

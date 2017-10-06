@@ -46,8 +46,8 @@ import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * Users should not need to extend this class. Item specific behavior should be
- * handled by extending {@link TreeChildContribution} for each type of node
- * which can appear in a tree.
+ * handled by extending {@link TreeContribution} for each type of node which can
+ * appear in a tree.
  * 
  * @author Elias N Vasylenko
  *
@@ -61,17 +61,29 @@ public class TreeItemImpl<T> extends TreeItem<TreeItemData<?>> {
   private final Map<TypedReference<?>, TreeItemImpl<?>> childTreeItems = new HashMap<>();
   private boolean childrenCalculated;
 
-  TreeItemImpl(ModularTreeView treeView, TypedReference<T> data) {
-    this(treeView, data, null);
+  protected TreeItemImpl(TypedReference<T> data, ModularTreeView treeView) {
+    this(data, treeView, null);
   }
 
-  TreeItemImpl(ModularTreeView treeView, TypedReference<T> data, TreeItemImpl<?> parent) {
+  protected TreeItemImpl(TypedReference<T> data, TreeItemImpl<?> parent) {
+    this(data, parent.treeView, parent);
+  }
+
+  private TreeItemImpl(TypedReference<T> data, ModularTreeView treeView, TreeItemImpl<?> parent) {
     this.treeView = treeView;
     this.parent = parent;
 
-    setValue(new TreeItemDataImpl<>(data));
+    setValue(createData(data));
 
     rebuildChildren();
+  }
+
+  protected TreeItemData<?> createData(TypedReference<T> data) {
+    return new TreeItemDataImpl(data);
+  }
+
+  protected TreeItemImpl<?> createChild(TypedReference<?> data) {
+    return new TreeItemImpl<>(data, this);
   }
 
   protected boolean hasChildrenContributions() {
@@ -95,8 +107,8 @@ public class TreeItemImpl<T> extends TreeItem<TreeItemData<?>> {
   }
 
   @SuppressWarnings("unchecked")
-  protected TreeItemDataImpl<T> getDataImpl() {
-    return (TreeItemDataImpl<T>) getValue();
+  protected TreeItemDataImpl getDataImpl() {
+    return (TreeItemDataImpl) getValue();
   }
 
   @Override
@@ -136,7 +148,7 @@ public class TreeItemImpl<T> extends TreeItem<TreeItemData<?>> {
           TreeItemImpl<?> treeItem = childTreeItems.get(i);
 
           if (treeItem == null) {
-            treeItem = new TreeItemImpl<>(treeView, i, this);
+            treeItem = createChild(i);
             childTreeItems.put(i, treeItem);
           } else {
             treeItem.rebuild(true);
@@ -165,20 +177,17 @@ public class TreeItemImpl<T> extends TreeItem<TreeItemData<?>> {
    * An implementation of {@link TreeItemData} for {@link TreeItemImpl}.
    * 
    * @author Elias N Vasylenko
-   *
-   * @param <U>
-   *          the type of the tree item data
    */
-  public class TreeItemDataImpl<U> implements TreeItemData<U> {
-    private final TypedReference<U> data;
+  public class TreeItemDataImpl implements TreeItemData<T> {
+    private final TypedReference<T> data;
 
-    private List<TreeContribution<? super U>> itemContributions;
+    private List<TreeContribution<? super T>> itemContributions;
 
     /**
      * @param data
      *          the typed data for this tree item data object
      */
-    public TreeItemDataImpl(TypedReference<U> data) {
+    public TreeItemDataImpl(TypedReference<T> data) {
       this.data = data;
       refreshContributions();
     }
@@ -189,7 +198,7 @@ public class TreeItemImpl<T> extends TreeItem<TreeItemData<?>> {
     }
 
     @Override
-    public TypedReference<U> typedData() {
+    public TypedReference<T> typedData() {
       return data;
     }
 
@@ -203,19 +212,19 @@ public class TreeItemImpl<T> extends TreeItem<TreeItemData<?>> {
       itemContributions = treeView
           .getContributions()
           .filter(c -> c.getDataType().isAssignableFrom(type()))
-          .map(c -> (TreeContribution<? super U>) c)
+          .map(c -> (TreeContribution<? super T>) c)
           .filter(c -> c.appliesTo(this))
           .collect(Collectors.toList());
     }
 
     @Override
-    public Stream<TreeContribution<? super U>> contributions() {
+    public Stream<TreeContribution<? super T>> contributions() {
       return itemContributions.stream();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <V extends TreeContribution<? super U>> Stream<V> contributions(TypeToken<V> type) {
+    public <V extends TreeContribution<? super T>> Stream<V> contributions(TypeToken<V> type) {
       return itemContributions
           .stream()
           .filter(c -> forType(type.getErasedType()).isAssignableFrom(c.getClass()))

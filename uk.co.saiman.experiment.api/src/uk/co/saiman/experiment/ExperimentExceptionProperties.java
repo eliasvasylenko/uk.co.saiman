@@ -31,8 +31,8 @@ import java.nio.file.Path;
 
 import uk.co.saiman.text.properties.Nested;
 import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.SaiProperties;
 import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.text.properties.SaiProperties;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface ExperimentExceptionProperties {
@@ -51,8 +51,6 @@ public interface ExperimentExceptionProperties {
   String typeMayNotSucceed(ExperimentType<?> descendantType, ExperimentNode<?, ?> ancestorNode);
 
   String experimentIsDisposed(ExperimentNode<?, ?> experimentNode);
-
-  String illegalCommandForSelection(String commandId, Object selection);
 
   String illegalMenuForSelection(String commandId, Object selection);
 
@@ -83,4 +81,6 @@ public interface ExperimentExceptionProperties {
   String userCancelledSetExperimentName();
 
   String cannotDelete(Path newLocation);
+
+  String illegalCommandForSelection(String string, Object object);
 }

@@ -50,13 +50,13 @@ public interface TreeCellContribution<T> extends TreeContribution<T> {
    * 
    * @param <U>
    *          the specific type of the tree item
-   * @param data
+   * @param item
    *          the data contents of the tree item
    * @param content
    *          the current cell content for the tree item
    * @return the new cell content for the tree item
    */
-  <U extends T> Node configureCell(TreeItemData<U> data, Node content);
+  <U extends T> Node configureCell(TreeItemData<U> item, Node content);
 
   default Node configurePseudoClass(Node content) {
     return configurePseudoClass(content, getClass().getSimpleName());

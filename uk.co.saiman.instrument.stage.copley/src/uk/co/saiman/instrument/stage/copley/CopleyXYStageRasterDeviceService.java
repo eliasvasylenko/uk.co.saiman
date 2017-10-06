@@ -120,6 +120,11 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
   private Quantity<Length> rasterResolutionX;
   private Quantity<Length> rasterResolutionY;
 
+  @Override
+  public String getName() {
+    return getProperties().copleyXYStageRasterName().get();
+  }
+
   @Activate
   void activate(
       CopleyXYStageRasterConfiguration rasterConfiguration,

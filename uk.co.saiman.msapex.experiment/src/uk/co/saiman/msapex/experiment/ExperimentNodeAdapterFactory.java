@@ -37,57 +37,64 @@ import java.util.stream.Stream;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IAdapterManager;
 
+import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
-	private final IAdapterManager adapterManager;
-	private final Workspace workspace;
+  private final IAdapterManager adapterManager;
+  private final Workspace workspace;
 
-	public ExperimentNodeAdapterFactory(
-			IAdapterManager adapterManager,
-			Workspace workspace) {
-		this.adapterManager = adapterManager;
-		this.workspace = workspace;
-		adapterManager.registerAdapters(this, ExperimentNode.class);
-	}
+  public ExperimentNodeAdapterFactory(IAdapterManager adapterManager, Workspace workspace) {
+    this.adapterManager = adapterManager;
+    this.workspace = workspace;
+    adapterManager.registerAdapters(this, ExperimentNode.class);
+  }
 
-	public void unregister() {
-		adapterManager.unregisterAdapters(this);
-	}
+  public void unregister() {
+    adapterManager.unregisterAdapters(this);
+  }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-		ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) adaptableObject;
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+    ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) adaptableObject;
 
-		if (adapterType == ExperimentType.class) {
-			return (T) node.getType();
-		}
+    if (adapterType == ExperimentType.class) {
+      return (T) node.getType();
+    }
 
-		if (adapterType == node.getType().getStateType().getErasedType()) {
-			return (T) node.getState();
-		}
+    if (adapterType == Experiment.class) {
+      return (T) node.getRoot();
+    }
 
-		return (T) adapterManager.loadAdapter(node.getState(), adapterType.getName());
-	}
+    if (adapterType == Workspace.class) {
+      return (T) node.getExperimentWorkspace();
+    }
 
-	@Override
-	public Class<?>[] getAdapterList() {
-		return concat(
-				of(ExperimentType.class),
-				workspace
-						.getRegisteredExperimentTypes()
-						.map(type -> type.getStateType().getErasedType())
-						.flatMap(this::getTransitive)).toArray(Class<?>[]::new);
-	}
+    if (adapterType == node.getType().getStateType().getErasedType()) {
+      return (T) node.getState();
+    }
 
-	public Stream<? extends Class<?>> getTransitive(Class<?> adapterType) {
-		return concat(
-				of(adapterType),
-				of(adapterManager.computeAdapterTypes(adapterType)).distinct().flatMap(
-						typeName -> streamOptional(
-								tryOptional(() -> getClass().getClassLoader().loadClass(typeName)))));
-	}
+    return (T) adapterManager.loadAdapter(node.getState(), adapterType.getName());
+  }
+
+  @Override
+  public Class<?>[] getAdapterList() {
+    return concat(
+        of(ExperimentType.class, Experiment.class, Workspace.class),
+        workspace
+            .getRegisteredExperimentTypes()
+            .map(type -> type.getStateType().getErasedType())
+            .flatMap(this::getTransitive)).toArray(Class<?>[]::new);
+  }
+
+  public Stream<? extends Class<?>> getTransitive(Class<?> adapterType) {
+    return concat(
+        of(adapterType),
+        of(adapterManager.computeAdapterTypes(adapterType)).distinct().flatMap(
+            typeName -> streamOptional(
+                tryOptional(() -> getClass().getClassLoader().loadClass(typeName)))));
+  }
 }

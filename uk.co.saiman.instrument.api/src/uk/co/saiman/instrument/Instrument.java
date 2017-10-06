@@ -29,6 +29,7 @@ package uk.co.saiman.instrument;
 
 import java.util.stream.Stream;
 
+import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.ObservableValue;
 
 /**
@@ -49,7 +50,5 @@ public interface Instrument {
 
   Stream<Device> getDevices();
 
-  void addDevice(Device device);
-
-  void removeDevice(Device device);
+  Disposable addDevice(Device device);
 }

@@ -36,6 +36,15 @@ public interface Device {
   String getName();
 
   /**
+   * Devices should only return an instrument they are added to, and should only
+   * add themselves to a single instrument.
+   * 
+   * @return the instrument this device is a part of, or null if it is not a
+   *         part of an instrument
+   */
+  Instrument getInstrument();
+
+  /**
    * Get an observable value over the state of the connection to the hardware
    * device.
    * <p>

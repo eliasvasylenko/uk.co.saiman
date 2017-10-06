@@ -27,21 +27,26 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
-import static uk.co.saiman.reflection.token.TypedReference.typedObject;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Named;
 
+import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.internal.workbench.E4Workbench;
 import org.eclipse.fx.core.di.LocalInstance;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.Constants;
 
 import aQute.bnd.annotation.headers.RequireCapability;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.BorderPane;
-import uk.co.saiman.eclipse.treeview.EclipseModularTreeController;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceFactory;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -54,30 +59,55 @@ import uk.co.saiman.experiment.Workspace;
  * injection via the bundle manifest.
  */
 @RequireCapability(
-    ns = ExperimentPart.OSGI_SERVICE,
+    ns = ExperimentAddon.OSGI_SERVICE,
     filter = "(" + Constants.OBJECTCLASS + "=uk.co.saiman.experiment.WorkspaceFactory)")
-public class ExperimentPart {
+public class ExperimentAddon {
   static final String OSGI_SERVICE = "osgi.service";
   static final String ADD_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.experiment.command.addexperiment";
 
-  @FXML
-  private EclipseModularTreeController modularTreeController;
+  @Inject
+  private IEclipseContext context;
 
   @Inject
-  private Workspace workspace;
+  private IAdapterManager adapterManager;
+  private ExperimentNodeAdapterFactory experimentNodeAdapterFactory;
+  private ExperimentAdapterFactory experimentAdapterFactory;
 
   @PostConstruct
-  void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
-    container.setCenter(buildWith(loader).controller(this).loadRoot());
+  void initialize(
+      @LocalInstance FXMLLoader loader,
+      @Named(E4Workbench.INSTANCE_LOCATION) Location instanceLocation,
+      WorkspaceFactory workspaceFactory) {
+    Path workspaceLocation;
+    try {
+      workspaceLocation = Paths.get(instanceLocation.getURL().toURI());
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
 
-    modularTreeController.getTreeView().setRootData(typedObject(Workspace.class, workspace));
+    Workspace workspace = workspaceFactory.openWorkspace(workspaceLocation);
+
+    context.set(Workspace.class, workspace);
+
+    experimentNodeAdapterFactory = new ExperimentNodeAdapterFactory(adapterManager, workspace);
+    experimentAdapterFactory = new ExperimentAdapterFactory(
+        adapterManager,
+        experimentNodeAdapterFactory);
+
+    /*
+     * 
+     * 
+     * TODO invalidate the AdapterManager cache when new types of experiment are
+     * added to the workspace
+     * 
+     * 
+     * 
+     */
   }
 
-  public Workspace getExperimentWorkspace() {
-    return workspace;
-  }
-
-  public EclipseModularTreeController getExperimentTreeController() {
-    return modularTreeController;
+  @PreDestroy
+  void destroy() {
+    experimentAdapterFactory.unregister();
+    experimentNodeAdapterFactory.unregister();
   }
 }

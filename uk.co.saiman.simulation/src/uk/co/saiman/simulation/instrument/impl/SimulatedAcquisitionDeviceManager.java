@@ -89,7 +89,7 @@ public class SimulatedAcquisitionDeviceManager {
   }
 
   @Reference(policy = DYNAMIC, cardinality = MULTIPLE)
-  synchronized void addComms(DetectorSimulation detector) {
+  synchronized void addDetector(DetectorSimulation detector) {
     try {
       this.detectors.add(detector);
 
@@ -101,10 +101,11 @@ public class SimulatedAcquisitionDeviceManager {
     }
   }
 
-  synchronized void removeComms(DetectorSimulation comms) {
-    this.detectors.remove(comms);
-    ServiceRegistration<?> restService = serviceRegistrations.remove(comms);
+  synchronized void removeDetector(DetectorSimulation detector) {
+    this.detectors.remove(detector);
+    ServiceRegistration<?> restService = serviceRegistrations.remove(detector);
     if (restService != null) {
+      ((SimulatedAcquisitionDevice) context.getService(restService.getReference())).dispose();
       restService.unregister();
     }
   }
