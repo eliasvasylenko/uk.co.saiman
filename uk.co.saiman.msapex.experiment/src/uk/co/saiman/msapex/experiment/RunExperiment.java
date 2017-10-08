@@ -27,15 +27,16 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
+import org.eclipse.e4.core.di.annotations.Execute;
+
+import uk.co.saiman.eclipse.AdaptNamed;
 import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.fx.TreeItemData;
-import uk.co.saiman.fx.TreeItemImpl;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
@@ -50,24 +51,18 @@ public class RunExperiment {
   public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.runexperiment";
 
   @Execute
-  void execute(MPart part, @Localize ExperimentProperties text) {
-    ExperimentPart experimentPart = (ExperimentPart) part.getObject();
+  void execute(
+      @Localize ExperimentProperties text,
+      @AdaptNamed(ACTIVE_SELECTION) TreeEntry<?> entry) {
+    TreeEntry<?> ancestor = entry;
 
-    TreeItemImpl<?> item = experimentPart.getExperimentTreeController().getSelection();
-
-    if (item == null) {
-      throw new ExperimentException(text.exception().illegalCommandForSelection(COMMAND_ID, null));
-    }
-
-    TreeItemData<?> experimentItem = item.getData();
-
-    while (!experimentItem.type().isAssignableTo(new TypeToken<ExperimentNode<?, ?>>() {})) {
-      experimentItem = experimentItem.parent().orElseThrow(
+    while (!ancestor.type().isAssignableTo(new TypeToken<ExperimentNode<?, ?>>() {})) {
+      ancestor = ancestor.parent().orElseThrow(
           () -> new ExperimentException(
-              text.exception().illegalCommandForSelection(COMMAND_ID, item.getData())));
+              text.exception().illegalCommandForSelection(COMMAND_ID, entry)));
     }
 
-    ExperimentNode<?, ?> experimentNode = (ExperimentNode<?, ?>) experimentItem.data();
+    ExperimentNode<?, ?> experimentNode = (ExperimentNode<?, ?>) ancestor.data();
 
     new Thread(experimentNode::process).start();
   }

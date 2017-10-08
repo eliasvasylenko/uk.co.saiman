@@ -25,40 +25,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.fx;
+package uk.co.saiman.eclipse.treeview;
 
-import static uk.co.saiman.fx.FxmlLoadBuilder.build;
+import org.eclipse.e4.ui.di.AboutToShow;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
 
-import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
 /**
- * The default UI node provided by {@link DefaultTreeCellContribution}.
+ * The default tree cell contribution. This configures a cell with basic text
+ * content derived from any applicable {@link TreeTextContribution text
+ * contributions}.
  * 
  * @author Elias N Vasylenko
  */
-public class DefaultTreeCellContent extends HBox {
-	@FXML
-	private Label text;
-	@FXML
-	private Label supplementalText;
+@Component(property = Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE)
+public class DefaultTreeCellContribution implements ModularTreeContribution {
+  public static final String TEXT_ID = "text";
+  public static final String SUPPLEMENTAL_TEXT_ID = "supplementalText";
 
-	/**
-	 * @param text
-	 *          the {@link TreeTextContribution#getText(TreeItemData) main text}
-	 *          for the tree item
-	 * @param supplementalText
-	 *          the {@link TreeTextContribution#getText(TreeItemData) supplemental
-	 *          text} for the tree item
-	 */
-	public DefaultTreeCellContent(String text, String supplementalText) {
-		build().object(this).load();
+  @AboutToShow
+  public void prepare(HBox node, TreeEntry<Object> entry) {
+    Label text = new Label(entry.data().toString());
+    text.setId(TEXT_ID);
+    node.getChildren().add(text);
 
-		setMinWidth(0);
-		prefWidth(0);
+    Label supplemental = new Label();
+    supplemental.setId(SUPPLEMENTAL_TEXT_ID);
+    node.getChildren().add(supplemental);
 
-		this.text.setText(text);
-		this.supplementalText.setText(supplementalText);
-	}
+    node.setPrefWidth(0);
+  }
+
+  public static void setLabel(HBox node, String text) {
+    ((Label) node.lookup("#" + TEXT_ID)).setText(text);
+  }
+
+  public static void setSupplemental(HBox node, String text) {
+    ((Label) node.lookup("#" + SUPPLEMENTAL_TEXT_ID)).setText(text);
+  }
 }

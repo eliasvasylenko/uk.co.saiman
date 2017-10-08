@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenu;
@@ -43,9 +43,6 @@ import javafx.scene.control.Control;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import uk.co.saiman.fx.TreeCellContribution;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
 
 /**
  * A tree cell contribution intended to be supplied via {@link TreeContribution}
@@ -59,10 +56,8 @@ import uk.co.saiman.fx.TreeItemData;
  * @param <T>
  *          the type of data of applicable nodes
  */
-public abstract class MenuTreeCellContribution<T> implements TreeCellContribution<T> {
-  private final String menuId;
-  private ContextMenu menu;
-
+@Creatable
+public class MenuContributor {
   @Inject
   EModelService modelService;
 
@@ -75,32 +70,30 @@ public abstract class MenuTreeCellContribution<T> implements TreeCellContributio
   @Inject
   MApplication application;
 
-  /**
-   * @param menuId
-   *          the ID of the popup menu in the E4 model
-   */
-  public MenuTreeCellContribution(String menuId) {
-    this.menuId = menuId;
-  }
+  private String menuId;
+  private ContextMenu menu;
 
-  @SuppressWarnings({ "javadoc" })
-  @PostConstruct
-  public void configureMenu() {
+  protected ContextMenu createMenu(String menuId) {
     Control menuControl = new Control() {};
 
     MMenu menu = (MMenu) modelService.cloneSnippet(application, menuId, null);
     part.getMenus().add(menu);
 
     if (menuService.registerContextMenu(menuControl, menuId)) {
-      this.menu = menuControl.getContextMenu();
-      this.menu.addEventHandler(KeyEvent.ANY, Event::consume);
+      ContextMenu contextMenu = menuControl.getContextMenu();
+      contextMenu.addEventHandler(KeyEvent.ANY, Event::consume);
+      return contextMenu;
     } else {
       throw new RuntimeException("Unable to register tree cell context menu " + menuId);
     }
   }
 
-  @Override
-  public <U extends T> Node configureCell(TreeItemData<U> data, Node content) {
+  public Node configureCell(String menuId, Node content) {
+    if (this.menuId != menuId) {
+      this.menuId = menuId;
+      menu = createMenu(menuId);
+    }
+
     content.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
       menu.show(content, event.getScreenX(), event.getScreenY());
       event.consume();

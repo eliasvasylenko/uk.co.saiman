@@ -32,8 +32,8 @@ import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import uk.co.saiman.eclipse.AdaptNamed;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.fx.TreeItemImpl;
 
 /**
  * Remove a node from an experiment in the workspace
@@ -44,12 +44,12 @@ public class RemoveNode {
   @Execute
   void execute(
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      @AdaptNamed(ACTIVE_SELECTION) TreeItemImpl<?> item) {
+      @AdaptNamed(ACTIVE_SELECTION) TreeEntry<?> entry) {
     /*
      * TODO an "are you sure?" dialog. This is permanent!
      */
-    
+
     selectedNode.remove();
-    item.getData().parent().get().refresh(true);
+    entry.parent().get().refresh(true);
   }
 }

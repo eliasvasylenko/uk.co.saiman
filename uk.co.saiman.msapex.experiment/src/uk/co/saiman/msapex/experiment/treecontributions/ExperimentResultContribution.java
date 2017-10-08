@@ -31,55 +31,47 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.fx.TreeCellContribution;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
-import uk.co.saiman.fx.TreeTextContribution;
 
 /**
  * Contribution for root experiment nodes in the experiment tree
  * 
  * @author Elias N Vasylenko
  */
-@Component(
-    service = TreeContribution.class,
-    scope = ServiceScope.PROTOTYPE,
-    property = Constants.SERVICE_RANKING + ":Integer=" + -80)
-public class ExperimentResultContribution
-    implements TreeTextContribution<Result<?>>, TreeCellContribution<Result<?>> {
+@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + -80)
+public class ExperimentResultContribution implements ModularTreeContribution {
   private static final String RESULT_PRESENT = "Present";
 
   @Inject
   @Localize
-  ExperimentProperties text;
+  ExperimentProperties properties;
 
-  @Override
-  public <U extends Result<?>> String getText(TreeItemData<U> data) {
-    return data.data().getResultType().getName();
-  }
+  @AboutToShow
+  public void prepare(HBox node, TreeEntry<Result<?>> entry) {
+    node.getChildren().add(new Label(entry.data().getResultType().getName()));
 
-  @Override
-  public <U extends Result<?>> String getSupplementalText(TreeItemData<U> data) {
-    return "[" + data
-        .data()
-        .getData()
-        .map(d -> Objects.toString(data.data().getResultDataPath()))
-        .map(Object::toString)
-        .orElse(text.missingResult().toString()) + "]";
-  }
+    node.getChildren().add(
+        new Label(
+            "[" + entry
+                .data()
+                .getData()
+                .map(d -> Objects.toString(entry.data().getResultDataPath()))
+                .map(Object::toString)
+                .orElse(properties.missingResult().toString()) + "]"));
 
-  @Override
-  public <U extends Result<?>> Node configureCell(TreeItemData<U> data, Node content) {
-    return configurePseudoClass(
-        content,
-        getClass().getSimpleName() + (data.data().getData().isPresent() ? RESULT_PRESENT : ""));
+    configurePseudoClass(
+        node,
+        getClass().getSimpleName() + (entry.data().getData().isPresent() ? RESULT_PRESENT : ""));
   }
 }

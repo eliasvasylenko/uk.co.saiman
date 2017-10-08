@@ -28,18 +28,16 @@
 package uk.co.saiman.msapex.instrument;
 
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
-import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.eclipse.treeview.EclipseModularTreeController;
+import uk.co.saiman.eclipse.treeview.ModularTreeController;
 import uk.co.saiman.instrument.Instrument;
 
 /**
@@ -52,23 +50,19 @@ public class InstrumentPart {
   static final String OSGI_SERVICE = "osgi.service";
 
   @FXML
-  private EclipseModularTreeController modularTreeController;
+  private ModularTreeController modularTreeController;
 
   @Inject
   private Instrument instrument;
-
-  @Inject
-  private IAdapterManager adapterManager;
-  // private ExperimentNodeAdapterFactory adapterFactory;
 
   @PostConstruct
   void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    modularTreeController.getTreeView().setRootData(typedObject(Instrument.class, instrument));
+    modularTreeController.setRootData(instrument);
   }
 
-  public EclipseModularTreeController getExperimentTreeController() {
+  public ModularTreeController getExperimentTreeController() {
     return modularTreeController;
   }
 }

@@ -9,11 +9,11 @@
 	-fx-graphic: url("${fugue.icon.runtime}/size16/document.png");
 }
 
-.ModularTreeCell :RootExperimentNodeContribution #text {
+.ModularTreeCell :ExperimentContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book.png");
 }
 
-.ModularTreeCell:expanded :RootExperimentNodeContribution #text {
+.ModularTreeCell:expanded :ExperimentContribution #text {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open.png");
 }
 
@@ -21,13 +21,13 @@
 	-fx-graphic: url("${fugue.icon.runtime}/size16/flask.png");
 }
 
-.label:ExperimentLifecycleState-PROCESSING {
+.ModularTreeCell :ExperimentNodeContribution :PROCESSING {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/clock.png");	
 }
-.label:ExperimentLifecycleState-COMPLETION {
+.ModularTreeCell :ExperimentNodeContribution :COMPLETION {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/tick-circle.png");
 }
-.label:ExperimentLifecycleState-FAILURE {
+.ModularTreeCell :ExperimentNodeContribution :FAILURE {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/exclamation-red.png");
 }
 

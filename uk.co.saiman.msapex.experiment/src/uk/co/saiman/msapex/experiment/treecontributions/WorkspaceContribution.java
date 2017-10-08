@@ -29,22 +29,21 @@ package uk.co.saiman.msapex.experiment.treecontributions;
 
 import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
-import java.util.stream.Stream;
+import java.util.List;
 
+import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
 
+import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.fx.TreeChildContribution;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
 import uk.co.saiman.reflection.token.TypedReference;
 
-@Component(service = TreeContribution.class, scope = ServiceScope.PROTOTYPE)
-public class WorkspaceContribution implements TreeChildContribution<Workspace> {
-  @Override
-  public <U extends Workspace> Stream<TypedReference<?>> getChildren(TreeItemData<U> data) {
-    return data.data().getExperiments().map(c -> typedObject(Experiment.class, c));
+@Component
+public class WorkspaceContribution implements ModularTreeContribution {
+  @AboutToShow
+  public void prepare(List<TypedReference<?>> children, TreeEntry<Workspace> entry) {
+    entry.data().getExperiments().map(c -> typedObject(Experiment.class, c)).forEach(children::add);
   }
 }

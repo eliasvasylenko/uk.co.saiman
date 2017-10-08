@@ -27,55 +27,39 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
+import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setLabel;
+import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
+
 import javax.inject.Inject;
 
+import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import javafx.scene.Node;
+import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.Localize;
-import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.saiman.fx.TreeCellContribution;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
-import uk.co.saiman.fx.TreeTextContribution;
 
 /**
  * Contribution for root experiment nodes in the experiment tree
  * 
  * @author Elias N Vasylenko
  */
-@Component(
-    service = TreeContribution.class,
-    scope = ServiceScope.PROTOTYPE,
-    property = Constants.SERVICE_RANKING + ":Integer=" + 50)
-public class RootExperimentNodeContribution
-    implements TreeTextContribution<ExperimentNode<ExperimentRoot, ExperimentConfiguration>>,
-    TreeCellContribution<ExperimentNode<ExperimentRoot, ExperimentConfiguration>> {
+@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 50)
+public class ExperimentContribution implements ModularTreeContribution {
   @Inject
   @Localize
   ExperimentProperties text;
 
-  @Override
-  public <U extends ExperimentNode<ExperimentRoot, ExperimentConfiguration>> String getText(
-      TreeItemData<U> data) {
-    return data.data().getState().getName();
-  }
+  @AboutToShow
+  public void prepare(HBox node, TreeEntry<Experiment> entry) {
+    setLabel(node, entry.data().getState().getName());
+    setSupplemental(node, "[" + text.lifecycleState(entry.data().lifecycleState().get()) + "]");
 
-  @Override
-  public <U extends ExperimentNode<ExperimentRoot, ExperimentConfiguration>> String getSupplementalText(
-      TreeItemData<U> data) {
-    return "[" + text.lifecycleState(data.data().lifecycleState().get()) + "]";
-  }
-
-  @Override
-  public <U extends ExperimentNode<ExperimentRoot, ExperimentConfiguration>> Node configureCell(
-      TreeItemData<U> data,
-      Node content) {
-    return configurePseudoClass(content);
+    configurePseudoClass(node);
   }
 }

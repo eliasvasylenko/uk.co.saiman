@@ -29,21 +29,18 @@ package uk.co.saiman.eclipse.treeview;
 
 import static java.util.Collections.emptyMap;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.e4.core.commands.EHandlerService;
+import org.eclipse.e4.core.di.annotations.Creatable;
 
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import uk.co.saiman.fx.TreeCellContribution;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
 
 /**
  * A tree cell contribution intended to be supplied via {@link TreeContribution}
@@ -57,29 +54,21 @@ import uk.co.saiman.fx.TreeItemData;
  * @param <T>
  *          the type of data of applicable nodes
  */
-public abstract class CommandTreeCellContribution<T> implements TreeCellContribution<T> {
+@Creatable
+public class CommandContributor {
   @Inject
   EHandlerService handlerService;
 
-  private final String commandId;
+  @Inject
+  ECommandService commandService;
+
   private ParameterizedCommand command;
 
-  /**
-   * @param commandId
-   *          the ID of the command in the E4 model
-   */
-  public CommandTreeCellContribution(String commandId) {
-    this.commandId = commandId;
-  }
-
-  @SuppressWarnings("javadoc")
-  @PostConstruct
-  public void configureCommand(ECommandService commandService) {
+  public void configureCommand(String commandId) {
     command = commandService.createCommand(commandId, emptyMap());
   }
 
-  @Override
-  public <U extends T> Node configureCell(TreeItemData<U> data, Node content) {
+  public Node configureCell(TreeEntry<?> data, Node content) {
     content.addEventHandler(MouseEvent.ANY, event -> {
       if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
         event.consume();
@@ -103,7 +92,7 @@ public abstract class CommandTreeCellContribution<T> implements TreeCellContribu
     return content;
   }
 
-  private void executeCommand(TreeItemData<?> data, Node node) {
+  private void executeCommand(TreeEntry<?> data, Node node) {
     handlerService.executeHandler(command);
   }
 }

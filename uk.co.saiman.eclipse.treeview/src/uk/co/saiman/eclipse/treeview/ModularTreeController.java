@@ -27,11 +27,15 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
+import java.util.stream.Stream;
+
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.IInjector;
+import org.eclipse.e4.core.di.InjectorFactory;
 import org.eclipse.e4.core.services.adapter.Adapter;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 
@@ -41,10 +45,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import uk.co.saiman.eclipse.ObservableService;
-import uk.co.saiman.fx.ModularTreeView;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
-import uk.co.saiman.fx.TreeItemImpl;
+import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * A controller over a {@link ModularTreeView modular tree view} for use within
@@ -56,18 +57,20 @@ import uk.co.saiman.fx.TreeItemImpl;
  * 
  * @author Elias N Vasylenko
  */
-public class EclipseModularTreeController {
+public class ModularTreeController {
+  final private static IInjector INJECTOR = InjectorFactory.getDefault();
+
   private final StringProperty tableId = new SimpleStringProperty();
 
   @FXML
-  private EclipseModularTreeView eclipseModularTree;
+  private ModularTreeView modularTreeView;
 
   @Inject
   private IEclipseContext context;
 
   @Inject
   @ObservableService
-  private ObservableList<EclipseTreeContributor> contributors;
+  private ObservableList<ModularTreeContribution> contributors;
 
   @Inject
   private ESelectionService selectionService;
@@ -76,10 +79,10 @@ public class EclipseModularTreeController {
   private Adapter adapter;
 
   /**
-   * Instantiate a controller with the default id - the simple name of the class
-   * - and no contribution filter.
+   * Instantiate a controller with the default id - the simple name of the class -
+   * and no contribution filter.
    */
-  public EclipseModularTreeController() {
+  public ModularTreeController() {
     tableId.set(getClass().getName());
   }
 
@@ -87,29 +90,25 @@ public class EclipseModularTreeController {
    * @param id
    *          the {@link #getId() ID} of the controller to create
    */
-  public EclipseModularTreeController(String id) {
+  public ModularTreeController(String id) {
     tableId.set(id);
   }
 
   @FXML
   void initialize() {
-    contributors.addListener((ListChangeListener<EclipseTreeContributor>) change -> {
+    contributors.addListener((ListChangeListener<ModularTreeContribution>) change -> {
       while (change.next())
         if (change.wasAdded())
           change.getAddedSubList().forEach(this::prepareContribution);
-      updateContributions();
+      refresh();
     });
     contributors.stream().forEach(this::prepareContribution);
-    updateContributions();
 
-    eclipseModularTree.getSelectionModel().selectedItemProperty().addListener(
+    modularTreeView.getSelectionModel().selectedItemProperty().addListener(
         (observable, oldValue, newValue) -> {
           selectionService.setSelection(newValue);
         });
 
-    eclipseModularTree.setAdapter(adapter);
-
-    eclipseModularTree.addContribution(new EclipseTreeContribution());
   }
 
   @PreDestroy
@@ -139,35 +138,74 @@ public class EclipseModularTreeController {
     tableId.set(id);
   }
 
-  protected void prepareContribution(EclipseTreeContributor contribution) {
-    context.set(EclipseModularTreeController.class, this);
+  protected void prepareContribution(ModularTreeContribution contribution) {
+    context.set(ModularTreeController.class, this);
     ContextInjectionFactory.inject(contribution, context);
-  }
-
-  protected void updateContributions() {
-    int ranking = 0;
-    for (TreeContribution<?> contribution : contributors)
-      eclipseModularTree.addContribution(contribution, ranking++);
-  }
-
-  /**
-   * @return the modular tree view instance
-   */
-  public ModularTreeView getTreeView() {
-    return eclipseModularTree;
   }
 
   /**
    * @return the currently selected tree item
    */
-  public TreeItemImpl<?> getSelection() {
-    return (TreeItemImpl<?>) eclipseModularTree.getSelectionModel().getSelectedItem();
+  public ModularTreeItem<?> getSelection() {
+    return (ModularTreeItem<?>) modularTreeView.getSelectionModel().getSelectedItem();
   }
 
   /**
    * @return the currently selected tree item data
    */
-  public TreeItemData<?> getSelectionData() {
+  public TreeEntry<?> getSelectionData() {
     return getSelection().getValue();
+  }
+
+  /**
+   * @param root
+   *          the root object supplemented with its exact generic type
+   */
+  public void setRootData(TypedReference<?> root) {
+    ModularTreeItem<?> rootItem = createRoot(root);
+    rootItem.setExpanded(true);
+    modularTreeView.setShowRoot(false);
+
+    // add root
+    modularTreeView.setRoot(rootItem);
+
+    modularTreeView.refresh();
+  }
+
+  @SuppressWarnings("unchecked")
+  /**
+   * @param root
+   *          the root object
+   */
+  public void setRootData(Object root) {
+    setRootData(TypedReference.typedObject((Class<Object>) root.getClass(), root));
+  }
+
+  protected ModularTreeItem<?> createRoot(TypedReference<?> root) {
+    return new ModularTreeItem<>(root, this);
+  }
+
+  <U> U adapt(TreeEntry<?> treeEntry, Class<U> adapterType) {
+    return adapter.adapt(treeEntry.data(), adapterType);
+  }
+
+  IEclipseContext getContext() {
+    return context;
+  }
+
+  IInjector getInjector() {
+    return INJECTOR;
+  }
+
+  protected ModularTreeItem<?> getRoot() {
+    return (ModularTreeItem<?>) modularTreeView.getRoot();
+  }
+
+  public void refresh() {
+    getRoot().getEntry().refresh(true);
+  }
+
+  public Stream<ModularTreeContribution> getContributors() {
+    return contributors.stream();
   }
 }

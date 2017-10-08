@@ -39,8 +39,8 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 
 import uk.co.saiman.eclipse.AdaptNamed;
+import uk.co.saiman.eclipse.treeview.ModularTreeItem;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.fx.TreeItemImpl;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -53,7 +53,7 @@ public class AddNodeMenu {
   void aboutToShow(
       List<MMenuElement> items,
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      @AdaptNamed(ACTIVE_SELECTION) TreeItemImpl<?> item) {
+      @AdaptNamed(ACTIVE_SELECTION) ModularTreeItem<?> item) {
     selectedNode.getAvailableChildExperimentTypes().forEach(childType -> {
       MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
       moduleItem.setLabel(childType.getName());
@@ -62,7 +62,7 @@ public class AddNodeMenu {
         @Execute
         public void execute() {
           selectedNode.addChild(childType);
-          item.getData().refresh(true);
+          item.getEntry().refresh(true);
           item.setExpanded(true);
         }
       });

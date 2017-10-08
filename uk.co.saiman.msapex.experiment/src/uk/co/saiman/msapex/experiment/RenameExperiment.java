@@ -90,7 +90,7 @@ public class RenameExperiment {
           RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
 
           selectedNode.getState().setName(name);
-          experimentPart.getExperimentTreeController().getTreeView().refresh();
+          experimentPart.getExperimentTreeController().refresh();
         });
   }
 

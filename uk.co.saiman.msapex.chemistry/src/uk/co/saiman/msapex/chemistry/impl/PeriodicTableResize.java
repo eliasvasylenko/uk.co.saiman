@@ -49,34 +49,34 @@ import uk.co.saiman.utility.Enumeration;
  * @author Elias N Vasylenko
  */
 public class PeriodicTableResize {
-	@Execute
-	void execute(MPart part) {
-		PeriodicTablePart periodicTablePart = (PeriodicTablePart) part.getObject();
+  @Execute
+  void execute(MPart part) {
+    PeriodicTablePart periodicTablePart = (PeriodicTablePart) part.getObject();
 
-		Size currentSize = periodicTablePart.getPeriodicTableController().getTileSize();
+    Size currentSize = periodicTablePart.getPeriodicTableController().getTileSize();
 
-		periodicTablePart.getPeriodicTableController().setTileSize(next(currentSize));
-	}
+    periodicTablePart.getPeriodicTableController().setTileSize(next(currentSize));
+  }
 
-	@AboutToShow
-	void aboutToShow(List<MMenuElement> items, MPart part) {
-		PeriodicTablePart periodicTablePart = (PeriodicTablePart) part.getObject();
+  @AboutToShow
+  void aboutToShow(List<MMenuElement> items, MPart part) {
+    PeriodicTablePart periodicTablePart = (PeriodicTablePart) part.getObject();
 
-		for (Size size : Arrays.asList(Size.values())) {
-			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-			moduleItem.setLabel(Enumeration.readableName(size));
-			moduleItem.setType(ItemType.RADIO);
-			moduleItem.setSelected(periodicTablePart.getPeriodicTableController().getTileSize() == size);
-			moduleItem.setObject(new Object() {
-				@Execute
-				public void execute() {
-					if (moduleItem.isSelected()) {
-						periodicTablePart.getPeriodicTableController().setTileSize(size);
-					}
-				}
-			});
+    for (Size size : Arrays.asList(Size.values())) {
+      MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
+      moduleItem.setLabel(Enumeration.readableName(size));
+      moduleItem.setType(ItemType.RADIO);
+      moduleItem.setSelected(periodicTablePart.getPeriodicTableController().getTileSize() == size);
+      moduleItem.setObject(new Object() {
+        @Execute
+        public void execute() {
+          if (moduleItem.isSelected()) {
+            periodicTablePart.getPeriodicTableController().setTileSize(size);
+          }
+        }
+      });
 
-			items.add(moduleItem);
-		}
-	}
+      items.add(moduleItem);
+    }
+  }
 }

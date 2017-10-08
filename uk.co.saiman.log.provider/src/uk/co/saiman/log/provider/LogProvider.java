@@ -64,7 +64,9 @@ public class LogProvider implements Log {
 
   @Deactivate
   public void deactivate() {
-    usingBundle.getBundleContext().ungetService(logServiceReference);
+    if (usingBundle.getState() == Bundle.ACTIVE) {
+      usingBundle.getBundleContext().ungetService(logServiceReference);
+    }
   }
 
   private int getLogServiceLevel(Level level) {

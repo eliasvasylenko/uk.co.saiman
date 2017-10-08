@@ -25,46 +25,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.fx;
+package uk.co.saiman.eclipse.treeview;
 
-import java.util.Collection;
-import java.util.stream.Stream;
+import static uk.co.saiman.fx.FxUtilities.getResource;
+import static uk.co.saiman.fx.FxmlLoadBuilder.build;
 
-import uk.co.saiman.reflection.token.TypedReference;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.layout.HBox;
+import uk.co.saiman.fx.FxUtilities;
 
 /**
- * A type of contribution for items in a {@link ModularTreeView}.
+ * A basic tree cell implementation for {@link TreeItem}. This class may be
+ * extended to provide further functionality.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- *          the type of the tree item data
  */
-public interface TreeChildContribution<T> extends TreeContribution<T> {
+public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
   /**
-   * Determine whether children should be contributed to the given data item.
-   * This should given the same result as {@link Collection#isEmpty()} invoked
-   * on the result of {@link #getChildren(TreeItemData)}, but may be more
-   * efficient to implement.
+   * Load a new instance from the FXML located according to
+   * {@link FxUtilities#getResource(Class)} for this class.
    * 
-   * @param <U>
-   *          the specific type of the tree item
-   * @param data
-   *          a data item in the tree
-   * @return true if children should be contributed, false otherwise
+   * @param tree
+   *          the owning tree view
    */
-  default <U extends T> boolean hasChildren(TreeItemData<U> data) {
-    return getChildren(data).findAny().isPresent();
+  public ModularTreeCell(ModularTreeView tree) {
+    build().object(this).resource(getResource(ModularTreeCell.class)).load();
   }
 
-  /**
-   * Determine which children should be contributed to the given data item.
-   * 
-   * @param <U>
-   *          the specific type of the tree item
-   * @param data
-   *          a data item in the tree
-   * @return a list of children to be contributed
-   */
-  <U extends T> Stream<TypedReference<?>> getChildren(TreeItemData<U> data);
+  @Override
+  protected void updateItem(TreeEntry<?> item, boolean empty) {
+    super.updateItem(item, empty);
+
+    if (empty || item == null) {
+      clearItem();
+    } else {
+      updateItem(item);
+    }
+  }
+
+  protected void clearItem() {
+    setGraphic(null);
+  }
+
+  protected <T> void updateItem(TreeEntry<T> item) {
+    HBox node = (HBox) ((ModularTreeItem<?>.TreeEntryImpl) item).getNode();
+    setGraphic(node);
+  }
 }

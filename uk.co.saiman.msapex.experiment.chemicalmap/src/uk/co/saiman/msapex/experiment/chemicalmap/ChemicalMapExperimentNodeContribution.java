@@ -27,19 +27,23 @@
  */
 package uk.co.saiman.msapex.experiment.chemicalmap;
 
+import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setLabel;
+import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
+
+import javax.inject.Inject;
+
+import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import javafx.scene.Node;
-import uk.co.saiman.eclipse.treeview.CommandTreeCellContribution;
+import javafx.scene.layout.HBox;
+import uk.co.saiman.eclipse.treeview.MenuContributor;
+import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
 import uk.co.saiman.experiment.chemicalmap.ChemicalMapExperimentType;
-import uk.co.saiman.fx.TreeCellContribution;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
-import uk.co.saiman.fx.TreeTextContribution;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the
@@ -47,39 +51,22 @@ import uk.co.saiman.fx.TreeTextContribution;
  * 
  * @author Elias N Vasylenko
  */
-@Component(
-    service = TreeContribution.class,
-    scope = ServiceScope.PROTOTYPE,
-    property = Constants.SERVICE_RANKING + ":Integer=" + 100)
-public class ChemicalMapExperimentNodeContribution extends
-    CommandTreeCellContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>>
-    implements
-    TreeTextContribution<ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> {
+@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
+public class ChemicalMapExperimentNodeContribution implements ModularTreeContribution {
   static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.open";
 
-  /**
-   * Create over open command
-   */
-  public ChemicalMapExperimentNodeContribution() {
-    super(OPEN_COMMAND);
-  }
+  @Inject
+  MenuContributor menuContributor;
 
-  @Override
-  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getText(
-      TreeItemData<U> data) {
-    return data.data().getType().getName();
-  }
+  @AboutToShow
+  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> void prepare(
+      HBox node,
+      TreeEntry<U> data) {
+    setLabel(node, data.data().getType().getName());
+    setSupplemental(node, data.data().getState().getChemicalMapName());
 
-  @Override
-  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> String getSupplementalText(
-      TreeItemData<U> data) {
-    return data.data().getState().getChemicalMapName();
-  }
+    configurePseudoClass(node);
 
-  @Override
-  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> Node configureCell(
-      TreeItemData<U> data,
-      Node content) {
-    return configurePseudoClass(super.configureCell(data, content));
+    menuContributor.configureCell(OPEN_COMMAND, node);
   }
 }

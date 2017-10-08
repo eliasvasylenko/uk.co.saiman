@@ -40,7 +40,7 @@ import aQute.bnd.annotation.headers.RequireCapability;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.eclipse.treeview.EclipseModularTreeController;
+import uk.co.saiman.eclipse.treeview.ModularTreeController;
 import uk.co.saiman.experiment.Workspace;
 
 /**
@@ -61,7 +61,7 @@ public class ExperimentPart {
   static final String ADD_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.experiment.command.addexperiment";
 
   @FXML
-  private EclipseModularTreeController modularTreeController;
+  private ModularTreeController modularTreeController;
 
   @Inject
   private Workspace workspace;
@@ -70,14 +70,14 @@ public class ExperimentPart {
   void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    modularTreeController.getTreeView().setRootData(typedObject(Workspace.class, workspace));
+    modularTreeController.setRootData(typedObject(Workspace.class, workspace));
   }
 
   public Workspace getExperimentWorkspace() {
     return workspace;
   }
 
-  public EclipseModularTreeController getExperimentTreeController() {
+  public ModularTreeController getExperimentTreeController() {
     return modularTreeController;
   }
 }

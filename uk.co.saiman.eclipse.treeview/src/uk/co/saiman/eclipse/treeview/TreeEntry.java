@@ -25,36 +25,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.fx;
+package uk.co.saiman.eclipse.treeview;
+
+import java.util.Optional;
+
+import javafx.scene.control.TreeItem;
+import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.reflection.token.TypedReference;
 
 /**
- * A type of contribution for items in a {@link ModularTreeView}.
- * 
- * Loosely based on ideas from Eclipse CNF
+ * This interface defines the type of a {@link TreeItem} for a
+ * {@link ModularTreeView}. It provides access to the actual typed data of each
+ * node, as well as to the contributions which apply to that node, and the
+ * {@link TreeEntry item data} of the parent.
  * 
  * @author Elias N Vasylenko
  *
  * @param <T>
- *          the type of the tree item data
+ *          the type of the data
  */
-public interface TreeTextContribution<T> extends TreeContribution<T> {
-	/**
-	 * @param <U>
-	 *          a capture of the exact type of the tree item data
-	 * @param item
-	 *          the data item we wish to retrieve the text for
-	 * @return the primary text representation for the given data item, or null if
-	 *         none is provided
-	 */
-	<U extends T> String getText(TreeItemData<U> item);
+public interface TreeEntry<T> {
+  /**
+   * @return the typed data of a tree node
+   */
+  TypedReference<? extends T> typedData();
 
-	/**
-	 * @param <U>
-	 *          a capture of the exact type of the tree item data
-	 * @param item
-	 *          the data item we wish to retrieve the text for
-	 * @return any supplemental text information for the given data item, or null
-	 *         if none is provided
-	 */
-  <U extends T> String getSupplementalText(TreeItemData<U> item);
+  /**
+   * @return the actual data of a tree node
+   */
+  default T data() {
+    return typedData().getObject();
+  }
+
+  /**
+   * @return the type of the actual data of a tree node
+   */
+  default TypeToken<?> type() {
+    return typedData().getTypeToken();
+  }
+
+  /**
+   * @return a {@link TreeEntry} interface over the parent node
+   */
+  Optional<TreeEntry<?>> parent();
+
+  /**
+   * Refresh the tree cell associated with this tree item.
+   * 
+   * @param recursive
+   *          true if the item's children should also be refreshed recursively,
+   *          false otherwise
+   */
+  void refresh(boolean recursive);
 }

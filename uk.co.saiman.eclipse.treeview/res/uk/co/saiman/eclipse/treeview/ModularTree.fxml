@@ -7,9 +7,9 @@
 <?import uk.co.saiman.eclipse.*?>
 <?import uk.co.saiman.eclipse.treeview.*?>
 
-<EclipseModularTreeView
-	fx:id="eclipseModularTree"
+<ModularTreeView
+	fx:id="modularTreeView"
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml"
-	fx:controller="uk.co.saiman.eclipse.treeview.EclipseModularTreeController">
-</EclipseModularTreeView>
+	fx:controller="uk.co.saiman.eclipse.treeview.ModularTreeController">
+</ModularTreeView>

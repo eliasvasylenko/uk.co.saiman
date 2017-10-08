@@ -27,18 +27,20 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
+import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setLabel;
+import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
+
+import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import javafx.scene.Node;
+import javafx.scene.layout.HBox;
+import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.sample.SampleConfiguration;
 import uk.co.saiman.experiment.sample.SampleExperimentType;
-import uk.co.saiman.fx.TreeCellContribution;
-import uk.co.saiman.fx.TreeContribution;
-import uk.co.saiman.fx.TreeItemData;
-import uk.co.saiman.fx.TreeTextContribution;
 
 /**
  * An implementation of {@link TreeCellContribution} which registers the
@@ -46,29 +48,15 @@ import uk.co.saiman.fx.TreeTextContribution;
  * 
  * @author Elias N Vasylenko
  */
-@Component(
-    service = TreeContribution.class,
-    scope = ServiceScope.PROTOTYPE,
-    property = Constants.SERVICE_RANKING + ":Integer=" + 100)
-public class SampleExperimentNodeContribution implements
-    TreeTextContribution<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>>,
-    TreeCellContribution<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> {
-  @Override
-  public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> String getText(
-      TreeItemData<U> data) {
-    return data.data().getState().getName();
-  }
+@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
+public class SampleExperimentNodeContribution implements ModularTreeContribution {
+  @AboutToShow
+  public void prepare(
+      HBox node,
+      TreeEntry<ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> entry) {
+    setLabel(node, entry.data().getState().getName());
+    setSupplemental(node, entry.data().getState().toString());
 
-  @Override
-  public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> String getSupplementalText(
-      TreeItemData<U> data) {
-    return data.data().getState().toString();
-  }
-
-  @Override
-  public <U extends ExperimentNode<? extends SampleExperimentType<?>, ? extends SampleConfiguration>> Node configureCell(
-      TreeItemData<U> data,
-      Node content) {
-    return configurePseudoClass(content);
+    configurePseudoClass(node);
   }
 }

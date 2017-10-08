@@ -39,19 +39,19 @@ import uk.co.saiman.data.ContinuousFunction;
  *          The type of the data of the annotation
  */
 public interface ChartContinuousFunctionAnnotation<T> extends ChartAnnotation<T> {
-	@Override
-	double getX();
+  @Override
+  double getX();
 
-	/**
-	 * @return The continuous function this annotation should apply to.
-	 */
-	ContinuousFunction getContinuousFunction();
+  /**
+   * @return The continuous function this annotation should apply to.
+   */
+  ContinuousFunction<?, ?> getContinuousFunction();
 
-	/**
-	 * @return The position in the domain of the continuous function in the chart
-	 */
-	@Override
-	default double getY() {
-		return getContinuousFunction().sample(getX());
-	}
+  /**
+   * @return The position in the domain of the continuous function in the chart
+   */
+  @Override
+  default double getY() {
+    return getContinuousFunction().sample(getX());
+  }
 }

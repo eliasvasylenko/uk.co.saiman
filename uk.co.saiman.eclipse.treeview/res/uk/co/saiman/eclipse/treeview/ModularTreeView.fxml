@@ -3,16 +3,9 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-<?import uk.co.saiman.fx.DefaultTreeCellContent?>
 
 <fx:root
-	type="DefaultTreeCellContent"
+	type="TreeView"
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml">
-
-	<children>
-		<Label fx:id="text" />
-
-		<Label fx:id="supplementalText" />
-	</children>
 </fx:root>
