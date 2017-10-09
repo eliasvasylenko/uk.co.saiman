@@ -52,9 +52,6 @@ import javafx.scene.input.MouseEvent;
  * activated via right click or the context menu key.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- *          the type of data of applicable nodes
  */
 @Creatable
 public class MenuContributor {

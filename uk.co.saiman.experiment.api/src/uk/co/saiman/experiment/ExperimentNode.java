@@ -65,7 +65,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   /**
    * @return the experiment workspace containing this experiment
    */
-  Workspace getExperimentWorkspace();
+  Workspace getWorkspace();
 
   /**
    * @return the current state object of the experiment node
@@ -88,14 +88,14 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    */
   default int getIndex() {
     return getParent().map(p -> p.getChildren().collect(toList()).indexOf(this)).orElse(
-        getExperimentWorkspace().getExperiments().collect(toList()).indexOf(this));
+        getWorkspace().getExperiments().collect(toList()).indexOf(this));
   }
 
   /**
    * @return the root part of the experiment tree this part occurs in
    */
   default Experiment getRoot() {
-    return (Experiment) getAncestor(getExperimentWorkspace().getExperimentRootType()).get();
+    return (Experiment) getAncestor(getWorkspace().getExperimentRootType()).get();
   }
 
   /**

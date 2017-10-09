@@ -58,7 +58,6 @@ import uk.co.saiman.experiment.PersistedState;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultManager;
 import uk.co.saiman.experiment.ResultType;
-import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
@@ -169,7 +168,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   @Override
-  public Workspace getExperimentWorkspace() {
+  public XmlWorkspace getWorkspace() {
     return workspace;
   }
 
@@ -211,22 +210,20 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   @Override
   public void remove() {
     assertAvailable();
+    setDisposed();
 
-    if (parent != null) {
-      if (!parent.children.remove(this)) {
-        throw new ExperimentException(getText().exception().experimentDoesNotExist(this));
-      }
-    } else {
-      if (!workspace.removeExperiment(getRoot())) {
-        throw new ExperimentException(getText().exception().experimentDoesNotExist(this));
-      }
+    if (parent != null && !parent.children.remove(this)) {
+      ExperimentException e = new ExperimentException(
+          getText().exception().experimentDoesNotExist(this));
+      getWorkspace().getLog().log(Level.ERROR, e);
+      throw e;
+
     }
 
     getRootImpl().save();
-    setDisposed();
   }
 
-  private void setDisposed() {
+  protected void setDisposed() {
     lifecycleState.set(ExperimentLifecycleState.DISPOSED);
     for (XmlExperimentNode<?, ?> child : children) {
       child.setDisposed();

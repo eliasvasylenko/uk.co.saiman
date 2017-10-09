@@ -36,20 +36,14 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.sample.SampleConfiguration;
 import uk.co.saiman.experiment.sample.SampleExperimentType;
 
-/**
- * An implementation of {@link TreeCellContribution} which registers the
- * experiment tree pop-up menu from the experiment project model fragment.
- * 
- * @author Elias N Vasylenko
- */
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
-public class SampleExperimentNodeContribution implements ModularTreeContribution {
+public class SampleExperimentNodeContribution implements TreeContribution {
   @AboutToShow
   public void prepare(
       HBox node,

@@ -34,8 +34,10 @@ import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,6 +56,7 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentRoot;
+import uk.co.saiman.log.Log.Level;
 
 public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentConfiguration>
     implements Experiment {
@@ -70,9 +73,12 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentC
     super(type, id, workspace, persistedState);
   }
 
+  private Path getPath() {
+    return getWorkspace().getWorkspaceDataPath().resolve(getID() + EXPERIMENT_EXTENSION);
+  }
+
   protected Path save() {
-    Path location = getExperimentWorkspace().getWorkspaceDataPath().resolve(
-        getID() + EXPERIMENT_EXTENSION);
+    Path location = getPath();
 
     try (OutputStream output = newOutputStream(location, CREATE, TRUNCATE_EXISTING, WRITE)) {
       Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -89,7 +95,34 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentC
 
       return location;
     } catch (Exception e) {
-      throw new ExperimentException(getText().exception().cannotPersistState(this), e);
+      ExperimentException ee = new ExperimentException(
+          getText().exception().cannotPersistState(this),
+          e);
+      getWorkspace().getLog().log(Level.ERROR, ee);
+      throw ee;
+    }
+  }
+
+  @Override
+  public void remove() {
+    assertAvailable();
+    setDisposed();
+
+    if (!getWorkspace().removeExperiment(getRoot())) {
+      ExperimentException e = new ExperimentException(
+          getText().exception().experimentDoesNotExist(this));
+      getWorkspace().getLog().log(Level.ERROR, e);
+      throw e;
+    }
+
+    try {
+      Files.delete(getPath());
+    } catch (IOException e) {
+      ExperimentException ee = new ExperimentException(
+          getText().exception().cannotRemoveExperiment(this),
+          e);
+      getWorkspace().getLog().log(Level.ERROR, ee);
+      throw ee;
     }
   }
 
@@ -110,8 +143,11 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentC
 
       return experiment;
     } catch (Exception e) {
-      e.printStackTrace();
-      throw new ExperimentException(workspace.getText().exception().cannotLoadExperiment(path), e);
+      ExperimentException ee = new ExperimentException(
+          workspace.getText().exception().cannotLoadExperiment(path),
+          e);
+      workspace.getLog().log(Level.ERROR, ee);
+      throw ee;
     }
   }
 }

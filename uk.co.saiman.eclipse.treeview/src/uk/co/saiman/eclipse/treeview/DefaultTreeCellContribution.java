@@ -36,13 +36,13 @@ import javafx.scene.layout.HBox;
 
 /**
  * The default tree cell contribution. This configures a cell with basic text
- * content derived from any applicable {@link TreeTextContribution text
- * contributions}.
+ * content, which can be overridden using {@link #setLabel(HBox, String)} and
+ * {@link #setSupplemental(HBox, String)}.
  * 
  * @author Elias N Vasylenko
  */
 @Component(property = Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE)
-public class DefaultTreeCellContribution implements ModularTreeContribution {
+public class DefaultTreeCellContribution implements TreeContribution {
   public static final String TEXT_ID = "text";
   public static final String SUPPLEMENTAL_TEXT_ID = "supplementalText";
 

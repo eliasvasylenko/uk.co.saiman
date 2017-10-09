@@ -70,7 +70,7 @@ public class ModularTreeController {
 
   @Inject
   @ObservableService
-  private ObservableList<ModularTreeContribution> contributors;
+  private ObservableList<TreeContribution> contributors;
 
   @Inject
   private ESelectionService selectionService;
@@ -96,7 +96,7 @@ public class ModularTreeController {
 
   @FXML
   void initialize() {
-    contributors.addListener((ListChangeListener<ModularTreeContribution>) change -> {
+    contributors.addListener((ListChangeListener<TreeContribution>) change -> {
       while (change.next())
         if (change.wasAdded())
           change.getAddedSubList().forEach(this::prepareContribution);
@@ -138,7 +138,7 @@ public class ModularTreeController {
     tableId.set(id);
   }
 
-  protected void prepareContribution(ModularTreeContribution contribution) {
+  protected void prepareContribution(TreeContribution contribution) {
     context.set(ModularTreeController.class, this);
     ContextInjectionFactory.inject(contribution, context);
   }
@@ -205,7 +205,7 @@ public class ModularTreeController {
     getRoot().getEntry().refresh(true);
   }
 
-  public Stream<ModularTreeContribution> getContributors() {
+  public Stream<TreeContribution> getContributors() {
     return contributors.stream();
   }
 }

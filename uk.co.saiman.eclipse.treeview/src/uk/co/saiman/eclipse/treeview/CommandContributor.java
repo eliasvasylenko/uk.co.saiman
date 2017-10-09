@@ -50,9 +50,6 @@ import javafx.scene.input.MouseEvent;
  * via double click or the enter key.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- *          the type of data of applicable nodes
  */
 @Creatable
 public class CommandContributor {

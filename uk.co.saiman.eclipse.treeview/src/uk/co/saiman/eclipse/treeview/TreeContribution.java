@@ -22,7 +22,7 @@ import javafx.scene.Node;
  * 
  * @author Elias N Vasylenko
  */
-public interface ModularTreeContribution {
+public interface TreeContribution {
   default void configurePseudoClass(Node node) {
     configurePseudoClass(node, getClass().getSimpleName());
   }

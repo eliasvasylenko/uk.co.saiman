@@ -48,10 +48,10 @@ import org.eclipse.e4.core.di.suppliers.IRequestor;
 import org.eclipse.e4.core.di.suppliers.PrimaryObjectSupplier;
 import org.eclipse.e4.ui.di.AboutToShow;
 
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.HBox;
-import uk.co.saiman.fx.FxUtilities;
 import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
 
@@ -270,7 +270,7 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
 
     @Override
     public void refresh(boolean recursive) {
-      FxUtilities.runNow(() -> {
+      Platform.runLater(() -> {
         refreshImpl(recursive);
       });
     }

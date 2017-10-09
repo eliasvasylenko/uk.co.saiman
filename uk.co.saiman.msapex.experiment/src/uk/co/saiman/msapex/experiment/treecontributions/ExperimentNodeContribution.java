@@ -45,7 +45,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.eclipse.treeview.MenuContributor;
-import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
@@ -60,7 +60,7 @@ import uk.co.saiman.reflection.token.TypedReference;
 @Component(
     scope = ServiceScope.PROTOTYPE,
     property = Constants.SERVICE_RANKING + ":Integer=" + -100)
-public class ExperimentNodeContribution implements ModularTreeContribution {
+public class ExperimentNodeContribution implements TreeContribution {
   private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
 
   @Inject

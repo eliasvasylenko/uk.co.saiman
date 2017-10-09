@@ -8,12 +8,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.instrument.Device;
 
 @Component(scope = ServiceScope.PROTOTYPE)
-public class DeviceContribution implements ModularTreeContribution {
+public class DeviceContribution implements TreeContribution {
   @AboutToShow
   public void prepare(HBox node, TreeEntry<Device> item) {
     configurePseudoClass(node);

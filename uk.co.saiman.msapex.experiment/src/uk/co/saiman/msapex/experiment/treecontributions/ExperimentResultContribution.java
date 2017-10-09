@@ -39,7 +39,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.Localize;
-import uk.co.saiman.eclipse.treeview.ModularTreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Result;
@@ -50,7 +50,7 @@ import uk.co.saiman.experiment.Result;
  * @author Elias N Vasylenko
  */
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + -80)
-public class ExperimentResultContribution implements ModularTreeContribution {
+public class ExperimentResultContribution implements TreeContribution {
   private static final String RESULT_PRESENT = "Present";
 
   @Inject

@@ -83,4 +83,6 @@ public interface ExperimentExceptionProperties {
   String cannotDelete(Path newLocation);
 
   String illegalCommandForSelection(String string, Object object);
+
+  String cannotRemoveExperiment(Experiment experiment);
 }
