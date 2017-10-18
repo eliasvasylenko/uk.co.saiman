@@ -127,11 +127,16 @@ public class ExperimentEditorAddon {
     try {
       if (event.getProperty(ELEMENT) instanceof MHandlerContainer
           && SET.equals(event.getProperty(TYPE))) {
+
         IEclipseContext context = (IEclipseContext) event.getProperty(NEW_VALUE);
+        if (context == null)
+          return;
 
         MPart part = context.get(MPart.class);
-        String resourceId = part.getPersistedState().get(MANAGED_EDITOR_RESOURCE);
+        if (part == null)
+          return;
 
+        String resourceId = part.getPersistedState().get(MANAGED_EDITOR_RESOURCE);
         if (resourceId != null) {
           Result<?> result = partResults.get(part);
 
