@@ -65,13 +65,13 @@ public class ExperimentResultContribution implements TreeContribution {
         new Label(
             "[" + entry
                 .data()
-                .getData()
                 .map(d -> Objects.toString(entry.data().getResultDataPath()))
                 .map(Object::toString)
+                .tryGet()
                 .orElse(properties.missingResult().toString()) + "]"));
 
     configurePseudoClass(
         node,
-        getClass().getSimpleName() + (entry.data().getData().isPresent() ? RESULT_PRESENT : ""));
+        getClass().getSimpleName() + (entry.data().isValid() ? RESULT_PRESENT : ""));
   }
 }

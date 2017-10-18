@@ -69,7 +69,7 @@ public class CopleyLinearDimension implements StageDimension<Length> {
     this.actualPosition = new ObservablePropertyImpl<>(minimum);
 
     this.requestedPosition.observe(this::positionRequested);
-    fixedRate(0, 500, MILLISECONDS).observe(o -> updateActualPosition());
+    fixedRate(0, 50, MILLISECONDS).observe(o -> updateActualPosition());
   }
 
   void positionRequested(Quantity<Length> position) {

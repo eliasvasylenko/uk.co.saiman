@@ -96,17 +96,11 @@ public abstract class AccumulatingContinuousFunction<UD extends Quantity<UD>, UR
     super(domain, unitRange, new double[domain.getDepth()]);
 
     source
-        .then(m -> System.out.println("!"))
-        .then(m -> System.out.println("?"))
         .executeOn(newSingleThreadExecutor())
         .aggregateBackpressure()
         .executeOn(newSingleThreadExecutor())
         .then(onObservation(o -> o.requestNext()))
-        .then(m -> System.out.println("*"))
-        .observe(Observer.singleUse(o -> m -> {
-          o.requestNext();
-          System.out.println(m.size());
-        }));
+        .observe(Observer.singleUse(o -> m -> o.requestNext()));
 
     source
         .then(m -> count++)

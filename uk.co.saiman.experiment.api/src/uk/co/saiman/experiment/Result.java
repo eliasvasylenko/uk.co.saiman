@@ -28,14 +28,13 @@
 package uk.co.saiman.experiment;
 
 import java.nio.file.Path;
-import java.util.Optional;
 
-import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
 
-public interface Result<T> extends Observable<Optional<T>> {
+public interface Result<T> extends ObservableValue<T> {
   ExperimentNode<?, ?> getExperimentNode();
 
   /**
@@ -47,8 +46,6 @@ public interface Result<T> extends Observable<Optional<T>> {
   Path getResultDataPath();
 
   ResultType<T> getResultType();
-
-  Optional<T> getData();
 
   default TypeToken<Result<T>> getThisTypeToken() {
     return new TypeToken<Result<T>>() {}

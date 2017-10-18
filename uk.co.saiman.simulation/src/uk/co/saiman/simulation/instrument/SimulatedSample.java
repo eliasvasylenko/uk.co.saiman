@@ -33,16 +33,16 @@ import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice;
 
 /**
- * A description of a simulated physical sample, which can be turned into a
+ * A description of a physical, chemical sample, which can be turned into a
  * simulated acquisition signal by way of a {@link DetectorSimulation} and an
  * {@link SimulatedAcquisitionDevice}.
  * 
  * @author Elias N Vasylenko
  */
 public interface SimulatedSample {
-	/**
-	 * @return a mapping from chemicals which constitute the sample to their
-	 *         intensities
-	 */
-	Map<ChemicalComposition, Double> chemicalIntensities();
+  /**
+   * @return a mapping from chemicals which constitute the sample to their
+   *         intensities
+   */
+  Map<ChemicalComposition, Double> chemicalIntensities();
 }

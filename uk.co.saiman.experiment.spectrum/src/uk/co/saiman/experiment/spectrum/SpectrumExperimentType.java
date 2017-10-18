@@ -103,7 +103,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 
     try {
       acquisition.get();
-      context.results().get(spectrumResult).getData().ifPresent(d -> d.complete());
+      context.results().get(spectrumResult).tryGet().ifPresent(d -> d.complete());
     } catch (InterruptedException | ExecutionException e) {
       context.results().unset(spectrumResult);
       throw new ExperimentException(properties.experiment().exception().experimentInterrupted(), e);

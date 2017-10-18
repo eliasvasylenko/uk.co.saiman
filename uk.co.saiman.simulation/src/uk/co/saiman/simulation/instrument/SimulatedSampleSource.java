@@ -27,6 +27,15 @@
  */
 package uk.co.saiman.simulation.instrument;
 
+/**
+ * A simulated sample source to retrieve {@link SimulatedSample descriptions of
+ * a physical, chemical samples}.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface SimulatedSampleSource {
+  /**
+   * @return a description of a chemical sample at the time of invocation
+   */
   SimulatedSample getNextSample();
 }

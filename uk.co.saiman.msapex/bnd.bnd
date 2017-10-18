@@ -2,6 +2,9 @@ Bundle-Name: SAI :: MSApex
 Bundle-SymbolicName: ${p};singleton:=true
 
 Export-Package:\
+	uk.co.saiman.msapex.model
+
+Private-Package:\
 	uk.co.saiman.msapex
 
 -include:\

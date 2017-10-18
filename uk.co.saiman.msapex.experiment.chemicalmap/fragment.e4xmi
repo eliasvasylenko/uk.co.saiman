@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_JTBioHzxEeeLpZ9wHq5Ynw"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_JTBioHzxEeeLpZ9wHq5Ynw">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_hteqYLPbEeea0psSVURp7w" featurename="children" parentElementId="uk.co.saiman.msapex.experiment.partstack.resulteditor">
+    <elements xsi:type="basic:Part" xmi:id="_nrDcELPbEeea0psSVURp7w" elementId="uk.co.saiman.msapex.experiment.chemicalmap.part.image" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.chemicalmap/uk.co.saiman.msapex.experiment.chemicalmap.ChemicalMapImageEditorPart" label="Image">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_t9Go8LPbEeea0psSVURp7w" elementId="uk.co.saiman.msapex.experiment.chemicalmap.toolbar.0"/>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

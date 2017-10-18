@@ -8,4 +8,4 @@ Bundle-Name: SAI :: MSApex :: SAINT
 	fragment.e4xmi
 
 Private-Package: \
-	uk.co.saiman.simulation.saint.msapex
+	uk.co.saiman.msapex.saint

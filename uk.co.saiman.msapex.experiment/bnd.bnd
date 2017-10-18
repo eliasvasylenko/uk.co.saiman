@@ -36,8 +36,6 @@ Bundle-Name: SAI :: MSApex :: Experiment
 #	uk.co.saiman.msapex.experiment.treecontributions
 
 Export-Package: \
-	uk.co.saiman.msapex.experiment.editor,\
-\
 	uk.co.saiman.msapex.experiment,\
 	uk.co.saiman.msapex.experiment.treecontributions
 

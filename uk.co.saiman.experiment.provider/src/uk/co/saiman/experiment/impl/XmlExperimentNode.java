@@ -363,6 +363,11 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
       public void setID(String id) {
         XmlExperimentNode.this.setID(id);
       }
+
+      @Override
+      public Optional<String> getID() {
+        return Optional.ofNullable(id);
+      }
     };
   }
 
@@ -409,12 +414,12 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
 
   @Override
   public void clearResults() {
-    results.values().forEach(r -> r.setData(null));
+    results.values().forEach(r -> r.setProblem(new NullPointerException()));
   }
 
   protected <U> XmlResult<U> setResult(ResultType<U> resultType, U resultData) {
     XmlResult<U> result = getResult(resultType);
-    result.setData(resultData);
+    result.set(resultData);
     return result;
   }
 

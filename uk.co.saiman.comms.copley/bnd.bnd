@@ -14,6 +14,9 @@ Bundle-Name: SAI :: Comms :: Copley
 	org.eclipse.equinox.metatype
 	
 
-Private-Package: uk.co.saiman.comms.copley.impl
+Private-Package: \
+	uk.co.saiman.comms.copley.impl,\
+	uk.co.saiman.comms.copley.rest,\
+	uk.co.saiman.comms.copley.simulation
 
 Export-Package: uk.co.saiman.comms.copley

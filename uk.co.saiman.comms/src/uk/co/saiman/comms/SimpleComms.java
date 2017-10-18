@@ -121,8 +121,10 @@ public abstract class SimpleComms<T> implements Comms<T> {
     if (!status().isEqual(CLOSED)) {
       try {
         comms.close();
-        controller.closeController();
-        controller = null;
+        if (controller != null) {
+          controller.closeController();
+          controller = null;
+        }
         status.set(CLOSED);
       } catch (CommsException e) {
         throw setFault(e);

@@ -86,16 +86,16 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
   private StageDimension<Length> xAxis;
   private StageDimension<Length> yAxis;
 
-  private boolean atExchange;
-  private boolean atHome;
+  private boolean requestedExchange;
+  private boolean requestedHome;
 
   @Override
-  void initialize(Instrument instrument, CopleyComms comms, PropertyLoader loader) {
+  protected void initialize(Instrument instrument, CopleyComms comms, PropertyLoader loader) {
     super.initialize(instrument, comms, loader);
     instrument.lifecycleState().filter(BEGIN_OPERATION::equals).observe(o -> moveToHome());
   }
 
-  void configure(CopleyXYStageConfiguration configuration, Units units) {
+  protected void configure(CopleyXYStageConfiguration configuration, Units units) {
     lowerBoundX = units.parseQuantity(configuration.lowerBoundX()).asType(Length.class);
     lowerBoundY = units.parseQuantity(configuration.lowerBoundY()).asType(Length.class);
 
@@ -123,8 +123,8 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
 
     merge(xAxis.requestedPosition(), yAxis.requestedPosition()).observe(p -> {
       synchronized (CopleyXYStageDevice.this) {
-        atHome = false;
-        atExchange = false;
+        requestedHome = false;
+        requestedExchange = false;
       }
     });
   }
@@ -145,31 +145,27 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
   }
 
   public synchronized void moveToHome() {
-    if (!atHome) {
-      System.out.println("moving home");
-
+    if (!requestedHome) {
       xAxis.requestedPosition().set(homeX);
       yAxis.requestedPosition().set(homeY);
 
-      atExchange = false;
-      atHome = true;
+      requestedExchange = false;
+      requestedHome = true;
 
       // TODO wait for move
     }
   }
 
   public synchronized void moveToExchange() {
-    if (!atExchange) {
+    if (!requestedExchange) {
       moveToHome();
       getInstrument().requestStandby();
-
-      System.out.println("exhanging...");
 
       xAxis.requestedPosition().set(exchangeX);
       yAxis.requestedPosition().set(exchangeY);
 
-      atExchange = true;
-      atHome = false;
+      requestedExchange = true;
+      requestedHome = false;
 
       // TODO wait for move
     }

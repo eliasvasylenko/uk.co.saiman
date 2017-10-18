@@ -32,6 +32,7 @@
 	uk.co.saiman.msapex.camera;version=snapshot,\
 	uk.co.saiman.msapex.chemistry;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
+	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
 	uk.co.saiman.simulation.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	javax.measure.unit-api

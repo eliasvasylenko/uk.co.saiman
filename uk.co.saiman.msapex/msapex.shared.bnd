@@ -18,6 +18,7 @@
 	${req;uk.co.saiman.msapex.instrument},\
 	${req;uk.co.saiman.msapex.instrument.acquisition},\
 	${req;uk.co.saiman.msapex.instrument.stage},\
+	${req;uk.co.saiman.msapex.instrument.sample},\
 	${req;uk.co.saiman.instrument.provider},\
 	${req;uk.co.saiman.msapex.instrument.stage},\
 	${req;uk.co.saiman.msapex},\

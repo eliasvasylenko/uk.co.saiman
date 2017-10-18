@@ -24,7 +24,7 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 \
 	javax.measure.unit-api
 
-Private-Package: uk.co.saiman.msapex.instrument.acquisition
+Export-Package: uk.co.saiman.msapex.instrument.acquisition
 
 -includeresource: \
 	{fragment.e4xmi},\

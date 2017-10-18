@@ -8,14 +8,14 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.sample.XYStageConfiguration;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.measurement.Units;
+import uk.co.saiman.saint.SaintXYStageConfiguration;
 
 @Component
-public class SaintXYStageExperimentType
-    implements XYStageExperimentType<XYStageConfiguration>, ExperimentType<XYStageConfiguration> {
+public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXYStageConfiguration>,
+    ExperimentType<SaintXYStageConfiguration> {
   private static final String X_STATE = "xOffset";
   private static final String Y_STATE = "yOffset";
 
@@ -31,13 +31,13 @@ public class SaintXYStageExperimentType
   }
 
   @Override
-  public XYStageConfiguration createState(
-      ExperimentConfigurationContext<XYStageConfiguration> context) {
+  public SaintXYStageConfiguration createState(
+      ExperimentConfigurationContext<SaintXYStageConfiguration> context) {
     String id = "A1";
 
-    context.setID("Sample " + id);
+    context.setID(context.getID().orElse("Sample " + id));
 
-    return new XYStageConfiguration() {
+    return new SaintXYStageConfiguration() {
       private Quantity<Length> x = loadLength(X_STATE);
       private Quantity<Length> y = loadLength(Y_STATE);
 

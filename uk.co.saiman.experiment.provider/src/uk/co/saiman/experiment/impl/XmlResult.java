@@ -28,19 +28,18 @@
 package uk.co.saiman.experiment.impl;
 
 import java.nio.file.Path;
-import java.util.Optional;
 
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultType;
-import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.ObservablePropertyImpl;
 
-public class XmlResult<T> extends HotObservable<Optional<T>> implements Result<T> {
+public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T> {
   private final XmlExperimentNode<?, ?> node;
   private final ResultType<T> resultType;
-  private T data;
 
   public XmlResult(XmlExperimentNode<?, ?> node, ResultType<T> type) {
+    super(new NullPointerException());
     this.node = node;
     this.resultType = type;
   }
@@ -58,15 +57,5 @@ public class XmlResult<T> extends HotObservable<Optional<T>> implements Result<T
   @Override
   public ResultType<T> getResultType() {
     return resultType;
-  }
-
-  protected void setData(T data) {
-    this.data = data;
-    next(getData());
-  }
-
-  @Override
-  public Optional<T> getData() {
-    return Optional.ofNullable(data);
   }
 }

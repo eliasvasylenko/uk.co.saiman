@@ -86,9 +86,16 @@ public class MenuContributor {
   }
 
   public Node configureCell(String menuId, Node content) {
-    if (this.menuId != menuId) {
-      this.menuId = menuId;
-      menu = createMenu(menuId);
+    ContextMenu menu;
+    synchronized (this) {
+      if (this.menuId != menuId) {
+        menu = createMenu(menuId);
+
+        this.menuId = menuId;
+        this.menu = menu;
+      } else {
+        menu = this.menu;
+      }
     }
 
     content.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {

@@ -66,10 +66,10 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
     implements CopleyComms, Comms<CopleyController> {
   static final String CONFIGURATION_PID = "uk.co.saiman.comms.copley";
 
-  static final int NODE_ID_MASK = 0x7F;
-  static final int NODE_ID_MARK = 0x80;
-  static final byte CHECKSUM = 0x5A;
-  static final int WORD_SIZE = 2;
+  public static final int NODE_ID_MASK = 0x7F;
+  public static final int NODE_ID_MARK = 0x80;
+  public static final byte CHECKSUM = 0x5A;
+  public static final int WORD_SIZE = 2;
 
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(

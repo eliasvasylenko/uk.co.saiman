@@ -28,9 +28,8 @@
 package uk.co.saiman.experiment;
 
 import java.lang.reflect.Type;
-import java.util.Map;
 
-public interface MissingExperimentType extends ExperimentType<Map<String, String>> {
+public interface MissingExperimentType extends ExperimentType<PersistedState> {
   @Override
   default Type getThisType() {
     return MissingExperimentType.class;

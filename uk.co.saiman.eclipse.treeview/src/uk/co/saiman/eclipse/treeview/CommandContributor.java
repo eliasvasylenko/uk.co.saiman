@@ -59,19 +59,32 @@ public class CommandContributor {
   @Inject
   ECommandService commandService;
 
+  private String commandId;
   private ParameterizedCommand command;
 
-  public void configureCommand(String commandId) {
-    command = commandService.createCommand(commandId, emptyMap());
+  protected ParameterizedCommand createCommand(String commandId) {
+    return commandService.createCommand(commandId, emptyMap());
   }
 
-  public Node configureCell(TreeEntry<?> data, Node content) {
+  public Node configureCell(String commandId, Node content) {
+    ParameterizedCommand command;
+    synchronized (this) {
+      if (this.commandId != commandId) {
+        command = createCommand(commandId);
+
+        this.commandId = commandId;
+        this.command = command;
+      } else {
+        command = this.command;
+      }
+    }
+
     content.addEventHandler(MouseEvent.ANY, event -> {
       if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
         event.consume();
 
         if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-          executeCommand(data, content);
+          executeCommand(command);
         }
       }
     });
@@ -81,7 +94,7 @@ public class CommandContributor {
         event.consume();
 
         if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
-          executeCommand(data, content);
+          executeCommand(command);
         }
       }
     });
@@ -89,7 +102,7 @@ public class CommandContributor {
     return content;
   }
 
-  private void executeCommand(TreeEntry<?> data, Node node) {
+  protected void executeCommand(ParameterizedCommand command) {
     handlerService.executeHandler(command);
   }
 }

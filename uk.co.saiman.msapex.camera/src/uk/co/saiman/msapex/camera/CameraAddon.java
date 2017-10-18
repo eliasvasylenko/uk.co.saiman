@@ -24,8 +24,8 @@ import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
 /**
- * Register a camera device in the application context whenever one becomes
- * available and there is no camera already registered.
+ * Register a camera device in the application context and persist the selection
+ * between runs.
  *
  * @author Elias N Vasylenko
  */

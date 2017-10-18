@@ -53,6 +53,7 @@ import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 
 /**
  * Reference implementation of {@link Workspace}.
@@ -115,7 +116,7 @@ public class XmlWorkspace implements Workspace {
         XmlExperiment.load(this, path);
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      getLog().log(Level.ERROR, e);
     }
   }
 

@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.treeview.MenuContributor;
+import uk.co.saiman.eclipse.treeview.CommandContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
@@ -50,7 +50,7 @@ public class SpectrumExperimentNodeContribution implements TreeContribution {
   static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.open";
 
   @Inject
-  MenuContributor menuContributor;
+  CommandContributor commandContributor;
 
   @AboutToShow
   public void prepare(
@@ -61,6 +61,6 @@ public class SpectrumExperimentNodeContribution implements TreeContribution {
 
     configurePseudoClass(node);
 
-    menuContributor.configureCell(OPEN_COMMAND, node);
+    commandContributor.configureCell(OPEN_COMMAND, node);
   }
 }

@@ -1,0 +1,51 @@
+[
+	{
+		"service.pid": "uk.co.saiman.simulation.adc.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.simulation.adc",
+		"acquisitionResolution": "2.5E-7s",
+		"signalToNoiseRatio": "120"
+	},
+	{
+		"service.pid": "uk.co.saiman.msapex.simulation.samplesource.xystage.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.msapex.simulation.samplesource.xystage",
+		"cameraResolutionWidth": 320,
+		"cameraResolutionHeight": 240,
+		"viewAreaWidth": "20mm"
+	},
+	{
+		"service.pid": "uk.co.saiman.instrument.stage.copley.xy.rastering.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.instrument.stage.copley.xy.rastering",
+		"exchangePositionX": "0mm",
+		"exchangePositionY": "-100mm",
+		"homePositionX": "0mm",
+		"homePositionY": "0mm",
+		"lowerBoundX": "-27.5mm",
+		"lowerBoundY": "-20mm",
+		"upperBoundX": "27.5mm",
+		"upperBoundY": "20mm"
+	},
+	{
+		"service.pid": "uk.co.saiman.comms.copley.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.copley",
+		"axes": 2,
+		"node": 0,
+		"serialPort": "CNCA2"
+	},
+	{
+		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.copley.simulation",
+		"axes": 2,
+		"node": 0,
+		"serialPort": "CNCB2"
+	},
+	{
+		"service.pid": "uk.co.saiman.comms.saint.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.saint",
+		"serialPort": "CNCA0"
+	},
+	{
+		"service.pid": "uk.co.saiman.comms.saint.simulation.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.saint.simulation",
+		"serialPort": "CNCB0"
+	}
+]

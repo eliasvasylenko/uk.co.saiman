@@ -79,7 +79,7 @@ public class XmlWorkspaceFactory implements WorkspaceFactory {
     return new XmlWorkspace(this, location, loader.getProperties(ExperimentProperties.class));
   }
 
-  public Log getLog() {
+  Log getLog() {
     return Log.forwardingLog(() -> log);
   }
 }

@@ -49,17 +49,14 @@ import uk.co.saiman.camera.CameraDevice;
  */
 public class CameraDevicesMenu {
   @AboutToShow
-  void aboutToShow(
-      List<MMenuElement> items,
-      IEclipseContext context,
-      @Service List<CameraDevice> availableDevices) {
+  void aboutToShow(List<MMenuElement> items, @Service List<CameraDevice> availableDevices) {
     for (CameraDevice module : new ArrayList<>(availableDevices)) {
       MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
       moduleItem.setLabel(module.getName());
       moduleItem.setType(ItemType.PUSH);
       moduleItem.setObject(new Object() {
         @Execute
-        public void execute() {
+        public void execute(IEclipseContext context) {
           CameraSelectionHelper.selectCamera(context, module);
         }
       });

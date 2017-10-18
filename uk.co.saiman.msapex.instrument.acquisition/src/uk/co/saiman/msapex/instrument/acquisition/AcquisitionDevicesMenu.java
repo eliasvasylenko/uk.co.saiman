@@ -27,18 +27,21 @@
  */
 package uk.co.saiman.msapex.instrument.acquisition;
 
-import java.util.ArrayList;
+import static java.util.stream.Collectors.toCollection;
+
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
+import org.eclipse.fx.core.di.Service;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 
@@ -49,32 +52,37 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
  * @author Elias N Vasylenko
  */
 public class AcquisitionDevicesMenu {
-	private AcquisitionPart acquisitionPart;
+  @AboutToShow
+  void aboutToShow(
+      List<MMenuElement> items,
+      @Service List<AcquisitionDevice> available,
+      @Optional AcquisitionDeviceSelection selection) {
+    if (selection == null)
+      selection = new AcquisitionDeviceSelection();
 
-	@PostConstruct
-	void initialise(MPart part) {
-		acquisitionPart = (AcquisitionPart) part.getObject();
-	}
+    Set<AcquisitionDevice> selectedDevices = selection.getSelectedDevices().collect(
+        toCollection(LinkedHashSet::new));
 
-	@AboutToShow
-	void aboutToShow(List<MMenuElement> items) {
-		for (AcquisitionDevice module : new ArrayList<>(acquisitionPart.getAvailableAcquisitionDevices())) {
-			MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-			moduleItem.setLabel(module.getName());
-			moduleItem.setType(ItemType.CHECK);
-			moduleItem.setSelected(acquisitionPart.getSelectedAcquisitionDevices().contains(module));
-			moduleItem.setObject(new Object() {
-				@Execute
-				public void execute() {
-					if (moduleItem.isSelected()) {
-						acquisitionPart.selectAcquisitionDevice(module);
-					} else {
-						acquisitionPart.deselectAcquisitionDevice(module);
-					}
-				}
-			});
+    for (AcquisitionDevice module : available) {
+      MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
+      moduleItem.setLabel(module.getName());
+      moduleItem.setType(ItemType.CHECK);
+      moduleItem.setSelected(selectedDevices.contains(module));
+      moduleItem.setObject(new Object() {
+        @Execute
+        public void execute(IEclipseContext context) {
+          if (moduleItem.isSelected()) {
+            selectedDevices.add(module);
+          } else {
+            selectedDevices.remove(module);
+          }
+          context.modify(
+              AcquisitionDeviceSelection.class,
+              new AcquisitionDeviceSelection(selectedDevices));
+        }
+      });
 
-			items.add(moduleItem);
-		}
-	}
+      items.add(moduleItem);
+    }
+  }
 }

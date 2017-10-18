@@ -1,7 +1,6 @@
 Bundle-Name: SAI :: MSApex :: Stage
 
 -include:\
-	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.oxygen.bnd,\
 	${build}/include/eclipse.fx.3.0.0.bnd,\
 	${build}/include/fugue.icons.bnd
@@ -27,6 +26,5 @@ Bundle-Name: SAI :: MSApex :: Stage
 Export-Package: uk.co.saiman.msapex.instrument.stage
 
 -includeresource: \
-	{fragment.e4xmi},\
 	res,\
 	{css=css}

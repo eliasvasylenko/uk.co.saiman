@@ -27,14 +27,14 @@
  */
 package uk.co.saiman.msapex.instrument.acquisition;
 
-import static java.util.Arrays.asList;
-import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toCollection;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,12 +44,8 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.fx.core.di.LocalInstance;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
@@ -60,9 +56,7 @@ import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.data.ContinuousFunctionExpression;
-import uk.co.saiman.eclipse.AdaptNamed;
 import uk.co.saiman.eclipse.Localize;
-import uk.co.saiman.eclipse.ObservableService;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
 
@@ -72,6 +66,8 @@ import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
  * @author Elias N Vasylenko
  */
 public class AcquisitionPart {
+  static final String ID = "uk.co.saiman.msapex.instrument.acquisition.part";
+
   @Localize
   @Inject
   private AcquisitionProperties text;
@@ -81,11 +77,7 @@ public class AcquisitionPart {
   @FXML
   private Label noSelectionLabel;
 
-  @Inject
-  @ObservableService
-  private ObservableSet<AcquisitionDevice> availableDevices;
-
-  private ObservableSet<AcquisitionDevice> selectedDevices = FXCollections.observableSet();
+  private Set<AcquisitionDevice> currentSelection;
   private Map<AcquisitionDevice, ContinuousFunctionChartController> controllers = new HashMap<>();
 
   @Inject
@@ -95,74 +87,33 @@ public class AcquisitionPart {
   @Inject
   private Units units;
 
-  /**
-   * Get the visible acquisition devices.
-   * 
-   * @return The set of all currently visible acquisition devices
-   */
-  public synchronized Set<AcquisitionDevice> getSelectedAcquisitionDevices() {
-    return new HashSet<>(selectedDevices);
-  }
+  @Inject
+  synchronized void updateSelectedDevices(@Optional AcquisitionDeviceSelection devices) {
+    if (chartPane == null)
+      return;
 
-  /**
-   * Set the visible acquisition devices. All devices in the given set will be
-   * made visible, and all others will be removed.
-   * 
-   * @param selectedDevices
-   *          The acquisition devices to show
-   * @return True if the device selection changes as a result of this
-   *         invocation, false otherwise
-   */
-  public synchronized boolean setSelectedAcquisitionDevices(
-      Collection<? extends AcquisitionDevice> selectedDevices) {
-    return this.selectedDevices.retainAll(selectedDevices)
-        | this.selectedDevices.addAll(selectedDevices);
-  }
+    Set<AcquisitionDevice> newSelection = devices == null
+        ? emptySet()
+        : devices.getSelectedDevices().collect(toCollection(LinkedHashSet::new));
 
-  /**
-   * Set an acquisition device to be visible. All currently visible devices will
-   * remain so.
-   * 
-   * @param device
-   *          The acquisition device to show
-   * @return True if the device selection changes as a result of this
-   *         invocation, false otherwise
-   */
-  public synchronized boolean selectAcquisitionDevice(AcquisitionDevice device) {
-    return selectedDevices.add(device);
-  }
-
-  /**
-   * Set an acquisition device to not be visible. All other currently visible
-   * devices will remain so.
-   * 
-   * @param device
-   *          The acquisition device to not show
-   * @return True if the device selection changes as a result of this
-   *         invocation, false otherwise
-   */
-  public synchronized boolean deselectAcquisitionDevice(AcquisitionDevice device) {
-    return selectedDevices.remove(device);
-  }
-
-  /**
-   * @return the set of all known available acquisition devices
-   */
-  public ObservableSet<AcquisitionDevice> getAvailableAcquisitionDevices() {
-    return availableDevices;
+    for (AcquisitionDevice oldDevice : currentSelection) {
+      if (!newSelection.remove(oldDevice)) {
+        deselectAcquisitionDevice(oldDevice);
+        currentSelection.remove(oldDevice);
+      }
+    }
+    for (AcquisitionDevice newDevice : newSelection) {
+      selectAcquisitionDevice(newDevice);
+      currentSelection.add(newDevice);
+    }
   }
 
   @PostConstruct
-  void postConstruct(BorderPane container) {
+  void postConstruct(BorderPane container, @Optional AcquisitionDeviceSelection devices) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
-    selectedDevices.addListener((SetChangeListener.Change<? extends AcquisitionDevice> change) -> {
-      if (change.wasAdded()) {
-        selectAcquisitionDeviceImpl(change.getElementAdded());
-      } else if (change.wasRemoved()) {
-        deselectAcquisitionDeviceImpl(change.getElementRemoved());
-      }
-    });
+    currentSelection = new HashSet<>();
+    updateSelectedDevices(devices);
   }
 
   @FXML
@@ -170,7 +121,7 @@ public class AcquisitionPart {
     noSelectionLabel.textProperty().bind(wrap(text.noAcquisitionDevices()));
   }
 
-  private void selectAcquisitionDeviceImpl(AcquisitionDevice acquisitionDevice) {
+  private void selectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {
     noSelectionLabel.setVisible(false);
 
     /*
@@ -199,24 +150,11 @@ public class AcquisitionPart {
     chartController.getContinuousFunctions().add(latestContinuousFunction);
   }
 
-  private void deselectAcquisitionDeviceImpl(AcquisitionDevice acquisitionDevice) {
+  private void deselectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {
     ContinuousFunctionChartController controller = controllers.remove(acquisitionDevice);
 
     chartPane.getChildren().remove(controller.getRoot());
 
     noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
-  }
-
-  @Inject
-  synchronized void setSelection(
-      @Optional @AdaptNamed(ACTIVE_SELECTION) AcquisitionDevice device,
-      MPart part) {
-    if (device != null) {
-      part.getContext().activate();
-
-      if (!selectedDevices.contains(device)) {
-        setSelectedAcquisitionDevices(asList(device));
-      }
-    }
   }
 }

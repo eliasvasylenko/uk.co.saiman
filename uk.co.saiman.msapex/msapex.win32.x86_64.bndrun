@@ -126,8 +126,8 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	org.eclipse.fx.ui.workbench.renderers.base;version='[3.1.0,3.1.1)',\
 	org.eclipse.fx.ui.workbench.renderers.fx;version='[3.1.0,3.1.1)',\
 	org.eclipse.fx.ui.workbench.services;version='[3.1.0,3.1.1)',\
-	org.eclipse.rap.jface;version='[3.2.0,3.2.1)',\
-	org.eclipse.rap.rwt;version='[3.2.0,3.2.1)',\
+	org.eclipse.rap.jface;version='[3.3.0,3.3.1)',\
+	org.eclipse.rap.rwt;version='[3.3.0,3.3.1)',\
 	org.eclipse.swt;version='[3.106.0,3.106.1)',\
 	org.sat4j.core;version='[2.3.5,2.3.6)',\
 	org.sat4j.pb;version='[2.3.5,2.3.6)',\
@@ -181,6 +181,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.msapex.instrument;version=snapshot,\
 	uk.co.saiman.msapex.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
+	uk.co.saiman.msapex.instrument.sample;version=snapshot,\
 	uk.co.saiman.msapex.simulation;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi.api;version=snapshot,\
@@ -199,4 +200,5 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.text.provider;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webconsole.branding;version=snapshot,\
-	uk.co.saiman.webconsole.webresource;version=snapshot
+	uk.co.saiman.webconsole.webresource;version=snapshot,\
+	uk.co.saiman.saint.simulation;version=snapshot

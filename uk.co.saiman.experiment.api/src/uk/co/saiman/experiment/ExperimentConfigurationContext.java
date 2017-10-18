@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.Optional;
+
 /**
  * The context of an experiment node's initial configuration. When a workspace
  * is requested to create an experiment node of a given type, this context is
@@ -43,39 +45,52 @@ package uk.co.saiman.experiment;
  *          the type of the executing node
  */
 public interface ExperimentConfigurationContext<T> {
-	/**
-	 * @return the currently executing experiment node
-	 */
-	ExperimentNode<?, T> node();
+  /**
+   * @return the currently executing experiment node
+   */
+  ExperimentNode<?, T> node();
 
-	ResultManager results();
+  ResultManager results();
 
-	/**
-	 * This map represents the state of the experiment node associated with this
-	 * configuration context. This data should be persisted by the workspace
-	 * according to the format of an experiment file.
-	 * <p>
-	 * The map is coupled directly with the persisted data, with changes of the
-	 * map being immediately stored.
-	 * <p>
-	 * There is no standard enforced for the format of the value strings.
-	 * <p>
-	 * The execution of an experiment should generally not affect its persisted
-	 * state, directly or otherwise.
-	 * 
-	 * @return a map containing persisted key/value pairs
-	 */
-	PersistedState persistedState();
+  /**
+   * This map represents the state of the experiment node associated with this
+   * configuration context. This data should be persisted by the workspace
+   * according to the format of an experiment file.
+   * <p>
+   * The map is coupled directly with the persisted data, with changes of the
+   * map being immediately stored.
+   * <p>
+   * There is no standard enforced for the format of the value strings.
+   * <p>
+   * The execution of an experiment should generally not affect its persisted
+   * state, directly or otherwise.
+   * 
+   * @return a map containing persisted key/value pairs
+   */
+  PersistedState persistedState();
 
-	/**
-	 * Set the ID of the node. The ID should be unique amongst the children of a
-	 * node's parent. Typically the ID may be used to locate the
-	 * {@link #persistedState() persisted state} of an experiment, and so
-	 * changing the ID may result in the movement or modification of persisted
-	 * data.
-	 * 
-	 * @param id
-	 *          the ID for the node
-	 */
-	void setID(String id);
+  /**
+   * Get the ID of the node. The ID must be unique amongst the children of a
+   * node's parent. Typically the ID may be used to locate the
+   * {@link #persistedState() persisted state} of an experiment, and so changing
+   * the ID may result in the movement or modification of persisted data.
+   * <p>
+   * If the node is newly created an id must be set before the end of
+   * {@link ExperimentType#createState(ExperimentConfigurationContext)}. If the
+   * node is loaded from disk, it should retain keep the previously id.
+   * 
+   * @return the ID of the node, or an empty optional if it has not yet been set
+   */
+  Optional<String> getID();
+
+  /**
+   * Set the ID of the node. The ID must be unique amongst the children of a
+   * node's parent. Typically the ID may be used to locate the
+   * {@link #persistedState() persisted state} of an experiment, and so changing
+   * the ID may result in the movement or modification of persisted data.
+   * 
+   * @param id
+   *          the ID for the node
+   */
+  void setID(String id);
 }

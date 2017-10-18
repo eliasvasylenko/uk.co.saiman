@@ -67,8 +67,4 @@ public class DateTimeParser<T> implements AbstractParser<T> {
 					position.getErrorIndex() > 0 ? position.getErrorIndex() : position.getIndex(), e).getException();
 		}
 	}
-
-	public static void main(String... args) {
-		System.out.println(Parser.list(overIsoLocalDate(), ",").parse("4567-01-23,010-01-23"));
-	}
 }

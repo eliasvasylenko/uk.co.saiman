@@ -27,11 +27,6 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Collections.unmodifiableMap;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentExecutionContext;
@@ -39,6 +34,7 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.MissingExperimentType;
+import uk.co.saiman.experiment.PersistedState;
 
 public class MissingExperimentTypeImpl implements MissingExperimentType {
   private final ExperimentProperties text;
@@ -59,19 +55,14 @@ public class MissingExperimentTypeImpl implements MissingExperimentType {
   }
 
   @Override
-  public Map<String, String> createState(
-      ExperimentConfigurationContext<Map<String, String>> context) {
-    Map<String, String> state = new HashMap<>();
-
+  public PersistedState createState(ExperimentConfigurationContext<PersistedState> context) {
     context.persistedState().putString(getID(), getMissingTypeID());
-    context.persistedState().getStrings().forEach(
-        string -> state.put(string, context.persistedState().getString(string).get()));
 
-    return unmodifiableMap(state);
+    return context.persistedState();
   }
 
   @Override
-  public void execute(ExperimentExecutionContext<Map<String, String>> context) {
+  public void execute(ExperimentExecutionContext<PersistedState> context) {
     throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
   }
 

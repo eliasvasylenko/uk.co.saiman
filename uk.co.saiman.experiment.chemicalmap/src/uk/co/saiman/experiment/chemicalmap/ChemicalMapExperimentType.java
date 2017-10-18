@@ -129,7 +129,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
       throw new ExperimentException(properties.experiment().exception().experimentInterrupted(), e);
     }
 
-    context.results().get(chemicalMapResult).getData().get().save();
+    context.results().get(chemicalMapResult).get().save();
   }
 
   protected abstract void startAcquisition();

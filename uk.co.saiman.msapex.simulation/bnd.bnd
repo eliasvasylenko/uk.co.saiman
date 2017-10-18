@@ -17,6 +17,7 @@ Bundle-Name: SAI :: MSApex :: Simulation
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 \
+	uk.co.saiman.camera;version=snapshot,\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
