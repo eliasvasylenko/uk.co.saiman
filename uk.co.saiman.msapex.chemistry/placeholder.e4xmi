@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_om4acLREEeeVS6ywMXk18Q">
+  <imports xsi:type="basic:Part" xmi:id="_OK3ZMLRFEeeVS6ywMXk18Q" elementId="uk.co.saiman.msapex.chemistry.part.periodictable"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qI7cALREEeeVS6ywMXk18Q" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Command" xmi:id="_snODYLREEeeVS6ywMXk18Q" elementId="uk.co.saiman.msapex.chemistry.command.lame" commandName="Lame"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_EcQl4LRFEeeVS6ywMXk18Q" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.status">
+    <elements xsi:type="advanced:Placeholder" xmi:id="_tt4UALRFEeeVS6ywMXk18Q" elementId="uk.co.saiman.msapex.chemistry.placeholder.periodictable" ref="_OK3ZMLRFEeeVS6ywMXk18Q"/>
+  </fragments>
+</fragment:ModelFragments>

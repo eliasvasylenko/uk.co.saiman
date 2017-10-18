@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="__OjsYIDHEeeN2sgw5j4-sA">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_AinVQIDIEeeN2sgw5j4-sA" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.status">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_RcD-oIDIEeeN2sgw5j4-sA" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Command" xmi:id="_T7Fl0IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.command.periodictable.resize" commandName="Periodic Table Resize" description="Resize the periodic table" category="_dUNRUIDIEeeN2sgw5j4-sA"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_YPrngIDIEeeN2sgw5j4-sA" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Handler" xmi:id="_anNfkIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.handler.periodictable.resize" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.impl.PeriodicTableResize" command="_T7Fl0IDIEeeN2sgw5j4-sA"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_b0r_UIDIEeeN2sgw5j4-sA" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Category" xmi:id="_dUNRUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.category" name="Chemistry" description="Chemical inspection"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_BvFO8LQ6EeeWGpjhK3e1_A" featurename="children" parentElementId="uk.co.saiman.msapex.partstack.status"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_48rEgLRBEeeVS6ywMXk18Q" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
     <elements xsi:type="basic:Part" xmi:id="_H6hW8IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.part.periodictable" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.impl.PeriodicTablePart" label="Periodic Table" iconURI="${fugue.icon.runtime}/size16/application-table.png">
       <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_N0O8UIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.toolbar.periodictable">
@@ -11,14 +21,5 @@
         </children>
       </toolbar>
     </elements>
-  </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_RcD-oIDIEeeN2sgw5j4-sA" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Command" xmi:id="_T7Fl0IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.command.periodictable.resize" commandName="Periodic Table Resize" description="Resize the periodic table" category="_dUNRUIDIEeeN2sgw5j4-sA"/>
-  </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_YPrngIDIEeeN2sgw5j4-sA" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Handler" xmi:id="_anNfkIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.handler.periodictable.resize" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.impl.PeriodicTableResize" command="_T7Fl0IDIEeeN2sgw5j4-sA"/>
-  </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_b0r_UIDIEeeN2sgw5j4-sA" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Category" xmi:id="_dUNRUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.category" name="Chemistry" description="Chemical inspection"/>
   </fragments>
 </fragment:ModelFragments>
