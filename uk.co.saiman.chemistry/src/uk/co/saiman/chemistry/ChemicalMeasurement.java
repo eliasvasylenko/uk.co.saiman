@@ -27,9 +27,6 @@
  */
 package uk.co.saiman.chemistry;
 
-import org.osgi.service.component.annotations.Component;
-
-@Component
 public interface ChemicalMeasurement {
 	ChemicalComposition getTheoreticalComposition();
 
