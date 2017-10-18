@@ -29,6 +29,8 @@ package uk.co.saiman.log.provider;
 
 import java.util.function.Function;
 
+import uk.co.saiman.log.provider.ConsoleLog.ConsoleLogConfiguration;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -40,7 +42,9 @@ import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
  * {@link LogListener} implementation dumping all logs to console
@@ -49,74 +53,85 @@ import org.osgi.service.metatype.annotations.Designate;
  */
 @Designate(ocd = ConsoleLogConfiguration.class)
 @Component(
-		configurationPid = ConsoleLog.CONFIGURATION_PID,
-		configurationPolicy = ConfigurationPolicy.REQUIRE,
-		immediate = true)
+    configurationPid = ConsoleLog.CONFIGURATION_PID,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    immediate = true)
 public class ConsoleLog implements LogListener {
-	static final String CONFIGURATION_PID = "uk.co.saiman.console.log";
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "Console Log Configuration",
+      description = "The console log provides a listener over the OSGi log service which directs output to stdout")
+  public @interface ConsoleLogConfiguration {
+    @AttributeDefinition(
+        name = "Enable Console Log",
+        description = "Enable console output for the OSGi log service")
+    boolean enabled();
+  }
 
-	private boolean enabled = false;
+  static final String CONFIGURATION_PID = "uk.co.saiman.console.log";
 
-	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	@SuppressWarnings("javadoc")
-	public void addLogReader(LogReaderService service) {
-		service.addLogListener(this);
-	}
+  private boolean enabled = false;
 
-	@SuppressWarnings("javadoc")
-	public void removeLogReader(LogReaderService service) {
-		service.removeLogListener(this);
-	}
+  @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+  @SuppressWarnings("javadoc")
+  public void addLogReader(LogReaderService service) {
+    service.addLogListener(this);
+  }
 
-	@Activate
-	@Modified
-	void updated(ConsoleLogConfiguration configuration) {
-		enabled = configuration.enabled();
-	}
+  @SuppressWarnings("javadoc")
+  public void removeLogReader(LogReaderService service) {
+    service.removeLogListener(this);
+  }
 
-	@Override
-	public void logged(LogEntry entry) {
-		if (enabled) {
-			String level = formatLevel(entry.getLevel());
-			String bundle = formatIfPresent(entry.getBundle());
-			String service = formatIfPresent(entry.getServiceReference());
+  @Activate
+  @Modified
+  void updated(ConsoleLogConfiguration configuration) {
+    enabled = configuration.enabled();
+  }
 
-			System.out.println("[" + level + bundle + service + "] " + entry.getMessage());
+  @Override
+  public void logged(LogEntry entry) {
+    if (enabled) {
+      String level = formatLevel(entry.getLevel());
+      String bundle = formatIfPresent(entry.getBundle());
+      String service = formatIfPresent(entry.getServiceReference());
 
-			if (entry.getException() != null) {
-				entry.getException().printStackTrace();
-			}
-		}
-	}
+      System.out.println("[" + level + bundle + service + "] " + entry.getMessage());
 
-	private String formatLevel(int level) {
-		String levelString;
+      if (entry.getException() != null) {
+        entry.getException().printStackTrace();
+      }
+    }
+  }
 
-		switch (level) {
-		case LogService.LOG_ERROR:
-			levelString = "ERROR  ";
-			break;
-		case LogService.LOG_WARNING:
-			levelString = "WARNING";
-			break;
-		case LogService.LOG_INFO:
-			levelString = "INFO   ";
-			break;
-		case LogService.LOG_DEBUG:
-			levelString = "DEBUG  ";
-			break;
-		default:
-			throw new IllegalArgumentException("Unexpected log level");
-		}
+  private String formatLevel(int level) {
+    String levelString;
 
-		return levelString;
-	}
+    switch (level) {
+    case LogService.LOG_ERROR:
+      levelString = "ERROR  ";
+      break;
+    case LogService.LOG_WARNING:
+      levelString = "WARNING";
+      break;
+    case LogService.LOG_INFO:
+      levelString = "INFO   ";
+      break;
+    case LogService.LOG_DEBUG:
+      levelString = "DEBUG  ";
+      break;
+    default:
+      throw new IllegalArgumentException("Unexpected log level");
+    }
 
-	private String formatIfPresent(Object object) {
-		return formatIfPresent(object, Object::toString);
-	}
+    return levelString;
+  }
 
-	private String formatIfPresent(Object object, Function<Object, String> format) {
-		return object != null ? "; " + format.apply(object) : "";
-	}
+  private String formatIfPresent(Object object) {
+    return formatIfPresent(object, Object::toString);
+  }
+
+  private String formatIfPresent(Object object, Function<Object, String> format) {
+    return object != null ? "; " + format.apply(object) : "";
+  }
 }
