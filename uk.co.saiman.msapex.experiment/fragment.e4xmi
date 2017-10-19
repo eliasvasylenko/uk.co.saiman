@@ -46,6 +46,5 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_H5pqEKqSEees7YDco-lLaA" featurename="addons" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="application:Addon" xmi:id="_KwIH8KqSEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.addon.workspace" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentWorkspaceAddon"/>
-    <elements xsi:type="application:Addon" xmi:id="_83iTELM6Eeea0psSVURp7w" elementId="uk.co.saiman.msapex.experiment.addon.editor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentEditorAddon"/>
   </fragments>
 </fragment:ModelFragments>

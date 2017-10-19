@@ -28,6 +28,11 @@
 package uk.co.saiman.msapex.experiment;
 
 import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
+import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,16 +44,23 @@ import javax.inject.Named;
 
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.fx.core.di.LocalInstance;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.Constants;
+import org.osgi.service.event.Event;
 
 import aQute.bnd.annotation.headers.RequireCapability;
 import javafx.fxml.FXMLLoader;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.WorkspaceFactory;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.msapex.editor.EditorAddon;
 
 /**
  * Addon for registering an experiment workspace in the root application
@@ -107,6 +119,32 @@ public class ExperimentWorkspaceAddon {
      * 
      * 
      */
+  }
+
+  /**
+   * Watch for context creation events so we can inject into the part contexts
+   * before the UI is created.
+   * 
+   * @param event
+   *          the event which may be a context creation event
+   */
+  @Inject
+  @Optional
+  private synchronized void initializeEditorContext(@UIEventTopic(TOPIC_CONTEXT) Event event) {
+    try {
+      if (event.getProperty(ELEMENT) instanceof MHandlerContainer
+          && SET.equals(event.getProperty(TYPE))) {
+        IEclipseContext context = (IEclipseContext) event.getProperty(NEW_VALUE);
+
+        MPart parentPart = context.getParent().get(MPart.class);
+
+        if (OpenExperimentHandler.RESULT_EDITOR_PART.equals(parentPart.getElementId())) {
+          context.set(Result.class, (Result<?>) context.get(EditorAddon.EDITOR_DATA));
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
+    }
   }
 
   @PreDestroy

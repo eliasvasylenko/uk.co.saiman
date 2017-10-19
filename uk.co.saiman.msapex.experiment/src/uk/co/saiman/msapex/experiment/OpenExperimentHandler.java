@@ -37,6 +37,7 @@ import uk.co.saiman.eclipse.AdaptNamed;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.msapex.editor.EditorService;
 
 /**
  * Add an experiment to the workspace.
@@ -44,6 +45,8 @@ import uk.co.saiman.experiment.ExperimentProperties;
  * @author Elias N Vasylenko
  */
 public class OpenExperimentHandler {
+  static final String RESULT_EDITOR_PART = "uk.co.saiman.msapex.experiment.compositepart.resulteditor";
+
   @CanExecute
   boolean canExecute(
       @Optional @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
@@ -54,7 +57,7 @@ public class OpenExperimentHandler {
   @Execute
   void execute(
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      ExperimentEditorManager editorManager) {
-    editorManager.openEditor(selectedNode.getResults().findFirst().get());
+      EditorService editorService) {
+    editorService.openEditor(RESULT_EDITOR_PART, selectedNode.getResults().findFirst().get());
   }
 }

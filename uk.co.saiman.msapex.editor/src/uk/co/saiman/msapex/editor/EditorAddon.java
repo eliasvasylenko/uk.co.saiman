@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment;
+package uk.co.saiman.msapex.editor;
 
 import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
@@ -41,7 +41,6 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
@@ -54,19 +53,16 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.osgi.service.event.Event;
 
-import uk.co.saiman.experiment.Result;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
-public class ExperimentEditorAddon {
-  static final String PART_ID = "uk.co.saiman.msapex.experiment.compositepart.resulteditor";
-  static final String PART_STACK_ID = "uk.co.saiman.msapex.partstack.editor";
-  private static final String MANAGED_EDITOR_RESOURCE = "uk.co.saiman.msapex.editor.resource";
+public class EditorAddon {
+  public static final String PART_STACK_ID = "uk.co.saiman.msapex.partstack.editor";
+  public static final String EDITOR_DATA = "uk.co.saiman.msapex.editor.data";
+  private static final String EDITOR_RESOURCE = "uk.co.saiman.msapex.editor.resource";
 
   @Inject
   private EPartService partService;
-  @Inject
-  private IEventBroker eventBroker;
 
   @Inject
   private MApplication application;
@@ -76,17 +72,21 @@ public class ExperimentEditorAddon {
   @Inject
   private Log log;
 
-  private final Map<MCompositePart, Result<?>> partResults = new HashMap<>();
-  private final Map<Result<?>, MCompositePart> editorParts = new HashMap<>();
+  private final Map<MPart, Object> partResults = new HashMap<>();
+  private final Map<Object, MPart> editorParts = new HashMap<>();
 
   @PostConstruct
   void initialize(IEclipseContext context) {
-    context.set(ExperimentEditorManager.class, new ExperimentEditorManager() {
+    context.set(EditorService.class, new EditorService() {
       @Override
-      public synchronized <T> MCompositePart openEditor(Result<T> result) {
-        MCompositePart editorPart = editorParts.computeIfAbsent(result, r -> createEditor(result));
+      public MPart openEditor(String partId, Object data) {
+        MPart editorPart = getEditor(partId, data);
         partService.activate(editorPart);
         return editorPart;
+      }
+
+      MPart getEditor(String partId, Object data) {
+        return editorParts.computeIfAbsent(data, r -> createEditor(partId, data));
       }
     });
   }
@@ -95,21 +95,17 @@ public class ExperimentEditorAddon {
     editorParts.remove(partResults.remove(controller));
   }
 
-  protected <T> MCompositePart createEditor(Result<T> data) {
-    MCompositePart editorPart = (MCompositePart) modelService
-        .cloneSnippet(application, PART_ID, null);
+  protected <T> MPart createEditor(String partId, Object data) {
+    MPart editorPart = (MPart) modelService.cloneSnippet(application, partId, null);
     editorPart.setDirty(true);
     editorPart.setCloseable(true);
-    editorPart
-        .getPersistedState()
-        .put(MANAGED_EDITOR_RESOURCE, data.getResultDataPath().toString());
+    editorPart.getPersistedState().put(EDITOR_RESOURCE, data.toString());
 
     partResults.put(editorPart, data);
 
     ((MPartStack) modelService.find(PART_STACK_ID, application)).getChildren().add(editorPart);
 
     partService.showPart(editorPart, PartState.CREATE);
-    editorPart.getContext().set(Result.class, data);
 
     return editorPart;
   }
@@ -127,25 +123,25 @@ public class ExperimentEditorAddon {
     try {
       if (event.getProperty(ELEMENT) instanceof MHandlerContainer
           && SET.equals(event.getProperty(TYPE))) {
-
         IEclipseContext context = (IEclipseContext) event.getProperty(NEW_VALUE);
-        if (context == null)
-          return;
 
         MPart part = context.get(MPart.class);
-        if (part == null)
-          return;
+        String resourceId = part.getPersistedState().get(EDITOR_RESOURCE);
 
-        String resourceId = part.getPersistedState().get(MANAGED_EDITOR_RESOURCE);
         if (resourceId != null) {
-          Result<?> result = partResults.get(part);
+          Object result = partResults.get(part);
+
+          /*
+           * TODO if result == null we're coming from the persisted state and
+           * need to load it
+           */
 
           System.out.println("[REM] initializing part: " + part.getElementId() + " " + resourceId);
 
           prepareContainerPartContext(context, result);
         } else {
           MPart parentPart = context.getParent().get(MPart.class);
-          if (parentPart != null && PART_ID.equals(parentPart.getElementId())) {
+          if (parentPart != null && parentPart.getPersistedState().get(EDITOR_RESOURCE) != null) {
             prepareContributionPartContext(context);
           }
         }
@@ -163,7 +159,7 @@ public class ExperimentEditorAddon {
     context.set(MDirtyable.class, context.getParent().get(MDirtyable.class));
   }
 
-  private void prepareContainerPartContext(IEclipseContext context, Result<?> result) {
-    context.set(Result.class, result);
+  private void prepareContainerPartContext(IEclipseContext context, Object result) {
+    context.set(EDITOR_DATA, result);
   }
 }

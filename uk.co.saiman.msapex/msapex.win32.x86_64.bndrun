@@ -175,6 +175,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.msapex.camera;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.chemistry;version=snapshot,\
+	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.msapex.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.msapex.experiment.spectrum;version=snapshot,\
