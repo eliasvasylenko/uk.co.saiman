@@ -55,7 +55,7 @@ public interface ExperimentType<S> {
   /**
    * @return the unique and persistent ID of the experiment type
    */
-  String getID();
+  String getId();
 
   /**
    * @return the human readable name of the experiment type

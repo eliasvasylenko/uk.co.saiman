@@ -43,4 +43,5 @@ Export-Package: \
 -includeresource:\
 	{css=css},\
 	res,\
-	{fragment.e4xmi}
+	{always.e4xmi},\
+	{initial.e4xmi}

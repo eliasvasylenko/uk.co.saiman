@@ -32,11 +32,11 @@ import java.nio.file.Path;
 public interface ResultManager {
   /**
    * Experiment data root directories are defined hierarchically from the
-   * {@link Workspace#getWorkspaceDataPath() workspace path}.
+   * {@link Workspace#getRootPath() workspace path}.
    * 
    * @return the data root of the experiment
    */
-  Path dataPath();
+  Path getDataPath();
 
   /**
    * @param resultType

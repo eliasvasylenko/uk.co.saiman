@@ -71,10 +71,12 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentC
       XmlWorkspace workspace,
       XmlPersistedState persistedState) {
     super(type, id, workspace, persistedState);
+
+    workspace.addExperimentImpl(this);
   }
 
   private Path getPath() {
-    return getWorkspace().getWorkspaceDataPath().resolve(getID() + EXPERIMENT_EXTENSION);
+    return getWorkspace().getRootPath().resolve(getId() + EXPERIMENT_EXTENSION);
   }
 
   protected Path save() {
@@ -108,7 +110,7 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentC
     assertAvailable();
     setDisposed();
 
-    if (!getWorkspace().removeExperiment(getRoot())) {
+    if (!getWorkspace().removeExperiment(getExperiment())) {
       ExperimentException e = new ExperimentException(
           getText().exception().experimentDoesNotExist(this));
       getWorkspace().getLog().log(Level.ERROR, e);
@@ -127,7 +129,7 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentC
   }
 
   protected static XmlExperiment load(XmlWorkspace workspace, String name) {
-    return load(workspace, workspace.getWorkspaceDataPath().resolve(name + EXPERIMENT_EXTENSION));
+    return load(workspace, workspace.getRootPath().resolve(name + EXPERIMENT_EXTENSION));
   }
 
   static XmlExperiment load(XmlWorkspace workspace, Path path) {

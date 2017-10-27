@@ -66,7 +66,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
     }
 
     if (adapterType == Experiment.class) {
-      return (T) node.getRoot();
+      return (T) node.getExperiment();
     }
 
     if (adapterType == Workspace.class) {

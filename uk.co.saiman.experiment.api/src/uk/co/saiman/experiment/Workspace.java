@@ -30,10 +30,12 @@ package uk.co.saiman.experiment;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import uk.co.saiman.observable.Observable;
+
 /**
- * The concept of an experiment in a {@link Workspace workspace} is
- * represented by a hierarchy of nodes. The workspace provides an interface for
- * managing those experiments.
+ * The concept of an experiment in a {@link Workspace workspace} is represented
+ * by a hierarchy of nodes. The workspace provides an interface for managing
+ * those experiments.
  * <p>
  * A workspace contains a register of {@link ExperimentType experiment types}.
  * Experiment nodes can be created according to these types.
@@ -41,63 +43,70 @@ import java.util.stream.Stream;
  * @author Elias N Vasylenko
  */
 public interface Workspace {
-	/**
-	 * The root path for the workspace data persistence.
-	 * 
-	 * @return the data root of the workspace
-	 */
-	Path getWorkspaceDataPath();
+  /**
+   * The root path for the workspace data persistence. This may be a virtual
+   * file system over e.g. a database according on the chosen persistence
+   * strategy.
+   * 
+   * @return the data root of the workspace
+   */
+  Path getRootPath();
 
-	/*
-	 * Root experiment types
-	 */
+  ExperimentNode<?, ?> resolveNode(Path path);
 
-	/**
-	 * @return the root experiment type
-	 */
-	ExperimentRoot getExperimentRootType();
+  ExperimentNode<?, ?> resolveContainingNode(Path path);
 
-	/**
-	 * Get all experiments of the {@link #getExperiments() root experiment
-	 * type}.
-	 * 
-	 * @return all registered root experiment parts
-	 */
-	Stream<Experiment> getExperiments();
+  /*
+   * Root experiment types
+   */
 
-	/**
-	 * Add a root experiment node to management.
-	 * 
-	 * @param name
-	 *          the name of the new experiment
-	 * @return a new root experiment part of the root type
-	 */
-	Experiment addExperiment(String name);
+  /**
+   * @return the root experiment type
+   */
+  ExperimentRoot getExperimentRootType();
 
-	/*
-	 * Child experiment types
-	 */
+  /**
+   * Get all experiments of the {@link #getExperiments() root experiment type}.
+   * 
+   * @return all registered root experiment parts
+   */
+  Stream<Experiment> getExperiments();
 
-	/**
-	 * Register an available experiment type
-	 * 
-	 * @param experimentType
-	 *          a possible experiment type
-	 * @return true if the type was added successfully, false otherwise
-	 */
-	boolean registerExperimentType(ExperimentType<?> experimentType);
+  /**
+   * Add a root experiment node to management.
+   * 
+   * @param name
+   *          the name of the new experiment
+   * @return a new root experiment part of the root type
+   */
+  Experiment addExperiment(String name);
 
-	/**
-	 * Unregister an available experiment type
-	 * 
-	 * @param experimentType
-	 *          a possible experiment type
-	 * @return true if the type was removed successfully, false otherwise
-	 */
-	boolean unregisterExperimentType(ExperimentType<?> experimentType);
+  /*
+   * Child experiment types
+   */
 
-	/**
-	 * @return the set of all experiment types registered to this workspace
-	 */
-	Stream<ExperimentType<?>> getRegisteredExperimentTypes();
+  /**
+   * Register an available experiment type
+   * 
+   * @param experimentType
+   *          a possible experiment type
+   * @return true if the type was added successfully, false otherwise
+   */
+  boolean registerExperimentType(ExperimentType<?> experimentType);
+
+  /**
+   * Unregister an available experiment type
+   * 
+   * @param experimentType
+   *          a possible experiment type
+   * @return true if the type was removed successfully, false otherwise
+   */
+  boolean unregisterExperimentType(ExperimentType<?> experimentType);
+
+  /**
+   * @return the set of all experiment types registered to this workspace
+   */
+  Stream<ExperimentType<?>> getRegisteredExperimentTypes();
+
+  Observable<WorkspaceEvent> events();
 }

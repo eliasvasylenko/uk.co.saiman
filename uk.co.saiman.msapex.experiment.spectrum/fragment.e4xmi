@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_lrkSELAhEee3CYPXi8ELmw">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_mlnfgLAhEee3CYPXi8ELmw" featurename="children" parentElementId="uk.co.saiman.msapex.experiment.partstack.resulteditor">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_mlnfgLAhEee3CYPXi8ELmw" featurename="children" parentElementId="uk.co.saiman.msapex.experiment.spectrum.partstack.editor">
     <elements xsi:type="basic:Part" xmi:id="_rVPQULAhEee3CYPXi8ELmw" elementId="uk.co.saiman.msapex.experiment.spectrum.part.graph" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SpectrumGraphEditorPart" label="Graph">
       <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_1kB_kLAhEee3CYPXi8ELmw" elementId="uk.co.saiman.msapex.experiment.spectrum.toolbar.0">
         <children xsi:type="menu:DirectToolItem" xmi:id="_2bw0QLJPEeeJ5pK9mFDPsw" elementId="uk.co.saiman.msapex.experiment.spectrum.directtoolitem.dirty" label="Dirty?" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SetDirty"/>
       </toolbar>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_oGF0ULpUEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="basic:CompositePart" xmi:id="_p0iTILpUEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.spectrum.compositepart.editor" label="Spectrum" selectedElement="_xxMnsLpUEeel5-btXoqucA" horizontal="true">
+      <persistedState key="uk.co.saiman.msapex.editor.result.class" value="bundleclass://uk.co.saiman.experiment/uk.co.saiman.experiment.spectrum.Spectrum"/>
+      <children xsi:type="basic:PartStack" xmi:id="_xxMnsLpUEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.spectrum.partstack.editor"/>
     </elements>
   </fragments>
 </fragment:ModelFragments>

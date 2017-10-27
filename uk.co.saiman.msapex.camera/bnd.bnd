@@ -18,7 +18,8 @@ Bundle-Name: SAI :: MSApex :: Camera
 	com.github.sarxos.webcam-capture
 
 -includeresource:\
-	{fragment.e4xmi},\
+	{always.e4xmi},\
+	{initial.e4xmi},\
 	res,\
 	{css=css}
 

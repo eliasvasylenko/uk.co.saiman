@@ -7,17 +7,16 @@
 
 		<fragment
 			apply="always"
-			uri="fragment.e4xmi" />
+			uri="always.e4xmi" />
     </extension>
 
 	<extension
-		id="placeholderContribution"
+		id="initialModelContribution"
     	point="org.eclipse.e4.workbench.model">
 
 		<fragment
 			apply="initial"
-			uri="placeholder.e4xmi" />
+			uri="initial.e4xmi" />
     </extension>
 
 </plugin> 
-

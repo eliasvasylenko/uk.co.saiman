@@ -32,6 +32,7 @@ import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import java.util.List;
 
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
@@ -53,7 +54,7 @@ public class AddNodeMenu {
   void aboutToShow(
       List<MMenuElement> items,
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      @AdaptNamed(ACTIVE_SELECTION) ModularTreeItem<?> item) {
+      @Optional @AdaptNamed(ACTIVE_SELECTION) ModularTreeItem<?> item) {
     selectedNode.getAvailableChildExperimentTypes().forEach(childType -> {
       MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
       moduleItem.setLabel(childType.getName());
@@ -62,8 +63,10 @@ public class AddNodeMenu {
         @Execute
         public void execute() {
           selectedNode.addChild(childType);
-          item.getEntry().refresh(true);
-          item.setExpanded(true);
+          if (item != null) {
+            item.getEntry().refresh(true);
+            item.setExpanded(true);
+          }
         }
       });
 

@@ -24,7 +24,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   AcquisitionDevice acquisitionDevice;
 
   @Override
-  public String getID() {
+  public String getId() {
     return getClass().getName();
   }
 

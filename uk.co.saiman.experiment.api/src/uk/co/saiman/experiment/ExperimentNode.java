@@ -30,6 +30,7 @@ package uk.co.saiman.experiment;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -60,7 +61,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    *         {@link ExperimentConfigurationContext}. The ID should be unique
    *         amongst the children of a node's parent.
    */
-  String getID();
+  String getId();
 
   /**
    * @return the experiment workspace containing this experiment
@@ -84,6 +85,18 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   Optional<ExperimentNode<?, ?>> getParent();
 
   /**
+   * @return the path of the experiment node data relative to the
+   *         {@link Workspace#getRootPath() workspace root}.
+   */
+  Path getDataPath();
+
+  /**
+   * @return the absolute path of the experiment node data from the
+   *         {@link Workspace#getRootPath() workspace root}.
+   */
+  Path getAbsoluteDataPath();
+
+  /**
    * @return the node's index in its parent's list of children
    */
   default int getIndex() {
@@ -94,7 +107,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   /**
    * @return the root part of the experiment tree this part occurs in
    */
-  default Experiment getRoot() {
+  default Experiment getExperiment() {
     return (Experiment) getAncestor(getWorkspace().getExperimentRootType()).get();
   }
 

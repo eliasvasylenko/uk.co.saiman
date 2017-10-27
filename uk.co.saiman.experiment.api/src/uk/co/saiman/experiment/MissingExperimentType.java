@@ -36,7 +36,7 @@ public interface MissingExperimentType extends ExperimentType<PersistedState> {
   }
 
   @Override
-  default String getID() {
+  default String getId() {
     return MissingExperimentType.class.getName();
   }
 }

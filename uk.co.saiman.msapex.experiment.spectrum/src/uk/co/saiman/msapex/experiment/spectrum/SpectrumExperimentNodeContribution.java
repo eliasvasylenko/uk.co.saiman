@@ -47,7 +47,7 @@ import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class SpectrumExperimentNodeContribution implements TreeContribution {
-  static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.open";
+  static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.openselection";
 
   @Inject
   CommandContributor commandContributor;

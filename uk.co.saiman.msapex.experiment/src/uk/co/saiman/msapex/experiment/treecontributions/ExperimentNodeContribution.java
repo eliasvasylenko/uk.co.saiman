@@ -78,7 +78,7 @@ public class ExperimentNodeContribution implements TreeContribution {
     /*
      * configure label
      */
-    setLabel(node, entry.data().getID());
+    setLabel(node, entry.data().getId());
     setSupplemental(
         node,
         entry.data().getType().getName() + " ["

@@ -59,13 +59,13 @@ public class ExperimentResultContribution implements TreeContribution {
 
   @AboutToShow
   public void prepare(HBox node, TreeEntry<Result<?>> entry) {
-    node.getChildren().add(new Label(entry.data().getResultType().getName()));
+    node.getChildren().add(new Label(entry.data().getType().getName()));
 
     node.getChildren().add(
         new Label(
             "[" + entry
                 .data()
-                .map(d -> Objects.toString(entry.data().getResultDataPath()))
+                .map(d -> Objects.toString(entry.data().getAbsoluteDataPath()))
                 .map(Object::toString)
                 .tryGet()
                 .orElse(properties.missingResult().toString()) + "]"));

@@ -38,18 +38,22 @@ public interface Result<T> extends ObservableValue<T> {
   ExperimentNode<?, ?> getExperimentNode();
 
   /**
-   * Experiment data root directories are defined hierarchically from the
-   * {@link Workspace#getWorkspaceDataPath() workspace path}.
-   * 
-   * @return the data root of the experiment
+   * @return the path of the result data relative to the
+   *         {@link Workspace#getRootPath() workspace root}.
    */
-  Path getResultDataPath();
+  Path getDataPath();
 
-  ResultType<T> getResultType();
+  /**
+   * @return the absolute path of the result data from the
+   *         {@link Workspace#getRootPath() workspace root}.
+   */
+  Path getAbsoluteDataPath();
+
+  ResultType<T> getType();
 
   default TypeToken<Result<T>> getThisTypeToken() {
     return new TypeToken<Result<T>>() {}
-        .withTypeArguments(new TypeArgument<T>(getResultType().getDataType()) {});
+        .withTypeArguments(new TypeArgument<T>(getType().getDataType()) {});
   }
 
   default TypedReference<Result<T>> asTypedObject() {

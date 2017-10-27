@@ -1,3 +1,4 @@
+Private-Package: uk.co.saiman.msapex.editor.impl
 Export-Package: uk.co.saiman.msapex.editor
 
 -include:\

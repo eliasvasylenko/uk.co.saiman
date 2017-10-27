@@ -48,7 +48,7 @@ public class AddExperimentHandler {
   void execute(Workspace workspace, @Localize ExperimentProperties text) {
     requestExperimentNameDialog(workspace, text.newExperiment(), text.newExperimentName())
         .ifPresent(name -> {
-          Path newLocation = workspace.getWorkspaceDataPath().resolve(name);
+          Path newLocation = workspace.getRootPath().resolve(name);
 
           confirmOverwriteIfNecessary(newLocation, text);
 

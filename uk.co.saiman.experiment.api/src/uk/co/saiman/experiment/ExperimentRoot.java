@@ -36,7 +36,7 @@ public interface ExperimentRoot extends ExperimentType<ExperimentConfiguration> 
   }
 
   @Override
-  default String getID() {
+  default String getId() {
     return ExperimentRoot.class.getName();
   }
 }

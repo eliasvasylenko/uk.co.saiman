@@ -66,6 +66,11 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
     this.properties = properties;
     this.chemicalMapResult = new ResultType<ChemicalMap>() {
       @Override
+      public String getId() {
+        return "uk.co.saiman.experiment.chemicalmap.result";
+      }
+
+      @Override
       public String getName() {
         return properties.chemicalMapResultName().toString();
       }
@@ -110,7 +115,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 
     Future<AccumulatingFileSpectrum> acquisition = acquisitionDevice.acquisitionDataEvents().reduce(
         () -> new AccumulatingFileSpectrum(
-            context.results().dataPath(),
+            context.results().getDataPath(),
             CHEMICAL_MAP_DATA_NAME,
             acquisitionDevice.getSampleDomain(),
             acquisitionDevice.getSampleIntensityUnits()),

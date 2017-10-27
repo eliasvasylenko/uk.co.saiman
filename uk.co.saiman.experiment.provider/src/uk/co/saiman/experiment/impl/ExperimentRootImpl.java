@@ -65,7 +65,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
 
       @Override
       public String getName() {
-        return configuration.node().getID();
+        return configuration.node().getId();
       }
 
       @Override

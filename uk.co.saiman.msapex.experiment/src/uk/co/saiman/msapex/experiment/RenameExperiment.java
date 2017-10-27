@@ -84,7 +84,7 @@ public class RenameExperiment {
         experimentPart.getExperimentWorkspace(),
         text.renameExperiment(),
         text.renameExperimentName(selectedNode.getState().getName())).ifPresent(name -> {
-          Path newLocation = experimentPart.getExperimentWorkspace().getWorkspaceDataPath().resolve(
+          Path newLocation = experimentPart.getExperimentWorkspace().getRootPath().resolve(
               name);
 
           RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);

@@ -85,4 +85,12 @@ public interface ExperimentExceptionProperties {
   String illegalCommandForSelection(String string, Object object);
 
   String cannotRemoveExperiment(Experiment experiment);
+
+  String cannotOpenResultEditor();
+
+  String cannotResolveContainingExperimentNode(Workspace experimentWorkspace, Path path);
+
+  String cannotResolveExperimentNode(Workspace experimentWorkspace, Path path);
+
+  String cannotResolveExperimentResult(Workspace experimentWorkspace, Path path);
 }

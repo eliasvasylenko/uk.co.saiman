@@ -48,12 +48,16 @@ import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceEvent;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
 
 /**
  * Reference implementation of {@link Workspace}.
@@ -72,6 +76,8 @@ public class XmlWorkspace implements Workspace {
   private final ExperimentProperties text;
 
   private final Lock processingLock = new ReentrantLock();
+
+  private final HotObservable<WorkspaceEvent> events = new HotObservable<>();
 
   /**
    * Try to create a new experiment workspace over the given root path
@@ -105,6 +111,11 @@ public class XmlWorkspace implements Workspace {
     loadExperiments();
   }
 
+  @Override
+  public Observable<WorkspaceEvent> events() {
+    return events;
+  }
+
   private void loadExperiments() {
     PathMatcher filter = dataRoot.getFileSystem().getPathMatcher(
         "glob:**/*" + XmlExperiment.EXPERIMENT_EXTENSION);
@@ -129,8 +140,48 @@ public class XmlWorkspace implements Workspace {
   }
 
   @Override
-  public Path getWorkspaceDataPath() {
+  public Path getRootPath() {
     return dataRoot;
+  }
+
+  @Override
+  public ExperimentNode<?, ?> resolveNode(Path path) {
+    Path relativePath = path.isAbsolute() ? dataRoot.relativize(path) : path;
+
+    ExperimentNode<?, ?> node = resolveContainingNode(relativePath);
+    Path remainingPath = node.getDataPath().relativize(relativePath);
+    if (remainingPath.getNameCount() > 0) {
+      throw new ExperimentException(text.exception().cannotResolveExperimentNode(this, path));
+    }
+    return node;
+  }
+
+  @Override
+  public ExperimentNode<?, ?> resolveContainingNode(Path path) {
+    Path relativePath = path.isAbsolute() ? dataRoot.relativize(path) : path;
+
+    String experimentName = relativePath.getName(0).toString();
+    ExperimentNode<?, ?> node = getExperiments()
+        .filter(n -> n.getId().equals(experimentName))
+        .findAny()
+        .orElseThrow(
+            () -> new ExperimentException(
+                text.exception().cannotResolveExperimentResult(this, path)));
+    for (int i = 1; i < relativePath.getNameCount(); i++) {
+      String nodeName = relativePath.getName(i).toString();
+
+      ExperimentNode<?, ?> child = node
+          .getChildren()
+          .filter(n -> n.getId().equals(nodeName))
+          .findAny()
+          .orElse(null);
+      if (child == null)
+        break;
+      else
+        node = child;
+    }
+
+    return node;
   }
 
   /*
@@ -164,9 +215,12 @@ public class XmlWorkspace implements Workspace {
     }
 
     XmlExperiment experiment = new XmlExperiment(experimentRootType, name, this, persistedState);
-    experiments.add(experiment);
 
     return experiment;
+  }
+  
+  void addExperimentImpl(XmlExperiment experiment) {
+    experiments.add(experiment);
   }
 
   protected boolean removeExperiment(Experiment experiment) {
@@ -201,7 +255,7 @@ public class XmlWorkspace implements Workspace {
       }
     } else {
       throw new ExperimentException(
-          text.exception().cannotProcessExperimentConcurrently(node.getRoot()));
+          text.exception().cannotProcessExperimentConcurrently(node.getExperiment()));
     }
   }
 

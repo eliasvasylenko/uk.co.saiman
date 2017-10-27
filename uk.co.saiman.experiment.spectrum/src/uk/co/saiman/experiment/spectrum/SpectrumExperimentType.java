@@ -114,7 +114,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
       ExperimentExecutionContext<T> context,
       AcquisitionDevice device) {
     AccumulatingFileSpectrum fileSpectrum = new AccumulatingFileSpectrum(
-        context.results().dataPath(),
+        context.results().getDataPath(),
         SPECTRUM_DATA_NAME,
         device.getSampleDomain(),
         device.getSampleIntensityUnits());

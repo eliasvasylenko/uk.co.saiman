@@ -45,8 +45,13 @@ public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T>
   }
 
   @Override
-  public Path getResultDataPath() {
-    return node.getResultDataPath();
+  public Path getDataPath() {
+    return node.getDataPath();
+  }
+
+  @Override
+  public Path getAbsoluteDataPath() {
+    return node.getAbsoluteDataPath();
   }
 
   @Override
@@ -55,7 +60,7 @@ public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T>
   }
 
   @Override
-  public ResultType<T> getResultType() {
+  public ResultType<T> getType() {
     return resultType;
   }
 }

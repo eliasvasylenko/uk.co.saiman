@@ -42,15 +42,22 @@ import uk.co.saiman.reflection.token.TypeToken;
  *          the type of the result data
  */
 public interface ResultType<T> {
-	/**
-	 * A human readable name for the experiment result.
-	 * 
-	 * @return the result type name
-	 */
-	String getName();
+  /**
+   * A persistent ID for the result type.
+   * 
+   * @return the result type id
+   */
+  String getId();
 
-	/**
-	 * @return the exact static type of the experiment result data
-	 */
-	TypeToken<T> getDataType();
+  /**
+   * A human readable name for the experiment result.
+   * 
+   * @return the result type name
+   */
+  String getName();
+
+  /**
+   * @return the exact static type of the experiment result data
+   */
+  TypeToken<T> getDataType();
 }

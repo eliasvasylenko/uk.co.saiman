@@ -26,7 +26,7 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
   Units units;
 
   @Override
-  public String getID() {
+  public String getId() {
     return getClass().getName();
   }
 

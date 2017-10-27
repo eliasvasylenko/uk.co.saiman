@@ -31,19 +31,24 @@ import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.reflection.token.TypeToken;
 
 public class FileSpectrumExperimentResultType<T> implements ResultType<AccumulatingFileSpectrum> {
-	private final SpectrumExperimentType<?> type;
+  private final SpectrumExperimentType<?> type;
 
-	FileSpectrumExperimentResultType(SpectrumExperimentType<?> type) {
-		this.type = type;
-	}
+  FileSpectrumExperimentResultType(SpectrumExperimentType<?> type) {
+    this.type = type;
+  }
 
-	@Override
-	public String getName() {
-		return type.getProperties().spectrumResultName().toString();
-	}
+  @Override
+  public String getId() {
+    return "uk.co.saiman.experiment.spectrum.result";
+  }
 
-	@Override
-	public TypeToken<AccumulatingFileSpectrum> getDataType() {
-		return new TypeToken<AccumulatingFileSpectrum>() {};
-	}
+  @Override
+  public String getName() {
+    return type.getProperties().spectrumResultName().toString();
+  }
+
+  @Override
+  public TypeToken<AccumulatingFileSpectrum> getDataType() {
+    return new TypeToken<AccumulatingFileSpectrum>() {};
+  }
 }

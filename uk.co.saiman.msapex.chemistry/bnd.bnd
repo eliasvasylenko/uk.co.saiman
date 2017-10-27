@@ -26,11 +26,12 @@ Bundle-Name: SAI :: MSApex :: Chemistry
 	org.eclipse.fx.ui.workbench.base.source
 	
 
-Private-Package: uk.co.saiman.msapex.chemistry.impl
+Private-Package: uk.co.saiman.msapex.chemistry
 
 Export-Package: uk.co.saiman.msapex.chemistry
 
 -includeresource: \
-	{fragment.e4xmi},\
+	{always.e4xmi},\
+	{initial.e4xmi},\
 	res,\
 	{css=css}

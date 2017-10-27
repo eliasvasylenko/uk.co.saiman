@@ -144,7 +144,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     persistedState.observe(s -> getRootImpl().save());
     this.state = type.createState(createConfigurationContext());
 
-    if (getID() == null) {
+    if (getId() == null) {
       throw new ExperimentException(getText().exception().invalidExperimentName(null));
     }
   }
@@ -154,7 +154,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   @Override
-  public String getID() {
+  public String getId() {
     return id;
   }
 
@@ -172,8 +172,14 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     return workspace;
   }
 
-  protected Path getResultDataPath() {
+  @Override
+  public Path getDataPath() {
     return getParentDataPath().resolve(id);
+  }
+
+  @Override
+  public Path getAbsoluteDataPath() {
+    return getWorkspace().getRootPath().resolve(getParentDataPath().resolve(id));
   }
 
   protected XmlPersistedState persistedState() {
@@ -181,7 +187,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   private Path getParentDataPath() {
-    return getParentImpl().map(p -> p.getResultDataPath()).orElse(workspace.getWorkspaceDataPath());
+    return getParentImpl().map(p -> p.getDataPath()).orElse(workspace.getRootPath());
   }
 
   private Stream<? extends XmlExperimentNode<?, ?>> getSiblings() {
@@ -204,7 +210,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   protected XmlExperiment getRootImpl() {
-    return (XmlExperiment) ExperimentNode.super.getRoot();
+    return (XmlExperiment) ExperimentNode.super.getExperiment();
   }
 
   @Override
@@ -274,7 +280,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
 
   @Override
   public String toString() {
-    return getID() + " : " + type.getName() + " [" + lifecycleState.get() + "]";
+    return getId() + " : " + type.getName() + " [" + lifecycleState.get() + "]";
   }
 
   @Override
@@ -288,7 +294,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     try {
       validate();
 
-      Files.createDirectories(getResultDataPath());
+      Files.createDirectories(getAbsoluteDataPath());
 
       getType().execute(createExecutionContext());
 
@@ -322,8 +328,8 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
       }
 
       @Override
-      public Path dataPath() {
-        return XmlExperimentNode.this.getResultDataPath();
+      public Path getDataPath() {
+        return XmlExperimentNode.this.getAbsoluteDataPath();
       }
     };
   }
@@ -378,7 +384,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     } else if (!ExperimentConfiguration.isNameValid(id)) {
       throw new ExperimentException(getText().exception().invalidExperimentName(id));
 
-    } else if (getSiblings().anyMatch(s -> id.equals(s.getID()))) {
+    } else if (getSiblings().anyMatch(s -> id.equals(s.getId()))) {
       throw new ExperimentException(getText().exception().duplicateExperimentName(id));
 
     } else {
@@ -430,8 +436,8 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   protected void saveNode(Element element) {
-    element.setAttribute(TYPE_ATTRIBUTE, getType().getID());
-    element.setAttribute(ID_ATTRIBUTE, getID());
+    element.setAttribute(TYPE_ATTRIBUTE, getType().getId());
+    element.setAttribute(ID_ATTRIBUTE, getId());
 
     persistedState().save(element);
 
@@ -453,7 +459,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     String experimentTypeID = element.getAttribute(TYPE_ATTRIBUTE);
 
     ExperimentType<?> experimentType = getAvailableChildExperimentTypes()
-        .filter(e -> e.getID().equals(experimentTypeID))
+        .filter(e -> e.getId().equals(experimentTypeID))
         .findAny()
         .orElseGet(() -> new MissingExperimentTypeImpl(getText(), experimentTypeID));
 
