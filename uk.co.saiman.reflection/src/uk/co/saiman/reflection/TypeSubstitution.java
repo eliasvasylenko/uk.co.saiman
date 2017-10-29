@@ -45,7 +45,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import uk.co.saiman.utility.IdentityProperty;
+import uk.co.saiman.property.IdentityProperty;
 import uk.co.saiman.utility.Isomorphism;
 
 /**

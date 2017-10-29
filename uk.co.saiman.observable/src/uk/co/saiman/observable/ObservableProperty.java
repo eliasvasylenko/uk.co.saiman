@@ -27,7 +27,9 @@
  */
 package uk.co.saiman.observable;
 
-import uk.co.saiman.utility.Property;
+import java.util.Optional;
+
+import uk.co.saiman.property.Property;
 
 /**
  * A {@link Property property} which is observable as per
@@ -68,4 +70,9 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
   }
 
   void setProblem(Throwable t);
+
+  @Override
+  default Optional<T> tryGet() {
+    return ObservableValue.super.tryGet();
+  }
 }

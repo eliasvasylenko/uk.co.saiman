@@ -44,8 +44,8 @@ import uk.co.saiman.data.SampledContinuousFunction;
 import uk.co.saiman.data.SampledDomain;
 import uk.co.saiman.mathematics.Interval;
 import uk.co.saiman.observable.Observation;
-import uk.co.saiman.utility.IdentityProperty;
-import uk.co.saiman.utility.Property;
+import uk.co.saiman.property.IdentityProperty;
+import uk.co.saiman.property.Property;
 
 /**
  * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series

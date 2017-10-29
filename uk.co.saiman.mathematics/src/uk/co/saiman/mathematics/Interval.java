@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 
-import uk.co.saiman.utility.Property;
+import uk.co.saiman.property.Property;
 
 public final class Interval<T> {
 	private final T leftEndpoint;

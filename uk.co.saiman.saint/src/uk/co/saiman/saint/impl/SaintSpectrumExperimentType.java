@@ -37,7 +37,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
       @Override
       public void setSpectrumName(String name) {
         this.name = name;
-        context.setID(name);
+        context.setId(name);
       }
 
       @Override

@@ -34,10 +34,10 @@ import java.util.Locale;
 
 import org.junit.Test;
 
+import uk.co.saiman.property.IdentityProperty;
 import uk.co.saiman.text.properties.LocaleManager;
 import uk.co.saiman.text.properties.Localized;
 import uk.co.saiman.text.properties.PropertyLoader;
-import uk.co.saiman.utility.IdentityProperty;
 
 @SuppressWarnings("javadoc")
 public class LocalizedPropertiesTest {

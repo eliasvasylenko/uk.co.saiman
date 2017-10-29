@@ -25,14 +25,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.utility;
-
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+package uk.co.saiman.property;
 
 /**
- * This interface represents a gettable and settable property of a given type.
+ * A basic implementation of {@link Property} which simple stores it's value as
+ * a member variable, which can be updated and retrieved through get and set.
  * 
  * @author Elias N Vasylenko
  *
@@ -40,50 +37,32 @@ import java.util.function.Supplier;
  *          The type of the property.
  */
 /* @I */
-public interface Property<T> {
-  /**
-   * Set the value of this property to the given value.
-   * 
-   * @param to
-   *          The new value to set for this property.
-   * @return The previous value of this property.
-   */
-  T set(/* @Mutable Property<T, R> this, */T to);
+public class IdentityProperty<T> implements Property<T> {
+  private/* @I */T value;
 
   /**
-   * Get the current value of the property.
-   * 
-   * @return The current value.
+   * Create an IndentityProperty with null as the initial value.
    */
-  /* @I */T get();
+  public IdentityProperty() {}
 
   /**
-   * Create a property which defers its implementation to the given callbacks.
+   * Create an identity with the given initial value.
    * 
-   * @param get
-   *          the property retrieval callback
-   * @param set
-   *          the property assignment callback
-   * @return a property over the given callbacks
+   * @param value
+   *          The initial value for this property.
    */
-  static <T> Property<T> over(Supplier<T> get, Consumer<T> set) {
-    return new Property<T>() {
-      @Override
-      public T set(T to) {
-        T previous = get();
-        set.accept(to);
-        return previous;
-      }
+  public IdentityProperty(T value) {
+    this.value = value;
+  }
 
-      @Override
-      public T get() {
-        return get.get();
-      }
+  @Override
+  public T set(/* @Mutable IdentityProperty<T> this, */T to) {
+    value = to;
+    return value;
+  }
 
-      @Override
-      public String toString() {
-        return Objects.toString(get());
-      }
-    };
+  @Override
+  public/* @I */T get() {
+    return value;
   }
 }

@@ -11,6 +11,7 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.measurement.Units;
+import uk.co.saiman.property.Property;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 
 @Component
@@ -33,13 +34,19 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
   @Override
   public SaintXYStageConfiguration createState(
       ExperimentConfigurationContext<SaintXYStageConfiguration> context) {
-    String id = "A1";
-
-    context.setID(context.getID().orElse("Sample " + id));
+    String id = context.getId(() -> "A1");
 
     return new SaintXYStageConfiguration() {
-      private Quantity<Length> x = loadLength(X_STATE);
-      private Quantity<Length> y = loadLength(Y_STATE);
+      private final Property<Quantity<Length>> x = getLength(X_STATE);
+      private final Property<Quantity<Length>> y = getLength(Y_STATE);
+
+      private Property<Quantity<Length>> getLength(String value) {
+        return context
+            .persistedState()
+            .stringValue(value)
+            .map(l -> units.parseQuantity(l).asType(Length.class), units::formatQuantity)
+            .setDefault(() -> units.metre().micro().getQuantity(0));
+      }
 
       @Override
       public String getName() {
@@ -53,35 +60,22 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
 
       @Override
       public void setX(Quantity<Length> offset) {
-        x = saveLength(X_STATE, offset);
+        x.set(offset);
       }
 
       @Override
       public void setY(Quantity<Length> offset) {
-        y = saveLength(Y_STATE, offset);
+        y.set(offset);
       }
 
       @Override
       public Quantity<Length> getX() {
-        return x;
+        return x.get();
       }
 
       @Override
       public Quantity<Length> getY() {
-        return y;
-      }
-
-      private Quantity<Length> loadLength(String key) {
-        return context
-            .persistedState()
-            .getString(key)
-            .map(l -> units.parseQuantity(l).asType(Length.class))
-            .orElseGet(() -> saveLength(key, units.metre().micro().getQuantity(0)));
-      }
-
-      private Quantity<Length> saveLength(String key, Quantity<Length> length) {
-        context.persistedState().putString(key, units.formatQuantity(length));
-        return length;
+        return y.get();
       }
 
       @Override

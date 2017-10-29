@@ -55,8 +55,9 @@ public abstract class CopleyStageDevice implements StageDevice {
   void initialize(Instrument instrument, CopleyComms comms, PropertyLoader loader) {
     this.instrument = instrument;
     this.comms = comms;
-    this.controller = comms.openController();
     this.properties = loader.getProperties(CopleyStageProperties.class);
+
+    reset();
 
     instrument.addDevice(this);
   }
@@ -82,14 +83,23 @@ public abstract class CopleyStageDevice implements StageDevice {
     return comms.status().isEqual(OPEN);
   }
 
-  public void reset() {
+  public boolean reset() {
     comms.reset();
-    controller = comms.openController();
+    try {
+      this.controller = comms.openController();
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   @Override
   public ObservableValue<DeviceConnection> connectionState() {
-    return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
+    return comms
+        .status()
+        .optional()
+        .map(s -> s.isPresent() && s.get() == OPEN ? CONNECTED : DISCONNECTED)
+        .toValue();
   }
 
   @Override

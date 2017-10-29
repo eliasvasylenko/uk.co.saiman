@@ -36,6 +36,7 @@ import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -69,8 +70,7 @@ import uk.co.saiman.msapex.editor.EditorService;
 
 public class EditorAddon {
   private static final String PART_STACK_ID = "uk.co.saiman.msapex.partstack.editor";
-  public static final String EDITOR_DATA = "uk.co.saiman.msapex.editor.data";
-  public static final String EDITOR_TAG = "uk.co.saiman.msapex.editor";
+  public static final String PROVIDER_ID = "uk.co.saiman.msapex.editor.provider";
 
   @Inject
   private EPartService partService;
@@ -83,9 +83,9 @@ public class EditorAddon {
   @Inject
   private Log log;
 
-  private final Set<EditorProvider> editorProviders = new LinkedHashSet<>();
-  private final Map<MPart, Object> partResults = new HashMap<>();
-  private final Map<Object, MPart> editorParts = new HashMap<>();
+  private final Map<String, EditorProvider> editorProviders = new LinkedHashMap<>();
+  private final Map<MPart, Object> partResources = new HashMap<>();
+  private final Map<Object, MPart> resourceEditorParts = new HashMap<>();
   private final Set<EditorDescriptor> editorPrecedence = new LinkedHashSet<>();
 
   @PostConstruct
@@ -105,34 +105,34 @@ public class EditorAddon {
 
       @Override
       public Stream<EditorDescriptor> getEditors() {
-        return editorProviders.stream().flatMap(
+        return editorProviders.values().stream().flatMap(
             e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
       }
 
       @Override
       public void registerProvider(EditorProvider provider) {
-        editorProviders.add(provider);
+        editorProviders.put(provider.getId(), provider);
       }
 
       @Override
       public void unregisterProvider(EditorProvider provider) {
-        editorProviders.remove(provider);
+        editorProviders.remove(provider.getId());
       }
     });
   }
 
   protected void removeEditor(MCompositePart controller) {
-    editorParts.remove(partResults.remove(controller));
+    resourceEditorParts.remove(partResources.remove(controller));
   }
 
   protected <T> MPart createEditor(EditorDescriptor descriptor, Object data) {
-    MPart editorPart = (MPart) modelService.cloneSnippet(application, descriptor.getPartId(), null);
+    MPart editorPart = descriptor.getProvider().createEditorPart(descriptor.getPartId());
 
     editorPart.setDirty(true);
     editorPart.setCloseable(true);
-    editorPart.getTags().add(EDITOR_TAG);
+    editorPart.getPersistedState().put(PROVIDER_ID, descriptor.getProvider().getId());
 
-    partResults.put(editorPart, data);
+    partResources.put(editorPart, data);
 
     ((MPartStack) modelService.find(PART_STACK_ID, application)).getChildren().add(editorPart);
 
@@ -159,19 +159,18 @@ public class EditorAddon {
         MPart part = context.get(MPart.class);
         MPart parentPart = context.getParent().get(MPart.class);
 
-        if (part.getTags().contains(EDITOR_TAG)) {
-          prepareEditorPartContext(context, partResults.get(part));
-        } else if (parentPart != null && parentPart.getTags().contains(EDITOR_TAG)) {
+        if (part != null && part.getPersistedState().containsKey(PROVIDER_ID)) {
+          Object resource = partResources.get(part);
+          EditorProvider provider = editorProviders.get(part.getPersistedState().get(PROVIDER_ID));
+          resource = provider.initializeEditorPart(part, resource);
+          resourceEditorParts.put(resource, part);
+        } else if (parentPart != null && parentPart.getPersistedState().containsKey(PROVIDER_ID)) {
           prepareEditorChildPartContext(context);
         }
       }
     } catch (Exception e) {
       log.log(Level.ERROR, e);
     }
-  }
-
-  private void prepareEditorPartContext(IEclipseContext context, Object result) {
-    context.set(EDITOR_DATA, result);
   }
 
   private void prepareEditorChildPartContext(IEclipseContext context) {
@@ -265,7 +264,8 @@ public class EditorAddon {
     }
 
     MPart getEditor() {
-      return editorParts.computeIfAbsent(resource, r -> createEditor(getDescriptor(), resource));
+      return resourceEditorParts
+          .computeIfAbsent(resource, r -> createEditor(getDescriptor(), resource));
     }
   }
 }

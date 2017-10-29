@@ -34,7 +34,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import uk.co.saiman.utility.IdentityProperty;
+import uk.co.saiman.property.IdentityProperty;
 
 /**
  * A simple text parser, composable by way of fluid and type-safe API. This

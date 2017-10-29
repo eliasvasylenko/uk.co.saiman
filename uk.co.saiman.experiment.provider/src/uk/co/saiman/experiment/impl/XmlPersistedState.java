@@ -27,12 +27,10 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Optional.ofNullable;
 import static javax.xml.xpath.XPathConstants.NODESET;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.xml.xpath.XPath;
@@ -43,6 +41,7 @@ import org.w3c.dom.NodeList;
 
 import uk.co.saiman.experiment.PersistedState;
 import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.property.Property;
 
 public class XmlPersistedState extends HotObservable<PersistedState> implements PersistedState {
   private static final String CONFIGURATION_ELEMENT = "configuration";
@@ -61,29 +60,14 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
     return strings.keySet().stream();
   }
 
-  @Override
-  public Optional<String> removeString(String key) {
-    String previous = strings.remove(key);
-    update();
-    return ofNullable(previous);
+  public Property<String> stringValue(String key) {
+    return Property.over(() -> strings.get(key), v -> strings.put(key, v));
   }
 
   @Override
   public void clear() {
     strings.clear();
     update();
-  }
-
-  @Override
-  public Optional<String> getString(String key) {
-    return ofNullable(strings.get(key));
-  }
-
-  @Override
-  public Optional<String> putString(String key, String value) {
-    String previous = strings.put(key, value);
-    update();
-    return ofNullable(previous);
   }
 
   protected void save(Element parent) {
@@ -93,7 +77,7 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
       Element string = parent.getOwnerDocument().createElement(CONFIGURATION_STRING_ELEMENT);
       configuration.appendChild(string);
       string.setAttribute(CONFIGURATION_KEY_ATTRIBUTE, key);
-      string.setAttribute(CONFIGURATION_VALUE_ATTRIBUTE, getString(key).get());
+      string.setAttribute(CONFIGURATION_VALUE_ATTRIBUTE, stringValue(key).get());
     });
   }
 
@@ -105,8 +89,7 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
         .evaluate(CONFIGURATION_ELEMENT + "/" + CONFIGURATION_STRING_ELEMENT, parent, NODESET);
     for (int i = 0; i < strings.getLength(); i++) {
       Element string = (Element) strings.item(i);
-      persistedState.putString(
-          string.getAttribute(CONFIGURATION_KEY_ATTRIBUTE),
+      persistedState.stringValue(string.getAttribute(CONFIGURATION_KEY_ATTRIBUTE)).set(
           string.getAttribute(CONFIGURATION_VALUE_ATTRIBUTE));
     }
     return persistedState;

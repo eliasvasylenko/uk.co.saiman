@@ -27,9 +27,6 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.Objects;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
@@ -39,6 +36,7 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.property.Property;
 
 /**
  * The root experiment type implementation for {@link XmlWorkspace}.
@@ -61,7 +59,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
   public ExperimentConfiguration createState(
       ExperimentConfigurationContext<ExperimentConfiguration> configuration) {
     return new ExperimentConfiguration() {
-      private String notes = configuration.persistedState().getString("notes").orElse(null);
+      private Property<String> notes = configuration.persistedState().stringValue("notes");
 
       @Override
       public String getName() {
@@ -70,19 +68,17 @@ public class ExperimentRootImpl implements ExperimentRoot {
 
       @Override
       public void setName(String name) {
-        configuration.setID(name);
+        configuration.setId(name);
       }
 
       @Override
       public Optional<String> getNotes() {
-        return ofNullable(notes);
+        return notes.tryGet();
       }
 
       @Override
       public void setNotes(String notes) {
-        Objects.requireNonNull(notes);
-        this.notes = notes;
-        configuration.persistedState().putString("notes", notes);
+        this.notes.set(notes);
       }
 
       @Override

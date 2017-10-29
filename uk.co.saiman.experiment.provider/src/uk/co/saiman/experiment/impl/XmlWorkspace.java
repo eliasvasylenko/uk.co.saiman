@@ -146,10 +146,19 @@ public class XmlWorkspace implements Workspace {
 
   @Override
   public ExperimentNode<?, ?> resolveNode(Path path) {
+    System.out.println("dataRoot: " + dataRoot);
+    System.out.println("path: " + path);
     Path relativePath = path.isAbsolute() ? dataRoot.relativize(path) : path;
+    System.out.println("relativePath: " + relativePath);
 
     ExperimentNode<?, ?> node = resolveContainingNode(relativePath);
-    Path remainingPath = node.getDataPath().relativize(relativePath);
+    Path remainingPath;
+    System.out.println("node.getAbsoluteDataPath(): " + node.getAbsoluteDataPath());
+    remainingPath = node
+        .getAbsoluteDataPath()
+        .relativize(dataRoot.resolve(relativePath))
+        .normalize();
+    System.out.println("remainingPath: " + remainingPath);
     if (remainingPath.getNameCount() > 0) {
       throw new ExperimentException(text.exception().cannotResolveExperimentNode(this, path));
     }
@@ -218,7 +227,7 @@ public class XmlWorkspace implements Workspace {
 
     return experiment;
   }
-  
+
   void addExperimentImpl(XmlExperiment experiment) {
     experiments.add(experiment);
   }

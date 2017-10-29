@@ -112,11 +112,10 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   }
 
   /**
-   * @return a list of all ancestors, nearest first, inclusive of the node
-   *         itself
+   * @return a list of all ancestors, nearest first, inclusive of the node itself
    */
   default Stream<ExperimentNode<?, ?>> getAncestors() {
-    return StreamUtilities.<ExperimentNode<?, ?>> iterateOptional(this, ExperimentNode::getParent);
+    return StreamUtilities.<ExperimentNode<?, ?>>iterateOptional(this, ExperimentNode::getParent);
   }
 
   /**
@@ -151,8 +150,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   }
 
   /**
-   * Get the ancestor nodes of the processing experiment node which are of one
-   * of the given {@link ExperimentType experiment types}.
+   * Get the ancestor nodes of the processing experiment node which are of one of
+   * the given {@link ExperimentType experiment types}.
    * 
    * @param types
    *          the possible types of the ancestor we wish to inspect
@@ -166,14 +165,14 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   }
 
   /**
-   * Remove this part from its parent, or from the containing manager if it is
-   * the root part.
+   * Remove this part from its parent, or from the containing manager if it is the
+   * root part.
    */
   void remove();
 
   /**
-   * Get all child experiment parts, to be executed sequentially during this
-   * parts {@link ExperimentLifecycleState#PROCESSING} state.
+   * Get all child experiment parts, to be executed sequentially during this parts
+   * {@link ExperimentLifecycleState#PROCESSING} state.
    * 
    * @return An ordered list of all sequential child experiment parts
    */
@@ -213,9 +212,9 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
 
   /**
    * Process this experiment node. The request will be passed down to the root
-   * experiment node and processing will proceed back down the ancestor
-   * hierarchy to this node. If the experiment is already in progress then
-   * invocation of this method should fail.
+   * experiment node and processing will proceed back down the ancestor hierarchy
+   * to this node. If the experiment is already in progress then invocation of
+   * this method should fail.
    */
   void process();
 
@@ -225,8 +224,8 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   Stream<Result<?>> getResults();
 
   /**
-   * Clear all the results associated with this node. Take care, as this will
-   * also delete any result data from disk.
+   * Clear all the results associated with this node. Take care, as this will also
+   * delete any result data from disk.
    */
   void clearResults();
 

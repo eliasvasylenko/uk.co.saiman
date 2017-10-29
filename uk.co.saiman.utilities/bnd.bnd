@@ -4,7 +4,7 @@ Export-Package: \
 	uk.co.saiman.log,\
 	uk.co.saiman.reflection.classloading,\
 	uk.co.saiman.utility,\
-	uk.co.saiman.utility.tuple
+	uk.co.saiman.property
 
 Bundle-Name: SAI :: Utilities
 Bundle-Description: \

@@ -151,12 +151,14 @@ runplatform: linux64
 	uk.co.saiman.msapex.camera;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.chemistry;version=snapshot,\
+	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.msapex.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.msapex.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.msapex.instrument;version=snapshot,\
 	uk.co.saiman.msapex.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
+	uk.co.saiman.msapex.instrument.sample;version=snapshot,\
 	uk.co.saiman.msapex.simulation;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi.api;version=snapshot,\
@@ -168,6 +170,8 @@ runplatform: linux64
 	uk.co.saiman.requirejs.webresource;version=snapshot,\
 	uk.co.saiman.saint.api;version=snapshot,\
 	uk.co.saiman.saint.provider;version=snapshot,\
+	uk.co.saiman.saint.msapex;version=snapshot,\
+	uk.co.saiman.saint.simulation;version=snapshot,\
 	uk.co.saiman.simulation.api;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\

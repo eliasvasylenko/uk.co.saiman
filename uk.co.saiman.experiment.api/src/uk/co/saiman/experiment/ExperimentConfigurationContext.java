@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment;
 
-import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * The context of an experiment node's initial configuration. When a workspace
@@ -57,8 +57,8 @@ public interface ExperimentConfigurationContext<T> {
    * configuration context. This data should be persisted by the workspace
    * according to the format of an experiment file.
    * <p>
-   * The map is coupled directly with the persisted data, with changes of the
-   * map being immediately stored.
+   * The map is coupled directly with the persisted data, with changes of the map
+   * being immediately stored.
    * <p>
    * There is no standard enforced for the format of the value strings.
    * <p>
@@ -70,27 +70,35 @@ public interface ExperimentConfigurationContext<T> {
   PersistedState persistedState();
 
   /**
-   * Get the ID of the node. The ID must be unique amongst the children of a
-   * node's parent. Typically the ID may be used to locate the
-   * {@link #persistedState() persisted state} of an experiment, and so changing
-   * the ID may result in the movement or modification of persisted data.
-   * <p>
-   * If the node is newly created an id must be set before the end of
-   * {@link ExperimentType#createState(ExperimentConfigurationContext)}. If the
-   * node is loaded from disk, it should retain keep the previously id.
+   * Get the ID of the node.
    * 
    * @return the ID of the node, or an empty optional if it has not yet been set
    */
-  Optional<String> getID();
+  String getId();
 
   /**
-   * Set the ID of the node. The ID must be unique amongst the children of a
-   * node's parent. Typically the ID may be used to locate the
+   * {@link #get Get} the ID of the node, or {@link setId set} the ID to the given
+   * default if it is not already set.
+   * <p>
+   * If the node is newly created an id must be set before the end of
+   * {@link ExperimentType#createState(ExperimentConfigurationContext)}. If the
+   * node is loaded from the persisted workspace, it is strongly recommended that
+   * it keep the previously ID, as per the behavior of this method.
+   * 
+   * @return
+   */
+  String getId(Supplier<String> defaultId);
+
+  /**
+   * Set the ID of the node. The ID must be unique amongst all sibling nodes of
+   * the same {@link ResultType result type}.
+   * <p>
+   * Typically the ID may be used to determine the location of
    * {@link #persistedState() persisted state} of an experiment, and so changing
-   * the ID may result in the movement or modification of persisted data.
+   * the ID may result in the movement or modification of data.
    * 
    * @param id
    *          the ID for the node
    */
-  void setID(String id);
+  void setId(String id);
 }

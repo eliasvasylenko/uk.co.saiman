@@ -27,49 +27,40 @@
  */
 package uk.co.saiman.experiment;
 
-/**
- * An {@link ExperimentNode} has a many to one relationship with a lifecycle
- * state. When transitions between states are requested of an experiment
- * execution, the action is delegated to lifecycle participants registered with
- * that experiment part.
- * 
- * @author Elias N Vasylenko
- *
- */
 public enum ExperimentLifecycleState {
-	/**
-	 * Experiment if configurable and unprocessed.
-	 */
-	CONFIGURATION,
+  /**
+   * Experiment if configurable and unprocessed.
+   */
+  CONFIGURATION,
 
-	/**
-	 * Experiment part is locked out of configuration and waiting in part of a
-	 * processing queue.
-	 */
-	WAITING,
+  /**
+   * Experiment part is locked out of configuration and waiting in part of a
+   * processing queue.
+   */
+  WAITING,
 
-	/**
-	 * Move stage into position, etc.
-	 */
-	PREPARATION,
+  /**
+   * Move stage into position, etc.
+   */
+  PREPARATION,
 
-	/**
-	 * Optimize laser, acquire from TDC, etc.
-	 */
-	PROCESSING,
+  /**
+   * Optimize laser, acquire from TDC, etc.
+   */
+  PROCESSING,
 
-	/**
-	 * Once transitioned to this state, data is acquired
-	 */
-	COMPLETION,
+  /**
+   * Once transitioned to this state, data is acquired
+   */
+  COMPLETION,
 
-	/**
-	 * Something went wrong...
-	 */
-	FAILURE,
+  /**
+   * Something went wrong...
+   */
+  FAILURE,
 
-	/**
-	 * The experiment node has been removed from the workspace
-	 */
-	DISPOSED
+  /**
+   * The experiment node has been removed from the workspace
+   */
+  DISPOSED
 }

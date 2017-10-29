@@ -13,8 +13,6 @@ runplatform: win64
 	javax.annotation.security;version=1.0.0,\
 	javax.annotation.sql;version=1.0.0
 
-
-
 should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	org.apache.felix.log;version='[1.0.1,1.0.2)',\
 	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
@@ -195,11 +193,11 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.saint.api;version=snapshot,\
 	uk.co.saiman.saint.provider;version=snapshot,\
 	uk.co.saiman.saint.msapex;version=snapshot,\
+	uk.co.saiman.saint.simulation;version=snapshot,\
 	uk.co.saiman.simulation.api;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.text.provider;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webconsole.branding;version=snapshot,\
-	uk.co.saiman.webconsole.webresource;version=snapshot,\
-	uk.co.saiman.saint.simulation;version=snapshot
+	uk.co.saiman.webconsole.webresource;version=snapshot

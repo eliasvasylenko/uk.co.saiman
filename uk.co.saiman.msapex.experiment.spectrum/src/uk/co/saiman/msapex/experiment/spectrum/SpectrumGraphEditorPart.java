@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
@@ -29,28 +30,37 @@ public class SpectrumGraphEditorPart {
 
   @FXML
   private ContinuousFunctionChartController spectrumGraphController;
+  private Spectrum data;
 
   @PostConstruct
   void postConstruct(
       BorderPane container,
       @LocalInstance FXMLLoader loaderProvider,
-      IEclipseContext context) {
+      IEclipseContext context,
+      Result<?> result) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
-    System.out.println("[SGEP]");
+    System.out.println("[SGEP] result! " + result);
+    updateGraph();
   }
 
   @Inject
   public void setResultData(@Optional Spectrum data) {
-    System.out.println("[SGEP] set data! " + data);
-
-    Platform.runLater(() -> {
-      spectrumGraphController.getContinuousFunctions().clear();
-      if (data != null)
-        spectrumGraphController.getContinuousFunctions().add(data.getRawData());
-    });
-
+    this.data = data;
     dirty.setDirty(true);
+
+    System.out.println("[SGEP] set data! " + data);
+    updateGraph();
+  }
+
+  private void updateGraph() {
+    Platform.runLater(() -> {
+      if (spectrumGraphController != null && data != null) {
+        spectrumGraphController.getContinuousFunctions().clear();
+        if (data != null)
+          spectrumGraphController.getContinuousFunctions().add(data.getRawData());
+      }
+    });
   }
 
   @FXML

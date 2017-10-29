@@ -1,6 +1,5 @@
 package uk.co.saiman.msapex.editor.impl;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
@@ -19,12 +18,6 @@ public class OpenSelectionHandler {
       EditorService editorService,
       @Localize EditorProperties text,
       @Optional @AdaptNamed(ACTIVE_SELECTION) Object selection) {
-    System.out.println("?");
-    System.out.println(
-        selection + " "
-            + (selection != null
-                ? editorService.getApplicableEditors(selection).collect(toList())
-                : ""));
     return selection != null && editorService.getApplicableEditors(selection).findAny().isPresent();
   }
 

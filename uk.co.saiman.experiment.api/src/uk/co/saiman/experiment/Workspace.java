@@ -44,9 +44,8 @@ import uk.co.saiman.observable.Observable;
  */
 public interface Workspace {
   /**
-   * The root path for the workspace data persistence. This may be a virtual
-   * file system over e.g. a database according on the chosen persistence
-   * strategy.
+   * The root path for the workspace data persistence. This may be a virtual file
+   * system over e.g. a database according on the chosen persistence strategy.
    * 
    * @return the data root of the workspace
    */

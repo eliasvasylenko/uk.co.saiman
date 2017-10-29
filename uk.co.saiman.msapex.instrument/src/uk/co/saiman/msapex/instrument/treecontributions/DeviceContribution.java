@@ -11,15 +11,18 @@ import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.instrument.Device;
+import uk.co.saiman.instrument.DeviceConnection;
 
 @Component(scope = ServiceScope.PROTOTYPE)
 public class DeviceContribution implements TreeContribution {
   @AboutToShow
   public void prepare(HBox node, TreeEntry<Device> item) {
+    DeviceConnection state = item.data().connectionState().get();
+
     configurePseudoClass(node);
-    configurePseudoClass(node, item.data().connectionState().get().toString());
+    configurePseudoClass(node, state.toString());
 
     setLabel(node, item.data().getName());
-    setSupplemental(node, item.data().connectionState().get().toString());
+    setSupplemental(node, state.toString());
   }
 }

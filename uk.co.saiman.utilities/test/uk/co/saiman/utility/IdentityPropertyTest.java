@@ -30,7 +30,7 @@ package uk.co.saiman.utility;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uk.co.saiman.utility.IdentityProperty;
+import uk.co.saiman.property.IdentityProperty;
 
 /**
  * It is very difficult or impossible to test this class properly, as the

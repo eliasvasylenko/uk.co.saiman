@@ -30,15 +30,12 @@ package uk.co.saiman.msapex.experiment.spectrum;
 import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setLabel;
 import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
 
-import javax.inject.Inject;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.treeview.CommandContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
@@ -47,11 +44,6 @@ import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class SpectrumExperimentNodeContribution implements TreeContribution {
-  static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.openselection";
-
-  @Inject
-  CommandContributor commandContributor;
-
   @AboutToShow
   public void prepare(
       HBox node,
@@ -60,7 +52,5 @@ public class SpectrumExperimentNodeContribution implements TreeContribution {
     setSupplemental(node, data.data().getState().getSpectrumName());
 
     configurePseudoClass(node);
-
-    commandContributor.configureCell(OPEN_COMMAND, node);
   }
 }

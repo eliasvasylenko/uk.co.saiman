@@ -11,7 +11,9 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_oGF0ULpUEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="basic:CompositePart" xmi:id="_p0iTILpUEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.spectrum.compositepart.editor" label="Spectrum" selectedElement="_xxMnsLpUEeel5-btXoqucA" horizontal="true">
       <persistedState key="uk.co.saiman.msapex.editor.result.class" value="bundleclass://uk.co.saiman.experiment/uk.co.saiman.experiment.spectrum.Spectrum"/>
-      <children xsi:type="basic:PartStack" xmi:id="_xxMnsLpUEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.spectrum.partstack.editor"/>
+      <children xsi:type="basic:PartStack" xmi:id="_xxMnsLpUEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.spectrum.partstack.editor">
+      	<persistedState key="fx.stack.tabslocation" value="BOTTOM"/>
+      </children>
     </elements>
   </fragments>
 </fragment:ModelFragments>

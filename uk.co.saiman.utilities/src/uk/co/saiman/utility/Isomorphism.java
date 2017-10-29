@@ -39,6 +39,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import uk.co.saiman.property.IdentityProperty;
+
 /**
  * An isomorphic mapping from one object graph to another, typically maintained
  * during a set of {@link Copyable#deepCopy(Isomorphism) deep copy} operations.

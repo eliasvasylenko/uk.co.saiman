@@ -60,7 +60,6 @@ import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
  * @author Elias N Vasylenko
  */
 public class ChemicalElementPanelController {
-  private static final String ISOTOPES = "Isotopes";
   private static final double VARIANCE = 0.05;
 
   @FXML
@@ -90,10 +89,25 @@ public class ChemicalElementPanelController {
   @FXML
   void initialize() {
     peakFunction = new GaussianFunctionFactory(VARIANCE);
-    isotopeChartController.setTitle(ISOTOPES);
     isotopeChartController.getContinuousFunctions().add(isotopeFunction);
 
     setElement(null);
+
+    isotopeTable.managedProperty().bind(isotopeTable.visibleProperty());
+    isotopeChart.managedProperty().bind(isotopeChart.visibleProperty());
+    elementTile.getClickEvents().observe(o -> {
+      if (isotopeTable.isVisible()) {
+        if (isotopeChart.isVisible()) {
+          isotopeChart.setVisible(false);
+        } else {
+          isotopeTable.setVisible(false);
+          isotopeChart.setVisible(true);
+        }
+      } else {
+        isotopeTable.setVisible(true);
+      }
+    });
+
   }
 
   @PostConstruct

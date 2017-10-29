@@ -3,7 +3,6 @@ package uk.co.saiman.msapex.editor.impl;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -12,6 +11,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.services.adapter.Adapter;
+import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -34,14 +35,19 @@ public class FileEditorAddon implements EditorProvider {
   private final Map<String, MPart> editorParts = new LinkedHashMap<>();
 
   @Inject
-  EditorService editorService;
+  private EditorService editorService;
   @Inject
-  EModelService modelService;
+  private EModelService modelService;
   @Inject
-  MApplication application;
+  private MApplication application;
+  @Inject
+  private Adapter adapter;
+  @Inject
+  private MAddon addon;
 
   @PostConstruct
   void create() {
+    System.out.println("create FileEditorAddon");
     for (MUIElement snippet : application.getSnippets()) {
       if (snippet instanceof MPart) {
         MPart part = (MPart) snippet;
@@ -57,6 +63,11 @@ public class FileEditorAddon implements EditorProvider {
   @PreDestroy
   void destroy() {
     editorService.unregisterProvider(this);
+  }
+
+  @Override
+  public String getId() {
+    return addon.getElementId();
   }
 
   @Override
@@ -79,21 +90,22 @@ public class FileEditorAddon implements EditorProvider {
   }
 
   @Override
-  public MPart getEditorPart(String ID) {
+  public MPart createEditorPart(String ID) {
     MPart part = (MPart) modelService.cloneSnippet(application, ID, null);
     part.getPersistedState().remove(EDITOR_FILE_PATH_PATTERN);
     return part;
   }
 
   @Override
-  public Map<String, String> persistResource(Object resource) {
-    Map<String, String> data = new HashMap<>();
-    data.put(EDITOR_FILE_NAME, ((Path) resource).toString());
-    return data;
-  }
-
-  @Override
-  public Object resolveResource(Map<String, String> persistentData) {
-    return Paths.get(persistentData.get(EDITOR_FILE_NAME));
+  public Path initializeEditorPart(MPart part, Object resource) {
+    Path path;
+    Map<String, String> state = part.getPersistedState();
+    if (resource == null) {
+      path = Paths.get(state.get(EDITOR_FILE_NAME));
+    } else {
+      path = adapter.adapt(resource, Path.class);
+      state.put(EDITOR_FILE_NAME, path.toString());
+    }
+    return path;
   }
 }

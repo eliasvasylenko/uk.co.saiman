@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.xml.xpath.XPath;
@@ -85,10 +86,10 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   private final ObservableProperty<ExperimentLifecycleState> lifecycleState;
   private final S state;
 
-  private HashMap<ResultType<?>, XmlResult<?>> results;
+  private final HashMap<ResultType<?>, XmlResult<?>> results;
 
   private String id;
-  private XmlPersistedState persistedState;
+  private final XmlPersistedState persistedState;
 
   /**
    * Try to create a new experiment node of the given type, and with the given
@@ -366,13 +367,22 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
       }
 
       @Override
-      public void setID(String id) {
+      public void setId(String id) {
         XmlExperimentNode.this.setID(id);
       }
 
       @Override
-      public Optional<String> getID() {
-        return Optional.ofNullable(id);
+      public String getId() {
+        if (id == null)
+          throw new NullPointerException();
+        return id;
+      }
+
+      @Override
+      public String getId(Supplier<String> defaultId) {
+        if (id == null)
+          setId(defaultId.get());
+        return id;
       }
     };
   }

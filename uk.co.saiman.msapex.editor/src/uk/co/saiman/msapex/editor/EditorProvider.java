@@ -1,6 +1,5 @@
 package uk.co.saiman.msapex.editor;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -11,10 +10,17 @@ import uk.co.saiman.msapex.editor.impl.EditorAddon;
 /**
  * An editor provider for certain types of resource. Implementations may manage
  * abstract resource descriptors or operate directly on business objects.
+ * <p>
+ * The provider can provide a number of different editors for different types of
+ * resource. Each provided editor has to a unique {@link #getEditorPartIds ID},
+ * where each ID corresponds to the {@link MPart#getElementId element id} of the
+ * editor part which can be added to the application model.
  * 
  * @author Elias N Vasylenko
  */
 public interface EditorProvider {
+  String getId();
+
   /**
    * Get a list of the available editor part IDs.
    * 
@@ -30,8 +36,8 @@ public interface EditorProvider {
    *          the ID of the editor
    * @param resource
    *          the object to edit
-   * @return true if the editor with the given part ID is applicable to the
-   *         given resource
+   * @return true if the editor with the given part ID is applicable to the given
+   *         resource
    */
   boolean isEditorApplicable(String editorId, Object resource);
 
@@ -47,26 +53,19 @@ public interface EditorProvider {
    *          the ID of the editor part to create
    * @return a new editor part, not yet added to the application model
    */
-  MPart getEditorPart(String ID);
+  MPart createEditorPart(String ID);
 
   /**
-   * Retrieve metadata describing a resource which can be used to obtain a new
-   * reference to the resource if it is closed.
+   * Initialize an editor part for the given resource.
    * 
+   * @param part
+   *          the editor part which is being entered into the application model
    * @param resource
-   *          the object to persist
-   * @return a key-value metadata store
+   *          the object to edit, or null if the part has been persisted and
+   *          re-loaded
+   * @return A reference to the editing resource. This may be adapted from the
+   *         given resource or loaded from a persisted state if no resource was
+   *         given.
    */
-  Map<String, String> persistResource(Object resource);
-
-  /**
-   * Obtain a new reference to the resource from its previously
-   * {@link #persistResource retrieved metadata}.
-   * 
-   * @param persistentData
-   *          A key-value store containing metadata describing a resource. The
-   *          map may contain unrelated entries.
-   * @return a reference to the data of the described resource
-   */
-  Object resolveResource(Map<String, String> persistentData);
+  Object initializeEditorPart(MPart part, Object resource);
 }
