@@ -36,10 +36,8 @@ package uk.co.saiman.experiment;
  *          the type of the executing node
  */
 public interface ExecutionContext<T> {
-	/**
-	 * @return the currently executing experiment node
-	 */
-	ExperimentNode<? extends ExperimentType<T>, T> node();
-
-	ResultManager results();
+  /**
+   * @return the currently executing experiment node
+   */
+  ExperimentNode<? extends ExperimentType<T, ?>, T> node();
 }

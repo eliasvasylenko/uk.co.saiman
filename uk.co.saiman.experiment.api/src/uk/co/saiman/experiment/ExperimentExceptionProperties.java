@@ -48,7 +48,7 @@ public interface ExperimentExceptionProperties {
    *          an ancestor of the candidate node
    * @return a node of the given type may not be a descendant of the given node
    */
-  String typeMayNotSucceed(ExperimentType<?> descendantType, ExperimentNode<?, ?> ancestorNode);
+  String typeMayNotSucceed(ExperimentType<?, ?> descendantType, ExperimentNode<?, ?> ancestorNode);
 
   String experimentIsDisposed(ExperimentNode<?, ?> experimentNode);
 

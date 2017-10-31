@@ -35,6 +35,7 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.MissingExperimentType;
 import uk.co.saiman.experiment.PersistedState;
+import uk.co.saiman.experiment.ResultType;
 
 public class MissingExperimentTypeImpl implements MissingExperimentType {
   private final ExperimentProperties text;
@@ -62,7 +63,7 @@ public class MissingExperimentTypeImpl implements MissingExperimentType {
   }
 
   @Override
-  public void execute(ExecutionContext<PersistedState> context) {
+  public Void execute(ExecutionContext<PersistedState> context) {
     throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
   }
 
@@ -74,7 +75,13 @@ public class MissingExperimentTypeImpl implements MissingExperimentType {
   @Override
   public boolean mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?> descendantNodeType) {
+      ExperimentType<?, ?> descendantNodeType) {
     return true;
+  }
+
+  @Override
+  public ResultType<? extends Void> getResultType() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

@@ -78,7 +78,7 @@ public interface Workspace {
    *          a possible experiment type
    * @return true if the type was added successfully, false otherwise
    */
-  boolean registerExperimentType(ExperimentType<?> experimentType);
+  boolean registerExperimentType(ExperimentType<?, ?> experimentType);
 
   /**
    * Unregister an available experiment type
@@ -87,12 +87,12 @@ public interface Workspace {
    *          a possible experiment type
    * @return true if the type was removed successfully, false otherwise
    */
-  boolean unregisterExperimentType(ExperimentType<?> experimentType);
+  boolean unregisterExperimentType(ExperimentType<?, ?> experimentType);
 
   /**
    * @return the set of all experiment types registered to this workspace
    */
-  Stream<ExperimentType<?>> getRegisteredExperimentTypes();
+  Stream<ExperimentType<?, ?>> getRegisteredExperimentTypes();
 
   Observable<WorkspaceEvent> events();
 }

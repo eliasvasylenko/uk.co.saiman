@@ -54,7 +54,7 @@ import uk.co.saiman.reflection.token.TypedReference;
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public interface ExperimentNode<T extends ExperimentType<S>, S> {
+public interface ExperimentNode<T extends ExperimentType<S, ?>, S> {
   /**
    * @return The ID of the node, as configured via {@link ConfigurationContext}.
    *         The ID should be unique amongst the children of a node's parent.
@@ -98,11 +98,10 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   }
 
   /**
-   * @return a list of all ancestors, nearest first, inclusive of the node
-   *         itself
+   * @return a list of all ancestors, nearest first, inclusive of the node itself
    */
   default Stream<ExperimentNode<?, ?>> getAncestors() {
-    return StreamUtilities.<ExperimentNode<?, ?>> iterateOptional(this, ExperimentNode::getParent);
+    return StreamUtilities.<ExperimentNode<?, ?>>iterateOptional(this, ExperimentNode::getParent);
   }
 
   /**
@@ -115,7 +114,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  default <U, E extends ExperimentType<U>> Optional<ExperimentNode<E, U>> findAncestor(E type) {
+  default <U, E extends ExperimentType<U, ?>> Optional<ExperimentNode<E, U>> findAncestor(E type) {
     return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(
         a -> (ExperimentNode<E, U>) a);
   }
@@ -130,36 +129,36 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> findAncestor(
+  default <U, E extends ExperimentType<? extends U, ?>> Optional<ExperimentNode<E, ? extends U>> findAncestor(
       Collection<E> types) {
     return getAncestors().filter(a -> types.contains(a.getType())).findFirst().map(
         a -> (ExperimentNode<E, ? extends U>) a);
   }
 
   /**
-   * Get the ancestor nodes of the processing experiment node which are of one
-   * of the given {@link ExperimentType experiment types}.
+   * Get the ancestor nodes of the processing experiment node which are of one of
+   * the given {@link ExperimentType experiment types}.
    * 
    * @param types
    *          the possible types of the ancestor we wish to inspect
    * @return a stream of ancestor nodes of the given type, from the nearest
    */
   @SuppressWarnings("unchecked")
-  default <U, E extends ExperimentType<? extends U>> Stream<ExperimentNode<E, ? extends U>> findAncestors(
+  default <U, E extends ExperimentType<? extends U, ?>> Stream<ExperimentNode<E, ? extends U>> findAncestors(
       Collection<E> types) {
     return getAncestors().filter(a -> types.contains(a.getType())).map(
         a -> (ExperimentNode<E, ? extends U>) a);
   }
 
   /**
-   * Remove this part from its parent, or from the containing manager if it is
-   * the root part.
+   * Remove this part from its parent, or from the containing manager if it is the
+   * root part.
    */
   void remove();
 
   /**
-   * Get all child experiment parts, to be executed sequentially during this
-   * parts {@link ExperimentLifecycleState#PROCESSING} state.
+   * Get all child experiment parts, to be executed sequentially during this parts
+   * {@link ExperimentLifecycleState#PROCESSING} state.
    * 
    * @return An ordered list of all sequential child experiment parts
    */
@@ -168,7 +167,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   /**
    * @return All known available child experiment types
    */
-  Stream<ExperimentType<?>> getAvailableChildExperimentTypes();
+  Stream<ExperimentType<?, ?>> getAvailableChildExperimentTypes();
 
   /**
    * Add a child experiment node of the given type to this node.
@@ -177,7 +176,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    *          The type of experiment
    * @return A new child experiment part of the given type
    */
-  <U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType);
+  <U, E extends ExperimentType<U, ?>> ExperimentNode<E, U> addChild(E childType);
 
   /**
    * @return the current execution lifecycle state of the experiment part
@@ -199,9 +198,9 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
 
   /**
    * Process this experiment node. The request will be passed down to the root
-   * experiment node and processing will proceed back down the ancestor
-   * hierarchy to this node. If the experiment is already in progress then
-   * invocation of this method should fail.
+   * experiment node and processing will proceed back down the ancestor hierarchy
+   * to this node. If the experiment is already in progress then invocation of
+   * this method should fail.
    */
   void execute();
 
@@ -211,18 +210,11 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    * @return an optional containing the result, or an empty optional if the
    *         experiment type has no result type
    */
-  Optional<Result<?>> getResult();
+  Result<?> getResult();
 
   /**
-   * Find the result of the nearest ancestor which matches the given type.
-   * 
-   * @return the result found
-   */
-  <U> Optional<Result<U>> findResult(ResultType<U> type);
-
-  /**
-   * Clear all the results associated with this node. Take care, as this will
-   * also delete any result data from disk.
+   * Clear all the results associated with this node. Take care, as this will also
+   * delete any result data from disk.
    */
   void clearResult();
 }

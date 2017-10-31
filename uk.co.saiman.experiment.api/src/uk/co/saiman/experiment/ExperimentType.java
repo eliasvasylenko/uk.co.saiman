@@ -30,7 +30,6 @@ package uk.co.saiman.experiment;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.Type;
-import java.util.Optional;
 
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -51,7 +50,7 @@ import uk.co.saiman.reflection.token.TypeToken;
  *          the type of the data describing the experiment state, including
  *          configuration and results
  */
-public interface ExperimentType<S> {
+public interface ExperimentType<S, R> {
   /**
    * @return the unique and persistent ID of the experiment type
    */
@@ -73,8 +72,8 @@ public interface ExperimentType<S> {
   /**
    * @param context
    *          the node which the configuration is being requested for
-   * @return a new state object suitable for an instance of
-   *         {@link ExperimentNode} over this type.
+   * @return a new state object suitable for an instance of {@link ExperimentNode}
+   *         over this type.
    */
   S createState(ConfigurationContext<S> context);
 
@@ -84,27 +83,24 @@ public interface ExperimentType<S> {
    * @param context
    *          the execution context
    */
-  void execute(ExecutionContext<S> context);
+  R execute(ExecutionContext<S> context);
 
   /**
-   * If this experiment node produces a result upon execution, get the type of
-   * the result which is produced.
+   * If this experiment node produces a result upon execution, get the type of the
+   * result which is produced.
    * 
    * @return an optional containing the type of the result, or else an empty
    *         optional
    */
-  default Optional<? extends ResultType<?>> getResultType() {
-    return Optional.empty();
-  }
+  ResultType<? extends R> getResultType();
 
   /**
-   * Test whether a node of this type may follow from the given directly
-   * preceding node and be validly added as its child.
+   * Test whether a node of this type may follow from the given directly preceding
+   * node and be validly added as its child.
    * 
    * @param parentNode
    *          the candidate parent node
-   * @return true if a node of this type may be added as a child, false
-   *         otherwise
+   * @return true if a node of this type may be added as a child, false otherwise
    */
   boolean mayComeAfter(ExperimentNode<?, ?> parentNode);
 
@@ -113,19 +109,19 @@ public interface ExperimentType<S> {
    * validly added as its child. The penultimate descendant node should be a
    * descendant of a node of this type.
    * <p>
-   * This test is performed on all ancestors when an attempt is made to add a
-   * new node.
+   * This test is performed on all ancestors when an attempt is made to add a new
+   * node.
    * 
    * @param penultimateDescendantNode
    *          the candidate parent node
    * @param descendantNodeType
    *          the candidate child node
-   * @return true if a node of the given type may be added as a child of the
-   *         given node, false otherwise
+   * @return true if a node of the given type may be added as a child of the given
+   *         node, false otherwise
    */
   boolean mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?> descendantNodeType);
+      ExperimentType<?, ?> descendantNodeType);
 
   /**
    * @return the exact generic type of the configuration interface

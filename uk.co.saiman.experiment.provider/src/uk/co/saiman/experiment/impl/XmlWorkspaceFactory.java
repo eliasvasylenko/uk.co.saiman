@@ -59,18 +59,18 @@ public class XmlWorkspaceFactory implements WorkspaceFactory {
   @Reference
   PropertyLoader loader;
 
-  private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
+  private final Set<ExperimentType<?, ?>> experimentTypes = new HashSet<>();
 
   @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
-  protected void registerExperimentType(ExperimentType<?> experimentType) {
+  protected void registerExperimentType(ExperimentType<?, ?> experimentType) {
     experimentTypes.add(experimentType);
   }
 
-  protected void unregisterExperimentType(ExperimentType<?> experimentType) {
+  protected void unregisterExperimentType(ExperimentType<?, ?> experimentType) {
     experimentTypes.remove(experimentType);
   }
 
-  public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
+  public Stream<ExperimentType<?, ?>> getRegisteredExperimentTypes() {
     return experimentTypes.stream();
   }
 

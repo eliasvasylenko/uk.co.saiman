@@ -36,9 +36,9 @@ import java.util.function.Supplier;
  * {@link ExperimentType#createState(ConfigurationContext)}.
  * <p>
  * In other words, each {@link ExperimentNode} has only one
- * {@link ConfigurationContext} associated with it when it is created.
- * The configuration context remains valid so long as the experiment node
- * remains in the workspace, and references may be held to it.
+ * {@link ConfigurationContext} associated with it when it is created. The
+ * configuration context remains valid so long as the experiment node remains in
+ * the workspace, and references may be held to it.
  * 
  * @author Elias N Vasylenko
  * @param <T>
@@ -50,15 +50,13 @@ public interface ConfigurationContext<T> {
    */
   ExperimentNode<?, T> node();
 
-  ResultManager results();
-
   /**
    * This map represents the state of the experiment node associated with this
    * configuration context. This data should be persisted by the workspace
    * according to the format of an experiment file.
    * <p>
-   * The map is coupled directly with the persisted data, with changes of the
-   * map being immediately stored.
+   * The map is coupled directly with the persisted data, with changes of the map
+   * being immediately stored.
    * <p>
    * There is no standard enforced for the format of the value strings.
    * <p>
@@ -81,9 +79,9 @@ public interface ConfigurationContext<T> {
    * to the given default if it is not already set.
    * <p>
    * If the node is newly created an id must be set before the end of
-   * {@link ExperimentType#createState(ConfigurationContext)}. If the
-   * node is loaded from the persisted workspace, it is strongly recommended
-   * that it keep the previously ID, as per the behavior of this method.
+   * {@link ExperimentType#createState(ConfigurationContext)}. If the node is
+   * loaded from the persisted workspace, it is strongly recommended that it keep
+   * the previously ID, as per the behavior of this method.
    * 
    * @return the ID for the node
    */

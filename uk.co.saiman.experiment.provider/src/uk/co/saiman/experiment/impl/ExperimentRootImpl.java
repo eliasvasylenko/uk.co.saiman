@@ -36,6 +36,7 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.property.Property;
 
 /**
@@ -89,7 +90,9 @@ public class ExperimentRootImpl implements ExperimentRoot {
   }
 
   @Override
-  public void execute(ExecutionContext<ExperimentConfiguration> context) {}
+  public Void execute(ExecutionContext<ExperimentConfiguration> context) {
+    return null;
+  }
 
   @Override
   public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
@@ -99,7 +102,13 @@ public class ExperimentRootImpl implements ExperimentRoot {
   @Override
   public boolean mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?> descendantNodeType) {
+      ExperimentType<?, ?> descendantNodeType) {
     return true;
+  }
+
+  @Override
+  public ResultType<Void> getResultType() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

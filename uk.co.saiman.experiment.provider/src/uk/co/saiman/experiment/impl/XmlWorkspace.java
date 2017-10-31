@@ -67,7 +67,7 @@ public class XmlWorkspace implements Workspace {
   private final XmlWorkspaceFactory factory;
   private final Path dataRoot;
 
-  private final Set<ExperimentType<?>> experimentTypes = new HashSet<>();
+  private final Set<ExperimentType<?, ?>> experimentTypes = new HashSet<>();
 
   private final ExperimentRoot experimentRootType;
   private final List<XmlExperiment> experiments = new ArrayList<>();
@@ -190,17 +190,17 @@ public class XmlWorkspace implements Workspace {
    */
 
   @Override
-  public boolean registerExperimentType(ExperimentType<?> experimentType) {
+  public boolean registerExperimentType(ExperimentType<?, ?> experimentType) {
     return experimentTypes.add(experimentType);
   }
 
   @Override
-  public boolean unregisterExperimentType(ExperimentType<?> experimentType) {
+  public boolean unregisterExperimentType(ExperimentType<?, ?> experimentType) {
     return experimentTypes.remove(experimentType);
   }
 
   @Override
-  public Stream<ExperimentType<?>> getRegisteredExperimentTypes() {
+  public Stream<ExperimentType<?, ?>> getRegisteredExperimentTypes() {
     return Stream.concat(factory.getRegisteredExperimentTypes(), experimentTypes.stream());
   }
 

@@ -36,6 +36,7 @@ import java.util.concurrent.Future;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Resource;
 import uk.co.saiman.experiment.ResultType;
@@ -51,7 +52,7 @@ import uk.co.saiman.experiment.ResultType;
  *          the type of sample configuration for the instrument
  */
 public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
-    implements ExperimentType<T> {
+    implements ExperimentType<T, Spectrum> {
   private static final String SPECTRUM_DATA_NAME = "spectrum";
 
   private SpectrumProperties properties;
@@ -62,8 +63,8 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   }
 
   /*
-   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to
-   * make this possible ...
+   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to make
+   * this possible ...
    */
   public SpectrumExperimentType(SpectrumProperties properties) {
     this.properties = properties;
@@ -83,14 +84,10 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
     return properties.spectrumExperimentName().toString();
   }
 
-  public ResultType<? extends Spectrum> getSpectrumResult() {
-    return spectrumResult;
-  }
-
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public void execute(ExecutionContext<T> context) {
+  public AccumulatingFileSpectrum execute(ExperimentNode<?, T> node) {
     AcquisitionDevice device = getAcquisitionDevice();
 
     Future<AccumulatingFileSpectrum> acquisition = device
@@ -102,17 +99,11 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 
     device.startAcquisition();
 
-    try {
-      acquisition.get();
-      context.results().get(spectrumResult).tryGet().ifPresent(d -> d.complete());
-    } catch (InterruptedException | ExecutionException e) {
-      context.results().unset(spectrumResult);
-      throw new ExperimentException(properties.experiment().exception().experimentInterrupted(), e);
-    }
+    return acquisition.get();
   }
 
   private AccumulatingFileSpectrum initializeResult(
-      ExecutionContext<T> context,
+      ExperimentNode<?, T> context,
       AcquisitionDevice device) {
     Resource resource = context.results().getResource(spectrumResult);
 
@@ -128,7 +119,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   }
 
   @Override
-  public Optional<ResultType<AccumulatingFileSpectrum>> getResultType() {
-    return Optional.ofNullable(spectrumResult);
+  public ResultType<AccumulatingFileSpectrum> getResultType() {
+    return spectrumResult;
   }
 }

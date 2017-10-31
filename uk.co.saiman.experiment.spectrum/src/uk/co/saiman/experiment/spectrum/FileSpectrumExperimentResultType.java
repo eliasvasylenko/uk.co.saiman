@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import uk.co.saiman.experiment.ResultConfigurationContext;
 import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.reflection.token.TypeToken;
 

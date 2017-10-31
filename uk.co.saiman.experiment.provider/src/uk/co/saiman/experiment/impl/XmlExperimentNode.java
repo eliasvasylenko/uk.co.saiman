@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Objects.requireNonNull;
 import static javax.xml.xpath.XPathConstants.NODESET;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
 
@@ -57,8 +56,6 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.PersistedState;
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.experiment.ResultManager;
-import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
@@ -72,7 +69,7 @@ import uk.co.saiman.observable.ObservableValue;
  * @param <S>
  *          the type of the data describing the experiment configuration
  */
-public class XmlExperimentNode<T extends ExperimentType<S>, S> implements ExperimentNode<T, S> {
+public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements ExperimentNode<T, S> {
   private static final String NODE_ELEMENT = "node";
   private static final String TYPE_ATTRIBUTE = "type";
   private static final String ID_ATTRIBUTE = "id";
@@ -137,7 +134,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     this.children = new ArrayList<>();
     setID(id);
 
-    result = getType().getResultType().map(r -> new XmlResult<>(this, r)).orElse(null);
+    result = new XmlResult<>(this, getType().getResultType());
 
     this.lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
     this.persistedState = persistedState;
@@ -247,19 +244,19 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   @Override
-  public Stream<ExperimentType<?>> getAvailableChildExperimentTypes() {
+  public Stream<ExperimentType<?, ?>> getAvailableChildExperimentTypes() {
     return workspace.getRegisteredExperimentTypes().filter(
         type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
   }
 
   @Override
-  public <U, E extends ExperimentType<U>> ExperimentNode<E, U> addChild(E childType) {
+  public <U, E extends ExperimentType<U, ?>> ExperimentNode<E, U> addChild(E childType) {
     ExperimentNode<E, U> child = loadChild(childType, null, new XmlPersistedState());
     getRootImpl().save();
     return child;
   }
 
-  protected <U, E extends ExperimentType<U>> XmlExperimentNode<E, U> loadChild(
+  protected <U, E extends ExperimentType<U, ?>> XmlExperimentNode<E, U> loadChild(
       E childType,
       String id,
       XmlPersistedState persistedState) {
@@ -309,32 +306,8 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     }
   }
 
-  private ResultManager createResultManager() {
-    return new ResultManager() {
-      @Override
-      public <U> Result<U> get(ResultType<U> resultType) {
-        return XmlExperimentNode.this.findResult(resultType);
-      }
-
-      @Override
-      public <U> Result<U> set(ResultType<U> resultType, U resultData) {
-        return XmlExperimentNode.this.setResult(resultType, requireNonNull(resultData));
-      }
-
-      @Override
-      public <U> Result<U> unset(ResultType<U> resultType) {
-        return XmlExperimentNode.this.setResult(resultType, null);
-      }
-    };
-  }
-
   private ExecutionContext<S> createExecutionContext() {
     return new ExecutionContext<S>() {
-      @Override
-      public ResultManager results() {
-        return createResultManager();
-      }
-
       @Override
       public XmlExperimentNode<?, S> node() {
         return XmlExperimentNode.this;
@@ -347,11 +320,6 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
       @Override
       public XmlExperimentNode<?, S> node() {
         return XmlExperimentNode.this;
-      }
-
-      @Override
-      public ResultManager results() {
-        return createResultManager();
       }
 
       @Override
@@ -417,19 +385,13 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   @Override
-  public Optional<Result<?>> getResult() {
-    return Optional.ofNullable(result);
+  public Result<?> getResult() {
+    return result;
   }
 
   @Override
   public void clearResult() {
     result.setProblem(new NullPointerException());
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <U> Optional<Result<U>> findResult(ResultType<U> resultType) {
-    return (XmlResult<U>) results.get(resultType);
   }
 
   protected void saveNode(Element element) {
@@ -455,7 +417,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     String experimentID = element.getAttribute(ID_ATTRIBUTE);
     String experimentTypeID = element.getAttribute(TYPE_ATTRIBUTE);
 
-    ExperimentType<?> experimentType = getAvailableChildExperimentTypes()
+    ExperimentType<?, ?> experimentType = getAvailableChildExperimentTypes()
         .filter(e -> e.getId().equals(experimentTypeID))
         .findAny()
         .orElseGet(() -> new MissingExperimentTypeImpl(getText(), experimentTypeID));
