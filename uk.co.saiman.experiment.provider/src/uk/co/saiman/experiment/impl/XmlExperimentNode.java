@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.util.Objects.requireNonNull;
 import static javax.xml.xpath.XPathConstants.NODESET;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
 
@@ -34,7 +35,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,10 +47,10 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import uk.co.saiman.experiment.ConfigurationContext;
+import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
@@ -86,7 +86,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   private final ObservableProperty<ExperimentLifecycleState> lifecycleState;
   private final S state;
 
-  private final HashMap<ResultType<?>, XmlResult<?>> results;
+  private final XmlResult<?> result;
 
   private String id;
   private final XmlPersistedState persistedState;
@@ -137,8 +137,7 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     this.children = new ArrayList<>();
     setID(id);
 
-    this.results = new HashMap<>();
-    getType().getResultTypes().forEach(r -> results.put(r, new XmlResult<>(this, r)));
+    result = getType().getResultType().map(r -> new XmlResult<>(this, r)).orElse(null);
 
     this.lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
     this.persistedState = persistedState;
@@ -173,22 +172,16 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     return workspace;
   }
 
-  @Override
-  public Path getDataPath() {
-    return getParentDataPath().resolve(id);
-  }
-
-  @Override
-  public Path getAbsoluteDataPath() {
+  protected Path getDataPath() {
     return getWorkspace().getRootPath().resolve(getParentDataPath().resolve(id));
-  }
-
-  protected XmlPersistedState persistedState() {
-    return persistedState;
   }
 
   private Path getParentDataPath() {
     return getParentImpl().map(p -> p.getDataPath()).orElse(workspace.getRootPath());
+  }
+
+  protected XmlPersistedState persistedState() {
+    return persistedState;
   }
 
   private Stream<? extends XmlExperimentNode<?, ?>> getSiblings() {
@@ -285,17 +278,17 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   @Override
-  public void process() {
+  public void execute() {
     workspace.process(this);
   }
 
-  protected boolean execute() {
+  protected boolean executeImpl() {
     lifecycleState.set(ExperimentLifecycleState.PROCESSING);
 
     try {
       validate();
 
-      Files.createDirectories(getAbsoluteDataPath());
+      Files.createDirectories(getDataPath());
 
       getType().execute(createExecutionContext());
 
@@ -320,23 +313,23 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     return new ResultManager() {
       @Override
       public <U> Result<U> get(ResultType<U> resultType) {
-        return XmlExperimentNode.this.getResult(resultType);
+        return XmlExperimentNode.this.findResult(resultType);
       }
 
       @Override
       public <U> Result<U> set(ResultType<U> resultType, U resultData) {
-        return XmlExperimentNode.this.setResult(resultType, resultData);
+        return XmlExperimentNode.this.setResult(resultType, requireNonNull(resultData));
       }
 
       @Override
-      public Path getDataPath() {
-        return XmlExperimentNode.this.getAbsoluteDataPath();
+      public <U> Result<U> unset(ResultType<U> resultType) {
+        return XmlExperimentNode.this.setResult(resultType, null);
       }
     };
   }
 
-  private ExperimentExecutionContext<S> createExecutionContext() {
-    return new ExperimentExecutionContext<S>() {
+  private ExecutionContext<S> createExecutionContext() {
+    return new ExecutionContext<S>() {
       @Override
       public ResultManager results() {
         return createResultManager();
@@ -349,8 +342,8 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
     };
   }
 
-  private ExperimentConfigurationContext<S> createConfigurationContext() {
-    return new ExperimentConfigurationContext<S>() {
+  private ConfigurationContext<S> createConfigurationContext() {
+    return new ConfigurationContext<S>() {
       @Override
       public XmlExperimentNode<?, S> node() {
         return XmlExperimentNode.this;
@@ -424,24 +417,18 @@ public class XmlExperimentNode<T extends ExperimentType<S>, S> implements Experi
   }
 
   @Override
-  public Stream<Result<?>> getResults() {
-    return results.values().stream().map(t -> (Result<?>) t);
+  public Optional<Result<?>> getResult() {
+    return Optional.ofNullable(result);
   }
 
   @Override
-  public void clearResults() {
-    results.values().forEach(r -> r.setProblem(new NullPointerException()));
-  }
-
-  protected <U> XmlResult<U> setResult(ResultType<U> resultType, U resultData) {
-    XmlResult<U> result = getResult(resultType);
-    result.set(resultData);
-    return result;
+  public void clearResult() {
+    result.setProblem(new NullPointerException());
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <U> XmlResult<U> getResult(ResultType<U> resultType) {
+  public <U> Optional<Result<U>> findResult(ResultType<U> resultType) {
     return (XmlResult<U>) results.get(resultType);
   }
 

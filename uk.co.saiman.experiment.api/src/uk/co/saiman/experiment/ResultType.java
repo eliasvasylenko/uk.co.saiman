@@ -60,4 +60,20 @@ public interface ResultType<T> {
    * @return the exact static type of the experiment result data
    */
   TypeToken<T> getDataType();
+
+  /*
+   * 
+   * 
+   * 
+   * TODO think about how we can separate result data from the actual
+   * ExperimentType implementations. i.e. the data should still be loadable and
+   * processable on systems without the correct particular experiment types
+   * installed. This means we cannot rely on the ExperimentType which owns a
+   * result to deal with creating and persisting the data as is the current
+   * strategy.
+   * 
+   * 
+   * 
+   */
+  T createData(ResultConfigurationContext<T> context);
 }

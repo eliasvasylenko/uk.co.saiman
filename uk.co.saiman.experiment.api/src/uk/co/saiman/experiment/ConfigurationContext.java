@@ -33,10 +33,10 @@ import java.util.function.Supplier;
  * The context of an experiment node's initial configuration. When a workspace
  * is requested to create an experiment node of a given type, this context is
  * instantiated and passed to the experiment type implementation via
- * {@link ExperimentType#createState(ExperimentConfigurationContext)}.
+ * {@link ExperimentType#createState(ConfigurationContext)}.
  * <p>
  * In other words, each {@link ExperimentNode} has only one
- * {@link ExperimentConfigurationContext} associated with it when it is created.
+ * {@link ConfigurationContext} associated with it when it is created.
  * The configuration context remains valid so long as the experiment node
  * remains in the workspace, and references may be held to it.
  * 
@@ -44,7 +44,7 @@ import java.util.function.Supplier;
  * @param <T>
  *          the type of the executing node
  */
-public interface ExperimentConfigurationContext<T> {
+public interface ConfigurationContext<T> {
   /**
    * @return the currently executing experiment node
    */
@@ -57,8 +57,8 @@ public interface ExperimentConfigurationContext<T> {
    * configuration context. This data should be persisted by the workspace
    * according to the format of an experiment file.
    * <p>
-   * The map is coupled directly with the persisted data, with changes of the map
-   * being immediately stored.
+   * The map is coupled directly with the persisted data, with changes of the
+   * map being immediately stored.
    * <p>
    * There is no standard enforced for the format of the value strings.
    * <p>
@@ -77,15 +77,15 @@ public interface ExperimentConfigurationContext<T> {
   String getId();
 
   /**
-   * {@link #get Get} the ID of the node, or {@link setId set} the ID to the given
-   * default if it is not already set.
+   * {@link #getId() Get} the ID of the node, or {@link #setId(String) set} the ID
+   * to the given default if it is not already set.
    * <p>
    * If the node is newly created an id must be set before the end of
-   * {@link ExperimentType#createState(ExperimentConfigurationContext)}. If the
-   * node is loaded from the persisted workspace, it is strongly recommended that
-   * it keep the previously ID, as per the behavior of this method.
+   * {@link ExperimentType#createState(ConfigurationContext)}. If the
+   * node is loaded from the persisted workspace, it is strongly recommended
+   * that it keep the previously ID, as per the behavior of this method.
    * 
-   * @return
+   * @return the ID for the node
    */
   String getId(Supplier<String> defaultId);
 

@@ -30,7 +30,6 @@ package uk.co.saiman.experiment;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -57,9 +56,8 @@ import uk.co.saiman.reflection.token.TypedReference;
  */
 public interface ExperimentNode<T extends ExperimentType<S>, S> {
   /**
-   * @return The ID of the node, as configured via
-   *         {@link ExperimentConfigurationContext}. The ID should be unique
-   *         amongst the children of a node's parent.
+   * @return The ID of the node, as configured via {@link ConfigurationContext}.
+   *         The ID should be unique amongst the children of a node's parent.
    */
   String getId();
 
@@ -85,18 +83,6 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
   Optional<ExperimentNode<?, ?>> getParent();
 
   /**
-   * @return the path of the experiment node data relative to the
-   *         {@link Workspace#getRootPath() workspace root}.
-   */
-  Path getDataPath();
-
-  /**
-   * @return the absolute path of the experiment node data from the
-   *         {@link Workspace#getRootPath() workspace root}.
-   */
-  Path getAbsoluteDataPath();
-
-  /**
    * @return the node's index in its parent's list of children
    */
   default int getIndex() {
@@ -108,14 +94,15 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    * @return the root part of the experiment tree this part occurs in
    */
   default Experiment getExperiment() {
-    return (Experiment) getAncestor(getWorkspace().getExperimentRootType()).get();
+    return (Experiment) findAncestor(getWorkspace().getExperimentRootType()).get();
   }
 
   /**
-   * @return a list of all ancestors, nearest first, inclusive of the node itself
+   * @return a list of all ancestors, nearest first, inclusive of the node
+   *         itself
    */
   default Stream<ExperimentNode<?, ?>> getAncestors() {
-    return StreamUtilities.<ExperimentNode<?, ?>>iterateOptional(this, ExperimentNode::getParent);
+    return StreamUtilities.<ExperimentNode<?, ?>> iterateOptional(this, ExperimentNode::getParent);
   }
 
   /**
@@ -128,7 +115,7 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  default <U, E extends ExperimentType<U>> Optional<ExperimentNode<E, U>> getAncestor(E type) {
+  default <U, E extends ExperimentType<U>> Optional<ExperimentNode<E, U>> findAncestor(E type) {
     return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(
         a -> (ExperimentNode<E, U>) a);
   }
@@ -143,36 +130,36 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> getAncestor(
+  default <U, E extends ExperimentType<? extends U>> Optional<ExperimentNode<E, ? extends U>> findAncestor(
       Collection<E> types) {
     return getAncestors().filter(a -> types.contains(a.getType())).findFirst().map(
         a -> (ExperimentNode<E, ? extends U>) a);
   }
 
   /**
-   * Get the ancestor nodes of the processing experiment node which are of one of
-   * the given {@link ExperimentType experiment types}.
+   * Get the ancestor nodes of the processing experiment node which are of one
+   * of the given {@link ExperimentType experiment types}.
    * 
    * @param types
    *          the possible types of the ancestor we wish to inspect
    * @return a stream of ancestor nodes of the given type, from the nearest
    */
   @SuppressWarnings("unchecked")
-  default <U, E extends ExperimentType<? extends U>> Stream<ExperimentNode<E, ? extends U>> getAncestors(
+  default <U, E extends ExperimentType<? extends U>> Stream<ExperimentNode<E, ? extends U>> findAncestors(
       Collection<E> types) {
     return getAncestors().filter(a -> types.contains(a.getType())).map(
         a -> (ExperimentNode<E, ? extends U>) a);
   }
 
   /**
-   * Remove this part from its parent, or from the containing manager if it is the
-   * root part.
+   * Remove this part from its parent, or from the containing manager if it is
+   * the root part.
    */
   void remove();
 
   /**
-   * Get all child experiment parts, to be executed sequentially during this parts
-   * {@link ExperimentLifecycleState#PROCESSING} state.
+   * Get all child experiment parts, to be executed sequentially during this
+   * parts {@link ExperimentLifecycleState#PROCESSING} state.
    * 
    * @return An ordered list of all sequential child experiment parts
    */
@@ -212,27 +199,30 @@ public interface ExperimentNode<T extends ExperimentType<S>, S> {
 
   /**
    * Process this experiment node. The request will be passed down to the root
-   * experiment node and processing will proceed back down the ancestor hierarchy
-   * to this node. If the experiment is already in progress then invocation of
-   * this method should fail.
+   * experiment node and processing will proceed back down the ancestor
+   * hierarchy to this node. If the experiment is already in progress then
+   * invocation of this method should fail.
    */
-  void process();
+  void execute();
 
   /**
-   * @return all results associated with this node
+   * Get the result associated with this node.
+   * 
+   * @return an optional containing the result, or an empty optional if the
+   *         experiment type has no result type
    */
-  Stream<Result<?>> getResults();
+  Optional<Result<?>> getResult();
 
   /**
-   * Clear all the results associated with this node. Take care, as this will also
-   * delete any result data from disk.
+   * Find the result of the nearest ancestor which matches the given type.
+   * 
+   * @return the result found
    */
-  void clearResults();
+  <U> Optional<Result<U>> findResult(ResultType<U> type);
 
   /**
-   * @param resultType
-   *          the result type to set the result data for
-   * @return the result associated with this node for the given result type
+   * Clear all the results associated with this node. Take care, as this will
+   * also delete any result data from disk.
    */
-  <U> Result<U> getResult(ResultType<U> resultType);
+  void clearResult();
 }

@@ -106,7 +106,7 @@ public class ResultEditorAddon implements EditorProvider {
       Path path = workspace.getRootPath().getFileSystem().getPath(state.get(EDITOR_RESULT_PATH));
       result = workspace
           .resolveNode(path)
-          .getResults()
+          .getResult()
           .filter(r -> r.getType().getId().equals(id))
           .findAny()
           .get();

@@ -48,7 +48,6 @@ import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
@@ -139,58 +138,8 @@ public class XmlWorkspace implements Workspace {
     return text;
   }
 
-  @Override
-  public Path getRootPath() {
+  protected Path getRootPath() {
     return dataRoot;
-  }
-
-  @Override
-  public ExperimentNode<?, ?> resolveNode(Path path) {
-    System.out.println("dataRoot: " + dataRoot);
-    System.out.println("path: " + path);
-    Path relativePath = path.isAbsolute() ? dataRoot.relativize(path) : path;
-    System.out.println("relativePath: " + relativePath);
-
-    ExperimentNode<?, ?> node = resolveContainingNode(relativePath);
-    Path remainingPath;
-    System.out.println("node.getAbsoluteDataPath(): " + node.getAbsoluteDataPath());
-    remainingPath = node
-        .getAbsoluteDataPath()
-        .relativize(dataRoot.resolve(relativePath))
-        .normalize();
-    System.out.println("remainingPath: " + remainingPath);
-    if (remainingPath.getNameCount() > 0) {
-      throw new ExperimentException(text.exception().cannotResolveExperimentNode(this, path));
-    }
-    return node;
-  }
-
-  @Override
-  public ExperimentNode<?, ?> resolveContainingNode(Path path) {
-    Path relativePath = path.isAbsolute() ? dataRoot.relativize(path) : path;
-
-    String experimentName = relativePath.getName(0).toString();
-    ExperimentNode<?, ?> node = getExperiments()
-        .filter(n -> n.getId().equals(experimentName))
-        .findAny()
-        .orElseThrow(
-            () -> new ExperimentException(
-                text.exception().cannotResolveExperimentResult(this, path)));
-    for (int i = 1; i < relativePath.getNameCount(); i++) {
-      String nodeName = relativePath.getName(i).toString();
-
-      ExperimentNode<?, ?> child = node
-          .getChildren()
-          .filter(n -> n.getId().equals(nodeName))
-          .findAny()
-          .orElse(null);
-      if (child == null)
-        break;
-      else
-        node = child;
-    }
-
-    return node;
   }
 
   /*
@@ -271,7 +220,7 @@ public class XmlWorkspace implements Workspace {
   private boolean processImpl(XmlExperimentNode<?, ?> node) {
     boolean success = StreamUtilities
         .reverse(node.getAncestorsImpl())
-        .filter(XmlExperimentNode::execute)
+        .filter(XmlExperimentNode::executeImpl)
         .count() > 0;
 
     if (success) {
@@ -282,6 +231,6 @@ public class XmlWorkspace implements Workspace {
   }
 
   private void processChildren(XmlExperimentNode<?, ?> node) {
-    node.getChildrenImpl().filter(XmlExperimentNode::execute).forEach(this::processChildren);
+    node.getChildrenImpl().filter(XmlExperimentNode::executeImpl).forEach(this::processChildren);
   }
 }

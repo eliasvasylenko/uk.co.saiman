@@ -6,7 +6,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.experiment.ExperimentConfigurationContext;
+import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
@@ -30,7 +30,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
 
   @Override
   public SaintSpectrumConfiguration createState(
-      ExperimentConfigurationContext<SaintSpectrumConfiguration> context) {
+      ConfigurationContext<SaintSpectrumConfiguration> context) {
     SaintSpectrumConfiguration configuration = new SaintSpectrumConfiguration() {
       private String name;
 
@@ -56,7 +56,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
 
   @Override
   public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return parentNode.getAncestor(stageExperiment).isPresent();
+    return parentNode.findAncestor(stageExperiment).isPresent();
   }
 
   @Override

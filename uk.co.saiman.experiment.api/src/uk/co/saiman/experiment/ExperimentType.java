@@ -30,7 +30,7 @@ package uk.co.saiman.experiment;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.Type;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -62,13 +62,21 @@ public interface ExperimentType<S> {
    */
   String getName();
 
+  default boolean hasAutomaticExecution() {
+    return false;
+  }
+
+  default boolean isExecutionContextDependent() {
+    return true;
+  }
+
   /**
    * @param context
    *          the node which the configuration is being requested for
    * @return a new state object suitable for an instance of
    *         {@link ExperimentNode} over this type.
    */
-  S createState(ExperimentConfigurationContext<S> context);
+  S createState(ConfigurationContext<S> context);
 
   /**
    * Execute this experiment type for a given node.
@@ -76,14 +84,17 @@ public interface ExperimentType<S> {
    * @param context
    *          the execution context
    */
-  void execute(ExperimentExecutionContext<S> context);
+  void execute(ExecutionContext<S> context);
 
   /**
-   * @return a stream over the types of result published by an experiment of
-   *         this type
+   * If this experiment node produces a result upon execution, get the type of
+   * the result which is produced.
+   * 
+   * @return an optional containing the type of the result, or else an empty
+   *         optional
    */
-  default Stream<ResultType<?>> getResultTypes() {
-    return Stream.empty();
+  default Optional<? extends ResultType<?>> getResultType() {
+    return Optional.empty();
   }
 
   /**

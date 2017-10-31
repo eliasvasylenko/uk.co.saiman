@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
-import java.util.Objects;
-
 import javax.inject.Inject;
 
 import org.eclipse.e4.ui.di.AboutToShow;
@@ -66,14 +64,7 @@ public class ExperimentResultContribution implements TreeContribution {
   public void prepare(HBox node, TreeEntry<Result<?>> entry) {
     node.getChildren().add(new Label(entry.data().getType().getName()));
 
-    node.getChildren().add(
-        new Label(
-            "[" + entry
-                .data()
-                .map(d -> Objects.toString(entry.data().getAbsoluteDataPath()))
-                .map(Object::toString)
-                .tryGet()
-                .orElse(properties.missingResult().toString()) + "]"));
+    node.getChildren().add(new Label("[" + entry.data() + "]"));
 
     configurePseudoClass(
         node,

@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import java.nio.file.Path;
-
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultType;
@@ -42,16 +40,6 @@ public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T>
     super(new NullPointerException());
     this.node = node;
     this.resultType = type;
-  }
-
-  @Override
-  public Path getDataPath() {
-    return node.getDataPath();
-  }
-
-  @Override
-  public Path getAbsoluteDataPath() {
-    return node.getAbsoluteDataPath();
   }
 
   @Override

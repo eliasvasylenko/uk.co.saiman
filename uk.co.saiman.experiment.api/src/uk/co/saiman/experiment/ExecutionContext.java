@@ -27,33 +27,19 @@
  */
 package uk.co.saiman.experiment;
 
-public interface ResultManager {
-  /**
-   * @param resultType
-   *          the type of result
-   * @return the result object now registered to the executing node
-   */
-  <U> Result<U> get(ResultType<U> resultType);
+/**
+ * The context of an experiment execution, providing information about the
+ * current state, and enabling modification of that state.
+ * 
+ * @author Elias N Vasylenko
+ * @param <T>
+ *          the type of the executing node
+ */
+public interface ExecutionContext<T> {
+	/**
+	 * @return the currently executing experiment node
+	 */
+	ExperimentNode<? extends ExperimentType<T>, T> node();
 
-  /**
-   * This method provides a target for the submission of results during
-   * execution of an experiment node.
-   * 
-   * @param resultType
-   *          the type of result
-   * @param resultData
-   *          the result
-   * @return the result object now registered to the executing node
-   */
-  <U> Result<U> set(ResultType<U> resultType, U resultData);
-
-  /**
-   * This method provides a target for the submission of results during
-   * execution of an experiment node.
-   * 
-   * @param resultType
-   *          the type of result
-   * @return the result object now registered to the executing node
-   */
-  <U> Result<U> unset(ResultType<U> resultType);
+	ResultManager results();
 }

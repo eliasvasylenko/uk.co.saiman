@@ -255,8 +255,13 @@ public class EditorAddon {
 
     @Override
     public MPart showPart() {
-      editorPrecedence.remove(getDescriptor());
-      editorPrecedence.add(getDescriptor());
+      /*
+       * TODO this should only move the editor preference before other editors
+       * which were actually applicable to the resource!!!
+       * 
+       * editorPrecedence.remove(getDescriptor());
+       * editorPrecedence.add(getDescriptor());
+       */
 
       MPart editorPart = getEditor();
       partService.activate(editorPart);

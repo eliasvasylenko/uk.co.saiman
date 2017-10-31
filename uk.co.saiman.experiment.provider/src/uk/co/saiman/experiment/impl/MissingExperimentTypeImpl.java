@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import uk.co.saiman.experiment.ExperimentConfigurationContext;
+import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentExecutionContext;
+import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
@@ -55,14 +55,14 @@ public class MissingExperimentTypeImpl implements MissingExperimentType {
   }
 
   @Override
-  public PersistedState createState(ExperimentConfigurationContext<PersistedState> context) {
+  public PersistedState createState(ConfigurationContext<PersistedState> context) {
     context.persistedState().stringValue(getId()).set(getMissingTypeID());
 
     return context.persistedState();
   }
 
   @Override
-  public void execute(ExperimentExecutionContext<PersistedState> context) {
+  public void execute(ExecutionContext<PersistedState> context) {
     throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
   }
 

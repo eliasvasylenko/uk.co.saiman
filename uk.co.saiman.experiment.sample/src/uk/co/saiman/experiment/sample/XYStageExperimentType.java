@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.ExperimentExecutionContext;
+import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 
 /**
@@ -49,7 +49,7 @@ public interface XYStageExperimentType<T extends XYStageConfiguration>
   XYStageDevice device();
 
   @Override
-  default void execute(ExperimentExecutionContext<T> context) {
+  default void execute(ExecutionContext<T> context) {
     device().getXAxis().requestedPosition().set(context.node().getState().getX());
     device().getYAxis().requestedPosition().set(context.node().getState().getY());
   }

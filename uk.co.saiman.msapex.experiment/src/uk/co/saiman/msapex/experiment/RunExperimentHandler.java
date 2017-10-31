@@ -64,6 +64,6 @@ public class RunExperimentHandler {
 
     ExperimentNode<?, ?> experimentNode = (ExperimentNode<?, ?>) ancestor.data();
 
-    new Thread(experimentNode::process).start();
+    new Thread(experimentNode::execute).start();
   }
 }

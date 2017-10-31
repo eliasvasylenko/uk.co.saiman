@@ -6,7 +6,7 @@ import javax.measure.quantity.Length;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.ExperimentConfigurationContext;
+import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.instrument.stage.XYStageDevice;
@@ -33,7 +33,7 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
 
   @Override
   public SaintXYStageConfiguration createState(
-      ExperimentConfigurationContext<SaintXYStageConfiguration> context) {
+      ConfigurationContext<SaintXYStageConfiguration> context) {
     String id = context.getId(() -> "A1");
 
     return new SaintXYStageConfiguration() {

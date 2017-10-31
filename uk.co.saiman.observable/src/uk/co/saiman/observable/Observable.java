@@ -182,10 +182,10 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive a new observable by application of the given function. This gives the
-   * same result as just applying the function to the observable directly, and
-   * exists only to create a more natural fit into the fluent API by making the
-   * order of operations clearer in method chains.
+   * Derive a new observable by application of the given function. This gives
+   * the same result as just applying the function to the observable directly,
+   * and exists only to create a more natural fit into the fluent API by making
+   * the order of operations clearer in method chains.
    * 
    * @param <T>
    *          the type of the resulting observable
@@ -222,8 +222,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which passes events to the given observer directly after
-   * passing them downstream.
+   * Derive an observable which passes events to the given observer directly
+   * after passing them downstream.
    * 
    * @param action
    *          an observer representing the action to take
@@ -309,8 +309,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after they are no longer weakly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after they are no longer weakly reachable.
    * 
    * @return the derived observable
    */
@@ -319,8 +319,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after the given owner is no longer weakly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after the given owner is no longer weakly reachable.
    * <p>
    * Care should be taken not to refer to the owner directly in any observer
    * logic, as this will create a strong reference to the owner, preventing it
@@ -339,8 +339,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after they are no longer softly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after they are no longer softly reachable.
    * 
    * @return the derived observable
    */
@@ -349,8 +349,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some point
-   * after the given owner is no longer softly reachable.
+   * Derive an observable which automatically disposes of observers at some
+   * point after the given owner is no longer softly reachable.
    * <p>
    * Care should be taken not to refer to the owner directly in any observer
    * logic, as this will create a strong reference to the owner, preventing it
@@ -407,10 +407,10 @@ public interface Observable<M> {
 
   /**
    * Derive an observable which passes along only those messages which match the
-   * given condition.
+   * given type.
    * 
-   * @param condition
-   *          the terminating condition
+   * @param type
+   *          the message type
    * @return the derived observable
    */
   default <T> Observable<T> filterTo(Class<T> type) {
@@ -418,11 +418,12 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which passes along only those messages which match the
-   * given condition.
+   * Derive an observable which transforms messages according to the given
+   * optional mapping, and passes along only those messages which produce an
+   * optional containing a result.
    * 
-   * @param condition
-   *          the terminating condition
+   * @param mapping
+   *          the optional mapping function
    * @return the derived observable
    */
   default <T> Observable<T> optionalMap(Function<? super M, ? extends Optional<T>> mapping) {
@@ -468,9 +469,9 @@ public interface Observable<M> {
    * An unbounded request is made to the upstream observable, so it is not
    * required to support backpressure.
    * <p>
-   * The intermediate observables are not required to support backpressure, as an
-   * unbounded request will be made to them and the downstream observable will
-   * forward every message as soon as it is available. Because of this, The
+   * The intermediate observables are not required to support backpressure, as
+   * an unbounded request will be made to them and the downstream observable
+   * will forward every message as soon as it is available. Because of this, The
    * downstream observable does not support backpressure.
    * 
    * @param <T>
@@ -506,12 +507,12 @@ public interface Observable<M> {
    * then combines those intermediate observables into one.
    * <P>
    * The intermediate observables accept requests from downstream until they are
-   * complete. Requests are allocated to the intermediate observables by the given
-   * {@link RequestAllocator request allocation strategy}.
+   * complete. Requests are allocated to the intermediate observables by the
+   * given {@link RequestAllocator request allocation strategy}.
    * <p>
-   * The upstream observable is not required to support backpressure. If a request
-   * is made downstream when there are no intermediate observables to fulfill that
-   * request, another message is requested from upstream.
+   * The upstream observable is not required to support backpressure. If a
+   * request is made downstream when there are no intermediate observables to
+   * fulfill that request, another message is requested from upstream.
    * <p>
    * The resulting observable supports backpressure if and only if the
    * intermediate observables support backpressure.

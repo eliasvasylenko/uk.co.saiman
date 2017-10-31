@@ -29,14 +29,15 @@ package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.stream.Stream;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.Resource;
 import uk.co.saiman.experiment.ResultType;
 
 /**
@@ -89,7 +90,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public void execute(ExperimentExecutionContext<T> context) {
+  public void execute(ExecutionContext<T> context) {
     AcquisitionDevice device = getAcquisitionDevice();
 
     Future<AccumulatingFileSpectrum> acquisition = device
@@ -111,10 +112,12 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   }
 
   private AccumulatingFileSpectrum initializeResult(
-      ExperimentExecutionContext<T> context,
+      ExecutionContext<T> context,
       AcquisitionDevice device) {
+    Resource resource = context.results().getResource(spectrumResult);
+
     AccumulatingFileSpectrum fileSpectrum = new AccumulatingFileSpectrum(
-        context.results().getDataPath(),
+        resource,
         SPECTRUM_DATA_NAME,
         device.getSampleDomain(),
         device.getSampleIntensityUnits());
@@ -125,7 +128,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   }
 
   @Override
-  public Stream<ResultType<?>> getResultTypes() {
-    return Stream.of(spectrumResult);
+  public Optional<ResultType<AccumulatingFileSpectrum>> getResultType() {
+    return Optional.ofNullable(spectrumResult);
   }
 }

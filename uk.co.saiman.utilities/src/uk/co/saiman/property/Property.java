@@ -57,8 +57,6 @@ public interface Property<T> {
    * {@link NullPointerException} if null values are not supported by the
    * underlying implementation.
    * 
-   * @param to
-   *          The new value to set for this property.
    * @return The previous value of this property.
    */
   default T unset() {

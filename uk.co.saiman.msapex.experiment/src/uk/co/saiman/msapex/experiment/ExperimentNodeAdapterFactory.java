@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IAdapterManager;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
@@ -75,6 +76,18 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
 
     if (adapterType == node.getType().getStateType().getErasedType()) {
       return (T) node.getState();
+    }
+
+    if (adapterType == Result.class && node.getType().getResultType().isPresent()) {
+      return (T) node.getResult();
+    }
+
+    if (adapterType == node
+        .getType()
+        .getResultType()
+        .map(r -> r.getDataType().getErasedType())
+        .orElse(null)) {
+      return (T) node.getResult().get();
     }
 
     return (T) adapterManager.loadAdapter(node.getState(), adapterType.getName());

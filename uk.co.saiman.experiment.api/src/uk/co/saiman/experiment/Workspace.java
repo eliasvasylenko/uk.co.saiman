@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.experiment;
 
-import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import uk.co.saiman.observable.Observable;
@@ -43,18 +42,6 @@ import uk.co.saiman.observable.Observable;
  * @author Elias N Vasylenko
  */
 public interface Workspace {
-  /**
-   * The root path for the workspace data persistence. This may be a virtual file
-   * system over e.g. a database according on the chosen persistence strategy.
-   * 
-   * @return the data root of the workspace
-   */
-  Path getRootPath();
-
-  ExperimentNode<?, ?> resolveNode(Path path);
-
-  ExperimentNode<?, ?> resolveContainingNode(Path path);
-
   /*
    * Root experiment types
    */

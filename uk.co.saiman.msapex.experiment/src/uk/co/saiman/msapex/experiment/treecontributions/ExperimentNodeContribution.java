@@ -109,7 +109,7 @@ public class ExperimentNodeContribution implements TreeContribution {
      * add children
      */
     entry.data().getChildren().map(ExperimentNode::asTypedObject).forEach(children::add);
-    entry.data().getResults().map(Result::asTypedObject).forEach(children::add);
+    entry.data().getResult().map(Result::asTypedObject).forEach(children::add);
 
     /*
      * pseudo class

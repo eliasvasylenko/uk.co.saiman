@@ -30,8 +30,8 @@ package uk.co.saiman.experiment.impl;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentConfigurationContext;
-import uk.co.saiman.experiment.ExperimentExecutionContext;
+import uk.co.saiman.experiment.ConfigurationContext;
+import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
@@ -57,7 +57,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
 
   @Override
   public ExperimentConfiguration createState(
-      ExperimentConfigurationContext<ExperimentConfiguration> configuration) {
+      ConfigurationContext<ExperimentConfiguration> configuration) {
     return new ExperimentConfiguration() {
       private Property<String> notes = configuration.persistedState().stringValue("notes");
 
@@ -89,7 +89,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
   }
 
   @Override
-  public void execute(ExperimentExecutionContext<ExperimentConfiguration> context) {}
+  public void execute(ExecutionContext<ExperimentConfiguration> context) {}
 
   @Override
   public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {

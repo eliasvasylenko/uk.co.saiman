@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentExecutionContext;
+import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.experiment.spectrum.AccumulatingFileSpectrum;
@@ -109,7 +109,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public void execute(ExperimentExecutionContext<T> context) {
+  public void execute(ExecutionContext<T> context) {
     AcquisitionDevice acquisitionDevice = getAcquisitionDevice();
     RasterDevice rasterDevice = getRasterDevice();
 
@@ -140,7 +140,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
   protected abstract void startAcquisition();
 
   @Override
-  public Stream<ResultType<?>> getResultTypes() {
+  public Stream<ResultType<?>> getResultType() {
     return Stream.of(chemicalMapResult);
   }
 }

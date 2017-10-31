@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment;
 
-import java.nio.file.Path;
-
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -36,18 +34,6 @@ import uk.co.saiman.reflection.token.TypedReference;
 
 public interface Result<T> extends ObservableValue<T> {
   ExperimentNode<?, ?> getExperimentNode();
-
-  /**
-   * @return the path of the result data relative to the
-   *         {@link Workspace#getRootPath() workspace root}.
-   */
-  Path getDataPath();
-
-  /**
-   * @return the absolute path of the result data from the
-   *         {@link Workspace#getRootPath() workspace root}.
-   */
-  Path getAbsoluteDataPath();
 
   ResultType<T> getType();
 
