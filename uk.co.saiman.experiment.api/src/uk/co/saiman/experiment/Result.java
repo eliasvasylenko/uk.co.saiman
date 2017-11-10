@@ -27,19 +27,36 @@
  */
 package uk.co.saiman.experiment;
 
+import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
 
+/**
+ * TODO this should probably be weak-referenced to the actual data object, with
+ * a way to load (and save?) according to whatever {@link DataFormat format} it
+ * was originally saved as or is appropriate. Otherwise there will certainly be
+ * memory usage issues. So how can this work alongside the observable value
+ * aspect? Presumably if any observers are attached this will count as a
+ * reference to the data object? Or will they just be sent a fail event after
+ * it's cleaned up by GC?
+ * 
+ * TODO also consider that the data should still be loadable even if the
+ * ExperimentNode type is {@link MissingExperimentType missing}.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          the data type of the result
+ */
 public interface Result<T> extends ObservableValue<T> {
   ExperimentNode<?, ?> getExperimentNode();
 
-  ResultType<T> getType();
+  TypeToken<T> getType();
 
   default TypeToken<Result<T>> getThisTypeToken() {
-    return new TypeToken<Result<T>>() {}
-        .withTypeArguments(new TypeArgument<T>(getType().getDataType()) {});
+    return new TypeToken<Result<T>>() {}.withTypeArguments(new TypeArgument<T>(getType()) {});
   }
 
   default TypedReference<Result<T>> asTypedObject() {

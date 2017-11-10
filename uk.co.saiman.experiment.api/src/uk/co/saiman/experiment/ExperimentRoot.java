@@ -29,7 +29,7 @@ package uk.co.saiman.experiment;
 
 import java.lang.reflect.Type;
 
-public interface ExperimentRoot extends ExperimentType<ExperimentConfiguration, Void> {
+public interface ExperimentRoot extends VoidExperimentType<ExperimentConfiguration> {
   @Override
   default Type getThisType() {
     return ExperimentRoot.class;

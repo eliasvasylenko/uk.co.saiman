@@ -32,8 +32,8 @@ import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
+import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.instrument.Instrument;
 
 /**

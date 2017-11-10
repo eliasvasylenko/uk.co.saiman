@@ -44,9 +44,9 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
-import uk.co.saiman.data.SparseSampledContinuousFunction;
+import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.data.function.SampledDomain;
+import uk.co.saiman.data.function.SparseSampledContinuousFunction;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;

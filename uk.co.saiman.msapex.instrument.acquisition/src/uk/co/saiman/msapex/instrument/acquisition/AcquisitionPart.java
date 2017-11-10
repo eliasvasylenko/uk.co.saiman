@@ -40,8 +40,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.LocalInstance;
@@ -55,10 +53,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionProperties;
-import uk.co.saiman.data.ContinuousFunctionExpression;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
+import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 
 /**
  * An Eclipse part for management and display of acquisition devices.
@@ -136,18 +134,9 @@ public class AcquisitionPart {
     HBox.setHgrow(chartController.getRoot(), Priority.ALWAYS);
 
     /*
-     * Create continuous function view of latest data from device
-     */
-    ContinuousFunctionExpression<Time, Dimensionless> latestContinuousFunction = new ContinuousFunctionExpression<>(
-        units.second().get(),
-        units.count().get());
-    acquisitionDevice.dataEvents().weakReference(latestContinuousFunction).observe(
-        m -> m.owner().setComponent(m.message()));
-
-    /*
      * Add latest data to chart controller
      */
-    chartController.getContinuousFunctions().add(latestContinuousFunction);
+    ContinuousFunctionSeries series = chartController.addSeries(acquisitionDevice.dataEvents());
   }
 
   private void deselectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {

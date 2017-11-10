@@ -40,8 +40,8 @@ import javax.measure.quantity.Time;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
+import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.instrument.DeviceConnection;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.observable.Disposable;
@@ -175,6 +175,33 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
     return manager.getText().acquisitionSimulationDeviceName().toString();
   }
 
+  /*
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO
+   * 
+   * 
+   * TODO
+   * 
+   * 
+   * 
+   * TODO have a buffer pool of SoftReferenced arrays we can re-use when the
+   * previous WeakReferenced ContinuousFunction which used the array is garbage
+   * collected. This way we mostly mitigate unnecessary memory allocation while
+   * keeping a nice API and immutability.
+   * 
+   * 
+   * 
+   * 
+   */
+
   @Override
   public void startAcquisition() {
     synchronized (acquiringLock) {
@@ -239,8 +266,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
         domain = experiment.map(e -> e.domain).orElse(getSampleDomain());
         counter = experiment.map(e -> --e.counter).orElse(-1);
 
-        SampledContinuousFunction<Time, Dimensionless> acquisitionData = detector
-            .acquire(domain, getSampleIntensityUnits());
+        acquisitionData = detector.acquire(domain, getSampleIntensityUnits());
         acquisitionBuffer.next(new Acquisition(counter, acquisitionData));
 
         synchronized (acquiringLock) {

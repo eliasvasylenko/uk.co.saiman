@@ -49,7 +49,6 @@ import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.Result;
 import uk.co.saiman.reflection.token.TypedReference;
 
 /**
@@ -109,7 +108,6 @@ public class ExperimentNodeContribution implements TreeContribution {
      * add children
      */
     entry.data().getChildren().map(ExperimentNode::asTypedObject).forEach(children::add);
-    entry.data().getResult().map(Result::asTypedObject).forEach(children::add);
 
     /*
      * pseudo class

@@ -70,7 +70,11 @@ public class HotObservable<M> implements Observable<M> {
   }
 
   @Override
-  public ObservationImpl<M> observe(Observer<? super M> observer) {
+  public Disposable observe(Observer<? super M> observer) {
+    return observeImpl(observer);
+  }
+
+  protected ObservationImpl<M> observeImpl(Observer<? super M> observer) {
     ObservationImpl<M> observation = new ObservationImpl<M>(observer) {
       @Override
       public void cancelImpl() {

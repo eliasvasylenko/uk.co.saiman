@@ -27,18 +27,10 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.stream.Stream;
-
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.ResultType;
-import uk.co.saiman.experiment.spectrum.AccumulatingFileSpectrum;
 import uk.co.saiman.instrument.raster.RasterDevice;
-import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
@@ -52,11 +44,10 @@ import uk.co.saiman.text.properties.PropertyLoader;
  *          the type of sample configuration for the instrument
  */
 public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfiguration>
-    implements ExperimentType<T> {
+    implements ExperimentType<T, ChemicalMap> {
   private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
 
   private ChemicalMapProperties properties;
-  private final ResultType<ChemicalMap> chemicalMapResult;
 
   public ChemicalMapExperimentType() {
     this(PropertyLoader.getDefaultProperties(ChemicalMapProperties.class));
@@ -64,22 +55,6 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
 
   public ChemicalMapExperimentType(ChemicalMapProperties properties) {
     this.properties = properties;
-    this.chemicalMapResult = new ResultType<ChemicalMap>() {
-      @Override
-      public String getId() {
-        return "uk.co.saiman.experiment.chemicalmap.result";
-      }
-
-      @Override
-      public String getName() {
-        return properties.chemicalMapResultName().toString();
-      }
-
-      @Override
-      public TypeToken<ChemicalMap> getDataType() {
-        return new TypeToken<ChemicalMap>() {};
-      }
-    };
   }
 
   /*
@@ -100,47 +75,40 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
     return properties.chemicalMapExperimentName().toString();
   }
 
-  public ResultType<ChemicalMap> getChemicalMapResult() {
-    return chemicalMapResult;
-  }
-
   protected abstract RasterDevice getRasterDevice();
 
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public void execute(ExecutionContext<T> context) {
+  public ChemicalMap execute(ExecutionContext<T, ChemicalMap> context) {
     AcquisitionDevice acquisitionDevice = getAcquisitionDevice();
     RasterDevice rasterDevice = getRasterDevice();
 
-    Future<AccumulatingFileSpectrum> acquisition = acquisitionDevice.acquisitionDataEvents().reduce(
-        () -> new AccumulatingFileSpectrum(
-            context.results().getDataPath(),
-            CHEMICAL_MAP_DATA_NAME,
-            acquisitionDevice.getSampleDomain(),
-            acquisitionDevice.getSampleIntensityUnits()),
-        (fileSpectrum, message) -> {
-          fileSpectrum.accumulate(message);
-          return fileSpectrum;
-        });
+    /*- TODO
+    Consumer<Spectrum> writer = new CumulativeChemicalMapFormat()
+        .getWriter(rasterDevice.getRasterPattern());
 
+    CompletableFuture<SampledSpectrum> acquisition = acquisitionDevice
+        .acquisitionDataEvents()
+        .reduce(
+            () -> new SampledSpectrum(
+                context.results().getDataPath(),
+                CHEMICAL_MAP_DATA_NAME,
+                acquisitionDevice.getSampleDomain(),
+                acquisitionDevice.getSampleIntensityUnits()),
+            (fileSpectrum, message) -> {
+              fileSpectrum.accumulate(message);
+              return fileSpectrum;
+            });
+    
     startAcquisition();
-
-    try {
-      acquisition.get();
-      // TODO convert this experiment to actual chemical map acquisition
-    } catch (InterruptedException | ExecutionException e) {
-      context.results().unset(chemicalMapResult);
-      throw new ExperimentException(properties.experiment().exception().experimentInterrupted(), e);
-    }
-
+    
+    return acquisition.join();
+    
     context.results().get(chemicalMapResult).get().save();
+    */
+    throw new UnsupportedOperationException();
   }
 
   protected abstract void startAcquisition();
-
-  @Override
-  public Stream<ResultType<?>> getResultType() {
-    return Stream.of(chemicalMapResult);
-  }
 }

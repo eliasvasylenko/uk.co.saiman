@@ -1,3 +1,30 @@
+/*
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.msapex.experiment.
+ *
+ * uk.co.saiman.msapex.experiment is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.msapex.experiment is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.msapex.experiment;
 
 import java.nio.file.Path;
@@ -83,8 +110,8 @@ public class ResultEditorAddon implements EditorProvider {
 
       if (classLocation.startsWith("bundleclass://")) {
         System.out.println(classLocation);
-        Class<?> editorClass = null;// TODO new URI(classLocation);
-        return result.getType().getDataType().isAssignableTo(editorClass);
+        Class<?> editorClass = null; // TODO new URI(classLocation);
+        return result.getType().isAssignableTo(editorClass);
       }
     }
     return false;
@@ -92,9 +119,7 @@ public class ResultEditorAddon implements EditorProvider {
 
   @Override
   public MPart createEditorPart(String ID) {
-    MPart part = (MPart) modelService.cloneSnippet(application, ID, null);
-
-    return part;
+    return (MPart) modelService.cloneSnippet(application, ID, null);
   }
 
   @Override
@@ -119,7 +144,7 @@ public class ResultEditorAddon implements EditorProvider {
 
     // inject result and result data changes into context
     part.getContext().set(Result.class, result);
-    Class<?> resultType = result.getType().getDataType().getErasedType();
+    Class<?> resultType = result.getType().getErasedType();
     result.observe(o -> System.out.println("o " + o + " == " + result.tryGet().orElse(null)));
     result
         .observe(o -> part.getContext().modify(resultType.getName(), result.tryGet().orElse(null)));

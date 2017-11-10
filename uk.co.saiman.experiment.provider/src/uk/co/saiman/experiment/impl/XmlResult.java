@@ -29,14 +29,14 @@ package uk.co.saiman.experiment.impl;
 
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.experiment.ResultType;
 import uk.co.saiman.observable.ObservablePropertyImpl;
+import uk.co.saiman.reflection.token.TypeToken;
 
 public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T> {
   private final XmlExperimentNode<?, ?> node;
-  private final ResultType<T> resultType;
+  private final TypeToken<T> resultType;
 
-  public XmlResult(XmlExperimentNode<?, ?> node, ResultType<T> type) {
+  public XmlResult(XmlExperimentNode<?, ?> node, TypeToken<T> type) {
     super(new NullPointerException());
     this.node = node;
     this.resultType = type;
@@ -48,7 +48,7 @@ public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T>
   }
 
   @Override
-  public ResultType<T> getType() {
+  public TypeToken<T> getType() {
     return resultType;
   }
 }

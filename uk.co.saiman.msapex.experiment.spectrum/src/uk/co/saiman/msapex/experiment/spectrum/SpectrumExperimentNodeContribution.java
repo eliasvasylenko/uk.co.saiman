@@ -40,14 +40,13 @@ import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
-import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class SpectrumExperimentNodeContribution implements TreeContribution {
   @AboutToShow
   public void prepare(
       HBox node,
-      TreeEntry<ExperimentNode<? extends SpectrumExperimentType<?>, ? extends SpectrumConfiguration>> data) {
+      TreeEntry<ExperimentNode<? extends SpectrumConfiguration, ?>> data) {
     setLabel(node, data.data().getType().getName());
     setSupplemental(node, data.data().getState().getSpectrumName());
 

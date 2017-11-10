@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.chart;
 
-import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.data.function.ContinuousFunction;
 
 /**
  * A typed data annotation on a chart at a specific location on a continuous

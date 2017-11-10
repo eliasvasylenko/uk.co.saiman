@@ -28,16 +28,15 @@
 package uk.co.saiman.experiment.impl;
 
 import uk.co.saiman.experiment.ConfigurationContext;
-import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExecutionContext;
+import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.MissingExperimentType;
 import uk.co.saiman.experiment.PersistedState;
-import uk.co.saiman.experiment.ResultType;
 
-public class MissingExperimentTypeImpl implements MissingExperimentType {
+public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   private final ExperimentProperties text;
   private final String id;
 
@@ -63,7 +62,7 @@ public class MissingExperimentTypeImpl implements MissingExperimentType {
   }
 
   @Override
-  public Void execute(ExecutionContext<PersistedState> context) {
+  public T execute(ExecutionContext<PersistedState, T> context) {
     throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
   }
 
@@ -77,11 +76,5 @@ public class MissingExperimentTypeImpl implements MissingExperimentType {
       ExperimentNode<?, ?> penultimateDescendantNode,
       ExperimentType<?, ?> descendantNodeType) {
     return true;
-  }
-
-  @Override
-  public ResultType<? extends Void> getResultType() {
-    // TODO Auto-generated method stub
-    return null;
   }
 }

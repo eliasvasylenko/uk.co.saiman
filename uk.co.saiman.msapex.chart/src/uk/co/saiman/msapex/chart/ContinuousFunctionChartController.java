@@ -31,6 +31,7 @@ import static uk.co.saiman.fx.FxUtilities.wrap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -57,12 +58,13 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import uk.co.saiman.data.ContinuousFunction;
-import uk.co.saiman.data.DataException;
-import uk.co.saiman.data.DataProperties;
-import uk.co.saiman.measurement.Units;
+import uk.co.saiman.data.function.ContinuousFunction;
+import uk.co.saiman.data.function.DataException;
+import uk.co.saiman.data.function.FunctionProperties;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.measurement.Units;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
@@ -87,8 +89,7 @@ public class ContinuousFunctionChartController {
   @FXML
   private HBox extraAxesContainer;
 
-  private ObservableSet<ContinuousFunction<?, ?>> continuousFunctions;
-  private final Map<ContinuousFunction<?, ?>, ContinuousFunctionSeries> series;
+  private final Set<ContinuousFunctionSeries> series;
 
   private boolean zoomed;
   private Interval<Double> domain = Interval.bounded(0d, 100d);
@@ -118,11 +119,10 @@ public class ContinuousFunctionChartController {
   Units units;
   @Inject
   @Localize
-  DataProperties properties;
+  FunctionProperties properties;
 
   public ContinuousFunctionChartController() {
-    continuousFunctions = FXCollections.observableSet(new LinkedHashSet<>());
-    series = new HashMap<>();
+    series = new HashSet<>();
 
     rangeGroups = new HashMap<>();
     extraYAxes = new ArrayList<>();
@@ -155,7 +155,6 @@ public class ContinuousFunctionChartController {
     getYAxis().scaleProperty().addListener(num -> updateAnnotations());
 
     annotations.addListener(this::annotationsChanged);
-    continuousFunctions.addListener(this::continuousFunctionsChanged);
 
     getXAxis().scaleProperty().addListener(num -> updateAxis(getXAxis()));
     getYAxis().scaleProperty().addListener(num -> updateAxis(getYAxis()));
@@ -203,13 +202,6 @@ public class ContinuousFunctionChartController {
   }
 
   /**
-   * @return The backing functions of the chart
-   */
-  public ObservableSet<ContinuousFunction<?, ?>> getContinuousFunctions() {
-    return continuousFunctions;
-  }
-
-  /**
    * @return The annotations on the chart
    */
   public ObservableSet<ChartAnnotation<?>> getAnnotations() {
@@ -217,7 +209,7 @@ public class ContinuousFunctionChartController {
   }
 
   private Stream<ContinuousFunctionSeries> series() {
-    return series.values().stream();
+    return series.stream();
   }
 
   /**
@@ -497,26 +489,31 @@ public class ContinuousFunctionChartController {
     updateAnnotations();
   }
 
-  private void continuousFunctionsChanged(Change<? extends ContinuousFunction<?, ?>> d) {
-    if (d.wasAdded()) {
-      ContinuousFunction<?, ?> continuousFunction = d.getElementAdded();
-      ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(
-          continuousFunction);
+  public ContinuousFunctionSeries addSeries(
+      Observable<? extends ContinuousFunction<?, ?>> observable) {
+    ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(
+        this,
+        observable);
 
-      series.put(continuousFunction, continuousFunctionSeries);
-      lineChart.getData().add(continuousFunctionSeries.getSeries());
-    } else if (d.wasRemoved()) {
-      ContinuousFunction<?, ?> continuousFunction = d.getElementRemoved();
-      ContinuousFunctionSeries continuousFunctionSeries;
+    series.add(continuousFunctionSeries);
+    lineChart.getData().add(continuousFunctionSeries.getSeries());
 
-      continuousFunctionSeries = series.remove(continuousFunction);
-      lineChart.getData().remove(continuousFunctionSeries.getSeries());
+    refreshSeries();
 
-      continuousFunctionSeries.dispose();
+    return continuousFunctionSeries;
+  }
 
-      if (series.isEmpty()) {
-        zoomed = false;
-      }
+  void removeSeries(ContinuousFunctionSeries series) {
+    if (this.series.remove(series)) {
+      lineChart.getData().remove(series.getSeries());
+
+      refreshSeries();
+    }
+  }
+
+  private void refreshSeries() {
+    if (series.isEmpty()) {
+      zoomed = false;
     }
 
     noChartDataLabel.setVisible(lineChart.getData().isEmpty());
@@ -549,7 +546,7 @@ public class ContinuousFunctionChartController {
   }
 
   private void updateAxisUnits() {
-    if (getContinuousFunctions().isEmpty()) {
+    if (series.isEmpty()) {
       extraAxesContainer.getChildren().clear();
     } else {
       List<Node> extraAxes = extraAxesContainer.getChildren();
@@ -562,9 +559,9 @@ public class ContinuousFunctionChartController {
         group.clearContinuousFunctions();
       }
 
-      for (ContinuousFunction<?, ?> function : getContinuousFunctions()) {
-        Unit<?> functionXUnit = function.domain().getUnit();
-        Unit<?> functionYUnit = function.range().getUnit();
+      for (ContinuousFunctionSeries series : this.series) {
+        Unit<?> functionXUnit = series.getLatestRenderedContinuousFunction().domain().getUnit();
+        Unit<?> functionYUnit = series.getLatestRenderedContinuousFunction().range().getUnit();
 
         if (xUnit == null) {
           xUnit = functionXUnit;
@@ -579,7 +576,7 @@ public class ContinuousFunctionChartController {
         RangeGroup group = rangeGroups
             .computeIfAbsent(functionYUnit, u -> new RangeGroup(units, functionYUnit));
 
-        group.addContinuousFunction(series.get(function));
+        group.addContinuousFunction(series);
       }
       getXAxis().setLabel(units.formatUnit(xUnit));
 

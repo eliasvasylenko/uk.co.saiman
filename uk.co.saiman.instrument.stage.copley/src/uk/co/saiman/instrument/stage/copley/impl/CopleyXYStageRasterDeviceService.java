@@ -49,7 +49,6 @@ import uk.co.saiman.instrument.raster.RasterPosition;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice;
-import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice.CopleyXYStageConfiguration;
 import uk.co.saiman.instrument.stage.copley.impl.CopleyXYStageRasterDeviceService.CopleyXYStageRasterConfiguration;
 import uk.co.saiman.mathematics.Interval;
 import uk.co.saiman.measurement.Units;
@@ -146,6 +145,11 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
     rasterPattern = mode;
   }
 
+  @Override
+  public RasterPattern getRasterPattern() {
+    return rasterPattern;
+  }
+  
   public void setRasterResolution(Quantity<Length> x, Quantity<Length> y) {
     this.rasterResolutionX = x;
     this.rasterResolutionY = y;

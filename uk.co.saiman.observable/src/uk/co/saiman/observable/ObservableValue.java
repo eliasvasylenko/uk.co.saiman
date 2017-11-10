@@ -53,14 +53,22 @@ import java.util.function.Predicate;
  * <p>
  * The observable should always be primed with either a message event or a
  * failure event immediately upon instantiation, and observers which subscribe
- * to the observable should receive the last such event directly subsequent to
- * observation. This means that the {@link #get()} method inherited from
- * observable should never have to block.
+ * to the observable should always receive the last such event immediately upon
+ * the first request made. Typically implementations may not support
+ * backpressure, meaning a signal will always be propagated immediately upon
+ * observation.
+ * <p>
+ * This means that the {@link #get()} method inherited from observable should
+ * never block.
  * <p>
  * Invocation of {@link #get()} should be idempotent and always reflect the
  * current up-to-date state of the value. Invocation of
- * {@link #observe(Observer)} should also be idempotent. This in turn means that
- * implementations of {@link ObservableValue} should never support backpressure.
+ * {@link #observe(Observer)} should also be idempotent.
+ * <p>
+ * This does <em>not</em> mean that implementations of {@link ObservableValue}
+ * can never support backpressure, but it does mean that at any given moment the
+ * implementation should only be prepared to fulfill a single request with the
+ * latest value, and previous signals are discarded.
  * 
  * @author Elias N Vasylenko
  *
@@ -141,7 +149,7 @@ public interface ObservableValue<T> extends Observable<T> {
   }
 
   default Throwable getProblem() {
-    return tryGetProblem().orElseThrow(() -> new IllegalStateException());
+    return tryGetProblem().orElseThrow(IllegalStateException::new);
   }
 
   default Optional<Throwable> tryGetProblem() {

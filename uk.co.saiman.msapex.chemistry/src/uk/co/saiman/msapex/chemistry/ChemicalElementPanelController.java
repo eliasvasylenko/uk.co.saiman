@@ -47,12 +47,13 @@ import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
 import uk.co.saiman.chemistry.Isotope;
 import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.saiman.data.ContinuousFunctionExpression;
-import uk.co.saiman.data.GaussianFunctionFactory;
-import uk.co.saiman.data.PeakShapeFunctionFactory;
-import uk.co.saiman.data.PeakShapeImpulseConvolutionFunction;
+import uk.co.saiman.data.function.ContinuousFunction;
+import uk.co.saiman.data.function.GaussianFunctionFactory;
+import uk.co.saiman.data.function.PeakShapeFunctionFactory;
+import uk.co.saiman.data.function.PeakShapeImpulseConvolutionFunction;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
+import uk.co.saiman.observable.HotObservable;
 
 /**
  * A JavaFX UI component for display of a {@link PeriodicTable}.
@@ -82,14 +83,15 @@ public class ChemicalElementPanelController {
   private TableColumn<Isotope, Double> abundanceColumn;
 
   private PeakShapeFunctionFactory peakFunction;
-  private ContinuousFunctionExpression<Mass, Dimensionless> isotopeFunction;
+  private HotObservable<ContinuousFunction<Mass, Dimensionless>> isotopeFunction;
   private Unit<Dimensionless> abundanceUnit;
   private Unit<Mass> massUnit;
 
   @FXML
   void initialize() {
     peakFunction = new GaussianFunctionFactory(VARIANCE);
-    isotopeChartController.getContinuousFunctions().add(isotopeFunction);
+    isotopeChartController.addSeries(isotopeFunction);
+    isotopeFunction.next(ContinuousFunction.empty(massUnit, abundanceUnit));
 
     setElement(null);
 
@@ -112,10 +114,10 @@ public class ChemicalElementPanelController {
 
   @PostConstruct
   void postInitialize(@Service Units units) {
-    abundanceUnit = units.percent().get();
     massUnit = units.dalton().get();
+    abundanceUnit = units.percent().get();
 
-    isotopeFunction = new ContinuousFunctionExpression<>(massUnit, abundanceUnit);
+    isotopeFunction = new HotObservable<>();
   }
 
   /**
@@ -142,7 +144,7 @@ public class ChemicalElementPanelController {
         }
       }
 
-      isotopeFunction.setComponent(
+      isotopeFunction.next(
           new PeakShapeImpulseConvolutionFunction<>(
               massUnit,
               abundanceUnit,

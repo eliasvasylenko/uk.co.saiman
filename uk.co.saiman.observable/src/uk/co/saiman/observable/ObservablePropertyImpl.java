@@ -101,7 +101,7 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
 
   @Override
   public synchronized Disposable observe(Observer<? super T> observer) {
-    ObservationImpl<T> disposable = backingObservable.observe(observer);
+    ObservationImpl<T> disposable = backingObservable.observeImpl(observer);
 
     if (value != null) {
       disposable.onNext(value);

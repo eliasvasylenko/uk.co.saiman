@@ -78,14 +78,13 @@ public class RenameExperiment {
     }
 
     @SuppressWarnings("unchecked")
-    ExperimentNode<?, ExperimentConfiguration> selectedNode = (ExperimentNode<?, ExperimentConfiguration>) itemData;
+    ExperimentNode<ExperimentConfiguration, ?> selectedNode = (ExperimentNode<ExperimentConfiguration, ?>) itemData;
 
     requestExperimentNameDialog(
         experimentPart.getExperimentWorkspace(),
         text.renameExperiment(),
         text.renameExperimentName(selectedNode.getState().getName())).ifPresent(name -> {
-          Path newLocation = experimentPart.getExperimentWorkspace().getRootPath().resolve(
-              name);
+          Path newLocation = experimentPart.getExperimentWorkspace().getRootPath().resolve(name);
 
           RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
 

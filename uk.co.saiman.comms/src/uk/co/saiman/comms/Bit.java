@@ -51,5 +51,5 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target({ FIELD, METHOD })
 public @interface Bit {
-	int value();
+  int value();
 }

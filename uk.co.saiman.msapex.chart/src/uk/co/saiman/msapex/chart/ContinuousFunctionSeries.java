@@ -38,11 +38,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import uk.co.saiman.data.ContinuousFunction;
-import uk.co.saiman.data.RegularSampledDomain;
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
+import uk.co.saiman.data.function.ContinuousFunction;
+import uk.co.saiman.data.function.RegularSampledDomain;
+import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.Observation;
 import uk.co.saiman.property.IdentityProperty;
 import uk.co.saiman.property.Property;
@@ -59,10 +60,12 @@ import uk.co.saiman.property.Property;
  * @author Elias N Vasylenko
  */
 public class ContinuousFunctionSeries {
+  private final ContinuousFunctionChartController controller;
+
   /*
    * Continuous function data
    */
-  private final ContinuousFunction<?, ?> sourceContinuousFunction;
+  private final Observable<? extends ContinuousFunction<?, ?>> sourceContinuousFunction;
   private final Observation observation;
   private ContinuousFunction<?, ?> latestContinuousFunction;
   private boolean dirty;
@@ -77,53 +80,67 @@ public class ContinuousFunctionSeries {
    * Create a mapping from a given {@link ContinuousFunction} to a
    * {@link Series}.
    * 
-   * @param continuousFunction
-   *          The backing function
+   * @param controller
+   *          the owning chart
+   * @param sourceContinuousFunction
+   *          the backing function
    */
-  public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction) {
-    this.sourceContinuousFunction = continuousFunction;
+  public ContinuousFunctionSeries(
+      ContinuousFunctionChartController controller,
+      Observable<? extends ContinuousFunction<?, ?>> sourceContinuousFunction) {
+    this.controller = controller;
+    this.sourceContinuousFunction = sourceContinuousFunction;
 
     data = FXCollections.observableArrayList();
     series = new Series<>(data);
 
     Property<Observation> observation = new IdentityProperty<>();
-    continuousFunction
-        .changes()
+    sourceContinuousFunction
         .weakReference(this)
         .reduceBackpressure((a, b) -> b)
         .then(onObservation(observation::set))
         .observe(m -> m.owner().setValue(m.message()));
     this.observation = observation.get();
-
     this.observation.requestNext();
-  }
-
-  public void dispose() {
-    observation.cancel();
   }
 
   /**
    * Create a mapping from a given {@link ContinuousFunction} to a
    * {@link Series}.
    * 
-   * @param continuousFunction
-   *          The backing function
+   * @param controller
+   *          the owning chart
+   * @param sourceContinuousFunction
+   *          the backing function
    * @param name
-   *          The name of the series
+   *          the name of the series
    */
-  public ContinuousFunctionSeries(ContinuousFunction<?, ?> continuousFunction, String name) {
-    this(continuousFunction);
+  public ContinuousFunctionSeries(
+      ContinuousFunctionChartController controller,
+      Observable<? extends ContinuousFunction<?, ?>> sourceContinuousFunction,
+      String name) {
+    this(controller, sourceContinuousFunction);
 
     series.setName(name);
+  }
+
+  public void remove() {
+    observation.cancel();
+    controller.removeSeries(this);
   }
 
   public synchronized boolean isDirty() {
     return dirty;
   }
 
+  public Object setContinuousFunction(ContinuousFunction<?, ?> function) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   private synchronized void setValue(ContinuousFunction<?, ?> message) {
     dirty = true;
-    latestContinuousFunction = message.copy();
+    latestContinuousFunction = message;
   }
 
   private synchronized ContinuousFunction<?, ?> getNextValue() {
@@ -182,13 +199,6 @@ public class ContinuousFunctionSeries {
         domain.getLeftEndpoint());
 
     return latestRenderedContinuousFunction.resample(resolvableDomain);
-  }
-
-  /**
-   * @return the continuous function backing the series
-   */
-  public ContinuousFunction<?, ?> getBackingContinuousFunction() {
-    return sourceContinuousFunction;
   }
 
   /**

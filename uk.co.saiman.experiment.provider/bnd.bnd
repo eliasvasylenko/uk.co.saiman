@@ -7,6 +7,7 @@ Bundle-Name: SAI :: Experiment :: Provider
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot

@@ -78,15 +78,12 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
       return (T) node.getState();
     }
 
-    if (adapterType == Result.class && node.getType().getResultType().isPresent()) {
+    if (adapterType == Result.class
+        && node.getType().getResultType().getErasedType() != void.class) {
       return (T) node.getResult();
     }
 
-    if (adapterType == node
-        .getType()
-        .getResultType()
-        .map(r -> r.getDataType().getErasedType())
-        .orElse(null)) {
+    if (adapterType == node.getType().getResultType().getErasedType()) {
       return (T) node.getResult().get();
     }
 

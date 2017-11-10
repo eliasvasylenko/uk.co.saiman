@@ -44,4 +44,6 @@ public interface RasterDevice extends Device {
   RasterPosition getRasterPosition();
 
   Observable<RasterPosition> rasterPositionEvents();
+
+  RasterPattern getRasterPattern();
 }

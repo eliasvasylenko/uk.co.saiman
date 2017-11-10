@@ -1,3 +1,30 @@
+/*
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.msapex.editor.
+ *
+ * uk.co.saiman.msapex.editor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.msapex.editor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.msapex.editor;
 
 import java.util.stream.Stream;
@@ -36,8 +63,8 @@ public interface EditorProvider {
    *          the ID of the editor
    * @param resource
    *          the object to edit
-   * @return true if the editor with the given part ID is applicable to the given
-   *         resource
+   * @return true if the editor with the given part ID is applicable to the
+   *         given resource
    */
   boolean isEditorApplicable(String editorId, Object resource);
 
@@ -57,6 +84,11 @@ public interface EditorProvider {
 
   /**
    * Initialize an editor part for the given resource.
+   * <p>
+   * The management system is guaranteed to only invoke this method for a part
+   * which has been {@link #createEditorPart(String) created via an id} which
+   * has been {@link #isEditorApplicable(String, Object) verified to be
+   * compatible} with the given resource.
    * 
    * @param part
    *          the editor part which is being entered into the application model

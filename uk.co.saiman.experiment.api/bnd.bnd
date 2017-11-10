@@ -9,7 +9,7 @@ Bundle-Name: SAI :: Experiment
 	uk.co.saiman.text;version=snapshot,\
 \
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.processing;version=snapshot
+	uk.co.saiman.data;version=snapshot
 
 Export-Package: uk.co.saiman.experiment
 

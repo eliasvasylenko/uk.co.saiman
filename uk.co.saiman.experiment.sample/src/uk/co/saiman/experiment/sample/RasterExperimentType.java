@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.VoidExperimentType;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**
@@ -39,11 +39,11 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public interface RasterExperimentType<T extends RasterConfiguration> extends ExperimentType<T> {
-	@Override
-	default String getName() {
-		return "XY Raster";
-	}
+public interface RasterExperimentType<T extends RasterConfiguration> extends VoidExperimentType<T> {
+  @Override
+  default String getName() {
+    return "XY Raster";
+  }
 
-	RasterDevice device();
+  RasterDevice device();
 }

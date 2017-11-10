@@ -1,24 +1,53 @@
+/*
+ * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.msapex.experiment.spectrum.
+ *
+ * uk.co.saiman.msapex.experiment.spectrum is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.msapex.experiment.spectrum is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
 import org.eclipse.fx.core.di.LocalInstance;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
+import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.eclipse.Localize;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
+import uk.co.saiman.observable.HotObservable;
 
 public class SpectrumGraphEditorPart {
   @Inject
@@ -30,6 +59,7 @@ public class SpectrumGraphEditorPart {
 
   @FXML
   private ContinuousFunctionChartController spectrumGraphController;
+  private HotObservable<ContinuousFunction<Time, Dimensionless>> spectrum;
   private Spectrum data;
 
   @PostConstruct
@@ -37,30 +67,12 @@ public class SpectrumGraphEditorPart {
       BorderPane container,
       @LocalInstance FXMLLoader loaderProvider,
       IEclipseContext context,
-      Result<?> result) {
+      Result<Spectrum> result) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
     System.out.println("[SGEP] result! " + result);
-    updateGraph();
-  }
 
-  @Inject
-  public void setResultData(@Optional Spectrum data) {
-    this.data = data;
-    dirty.setDirty(true);
-
-    System.out.println("[SGEP] set data! " + data);
-    updateGraph();
-  }
-
-  private void updateGraph() {
-    Platform.runLater(() -> {
-      if (spectrumGraphController != null && data != null) {
-        spectrumGraphController.getContinuousFunctions().clear();
-        if (data != null)
-          spectrumGraphController.getContinuousFunctions().add(data.getRawData());
-      }
-    });
+    spectrumGraphController.addSeries(result.map(Spectrum::getRawData));
   }
 
   @FXML

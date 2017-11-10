@@ -58,7 +58,7 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.log.Log.Level;
 
-public class XmlExperiment extends XmlExperimentNode<ExperimentRoot, ExperimentConfiguration>
+public class XmlExperiment extends XmlExperimentNode<ExperimentConfiguration, Void>
     implements Experiment {
   static final String EXPERIMENT_EXTENSION = ".exml";
 

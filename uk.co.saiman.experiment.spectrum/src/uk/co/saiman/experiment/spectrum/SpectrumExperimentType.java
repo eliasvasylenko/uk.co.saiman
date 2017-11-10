@@ -29,17 +29,13 @@ package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.ExecutionContext;
-import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.Resource;
-import uk.co.saiman.experiment.ResultType;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -56,19 +52,17 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   private static final String SPECTRUM_DATA_NAME = "spectrum";
 
   private SpectrumProperties properties;
-  private final ResultType<AccumulatingFileSpectrum> spectrumResult;
 
   public SpectrumExperimentType() {
     this(getDefaultProperties(SpectrumProperties.class));
   }
 
   /*
-   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to make
-   * this possible ...
+   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to
+   * make this possible ...
    */
   public SpectrumExperimentType(SpectrumProperties properties) {
     this.properties = properties;
-    spectrumResult = new FileSpectrumExperimentResultType<T>(this);
   }
 
   protected void setProperties(SpectrumProperties properties) {
@@ -87,39 +81,24 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public AccumulatingFileSpectrum execute(ExperimentNode<?, T> node) {
+  public Spectrum execute(ExecutionContext<T, Spectrum> context) {
     AcquisitionDevice device = getAcquisitionDevice();
 
-    Future<AccumulatingFileSpectrum> acquisition = device
-        .acquisitionDataEvents()
-        .reduce(() -> initializeResult(context, device), (fileSpectrum, message) -> {
-          fileSpectrum.accumulate(message);
-          return fileSpectrum;
-        });
-
-    device.startAcquisition();
-
-    return acquisition.get();
-  }
-
-  private AccumulatingFileSpectrum initializeResult(
-      ExperimentNode<?, T> context,
-      AcquisitionDevice device) {
-    Resource resource = context.results().getResource(spectrumResult);
-
-    AccumulatingFileSpectrum fileSpectrum = new AccumulatingFileSpectrum(
-        resource,
-        SPECTRUM_DATA_NAME,
+    ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
+        device.acquisitionDataEvents(),
         device.getSampleDomain(),
         device.getSampleIntensityUnits());
 
-    context.results().set(spectrumResult, fileSpectrum);
+    Data<Spectrum> data = context
+        .setResult(context.getData(SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null)));
 
-    return fileSpectrum;
-  }
+    /*
+     * TODO some sort of invalidate/lazy-revalidate message passer
+     */
+    data.set(new SampledSpectrum(accumulator.getAccumulation()));
 
-  @Override
-  public ResultType<AccumulatingFileSpectrum> getResultType() {
-    return spectrumResult;
+    device.startAcquisition();
+
+    return data.get();
   }
 }

@@ -27,17 +27,19 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static uk.co.saiman.reflection.token.TypeToken.forType;
+
 import java.util.Optional;
 
-import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ConfigurationContext;
-import uk.co.saiman.experiment.ExecutionContext;
+import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.ResultType;
+import uk.co.saiman.experiment.VoidExecutionContext;
 import uk.co.saiman.property.Property;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * The root experiment type implementation for {@link XmlWorkspace}.
@@ -90,9 +92,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
   }
 
   @Override
-  public Void execute(ExecutionContext<ExperimentConfiguration> context) {
-    return null;
-  }
+  public void executeVoid(VoidExecutionContext<ExperimentConfiguration> context) {}
 
   @Override
   public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
@@ -107,8 +107,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
   }
 
   @Override
-  public ResultType<Void> getResultType() {
-    // TODO Auto-generated method stub
-    return null;
+  public TypeToken<Void> getResultType() {
+    return forType(void.class);
   }
 }

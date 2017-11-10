@@ -33,8 +33,8 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.data.RegularSampledDomain;
-import uk.co.saiman.data.SampledContinuousFunction;
+import uk.co.saiman.data.function.RegularSampledDomain;
+import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.observable.Observable;
 

@@ -46,6 +46,9 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import uk.co.saiman.data.Data;
+import uk.co.saiman.data.Resource;
+import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentConfiguration;
@@ -64,18 +67,18 @@ import uk.co.saiman.observable.ObservableValue;
  * Reference implementation of {@link ExperimentNode}.
  * 
  * @author Elias N Vasylenko
- * @param <T>
- *          the type of the experiment type
  * @param <S>
  *          the type of the data describing the experiment configuration
+ * @param <R>
+ *          the type of the data describing the experiment result
  */
-public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements ExperimentNode<T, S> {
+public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
   private static final String NODE_ELEMENT = "node";
   private static final String TYPE_ATTRIBUTE = "type";
   private static final String ID_ATTRIBUTE = "id";
 
   private final XmlWorkspace workspace;
-  private final T type;
+  private final ExperimentType<S, R> type;
   private final XmlExperimentNode<?, ?> parent;
 
   private final List<XmlExperimentNode<?, ?>> children;
@@ -83,7 +86,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
   private final ObservableProperty<ExperimentLifecycleState> lifecycleState;
   private final S state;
 
-  private final XmlResult<?> result;
+  private final XmlResult<R> result;
 
   private String id;
   private final XmlPersistedState persistedState;
@@ -98,7 +101,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
    *          the parent of the experiment
    */
   protected XmlExperimentNode(
-      T type,
+      ExperimentType<S, R> type,
       String id,
       XmlExperimentNode<?, ?> parent,
       XmlPersistedState persistedState) {
@@ -115,7 +118,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
   }
 
   protected XmlExperimentNode(
-      T type,
+      ExperimentType<S, R> type,
       String id,
       XmlWorkspace workspace,
       XmlPersistedState persistedState) {
@@ -123,7 +126,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
   }
 
   private XmlExperimentNode(
-      T type,
+      ExperimentType<S, R> type,
       String id,
       XmlWorkspace workspace,
       XmlExperimentNode<?, ?> parent,
@@ -187,7 +190,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
   }
 
   @Override
-  public T getType() {
+  public ExperimentType<S, R> getType() {
     return type;
   }
 
@@ -250,14 +253,14 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
   }
 
   @Override
-  public <U, E extends ExperimentType<U, ?>> ExperimentNode<E, U> addChild(E childType) {
-    ExperimentNode<E, U> child = loadChild(childType, null, new XmlPersistedState());
+  public <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType) {
+    ExperimentNode<U, V> child = loadChild(childType, null, new XmlPersistedState());
     getRootImpl().save();
     return child;
   }
 
-  protected <U, E extends ExperimentType<U, ?>> XmlExperimentNode<E, U> loadChild(
-      E childType,
+  protected <U, V> XmlExperimentNode<U, V> loadChild(
+      ExperimentType<U, V> childType,
       String id,
       XmlPersistedState persistedState) {
     assertAvailable();
@@ -306,11 +309,41 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
     }
   }
 
-  private ExecutionContext<S> createExecutionContext() {
-    return new ExecutionContext<S>() {
+  private ExecutionContext<S, R> createExecutionContext() {
+    return new ExecutionContext<S, R>() {
       @Override
-      public XmlExperimentNode<?, S> node() {
+      public ExperimentNode<S, R> node() {
         return XmlExperimentNode.this;
+      }
+
+      @Override
+      public void executeChildren() {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public Resource getResource(String name, String extension) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public Data<R> setResult(Data<? extends R> data) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public void setResultFormat(String name, DataFormat<R> format) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void setResultFormat(String name, String extension) {
+        // TODO Auto-generated method stub
+
       }
     };
   }
@@ -318,7 +351,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
   private ConfigurationContext<S> createConfigurationContext() {
     return new ConfigurationContext<S>() {
       @Override
-      public XmlExperimentNode<?, S> node() {
+      public XmlExperimentNode<S, R> node() {
         return XmlExperimentNode.this;
       }
 
@@ -385,7 +418,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
   }
 
   @Override
-  public Result<?> getResult() {
+  public Result<R> getResult() {
     return result;
   }
 
@@ -420,7 +453,7 @@ public class XmlExperimentNode<T extends ExperimentType<S, ?>, S> implements Exp
     ExperimentType<?, ?> experimentType = getAvailableChildExperimentTypes()
         .filter(e -> e.getId().equals(experimentTypeID))
         .findAny()
-        .orElseGet(() -> new MissingExperimentTypeImpl(getText(), experimentTypeID));
+        .orElseGet(() -> new MissingExperimentTypeImpl<>(getText(), experimentTypeID));
 
     XmlExperimentNode<?, ?> node = loadChild(
         experimentType,

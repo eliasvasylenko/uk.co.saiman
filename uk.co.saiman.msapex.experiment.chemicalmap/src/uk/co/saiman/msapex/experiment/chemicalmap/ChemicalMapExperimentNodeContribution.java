@@ -43,7 +43,6 @@ import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
-import uk.co.saiman.experiment.chemicalmap.ChemicalMapExperimentType;
 
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class ChemicalMapExperimentNodeContribution implements TreeContribution {
@@ -53,9 +52,9 @@ public class ChemicalMapExperimentNodeContribution implements TreeContribution {
   MenuContributor menuContributor;
 
   @AboutToShow
-  public <U extends ExperimentNode<? extends ChemicalMapExperimentType<?>, ? extends ChemicalMapConfiguration>> void prepare(
+  public void prepare(
       HBox node,
-      TreeEntry<U> data) {
+      TreeEntry<ExperimentNode<? extends ChemicalMapConfiguration, ?>> data) {
     setLabel(node, data.data().getType().getName());
     setSupplemental(node, data.data().getState().getChemicalMapName());
 

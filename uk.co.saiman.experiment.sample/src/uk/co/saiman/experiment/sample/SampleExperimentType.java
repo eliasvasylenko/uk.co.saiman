@@ -29,6 +29,7 @@ package uk.co.saiman.experiment.sample;
 
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.VoidExperimentType;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -40,25 +41,27 @@ import uk.co.saiman.experiment.ExperimentType;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public interface SampleExperimentType<T extends SampleConfiguration> extends ExperimentType<T> {
-	@Override
-	default String getName() {
-		return "Sample";
-	}
+public interface SampleExperimentType<T extends SampleConfiguration> extends VoidExperimentType<T> {
+  @Override
+  default String getName() {
+    return "Sample";
+  }
 
-	@Override
-	default boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-		/*
-		 * by default, must be a direct descendant of the experiment root
-		 */
-		return !parentNode.getParent().isPresent();
-	}
+  @Override
+  default boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
+    /*
+     * by default, must be a direct descendant of the experiment root
+     */
+    return !parentNode.getParent().isPresent();
+  }
 
-	@Override
-	default boolean mayComeBefore(ExperimentNode<?, ?> penultimateDescendantNode, ExperimentType<?> descendantNodeType) {
-		/*
-		 * by default, no restrictions
-		 */
-		return true;
-	}
+  @Override
+  default boolean mayComeBefore(
+      ExperimentNode<?, ?> penultimateDescendantNode,
+      ExperimentType<?, ?> descendantNodeType) {
+    /*
+     * by default, no restrictions
+     */
+    return true;
+  }
 }

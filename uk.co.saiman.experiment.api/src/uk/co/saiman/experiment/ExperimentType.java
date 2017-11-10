@@ -72,8 +72,8 @@ public interface ExperimentType<S, R> {
   /**
    * @param context
    *          the node which the configuration is being requested for
-   * @return a new state object suitable for an instance of {@link ExperimentNode}
-   *         over this type.
+   * @return a new state object suitable for an instance of
+   *         {@link ExperimentNode} over this type.
    */
   S createState(ConfigurationContext<S> context);
 
@@ -83,24 +83,16 @@ public interface ExperimentType<S, R> {
    * @param context
    *          the execution context
    */
-  R execute(ExecutionContext<S> context);
+  R execute(ExecutionContext<S, R> context);
 
   /**
-   * If this experiment node produces a result upon execution, get the type of the
-   * result which is produced.
-   * 
-   * @return an optional containing the type of the result, or else an empty
-   *         optional
-   */
-  ResultType<? extends R> getResultType();
-
-  /**
-   * Test whether a node of this type may follow from the given directly preceding
-   * node and be validly added as its child.
+   * Test whether a node of this type may follow from the given directly
+   * preceding node and be validly added as its child.
    * 
    * @param parentNode
    *          the candidate parent node
-   * @return true if a node of this type may be added as a child, false otherwise
+   * @return true if a node of this type may be added as a child, false
+   *         otherwise
    */
   boolean mayComeAfter(ExperimentNode<?, ?> parentNode);
 
@@ -109,15 +101,15 @@ public interface ExperimentType<S, R> {
    * validly added as its child. The penultimate descendant node should be a
    * descendant of a node of this type.
    * <p>
-   * This test is performed on all ancestors when an attempt is made to add a new
-   * node.
+   * This test is performed on all ancestors when an attempt is made to add a
+   * new node.
    * 
    * @param penultimateDescendantNode
    *          the candidate parent node
    * @param descendantNodeType
    *          the candidate child node
-   * @return true if a node of the given type may be added as a child of the given
-   *         node, false otherwise
+   * @return true if a node of the given type may be added as a child of the
+   *         given node, false otherwise
    */
   boolean mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
@@ -130,6 +122,16 @@ public interface ExperimentType<S, R> {
     return forType(getThisType())
         .resolveSupertype(ExperimentType.class)
         .resolveTypeArgument(new TypeParameter<S>() {})
+        .getTypeToken();
+  }
+
+  /**
+   * @return the exact generic type of the configuration interface
+   */
+  default TypeToken<R> getResultType() {
+    return forType(getThisType())
+        .resolveSupertype(ExperimentType.class)
+        .resolveTypeArgument(new TypeParameter<R>() {})
         .getTypeToken();
   }
 

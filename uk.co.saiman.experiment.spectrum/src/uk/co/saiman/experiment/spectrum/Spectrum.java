@@ -31,11 +31,9 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.data.ContinuousFunction;
+import uk.co.saiman.data.function.ContinuousFunction;
 
 public interface Spectrum {
-	void complete();
-
 	ContinuousFunction<Time, Dimensionless> getRawData();
 
 	ContinuousFunction<Mass, Dimensionless> getCalibratedData();
