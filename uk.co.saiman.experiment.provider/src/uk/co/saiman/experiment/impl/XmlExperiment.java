@@ -112,7 +112,7 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentConfiguration, Vo
 
     if (!getWorkspace().removeExperiment(getExperiment())) {
       ExperimentException e = new ExperimentException(
-          getText().exception().experimentDoesNotExist(this));
+          getText().exception().experimentDoesNotExist(getId()));
       getWorkspace().getLog().log(Level.ERROR, e);
       throw e;
     }

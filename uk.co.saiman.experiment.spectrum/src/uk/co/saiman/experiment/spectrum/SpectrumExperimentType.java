@@ -33,6 +33,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.data.CachingData;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
@@ -58,8 +59,8 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   }
 
   /*
-   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to
-   * make this possible ...
+   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to make
+   * this possible ...
    */
   public SpectrumExperimentType(SpectrumProperties properties) {
     this.properties = properties;
@@ -89,8 +90,11 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
         device.getSampleDomain(),
         device.getSampleIntensityUnits());
 
-    Data<Spectrum> data = context
-        .setResult(context.getData(SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null)));
+    Data<Spectrum> data = context.setResult(
+        new CachingData<>(
+            context.getLocation(),
+            SPECTRUM_DATA_NAME,
+            new RegularSampledSpectrumFormat(null)));
 
     /*
      * TODO some sort of invalidate/lazy-revalidate message passer

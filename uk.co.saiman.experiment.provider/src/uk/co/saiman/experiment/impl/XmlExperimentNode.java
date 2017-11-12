@@ -47,8 +47,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import uk.co.saiman.data.Data;
-import uk.co.saiman.data.Resource;
 import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentConfiguration;
@@ -214,7 +214,7 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
 
     if (parent != null && !parent.children.remove(this)) {
       ExperimentException e = new ExperimentException(
-          getText().exception().experimentDoesNotExist(this));
+          getText().exception().experimentDoesNotExist(getId()));
       getWorkspace().getLog().log(Level.ERROR, e);
       throw e;
 
@@ -244,6 +244,11 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
 
   protected Stream<XmlExperimentNode<?, ?>> getChildrenImpl() {
     return children.stream();
+  }
+
+  @Override
+  public Optional<ExperimentNode<?, ?>> getChild(String id) {
+    return getChildren().filter(c -> c.getId().equals(id)).findAny();
   }
 
   @Override
@@ -323,7 +328,7 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
       }
 
       @Override
-      public Resource getResource(String name, String extension) {
+      public Location getLocation() {
         // TODO Auto-generated method stub
         return null;
       }

@@ -25,47 +25,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.data;
+package uk.co.saiman.data.resource;
 
-import uk.co.saiman.data.format.DataFormat;
-import uk.co.saiman.data.function.DataException;
-import uk.co.saiman.data.resource.Resource;
+import java.io.IOException;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.Path;
 
-/**
- * A container for a data object which is backed by a {@link Resource resource}
- * according to a {@link DataFormat format}.
- * 
- * @author Elias N Vasylenko
- *
- * @param <T>
- *          the type of the data object
- */
-public interface Data<T> {
-  Resource getResource();
+public class PathResource implements Resource {
+  private final Path path;
 
-  DataFormat<T> getFormat();
+  public PathResource(Path path) {
+    this.path = path;
+  }
 
-  boolean save() throws DataException;
+  public Path getPath() {
+    return path;
+  }
 
-  boolean load() throws DataException;
+  @Override
+  public String getName() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  /**
-   * @return true if the resource has been changed since it was last saved,
-   *         false otherwise
-   */
-  boolean isDirty();
+  @Override
+  public String getExtension() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  /**
-   * Mark the data as inconsistent with the previously saved state.
-   */
-  void makeDirty();
+  @Override
+  public ReadableByteChannel read() throws IOException {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  boolean set(T data);
+  @Override
+  public WritableByteChannel write() throws IOException {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-  /**
-   * Get the data, loading from the input channel if necessary.
-   * 
-   * @return the data
-   */
-  T get();
+  @Override
+  public Location getLocation() {
+    return new PathLocation(path.getParent());
+  }
 }

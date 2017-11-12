@@ -30,6 +30,7 @@ package uk.co.saiman.data;
 import java.util.function.Function;
 
 import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observable;
 

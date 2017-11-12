@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.observable.Observable;
@@ -57,6 +58,8 @@ public interface Workspace {
    * @return all registered root experiment parts
    */
   Stream<Experiment> getExperiments();
+
+  Optional<Experiment> getExperiment(String id);
 
   /**
    * Add a root experiment node to management.

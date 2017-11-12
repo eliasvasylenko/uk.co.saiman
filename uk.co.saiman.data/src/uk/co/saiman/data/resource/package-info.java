@@ -25,18 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.data;
-
-import java.io.IOException;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
-
-public interface Resource {
-  String getName();
-
-  String getExtension();
-
-  ReadableByteChannel read() throws IOException;
-
-  WritableByteChannel write() throws IOException;
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.data.resource;

@@ -84,9 +84,14 @@ public class RenameExperiment {
         experimentPart.getExperimentWorkspace(),
         text.renameExperiment(),
         text.renameExperimentName(selectedNode.getState().getName())).ifPresent(name -> {
-          Path newLocation = experimentPart.getExperimentWorkspace().getRootPath().resolve(name);
+          if (experimentPart.getExperimentWorkspace().getExperiment(name).isPresent()) {
+            throw new ExperimentException(text.exception().experimentAlreadyExists(name));
+          }
 
-          RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
+          /*
+           * TODO we can no longer check if data already exists at the location.
+           * RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
+           */
 
           selectedNode.getState().setName(name);
           experimentPart.getExperimentTreeController().refresh();

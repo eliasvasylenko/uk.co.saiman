@@ -30,14 +30,19 @@ package uk.co.saiman.data;
 import java.lang.ref.SoftReference;
 
 import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.data.resource.Location;
+import uk.co.saiman.data.resource.Resource;
 
 public class CachingData<T> extends SimpleData<T> {
   private SoftReference<T> dataReference;
 
   public CachingData(Resource resource, DataFormat<T> format) {
     super(resource, format);
-
     this.dataReference = new SoftReference<>(null);
+  }
+
+  public CachingData(Location location, String name, DataFormat<T> format) {
+    this(location.getResource(name, format.getExtension()), format);
   }
 
   @Override

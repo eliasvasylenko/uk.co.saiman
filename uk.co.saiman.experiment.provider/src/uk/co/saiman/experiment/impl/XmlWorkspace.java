@@ -39,6 +39,7 @@ import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -154,6 +155,11 @@ public class XmlWorkspace implements Workspace {
   @Override
   public Stream<Experiment> getExperiments() {
     return upcastStream(experiments.stream());
+  }
+
+  @Override
+  public Optional<Experiment> getExperiment(String id) {
+    return getExperiments().filter(c -> c.getId().equals(id)).findAny();
   }
 
   protected Stream<XmlExperiment> getExperimentsImpl() {

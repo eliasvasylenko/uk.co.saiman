@@ -27,10 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.saiman.msapex.experiment.RenameExperiment.confirmOverwriteIfNecessary;
 import static uk.co.saiman.msapex.experiment.RenameExperiment.requestExperimentNameDialog;
-
-import java.nio.file.Path;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 
@@ -48,9 +45,8 @@ public class AddExperimentHandler {
   void execute(Workspace workspace, @Localize ExperimentProperties text) {
     requestExperimentNameDialog(workspace, text.newExperiment(), text.newExperimentName())
         .ifPresent(name -> {
-          Path newLocation = workspace.getRootPath().resolve(name);
-
-          confirmOverwriteIfNecessary(newLocation, text);
+          // Path newLocation = workspace.getRootPath().resolve(name);
+          // TODO confirmOverwriteIfNecessary(newLocation, text);
 
           workspace.addExperiment(name);
         });

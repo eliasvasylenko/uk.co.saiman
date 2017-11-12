@@ -36,6 +36,8 @@ import java.util.Objects;
 
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.Payload;
+import uk.co.saiman.data.resource.Location;
+import uk.co.saiman.data.resource.Resource;
 
 public class SimpleData<T> implements Data<T> {
   private final Resource resource;
@@ -46,6 +48,10 @@ public class SimpleData<T> implements Data<T> {
   public SimpleData(Resource resource, DataFormat<T> format) {
     this.resource = resource;
     this.format = format;
+  }
+
+  public SimpleData(Location location, String name, DataFormat<T> format) {
+    this(location.getResource(name, format.getExtension()), format);
   }
 
   @Override

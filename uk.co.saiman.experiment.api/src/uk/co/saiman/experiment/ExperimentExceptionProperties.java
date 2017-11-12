@@ -54,7 +54,7 @@ public interface ExperimentExceptionProperties {
 
   String illegalMenuForSelection(String commandId, Object selection);
 
-  String experimentDoesNotExist(ExperimentNode<?, ?> experimentNode);
+  String experimentDoesNotExist(String id);
 
   String invalidExperimentName(String name);
 
@@ -93,4 +93,6 @@ public interface ExperimentExceptionProperties {
   String cannotResolveExperimentNode(Workspace experimentWorkspace, Path path);
 
   String cannotResolveExperimentResult(Workspace experimentWorkspace, Path path);
+
+  String experimentAlreadyExists(String name);
 }

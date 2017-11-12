@@ -27,9 +27,11 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import java.nio.file.Path;
+import static java.util.stream.Collectors.joining;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -43,6 +45,11 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
+import uk.co.saiman.collection.StreamUtilities;
+import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.msapex.editor.EditorProvider;
@@ -50,8 +57,8 @@ import uk.co.saiman.msapex.editor.EditorService;
 
 public class ResultEditorAddon implements EditorProvider {
   public static final String EDITOR_RESULT_CLASS = "uk.co.saiman.msapex.editor.result.class";
-  public static final String EDITOR_RESULT_TYPE = "uk.co.saiman.msapex.editor.result.type";
   public static final String EDITOR_RESULT_PATH = "uk.co.saiman.msapex.editor.result.path";
+  public static final String EDITOR_RESULT_PATH_SEPARATOR = "/";
 
   private final Map<String, MPart> editorParts = new LinkedHashMap<>();
 
@@ -67,6 +74,9 @@ public class ResultEditorAddon implements EditorProvider {
   private Adapter adapter;
   @Inject
   private MAddon addon;
+  @Inject
+  @Localize
+  private ExperimentProperties text;
 
   @PostConstruct
   void create() {
@@ -127,19 +137,27 @@ public class ResultEditorAddon implements EditorProvider {
     Result<?> result;
     Map<String, String> state = part.getPersistedState();
     if (resource == null) {
-      String id = state.get(EDITOR_RESULT_TYPE);
-      Path path = workspace.getRootPath().getFileSystem().getPath(state.get(EDITOR_RESULT_PATH));
-      result = workspace
-          .resolveNode(path)
-          .getResult()
-          .filter(r -> r.getType().getId().equals(id))
-          .findAny()
-          .get();
+      String path = state.get(EDITOR_RESULT_PATH);
+      String[] pathComponents = path.split(EDITOR_RESULT_PATH_SEPARATOR);
+      Optional<? extends ExperimentNode<?, ?>> node = workspace.getExperiment(pathComponents[0]);
+      for (int i = 1; i < pathComponents.length; i++) {
+        String pathItem = pathComponents[i];
+        node = node.flatMap(e -> e.getChild(pathItem));
+      }
+      result = node
+          .orElseThrow(() -> new ExperimentException(text.exception().experimentDoesNotExist(path)))
+          .getResult();
       System.out.println("   RESULT: " + result);
     } else {
       result = adapter.adapt(resource, Result.class);
-      state.put(EDITOR_RESULT_TYPE, result.getType().getId());
-      state.put(EDITOR_RESULT_PATH, result.getDataPath().toString());
+      state.put(
+          EDITOR_RESULT_PATH,
+          StreamUtilities
+              .<ExperimentNode<?, ?>>iterateOptional(
+                  result.getExperimentNode(),
+                  ExperimentNode::getParent)
+              .map(ExperimentNode::getId)
+              .collect(joining(EDITOR_RESULT_PATH_SEPARATOR)));
     }
 
     // inject result and result data changes into context

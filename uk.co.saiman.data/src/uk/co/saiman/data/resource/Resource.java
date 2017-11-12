@@ -25,45 +25,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.data;
+package uk.co.saiman.data.resource;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.Path;
 
-public class PathResource implements Resource {
-  private final Path path;
+public interface Resource {
+  Location getLocation();
 
-  public PathResource(Path path) {
-    this.path = path;
-  }
+  String getName();
 
-  public Path getPath() {
-    return path;
-  }
+  String getExtension();
 
-  @Override
-  public String getName() {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  ReadableByteChannel read() throws IOException;
 
-  @Override
-  public String getExtension() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public ReadableByteChannel read() throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public WritableByteChannel write() throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  WritableByteChannel write() throws IOException;
 }
