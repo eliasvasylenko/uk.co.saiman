@@ -53,11 +53,8 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.WorkspaceEvent;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
-import uk.co.saiman.observable.HotObservable;
-import uk.co.saiman.observable.Observable;
 
 /**
  * Reference implementation of {@link Workspace}.
@@ -76,8 +73,6 @@ public class XmlWorkspace implements Workspace {
   private final ExperimentProperties text;
 
   private final Lock processingLock = new ReentrantLock();
-
-  private final HotObservable<WorkspaceEvent> events = new HotObservable<>();
 
   /**
    * Try to create a new experiment workspace over the given root path
@@ -109,11 +104,6 @@ public class XmlWorkspace implements Workspace {
     this.experimentRootType = new ExperimentRootImpl(text);
 
     loadExperiments();
-  }
-
-  @Override
-  public Observable<WorkspaceEvent> events() {
-    return events;
   }
 
   private void loadExperiments() {

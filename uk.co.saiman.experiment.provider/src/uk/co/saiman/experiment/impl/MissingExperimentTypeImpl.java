@@ -56,7 +56,7 @@ public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
 
   @Override
   public PersistedState createState(ConfigurationContext<PersistedState> context) {
-    context.persistedState().stringValue(getId()).set(getMissingTypeID());
+    context.persistedState().forString(getId()).set(getMissingTypeID());
 
     return context.persistedState();
   }

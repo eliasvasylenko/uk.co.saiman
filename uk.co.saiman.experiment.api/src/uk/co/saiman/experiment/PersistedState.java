@@ -32,9 +32,17 @@ import java.util.stream.Stream;
 import uk.co.saiman.property.Property;
 
 public interface PersistedState {
-  Stream<String> getStrings();
-
   void clear();
 
-  Property<String> stringValue(String key);
+  Stream<String> getStrings();
+
+  Property<String> forString(String id);
+
+  Stream<String> getMaps();
+
+  PersistedState forMap(String id);
+
+  Stream<String> getMapLists();
+
+  PersistedStateList forMapList(String id);
 }

@@ -463,7 +463,7 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
     XmlExperimentNode<?, ?> node = loadChild(
         experimentType,
         experimentID,
-        XmlPersistedState.load(element, xPath));
+        new XmlPersistedState().load(element, xPath));
 
     node.loadChildNodes(element, xPath);
   }

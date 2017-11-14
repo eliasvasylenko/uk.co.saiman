@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static javax.xml.xpath.XPathConstants.NODE;
 import static javax.xml.xpath.XPathConstants.NODESET;
 
 import java.util.HashMap;
@@ -44,24 +45,18 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.property.Property;
 
 public class XmlPersistedState extends HotObservable<PersistedState> implements PersistedState {
-  private static final String CONFIGURATION_ELEMENT = "configuration";
-  private static final String CONFIGURATION_STRING_ELEMENT = "string";
-  private static final String CONFIGURATION_KEY_ATTRIBUTE = "key";
-  private static final String CONFIGURATION_VALUE_ATTRIBUTE = "value";
+  static final String CONFIGURATION_ELEMENT = "configuration";
+  static final String CONFIGURATION_STRING_ELEMENT = "string";
+  static final String CONFIGURATION_MAP_ELEMENT = "map";
+  static final String CONFIGURATION_MAP_LIST_ELEMENT = "maps";
+  static final String CONFIGURATION_ID_ATTRIBUTE = "id";
 
   private final Map<String, String> strings = new HashMap<>();
+  private final Map<String, XmlPersistedState> maps = new HashMap<>();
+  private final Map<String, XmlPersistedStateList> mapLists = new HashMap<>();
 
   private void update() {
     next(this);
-  }
-
-  @Override
-  public Stream<String> getStrings() {
-    return strings.keySet().stream();
-  }
-
-  public Property<String> stringValue(String key) {
-    return Property.over(() -> strings.get(key), v -> strings.put(key, v));
   }
 
   @Override
@@ -70,28 +65,105 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
     update();
   }
 
+  boolean isEmpty() {
+    return strings.isEmpty() && maps.values().stream().allMatch(XmlPersistedState::isEmpty)
+        && mapLists.values().stream().allMatch(XmlPersistedStateList::isEmpty);
+  }
+
+  @Override
+  public Stream<String> getStrings() {
+    return strings.keySet().stream();
+  }
+
+  @Override
+  public Property<String> forString(String id) {
+    return Property.over(() -> strings.get(id), v -> strings.put(id, v));
+  }
+
+  @Override
+  public Stream<String> getMaps() {
+    return maps.keySet().stream();
+  }
+
+  @Override
+  public XmlPersistedState forMap(String id) {
+    return maps.computeIfAbsent(id, i -> new XmlPersistedState());
+  }
+
+  @Override
+  public Stream<String> getMapLists() {
+    return mapLists.keySet().stream();
+  }
+
+  @Override
+  public XmlPersistedStateList forMapList(String id) {
+    return mapLists.computeIfAbsent(id, i -> new XmlPersistedStateList());
+  }
+
   protected void save(Element parent) {
     Element configuration = parent.getOwnerDocument().createElement(CONFIGURATION_ELEMENT);
     parent.appendChild(configuration);
-    getStrings().forEach(key -> {
-      Element string = parent.getOwnerDocument().createElement(CONFIGURATION_STRING_ELEMENT);
-      configuration.appendChild(string);
-      string.setAttribute(CONFIGURATION_KEY_ATTRIBUTE, key);
-      string.setAttribute(CONFIGURATION_VALUE_ATTRIBUTE, stringValue(key).get());
+  }
+
+  protected void saveInline(Element configuration) {
+    getStrings().forEach(id -> {
+      Element element = configuration.getOwnerDocument().createElement(
+          CONFIGURATION_STRING_ELEMENT);
+      configuration.appendChild(element);
+      element.setAttribute(CONFIGURATION_ID_ATTRIBUTE, id);
+      element.setTextContent(forString(id).get());
+    });
+
+    getMaps().forEach(id -> {
+      XmlPersistedState map = maps.get(id);
+      if (map != null && !map.isEmpty()) {
+        Element element = configuration.getOwnerDocument().createElement(CONFIGURATION_MAP_ELEMENT);
+        configuration.appendChild(element);
+        element.setAttribute(CONFIGURATION_ID_ATTRIBUTE, id);
+        map.saveInline(element);
+      }
+    });
+
+    getMapLists().forEach(id -> {
+      XmlPersistedStateList mapList = mapLists.get(id);
+      if (mapList != null && !mapList.isEmpty()) {
+        Element element = configuration.getOwnerDocument().createElement(
+            CONFIGURATION_MAP_LIST_ELEMENT);
+        configuration.appendChild(element);
+        element.setAttribute(CONFIGURATION_ID_ATTRIBUTE, id);
+        mapList.save(element);
+      }
     });
   }
 
-  protected static XmlPersistedState load(Element parent, XPath xPath)
-      throws XPathExpressionException {
-    XmlPersistedState persistedState = new XmlPersistedState();
+  protected XmlPersistedState load(Element parent, XPath xPath) throws XPathExpressionException {
+    Element configuration = (Element) xPath.evaluate(CONFIGURATION_ELEMENT, parent, NODE);
+    return loadInline(configuration, xPath);
+  }
 
-    NodeList strings = (NodeList) xPath
-        .evaluate(CONFIGURATION_ELEMENT + "/" + CONFIGURATION_STRING_ELEMENT, parent, NODESET);
-    for (int i = 0; i < strings.getLength(); i++) {
-      Element string = (Element) strings.item(i);
-      persistedState.stringValue(string.getAttribute(CONFIGURATION_KEY_ATTRIBUTE)).set(
-          string.getAttribute(CONFIGURATION_VALUE_ATTRIBUTE));
+  protected XmlPersistedState loadInline(Element configuration, XPath xPath)
+      throws XPathExpressionException {
+    NodeList stringElements = (NodeList) xPath
+        .evaluate(CONFIGURATION_STRING_ELEMENT, configuration, NODESET);
+    for (int i = 0; i < stringElements.getLength(); i++) {
+      Element element = (Element) stringElements.item(i);
+      forString(element.getAttribute(CONFIGURATION_ID_ATTRIBUTE)).set(element.getTextContent());
     }
-    return persistedState;
+
+    NodeList mapElements = (NodeList) xPath
+        .evaluate(CONFIGURATION_MAP_ELEMENT, configuration, NODESET);
+    for (int i = 0; i < mapElements.getLength(); i++) {
+      Element element = (Element) mapElements.item(i);
+      forMap(element.getAttribute(CONFIGURATION_ID_ATTRIBUTE)).loadInline(element, xPath);
+    }
+
+    NodeList mapListElements = (NodeList) xPath
+        .evaluate(CONFIGURATION_MAP_LIST_ELEMENT, configuration, NODESET);
+    for (int i = 0; i < mapListElements.getLength(); i++) {
+      Element element = (Element) mapListElements.item(i);
+      forMapList(element.getAttribute(CONFIGURATION_ID_ATTRIBUTE)).load(element, xPath);
+    }
+
+    return this;
   }
 }

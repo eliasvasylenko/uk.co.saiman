@@ -31,9 +31,6 @@ import org.junit.Test;
 
 import mockit.FullVerificationsInOrder;
 import mockit.Mocked;
-import uk.co.saiman.observable.FilteringObserver;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.observable.Observer;
 
 @SuppressWarnings("javadoc")
 public class FilteringObserverTest {

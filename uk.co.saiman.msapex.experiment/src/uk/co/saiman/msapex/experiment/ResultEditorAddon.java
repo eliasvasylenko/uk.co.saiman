@@ -80,7 +80,6 @@ public class ResultEditorAddon implements EditorProvider {
 
   @PostConstruct
   void create() {
-    System.out.println("create ResultEditorProvider");
     for (MUIElement snippet : application.getSnippets()) {
       if (snippet instanceof MPart) {
         MPart part = (MPart) snippet;

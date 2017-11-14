@@ -138,8 +138,9 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentConfiguration, Vo
       XPath xPath = XPathFactory.newInstance().newXPath();
 
       Element root = document.getDocumentElement();
-      XmlExperiment experiment = workspace
-          .addExperiment(root.getAttribute(ID_ATTRIBUTE), XmlPersistedState.load(root, xPath));
+      XmlExperiment experiment = workspace.addExperiment(
+          root.getAttribute(ID_ATTRIBUTE),
+          new XmlPersistedState().load(root, xPath));
 
       experiment.loadChildNodes(root, xPath);
 

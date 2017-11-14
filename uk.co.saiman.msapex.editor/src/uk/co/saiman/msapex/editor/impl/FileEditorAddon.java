@@ -74,7 +74,6 @@ public class FileEditorAddon implements EditorProvider {
 
   @PostConstruct
   void create() {
-    System.out.println("create FileEditorAddon");
     for (MUIElement snippet : application.getSnippets()) {
       if (snippet instanceof MPart) {
         MPart part = (MPart) snippet;

@@ -30,8 +30,6 @@ package uk.co.saiman.experiment;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.observable.Observable;
-
 /**
  * The concept of an experiment in a {@link Workspace workspace} is represented
  * by a hierarchy of nodes. The workspace provides an interface for managing
@@ -43,6 +41,8 @@ import uk.co.saiman.observable.Observable;
  * @author Elias N Vasylenko
  */
 public interface Workspace {
+  
+
   /*
    * Root experiment types
    */
@@ -96,6 +96,4 @@ public interface Workspace {
    * @return the set of all experiment types registered to this workspace
    */
   Stream<ExperimentType<?, ?>> getRegisteredExperimentTypes();
-
-  Observable<WorkspaceEvent> events();
 }

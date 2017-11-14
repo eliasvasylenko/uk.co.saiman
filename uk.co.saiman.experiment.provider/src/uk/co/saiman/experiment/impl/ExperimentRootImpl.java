@@ -62,7 +62,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
   public ExperimentConfiguration createState(
       ConfigurationContext<ExperimentConfiguration> configuration) {
     return new ExperimentConfiguration() {
-      private Property<String> notes = configuration.persistedState().stringValue("notes");
+      private Property<String> notes = configuration.persistedState().forString("notes");
 
       @Override
       public String getName() {

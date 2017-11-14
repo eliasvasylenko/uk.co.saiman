@@ -70,7 +70,7 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
       private Property<Quantity<Length>> getLength(String value) {
         return context
             .persistedState()
-            .stringValue(value)
+            .forString(value)
             .map(l -> units.parseQuantity(l).asType(Length.class), units::formatQuantity)
             .setDefault(() -> units.metre().micro().getQuantity(0));
       }
