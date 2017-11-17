@@ -83,13 +83,29 @@ public class EditorAddon {
   @Inject
   private Log log;
 
+  private final Map<String, List<MPart>> orphanedEditors = new HashMap<>();
   private final Map<String, EditorProvider> editorProviders = new LinkedHashMap<>();
+
   private final Map<MPart, Object> partResources = new HashMap<>();
-  private final Map<Object, MPart> resourceEditorParts = new HashMap<>();
+  private final Map<Object, MPart> resourceParts = new HashMap<>();
+
   private final Set<EditorDescriptor> editorPrecedence = new LinkedHashSet<>();
 
   @PostConstruct
   void initialize(IEclipseContext context) {
+    System.out.println("init editor addon");
+
+    List<MPart> persistedParts = modelService
+        .findElements(
+            application,
+            MPart.class,
+            EModelService.ANYWHERE,
+            e -> e.getPersistedState().containsKey(PROVIDER_ID));
+    persistedParts.forEach(part -> {
+      String provider = part.getPersistedState().get(PROVIDER_ID);
+      orphanedEditors.computeIfAbsent(provider, k -> new ArrayList<>()).add(part);
+    });
+
     context.set(EditorService.class, new EditorService() {
       @Override
       public Stream<EditorPrototype> getApplicableEditors(Object resource) {
@@ -99,19 +115,29 @@ public class EditorAddon {
          * TODO deal with precedence
          */
 
-        return getEditors().filter(e -> e.isApplicable(resource)).map(
-            e -> e.getPrototype(resource));
+        return getEditors()
+            .filter(e -> e.isApplicable(resource))
+            .map(e -> e.getPrototype(resource));
       }
 
       @Override
       public Stream<EditorDescriptor> getEditors() {
-        return editorProviders.values().stream().flatMap(
-            e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
+        return editorProviders
+            .values()
+            .stream()
+            .flatMap(e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
       }
 
       @Override
       public void registerProvider(EditorProvider provider) {
         editorProviders.put(provider.getId(), provider);
+        System.out.println("load orphans: " + provider.getId());
+        List<MPart> orphans = orphanedEditors.remove(provider.getId());
+        for (MPart part : orphans) {
+          Object resource = provider.loadEditorResource(part);
+          partResources.put(part, resource);
+          resourceParts.put(resource, part);
+        }
       }
 
       @Override
@@ -122,7 +148,7 @@ public class EditorAddon {
   }
 
   protected void removeEditor(MCompositePart controller) {
-    resourceEditorParts.remove(partResources.remove(controller));
+    resourceParts.remove(partResources.remove(controller));
   }
 
   protected <T> MPart createEditor(EditorDescriptor descriptor, Object data) {
@@ -152,9 +178,10 @@ public class EditorAddon {
   @Optional
   private synchronized void initializeEditorContext(@UIEventTopic(TOPIC_CONTEXT) Event event) {
     try {
+      Object value = event.getProperty(NEW_VALUE);
       if (event.getProperty(ELEMENT) instanceof MHandlerContainer
-          && SET.equals(event.getProperty(TYPE))) {
-        IEclipseContext context = (IEclipseContext) event.getProperty(NEW_VALUE);
+          && value instanceof IEclipseContext && SET.equals(event.getProperty(TYPE))) {
+        IEclipseContext context = (IEclipseContext) value;
 
         MPart part = context.get(MPart.class);
         MPart parentPart = context.getParent().get(MPart.class);
@@ -162,8 +189,7 @@ public class EditorAddon {
         if (part != null && part.getPersistedState().containsKey(PROVIDER_ID)) {
           Object resource = partResources.get(part);
           EditorProvider provider = editorProviders.get(part.getPersistedState().get(PROVIDER_ID));
-          resource = provider.initializeEditorPart(part, resource);
-          resourceEditorParts.put(resource, part);
+          provider.initializeEditorPart(part, resource);
         } else if (parentPart != null && parentPart.getPersistedState().containsKey(PROVIDER_ID)) {
           prepareEditorChildPartContext(context);
         }
@@ -256,8 +282,8 @@ public class EditorAddon {
     @Override
     public MPart showPart() {
       /*
-       * TODO this should only move the editor preference before other editors
-       * which were actually applicable to the resource!!!
+       * TODO this should only move the editor preference before other editors which
+       * were actually applicable to the resource!!!
        * 
        * editorPrecedence.remove(getDescriptor());
        * editorPrecedence.add(getDescriptor());
@@ -269,8 +295,7 @@ public class EditorAddon {
     }
 
     MPart getEditor() {
-      return resourceEditorParts
-          .computeIfAbsent(resource, r -> createEditor(getDescriptor(), resource));
+      return resourceParts.computeIfAbsent(resource, r -> createEditor(getDescriptor(), resource));
     }
   }
 }

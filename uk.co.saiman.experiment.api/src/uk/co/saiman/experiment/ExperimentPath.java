@@ -1,16 +1,19 @@
 package uk.co.saiman.experiment;
 
+import static java.lang.Math.max;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.nCopies;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 import static uk.co.saiman.collection.StreamUtilities.reverse;
 import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ExperimentPath {
@@ -18,6 +21,9 @@ public class ExperimentPath {
   private static final String PARENT = "..";
 
   private static final String PARENT_OF_ROOT = "Cannot resolve parent of root path";
+  private static final String CANNOT_RESOLVE = "Cannot resolve path";
+  private static final String ROOT_NOT_EXPERIMENT = "Root path does not resolve an experiment";
+  private static final String PARENT_OF_EXPERIMENT = "Cannot resolve parent of experiment";
 
   private final int ancestors;
   private final List<ExperimentMatcher> matchers;
@@ -28,11 +34,11 @@ public class ExperimentPath {
   }
 
   public static ExperimentPath relative() {
-    return new ExperimentPath(0, Collections.emptyList());
+    return new ExperimentPath(0, emptyList());
   }
 
   public static ExperimentPath absolute() {
-    return new ExperimentPath(-1, Collections.emptyList());
+    return new ExperimentPath(-1, emptyList());
   }
 
   public static ExperimentPath of(ExperimentNode<?, ?> node) {
@@ -62,7 +68,9 @@ public class ExperimentPath {
 
   @Override
   public String toString() {
-    return getMatchers().map(Objects::toString).collect(joining(SEPARATOR));
+    return (ancestors == -1 ? "/" : "")
+        + concat(nCopies(max(0, ancestors), "..").stream(), getMatchers().map(Objects::toString))
+            .collect(joining(SEPARATOR));
   }
 
   public ExperimentPath parent() {
@@ -83,6 +91,7 @@ public class ExperimentPath {
 
   public ExperimentPath match(ExperimentMatcher matcher) {
     List<ExperimentMatcher> matchers = new ArrayList<>(this.matchers.size() + 1);
+    matchers.addAll(this.matchers);
     matchers.add(matcher);
     return new ExperimentPath(ancestors, matchers);
   }
@@ -109,15 +118,39 @@ public class ExperimentPath {
     if (isAbsolute())
       return resolve(node.getWorkspace());
 
+    Optional<ExperimentNode<?, ?>> result = Optional.of(node);
+
     for (int i = 0; i < ancestors; i++) {
-      node = node.getParent().orElse(null);
+      result = result.flatMap(ExperimentNode::getParent);
     }
+    if (!result.isPresent()) {
+      throw new ExperimentException(PARENT_OF_EXPERIMENT);
+    }
+
+    for (ExperimentMatcher matcher : matchers) {
+      result = result.flatMap(r -> r.getChildren().filter(matcher::match).findFirst());
+    }
+
+    return result.orElseThrow(() -> new ExperimentException(CANNOT_RESOLVE + " " + this));
   }
 
   public ExperimentNode<?, ?> resolve(Workspace workspace) {
     if (ancestors > 0)
       throw new ExperimentException(PARENT_OF_ROOT);
+    if (matchers.isEmpty())
+      throw new ExperimentException(ROOT_NOT_EXPERIMENT);
 
+    Optional<? extends ExperimentNode<?, ?>> result = workspace
+        .getExperiments()
+        .filter(matchers.get(0)::match)
+        .findFirst();
+
+    for (int i = 1; i < matchers.size(); i++) {
+      ExperimentMatcher matcher = matchers.get(i);
+      result = result.flatMap(r -> r.getChildren().filter(matcher::match).findFirst());
+    }
+
+    return result.orElseThrow(() -> new ExperimentException(CANNOT_RESOLVE + " " + this));
   }
 
   public boolean isAbsolute() {

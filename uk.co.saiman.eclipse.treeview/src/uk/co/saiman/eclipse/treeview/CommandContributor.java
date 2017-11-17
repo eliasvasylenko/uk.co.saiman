@@ -36,12 +36,6 @@ import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.core.di.annotations.Creatable;
 
-import javafx.scene.Node;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-
 /**
  * A tree cell contribution intended to be supplied via {@link TreeContribution}
  * so as to be injected according to an eclipse context.
@@ -59,50 +53,11 @@ public class CommandContributor {
   @Inject
   ECommandService commandService;
 
-  private String commandId;
-  private ParameterizedCommand command;
-
-  protected ParameterizedCommand createCommand(String commandId) {
-    return commandService.createCommand(commandId, emptyMap());
-  }
-
-  public Node configureCell(String commandId, Node content) {
-    ParameterizedCommand command;
-    synchronized (this) {
-      if (this.commandId != commandId) {
-        command = createCommand(commandId);
-
-        this.commandId = commandId;
-        this.command = command;
-      } else {
-        command = this.command;
-      }
-    }
-
-    content.addEventHandler(MouseEvent.ANY, event -> {
-      if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
-        event.consume();
-
-        if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
-          executeCommand(command);
-        }
-      }
-    });
-
-    content.addEventHandler(KeyEvent.ANY, event -> {
-      if (event.getCode() == KeyCode.ENTER) {
-        event.consume();
-
-        if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
-          executeCommand(command);
-        }
-      }
-    });
-
-    return content;
-  }
-
-  protected void executeCommand(ParameterizedCommand command) {
-    handlerService.executeHandler(command);
+  protected ActionContributor forCommand(String commandId) {
+    ParameterizedCommand command = commandService.createCommand(commandId, emptyMap());
+    return node -> {
+      handlerService.executeHandler(command);
+      return true;
+    };
   }
 }

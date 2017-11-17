@@ -35,6 +35,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
+import uk.co.saiman.eclipse.treeview.Contributor;
+import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.instrument.Device;
@@ -42,12 +44,14 @@ import uk.co.saiman.instrument.DeviceConnection;
 
 @Component(scope = ServiceScope.PROTOTYPE)
 public class DeviceContribution implements TreeContribution {
+  private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
+
   @AboutToShow
   public void prepare(HBox node, TreeEntry<Device> item) {
     DeviceConnection state = item.data().connectionState().get();
 
-    configurePseudoClass(node);
-    configurePseudoClass(node, state.toString());
+    pseudoClass.configureCell(node);
+    new PseudoClassContributor(state.toString()).configureCell(node);
 
     setLabel(node, item.data().getName());
     setSupplemental(node, state.toString());

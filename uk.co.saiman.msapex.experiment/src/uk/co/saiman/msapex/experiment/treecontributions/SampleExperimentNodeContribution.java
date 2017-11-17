@@ -36,6 +36,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
+import uk.co.saiman.eclipse.treeview.Contributor;
+import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
@@ -43,6 +45,8 @@ import uk.co.saiman.experiment.sample.SampleConfiguration;
 
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class SampleExperimentNodeContribution implements TreeContribution {
+  private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
+
   @AboutToShow
   public void prepare(
       HBox node,
@@ -50,6 +54,6 @@ public class SampleExperimentNodeContribution implements TreeContribution {
     setLabel(node, entry.data().getState().getName());
     setSupplemental(node, entry.data().getState().toString());
 
-    configurePseudoClass(node);
+    pseudoClass.configureCell(node);
   }
 }

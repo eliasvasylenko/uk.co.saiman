@@ -27,38 +27,34 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static java.util.stream.Collectors.joining;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.services.adapter.Adapter;
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
-import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.eclipse.Localize;
-import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentPath;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
-public class ResultEditorAddon implements EditorProvider {
+public class ExperimentEditorAddon implements EditorProvider {
   public static final String EDITOR_RESULT_CLASS = "uk.co.saiman.msapex.editor.result.class";
-  public static final String EDITOR_RESULT_PATH = "uk.co.saiman.msapex.editor.result.path";
-  public static final String EDITOR_RESULT_PATH_SEPARATOR = "/";
+  public static final String EDITOR_EXPERIMENT_PATH = "uk.co.saiman.msapex.editor.experiment.path";
+  private static final String BUNDLE_CLASS = "bundleclass://";
+  private static final String BUNDLE_CLASS_SEPARATOR = "/";
 
   private final Map<String, MPart> editorParts = new LinkedHashMap<>();
 
@@ -70,8 +66,6 @@ public class ResultEditorAddon implements EditorProvider {
   private MApplication application;
   @Inject
   private Workspace workspace;
-  @Inject
-  private Adapter adapter;
   @Inject
   private MAddon addon;
   @Inject
@@ -109,18 +103,35 @@ public class ResultEditorAddon implements EditorProvider {
 
   @Override
   public boolean isEditorApplicable(String editorId, Object resource) {
-    System.out.println(" isEditorApplicable? " + editorId + " for " + resource);
-
     MPart part = editorParts.get(editorId);
-    Result<?> result = adapter.adapt(resource, Result.class);
+    ExperimentNode<?, ?> experiment = (ExperimentNode<?, ?>) resource;
 
-    if (part != null && result != null) {
+    if (part != null && experiment != null) {
       String classLocation = part.getPersistedState().get(EDITOR_RESULT_CLASS);
 
-      if (classLocation.startsWith("bundleclass://")) {
-        System.out.println(classLocation);
-        Class<?> editorClass = null; // TODO new URI(classLocation);
-        return result.getType().isAssignableTo(editorClass);
+      if (classLocation.startsWith(BUNDLE_CLASS)) {
+        String[] classLocationElements = classLocation
+            .substring(BUNDLE_CLASS.length())
+            .split(BUNDLE_CLASS_SEPARATOR);
+
+        if (classLocationElements.length == 2) {
+          /*
+           * If it is a superclass then we'll be able to find it from the same class
+           * loader.
+           */
+          ClassLoader classLoader = experiment
+              .getResult()
+              .getType()
+              .getErasedType()
+              .getClassLoader();
+
+          if (classLoader != null) {
+            try {
+              Class<?> superClass = classLoader.loadClass(classLocationElements[1]);
+              return experiment.getResult().getType().isAssignableTo(superClass);
+            } catch (ClassNotFoundException e) {}
+          }
+        }
       }
     }
     return false;
@@ -131,41 +142,23 @@ public class ResultEditorAddon implements EditorProvider {
     return (MPart) modelService.cloneSnippet(application, ID, null);
   }
 
+  public Object loadEditorResource(MPart part) {
+    String pathString = part.getPersistedState().get(EDITOR_EXPERIMENT_PATH);
+    return ExperimentPath.fromString(pathString).resolve(workspace);
+  }
+
   @Override
-  public Result<?> initializeEditorPart(MPart part, Object resource) {
-    Result<?> result;
-    Map<String, String> state = part.getPersistedState();
-    if (resource == null) {
-      String path = state.get(EDITOR_RESULT_PATH);
-      String[] pathComponents = path.split(EDITOR_RESULT_PATH_SEPARATOR);
-      Optional<? extends ExperimentNode<?, ?>> node = workspace.getExperiment(pathComponents[0]);
-      for (int i = 1; i < pathComponents.length; i++) {
-        String pathItem = pathComponents[i];
-        node = node.flatMap(e -> e.getChild(pathItem));
-      }
-      result = node
-          .orElseThrow(() -> new ExperimentException(text.exception().experimentDoesNotExist(path)))
-          .getResult();
-      System.out.println("   RESULT: " + result);
-    } else {
-      result = adapter.adapt(resource, Result.class);
-      state.put(
-          EDITOR_RESULT_PATH,
-          StreamUtilities
-              .<ExperimentNode<?, ?>>iterateOptional(
-                  result.getExperimentNode(),
-                  ExperimentNode::getParent)
-              .map(ExperimentNode::getId)
-              .collect(joining(EDITOR_RESULT_PATH_SEPARATOR)));
-    }
+  public void initializeEditorPart(MPart part, Object resource) {
+    ExperimentNode<?, ?> experiment;
+    experiment = (ExperimentNode<?, ?>) resource;
+    part.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(experiment).toString());
 
     // inject result and result data changes into context
-    part.getContext().set(Result.class, result);
-    Class<?> resultType = result.getType().getErasedType();
-    result.observe(o -> System.out.println("o " + o + " == " + result.tryGet().orElse(null)));
+    part.getContext().set(ExperimentNode.class, experiment);
+    Result<?> result = experiment.getResult();
+    part.getContext().set(Result.class, experiment.getResult());
+    Class<?> resultType = experiment.getResult().getType().getErasedType();
     result
         .observe(o -> part.getContext().modify(resultType.getName(), result.tryGet().orElse(null)));
-
-    return result;
   }
 }

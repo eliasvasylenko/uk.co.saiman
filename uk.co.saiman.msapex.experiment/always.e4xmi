@@ -15,7 +15,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_H5pqEKqSEees7YDco-lLaA" featurename="addons" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="application:Addon" xmi:id="_KwIH8KqSEees7YDco-lLaA" elementId="uk.co.saiman.msapex.experiment.addon.workspace" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.WorkspaceAddon"/>
-    <elements xsi:type="application:Addon" xmi:id="_apWEa22hn5zDDThfd46eZZ" elementId="uk.co.saiman.msapex.experiment.addon.editor.result" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ResultEditorAddon"/>
+    <elements xsi:type="application:Addon" xmi:id="_apWEa22hn5zDDThfd46eZZ" elementId="uk.co.saiman.msapex.experiment.addon.editor.experiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentEditorAddon"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="menu:PopupMenu" xmi:id="_Pdgl4LshEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.popupmenu.node" label="Add Node">

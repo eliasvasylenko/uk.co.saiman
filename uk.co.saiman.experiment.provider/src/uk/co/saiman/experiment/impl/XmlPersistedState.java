@@ -103,12 +103,14 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
   protected void save(Element parent) {
     Element configuration = parent.getOwnerDocument().createElement(CONFIGURATION_ELEMENT);
     parent.appendChild(configuration);
+    saveInline(configuration);
   }
 
   protected void saveInline(Element configuration) {
     getStrings().forEach(id -> {
-      Element element = configuration.getOwnerDocument().createElement(
-          CONFIGURATION_STRING_ELEMENT);
+      Element element = configuration
+          .getOwnerDocument()
+          .createElement(CONFIGURATION_STRING_ELEMENT);
       configuration.appendChild(element);
       element.setAttribute(CONFIGURATION_ID_ATTRIBUTE, id);
       element.setTextContent(forString(id).get());
@@ -127,8 +129,9 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
     getMapLists().forEach(id -> {
       XmlPersistedStateList mapList = mapLists.get(id);
       if (mapList != null && !mapList.isEmpty()) {
-        Element element = configuration.getOwnerDocument().createElement(
-            CONFIGURATION_MAP_LIST_ELEMENT);
+        Element element = configuration
+            .getOwnerDocument()
+            .createElement(CONFIGURATION_MAP_LIST_ELEMENT);
         configuration.appendChild(element);
         element.setAttribute(CONFIGURATION_ID_ATTRIBUTE, id);
         mapList.save(element);

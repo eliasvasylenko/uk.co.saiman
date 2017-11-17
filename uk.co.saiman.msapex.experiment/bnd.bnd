@@ -30,7 +30,8 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 \
-	javax.measure.unit-api
+	javax.measure.unit-api,\
+	org.eclipse.emf.common
 
 #Private-Package: \
 #	uk.co.saiman.msapex.experiment,\

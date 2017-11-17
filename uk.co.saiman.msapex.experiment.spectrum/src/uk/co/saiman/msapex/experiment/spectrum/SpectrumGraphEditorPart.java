@@ -43,7 +43,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.eclipse.Localize;
-import uk.co.saiman.experiment.Result;
+import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
@@ -67,12 +67,12 @@ public class SpectrumGraphEditorPart {
       BorderPane container,
       @LocalInstance FXMLLoader loaderProvider,
       IEclipseContext context,
-      Result<Spectrum> result) {
+      ExperimentNode<?, Spectrum> result) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
     System.out.println("[SGEP] result! " + result);
 
-    spectrumGraphController.addSeries(result.map(Spectrum::getRawData));
+    spectrumGraphController.addSeries(result.getResult().map(Spectrum::getRawData));
   }
 
   @FXML

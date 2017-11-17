@@ -60,7 +60,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   public SaintSpectrumConfiguration createState(
       ConfigurationContext<SaintSpectrumConfiguration> context) {
     SaintSpectrumConfiguration configuration = new SaintSpectrumConfiguration() {
-      private String name;
+      private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
 
       @Override
       public void setSpectrumName(String name) {
@@ -78,7 +78,6 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
         return acquisitionDevice;
       }
     };
-    configuration.setSpectrumName("test-" + new Random().nextInt(Integer.MAX_VALUE));
     return configuration;
   }
 

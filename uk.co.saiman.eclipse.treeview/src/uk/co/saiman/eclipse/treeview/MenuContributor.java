@@ -67,45 +67,29 @@ public class MenuContributor {
   @Inject
   MApplication application;
 
-  private String menuId;
-  private ContextMenu menu;
-
-  protected ContextMenu createMenu(String menuId) {
+  public Contributor forMenu(String menuId) {
     Control menuControl = new Control() {};
 
     MMenu menu = (MMenu) modelService.cloneSnippet(application, menuId, null);
     part.getMenus().add(menu);
 
-    if (menuService.registerContextMenu(menuControl, menuId)) {
-      ContextMenu contextMenu = menuControl.getContextMenu();
-      contextMenu.addEventHandler(KeyEvent.ANY, Event::consume);
-      return contextMenu;
-    } else {
+    if (!menuService.registerContextMenu(menuControl, menuId)) {
       throw new RuntimeException("Unable to register tree cell context menu " + menuId);
     }
-  }
 
-  public Node configureCell(String menuId, Node content) {
-    ContextMenu menu;
-    synchronized (this) {
-      if (this.menuId != menuId) {
-        menu = createMenu(menuId);
+    ContextMenu contextMenu = menuControl.getContextMenu();
+    contextMenu.addEventHandler(KeyEvent.ANY, Event::consume);
 
-        this.menuId = menuId;
-        this.menu = menu;
-      } else {
-        menu = this.menu;
-      }
-    }
+    return (Node content) -> {
+      content.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+        contextMenu.show(content, event.getScreenX(), event.getScreenY());
+        event.consume();
+      });
+      content.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+        contextMenu.hide();
+      });
 
-    content.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-      menu.show(content, event.getScreenX(), event.getScreenY());
-      event.consume();
-    });
-    content.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
-      menu.hide();
-    });
-
-    return content;
+      return content;
+    };
   }
 }

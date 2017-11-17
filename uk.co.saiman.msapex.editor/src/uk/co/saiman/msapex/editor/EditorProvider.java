@@ -30,6 +30,7 @@ package uk.co.saiman.msapex.editor;
 import java.util.stream.Stream;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.MContribution;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
 import uk.co.saiman.msapex.editor.impl.EditorAddon;
@@ -63,8 +64,8 @@ public interface EditorProvider {
    *          the ID of the editor
    * @param resource
    *          the object to edit
-   * @return true if the editor with the given part ID is applicable to the
-   *         given resource
+   * @return true if the editor with the given part ID is applicable to the given
+   *         resource
    */
   boolean isEditorApplicable(String editorId, Object resource);
 
@@ -83,21 +84,31 @@ public interface EditorProvider {
   MPart createEditorPart(String ID);
 
   /**
+   * Load the resource for a persisted editor.
+   * 
+   * @param part
+   *          the editor part which has been persisted and loaded into the
+   *          application model
+   * @return a reference to the editing resource loaded from the persisted state
+   */
+  Object loadEditorResource(MPart part);
+
+  /**
    * Initialize an editor part for the given resource.
    * <p>
    * The management system is guaranteed to only invoke this method for a part
-   * which has been {@link #createEditorPart(String) created via an id} which
-   * has been {@link #isEditorApplicable(String, Object) verified to be
-   * compatible} with the given resource.
+   * which has been {@link #createEditorPart(String) created via an id} which has
+   * been {@link #getCompatibleResource(String, Object) verified to be compatible}
+   * with the given resource.
+   * <p>
+   * It is also guaranteed that this method will be invoked after the part's
+   * {@link IEclipseContext context} has been initialized, but before the part's
+   * {@link MContribution#getContributionURI() contribution} has been created.
    * 
    * @param part
    *          the editor part which is being entered into the application model
    * @param resource
-   *          the object to edit, or null if the part has been persisted and
-   *          re-loaded
-   * @return A reference to the editing resource. This may be adapted from the
-   *         given resource or loaded from a persisted state if no resource was
-   *         given.
+   *          the object to edit
    */
-  Object initializeEditorPart(MPart part, Object resource);
+  void initializeEditorPart(MPart part, Object resource);
 }

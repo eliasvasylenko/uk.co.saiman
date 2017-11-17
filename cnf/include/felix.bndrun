@@ -9,4 +9,5 @@
 	${req;osgi.enroute.webconsole.xray.provider},\
 	${req;org.apache.felix.webconsole},\
 	${req;org.apache.felix.http.jetty},\
-	${req;uk.co.saiman.jetty.logger}
+	${req;uk.co.saiman.jetty.logger},\
+	${req;org.apache.felix.webconsole.plugins.ds}

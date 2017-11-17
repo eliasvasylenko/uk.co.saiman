@@ -123,15 +123,13 @@ public class FileEditorAddon implements EditorProvider {
   }
 
   @Override
-  public Path initializeEditorPart(MPart part, Object resource) {
-    Path path;
-    Map<String, String> state = part.getPersistedState();
-    if (resource == null) {
-      path = Paths.get(state.get(EDITOR_FILE_NAME));
-    } else {
-      path = adapter.adapt(resource, Path.class);
-      state.put(EDITOR_FILE_NAME, path.toString());
-    }
-    return path;
+  public Object loadEditorResource(MPart part) {
+    return Paths.get(part.getPersistedState().get(EDITOR_FILE_NAME));
+  }
+
+  @Override
+  public void initializeEditorPart(MPart part, Object resource) {
+    Path path = adapter.adapt(resource, Path.class);
+    part.getPersistedState().put(EDITOR_FILE_NAME, path.toString());
   }
 }

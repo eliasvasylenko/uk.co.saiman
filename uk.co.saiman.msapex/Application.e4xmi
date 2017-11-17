@@ -8,6 +8,7 @@
           <children xsi:type="basic:PartSashContainer" xmi:id="_bVxEAHfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partsashcontainer.1" containerData="0.78">
             <children xsi:type="basic:PartStack" xmi:id="_cpNB0HfZEeW4bozxYcFcjw" elementId="uk.co.saiman.msapex.partstack.editor" containerData="0.5">
               <tags>uk.co.saiman.msapex.partstack.editor</tags>
+              <tags>NoAutoCollapse</tags>
             </children>
             <children xsi:type="basic:PartStack" xmi:id="_td12UISsEea6IqETRGT-CQ" elementId="uk.co.saiman.msapex.partstack.status" containerData="0.5"/>
           </children>

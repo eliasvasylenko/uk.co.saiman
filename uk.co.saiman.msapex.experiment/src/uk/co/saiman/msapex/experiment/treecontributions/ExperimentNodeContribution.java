@@ -32,6 +32,7 @@ import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSuppl
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.ui.di.AboutToShow;
@@ -44,11 +45,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.treeview.ActionContributor;
+import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.MenuContributor;
+import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.msapex.editor.EditorPrototype;
+import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.reflection.token.TypedReference;
 
 /**
@@ -63,11 +69,19 @@ public class ExperimentNodeContribution implements TreeContribution {
   private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
 
   @Inject
-  MenuContributor menuContributor;
-
-  @Inject
   @Localize
   ExperimentProperties text;
+
+  @Inject
+  EditorService editorService;
+
+  private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
+  private Contributor menuContributor;
+
+  @PostConstruct
+  public void initialize(MenuContributor menuContributor) {
+    this.menuContributor = menuContributor.forMenu(EXPERIMENT_TREE_POPUP_MENU);
+  }
 
   @AboutToShow
   public void prepare(
@@ -93,16 +107,31 @@ public class ExperimentNodeContribution implements TreeContribution {
     /*
      * label to show lifecycle state icon
      */
-    entry.data().lifecycleState().changes().weakReference(entry).observe(
-        m -> m.owner().refresh(false));
+    entry
+        .data()
+        .lifecycleState()
+        .changes()
+        .weakReference(entry)
+        .observe(m -> m.owner().refresh(false));
     Label lifecycleIndicator = new Label();
-    configurePseudoClass(lifecycleIndicator, entry.data().lifecycleState().get().toString());
+    new PseudoClassContributor(entry.data().lifecycleState().get().toString())
+        .configureCell(lifecycleIndicator);
     node.getChildren().add(lifecycleIndicator);
 
     /*
      * add popup menu
      */
-    menuContributor.configureCell(EXPERIMENT_TREE_POPUP_MENU, node);
+    menuContributor.configureCell(node);
+
+    /*
+     * add editor open if applicable
+     */
+    ActionContributor action = n -> editorService
+        .getApplicableEditors(entry.data())
+        .findFirst()
+        .map(EditorPrototype::showPart)
+        .isPresent();
+    action.configureCell(node);
 
     /*
      * add children
@@ -112,6 +141,6 @@ public class ExperimentNodeContribution implements TreeContribution {
     /*
      * pseudo class
      */
-    configurePseudoClass(node);
+    pseudoClass.configureCell(node);
   }
 }

@@ -39,6 +39,8 @@ import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.treeview.Contributor;
+import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.Experiment;
@@ -55,11 +57,13 @@ public class ExperimentContribution implements TreeContribution {
   @Localize
   ExperimentProperties text;
 
+  private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
+
   @AboutToShow
   public void prepare(HBox node, TreeEntry<Experiment> entry) {
     setLabel(node, entry.data().getState().getName());
     setSupplemental(node, "[" + text.lifecycleState(entry.data().lifecycleState().get()) + "]");
 
-    configurePseudoClass(node);
+    pseudoClass.configureCell(node);
   }
 }

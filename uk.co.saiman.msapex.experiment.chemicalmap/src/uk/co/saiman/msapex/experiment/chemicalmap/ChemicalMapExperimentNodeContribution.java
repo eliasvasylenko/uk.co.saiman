@@ -30,15 +30,14 @@ package uk.co.saiman.msapex.experiment.chemicalmap;
 import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setLabel;
 import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
 
-import javax.inject.Inject;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.treeview.MenuContributor;
+import uk.co.saiman.eclipse.treeview.Contributor;
+import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
@@ -46,10 +45,7 @@ import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
 
 @Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
 public class ChemicalMapExperimentNodeContribution implements TreeContribution {
-  static final String OPEN_COMMAND = "uk.co.saiman.msapex.command.open";
-
-  @Inject
-  MenuContributor menuContributor;
+  private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
   @AboutToShow
   public void prepare(
@@ -58,8 +54,6 @@ public class ChemicalMapExperimentNodeContribution implements TreeContribution {
     setLabel(node, data.data().getType().getName());
     setSupplemental(node, data.data().getState().getChemicalMapName());
 
-    configurePseudoClass(node);
-
-    menuContributor.configureCell(OPEN_COMMAND, node);
+    pseudoClass.configureCell(node);
   }
 }

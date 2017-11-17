@@ -27,22 +27,42 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
+import javafx.scene.Node;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+
 /**
- * This is a marker interface for OSGi services to signify an injectable
- * {@link ModularTreeView} contribution. Services with higher service rankings
- * are applied later so that they can choose to override other contributions.
+ * A tree cell contribution intended to be supplied via {@link TreeContribution}
+ * so as to be injected according to an eclipse context.
  * <p>
- * Implementations which have fields injected should be registered as prototype
- * scope services, as if an instance is shared each tree will re-inject from
- * their own context.
- * <P>
- * TODO If this system is eventually migrated to an e4 model based definition,
- * this will probably be deprecated. It's function is only to allow OSGi-DS to
- * wire up the contributions to trees in the meantime. In such a hypothetical
- * system, ordering between contributions would probably be achieved by some
- * sort of "before:id" "after:id" type system as used by many other types of
- * model element, instead of service ranking.
+ * This contribution registers an E4 command to the cell, which can be activated
+ * via double click or the enter key.
  * 
  * @author Elias N Vasylenko
  */
-public interface TreeContribution {}
+public interface ActionContributor extends Contributor {
+  @Override
+  default Node configureCell(Node content) {
+    content.addEventHandler(MouseEvent.ANY, event -> {
+      if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
+        if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED) && performAction(content)) {
+          event.consume();
+        }
+      }
+    });
+
+    content.addEventHandler(KeyEvent.ANY, event -> {
+      if (event.getCode() == KeyCode.ENTER) {
+        if (event.getEventType().equals(KeyEvent.KEY_PRESSED) && performAction(content)) {
+          event.consume();
+        }
+      }
+    });
+
+    return content;
+  }
+
+  boolean performAction(Node content);
+}
