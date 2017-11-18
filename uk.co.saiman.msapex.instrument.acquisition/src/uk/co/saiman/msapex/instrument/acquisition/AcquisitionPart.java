@@ -53,7 +53,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionProperties;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;

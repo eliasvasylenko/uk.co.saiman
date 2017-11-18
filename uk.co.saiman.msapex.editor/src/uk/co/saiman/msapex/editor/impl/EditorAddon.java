@@ -28,11 +28,13 @@
 package uk.co.saiman.msapex.editor.impl;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
+import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_TOBERENDERED;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -53,9 +56,9 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
-import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
@@ -68,20 +71,20 @@ import uk.co.saiman.msapex.editor.EditorPrototype;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
-public class EditorAddon {
+public class EditorAddon implements EditorService {
   private static final String PART_STACK_ID = "uk.co.saiman.msapex.partstack.editor";
   public static final String PROVIDER_ID = "uk.co.saiman.msapex.editor.provider";
-
-  @Inject
-  private EPartService partService;
 
   @Inject
   private MApplication application;
   @Inject
   private EModelService modelService;
-
+  @Inject
+  private EPartService partService;
   @Inject
   private Log log;
+
+  private final Set<EditorDescriptor> editorPrecedence = new LinkedHashSet<>();
 
   private final Map<String, List<MPart>> orphanedEditors = new HashMap<>();
   private final Map<String, EditorProvider> editorProviders = new LinkedHashMap<>();
@@ -89,72 +92,25 @@ public class EditorAddon {
   private final Map<MPart, Object> partResources = new HashMap<>();
   private final Map<Object, MPart> resourceParts = new HashMap<>();
 
-  private final Set<EditorDescriptor> editorPrecedence = new LinkedHashSet<>();
-
   @PostConstruct
   void initialize(IEclipseContext context) {
-    System.out.println("init editor addon");
+    List<MPart> persistedParts = modelService.findElements(
+        application,
+        MPart.class,
+        EModelService.ANYWHERE,
+        part -> isEditor((MPart) part));
 
-    List<MPart> persistedParts = modelService
-        .findElements(
-            application,
-            MPart.class,
-            EModelService.ANYWHERE,
-            e -> e.getPersistedState().containsKey(PROVIDER_ID));
     persistedParts.forEach(part -> {
       String provider = part.getPersistedState().get(PROVIDER_ID);
       orphanedEditors.computeIfAbsent(provider, k -> new ArrayList<>()).add(part);
     });
 
-    context.set(EditorService.class, new EditorService() {
-      @Override
-      public Stream<EditorPrototype> getApplicableEditors(Object resource) {
-        List<EditorDescriptor> existingPrecedence = new ArrayList<>(editorPrecedence);
-
-        /*
-         * TODO deal with precedence
-         */
-
-        return getEditors()
-            .filter(e -> e.isApplicable(resource))
-            .map(e -> e.getPrototype(resource));
-      }
-
-      @Override
-      public Stream<EditorDescriptor> getEditors() {
-        return editorProviders
-            .values()
-            .stream()
-            .flatMap(e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
-      }
-
-      @Override
-      public void registerProvider(EditorProvider provider) {
-        editorProviders.put(provider.getId(), provider);
-        System.out.println("load orphans: " + provider.getId());
-        List<MPart> orphans = orphanedEditors.remove(provider.getId());
-        for (MPart part : orphans) {
-          Object resource = provider.loadEditorResource(part);
-          partResources.put(part, resource);
-          resourceParts.put(resource, part);
-        }
-      }
-
-      @Override
-      public void unregisterProvider(EditorProvider provider) {
-        editorProviders.remove(provider.getId());
-      }
-    });
-  }
-
-  protected void removeEditor(MCompositePart controller) {
-    resourceParts.remove(partResources.remove(controller));
+    context.set(EditorService.class, this);
   }
 
   protected <T> MPart createEditor(EditorDescriptor descriptor, Object data) {
     MPart editorPart = descriptor.getProvider().createEditorPart(descriptor.getPartId());
 
-    editorPart.setDirty(true);
     editorPart.setCloseable(true);
     editorPart.getPersistedState().put(PROVIDER_ID, descriptor.getProvider().getId());
 
@@ -168,15 +124,25 @@ public class EditorAddon {
   }
 
   /**
-   * Watch for context creation events so we can inject into the part contexts
-   * before the UI is created.
-   * 
-   * @param event
-   *          the event which may be a context creation event
+   * Watch for part close events so we can clean up after the editors.
    */
   @Inject
   @Optional
-  private synchronized void initializeEditorContext(@UIEventTopic(TOPIC_CONTEXT) Event event) {
+  private synchronized void partCloseListener(@UIEventTopic(TOPIC_TOBERENDERED) Event event) {
+    Object part = event.getProperty(UIEvents.EventTags.ELEMENT);
+    boolean toBeRendered = (Boolean) event.getProperty(UIEvents.EventTags.NEW_VALUE);
+    if (part instanceof MPart && !toBeRendered && isEditor((MPart) part)) {
+      resourceParts.remove(partResources.remove(part));
+    }
+  }
+
+  /**
+   * Watch for context creation events so we can inject into the part contexts
+   * before the UI is created.
+   */
+  @Inject
+  @Optional
+  private synchronized void partContextListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
     try {
       Object value = event.getProperty(NEW_VALUE);
       if (event.getProperty(ELEMENT) instanceof MHandlerContainer
@@ -186,11 +152,9 @@ public class EditorAddon {
         MPart part = context.get(MPart.class);
         MPart parentPart = context.getParent().get(MPart.class);
 
-        if (part != null && part.getPersistedState().containsKey(PROVIDER_ID)) {
-          Object resource = partResources.get(part);
-          EditorProvider provider = editorProviders.get(part.getPersistedState().get(PROVIDER_ID));
-          provider.initializeEditorPart(part, resource);
-        } else if (parentPart != null && parentPart.getPersistedState().containsKey(PROVIDER_ID)) {
+        if (isEditor(part)) {
+          prepareEditorPartContext(part);
+        } else if (isEditor(parentPart)) {
           prepareEditorChildPartContext(context);
         }
       }
@@ -199,12 +163,61 @@ public class EditorAddon {
     }
   }
 
+  private void prepareEditorPartContext(MPart part) {
+    Object resource = partResources.get(part);
+    EditorProvider provider = editorProviders.get(part.getPersistedState().get(PROVIDER_ID));
+    provider.initializeEditorPart(part, resource);
+  }
+
   private void prepareEditorChildPartContext(IEclipseContext context) {
     /*
      * We don't want the child part to dirty itself, we want it to dirty the
      * container.
      */
     context.set(MDirtyable.class, context.getParent().get(MDirtyable.class));
+  }
+
+  @Override
+  public Stream<EditorPrototype> getApplicableEditors(Object resource) {
+    List<EditorDescriptor> existingPrecedence = new ArrayList<>(editorPrecedence);
+
+    /*
+     * TODO deal with precedence
+     */
+
+    return getEditors().filter(e -> e.isApplicable(resource)).map(e -> e.getPrototype(resource));
+  }
+
+  @Override
+  public Stream<EditorDescriptor> getEditors() {
+    return editorProviders.values().stream().flatMap(
+        e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
+  }
+
+  @Override
+  public void registerProvider(EditorProvider provider) {
+    editorProviders.put(provider.getId(), provider);
+    List<MPart> orphans = orphanedEditors.remove(provider.getId());
+    for (MPart part : orphans) {
+      Object resource = provider.loadEditorResource(part);
+      partResources.put(part, resource);
+      resourceParts.put(resource, part);
+    }
+  }
+
+  @Override
+  public void unregisterProvider(EditorProvider provider) {
+    editorProviders.remove(provider.getId());
+  }
+
+  @Override
+  public boolean isEditor(MPart part) {
+    return part != null && part.getPersistedState().containsKey(PROVIDER_ID);
+  }
+
+  @Override
+  public Object getResource(MPart part) {
+    return partResources.get(part);
   }
 
   public class EditorDescriptorImpl implements EditorDescriptor {
@@ -280,7 +293,7 @@ public class EditorAddon {
     }
 
     @Override
-    public MPart showPart() {
+    public MPart openEditor() {
       /*
        * TODO this should only move the editor preference before other editors which
        * were actually applicable to the resource!!!

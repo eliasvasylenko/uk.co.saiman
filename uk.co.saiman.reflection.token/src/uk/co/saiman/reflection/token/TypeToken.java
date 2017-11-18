@@ -426,7 +426,6 @@ public class TypeToken<T> {
   @SuppressWarnings({ "unchecked", "javadoc" })
   public TypeToken<? super T> resolveSupertype(Class<?> superclass) {
     TypeToken<?> superType = forType(new TypeHierarchy(getType()).resolveSupertype(superclass));
-
     return (TypeToken<? super T>) superType;
   }
 

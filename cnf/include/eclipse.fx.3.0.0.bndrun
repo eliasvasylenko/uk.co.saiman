@@ -8,19 +8,19 @@
 
 ## Run requirement groups:
 -runrequires.eclipse.fx:\
-	${req;org.eclipse.fx.ui.databinding},\
-	${req;org.eclipse.fx.ui.di},\
-	${req;org.eclipse.fx.ui.di.interopt},\
-	${req;org.eclipse.fx.ui.keybindings.e4},\
-	${req;org.eclipse.fx.ui.keybindings.generic},\
-	${req;org.eclipse.fx.ui.workbench.fx},\
-	${req;org.eclipse.fx.ui.workbench.renderers.fx},\
-	${req;org.eclipse.fx.core},\
-	${req;org.eclipse.fx.core.di},\
-	${req;org.eclipse.fx.core.di.context}
+	bnd.identity; id=org.eclipse.fx.ui.databinding,\
+	bnd.identity; id=org.eclipse.fx.ui.di,\
+	bnd.identity; id=org.eclipse.fx.ui.di.interopt,\
+	bnd.identity; id=org.eclipse.fx.ui.keybindings.e4,\
+	bnd.identity; id=org.eclipse.fx.ui.keybindings.generic,\
+	bnd.identity; id=org.eclipse.fx.ui.workbench.fx,\
+	bnd.identity; id=org.eclipse.fx.ui.workbench.renderers.fx,\
+	bnd.identity; id=org.eclipse.fx.core,\
+	bnd.identity; id=org.eclipse.fx.core.di,\
+	bnd.identity; id=org.eclipse.fx.core.di.context
 
 -runrequires.eclipse.fx.p2:\
-	${req;org.eclipse.fx.core.p2}
+	bnd.identity; id=org.eclipse.fx.core.p2
 
 ## Run properties groups:
 -runproperties.eclipse.fx:\

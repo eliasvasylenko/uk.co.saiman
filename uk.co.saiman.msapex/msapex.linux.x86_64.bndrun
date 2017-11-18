@@ -6,7 +6,28 @@ runplatform: linux64
 	osgi.os=linux,\
 	osgi.arch=x86_64
 
+should-be-first-in-runbundles-to-fix-some-startup-problems: \
+	org.apache.felix.log;version='[1.0.1,1.0.2)',\
+	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
+	org.apache.felix.configadmin;version='[1.8.16,1.8.17)',\
+	uk.co.saiman.configadmin.persistence;version=snapshot,\
+	org.eclipse.osgi.services;version='[3.6.0,3.6.1)',\
+	org.eclipse.equinox.metatype;version='[1.4.300,1.4.301)',\
+	osgi.enroute.logger.simple.provider;version='[2.1.0,2.1.1)',\
+	uk.co.saiman.jetty.logger;version=snapshot,\
+	uk.co.saiman.log.provider;version=snapshot,\
+
 -runbundles: \
+	org.apache.felix.log;version='[1.0.1,1.0.2)',\
+	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
+	org.apache.felix.configadmin;version='[1.8.16,1.8.17)',\
+	uk.co.saiman.configadmin.persistence;version=snapshot,\
+	org.eclipse.osgi.services;version='[3.6.0,3.6.1)',\
+	org.eclipse.equinox.metatype;version='[1.4.300,1.4.301)',\
+	osgi.enroute.logger.simple.provider;version='[2.1.0,2.1.1)',\
+	uk.co.saiman.jetty.logger;version=snapshot,\
+	uk.co.saiman.log.provider;version=snapshot,\
+\
 	bndtools.runtime.eclipse.applaunch;version='[0.1.0,0.1.1)',\
 	com.google.guava;version='[21.0.0,21.0.1)',\
 	com.ibm.icu;version='[58.2.0,58.2.1)',\
@@ -16,15 +37,14 @@ runplatform: linux64
 	org.apache.commons.io;version='[2.5.0,2.5.1)',\
 	org.apache.commons.jxpath;version='[1.3.0,1.3.1)',\
 	org.apache.commons.lang;version='[2.6.0,2.6.1)',\
-	org.apache.felix.configadmin;version='[1.8.14,1.8.15)',\
 	org.apache.felix.gogo.command;version='[0.16.0,0.16.1)',\
 	org.apache.felix.gogo.runtime;version='[0.16.2,0.16.3)',\
 	org.apache.felix.gogo.shell;version='[0.10.0,0.10.1)',\
 	org.apache.felix.http.jetty;version='[3.2.0,3.2.1)',\
 	org.apache.felix.http.servlet-api;version='[1.1.2,1.1.3)',\
-	org.apache.felix.log;version='[1.0.1,1.0.2)',\
-	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
+	org.apache.felix.inventory;version='[1.0.4,1.0.5)',\
 	org.apache.felix.webconsole;version='[4.3.0,4.3.1)',\
+	org.apache.felix.webconsole.plugins.ds;version='[2.0.8,2.0.9)',\
 	org.eclipse.core.commands;version='[3.9.0,3.9.1)',\
 	org.eclipse.core.contenttype;version='[3.6.0,3.6.1)',\
 	org.eclipse.core.databinding;version='[1.6.100,1.6.101)',\
@@ -63,7 +83,7 @@ runplatform: linux64
 	org.eclipse.equinox.coordinator;version='[1.3.300,1.3.301)',\
 	org.eclipse.equinox.event;version='[1.4.0,1.4.1)',\
 	org.eclipse.equinox.launcher;version='[1.4.0,1.4.1)',\
-	org.eclipse.equinox.launcher.gtk.linux.x86_64;version='[1.1.500,1.1.501)',\
+	org.eclipse.equinox.launcher.gtk.linux.x86_64;version='[1.1.550,1.1.551)',\
 	org.eclipse.equinox.p2.core;version='[2.4.100,2.4.101)',\
 	org.eclipse.equinox.p2.director;version='[2.3.300,2.3.301)',\
 	org.eclipse.equinox.p2.engine;version='[2.5.0,2.5.1)',\
@@ -98,7 +118,6 @@ runplatform: linux64
 	org.eclipse.fx.ui.workbench.renderers.base;version='[3.1.0,3.1.1)',\
 	org.eclipse.fx.ui.workbench.renderers.fx;version='[3.1.0,3.1.1)',\
 	org.eclipse.fx.ui.workbench.services;version='[3.1.0,3.1.1)',\
-	org.eclipse.osgi.services;version='[3.6.0,3.6.1)',\
 	org.eclipse.rap.jface;version='[3.3.0,3.3.1)',\
 	org.eclipse.rap.rwt;version='[3.3.0,3.3.1)',\
 	org.eclipse.swt;version='[3.106.0,3.106.1)',\
@@ -106,13 +125,12 @@ runplatform: linux64
 	org.sat4j.pb;version='[2.3.5,2.3.6)',\
 	org.tukaani.xz;version='[1.5.0,1.5.1)',\
 	osgi.enroute.bostock.d3.webresource;version='[3.5.6,3.5.7)',\
-	osgi.enroute.configurer.simple.provider;version='[2.0.0,2.0.1)',\
-	osgi.enroute.dtos.bndlib.provider;version='[2.0.0,2.0.1)',\
-	osgi.enroute.executor.simple.provider;version='[2.0.0,2.0.1)',\
-	osgi.enroute.logger.simple.provider;version='[2.0.0,2.0.1)',\
-	osgi.enroute.rest.simple.provider;version='[2.0.0,2.0.1)',\
-	osgi.enroute.web.simple.provider;version='[2.0.0,2.0.1)',\
-	osgi.enroute.webconsole.xray.provider;version='[2.0.0,2.0.1)',\
+	osgi.enroute.configurer.simple.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.dtos.bndlib.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.executor.simple.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.rest.simple.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.web.simple.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.webconsole.xray.provider;version='[2.1.0,2.1.1)',\
 	osgi.promise;version='[6.0.0,6.0.1)',\
 	uk.co.saiman.axios.webresource;version=snapshot,\
 	uk.co.saiman.camera;version=snapshot,\
@@ -121,7 +139,6 @@ runplatform: linux64
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
-	uk.co.saiman.configadmin.persistence;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
@@ -143,8 +160,6 @@ runplatform: linux64
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.instrument.stage.copley;version=snapshot,\
-	uk.co.saiman.jetty.logger;version=snapshot,\
-	uk.co.saiman.log.provider;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.measurement.provider;version=snapshot,\
@@ -158,8 +173,8 @@ runplatform: linux64
 	uk.co.saiman.msapex.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.msapex.instrument;version=snapshot,\
 	uk.co.saiman.msapex.instrument.acquisition;version=snapshot,\
-	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
 	uk.co.saiman.msapex.instrument.sample;version=snapshot,\
+	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
 	uk.co.saiman.msapex.simulation;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi.api;version=snapshot,\
@@ -170,8 +185,8 @@ runplatform: linux64
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.requirejs.webresource;version=snapshot,\
 	uk.co.saiman.saint.api;version=snapshot,\
-	uk.co.saiman.saint.provider;version=snapshot,\
 	uk.co.saiman.saint.msapex;version=snapshot,\
+	uk.co.saiman.saint.provider;version=snapshot,\
 	uk.co.saiman.saint.simulation;version=snapshot,\
 	uk.co.saiman.simulation.api;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\

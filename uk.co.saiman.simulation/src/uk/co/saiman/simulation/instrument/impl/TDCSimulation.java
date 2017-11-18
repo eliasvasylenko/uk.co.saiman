@@ -31,7 +31,6 @@ import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE
 
 import java.util.Random;
 
-import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
@@ -47,7 +46,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.data.function.SparseSampledContinuousFunction;
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.impl.TDCSimulation.TDCSimulationConfiguration;
@@ -66,12 +64,6 @@ public class TDCSimulation implements DetectorSimulation {
       description = "The TDC simulation provides an implementation of a detector interface simulating a time-to-digital converter")
   public @interface TDCSimulationConfiguration {
     @AttributeDefinition(
-        name = "Acquisition Resolution",
-        description = "The minimum resolvable units of time for samples")
-    String acquisitionResolution() default SimulatedAcquisitionDevice.DEFAULT_ACQUISITION_RESOLUTION_SECONDS
-        + "s";
-
-    @AttributeDefinition(
         name = "Maximum Hits Per Spectrum",
         description = "Set the maximum number of hit events per detector event")
     int maximumHitsPerSpectrum() default 10;
@@ -80,15 +72,11 @@ public class TDCSimulation implements DetectorSimulation {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.tdc";
 
   @Reference
-  Instrument instrument;
-
-  @Reference
   Units units;
 
   private int maximumHits = 10;
   private int[] hitIndices;
   private double[] hitIntensities;
-  private Quantity<Time> resolution;
 
   private final Random random = new Random();
 
@@ -96,17 +84,6 @@ public class TDCSimulation implements DetectorSimulation {
   @Modified
   void configure(TDCSimulationConfiguration configuration) {
     maximumHits = configuration.maximumHitsPerSpectrum();
-    resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(Time.class);
-  }
-
-  @Override
-  public Instrument getInstrument() {
-    return instrument;
-  }
-
-  @Override
-  public Quantity<Time> getSampleResolution() {
-    return resolution;
   }
 
   private int updateMaximumHitsPerSpectrum() {

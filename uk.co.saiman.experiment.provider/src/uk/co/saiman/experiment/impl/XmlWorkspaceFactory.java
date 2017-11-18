@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.impl;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
@@ -61,7 +63,7 @@ public class XmlWorkspaceFactory implements WorkspaceFactory {
 
   private final Set<ExperimentType<?, ?>> experimentTypes = new HashSet<>();
 
-  @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
+  @Reference(cardinality = MULTIPLE, policy = DYNAMIC, policyOption = GREEDY)
   protected void registerExperimentType(ExperimentType<?, ?> experimentType) {
     experimentTypes.add(experimentType);
   }

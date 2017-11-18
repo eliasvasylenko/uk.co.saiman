@@ -79,7 +79,7 @@ Import-Package:\
 
 ## Run requirement groups:
 -runrequires.base:\
-	osgi.identity;filter:='(&(osgi.identity=osgi.enroute.logger.simple.provider)(version>=0))'
+	bnd.identity; id=osgi.enroute.logger.simple.provider
 
 ## Build path groups:
 -buildpath.base=\

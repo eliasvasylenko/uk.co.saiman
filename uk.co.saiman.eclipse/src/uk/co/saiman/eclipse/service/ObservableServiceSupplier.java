@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse;
+package uk.co.saiman.eclipse.service;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -69,7 +69,7 @@ import uk.co.saiman.text.properties.PropertyLoader;
  */
 @Component(
     service = ExtendedObjectSupplier.class,
-    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.ObservableService")
+    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.service.ObservableService")
 public class ObservableServiceSupplier extends ExtendedObjectSupplier {
   private class ServiceUpdateListener<T> implements ServiceListener {
     private final BundleContext context;

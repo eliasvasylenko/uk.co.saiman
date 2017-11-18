@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse;
+package uk.co.saiman.eclipse.adapter;
 
 import static java.util.Collections.synchronizedMap;
 import static java.util.Objects.hash;
@@ -56,7 +56,7 @@ import uk.co.saiman.text.properties.PropertyLoader;
  */
 @Component(
     service = ExtendedObjectSupplier.class,
-    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.AdaptNamed",
+    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.adapter.AdaptNamed",
     immediate = true)
 public class AdaptingNamedObjectSupplier extends ExtendedObjectSupplier {
   class Request {

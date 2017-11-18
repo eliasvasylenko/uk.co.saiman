@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static uk.co.saiman.reflection.token.TypeToken.forType;
+
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentException;
@@ -35,6 +37,7 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.MissingExperimentType;
 import uk.co.saiman.experiment.PersistedState;
+import uk.co.saiman.reflection.token.TypeToken;
 
 public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   private final ExperimentProperties text;
@@ -76,5 +79,20 @@ public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
       ExperimentNode<?, ?> penultimateDescendantNode,
       ExperimentType<?, ?> descendantNodeType) {
     return true;
+  }
+
+  @Override
+  public TypeToken<PersistedState> getStateType() {
+    return forType(PersistedState.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public TypeToken<T> getResultType() {
+    /*
+     * TODO best effort at result type by loading any persisted result data and
+     * using the type of that.
+     */
+    return (TypeToken<T>) forType(void.class);
   }
 }

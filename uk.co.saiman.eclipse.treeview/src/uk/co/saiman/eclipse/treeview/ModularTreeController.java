@@ -44,7 +44,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import uk.co.saiman.eclipse.ObservableService;
+import uk.co.saiman.eclipse.service.ObservableService;
 import uk.co.saiman.reflection.token.TypedReference;
 
 /**

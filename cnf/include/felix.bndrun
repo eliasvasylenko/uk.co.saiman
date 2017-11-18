@@ -1,13 +1,11 @@
 -runrequires.felix.shell=\
-	${req;org.apache.felix.gogo.command},\
-	${req;org.apache.felix.gogo.runtime},\
-	${req;org.apache.felix.gogo.shell}
-
-#	${req;osgi.enroute.gogo.shell.provider} TODO this doesn't work in Windows yet...
+	bnd.identity; id=org.apache.felix.gogo.command; version='[0.16.0,0.16.1)',\
+	bnd.identity; id=org.apache.felix.gogo.runtime; version='[0.16.2,0.16.3)',\
+	bnd.identity; id=org.apache.felix.gogo.shell; version='[0.10.0,0.10.1)'
 
 -runrequires.felix.web=\
-	${req;osgi.enroute.webconsole.xray.provider},\
-	${req;org.apache.felix.webconsole},\
-	${req;org.apache.felix.http.jetty},\
-	${req;uk.co.saiman.jetty.logger},\
-	${req;org.apache.felix.webconsole.plugins.ds}
+	bnd.identity; id=osgi.enroute.webconsole.xray.provider,\
+	bnd.identity; id=org.apache.felix.webconsole,\
+	bnd.identity; id=org.apache.felix.http.jetty,\
+	bnd.identity; id=uk.co.saiman.jetty.logger,\
+	bnd.identity; id=org.apache.felix.webconsole.plugins.ds

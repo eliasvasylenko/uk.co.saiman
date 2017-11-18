@@ -53,8 +53,8 @@ import org.eclipse.fx.core.di.Service;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.eclipse.AdaptNamed;
-import uk.co.saiman.eclipse.ObservableService;
+import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.service.ObservableService;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.log.Log;
 

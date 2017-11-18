@@ -39,7 +39,7 @@ import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 
-import uk.co.saiman.eclipse.AdaptNamed;
+import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.treeview.ModularTreeItem;
 import uk.co.saiman.experiment.ExperimentNode;
 

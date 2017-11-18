@@ -52,7 +52,7 @@ import uk.co.saiman.camera.CameraConnection;
 import uk.co.saiman.camera.CameraDevice;
 import uk.co.saiman.camera.CameraImage;
 import uk.co.saiman.camera.CameraProperties;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.observable.Disposable;
 
 /**

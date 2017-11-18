@@ -14,6 +14,7 @@
       <tags>removeOnHide</tags>
       <children xsi:type="basic:PartStack" xmi:id="_xxMnsLpUEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.spectrum.partstack.editor">
         <persistedState key="fx.stack.tabslocation" value="BOTTOM"/>
+        <tags>renameOnClone</tags>
       </children>
     </elements>
   </fragments>

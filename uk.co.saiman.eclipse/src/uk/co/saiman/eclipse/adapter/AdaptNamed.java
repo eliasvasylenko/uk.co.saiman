@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse;
+package uk.co.saiman.eclipse.adapter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,30 +35,15 @@ import java.lang.annotation.Target;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
-
 /**
- * Marks an {@link Inject} field as requiring an observable view of available
- * services.
- * <p>
- * Fields annotated as such should be of one of the following types, and will
- * reflect service availability changes with the associated behaviors:
- * <ul>
- * <li>{@link ObservableList} - ordered by service ranking</li>
- * <li>{@link ObservableSet} - unordered</li>
- * <li>{@link ObservableValue} - updated to highest ranked</li>
- * </ul>
+ * Marks an {@link Inject} field as allowing an adapter from the current context
+ * to adapt to the injection target type.
  * 
  * @author Elias N Vasylenko
  */
 @Qualifier
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ObservableService {
-	/**
-	 * The target filter for the reference.
-	 */
-	String target() default "";
+public @interface AdaptNamed {
+	String value();
 }

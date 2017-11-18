@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
@@ -44,7 +45,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.ActionContributor;
 import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.MenuContributor;
@@ -78,6 +79,9 @@ public class ExperimentNodeContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
   private Contributor menuContributor;
 
+  @Inject
+  EPartService partService;
+
   @PostConstruct
   public void initialize(MenuContributor menuContributor) {
     this.menuContributor = menuContributor.forMenu(EXPERIMENT_TREE_POPUP_MENU);
@@ -107,12 +111,8 @@ public class ExperimentNodeContribution implements TreeContribution {
     /*
      * label to show lifecycle state icon
      */
-    entry
-        .data()
-        .lifecycleState()
-        .changes()
-        .weakReference(entry)
-        .observe(m -> m.owner().refresh(false));
+    entry.data().lifecycleState().changes().weakReference(entry).observe(
+        m -> m.owner().refresh(false));
     Label lifecycleIndicator = new Label();
     new PseudoClassContributor(entry.data().lifecycleState().get().toString())
         .configureCell(lifecycleIndicator);
@@ -129,7 +129,7 @@ public class ExperimentNodeContribution implements TreeContribution {
     ActionContributor action = n -> editorService
         .getApplicableEditors(entry.data())
         .findFirst()
-        .map(EditorPrototype::showPart)
+        .map(EditorPrototype::openEditor)
         .isPresent();
     action.configureCell(node);
 

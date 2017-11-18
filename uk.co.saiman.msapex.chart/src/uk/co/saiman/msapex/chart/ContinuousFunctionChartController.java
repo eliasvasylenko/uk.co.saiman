@@ -61,7 +61,7 @@ import javafx.scene.layout.Pane;
 import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.DataException;
 import uk.co.saiman.data.function.FunctionProperties;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.mathematics.Interval;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.observable.Observable;

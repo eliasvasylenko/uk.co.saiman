@@ -29,17 +29,23 @@ package uk.co.saiman.msapex.editor.impl;
 
 import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
+import javax.inject.Inject;
+
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
-import uk.co.saiman.eclipse.AdaptNamed;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.msapex.editor.EditorProperties;
 import uk.co.saiman.msapex.editor.EditorPrototype;
 import uk.co.saiman.msapex.editor.EditorService;
 
 public class OpenSelectionHandler {
+  @Inject
+  EPartService partService;
+
   @CanExecute
   boolean canExecute(
       EditorService editorService,
@@ -53,6 +59,7 @@ public class OpenSelectionHandler {
       EditorService editorService,
       @Localize EditorProperties text,
       @AdaptNamed(ACTIVE_SELECTION) Object selection) {
-    editorService.getApplicableEditors(selection).findFirst().ifPresent(EditorPrototype::showPart);
+    editorService.getApplicableEditors(selection).findFirst().ifPresent(
+        EditorPrototype::openEditor);
   }
 }

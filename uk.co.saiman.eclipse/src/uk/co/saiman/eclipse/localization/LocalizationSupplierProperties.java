@@ -25,48 +25,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse;
-
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
+package uk.co.saiman.eclipse.localization;
 
 /**
  * Text resource accessor for Eclipse OSGi utilities
  * 
  * @author Elias N Vasylenko
  */
-public interface ObservableServiceSupplierProperties {
+public interface LocalizationSupplierProperties {
 	/**
-	 * @return invalid type was annotated with {@link ObservableService} for service
-	 *         collection injection
+	 * @return invalid type was annotated with {@link Localize} for localization
+	 *         supplier
 	 */
 	default String illegalInjectionTarget() {
-		return illegalInjectionTarget(
-				ObservableService.class,
-				ObservableList.class,
-				ObservableSet.class,
-				ObservableValue.class);
+		return illegalInjectionTarget(Localize.class);
 	}
 
 	/**
-	 * @param observableService
-	 *          the {@link ObservableService} class for service collection injection
-	 * @param list
-	 *          an observable list in service ranking order
-	 * @param set
-	 *          an observable set in service ranking order
-	 * @param value
-	 *          an observable value of the highest ranking service
-	 * @return invalid type was annotated with {@link ObservableService} for service
-	 *         collection injection
+	 * @param localizeClass
+	 *          the {@link Localize} class for formatting
+	 * @return invalid type was annotated with {@link Localize} for localization
+	 *         supplier
 	 */
-	@SuppressWarnings("rawtypes")
-	String illegalInjectionTarget(
-			Class<ObservableService> observableService,
-			Class<ObservableList> list,
-			Class<ObservableSet> set,
-			Class<ObservableValue> value);
+	String illegalInjectionTarget(Class<Localize> localizeClass);
 
 	/**
 	 * @return an unexpected error occurred

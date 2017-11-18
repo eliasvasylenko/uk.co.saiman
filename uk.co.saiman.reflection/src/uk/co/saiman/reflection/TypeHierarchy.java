@@ -60,8 +60,8 @@ public class TypeHierarchy {
 
   /**
    * @param lowerBound
-   *          the type providing a context within which to determine the
-   *          arguments of the supertypes
+   *          the type providing a context within which to determine the arguments
+   *          of the supertypes
    */
   public TypeHierarchy(Type lowerBound) {
     this.lowerBound = lowerBound;

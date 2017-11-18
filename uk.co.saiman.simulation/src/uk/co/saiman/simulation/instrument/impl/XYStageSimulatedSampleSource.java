@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.simulation;
+package uk.co.saiman.simulation.instrument.impl;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
@@ -56,7 +56,6 @@ import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.measurement.Units;
-import uk.co.saiman.msapex.simulation.XYStageSimulatedSampleSource.XYStageSimulatedSampleSourceConfiguration;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.PassthroughObserver;
@@ -65,6 +64,7 @@ import uk.co.saiman.simulation.instrument.ImageSimulatedSampleSource;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
+import uk.co.saiman.simulation.instrument.impl.XYStageSimulatedSampleSource.XYStageSimulatedSampleSourceConfiguration;
 import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
@@ -84,7 +84,7 @@ import uk.co.saiman.text.properties.PropertyLoader;
     configurationPolicy = REQUIRE)
 public class XYStageSimulatedSampleSource
     implements ImageSimulatedSampleSource, SimulatedSampleSource, CameraDevice {
-  static final String CONFIGURATION_PID = "uk.co.saiman.msapex.simulation.samplesource.xystage";
+  static final String CONFIGURATION_PID = "uk.co.saiman.simulation.samplesource.xystage";
 
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(

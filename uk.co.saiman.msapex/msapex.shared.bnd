@@ -10,26 +10,31 @@
 	osgi.identity;filter:='(osgi.identity=javax.annotation-api)'
 
 -runrequires.msapex:\
-	${req;org.apache.felix.configadmin},\
-	${req;uk.co.saiman.msapex.chemistry},\
-	${req;uk.co.saiman.comms.saint},\
-	${req;uk.co.saiman.comms.copley},\
-	${req;uk.co.saiman.icons.fugue},\
-	${req;uk.co.saiman.msapex.instrument},\
-	${req;uk.co.saiman.msapex.instrument.acquisition},\
-	${req;uk.co.saiman.msapex.instrument.stage},\
-	${req;uk.co.saiman.msapex.instrument.sample},\
-	${req;uk.co.saiman.instrument.provider},\
-	${req;uk.co.saiman.msapex.instrument.stage},\
-	${req;uk.co.saiman.msapex},\
-	${req;uk.co.saiman.msapex.camera},\
-	${req;uk.co.saiman.msapex.simulation},\
-	${req;uk.co.saiman.msapex.experiment.spectrum},\
-	${req;uk.co.saiman.msapex.experiment.chemicalmap},\
-	${req;uk.co.saiman.simulation.provider},\
-	${req;uk.co.saiman.webconsole.branding},\
-	${req;uk.co.saiman.webconsole.webresource},\
-	${req;uk.co.saiman.configadmin.persistence}
+	bnd.identity; id=org.apache.felix.configadmin,\
+	bnd.identity; id=org.eclipse.equinox.metatype,\
+	bnd.identity; id=uk.co.saiman.comms.copley,\
+	bnd.identity; id=uk.co.saiman.comms.saint,\
+	bnd.identity; id=uk.co.saiman.configadmin.persistence,\
+	bnd.identity; id=uk.co.saiman.icons.fugue,\
+	bnd.identity; id=uk.co.saiman.instrument.provider,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.stage,\
+	bnd.identity; id=uk.co.saiman.msapex,\
+	bnd.identity; id=uk.co.saiman.msapex.camera,\
+	bnd.identity; id=uk.co.saiman.msapex.chemistry,\
+	bnd.identity; id=uk.co.saiman.msapex.experiment,\
+	bnd.identity; id=uk.co.saiman.msapex.experiment.chemicalmap,\
+	bnd.identity; id=uk.co.saiman.msapex.experiment.spectrum,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.acquisition,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.sample,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.stage,\
+	bnd.identity; id=uk.co.saiman.msapex.simulation,\
+	bnd.identity; id=uk.co.saiman.saint.msapex,\
+	bnd.identity; id=uk.co.saiman.saint.provider,\
+	bnd.identity; id=uk.co.saiman.saint.simulation,\
+	bnd.identity; id=uk.co.saiman.simulation.provider,\
+	bnd.identity; id=uk.co.saiman.webconsole.branding,\
+	bnd.identity; id=uk.co.saiman.webconsole.webresource
 
 -runvm.msapex:\
 	-Xmx1024m

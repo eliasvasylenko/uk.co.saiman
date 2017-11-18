@@ -27,14 +27,12 @@
  */
 package uk.co.saiman.simulation.instrument;
 
-import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
-import uk.co.saiman.instrument.Instrument;
 
 /**
  * A simulation of a signal function derived from a given resolution, depth, and
@@ -43,14 +41,7 @@ import uk.co.saiman.instrument.Instrument;
  * @author Elias N Vasylenko
  */
 public interface DetectorSimulation {
-  /**
-   * @return the instrument which this detector is a part of
-   */
-  Instrument getInstrument();
-
   SampledContinuousFunction<Time, Dimensionless> acquire(
       SampledDomain<Time> domain,
       Unit<Dimensionless> intensityUnits);
-
-  Quantity<Time> getSampleResolution();
 }

@@ -3,11 +3,11 @@
 	${build}/include/utilities.bnd
 
 -runrequires:\
-	${req;uk.co.saiman.comms.saint},\
-	${req;uk.co.saiman.comms.copley},\
-	${req;uk.co.saiman.utilities},\
-	${req;uk.co.saiman.webconsole},\
-	${req;uk.co.saiman.configadmin.persistence}
+	bnd.identity; id=uk.co.saiman.comms.saint,\
+	bnd.identity; id=uk.co.saiman.comms.copley,\
+	bnd.identity; id=uk.co.saiman.utilities,\
+	bnd.identity; id=uk.co.saiman.webconsole,\
+	bnd.identity; id=uk.co.saiman.configadmin.persistence
 
 -runbundles: \
 	org.apache.felix.scr;version='[2.0.2,2.0.3)',\

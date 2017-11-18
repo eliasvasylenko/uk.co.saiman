@@ -31,8 +31,8 @@ import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 
-import uk.co.saiman.eclipse.AdaptNamed;
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;

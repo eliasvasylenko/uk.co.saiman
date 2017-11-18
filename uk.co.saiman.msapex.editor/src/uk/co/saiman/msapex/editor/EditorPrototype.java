@@ -34,5 +34,5 @@ public interface EditorPrototype {
 
   Object getResource();
 
-  MPart showPart();
+  MPart openEditor();
 }

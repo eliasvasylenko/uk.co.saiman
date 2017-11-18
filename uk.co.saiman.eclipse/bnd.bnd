@@ -17,7 +17,12 @@ Bundle-Name: SAI :: Eclipse
 Bundle-Description: \
 	Classes for working with Eclipse RCP and IDE projects with JavaFX.
 
-Export-Package: uk.co.saiman.eclipse
+Export-Package: \
+	uk.co.saiman.eclipse,\
+	uk.co.saiman.eclipse.adapter,\
+	uk.co.saiman.eclipse.localization,\
+	uk.co.saiman.eclipse.model,\
+	uk.co.saiman.eclipse.service
 
 Private-Package: \
 	org.eclipse.osgi.compatibility.state,\

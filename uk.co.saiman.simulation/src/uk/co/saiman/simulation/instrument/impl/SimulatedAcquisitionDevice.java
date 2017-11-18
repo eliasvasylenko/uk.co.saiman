@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.simulation.instrument.impl;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
 import static uk.co.saiman.log.Log.Level.ERROR;
 
@@ -38,24 +39,53 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceConnection;
 import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.measurement.Units;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
+import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.AcquisitionSimulationConfiguration;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
  * Implementation of a simulation of an acquisition device.
  * 
  * @author Elias N Vasylenko
  */
-public class SimulatedAcquisitionDevice implements AcquisitionDevice {
+@Designate(ocd = AcquisitionSimulationConfiguration.class, factory = true)
+@Component(
+    configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
+public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "Simulated Acquisition Device Configuration",
+      description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
+  public @interface AcquisitionSimulationConfiguration {
+    @AttributeDefinition(
+        name = "Acquisition Resolution",
+        description = "The minimum resolvable units of time for samples")
+    String acquisitionResolution() default DEFAULT_ACQUISITION_RESOLUTION_SECONDS + "s";
+  }
+
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.instrument.acquisition";
 
   private class ExperimentConfiguration {
@@ -68,8 +98,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
 
       counter = getAcquisitionCount();
       if (counter <= 0) {
-        throw new AcquisitionException(
-            manager.getText().acquisition().exceptions().countMustBePositive());
+        throw new AcquisitionException(text.acquisition().exceptions().countMustBePositive());
       }
     }
   }
@@ -109,17 +138,29 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
    */
   public static final int DEFAULT_ACQUISITION_COUNT = 1000;
 
+  @Reference
+  private Log log;
+  @Reference
+  private Units units;
+  private Unit<Dimensionless> intensityUnits;
+  private Unit<Time> timeUnits;
+  @Reference
+  private PropertyLoader loader;
+  private SimulationProperties text;
+  @Reference
+  private Instrument instrument;
   private boolean disposed;
-  private final Disposable instrumentSubscription;
+  private Disposable instrumentSubscription;
 
   /*
    * Instrument Configuration
    */
   private int acquisitionDepth;
   private int acquisitionCount;
+  private Quantity<Time> resolution;
 
-  private final SimulatedAcquisitionDeviceManager manager;
-  private final DetectorSimulation detector;
+  @Reference
+  private DetectorSimulation detector;
 
   /*
    * External Acquisition State
@@ -138,28 +179,33 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
   private final Object acquiringLock = new Object();
   private Optional<ExperimentConfiguration> experiment;
 
-  public SimulatedAcquisitionDevice(
-      SimulatedAcquisitionDeviceManager manager,
-      DetectorSimulation detector) {
+  public SimulatedAcquisitionDevice() {
     acquisitionBuffer = new HotObservable<>();
     dataListeners = new HotObservable<>();
     acquisitionListeners = new HotObservable<>();
     acquisitionListeners.complete();
     acquiring = false;
     experiment = Optional.empty();
+  }
 
-    this.manager = manager;
-    this.detector = detector;
+  @Activate
+  synchronized void activate(AcquisitionSimulationConfiguration configuration) {
+    text = loader.getProperties(SimulationProperties.class);
 
-    setAcquisitionTime(manager.getUnits().second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
+    intensityUnits = units.count().get();
+    timeUnits = units.second().get();
+
+    resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(Time.class);
+    setAcquisitionTime(units.second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
     setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
     acquisitionBuffer.observe(this::acquired);
     new Thread(this::acquire).start();
 
-    instrumentSubscription = detector.getInstrument().addDevice(this);
+    instrumentSubscription = instrument.addDevice(this);
   }
 
+  @Deactivate
   public void dispose() {
     disposed = true;
     instrumentSubscription.cancel();
@@ -167,12 +213,12 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
 
   @Override
   public Instrument getInstrument() {
-    return detector.getInstrument();
+    return instrument;
   }
 
   @Override
   public String getName() {
-    return manager.getText().acquisitionSimulationDeviceName().toString();
+    return text.acquisitionSimulationDeviceName().toString();
   }
 
   /*
@@ -208,8 +254,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
       try {
         synchronized (startingLock) {
           this.experiment.ifPresent(e -> {
-            throw new AcquisitionException(
-                manager.getText().acquisition().exceptions().alreadyAcquiring());
+            throw new AcquisitionException(text.acquisition().exceptions().alreadyAcquiring());
           });
 
           // wait any previous experiment to flush from the buffer
@@ -229,9 +274,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
         }
       } catch (InterruptedException e) {
         this.experiment = Optional.empty();
-        throw new AcquisitionException(
-            manager.getText().acquisition().exceptions().experimentInterrupted(),
-            e);
+        throw new AcquisitionException(text.acquisition().exceptions().experimentInterrupted(), e);
       }
     }
   }
@@ -259,9 +302,8 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
 
       try {
         /*
-         * These may remain blocking after an attempt to start an experiment,
-         * but this is okay as the experiment should have failed anyway if this
-         * is blocked:
+         * These may remain blocking after an attempt to start an experiment, but this
+         * is okay as the experiment should have failed anyway if this is blocked:
          */
         domain = experiment.map(e -> e.domain).orElse(getSampleDomain());
         counter = experiment.map(e -> --e.counter).orElse(-1);
@@ -279,9 +321,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
         exception(e);
       } catch (Exception e) {
         exception(
-            new AcquisitionException(
-                manager.getText().acquisition().exceptions().unexpectedException(),
-                e));
+            new AcquisitionException(text.acquisition().exceptions().unexpectedException(), e));
       }
 
       try {
@@ -297,7 +337,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
   private void exception(AcquisitionException exception) {
     dataListeners.fail(exception);
     acquisitionListeners.fail(exception);
-    manager.getLog().log(ERROR, exception);
+    log.log(ERROR, exception);
   }
 
   @Override
@@ -332,7 +372,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
 
   @Override
   public Quantity<Time> getSampleResolution() {
-    return detector.getSampleResolution();
+    return resolution;
   }
 
   @Override
@@ -367,7 +407,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
   @Override
   public void setAcquisitionCount(int count) {
     if (count <= 0) {
-      throw new AcquisitionException(manager.getText().invalidAcquisitionCount(count));
+      throw new AcquisitionException(text.invalidAcquisitionCount(count));
     }
     acquisitionCount = count;
   }
@@ -379,12 +419,12 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice {
 
   @Override
   public Unit<Time> getSampleTimeUnits() {
-    return manager.getTimeUnits();
+    return timeUnits;
   }
 
   @Override
   public Unit<Dimensionless> getSampleIntensityUnits() {
-    return manager.getIntensityUnits();
+    return intensityUnits;
   }
 
   @Override

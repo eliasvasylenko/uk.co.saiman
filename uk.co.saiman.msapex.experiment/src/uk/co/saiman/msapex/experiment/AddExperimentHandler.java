@@ -31,7 +31,7 @@ import static uk.co.saiman.msapex.experiment.RenameExperiment.requestExperimentN
 
 import org.eclipse.e4.core.di.annotations.Execute;
 
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Workspace;
 

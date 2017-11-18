@@ -29,6 +29,8 @@ package uk.co.saiman.msapex.editor;
 
 import java.util.stream.Stream;
 
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+
 public interface EditorService {
   void registerProvider(EditorProvider provider);
 
@@ -49,4 +51,8 @@ public interface EditorService {
   Stream<EditorPrototype> getApplicableEditors(Object resource);
 
   Stream<EditorDescriptor> getEditors();
+
+  boolean isEditor(MPart part);
+
+  Object getResource(MPart part);
 }

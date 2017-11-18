@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.util.Arrays.asList;
+import static org.eclipse.e4.ui.workbench.modeling.EModelService.ANYWHERE;
+
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -37,11 +41,14 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
-import uk.co.saiman.eclipse.Localize;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentPath;
 import uk.co.saiman.experiment.ExperimentProperties;
@@ -84,6 +91,7 @@ public class ExperimentEditorAddon implements EditorProvider {
     }
 
     editorService.registerProvider(this);
+    System.out.println("initialized experiment editor addon");
   }
 
   @PreDestroy
@@ -103,6 +111,9 @@ public class ExperimentEditorAddon implements EditorProvider {
 
   @Override
   public boolean isEditorApplicable(String editorId, Object resource) {
+    if (!(resource instanceof ExperimentNode<?, ?>))
+      return false;
+
     MPart part = editorParts.get(editorId);
     ExperimentNode<?, ?> experiment = (ExperimentNode<?, ?>) resource;
 
@@ -110,9 +121,8 @@ public class ExperimentEditorAddon implements EditorProvider {
       String classLocation = part.getPersistedState().get(EDITOR_RESULT_CLASS);
 
       if (classLocation.startsWith(BUNDLE_CLASS)) {
-        String[] classLocationElements = classLocation
-            .substring(BUNDLE_CLASS.length())
-            .split(BUNDLE_CLASS_SEPARATOR);
+        String[] classLocationElements = classLocation.substring(BUNDLE_CLASS.length()).split(
+            BUNDLE_CLASS_SEPARATOR);
 
         if (classLocationElements.length == 2) {
           /*
@@ -138,8 +148,14 @@ public class ExperimentEditorAddon implements EditorProvider {
   }
 
   @Override
-  public MPart createEditorPart(String ID) {
-    return (MPart) modelService.cloneSnippet(application, ID, null);
+  public MPart createEditorPart(String id) {
+    MPart part = (MPart) modelService.cloneSnippet(application, id, null);
+    modelService
+        .findElements(part, null, MApplicationElement.class, asList("renameOnClone"))
+        .stream()
+        .forEach(e -> e.setElementId(e.getElementId() + ".clone"));
+    part.setDirty(true);
+    return part;
   }
 
   public Object loadEditorResource(MPart part) {

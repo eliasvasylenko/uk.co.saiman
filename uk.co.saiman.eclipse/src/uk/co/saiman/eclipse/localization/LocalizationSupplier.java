@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse;
+package uk.co.saiman.eclipse.localization;
 
 import java.lang.reflect.Type;
 
@@ -52,7 +52,7 @@ import uk.co.saiman.text.properties.PropertyLoaderException;
  */
 @Component(
     service = ExtendedObjectSupplier.class,
-    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.Localize",
+    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.localization.Localize",
     immediate = true)
 public class LocalizationSupplier extends ExtendedObjectSupplier {
   @Reference

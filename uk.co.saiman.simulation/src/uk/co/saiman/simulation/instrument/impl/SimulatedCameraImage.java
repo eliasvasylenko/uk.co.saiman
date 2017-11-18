@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.simulation;
+package uk.co.saiman.simulation.instrument.impl;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;

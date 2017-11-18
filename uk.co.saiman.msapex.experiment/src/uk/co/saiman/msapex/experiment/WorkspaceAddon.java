@@ -91,6 +91,7 @@ public class WorkspaceAddon {
       initializeAdapters();
     } catch (Exception e) {
       log.log(Level.ERROR, e);
+      e.printStackTrace();
     }
 
     /*
@@ -125,7 +126,9 @@ public class WorkspaceAddon {
 
   @PreDestroy
   void destroy() {
-    experimentAdapterFactory.unregister();
-    experimentNodeAdapterFactory.unregister();
+    if (experimentAdapterFactory != null)
+      experimentAdapterFactory.unregister();
+    if (experimentNodeAdapterFactory != null)
+      experimentNodeAdapterFactory.unregister();
   }
 }

@@ -25,32 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse;
-
-/**
- * Text resource accessor for Eclipse OSGi utilities
- * 
- * @author Elias N Vasylenko
- */
-public interface LocalizationSupplierProperties {
-	/**
-	 * @return invalid type was annotated with {@link Localize} for localization
-	 *         supplier
-	 */
-	default String illegalInjectionTarget() {
-		return illegalInjectionTarget(Localize.class);
-	}
-
-	/**
-	 * @param localizeClass
-	 *          the {@link Localize} class for formatting
-	 * @return invalid type was annotated with {@link Localize} for localization
-	 *         supplier
-	 */
-	String illegalInjectionTarget(Class<Localize> localizeClass);
-
-	/**
-	 * @return an unexpected error occurred
-	 */
-	String unexpectedError();
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.eclipse.service;

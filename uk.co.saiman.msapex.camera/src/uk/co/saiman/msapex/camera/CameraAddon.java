@@ -46,7 +46,7 @@ import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import uk.co.saiman.camera.CameraConnection;
 import uk.co.saiman.camera.CameraDevice;
-import uk.co.saiman.eclipse.ObservableService;
+import uk.co.saiman.eclipse.service.ObservableService;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
