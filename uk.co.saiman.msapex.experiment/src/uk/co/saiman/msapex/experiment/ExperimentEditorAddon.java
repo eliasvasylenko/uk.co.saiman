@@ -28,9 +28,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.e4.ui.workbench.modeling.EModelService.ANYWHERE;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -43,9 +41,7 @@ import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
-import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.localization.Localize;
@@ -91,7 +87,6 @@ public class ExperimentEditorAddon implements EditorProvider {
     }
 
     editorService.registerProvider(this);
-    System.out.println("initialized experiment editor addon");
   }
 
   @PreDestroy

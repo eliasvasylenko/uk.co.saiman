@@ -71,9 +71,9 @@ public class TypeSubstitution {
   }
 
   /**
-   * Create a new TypeSubstitution to apply the given mapping function.
-   * Typically we do something like create an instance from a {@link Map} of
-   * Type instances to other Type instances, then pass the method reference of
+   * Create a new TypeSubstitution to apply the given mapping function. Typically
+   * we do something like create an instance from a {@link Map} of Type instances
+   * to other Type instances, then pass the method reference of
    * {@link Map#get(Object)} for that map to this constructor. For this specific
    * example use case though, {@link #TypeSubstitution(Map)} would perform
    * slightly better.
@@ -134,8 +134,8 @@ public class TypeSubstitution {
    * @param from
    *          The type matching condition of the new rule.
    * @param to
-   *          The substitution transformation to apply to types matching the
-   *          given condition.
+   *          The substitution transformation to apply to types matching the given
+   *          condition.
    * @return A new TypeSubstitution object with the rule added.
    */
   public TypeSubstitution where(
@@ -216,11 +216,11 @@ public class TypeSubstitution {
 
         } else if (type instanceof ParameterizedType) {
           return resolveParameterizedType((ParameterizedType) type, changed);
+
+        } else {
+          return type;
         }
       }
-
-      throw new IllegalArgumentException(
-          "Cannot resolve unrecognised type '" + type + "' of class'" + type.getClass() + "'.");
     }
   }
 

@@ -45,30 +45,34 @@ import uk.co.saiman.reflection.TypeSubstitution;
 
 @SuppressWarnings("javadoc")
 public class TypeSubstitutionTest {
-	private Type createTestType(Class<?> clazz) {
-		return parameterize(
-				Map.class,
-				wildcardExtending(arrayFromComponent(arrayFromComponent(Number.class))),
-				parameterize(Map.class, wildcardSuper(clazz), typeVariableExtending(Collection.class, "E")));
-	}
+  private Type createTestType(Class<?> clazz) {
+    return parameterize(
+        Map.class,
+        wildcardExtending(arrayFromComponent(arrayFromComponent(Number.class))),
+        parameterize(
+            Map.class,
+            wildcardSuper(clazz),
+            typeVariableExtending(Collection.class, "E")));
+  }
 
-	@Test
-	public <T extends Number> void noSubstitutionIdentityTest() {
-		Type type = createTestType(Number.class);
+  @Test
+  public <T extends Number> void noSubstitutionIdentityTest() {
+    Type type = createTestType(Number.class);
 
-		Type substitution = new TypeSubstitution().where(t -> false, t -> t).resolve(type);
+    Type substitution = new TypeSubstitution().where(t -> false, t -> t).resolve(type);
 
-		Assert.assertTrue(type == substitution);
-	}
+    Assert.assertTrue(type == substitution);
+  }
 
-	@Test
-	public <T extends Number> void doublyNestedWildcardSubstitutionTest() {
-		Type type = createTestType(Number.class);
+  @Test
+  public <T extends Number> void doublyNestedWildcardSubstitutionTest() {
+    Type type = createTestType(Number.class);
 
-		Type expected = createTestType(Serializable.class);
+    Type expected = createTestType(Serializable.class);
 
-		Type substitution = new TypeSubstitution().where(Number.class, Serializable.class).resolve(type);
+    Type substitution = new TypeSubstitution().where(Number.class, Serializable.class).resolve(
+        type);
 
-		Assert.assertEquals(expected, substitution);
-	}
+    Assert.assertEquals(expected, substitution);
+  }
 }
