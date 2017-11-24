@@ -29,6 +29,8 @@ package uk.co.saiman.experiment;
 
 import java.util.function.Supplier;
 
+import uk.co.saiman.experiment.persistence.PersistedState;
+
 /**
  * The context of an experiment node's initial configuration. When a workspace
  * is requested to create an experiment node of a given type, this context is

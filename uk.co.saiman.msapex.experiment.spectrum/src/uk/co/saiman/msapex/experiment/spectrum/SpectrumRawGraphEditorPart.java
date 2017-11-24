@@ -49,7 +49,7 @@ import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
 import uk.co.saiman.observable.HotObservable;
 
-public class SpectrumGraphEditorPart {
+public class SpectrumRawGraphEditorPart {
   @Inject
   @Localize
   SpectrumProperties properties;
@@ -70,8 +70,6 @@ public class SpectrumGraphEditorPart {
       ExperimentNode<?, Spectrum> result) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
-    System.out.println("[SGEP] result! " + result);
-
-    spectrumGraphController.addSeries(result.getResult().map(Spectrum::getMassData));
+    spectrumGraphController.addSeries(result.getResult().map(Spectrum::getTimeData));
   }
 }

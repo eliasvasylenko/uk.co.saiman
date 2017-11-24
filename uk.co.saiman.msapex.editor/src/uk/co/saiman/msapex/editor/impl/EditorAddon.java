@@ -28,7 +28,6 @@
 package uk.co.saiman.msapex.editor.impl;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
@@ -44,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -94,11 +92,12 @@ public class EditorAddon implements EditorService {
 
   @PostConstruct
   void initialize(IEclipseContext context) {
-    List<MPart> persistedParts = modelService.findElements(
-        application,
-        MPart.class,
-        EModelService.ANYWHERE,
-        part -> isEditor((MPart) part));
+    List<MPart> persistedParts = modelService
+        .findElements(
+            application,
+            MPart.class,
+            EModelService.ANYWHERE,
+            part -> isEditor((MPart) part));
 
     persistedParts.forEach(part -> {
       String provider = part.getPersistedState().get(PROVIDER_ID);
@@ -184,14 +183,15 @@ public class EditorAddon implements EditorService {
     /*
      * TODO deal with precedence
      */
-
     return getEditors().filter(e -> e.isApplicable(resource)).map(e -> e.getPrototype(resource));
   }
 
   @Override
   public Stream<EditorDescriptor> getEditors() {
-    return editorProviders.values().stream().flatMap(
-        e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
+    return editorProviders
+        .values()
+        .stream()
+        .flatMap(e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
   }
 
   @Override
@@ -270,6 +270,11 @@ public class EditorAddon implements EditorService {
     @Override
     public EditorPrototype getPrototype(Object resource) {
       return new EditorPrototypeImpl(resource, this);
+    }
+
+    @Override
+    public String toString() {
+      return getProvider().getId() + "/" + getPartId();
     }
   }
 

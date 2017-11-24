@@ -1,0 +1,5 @@
+Bundle-Name: SAI :: Data :: Spectrum
+
+Export-Package: \
+	uk.co.saiman.data.spectrum,\
+	uk.co.saiman.data.spectrum.format

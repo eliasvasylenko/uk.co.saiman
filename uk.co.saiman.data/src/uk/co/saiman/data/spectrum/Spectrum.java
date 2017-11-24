@@ -25,7 +25,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.spectrum;
+package uk.co.saiman.data.spectrum;
+
+import java.util.stream.Stream;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -34,13 +36,23 @@ import javax.measure.quantity.Time;
 import uk.co.saiman.data.function.ContinuousFunction;
 
 public interface Spectrum {
-	ContinuousFunction<Time, Dimensionless> getRawData();
+  /**
+   * @return the raw time data
+   */
+  ContinuousFunction<Time, Dimensionless> getTimeData();
 
-	ContinuousFunction<Mass, Dimensionless> getCalibratedData();
+  /**
+   * @return the mass data, as {@link #getCalibration() calibrated} and
+   *         {@link #getProcessing() processed} from the {@link #getTimeData()
+   *         time data}
+   */
+  ContinuousFunction<Mass, Dimensionless> getMassData();
 
-	/**
-	 * @return the calibration settings of the spectrum experiment at the time of
-	 *         collection
-	 */
-	SpectrumCalibration getCalibration();
+  /**
+   * @return the calibration settings of the spectrum experiment at the time of
+   *         acquisition
+   */
+  SpectrumCalibration getCalibration();
+
+  Stream<SpectrumProcessor> getProcessing();
 }

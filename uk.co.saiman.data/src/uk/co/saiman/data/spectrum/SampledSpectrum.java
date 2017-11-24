@@ -25,7 +25,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.spectrum;
+package uk.co.saiman.data.spectrum;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -35,26 +39,38 @@ import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 
 public class SampledSpectrum implements Spectrum {
-  private final SampledContinuousFunction<Time, Dimensionless> function;
+  private final SampledContinuousFunction<Time, Dimensionless> timeData;
 
-  public SampledSpectrum(SampledContinuousFunction<Time, Dimensionless> function) {
-    this.function = function;
+  private final SpectrumCalibration calibration;
+  private final List<SpectrumProcessor> processing;
+
+  public SampledSpectrum(
+      SampledContinuousFunction<Time, Dimensionless> timeData,
+      SpectrumCalibration calibration,
+      List<SpectrumProcessor> processing) {
+    this.timeData = timeData;
+    this.calibration = calibration;
+    this.processing = new ArrayList<>(processing);
   }
 
   @Override
-  public ContinuousFunction<Time, Dimensionless> getRawData() {
-    return function;
+  public ContinuousFunction<Time, Dimensionless> getTimeData() {
+    return timeData;
   }
 
   @Override
-  public ContinuousFunction<Mass, Dimensionless> getCalibratedData() {
+  public ContinuousFunction<Mass, Dimensionless> getMassData() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public SpectrumCalibration getCalibration() {
-    // TODO Auto-generated method stub
-    return null;
+    return calibration;
+  }
+
+  @Override
+  public Stream<SpectrumProcessor> getProcessing() {
+    return processing.stream();
   }
 }

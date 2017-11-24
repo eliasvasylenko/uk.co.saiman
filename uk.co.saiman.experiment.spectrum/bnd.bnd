@@ -22,5 +22,6 @@ Export-Package: uk.co.saiman.experiment.spectrum
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
+	uk.co.saiman.data.spectrum;version=snapshot,\
 \
 	javax.measure.unit-api

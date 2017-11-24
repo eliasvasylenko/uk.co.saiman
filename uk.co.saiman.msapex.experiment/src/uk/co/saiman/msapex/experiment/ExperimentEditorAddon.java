@@ -46,10 +46,10 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentPath;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
@@ -116,8 +116,9 @@ public class ExperimentEditorAddon implements EditorProvider {
       String classLocation = part.getPersistedState().get(EDITOR_RESULT_CLASS);
 
       if (classLocation.startsWith(BUNDLE_CLASS)) {
-        String[] classLocationElements = classLocation.substring(BUNDLE_CLASS.length()).split(
-            BUNDLE_CLASS_SEPARATOR);
+        String[] classLocationElements = classLocation
+            .substring(BUNDLE_CLASS.length())
+            .split(BUNDLE_CLASS_SEPARATOR);
 
         if (classLocationElements.length == 2) {
           /*

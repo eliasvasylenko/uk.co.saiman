@@ -53,7 +53,6 @@ public class DragAndDropAddon implements DnDService {
       targetAncestor = targetAncestor.getParent();
     }
 
-    System.out.println((sourceAncestor == targetAncestor) ? "YEAH!!!" : "nah.");
     return sourceAncestor == targetAncestor;
   }
 
@@ -64,7 +63,6 @@ public class DragAndDropAddon implements DnDService {
 
   @Override
   public boolean detachAllowed(MUIElement element) {
-    System.out.println("detach???");
     return true;
   }
 

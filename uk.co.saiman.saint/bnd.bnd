@@ -20,6 +20,7 @@
 	uk.co.saiman.comms.copley;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.data.spectrum;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\

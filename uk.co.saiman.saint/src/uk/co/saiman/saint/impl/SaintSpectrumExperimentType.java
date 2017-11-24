@@ -27,17 +27,15 @@
  */
 package uk.co.saiman.saint.impl;
 
-import java.util.Random;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
-import uk.co.saiman.experiment.spectrum.Spectrum;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
@@ -59,25 +57,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   @Override
   public SaintSpectrumConfiguration createState(
       ConfigurationContext<SaintSpectrumConfiguration> context) {
-    SaintSpectrumConfiguration configuration = new SaintSpectrumConfiguration() {
-      private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
-
-      @Override
-      public void setSpectrumName(String name) {
-        this.name = name;
-        context.setId(name);
-      }
-
-      @Override
-      public String getSpectrumName() {
-        return name;
-      }
-
-      @Override
-      public AcquisitionDevice getAcquisitionDevice() {
-        return acquisitionDevice;
-      }
-    };
+    SaintSpectrumConfiguration configuration = new SaintSpectrumConfigurationImpl(this, context);
     return configuration;
   }
 

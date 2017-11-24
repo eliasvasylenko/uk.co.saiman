@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.experiment.provider.
+ * This file is part of uk.co.saiman.experiment.api.
  *
- * uk.co.saiman.experiment.provider is free software: you can redistribute it and/or modify
+ * uk.co.saiman.experiment.api is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.experiment.provider is distributed in the hope that it will be useful,
+ * uk.co.saiman.experiment.api is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,28 +25,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.impl;
+package uk.co.saiman.experiment.path;
 
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Result;
-import uk.co.saiman.observable.ObservablePropertyImpl;
-import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.experiment.ExperimentPathTest;
 
-public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T> {
-  private final XmlExperimentNode<?, T> node;
+/**
+ * Currently the {@link ExperimentPathTest path} only matches each child by ID.
+ * This could be expanded to XPath like behavior with different matching
+ * strategies.
+ */
+public class ExperimentMatcher {
+  private final String id;
 
-  public XmlResult(XmlExperimentNode<?, T> node) {
-    super(new NullPointerException());
-    this.node = node;
+  ExperimentMatcher(String id) {
+    this.id = id;
+  }
+
+  public static ExperimentMatcher matching(ExperimentNode<?, ?> node) {
+    return new ExperimentMatcher(node.getId());
+  }
+
+  public boolean match(ExperimentNode<?, ?> node) {
+    return id.equals(node.getId());
   }
 
   @Override
-  public ExperimentNode<?, ?> getExperimentNode() {
-    return node;
+  public String toString() {
+    return id;
   }
 
-  @Override
-  public TypeToken<T> getType() {
-    return node.getType().getResultType();
+  public static ExperimentMatcher fromString(String string) {
+    return new ExperimentMatcher(string);
   }
 }

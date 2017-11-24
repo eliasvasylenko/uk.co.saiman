@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.spectrum;
+package uk.co.saiman.data.spectrum.format;
 
 import static uk.co.saiman.data.function.format.RegularSampledContinuousFunctionFormat.overEncodedDomain;
 
@@ -44,6 +44,7 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.measurement.Units;
 
 @Component
@@ -76,8 +77,8 @@ public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
   @Override
   public void save(WritableByteChannel outputChannel, Payload<? extends Spectrum> payload)
       throws IOException {
-    Unit<Time> domainUnits = payload.data.getRawData().domain().getUnit();
-    Unit<Dimensionless> rangeUnits = payload.data.getRawData().range().getUnit();
+    Unit<Time> domainUnits = payload.data.getTimeData().domain().getUnit();
+    Unit<Dimensionless> rangeUnits = payload.data.getTimeData().range().getUnit();
 
     byte[] bytes;
     bytes = units.formatUnit(domainUnits).getBytes();
@@ -87,8 +88,10 @@ public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
     outputChannel.write(ByteBuffer.wrap(bytes));
     outputChannel.write(ByteBuffer.wrap(new byte[] { 0 }));
 
-    overEncodedDomain(domainUnits, rangeUnits).save(
-        outputChannel,
-        new Payload<>((SampledContinuousFunction<Time, Dimensionless>) payload.data.getRawData()));
+    overEncodedDomain(domainUnits, rangeUnits)
+        .save(
+            outputChannel,
+            new Payload<>(
+                (SampledContinuousFunction<Time, Dimensionless>) payload.data.getTimeData()));
   }
 }

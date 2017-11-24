@@ -36,7 +36,7 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.MissingExperimentType;
-import uk.co.saiman.experiment.PersistedState;
+import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.reflection.token.TypeToken;
 
 public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {

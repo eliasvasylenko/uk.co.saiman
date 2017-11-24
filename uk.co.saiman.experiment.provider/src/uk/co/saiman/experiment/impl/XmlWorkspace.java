@@ -47,7 +47,6 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
@@ -107,8 +106,9 @@ public class XmlWorkspace implements Workspace {
   }
 
   private void loadExperiments() {
-    PathMatcher filter = dataRoot.getFileSystem().getPathMatcher(
-        "glob:**/*" + XmlExperiment.EXPERIMENT_EXTENSION);
+    PathMatcher filter = dataRoot
+        .getFileSystem()
+        .getPathMatcher("glob:**/*" + XmlExperiment.EXPERIMENT_EXTENSION);
 
     try (DirectoryStream<Path> stream = newDirectoryStream(
         dataRoot,
@@ -158,19 +158,7 @@ public class XmlWorkspace implements Workspace {
 
   @Override
   public Experiment addExperiment(String name) {
-    XmlExperiment experiment = addExperiment(name, new XmlPersistedState());
-    experiment.save();
-    return experiment;
-  }
-
-  protected XmlExperiment addExperiment(String name, XmlPersistedState persistedState) {
-    if (!ExperimentConfiguration.isNameValid(name)) {
-      throw new ExperimentException(text.exception().invalidExperimentName(name));
-    }
-
-    XmlExperiment experiment = new XmlExperiment(experimentRootType, name, this, persistedState);
-
-    return experiment;
+    return new XmlExperiment(this, name);
   }
 
   void addExperimentImpl(XmlExperiment experiment) {

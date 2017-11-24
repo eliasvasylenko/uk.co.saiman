@@ -29,6 +29,8 @@ package uk.co.saiman.experiment;
 
 import java.lang.reflect.Type;
 
+import uk.co.saiman.experiment.persistence.PersistedState;
+
 public interface MissingExperimentType<T> extends ExperimentType<PersistedState, T> {
   @Override
   default Type getThisType() {

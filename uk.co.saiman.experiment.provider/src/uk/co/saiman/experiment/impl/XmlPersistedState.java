@@ -40,12 +40,10 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import uk.co.saiman.experiment.PersistedState;
-import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.property.Property;
 
-public class XmlPersistedState extends HotObservable<PersistedState> implements PersistedState {
-  static final String CONFIGURATION_ELEMENT = "configuration";
+public class XmlPersistedState implements PersistedState {
   static final String CONFIGURATION_STRING_ELEMENT = "string";
   static final String CONFIGURATION_MAP_ELEMENT = "map";
   static final String CONFIGURATION_MAP_LIST_ELEMENT = "maps";
@@ -55,14 +53,38 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
   private final Map<String, XmlPersistedState> maps = new HashMap<>();
   private final Map<String, XmlPersistedStateList> mapLists = new HashMap<>();
 
+  private Runnable update;
+
+  public XmlPersistedState(Runnable update) {
+    this.update = update;
+  }
+
   private void update() {
-    next(this);
+    update.run();
   }
 
   @Override
   public void clear() {
     strings.clear();
     update();
+  }
+
+  @Override
+  public void merge(PersistedState state) {
+    mergeImpl(state);
+    update();
+  }
+
+  XmlPersistedState mergeImpl(PersistedState state) {
+    state.getStrings().forEach(s -> strings.put(s, state.forString(s).get()));
+    state.getMaps().forEach(m -> forMap(m).mergeImpl(state.forMap(m)));
+    state.getMapLists().forEach(m -> forMapList(m).setImpl(state.forMapList(m)));
+    return this;
+  }
+
+  public XmlPersistedState removeImpl() {
+    update = null;
+    return this;
   }
 
   boolean isEmpty() {
@@ -77,7 +99,10 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
 
   @Override
   public Property<String> forString(String id) {
-    return Property.over(() -> strings.get(id), v -> strings.put(id, v));
+    return Property.over(() -> strings.get(id), v -> {
+      strings.put(id, v);
+      update();
+    });
   }
 
   @Override
@@ -87,7 +112,7 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
 
   @Override
   public XmlPersistedState forMap(String id) {
-    return maps.computeIfAbsent(id, i -> new XmlPersistedState());
+    return maps.computeIfAbsent(id, i -> new XmlPersistedState(update));
   }
 
   @Override
@@ -97,7 +122,7 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
 
   @Override
   public XmlPersistedStateList forMapList(String id) {
-    return mapLists.computeIfAbsent(id, i -> new XmlPersistedStateList());
+    return mapLists.computeIfAbsent(id, i -> new XmlPersistedStateList(update));
   }
 
   protected void save(Element parent) {
@@ -150,7 +175,7 @@ public class XmlPersistedState extends HotObservable<PersistedState> implements 
         .evaluate(CONFIGURATION_STRING_ELEMENT, configuration, NODESET);
     for (int i = 0; i < stringElements.getLength(); i++) {
       Element element = (Element) stringElements.item(i);
-      forString(element.getAttribute(CONFIGURATION_ID_ATTRIBUTE)).set(element.getTextContent());
+      strings.put(element.getAttribute(CONFIGURATION_ID_ATTRIBUTE), element.getTextContent());
     }
 
     NodeList mapElements = (NodeList) xPath

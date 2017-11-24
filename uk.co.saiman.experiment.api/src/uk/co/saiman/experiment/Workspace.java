@@ -41,8 +41,6 @@ import java.util.stream.Stream;
  * @author Elias N Vasylenko
  */
 public interface Workspace {
-  
-
   /*
    * Root experiment types
    */

@@ -35,6 +35,10 @@ import javax.measure.quantity.Time;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.CachingData;
 import uk.co.saiman.data.Data;
+import uk.co.saiman.data.spectrum.ContinuousFunctionAccumulator;
+import uk.co.saiman.data.spectrum.SampledSpectrum;
+import uk.co.saiman.data.spectrum.Spectrum;
+import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
 
@@ -90,16 +94,22 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
         device.getSampleDomain(),
         device.getSampleIntensityUnits());
 
-    Data<Spectrum> data = context.setResult(
-        new CachingData<>(
-            context.getLocation(),
-            SPECTRUM_DATA_NAME,
-            new RegularSampledSpectrumFormat(null)));
+    Data<Spectrum> data = context
+        .setResult(
+            new CachingData<>(
+                context.getLocation(),
+                SPECTRUM_DATA_NAME,
+                new RegularSampledSpectrumFormat(null)));
 
     /*
      * TODO some sort of invalidate/lazy-revalidate message passer
      */
-    data.set(new SampledSpectrum(accumulator.getAccumulation()));
+    data
+        .set(
+            new SampledSpectrum(
+                accumulator.getAccumulation(),
+                null,
+                context.node().getState().getProcessing()));
 
     device.startAcquisition();
 

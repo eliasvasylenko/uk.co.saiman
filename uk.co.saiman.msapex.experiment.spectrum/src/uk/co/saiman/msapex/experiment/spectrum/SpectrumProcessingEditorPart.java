@@ -28,50 +28,52 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.saiman.reflection.token.TypedReference.typedObject;
+
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.model.application.ui.MDirtyable;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.spectrum.Spectrum;
+import uk.co.saiman.data.spectrum.SpectrumProcessor;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.eclipse.treeview.ModularTreeController;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
-import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
-import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.reflection.token.TypeToken;
 
-public class SpectrumGraphEditorPart {
+public class SpectrumProcessingEditorPart {
   @Inject
   @Localize
-  SpectrumProperties properties;
-
-  @Inject
-  MDirtyable dirty;
+  private SpectrumProperties properties;
 
   @FXML
-  private ContinuousFunctionChartController spectrumGraphController;
-  private HotObservable<ContinuousFunction<Time, Dimensionless>> spectrum;
-  private Spectrum data;
+  private ModularTreeController modularTreeController;
 
   @PostConstruct
   void postConstruct(
       BorderPane container,
-      @LocalInstance FXMLLoader loaderProvider,
+      @LocalInstance FXMLLoader loader,
       IEclipseContext context,
-      ExperimentNode<?, Spectrum> result) {
-    container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
+      ExperimentNode<? extends SpectrumConfiguration, Spectrum> result) {
+    container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    System.out.println("[SGEP] result! " + result);
+    modularTreeController
+        .setRootData(
+            typedObject(
+                new TypeToken<List<SpectrumProcessor>>() {},
+                result.getState().getProcessing()));
+  }
 
-    spectrumGraphController.addSeries(result.getResult().map(Spectrum::getMassData));
+  public ModularTreeController getProcessingTreeController() {
+    return modularTreeController;
   }
 }

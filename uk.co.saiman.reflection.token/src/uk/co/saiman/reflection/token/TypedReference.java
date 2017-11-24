@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.reflection.token;
 
+import static uk.co.saiman.reflection.WildcardTypes.wildcard;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.Type;
@@ -60,8 +61,8 @@ public class TypedReference<T> {
   }
 
   /**
-   * Convenience method to return a {@link TypedReference} wrapper around an object
-   * instance of this type.
+   * Convenience method to return a {@link TypedReference} wrapper around an
+   * object instance of this type.
    * 
    * @param object
    *          The object to wrap with a typed container
@@ -72,8 +73,8 @@ public class TypedReference<T> {
   }
 
   /**
-   * Convenience method to return a {@link TypedReference} wrapper around an object
-   * instance of this type.
+   * Convenience method to return a {@link TypedReference} wrapper around an
+   * object instance of this type.
    * 
    * @param object
    *          The object to wrap with a typed container
@@ -81,6 +82,22 @@ public class TypedReference<T> {
    */
   public static <T> TypedReference<T> typedObject(Class<T> type, T object) {
     return typedObject(forType(type), object);
+  }
+
+  /**
+   * Convenience method to return a {@link TypedReference} wrapper around an
+   * object of unknown runtime type, substituting wildcards if the type is generic
+   * and therefore erased.
+   * 
+   * @param object
+   *          The object to wrap with a typed container
+   * @return A typed container for the given object
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> TypedReference<? extends T> typedObject(T object) {
+    return typedObject(
+        (TypeToken<T>) forType(object.getClass()).parameterize().withTypeArguments(p -> wildcard()),
+        object);
   }
 
   /**

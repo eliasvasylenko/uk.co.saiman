@@ -27,7 +27,10 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import java.util.List;
+
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.data.spectrum.SpectrumProcessor;
 
 /**
  * TODO
@@ -35,9 +38,13 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
  * @author Elias N Vasylenko
  */
 public interface SpectrumConfiguration {
-	String getSpectrumName();
+  String getSpectrumName();
 
-	void setSpectrumName(String name);
+  void setSpectrumName(String name);
 
-	AcquisitionDevice getAcquisitionDevice();
+  AcquisitionDevice getAcquisitionDevice();
+
+  void setProcessing(List<SpectrumProcessor> processors);
+
+  List<SpectrumProcessor> getProcessing();
 }

@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment;
+package uk.co.saiman.experiment.path;
 
 import static java.lang.Math.max;
 import static java.util.Arrays.stream;
@@ -42,6 +42,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentPath {
   private static final String SEPARATOR = "/";

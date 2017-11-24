@@ -42,13 +42,32 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import uk.co.saiman.experiment.PersistedState;
-import uk.co.saiman.experiment.PersistedStateList;
+import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.persistence.PersistedStateList;
 
 public class XmlPersistedStateList implements PersistedStateList {
   private static final String CONFIGURATION_LIST_ITEM_ELEMENT = "element";
 
   private final List<XmlPersistedState> maps = new ArrayList<>();
+
+  private final Runnable update;
+
+  public XmlPersistedStateList(Runnable update) {
+    this.update = update;
+  }
+
+  private void update() {
+    update.run();
+  }
+
+  public XmlPersistedStateList setImpl(PersistedStateList stateList) {
+    maps.forEach(XmlPersistedState::removeImpl);
+    maps.clear();
+    for (PersistedState state : stateList) {
+      maps.add(new XmlPersistedState(update).mergeImpl(state));
+    }
+    return this;
+  }
 
   boolean isEmpty() {
     return maps.stream().allMatch(XmlPersistedState::isEmpty);
@@ -68,8 +87,9 @@ public class XmlPersistedStateList implements PersistedStateList {
 
   @Override
   public XmlPersistedState add(int index) {
-    XmlPersistedState element = new XmlPersistedState();
+    XmlPersistedState element = new XmlPersistedState(update);
     maps.add(index, element);
+    update();
     return element;
   }
 
@@ -80,7 +100,9 @@ public class XmlPersistedStateList implements PersistedStateList {
 
   @Override
   public XmlPersistedState remove(int index) {
-    return maps.remove(index);
+    XmlPersistedState removed = maps.remove(index).removeImpl();
+    update();
+    return removed;
   }
 
   @Override

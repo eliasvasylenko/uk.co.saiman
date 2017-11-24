@@ -11,7 +11,10 @@ Bundle-Name: SAI :: Experiment
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data;version=snapshot
 
-Export-Package: uk.co.saiman.experiment
+Export-Package: \
+	uk.co.saiman.experiment,\
+	uk.co.saiman.experiment.path,\
+	uk.co.saiman.experiment.persistence
 
 -includeresource: \
 	l10n

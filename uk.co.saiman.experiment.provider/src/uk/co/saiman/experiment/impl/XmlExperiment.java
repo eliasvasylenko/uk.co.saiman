@@ -47,6 +47,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
@@ -55,7 +56,6 @@ import org.w3c.dom.Element;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.log.Log.Level;
 
 public class XmlExperiment extends XmlExperimentNode<ExperimentConfiguration, Void>
@@ -63,15 +63,20 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentConfiguration, Vo
   static final String EXPERIMENT_EXTENSION = ".exml";
 
   private static final String EXPERIMENT_ELEMENT = "experiment";
-  private static final String ID_ATTRIBUTE = "id";
 
-  protected XmlExperiment(
-      ExperimentRoot type,
-      String id,
-      XmlWorkspace workspace,
-      XmlPersistedState persistedState) {
-    super(type, id, workspace, persistedState);
+  protected XmlExperiment(XmlWorkspace workspace, String id) {
+    super(workspace, workspace.getExperimentRootType(), id);
+    workspace.addExperimentImpl(this);
+    save();
+  }
 
+  protected XmlExperiment(XmlWorkspace workspace, Element root) throws XPathExpressionException {
+    this(workspace, root, XPathFactory.newInstance().newXPath());
+  }
+
+  private XmlExperiment(XmlWorkspace workspace, Element root, XPath xPath)
+      throws XPathExpressionException {
+    super(workspace, workspace.getExperimentRootType(), root, xPath);
     workspace.addExperimentImpl(this);
   }
 
@@ -135,14 +140,9 @@ public class XmlExperiment extends XmlExperimentNode<ExperimentConfiguration, Vo
   static XmlExperiment load(XmlWorkspace workspace, Path path) {
     try (InputStream input = newInputStream(path, READ)) {
       Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input);
-      XPath xPath = XPathFactory.newInstance().newXPath();
 
       Element root = document.getDocumentElement();
-      XmlExperiment experiment = workspace.addExperiment(
-          root.getAttribute(ID_ATTRIBUTE),
-          new XmlPersistedState().load(root, xPath));
-
-      experiment.loadChildNodes(root, xPath);
+      XmlExperiment experiment = new XmlExperiment(workspace, root);
 
       return experiment;
     } catch (Exception e) {

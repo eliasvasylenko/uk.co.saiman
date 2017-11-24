@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
-import uk.co.saiman.experiment.spectrum.Spectrum;
+import uk.co.saiman.data.spectrum.Spectrum;
 
 public interface ChemicalMap {
   /**

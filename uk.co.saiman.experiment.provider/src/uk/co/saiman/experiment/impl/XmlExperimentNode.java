@@ -29,6 +29,7 @@ package uk.co.saiman.experiment.impl;
 
 import static javax.xml.xpath.XPathConstants.NODESET;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,8 +58,8 @@ import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.PersistedState;
 import uk.co.saiman.experiment.Result;
+import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
@@ -77,76 +78,116 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
   private static final String TYPE_ATTRIBUTE = "type";
   private static final String ID_ATTRIBUTE = "id";
 
-  private final XmlWorkspace workspace;
-  private final ExperimentType<S, R> type;
-  private final XmlExperimentNode<?, ?> parent;
-
-  private final List<XmlExperimentNode<?, ?>> children;
-
-  private final ObservableProperty<ExperimentLifecycleState> lifecycleState;
-  private final S state;
-
-  private final XmlResult<R> result;
-
   private String id;
-  private final XmlPersistedState persistedState;
+  private final ExperimentType<S, R> type;
+
+  private final XmlWorkspace workspace;
+  private final XmlExperimentNode<?, ?> parent;
+  private final List<XmlExperimentNode<?, ?>> children = new ArrayList<>();
+
+  private final XmlPersistedState persistedState = new XmlPersistedState(
+      () -> getRootImpl().save());
+  private final ObservableProperty<ExperimentLifecycleState> lifecycleState = ObservableProperty
+      .over(PREPARATION);
+  private final S state;
+  private final PersistedStateResult<R> result = new PersistedStateResult<>(this);
 
   /**
-   * Try to create a new experiment node of the given type, and with the given
-   * parent.
+   * Create a new root experiment.
    * 
+   * @param workspace
    * @param type
-   *          the type of the experiment
+   * @param id
+   */
+  protected XmlExperimentNode(XmlWorkspace workspace, ExperimentType<S, R> type, String id) {
+    this.type = type;
+    this.workspace = workspace;
+    this.parent = null;
+    this.state = createState(id);
+  }
+
+  /**
+   * Create a new child experiment.
+   * 
    * @param parent
-   *          the parent of the experiment
+   * @param type
+   * @param id
    */
   protected XmlExperimentNode(
-      ExperimentType<S, R> type,
-      String id,
       XmlExperimentNode<?, ?> parent,
-      XmlPersistedState persistedState) {
-    this(type, id, parent.workspace, parent, persistedState);
+      ExperimentType<S, R> type,
+      String id) {
+    this.type = type;
+    this.workspace = parent.workspace;
+    this.parent = parent;
+    this.state = createState(id);
 
+    validateChild();
+  }
+
+  /**
+   * Load an existing root experiment.
+   * 
+   * @param workspace
+   * @param type
+   * @param id
+   */
+  protected XmlExperimentNode(
+      XmlWorkspace workspace,
+      ExperimentType<S, R> type,
+      Element root,
+      XPath xPath) throws XPathExpressionException {
+    this.type = type;
+    this.workspace = workspace;
+    this.parent = null;
+    this.persistedState.load(root, xPath);
+    this.state = createState(root.getAttribute(ID_ATTRIBUTE));
+
+    loadChildNodes(root, xPath);
+  }
+
+  /**
+   * Load an existing child experiment.
+   * 
+   * @param parent
+   * @param type
+   * @param id
+   */
+  protected XmlExperimentNode(
+      XmlExperimentNode<?, ?> parent,
+      ExperimentType<S, R> type,
+      Element root,
+      XPath xPath) throws XPathExpressionException {
+    this.type = type;
+    this.workspace = parent.workspace;
+    this.parent = parent;
+    this.persistedState.load(root, xPath);
+    this.state = createState(root.getAttribute(ID_ATTRIBUTE));
+
+    loadChildNodes(root, xPath);
+    validateChild();
+  }
+
+  private void validateChild() {
     if (!type.mayComeAfter(parent)) {
       throw new ExperimentException(getText().exception().typeMayNotSucceed(type, this));
     }
     parent.getAncestorsImpl().filter(a -> !a.type.mayComeBefore(parent, type)).forEach(a -> {
       throw new ExperimentException(getText().exception().typeMayNotSucceed(type, a));
     });
-
     parent.children.add(this);
   }
 
-  protected XmlExperimentNode(
-      ExperimentType<S, R> type,
-      String id,
-      XmlWorkspace workspace,
-      XmlPersistedState persistedState) {
-    this(type, id, workspace, null, persistedState);
-  }
+  private S createState(String id) {
+    setId(id);
 
-  private XmlExperimentNode(
-      ExperimentType<S, R> type,
-      String id,
-      XmlWorkspace workspace,
-      XmlExperimentNode<?, ?> parent,
-      XmlPersistedState persistedState) {
-    this.type = type;
-    this.workspace = workspace;
-    this.parent = parent;
-    this.children = new ArrayList<>();
-    setID(id);
-
-    result = new XmlResult<>(this, getType().getResultType());
-
-    this.lifecycleState = ObservableProperty.over(ExperimentLifecycleState.PREPARATION);
-    this.persistedState = persistedState;
-    persistedState.observe(s -> getRootImpl().save());
-    this.state = type.createState(createConfigurationContext());
+    S state = type.createState(createConfigurationContext());
 
     if (getId() == null) {
       throw new ExperimentException(getText().exception().invalidExperimentName(null));
     }
+
+    return state;
   }
 
   protected ExperimentProperties getText() {
@@ -177,7 +218,7 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
   }
 
   private Path getParentDataPath() {
-    return getParentImpl().map(p -> p.getDataPath()).orElse(workspace.getRootPath());
+    return getParentImpl().map(p -> p.getDataPath()).orElseGet(() -> getWorkspace().getRootPath());
   }
 
   protected XmlPersistedState persistedState() {
@@ -185,8 +226,9 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
   }
 
   private Stream<? extends XmlExperimentNode<?, ?>> getSiblings() {
-    return getParentImpl().map(p -> p.getChildrenImpl()).orElse(
-        upcastStream(workspace.getExperimentsImpl()));
+    return getParentImpl()
+        .map(p -> p.getChildrenImpl())
+        .orElseGet(() -> upcastStream(getWorkspace().getExperimentsImpl()));
   }
 
   @Override
@@ -253,23 +295,17 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
 
   @Override
   public Stream<ExperimentType<?, ?>> getAvailableChildExperimentTypes() {
-    return workspace.getRegisteredExperimentTypes().filter(
-        type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
+    return workspace
+        .getRegisteredExperimentTypes()
+        .filter(type -> this.type.mayComeBefore(this, type) && type.mayComeAfter(this));
   }
 
   @Override
   public <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType) {
-    ExperimentNode<U, V> child = loadChild(childType, null, new XmlPersistedState());
+    assertAvailable();
+    ExperimentNode<U, V> child = new XmlExperimentNode<>(this, childType, null);
     getRootImpl().save();
     return child;
-  }
-
-  protected <U, V> XmlExperimentNode<U, V> loadChild(
-      ExperimentType<U, V> childType,
-      String id,
-      XmlPersistedState persistedState) {
-    assertAvailable();
-    return new XmlExperimentNode<>(childType, id, this, persistedState);
   }
 
   @Override
@@ -300,9 +336,11 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
       lifecycleState.set(ExperimentLifecycleState.COMPLETION);
       return true;
     } catch (Exception e) {
-      workspace.getLog().log(
-          Level.ERROR,
-          new ExperimentException(getText().exception().failedExperimentExecution(this), e));
+      workspace
+          .getLog()
+          .log(
+              Level.ERROR,
+              new ExperimentException(getText().exception().failedExperimentExecution(this), e));
       lifecycleState.set(ExperimentLifecycleState.FAILURE);
       return false;
     }
@@ -367,7 +405,7 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
 
       @Override
       public void setId(String id) {
-        XmlExperimentNode.this.setID(id);
+        XmlExperimentNode.this.setId(id);
       }
 
       @Override
@@ -386,7 +424,7 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
     };
   }
 
-  protected void setID(String id) {
+  protected void setId(String id) {
     if (Objects.equals(id, this.id)) {
       return;
 
@@ -438,9 +476,12 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
 
     persistedState().save(element);
 
-    getChildrenImpl().forEach(
-        child -> child.saveNode(
-            (Element) element.appendChild(element.getOwnerDocument().createElement(NODE_ELEMENT))));
+    getChildrenImpl()
+        .forEach(
+            child -> child
+                .saveNode(
+                    (Element) element
+                        .appendChild(element.getOwnerDocument().createElement(NODE_ELEMENT))));
   }
 
   protected void loadChildNodes(Element parentElement, XPath xPath)
@@ -452,7 +493,6 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
   }
 
   private void loadChildNode(Element element, XPath xPath) throws XPathExpressionException {
-    String experimentID = element.getAttribute(ID_ATTRIBUTE);
     String experimentTypeID = element.getAttribute(TYPE_ATTRIBUTE);
 
     ExperimentType<?, ?> experimentType = getAvailableChildExperimentTypes()
@@ -460,11 +500,6 @@ public class XmlExperimentNode<S, R> implements ExperimentNode<S, R> {
         .findAny()
         .orElseGet(() -> new MissingExperimentTypeImpl<>(getText(), experimentTypeID));
 
-    XmlExperimentNode<?, ?> node = loadChild(
-        experimentType,
-        experimentID,
-        new XmlPersistedState().load(element, xPath));
-
-    node.loadChildNodes(element, xPath);
+    new XmlExperimentNode<>(this, experimentType, element, xPath);
   }
 }
