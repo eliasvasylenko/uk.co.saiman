@@ -19,7 +19,6 @@ import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.experiment.persistence.PersistedStateList;
-import uk.co.saiman.experiment.persistence.impl.PersistedStateImpl;
 
 @Component
 public class JsonPersistedStateFormat implements DataFormat<PersistedState> {
@@ -36,7 +35,7 @@ public class JsonPersistedStateFormat implements DataFormat<PersistedState> {
   @Override
   public Payload<? extends PersistedState> load(ReadableByteChannel inputChannel)
       throws IOException {
-    PersistedState persistedState = new PersistedStateImpl(() -> {});
+    PersistedState persistedState = new PersistedState();
     load(inputChannel, persistedState);
     return new Payload<>(persistedState);
   }

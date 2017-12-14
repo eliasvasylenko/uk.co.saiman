@@ -35,7 +35,6 @@ import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.resource.PathResource;
 import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.persistence.PersistedState;
-import uk.co.saiman.experiment.persistence.impl.PersistedStateImpl;
 
 public class JsonPersistedStateDocument {
   private final JsonPersistedStateFormat format;
@@ -49,7 +48,8 @@ public class JsonPersistedStateDocument {
   public JsonPersistedStateDocument(Resource resource) throws IOException {
     this.format = new JsonPersistedStateFormat();
     this.resource = resource;
-    this.persistedState = new PersistedStateImpl(() -> save());
+    this.persistedState = new PersistedState();
+    persistedState.changes().observe(m -> save());
     load();
   }
 
@@ -71,7 +71,7 @@ public class JsonPersistedStateDocument {
     return persistedState;
   }
 
-  public JsonPersistedStateDocument save() {
+  private JsonPersistedStateDocument save() {
     try {
       format.save(resource.write(), new Payload<>(this.persistedState));
       return this;

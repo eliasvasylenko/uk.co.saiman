@@ -104,8 +104,7 @@ public class JsonPersistenceManager implements ExperimentPersistenceManager {
     rootDocuments.get(experiment).getResource().delete();
     rootDocuments
         .get(experiment)
-        .setResource(new PathResource(rootPath.resolve(id + FILE_EXTENSION)))
-        .save();
+        .setResource(new PathResource(rootPath.resolve(id + FILE_EXTENSION)));
   }
 
   @Override

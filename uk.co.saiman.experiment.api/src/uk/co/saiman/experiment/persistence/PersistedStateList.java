@@ -27,22 +27,60 @@
  */
 package uk.co.saiman.experiment.persistence;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Stream;
 
-public interface PersistedStateList extends Iterable<PersistedState> {
-  PersistedState add();
+import uk.co.saiman.experiment.persistence.PersistedState.PersistedStateSubscription;
+import uk.co.saiman.observable.Disposable;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
 
-  PersistedState add(int index);
+public class PersistedStateList implements Iterable<PersistedState> {
+  private final List<PersistedStateSubscription> maps = new ArrayList<>();
 
-  PersistedState get(int index);
+  private final HotObservable<PersistedStateList> changes = new HotObservable<>();
 
-  PersistedState remove(int index);
+  private void update() {
+    changes.next(this);
+  }
 
-  PersistedState move(int fromIndex, int toIndex);
+  boolean isEmpty() {
+    return stream().allMatch(PersistedState::isEmpty);
+  }
 
-  void clear();
+  public Iterator<PersistedState> iterator() {
+    Iterator<PersistedStateSubscription> iterator = maps.iterator();
+    return new Iterator<PersistedState>() {
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
 
-  default PersistedState remove(PersistedState state) {
+      @Override
+      public PersistedState next() {
+        return iterator.next().get();
+      }
+    };
+  }
+
+  public PersistedState add() {
+    return add(size());
+  }
+
+  public PersistedState add(int index) {
+    PersistedStateSubscription subscription = new PersistedStateSubscription(this::update);
+    maps.add(index, subscription);
+    update();
+    return subscription.get();
+  }
+
+  public PersistedState get(int index) {
+    return maps.get(index).get();
+  }
+
+  public PersistedState remove(PersistedState state) {
     for (int i = 0; i < size(); i++) {
       if (get(i).equals(state)) {
         return remove(i);
@@ -51,7 +89,46 @@ public interface PersistedStateList extends Iterable<PersistedState> {
     throw new IndexOutOfBoundsException();
   }
 
-  int size();
+  public PersistedState remove(int index) {
+    PersistedStateSubscription removed = maps.remove(index);
+    removed.cancel();
+    update();
+    return removed.get();
+  }
 
-  Stream<PersistedState> stream();
+  public int size() {
+    return maps.size();
+  }
+
+  public Stream<PersistedState> stream() {
+    return maps.stream().map(PersistedStateSubscription::get);
+  }
+
+  public void clear() {
+    maps.forEach(PersistedStateSubscription::cancel);
+    maps.clear();
+    update();
+  }
+
+  public Observable<PersistedStateList> changes() {
+    return changes;
+  }
+
+  static class PersistedStateListSubscription {
+    private final PersistedStateList persistedStateList;
+    private final Disposable disposable;
+
+    public PersistedStateListSubscription(Runnable update) {
+      persistedStateList = new PersistedStateList();
+      disposable = persistedStateList.changes().observe(m -> update.run());
+    }
+
+    public PersistedStateList get() {
+      return persistedStateList;
+    }
+
+    public void cancel() {
+      disposable.cancel();
+    }
+  }
 }

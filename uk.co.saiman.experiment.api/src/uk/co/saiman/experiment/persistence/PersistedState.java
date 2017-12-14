@@ -27,24 +27,94 @@
  */
 package uk.co.saiman.experiment.persistence;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.persistence.PersistedStateList.PersistedStateListSubscription;
+import uk.co.saiman.observable.Disposable;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.property.Property;
 
-public interface PersistedState {
-  void clear();
+public class PersistedState {
+  private final Map<String, String> strings = new HashMap<>();
+  private final Map<String, PersistedStateSubscription> maps = new HashMap<>();
+  private final Map<String, PersistedStateListSubscription> mapLists = new HashMap<>();
 
-  Stream<String> getStrings();
+  private final HotObservable<PersistedState> changes = new HotObservable<>();
 
-  Property<String> forString(String id);
+  private void update() {
+    changes.next(this);
+  }
 
-  Stream<String> getMaps();
+  public void clear() {
+    strings.clear();
+    update();
+  }
 
-  PersistedState forMap(String id);
+  boolean isEmpty() {
+    return strings.isEmpty() && maps.values().stream().allMatch(p -> p.get().isEmpty())
+        && mapLists.values().stream().allMatch(p -> p.get().isEmpty());
+  }
 
-  Stream<String> getMapLists();
+  public Stream<String> getStrings() {
+    return strings.keySet().stream();
+  }
 
-  PersistedStateList forMapList(String id);
+  public Property<String> forString(String id) {
+    return Property.over(() -> strings.get(id), v -> {
+      if (!Objects.equals(strings.put(id, v), v)) {
+        update();
+      }
+    });
+  }
 
-  void copyState(PersistedState initialState);
+  public Stream<String> getMaps() {
+    return maps.keySet().stream();
+  }
+
+  public PersistedState forMap(String id) {
+    return maps.computeIfAbsent(id, i -> new PersistedStateSubscription(this::update)).get();
+  }
+
+  public Stream<String> getMapLists() {
+    return mapLists.keySet().stream();
+  }
+
+  public PersistedStateList forMapList(String id) {
+    return mapLists
+        .computeIfAbsent(id, i -> new PersistedStateListSubscription(this::update))
+        .get();
+  }
+
+  public void copyState(PersistedState from) {
+    clear();
+    from.getStrings().forEach(s -> forString(s).set(from.forString(s).get()));
+
+    // TODO
+  }
+
+  public Observable<PersistedState> changes() {
+    return changes;
+  }
+
+  static class PersistedStateSubscription {
+    private final PersistedState persistedState;
+    private final Disposable disposable;
+
+    public PersistedStateSubscription(Runnable update) {
+      persistedState = new PersistedState();
+      disposable = persistedState.changes().observe(m -> update.run());
+    }
+
+    public PersistedState get() {
+      return persistedState;
+    }
+
+    public void cancel() {
+      disposable.cancel();
+    }
+  }
 }

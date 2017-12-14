@@ -560,8 +560,8 @@ public interface Observable<M> {
     this
         .thenAfter(onCompletion(() -> observation.get().requestNext()))
         .reduceBackpressure(identity, accumulator)
-        .then(onObservation(o -> observation.set(o)))
-        .observe(m -> future.complete(m));
+        .then(onObservation(observation::set))
+        .observe(future::complete);
 
     return future;
   }
