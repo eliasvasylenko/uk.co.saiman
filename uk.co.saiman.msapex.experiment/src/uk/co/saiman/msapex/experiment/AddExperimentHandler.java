@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.saiman.msapex.experiment.RenameExperiment.requestExperimentNameDialog;
+import static uk.co.saiman.msapex.experiment.RenameExperimentHandler.requestExperimentNameDialog;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 

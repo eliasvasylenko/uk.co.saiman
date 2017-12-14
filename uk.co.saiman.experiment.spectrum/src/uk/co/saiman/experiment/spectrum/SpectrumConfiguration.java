@@ -46,5 +46,5 @@ public interface SpectrumConfiguration {
 
   void setProcessing(List<SpectrumProcessor> processors);
 
-  List<SpectrumProcessor> getProcessing();
+  List<SpectrumProcessorType> getProcessing();
 }

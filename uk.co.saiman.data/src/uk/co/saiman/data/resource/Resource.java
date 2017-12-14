@@ -28,6 +28,7 @@
 package uk.co.saiman.data.resource;
 
 import java.io.IOException;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -41,4 +42,8 @@ public interface Resource {
   ReadableByteChannel read() throws IOException;
 
   WritableByteChannel write() throws IOException;
+
+  ByteChannel open() throws IOException;
+
+  void delete() throws IOException;
 }

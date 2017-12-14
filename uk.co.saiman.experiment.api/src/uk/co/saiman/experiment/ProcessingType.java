@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment;
 
+import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
+import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import uk.co.saiman.reflection.token.TypeParameter;
@@ -53,15 +55,17 @@ public interface ProcessingType<S, T, U> extends ExperimentType<S, U> {
   U process(T input);
 
   @Override
-  default boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return parentNode.getType().getResultType().isAssignableTo(getInputType());
+  default ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
+    return parentNode.getType().getResultType().isAssignableTo(getInputType())
+        ? FULFILLED
+        : UNFULFILLED;
   }
 
   @Override
-  default boolean mayComeBefore(
+  default ExperimentNodeConstraint mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
       ExperimentType<?, ?> descendantNodeType) {
-    return true;
+    return FULFILLED;
   }
 
   /**

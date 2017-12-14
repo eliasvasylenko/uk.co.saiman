@@ -85,9 +85,19 @@ public interface ExperimentNode<S, T> {
    * @return the node's index in its parent's list of children
    */
   default int getIndex() {
-    return getParent().map(p -> p.getChildren().collect(toList()).indexOf(this)).orElse(
-        getWorkspace().getExperiments().collect(toList()).indexOf(this));
+    return getParent().get().getChildren().collect(toList()).indexOf(this);
   }
+
+  /**
+   * Move the node to the given index. A node cannot be reparented, it can only be
+   * moved to a different index under its existing parent (or within workspace in
+   * the case of a root node).
+   * 
+   * @param index
+   *          the index to move the node to
+   * @throws IndexOutOfBoundsException
+   */
+  void moveToIndex(int index);
 
   /**
    * @return the root part of the experiment tree this part occurs in
@@ -114,8 +124,10 @@ public interface ExperimentNode<S, T> {
    */
   @SuppressWarnings("unchecked")
   default <U, V> Optional<ExperimentNode<U, V>> findAncestor(ExperimentType<U, V> type) {
-    return getAncestors().filter(a -> type.equals(a.getType())).findFirst().map(
-        a -> (ExperimentNode<U, V>) a);
+    return getAncestors()
+        .filter(a -> type.equals(a.getType()))
+        .findFirst()
+        .map(a -> (ExperimentNode<U, V>) a);
   }
 
   /**
@@ -130,8 +142,10 @@ public interface ExperimentNode<S, T> {
   @SuppressWarnings("unchecked")
   default <U, V> Optional<ExperimentNode<? extends U, ? extends V>> findAncestor(
       Collection<? extends ExperimentType<? extends U, ? extends V>> types) {
-    return getAncestors().filter(a -> types.contains(a.getType())).findFirst().map(
-        a -> (ExperimentNode<? extends U, ? extends V>) a);
+    return getAncestors()
+        .filter(a -> types.contains(a.getType()))
+        .findFirst()
+        .map(a -> (ExperimentNode<? extends U, ? extends V>) a);
   }
 
   /**
@@ -145,8 +159,9 @@ public interface ExperimentNode<S, T> {
   @SuppressWarnings("unchecked")
   default <U, V> Stream<ExperimentNode<? extends U, ? extends V>> findAncestors(
       Collection<? extends ExperimentType<? extends U, ? extends V>> types) {
-    return getAncestors().filter(a -> types.contains(a.getType())).map(
-        a -> (ExperimentNode<? extends U, ? extends V>) a);
+    return getAncestors()
+        .filter(a -> types.contains(a.getType()))
+        .map(a -> (ExperimentNode<? extends U, ? extends V>) a);
   }
 
   /**
@@ -171,13 +186,50 @@ public interface ExperimentNode<S, T> {
   Stream<ExperimentType<?, ?>> getAvailableChildExperimentTypes();
 
   /**
-   * Add a child experiment node of the given type to this node.
+   * Add an experiment node of the given type as the last child of this node.
    * 
    * @param childType
-   *          The type of experiment
-   * @return A new child experiment part of the given type
+   *          the type of experiment
+   * @return a new child experiment part of the given type
    */
-  <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType);
+  default <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType) {
+    return addChild(childType, (int) getChildren().count());
+  }
+
+  /**
+   * Add an experiment node of the given type as a child of this node.
+   * 
+   * @param childType
+   *          the type of experiment
+   * @param index
+   *          the positional index at which to add the child
+   * @return a new child experiment part of the given type
+   */
+  <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType, int index);
+
+  /**
+   * Add a copy of the given experiment node as the last child of this node.
+   * 
+   * @param node
+   *          the node to copy
+   * @return a new child experiment part of the same type and with the same state
+   *         as that given
+   */
+  default <U, V> ExperimentNode<U, V> addCopy(ExperimentNode<U, V> node) {
+    return addCopy(node, (int) getChildren().count());
+  }
+
+  /**
+   * Add a copy of the given experiment node as a child of this node.
+   * 
+   * @param node
+   *          the node to copy
+   * @param index
+   *          the positional index at which to add the child
+   * @return a new child experiment part of the same type and with the same state
+   *         as that given
+   */
+  <U, V> ExperimentNode<U, V> addCopy(ExperimentNode<U, V> node, int index);
 
   /**
    * @return the current execution lifecycle state of the experiment part
@@ -185,9 +237,10 @@ public interface ExperimentNode<S, T> {
   ObservableValue<ExperimentLifecycleState> lifecycleState();
 
   default TypeToken<ExperimentNode<S, T>> getThisTypeToken() {
-    return new TypeToken<ExperimentNode<S, T>>() {}.withTypeArguments(
-        new TypeArgument<S>(getType().getStateType()) {},
-        new TypeArgument<T>(getType().getResultType()) {});
+    return new TypeToken<ExperimentNode<S, T>>() {}
+        .withTypeArguments(
+            new TypeArgument<S>(getType().getStateType()) {},
+            new TypeArgument<T>(getType().getResultType()) {});
   }
 
   default TypedReference<ExperimentNode<S, T>> asTypedObject() {

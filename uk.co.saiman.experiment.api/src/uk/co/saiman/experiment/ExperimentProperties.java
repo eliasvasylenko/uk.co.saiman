@@ -109,4 +109,8 @@ public interface ExperimentProperties {
   Localized<String> renameExperimentName(String name);
 
   Localized<String> cannotCreateWorkspace(Workspace experimentWorkspace);
+
+  Localized<String> addSpectrumProcessor();
+
+  Localized<String> addSpectrumProcessorDescription();
 }

@@ -7,7 +7,7 @@
       <attribute name="version" type="Version" value="0.1.0"/>
     </capability>
     <capability namespace="osgi.content">
-      <attribute name="osgi.content" value="6d2be98032533a8d1bdef6aad6cc4a71a2ff6f083d3e2e491bbfec3014a961dc"/>
+      <attribute name="osgi.content" value="6D2BE98032533A8D1BDEF6AAD6CC4A71A2FF6F083D3E2E491BBFEC3014A961DC"/>
       <attribute name="url" value="bndtools.runtime.eclipse.applaunch/bndtools.runtime.eclipse.applaunch-0.1.0.jar"/>
       <attribute name="size" type="Long" value="14079"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>
@@ -37,7 +37,7 @@
       <attribute name="version" type="Version" value="1.0.0.201706181304"/>
     </capability>
     <capability namespace="osgi.content">
-      <attribute name="osgi.content" value="8b9a0ee73a4305a5817d3c55ce10725ea94729464b5aae8374dd84b0b9cfba4d"/>
+      <attribute name="osgi.content" value="8B9A0EE73A4305A5817D3C55CE10725EA94729464B5AAE8374DD84B0B9CFBA4D"/>
       <attribute name="url" value="uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar"/>
       <attribute name="size" type="Long" value="629186"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>

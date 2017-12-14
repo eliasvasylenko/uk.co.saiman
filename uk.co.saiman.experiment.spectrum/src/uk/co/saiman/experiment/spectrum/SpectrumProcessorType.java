@@ -1,13 +1,16 @@
 package uk.co.saiman.experiment.spectrum;
 
+import uk.co.saiman.data.spectrum.SpectrumProcessor;
 import uk.co.saiman.experiment.persistence.PersistedState;
 
-public interface SpectrumProcessorType<T extends SpectrumProcessorConfiguration> {
+public interface SpectrumProcessorType {
   String getId();
 
   String getName();
 
-  String getDescription();
+  SpectrumProcessor getProcessor();
 
-  T createConfiguration(PersistedState state);
+  void save(PersistedState state);
+
+  SpectrumProcessorType load(PersistedState state);
 }

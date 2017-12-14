@@ -27,18 +27,19 @@
  */
 package uk.co.saiman.data;
 
+import static uk.co.saiman.observable.Observer.onObservation;
+
 import java.util.function.Function;
 
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Resource;
-import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.Observation;
 
 /**
- * Sometimes a data object is mutable, in which case ideally we would like to
- * automatically invalidate the {@link Data container} upon modification. This
- * class enables this functionality by allowing the user to attach an observer
- * to the data.
+ * For mutable objects we may like to automatically invalidate the {@link Data
+ * container} upon modification. This class enables this functionality by
+ * allowing the user to map an object to an observable for invalidation events.
  * 
  * @author Elias N Vasylenko
  *
@@ -47,22 +48,25 @@ import uk.co.saiman.observable.Observable;
  */
 public class ObservableData<T> implements Data<T> {
   private final Data<T> backingData;
-  private final Function<? super T, ? extends Observable<?>> observable;
-  private Disposable observation;
+  private final Function<? super T, ? extends Observable<? extends T>> observable;
+  private Observation observation;
 
   public ObservableData(
       Data<T> backingData,
       Function<? super T, ? extends Observable<?>> observable) {
     this.backingData = backingData;
-    this.observable = observable;
+    this.observable = o -> observable.apply(o).map(m -> o);
   }
 
   private void addObserver(T data) {
-    observation = observable.apply(data).observe((Object o) -> makeDirty());
+    observable.apply(data).then(onObservation(o -> observation = o)).observe(m -> makeDirty());
   }
 
   @Override
   public boolean save() {
+    if (observation != null)
+      observation.requestNext();
+
     boolean saved = backingData.save();
 
     if (saved) {
@@ -77,9 +81,6 @@ public class ObservableData<T> implements Data<T> {
     return backingData.load();
   }
 
-  /**
-   * Mark the data as inconsistent with the previously saved state.
-   */
   @Override
   public void makeDirty() {
     backingData.makeDirty();
@@ -87,6 +88,11 @@ public class ObservableData<T> implements Data<T> {
     if (observation != null) {
       observation.cancel();
     }
+  }
+
+  @Override
+  public boolean isDirty() {
+    return backingData.isDirty();
   }
 
   @Override
@@ -124,10 +130,5 @@ public class ObservableData<T> implements Data<T> {
   @Override
   public DataFormat<T> getFormat() {
     return backingData.getFormat();
-  }
-
-  @Override
-  public boolean isDirty() {
-    return backingData.isDirty();
   }
 }

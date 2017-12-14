@@ -28,6 +28,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import static java.util.Comparator.reverseOrder;
+import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 
 import java.io.File;
@@ -37,7 +38,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -46,12 +46,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
+import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.text.properties.Localized;
 
@@ -60,31 +61,22 @@ import uk.co.saiman.text.properties.Localized;
  * 
  * @author Elias N Vasylenko
  */
-public class RenameExperiment {
-  /**
-   * The ID of the command in the e4 model fragment.
-   */
-  public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.addexperiment";
-
+public class RenameExperimentHandler {
   @Execute
-  void execute(MPart part, @Localize ExperimentProperties text) {
-    ExperimentPart experimentPart = (ExperimentPart) part.getObject();
-    Object itemData = experimentPart.getExperimentTreeController().getSelectionData().data();
-
-    if (!(itemData instanceof ExperimentNode<?, ?>
-        && ((ExperimentNode<?, ?>) itemData).getType() instanceof ExperimentRoot)) {
-      throw new ExperimentException(
-          text.exception().illegalCommandForSelection(COMMAND_ID, itemData));
-    }
-
-    @SuppressWarnings("unchecked")
-    ExperimentNode<ExperimentConfiguration, ?> selectedNode = (ExperimentNode<ExperimentConfiguration, ?>) itemData;
+  void execute(
+      Workspace workspace,
+      @Localize ExperimentProperties text,
+      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> node,
+      @AdaptNamed(ACTIVE_SELECTION) ExperimentConfiguration nodeConfiguration,
+      @AdaptNamed(ACTIVE_SELECTION) TreeEntry<?> entry) {
+    System.out.println(node);
+    System.out.println(nodeConfiguration);
 
     requestExperimentNameDialog(
-        experimentPart.getExperimentWorkspace(),
+        workspace,
         text.renameExperiment(),
-        text.renameExperimentName(selectedNode.getState().getName())).ifPresent(name -> {
-          if (experimentPart.getExperimentWorkspace().getExperiment(name).isPresent()) {
+        text.renameExperimentName(nodeConfiguration.getName())).ifPresent(name -> {
+          if (workspace.getExperiment(name).isPresent()) {
             throw new ExperimentException(text.exception().experimentAlreadyExists(name));
           }
 
@@ -93,8 +85,8 @@ public class RenameExperiment {
            * RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
            */
 
-          selectedNode.getState().setName(name);
-          experimentPart.getExperimentTreeController().refresh();
+          nodeConfiguration.setName(name);
+          entry.refresh(false);
         });
   }
 
@@ -114,8 +106,9 @@ public class RenameExperiment {
     okButton.setDisable(true);
     nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
 
-      boolean exists = workspace.getExperiments().anyMatch(
-          e -> e.getState().getName().equals(newValue));
+      boolean exists = workspace
+          .getExperiments()
+          .anyMatch(e -> e.getState().getName().equals(newValue));
 
       boolean isValid = ExperimentConfiguration.isNameValid(newValue);
 

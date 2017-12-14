@@ -27,21 +27,20 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public class XmlResult<T> extends ObservablePropertyImpl<T> implements Result<T> {
-  private final XmlExperimentNode<?, T> node;
+public class ResultImpl<T> extends ObservablePropertyImpl<T> implements Result<T> {
+  private final ExperimentNodeImpl<?, T> node;
 
-  public XmlResult(XmlExperimentNode<?, T> node) {
+  public ResultImpl(ExperimentNodeImpl<?, T> node) {
     super(new NullPointerException());
     this.node = node;
   }
 
   @Override
-  public ExperimentNode<?, ?> getExperimentNode() {
+  public ExperimentNodeImpl<?, ?> getExperimentNode() {
     return node;
   }
 

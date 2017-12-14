@@ -50,8 +50,8 @@ public interface Data<T> {
   boolean load() throws DataException;
 
   /**
-   * @return true if the resource has been changed since it was last saved,
-   *         false otherwise
+   * @return true if the resource has been changed since it was last saved, false
+   *         otherwise
    */
   boolean isDirty();
 

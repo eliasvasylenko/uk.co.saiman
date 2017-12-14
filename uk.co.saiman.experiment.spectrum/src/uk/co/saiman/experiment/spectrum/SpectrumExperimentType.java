@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static uk.co.saiman.data.spectrum.SpectrumProcessor.identity;
 import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
 import javax.measure.quantity.Dimensionless;
@@ -38,6 +39,7 @@ import uk.co.saiman.data.Data;
 import uk.co.saiman.data.spectrum.ContinuousFunctionAccumulator;
 import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
+import uk.co.saiman.data.spectrum.SpectrumProcessor;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
@@ -96,20 +98,38 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 
     Data<Spectrum> data = context
         .setResult(
-            new CachingData<>(
+            new CachingData<Spectrum>(
                 context.getLocation(),
                 SPECTRUM_DATA_NAME,
-                new RegularSampledSpectrumFormat(null)));
+                new RegularSampledSpectrumFormat(null)) {
+
+            });
 
     /*
      * TODO some sort of invalidate/lazy-revalidate message passer
+     * 
+     * ContinuousFunctionAccumulator already has this, it provides an observable
+     * with backpressure which gives the latest spectrum every time it is requested
+     * and otherwise does no work (i.e. no array copying etc.). The limitation is
+     * that it can't notify a listener when a new item is actually available without
+     * actually doing the work and sending an item, the listener has to just request
+     * and see.
+     * 
+     * The problem is how to pass this through the Result API to users without
+     * losing the laziness so we can request at e.g. the monitor refresh rate.
      */
     data
         .set(
             new SampledSpectrum(
-                accumulator.getAccumulation(),
+                accumulator.accumulation().getNext().join().revalidate(),
                 null,
-                context.node().getState().getProcessing()));
+                context
+                    .node()
+                    .getState()
+                    .getProcessing()
+                    .stream()
+                    .map(SpectrumProcessorType::getProcessor)
+                    .reduce(identity(), SpectrumProcessor::andThen)));
 
     device.startAcquisition();
 

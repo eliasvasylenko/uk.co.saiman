@@ -37,8 +37,8 @@ import javax.measure.UnitConverter;
 import uk.co.saiman.data.function.ArraySampledContinuousFunction;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
+import uk.co.saiman.observable.Invalidation;
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.Observer;
 
 /**
  * A continuous function to accumulate the sum of input continuous functions.
@@ -57,6 +57,7 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
   private final Unit<UR> unitRange;
   private double[] intensities;
   private long count;
+  private final Observable<Invalidation<SampledContinuousFunction<UD, UR>>> accumulation;
 
   /**
    * @param domain
@@ -72,12 +73,12 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
     this.unitRange = unitRange;
     this.intensities = new double[domain.getDepth()];
 
-    source
+    accumulation = source
         .then(m -> count++)
         .aggregateBackpressure()
         .executeOn(newSingleThreadExecutor())
-        .then(onObservation(o -> o.requestNext()))
-        .observe(Observer.singleUse(o -> a -> {
+        .then(onObservation(o -> o.requestUnbounded()))
+        .map(a -> {
           synchronized (intensities) {
             for (SampledContinuousFunction<?, UR> c : a) {
               UnitConverter converter = c.range().getUnit().getConverterTo(unitRange);
@@ -87,7 +88,13 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
               }
             }
           }
-          o.requestNext();
+          return intensities;
+        })
+        .invalidateLazyRevalidate()
+        .map(m -> m.map(i -> {
+          synchronized (i) {
+            return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
+          }
         }));
   }
 
@@ -98,9 +105,15 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
     return count;
   }
 
-  public SampledContinuousFunction<UD, UR> getAccumulation() {
-    synchronized (intensities) {
-      return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
-    }
+  public SampledDomain<UD> getDomain() {
+    return domain;
+  }
+
+  public Unit<UR> getUnitRange() {
+    return unitRange;
+  }
+
+  public Observable<Invalidation<SampledContinuousFunction<UD, UR>>> accumulation() {
+    return accumulation;
   }
 }

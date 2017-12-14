@@ -32,12 +32,7 @@ import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.eclipse.treeview.TreeEntry;
-import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * Add an experiment to the workspace.
@@ -45,25 +40,8 @@ import uk.co.saiman.reflection.token.TypeToken;
  * @author Elias N Vasylenko
  */
 public class RunExperimentHandler {
-  /**
-   * The ID of the command in the e4 model fragment.
-   */
-  public static final String COMMAND_ID = "uk.co.saiman.msapex.experiment.command.runexperiment";
-
   @Execute
-  void execute(
-      @Localize ExperimentProperties text,
-      @AdaptNamed(ACTIVE_SELECTION) TreeEntry<?> entry) {
-    TreeEntry<?> ancestor = entry;
-
-    while (!ancestor.type().isAssignableTo(new TypeToken<ExperimentNode<?, ?>>() {})) {
-      ancestor = ancestor.parent().orElseThrow(
-          () -> new ExperimentException(
-              text.exception().illegalCommandForSelection(COMMAND_ID, entry)));
-    }
-
-    ExperimentNode<?, ?> experimentNode = (ExperimentNode<?, ?>) ancestor.data();
-
+  void execute(@AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> experimentNode) {
     new Thread(experimentNode::execute).start();
   }
 }

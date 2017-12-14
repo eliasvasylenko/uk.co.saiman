@@ -5,11 +5,13 @@
     <elements xsi:type="commands:Command" xmi:id="_RiIukHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.runexperiment" commandName="Run Experiment" description="Run the selected experiment" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_VMhVoHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.removenode" commandName="Remove Node" description="Remove an experiment node from the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_TIhgQM7DEeePVOUOTm0QwA" elementId="uk.co.saiman.msapex.experiment.command.addprocessor" commandName="Add Processor" description="Add a data processor to the experiment definition" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Command" xmi:id="_7__6MN9EEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.command.renameexperiment" commandName="Rename Experiment" description="Rename the selected experiment" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_KYYdoHzwEeeLpZ9wHq5Ynw" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Handler" xmi:id="_NQSe4HzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.addexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddExperimentHandler" command="_zfCuYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Handler" xmi:id="_MlXv4JeaEee2AtH7-tuIcw" elementId="uk.co.saiman.msapex.experiment.handler.runexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RunExperimentHandler" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Handler" xmi:id="_ebj4EHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.removenode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RemoveNodeHandler" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Handler" xmi:id="_AzISAN9FEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handler.renameexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RenameExperimentHandler" command="_7__6MN9EEee47os9dS7QbA"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_4bs1oHzvEeeLpZ9wHq5Ynw" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Category" xmi:id="_6M4fYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.category" name="Experiments" description="Experiment definition and processing"/>
@@ -20,7 +22,11 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="menu:PopupMenu" xmi:id="_Pdgl4LshEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.popupmenu.node" label="Add Node">
-      <children xsi:type="menu:DynamicMenuContribution" xmi:id="_Rj2nULshEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddNodeMenu"/>
+      <children xsi:type="menu:Menu" xmi:id="_fGt3MN9DEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.menu.addnode" label="Add Node">
+        <children xsi:type="menu:DynamicMenuContribution" xmi:id="_Rj2nULshEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddNodeMenu"/>
+      </children>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_aKoXsN9DEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.removenode" label="Remove Node" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_3FoR8N9EEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.renameexperiment" label="Rename Experiment" command="_7__6MN9EEee47os9dS7QbA"/>
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_iYArkLsiEeel5-btXoqucA" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">

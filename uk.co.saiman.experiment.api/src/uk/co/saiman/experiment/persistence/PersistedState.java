@@ -27,16 +27,24 @@
  */
 package uk.co.saiman.experiment.persistence;
 
+import java.util.stream.Stream;
+
 import uk.co.saiman.property.Property;
 
 public interface PersistedState {
   void clear();
 
-  void merge(PersistedState state);
+  Stream<String> getStrings();
 
   Property<String> forString(String id);
 
+  Stream<String> getMaps();
+
   PersistedState forMap(String id);
 
+  Stream<String> getMapLists();
+
   PersistedStateList forMapList(String id);
+
+  void copyState(PersistedState initialState);
 }

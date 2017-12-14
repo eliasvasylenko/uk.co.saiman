@@ -32,6 +32,7 @@ import static java.util.stream.Stream.of;
 import static uk.co.saiman.collection.StreamUtilities.streamOptional;
 import static uk.co.saiman.collection.StreamUtilities.tryOptional;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdapterFactory;
@@ -45,11 +46,13 @@ import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
-  private final Workspace workspace;
+  private final List<ExperimentType<?, ?>> experimentTypes;
 
-  public ExperimentNodeAdapterFactory(IAdapterManager adapterManager, Workspace workspace) {
+  public ExperimentNodeAdapterFactory(
+      IAdapterManager adapterManager,
+      List<ExperimentType<?, ?>> experimentTypes) {
     this.adapterManager = adapterManager;
-    this.workspace = workspace;
+    this.experimentTypes = experimentTypes;
     adapterManager.registerAdapters(this, ExperimentNode.class);
   }
 
@@ -94,8 +97,8 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   public Class<?>[] getAdapterList() {
     return concat(
         of(ExperimentType.class, Experiment.class, Workspace.class),
-        workspace
-            .getRegisteredExperimentTypes()
+        experimentTypes
+            .stream()
             .map(type -> type.getStateType().getErasedType())
             .flatMap(this::getTransitive)).toArray(Class<?>[]::new);
   }
@@ -103,8 +106,10 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   public Stream<? extends Class<?>> getTransitive(Class<?> adapterType) {
     return concat(
         of(adapterType),
-        of(adapterManager.computeAdapterTypes(adapterType)).distinct().flatMap(
-            typeName -> streamOptional(
-                tryOptional(() -> getClass().getClassLoader().loadClass(typeName)))));
+        of(adapterManager.computeAdapterTypes(adapterType))
+            .distinct()
+            .flatMap(
+                typeName -> streamOptional(
+                    tryOptional(() -> getClass().getClassLoader().loadClass(typeName)))));
   }
 }

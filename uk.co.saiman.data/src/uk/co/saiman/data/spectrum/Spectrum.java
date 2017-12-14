@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.data.spectrum;
 
-import java.util.stream.Stream;
-
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
@@ -54,5 +52,5 @@ public interface Spectrum {
    */
   SpectrumCalibration getCalibration();
 
-  Stream<SpectrumProcessor> getProcessing();
+  SpectrumProcessor getProcessing();
 }

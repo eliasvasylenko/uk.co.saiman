@@ -64,7 +64,7 @@ public interface ExperimentExceptionProperties {
 
   String cannotCreateWorkspace(Workspace experimentWorkspace);
 
-  String cannotLoadExperiment(Path path);
+  String cannotLoadExperiment();
 
   String duplicateExperimentName(String name);
 
@@ -82,9 +82,7 @@ public interface ExperimentExceptionProperties {
 
   String cannotDelete(Path newLocation);
 
-  String illegalCommandForSelection(String string, Object object);
-
-  String cannotRemoveExperiment(Experiment experiment);
+  String cannotRemoveExperiment(ExperimentNode<?, ?> experiment);
 
   String cannotOpenResultEditor();
 
@@ -95,4 +93,14 @@ public interface ExperimentExceptionProperties {
   String cannotResolveExperimentResult(Workspace experimentWorkspace, Path path);
 
   String experimentAlreadyExists(String name);
+
+  String cannotRenameExperiment(ExperimentNode<?, ?> experimentNode, String id);
+
+  String cannotPrepareLocation(ExperimentNode<?, ?> experimentNode);
+
+  String cannotCreateExperiment(ExperimentNode<?, ?> parent);
+
+  String cannotCreateWorkspace(Path workspaceRoot);
+
+  String cannotCopyFromOutsideWorkspace();
 }

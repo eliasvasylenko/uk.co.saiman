@@ -27,10 +27,20 @@
  */
 package uk.co.saiman.msapex.instrument.acquisition;
 
-import org.eclipse.e4.core.di.annotations.Execute;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.fx.core.di.Service;
+
+import uk.co.saiman.acquisition.AcquisitionDevice;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -39,8 +49,22 @@ import javafx.scene.control.Alert.AlertType;
  * @author Elias N Vasylenko
  */
 public class SelectNextAcquisitionDeviceHandler {
+  @Inject
+  @Service
+  List<AcquisitionDevice> availableDevices;
+
   @Execute
-  void execute() {
-    new Alert(AlertType.INFORMATION, "Hello there!").showAndWait();
+  void execute(IEclipseContext context, @Optional AcquisitionDeviceSelection selectedDevices) {
+    List<AcquisitionDevice> availableDevices = new ArrayList<>(this.availableDevices);
+    List<AcquisitionDevice> selection = selectedDevices.getSelectedDevices().collect(toList());
+
+    int index = selection.size() != 1 ? -1 : availableDevices.indexOf(selection.get(0));
+    if (++index == availableDevices.size())
+      index = 0;
+
+    context
+        .modify(
+            AcquisitionDeviceSelection.class,
+            new AcquisitionDeviceSelection(singleton(availableDevices.get(index))));
   }
 }

@@ -14,4 +14,12 @@ public interface SpectrumProcessor {
    * @return
    */
   double[] process(double[] data);
+
+  default SpectrumProcessor andThen(SpectrumProcessor next) {
+    return d -> next.process(process(d));
+  }
+
+  static SpectrumProcessor identity() {
+    return d -> d;
+  }
 }

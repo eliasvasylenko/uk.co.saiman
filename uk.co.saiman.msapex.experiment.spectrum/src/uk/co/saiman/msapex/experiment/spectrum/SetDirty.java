@@ -34,6 +34,5 @@ public class SetDirty {
   @Execute
   void execute(MDirtyable dirtyable) {
     dirtyable.setDirty(!dirtyable.isDirty());
-    System.out.println("dirty? " + dirtyable.isDirty());
   }
 }

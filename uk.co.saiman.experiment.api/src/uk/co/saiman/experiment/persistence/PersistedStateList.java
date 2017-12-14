@@ -38,6 +38,19 @@ public interface PersistedStateList extends Iterable<PersistedState> {
 
   PersistedState remove(int index);
 
+  PersistedState move(int fromIndex, int toIndex);
+
+  void clear();
+
+  default PersistedState remove(PersistedState state) {
+    for (int i = 0; i < size(); i++) {
+      if (get(i).equals(state)) {
+        return remove(i);
+      }
+    }
+    throw new IndexOutOfBoundsException();
+  }
+
   int size();
 
   Stream<PersistedState> stream();

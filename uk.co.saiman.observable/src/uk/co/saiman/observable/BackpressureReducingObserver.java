@@ -33,38 +33,63 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class BackpressureReducingObserver<T, M> extends PassthroughObserver<T, M> {
-  private final Function<? super T, ? extends M> initial;
-  private final BiFunction<? super M, ? super T, ? extends M> accumulator;
-
+public abstract class BackpressureReducingObserver<T, M> extends PassthroughObserver<T, M> {
   private M current;
   private boolean complete;
   private final RequestCount outstandingRequests = new RequestCount();
 
-  public BackpressureReducingObserver(
+  public BackpressureReducingObserver(Observer<? super M> downstreamObserver) {
+    super(downstreamObserver);
+  }
+
+  public static <T, M> BackpressureReducingObserver<T, M> backpressureReducingObserver(
       Observer<? super M> downstreamObserver,
       Supplier<? extends M> identity,
       BiFunction<? super M, ? super T, ? extends M> accumulator) {
-    super(downstreamObserver);
-
     requireNonNull(identity);
-    this.accumulator = requireNonNull(accumulator);
-    this.initial = m -> accumulator.apply(identity.get(), m);
+    requireNonNull(accumulator);
+
+    return new BackpressureReducingObserver<T, M>(downstreamObserver) {
+      @Override
+      public M initialize(T message) {
+        return accumulate(identity.get(), message);
+      }
+
+      @Override
+      public M accumulate(M current, T message) {
+        return accumulator.apply(current, message);
+      }
+    };
   }
 
-  public BackpressureReducingObserver(
+  public static <T, M> BackpressureReducingObserver<T, M> backpressureReducingObserver(
       Observer<? super M> downstreamObserver,
       Function<? super T, ? extends M> initial,
       BiFunction<? super M, ? super T, ? extends M> accumulator) {
-    super(downstreamObserver);
+    requireNonNull(initial);
+    requireNonNull(accumulator);
 
-    this.accumulator = requireNonNull(accumulator);
-    this.initial = requireNonNull(initial);
+    return new BackpressureReducingObserver<T, M>(downstreamObserver) {
+      @Override
+      public M initialize(T message) {
+        return initial.apply(message);
+      }
+
+      @Override
+      public M accumulate(M current, T message) {
+        return accumulator.apply(current, message);
+      }
+    };
   }
 
   @Override
   public void onObserve(Observation observation) {
-    super.onObserve(new Observation() {
+    super.onObserve(createDownstreamObservation(observation));
+    observation.requestUnbounded();
+  }
+
+  protected Observation createDownstreamObservation(Observation observation) {
+    return new Observation() {
       @Override
       public void requestNext() {
         request(1);
@@ -100,11 +125,12 @@ public class BackpressureReducingObserver<T, M> extends PassthroughObserver<T, M
       public long getPendingRequestCount() {
         return outstandingRequests.getCount();
       }
-
-    });
-
-    observation.requestUnbounded();
+    };
   }
+
+  public abstract M initialize(T message);
+
+  public abstract M accumulate(M current, T message);
 
   private void sendNext() {
     synchronized (outstandingRequests) {
@@ -119,9 +145,9 @@ public class BackpressureReducingObserver<T, M> extends PassthroughObserver<T, M
   public void onNext(T message) {
     synchronized (outstandingRequests) {
       if (current == null)
-        current = initial.apply(message);
+        current = initialize(message);
       else
-        current = accumulator.apply(current, message);
+        current = accumulate(current, message);
 
       if (!outstandingRequests.isFulfilled()) {
         sendNext();

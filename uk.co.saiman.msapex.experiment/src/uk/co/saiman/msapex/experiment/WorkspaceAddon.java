@@ -32,6 +32,8 @@ import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -41,13 +43,17 @@ import javax.inject.Named;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.fx.core.di.LocalInstance;
+import org.eclipse.fx.core.di.Service;
 import org.eclipse.osgi.service.datalocation.Location;
-import org.osgi.framework.Constants;
 
-import aQute.bnd.annotation.headers.RequireCapability;
 import javafx.fxml.FXMLLoader;
+import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.WorkspaceFactory;
+import uk.co.saiman.experiment.filesystem.FileSystemLocationManager;
+import uk.co.saiman.experiment.impl.WorkspaceImpl;
+import uk.co.saiman.experiment.persistence.json.JsonPersistenceManager;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -58,13 +64,6 @@ import uk.co.saiman.log.Log.Level;
  * 
  * @author Elias N Vasylenko
  */
-/*
- * Specify a service capability requirement on the ExperimentWorkspaceFactory
- * injection via the bundle manifest.
- */
-@RequireCapability(
-    ns = WorkspaceAddon.OSGI_SERVICE,
-    filter = "(" + Constants.OBJECTCLASS + "=uk.co.saiman.experiment.WorkspaceFactory)")
 public class WorkspaceAddon {
   static final String OSGI_SERVICE = "osgi.service";
 
@@ -78,46 +77,48 @@ public class WorkspaceAddon {
 
   @Inject
   private Log log;
+  @Inject
+  @Localize
+  private ExperimentProperties text;
 
-  private Workspace workspace;
+  private List<ExperimentType<?, ?>> experimentTypes;
 
   @PostConstruct
   void initialize(
       @LocalInstance FXMLLoader loader,
       @Named(INSTANCE_LOCATION) Location instanceLocation,
-      WorkspaceFactory workspaceFactory) {
+      @Service List<ExperimentType<?, ?>> experimentTypes) {
+    this.experimentTypes = experimentTypes;
+
     try {
-      workspace = initializeWorkspace(instanceLocation, workspaceFactory);
+      initializeWorkspace(instanceLocation);
       initializeAdapters();
     } catch (Exception e) {
       log.log(Level.ERROR, e);
       e.printStackTrace();
     }
-
-    /*
-     * 
-     * 
-     * TODO invalidate the AdapterManager cache when new types of experiment are
-     * added to the workspace
-     * 
-     * 
-     * 
-     */
   }
 
   private void initializeAdapters() {
-    experimentNodeAdapterFactory = new ExperimentNodeAdapterFactory(adapterManager, workspace);
+    List<ExperimentType<?, ?>> experimentTypes = new ArrayList<>(this.experimentTypes.size() + 1);
+    experimentTypes.addAll(this.experimentTypes);
+    experimentTypes.add(context.get(Workspace.class).getExperimentRootType());
+    experimentNodeAdapterFactory = new ExperimentNodeAdapterFactory(
+        adapterManager,
+        experimentTypes);
     experimentAdapterFactory = new ExperimentAdapterFactory(
         adapterManager,
         experimentNodeAdapterFactory);
   }
 
-  private Workspace initializeWorkspace(
-      Location instanceLocation,
-      WorkspaceFactory workspaceFactory) throws URISyntaxException {
+  private Workspace initializeWorkspace(Location instanceLocation) throws URISyntaxException {
     Path workspaceLocation = Paths.get(instanceLocation.getURL().toURI());
 
-    Workspace workspace = workspaceFactory.openWorkspace(workspaceLocation);
+    Workspace workspace = new WorkspaceImpl(
+        new FileSystemLocationManager(workspaceLocation),
+        new JsonPersistenceManager(workspaceLocation, experimentTypes),
+        log,
+        text);
 
     context.set(Workspace.class, workspace);
 

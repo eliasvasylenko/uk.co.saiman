@@ -10,6 +10,12 @@
 
 	<dependencies>
 		<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20171018</version>
+		</dependency>
+
+		<dependency>
 		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>prop-types</artifactId>
 		    <version>15.5.10</version>

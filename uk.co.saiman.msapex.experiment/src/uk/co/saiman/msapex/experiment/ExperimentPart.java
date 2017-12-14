@@ -34,9 +34,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.fx.core.di.LocalInstance;
-import org.osgi.framework.Constants;
 
-import aQute.bnd.annotation.headers.RequireCapability;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
@@ -49,13 +47,6 @@ import uk.co.saiman.experiment.Workspace;
  * 
  * @author Elias N Vasylenko
  */
-/*
- * Specify a service capability requirement on the ExperimentWorkspaceFactory
- * injection via the bundle manifest.
- */
-@RequireCapability(
-    ns = ExperimentPart.OSGI_SERVICE,
-    filter = "(" + Constants.OBJECTCLASS + "=uk.co.saiman.experiment.WorkspaceFactory)")
 public class ExperimentPart {
   static final String OSGI_SERVICE = "osgi.service";
   static final String ADD_EXPERIMENT_COMMAND = "uk.co.saiman.msapex.experiment.command.addexperiment";

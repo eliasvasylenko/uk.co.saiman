@@ -10,6 +10,12 @@ Bundle-Name: SAI :: Experiment :: Provider
 	uk.co.saiman.data;version=snapshot,\
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
-	uk.co.saiman.utilities;version=snapshot
+	uk.co.saiman.utilities;version=snapshot,\
+\
+	json;version=latest
 
-Private-Package: uk.co.saiman.experiment.impl
+Export-Package: \
+	uk.co.saiman.experiment.filesystem,\
+	uk.co.saiman.experiment.impl,\
+	uk.co.saiman.experiment.persistence.impl,\
+	uk.co.saiman.experiment.persistence.json

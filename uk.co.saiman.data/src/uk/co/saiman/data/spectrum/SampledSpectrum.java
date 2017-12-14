@@ -27,10 +27,6 @@
  */
 package uk.co.saiman.data.spectrum;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
@@ -42,15 +38,15 @@ public class SampledSpectrum implements Spectrum {
   private final SampledContinuousFunction<Time, Dimensionless> timeData;
 
   private final SpectrumCalibration calibration;
-  private final List<SpectrumProcessor> processing;
+  private final SpectrumProcessor processing;
 
   public SampledSpectrum(
       SampledContinuousFunction<Time, Dimensionless> timeData,
       SpectrumCalibration calibration,
-      List<SpectrumProcessor> processing) {
+      SpectrumProcessor processing) {
     this.timeData = timeData;
     this.calibration = calibration;
-    this.processing = new ArrayList<>(processing);
+    this.processing = processing;
   }
 
   @Override
@@ -70,7 +66,7 @@ public class SampledSpectrum implements Spectrum {
   }
 
   @Override
-  public Stream<SpectrumProcessor> getProcessing() {
-    return processing.stream();
+  public SpectrumProcessor getProcessing() {
+    return processing;
   }
 }

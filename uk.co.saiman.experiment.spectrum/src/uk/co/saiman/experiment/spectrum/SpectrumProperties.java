@@ -46,4 +46,8 @@ public interface SpectrumProperties {
   Localized<String> convolutionProcessor();
 
   Localized<String> convolutionProcessorDescription();
+
+  Localized<String> gaussianSmoothProcessor();
+
+  Localized<String> boxFilterProcessor();
 }

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.observable;
 
+import static uk.co.saiman.observable.BackpressureReducingObserver.backpressureReducingObserver;
+
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -63,10 +65,7 @@ public class BackpressureReducingObserverTest {
       }
     };
 
-    Observer<String> test = new BackpressureReducingObserver<>(
-        downstreamObserver,
-        identity,
-        accumulator);
+    Observer<String> test = backpressureReducingObserver(downstreamObserver, identity, accumulator);
 
     test.onObserve(upstreamObservation);
     test.onNext("message");
@@ -90,10 +89,7 @@ public class BackpressureReducingObserverTest {
       }
     };
 
-    Observer<String> test = new BackpressureReducingObserver<>(
-        downstreamObserver,
-        identity,
-        accumulator);
+    Observer<String> test = backpressureReducingObserver(downstreamObserver, identity, accumulator);
 
     test.onObserve(upstreamObservation);
     test.onNext("message1");
@@ -121,10 +117,7 @@ public class BackpressureReducingObserverTest {
       }
     };
 
-    Observer<String> test = new BackpressureReducingObserver<>(
-        downstreamObserver,
-        identity,
-        accumulator);
+    Observer<String> test = backpressureReducingObserver(downstreamObserver, identity, accumulator);
 
     test.onObserve(upstreamObservation);
     test.onNext("message");
@@ -151,10 +144,7 @@ public class BackpressureReducingObserverTest {
       }
     };
 
-    Observer<String> test = new BackpressureReducingObserver<>(
-        downstreamObserver,
-        initial,
-        accumulator);
+    Observer<String> test = backpressureReducingObserver(downstreamObserver, initial, accumulator);
 
     test.onObserve(upstreamObservation);
     test.onNext("message1");
@@ -172,10 +162,7 @@ public class BackpressureReducingObserverTest {
 
   @Test
   public void immediatelyComplete() {
-    Observer<String> test = new BackpressureReducingObserver<>(
-        downstreamObserver,
-        identity,
-        accumulator);
+    Observer<String> test = backpressureReducingObserver(downstreamObserver, identity, accumulator);
 
     test.onObserve(upstreamObservation);
     test.onComplete();
@@ -191,7 +178,7 @@ public class BackpressureReducingObserverTest {
 
   @Test
   public void requestNextFromIdentity() {
-    PassthroughObserver<String, String> test = new BackpressureReducingObserver<>(
+    PassthroughObserver<String, String> test = backpressureReducingObserver(
         downstreamObserver,
         identity,
         accumulator);
@@ -209,7 +196,7 @@ public class BackpressureReducingObserverTest {
 
   @Test
   public void requestNextFromMissingInitialMessage() {
-    PassthroughObserver<String, String> test = new BackpressureReducingObserver<>(
+    PassthroughObserver<String, String> test = backpressureReducingObserver(
         downstreamObserver,
         initial,
         accumulator);
@@ -234,7 +221,7 @@ public class BackpressureReducingObserverTest {
       }
     };
 
-    PassthroughObserver<String, String> test = new BackpressureReducingObserver<>(
+    PassthroughObserver<String, String> test = backpressureReducingObserver(
         downstreamObserver,
         initial,
         accumulator);
@@ -255,22 +242,22 @@ public class BackpressureReducingObserverTest {
 
   @Test(expected = NullPointerException.class)
   public void nullAccumulaterWithIdentityTest() {
-    new BackpressureReducingObserver<>(downstreamObserver, () -> null, null);
+    backpressureReducingObserver(downstreamObserver, () -> null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void nullAccumulaterWithInitialTest() {
-    new BackpressureReducingObserver<>(downstreamObserver, a -> null, null);
+    backpressureReducingObserver(downstreamObserver, a -> null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void nullIdentityTest() {
-    new BackpressureReducingObserver<>(downstreamObserver, (Supplier<String>) null, (a, b) -> null);
+    backpressureReducingObserver(downstreamObserver, (Supplier<String>) null, (a, b) -> null);
   }
 
   @Test(expected = NullPointerException.class)
   public void nullInitialTest() {
-    new BackpressureReducingObserver<>(
+    backpressureReducingObserver(
         downstreamObserver,
         (Function<String, String>) null,
         (a, b) -> null);

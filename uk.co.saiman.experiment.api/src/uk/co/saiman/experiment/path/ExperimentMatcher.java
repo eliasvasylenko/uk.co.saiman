@@ -32,7 +32,7 @@ import uk.co.saiman.experiment.ExperimentPathTest;
 
 /**
  * Currently the {@link ExperimentPathTest path} only matches each child by ID.
- * This could be expanded to XPath like behavior with different matching
+ * This could be expanded to XPath-like behavior with different matching
  * strategies.
  */
 public class ExperimentMatcher {

@@ -6,20 +6,21 @@ import java.util.Random;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.spectrum.SpectrumProcessor;
 import uk.co.saiman.experiment.ConfigurationContext;
+import uk.co.saiman.experiment.spectrum.SpectrumProcessorType;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 
 final class SaintSpectrumConfigurationImpl implements SaintSpectrumConfiguration {
   private String name;
   private final ConfigurationContext<SaintSpectrumConfiguration> context;
   private final AcquisitionDevice acquisitionDevice;
-  private final List<SpectrumProcessor> processors;
+  private final List<SpectrumProcessorType> processors;
 
   SaintSpectrumConfigurationImpl(
       SaintSpectrumExperimentType experimentType,
       ConfigurationContext<SaintSpectrumConfiguration> context) {
     this.context = context;
     this.acquisitionDevice = experimentType.acquisitionDevice;
-    this.processors = experimentType.processors.createProcessorList(context.persistedState());
+    this.processors = experimentType.createProcessorList(context.persistedState());
     name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
 
     // context.persistedState().forMapList(PROCESSORS).stream().map(arg0);
@@ -42,7 +43,7 @@ final class SaintSpectrumConfigurationImpl implements SaintSpectrumConfiguration
   }
 
   @Override
-  public List<SpectrumProcessor> getProcessing() {
+  public List<SpectrumProcessorType> getProcessing() {
     return processors;
   }
 

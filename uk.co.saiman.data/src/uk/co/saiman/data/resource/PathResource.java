@@ -27,9 +27,16 @@
  */
 package uk.co.saiman.data.resource;
 
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 import java.io.IOException;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class PathResource implements Resource {
@@ -45,30 +52,41 @@ public class PathResource implements Resource {
 
   @Override
   public String getName() {
-    // TODO Auto-generated method stub
-    return null;
+    String name = path.getFileName().toString();
+    int lastDot = name.lastIndexOf('.');
+    return lastDot > 0 ? name.substring(0, lastDot - 1) : name;
   }
 
   @Override
   public String getExtension() {
-    // TODO Auto-generated method stub
-    return null;
+    String name = path.getFileName().toString();
+    int lastDot = name.lastIndexOf('.');
+    return lastDot > 0 ? name.substring(lastDot) : "";
   }
 
   @Override
   public ReadableByteChannel read() throws IOException {
-    // TODO Auto-generated method stub
-    return null;
+    return Files.newByteChannel(path, READ);
   }
 
   @Override
   public WritableByteChannel write() throws IOException {
-    // TODO Auto-generated method stub
-    return null;
+    return Files.newByteChannel(path, CREATE, WRITE, TRUNCATE_EXISTING);
+  }
+
+  @Override
+  public ByteChannel open() throws IOException {
+    return Files.newByteChannel(path, CREATE, READ, WRITE);
   }
 
   @Override
   public Location getLocation() {
     return new PathLocation(path.getParent());
+  }
+
+  @Override
+  public void delete() throws IOException {
+    if (Files.exists(path))
+      Files.delete(path);
   }
 }

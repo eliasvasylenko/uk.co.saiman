@@ -28,6 +28,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.jetty.logger;version=snapshot,\
 	uk.co.saiman.log.provider;version=snapshot,\
 \
+	json;version='[20171018.0.0,20171018.0.1)',\
 	bndtools.runtime.eclipse.applaunch;version='[0.1.0,0.1.1)',\
 	com.google.guava;version='[21.0.0,21.0.1)',\
 	com.ibm.icu;version='[58.2.0,58.2.1)',\

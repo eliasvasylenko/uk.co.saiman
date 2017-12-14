@@ -29,14 +29,12 @@ package uk.co.saiman.experiment.impl;
 
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
-import uk.co.saiman.experiment.ConfigurationContext;
+import java.util.Map;
+
 import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.MissingExperimentType;
-import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.reflection.token.TypeToken;
 
 public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
@@ -58,32 +56,8 @@ public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   }
 
   @Override
-  public PersistedState createState(ConfigurationContext<PersistedState> context) {
-    context.persistedState().forString(getId()).set(getMissingTypeID());
-
-    return context.persistedState();
-  }
-
-  @Override
-  public T execute(ExecutionContext<PersistedState, T> context) {
+  public T execute(ExecutionContext<Map<String, Object>, T> context) {
     throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
-  }
-
-  @Override
-  public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return true;
-  }
-
-  @Override
-  public boolean mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?, ?> descendantNodeType) {
-    return true;
-  }
-
-  @Override
-  public TypeToken<PersistedState> getStateType() {
-    return forType(PersistedState.class);
   }
 
   @SuppressWarnings("unchecked")

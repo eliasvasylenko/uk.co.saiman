@@ -165,7 +165,6 @@ public class MoleculeCompositionConstraint {
             return new HashSet<>();
           }
           if (monoisotopicMassConstraint.isValueBelow(molecule.getMonoisotopicMass())) {
-            System.out.println("min: " + elementMinimum);
             return new HashSet<>();
           }
         }
@@ -262,12 +261,13 @@ public class MoleculeCompositionConstraint {
         nextMolecule = molecule;
         nextMolecule.withIsotope(isotope);
         if (getIsotopeConstraints().get(isotope).contains(nextMolecule.isotopeCount(isotope))) {
-          possibleMoleculesSet.addAll(
-              conformingMoleculeRecursion(
-                  nextMolecule,
-                  -1,
-                  isotope.getElement(),
-                  isotope.getMassNumber()));
+          possibleMoleculesSet
+              .addAll(
+                  conformingMoleculeRecursion(
+                      nextMolecule,
+                      -1,
+                      isotope.getElement(),
+                      isotope.getMassNumber()));
         }
       }
     }

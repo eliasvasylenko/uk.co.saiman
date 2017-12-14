@@ -33,6 +33,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.observable.BackpressureReducingObserver.backpressureReducingObserver;
 import static uk.co.saiman.observable.Observer.onCompletion;
 import static uk.co.saiman.observable.Observer.onObservation;
 import static uk.co.saiman.observable.RequestAllocator.balanced;
@@ -182,10 +183,10 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive a new observable by application of the given function. This gives
-   * the same result as just applying the function to the observable directly,
-   * and exists only to create a more natural fit into the fluent API by making
-   * the order of operations clearer in method chains.
+   * Derive a new observable by application of the given function. This gives the
+   * same result as just applying the function to the observable directly, and
+   * exists only to create a more natural fit into the fluent API by making the
+   * order of operations clearer in method chains.
    * 
    * @param <T>
    *          the type of the resulting observable
@@ -222,8 +223,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which passes events to the given observer directly
-   * after passing them downstream.
+   * Derive an observable which passes events to the given observer directly after
+   * passing them downstream.
    * 
    * @param action
    *          an observer representing the action to take
@@ -246,6 +247,23 @@ public interface Observable<M> {
       @Override
       public void onObserve(Observation observation) {
         observation.requestUnbounded();
+      }
+    });
+  }
+
+  default Observable<M> requestNext() {
+    // return then(onObservation(o -> o.requestUnbounded()));
+
+    return then(new Observer<M>() {
+      @Override
+      public void onNext(M message) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void onObserve(Observation observation) {
+        observation.requestNext();
       }
     });
   }
@@ -309,8 +327,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some
-   * point after they are no longer weakly reachable.
+   * Derive an observable which automatically disposes of observers at some point
+   * after they are no longer weakly reachable.
    * 
    * @return the derived observable
    */
@@ -319,8 +337,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some
-   * point after the given owner is no longer weakly reachable.
+   * Derive an observable which automatically disposes of observers at some point
+   * after the given owner is no longer weakly reachable.
    * <p>
    * Care should be taken not to refer to the owner directly in any observer
    * logic, as this will create a strong reference to the owner, preventing it
@@ -339,8 +357,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some
-   * point after they are no longer softly reachable.
+   * Derive an observable which automatically disposes of observers at some point
+   * after they are no longer softly reachable.
    * 
    * @return the derived observable
    */
@@ -349,8 +367,8 @@ public interface Observable<M> {
   }
 
   /**
-   * Derive an observable which automatically disposes of observers at some
-   * point after the given owner is no longer softly reachable.
+   * Derive an observable which automatically disposes of observers at some point
+   * after the given owner is no longer softly reachable.
    * <p>
    * Care should be taken not to refer to the owner directly in any observer
    * logic, as this will create a strong reference to the owner, preventing it
@@ -469,9 +487,9 @@ public interface Observable<M> {
    * An unbounded request is made to the upstream observable, so it is not
    * required to support backpressure.
    * <p>
-   * The intermediate observables are not required to support backpressure, as
-   * an unbounded request will be made to them and the downstream observable
-   * will forward every message as soon as it is available. Because of this, The
+   * The intermediate observables are not required to support backpressure, as an
+   * unbounded request will be made to them and the downstream observable will
+   * forward every message as soon as it is available. Because of this, The
    * downstream observable does not support backpressure.
    * 
    * @param <T>
@@ -507,12 +525,12 @@ public interface Observable<M> {
    * then combines those intermediate observables into one.
    * <P>
    * The intermediate observables accept requests from downstream until they are
-   * complete. Requests are allocated to the intermediate observables by the
-   * given {@link RequestAllocator request allocation strategy}.
+   * complete. Requests are allocated to the intermediate observables by the given
+   * {@link RequestAllocator request allocation strategy}.
    * <p>
-   * The upstream observable is not required to support backpressure. If a
-   * request is made downstream when there are no intermediate observables to
-   * fulfill that request, another message is requested from upstream.
+   * The upstream observable is not required to support backpressure. If a request
+   * is made downstream when there are no intermediate observables to fulfill that
+   * request, another message is requested from upstream.
    * <p>
    * The resulting observable supports backpressure if and only if the
    * intermediate observables support backpressure.
@@ -549,6 +567,34 @@ public interface Observable<M> {
   }
 
   /**
+   * Create an invalidate/lazy-revalidate reactive observable.
+   * <p>
+   * 
+   * <p>
+   * The created downstream observable technically does not support backpressure
+   * regardless of whether the upstream does, however it does provide similar
+   * control and guarantees about message delivery to the downstream observer.
+   * <p>
+   * Downstream observers should not signal interest in further messages via the
+   * usual {@link Observation#request(long) request method and similar}, but
+   * instead by invoking {@link Invalidation#revalidate()}, which will return the
+   * most recent message from upstream.
+   * 
+   * @param <R>
+   *          the resulting reduction type
+   * 
+   * @param identity
+   *          the identity value for the accumulating function
+   * @param accumulator
+   *          an associative, non-interfering, stateless function for combining
+   *          two values
+   * @return an observable over the reduced values
+   */
+  default Observable<Invalidation<M>> invalidateLazyRevalidate() {
+    return observer -> observe(new InvalidatingLazyRevalidatingObserver<>(observer));
+  }
+
+  /**
    * Introduce backpressure by reducing messages until a request is made
    * downstream, then forwarding the reduction.
    * 
@@ -565,7 +611,7 @@ public interface Observable<M> {
   default <R> Observable<R> reduceBackpressure(
       Supplier<? extends R> identity,
       BiFunction<? super R, ? super M, ? extends R> accumulator) {
-    return observer -> observe(new BackpressureReducingObserver<>(observer, identity, accumulator));
+    return observer -> observe(backpressureReducingObserver(observer, identity, accumulator));
   }
 
   /**
@@ -585,7 +631,7 @@ public interface Observable<M> {
   default <R> Observable<R> reduceBackpressure(
       Function<? super M, ? extends R> initial,
       BiFunction<? super R, ? super M, ? extends R> accumulator) {
-    return observer -> observe(new BackpressureReducingObserver<>(observer, initial, accumulator));
+    return observer -> observe(backpressureReducingObserver(observer, initial, accumulator));
   }
 
   /**

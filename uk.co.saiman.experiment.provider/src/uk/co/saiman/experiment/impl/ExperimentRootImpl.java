@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFILLED;
+import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.Optional;
@@ -34,6 +36,7 @@ import java.util.Optional;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentNodeConstraint;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
@@ -42,14 +45,14 @@ import uk.co.saiman.property.Property;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
- * The root experiment type implementation for {@link XmlWorkspace}.
+ * The root experiment type implementation for {@link FileSystemWorkspace}.
  * 
  * @author Elias N Vasylenko
  */
 public class ExperimentRootImpl implements ExperimentRoot {
   private final ExperimentProperties text;
 
-  protected ExperimentRootImpl(ExperimentProperties text) {
+  public ExperimentRootImpl(ExperimentProperties text) {
     this.text = text;
   }
 
@@ -95,15 +98,15 @@ public class ExperimentRootImpl implements ExperimentRoot {
   public void executeVoid(VoidExecutionContext<ExperimentConfiguration> context) {}
 
   @Override
-  public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return false;
+  public ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
+    return VIOLATED;
   }
 
   @Override
-  public boolean mayComeBefore(
+  public ExperimentNodeConstraint mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
       ExperimentType<?, ?> descendantNodeType) {
-    return true;
+    return ASSUME_ALL_FULFILLED;
   }
 
   @Override

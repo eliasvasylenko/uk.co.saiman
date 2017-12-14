@@ -27,20 +27,12 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.nio.file.Files.isRegularFile;
-import static java.nio.file.Files.newDirectoryStream;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
 import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
@@ -60,16 +52,15 @@ import uk.co.saiman.log.Log.Level;
  * 
  * @author Elias N Vasylenko
  */
-public class XmlWorkspace implements Workspace {
-  private final XmlWorkspaceFactory factory;
-  private final Path dataRoot;
-
-  private final Set<ExperimentType<?, ?>> experimentTypes = new HashSet<>();
+public class WorkspaceImpl implements Workspace {
+  private final ExperimentLocationManager locationManager;
+  private final ExperimentPersistenceManager persistenceManager;
 
   private final ExperimentRoot experimentRootType;
-  private final List<XmlExperiment> experiments = new ArrayList<>();
+  private final List<ExperimentImpl> experiments = new ArrayList<>();
 
   private final ExperimentProperties text;
+  private final Log log;
 
   private final Lock processingLock = new ReentrantLock();
 
@@ -81,8 +72,15 @@ public class XmlWorkspace implements Workspace {
    * @param workspaceRoot
    *          the path of the workspace data
    */
-  public XmlWorkspace(XmlWorkspaceFactory factory, Path workspaceRoot) {
-    this(factory, workspaceRoot, getDefaultProperties(ExperimentProperties.class));
+  public WorkspaceImpl(
+      ExperimentLocationManager locationManager,
+      ExperimentPersistenceManager persistenceManager,
+      Log log) {
+    this(
+        locationManager,
+        persistenceManager,
+        log,
+        getDefaultProperties(ExperimentProperties.class));
   }
 
   /**
@@ -95,9 +93,14 @@ public class XmlWorkspace implements Workspace {
    * @param text
    *          a localized text accessor implementation
    */
-  public XmlWorkspace(XmlWorkspaceFactory factory, Path workspaceRoot, ExperimentProperties text) {
-    this.factory = factory;
-    this.dataRoot = workspaceRoot;
+  public WorkspaceImpl(
+      ExperimentLocationManager locationManager,
+      ExperimentPersistenceManager persistenceManager,
+      Log log,
+      ExperimentProperties text) {
+    this.locationManager = locationManager;
+    this.persistenceManager = persistenceManager;
+    this.log = log;
     this.text = text;
 
     this.experimentRootType = new ExperimentRootImpl(text);
@@ -105,32 +108,34 @@ public class XmlWorkspace implements Workspace {
     loadExperiments();
   }
 
-  private void loadExperiments() {
-    PathMatcher filter = dataRoot
-        .getFileSystem()
-        .getPathMatcher("glob:**/*" + XmlExperiment.EXPERIMENT_EXTENSION);
-
-    try (DirectoryStream<Path> stream = newDirectoryStream(
-        dataRoot,
-        file -> isRegularFile(file) && filter.matches(file))) {
-      for (Path path : stream) {
-        XmlExperiment.load(this, path);
-      }
-    } catch (IOException e) {
-      getLog().log(Level.ERROR, e);
+  protected void loadExperiments() {
+    try {
+      persistenceManager
+          .getExperiments()
+          .forEach(s -> experiments.add(new ExperimentImpl(this, s)));
+    } catch (Exception e) {
+      ExperimentException ee = new ExperimentException(
+          getText().exception().cannotLoadExperiment(),
+          e);
+      getLog().log(Level.ERROR, ee);
+      throw ee;
     }
   }
 
-  Log getLog() {
-    return factory.getLog();
+  protected Log getLog() {
+    return log;
   }
 
-  ExperimentProperties getText() {
+  protected ExperimentProperties getText() {
     return text;
   }
 
-  protected Path getRootPath() {
-    return dataRoot;
+  protected ExperimentLocationManager getLocationManager() {
+    return locationManager;
+  }
+
+  protected ExperimentPersistenceManager getPersistenceManager() {
+    return persistenceManager;
   }
 
   /*
@@ -152,17 +157,8 @@ public class XmlWorkspace implements Workspace {
     return getExperiments().filter(c -> c.getId().equals(id)).findAny();
   }
 
-  protected Stream<XmlExperiment> getExperimentsImpl() {
+  protected Stream<ExperimentImpl> getExperimentsImpl() {
     return experiments.stream();
-  }
-
-  @Override
-  public Experiment addExperiment(String name) {
-    return new XmlExperiment(this, name);
-  }
-
-  void addExperimentImpl(XmlExperiment experiment) {
-    experiments.add(experiment);
   }
 
   protected boolean removeExperiment(Experiment experiment) {
@@ -173,22 +169,7 @@ public class XmlWorkspace implements Workspace {
    * Child experiment types
    */
 
-  @Override
-  public boolean registerExperimentType(ExperimentType<?, ?> experimentType) {
-    return experimentTypes.add(experimentType);
-  }
-
-  @Override
-  public boolean unregisterExperimentType(ExperimentType<?, ?> experimentType) {
-    return experimentTypes.remove(experimentType);
-  }
-
-  @Override
-  public Stream<ExperimentType<?, ?>> getRegisteredExperimentTypes() {
-    return Stream.concat(factory.getRegisteredExperimentTypes(), experimentTypes.stream());
-  }
-
-  protected void process(XmlExperimentNode<?, ?> node) {
+  protected void process(ExperimentNodeImpl<?, ?> node) {
     if (processingLock.tryLock()) {
       try {
         processImpl(node);
@@ -201,10 +182,10 @@ public class XmlWorkspace implements Workspace {
     }
   }
 
-  private boolean processImpl(XmlExperimentNode<?, ?> node) {
+  private boolean processImpl(ExperimentNodeImpl<?, ?> node) {
     boolean success = StreamUtilities
         .reverse(node.getAncestorsImpl())
-        .filter(XmlExperimentNode::executeImpl)
+        .filter(ExperimentNodeImpl::executeImpl)
         .count() > 0;
 
     if (success) {
@@ -214,7 +195,18 @@ public class XmlWorkspace implements Workspace {
     return success;
   }
 
-  private void processChildren(XmlExperimentNode<?, ?> node) {
-    node.getChildrenImpl().filter(XmlExperimentNode::executeImpl).forEach(this::processChildren);
+  private void processChildren(ExperimentNodeImpl<?, ?> node) {
+    node.getChildrenImpl().filter(ExperimentNodeImpl::executeImpl).forEach(this::processChildren);
+  }
+
+  @Override
+  public Experiment addExperiment(String name) {
+    experiments.add(new ExperimentImpl(this, name));
+    return null;
+  }
+
+  @Override
+  public Stream<ExperimentType<?, ?>> getExperimentTypes() {
+    return persistenceManager.getExperimentTypes();
   }
 }

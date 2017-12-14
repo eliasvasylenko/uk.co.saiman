@@ -1,47 +1,44 @@
 package uk.co.saiman.experiment.spectrum;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
+import uk.co.saiman.data.spectrum.SpectrumProcessor;
 import uk.co.saiman.experiment.persistence.PersistedState;
-import uk.co.saiman.text.properties.PropertyLoader;
 
-@Component
-public class ConvolutionSpectrumProcessor
-    implements SpectrumProcessorType<ConvolutionSpectrumProcessorConfiguration> {
-  @Reference
-  PropertyLoader propertyLoader;
-  private SpectrumProperties properties;
+public abstract class ConvolutionSpectrumProcessor implements SpectrumProcessorType {
+  protected static final double[] NO_OP = new double[] { 1 };
 
-  public ConvolutionSpectrumProcessor(SpectrumProperties properties) {
-    this.properties = properties;
+  private final double[] vector;
+
+  public ConvolutionSpectrumProcessor() {
+    vector = NO_OP;
   }
 
-  protected ConvolutionSpectrumProcessor() {}
+  public ConvolutionSpectrumProcessor(double[] vector) {
+    this.vector = vector;
+  }
 
-  @Activate
-  void activate() {
-    properties = propertyLoader.getProperties(SpectrumProperties.class);
+  public double[] getConvolutionVector() {
+    return vector.clone();
   }
 
   @Override
   public String getId() {
-    return getClass().getSimpleName();
+    return getClass().getName();
   }
 
   @Override
-  public String getName() {
-    return properties.convolutionProcessor().get();
-  }
+  public abstract ConvolutionSpectrumProcessor load(PersistedState state);
 
   @Override
-  public String getDescription() {
-    return properties.convolutionProcessorDescription().get();
-  }
+  public SpectrumProcessor getProcessor() {
+    double[] vector = this.vector;
 
-  @Override
-  public ConvolutionSpectrumProcessorConfiguration createConfiguration(PersistedState state) {
-    return new ConvolutionSpectrumProcessorConfiguration(state);
+    return new SpectrumProcessor() {
+      @Override
+      public double[] process(double[] data) {
+        double[] processed = new double[data.length];
+
+        return processed;
+      }
+    };
   }
 }

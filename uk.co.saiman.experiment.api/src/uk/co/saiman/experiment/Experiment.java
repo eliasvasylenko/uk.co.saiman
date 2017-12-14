@@ -27,4 +27,10 @@
  */
 package uk.co.saiman.experiment;
 
-public interface Experiment extends ExperimentNode<ExperimentConfiguration, Void> {}
+import static java.util.stream.Collectors.toList;
+
+public interface Experiment extends ExperimentNode<ExperimentConfiguration, Void> {
+  default int getIndex() {
+    return getWorkspace().getExperiments().collect(toList()).indexOf(this);
+  }
+}

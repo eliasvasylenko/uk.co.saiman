@@ -55,11 +55,11 @@ public class SelectNextCameraHandler {
 
   @Execute
   void execute(IEclipseContext context, @Optional CameraDevice selectedDevice) {
-    List<CameraDevice> devices = new ArrayList<>(availableDevices);
-    int index = devices.indexOf(selectedDevice);
-    if (++index == devices.size())
+    List<CameraDevice> availableDevices = new ArrayList<>(this.availableDevices);
+    int index = availableDevices.indexOf(selectedDevice);
+    if (++index == availableDevices.size())
       index = 0;
 
-    CameraSelectionHelper.selectCamera(context, devices.get(index));
+    CameraSelectionHelper.selectCamera(context, availableDevices.get(index));
   }
 }

@@ -57,7 +57,6 @@ public class ChemicalMapImageEditorPart {
   @PostConstruct
   void postConstruct(BorderPane container, @LocalInstance FXMLLoader loaderProvider) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
-    System.out.println("PC: ChemicalMapImageEditorPart");
   }
 
   @FXML

@@ -70,8 +70,6 @@ public class SpectrumGraphEditorPart {
       ExperimentNode<?, Spectrum> result) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
-    System.out.println("[SGEP] result! " + result);
-
     spectrumGraphController.addSeries(result.getResult().map(Spectrum::getMassData));
   }
 }

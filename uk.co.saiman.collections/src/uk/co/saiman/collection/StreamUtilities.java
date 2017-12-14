@@ -28,6 +28,7 @@
 package uk.co.saiman.collection;
 
 import static java.util.Optional.ofNullable;
+import static java.util.function.Function.identity;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
@@ -165,6 +166,16 @@ public class StreamUtilities {
     return Collectors.toMap(Entry::getKey, Entry::getValue, throwingMerger(), LinkedHashMap::new);
   }
 
+  public static <T, V> Function<T, Entry<T, V>> mapToEntry(Function<T, V> value) {
+    return mapToEntry(identity(), value);
+  }
+
+  public static <T, K, V> Function<T, Entry<K, V>> mapToEntry(
+      Function<T, K> key,
+      Function<T, V> value) {
+    return t -> new SimpleEntry<>(key.apply(t), value.apply(t));
+  }
+
   public static <A, B> Stream<Entry<A, B>> zip(Stream<A> first, Stream<B> second) {
     return zip(first, second, (Supplier<RuntimeException>) null);
   }
@@ -239,10 +250,14 @@ public class StreamUtilities {
       }
     };
 
-    return StreamSupport.stream(
-        Spliterators
-            .spliterator(iterator, collection.size(), Spliterator.ORDERED | Spliterator.IMMUTABLE),
-        false);
+    return StreamSupport
+        .stream(
+            Spliterators
+                .spliterator(
+                    iterator,
+                    collection.size(),
+                    Spliterator.ORDERED | Spliterator.IMMUTABLE),
+            false);
   }
 
   /**
@@ -316,9 +331,11 @@ public class StreamUtilities {
         return result;
       }
     };
-    return StreamSupport.stream(
-        Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED | Spliterator.IMMUTABLE),
-        false);
+    return StreamSupport
+        .stream(
+            Spliterators
+                .spliteratorUnknownSize(iterator, Spliterator.ORDERED | Spliterator.IMMUTABLE),
+            false);
   }
 
   /**
@@ -350,8 +367,8 @@ public class StreamUtilities {
    *          the stream of initial elements
    * @param mapping
    *          a mapping from an element to a stream of its direct children
-   * @return a stream over elements in a tree and each of their children, as
-   *         well as each of their children, in a depth first manner
+   * @return a stream over elements in a tree and each of their children, as well
+   *         as each of their children, in a depth first manner
    */
   public static <T> Stream<T> flatMapRecursive(
       Stream<? extends T> stream,
@@ -390,8 +407,8 @@ public class StreamUtilities {
    *          the stream of initial elements
    * @param mapping
    *          a mapping from an element to a stream of its direct children
-   * @return a stream over elements in a tree and each of their children, as
-   *         well as each of their children, in a depth first manner
+   * @return a stream over elements in a tree and each of their children, as well
+   *         as each of their children, in a depth first manner
    */
   public static <T> Stream<T> flatMapRecursiveDistinct(
       Stream<? extends T> stream,
@@ -403,7 +420,8 @@ public class StreamUtilities {
       Stream<? extends T> stream,
       Function<? super T, ? extends Stream<? extends T>> mapping,
       Set<T> visited) {
-    return stream.filter(visited::add).flatMap(
-        s -> concat(of(s), flatMapRecursiveDistinct(mapping.apply(s), mapping, visited)));
+    return stream
+        .filter(visited::add)
+        .flatMap(s -> concat(of(s), flatMapRecursiveDistinct(mapping.apply(s), mapping, visited)));
   }
 }

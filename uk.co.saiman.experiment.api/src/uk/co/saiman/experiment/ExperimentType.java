@@ -93,7 +93,7 @@ public interface ExperimentType<S, R> {
    *          the candidate parent node
    * @return true if a node of this type may be added as a child, false otherwise
    */
-  boolean mayComeAfter(ExperimentNode<?, ?> parentNode);
+  ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode);
 
   /**
    * Test whether a node of the given type may follow from the given node and be
@@ -110,7 +110,7 @@ public interface ExperimentType<S, R> {
    * @return true if a node of the given type may be added as a child of the given
    *         node, false otherwise
    */
-  boolean mayComeBefore(
+  ExperimentNodeConstraint mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
       ExperimentType<?, ?> descendantNodeType);
 

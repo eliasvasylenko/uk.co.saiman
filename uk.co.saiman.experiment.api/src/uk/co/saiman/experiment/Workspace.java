@@ -41,10 +41,6 @@ import java.util.stream.Stream;
  * @author Elias N Vasylenko
  */
 public interface Workspace {
-  /*
-   * Root experiment types
-   */
-
   /**
    * @return the root experiment type
    */
@@ -68,30 +64,8 @@ public interface Workspace {
    */
   Experiment addExperiment(String name);
 
-  /*
-   * Child experiment types
-   */
-
-  /**
-   * Register an available experiment type
-   * 
-   * @param experimentType
-   *          a possible experiment type
-   * @return true if the type was added successfully, false otherwise
-   */
-  boolean registerExperimentType(ExperimentType<?, ?> experimentType);
-
-  /**
-   * Unregister an available experiment type
-   * 
-   * @param experimentType
-   *          a possible experiment type
-   * @return true if the type was removed successfully, false otherwise
-   */
-  boolean unregisterExperimentType(ExperimentType<?, ?> experimentType);
-
   /**
    * @return the set of all experiment types registered to this workspace
    */
-  Stream<ExperimentType<?, ?>> getRegisteredExperimentTypes();
+  Stream<ExperimentType<?, ?>> getExperimentTypes();
 }
