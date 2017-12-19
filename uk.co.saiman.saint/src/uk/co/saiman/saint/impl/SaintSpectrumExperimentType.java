@@ -27,13 +27,16 @@
  */
 package uk.co.saiman.saint.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
+import static uk.co.saiman.experiment.spectrum.SpectrumProcessorState.PROCESSING_KEY;
+import static uk.co.saiman.experiment.spectrum.SpectrumProcessorState.PROCESSOR_TYPE_KEY;
 
-import java.util.AbstractList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -45,27 +48,38 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentNodeConstraint;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.persistence.PersistedState;
-import uk.co.saiman.experiment.persistence.PersistedStateList;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
+import uk.co.saiman.experiment.spectrum.MissingSpectrumProcessorType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
+import uk.co.saiman.experiment.spectrum.SpectrumProcessorState;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessorType;
+import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
 public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpectrumConfiguration>
     implements ExperimentType<SaintSpectrumConfiguration, Spectrum> {
-  private static final String PROCESSING_KEY = "processing";
-  private static final String PROCESSOR_TYPE_KEY = "type";
-
   @Reference
   XYStageExperimentType<SaintXYStageConfiguration> stageExperiment;
 
   @Reference
   AcquisitionDevice acquisitionDevice;
 
-  @Reference(policy = DYNAMIC)
-  List<SpectrumProcessorType> processingTypes = new CopyOnWriteArrayList<>();
+  private final Map<String, SpectrumProcessorType<?>> processingTypes = new HashMap<>();
+
+  @Reference
+  PropertyLoader propertyLoader;
+
+  @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
+  void addProcessingType(SpectrumProcessorType<?> type) {
+    processingTypes.putIfAbsent(type.getId(), type);
+  }
+
+  void removeProcessingType(SpectrumProcessorType<?> type) {
+    processingTypes.remove(type.getId());
+  }
 
   @Override
   public String getId() {
@@ -96,25 +110,19 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
     return acquisitionDevice;
   }
 
-  protected List<SpectrumProcessorType> createProcessorList(PersistedState persistedState) {
-    PersistedStateList processingList = persistedState.forMapList(PROCESSING_KEY);
+  protected List<SpectrumProcessorState> createProcessorList(PersistedState persistedState) {
+    return persistedState
+        .getMapList(PROCESSING_KEY)
+        .map(this::createProcessorConfiguration, SpectrumProcessorState::getPersistedState);
+  }
 
-    return new AbstractList<SpectrumProcessorType>() {
-      @Override
-      public SpectrumProcessorType get(int index) {
-        PersistedState processorState = processingList.get(index);
-        return processingTypes
-            .stream()
-            .filter(p -> p.getId().equals(processorState.forString(PROCESSOR_TYPE_KEY).get()))
-            .findFirst()
-            .get() // TODO orElseThrow something sensible
-            .load(processorState);
-      }
-
-      @Override
-      public int size() {
-        return processingList.size();
-      }
-    };
+  protected SpectrumProcessorState createProcessorConfiguration(PersistedState persistedState) {
+    return processingTypes
+        .computeIfAbsent(
+            persistedState.forString(PROCESSOR_TYPE_KEY).get(),
+            id -> new MissingSpectrumProcessorType(
+                id,
+                propertyLoader.getProperties(SpectrumProperties.class)))
+        .configure(persistedState);
   }
 }

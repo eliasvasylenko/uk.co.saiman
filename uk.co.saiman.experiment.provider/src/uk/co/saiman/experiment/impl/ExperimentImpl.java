@@ -75,10 +75,12 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
     return workspace;
   }
 
+  @Override
   protected ExperimentProperties getText() {
     return workspace.getText();
   }
 
+  @Override
   protected Log getLog() {
     return workspace.getLog();
   }
@@ -94,10 +96,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
   }
 
   @Override
-  public void remove() {
-    assertAvailable();
-    setDisposed();
-
+  public void removeImpl() {
     if (!getWorkspace().removeExperiment(getExperiment())) {
       ExperimentException e = new ExperimentException(
           getText().exception().experimentDoesNotExist(getId()));

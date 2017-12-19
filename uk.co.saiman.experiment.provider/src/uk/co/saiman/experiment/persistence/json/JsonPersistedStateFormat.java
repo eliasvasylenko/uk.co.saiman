@@ -58,9 +58,9 @@ public class JsonPersistedStateFormat implements DataFormat<PersistedState> {
         Object value = object.get(name);
 
         if (value instanceof JSONArray) {
-          fillMapList(persistedState.forMapList(name), (JSONArray) value);
+          fillMapList(persistedState.getMapList(name), (JSONArray) value);
         } else if (value instanceof JSONObject) {
-          fillMap(persistedState.forMap(name), (JSONObject) value);
+          fillMap(persistedState.getMap(name), (JSONObject) value);
         } else {
           persistedState.forString(name).set(value.toString());
         }
@@ -85,11 +85,11 @@ public class JsonPersistedStateFormat implements DataFormat<PersistedState> {
 
     persistedState.getStrings().forEach(s -> object.put(s, persistedState.forString(s).get()));
 
-    persistedState.getMaps().forEach(s -> object.put(s, buildMap(persistedState.forMap(s))));
+    persistedState.getMaps().forEach(s -> object.put(s, buildMap(persistedState.getMap(s))));
 
     persistedState
         .getMapLists()
-        .forEach(s -> object.put(s, buildMapList(persistedState.forMapList(s))));
+        .forEach(s -> object.put(s, buildMapList(persistedState.getMapList(s))));
 
     return object;
   }

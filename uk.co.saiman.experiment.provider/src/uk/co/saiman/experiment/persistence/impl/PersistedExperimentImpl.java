@@ -1,6 +1,7 @@
 package uk.co.saiman.experiment.persistence.impl;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.impl.PersistedExperiment;
@@ -36,7 +37,7 @@ public class PersistedExperimentImpl implements PersistedExperiment {
 
   @Override
   public PersistedState getPersistedState() {
-    return state.forMap(CONFIGURATION_KEY);
+    return state.getMap(CONFIGURATION_KEY);
   }
 
   @Override
@@ -45,21 +46,48 @@ public class PersistedExperimentImpl implements PersistedExperiment {
   }
 
   @Override
-  public Stream<PersistedExperiment> getChildren() {
-    return state.forMapList(NODE_KEY).stream().map(PersistedExperimentImpl::new);
+  public Stream<PersistedExperimentImpl> getChildren() {
+    return state.getMapList(NODE_KEY).stream().map(PersistedExperimentImpl::new);
   }
 
   @Override
-  public PersistedExperiment addChild(int index, String typeId, PersistedState initialState) {
-    PersistedState newState = state.forMapList(NODE_KEY).add(index);
-    if (initialState != null) {
-      newState.copyState(initialState);
-    }
-    return new PersistedExperimentImpl(newState, null, typeId);
+  public PersistedExperiment addChild(
+      String id,
+      String typeId,
+      PersistedState configuration,
+      int index) throws IOException {
+    PersistedState newState = state.getMapList(NODE_KEY).add(index);
+
+    if (configuration == null)
+      configuration = newState.getMap(CONFIGURATION_KEY);
+    else
+      newState.setMap(CONFIGURATION_KEY, configuration);
+
+    return new PersistedExperimentImpl(newState, id, typeId);
   }
 
   @Override
-  public void removeChild(PersistedExperiment child) {
-    state.forMapList(NODE_KEY).remove(((PersistedExperimentImpl) child).state);
+  public void removeChild(String id, String typeId) {
+    getChildren()
+        .filter(c -> c.getId().equals(id) && c.getTypeId().equals(typeId))
+        .findAny()
+        .ifPresent(c -> state.getMapList(NODE_KEY).remove(c.state));
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this)
+      return true;
+    if (!(obj instanceof PersistedExperimentImpl))
+      return false;
+
+    PersistedExperimentImpl that = (PersistedExperimentImpl) obj;
+
+    return Objects.equals(this.state, that.state);
+  }
+
+  @Override
+  public int hashCode() {
+    return state.hashCode();
   }
 }

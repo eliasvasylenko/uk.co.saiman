@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.msapex.instrument.acquisition;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 
@@ -56,7 +57,9 @@ public class SelectNextAcquisitionDeviceHandler {
   @Execute
   void execute(IEclipseContext context, @Optional AcquisitionDeviceSelection selectedDevices) {
     List<AcquisitionDevice> availableDevices = new ArrayList<>(this.availableDevices);
-    List<AcquisitionDevice> selection = selectedDevices.getSelectedDevices().collect(toList());
+    List<AcquisitionDevice> selection = selectedDevices != null
+        ? selectedDevices.getSelectedDevices().collect(toList())
+        : emptyList();
 
     int index = selection.size() != 1 ? -1 : availableDevices.indexOf(selection.get(0));
     if (++index == availableDevices.size())

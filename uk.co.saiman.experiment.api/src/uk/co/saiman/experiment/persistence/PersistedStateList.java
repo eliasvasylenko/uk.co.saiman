@@ -27,9 +27,11 @@
  */
 package uk.co.saiman.experiment.persistence;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.persistence.PersistedState.PersistedStateSubscription;
@@ -42,6 +44,15 @@ public class PersistedStateList implements Iterable<PersistedState> {
 
   private final HotObservable<PersistedStateList> changes = new HotObservable<>();
 
+  public PersistedStateList() {}
+
+  public PersistedStateList(PersistedStateList base) {
+    for (PersistedStateSubscription subscription : base.maps) {
+      PersistedState copy = new PersistedState(subscription.get());
+      maps.add(new PersistedStateSubscription(this::update, copy));
+    }
+  }
+
   private void update() {
     changes.next(this);
   }
@@ -50,6 +61,7 @@ public class PersistedStateList implements Iterable<PersistedState> {
     return stream().allMatch(PersistedState::isEmpty);
   }
 
+  @Override
   public Iterator<PersistedState> iterator() {
     Iterator<PersistedStateSubscription> iterator = maps.iterator();
     return new Iterator<PersistedState>() {
@@ -74,6 +86,24 @@ public class PersistedStateList implements Iterable<PersistedState> {
     maps.add(index, subscription);
     update();
     return subscription.get();
+  }
+
+  public void add(PersistedState map) {
+    add(size(), map);
+  }
+
+  public void add(int index, PersistedState map) {
+    PersistedStateSubscription subscription = new PersistedStateSubscription(this::update, map);
+    maps.add(index, subscription);
+    update();
+  }
+
+  public PersistedState set(int index, PersistedState map) {
+    PersistedStateSubscription subscription = new PersistedStateSubscription(this::update, map);
+    PersistedStateSubscription previous = maps.set(index, subscription);
+    previous.cancel();
+    update();
+    return previous.get();
   }
 
   public PersistedState get(int index) {
@@ -105,7 +135,7 @@ public class PersistedStateList implements Iterable<PersistedState> {
   }
 
   public void clear() {
-    maps.forEach(PersistedStateSubscription::cancel);
+    maps.forEach(Disposable::cancel);
     maps.clear();
     update();
   }
@@ -114,7 +144,7 @@ public class PersistedStateList implements Iterable<PersistedState> {
     return changes;
   }
 
-  static class PersistedStateListSubscription {
+  static class PersistedStateListSubscription implements Disposable {
     private final PersistedStateList persistedStateList;
     private final Disposable disposable;
 
@@ -123,12 +153,49 @@ public class PersistedStateList implements Iterable<PersistedState> {
       disposable = persistedStateList.changes().observe(m -> update.run());
     }
 
+    public PersistedStateListSubscription(Runnable update, PersistedStateList persistedStateList) {
+      this.persistedStateList = persistedStateList;
+      disposable = persistedStateList.changes().observe(m -> update.run());
+    }
+
     public PersistedStateList get() {
       return persistedStateList;
     }
 
+    @Override
     public void cancel() {
       disposable.cancel();
     }
+  }
+
+  public <T> List<T> map(
+      Function<? super PersistedState, ? extends T> out,
+      Function<? super T, ? extends PersistedState> in) {
+    return new AbstractList<T>() {
+      @Override
+      public T get(int index) {
+        return out.apply(PersistedStateList.this.get(index));
+      }
+
+      @Override
+      public T set(int index, T element) {
+        return out.apply(PersistedStateList.this.set(index, in.apply(element)));
+      }
+
+      @Override
+      public void add(int index, T element) {
+        PersistedStateList.this.add(index, in.apply(element));
+      }
+
+      @Override
+      public T remove(int index) {
+        return out.apply(PersistedStateList.this.remove(index));
+      }
+
+      @Override
+      public int size() {
+        return PersistedStateList.this.size();
+      }
+    };
   }
 }

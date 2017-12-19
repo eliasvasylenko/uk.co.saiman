@@ -37,18 +37,22 @@ package uk.co.saiman.utility;
  *          correctly typed
  */
 public interface Copyable<S extends Copyable<S>> {
-	/**
-	 * @return a copy of the receiving instance
-	 */
-	S copy();
+  /**
+   * @return a copy of the receiving instance
+   */
+  S copy();
 
-	/**
-	 * @param context
-	 *          an object graph {@link Isomorphism}
-	 * @return a deep copy of the receiving instance, consistent with the given
-	 *         {@link Isomorphism}
-	 */
-	default S deepCopy(Isomorphism context) {
-		return context.byIdentity().getDeepCopy(this);
-	}
+  /**
+   * @param context
+   *          an object graph {@link Isomorphism}
+   * @return a deep copy of the receiving instance, consistent with the given
+   *         {@link Isomorphism}
+   */
+  default S deepCopy(Isomorphism context) {
+    return context.byIdentity().getCopy(this);
+  }
+
+  default S deepCopy() {
+    return deepCopy(new Isomorphism());
+  }
 }

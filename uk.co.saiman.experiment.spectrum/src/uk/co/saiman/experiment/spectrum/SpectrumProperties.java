@@ -50,4 +50,6 @@ public interface SpectrumProperties {
   Localized<String> gaussianSmoothProcessor();
 
   Localized<String> boxFilterProcessor();
+
+  Localized<String> missingSpectrumProcessor();
 }

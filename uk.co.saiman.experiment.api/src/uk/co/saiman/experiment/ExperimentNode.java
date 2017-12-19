@@ -89,17 +89,6 @@ public interface ExperimentNode<S, T> {
   }
 
   /**
-   * Move the node to the given index. A node cannot be reparented, it can only be
-   * moved to a different index under its existing parent (or within workspace in
-   * the case of a root node).
-   * 
-   * @param index
-   *          the index to move the node to
-   * @throws IndexOutOfBoundsException
-   */
-  void moveToIndex(int index);
-
-  /**
    * @return the root part of the experiment tree this part occurs in
    */
   default Experiment getExperiment() {
@@ -208,28 +197,49 @@ public interface ExperimentNode<S, T> {
   <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType, int index);
 
   /**
-   * Add a copy of the given experiment node as the last child of this node.
+   * Add a copy of this experiment node as the last child of the given parent.
    * 
-   * @param node
-   *          the node to copy
+   * @param parent
+   *          the parent of the new copy
    * @return a new child experiment part of the same type and with the same state
-   *         as that given
    */
-  default <U, V> ExperimentNode<U, V> addCopy(ExperimentNode<U, V> node) {
-    return addCopy(node, (int) getChildren().count());
+  default ExperimentNode<S, T> copy(ExperimentNode<?, ?> parent) {
+    return copy(parent, (int) parent.getChildren().count());
   }
 
   /**
-   * Add a copy of the given experiment node as a child of this node.
+   * Add a copy of this experiment node as a child of the given parent.
    * 
-   * @param node
-   *          the node to copy
+   * @param parent
+   *          the parent of the new copy
    * @param index
    *          the positional index at which to add the child
    * @return a new child experiment part of the same type and with the same state
-   *         as that given
    */
-  <U, V> ExperimentNode<U, V> addCopy(ExperimentNode<U, V> node, int index);
+  ExperimentNode<S, T> copy(ExperimentNode<?, ?> parent, int index);
+
+  /**
+   * Remove this experiment node from its current parent and add it as the last
+   * child of the given parent.
+   * 
+   * @param parent
+   *          the new parent
+   */
+  default void move(ExperimentNode<?, ?> parent) {
+    move(parent, (int) parent.getChildren().count());
+  }
+
+  /**
+   * Remove this experiment node from its current parent and add it as a chidl of
+   * the given parent.
+   * 
+   * @param parent
+   *          the parent of the new copy
+   * @param index
+   *          the positional index at which to add the child
+   * @return a new child experiment part of the same type and with the same state
+   */
+  void move(ExperimentNode<?, ?> parent, int index);
 
   /**
    * @return the current execution lifecycle state of the experiment part

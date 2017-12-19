@@ -103,4 +103,6 @@ public interface ExperimentExceptionProperties {
   String cannotCreateWorkspace(Path workspaceRoot);
 
   String cannotCopyFromOutsideWorkspace();
+
+  String cannotMoveExperiment(ExperimentNode<?, ?> experimentNode);
 }

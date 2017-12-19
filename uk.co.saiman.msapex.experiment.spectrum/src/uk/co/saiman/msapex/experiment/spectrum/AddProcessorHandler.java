@@ -11,6 +11,7 @@ import javafx.scene.control.ChoiceDialog;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessorType;
 import uk.co.saiman.text.properties.Localized;
@@ -19,20 +20,24 @@ public class AddProcessorHandler {
   @Execute
   void execute(
       ExperimentNode<? extends SpectrumConfiguration, ?> node,
-      @Service List<SpectrumProcessorType> processors,
+      @Service List<SpectrumProcessorType<?>> processors,
       @Localize ExperimentProperties text) {
     requestProcessorType(
         processors,
         text.addSpectrumProcessor(),
         text.addSpectrumProcessorDescription())
-            .ifPresent(processor -> node.getState().getProcessing().add(processor));
+            .ifPresent(
+                processor -> node
+                    .getState()
+                    .getProcessing()
+                    .add(processor.configure(new PersistedState())));
   }
 
-  static java.util.Optional<SpectrumProcessorType> requestProcessorType(
-      @Service List<SpectrumProcessorType> processors,
+  static java.util.Optional<SpectrumProcessorType<?>> requestProcessorType(
+      @Service List<SpectrumProcessorType<?>> processors,
       Localized<String> title,
       Localized<String> header) {
-    ChoiceDialog<SpectrumProcessorType> nameDialog = processors.isEmpty()
+    ChoiceDialog<SpectrumProcessorType<?>> nameDialog = processors.isEmpty()
         ? new ChoiceDialog<>()
         : new ChoiceDialog<>(processors.get(0), processors);
     nameDialog.titleProperty().bind(wrap(title));

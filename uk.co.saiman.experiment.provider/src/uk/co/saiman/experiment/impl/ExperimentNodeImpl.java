@@ -7,8 +7,8 @@ import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFIL
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -38,7 +38,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   private final ExperimentType<S, T> type;
 
   private final ExperimentNodeImpl<?, ?> parent;
-  private final List<ExperimentNodeImpl<?, ?>> children = new ArrayList<>();
+  private final Map<PersistedExperiment, ExperimentNodeImpl<?, ?>> children = new HashMap<>();
 
   private final ObservableProperty<ExperimentLifecycleState> lifecycleState = ObservableProperty
       .over(PREPARATION);
@@ -95,10 +95,11 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     this.type = type;
     this.parent = parent;
     this.persistedExperiment = persistedExperiment;
+    this.parent.children.put(persistedExperiment, this);
+
     this.state = createState(persistedExperiment.getId());
 
     loadChildNodes();
-    validateChild();
   }
 
   /**
@@ -118,10 +119,19 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
     this.type = type;
     this.parent = parent;
+    this.persistedExperiment = this.parent.addChildImpl(this, initialState, index);
 
+    this.state = createState(null);
+  }
+
+  private PersistedExperiment addChildImpl(
+      ExperimentNodeImpl<?, ?> child,
+      PersistedState state,
+      int index) {
+    PersistedExperiment persistedExperiment;
     try {
-      this.persistedExperiment = parent.persistedExperiment
-          .addChild(index, type.getId(), initialState);
+      persistedExperiment = parent.persistedExperiment
+          .addChild(child.getId(), child.getType().getId(), state, index);
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
           getText().exception().cannotCreateExperiment(parent),
@@ -129,10 +139,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       getLog().log(Level.ERROR, ee);
       throw ee;
     }
-
-    this.state = createState(null);
-
-    validateChild();
+    children.put(persistedExperiment, child);
+    return persistedExperiment;
   }
 
   protected void loadChildNodes() {
@@ -153,11 +161,6 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       getLog().log(Level.ERROR, ee);
       throw ee;
     }
-  }
-
-  private void validateChild() {
-    validateChild(parent, type);
-    parent.children.add(this);
   }
 
   private static void validateChild(ExperimentNodeImpl<?, ?> parent, ExperimentType<?, ?> type) {
@@ -186,7 +189,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
   private boolean isChildValid(ExperimentType<?, ?> type) {
     try {
-      validateChild(parent, type);
+      validateChild(this, type);
     } catch (ExperimentException e) {
       return false;
     }
@@ -271,29 +274,31 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     assertAvailable();
     setDisposed();
 
-    if (parent != null) {
-      if (!parent.children.remove(this)) {
-        ExperimentException e = new ExperimentException(
-            getText().exception().experimentDoesNotExist(getId()));
-        getLog().log(Level.ERROR, e);
-        throw e;
-      }
+    removeImpl();
+  }
 
-      try {
-        parent.persistedExperiment.removeChild(persistedExperiment);
-      } catch (IOException e) {
-        ExperimentException ee = new ExperimentException(
-            getText().exception().cannotRemoveExperiment(this),
-            e);
-        getLog().log(Level.ERROR, ee);
-        throw ee;
-      }
+  protected void removeImpl() {
+    if (parent.children.remove(persistedExperiment) == null) {
+      ExperimentException e = new ExperimentException(
+          getText().exception().experimentDoesNotExist(getId()));
+      getLog().log(Level.ERROR, e);
+      throw e;
+    }
+
+    try {
+      parent.persistedExperiment.removeChild(getId(), getType().getId());
+    } catch (IOException e) {
+      ExperimentException ee = new ExperimentException(
+          getText().exception().cannotRemoveExperiment(this),
+          e);
+      getLog().log(Level.ERROR, ee);
+      throw ee;
     }
   }
 
   protected void setDisposed() {
     lifecycleState.set(DISPOSED);
-    for (ExperimentNodeImpl<?, ?> child : children) {
+    for (ExperimentNodeImpl<?, ?> child : children.values()) {
       child.setDisposed();
     }
   }
@@ -311,7 +316,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   protected Stream<ExperimentNodeImpl<?, ?>> getChildrenImpl() {
-    return children.stream();
+    return persistedExperiment.getChildren().map(children::get);
   }
 
   @Override
@@ -331,26 +336,30 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   @Override
-  public <U, V> ExperimentNode<U, V> addCopy(ExperimentNode<U, V> node, int index) {
+  public ExperimentNode<S, T> copy(ExperimentNode<?, ?> parent, int index) {
     assertAvailable();
 
-    if (node.getWorkspace() != getWorkspace())
+    if (parent.getWorkspace() != getWorkspace())
       throw new ExperimentException(getText().exception().cannotCopyFromOutsideWorkspace());
 
-    return new ExperimentNodeImpl<>(
-        this,
-        node.getType(),
+    return new ExperimentNodeImpl<S, T>(
+        ((ExperimentNodeImpl<?, ?>) parent),
+        type,
         index,
-        ((ExperimentNodeImpl<?, ?>) node).persistedExperiment.getPersistedState());
+        persistedExperiment.getPersistedState().copy());
   }
 
   @Override
-  public void moveToIndex(int index) {
-    parent.move(getIndex(), index);
-  }
+  public void move(ExperimentNode<?, ?> parent, int index) {
+    assertAvailable();
 
-  protected void move(int from, int to) {
-    // TODO perform move operation!
+    if (parent.getWorkspace() != getWorkspace())
+      throw new ExperimentException(getText().exception().cannotCopyFromOutsideWorkspace());
+
+    removeImpl();
+
+    ((ExperimentNodeImpl<?, ?>) parent)
+        .addChildImpl(this, persistedExperiment.getPersistedState(), index);
   }
 
   @Override
@@ -369,6 +378,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   protected boolean executeImpl() {
+    validateChild(parent, type);
+
     lifecycleState.set(ExperimentLifecycleState.PROCESSING);
 
     try {
@@ -420,6 +431,18 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       @Override
       public void executeChildren() {
         // TODO Auto-generated method stub
+
+        /*
+         * 
+         * TODO if this method is invoked, then repeat executions of the experiment node
+         * may only occur during repeat execution of the parent.
+         * 
+         * Otherwise repeat execution of this node may occur so long as the results of
+         * all ancestors are still present.
+         * 
+         * 
+         * 
+         */
 
       }
 

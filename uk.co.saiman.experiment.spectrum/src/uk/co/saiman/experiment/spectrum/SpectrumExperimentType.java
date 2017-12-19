@@ -128,7 +128,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
                     .getState()
                     .getProcessing()
                     .stream()
-                    .map(SpectrumProcessorType::getProcessor)
+                    .map(SpectrumProcessorState::getProcessor)
                     .reduce(identity(), SpectrumProcessor::andThen)));
 
     device.startAcquisition();

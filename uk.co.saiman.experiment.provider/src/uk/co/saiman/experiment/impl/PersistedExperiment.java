@@ -5,6 +5,13 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.persistence.PersistedState;
 
+/**
+ * implementations do not need to maintain identity or keep unique instances for
+ * a given experiment node, but they do need to define equality.
+ * 
+ * @author Elias N Vasylenko
+ *
+ */
 public interface PersistedExperiment {
   String getId();
 
@@ -14,10 +21,16 @@ public interface PersistedExperiment {
 
   PersistedState getPersistedState();
 
-  Stream<PersistedExperiment> getChildren() throws IOException;
+  Stream<? extends PersistedExperiment> getChildren();
 
-  PersistedExperiment addChild(int index, String typeId, PersistedState initialState)
+  PersistedExperiment addChild(String id, String typeId, PersistedState configuration, int index)
       throws IOException;
 
-  void removeChild(PersistedExperiment child) throws IOException;
+  void removeChild(String id, String typeId) throws IOException;
+
+  @Override
+  boolean equals(Object obj);
+
+  @Override
+  int hashCode();
 }

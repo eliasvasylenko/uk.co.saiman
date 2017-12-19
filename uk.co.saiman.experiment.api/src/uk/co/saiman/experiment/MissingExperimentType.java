@@ -70,13 +70,13 @@ public interface MissingExperimentType<T> extends ExperimentType<Map<String, Obj
                     .map(mapToEntry(s -> (Object) persistedState.forString(s).get())),
                 persistedState
                     .getMaps()
-                    .map(mapToEntry(s -> (Object) persistedStateMap(persistedState.forMap(s)))),
+                    .map(mapToEntry(s -> (Object) persistedStateMap(persistedState.getMap(s)))),
                 persistedState
                     .getMapLists()
                     .map(
                         mapToEntry(
                             s -> (Object) persistedState
-                                .forMapList(s)
+                                .getMapList(s)
                                 .stream()
                                 .map(e -> persistedStateMap(e))
                                 .collect(toList()))))
