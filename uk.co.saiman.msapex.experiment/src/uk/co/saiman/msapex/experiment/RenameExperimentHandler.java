@@ -55,6 +55,7 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.text.properties.Localized;
+import uk.co.saiman.utility.Named;
 
 /**
  * Add an experiment to the workspace
@@ -67,27 +68,28 @@ public class RenameExperimentHandler {
       Workspace workspace,
       @Localize ExperimentProperties text,
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> node,
-      @AdaptNamed(ACTIVE_SELECTION) ExperimentConfiguration nodeConfiguration,
       @AdaptNamed(ACTIVE_SELECTION) TreeEntry<?> entry) {
-    System.out.println(node);
-    System.out.println(nodeConfiguration);
+    Object state = node.getState();
+    if (state instanceof Named) {
+      Named named = (Named) state;
 
-    requestExperimentNameDialog(
-        workspace,
-        text.renameExperiment(),
-        text.renameExperimentName(nodeConfiguration.getName())).ifPresent(name -> {
-          if (workspace.getExperiment(name).isPresent()) {
-            throw new ExperimentException(text.exception().experimentAlreadyExists(name));
-          }
+      requestExperimentNameDialog(
+          workspace,
+          text.renameExperiment(),
+          text.renameExperimentName(named.getName())).ifPresent(name -> {
+            if (workspace.getExperiment(name).isPresent()) {
+              throw new ExperimentException(text.exception().experimentAlreadyExists(name));
+            }
 
-          /*
-           * TODO we can no longer check if data already exists at the location.
-           * RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
-           */
+            /*
+             * TODO we can no longer check if data already exists at the location.
+             * RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
+             */
 
-          nodeConfiguration.setName(name);
-          entry.refresh(false);
-        });
+            named.setName(name);
+            entry.refresh(false);
+          });
+    }
   }
 
   static Optional<String> requestExperimentNameDialog(

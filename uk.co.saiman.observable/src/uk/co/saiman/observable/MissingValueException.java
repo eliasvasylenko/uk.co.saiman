@@ -37,4 +37,16 @@ public class MissingValueException extends RuntimeException {
   public MissingValueException(Observable<?> observable, Throwable t) {
     super("Unable to obtain value from source " + observable, t);
   }
+
+  public MissingValueException(Observation observation) {
+    this(observation, null);
+  }
+
+  public MissingValueException(Observation observation, Throwable t) {
+    super("Unable to obtain value from source " + observation, t);
+  }
+
+  public MissingValueException(Throwable t) {
+    super("Unable to obtain value", t);
+  }
 }

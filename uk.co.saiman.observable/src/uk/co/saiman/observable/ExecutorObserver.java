@@ -42,10 +42,7 @@ public class ExecutorObserver<T> extends SafeObserver<T> {
 
   @Override
   public void onNext(T message) {
-    executor.execute(() -> {
-      super.onNext(message);
-      getObservation().requestNext();
-    });
+    executor.execute(() -> super.onNext(message));
   }
 
   @Override

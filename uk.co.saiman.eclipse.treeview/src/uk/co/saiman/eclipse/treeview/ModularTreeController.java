@@ -97,15 +97,18 @@ public class ModularTreeController {
   @FXML
   void initialize() {
     contributors.addListener((ListChangeListener<TreeContribution>) change -> {
-      while (change.next())
+      while (change.next()) {
         if (change.wasAdded())
           change.getAddedSubList().forEach(this::prepareContribution);
+      }
       refresh();
     });
     contributors.stream().forEach(this::prepareContribution);
 
-    modularTreeView.getSelectionModel().selectedItemProperty().addListener(
-        (observable, oldValue, newValue) -> {
+    modularTreeView
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener((observable, oldValue, newValue) -> {
           selectionService.setSelection(newValue);
         });
 

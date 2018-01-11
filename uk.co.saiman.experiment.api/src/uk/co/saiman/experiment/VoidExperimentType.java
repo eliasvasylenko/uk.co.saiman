@@ -27,9 +27,13 @@
  */
 package uk.co.saiman.experiment;
 
+import static uk.co.saiman.reflection.token.TypeToken.forType;
+
+import uk.co.saiman.reflection.token.TypeToken;
+
 public interface VoidExperimentType<T> extends ExperimentType<T, Void> {
   @Override
-  default Void execute(ExecutionContext<T, Void> context) {
+  default Void process(ProcessingContext<T, Void> context) {
     executeVoid(new VoidExecutionContext<T>() {
       @Override
       public ExperimentNode<T, Void> node() {
@@ -37,12 +41,17 @@ public interface VoidExperimentType<T> extends ExperimentType<T, Void> {
       }
 
       @Override
-      public void executeChildren() {
-        context.executeChildren();
+      public void processChildren() {
+        context.processChildren();
       }
     });
     return null;
   }
 
   void executeVoid(VoidExecutionContext<T> context);
+
+  @Override
+  default TypeToken<Void> getResultType() {
+    return forType(void.class);
+  }
 }

@@ -30,17 +30,15 @@ package uk.co.saiman.observable;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import mockit.Mocked;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.observable.Observer;
+import mockit.Injectable;
 
 @Ignore
 @SuppressWarnings("javadoc")
 public class MaterializingObserverTest {
-  @Mocked
+  @Injectable
   Observation upstreamObservation;
 
-  @Mocked
+  @Injectable
   Observer<String> downstreamObserver;
 
   @Test

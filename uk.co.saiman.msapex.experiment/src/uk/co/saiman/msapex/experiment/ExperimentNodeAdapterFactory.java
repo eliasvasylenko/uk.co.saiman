@@ -33,6 +33,7 @@ import static uk.co.saiman.collection.StreamUtilities.streamOptional;
 import static uk.co.saiman.collection.StreamUtilities.tryOptional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdapterFactory;
@@ -86,8 +87,10 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
       return (T) node.getResult();
     }
 
-    if (adapterType == node.getType().getResultType().getErasedType()) {
-      return (T) node.getResult().get();
+    if (adapterType == node.getResult().getType().getErasedType()) {
+      Optional<?> value = node.getResult().getValue();
+      if (value.isPresent())
+        return (T) value.get();
     }
 
     return (T) adapterManager.loadAdapter(node.getState(), adapterType.getName());

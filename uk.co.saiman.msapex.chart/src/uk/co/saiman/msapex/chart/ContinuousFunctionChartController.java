@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -58,13 +59,12 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import uk.co.saiman.data.DataException;
 import uk.co.saiman.data.function.ContinuousFunction;
-import uk.co.saiman.data.function.DataException;
 import uk.co.saiman.data.function.FunctionProperties;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.mathematics.Interval;
 import uk.co.saiman.measurement.Units;
-import uk.co.saiman.observable.Observable;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
@@ -283,7 +283,8 @@ public class ContinuousFunctionChartController {
       Function<ContinuousFunction<?, ?>, Interval<Double>> continuousFunctionRange) {
     synchronized (domain) {
       return series()
-          .map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction)
+          .map(ContinuousFunctionSeries::getLatestPreparedContinuousFunction)
+          .filter(Objects::nonNull)
           .map(continuousFunctionRange)
           .reduce(Interval::getExtendedThrough)
           .orElse(Interval.bounded(0d, 100d));
@@ -389,8 +390,8 @@ public class ContinuousFunctionChartController {
    * percentage.
    * 
    * @param percentage
-   *          A percentage of the full width of the view area by which to move
-   *          the chart
+   *          A percentage of the full width of the view area by which to move the
+   *          chart
    */
   public void moveDomain(double percentage) {
     synchronized (domain) {
@@ -405,8 +406,8 @@ public class ContinuousFunctionChartController {
   }
 
   /**
-   * Move the view of the domain to contain exactly the interval between the
-   * given values.
+   * Move the view of the domain to contain exactly the interval between the given
+   * values.
    * 
    * @param from
    *          The leftmost value in the domain to show in the view
@@ -489,11 +490,8 @@ public class ContinuousFunctionChartController {
     updateAnnotations();
   }
 
-  public ContinuousFunctionSeries addSeries(
-      Observable<? extends ContinuousFunction<?, ?>> observable) {
-    ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(
-        this,
-        observable);
+  public ContinuousFunctionSeries addSeries() {
+    ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(this);
 
     series.add(continuousFunctionSeries);
     lineChart.getData().add(continuousFunctionSeries.getSeries());
@@ -527,6 +525,8 @@ public class ContinuousFunctionChartController {
           || series().map(ContinuousFunctionSeries::isDirty).reduce(false, (a, b) -> a || b);
 
       if (dirty) {
+        series().forEach(s -> s.prepare());
+
         if (!zoomed) {
           resetZoomDomainImpl();
         }
@@ -560,30 +560,37 @@ public class ContinuousFunctionChartController {
       }
 
       for (ContinuousFunctionSeries series : this.series) {
-        Unit<?> functionXUnit = series.getLatestRenderedContinuousFunction().domain().getUnit();
-        Unit<?> functionYUnit = series.getLatestRenderedContinuousFunction().range().getUnit();
+        ContinuousFunction<?, ?> preparedFunction = series.getLatestPreparedContinuousFunction();
+        if (preparedFunction != null) {
+          Unit<?> functionXUnit = preparedFunction.domain().getUnit();
+          Unit<?> functionYUnit = preparedFunction.range().getUnit();
 
-        if (xUnit == null) {
-          xUnit = functionXUnit;
-        } else {
-          if (!xUnit.equals(functionXUnit)) {
-            Unit<?> xUnitFinal = xUnit;
-            throw new DataException(properties.incompatibleDomainUnits(xUnitFinal, functionXUnit));
+          if (xUnit == null) {
+            xUnit = functionXUnit;
+          } else {
+            if (!xUnit.equals(functionXUnit)) {
+              Unit<?> xUnitFinal = xUnit;
+              throw new DataException(
+                  properties.incompatibleDomainUnits(xUnitFinal, functionXUnit));
+            }
           }
+          yUnits.add(functionYUnit);
+
+          RangeGroup group = rangeGroups
+              .computeIfAbsent(functionYUnit, u -> new RangeGroup(units, functionYUnit));
+
+          group.addContinuousFunction(series);
         }
-        yUnits.add(functionYUnit);
-
-        RangeGroup group = rangeGroups
-            .computeIfAbsent(functionYUnit, u -> new RangeGroup(units, functionYUnit));
-
-        group.addContinuousFunction(series);
       }
+      if (xUnit == null)
+        xUnit = units.count().get();
       getXAxis().setLabel(units.formatUnit(xUnit));
 
       rangeGroups.keySet().retainAll(yUnits);
 
       Iterator<Unit<?>> yUnitIterator = yUnits.iterator();
-      rangeGroups.get(yUnitIterator.next()).setAxis(getYAxis());
+      if (yUnitIterator.hasNext())
+        rangeGroups.get(yUnitIterator.next()).setAxis(getYAxis());
 
       // yUnitIterator = yUnits.iterator();
 
@@ -615,8 +622,8 @@ public class ContinuousFunctionChartController {
      * 
      * 
      * from now on all members of the graph must use the same units. it's just
-     * simpler that way. have conversion functions between continuous functions
-     * to facilitate this.
+     * simpler that way. have conversion functions between continuous functions to
+     * facilitate this.
      * 
      * 
      * 

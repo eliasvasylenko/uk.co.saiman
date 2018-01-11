@@ -53,7 +53,7 @@ import uk.co.saiman.data.function.PeakShapeFunctionFactory;
 import uk.co.saiman.data.function.PeakShapeImpulseConvolutionFunction;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
-import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 
 /**
  * A JavaFX UI component for display of a {@link PeriodicTable}.
@@ -83,15 +83,15 @@ public class ChemicalElementPanelController {
   private TableColumn<Isotope, Double> abundanceColumn;
 
   private PeakShapeFunctionFactory peakFunction;
-  private HotObservable<ContinuousFunction<Mass, Dimensionless>> isotopeFunction;
+  private ContinuousFunctionSeries isotopeSeries;
   private Unit<Dimensionless> abundanceUnit;
   private Unit<Mass> massUnit;
 
   @FXML
   void initialize() {
     peakFunction = new GaussianFunctionFactory(VARIANCE);
-    isotopeChartController.addSeries(isotopeFunction);
-    isotopeFunction.next(ContinuousFunction.empty(massUnit, abundanceUnit));
+    isotopeSeries = isotopeChartController.addSeries();
+    isotopeSeries.setContinuousFunction(ContinuousFunction.empty(massUnit, abundanceUnit));
 
     setElement(null);
 
@@ -116,8 +116,6 @@ public class ChemicalElementPanelController {
   void postInitialize(@Service Units units) {
     massUnit = units.dalton().get();
     abundanceUnit = units.percent().get();
-
-    isotopeFunction = new HotObservable<>();
   }
 
   /**
@@ -144,14 +142,15 @@ public class ChemicalElementPanelController {
         }
       }
 
-      isotopeFunction.next(
-          new PeakShapeImpulseConvolutionFunction<>(
-              massUnit,
-              abundanceUnit,
-              isotopeCount,
-              values,
-              intensities,
-              peakFunction));
+      isotopeSeries
+          .setContinuousFunction(
+              new PeakShapeImpulseConvolutionFunction<>(
+                  massUnit,
+                  abundanceUnit,
+                  isotopeCount,
+                  values,
+                  intensities,
+                  peakFunction));
     }
 
     isotopeTable

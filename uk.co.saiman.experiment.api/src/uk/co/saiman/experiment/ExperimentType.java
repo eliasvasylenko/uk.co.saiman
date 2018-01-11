@@ -78,12 +78,12 @@ public interface ExperimentType<S, R> {
   S createState(ConfigurationContext<S> context);
 
   /**
-   * Execute this experiment type for a given node.
+   * Process this experiment type for a given node.
    * 
    * @param context
-   *          the execution context
+   *          the processing context
    */
-  R execute(ExecutionContext<S, R> context);
+  R process(ProcessingContext<S, R> context);
 
   /**
    * Test whether a node of this type may follow from the given directly preceding

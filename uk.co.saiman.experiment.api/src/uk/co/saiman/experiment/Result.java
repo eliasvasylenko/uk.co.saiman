@@ -27,8 +27,11 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.Optional;
+
 import uk.co.saiman.data.format.DataFormat;
-import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.observable.Invalidation;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
@@ -50,10 +53,14 @@ import uk.co.saiman.reflection.token.TypedReference;
  * @param <T>
  *          the data type of the result
  */
-public interface Result<T> extends ObservableValue<T> {
+public interface Result<T> {
   ExperimentNode<?, ?> getExperimentNode();
 
   TypeToken<T> getType();
+
+  Optional<T> getValue();
+
+  Observable<Invalidation<T>> invalidations();
 
   default TypeToken<Result<T>> getThisTypeToken() {
     return new TypeToken<Result<T>>() {}.withTypeArguments(new TypeArgument<T>(getType()) {});

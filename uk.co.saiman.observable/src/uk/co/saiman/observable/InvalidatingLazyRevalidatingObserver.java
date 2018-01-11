@@ -30,7 +30,6 @@ package uk.co.saiman.observable;
 public class InvalidatingLazyRevalidatingObserver<M>
     extends BackpressureReducingObserver<M, Invalidation<M>> {
   private M latest;
-  private Invalidation<M> invalidation;
   private Observation intermediateObservation;
 
   public InvalidatingLazyRevalidatingObserver(
@@ -64,32 +63,37 @@ public class InvalidatingLazyRevalidatingObserver<M>
   }
 
   @Override
-  public Invalidation<M> initialize(M message) {
-    synchronized (this) {
-      latest = message;
-      invalidation = new Invalidation<M>() {
-        private boolean done;
-
-        @Override
-        public M revalidate() {
-          if (done)
-            throw new IllegalStateException();
-          done = true;
-          synchronized (this) {
-            intermediateObservation.requestNext();
-            return latest;
-          }
-        }
-      };
-      return invalidation;
-    }
+  public void onFail(Throwable t) {
+    getDownstreamObserver().onNext(new Invalidation<M>() {
+      @Override
+      public M revalidate() {
+        throw new MissingValueException(getObservation(), t);
+      }
+    });
+    super.onFail(t);
   }
 
   @Override
-  public Invalidation<M> accumulate(Invalidation<M> current, M message) {
-    synchronized (this) {
-      latest = message;
-      return invalidation;
-    }
+  public synchronized Invalidation<M> initialize(M message) {
+    latest = message;
+    return new Invalidation<M>() {
+      private M validated;
+
+      @Override
+      public M revalidate() {
+        synchronized (InvalidatingLazyRevalidatingObserver.this) {
+          if (validated == null)
+            validated = latest;
+        }
+        intermediateObservation.requestNext();
+        return validated;
+      }
+    };
+  }
+
+  @Override
+  public synchronized Invalidation<M> accumulate(Invalidation<M> current, M message) {
+    latest = message;
+    return current;
   }
 }

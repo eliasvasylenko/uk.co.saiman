@@ -33,11 +33,8 @@ import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
-import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
@@ -61,8 +58,6 @@ public class WorkspaceImpl implements Workspace {
 
   private final ExperimentProperties text;
   private final Log log;
-
-  private final Lock processingLock = new ReentrantLock();
 
   /**
    * Try to create a new experiment workspace over the given root path
@@ -168,36 +163,6 @@ public class WorkspaceImpl implements Workspace {
   /*
    * Child experiment types
    */
-
-  protected void process(ExperimentNodeImpl<?, ?> node) {
-    if (processingLock.tryLock()) {
-      try {
-        processImpl(node);
-      } finally {
-        processingLock.unlock();
-      }
-    } else {
-      throw new ExperimentException(
-          text.exception().cannotProcessExperimentConcurrently(node.getExperiment()));
-    }
-  }
-
-  private boolean processImpl(ExperimentNodeImpl<?, ?> node) {
-    boolean success = StreamUtilities
-        .reverse(node.getAncestorsImpl())
-        .filter(ExperimentNodeImpl::executeImpl)
-        .count() > 0;
-
-    if (success) {
-      processChildren(node);
-    }
-
-    return success;
-  }
-
-  private void processChildren(ExperimentNodeImpl<?, ?> node) {
-    node.getChildrenImpl().filter(ExperimentNodeImpl::executeImpl).forEach(this::processChildren);
-  }
 
   @Override
   public Experiment addExperiment(String name) {

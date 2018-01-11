@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static uk.co.saiman.collection.StreamUtilities.reverse;
-
 import java.io.IOException;
 import java.util.stream.Stream;
 
@@ -113,17 +111,6 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;
-    }
-  }
-
-  @Override
-  public void execute() {
-    boolean success = reverse(getAncestorsImpl())
-        .filter(ExperimentNodeImpl::executeImpl)
-        .count() > 0;
-
-    if (success) {
-      processChildren();
     }
   }
 

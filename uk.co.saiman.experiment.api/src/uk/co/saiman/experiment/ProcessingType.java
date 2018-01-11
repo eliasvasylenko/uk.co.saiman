@@ -46,9 +46,9 @@ public interface ProcessingType<S, T, U> extends ExperimentType<S, U> {
   }
 
   @Override
-  default U execute(ExecutionContext<S, U> context) {
+  default U process(ProcessingContext<S, U> context) {
     @SuppressWarnings("unchecked")
-    T input = (T) context.node().getParent().get().getResult().get();
+    T input = (T) context.node().getParent().get().getResult().getValue();
     return process(input);
   }
 

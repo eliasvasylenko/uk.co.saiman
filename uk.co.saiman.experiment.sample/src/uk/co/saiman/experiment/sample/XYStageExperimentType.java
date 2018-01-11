@@ -52,5 +52,12 @@ public interface XYStageExperimentType<T extends XYStageConfiguration>
   default void executeVoid(VoidExecutionContext<T> context) {
     device().getXAxis().requestedPosition().set(context.node().getState().getX());
     device().getYAxis().requestedPosition().set(context.node().getState().getY());
+
+    /*
+     * TODO listen for interruption of the stage position and cancel/fail/warn if it
+     * is disturbed. Possibly acquire some sort of lock?
+     */
+
+    context.processChildren();
   }
 }

@@ -34,8 +34,9 @@ public class RepeatingObserver<T> extends PassthroughObserver<T, T> {
     private Observation upstreamObservation;
     private long pendingRequests;
 
-    public RetryingObservation(Observation observation) {
-      pendingRequests = observation.getPendingRequestCount();
+    public RetryingObservation(Observation upstreamObservation) {
+      this.upstreamObservation = upstreamObservation;
+      pendingRequests = upstreamObservation.getPendingRequestCount();
     }
 
     public RetryingObservation setUpstreamObservation(Observation upstreamObservation) {

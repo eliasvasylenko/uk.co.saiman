@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
@@ -52,6 +53,7 @@ import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
+import uk.co.saiman.observable.Invalidation;
 
 public class ExperimentEditorAddon implements EditorProvider {
   public static final String EDITOR_RESULT_CLASS = "uk.co.saiman.msapex.editor.result.class";
@@ -154,6 +156,7 @@ public class ExperimentEditorAddon implements EditorProvider {
     return part;
   }
 
+  @Override
   public Object loadEditorResource(MPart part) {
     String pathString = part.getPersistedState().get(EDITOR_EXPERIMENT_PATH);
     return ExperimentPath.fromString(pathString).resolve(workspace);
@@ -166,11 +169,10 @@ public class ExperimentEditorAddon implements EditorProvider {
     part.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(experiment).toString());
 
     // inject result and result data changes into context
-    part.getContext().set(ExperimentNode.class, experiment);
-    Result<?> result = experiment.getResult();
-    part.getContext().set(Result.class, experiment.getResult());
-    Class<?> resultType = experiment.getResult().getType().getErasedType();
-    result
-        .observe(o -> part.getContext().modify(resultType.getName(), result.tryGet().orElse(null)));
+    IEclipseContext context = part.getContext();
+    context.set(ExperimentNode.class, experiment);
+    context.set(Result.class, experiment.getResult());
+    context.declareModifiable(Invalidation.class);
+    experiment.getResult().invalidations().observe(o -> context.modify(Invalidation.class, o));
   }
 }

@@ -8,6 +8,7 @@ import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
+import uk.co.saiman.data.SimpleData;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.experiment.ConfigurationContext;
@@ -25,11 +27,13 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentNodeConstraint;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ProcessingContext;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.observable.Invalidation;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
@@ -44,6 +48,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       .over(PREPARATION);
   private final S state;
   private final ResultImpl<T> result = new ResultImpl<>(this);
+  private Data<T> resultData;
+  private boolean processedChildrenInline;
 
   /**
    * Load an existing root experiment.
@@ -114,8 +120,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       ExperimentType<S, T> type,
       int index,
       PersistedState initialState) {
-    if (index < 0 || index > children.size())
-      throw new IndexOutOfBoundsException();
+    if (index < 0 || index > parent.children.size())
+      throw new IndexOutOfBoundsException(index + " in " + parent.children.size());
 
     this.type = type;
     this.parent = parent;
@@ -130,7 +136,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       int index) {
     PersistedExperiment persistedExperiment;
     try {
-      persistedExperiment = parent.persistedExperiment
+      persistedExperiment = this.persistedExperiment
           .addChild(child.getId(), child.getType().getId(), state, index);
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
@@ -170,7 +176,6 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
     ExperimentNode<?, ?> unfulfilledChildConstraint = null;
     for (ExperimentNodeImpl<?, ?> ancestor : parent.getAncestorsImpl().collect(toList())) {
-
       ExperimentNodeConstraint childConstraint = ancestor.type.mayComeBefore(parent, type);
       if (childConstraint == ASSUME_ALL_FULFILLED)
         return;
@@ -197,7 +202,9 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   private S createState(String id) {
-    setId(id);
+    if (id != null) {
+      setId(id);
+    }
 
     S state = type.createState(createConfigurationContext());
 
@@ -210,7 +217,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
   @Override
   public String getId() {
-    return persistedExperiment.getId();
+    return persistedExperiment != null ? persistedExperiment.getId() : null;
   }
 
   protected Stream<ExperimentNodeImpl<?, ?>> getAncestorsImpl() {
@@ -278,13 +285,6 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   protected void removeImpl() {
-    if (parent.children.remove(persistedExperiment) == null) {
-      ExperimentException e = new ExperimentException(
-          getText().exception().experimentDoesNotExist(getId()));
-      getLog().log(Level.ERROR, e);
-      throw e;
-    }
-
     try {
       parent.persistedExperiment.removeChild(getId(), getType().getId());
     } catch (IOException e) {
@@ -293,6 +293,13 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;
+    }
+
+    if (parent.children.remove(persistedExperiment) == null) {
+      ExperimentException e = new ExperimentException(
+          getText().exception().experimentDoesNotExist(getId()));
+      getLog().log(Level.ERROR, e);
+      throw e;
     }
   }
 
@@ -373,77 +380,81 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   @Override
-  public void execute() {
-    getRootImpl().execute();
-  }
-
-  protected boolean executeImpl() {
-    validateChild(parent, type);
-
-    lifecycleState.set(ExperimentLifecycleState.PROCESSING);
-
+  public void process() {
     try {
-      validate();
-
-      T result = getType().execute(createExecutionContext());
-
-      /*
-       * TODO set the result
-       * 
-       * TODO if
-       */
-
-      lifecycleState.set(ExperimentLifecycleState.COMPLETION);
-
-      /*
-       * TODO execute children if not already done
-       */
-      return true;
+      processAncestors(getAncestorsImpl().collect(toList()));
     } catch (Exception e) {
       getLog()
           .log(
               Level.ERROR,
               new ExperimentException(getText().exception().failedExperimentExecution(this), e));
       lifecycleState.set(ExperimentLifecycleState.FAILURE);
-      return false;
     }
   }
 
-  protected void processChildren() {
-    getChildrenImpl()
-        .filter(ExperimentNodeImpl::executeImpl)
-        .forEach(ExperimentNodeImpl::processChildren);
+  private void processAncestors(List<ExperimentNodeImpl<?, ?>> ancestors) {
+    ExperimentNodeImpl<?, ?> node = ancestors.remove(ancestors.size() - 1);
+
+    if (!ancestors.isEmpty()) {
+      node.processImpl(() -> node.processAncestors(ancestors));
+    } else {
+      node.processImpl(node::processChildren);
+    }
   }
 
-  private void validate() {
+  private void processChildren() {
+    getChildrenImpl().forEach(n -> n.processImpl(n::processChildren));
+  }
+
+  private void processImpl(Runnable processChildren) {
+    lifecycleState.set(ExperimentLifecycleState.PROCESSING);
+
     if (persistedExperiment.getId() == null) {
       throw new ExperimentException(getText().exception().invalidExperimentName(null));
     }
+    if (parent != null) {
+      validateChild(parent, type);
+    }
+
+    result.unsetValue();
+    if (resultData != null) {
+      resultData.unset();
+      resultData.save();
+      resultData = null;
+    }
+    processedChildrenInline = false;
+
+    T result = getType().process(createProcessingContext(processChildren));
+
+    if (getType().getResultType().getErasedType() != void.class) {
+      this.result.setValue(result);
+      if (resultData != null) {
+        resultData.set(result);
+      }
+    }
+
+    lifecycleState.set(ExperimentLifecycleState.COMPLETION);
+
+    if (!processedChildrenInline) {
+      processChildren.run();
+    }
   }
 
-  private ExecutionContextImpl<S, T> createExecutionContext() {
-    return new ExecutionContextImpl<S, T>() {
+  private ProcessingContext<S, T> createProcessingContext(Runnable processChildren) {
+    /*
+     * TODO once processed this must become inoperable, including the proxied Data
+     * from setResult. Make sure this is synchronized!
+     */
+    return new ProcessingContext<S, T>() {
       @Override
       public ExperimentNode<S, T> node() {
         return ExperimentNodeImpl.this;
       }
 
       @Override
-      public void executeChildren() {
-        // TODO Auto-generated method stub
-
-        /*
-         * 
-         * TODO if this method is invoked, then repeat executions of the experiment node
-         * may only occur during repeat execution of the parent.
-         * 
-         * Otherwise repeat execution of this node may occur so long as the results of
-         * all ancestors are still present.
-         * 
-         * 
-         * 
-         */
-
+      public void processChildren() {
+        processedChildrenInline = true;
+        processChildren.run();
       }
 
       @Override
@@ -458,22 +469,35 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       }
 
       @Override
-      public Data<T> setResult(Data<? extends T> data) {
-        result.set(data.get());
-        // TODO Auto-generated method stub
-        return null;
+      public void setPartialResult(T value) {
+        setPartialResult(() -> value);
+      }
+
+      @Override
+      public void setPartialResult(Invalidation<T> value) {
+        result.setInvalidation(value);
+      }
+
+      @Override
+      public void setResultData(Data<T> data) {
+        T value = data.get();
+        if (value != null)
+          result.setValue(value);
+        else
+          result.unsetValue();
+
+        resultData = data;
       }
 
       @Override
       public void setResultFormat(String name, DataFormat<T> format) {
-        // TODO Auto-generated method stub
-
+        resultData = new SimpleData<>(getLocation(), name, format);
       }
 
       @Override
       public void setResultFormat(String name, String extension) {
-        // TODO Auto-generated method stub
-
+        DataFormat<T> format = null; // TODO find based on extension (& type)
+        setResultFormat(name, format);
       }
     };
   }
@@ -540,6 +564,6 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
   @Override
   public void clearResult() {
-    result.setProblem(new NullPointerException());
+    result.unsetValue();
   }
 }

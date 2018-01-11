@@ -34,15 +34,13 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.CachingData;
-import uk.co.saiman.data.Data;
 import uk.co.saiman.data.spectrum.ContinuousFunctionAccumulator;
 import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumProcessor;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
-import uk.co.saiman.experiment.ExecutionContext;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ProcessingContext;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -88,22 +86,31 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public Spectrum execute(ExecutionContext<T, Spectrum> context) {
+  public Spectrum process(ProcessingContext<T, Spectrum> context) {
+    System.out.println("create accumulator");
     AcquisitionDevice device = getAcquisitionDevice();
-
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
         device.acquisitionDataEvents(),
         device.getSampleDomain(),
         device.getSampleIntensityUnits());
 
-    Data<Spectrum> data = context
-        .setResult(
-            new CachingData<Spectrum>(
-                context.getLocation(),
-                SPECTRUM_DATA_NAME,
-                new RegularSampledSpectrumFormat(null)) {
+    System.out.println("prepare processing");
+    SpectrumProcessor processing = context
+        .node()
+        .getState()
+        .getProcessing()
+        .stream()
+        .map(SpectrumProcessorState::getProcessor)
+        .reduce(identity(), SpectrumProcessor::andThen);
 
-            });
+    System.out.println("attach observer");
+    accumulator
+        .accumulation()
+        .observe(
+            o -> context.setPartialResult(o.map(s -> new SampledSpectrum(s, null, processing))));
+
+    System.out.println("start acquisition");
+    device.startAcquisition();
 
     /*
      * TODO some sort of invalidate/lazy-revalidate message passer
@@ -118,21 +125,9 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
      * The problem is how to pass this through the Result API to users without
      * losing the laziness so we can request at e.g. the monitor refresh rate.
      */
-    data
-        .set(
-            new SampledSpectrum(
-                accumulator.accumulation().getNext().join().revalidate(),
-                null,
-                context
-                    .node()
-                    .getState()
-                    .getProcessing()
-                    .stream()
-                    .map(SpectrumProcessorState::getProcessor)
-                    .reduce(identity(), SpectrumProcessor::andThen)));
 
-    device.startAcquisition();
-
-    return data.get();
+    System.out.println("get result");
+    context.setResultFormat(SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
+    return new SampledSpectrum(accumulator.getAccumulation(), null, processing);
   }
 }

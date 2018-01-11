@@ -160,8 +160,8 @@ public interface ExperimentNode<S, T> {
   void remove();
 
   /**
-   * Get all child experiment parts, to be executed sequentially during this parts
-   * {@link ExperimentLifecycleState#PROCESSING} state.
+   * Get all child experiment nodes, to be processed sequentially when this node
+   * is processed.
    * 
    * @return An ordered list of all sequential child experiment parts
    */
@@ -242,7 +242,7 @@ public interface ExperimentNode<S, T> {
   void move(ExperimentNode<?, ?> parent, int index);
 
   /**
-   * @return the current execution lifecycle state of the experiment part
+   * @return the current processing lifecycle state of the experiment part
    */
   ObservableValue<ExperimentLifecycleState> lifecycleState();
 
@@ -263,7 +263,7 @@ public interface ExperimentNode<S, T> {
    * to this node. If the experiment is already in progress then invocation of
    * this method should fail.
    */
-  void execute();
+  void process();
 
   /**
    * Get the result associated with this node.

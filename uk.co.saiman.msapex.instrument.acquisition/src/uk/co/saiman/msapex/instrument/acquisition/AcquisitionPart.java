@@ -54,7 +54,6 @@ import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 
@@ -81,9 +80,6 @@ public class AcquisitionPart {
   @Inject
   @LocalInstance
   private FXMLLoader loaderProvider;
-
-  @Inject
-  private Units units;
 
   @Inject
   synchronized void updateSelectedDevices(@Optional AcquisitionDeviceSelection devices) {
@@ -136,7 +132,8 @@ public class AcquisitionPart {
     /*
      * Add latest data to chart controller
      */
-    ContinuousFunctionSeries series = chartController.addSeries(acquisitionDevice.dataEvents());
+    ContinuousFunctionSeries series = chartController.addSeries();
+    acquisitionDevice.dataEvents().observe(series::setContinuousFunction);
   }
 
   private void deselectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {

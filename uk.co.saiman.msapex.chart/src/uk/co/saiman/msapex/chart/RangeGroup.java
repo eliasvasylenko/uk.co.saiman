@@ -103,7 +103,7 @@ class RangeGroup {
     // the total range of all the data
     Interval<Double> totalDataRange = continuousFunctions
         .stream()
-        .map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction)
+        .map(ContinuousFunctionSeries::getLatestPreparedContinuousFunction)
         .map(c -> c.range().getInterval())
         .reduce(Interval::getExtendedThrough)
         .orElse(Interval.bounded(0d, 100d));
@@ -112,14 +112,14 @@ class RangeGroup {
     totalZoomRange = updateRangeZoom(reset, totalDataRange, totalZoomRange);
 
     if (continuousFunctions.stream().allMatch(
-        c -> domain.contains(c.getLatestRenderedContinuousFunction().domain().getInterval()))) {
+        c -> domain.contains(c.getLatestPreparedContinuousFunction().domain().getInterval()))) {
 
       visibleZoomRange = totalZoomRange;
     } else {
       // the total range of visible data
       Interval<Double> visibleDataRange = continuousFunctions
           .stream()
-          .map(ContinuousFunctionSeries::getLatestRenderedContinuousFunction)
+          .map(ContinuousFunctionSeries::getLatestPreparedContinuousFunction)
           .map(
               c -> c
                   .range()

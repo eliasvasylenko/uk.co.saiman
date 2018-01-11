@@ -283,8 +283,9 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     synchronized (acquiringLock) {
       acquiring = acquisition.getRemaining() >= 0;
       dataListeners.next(acquisition.getData());
-      if (acquiring)
+      if (acquiring) {
         acquisitionListeners.next(acquisition.getData());
+      }
 
       if (acquisition.getRemaining() == 0) {
         acquiring = false;

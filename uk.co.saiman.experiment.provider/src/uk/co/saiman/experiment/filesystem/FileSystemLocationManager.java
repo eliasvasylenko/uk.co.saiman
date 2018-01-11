@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.impl.ExperimentLocationManager;
 import uk.co.saiman.experiment.impl.ExperimentNodeImpl;
@@ -30,9 +31,9 @@ public class FileSystemLocationManager implements ExperimentLocationManager {
     if (node.getId() != null) {
       Path oldLocation = getPath(node);
 
-      Files.move(oldLocation, newLocation);
-    } else {
-      Files.createDirectories(newLocation);
+      if (Files.exists(oldLocation)) {
+        Files.move(oldLocation, newLocation);
+      }
     }
   }
 
@@ -50,7 +51,9 @@ public class FileSystemLocationManager implements ExperimentLocationManager {
   }
 
   private Path resolvePath(Path parentPath, ExperimentType<?, ?> type, String id) {
-    return parentPath.resolve(type.getId()).resolve(id);
+    if (!(type instanceof ExperimentRoot))
+      parentPath = parentPath.resolve(type.getId());
+    return parentPath.resolve(id);
   }
 
   public Path getRootPath() {

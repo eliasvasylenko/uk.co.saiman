@@ -30,9 +30,10 @@ package uk.co.saiman.experiment;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
+import uk.co.saiman.observable.Invalidation;
 
 /**
- * The context of an {@link ExperimentType#execute(ExecutionContext) experiment
+ * The context of an {@link ExperimentType#process(ExecutionContext) experiment
  * execution}, providing information about the current state, and enabling
  * modification of that state.
  * 
@@ -40,30 +41,38 @@ import uk.co.saiman.data.resource.Location;
  * @param <T>
  *          the type of the executing node
  */
-public interface ExecutionContext<T, R> {
+public interface ProcessingContext<T, R> {
   /**
    * @return the currently executing experiment node
    */
   ExperimentNode<T, R> node();
 
   /**
-   * Execute the child nodes of the currently executing node. This method may only
-   * be invoked once for a given execution. If it is not invoked, then the
-   * children will be executed after the execution completes.
+   * Invocation of this method is optional, and it may only be invoked at most
+   * once during an execution.
    * <p>
-   * This method is useful in cases where an experiment node must ensure that its
-   * execution state is maintained during the execution of its children.
+   * This method causes the execution of all child nodes of the currently
+   * executing node, returning once they have stopped processing. This method may
+   * only be invoked once for a given execution. If it is not invoked, then the
+   * children will be processed after the execution completes.
+   * <p>
+   * If this method is invoked then
+   * <p>
+   * If this method is invoked then the currently executing node will only become
+   * complete once the execution of all the child nodes are complete, and if and
+   * of the child nodes fail then this node will also fail.
    * 
+   * @return true if the children were processed successfully
    * @throws ExperimentException
    *           if invoked multiple times
    */
-  void executeChildren();
+  void processChildren();
 
   /**
    * Get a location which can be used to persist resource artifacts of this
    * execution. Typically a resource in this location is used to construct one or
    * more related {@link Data data} instances, one of which will be set as the
-   * {@link #setResult(Data) result} of the execution.
+   * {@link #setResultData(Data) result} of the execution.
    * <p>
    * The location will be empty before execution begins.
    * 
@@ -72,35 +81,55 @@ public interface ExecutionContext<T, R> {
   Location getLocation();
 
   /**
-   * Set the result data for this execution. The value of the given data is
-   * expected to match the return value of the
-   * {@link ExperimentType#execute(ExecutionContext) execution} once it completes.
-   * At this point, if necessary, the data will be {@link Data#save() saved}.
+   * Set a preliminary partial result value for this execution.
+   * <p>
+   * This method may be invoked multiple times during processing. The purpose is
+   * to support live-updating of result data, and any values passed to this method
+   * will be overridden by the return value of
+   * {@link ExperimentType#process(ExecutionContext) execution} once processing
+   * completes.
+   * 
+   * @param value
+   *          the preliminary result
+   */
+  void setPartialResult(R value);
+
+  /**
+   * Set a preliminary partial result value for this execution.
+   * <p>
+   * This method may be invoked multiple times during processing. The purpose is
+   * to support live-updating of result data, and any values passed to this method
+   * will be overridden by the return value of
+   * {@link ExperimentType#process(ExecutionContext) execution} once processing
+   * completes.
+   * 
+   * @param value
+   *          an invalidation representing the preliminary result
+   */
+  void setPartialResult(Invalidation<R> value);
+
+  /**
+   * Set the result data for this execution. If the value of the given data
+   * matches the return value of {@link ExperimentType#process(ExecutionContext)
+   * execution} once it completes it does not have to be rewritten. This means
+   * that expensive disk IO can be performed during the experiment process rather
+   * than saved until the end.
    * <p>
    * This method may be invoked at most once during any given execution, and this
    * precludes invocation of {@link #setResultFormat(String, DataFormat)} or
    * {@link #setResultFormat(String, String)} during the same execution.
-   * <p>
-   * This method returns a wrapper around the given data item which invalidates
-   * the {@link Result result} associated with the execution when it is
-   * {@link Data#set(Object) changed} or {@link Data#makeDirty() dirtied}. This
-   * allows an experiment in progress to feed the application with
-   * {@link Result#observe(uk.co.saiman.observable.Observer) live updates} to the
-   * result data.
    * 
-   * @param data
-   *          the data item representing the execution result
    * @return a wrapper around the given data item
    */
-  Data<R> setResult(Data<? extends R> data);
+  void setResultData(Data<R> data);
 
   /**
    * Set the result format for this execution. If invoked, then once the
-   * {@link ExperimentType#execute(ExecutionContext) execution} is complete the
+   * {@link ExperimentType#process(ExecutionContext) execution} is complete the
    * returned value will be persisted according to the given file name and format.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResult(Data)} or
+   * precludes invocation of {@link #setResultData(Data)} or
    * {@link #setResultFormat(String, String)} during the same execution.
    * 
    * @param name
@@ -112,12 +141,12 @@ public interface ExecutionContext<T, R> {
 
   /**
    * Set the result format extensions for this execution. If invoked, then once
-   * the {@link ExperimentType#execute(ExecutionContext) execution} is complete
+   * the {@link ExperimentType#process(ExecutionContext) execution} is complete
    * the returned value will be persisted according to the given file name and a
    * format matching the given extension.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResult(Data)} or
+   * precludes invocation of {@link #setResultData(Data)} or
    * {@link #setResultFormat(String, DataFormat)} during the same execution.
    * 
    * @param name

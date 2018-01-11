@@ -34,14 +34,14 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import mockit.FullVerificationsInOrder;
-import mockit.Mocked;
+import mockit.Injectable;
 import uk.co.saiman.observable.ObservableValue.Change;
 
 @SuppressWarnings("javadoc")
 public class ObservablePropertyImplTest {
-  @Mocked
+  @Injectable
   Observer<String> downstreamObserver;
-  @Mocked
+  @Injectable
   Observer<Change<String>> changeObserver;
 
   @Test

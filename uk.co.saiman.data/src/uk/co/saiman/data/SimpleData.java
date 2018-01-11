@@ -46,8 +46,8 @@ public class SimpleData<T> implements Data<T> {
   private T data;
 
   public SimpleData(Resource resource, DataFormat<T> format) {
-    this.resource = resource;
-    this.format = format;
+    this.resource = requireNonNull(resource);
+    this.format = requireNonNull(format);
   }
 
   public SimpleData(Location location, String name, DataFormat<T> format) {
@@ -69,10 +69,19 @@ public class SimpleData<T> implements Data<T> {
     if (isDirty()) {
       this.dirty = false;
 
-      try (WritableByteChannel writeChannel = resource.write()) {
-        format.save(writeChannel, new Payload<>(getImpl()));
-      } catch (IOException e) {
-        throw new DataException("Unable to write data", e);
+      T value = getImpl();
+      if (value == null) {
+        try {
+          resource.delete();
+        } catch (IOException e) {
+          throw new DataException("Unable to clear data", e);
+        }
+      } else {
+        try (WritableByteChannel writeChannel = resource.write()) {
+          format.save(writeChannel, new Payload<>(value));
+        } catch (IOException e) {
+          throw new DataException("Unable to write data", e);
+        }
       }
 
       return true;
@@ -119,6 +128,16 @@ public class SimpleData<T> implements Data<T> {
     requireNonNull(data);
     if (!Objects.equals(getImpl(), data)) {
       setImpl(data);
+      makeDirty();
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean unset() {
+    if (data != null) {
+      data = null;
       makeDirty();
       return true;
     }

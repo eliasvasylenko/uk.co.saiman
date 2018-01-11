@@ -27,16 +27,25 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import java.util.Optional;
+
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.observable.ObservablePropertyImpl;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Invalidation;
+import uk.co.saiman.observable.MissingValueException;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public class ResultImpl<T> extends ObservablePropertyImpl<T> implements Result<T> {
+public class ResultImpl<T> implements Result<T> {
   private final ExperimentNodeImpl<?, T> node;
+  private T value;
+
+  private final HotObservable<Invalidation<T>> invalidations;
+  private Invalidation<T> invalidation;
 
   public ResultImpl(ExperimentNodeImpl<?, T> node) {
-    super(new NullPointerException());
     this.node = node;
+    this.invalidations = new HotObservable<>();
   }
 
   @Override
@@ -47,5 +56,51 @@ public class ResultImpl<T> extends ObservablePropertyImpl<T> implements Result<T
   @Override
   public TypeToken<T> getType() {
     return node.getType().getResultType();
+  }
+
+  void setValue(T value) {
+    this.value = value;
+    invalidation = null;
+    invalidations.next(new Invalidation<T>() {
+      @Override
+      public T revalidate() {
+        return value;
+      }
+    });
+  }
+
+  void unsetValue() {
+    value = null;
+    invalidation = null;
+    invalidations.next(new Invalidation<T>() {
+      @Override
+      public T revalidate() {
+        throw new MissingValueException(new NullPointerException());
+      }
+    });
+  }
+
+  void setInvalidation(Invalidation<T> invalidation) {
+    this.invalidation = invalidation;
+    invalidations.next(invalidation);
+  }
+
+  @Override
+  public Optional<T> getValue() {
+    if (invalidation != null) {
+      try {
+        setValue(invalidation.revalidate());
+      } catch (MissingValueException e) {
+        unsetValue();
+      }
+      invalidation = null;
+    }
+
+    return Optional.ofNullable(value);
+  }
+
+  @Override
+  public Observable<Invalidation<T>> invalidations() {
+    return invalidations.invalidateLazyRevalidate().map(i -> i.map(Invalidation::revalidate));
   }
 }

@@ -49,7 +49,6 @@ public class PathLocation implements Location {
 
   @Override
   public Resource getResource(String name, String extension) {
-    // TODO Auto-generated method stub
-    return null;
+    return new PathResource(path.resolve(name + "." + extension));
   }
 }

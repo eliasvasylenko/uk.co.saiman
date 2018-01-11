@@ -111,16 +111,18 @@ public class ExperimentNodeContribution implements TreeContribution {
     /*
      * label to show lifecycle state icon
      */
-    entry
-        .data()
-        .lifecycleState()
-        .changes()
-        .weakReference(entry)
-        .observe(m -> m.owner().refresh(false));
+
     Label lifecycleIndicator = new Label();
     new PseudoClassContributor(entry.data().lifecycleState().get().toString())
         .configureCell(lifecycleIndicator);
     node.getChildren().add(lifecycleIndicator);
+    entry
+        .data()
+        .lifecycleState()
+        .changes()
+        .weakReference(lifecycleIndicator)
+        .weakReference(entry)
+        .observe(m -> m.owner().refresh(false));
 
     /*
      * add popup menu

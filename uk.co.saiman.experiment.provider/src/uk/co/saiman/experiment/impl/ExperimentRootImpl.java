@@ -29,7 +29,6 @@ package uk.co.saiman.experiment.impl;
 
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
-import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.Optional;
 
@@ -42,7 +41,6 @@ import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.VoidExecutionContext;
 import uk.co.saiman.property.Property;
-import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * The root experiment type implementation for {@link FileSystemWorkspace}.
@@ -95,7 +93,9 @@ public class ExperimentRootImpl implements ExperimentRoot {
   }
 
   @Override
-  public void executeVoid(VoidExecutionContext<ExperimentConfiguration> context) {}
+  public void executeVoid(VoidExecutionContext<ExperimentConfiguration> context) {
+    context.processChildren();
+  }
 
   @Override
   public ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
@@ -107,10 +107,5 @@ public class ExperimentRootImpl implements ExperimentRoot {
       ExperimentNode<?, ?> penultimateDescendantNode,
       ExperimentType<?, ?> descendantNodeType) {
     return ASSUME_ALL_FULFILLED;
-  }
-
-  @Override
-  public TypeToken<Void> getResultType() {
-    return forType(void.class);
   }
 }

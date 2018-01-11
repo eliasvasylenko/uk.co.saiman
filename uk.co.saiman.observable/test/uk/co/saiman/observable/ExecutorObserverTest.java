@@ -33,12 +33,9 @@ import org.junit.Test;
 
 import mockit.Expectations;
 import mockit.FullVerificationsInOrder;
+import mockit.Injectable;
 import mockit.Mocked;
 import mockit.VerificationsInOrder;
-import uk.co.saiman.observable.ExecutorObserver;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.observable.Observer;
-import uk.co.saiman.observable.SafeObserver;
 
 @SuppressWarnings("javadoc")
 public class ExecutorObserverTest {
@@ -46,10 +43,10 @@ public class ExecutorObserverTest {
 
   interface MockObservation extends Observation {}
 
-  @Mocked
+  @Injectable
   MockObservation upstreamObservation;
 
-  @Mocked
+  @Injectable
   MockObserver<String> downstreamObserver;
 
   @Test

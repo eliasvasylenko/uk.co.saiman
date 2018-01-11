@@ -31,7 +31,7 @@ import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.Map;
 
-import uk.co.saiman.experiment.ExecutionContext;
+import uk.co.saiman.experiment.ProcessingContext;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.MissingExperimentType;
@@ -56,7 +56,7 @@ public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   }
 
   @Override
-  public T execute(ExecutionContext<Map<String, Object>, T> context) {
+  public T process(ProcessingContext<Map<String, Object>, T> context) {
     throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
   }
 

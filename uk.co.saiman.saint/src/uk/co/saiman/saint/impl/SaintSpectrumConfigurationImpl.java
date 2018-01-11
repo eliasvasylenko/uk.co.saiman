@@ -19,11 +19,9 @@ final class SaintSpectrumConfigurationImpl implements SaintSpectrumConfiguration
       SaintSpectrumExperimentType experimentType,
       ConfigurationContext<SaintSpectrumConfiguration> context) {
     this.context = context;
-    this.acquisitionDevice = experimentType.acquisitionDevice;
+    this.acquisitionDevice = experimentType.getAcquisitionDevice();
     this.processors = experimentType.createProcessorList(context.persistedState());
     name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
-
-    // context.persistedState().forMapList(PROCESSORS).stream().map(arg0);
   }
 
   @Override

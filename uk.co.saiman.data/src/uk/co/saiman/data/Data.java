@@ -28,7 +28,6 @@
 package uk.co.saiman.data;
 
 import uk.co.saiman.data.format.DataFormat;
-import uk.co.saiman.data.function.DataException;
 import uk.co.saiman.data.resource.Resource;
 
 /**
@@ -60,7 +59,9 @@ public interface Data<T> {
    */
   void makeDirty();
 
-  boolean set(T data);
+  boolean set(T value);
+
+  boolean unset();
 
   /**
    * Get the data, loading from the input channel if necessary.

@@ -72,6 +72,13 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
   void setProblem(Throwable t);
 
   @Override
+  default T unset() {
+    T t = tryGet().orElse(null);
+    setProblem(new NullPointerException());
+    return t;
+  }
+
+  @Override
   default Optional<T> tryGet() {
     return ObservableValue.super.tryGet();
   }

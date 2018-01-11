@@ -42,6 +42,6 @@ import uk.co.saiman.experiment.ExperimentNode;
 public class RunExperimentHandler {
   @Execute
   void execute(@AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> experimentNode) {
-    new Thread(experimentNode::execute).start();
+    new Thread(experimentNode::process).start();
   }
 }

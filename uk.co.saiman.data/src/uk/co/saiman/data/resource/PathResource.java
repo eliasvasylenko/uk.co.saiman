@@ -71,6 +71,7 @@ public class PathResource implements Resource {
 
   @Override
   public WritableByteChannel write() throws IOException {
+    Files.createDirectories(path.getParent());
     return Files.newByteChannel(path, CREATE, WRITE, TRUNCATE_EXISTING);
   }
 

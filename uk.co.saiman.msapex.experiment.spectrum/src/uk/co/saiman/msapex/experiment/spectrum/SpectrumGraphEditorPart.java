@@ -31,8 +31,6 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
@@ -41,13 +39,14 @@ import org.eclipse.fx.core.di.LocalInstance;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
-import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
+import uk.co.saiman.observable.Invalidation;
 
 public class SpectrumGraphEditorPart {
   @Inject
@@ -59,17 +58,28 @@ public class SpectrumGraphEditorPart {
 
   @FXML
   private ContinuousFunctionChartController spectrumGraphController;
-  private HotObservable<ContinuousFunction<Time, Dimensionless>> spectrum;
-  private Spectrum data;
+  private ContinuousFunctionSeries series;
 
   @PostConstruct
   void postConstruct(
       BorderPane container,
       @LocalInstance FXMLLoader loaderProvider,
       IEclipseContext context,
-      ExperimentNode<?, Spectrum> result) {
+      ExperimentNode<?, Spectrum> node,
+      Result<Spectrum> result,
+      Invalidation<Spectrum> value) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
-    spectrumGraphController.addSeries(result.getResult().map(Spectrum::getMassData));
+    series = spectrumGraphController.addSeries();
+    result.getValue().map(Spectrum::getMassData).ifPresent(series::setContinuousFunction);
+
+    value(value);
+  }
+
+  @Inject
+  void value(Invalidation<Spectrum> value) {
+    if (value != null && series != null) {
+      series.setContinuousFunction(value.map(Spectrum::getMassData));
+    }
   }
 }

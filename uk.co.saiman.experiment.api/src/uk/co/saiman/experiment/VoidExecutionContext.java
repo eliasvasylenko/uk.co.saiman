@@ -37,12 +37,12 @@ package uk.co.saiman.experiment;
  */
 public interface VoidExecutionContext<T> {
   /**
-   * @see ExecutionContext#node()
+   * @see ProcessingContext#node()
    */
   ExperimentNode<T, Void> node();
 
   /**
-   * @see ExecutionContext#executeChildren()
+   * @see ProcessingContext#processChildren()
    */
-  void executeChildren();
+  void processChildren();
 }

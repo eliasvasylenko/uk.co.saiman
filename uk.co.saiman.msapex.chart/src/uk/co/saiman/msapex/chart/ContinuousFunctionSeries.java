@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.msapex.chart;
 
-import static uk.co.saiman.observable.Observer.onObservation;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,10 +41,7 @@ import uk.co.saiman.data.function.RegularSampledDomain;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.mathematics.Interval;
-import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.property.IdentityProperty;
-import uk.co.saiman.property.Property;
+import uk.co.saiman.observable.Invalidation;
 
 /**
  * A mapping from a {@link ContinuousFunction} to a {@link Series}. The series
@@ -65,9 +60,8 @@ public class ContinuousFunctionSeries {
   /*
    * Continuous function data
    */
-  private final Observable<? extends ContinuousFunction<?, ?>> sourceContinuousFunction;
-  private final Observation observation;
-  private ContinuousFunction<?, ?> latestContinuousFunction;
+  private Invalidation<ContinuousFunction<?, ?>> latestContinuousFunction;
+  private ContinuousFunction<?, ?> lastRenderedContinuousFunction;
   private boolean dirty;
 
   /*
@@ -77,36 +71,22 @@ public class ContinuousFunctionSeries {
   private final Series<Number, Number> series;
 
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a
-   * {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
    * 
    * @param controller
    *          the owning chart
    * @param sourceContinuousFunction
    *          the backing function
    */
-  public ContinuousFunctionSeries(
-      ContinuousFunctionChartController controller,
-      Observable<? extends ContinuousFunction<?, ?>> sourceContinuousFunction) {
+  public ContinuousFunctionSeries(ContinuousFunctionChartController controller) {
     this.controller = controller;
-    this.sourceContinuousFunction = sourceContinuousFunction;
 
     data = FXCollections.observableArrayList();
     series = new Series<>(data);
-
-    Property<Observation> observation = new IdentityProperty<>();
-    sourceContinuousFunction
-        .weakReference(this)
-        .reduceBackpressure((a, b) -> b)
-        .then(onObservation(observation::set))
-        .observe(m -> m.owner().setValue(m.message()));
-    this.observation = observation.get();
-    this.observation.requestNext();
   }
 
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a
-   * {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
    * 
    * @param controller
    *          the owning chart
@@ -115,17 +95,13 @@ public class ContinuousFunctionSeries {
    * @param name
    *          the name of the series
    */
-  public ContinuousFunctionSeries(
-      ContinuousFunctionChartController controller,
-      Observable<? extends ContinuousFunction<?, ?>> sourceContinuousFunction,
-      String name) {
-    this(controller, sourceContinuousFunction);
+  public ContinuousFunctionSeries(ContinuousFunctionChartController controller, String name) {
+    this(controller);
 
     series.setName(name);
   }
 
   public void remove() {
-    observation.cancel();
     controller.removeSeries(this);
   }
 
@@ -133,27 +109,50 @@ public class ContinuousFunctionSeries {
     return dirty;
   }
 
-  public Object setContinuousFunction(ContinuousFunction<?, ?> function) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  private synchronized void setValue(ContinuousFunction<?, ?> message) {
+  public synchronized void setContinuousFunction(ContinuousFunction<?, ?> function) {
     dirty = true;
-    latestContinuousFunction = message;
+    latestContinuousFunction = () -> function;
   }
 
-  private synchronized ContinuousFunction<?, ?> getNextValue() {
+  public synchronized void setContinuousFunction(Invalidation<ContinuousFunction<?, ?>> function) {
+    dirty = true;
+    latestContinuousFunction = function;
+  }
+
+  /*
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO maybe have this return another interface with the render and
+   * getLatestPreparedContinuousFunction methods on it so we know this needs to be
+   * called first.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
+  public synchronized ContinuousFunction<?, ?> prepare() {
     if (dirty) {
       dirty = false;
-      observation.requestNext();
+      try {
+        lastRenderedContinuousFunction = latestContinuousFunction.revalidate();
+      } catch (Exception e) {
+        lastRenderedContinuousFunction = null;
+        /*
+         * TODO deal properly with the exception. Perhaps display a message on the chart
+         */
+      }
     }
-    return latestContinuousFunction;
+    return lastRenderedContinuousFunction;
   }
 
   /**
-   * Render the {@link #latestContinuousFunction latest continuous function}
-   * into the {@link #getSeries() series} for the given range and resolution.
+   * Render the {@link #latestContinuousFunction latest continuous function} into
+   * the {@link #getSeries() series} for the given range and resolution.
    * 
    * @param domain
    *          the range to render through in the domain
@@ -161,8 +160,13 @@ public class ContinuousFunctionSeries {
    *          the resolution to render at in the domain
    */
   public synchronized void render(Interval<Double> domain, int resolution) {
+    if (lastRenderedContinuousFunction == null) {
+      data.clear();
+      return;
+    }
+
     SampledContinuousFunction<?, ?> sampledContinuousFunction = resampleLastRendered(
-        getNextValue(),
+        lastRenderedContinuousFunction,
         domain,
         resolution);
 
@@ -179,10 +183,11 @@ public class ContinuousFunctionSeries {
     if (remainingData > 0) {
       List<Data<Number, Number>> dataTemp = new ArrayList<>(remainingData);
       for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
-        dataTemp.add(
-            new Data<>(
-                sampledContinuousFunction.domain().getSample(i),
-                sampledContinuousFunction.range().getSample(i)));
+        dataTemp
+            .add(
+                new Data<>(
+                    sampledContinuousFunction.domain().getSample(i),
+                    sampledContinuousFunction.range().getSample(i)));
       }
       data.addAll(dataTemp);
     }
@@ -204,8 +209,8 @@ public class ContinuousFunctionSeries {
   /**
    * @return the latest continuous function prepared for rendering
    */
-  public ContinuousFunction<?, ?> getLatestRenderedContinuousFunction() {
-    return latestContinuousFunction;
+  public ContinuousFunction<?, ?> getLatestPreparedContinuousFunction() {
+    return lastRenderedContinuousFunction;
   }
 
   /**

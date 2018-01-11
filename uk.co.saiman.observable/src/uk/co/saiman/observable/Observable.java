@@ -35,6 +35,7 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.observable.BackpressureReducingObserver.backpressureReducingObserver;
 import static uk.co.saiman.observable.Observer.onCompletion;
+import static uk.co.saiman.observable.Observer.onFailure;
 import static uk.co.saiman.observable.Observer.onObservation;
 import static uk.co.saiman.observable.RequestAllocator.balanced;
 import static uk.co.saiman.observable.RequestAllocator.sequential;
@@ -44,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -125,7 +127,6 @@ public interface Observable<M> {
       @Override
       public void onObserve(Observation observation) {
         o = observation;
-        observation.requestUnbounded();
       }
 
       @Override
@@ -285,7 +286,7 @@ public interface Observable<M> {
   }
 
   default ObservableValue<M> toValue(M initial) {
-    ObservableProperty<M> value = new ObservablePropertyImpl<>(initial);
+    ObservableProperty<M> value = new ObservablePropertyImpl<>(tryGet().orElse(initial));
     observe(new Observer<M>() {
       @Override
       public void onObserve(Observation observation) {
@@ -306,13 +307,11 @@ public interface Observable<M> {
   }
 
   default ObservableValue<M> toValue(Throwable initialProblem) {
-    ObservableProperty<M> value = new ObservablePropertyImpl<>(initialProblem);
-    observe(new Observer<M>() {
-      @Override
-      public void onObserve(Observation observation) {
-        observation.requestUnbounded();
-      }
+    ObservableProperty<M> value = tryGet()
+        .map(ObservablePropertyImpl::new)
+        .orElse(new ObservablePropertyImpl<>(initialProblem));
 
+    requestUnbounded().observe(new Observer<M>() {
       @Override
       public void onNext(M message) {
         value.set(message);
@@ -649,7 +648,7 @@ public interface Observable<M> {
 
   default <R, A> CompletableFuture<R> collect(Collector<? super M, A, ? extends R> collector) {
     return reduce(collector.supplier(), (a, m) -> {
-      collector.accumulator();
+      collector.accumulator().accept(a, m);
       return a;
     }).thenApply(collector.finisher());
   }
@@ -669,7 +668,7 @@ public interface Observable<M> {
    */
   default <R, A> Observable<R> collectBackpressure(Collector<? super M, A, ? extends R> collector) {
     return reduceBackpressure(collector.supplier(), (a, m) -> {
-      collector.accumulator();
+      collector.accumulator().accept(a, m);
       return a;
     }).map(collector.finisher());
   }
@@ -740,5 +739,24 @@ public interface Observable<M> {
         .newSingleThreadScheduledExecutor()
         .scheduleAtFixedRate(() -> hot.next(count.getAndIncrement()), delay, period, time);
     return hot;
+  }
+
+  default void join() {
+    CountDownLatch c = new CountDownLatch(1);
+    observe(Observer.onCompletion(c::countDown));
+    try {
+      c.await();
+    } catch (InterruptedException e) {
+      throw new LockException(e);
+    }
+  }
+
+  default Observable<M> reemit() {
+    HotObservable<M> observable = new HotObservable<>();
+    then(observable::next)
+        .then(onCompletion(observable::complete))
+        .then(onFailure(observable::fail))
+        .observe();
+    return observable;
   }
 }

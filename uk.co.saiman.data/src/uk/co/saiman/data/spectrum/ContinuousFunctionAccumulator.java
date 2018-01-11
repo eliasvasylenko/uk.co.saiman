@@ -28,7 +28,12 @@
 package uk.co.saiman.data.spectrum;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static uk.co.saiman.observable.Observer.onCompletion;
 import static uk.co.saiman.observable.Observer.onObservation;
+import static uk.co.saiman.observable.Observer.singleUse;
+
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -38,7 +43,9 @@ import uk.co.saiman.data.function.ArraySampledContinuousFunction;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.observable.Invalidation;
+import uk.co.saiman.observable.LockException;
 import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.Observation;
 
 /**
  * A continuous function to accumulate the sum of input continuous functions.
@@ -53,10 +60,10 @@ import uk.co.saiman.observable.Observable;
  *          the type of the units of measurement of values in the range
  */
 public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Quantity<UR>> {
+  private final CountDownLatch complete;
   private final SampledDomain<UD> domain;
   private final Unit<UR> unitRange;
   private double[] intensities;
-  private long count;
   private final Observable<Invalidation<SampledContinuousFunction<UD, UR>>> accumulation;
 
   /**
@@ -73,24 +80,16 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
     this.unitRange = unitRange;
     this.intensities = new double[domain.getDepth()];
 
+    complete = new CountDownLatch(1);
     accumulation = source
-        .then(m -> count++)
         .aggregateBackpressure()
         .executeOn(newSingleThreadExecutor())
-        .then(onObservation(o -> o.requestUnbounded()))
-        .map(a -> {
-          synchronized (intensities) {
-            for (SampledContinuousFunction<?, UR> c : a) {
-              UnitConverter converter = c.range().getUnit().getConverterTo(unitRange);
-
-              for (int i = 0; i < domain.getDepth(); i++) {
-                intensities[i] += converter.convert(c.range().getSample(i));
-              }
-            }
-          }
-          return intensities;
-        })
+        .map(this::aggregateArray)
+        .then(onObservation(Observation::requestNext))
+        .then(singleUse(o -> m -> o.requestNext()))
+        .then(onCompletion(complete::countDown))
         .invalidateLazyRevalidate()
+        .reemit()
         .map(m -> m.map(i -> {
           synchronized (i) {
             return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
@@ -98,11 +97,17 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
         }));
   }
 
-  /**
-   * @return the current number of accumulations
-   */
-  public long getCount() {
-    return count;
+  private double[] aggregateArray(List<SampledContinuousFunction<UD, UR>> next) {
+    synchronized (intensities) {
+      for (SampledContinuousFunction<?, UR> c : next) {
+        UnitConverter converter = c.range().getUnit().getConverterTo(unitRange);
+
+        for (int i = 0; i < domain.getDepth(); i++) {
+          intensities[i] += converter.convert(c.range().getSample(i));
+        }
+      }
+    }
+    return intensities;
   }
 
   public SampledDomain<UD> getDomain() {
@@ -115,5 +120,16 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
 
   public Observable<Invalidation<SampledContinuousFunction<UD, UR>>> accumulation() {
     return accumulation;
+  }
+
+  public SampledContinuousFunction<UD, UR> getAccumulation() {
+    try {
+      System.out.println("wait!");
+      complete.await();
+      System.out.println("waited!");
+    } catch (InterruptedException e) {
+      new LockException(e);
+    }
+    return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
   }
 }

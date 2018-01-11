@@ -31,24 +31,14 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 import org.junit.Test;
 
-import mockit.Mocked;
+import mockit.Injectable;
 import mockit.Verifications;
-import uk.co.saiman.observable.DropWhileObserver;
-import uk.co.saiman.observable.ExecutorObserver;
-import uk.co.saiman.observable.FilteringObserver;
-import uk.co.saiman.observable.MappingObserver;
-import uk.co.saiman.observable.MultiplePassthroughObserver;
-import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.Observer;
-import uk.co.saiman.observable.ReferenceOwnedObserver;
-import uk.co.saiman.observable.RetryingObserver;
-import uk.co.saiman.observable.TakeWhileObserver;
 
 @SuppressWarnings("javadoc")
 public class ObservableTest {
   Observable<String> upstreamObservable = a -> null;
 
-  @Mocked
+  @Injectable
   Observer<String> downstreamObserver;
 
   @Test

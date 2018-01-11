@@ -29,24 +29,15 @@ package uk.co.saiman.experiment;
 
 import java.util.Optional;
 
+import uk.co.saiman.utility.Named;
+
 /**
  * General configuration interface for experiment root nodes, as created via
  * {@link Workspace#addExperiment(String)}
  * 
  * @author Elias N Vasylenko
  */
-public interface ExperimentConfiguration {
-  /**
-   * @return the name of the experiment
-   */
-  String getName();
-
-  /**
-   * @param name
-   *          the new name for the experiment
-   */
-  void setName(String name);
-
+public interface ExperimentConfiguration extends Named {
   /**
    * @return the notes of the experiment
    */

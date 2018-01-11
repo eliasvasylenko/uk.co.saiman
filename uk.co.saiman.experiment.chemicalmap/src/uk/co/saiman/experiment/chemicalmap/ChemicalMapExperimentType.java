@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment.chemicalmap;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.experiment.ExecutionContext;
+import uk.co.saiman.experiment.ProcessingContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.text.properties.PropertyLoader;
@@ -80,7 +80,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public ChemicalMap execute(ExecutionContext<T, ChemicalMap> context) {
+  public ChemicalMap process(ProcessingContext<T, ChemicalMap> context) {
     AcquisitionDevice acquisitionDevice = getAcquisitionDevice();
     RasterDevice rasterDevice = getRasterDevice();
 

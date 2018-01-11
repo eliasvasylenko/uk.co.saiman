@@ -85,35 +85,18 @@ public abstract class BackpressureReducingObserver<T, M> extends PassthroughObse
   @Override
   public void onObserve(Observation observation) {
     super.onObserve(createDownstreamObservation(observation));
-    observation.requestUnbounded();
   }
 
   protected Observation createDownstreamObservation(Observation observation) {
     return new Observation() {
       @Override
-      public void requestNext() {
-        request(1);
-      }
-
-      @Override
       public void request(long count) {
+        M nextMessage;
         synchronized (outstandingRequests) {
           outstandingRequests.request(count);
-
-          if (current != null) {
-            if (complete) {
-              current = null;
-              getDownstreamObserver().onComplete();
-            } else if (count > 0) {
-              sendNext();
-            }
-          }
+          nextMessage = getNextMessage();
         }
-      }
-
-      @Override
-      public boolean isRequestUnbounded() {
-        return Observation.super.isRequestUnbounded();
+        sendNextMessage(nextMessage);
       }
 
       @Override
@@ -132,27 +115,41 @@ public abstract class BackpressureReducingObserver<T, M> extends PassthroughObse
 
   public abstract M accumulate(M current, T message);
 
-  private void sendNext() {
+  private M getNextMessage() {
     synchronized (outstandingRequests) {
-      outstandingRequests.fulfil();
-      M message = current;
-      current = null;
-      getDownstreamObserver().onNext(message);
+      if (current != null && !outstandingRequests.isFulfilled()) {
+        outstandingRequests.fulfil();
+        M message = current;
+        current = null;
+        return message;
+      } else {
+        return null;
+      }
+    }
+  }
+
+  private void sendNextMessage(M nextMessage) {
+    if (nextMessage != null) {
+      getDownstreamObserver().onNext(nextMessage);
+      synchronized (outstandingRequests) {
+        if (complete && current == null) {
+          getDownstreamObserver().onComplete();
+        }
+      }
     }
   }
 
   @Override
   public void onNext(T message) {
+    M nextMessage;
     synchronized (outstandingRequests) {
       if (current == null)
         current = initialize(message);
       else
         current = accumulate(current, message);
-
-      if (!outstandingRequests.isFulfilled()) {
-        sendNext();
-      }
+      nextMessage = getNextMessage();
     }
+    sendNextMessage(nextMessage);
   }
 
   @Override
