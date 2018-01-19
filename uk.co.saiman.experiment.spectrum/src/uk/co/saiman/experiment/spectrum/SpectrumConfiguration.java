@@ -30,7 +30,8 @@ package uk.co.saiman.experiment.spectrum;
 import java.util.List;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.spectrum.SpectrumProcessor;
+import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.experiment.processing.ProcessorState;
 
 /**
  * TODO
@@ -44,7 +45,7 @@ public interface SpectrumConfiguration {
 
   AcquisitionDevice getAcquisitionDevice();
 
-  void setProcessing(List<SpectrumProcessor> processors);
+  void setProcessing(List<DataProcessor> processors);
 
-  List<SpectrumProcessorState> getProcessing();
+  List<ProcessorState> getProcessing();
 }

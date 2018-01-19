@@ -147,6 +147,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.eclipse.treeview;version=snapshot,\
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
+	uk.co.saiman.experiment.processing;version=snapshot,\
 	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
@@ -172,6 +173,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.msapex.experiment.chemicalmap;version=snapshot,\
+	uk.co.saiman.msapex.experiment.processing;version=snapshot,\
 	uk.co.saiman.msapex.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.msapex.instrument;version=snapshot,\
 	uk.co.saiman.msapex.instrument.acquisition;version=snapshot,\

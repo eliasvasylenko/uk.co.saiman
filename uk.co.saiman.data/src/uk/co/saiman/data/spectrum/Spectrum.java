@@ -32,6 +32,7 @@ import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.function.ContinuousFunction;
+import uk.co.saiman.data.function.processing.DataProcessor;
 
 public interface Spectrum {
   /**
@@ -52,5 +53,5 @@ public interface Spectrum {
    */
   SpectrumCalibration getCalibration();
 
-  SpectrumProcessor getProcessing();
+  DataProcessor getProcessing();
 }

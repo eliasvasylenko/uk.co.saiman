@@ -16,6 +16,7 @@ Export-Package: uk.co.saiman.experiment.spectrum
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.experiment.processing;version=snapshot,\
 	uk.co.saiman.instrument.api;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

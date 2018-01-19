@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.simulation.instrument.impl;
 
+import static java.lang.Thread.MAX_PRIORITY;
+import static java.lang.Thread.currentThread;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
 import static uk.co.saiman.log.Log.Level.ERROR;
@@ -297,6 +299,8 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   }
 
   private void acquire() {
+    currentThread().setPriority(MAX_PRIORITY);
+
     while (!disposed) {
       SampledDomain<Time> domain;
       int counter;

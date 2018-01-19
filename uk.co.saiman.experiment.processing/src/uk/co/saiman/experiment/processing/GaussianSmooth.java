@@ -1,4 +1,4 @@
-package uk.co.saiman.experiment.spectrum;
+package uk.co.saiman.experiment.processing;
 
 import static java.lang.Math.floor;
 import static java.lang.Math.sqrt;
@@ -6,14 +6,14 @@ import static java.lang.Math.sqrt;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.data.spectrum.SpectrumProcessor;
+import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.persistence.PersistedState;
-import uk.co.saiman.experiment.spectrum.SpectrumGaussianSmooth.State;
+import uk.co.saiman.experiment.processing.GaussianSmooth.State;
 import uk.co.saiman.property.Property;
 import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
-public class SpectrumGaussianSmooth implements SpectrumProcessorType<State> {
+public class GaussianSmooth implements ProcessorType<State> {
   private static final String STANDARD_DEVIATION_KEY = "standardDeviation";
   private static final int BOX_ITERATIONS = 5;
 
@@ -22,7 +22,7 @@ public class SpectrumGaussianSmooth implements SpectrumProcessorType<State> {
 
   @Override
   public String getName() {
-    return propertyLoader.getProperties(SpectrumProperties.class).gaussianSmoothProcessor().get();
+    return propertyLoader.getProperties(ProcessingProperties.class).gaussianSmoothProcessor().get();
   }
 
   @Override
@@ -30,11 +30,11 @@ public class SpectrumGaussianSmooth implements SpectrumProcessorType<State> {
     return new State(state);
   }
 
-  class State extends SpectrumProcessorState {
+  public class State extends ProcessorState {
     private final Property<Double> standardDeviation;
 
     public State(PersistedState state) {
-      super(SpectrumGaussianSmooth.this, state);
+      super(GaussianSmooth.this, state);
       standardDeviation = state
           .forString(STANDARD_DEVIATION_KEY)
           .map(Double::parseDouble, Object::toString)
@@ -45,8 +45,12 @@ public class SpectrumGaussianSmooth implements SpectrumProcessorType<State> {
       return standardDeviation.get();
     }
 
+    public void setStandardDeviation(double standardDeviation) {
+      this.standardDeviation.set(standardDeviation);
+    }
+
     @Override
-    public SpectrumProcessor getProcessor() {
+    public DataProcessor getProcessor() {
       /*
        * This is a little dense to properly document in place. For more information,
        * the implementation is based on the report "Fast Almost-Gaussian Filtering" by
@@ -63,20 +67,17 @@ public class SpectrumGaussianSmooth implements SpectrumProcessorType<State> {
       int higherBoxWidth = lowerBoxWidth + 2;
       int higherIterations = BOX_ITERATIONS - lowerIterations;
 
-      return new SpectrumProcessor() {
-        @Override
-        public double[] process(double[] data) {
-          data = data.clone();
+      return DataProcessor.arrayProcessor(data -> {
+        data = data.clone();
 
-          for (int i = 0; i < lowerIterations; i++)
-            SpectrumBoxFilter.apply(data, lowerBoxWidth);
+        for (int i = 0; i < lowerIterations; i++)
+          BoxFilter.apply(data, lowerBoxWidth);
 
-          for (int i = 0; i < higherIterations; i++)
-            SpectrumBoxFilter.apply(data, higherBoxWidth);
+        for (int i = 0; i < higherIterations; i++)
+          BoxFilter.apply(data, higherBoxWidth);
 
-          return data;
-        }
-      };
+        return data;
+      }, 0);
     }
   }
 }

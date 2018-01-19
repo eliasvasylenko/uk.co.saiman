@@ -32,7 +32,6 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.build;
 
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
-import javafx.scene.layout.HBox;
 import uk.co.saiman.fx.FxUtilities;
 
 /**
@@ -60,16 +59,43 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
     if (empty || item == null) {
       clearItem();
     } else {
-      updateItem(item);
+      updateItem();
     }
   }
 
-  protected void clearItem() {
+  private void clearItem() {
     setGraphic(null);
+    setEditable(false);
   }
 
-  protected <T> void updateItem(TreeEntry<T> item) {
-    HBox node = (HBox) ((ModularTreeItem<?>.TreeEntryImpl) item).getNode();
-    setGraphic(node);
+  private <T> void updateItem() {
+    setGraphic(getTreeItem().getGraphic());
+    setEditable(((ModularTreeItem<?>) getTreeItem()).isEditable());
+  }
+
+  @Override
+  public void startEdit() {
+    if (!this.isEditable() || !this.getTreeView().isEditable()) {
+      return;
+    }
+    super.startEdit();
+    if (this.isEditing()) {
+      ((ModularTreeItem<?>) getTreeItem()).refreshContributions(() -> commitEdit(getItem()));
+    }
+  }
+
+  @Override
+  public void commitEdit(TreeEntry<?> newValue) {
+    super.commitEdit(newValue);
+    if (getParent() != null) {
+      ((ModularTreeItem<?>) getTreeItem().getParent()).refreshContributions(null);
+    }
+    ((ModularTreeItem<?>) getTreeItem()).refreshContributions(null);
+  }
+
+  @Override
+  public void cancelEdit() {
+    super.cancelEdit();
+    ((ModularTreeItem<?>) getTreeItem()).refreshContributions(null);
   }
 }

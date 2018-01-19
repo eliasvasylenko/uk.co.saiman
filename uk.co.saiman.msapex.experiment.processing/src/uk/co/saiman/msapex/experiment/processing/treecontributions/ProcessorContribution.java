@@ -25,9 +25,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.spectrum.treecontributions;
+package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
+import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
+import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
@@ -39,38 +40,18 @@ import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
-import uk.co.saiman.experiment.spectrum.SpectrumBoxFilter;
+import uk.co.saiman.experiment.processing.ProcessorState;
 
-/*
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * TODO after christmas: rename and repackage all the "SpectrumFilter"
- * stuff into a normal "DataFilter" package so we can reuse in other
- * places....
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */
-
-@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
-public class BoxFilterContribution implements TreeContribution {
+@Component(
+    scope = ServiceScope.PROTOTYPE,
+    property = Constants.SERVICE_RANKING + ":Integer=" + -100)
+public class ProcessorContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
   @AboutToShow
-  public void prepare(HBox node, TreeEntry<SpectrumBoxFilter.State> entry) {
-    setSupplemental(node, entry.data().getWidth().toString());
+  public void prepare(HBox node, TreeEntry<ProcessorState> entry) {
+    setLabel(node, entry.data().getProcessorType().getName());
+    setSupplemental(node, "");
 
     pseudoClass.configureCell(node);
   }

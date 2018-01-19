@@ -27,20 +27,24 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.saiman.data.spectrum.SpectrumProcessor.identity;
+import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
+import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.spectrum.ContinuousFunctionAccumulator;
 import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
-import uk.co.saiman.data.spectrum.SpectrumProcessor;
+import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
+import uk.co.saiman.experiment.processing.ProcessorState;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -95,19 +99,38 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
         device.getSampleIntensityUnits());
 
     System.out.println("prepare processing");
-    SpectrumProcessor processing = context
+    DataProcessor processing = context
         .node()
         .getState()
         .getProcessing()
         .stream()
-        .map(SpectrumProcessorState::getProcessor)
-        .reduce(identity(), SpectrumProcessor::andThen);
+        .map(ProcessorState::getProcessor)
+        .reduce(identity(), DataProcessor::andThen);
+
+    System.out.println("fetching calibration");
+    SpectrumCalibration calibration = new SpectrumCalibration() {
+      @Override
+      public Unit<Time> getTimeUnit() {
+        return device.getSampleTimeUnits();
+      }
+
+      @Override
+      public Unit<Mass> getMassUnit() {
+        return null;
+      }
+
+      @Override
+      public double getMass(double time) {
+        return time;
+      }
+    };
 
     System.out.println("attach observer");
     accumulator
         .accumulation()
         .observe(
-            o -> context.setPartialResult(o.map(s -> new SampledSpectrum(s, null, processing))));
+            o -> context
+                .setPartialResult(o.map(s -> new SampledSpectrum(s, calibration, processing))));
 
     System.out.println("start acquisition");
     device.startAcquisition();
@@ -128,6 +151,6 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 
     System.out.println("get result");
     context.setResultFormat(SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
-    return new SampledSpectrum(accumulator.getAccumulation(), null, processing);
+    return new SampledSpectrum(accumulator.getAccumulation(), calibration, processing);
   }
 }

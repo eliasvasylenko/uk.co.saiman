@@ -12,15 +12,15 @@ import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.processing.ProcessorType;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessorType;
 import uk.co.saiman.text.properties.Localized;
 
 public class AddProcessorHandler {
   @Execute
   void execute(
       ExperimentNode<? extends SpectrumConfiguration, ?> node,
-      @Service List<SpectrumProcessorType<?>> processors,
+      @Service List<ProcessorType<?>> processors,
       @Localize ExperimentProperties text) {
     requestProcessorType(
         processors,
@@ -33,11 +33,11 @@ public class AddProcessorHandler {
                     .add(processor.configure(new PersistedState())));
   }
 
-  static java.util.Optional<SpectrumProcessorType<?>> requestProcessorType(
-      @Service List<SpectrumProcessorType<?>> processors,
+  static java.util.Optional<ProcessorType<?>> requestProcessorType(
+      @Service List<ProcessorType<?>> processors,
       Localized<String> title,
       Localized<String> header) {
-    ChoiceDialog<SpectrumProcessorType<?>> nameDialog = processors.isEmpty()
+    ChoiceDialog<ProcessorType<?>> nameDialog = processors.isEmpty()
         ? new ChoiceDialog<>()
         : new ChoiceDialog<>(processors.get(0), processors);
     nameDialog.titleProperty().bind(wrap(title));

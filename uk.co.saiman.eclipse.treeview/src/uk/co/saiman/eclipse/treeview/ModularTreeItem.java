@@ -40,9 +40,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.IInjector;
+import org.eclipse.e4.core.di.InjectorFactory;
 import org.eclipse.e4.core.di.suppliers.IObjectDescriptor;
 import org.eclipse.e4.core.di.suppliers.IRequestor;
 import org.eclipse.e4.core.di.suppliers.PrimaryObjectSupplier;
@@ -51,6 +55,7 @@ import org.eclipse.e4.ui.di.AboutToShow;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
@@ -66,6 +71,8 @@ import uk.co.saiman.reflection.token.TypedReference;
  *          the type of data for this tree item
  */
 public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdaptable {
+  final private static IInjector INJECTOR = InjectorFactory.getDefault();
+
   private final ModularTreeController controller;
   private final ModularTreeItem<?> parent;
   private final TreeEntryImpl entry;
@@ -73,7 +80,9 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
 
   private final Map<TypedReference<?>, ModularTreeItem<?>> childTreeItems = new HashMap<>();
   private boolean childrenCalculated;
-  private List<TypedReference<?>> children;
+  private TreeChildren children;
+  private TreeEditor<T> editor;
+  private final BorderPane container;
   private HBox node;
 
   protected ModularTreeItem(TypedReference<T> data, ModularTreeController controller) {
@@ -93,6 +102,9 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     this.parent = parent;
     this.entry = new TreeEntryImpl();
 
+    container = new BorderPane();
+    setGraphic(container);
+
     setValue(entry);
     refreshImpl(true);
   }
@@ -111,7 +123,7 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
   @Override
   public ObservableList<TreeItem<TreeEntry<?>>> getChildren() {
     if (!childrenCalculated) {
-      refreshContributions();
+      refreshContributions(null);
       rebuildChildren();
     }
 
@@ -122,10 +134,7 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     boolean selected = false; // TODO
     boolean focused = false; // TODO
 
-    refreshContributions();
-
-    setValue(null);
-    setValue(entry);
+    refreshContributions(null);
 
     if (recursive) {
       rebuildChildren();
@@ -136,16 +145,14 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     }
   }
 
-  protected void rebuildChildren() {
-    boolean hasChildren = !children.isEmpty();
-
+  private void rebuildChildren() {
     List<TreeItem<TreeEntry<?>>> childrenItems;
 
-    if (hasChildren) {
+    if (children.hasChildren()) {
       if (isExpanded()) {
-        childTreeItems.keySet().retainAll(children);
+        childTreeItems.keySet().retainAll(children.getChildren().collect(toList()));
 
-        childrenItems = children.stream().map(i -> {
+        childrenItems = children.getChildren().map(i -> {
           ModularTreeItem<?> treeItem = childTreeItems.get(i);
 
           if (treeItem == null) {
@@ -174,54 +181,125 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     super.getChildren().setAll(childrenItems);
   }
 
-  private void refreshContributions() {
-    IEclipseContext context = controller.getContext();
+  void refreshContributions(Runnable commitEdit) {
+    children = new TreeChildren() {
+      private final List<TypedReference<?>> children = new ArrayList<>();
 
-    children = new ArrayList<>();
+      @Override
+      public void addChild(int index, TypedReference<?> child) {
+        children.add(index, child);
+      }
+
+      @Override
+      public Stream<TypedReference<?>> getChildren() {
+        return children.stream();
+      }
+
+      @Override
+      public void removeChild(int index) {
+        children.remove(index);
+      }
+
+      @Override
+      public boolean removeChild(Object child) {
+        return children.remove(child);
+      }
+    };
+    editor = new TreeEditor<T>() {
+      private Runnable editListener;
+      private boolean editable = commitEdit != null;
+
+      @Override
+      public void addEditListener(Runnable onEdit) {
+        if (editListener == null) {
+          editListener = onEdit;
+        } else {
+          editListener = () -> {
+            editListener.run();
+            onEdit.run();
+          };
+        }
+      }
+
+      @Override
+      public boolean isEditable() {
+        return editable;
+      }
+
+      @Override
+      public boolean isEditing() {
+        editable = true;
+        return commitEdit != null;
+      }
+
+      @Override
+      public void commitEdit() {
+        if (editListener != null)
+          editListener.run();
+        commitEdit.run();
+      }
+    };
     node = new HBox();
+    container.setCenter(node);
 
-    controller.getContributors().forEach(c -> {
-      PrimaryObjectSupplier contextSupplier = getObjectSupplier(context, controller.getInjector());
-      PrimaryObjectSupplier localSupplier = new PrimaryObjectSupplier() {
-        @Override
-        public void resumeRecording() {}
+    Consumer<Object> injector = getInjector(controller.getContext());
 
-        @Override
-        public void pauseRecording() {}
+    controller.getContributors().forEach(injector);
+    injector.accept(data.getObject());
+  }
 
-        @Override
-        public void get(
-            IObjectDescriptor[] descriptors,
-            Object[] actualValues,
-            IRequestor requestor,
-            boolean initial,
-            boolean track,
-            boolean group) {
-          for (int i = 0; i < descriptors.length; i++) {
-            Type desired = descriptors[i].getDesiredType();
+  private Consumer<Object> getInjector(IEclipseContext context) {
+    PrimaryObjectSupplier contextSupplier = getObjectSupplier(context, INJECTOR);
+    PrimaryObjectSupplier localSupplier = new PrimaryObjectSupplier() {
+      @Override
+      public void resumeRecording() {}
 
-            if (desired.equals(new TypeToken<List<TypedReference<?>>>() {}.getType())) {
-              actualValues[i] = children;
+      @Override
+      public void pauseRecording() {}
 
-            } else if (desired == HBox.class) {
-              actualValues[i] = node;
+      @Override
+      public void get(
+          IObjectDescriptor[] descriptors,
+          Object[] actualValues,
+          IRequestor requestor,
+          boolean initial,
+          boolean track,
+          boolean group) {
+        for (int i = 0; i < descriptors.length; i++) {
+          Type desired = descriptors[i].getDesiredType();
 
-            } else if (desired instanceof ParameterizedType
-                && getErasedType(desired) == TreeEntry.class
-                && TypeToken
-                    .forType(desired)
-                    .getTypeArguments()
-                    .findFirst()
-                    .get()
-                    .getTypeToken()
-                    .isAssignableFrom(getEntry().type())) {
-              actualValues[i] = getEntry();
-            }
+          if (desired == TreeChildren.class) {
+            actualValues[i] = children;
+
+          } else if (desired == HBox.class) {
+            actualValues[i] = node;
+
+          } else if (desired instanceof ParameterizedType
+              && getErasedType(desired) == TreeEntry.class
+              && TypeToken
+                  .forType(desired)
+                  .getTypeArguments()
+                  .findFirst()
+                  .get()
+                  .getTypeToken()
+                  .isAssignableFrom(getEntry().type())) {
+            actualValues[i] = entry;
+
+          } else if (desired instanceof ParameterizedType
+              && getErasedType(desired) == TreeEditor.class
+              && TypeToken
+                  .forType(desired)
+                  .getTypeArguments()
+                  .findFirst()
+                  .get()
+                  .getTypeToken()
+                  .isAssignableFrom(getEntry().type())) {
+            actualValues[i] = editor;
           }
         }
-      };
-      controller.getInjector().invoke(c, AboutToShow.class, null, contextSupplier, localSupplier);
-    });
+      }
+    };
+    return c -> INJECTOR.invoke(c, AboutToShow.class, null, contextSupplier, localSupplier);
   }
 
   @SuppressWarnings("unchecked")
@@ -232,6 +310,10 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     }
 
     return getEntry().getAdapter(adapter);
+  }
+
+  public boolean isEditable() {
+    return editor.isEditable();
   }
 
   public class TreeEntryImpl implements TreeEntry<T>, IAdaptable {
@@ -252,10 +334,6 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
       }
 
       return controller.adapt(this, adapter);
-    }
-
-    protected HBox getNode() {
-      return node;
     }
 
     @Override

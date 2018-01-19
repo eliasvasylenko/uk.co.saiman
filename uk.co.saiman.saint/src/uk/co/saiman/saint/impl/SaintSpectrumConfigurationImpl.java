@@ -4,16 +4,16 @@ import java.util.List;
 import java.util.Random;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.spectrum.SpectrumProcessor;
+import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.ConfigurationContext;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessorState;
+import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 
 final class SaintSpectrumConfigurationImpl implements SaintSpectrumConfiguration {
   private String name;
   private final ConfigurationContext<SaintSpectrumConfiguration> context;
   private final AcquisitionDevice acquisitionDevice;
-  private final List<SpectrumProcessorState> processors;
+  private final List<ProcessorState> processors;
 
   SaintSpectrumConfigurationImpl(
       SaintSpectrumExperimentType experimentType,
@@ -41,12 +41,12 @@ final class SaintSpectrumConfigurationImpl implements SaintSpectrumConfiguration
   }
 
   @Override
-  public List<SpectrumProcessorState> getProcessing() {
+  public List<ProcessorState> getProcessing() {
     return processors;
   }
 
   @Override
-  public void setProcessing(List<SpectrumProcessor> processors) {
+  public void setProcessing(List<DataProcessor> processors) {
     processors.clear();
     processors.addAll(processors);
   }

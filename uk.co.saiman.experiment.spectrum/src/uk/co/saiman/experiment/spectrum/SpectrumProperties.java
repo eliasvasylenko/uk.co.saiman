@@ -42,14 +42,4 @@ public interface SpectrumProperties {
   Localized<String> defaultSpectrumName();
 
   Localized<String> spectrumGraphEditor();
-
-  Localized<String> convolutionProcessor();
-
-  Localized<String> convolutionProcessorDescription();
-
-  Localized<String> gaussianSmoothProcessor();
-
-  Localized<String> boxFilterProcessor();
-
-  Localized<String> missingSpectrumProcessor();
 }

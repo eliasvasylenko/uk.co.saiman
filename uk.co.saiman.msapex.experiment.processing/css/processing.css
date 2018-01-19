@@ -1,0 +1,3 @@
+.ModularTreeCell :ProcessorContribution #text {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/gear.png");
+}

@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
-import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setLabel;
-import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
+import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
+import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;

@@ -31,6 +31,4 @@ import uk.co.saiman.text.properties.PropertyConfiguration;
 import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
-public interface SpectrumExceptionProperties {
-  String cannotFindSpectrumProcessor(String id);
-}
+public interface SpectrumExceptionProperties {}

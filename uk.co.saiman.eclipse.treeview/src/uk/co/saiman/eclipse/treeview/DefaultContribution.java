@@ -27,12 +27,15 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
+import static javafx.geometry.Pos.CENTER_LEFT;
+
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 
 /**
  * The default tree cell contribution. This configures a cell with basic text
@@ -42,7 +45,7 @@ import javafx.scene.layout.HBox;
  * @author Elias N Vasylenko
  */
 @Component(property = Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE)
-public class DefaultTreeCellContribution implements TreeContribution {
+public class DefaultContribution implements TreeContribution {
   public static final String TEXT_ID = "text";
   public static final String SUPPLEMENTAL_TEXT_ID = "supplementalText";
 
@@ -51,12 +54,15 @@ public class DefaultTreeCellContribution implements TreeContribution {
     Label text = new Label(entry.data().toString());
     text.setId(TEXT_ID);
     node.getChildren().add(text);
+    HBox.setHgrow(text, Priority.ALWAYS);
 
     Label supplemental = new Label();
     supplemental.setId(SUPPLEMENTAL_TEXT_ID);
     node.getChildren().add(supplemental);
+    HBox.setHgrow(supplemental, Priority.SOMETIMES);
 
     node.setPrefWidth(0);
+    node.setAlignment(CENTER_LEFT);
   }
 
   public static void setLabel(HBox node, String text) {

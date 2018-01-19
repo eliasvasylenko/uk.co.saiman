@@ -119,22 +119,6 @@ public class ContinuousFunctionSeries {
     latestContinuousFunction = function;
   }
 
-  /*
-   * 
-   * 
-   * 
-   * 
-   * 
-   * TODO maybe have this return another interface with the render and
-   * getLatestPreparedContinuousFunction methods on it so we know this needs to be
-   * called first.
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   */
   public synchronized ContinuousFunction<?, ?> prepare() {
     if (dirty) {
       dirty = false;

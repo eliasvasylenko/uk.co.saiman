@@ -27,10 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
-import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setLabel;
-import static uk.co.saiman.eclipse.treeview.DefaultTreeCellContribution.setSupplemental;
-
-import java.util.List;
+import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
+import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -50,13 +48,13 @@ import uk.co.saiman.eclipse.treeview.ActionContributor;
 import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.MenuContributor;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
+import uk.co.saiman.eclipse.treeview.TreeChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.msapex.editor.EditorPrototype;
 import uk.co.saiman.msapex.editor.EditorService;
-import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -88,10 +86,7 @@ public class ExperimentNodeContribution implements TreeContribution {
   }
 
   @AboutToShow
-  public void prepare(
-      HBox node,
-      List<TypedReference<?>> children,
-      TreeEntry<ExperimentNode<?, ?>> entry) {
+  public void prepare(HBox node, TreeChildren children, TreeEntry<ExperimentNode<?, ?>> entry) {
     /*
      * configure label
      */
@@ -105,7 +100,7 @@ public class ExperimentNodeContribution implements TreeContribution {
      * add spacer
      */
     Region spacer = new Region();
-    HBox.setHgrow(spacer, Priority.ALWAYS);
+    HBox.setHgrow(spacer, Priority.SOMETIMES);
     node.getChildren().add(spacer);
 
     /*
@@ -142,7 +137,7 @@ public class ExperimentNodeContribution implements TreeContribution {
     /*
      * add children
      */
-    entry.data().getChildren().map(ExperimentNode::asTypedObject).forEach(children::add);
+    entry.data().getChildren().map(ExperimentNode::asTypedObject).forEach(children::addChild);
 
     /*
      * pseudo class

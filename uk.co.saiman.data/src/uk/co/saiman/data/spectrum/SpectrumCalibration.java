@@ -27,10 +27,57 @@
  */
 package uk.co.saiman.data.spectrum;
 
-import javax.measure.Quantity;
+import javax.measure.Unit;
+import javax.measure.UnitConverter;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 public interface SpectrumCalibration {
-	Quantity<Mass> getMass(Quantity<Time> time);
+  Unit<Time> getTimeUnit();
+
+  Unit<Mass> getMassUnit();
+
+  double getMass(double time);
+
+  default SpectrumCalibration withTimeUnit(Unit<Time> time) {
+    SpectrumCalibration baseCalibration = this;
+    UnitConverter converter = time.getConverterTo(baseCalibration.getTimeUnit());
+    return new SpectrumCalibration() {
+      @Override
+      public Unit<Time> getTimeUnit() {
+        return time;
+      }
+
+      @Override
+      public Unit<Mass> getMassUnit() {
+        return baseCalibration.getMassUnit();
+      }
+
+      @Override
+      public double getMass(double time) {
+        return baseCalibration.getMass(converter.convert(time));
+      }
+    };
+  }
+
+  default SpectrumCalibration withMassUnit(Unit<Mass> mass) {
+    SpectrumCalibration baseCalibration = this;
+    UnitConverter converter = baseCalibration.getMassUnit().getConverterTo(mass);
+    return new SpectrumCalibration() {
+      @Override
+      public Unit<Time> getTimeUnit() {
+        return baseCalibration.getTimeUnit();
+      }
+
+      @Override
+      public Unit<Mass> getMassUnit() {
+        return mass;
+      }
+
+      @Override
+      public double getMass(double time) {
+        return converter.convert(baseCalibration.getMass(time));
+      }
+    };
+  }
 }

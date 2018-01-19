@@ -44,9 +44,9 @@ import uk.co.saiman.fx.FxmlLoadBuilder;
  */
 public class ModularTreeView extends TreeView<TreeEntry<?>> {
   /**
-   * Instantiate an empty tree view containing the
-   * {@link DefaultTreeCellContribution default cell contribution} over a cell
-   * factory which instantiates an empty {@link ModularTreeCell}.
+   * Instantiate an empty tree view containing the {@link DefaultContribution
+   * default cell contribution} over a cell factory which instantiates an empty
+   * {@link ModularTreeCell}.
    */
   public ModularTreeView() {
     FxmlLoadBuilder.build().object(this).load();
@@ -54,6 +54,7 @@ public class ModularTreeView extends TreeView<TreeEntry<?>> {
 
     setMinWidth(0);
     prefWidth(0);
+    setEditable(true);
 
     addEventHandler(KeyEvent.ANY, event -> {
       if (event.getCode() == KeyCode.CONTEXT_MENU) {

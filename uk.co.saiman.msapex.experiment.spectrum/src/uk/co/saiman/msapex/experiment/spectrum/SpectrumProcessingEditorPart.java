@@ -45,8 +45,8 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.ModularTreeController;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessorState;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.reflection.token.TypeToken;
 
@@ -69,7 +69,7 @@ public class SpectrumProcessingEditorPart {
     modularTreeController
         .setRootData(
             typedObject(
-                new TypeToken<List<SpectrumProcessorState>>() {},
+                new TypeToken<List<ProcessorState>>() {},
                 result.getState().getProcessing()));
   }
 

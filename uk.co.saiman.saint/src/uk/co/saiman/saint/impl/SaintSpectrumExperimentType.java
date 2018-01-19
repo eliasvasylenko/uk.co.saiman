@@ -31,8 +31,8 @@ import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIP
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
-import static uk.co.saiman.experiment.spectrum.SpectrumProcessorState.PROCESSING_KEY;
-import static uk.co.saiman.experiment.spectrum.SpectrumProcessorState.PROCESSOR_TYPE_KEY;
+import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSING_KEY;
+import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSOR_TYPE_KEY;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,12 +48,12 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentNodeConstraint;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.processing.MissingProcessorType;
+import uk.co.saiman.experiment.processing.ProcessingProperties;
+import uk.co.saiman.experiment.processing.ProcessorState;
+import uk.co.saiman.experiment.processing.ProcessorType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
-import uk.co.saiman.experiment.spectrum.MissingSpectrumProcessorType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessorState;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessorType;
-import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 import uk.co.saiman.text.properties.PropertyLoader;
@@ -67,17 +67,17 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   @Reference
   AcquisitionDevice acquisitionDevice;
 
-  private final Map<String, SpectrumProcessorType<?>> processingTypes = new HashMap<>();
+  private final Map<String, ProcessorType<?>> processingTypes = new HashMap<>();
 
   @Reference
   PropertyLoader propertyLoader;
 
   @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
-  void addProcessingType(SpectrumProcessorType<?> type) {
+  void addProcessingType(ProcessorType<?> type) {
     processingTypes.putIfAbsent(type.getId(), type);
   }
 
-  void removeProcessingType(SpectrumProcessorType<?> type) {
+  void removeProcessingType(ProcessorType<?> type) {
     processingTypes.remove(type.getId());
   }
 
@@ -110,19 +110,19 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
     return acquisitionDevice;
   }
 
-  protected List<SpectrumProcessorState> createProcessorList(PersistedState persistedState) {
+  protected List<ProcessorState> createProcessorList(PersistedState persistedState) {
     return persistedState
         .getMapList(PROCESSING_KEY)
-        .map(this::createProcessorConfiguration, SpectrumProcessorState::getPersistedState);
+        .map(this::createProcessorConfiguration, ProcessorState::getPersistedState);
   }
 
-  protected SpectrumProcessorState createProcessorConfiguration(PersistedState persistedState) {
+  protected ProcessorState createProcessorConfiguration(PersistedState persistedState) {
     return processingTypes
         .computeIfAbsent(
             persistedState.forString(PROCESSOR_TYPE_KEY).get(),
-            id -> new MissingSpectrumProcessorType(
+            id -> new MissingProcessorType(
                 id,
-                propertyLoader.getProperties(SpectrumProperties.class)))
+                propertyLoader.getProperties(ProcessingProperties.class)))
         .configure(persistedState);
   }
 }

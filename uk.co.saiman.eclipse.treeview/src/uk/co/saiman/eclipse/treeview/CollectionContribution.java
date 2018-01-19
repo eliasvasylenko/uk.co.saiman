@@ -27,16 +27,10 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
-import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.reflection.token.TypedReference.typedObject;
-
 import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
-
-import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * Contribution for root experiment nodes in the experiment tree
@@ -46,8 +40,7 @@ import uk.co.saiman.reflection.token.TypedReference;
 @Component
 public class CollectionContribution implements TreeContribution {
   @AboutToShow
-  public void prepare(List<TypedReference<?>> children, TreeEntry<Collection<?>> entry) {
-    children.addAll(
-        entry.data().stream().map(c -> (TypedReference<?>) typedObject(c)).collect(toList()));
+  public void prepare(TreeChildren children, TreeEntry<Collection<?>> entry) {
+    entry.data().forEach(children::addChild);
   }
 }

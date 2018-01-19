@@ -34,8 +34,6 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.IInjector;
-import org.eclipse.e4.core.di.InjectorFactory;
 import org.eclipse.e4.core.services.adapter.Adapter;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 
@@ -58,8 +56,6 @@ import uk.co.saiman.reflection.token.TypedReference;
  * @author Elias N Vasylenko
  */
 public class ModularTreeController {
-  final private static IInjector INJECTOR = InjectorFactory.getDefault();
-
   private final StringProperty tableId = new SimpleStringProperty();
 
   @FXML
@@ -194,10 +190,6 @@ public class ModularTreeController {
 
   IEclipseContext getContext() {
     return context;
-  }
-
-  IInjector getInjector() {
-    return INJECTOR;
   }
 
   protected ModularTreeItem<?> getRoot() {
