@@ -33,8 +33,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MContribution;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-import uk.co.saiman.msapex.editor.impl.EditorAddon;
-
 /**
  * An editor provider for certain types of resource. Implementations may manage
  * abstract resource descriptors or operate directly on business objects.
@@ -72,16 +70,16 @@ public interface EditorProvider {
   /**
    * Create a {@link MPart part} instance of the given element ID.
    * <p>
-   * The part should not be created or added to the model before it is returned.
-   * The {@link EditorAddon} is responsible for preparing the
-   * {@link IEclipseContext context} for injection of the resource object to the
-   * {@link MPart#getContributionURI part contribution}.
+   * This method is invoked the first time a part is to be added to the model, and
+   * <em>not</em> when a persisted part is reloaded into the model.
    * 
-   * @param ID
+   * @param id
    *          the ID of the editor part to create
+   * @param resource
+   *          the object to edit
    * @return a new editor part, not yet added to the application model
    */
-  MPart createEditorPart(String ID);
+  MPart createEditorPart(String id, Object resource);
 
   /**
    * Load the resource for a persisted editor.
@@ -95,6 +93,11 @@ public interface EditorProvider {
 
   /**
    * Initialize an editor part for the given resource.
+   * <p>
+   * This method will be invoked both when a
+   * {@link #createEditorPart(String, Object) new part instance is created} and
+   * when an {@link #loadEditorResource(MPart) existing part} is loaded from the
+   * persisted application model.
    * <p>
    * The management system is guaranteed to only invoke this method for a part
    * which has been {@link #createEditorPart(String) created via an id} which has

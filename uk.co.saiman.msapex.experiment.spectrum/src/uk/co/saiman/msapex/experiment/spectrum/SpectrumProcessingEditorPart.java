@@ -46,8 +46,8 @@ import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.ModularTreeController;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.processing.ProcessorState;
-import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
+import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
 import uk.co.saiman.reflection.token.TypeToken;
 
 public class SpectrumProcessingEditorPart {
@@ -63,7 +63,7 @@ public class SpectrumProcessingEditorPart {
       BorderPane container,
       @LocalInstance FXMLLoader loader,
       IEclipseContext context,
-      ExperimentNode<? extends SpectrumConfiguration, Spectrum> result) {
+      ExperimentNode<? extends SpectrumResultConfiguration, Spectrum> result) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
     modularTreeController

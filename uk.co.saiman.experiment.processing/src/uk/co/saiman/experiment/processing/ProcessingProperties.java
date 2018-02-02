@@ -46,4 +46,10 @@ public interface ProcessingProperties {
   Localized<String> standardDeviationLabel();
 
   Localized<String> widthLabel();
+
+  Localized<String> vectorLabel();
+
+  Localized<String> centreLabel();
+
+  Localized<String> processing();
 }

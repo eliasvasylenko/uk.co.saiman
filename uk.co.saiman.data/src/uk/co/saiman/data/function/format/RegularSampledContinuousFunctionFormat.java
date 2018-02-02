@@ -78,13 +78,19 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
     return MASS_SPECTRUM_RANGE_EXTENSION;
   }
 
+  @Override
+  public String getMimeType() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   /**
    * @param domain
    *          a description of the domain of the function to format
    * @param rangeUnit
    *          the type of the units of measurement of values in the range
-   * @return a continuous function byte format for the given domain frequency
-   *         and domain start
+   * @return a continuous function byte format for the given domain frequency and
+   *         domain start
    */
   public static <UD extends Quantity<UD>, UR extends Quantity<UR>> DataFormat<SampledContinuousFunction<UD, UR>> overDomain(
       RegularSampledDomain<UD> domain,
@@ -97,8 +103,8 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
    *          the type of the units of measurement of values in the domain
    * @param rangeUnit
    *          the type of the units of measurement of values in the range
-   * @return a continuous function byte format which encodes the domain start
-   *         and domain frequency
+   * @return a continuous function byte format which encodes the domain start and
+   *         domain frequency
    */
   public static <UD extends Quantity<UD>, UR extends Quantity<UR>> DataFormat<SampledContinuousFunction<UD, UR>> overEncodedDomain(
       Unit<UD> domainUnit,
@@ -111,6 +117,12 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
 
       @Override
       public String getId() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public String getMimeType() {
         // TODO Auto-generated method stub
         return null;
       }
@@ -162,9 +174,10 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
       throw new IllegalArgumentException(
           dataDomain.getFrequency() + " != " + domain.getFrequency());
     }
-    if (!Objects.equals(
-        dataDomain.getInterval().getLeftEndpoint(),
-        domain.getInterval().getLeftEndpoint())) {
+    if (!Objects
+        .equals(
+            dataDomain.getInterval().getLeftEndpoint(),
+            domain.getInterval().getLeftEndpoint())) {
       throw new IllegalArgumentException(
           dataDomain.getInterval().getLeftEndpoint() + " != "
               + domain.getInterval().getLeftEndpoint());

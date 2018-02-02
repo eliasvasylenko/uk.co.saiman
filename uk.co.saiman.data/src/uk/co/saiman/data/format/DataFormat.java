@@ -52,6 +52,11 @@ public interface DataFormat<T> {
    */
   String getExtension();
 
+  /**
+   * @return the default mime type for files of this format
+   */
+  String getMimeType();
+
   default TypeToken<T> getType() {
     return forType(getClass())
         .resolveSupertype(DataFormat.class)
@@ -64,8 +69,8 @@ public interface DataFormat<T> {
    * 
    * <p>
    * The calling context should take care of opening and cleaning up resources.
-   * The channel is assumed to be already open upon invocation, and should not
-   * be closed by any implementing method.
+   * The channel is assumed to be already open upon invocation, and should not be
+   * closed by any implementing method.
    * 
    * @param inputChannel
    *          the input byte source
@@ -80,8 +85,8 @@ public interface DataFormat<T> {
    * 
    * <p>
    * The calling context should take care of opening and cleaning up resources.
-   * The channel is assumed to be already open upon invocation, and should not
-   * be closed by any implementing method.
+   * The channel is assumed to be already open upon invocation, and should not be
+   * closed by any implementing method.
    * 
    * @param outputChannel
    *          the output byte sink

@@ -116,8 +116,8 @@ public class FileEditorAddon implements EditorProvider {
   }
 
   @Override
-  public MPart createEditorPart(String ID) {
-    MPart part = (MPart) modelService.cloneSnippet(application, ID, null);
+  public MPart createEditorPart(String id, Object resource) {
+    MPart part = (MPart) modelService.cloneSnippet(application, id, null);
     part.getPersistedState().remove(EDITOR_FILE_PATH_PATTERN);
     return part;
   }

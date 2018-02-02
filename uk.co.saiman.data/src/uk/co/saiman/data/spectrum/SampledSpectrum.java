@@ -32,7 +32,6 @@ import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.function.ArraySampledContinuousFunction;
-import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.IrregularSampledDomain;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
@@ -54,12 +53,12 @@ public class SampledSpectrum implements Spectrum {
   }
 
   @Override
-  public ContinuousFunction<Time, Dimensionless> getTimeData() {
+  public SampledContinuousFunction<Time, Dimensionless> getTimeData() {
     return timeData;
   }
 
   @Override
-  public ContinuousFunction<Mass, Dimensionless> getMassData() {
+  public SampledContinuousFunction<Mass, Dimensionless> getMassData() {
     if (massData == null)
       massData = processData();
     return massData;

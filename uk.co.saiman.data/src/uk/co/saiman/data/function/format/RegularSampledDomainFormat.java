@@ -62,6 +62,12 @@ public class RegularSampledDomainFormat<U extends Quantity<U>>
   }
 
   @Override
+  public String getMimeType() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public Payload<RegularSampledDomain<U>> load(ReadableByteChannel inputChannel)
       throws IOException {
     ByteBuffer buffer = ByteBuffer.allocate(SIZE);

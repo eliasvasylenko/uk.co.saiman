@@ -17,4 +17,5 @@ Private-Package:\
 	plugin.xml,\
 	{Application.e4xmi},\
 	{css=css},\
+	res,\
 	configuration=configuration

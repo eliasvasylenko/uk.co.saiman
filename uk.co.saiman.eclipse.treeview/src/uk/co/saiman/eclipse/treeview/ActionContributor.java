@@ -37,8 +37,8 @@ import javafx.scene.input.MouseEvent;
  * A tree cell contribution intended to be supplied via {@link TreeContribution}
  * so as to be injected according to an eclipse context.
  * <p>
- * This contribution registers an E4 command to the cell, which can be activated
- * via double click or the enter key.
+ * This contribution registers an action to the cell, which can be activated via
+ * double click or the enter key.
  * 
  * @author Elias N Vasylenko
  */
@@ -46,10 +46,11 @@ public interface ActionContributor extends Contributor {
   @Override
   default Node configureCell(Node content) {
     content.addEventHandler(MouseEvent.ANY, event -> {
-      if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
-        if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED) && performAction(content)) {
-          event.consume();
-        }
+      if (event.getClickCount() == 2
+          && event.getButton().equals(MouseButton.PRIMARY)
+          && event.getEventType().equals(MouseEvent.MOUSE_PRESSED)
+          && performAction(content)) {
+        event.consume();
       }
     });
 

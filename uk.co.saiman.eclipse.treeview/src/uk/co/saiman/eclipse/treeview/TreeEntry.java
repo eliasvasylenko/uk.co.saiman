@@ -28,6 +28,7 @@
 package uk.co.saiman.eclipse.treeview;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javafx.scene.control.TreeItem;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -68,6 +69,11 @@ public interface TreeEntry<T> {
    * @return a {@link TreeEntry} interface over the parent node
    */
   Optional<TreeEntry<?>> parent();
+
+  /**
+   * @return a {@link TreeEntry} interface over the child nodes
+   */
+  Stream<TreeEntry<?>> children();
 
   /**
    * Refresh the tree cell associated with this tree item.

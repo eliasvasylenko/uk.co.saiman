@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
@@ -43,11 +42,5 @@ final class SaintSpectrumConfigurationImpl implements SaintSpectrumConfiguration
   @Override
   public List<ProcessorState> getProcessing() {
     return processors;
-  }
-
-  @Override
-  public void setProcessing(List<DataProcessor> processors) {
-    processors.clear();
-    processors.addAll(processors);
   }
 }

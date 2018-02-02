@@ -48,11 +48,11 @@ public interface ProcessingType<S, T, U> extends ExperimentType<S, U> {
   @Override
   default U process(ProcessingContext<S, U> context) {
     @SuppressWarnings("unchecked")
-    T input = (T) context.node().getParent().get().getResult().getValue();
-    return process(input);
+    T input = (T) context.node().getParent().flatMap(p -> p.getResult().getValue()).orElse(null);
+    return process(context.node().getState(), input);
   }
 
-  U process(T input);
+  U process(S state, T input);
 
   @Override
   default ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
@@ -73,7 +73,7 @@ public interface ProcessingType<S, T, U> extends ExperimentType<S, U> {
    */
   default TypeToken<T> getInputType() {
     return forType(getThisType())
-        .resolveSupertype(ExperimentType.class)
+        .resolveSupertype(ProcessingType.class)
         .resolveTypeArgument(new TypeParameter<T>() {})
         .getTypeToken();
   }

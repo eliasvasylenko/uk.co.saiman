@@ -37,11 +37,8 @@ import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.core.di.annotations.Creatable;
 
 /**
- * A tree cell contribution intended to be supplied via {@link TreeContribution}
- * so as to be injected according to an eclipse context.
- * <p>
- * This contribution registers an E4 command to the cell, which can be activated
- * via double click or the enter key.
+ * A factory for an {@link ActionContributor} whose action is to execute an
+ * Eclipse e4 command.
  * 
  * @author Elias N Vasylenko
  */

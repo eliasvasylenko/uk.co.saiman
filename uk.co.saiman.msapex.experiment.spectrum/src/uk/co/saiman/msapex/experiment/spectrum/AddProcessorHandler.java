@@ -13,13 +13,13 @@ import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.experiment.processing.ProcessorType;
-import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
+import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
 import uk.co.saiman.text.properties.Localized;
 
 public class AddProcessorHandler {
   @Execute
   void execute(
-      ExperimentNode<? extends SpectrumConfiguration, ?> node,
+      ExperimentNode<? extends SpectrumResultConfiguration, ?> node,
       @Service List<ProcessorType<?>> processors,
       @Localize ExperimentProperties text) {
     requestProcessorType(

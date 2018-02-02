@@ -1,27 +1,19 @@
 package uk.co.saiman.experiment.persistence.json;
 
-import static java.nio.channels.Channels.newInputStream;
-import static java.nio.channels.Channels.newOutputStream;
-import static java.util.stream.Collectors.joining;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.Payload;
+import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.experiment.persistence.PersistedStateList;
 
 @Component
-public class JsonPersistedStateFormat implements DataFormat<PersistedState> {
+public class JsonPersistedStateFormat implements TextFormat<PersistedState> {
   @Override
   public String getId() {
     return "uk.co.saiman.experiment.persistence.json";
@@ -33,21 +25,27 @@ public class JsonPersistedStateFormat implements DataFormat<PersistedState> {
   }
 
   @Override
-  public Payload<? extends PersistedState> load(ReadableByteChannel inputChannel)
-      throws IOException {
-    PersistedState persistedState = new PersistedState();
-    load(inputChannel, persistedState);
-    return new Payload<>(persistedState);
+  public String getMimeType() {
+    return "application/json";
   }
 
   public void load(ReadableByteChannel inputChannel, PersistedState persistedState)
       throws IOException {
-    String string = new BufferedReader(new InputStreamReader(newInputStream(inputChannel)))
-        .lines()
-        .collect(joining());
-    JSONObject object = new JSONObject(string);
+    JSONObject object = new JSONObject(loadString(inputChannel));
     persistedState.clear();
     fillMap(persistedState, object);
+  }
+
+  @Override
+  public Payload<? extends PersistedState> decodeString(String string) {
+    PersistedState persistedState = new PersistedState();
+    decodeString(string, persistedState);
+    return new Payload<>(persistedState);
+  }
+
+  public void decodeString(String string, PersistedState persistedState) {
+    persistedState.clear();
+    fillMap(persistedState, new JSONObject(string));
   }
 
   void fillMap(PersistedState persistedState, JSONObject object) {
@@ -72,12 +70,8 @@ public class JsonPersistedStateFormat implements DataFormat<PersistedState> {
   }
 
   @Override
-  public void save(WritableByteChannel outputChannel, Payload<? extends PersistedState> payload)
-      throws IOException {
-    JSONObject object = buildMap(payload.data);
-    try (PrintWriter out = new PrintWriter(newOutputStream(outputChannel))) {
-      out.println(object.toString(2));
-    }
+  public String encodeString(Payload<? extends PersistedState> payload) {
+    return buildMap(payload.data).toString(2);
   }
 
   JSONObject buildMap(PersistedState persistedState) {

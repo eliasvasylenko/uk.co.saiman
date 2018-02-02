@@ -32,6 +32,7 @@ import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.function.ContinuousFunction;
+import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
 
 public interface Spectrum {
@@ -45,7 +46,7 @@ public interface Spectrum {
    *         {@link #getProcessing() processed} from the {@link #getTimeData()
    *         time data}
    */
-  ContinuousFunction<Mass, Dimensionless> getMassData();
+  SampledContinuousFunction<Mass, Dimensionless> getMassData();
 
   /**
    * @return the calibration settings of the spectrum experiment at the time of

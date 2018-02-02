@@ -35,7 +35,7 @@ public enum ExperimentNodeConstraint {
    */
   UNFULFILLED,
   /**
-   * No positive conditions are missing
+   * All positive conditions are present
    */
   FULFILLED,
   /**

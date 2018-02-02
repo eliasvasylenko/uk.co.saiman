@@ -27,10 +27,14 @@
  */
 package uk.co.saiman.experiment.persistence;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -172,24 +176,43 @@ public class PersistedStateList implements Iterable<PersistedState> {
       Function<? super PersistedState, ? extends T> out,
       Function<? super T, ? extends PersistedState> in) {
     return new AbstractList<T>() {
+      private final Map<PersistedState, T> elements = new HashMap<>();
+
+      {
+        changes().weakReference(this).observe(o -> o.owner().clearUnused());
+      }
+
+      private void clearUnused() {
+        elements.keySet().retainAll(PersistedStateList.this.stream().collect(toList()));
+      }
+
       @Override
       public T get(int index) {
-        return out.apply(PersistedStateList.this.get(index));
+        T item = elements.computeIfAbsent(PersistedStateList.this.get(index), out::apply);
+        return item;
       }
 
       @Override
       public T set(int index, T element) {
-        return out.apply(PersistedStateList.this.set(index, in.apply(element)));
+        T previous = get(index);
+        PersistedState state = in.apply(element);
+        elements.put(state, element);
+        PersistedStateList.this.set(index, state);
+        return previous;
       }
 
       @Override
       public void add(int index, T element) {
-        PersistedStateList.this.add(index, in.apply(element));
+        PersistedState state = in.apply(element);
+        elements.put(state, element);
+        PersistedStateList.this.add(index, state);
       }
 
       @Override
       public T remove(int index) {
-        return out.apply(PersistedStateList.this.remove(index));
+        T previous = get(index);
+        PersistedStateList.this.remove(index);
+        return previous;
       }
 
       @Override

@@ -93,8 +93,10 @@ public class ExperimentNodeContribution implements TreeContribution {
     setLabel(node, entry.data().getId());
     setSupplemental(
         node,
-        entry.data().getType().getName() + " ["
-            + text.lifecycleState(entry.data().lifecycleState().get()) + "]");
+        entry.data().getType().getName()
+            + " ["
+            + text.lifecycleState(entry.data().lifecycleState().get())
+            + "]");
 
     /*
      * add spacer

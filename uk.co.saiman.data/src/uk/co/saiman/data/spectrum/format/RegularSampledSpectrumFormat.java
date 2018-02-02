@@ -64,6 +64,12 @@ public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
   }
 
   @Override
+  public String getMimeType() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public String getExtension() {
     return "rss";
   }

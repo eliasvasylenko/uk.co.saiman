@@ -317,8 +317,8 @@ public class FxUtilities {
   }
 
   /**
-   * Wrap an {@link uk.co.saiman.observable.Observable} with a JavaFX
-   * equivalent {@link ObservableValue}.
+   * Wrap an {@link uk.co.saiman.observable.Observable} with a JavaFX equivalent
+   * {@link ObservableValue}.
    * 
    * @param <T>
    *          the type of the value
@@ -346,8 +346,7 @@ public class FxUtilities {
    *          the observable value to wrap
    * @return a JavaFX observable value backed by the given observable value
    */
-  public static <T> ObservableValue<T> wrap(
-      uk.co.saiman.observable.ObservableValue<T> observable) {
+  public static <T> ObservableValue<T> wrap(uk.co.saiman.observable.ObservableValue<T> observable) {
     return wrap(observable, observable.get());
   }
 

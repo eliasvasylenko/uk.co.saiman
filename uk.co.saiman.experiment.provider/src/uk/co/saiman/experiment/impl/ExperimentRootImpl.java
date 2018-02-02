@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFILLED;
+import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
 
 import java.util.Optional;
@@ -106,6 +106,6 @@ public class ExperimentRootImpl implements ExperimentRoot {
   public ExperimentNodeConstraint mayComeBefore(
       ExperimentNode<?, ?> penultimateDescendantNode,
       ExperimentType<?, ?> descendantNodeType) {
-    return ASSUME_ALL_FULFILLED;
+    return FULFILLED;
   }
 }

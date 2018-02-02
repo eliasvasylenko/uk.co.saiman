@@ -29,8 +29,8 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.Arrays.asList;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -42,7 +42,9 @@ import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.localization.Localize;
@@ -54,14 +56,65 @@ import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.observable.Invalidation;
+import uk.co.saiman.reflection.token.TypeToken;
 
+/**
+ * An editor addon which only provides a single type of composite editor for
+ * experiment nodes.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class ExperimentEditorAddon implements EditorProvider {
   public static final String EDITOR_RESULT_CLASS = "uk.co.saiman.msapex.editor.result.class";
+  public static final String EDITOR_STATE_CLASS = "uk.co.saiman.msapex.editor.state.class";
   public static final String EDITOR_EXPERIMENT_PATH = "uk.co.saiman.msapex.editor.experiment.path";
+
   private static final String BUNDLE_CLASS = "bundleclass://";
   private static final String BUNDLE_CLASS_SEPARATOR = "/";
 
-  private final Map<String, MPart> editorParts = new LinkedHashMap<>();
+  private static final String REMOVE_ON_HIDE = "removeOnHide";
+  private static final String SEGREGATED_DND = "segregatedDnD";
+  private static final String TABS_LOCATION = "fx.stack.tabslocation";
+  private static final String TABS_LOCATION_BOTTOM = "BOTTOM";
+
+  class EditorSnippet {
+    final String id;
+    final String stateClass;
+    final String resultClass;
+
+    public EditorSnippet(String id, String stateClass, String resultClass) {
+      this.id = id;
+      this.stateClass = stateClass;
+      this.resultClass = resultClass;
+    }
+
+    public boolean isCompatible(ExperimentNode<?, ?> experiment) {
+      if (!isClassNameCompatible(stateClass, experiment.getType().getStateType())
+          || !isClassNameCompatible(resultClass, experiment.getType().getResultType()))
+        return false;
+
+      return true;
+    }
+
+    private boolean isClassNameCompatible(String className, TypeToken<?> type) {
+      if (className == null)
+        return true;
+
+      ClassLoader classLoader = type.getErasedType().getClassLoader();
+
+      if (classLoader == null)
+        return false;
+
+      try {
+        Class<?> superClass = classLoader.loadClass(className);
+        return type.isAssignableTo(superClass);
+      } catch (ClassNotFoundException e) {
+        return false;
+      }
+    }
+  }
+
+  private final Set<EditorSnippet> editorSnippets = new LinkedHashSet<>();
 
   @Inject
   private EditorService editorService;
@@ -82,9 +135,14 @@ public class ExperimentEditorAddon implements EditorProvider {
     for (MUIElement snippet : application.getSnippets()) {
       if (snippet instanceof MPart) {
         MPart part = (MPart) snippet;
-        if (part.getPersistedState().containsKey(EDITOR_RESULT_CLASS)) {
-          editorParts.put(part.getElementId(), part);
-        }
+        String stateClass = part.getPersistedState().get(EDITOR_STATE_CLASS);
+        String resultClass = part.getPersistedState().get(EDITOR_RESULT_CLASS);
+
+        stateClass = parseClassLocation(stateClass);
+        resultClass = parseClassLocation(resultClass);
+
+        if (stateClass != null || resultClass != null)
+          editorSnippets.add(new EditorSnippet(part.getElementId(), stateClass, resultClass));
       }
     }
 
@@ -103,56 +161,66 @@ public class ExperimentEditorAddon implements EditorProvider {
 
   @Override
   public Stream<String> getEditorPartIds() {
-    return editorParts.values().stream().map(MPart::getElementId);
+    return Stream.of(getId());
   }
 
   @Override
   public boolean isEditorApplicable(String editorId, Object resource) {
+    if (!editorId.equals(getId()))
+      return false; // I don't think this should ever happen though
     if (!(resource instanceof ExperimentNode<?, ?>))
       return false;
 
-    MPart part = editorParts.get(editorId);
     ExperimentNode<?, ?> experiment = (ExperimentNode<?, ?>) resource;
 
-    if (part != null && experiment != null) {
-      String classLocation = part.getPersistedState().get(EDITOR_RESULT_CLASS);
+    for (EditorSnippet part : editorSnippets)
+      if (part.isCompatible(experiment))
+        return true;
 
-      if (classLocation.startsWith(BUNDLE_CLASS)) {
-        String[] classLocationElements = classLocation
-            .substring(BUNDLE_CLASS.length())
-            .split(BUNDLE_CLASS_SEPARATOR);
-
-        if (classLocationElements.length == 2) {
-          /*
-           * If it is a superclass then we'll be able to find it from the same class
-           * loader.
-           */
-          ClassLoader classLoader = experiment
-              .getResult()
-              .getType()
-              .getErasedType()
-              .getClassLoader();
-
-          if (classLoader != null) {
-            try {
-              Class<?> superClass = classLoader.loadClass(classLocationElements[1]);
-              return experiment.getResult().getType().isAssignableTo(superClass);
-            } catch (ClassNotFoundException e) {}
-          }
-        }
-      }
-    }
     return false;
   }
 
+  private String parseClassLocation(String classLocation) {
+    if (classLocation == null || !classLocation.startsWith(BUNDLE_CLASS))
+      return null;
+
+    String[] classLocationElements = classLocation
+        .substring(BUNDLE_CLASS.length())
+        .split(BUNDLE_CLASS_SEPARATOR);
+
+    if (classLocationElements.length != 2)
+      return null;
+
+    return classLocationElements[1];
+  }
+
   @Override
-  public MPart createEditorPart(String id) {
+  public MPart createEditorPart(String id, Object resource) {
+    MCompositePart part = modelService.createModelElement(MCompositePart.class);
+    part.getTags().add(REMOVE_ON_HIDE);
+    part.getTags().add(SEGREGATED_DND);
+    part.setDirty(true);
+
+    MPartStack partStack = modelService.createModelElement(MPartStack.class);
+    partStack.getPersistedState().put(TABS_LOCATION, TABS_LOCATION_BOTTOM);
+    part.getChildren().add(partStack);
+
+    ExperimentNode<?, ?> experiment = (ExperimentNode<?, ?>) resource;
+    for (EditorSnippet component : editorSnippets) {
+      if (component.isCompatible(experiment)) {
+        partStack.getChildren().add(loadSnippet(component.id, resource));
+      }
+    }
+
+    return part;
+  }
+
+  private MPart loadSnippet(String id, Object resource) {
     MPart part = (MPart) modelService.cloneSnippet(application, id, null);
     modelService
         .findElements(part, null, MApplicationElement.class, asList("renameOnClone"))
         .stream()
         .forEach(e -> e.setElementId(e.getElementId() + ".clone"));
-    part.setDirty(true);
     return part;
   }
 
@@ -164,8 +232,9 @@ public class ExperimentEditorAddon implements EditorProvider {
 
   @Override
   public void initializeEditorPart(MPart part, Object resource) {
-    ExperimentNode<?, ?> experiment;
-    experiment = (ExperimentNode<?, ?>) resource;
+    ExperimentNode<?, ?> experiment = (ExperimentNode<?, ?>) resource;
+    part.setLabel(experiment.getId());
+
     part.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(experiment).toString());
 
     // inject result and result data changes into context

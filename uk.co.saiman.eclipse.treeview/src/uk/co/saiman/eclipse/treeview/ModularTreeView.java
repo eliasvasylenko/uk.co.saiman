@@ -27,11 +27,16 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
+import static java.util.Collections.reverse;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.PickResult;
 import uk.co.saiman.fx.FxmlLoadBuilder;
@@ -57,9 +62,18 @@ public class ModularTreeView extends TreeView<TreeEntry<?>> {
     setEditable(true);
 
     addEventHandler(KeyEvent.ANY, event -> {
-      if (event.getCode() == KeyCode.CONTEXT_MENU) {
+      switch (event.getCode()) {
+      case DELETE:
         event.consume();
-
+        if (event.getEventType() == KeyEvent.KEY_PRESSED) {
+          List<TreeItem<?>> selection = new ArrayList<>(getSelectionModel().getSelectedItems());
+          reverse(selection);
+          for (TreeItem<?> treeItem : selection) {
+            ((ModularTreeItem<?>) treeItem).delete();
+          }
+        }
+      case CONTEXT_MENU:
+        event.consume();
         if (event.getEventType() == KeyEvent.KEY_RELEASED) {
           Node selectionBounds = this;
 
@@ -81,6 +95,9 @@ public class ModularTreeView extends TreeView<TreeEntry<?>> {
                   true,
                   pickResult));
         }
+        break;
+      default:
+        break;
       }
     });
   }

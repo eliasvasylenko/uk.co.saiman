@@ -1,6 +1,7 @@
 Bundle-Name: SAI :: Experiment :: Spectrum
 
 Export-Package: uk.co.saiman.experiment.processing
+Private-Package: uk.co.saiman.experiment.processing.impl
 
 -includeresource:\
 	l10n
@@ -15,6 +16,7 @@ Export-Package: uk.co.saiman.experiment.processing
 	uk.co.saiman.reflection.token;version=snapshot,\
 \
 	uk.co.saiman.experiment.api;version=snapshot,\
+	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.measurement.api;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\

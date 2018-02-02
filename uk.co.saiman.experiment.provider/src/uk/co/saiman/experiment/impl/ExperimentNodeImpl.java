@@ -5,6 +5,7 @@ import static uk.co.saiman.experiment.ExperimentLifecycleState.DISPOSED;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
+import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -170,25 +171,33 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   private static void validateChild(ExperimentNodeImpl<?, ?> parent, ExperimentType<?, ?> type) {
-    ExperimentNodeConstraint parentConstraint = type.mayComeAfter(parent);
-    if (parentConstraint == ASSUME_ALL_FULFILLED)
-      return;
+    boolean assumeAllFulfilled = false;
+    ExperimentNode<?, ?> unfulfilled = null;
 
-    ExperimentNode<?, ?> unfulfilledChildConstraint = null;
-    for (ExperimentNodeImpl<?, ?> ancestor : parent.getAncestorsImpl().collect(toList())) {
-      ExperimentNodeConstraint childConstraint = ancestor.type.mayComeBefore(parent, type);
-      if (childConstraint == ASSUME_ALL_FULFILLED)
-        return;
-      else if (childConstraint == UNFULFILLED)
-        unfulfilledChildConstraint = ancestor;
+    ExperimentNodeConstraint parentConstraint = type.mayComeAfter(parent);
+    if (parentConstraint == VIOLATED) {
+      throw new ExperimentException(parent.getText().exception().typeMayNotSucceed(type, parent));
+    } else if (parentConstraint == ASSUME_ALL_FULFILLED) {
+      assumeAllFulfilled = true;
+    } else if (parentConstraint == UNFULFILLED) {
+      unfulfilled = parent;
     }
 
-    if (parentConstraint == UNFULFILLED) {
-      throw new ExperimentException(parent.getText().exception().typeMayNotSucceed(type, parent));
+    for (ExperimentNodeImpl<?, ?> ancestor : parent.getAncestorsImpl().collect(toList())) {
+      ExperimentNodeConstraint ancestorConstraint = ancestor.type.mayComeBefore(parent, type);
+      if (ancestorConstraint == VIOLATED) {
+        throw new ExperimentException(
+            parent.getText().exception().typeMayNotSucceed(type, ancestor));
+      } else if (ancestorConstraint == ASSUME_ALL_FULFILLED) {
+        assumeAllFulfilled = true;
+      } else if (ancestorConstraint == UNFULFILLED) {
+        unfulfilled = ancestor;
+      }
+    }
 
-    } else if (unfulfilledChildConstraint != null) {
+    if (!assumeAllFulfilled && unfulfilled != null) {
       throw new ExperimentException(
-          parent.getText().exception().typeMayNotSucceed(type, unfulfilledChildConstraint));
+          parent.getText().exception().typeMayNotSucceed(type, unfulfilled));
     }
   }
 

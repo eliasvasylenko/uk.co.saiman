@@ -27,25 +27,13 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import java.util.List;
-
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.processing.ProcessorState;
 
 /**
  * TODO
  * 
  * @author Elias N Vasylenko
  */
-public interface SpectrumConfiguration {
-  String getSpectrumName();
-
-  void setSpectrumName(String name);
-
+public interface SpectrumConfiguration extends SpectrumResultConfiguration {
   AcquisitionDevice getAcquisitionDevice();
-
-  void setProcessing(List<DataProcessor> processors);
-
-  List<ProcessorState> getProcessing();
 }

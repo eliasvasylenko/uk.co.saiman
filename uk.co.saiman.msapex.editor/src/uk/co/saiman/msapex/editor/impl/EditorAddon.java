@@ -108,7 +108,7 @@ public class EditorAddon implements EditorService {
   }
 
   protected <T> MPart createEditor(EditorDescriptor descriptor, Object data) {
-    MPart editorPart = descriptor.getProvider().createEditorPart(descriptor.getPartId());
+    MPart editorPart = descriptor.getProvider().createEditorPart(descriptor.getPartId(), data);
 
     editorPart.setCloseable(true);
     editorPart.getPersistedState().put(PROVIDER_ID, descriptor.getProvider().getId());
@@ -145,7 +145,8 @@ public class EditorAddon implements EditorService {
     try {
       Object value = event.getProperty(NEW_VALUE);
       if (event.getProperty(ELEMENT) instanceof MHandlerContainer
-          && value instanceof IEclipseContext && SET.equals(event.getProperty(TYPE))) {
+          && value instanceof IEclipseContext
+          && SET.equals(event.getProperty(TYPE))) {
         IEclipseContext context = (IEclipseContext) value;
 
         MPart part = context.get(MPart.class);

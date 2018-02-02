@@ -42,4 +42,6 @@ public interface SpectrumProperties {
   Localized<String> defaultSpectrumName();
 
   Localized<String> spectrumGraphEditor();
+
+  Localized<String> spectrumProcessingExperimentName();
 }

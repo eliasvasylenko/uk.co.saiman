@@ -27,13 +27,12 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static javafx.css.PseudoClass.getPseudoClass;
 import static org.eclipse.e4.core.internal.contexts.ContextObjectSupplier.getObjectSupplier;
-import static uk.co.saiman.reflection.Types.getErasedType;
+import static uk.co.saiman.eclipse.treeview.TreeTransferMode.DISCARD;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,20 +43,19 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.IInjector;
 import org.eclipse.e4.core.di.InjectorFactory;
-import org.eclipse.e4.core.di.suppliers.IObjectDescriptor;
-import org.eclipse.e4.core.di.suppliers.IRequestor;
 import org.eclipse.e4.core.di.suppliers.PrimaryObjectSupplier;
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
+import javafx.scene.input.Clipboard;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.eclipse.treeview.TreeClipboardManager.TreeDragCandidateImpl;
+import uk.co.saiman.eclipse.treeview.TreeClipboardManager.TreeDropCandidates;
 import uk.co.saiman.reflection.token.TypedReference;
 
 /**
@@ -77,12 +75,13 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
   private final ModularTreeItem<?> parent;
   private final TreeEntryImpl entry;
   private final TypedReference<T> data;
+  private final BorderPane container;
 
   private final Map<TypedReference<?>, ModularTreeItem<?>> childTreeItems = new HashMap<>();
   private boolean childrenCalculated;
-  private TreeChildren children;
-  private TreeEditor<T> editor;
-  private final BorderPane container;
+  private TreeChildrenImpl children;
+  private TreeEditorImpl<T> editor;
+  private TreeClipboardManager dragAndDrop;
   private HBox node;
 
   protected ModularTreeItem(TypedReference<T> data, ModularTreeController controller) {
@@ -103,6 +102,7 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     this.entry = new TreeEntryImpl();
 
     container = new BorderPane();
+    container.pseudoClassStateChanged(getPseudoClass("fuck"), true);
     setGraphic(container);
 
     setValue(entry);
@@ -128,6 +128,14 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     }
 
     return super.getChildren();
+  }
+
+  public Optional<ModularTreeItem<?>> getModularParent() {
+    return Optional.ofNullable(parent);
+  }
+
+  public Stream<ModularTreeItem<?>> getModularChildren() {
+    return getChildren().stream().map(c -> (ModularTreeItem<?>) c);
   }
 
   private void refreshImpl(boolean recursive) {
@@ -182,124 +190,26 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
   }
 
   void refreshContributions(Runnable commitEdit) {
-    children = new TreeChildren() {
-      private final List<TypedReference<?>> children = new ArrayList<>();
-
-      @Override
-      public void addChild(int index, TypedReference<?> child) {
-        children.add(index, child);
-      }
-
-      @Override
-      public Stream<TypedReference<?>> getChildren() {
-        return children.stream();
-      }
-
-      @Override
-      public void removeChild(int index) {
-        children.remove(index);
-      }
-
-      @Override
-      public boolean removeChild(Object child) {
-        return children.remove(child);
-      }
-    };
-    editor = new TreeEditor<T>() {
-      private Runnable editListener;
-      private boolean editable = commitEdit != null;
-
-      @Override
-      public void addEditListener(Runnable onEdit) {
-        if (editListener == null) {
-          editListener = onEdit;
-        } else {
-          editListener = () -> {
-            editListener.run();
-            onEdit.run();
-          };
-        }
-      }
-
-      @Override
-      public boolean isEditable() {
-        return editable;
-      }
-
-      @Override
-      public boolean isEditing() {
-        editable = true;
-        return commitEdit != null;
-      }
-
-      @Override
-      public void commitEdit() {
-        if (editListener != null)
-          editListener.run();
-        commitEdit.run();
-      }
-    };
     node = new HBox();
+    children = new TreeChildrenImpl();
+    editor = new TreeEditorImpl<>(commitEdit);
+    dragAndDrop = new TreeClipboardManager();
+
     container.setCenter(node);
 
-    Consumer<Object> injector = getInjector(controller.getContext());
+    PrimaryObjectSupplier contextSupplier = getObjectSupplier(controller.getContext(), INJECTOR);
+    PrimaryObjectSupplier localSupplier = new TreeContributionObjectSupplier(
+        entry,
+        node,
+        children,
+        editor,
+        dragAndDrop);
+
+    Consumer<Object> injector = c -> INJECTOR
+        .invoke(c, AboutToShow.class, null, contextSupplier, localSupplier);
 
     controller.getContributors().forEach(injector);
     injector.accept(data.getObject());
-  }
-
-  private Consumer<Object> getInjector(IEclipseContext context) {
-    PrimaryObjectSupplier contextSupplier = getObjectSupplier(context, INJECTOR);
-    PrimaryObjectSupplier localSupplier = new PrimaryObjectSupplier() {
-      @Override
-      public void resumeRecording() {}
-
-      @Override
-      public void pauseRecording() {}
-
-      @Override
-      public void get(
-          IObjectDescriptor[] descriptors,
-          Object[] actualValues,
-          IRequestor requestor,
-          boolean initial,
-          boolean track,
-          boolean group) {
-        for (int i = 0; i < descriptors.length; i++) {
-          Type desired = descriptors[i].getDesiredType();
-
-          if (desired == TreeChildren.class) {
-            actualValues[i] = children;
-
-          } else if (desired == HBox.class) {
-            actualValues[i] = node;
-
-          } else if (desired instanceof ParameterizedType
-              && getErasedType(desired) == TreeEntry.class
-              && TypeToken
-                  .forType(desired)
-                  .getTypeArguments()
-                  .findFirst()
-                  .get()
-                  .getTypeToken()
-                  .isAssignableFrom(getEntry().type())) {
-            actualValues[i] = entry;
-
-          } else if (desired instanceof ParameterizedType
-              && getErasedType(desired) == TreeEditor.class
-              && TypeToken
-                  .forType(desired)
-                  .getTypeArguments()
-                  .findFirst()
-                  .get()
-                  .getTypeToken()
-                  .isAssignableFrom(getEntry().type())) {
-            actualValues[i] = editor;
-          }
-        }
-      }
-    };
-    return c -> INJECTOR.invoke(c, AboutToShow.class, null, contextSupplier, localSupplier);
   }
 
   @SuppressWarnings("unchecked")
@@ -312,8 +222,32 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
     return getEntry().getAdapter(adapter);
   }
 
-  public boolean isEditable() {
+  boolean isEditable() {
     return editor.isEditable();
+  }
+
+  void delete() {
+    TreeDragCandidateImpl<?> dragCandidate = getDragCandidate();
+    if (dragCandidate.getTransferModes().contains(DISCARD)) {
+      dragCandidate.handleDrag(DISCARD);
+      parent.getEntry().refresh(true);
+    }
+  }
+
+  TreeDragCandidateImpl<?> getDragCandidate() {
+    return getModularParent()
+        .map(p -> p.dragAndDrop.getDragCandidate(entry))
+        .orElseGet(() -> new TreeDragCandidateImpl<>(emptyList(), entry));
+  }
+
+  TreeDropCandidates getDropCandidates(Clipboard clipboard, TreeDropPosition position) {
+    if (position == TreeDropPosition.OVER) {
+      return dragAndDrop.getDropCandidates(clipboard, position, null);
+    } else {
+      return getModularParent()
+          .map(p -> p.dragAndDrop.getDropCandidates(clipboard, position, getEntry()))
+          .orElseGet(() -> new TreeDropCandidates(emptyList(), clipboard, position, getEntry()));
+    }
   }
 
   public class TreeEntryImpl implements TreeEntry<T>, IAdaptable {
@@ -343,7 +277,7 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
 
     @Override
     public Optional<TreeEntry<?>> parent() {
-      return Optional.ofNullable(parent).map(ModularTreeItem::getEntry);
+      return getModularParent().map(ModularTreeItem::getEntry);
     }
 
     @Override
@@ -351,6 +285,11 @@ public class ModularTreeItem<T> extends TreeItem<TreeEntry<?>> implements IAdapt
       Platform.runLater(() -> {
         refreshImpl(recursive);
       });
+    }
+
+    @Override
+    public Stream<TreeEntry<?>> children() {
+      return getModularChildren().map(c -> c.getEntry());
     }
   }
 }

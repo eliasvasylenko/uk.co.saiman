@@ -6,7 +6,7 @@ import org.junit.Test;
 public class ConvolutionTest {
   private static final double[] EMPTY = new double[] {};
   private static final double[] UNIT = new double[] { 1 };
-  private static final double[] ONE = new double[] { 7 };
+  // private static final double[] ONE = new double[] { 7 };
   private static final double[] TWO = new double[] { 5, 13 };
   private static final double[] THREE = new double[] { 3, 11, 17 };
 
