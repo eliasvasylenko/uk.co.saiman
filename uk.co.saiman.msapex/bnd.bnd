@@ -1,5 +1,5 @@
 Bundle-Name: SAI :: MSApex
-Bundle-SymbolicName: ${p};singleton:=true
+Bundle-SymbolicName: ${p};singleton:=true0
 
 Export-Package:\
 	uk.co.saiman.msapex.model,\
@@ -10,7 +10,7 @@ Private-Package:\
 
 -include:\
 	${build}/include/eclipse.platform.oxygen.bnd,\
-	${build}/include/eclipse.fx.3.0.0.bnd,\
+	${build}/include/eclipse.fx.3.1.0.bnd,\
 	${build}/include/fugue.icons.bnd
 
 -includeresource:\

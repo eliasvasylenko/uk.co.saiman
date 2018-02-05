@@ -3,7 +3,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Chemical Map
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.oxygen.bnd,\
-	${build}/include/eclipse.fx.3.0.0.bnd,\
+	${build}/include/eclipse.fx.3.1.0.bnd,\
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
