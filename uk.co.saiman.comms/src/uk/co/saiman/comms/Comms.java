@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -46,8 +46,8 @@ public interface Comms<T> {
   enum CommsStatus {
     /**
      * The byte channel is currently open. Subsequent invocations of
-     * {@link CommsPort#openChannel()} will fail until the previously opened
-     * byte channel is closed.
+     * {@link CommsPort#openChannel()} will fail until the previously opened byte
+     * channel is closed.
      */
     OPEN,
 
@@ -55,13 +55,58 @@ public interface Comms<T> {
      * The byte channel is ready to be opened. This does not guarantee that a
      * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
      * simply indicates that it is expected to succeed. If invocation fails, the
-     * comms channel will enter a failure state and rethrow when trying to
-     * resolve the value of {@link Comms#status()}.
+     * comms channel will enter a failure state and rethrow when trying to resolve
+     * the value of {@link Comms#status()}.
      */
     CLOSED,
   }
 
   /**
+   * The current status of the hardware interface connection.
+   * <p>
+   * This observable value may be in a failure state depending on the
+   * implementation. This should be documented by the implementation service
+   * provider.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO too troublesome to deal with using failure messages to communicate
+   * problem status. Problems with retrying:
+   * 
+   * - Does it always retry or do you have to call it?
+   * 
+   * - Problem of retry refiring the error every subscription ... How do we listen
+   * for the next normal message?
+   * 
+   * - ... can override retry with different semantics? unexpected consequence
+   * that chaining the retry after e.g. a map operation gives an infinite loop of
+   * repeating subscriptions and failures.
+   * 
+   * - ... can have another method on ObservableValue e.g. softRetry? unexpected
+   * consequence that chaining some operations e.g. map, then doing toValue, then
+   * doing softRetry, will just give a dead value and not pass on further messages
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
    * @return the current status of the hardware interface
    */
   ObservableValue<CommsStatus> status();
@@ -81,8 +126,8 @@ public interface Comms<T> {
 
   /**
    * Attempt to clear all faults and close the comms interface. Any controllers
-   * which are open will be made invalid, and will continue to be invalid even
-   * if another controller is opened at a later time.
+   * which are open will be made invalid, and will continue to be invalid even if
+   * another controller is opened at a later time.
    */
   void reset();
 

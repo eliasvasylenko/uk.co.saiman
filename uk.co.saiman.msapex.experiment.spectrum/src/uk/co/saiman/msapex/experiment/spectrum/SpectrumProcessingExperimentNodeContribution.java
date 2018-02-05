@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -35,7 +35,6 @@ import java.util.List;
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.treeview.Contributor;
@@ -48,7 +47,7 @@ import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
 import uk.co.saiman.reflection.token.TypeToken;
 
-@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 10)
+@Component(property = Constants.SERVICE_RANKING + ":Integer=" + 10)
 public class SpectrumProcessingExperimentNodeContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 

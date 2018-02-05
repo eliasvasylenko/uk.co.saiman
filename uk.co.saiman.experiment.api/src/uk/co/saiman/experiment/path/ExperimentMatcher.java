@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -28,11 +28,10 @@
 package uk.co.saiman.experiment.path;
 
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentPathTest;
 
 /**
- * Currently the {@link ExperimentPathTest path} only matches each child by ID.
- * This could be expanded to XPath-like behavior with different matching
+ * Currently the {@link ExperimentMatcher path} only matches each child by ID.
+ * This could be expanded to e.g. XPath-like behavior with different matching
  * strategies.
  */
 public class ExperimentMatcher {

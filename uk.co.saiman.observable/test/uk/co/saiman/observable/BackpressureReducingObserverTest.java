@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -73,7 +73,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
         identity.get();
         accumulator.apply("identity", "message");
       }
@@ -98,7 +97,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
         identity.get();
         accumulator.apply("identity", "message1");
         accumulator.apply("identity", "message2");
@@ -126,7 +124,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
         identity.get();
         accumulator.apply("identity", "message");
       }
@@ -153,7 +150,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
         initial.apply("message1");
         accumulator.apply("initial", "message2");
       }
@@ -170,7 +166,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
         downstreamObserver.onComplete();
       }
     };
@@ -189,7 +184,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
       }
     };
   }
@@ -207,7 +201,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
       }
     };
   }
@@ -233,7 +226,6 @@ public class BackpressureReducingObserverTest {
     new FullVerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        upstreamObservation.requestUnbounded();
         initial.apply("message");
         downstreamObserver.onNext("initial");
       }

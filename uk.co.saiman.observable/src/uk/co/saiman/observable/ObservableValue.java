@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -134,6 +134,12 @@ public interface ObservableValue<T> extends Observable<T> {
         return Optional.empty();
       }
     });
+  }
+  
+  @Override
+  default Observable<Observable<T>> materialize() {
+    // TODO Auto-generated method stub
+    return Observable.super.materialize();
   }
 
   default boolean isValid() {
