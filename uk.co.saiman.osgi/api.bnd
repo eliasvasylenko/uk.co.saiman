@@ -1,4 +1,6 @@
 Bundle-Name: SAI :: OSGi Utilities :: API
+Bundle-SymbolicName: uk.co.saiman.osgi
+
 Bundle-Description: \
 	The API specification for a generic service interceptor \
 	and wrapper/decorator.

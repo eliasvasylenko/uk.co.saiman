@@ -55,57 +55,25 @@ public interface Comms<T> {
      * The byte channel is ready to be opened. This does not guarantee that a
      * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
      * simply indicates that it is expected to succeed. If invocation fails, the
-     * comms channel will enter a failure state and rethrow when trying to resolve
-     * the value of {@link Comms#status()}.
+     * comms channel will enter the {@link #ERROR error state}.
      */
     CLOSED,
+
+    /**
+     * The comms connection has failed in some way. It should only be possible for
+     * the channel to be in this state after an invocation of
+     * {@link Comms#openController()} and before the associated invocation of
+     * {@link Comms#reset()}.
+     * <p>
+     * While the channel is in an error state, invocations of
+     * {@link Comms#openController()} should throw an exception detailing the
+     * problem.
+     */
+    FAULT
   }
 
   /**
    * The current status of the hardware interface connection.
-   * <p>
-   * This observable value may be in a failure state depending on the
-   * implementation. This should be documented by the implementation service
-   * provider.
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * TODO too troublesome to deal with using failure messages to communicate
-   * problem status. Problems with retrying:
-   * 
-   * - Does it always retry or do you have to call it?
-   * 
-   * - Problem of retry refiring the error every subscription ... How do we listen
-   * for the next normal message?
-   * 
-   * - ... can override retry with different semantics? unexpected consequence
-   * that chaining the retry after e.g. a map operation gives an infinite loop of
-   * repeating subscriptions and failures.
-   * 
-   * - ... can have another method on ObservableValue e.g. softRetry? unexpected
-   * consequence that chaining some operations e.g. map, then doing toValue, then
-   * doing softRetry, will just give a dead value and not pass on further messages
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
    * 
    * @return the current status of the hardware interface
    */
@@ -121,6 +89,10 @@ public interface Comms<T> {
    * 
    * @return If the controller was closed, return the newly opened controller,
    *         else return the controller already open.
+   * @throws CommsException
+   *           if the interface is in the {@link CommsStatus#FAULT fault state} at
+   *           the time of invocation, or if it enters the fault state as a result
+   *           of invocation.
    */
   T openController();
 

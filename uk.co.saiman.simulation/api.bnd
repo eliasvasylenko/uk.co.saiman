@@ -1,4 +1,5 @@
 Bundle-Name: SAI :: Simulation :: API
+Bundle-SymbolicName: uk.co.saiman.simulation
 
 Export-Package: \
 	uk.co.saiman.simulation,\

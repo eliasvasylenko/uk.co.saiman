@@ -11,7 +11,7 @@ Bundle-Name: SAI :: Eclipse
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
-	uk.co.saiman.osgi.api;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
 	org.eclipse.osgi.compatibility.state
 
 Bundle-Description: \

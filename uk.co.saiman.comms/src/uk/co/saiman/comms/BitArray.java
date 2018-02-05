@@ -32,8 +32,6 @@ import static java.nio.ByteBuffer.allocate;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import uk.co.saiman.comms.impl.HexConverter;
-
 /**
  * TODO flatten into long array like BitSet. Shame the API for that is so awful
  * and it doesn't understand size.
@@ -44,269 +42,269 @@ import uk.co.saiman.comms.impl.HexConverter;
  * @author Elias N Vasylenko
  */
 public class BitArray {
-	byte[] bytes;
-	int length;
+  byte[] bytes;
+  int length;
 
-	/**
-	 * Create a bit array of the given length, initialized with 0 fill
-	 * 
-	 * @param length
-	 *          the number of bits
-	 */
-	public BitArray(int length) {
-		this.bytes = new byte[minimumContainingBytes(length)];
-		this.length = length;
-	}
+  /**
+   * Create a bit array of the given length, initialized with 0 fill
+   * 
+   * @param length
+   *          the number of bits
+   */
+  public BitArray(int length) {
+    this.bytes = new byte[minimumContainingBytes(length)];
+    this.length = length;
+  }
 
-	protected BitArray(byte[] bytes) {
-		this.bytes = Arrays.copyOf(bytes, bytes.length);
-		this.length = bytes.length * Byte.SIZE;
-	}
+  protected BitArray(byte[] bytes) {
+    this.bytes = Arrays.copyOf(bytes, bytes.length);
+    this.length = bytes.length * Byte.SIZE;
+  }
 
-	protected BitArray(BitArray base) {
-		this.bytes = base.bytes;
-		this.length = base.length;
-	}
+  protected BitArray(BitArray base) {
+    this.bytes = base.bytes;
+    this.length = base.length;
+  }
 
-	int minimumContainingBytes(int bits) {
-		return bits / Byte.SIZE + ((bits % Byte.SIZE > 0) ? 1 : 0);
-	}
+  int minimumContainingBytes(int bits) {
+    return bits / Byte.SIZE + ((bits % Byte.SIZE > 0) ? 1 : 0);
+  }
 
-	@Override
-	public String toString() {
-		return new HexConverter().format(toByteBuffer(), 0, null).toString();
-	}
+  @Override
+  public String toString() {
+    return new HexConverter().format(toByteBuffer()).toString();
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this)
-			return true;
-		if (!(obj instanceof BitArray))
-			return false;
-		BitArray that = (BitArray) obj;
-		return Arrays.equals(bytes, that.bytes) && length == that.length;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this)
+      return true;
+    if (!(obj instanceof BitArray))
+      return false;
+    BitArray that = (BitArray) obj;
+    return Arrays.equals(bytes, that.bytes) && length == that.length;
+  }
 
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(bytes) ^ length;
-	}
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(bytes) ^ length;
+  }
 
-	/**
-	 * @return the number of bits
-	 */
-	public int length() {
-		return length;
-	}
+  /**
+   * @return the number of bits
+   */
+  public int length() {
+    return length;
+  }
 
-	private int getByteIndex(int index) {
-		return bytes.length - 1 - index / Byte.SIZE;
-	}
+  private int getByteIndex(int index) {
+    return bytes.length - 1 - index / Byte.SIZE;
+  }
 
-	private int getBitMask(int index) {
-		return 0x01 << (index % Byte.SIZE);
-	}
+  private int getBitMask(int index) {
+    return 0x01 << (index % Byte.SIZE);
+  }
 
-	private void validateIndex(int index) {
-		if (index < 0 || index >= length)
-			throw new IndexOutOfBoundsException(Integer.toString(index));
-	}
+  private void validateIndex(int index) {
+    if (index < 0 || index >= length)
+      throw new IndexOutOfBoundsException(Integer.toString(index));
+  }
 
-	/**
-	 * @param index
-	 *          the bit index, where 0 is the least significant bit
-	 * @return the value of the bit at the given index
-	 */
-	public boolean get(int index) {
-		validateIndex(index);
-		return (bytes[getByteIndex(index)] & getBitMask(index)) > 0;
-	}
+  /**
+   * @param index
+   *          the bit index, where 0 is the least significant bit
+   * @return the value of the bit at the given index
+   */
+  public boolean get(int index) {
+    validateIndex(index);
+    return (bytes[getByteIndex(index)] & getBitMask(index)) > 0;
+  }
 
-	protected BitArray set(int index, boolean value) {
-		validateIndex(index);
-		if (value)
-			bytes[getByteIndex(index)] |= getBitMask(index);
-		else
-			bytes[getByteIndex(index)] &= ~getBitMask(index);
-		return this;
-	}
+  protected BitArray set(int index, boolean value) {
+    validateIndex(index);
+    if (value)
+      bytes[getByteIndex(index)] |= getBitMask(index);
+    else
+      bytes[getByteIndex(index)] &= ~getBitMask(index);
+    return this;
+  }
 
-	/**
-	 * Derive a bit array from the receiver, whose contents are modified according
-	 * to the given value for the given bit index.
-	 * 
-	 * @param index
-	 *          the bit index, where 0 is the least significant bit
-	 * @param value
-	 *          the value for the bit in the derived array
-	 * @return the derived bit array
-	 */
-	public BitArray with(int index, boolean value) {
-		return new BitArray(this).set(index, value);
-	}
+  /**
+   * Derive a bit array from the receiver, whose contents are modified according
+   * to the given value for the given bit index.
+   * 
+   * @param index
+   *          the bit index, where 0 is the least significant bit
+   * @param value
+   *          the value for the bit in the derived array
+   * @return the derived bit array
+   */
+  public BitArray with(int index, boolean value) {
+    return new BitArray(this).set(index, value);
+  }
 
-	/**
-	 * Derive a new bit array of the given length.
-	 * <p>
-	 * If the given length is positive, changes are made by truncating from or
-	 * appending to the end of the most significant bit. If the given length is
-	 * negative, changes are made by truncating from or prepending to the least
-	 * significant bit.
-	 * 
-	 * @param length
-	 *          the new length
-	 * @return a derived bit array
-	 */
-	public BitArray resize(int length) {
-		boolean positive = length > 0;
-		length = positive ? length : -length;
-		int difference = length - length();
+  /**
+   * Derive a new bit array of the given length.
+   * <p>
+   * If the given length is positive, changes are made by truncating from or
+   * appending to the end of the most significant bit. If the given length is
+   * negative, changes are made by truncating from or prepending to the least
+   * significant bit.
+   * 
+   * @param length
+   *          the new length
+   * @return a derived bit array
+   */
+  public BitArray resize(int length) {
+    boolean positive = length > 0;
+    length = positive ? length : -length;
+    int difference = length - length();
 
-		if (difference > 0) {
-			return positive ? append(new BitArray(difference)) : prepend(new BitArray(difference));
+    if (difference > 0) {
+      return positive ? append(new BitArray(difference)) : prepend(new BitArray(difference));
 
-		} else {
-			BitArray tail = new BitArray(length);
-			difference = positive ? 0 : -difference;
+    } else {
+      BitArray tail = new BitArray(length);
+      difference = positive ? 0 : -difference;
 
-			for (int i = 0; i < length; i++) {
-				tail.set(i, get(i + difference));
-			}
+      for (int i = 0; i < length; i++) {
+        tail.set(i, get(i + difference));
+      }
 
-			return tail;
-		}
-	}
+      return tail;
+    }
+  }
 
-	/**
-	 * @param size
-	 *          the
-	 * @return a derived bit array, truncated or 0 filled to the new length
-	 */
-	public BitArray trim(int size) {
-		if (size < 0)
-			return resize(-length() - size);
-		else
-			return resize(length() - size);
-	}
+  /**
+   * @param size
+   *          the
+   * @return a derived bit array, truncated or 0 filled to the new length
+   */
+  public BitArray trim(int size) {
+    if (size < 0)
+      return resize(-length() - size);
+    else
+      return resize(length() - size);
+  }
 
-	public BitArray append(BitArray bits) {
-		BitArray appended = new BitArray(length() + bits.length());
+  public BitArray append(BitArray bits) {
+    BitArray appended = new BitArray(length() + bits.length());
 
-		for (int i = 0; i < length(); i++) {
-			appended.set(i, get(i));
-		}
-		for (int i = 0; i < bits.length(); i++) {
-			appended.set(i + length(), bits.get(i));
-		}
+    for (int i = 0; i < length(); i++) {
+      appended.set(i, get(i));
+    }
+    for (int i = 0; i < bits.length(); i++) {
+      appended.set(i + length(), bits.get(i));
+    }
 
-		return appended;
-	}
+    return appended;
+  }
 
-	public BitArray prepend(BitArray bits) {
-		return bits.append(this);
-	}
+  public BitArray prepend(BitArray bits) {
+    return bits.append(this);
+  }
 
-	public BitArray splice(int at, BitArray bitArray) {
-		BitArray spliced = new BitArray(this);
+  public BitArray splice(int at, BitArray bitArray) {
+    BitArray spliced = new BitArray(this);
 
-		for (int i = 0; i < bitArray.length(); i++) {
-			spliced.set(i + at, bitArray.get(i));
-		}
+    for (int i = 0; i < bitArray.length(); i++) {
+      spliced.set(i + at, bitArray.get(i));
+    }
 
-		return spliced;
-	}
+    return spliced;
+  }
 
-	public BitArray remove(int from, int to) {
-		int range = to - from;
-		BitArray removed = new BitArray(length() - range);
+  public BitArray remove(int from, int to) {
+    int range = to - from;
+    BitArray removed = new BitArray(length() - range);
 
-		for (int i = 0; i < from; i++) {
-			removed.set(i, get(i));
-		}
-		for (int i = to; i < length(); i++) {
-			removed.set(i - range, get(i));
-		}
+    for (int i = 0; i < from; i++) {
+      removed.set(i, get(i));
+    }
+    for (int i = to; i < length(); i++) {
+      removed.set(i - range, get(i));
+    }
 
-		return removed;
-	}
+    return removed;
+  }
 
-	public BitArray insert(int at, BitArray bitArray) {
-		BitArray inserted = new BitArray(length() + bitArray.length());
+  public BitArray insert(int at, BitArray bitArray) {
+    BitArray inserted = new BitArray(length() + bitArray.length());
 
-		for (int i = 0; i < at; i++) {
-			inserted.set(i, get(i));
-		}
-		for (int i = 0; i < bitArray.length(); i++) {
-			inserted.set(i + at, bitArray.get(i));
-		}
-		for (int i = at; i < length(); i++) {
-			inserted.set(i + bitArray.length(), get(i));
-		}
+    for (int i = 0; i < at; i++) {
+      inserted.set(i, get(i));
+    }
+    for (int i = 0; i < bitArray.length(); i++) {
+      inserted.set(i + at, bitArray.get(i));
+    }
+    for (int i = at; i < length(); i++) {
+      inserted.set(i + bitArray.length(), get(i));
+    }
 
-		return inserted;
-	}
+    return inserted;
+  }
 
-	public BitArray reverse() {
-		BitArray reversed = new BitArray(length());
+  public BitArray reverse() {
+    BitArray reversed = new BitArray(length());
 
-		for (int i = 0; i < length; i++) {
-			reversed.set(i, get(length - i - 1));
-		}
+    for (int i = 0; i < length; i++) {
+      reversed.set(i, get(length - i - 1));
+    }
 
-		return reversed;
-	}
+    return reversed;
+  }
 
-	public BitArray invert() {
-		BitArray inverted = new BitArray(length());
+  public BitArray invert() {
+    BitArray inverted = new BitArray(length());
 
-		for (int i = 0; i < length; i++) {
-			inverted.set(i, !get(i));
-		}
+    for (int i = 0; i < length; i++) {
+      inverted.set(i, !get(i));
+    }
 
-		return inverted;
-	}
+    return inverted;
+  }
 
-	public static BitArray fromByteArray(byte[] bytes) {
-		return new BitArray(bytes);
-	}
+  public static BitArray fromByteArray(byte[] bytes) {
+    return new BitArray(bytes);
+  }
 
-	public byte[] toByteArray() {
-		return Arrays.copyOf(bytes, bytes.length);
-	}
+  public byte[] toByteArray() {
+    return Arrays.copyOf(bytes, bytes.length);
+  }
 
-	public static BitArray fromByteBuffer(ByteBuffer bytes) {
-		byte[] array = new byte[bytes.remaining()];
-		bytes.get(array);
-		return fromByteArray(array);
-	}
+  public static BitArray fromByteBuffer(ByteBuffer bytes) {
+    byte[] array = new byte[bytes.remaining()];
+    bytes.get(array);
+    return fromByteArray(array);
+  }
 
-	public ByteBuffer toByteBuffer() {
-		return ByteBuffer.wrap(Arrays.copyOf(bytes, bytes.length));
-	}
+  public ByteBuffer toByteBuffer() {
+    return ByteBuffer.wrap(Arrays.copyOf(bytes, bytes.length));
+  }
 
-	public static BitArray fromByte(byte value) {
-		return fromByteArray(new byte[] { value });
-	}
+  public static BitArray fromByte(byte value) {
+    return fromByteArray(new byte[] { value });
+  }
 
-	public byte toByte() {
-		return bytes.length == 0 ? 0 : bytes[bytes.length - 1];
-	}
+  public byte toByte() {
+    return bytes.length == 0 ? 0 : bytes[bytes.length - 1];
+  }
 
-	public static BitArray fromInt(int value) {
-		ByteBuffer bytes = allocate(Integer.BYTES).putInt(value);
-		bytes.flip();
-		return fromByteBuffer(bytes);
-	}
+  public static BitArray fromInt(int value) {
+    ByteBuffer bytes = allocate(Integer.BYTES).putInt(value);
+    bytes.flip();
+    return fromByteBuffer(bytes);
+  }
 
-	public int toInt() {
-		return resize(Integer.SIZE).toByteBuffer().getInt();
-	}
+  public int toInt() {
+    return resize(Integer.SIZE).toByteBuffer().getInt();
+  }
 
-	public boolean[] toBooleanArray() {
-		boolean[] array = new boolean[length];
-		for (int i = 0; i < length; i++) {
-			array[i] = get(i);
-		}
-		return array;
-	}
+  public boolean[] toBooleanArray() {
+    boolean[] array = new boolean[length];
+    for (int i = 0; i < length; i++) {
+      array[i] = get(i);
+    }
+    return array;
+  }
 }

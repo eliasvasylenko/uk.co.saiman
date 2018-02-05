@@ -27,22 +27,10 @@
  */
 package uk.co.saiman.comms.copley;
 
-import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
-import static uk.co.saiman.comms.copley.VariableBank.STORED;
-
-import java.util.Optional;
 import java.util.function.Function;
 
 public interface WritableVariable<U> extends Variable<U> {
   void set(int axis, U value);
-
-  @Override
-  Optional<WritableVariable<U>> trySwitchBank(VariableBank bank);
-
-  @Override
-  default Optional<WritableVariable<U>> trySwitchBank() {
-    return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
-  }
 
   default <T> WritableVariable<T> map(Class<T> type, Function<U, T> out, Function<T, U> in) {
     WritableVariable<U> base = this;
@@ -66,11 +54,6 @@ public interface WritableVariable<U> extends Variable<U> {
       @Override
       public Class<T> getType() {
         return type;
-      }
-
-      @Override
-      public Optional<WritableVariable<T>> trySwitchBank(VariableBank bank) {
-        return base.trySwitchBank().map(b -> b.map(type, out, in));
       }
 
       @Override

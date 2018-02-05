@@ -12,8 +12,8 @@ Export-Package: uk.co.saiman.experiment.sample
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 \
-	uk.co.saiman.experiment.api;version=snapshot,\
-	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.experiment;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

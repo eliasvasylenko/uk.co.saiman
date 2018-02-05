@@ -1,4 +1,5 @@
 Bundle-Name: SAI :: SAINT :: API
+Bundle-SymbolicName: uk.co.saiman.saint
 
 Export-Package: \
 	uk.co.saiman.saint

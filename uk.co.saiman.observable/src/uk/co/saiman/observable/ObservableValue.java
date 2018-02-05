@@ -126,22 +126,6 @@ public interface ObservableValue<T> extends Observable<T> {
     return Observable.super.tryGet();
   }
 
-  default Observable<Optional<T>> optional() {
-    return changes().map(o -> {
-      try {
-        return Optional.of(o.newValue().get());
-      } catch (Exception e) {
-        return Optional.empty();
-      }
-    });
-  }
-  
-  @Override
-  default Observable<Observable<T>> materialize() {
-    // TODO Auto-generated method stub
-    return Observable.super.materialize();
-  }
-
   default boolean isValid() {
     return tryGet().isPresent();
   }

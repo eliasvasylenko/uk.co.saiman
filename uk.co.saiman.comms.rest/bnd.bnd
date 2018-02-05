@@ -1,0 +1,20 @@
+Bundle-Name: SAI :: Comms :: REST
+
+-buildpath: \
+	uk.co.saiman.comms;version=snapshot,\
+\
+	uk.co.saiman.instrument;version=snapshot,\
+\
+	uk.co.saiman.utilities;version=snapshot,\
+\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
+
+Import-Package: \
+	*
+
+Export-Package: \
+	uk.co.saiman.comms.rest

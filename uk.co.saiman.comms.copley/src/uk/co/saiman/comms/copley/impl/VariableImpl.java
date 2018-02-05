@@ -31,8 +31,6 @@ import static uk.co.saiman.comms.copley.CopleyOperationID.COPY_VARIABLE;
 import static uk.co.saiman.comms.copley.CopleyOperationID.GET_VARIABLE;
 import static uk.co.saiman.comms.copley.CopleyOperationID.SET_VARIABLE;
 
-import java.util.Optional;
-
 import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;
@@ -89,8 +87,10 @@ class VariableImpl<U> implements Variable<U> {
   public U get(int axis) {
     VariableIdentifier variableID = getVariableID(id, axis, bank);
 
-    byte[] outputBytes = controller.getConverters().getConverter(VariableIdentifier.class).toBytes(
-        variableID);
+    byte[] outputBytes = controller
+        .getConverters()
+        .getConverter(VariableIdentifier.class)
+        .toBytes(variableID);
 
     byte[] inputBytes = controller.executeCopleyCommand(GET_VARIABLE, outputBytes);
 
@@ -110,8 +110,10 @@ class VariableImpl<U> implements Variable<U> {
   public void copyToBank(int axis) {
     VariableIdentifier variableID = getVariableID(id, axis, bank);
 
-    byte[] outputBytes = controller.getConverters().getConverter(VariableIdentifier.class).toBytes(
-        variableID);
+    byte[] outputBytes = controller
+        .getConverters()
+        .getConverter(VariableIdentifier.class)
+        .toBytes(variableID);
 
     controller.executeCopleyCommand(COPY_VARIABLE, outputBytes);
   }
@@ -119,10 +121,5 @@ class VariableImpl<U> implements Variable<U> {
   @Override
   public VariableBank getBank() {
     return bank;
-  }
-
-  @Override
-  public Optional<? extends Variable<U>> trySwitchBank(VariableBank bank) {
-    return Optional.empty();
   }
 }

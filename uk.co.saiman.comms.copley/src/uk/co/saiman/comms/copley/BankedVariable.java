@@ -27,18 +27,10 @@
  */
 package uk.co.saiman.comms.copley;
 
-import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
-import static uk.co.saiman.comms.copley.VariableBank.STORED;
-
-import java.util.Optional;
 import java.util.function.Function;
 
 public interface BankedVariable<U> extends WritableVariable<U> {
-  BankedVariable<U> switchBank(VariableBank bank);
-
-  default BankedVariable<U> switchBank() {
-    return switchBank(getBank() == STORED ? ACTIVE : STORED);
-  }
+  BankedVariable<U> forBank(VariableBank bank);
 
   default void copyToBank() {
     for (int i = 0; i < getController().getAxisCount(); i++)
@@ -77,11 +69,6 @@ public interface BankedVariable<U> extends WritableVariable<U> {
       }
 
       @Override
-      public Optional<WritableVariable<T>> trySwitchBank(VariableBank bank) {
-        return base.trySwitchBank().map(b -> b.map(type, out, in));
-      }
-
-      @Override
       public T get(int axis) {
         return out.apply(base.get(axis));
       }
@@ -92,8 +79,8 @@ public interface BankedVariable<U> extends WritableVariable<U> {
       }
 
       @Override
-      public BankedVariable<T> switchBank(VariableBank bank) {
-        return base.switchBank().map(type, out, in);
+      public BankedVariable<T> forBank(VariableBank bank) {
+        return base.forBank(bank).map(type, out, in);
       }
 
       @Override

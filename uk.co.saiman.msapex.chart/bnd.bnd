@@ -18,7 +18,7 @@ Bundle-Name: SAI :: MSApex :: Chart
 \
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
-	uk.co.saiman.measurement.api;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
 \
 	javax.measure.unit-api
 

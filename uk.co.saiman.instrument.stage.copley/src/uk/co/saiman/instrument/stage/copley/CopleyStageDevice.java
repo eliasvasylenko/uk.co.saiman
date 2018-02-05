@@ -95,11 +95,7 @@ public abstract class CopleyStageDevice implements StageDevice {
 
   @Override
   public ObservableValue<DeviceConnection> connectionState() {
-    return comms
-        .status()
-        .optional()
-        .map(s -> s.isPresent() && s.get() == OPEN ? CONNECTED : DISCONNECTED)
-        .toValue();
+    return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
   }
 
   @Override

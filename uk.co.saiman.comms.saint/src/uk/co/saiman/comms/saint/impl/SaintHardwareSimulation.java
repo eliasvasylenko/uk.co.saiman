@@ -138,9 +138,12 @@ public class SaintHardwareSimulation {
   }
 
   private synchronized void setPort(String serialPort) throws IOException {
-    closePort();
+    boolean open = isOpen();
+    if (open)
+      closePort();
     port = serialPorts.getPort(serialPort);
-    openPort();
+    if (open)
+      openPort();
   }
 
   private synchronized void openPort() {
@@ -165,10 +168,14 @@ public class SaintHardwareSimulation {
   }
 
   private synchronized void closePort() throws IOException {
-    if (stream != null) {
+    if (isOpen()) {
       stream.close();
       stream = null;
     }
+  }
+
+  private boolean isOpen() {
+    return stream != null;
   }
 
   private void receiveMessage(ByteBuffer messageBuffer) {

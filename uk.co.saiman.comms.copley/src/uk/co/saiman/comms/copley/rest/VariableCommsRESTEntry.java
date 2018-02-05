@@ -31,6 +31,8 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
+import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+import static uk.co.saiman.comms.copley.VariableBank.STORED;
 import static uk.co.saiman.comms.copley.rest.CopleyControllerREST.READ_VALUE;
 import static uk.co.saiman.comms.copley.rest.CopleyControllerREST.SWITCH_BANK;
 import static uk.co.saiman.comms.copley.rest.CopleyControllerREST.WRITE_VALUE;
@@ -93,8 +95,14 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
     for (int axis = 0; axis < variable.getController().getAxisCount(); axis++) {
       Object value = variable.get(axis);
       try {
-        dtos.asMap(value).entrySet().stream().forEach(
-            e -> inputData.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).add(e.getValue()));
+        dtos
+            .asMap(value)
+            .entrySet()
+            .stream()
+            .forEach(
+                e -> inputData
+                    .computeIfAbsent(e.getKey(), k -> new ArrayList<>())
+                    .add(e.getValue()));
       } catch (Exception e) {
         throw new CommsException("Cannot convert " + value + " to map", e);
       }
@@ -116,8 +124,10 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
       int axis = i;
       U value;
 
-      Map<String, Object> axisOutput = outputData.entrySet().stream().collect(
-          toMap(Entry::getKey, e -> ((List<?>) e.getValue()).get(axis)));
+      Map<String, Object> axisOutput = outputData
+          .entrySet()
+          .stream()
+          .collect(toMap(Entry::getKey, e -> ((List<?>) e.getValue()).get(axis)));
 
       try {
         value = dtos.convert(axisOutput).to(variable.getType());
@@ -131,7 +141,8 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
   }
 
   public void switchBank() {
-    variable = ((BankedVariable<U>) variable).switchBank();
+    BankedVariable<U> bankedVariable = (BankedVariable<U>) variable;
+    variable = bankedVariable.forBank(bankedVariable.getBank() == ACTIVE ? STORED : ACTIVE);
     readValue(true);
   }
 }

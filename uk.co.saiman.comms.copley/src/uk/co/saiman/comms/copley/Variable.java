@@ -27,11 +27,6 @@
  */
 package uk.co.saiman.comms.copley;
 
-import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
-import static uk.co.saiman.comms.copley.VariableBank.STORED;
-
-import java.util.Optional;
-
 public interface Variable<U> {
   CopleyController getController();
 
@@ -40,12 +35,6 @@ public interface Variable<U> {
   VariableBank getBank();
 
   Class<U> getType();
-
-  Optional<? extends Variable<U>> trySwitchBank(VariableBank bank);
-
-  default Optional<? extends Variable<U>> trySwitchBank() {
-    return trySwitchBank(getBank() == STORED ? ACTIVE : STORED);
-  }
 
   U get(int axis);
 }

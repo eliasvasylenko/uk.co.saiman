@@ -28,13 +28,13 @@
 package uk.co.saiman.comms;
 
 import static uk.co.saiman.comms.Comms.CommsStatus.CLOSED;
+import static uk.co.saiman.comms.Comms.CommsStatus.FAULT;
 import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
 
 import uk.co.saiman.function.ThrowingFunction;
-import uk.co.saiman.observable.MissingValueException;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 
@@ -48,6 +48,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
   private CommsPort comms;
   private CommsChannel channel;
 
+  private CommsException fault;
   private final ObservablePropertyImpl<CommsStatus> status;
 
   private SimpleController<T> controller;
@@ -65,7 +66,8 @@ public abstract class SimpleComms<T> implements Comms<T> {
   }
 
   protected synchronized CommsException setFault(CommsException commsException) {
-    status.setProblem(commsException);
+    this.fault = commsException;
+    status.set(FAULT);
     return commsException;
   }
 
@@ -84,15 +86,12 @@ public abstract class SimpleComms<T> implements Comms<T> {
       reset();
     } catch (Exception e) {}
     this.comms = comms;
+    fault = null;
     status.set(CLOSED);
   }
 
   @Override
   public synchronized T openController() {
-    status().tryGetProblem().ifPresent(t -> {
-      reset();
-    });
-
     switch (status().get()) {
     case OPEN:
       break;
@@ -109,6 +108,9 @@ public abstract class SimpleComms<T> implements Comms<T> {
       }
       controller = createController();
       break;
+
+    case FAULT:
+      throw fault;
     }
 
     return controller.getController();
@@ -125,6 +127,7 @@ public abstract class SimpleComms<T> implements Comms<T> {
           controller.closeController();
           controller = null;
         }
+        fault = null;
         status.set(CLOSED);
       } catch (CommsException e) {
         throw setFault(e);
@@ -147,11 +150,12 @@ public abstract class SimpleComms<T> implements Comms<T> {
 
       case CLOSED:
         throw new CommsException("Port is closed");
+
+      case FAULT:
+        throw fault;
       }
 
       return action.apply(channel);
-    } catch (MissingValueException e) {
-      throw new CommsException("Problem opening comms", e.getCause());
     } catch (Exception e) {
       throw new CommsException("Problem transferring data", e);
     }

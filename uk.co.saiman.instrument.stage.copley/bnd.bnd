@@ -8,11 +8,11 @@ Bundle-Name: SAI :: Instrument :: Stage :: Copley
 	uk.co.saiman.utilities;version=snapshot,\
 \
 	uk.co.saiman.experiment.sample;version=snapshot,\
-	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.measurement.api;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
 \

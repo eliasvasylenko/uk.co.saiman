@@ -5,7 +5,7 @@ Bundle-Name: SAI :: Instrument :: Provider
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 \
-	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot
 
 Private-Package:\

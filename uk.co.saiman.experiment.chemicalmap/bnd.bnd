@@ -17,13 +17,13 @@ Export-Package: uk.co.saiman.experiment.chemicalmap
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
 	uk.co.saiman.data.spectrum;version=snapshot,\
-	uk.co.saiman.experiment.api;version=snapshot,\
+	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
-	uk.co.saiman.instrument.api;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.measurement.api;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
 \
 	javax.measure.unit-api
