@@ -27,17 +27,20 @@
  */
 package uk.co.saiman.comms.copley.impl;
 
+import static uk.co.saiman.comms.copley.CopleyOperationID.GET_VARIABLE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
 import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
+import static uk.co.saiman.comms.copley.ErrorCode.ILLEGAL_AXIS_NUMBER;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import uk.co.saiman.comms.ByteConverter;
 import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.copley.AmplifierState;
 import uk.co.saiman.comms.copley.CopleyController;
@@ -48,11 +51,16 @@ import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.comms.copley.TrajectoryProfile;
 import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;
+import uk.co.saiman.comms.copley.VariableIdentifier;
 import uk.co.saiman.comms.copley.WritableVariable;
 
 public class CopleyControllerImpl implements CopleyController {
+  private static final int MAXIMUM_AXES = 8;
+
   private CopleyCommsImpl comms;
   private final ByteConverters converters;
+
+  private final int axisCount;
 
   private final Map<CopleyVariableID, VariableImpl<?>> variables;
 
@@ -66,6 +74,7 @@ public class CopleyControllerImpl implements CopleyController {
   public CopleyControllerImpl(CopleyCommsImpl comms) {
     this.comms = comms;
     this.converters = comms.getConverters();
+    this.axisCount = countAxes();
 
     variables = new LinkedHashMap<>();
     driveEventStatus = addVariable(DRIVE_EVENT_STATUS, EventStatusRegister.class, ACTIVE);
@@ -79,8 +88,28 @@ public class CopleyControllerImpl implements CopleyController {
     actualPosition = addWritableVariable(ACTUAL_POSITION, Int32.class, ACTIVE);
   }
 
-  public ByteConverters getConverters() {
-    return converters;
+  private int countAxes() {
+    int axes = 0;
+    do {
+      try {
+        executeCopleyCommand(
+            GET_VARIABLE,
+            getConverter(VariableIdentifier.class)
+                .toBytes(new VariableIdentifier(DRIVE_EVENT_STATUS, axes, ACTIVE)));
+
+      } catch (CopleyErrorException e) {
+        if (e.getCode() == ILLEGAL_AXIS_NUMBER) {
+          return axes;
+        } else {
+          throw e;
+        }
+      }
+    } while (++axes < MAXIMUM_AXES);
+    return axes;
+  }
+
+  public <T> ByteConverter<T> getConverter(Class<T> type) {
+    return converters.getConverter(type);
   }
 
   public void close() {
@@ -115,7 +144,7 @@ public class CopleyControllerImpl implements CopleyController {
 
   @Override
   public int getAxisCount() {
-    return comms.getAxisCount();
+    return axisCount;
   }
 
   @Override

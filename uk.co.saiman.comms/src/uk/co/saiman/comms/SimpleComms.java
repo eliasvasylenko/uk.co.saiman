@@ -156,6 +156,8 @@ public abstract class SimpleComms<T> implements Comms<T> {
       }
 
       return action.apply(channel);
+    } catch (CommsException e) {
+      throw e;
     } catch (Exception e) {
       throw new CommsException("Problem transferring data", e);
     }

@@ -37,6 +37,7 @@ import java.util.List;
 import uk.co.saiman.comms.copley.VariableBank;
 
 class ByteVariable implements SimulatedVariable {
+  private final int size;
   private final List<byte[]> active;
   private final List<byte[]> defaults;
 
@@ -44,11 +45,17 @@ class ByteVariable implements SimulatedVariable {
     active = new ArrayList<>(axes);
     defaults = new ArrayList<>(axes);
 
-    byte[] identity = new byte[words * WORD_SIZE];
+    size = words * WORD_SIZE;
+    byte[] identity = new byte[size];
     for (int i = 0; i < axes; i++) {
       active.add(identity);
       defaults.add(identity);
     }
+  }
+
+  @Override
+  public int size() {
+    return size;
   }
 
   @Override

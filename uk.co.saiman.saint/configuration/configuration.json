@@ -35,25 +35,36 @@
 	{
 		"service.pid": "uk.co.saiman.comms.copley.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.copley",
-		"axes": 2,
 		"node": 0,
-		"serialPort": "CNCA2"
+		"serialPort": "/saiman/copley",
+		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.simulation.saintsimulation)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.copley.simulation",
 		"axes": 2,
 		"node": 0,
-		"serialPort": "CNCB2"
+		"serialPort": "/saiman/copley.partner",
+		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.simulation.saintsimulation)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.saint.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.saint",
-		"serialPort": "CNCA0"
+		"serialPort": "/saiman/saint",
+		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.simulation.saintsimulation)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.saint.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.saint.simulation",
-		"serialPort": "CNCB0"
+		"serialPort": "/saiman/saint.partner",
+		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.simulation.saintsimulation)"
+	},
+	{
+		"service.pid": "uk.co.saiman.comms.simulation.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.simulation",
+		"pairedPorts": [
+			"/saiman/copley",
+			"/saiman/saint"
+		]
 	}
 ]

@@ -88,7 +88,7 @@ public class WorkspaceAddon {
       @LocalInstance FXMLLoader loader,
       @Named(INSTANCE_LOCATION) Location instanceLocation,
       @Service List<ExperimentType<?, ?>> experimentTypes) {
-    this.experimentTypes = experimentTypes;
+    this.experimentTypes = new ArrayList<>(experimentTypes);
 
     try {
       initializeWorkspace(instanceLocation);

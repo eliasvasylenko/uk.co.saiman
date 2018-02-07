@@ -31,10 +31,17 @@ import uk.co.saiman.comms.ByteConverter;
 import uk.co.saiman.comms.copley.VariableBank;
 
 abstract class ComputedVariable<T> implements SimulatedVariable {
+  private final int size;
   private final ByteConverter<T> converter;
 
   public ComputedVariable(ByteConverter<T> converter) {
     this.converter = converter;
+    this.size = converter.toBytes(converter.create()).length;
+  }
+
+  @Override
+  public int size() {
+    return size;
   }
 
   @Override

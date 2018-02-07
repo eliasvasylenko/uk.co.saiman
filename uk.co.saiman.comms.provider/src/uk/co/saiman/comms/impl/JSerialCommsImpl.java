@@ -33,20 +33,21 @@ import static java.util.Arrays.stream;
 
 import java.util.stream.Stream;
 
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.comms.serial.SerialPorts;
 import uk.co.saiman.comms.serial.SerialPort;
 
-@Component
+@Component(property = Constants.SERVICE_RANKING + ":Integer=" + -10)
 public class JSerialCommsImpl implements SerialPorts {
-	@Override
-	public Stream<SerialPort> getPorts() {
-		return stream(getCommPorts()).map(JSerialCommsPort::new);
-	}
+  @Override
+  public Stream<SerialPort> getPorts() {
+    return stream(getCommPorts()).map(JSerialCommsPort::new);
+  }
 
-	@Override
-	public SerialPort getPort(String port) {
-		return new JSerialCommsPort(getCommPort(port));
-	}
+  @Override
+  public SerialPort getPort(String port) {
+    return new JSerialCommsPort(getCommPort(port));
+  }
 }

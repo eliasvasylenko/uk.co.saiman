@@ -31,13 +31,21 @@ import uk.co.saiman.comms.Bit;
 import uk.co.saiman.comms.Bits;
 
 public class VariableIdentifier {
-	@Bit(0)
-	public byte variableID;
+  public VariableIdentifier() {}
 
-	@Bit(12)
-	public boolean bank;
+  public VariableIdentifier(CopleyVariableID variable, int axis, VariableBank bank) {
+    this.axis = (byte) axis;
+    this.variableID = (byte) variable.getCode();
+    this.bank = bank.getBit();
+  }
 
-	@Bit(13)
-	@Bits(value = 3)
-	public byte axis;
+  @Bit(0)
+  public byte variableID;
+
+  @Bit(12)
+  public boolean bank;
+
+  @Bit(13)
+  @Bits(value = 3)
+  public byte axis;
 }

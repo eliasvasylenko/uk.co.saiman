@@ -31,6 +31,7 @@ import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE
 import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.copley.CopleyOperationID.NO_OP;
+import static uk.co.saiman.comms.copley.ErrorCode.SUCCESS;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -53,6 +54,7 @@ import uk.co.saiman.comms.SimpleController;
 import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.CopleyOperationID;
+import uk.co.saiman.comms.copley.ErrorCode;
 import uk.co.saiman.comms.copley.impl.CopleyCommsImpl.CopleyCommsConfiguration;
 import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.comms.serial.SerialPorts;
@@ -84,18 +86,12 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
         name = "Node Number",
         description = "The node number for multi-drop mode dispatch, or 0 for the directly connected node")
     int node() default 0;
-
-    @AttributeDefinition(
-        name = "Axis Count",
-        description = "The number of axes expected to be supported by the drive")
-    int axes() default 1;
   }
 
   @Reference(policy = STATIC, policyOption = GREEDY)
   SerialPorts comms;
   private SerialPort port;
   private int nodeID;
-  private int axisCount;
   private boolean nodeIDValid;
 
   @Reference
@@ -111,7 +107,6 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
     port = comms.getPort(configuration.serialPort());
     nodeIDValid = (configuration.node() & NODE_ID_MASK) == configuration.node();
     nodeID = configuration.node();
-    axisCount = configuration.axes();
     setComms(port);
     checkNodeId();
   }
@@ -121,10 +116,6 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
       setFault(new CommsException("Invalid node id number " + nodeID));
 
     return nodeIDValid;
-  }
-
-  public int getAxisCount() {
-    return axisCount;
   }
 
   @Deactivate
@@ -207,7 +198,7 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
     message_buffer.get(); // reserved
     byte checksum = message_buffer.get();
     int size = message_buffer.get() * WORD_SIZE;
-    byte errorCode = message_buffer.get();
+    ErrorCode errorCode = ErrorCode.values()[message_buffer.get()];
 
     message_buffer = ByteBuffer.allocate(size);
     try {
@@ -217,6 +208,10 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
       message_buffer.flip();
     } catch (IOException e) {
       throw setFault(new CommsException("Problem receiving command response"));
+    }
+
+    if (errorCode != SUCCESS) {
+      throw new CopleyErrorException(errorCode);
     }
 
     byte[] input = new byte[size];

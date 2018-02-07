@@ -68,14 +68,6 @@ class VariableImpl<U> implements Variable<U> {
     return variableClass;
   }
 
-  private VariableIdentifier getVariableID(CopleyVariableID variable, int axis, VariableBank bank) {
-    VariableIdentifier identifier = new VariableIdentifier();
-    identifier.axis = (byte) axis;
-    identifier.variableID = (byte) variable.getCode();
-    identifier.bank = bank.getBit();
-    return identifier;
-  }
-
   private byte[] concat(byte[] left, byte[] right) {
     byte[] bytes = new byte[left.length + right.length];
     System.arraycopy(left, 0, bytes, 0, left.length);
@@ -85,35 +77,29 @@ class VariableImpl<U> implements Variable<U> {
 
   @Override
   public U get(int axis) {
-    VariableIdentifier variableID = getVariableID(id, axis, bank);
+    VariableIdentifier variableID = new VariableIdentifier(id, axis, bank);
 
-    byte[] outputBytes = controller
-        .getConverters()
-        .getConverter(VariableIdentifier.class)
-        .toBytes(variableID);
+    byte[] outputBytes = controller.getConverter(VariableIdentifier.class).toBytes(variableID);
 
     byte[] inputBytes = controller.executeCopleyCommand(GET_VARIABLE, outputBytes);
 
-    return controller.getConverters().getConverter(variableClass).fromBytes(inputBytes);
+    return controller.getConverter(variableClass).fromBytes(inputBytes);
   }
 
   public void set(int axis, U output) {
-    VariableIdentifier variableID = getVariableID(id, axis, bank);
+    VariableIdentifier variableID = new VariableIdentifier(id, axis, bank);
 
     byte[] outputBytes = concat(
-        controller.getConverters().getConverter(VariableIdentifier.class).toBytes(variableID),
-        controller.getConverters().getConverter(variableClass).toBytes(output));
+        controller.getConverter(VariableIdentifier.class).toBytes(variableID),
+        controller.getConverter(variableClass).toBytes(output));
 
     controller.executeCopleyCommand(SET_VARIABLE, outputBytes);
   }
 
   public void copyToBank(int axis) {
-    VariableIdentifier variableID = getVariableID(id, axis, bank);
+    VariableIdentifier variableID = new VariableIdentifier(id, axis, bank);
 
-    byte[] outputBytes = controller
-        .getConverters()
-        .getConverter(VariableIdentifier.class)
-        .toBytes(variableID);
+    byte[] outputBytes = controller.getConverter(VariableIdentifier.class).toBytes(variableID);
 
     controller.executeCopleyCommand(COPY_VARIABLE, outputBytes);
   }

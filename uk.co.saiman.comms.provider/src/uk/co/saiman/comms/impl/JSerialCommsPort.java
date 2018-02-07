@@ -90,10 +90,6 @@ public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
 
   @Override
   public synchronized CommsChannel openChannel() {
-    if (serialPort.getSystemPortName().equals("/dev/null")) {
-      throw new CommsException("Port is not valid " + this);
-    }
-
     if (isOpen()) {
       throw new CommsException("Port already in use " + this);
     }

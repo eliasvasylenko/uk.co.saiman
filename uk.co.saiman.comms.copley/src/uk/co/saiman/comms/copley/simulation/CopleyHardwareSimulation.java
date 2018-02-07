@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.comms.copley.simulation;
 
-import static java.util.Optional.of;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
@@ -50,6 +49,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -65,6 +65,7 @@ import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsStream;
 import uk.co.saiman.comms.copley.CopleyOperationID;
 import uk.co.saiman.comms.copley.CopleyVariableID;
+import uk.co.saiman.comms.copley.ErrorCode;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.comms.copley.VariableIdentifier;
 import uk.co.saiman.comms.copley.impl.CopleyCommsImpl;
@@ -82,9 +83,6 @@ public class CopleyHardwareSimulation {
   static final String CONFIGURATION_PID = "uk.co.saiman.comms.copley.simulation";
 
   private static final double MOTOR_SPEED_UNITS_PER_MILLISECOND = 10;
-
-  @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
-  volatile Log log;
 
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
@@ -109,6 +107,9 @@ public class CopleyHardwareSimulation {
         description = "The number of axes supported by the drive")
     int axes() default 1;
   }
+
+  @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
+  volatile Log log;
 
   @Reference
   ByteConverters converters;
@@ -138,26 +139,35 @@ public class CopleyHardwareSimulation {
 
   @Modified
   void configure(CopleyHardwareSimulationConfiguration configuration) throws IOException {
-    setPort(configuration.serialPort());
-    node = configuration.node();
-    axes = configuration.axes();
-    variables.clear();
+    try {
+      setPort(configuration.serialPort());
+      node = configuration.node();
+      axes = configuration.axes();
+      variables.clear();
 
-    variables.put(DRIVE_EVENT_STATUS, new ByteVariable(axes, 2));
-    variables.put(LATCHED_EVENT_STATUS, new ByteVariable(axes, 2));
-    variables.put(AMPLIFIER_STATE, new ByteVariable(axes, 1));
-    variables.put(TRAJECTORY_PROFILE_MODE, new ByteVariable(axes, 1));
+      variables.put(DRIVE_EVENT_STATUS, new ByteVariable(axes, 2));
+      variables.put(LATCHED_EVENT_STATUS, new ByteVariable(axes, 2));
+      variables.put(AMPLIFIER_STATE, new ByteVariable(axes, 1));
+      variables.put(TRAJECTORY_PROFILE_MODE, new ByteVariable(axes, 1));
 
-    requestedPosition = new ReferenceVariable<>(axes, converters.getConverter(Int32.class));
-    variables.put(TRAJECTORY_POSITION_COUNTS, requestedPosition);
-    variables.put(
-        ACTUAL_POSITION,
-        new InterpolatedVariable<>(
-            axes,
-            requestedPosition,
-            MOTOR_SPEED_UNITS_PER_MILLISECOND,
-            i -> (double) i.value,
-            d -> new Int32(d.intValue())));
+      requestedPosition = new ReferenceVariable<>(axes, converters.getConverter(Int32.class));
+      variables.put(TRAJECTORY_POSITION_COUNTS, requestedPosition);
+      variables
+          .put(
+              ACTUAL_POSITION,
+              new InterpolatedVariable<>(
+                  axes,
+                  requestedPosition,
+                  MOTOR_SPEED_UNITS_PER_MILLISECOND,
+                  i -> (double) i.value,
+                  d -> new Int32(d.intValue())));
+    } catch (Exception e) {
+      Log log = this.log;
+      if (log != null)
+        log.log(ERROR, e);
+      else
+        e.printStackTrace();
+    }
   }
 
   @Deactivate
@@ -214,6 +224,7 @@ public class CopleyHardwareSimulation {
 
   private void receiveMessage() {
     byte[] result = new byte[] {};
+    ErrorCode errorCode = ErrorCode.SUCCESS;
 
     if (node == currentNode) {
       try {
@@ -223,20 +234,32 @@ public class CopleyHardwareSimulation {
         case GET_VARIABLE:
           variable = getVariableIdentifier();
           id = CopleyVariableID.forCode(variable.variableID);
-          result = getVariable(id).get(variable.axis, variable.bank ? STORED : ACTIVE);
+          if (variable.axis < 0 || variable.axis >= axes) {
+            result = new byte[getVariable(id).size()];
+            errorCode = ErrorCode.ILLEGAL_AXIS_NUMBER;
+          } else {
+            result = getVariable(id).get(variable.axis, variable.bank ? STORED : ACTIVE);
+          }
           break;
         case SET_VARIABLE:
           variable = getVariableIdentifier();
           id = CopleyVariableID.forCode(variable.variableID);
-
           byte[] value = new byte[message.remaining()];
           message.get(value);
-          getVariable(id).set(variable.axis, variable.bank ? STORED : ACTIVE, value);
+          if (variable.axis < 0 || variable.axis >= axes) {
+            errorCode = ErrorCode.ILLEGAL_AXIS_NUMBER;
+          } else {
+            getVariable(id).set(variable.axis, variable.bank ? STORED : ACTIVE, value);
+          }
           break;
         case COPY_VARIABLE:
           variable = getVariableIdentifier();
           id = CopleyVariableID.forCode(variable.variableID);
-          getVariable(id).copy(variable.axis, variable.bank ? STORED : ACTIVE);
+          if (variable.axis < 0 || variable.axis >= axes) {
+            errorCode = ErrorCode.ILLEGAL_AXIS_NUMBER;
+          } else {
+            getVariable(id).copy(variable.axis, variable.bank ? STORED : ACTIVE);
+          }
           break;
         case COPLEY_VIRTUAL_MACHINE:
           break;
@@ -276,18 +299,21 @@ public class CopleyHardwareSimulation {
         response.put((byte) 0);
         response.put(checksum);
         response.put((byte) (result.length / WORD_SIZE));
-        response.put((byte) 0);
+        response.put((byte) errorCode.ordinal());
         response.put(result);
         response.flip();
 
         stream.write(response);
       } catch (Exception e) {
-        of(log).ifPresent(
-            l -> l.log(
-                ERROR,
-                new CommsException(
-                    "Unable to send simulated hardware response: " + e.getMessage(),
-                    e)));
+        Optional
+            .ofNullable(log)
+            .ifPresent(
+                l -> l
+                    .log(
+                        ERROR,
+                        new CommsException(
+                            "Unable to send simulated hardware response: " + e.getMessage(),
+                            e)));
       }
     }
 

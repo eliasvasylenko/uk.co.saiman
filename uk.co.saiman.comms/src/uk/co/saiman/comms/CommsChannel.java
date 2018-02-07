@@ -27,13 +27,22 @@
  */
 package uk.co.saiman.comms;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 
 import uk.co.saiman.observable.Observable;
 
 public interface CommsChannel extends ByteChannel, Observable<CommsChannel> {
-	int bytesAvailable();
+  int bytesAvailable();
 
-	@Override
-	void close();
+  default ByteBuffer read() throws IOException {
+    ByteBuffer bytes = ByteBuffer.allocate(bytesAvailable());
+    read(bytes);
+    bytes.flip();
+    return bytes;
+  }
+
+  @Override
+  void close();
 }

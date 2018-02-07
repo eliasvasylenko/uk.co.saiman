@@ -169,7 +169,7 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
       }
     });
     setOnDragDropped(event -> {
-      if (event.isAccepted()) {
+      if (event.isAccepted() && event.getGestureTarget() == this) {
         event.consume();
         event.setDropCompleted(true);
 
