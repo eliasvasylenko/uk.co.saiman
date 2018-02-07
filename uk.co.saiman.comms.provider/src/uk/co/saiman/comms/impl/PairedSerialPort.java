@@ -105,22 +105,21 @@ public class PairedSerialPort implements SerialPort {
       public int read(ByteBuffer dst) throws IOException {
         checkState();
         synchronized (buffer) {
+          if (buffer.position() < dst.remaining()) {
+            Disposable disposable = updated.observe(o -> {
+              synchronized (buffer) {
+                if (buffer.position() >= dst.remaining())
+                  buffer.notifyAll();
+              }
+            });
+            try {
+              buffer.wait(1000);
+            } catch (InterruptedException e) {}
+            disposable.cancel();
+          }
+
           try {
-            if (buffer.position() < dst.remaining()) {
-              Disposable disposable = updated.observe(o -> {
-                synchronized (buffer) {
-                  if (buffer.position() >= dst.remaining())
-                    buffer.notifyAll();
-                }
-              });
-              try {
-                buffer.wait(1000);
-              } catch (InterruptedException e) {}
-              disposable.cancel();
-            }
-
             buffer.flip();
-
             int read = min(dst.remaining(), buffer.remaining());
             byte[] bytes = new byte[read];
             buffer.get(bytes);
