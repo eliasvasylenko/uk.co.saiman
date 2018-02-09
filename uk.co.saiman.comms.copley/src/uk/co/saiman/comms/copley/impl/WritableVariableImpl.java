@@ -36,7 +36,8 @@ class WritableVariableImpl<U> extends VariableImpl<U> implements WritableVariabl
       CopleyControllerImpl controller,
       CopleyVariableID id,
       Class<U> variableClass,
+      int axis,
       VariableBank bank) {
-    super(controller, id, variableClass, bank);
+    super(controller, id, variableClass, axis, bank);
   }
 }

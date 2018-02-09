@@ -195,6 +195,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.saint.msapex;version=snapshot,\
 	uk.co.saiman.saint.provider;version=snapshot,\
 	uk.co.saiman.saint.simulation;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.simulation;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\

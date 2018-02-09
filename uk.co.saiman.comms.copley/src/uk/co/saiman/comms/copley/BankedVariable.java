@@ -32,16 +32,7 @@ import java.util.function.Function;
 public interface BankedVariable<U> extends WritableVariable<U> {
   BankedVariable<U> forBank(VariableBank bank);
 
-  default void copyToBank() {
-    for (int i = 0; i < getController().getAxisCount(); i++)
-      copyToBank(i);
-  }
-
-  void copyToBank(int axis);
-
-  default void set(int axis) {
-    copyToBank(axis);
-  }
+  void copyToBank();
 
   @Override
   default <T> BankedVariable<T> map(Class<T> type, Function<U, T> out, Function<T, U> in) {
@@ -49,13 +40,13 @@ public interface BankedVariable<U> extends WritableVariable<U> {
 
     return new BankedVariable<T>() {
       @Override
-      public CopleyController getController() {
-        return base.getController();
+      public CopleyVariableID getID() {
+        return base.getID();
       }
 
       @Override
-      public CopleyVariableID getID() {
-        return base.getID();
+      public int getAxis() {
+        return base.getAxis();
       }
 
       @Override
@@ -69,13 +60,13 @@ public interface BankedVariable<U> extends WritableVariable<U> {
       }
 
       @Override
-      public T get(int axis) {
-        return out.apply(base.get(axis));
+      public T get() {
+        return out.apply(base.get());
       }
 
       @Override
-      public void set(int axis, T value) {
-        base.set(axis, in.apply(value));
+      public void set(T value) {
+        base.set(in.apply(value));
       }
 
       @Override
@@ -84,7 +75,7 @@ public interface BankedVariable<U> extends WritableVariable<U> {
       }
 
       @Override
-      public void copyToBank(int axis) {
+      public void copyToBank() {
         base.copyToBank();
       }
     };

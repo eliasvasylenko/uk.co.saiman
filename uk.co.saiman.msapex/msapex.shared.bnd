@@ -32,6 +32,7 @@
 	bnd.identity; id=uk.co.saiman.saint.msapex,\
 	bnd.identity; id=uk.co.saiman.saint.provider,\
 	bnd.identity; id=uk.co.saiman.saint.simulation,\
+	bnd.identity; id=uk.co.saiman.shell,\
 	bnd.identity; id=uk.co.saiman.simulation.provider,\
 	bnd.identity; id=uk.co.saiman.webconsole.branding,\
 	bnd.identity; id=uk.co.saiman.webconsole.webresource

@@ -34,6 +34,7 @@ import static uk.co.saiman.instrument.stage.StageState.POSITION_REACHED;
 
 import java.util.Optional;
 
+import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.instrument.DeviceConnection;
@@ -72,6 +73,10 @@ public abstract class CopleyStageDevice implements StageDevice {
 
   public Optional<CopleyController> getController() {
     return Optional.ofNullable(controller);
+  }
+
+  public Optional<CopleyAxis> getAxis(int axis) {
+    return Optional.ofNullable(controller).map(c -> c.getAxis(axis));
   }
 
   @Override

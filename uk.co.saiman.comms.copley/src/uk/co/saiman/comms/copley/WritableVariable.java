@@ -30,20 +30,20 @@ package uk.co.saiman.comms.copley;
 import java.util.function.Function;
 
 public interface WritableVariable<U> extends Variable<U> {
-  void set(int axis, U value);
+  void set(U value);
 
   default <T> WritableVariable<T> map(Class<T> type, Function<U, T> out, Function<T, U> in) {
     WritableVariable<U> base = this;
 
     return new WritableVariable<T>() {
       @Override
-      public CopleyController getController() {
-        return base.getController();
+      public CopleyVariableID getID() {
+        return base.getID();
       }
 
       @Override
-      public CopleyVariableID getID() {
-        return base.getID();
+      public int getAxis() {
+        return base.getAxis();
       }
 
       @Override
@@ -57,13 +57,13 @@ public interface WritableVariable<U> extends Variable<U> {
       }
 
       @Override
-      public T get(int axis) {
-        return out.apply(base.get(axis));
+      public T get() {
+        return out.apply(base.get());
       }
 
       @Override
-      public void set(int axis, T value) {
-        base.set(axis, in.apply(value));
+      public void set(T value) {
+        base.set(in.apply(value));
       }
     };
   }

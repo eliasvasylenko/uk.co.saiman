@@ -55,7 +55,7 @@ public class CopleyControllerREST implements ControllerREST {
   static final String WRITE_VALUE = "writeValue";
   static final String SWITCH_BANK = "switchBank";
 
-  private final Map<String, VariableCommsRESTEntry<?>> variableEntries;
+  private final Map<String, VariableCommsRESTEntry> variableEntries;
 
   private final ControllerRESTAction readValue;
   private final ControllerRESTAction writeValue;
@@ -63,9 +63,11 @@ public class CopleyControllerREST implements ControllerREST {
 
   public CopleyControllerREST(CopleyController controller, DTOs dtos) {
     this.variableEntries = new LinkedHashMap<>();
-    Arrays.stream(CopleyVariableID.values()).map(controller::getVariable).forEach(
-        variable -> variableEntries
-            .put(variable.getID().toString(), new VariableCommsRESTEntry<>(variable, dtos)));
+    Arrays
+        .stream(CopleyVariableID.values())
+        .forEach(
+            variable -> variableEntries
+                .put(variable.toString(), new VariableCommsRESTEntry(controller, variable, dtos)));
 
     readValue = new ControllerRESTAction() {
       @Override

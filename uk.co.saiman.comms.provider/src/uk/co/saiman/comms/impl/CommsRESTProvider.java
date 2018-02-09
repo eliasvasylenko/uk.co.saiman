@@ -83,14 +83,14 @@ public class CommsRESTProvider implements REST {
 
   private static final String ENTRY_ID_KEY = "id";
   private static final String ENTRY_ACTIONS_KEY = "actions";
+  private static final String ENTRY_INPUT_KEY = "input";
+  private static final String ENTRY_OUTPUT_KEY = "output";
 
   private static final String ACTION_ID_KEY = "id";
   private static final String ACTION_POLLABLE_KEY = "pollable";
   private static final String ACTION_RECEIVES_INPUT_KEY = "receivesInput";
   private static final String ACTION_SENDS_OUTPUT_KEY = "sendsOutput";
   private static final String ACTION_MODIFIES_OUTPUT_KEY = "modifiesOutput";
-  private static final String ACTION_INPUT_KEY = "input";
-  private static final String ACTION_OUTPUT_KEY = "output";
 
   private static final String ERROR_KEY = "error";
   private static final String TRACE_KEY = "trace";
@@ -255,7 +255,7 @@ public class CommsRESTProvider implements REST {
     Map<String, Object> info = new HashMap<>();
 
     info.put(ENTRY_ID_KEY, entry.getID());
-    info.put(ACTION_OUTPUT_KEY, entry.getOutputData());
+    info.put(ENTRY_OUTPUT_KEY, entry.getOutputData());
     info.put(ENTRY_ACTIONS_KEY, entry.getActions().collect(toList()));
 
     return info;
@@ -296,9 +296,9 @@ public class CommsRESTProvider implements REST {
 
       Map<String, Object> result = new HashMap<>();
       if (action.hasBehaviour(RECEIVES_INPUT_DATA))
-        result.put(ACTION_INPUT_KEY, entry.getInputData());
+        result.put(ENTRY_INPUT_KEY, entry.getInputData());
       if (action.hasBehaviour(MODIFIES_OUTPUT_DATA))
-        result.put(ACTION_OUTPUT_KEY, entry.getOutputData());
+        result.put(ENTRY_OUTPUT_KEY, entry.getOutputData());
 
       return result;
     } catch (Exception e) {

@@ -1,0 +1,15 @@
+Bundle-Name: SAI :: GoGo Shell
+
+Bundle-Description: \
+	Commands, services, and utilities for interactive with the Apache Felix GoGo shell.
+
+-buildpath: \
+	org.apache.felix.gogo.command,\
+	org.apache.felix.gogo.runtime,\
+	org.apache.felix.gogo.shell,\
+\
+	uk.co.saiman.utilities;version=snapshot
+
+Export-Package: \
+	uk.co.saiman.shell,\
+	uk.co.saiman.shell.converters

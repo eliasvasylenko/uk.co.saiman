@@ -1,0 +1,84 @@
+package uk.co.saiman.comms.copley.impl;
+
+import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
+import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
+import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import uk.co.saiman.comms.copley.AmplifierState;
+import uk.co.saiman.comms.copley.CopleyAxis;
+import uk.co.saiman.comms.copley.CopleyVariableID;
+import uk.co.saiman.comms.copley.EventStatusRegister;
+import uk.co.saiman.comms.copley.Int32;
+import uk.co.saiman.comms.copley.TrajectoryProfile;
+import uk.co.saiman.comms.copley.Variable;
+import uk.co.saiman.comms.copley.VariableBank;
+import uk.co.saiman.comms.copley.WritableVariable;
+
+public class CopleyAxisImpl implements CopleyAxis {
+  private final CopleyControllerImpl controller;
+  private final int axis;
+  private final Map<CopleyVariableID, VariableImpl<?>> variables;
+
+  public CopleyAxisImpl(CopleyControllerImpl controller, int axis) {
+    this.controller = controller;
+    this.axis = axis;
+    this.variables = new LinkedHashMap<>();
+
+    addVariable(DRIVE_EVENT_STATUS, EventStatusRegister.class, ACTIVE);
+    addWritableVariable(LATCHED_EVENT_STATUS, EventStatusRegister.class, ACTIVE);
+    addBankedVariable(TRAJECTORY_PROFILE_MODE, TrajectoryProfile.class);
+    addBankedVariable(TRAJECTORY_POSITION_COUNTS, Int32.class);
+    addBankedVariable(AMPLIFIER_STATE, AmplifierState.class);
+    addWritableVariable(ACTUAL_POSITION, Int32.class, ACTIVE);
+  }
+
+  @Override
+  public int getAxisNumber() {
+    return axis;
+  }
+
+  private <U> BankedVariableImpl<U> addBankedVariable(CopleyVariableID id, Class<U> type) {
+    BankedVariableImpl<U> variable = new BankedVariableImpl<>(controller, id, type, axis);
+    variables.put(id, variable);
+    return variable;
+  }
+
+  private <U> WritableVariableImpl<U> addWritableVariable(
+      CopleyVariableID id,
+      Class<U> type,
+      VariableBank bank) {
+    WritableVariableImpl<U> variable = new WritableVariableImpl<>(controller, id, type, axis, bank);
+    variables.put(id, variable);
+    return variable;
+  }
+
+  private <U> VariableImpl<U> addVariable(CopleyVariableID id, Class<U> type, VariableBank bank) {
+    VariableImpl<U> variable = new VariableImpl<>(controller, id, type, axis, bank);
+    variables.put(id, variable);
+    return variable;
+  }
+
+  @Override
+  public Variable<?> variable(CopleyVariableID id) {
+    return variables.get(id);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Variable<Int32> actualPosition() {
+    return (Variable<Int32>) variables.get(ACTUAL_POSITION);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public WritableVariable<Int32> requestedPosition() {
+    return (WritableVariable<Int32>) variables.get(TRAJECTORY_POSITION_COUNTS);
+  }
+}

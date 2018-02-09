@@ -28,13 +28,13 @@
 package uk.co.saiman.comms.copley;
 
 public interface Variable<U> {
-  CopleyController getController();
-
   CopleyVariableID getID();
+
+  int getAxis();
 
   VariableBank getBank();
 
   Class<U> getType();
 
-  U get(int axis);
+  U get();
 }

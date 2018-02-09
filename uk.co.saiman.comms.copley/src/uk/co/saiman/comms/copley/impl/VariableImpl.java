@@ -40,20 +40,22 @@ class VariableImpl<U> implements Variable<U> {
   private final CopleyControllerImpl controller;
   private final CopleyVariableID id;
   private final Class<U> variableClass;
+  private final int axis;
   private final VariableBank bank;
 
   public VariableImpl(
       CopleyControllerImpl controller,
       CopleyVariableID id,
       Class<U> variableClass,
+      int axis,
       VariableBank bank) {
     this.controller = controller;
     this.id = id;
     this.variableClass = variableClass;
+    this.axis = axis;
     this.bank = bank;
   }
 
-  @Override
   public CopleyControllerImpl getController() {
     return controller;
   }
@@ -68,6 +70,11 @@ class VariableImpl<U> implements Variable<U> {
     return variableClass;
   }
 
+  @Override
+  public int getAxis() {
+    return axis;
+  }
+
   private byte[] concat(byte[] left, byte[] right) {
     byte[] bytes = new byte[left.length + right.length];
     System.arraycopy(left, 0, bytes, 0, left.length);
@@ -76,7 +83,7 @@ class VariableImpl<U> implements Variable<U> {
   }
 
   @Override
-  public U get(int axis) {
+  public U get() {
     VariableIdentifier variableID = new VariableIdentifier(id, axis, bank);
 
     byte[] outputBytes = controller.getConverter(VariableIdentifier.class).toBytes(variableID);
@@ -86,7 +93,7 @@ class VariableImpl<U> implements Variable<U> {
     return controller.getConverter(variableClass).fromBytes(inputBytes);
   }
 
-  public void set(int axis, U output) {
+  public void set(U output) {
     VariableIdentifier variableID = new VariableIdentifier(id, axis, bank);
 
     byte[] outputBytes = concat(
@@ -96,7 +103,7 @@ class VariableImpl<U> implements Variable<U> {
     controller.executeCopleyCommand(SET_VARIABLE, outputBytes);
   }
 
-  public void copyToBank(int axis) {
+  public void copyToBank() {
     VariableIdentifier variableID = new VariableIdentifier(id, axis, bank);
 
     byte[] outputBytes = controller.getConverter(VariableIdentifier.class).toBytes(variableID);

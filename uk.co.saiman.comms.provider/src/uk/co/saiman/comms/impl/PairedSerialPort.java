@@ -4,7 +4,6 @@ import static java.lang.Math.min;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.function.Function;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
@@ -15,21 +14,28 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observer;
 
 public class PairedSerialPort implements SerialPort {
+  private static final int BUFFER_SIZE = 1024;
+
   private final PairedSerialPort partner;
   private final String name;
-  private Function<ByteBuffer, Integer> input;
+  private final ByteBuffer buffer;
+  private final HotObservable<CommsChannel> updated;
   private CommsChannel channel;
 
   public PairedSerialPort(String name, String partnerName) {
-    this.partner = new PairedSerialPort(this, partnerName);
+    this.partner = new PairedSerialPort(partnerName, this);
     this.name = name;
-    this.input = this::closedInput;
+    this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
+    this.updated = new HotObservable<>();
+    updated.complete();
   }
 
-  public PairedSerialPort(PairedSerialPort partner, String name) {
+  public PairedSerialPort(String name, PairedSerialPort partner) {
     this.partner = partner;
     this.name = name;
-    this.input = this::closedInput;
+    this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
+    this.updated = new HotObservable<>();
+    updated.complete();
   }
 
   @Override
@@ -55,29 +61,9 @@ public class PairedSerialPort implements SerialPort {
       throw new CommsException("Port already in use " + this);
     }
 
+    updated.start();
     return channel = new CommsChannel() {
       private boolean disposed;
-      private final ByteBuffer buffer = ByteBuffer.allocate(1024);
-      private final HotObservable<CommsChannel> updated = new HotObservable<>();
-
-      {
-        input = inputBuffer -> {
-          synchronized (buffer) {
-            if (inputBuffer.remaining() > buffer.remaining()) {
-              buffer.compact();
-            }
-
-            int written = Math.min(inputBuffer.remaining(), buffer.remaining());
-            byte[] bytes = new byte[written];
-            inputBuffer.get(bytes);
-            buffer.put(bytes, 0, written);
-
-            updated.next(this);
-
-            return written;
-          }
-        };
-      }
 
       private void checkState() {
         if (disposed)
@@ -93,7 +79,7 @@ public class PairedSerialPort implements SerialPort {
       @Override
       public int write(ByteBuffer src) throws IOException {
         checkState();
-        return partner.input.apply(src);
+        return partner.input(src);
       }
 
       @Override
@@ -133,25 +119,39 @@ public class PairedSerialPort implements SerialPort {
 
       @Override
       public void close() {
-        input = PairedSerialPort.this::closedInput;
-        channel = null;
-        disposed = true;
+        synchronized (buffer) {
+          channel = null;
+          disposed = true;
+          updated.complete();
+        }
       }
 
       @Override
       public int bytesAvailable() {
         synchronized (buffer) {
-          // position not remaining because we are writing
+          // position() not remaining() because we are writing
           return buffer.position();
         }
       }
     };
   }
 
-  private int closedInput(ByteBuffer bytes) {
-    int written = bytes.remaining();
-    bytes.get(new byte[written]);
-    return written;
+  private int input(ByteBuffer inputBuffer) {
+    synchronized (buffer) {
+      if (inputBuffer.remaining() > buffer.remaining()) {
+        buffer.compact();
+      }
+
+      int written = Math.min(inputBuffer.remaining(), buffer.remaining());
+      byte[] bytes = new byte[written];
+      inputBuffer.get(bytes);
+      buffer.put(bytes, 0, written);
+
+      if (channel != null)
+        updated.next(channel);
+
+      return written;
+    }
   }
 
   @Override

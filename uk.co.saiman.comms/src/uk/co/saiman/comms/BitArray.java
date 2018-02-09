@@ -28,6 +28,7 @@
 package uk.co.saiman.comms;
 
 import static java.nio.ByteBuffer.allocate;
+import static uk.co.saiman.bytes.ByteBuffers.toHexString;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -72,7 +73,7 @@ public class BitArray {
 
   @Override
   public String toString() {
-    return new HexConverter().format(toByteBuffer()).toString();
+    return toHexString(toByteBuffer()).toString();
   }
 
   @Override

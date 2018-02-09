@@ -28,31 +28,19 @@
 package uk.co.saiman.comms.copley.impl;
 
 import static uk.co.saiman.comms.copley.CopleyOperationID.GET_VARIABLE;
-import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
-import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
-import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
-import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
-import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
 import static uk.co.saiman.comms.copley.ErrorCode.ILLEGAL_AXIS_NUMBER;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import uk.co.saiman.comms.ByteConverter;
 import uk.co.saiman.comms.ByteConverters;
-import uk.co.saiman.comms.copley.AmplifierState;
+import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.CopleyOperationID;
-import uk.co.saiman.comms.copley.CopleyVariableID;
-import uk.co.saiman.comms.copley.EventStatusRegister;
-import uk.co.saiman.comms.copley.Int32;
-import uk.co.saiman.comms.copley.TrajectoryProfile;
-import uk.co.saiman.comms.copley.Variable;
-import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.copley.VariableIdentifier;
-import uk.co.saiman.comms.copley.WritableVariable;
 
 public class CopleyControllerImpl implements CopleyController {
   private static final int MAXIMUM_AXES = 8;
@@ -60,32 +48,16 @@ public class CopleyControllerImpl implements CopleyController {
   private CopleyCommsImpl comms;
   private final ByteConverters converters;
 
-  private final int axisCount;
-
-  private final Map<CopleyVariableID, VariableImpl<?>> variables;
-
-  private final VariableImpl<EventStatusRegister> driveEventStatus;
-  private final WritableVariableImpl<EventStatusRegister> latchedEventStatus;
-  private final BankedVariableImpl<TrajectoryProfile> trajectoryProfile;
-  private final BankedVariableImpl<Int32> trajectoryPosition;
-  private final BankedVariableImpl<AmplifierState> amplifierState;
-  private final WritableVariableImpl<Int32> actualPosition;
+  private final List<CopleyAxis> axes;
 
   public CopleyControllerImpl(CopleyCommsImpl comms) {
     this.comms = comms;
     this.converters = comms.getConverters();
-    this.axisCount = countAxes();
-
-    variables = new LinkedHashMap<>();
-    driveEventStatus = addVariable(DRIVE_EVENT_STATUS, EventStatusRegister.class, ACTIVE);
-    latchedEventStatus = addWritableVariable(
-        LATCHED_EVENT_STATUS,
-        EventStatusRegister.class,
-        ACTIVE);
-    trajectoryProfile = addBankedVariable(TRAJECTORY_PROFILE_MODE, TrajectoryProfile.class);
-    trajectoryPosition = addBankedVariable(TRAJECTORY_POSITION_COUNTS, Int32.class);
-    amplifierState = addBankedVariable(AMPLIFIER_STATE, AmplifierState.class);
-    actualPosition = addWritableVariable(ACTUAL_POSITION, Int32.class, ACTIVE);
+    int axisCount = countAxes();
+    this.axes = new ArrayList<>(axisCount);
+    for (int i = 0; i < axisCount; i++) {
+      axes.add(new CopleyAxisImpl(this, i));
+    }
   }
 
   private int countAxes() {
@@ -116,45 +88,14 @@ public class CopleyControllerImpl implements CopleyController {
     comms = null;
   }
 
-  private <U> BankedVariableImpl<U> addBankedVariable(CopleyVariableID id, Class<U> type) {
-    BankedVariableImpl<U> variable = new BankedVariableImpl<>(this, id, type);
-    variables.put(id, variable);
-    return variable;
-  }
-
-  private <U> WritableVariableImpl<U> addWritableVariable(
-      CopleyVariableID id,
-      Class<U> type,
-      VariableBank bank) {
-    WritableVariableImpl<U> variable = new WritableVariableImpl<>(this, id, type, bank);
-    variables.put(id, variable);
-    return variable;
-  }
-
-  private <U> VariableImpl<U> addVariable(CopleyVariableID id, Class<U> type, VariableBank bank) {
-    VariableImpl<U> variable = new VariableImpl<>(this, id, type, bank);
-    variables.put(id, variable);
-    return variable;
-  }
-
-  @Override
-  public Variable<?> getVariable(CopleyVariableID id) {
-    return variables.get(id);
-  }
-
   @Override
   public int getAxisCount() {
-    return axisCount;
+    return axes.size();
   }
 
   @Override
-  public Variable<Int32> getActualPosition() {
-    return actualPosition;
-  }
-
-  @Override
-  public WritableVariable<Int32> getRequestedPosition() {
-    return trajectoryPosition;
+  public CopleyAxis getAxis(int i) {
+    return axes.get(i);
   }
 
   byte[] executeCopleyCommand(CopleyOperationID operation, byte[] output) {

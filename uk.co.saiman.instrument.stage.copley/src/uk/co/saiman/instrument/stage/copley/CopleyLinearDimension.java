@@ -38,7 +38,7 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.comms.copley.CopleyController;
+import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.mathematics.Interval;
@@ -49,21 +49,18 @@ import uk.co.saiman.observable.ObservableValue;
 
 public class CopleyLinearDimension implements StageDimension<Length> {
   private final Units units;
-  private final int axis;
-  private final Supplier<CopleyController> controller;
+  private final Supplier<CopleyAxis> axis;
   private Interval<Quantity<Length>> bounds;
   private final ObservableProperty<Quantity<Length>> requestedPosition;
   private final ObservableProperty<Quantity<Length>> actualPosition;
 
   public CopleyLinearDimension(
-      int axis,
       Units units,
-      Supplier<CopleyController> controller,
+      Supplier<CopleyAxis> axis,
       Quantity<Length> minimum,
       Quantity<Length> maximum) {
     this.units = units;
     this.axis = axis;
-    this.controller = controller;
     this.bounds = bounded(minimum, maximum, comparing(q -> q.getValue().doubleValue()));
     this.requestedPosition = new ObservablePropertyImpl<>(minimum);
     this.actualPosition = new ObservablePropertyImpl<>(minimum);
@@ -73,15 +70,15 @@ public class CopleyLinearDimension implements StageDimension<Length> {
   }
 
   void positionRequested(Quantity<Length> position) {
-    CopleyController controller = this.controller.get();
-    if (controller != null)
-      controller.getRequestedPosition().set(axis, new Int32(getStepsFromLength(position)));
+    CopleyAxis axis = this.axis.get();
+    if (axis != null)
+      axis.requestedPosition().set(new Int32(getStepsFromLength(position)));
   }
 
   void updateActualPosition() {
-    CopleyController controller = this.controller.get();
-    if (controller != null)
-      actualPosition.set(getLengthFromSteps(controller.getActualPosition().get(axis).value));
+    CopleyAxis axis = this.axis.get();
+    if (axis != null)
+      actualPosition.set(getLengthFromSteps(axis.actualPosition().get().value));
   }
 
   @Override

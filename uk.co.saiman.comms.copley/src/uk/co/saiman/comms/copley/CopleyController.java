@@ -30,9 +30,5 @@ package uk.co.saiman.comms.copley;
 public interface CopleyController {
   int getAxisCount();
 
-  Variable<?> getVariable(CopleyVariableID id);
-
-  Variable<Int32> getActualPosition();
-
-  WritableVariable<Int32> getRequestedPosition();
+  CopleyAxis getAxis(int i);
 }

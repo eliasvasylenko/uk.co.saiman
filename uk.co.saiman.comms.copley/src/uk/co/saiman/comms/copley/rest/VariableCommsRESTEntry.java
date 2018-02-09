@@ -47,36 +47,50 @@ import java.util.stream.Stream;
 import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.copley.BankedVariable;
+import uk.co.saiman.comms.copley.CopleyController;
+import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.Variable;
+import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.copley.WritableVariable;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
-public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
+public class VariableCommsRESTEntry implements ControllerRESTEntry {
   private static final String BANK_VALUE = "CURRENT_BANK";
 
   private final Map<String, Object> inputData = new LinkedHashMap<>();
   private final Map<String, Object> outputData = new LinkedHashMap<>();
 
-  private Variable<U> variable;
+  private final CopleyController controller;
+  private final CopleyVariableID id;
   private final DTOs dtos;
 
-  public VariableCommsRESTEntry(Variable<U> variable, DTOs dtos) {
-    this.variable = variable;
+  private final boolean writable;
+  private final boolean banked;
+  private VariableBank bank;
+
+  public VariableCommsRESTEntry(CopleyController controller, CopleyVariableID id, DTOs dtos) {
+    this.controller = controller;
+    this.id = id;
     this.dtos = dtos;
+
+    Variable<?> variable = controller.getAxis(0).variable(id);
+    this.writable = variable instanceof WritableVariable<?>;
+    this.banked = variable instanceof BankedVariable<?>;
+    bank = variable.getBank();
+    
+    readValue(true);
   }
 
   @Override
   public String getID() {
-    return variable.getID().toString();
+    return id.toString();
   }
 
   @Override
   public Stream<String> getActions() {
     return concat(
         of(READ_VALUE),
-        concat(
-            variable instanceof WritableVariable<?> ? of(WRITE_VALUE) : empty(),
-            variable instanceof BankedVariable<?> ? of(SWITCH_BANK) : empty()));
+        concat(writable ? of(WRITE_VALUE) : empty(), banked ? of(SWITCH_BANK) : empty()));
   }
 
   @Override
@@ -92,8 +106,9 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
   public void readValue(boolean updateOutput) {
     Map<String, List<Object>> inputData = new LinkedHashMap<>();
 
-    for (int axis = 0; axis < variable.getController().getAxisCount(); axis++) {
-      Object value = variable.get(axis);
+    for (int axis = 0; axis < controller.getAxisCount(); axis++) {
+      Object value = getVariable(axis).get();
+
       try {
         dtos
             .asMap(value)
@@ -108,26 +123,34 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
       }
     }
 
-    if (updateOutput && variable instanceof WritableVariable<?>) {
+    if (updateOutput && writable) {
       outputData.clear();
       outputData.putAll(inputData);
     }
 
     this.inputData.clear();
     this.inputData.putAll(inputData);
-    if (variable instanceof BankedVariable<?>)
-      this.inputData.put(BANK_VALUE, variable.getBank());
+    if (banked)
+      this.inputData.put(BANK_VALUE, bank);
   }
 
+  private Variable<?> getVariable(int axis) {
+    Variable<?> variable = controller.getAxis(axis).variable(id);
+    if (banked)
+      variable = ((BankedVariable<?>) variable).forBank(bank);
+    return variable;
+  }
+
+  @SuppressWarnings("unchecked")
   public void writeValue() {
-    for (int i = 0; i < variable.getController().getAxisCount(); i++) {
-      int axis = i;
-      U value;
+    for (int axis = 0; axis < controller.getAxisCount(); axis++) {
+      Variable<?> variable = getVariable(axis);
+      Object value;
 
       Map<String, Object> axisOutput = outputData
           .entrySet()
           .stream()
-          .collect(toMap(Entry::getKey, e -> ((List<?>) e.getValue()).get(axis)));
+          .collect(toMap(Entry::getKey, e -> ((List<?>) e.getValue()).get(variable.getAxis())));
 
       try {
         value = dtos.convert(axisOutput).to(variable.getType());
@@ -136,13 +159,12 @@ public class VariableCommsRESTEntry<U> implements ControllerRESTEntry {
             "Cannot convert output data map to " + variable.getType().getSimpleName(),
             e);
       }
-      ((WritableVariable<U>) variable).set(axis, value);
+      ((WritableVariable<Object>) variable).set(value);
     }
   }
 
   public void switchBank() {
-    BankedVariable<U> bankedVariable = (BankedVariable<U>) variable;
-    variable = bankedVariable.forBank(bankedVariable.getBank() == ACTIVE ? STORED : ACTIVE);
+    bank = bank == ACTIVE ? STORED : ACTIVE;
     readValue(true);
   }
 }

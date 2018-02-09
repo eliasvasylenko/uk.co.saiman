@@ -109,15 +109,13 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
     exchangeY = units.parseQuantity(configuration.exchangePositionY()).asType(Length.class);
 
     xAxis = new CopleyLinearDimension(
-        0,
         units,
-        () -> getController().orElse(null),
+        () -> getAxis(0).orElse(null),
         lowerBoundX,
         upperBoundX);
     yAxis = new CopleyLinearDimension(
-        1,
         units,
-        () -> getController().orElse(null),
+        () -> getAxis(1).orElse(null),
         lowerBoundY,
         upperBoundY);
 

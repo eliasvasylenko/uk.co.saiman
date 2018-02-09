@@ -25,27 +25,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms.impl;
+package uk.co.saiman.shell.converters;
+
+import static uk.co.saiman.bytes.ByteBuffers.fromHexString;
+import static uk.co.saiman.bytes.ByteBuffers.toHexString;
+import static uk.co.saiman.shell.converters.RequireConverter.TYPE;
 
 import java.nio.ByteBuffer;
 
 import org.apache.felix.service.command.Converter;
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.comms.HexConverter;
-
 /**
  * Converter from hex strings to byte buffers for the GoGo shell
  * 
  * @author Elias N Vasylenko
  */
-@Component
-public class HexConverterService extends HexConverter implements Converter {
+@Component(property = TYPE + "=java.nio.ByteBuffer")
+public class HexConverterService implements Converter {
   @Override
-  public Object convert(Class<?> type, Object object) {
+  public ByteBuffer convert(Class<?> type, Object object) {
     if (type.isAssignableFrom(ByteBuffer.class)) {
       if (object instanceof CharSequence) {
-        return super.convert(object.toString());
+        return fromHexString(object.toString());
       }
     }
 
@@ -53,9 +55,9 @@ public class HexConverterService extends HexConverter implements Converter {
   }
 
   @Override
-  public CharSequence format(Object object, int p1, Converter p2) {
+  public String format(Object object, int p1, Converter p2) {
     if (object instanceof ByteBuffer) {
-      return super.format((ByteBuffer) object);
+      return toHexString((ByteBuffer) object);
     }
 
     return null;

@@ -16,6 +16,7 @@ Bundle-Name: SAI :: Comms :: Provider
 	uk.co.saiman.requirejs.webresource;version=snapshot,\
 \
 	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.webconsole.webresource;version=snapshot,\
 \
 	uk.co.saiman.collections;version=snapshot,\

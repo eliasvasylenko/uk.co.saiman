@@ -35,20 +35,22 @@ class BankedVariableImpl<U> extends WritableVariableImpl<U> implements BankedVar
   public BankedVariableImpl(
       CopleyControllerImpl controller,
       CopleyVariableID id,
-      Class<U> variableClass) {
-    this(controller, id, variableClass, VariableBank.ACTIVE);
+      Class<U> variableClass,
+      int axis) {
+    this(controller, id, variableClass, axis, VariableBank.ACTIVE);
   }
 
   private BankedVariableImpl(
       CopleyControllerImpl controller,
       CopleyVariableID id,
       Class<U> variableClass,
+      int axis,
       VariableBank bank) {
-    super(controller, id, variableClass, bank);
+    super(controller, id, variableClass, axis, bank);
   }
 
   @Override
   public BankedVariable<U> forBank(VariableBank bank) {
-    return new BankedVariableImpl<>(getController(), getID(), getType(), bank);
+    return new BankedVariableImpl<>(getController(), getID(), getType(), getAxis(), bank);
   }
 }
