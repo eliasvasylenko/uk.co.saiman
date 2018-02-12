@@ -31,7 +31,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.internal.events.EventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.fx.core.di.Service;
@@ -59,7 +58,6 @@ public class InstrumentAddon {
   @Inject
   private IEclipseContext context;
 
-  @Optional
   @Inject
   @Service
   private Log log;

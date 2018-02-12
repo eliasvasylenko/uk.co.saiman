@@ -1,20 +1,21 @@
 package uk.co.saiman.comms.impl;
 
 import static java.util.Arrays.asList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Stream.concat;
+import static java.util.Collections.emptySet;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static uk.co.saiman.log.Log.Level.ERROR;
 
-import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -23,16 +24,16 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.impl.SerialCommsSimulation.SerialPortSimulationConfiguration;
-import uk.co.saiman.comms.serial.SerialPort;
-import uk.co.saiman.comms.serial.SerialPorts;
 import uk.co.saiman.log.Log;
 
 @Designate(ocd = SerialPortSimulationConfiguration.class, factory = true)
 @Component(
+    immediate = true,
     configurationPid = SerialCommsSimulation.CONFIGURATION_PID,
     configurationPolicy = REQUIRE)
-public class SerialCommsSimulation implements SerialPorts {
+public class SerialCommsSimulation {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "Simulated Serial Comms Configuration",
@@ -55,15 +56,15 @@ public class SerialCommsSimulation implements SerialPorts {
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.comms.simulation";
-
   public static final String PARTNER_POSTFIX = "partner";
+  public static final String NAME = "name";
 
-  @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
-  volatile Log log;
+  @Reference
+  private Log log;
 
-  private Map<String, DumpSerialPort> dumpPorts;
-  private Map<String, InvalidSerialPort> invalidPorts;
-  private Map<String, PairedSerialPort> pairedPorts;
+  private Map<String, ServiceRegistration<CommsPort>> dumpPorts;
+  private Map<String, ServiceRegistration<CommsPort>> invalidPorts;
+  private Map<String, ServiceRegistration<CommsPort>> pairedPorts;
 
   public SerialCommsSimulation() {
     dumpPorts = new HashMap<>();
@@ -72,65 +73,74 @@ public class SerialCommsSimulation implements SerialPorts {
   }
 
   @Activate
-  public void activate(SerialPortSimulationConfiguration configuration) {
-    modified(configuration);
+  public void activate(BundleContext context, SerialPortSimulationConfiguration configuration) {
+    modified(context, configuration);
   }
 
   @Modified
-  public void modified(SerialPortSimulationConfiguration configuration) {
+  public void modified(BundleContext context, SerialPortSimulationConfiguration configuration) {
     try {
-      Set<String> dumpPorts = asSet(configuration.dumpPorts());
-      this.dumpPorts.keySet().retainAll(dumpPorts);
-      for (String port : dumpPorts)
-        this.dumpPorts.computeIfAbsent(port, DumpSerialPort::new);
+      updateServices(context, dumpPorts, configuration.dumpPorts(), DumpSerialPort::new);
 
-      Set<String> invalidPorts = asSet(configuration.invalidPorts());
-      this.invalidPorts.keySet().retainAll(invalidPorts);
-      for (String port : invalidPorts)
-        this.invalidPorts.computeIfAbsent(port, InvalidSerialPort::new);
+      updateServices(context, invalidPorts, configuration.invalidPorts(), InvalidSerialPort::new);
 
-      Set<String> pairedPorts = asSet(configuration.pairedPorts());
-      this.pairedPorts.keySet().retainAll(pairedPorts);
-      for (String port : pairedPorts)
-        this.pairedPorts
-            .computeIfAbsent(port, p -> new PairedSerialPort(p, p + "." + PARTNER_POSTFIX));
+      removeServices(pairedPorts, configuration.pairedPorts());
+      for (String portName : configuration.pairedPorts()) {
+        if (!pairedPorts.containsKey(portName)) {
+          PairedSerialPort newPort = new PairedSerialPort(
+              portName,
+              portName + "." + PARTNER_POSTFIX);
+          ServiceRegistration<CommsPort> service;
+          service = context.registerService(CommsPort.class, newPort, getProperties(newPort));
+          pairedPorts.put(newPort.getName(), service);
+
+          newPort = newPort.getPartner();
+          service = context.registerService(CommsPort.class, newPort, getProperties(newPort));
+          pairedPorts.put(newPort.getName(), service);
+        }
+      }
     } catch (Exception e) {
       Log log = this.log;
       if (log != null)
         log.log(ERROR, e);
-      else
-        e.printStackTrace();
+      e.printStackTrace();
     }
   }
 
-  private Set<String> asSet(String[] ports) {
-    return ports == null ? Collections.emptySet() : new HashSet<>(asList(ports));
-  }
+  private void removeServices(
+      Map<String, ServiceRegistration<CommsPort>> services,
+      String[] newPortNames) {
+    Set<String> portNames = newPortNames == null ? emptySet() : new HashSet<>(asList(newPortNames));
 
-  @Override
-  public Stream<SerialPort> getPorts() {
-    return concat(
-        concat(dumpPorts.values().stream(), invalidPorts.values().stream()),
-        pairedPorts.values().stream().flatMap(p -> Stream.of(p, p.getPartner())));
-  }
-
-  @Override
-  public SerialPort getPort(String port) {
-    requireNonNull(port);
-
-    if (dumpPorts.containsKey(port)) {
-      return dumpPorts.get(port);
-    } else if (invalidPorts.containsKey(port)) {
-      return invalidPorts.get(port);
-    } else if (pairedPorts.containsKey(port)) {
-      return pairedPorts.get(port);
-    } else if (port.endsWith("." + PARTNER_POSTFIX)) {
-      String pairPort = port.substring(0, port.length() - PARTNER_POSTFIX.length() - 1);
-      if (pairedPorts.containsKey(pairPort)) {
-        return pairedPorts.get(pairPort).getPartner();
+    for (String port : services.keySet()) {
+      if (!portNames.contains(port)) {
+        services.get(port).unregister();
       }
     }
+  }
 
-    return new InvalidSerialPort(port);
+  private void updateServices(
+      BundleContext context,
+      Map<String, ServiceRegistration<CommsPort>> services,
+      String[] newPortNames,
+      Function<String, CommsPort> newPortFactory) {
+    removeServices(services, newPortNames);
+
+    if (newPortNames != null) {
+      for (String portName : newPortNames) {
+        if (!services.containsKey(portName)) {
+          CommsPort newPort = newPortFactory.apply(portName);
+          ServiceRegistration<CommsPort> service = context
+              .registerService(CommsPort.class, newPort, getProperties(newPort));
+          services.put(newPort.getName(), service);
+        }
+      }
+    }
+  }
+
+  private Dictionary<String, String> getProperties(CommsPort port) {
+    Dictionary<String, String> properties = new Hashtable<>();
+    properties.put(NAME, port.getName());
+    return properties;
   }
 }

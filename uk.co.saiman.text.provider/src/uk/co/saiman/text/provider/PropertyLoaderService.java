@@ -37,7 +37,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import uk.co.saiman.log.Log;
@@ -55,7 +54,7 @@ import uk.co.saiman.text.properties.PropertyValueProviderFactory;
 public class PropertyLoaderService implements PropertyLoader {
   @Reference
   LocaleProvider provider;
-  @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+  @Reference
   Log log;
   private PropertyLoader component;
 

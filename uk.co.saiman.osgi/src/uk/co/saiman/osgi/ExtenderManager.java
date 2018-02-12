@@ -45,7 +45,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 import uk.co.saiman.log.Log;
@@ -150,11 +149,15 @@ public abstract class ExtenderManager implements BundleListener {
       synchronized (added) {
         added.remove(bundle);
       }
-      getLog().log(
-          Level.ERROR,
-          "Cannot register bundle '" + bundle.getSymbolicName() + "' with extension manager '"
-              + this + "'",
-          e);
+      getLog()
+          .log(
+              Level.ERROR,
+              "Cannot register bundle '"
+                  + bundle.getSymbolicName()
+                  + "' with extension manager '"
+                  + this
+                  + "'",
+              e);
     } finally {
       lock.unlock();
     }
@@ -182,7 +185,7 @@ public abstract class ExtenderManager implements BundleListener {
     }
   }
 
-  @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+  @Reference(policy = ReferencePolicy.DYNAMIC)
   protected void setLog(Log log) {
     this.log = log;
   }

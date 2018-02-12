@@ -29,6 +29,13 @@ package uk.co.saiman.instrument;
 
 import uk.co.saiman.observable.ObservableValue;
 
+/**
+ * Typically this interface should be extended to provide interfaces over
+ * general classes of hardware such that alternative hardware can be
+ * substituted.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface Device {
   /**
    * @return the human-readable and localized name of the device

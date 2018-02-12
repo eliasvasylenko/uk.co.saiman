@@ -28,9 +28,6 @@
 package uk.co.saiman.comms.saint.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_LAT;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_PORT;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_RB_LAT;
@@ -57,20 +54,18 @@ import java.util.Map;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
 import uk.co.saiman.comms.saint.SaintCommandAddress;
 import uk.co.saiman.comms.saint.SaintCommandType;
 import uk.co.saiman.comms.saint.SaintComms;
 import uk.co.saiman.comms.saint.impl.SaintHardwareSimulation.SaintHardwareSimulationConfiguration;
-import uk.co.saiman.comms.serial.SerialPort;
-import uk.co.saiman.comms.serial.SerialPorts;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -91,15 +86,14 @@ public class SaintHardwareSimulation {
     @AttributeDefinition(
         name = "Serial Port",
         description = "The serial port for the hardware simulation")
-    String serialPort();
+    String port_target();
   }
 
-  @Reference(cardinality = OPTIONAL)
-  Log log;
+  @Reference
+  private Log log;
 
-  @Reference(policy = STATIC, policyOption = GREEDY)
-  SerialPorts serialPorts;
-  private SerialPort port;
+  @Reference
+  private CommsPort port;
   private CommsStream stream;
 
   private List<Byte> memory = new ArrayList<>();
@@ -124,26 +118,12 @@ public class SaintHardwareSimulation {
 
   @Activate
   void activate(SaintHardwareSimulationConfiguration configuration) throws IOException {
-    configure(configuration);
-  }
-
-  @Modified
-  void configure(SaintHardwareSimulationConfiguration configuration) throws IOException {
-    setPort(configuration.serialPort());
+    openPort();
   }
 
   @Deactivate
   void deactivate() throws IOException {
     closePort();
-  }
-
-  private synchronized void setPort(String serialPort) throws IOException {
-    boolean open = isOpen();
-    if (open)
-      closePort();
-    port = serialPorts.getPort(serialPort);
-    if (open)
-      openPort();
   }
 
   private synchronized void openPort() {

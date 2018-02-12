@@ -38,7 +38,6 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.contexts.RunAndTrack;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.fx.core.di.Service;
 
@@ -67,7 +66,6 @@ public class CameraAddon {
   @Inject
   private IEclipseContext context;
 
-  @Optional
   @Inject
   @Service
   private Log log;
@@ -102,12 +100,13 @@ public class CameraAddon {
 
         // Make sure any open connection always belongs to the selected camera!
         if (connection != null && (device == null || connection.getDevice() != device)) {
-          log.log(
-              Level.ERROR,
-              format(
-                  "Camera connection %s inconsistent with device %s in Eclipse context",
-                  connection,
-                  device));
+          log
+              .log(
+                  Level.ERROR,
+                  format(
+                      "Camera connection %s inconsistent with device %s in Eclipse context",
+                      connection,
+                      device));
         }
 
         return true;

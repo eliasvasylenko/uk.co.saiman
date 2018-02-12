@@ -28,8 +28,6 @@
 package uk.co.saiman.comms.saint.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.CMOS_REF;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_1_ADC;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_2_ADC;
@@ -76,7 +74,6 @@ import java.nio.channels.ByteChannel;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -85,6 +82,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.SimpleComms;
 import uk.co.saiman.comms.SimpleController;
 import uk.co.saiman.comms.saint.ADC;
@@ -105,8 +103,6 @@ import uk.co.saiman.comms.saint.Value;
 import uk.co.saiman.comms.saint.ValueReadback;
 import uk.co.saiman.comms.saint.ValueRequest;
 import uk.co.saiman.comms.saint.impl.SaintCommsImpl.SaintCommsConfiguration;
-import uk.co.saiman.comms.serial.SerialPort;
-import uk.co.saiman.comms.serial.SerialPorts;
 
 @Designate(ocd = SaintCommsConfiguration.class, factory = true)
 @Component(configurationPid = SaintCommsImpl.CONFIGURATION_PID, configurationPolicy = REQUIRE)
@@ -120,7 +116,7 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
       description = "The configuration for the underlying serial comms for a SAINT instrument")
   public @interface SaintCommsConfiguration {
     @AttributeDefinition(name = "Serial Port", description = "The serial port for comms")
-    String serialPort();
+    String port_target();
   }
 
   class ValueImpl<T> implements Value<T> {
@@ -180,12 +176,11 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
     }
   }
 
-  @Reference(policy = STATIC, policyOption = GREEDY)
-  SerialPorts comms;
-  private SerialPort port;
+  @Reference
+  private CommsPort port;
 
   @Reference
-  ByteConverters converters;
+  private ByteConverters converters;
 
   private Value<LEDStatus> ledStatus;
   private Value<VacuumControl> vacuumStatus;
@@ -233,7 +228,7 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
 
   @Activate
   void activate(SaintCommsConfiguration configuration) throws IOException {
-    configure(configuration);
+    super.setComms(port);
 
     ledStatus = inOutBlock(LEDStatus.class, LED_PORT, LED_LAT);
     vacuumStatus = inOutBlock(VacuumControl.class, VACUUM_PORT, VACUUM_LAT);
@@ -268,12 +263,6 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
 
     turboControl = outBlock(TurboControl.class, TURBO_CONTROL);
     turboReadbacks = inBlock(TurboReadbacks.class, TURBO_READBACKS);
-  }
-
-  @Modified
-  void configure(SaintCommsConfiguration configuration) throws IOException {
-    port = comms.getPort(configuration.serialPort());
-    setComms(port);
   }
 
   @Deactivate

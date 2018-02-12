@@ -4,16 +4,18 @@ import static java.lang.Math.min;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
-import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observer;
 
-public class PairedSerialPort implements SerialPort {
+public class PairedSerialPort implements CommsPort {
   private static final int BUFFER_SIZE = 1024;
 
   private final PairedSerialPort partner;
@@ -187,7 +189,11 @@ public class PairedSerialPort implements SerialPort {
     };
   }
 
-  public SerialPort getPartner() {
+  public PairedSerialPort getPartner() {
     return partner;
+  }
+
+  public List<CommsPort> asList() {
+    return Arrays.asList(this, getPartner());
   }
 }

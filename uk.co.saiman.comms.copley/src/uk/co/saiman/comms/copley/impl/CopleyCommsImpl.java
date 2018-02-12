@@ -28,8 +28,7 @@
 package uk.co.saiman.comms.copley.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
+import static org.osgi.service.component.annotations.ReferenceCardinality.MANDATORY;
 import static uk.co.saiman.comms.copley.CopleyOperationID.NO_OP;
 import static uk.co.saiman.comms.copley.ErrorCode.SUCCESS;
 
@@ -49,6 +48,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.Comms;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.SimpleComms;
 import uk.co.saiman.comms.SimpleController;
 import uk.co.saiman.comms.copley.CopleyComms;
@@ -56,8 +56,6 @@ import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.CopleyOperationID;
 import uk.co.saiman.comms.copley.ErrorCode;
 import uk.co.saiman.comms.copley.impl.CopleyCommsImpl.CopleyCommsConfiguration;
-import uk.co.saiman.comms.serial.SerialPort;
-import uk.co.saiman.comms.serial.SerialPorts;
 
 @Designate(ocd = CopleyCommsConfiguration.class, factory = true)
 @Component(
@@ -80,18 +78,18 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
       description = "The configuration for the underlying serial comms for a Copley motor control")
   public @interface CopleyCommsConfiguration {
     @AttributeDefinition(name = "Serial Port", description = "The serial port for comms")
-    String serialPort();
+    String port_target();
 
     @AttributeDefinition(
-        name = "Node Number",
-        description = "The node number for multi-drop mode dispatch, or 0 for the directly connected node")
-    int node() default 0;
+        name = "Node Count",
+        description = "The node count for multi-drop mode dispatch, or 0 for the directly connected node")
+    int nodeCount() default 0;
   }
 
-  @Reference(policy = STATIC, policyOption = GREEDY)
-  SerialPorts comms;
-  private SerialPort port;
-  private int nodeID;
+  @Reference
+  CommsPort port;
+
+  private int nodeCount;
   private boolean nodeIDValid;
 
   @Reference
@@ -100,20 +98,19 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
   @Activate
   void activate(CopleyCommsConfiguration configuration) throws IOException {
     configure(configuration);
+    setComms(port);
   }
 
   @Modified
   void configure(CopleyCommsConfiguration configuration) throws IOException {
-    port = comms.getPort(configuration.serialPort());
-    nodeIDValid = (configuration.node() & NODE_ID_MASK) == configuration.node();
-    nodeID = configuration.node();
-    setComms(port);
+    nodeIDValid = (configuration.nodeCount() & NODE_ID_MASK) == configuration.nodeCount();
+    nodeCount = configuration.nodeCount();
     checkNodeId();
   }
 
   private boolean checkNodeId() {
     if (!nodeIDValid)
-      setFault(new CommsException("Invalid node id number " + nodeID));
+      setFault(new CommsException("Invalid node id number " + nodeCount));
 
     return nodeIDValid;
   }
@@ -162,7 +159,7 @@ public class CopleyCommsImpl extends SimpleComms<CopleyController>
   }
 
   private void sendCopleyCommand(CopleyOperationID operation, ByteChannel channel, byte[] output) {
-    byte id = (byte) (nodeID == 0 ? nodeID : (nodeID | NODE_ID_MARK));
+    byte id = (byte) (nodeCount == 0 ? nodeCount : (nodeCount | NODE_ID_MARK));
     byte size = (byte) (output.length / WORD_SIZE);
     byte opCode = operation.getCode();
     byte checksum = (byte) (CHECKSUM ^ id ^ size ^ opCode);

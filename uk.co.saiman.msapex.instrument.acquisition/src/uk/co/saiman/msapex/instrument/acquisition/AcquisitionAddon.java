@@ -76,7 +76,6 @@ public class AcquisitionAddon {
 
   @Inject
   @Service
-  @Optional
   private Log log;
 
   @Inject

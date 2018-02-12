@@ -30,7 +30,9 @@ package uk.co.saiman.comms;
 import uk.co.saiman.observable.ObservableValue;
 
 /**
- * An interface over a comms channel to a piece of hardware.
+ * An interface over a comms channel to a piece of hardware. Typically this
+ * should be a low-level interface over a specific piece of hardware rather than
+ * something substitutable.
  * 
  * @author Elias N Vasylenko
  *
@@ -44,32 +46,32 @@ public interface Comms<T> {
    * @author Elias N Vasylenko
    */
   enum CommsStatus {
-    /**
-     * The byte channel is currently open. Subsequent invocations of
-     * {@link CommsPort#openChannel()} will fail until the previously opened byte
-     * channel is closed.
-     */
-    OPEN,
+  /**
+   * The byte channel is currently open. Subsequent invocations of
+   * {@link CommsPort#openChannel()} will fail until the previously opened byte
+   * channel is closed.
+   */
+  OPEN,
 
-    /**
-     * The byte channel is ready to be opened. This does not guarantee that a
-     * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
-     * simply indicates that it is expected to succeed. If invocation fails, the
-     * comms channel will enter the {@link #ERROR error state}.
-     */
-    CLOSED,
+  /**
+   * The byte channel is ready to be opened. This does not guarantee that a
+   * subsequent invocation of {@link CommsPort#openChannel()} will succeed, it
+   * simply indicates that it is expected to succeed. If invocation fails, the
+   * comms channel will enter the {@link #ERROR error state}.
+   */
+  CLOSED,
 
-    /**
-     * The comms connection has failed in some way. It should only be possible for
-     * the channel to be in this state after an invocation of
-     * {@link Comms#openController()} and before the associated invocation of
-     * {@link Comms#reset()}.
-     * <p>
-     * While the channel is in an error state, invocations of
-     * {@link Comms#openController()} should throw an exception detailing the
-     * problem.
-     */
-    FAULT
+  /**
+   * The comms connection has failed in some way. It should only be possible for
+   * the channel to be in this state after an invocation of
+   * {@link Comms#openController()} and before the associated invocation of
+   * {@link Comms#reset()}.
+   * <p>
+   * While the channel is in an error state, invocations of
+   * {@link Comms#openController()} should throw an exception detailing the
+   * problem.
+   */
+  FAULT
   }
 
   /**

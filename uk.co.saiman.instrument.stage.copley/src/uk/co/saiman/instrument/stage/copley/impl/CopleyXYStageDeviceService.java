@@ -60,11 +60,14 @@ public class CopleyXYStageDeviceService extends CopleyXYStageDevice implements X
   Units units;
 
   @Reference
-  CopleyComms comms;
+  CopleyComms commsX;
+
+  @Reference
+  CopleyComms commsY;
 
   @Activate
   void activate(CopleyXYStageConfiguration configuration) {
-    initialize(instrument, comms, loader);
+    initialize(instrument, commsX, commsY, loader);
     configure(configuration, units);
   }
 

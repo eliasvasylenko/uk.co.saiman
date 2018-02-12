@@ -142,7 +142,6 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.comms.provider;version=snapshot,\
 	uk.co.saiman.comms.rest;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
-	uk.co.saiman.comms.serial;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
 	uk.co.saiman.data.spectrum;version=snapshot,\

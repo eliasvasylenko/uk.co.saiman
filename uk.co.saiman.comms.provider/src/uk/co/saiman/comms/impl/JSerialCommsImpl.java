@@ -27,27 +27,87 @@
  */
 package uk.co.saiman.comms.impl;
 
-import static com.fazecast.jSerialComm.SerialPort.getCommPort;
 import static com.fazecast.jSerialComm.SerialPort.getCommPorts;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static uk.co.saiman.log.Log.Level.ERROR;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.stream.Stream;
 
-import org.osgi.framework.Constants;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.comms.serial.SerialPorts;
-import uk.co.saiman.comms.serial.SerialPort;
+import com.fazecast.jSerialComm.SerialPort;
 
-@Component(property = Constants.SERVICE_RANKING + ":Integer=" + -10)
-public class JSerialCommsImpl implements SerialPorts {
-  @Override
-  public Stream<SerialPort> getPorts() {
-    return stream(getCommPorts()).map(JSerialCommsPort::new);
+import uk.co.saiman.comms.CommsPort;
+import uk.co.saiman.comms.impl.JSerialCommsImpl.JSerialPortConfiguration;
+import uk.co.saiman.log.Log;
+
+@Designate(ocd = JSerialPortConfiguration.class)
+@Component(
+    immediate = true,
+    configurationPid = JSerialCommsImpl.CONFIGURATION_PID,
+    configurationPolicy = OPTIONAL)
+public class JSerialCommsImpl {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "JSerialPort Comms Configuration",
+      description = "The JSerialPort component provides native serial port interfaces")
+  public @interface JSerialPortConfiguration {
+    @AttributeDefinition(
+        name = "Named Ports",
+        description = "A list of extra port names to provide alongside any automatically detected ports")
+    String[] namedPorts() default {};
   }
 
-  @Override
-  public SerialPort getPort(String port) {
-    return new JSerialCommsPort(getCommPort(port));
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.jserialport";
+  public static final String NAME = "name";
+
+  @Reference
+  private Log log;
+
+  private List<ServiceRegistration<CommsPort>> ports;
+
+  @Activate
+  void activate(BundleContext context, JSerialPortConfiguration configuration) {
+    try {
+      String[] namedPorts = configuration.namedPorts();
+      namedPorts = namedPorts == null ? new String[] {} : namedPorts;
+
+      ports = Stream
+          .concat(stream(getCommPorts()), stream(namedPorts).map(SerialPort::getCommPort))
+          .map(JSerialCommsPort::new)
+          .map(port -> context.registerService(CommsPort.class, port, getProperties(port)))
+          .collect(toList());
+    } catch (Exception e) {
+      Log log = this.log;
+      if (log != null)
+        log.log(ERROR, e);
+      e.printStackTrace();
+    }
+  }
+
+  private Dictionary<String, String> getProperties(JSerialCommsPort port) {
+    Dictionary<String, String> properties = new Hashtable<>();
+    properties.put(NAME, port.getName());
+    return properties;
+  }
+
+  @Deactivate
+  void deactivate(BundleContext context) {
+    for (ServiceRegistration<CommsPort> port : ports) {
+      port.unregister();
+    }
   }
 }

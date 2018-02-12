@@ -28,10 +28,7 @@
 package uk.co.saiman.comms.copley.simulation;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.copley.CopleyComms.HEADER_SIZE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
 import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
@@ -62,6 +59,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.ByteConverters;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
 import uk.co.saiman.comms.copley.CopleyOperationID;
 import uk.co.saiman.comms.copley.CopleyVariableID;
@@ -70,8 +68,6 @@ import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.comms.copley.VariableIdentifier;
 import uk.co.saiman.comms.copley.impl.CopleyCommsImpl;
 import uk.co.saiman.comms.copley.simulation.CopleyHardwareSimulation.CopleyHardwareSimulationConfiguration;
-import uk.co.saiman.comms.serial.SerialPort;
-import uk.co.saiman.comms.serial.SerialPorts;
 import uk.co.saiman.log.Log;
 
 @Designate(ocd = CopleyHardwareSimulationConfiguration.class, factory = true)
@@ -93,7 +89,7 @@ public class CopleyHardwareSimulation {
     @AttributeDefinition(
         name = "Serial Port",
         description = "The serial port for the hardware simulation")
-    String serialPort();
+    String port_target();
 
     @AttributeDefinition(
         name = "Node Number",
@@ -108,15 +104,14 @@ public class CopleyHardwareSimulation {
     int axes() default 1;
   }
 
-  @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
+  @Reference(policy = DYNAMIC)
   volatile Log log;
 
   @Reference
   ByteConverters converters;
 
-  @Reference(policy = STATIC, policyOption = GREEDY)
-  SerialPorts serialPorts;
-  private SerialPort port;
+  @Reference
+  private CommsPort port;
   private CommsStream stream;
 
   private final ByteBuffer header = ByteBuffer.allocate(HEADER_SIZE);
@@ -134,13 +129,13 @@ public class CopleyHardwareSimulation {
 
   @Activate
   void activate(CopleyHardwareSimulationConfiguration configuration) throws IOException {
+    openPort();
     configure(configuration);
   }
 
   @Modified
   void configure(CopleyHardwareSimulationConfiguration configuration) throws IOException {
     try {
-      setPort(configuration.serialPort());
       node = configuration.node();
       axes = configuration.axes();
       variables.clear();
@@ -173,12 +168,6 @@ public class CopleyHardwareSimulation {
   @Deactivate
   void deactivate() throws IOException {
     closePort();
-  }
-
-  private synchronized void setPort(String serialPort) throws IOException {
-    closePort();
-    port = serialPorts.getPort(serialPort);
-    openPort();
   }
 
   private synchronized void openPort() {

@@ -50,12 +50,19 @@ public abstract class CopleyStageDevice implements StageDevice {
   private final ObservableValue<StageState> state = new ObservablePropertyImpl<>(POSITION_REACHED);
 
   private Instrument instrument;
-  private CopleyComms comms;
-  private CopleyController controller;
+  private CopleyComms commsX;
+  private CopleyComms commsY;
+  private CopleyController controllerX;
+  private CopleyController controllerY;
 
-  void initialize(Instrument instrument, CopleyComms comms, PropertyLoader loader) {
+  void initialize(
+      Instrument instrument,
+      CopleyComms commsX,
+      CopleyComms commsY,
+      PropertyLoader loader) {
     this.instrument = instrument;
-    this.comms = comms;
+    this.commsX = commsX;
+    this.commsY = commsY;
     this.properties = loader.getProperties(CopleyStageProperties.class);
 
     reset();
@@ -84,12 +91,9 @@ public abstract class CopleyStageDevice implements StageDevice {
     return properties.copleyXYStageName().get();
   }
 
-  public boolean isConnected() {
-    return comms.status().isEqual(OPEN);
-  }
-
   public boolean reset() {
-    comms.reset();
+    commsX.reset();
+    commsY.reset();
     try {
       this.controller = comms.openController();
       return true;

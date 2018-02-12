@@ -2,10 +2,10 @@ package uk.co.saiman.comms.impl;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
-import uk.co.saiman.comms.serial.SerialPort;
 
-public class InvalidSerialPort implements SerialPort {
+public class InvalidSerialPort implements CommsPort {
   private final String name;
 
   public InvalidSerialPort(String name) {

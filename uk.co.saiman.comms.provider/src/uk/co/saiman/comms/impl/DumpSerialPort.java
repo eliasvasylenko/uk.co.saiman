@@ -5,12 +5,12 @@ import java.nio.ByteBuffer;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
-import uk.co.saiman.comms.serial.SerialPort;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observer;
 
-public class DumpSerialPort implements SerialPort {
+public class DumpSerialPort implements CommsPort {
   private final String name;
   private boolean open;
 

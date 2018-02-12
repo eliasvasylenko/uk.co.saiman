@@ -42,6 +42,7 @@ import com.fazecast.jSerialComm.SerialPortPacketListener;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
@@ -53,7 +54,7 @@ import uk.co.saiman.observable.Observer;
  * 
  * @author Elias N Vasylenko
  */
-public class JSerialCommsPort implements uk.co.saiman.comms.serial.SerialPort {
+public class JSerialCommsPort implements CommsPort {
   private final SerialPort serialPort;
 
   private CommsChannel openChannel;

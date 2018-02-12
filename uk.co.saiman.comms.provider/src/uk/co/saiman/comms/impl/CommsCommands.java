@@ -28,8 +28,7 @@
 package uk.co.saiman.comms.impl;
 
 import static java.util.stream.Collectors.toList;
-import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static osgi.enroute.debug.api.Debug.COMMAND_FUNCTION;
 import static osgi.enroute.debug.api.Debug.COMMAND_SCOPE;
 import static uk.co.saiman.text.properties.SaiProperties.SAI_COMMAND_SCOPE;
@@ -39,6 +38,7 @@ import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.service.command.Descriptor;
 import org.osgi.service.component.annotations.Component;
@@ -46,8 +46,7 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.serial.SerialPort;
-import uk.co.saiman.comms.serial.SerialPorts;
+import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.shell.converters.RequireConverter;
 
 /**
@@ -68,11 +67,10 @@ import uk.co.saiman.shell.converters.RequireConverter;
         COMMAND_FUNCTION + "=listPorts",
         COMMAND_FUNCTION + "=inspectPort" })
 public class CommsCommands {
-  private SerialPort openPort;
+  @Reference(policy = DYNAMIC)
+  private List<CommsPort> ports = new CopyOnWriteArrayList<>();
+  private CommsPort openPort;
   private CommsChannel openChannel;
-
-  @Reference(cardinality = OPTIONAL, policyOption = GREEDY)
-  SerialPorts comms;
 
   void deactivate() throws IOException {
     if (openPort != null) {
@@ -80,14 +78,7 @@ public class CommsCommands {
     }
   }
 
-  private void assertCommsAvailable() {
-    if (comms == null) {
-      throw new CommsException("Serial comms unavailable");
-    }
-  }
-
   private void assertPortAvailable() {
-    assertCommsAvailable();
     if (openPort == null)
       throw new CommsException("No port is open here");
   }
@@ -95,6 +86,14 @@ public class CommsCommands {
   private static final String PORT_NAME = "the system name of the serial port";
 
   private static final String OPEN_PORT_DESCRIPTOR = "open the given port";
+
+  private CommsPort getPort(String portName) {
+    return ports
+        .stream()
+        .filter(p -> p.getName().equals(portName))
+        .findAny()
+        .orElseThrow(() -> new CommsException("Cannot find port"));
+  }
 
   /**
    * Command: {@value #OPEN_PORT_DESCRIPTOR}
@@ -106,13 +105,11 @@ public class CommsCommands {
    */
   @Descriptor(OPEN_PORT_DESCRIPTOR)
   public void openPort(@Descriptor(PORT_NAME) String portName) throws IOException {
-    assertCommsAvailable();
-
     if (openPort != null) {
       throw new CommsException("Port already open " + openPort);
     }
 
-    SerialPort port = comms.getPort(portName);
+    CommsPort port = getPort(portName);
     openChannel = port.openChannel();
     openPort = port;
   }
@@ -204,11 +201,9 @@ public class CommsCommands {
    */
   @Descriptor(LIST_PORTS_DESCRIPTOR)
   public List<String> listPorts() {
-    assertCommsAvailable();
-
-    return comms
-        .getPorts()
-        .map(SerialPort::getName)
+    return ports
+        .stream()
+        .map(CommsPort::getName)
         .map(n -> n + (openPort != null && openPort.getName().equals(n) ? "*" : ""))
         .collect(toList());
   }
@@ -224,9 +219,7 @@ public class CommsCommands {
    */
   @Descriptor(INSPECT_PORT_DESCRIPTOR)
   public Map<String, String> inspectPort(@Descriptor(PORT_NAME) String portName) {
-    assertCommsAvailable();
-
-    SerialPort port = comms.getPort(portName);
+    CommsPort port = getPort(portName);
 
     Map<String, String> properties = new LinkedHashMap<>();
 
