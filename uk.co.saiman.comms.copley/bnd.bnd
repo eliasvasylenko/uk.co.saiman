@@ -1,6 +1,7 @@
 Bundle-Name: SAI :: Comms :: Copley
 
 -buildpath:\
+	uk.co.saiman.bytes;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.rest;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\

@@ -3,7 +3,6 @@ package uk.co.saiman.comms.impl;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static uk.co.saiman.log.Log.Level.ERROR;
 
 import java.util.Dictionary;
@@ -25,15 +24,16 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.CommsPort;
-import uk.co.saiman.comms.impl.SerialCommsSimulation.SerialPortSimulationConfiguration;
+import uk.co.saiman.comms.InvalidCommsPort;
+import uk.co.saiman.comms.impl.CommsSimulation.SerialPortSimulationConfiguration;
 import uk.co.saiman.log.Log;
 
 @Designate(ocd = SerialPortSimulationConfiguration.class, factory = true)
 @Component(
     immediate = true,
-    configurationPid = SerialCommsSimulation.CONFIGURATION_PID,
+    configurationPid = CommsSimulation.CONFIGURATION_PID,
     configurationPolicy = REQUIRE)
-public class SerialCommsSimulation {
+public class CommsSimulation {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "Simulated Serial Comms Configuration",
@@ -66,7 +66,7 @@ public class SerialCommsSimulation {
   private Map<String, ServiceRegistration<CommsPort>> invalidPorts;
   private Map<String, ServiceRegistration<CommsPort>> pairedPorts;
 
-  public SerialCommsSimulation() {
+  public CommsSimulation() {
     dumpPorts = new HashMap<>();
     invalidPorts = new HashMap<>();
     pairedPorts = new HashMap<>();
@@ -80,16 +80,14 @@ public class SerialCommsSimulation {
   @Modified
   public void modified(BundleContext context, SerialPortSimulationConfiguration configuration) {
     try {
-      updateServices(context, dumpPorts, configuration.dumpPorts(), DumpSerialPort::new);
+      updateServices(context, dumpPorts, configuration.dumpPorts(), DumpCommsPort::new);
 
-      updateServices(context, invalidPorts, configuration.invalidPorts(), InvalidSerialPort::new);
+      updateServices(context, invalidPorts, configuration.invalidPorts(), InvalidCommsPort::new);
 
       removeServices(pairedPorts, configuration.pairedPorts());
       for (String portName : configuration.pairedPorts()) {
         if (!pairedPorts.containsKey(portName)) {
-          PairedSerialPort newPort = new PairedSerialPort(
-              portName,
-              portName + "." + PARTNER_POSTFIX);
+          PairedCommsPort newPort = new PairedCommsPort(portName, portName + "." + PARTNER_POSTFIX);
           ServiceRegistration<CommsPort> service;
           service = context.registerService(CommsPort.class, newPort, getProperties(newPort));
           pairedPorts.put(newPort.getName(), service);

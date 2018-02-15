@@ -32,7 +32,7 @@ import java.util.Locale;
 import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.comms.copley.CopleyController;
-import uk.co.saiman.comms.rest.ControllerREST;
+import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.SimpleCommsREST;
 
 public class CopleyCommsREST extends SimpleCommsREST<CopleyComms, CopleyController> {
@@ -54,7 +54,7 @@ public class CopleyCommsREST extends SimpleCommsREST<CopleyComms, CopleyControll
   }
 
   @Override
-  public ControllerREST createControllerREST(CopleyController controller) {
+  public ActionTableREST createControllerREST(CopleyController controller) {
     return new CopleyControllerREST(controller, dtos);
   }
 }

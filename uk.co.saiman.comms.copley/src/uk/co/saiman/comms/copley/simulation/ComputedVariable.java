@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.comms.copley.simulation;
 
-import uk.co.saiman.comms.ByteConverter;
+import uk.co.saiman.bytes.ByteConverter;
 import uk.co.saiman.comms.copley.VariableBank;
 
 abstract class ComputedVariable<T> implements SimulatedVariable {

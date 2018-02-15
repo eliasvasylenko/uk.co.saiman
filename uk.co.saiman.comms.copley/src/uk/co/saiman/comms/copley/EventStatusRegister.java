@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.comms.copley;
 
-import uk.co.saiman.comms.Bit;
+import uk.co.saiman.bytes.Bit;
 
 public class EventStatusRegister {
 	@Bit(0)

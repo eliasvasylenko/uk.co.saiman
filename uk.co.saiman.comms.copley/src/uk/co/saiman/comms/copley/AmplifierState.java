@@ -29,12 +29,12 @@ package uk.co.saiman.comms.copley;
 
 import java.lang.reflect.Type;
 
-import uk.co.saiman.comms.Bit;
-import uk.co.saiman.comms.BitConverter;
-import uk.co.saiman.comms.BitConverterFactory;
-import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.Bytes;
-import uk.co.saiman.comms.PrimitiveBitConverters;
+import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.BitConverter;
+import uk.co.saiman.bytes.BitConverterFactory;
+import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.Bytes;
+import uk.co.saiman.bytes.PrimitiveBitConverters;
 
 @Bytes(2)
 public class AmplifierState {

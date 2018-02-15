@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Comms;
+import uk.co.saiman.comms.CommsService;
 
-public interface SaintComms extends Comms<SaintController> {
+public interface SaintComms extends CommsService<SaintController> {
   /**
    * The message size in bytes for the SAINT comms interface, for both sending
    * and receiving messages.

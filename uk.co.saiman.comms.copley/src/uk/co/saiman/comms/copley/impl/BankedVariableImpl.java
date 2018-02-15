@@ -33,7 +33,7 @@ import uk.co.saiman.comms.copley.VariableBank;
 
 class BankedVariableImpl<U> extends WritableVariableImpl<U> implements BankedVariable<U> {
   public BankedVariableImpl(
-      CopleyControllerImpl controller,
+      CopleyNodeImpl controller,
       CopleyVariableID id,
       Class<U> variableClass,
       int axis) {
@@ -41,7 +41,7 @@ class BankedVariableImpl<U> extends WritableVariableImpl<U> implements BankedVar
   }
 
   private BankedVariableImpl(
-      CopleyControllerImpl controller,
+      CopleyNodeImpl controller,
       CopleyVariableID id,
       Class<U> variableClass,
       int axis,

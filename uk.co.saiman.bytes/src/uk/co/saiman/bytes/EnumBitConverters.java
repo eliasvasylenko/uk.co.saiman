@@ -25,9 +25,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms;
+package uk.co.saiman.bytes;
 
-import static uk.co.saiman.comms.BitArray.fromInt;
+import static uk.co.saiman.bytes.BitArray.fromInt;
 import static uk.co.saiman.reflection.Types.getErasedType;
 
 import java.lang.reflect.Type;

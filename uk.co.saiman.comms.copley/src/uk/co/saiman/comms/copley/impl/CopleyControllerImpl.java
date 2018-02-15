@@ -27,82 +27,166 @@
  */
 package uk.co.saiman.comms.copley.impl;
 
-import static uk.co.saiman.comms.copley.CopleyOperationID.GET_VARIABLE;
-import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
-import static uk.co.saiman.comms.copley.ErrorCode.ILLEGAL_AXIS_NUMBER;
-import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+import static java.util.Collections.singletonList;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
+import static uk.co.saiman.collection.StreamUtilities.upcastStream;
+import static uk.co.saiman.comms.copley.ErrorCode.INVALID_NODE_ID;
+import static uk.co.saiman.comms.copley.impl.CopleyNodeImpl.NODE_ID_MASK;
 
+import java.io.IOException;
+import java.nio.channels.ByteChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
-import uk.co.saiman.comms.ByteConverter;
-import uk.co.saiman.comms.ByteConverters;
-import uk.co.saiman.comms.copley.CopleyAxis;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+import uk.co.saiman.bytes.ByteConverters;
+import uk.co.saiman.comms.CommsChannel;
+import uk.co.saiman.comms.CommsException;
+import uk.co.saiman.comms.CommsPort;
+import uk.co.saiman.comms.InvalidCommsPort;
 import uk.co.saiman.comms.copley.CopleyController;
-import uk.co.saiman.comms.copley.CopleyOperationID;
-import uk.co.saiman.comms.copley.VariableIdentifier;
+import uk.co.saiman.comms.copley.CopleyNode;
+import uk.co.saiman.comms.copley.impl.CopleyControllerImpl.CopleyCommsConfiguration;
+import uk.co.saiman.function.ThrowingFunction;
 
+@Designate(ocd = CopleyCommsConfiguration.class, factory = true)
+@Component(
+    name = CopleyControllerImpl.CONFIGURATION_PID,
+    configurationPid = CopleyControllerImpl.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
 public class CopleyControllerImpl implements CopleyController {
-  private static final int MAXIMUM_AXES = 8;
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.copley";
 
-  private CopleyCommsImpl comms;
-  private final ByteConverters converters;
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "Copley Comms Configuration",
+      description = "The configuration for the underlying serial comms for a Copley motor control")
+  public @interface CopleyCommsConfiguration {
+    @AttributeDefinition(name = "Serial Port", description = "The serial port for comms")
+    String port_target();
+  }
 
-  private final List<CopleyAxis> axes;
+  @Reference(cardinality = OPTIONAL, policy = STATIC, policyOption = GREEDY)
+  private CommsPort port;
+  private CommsChannel channel;
+  private CommsException fault;
 
-  public CopleyControllerImpl(CopleyCommsImpl comms) {
-    this.comms = comms;
-    this.converters = comms.getConverters();
-    int axisCount = countAxes();
-    this.axes = new ArrayList<>(axisCount);
-    for (int i = 0; i < axisCount; i++) {
-      axes.add(new CopleyAxisImpl(this, i));
+  @Reference
+  ByteConverters converters;
+
+  List<CopleyNodeImpl> nodes = new ArrayList<>();
+
+  @Activate
+  void activate(CopleyCommsConfiguration configuration) throws IOException {
+    if (port == null) {
+      port = new InvalidCommsPort(configuration.port_target());
+    }
+    reset();
+  }
+
+  @Deactivate
+  void deactivate() throws IOException {
+    if (channel != null) {
+      channel.close();
+      channel = null;
     }
   }
 
-  private int countAxes() {
-    int axes = 0;
+  @Override
+  public synchronized void reset() {
+    try {
+      if (fault != null) {
+        fault = null;
+      }
+      if (channel == null || !channel.isOpen()) {
+        nodes.clear();
+
+        channel = port.openChannel();
+        channel.read();
+
+        nodes.addAll(listNodes());
+      }
+
+      ping();
+    } catch (CommsException e) {
+      throw setFault(e);
+    } catch (Exception e) {
+      throw setFault(new CommsException("Problem opening comms", e));
+    }
+  }
+
+  private List<CopleyNodeImpl> listNodes() {
+    try {
+      return singletonList(new CopleyNodeImpl(this));
+    } catch (CopleyErrorException e) {
+      if (e.getCode() != INVALID_NODE_ID) {
+        throw e;
+      }
+    }
+
+    List<CopleyNodeImpl> nodes = new ArrayList<>();
     do {
       try {
-        executeCopleyCommand(
-            GET_VARIABLE,
-            getConverter(VariableIdentifier.class)
-                .toBytes(new VariableIdentifier(DRIVE_EVENT_STATUS, axes, ACTIVE)));
-
+        nodes.add(new CopleyNodeImpl(this, nodes.size()));
       } catch (CopleyErrorException e) {
-        if (e.getCode() == ILLEGAL_AXIS_NUMBER) {
-          return axes;
+        if (e.getCode() == INVALID_NODE_ID) {
+          break;
         } else {
           throw e;
         }
       }
-    } while (++axes < MAXIMUM_AXES);
-    return axes;
+    } while (nodes.size() < NODE_ID_MASK);
+    return nodes;
   }
 
-  public <T> ByteConverter<T> getConverter(Class<T> type) {
-    return converters.getConverter(type);
-  }
-
-  public void close() {
-    comms = null;
+  protected synchronized CommsException setFault(CommsException commsException) {
+    this.fault = commsException;
+    return commsException;
   }
 
   @Override
-  public int getAxisCount() {
-    return axes.size();
+  public CommsPort getPort() {
+    return port;
+  }
+
+  ByteConverters getConverters() {
+    return converters;
   }
 
   @Override
-  public CopleyAxis getAxis(int i) {
-    return axes.get(i);
+  public Stream<CopleyNode> getNodes() {
+    return upcastStream(nodes.stream());
   }
 
-  byte[] executeCopleyCommand(CopleyOperationID operation, byte[] output) {
-    CopleyCommsImpl comms = this.comms;
-    if (comms == null) {
-      throw new IllegalStateException("Copley comms controller was reset");
+  protected void ping() {
+    nodes.forEach(n -> n.ping());
+  }
+
+  protected synchronized <U> U useChannel(ThrowingFunction<ByteChannel, U, Exception> action) {
+    try {
+      if (fault != null)
+        throw fault;
+
+      if (channel == null || !channel.isOpen())
+        throw new CommsException("Port is closed");
+
+      return action.apply(channel);
+    } catch (CommsException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new CommsException("Problem transferring data", e);
     }
-    return comms.executeCopleyCommand(operation, output);
   }
 }

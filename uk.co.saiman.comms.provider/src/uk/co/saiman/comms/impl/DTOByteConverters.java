@@ -48,18 +48,18 @@ import java.util.stream.Stream;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.collection.StreamUtilities;
-import uk.co.saiman.comms.Bit;
-import uk.co.saiman.comms.BitArray;
-import uk.co.saiman.comms.BitConverter;
-import uk.co.saiman.comms.BitConverterFactory;
-import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.ByteConverter;
-import uk.co.saiman.comms.ByteConverters;
-import uk.co.saiman.comms.Bytes;
+import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.BitArray;
+import uk.co.saiman.bytes.BitConverter;
+import uk.co.saiman.bytes.BitConverterFactory;
+import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.ByteConverter;
+import uk.co.saiman.bytes.ByteConverters;
+import uk.co.saiman.bytes.Bytes;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.ElementBits;
-import uk.co.saiman.comms.EnumBitConverters;
-import uk.co.saiman.comms.PrimitiveBitConverters;
+import uk.co.saiman.bytes.ElementBits;
+import uk.co.saiman.bytes.EnumBitConverters;
+import uk.co.saiman.bytes.PrimitiveBitConverters;
 
 /**
  * TODO This should become WAY safer and simpler for consumers after data
@@ -173,9 +173,9 @@ public class DTOByteConverters implements ByteConverters {
     }
 
     /*
-     * Each field has a list of converters, if the field is an array, they
-     * represent the elements in order. If the field is not an array, the stream
-     * should only contain one item.
+     * Each field has a list of converters, if the field is an array, they represent
+     * the elements in order. If the field is not an array, the stream should only
+     * contain one item.
      */
     public Stream<FieldBitConverter> getFieldConverters(Field field) {
       return fieldConverters.get(field).stream();
@@ -191,9 +191,10 @@ public class DTOByteConverters implements ByteConverters {
       }
 
       getFields().filter(field -> field.getType().isArray()).forEach(field -> {
-        Object value = Array.newInstance(
-            field.getType().getComponentType(),
-            (int) getFieldConverters(field).count());
+        Object value = Array
+            .newInstance(
+                field.getType().getComponentType(),
+                (int) getFieldConverters(field).count());
 
         try {
           field.set(object, value);
@@ -309,8 +310,13 @@ public class DTOByteConverters implements ByteConverters {
               .getDeclaredConstructor();
           constructor.setAccessible(true);
           converter = constructor.newInstance().getBitConverter(type);
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
-            | SecurityException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (
+            InstantiationException
+            | IllegalAccessException
+            | NoSuchMethodException
+            | SecurityException
+            | IllegalArgumentException
+            | InvocationTargetException e) {
           throw new RuntimeException(e);
         }
         converterStream = Stream.of(converter);

@@ -1,7 +1,6 @@
 Export-Package: \
 	uk.co.saiman.flowcontrol,\
 	uk.co.saiman.function,\
-	uk.co.saiman.bytes,\
 	uk.co.saiman.log,\
 	uk.co.saiman.reflection.classloading,\
 	uk.co.saiman.utility,\

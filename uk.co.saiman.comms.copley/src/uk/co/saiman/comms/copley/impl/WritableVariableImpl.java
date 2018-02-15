@@ -33,7 +33,7 @@ import uk.co.saiman.comms.copley.WritableVariable;
 
 class WritableVariableImpl<U> extends VariableImpl<U> implements WritableVariable<U> {
   public WritableVariableImpl(
-      CopleyControllerImpl controller,
+      CopleyNodeImpl controller,
       CopleyVariableID id,
       Class<U> variableClass,
       int axis,

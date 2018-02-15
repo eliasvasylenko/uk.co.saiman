@@ -68,7 +68,7 @@ import uk.co.saiman.shell.converters.RequireConverter;
         COMMAND_FUNCTION + "=inspectPort" })
 public class CommsCommands {
   @Reference(policy = DYNAMIC)
-  private List<CommsPort> ports = new CopyOnWriteArrayList<>();
+  private volatile List<CommsPort> ports = new CopyOnWriteArrayList<>();
   private CommsPort openPort;
   private CommsChannel openChannel;
 

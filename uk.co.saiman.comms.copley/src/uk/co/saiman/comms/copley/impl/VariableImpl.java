@@ -37,14 +37,14 @@ import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.copley.VariableIdentifier;
 
 class VariableImpl<U> implements Variable<U> {
-  private final CopleyControllerImpl controller;
+  private final CopleyNodeImpl controller;
   private final CopleyVariableID id;
   private final Class<U> variableClass;
   private final int axis;
   private final VariableBank bank;
 
   public VariableImpl(
-      CopleyControllerImpl controller,
+      CopleyNodeImpl controller,
       CopleyVariableID id,
       Class<U> variableClass,
       int axis,
@@ -56,7 +56,7 @@ class VariableImpl<U> implements Variable<U> {
     this.bank = bank;
   }
 
-  public CopleyControllerImpl getController() {
+  public CopleyNodeImpl getController() {
     return controller;
   }
 

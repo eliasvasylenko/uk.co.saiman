@@ -45,10 +45,10 @@ import java.util.stream.Stream;
  * 
  * @author Elias N Vasylenko
  */
-public interface ControllerREST {
+public interface ActionTableREST {
   /**
-   * @return a list of enumeration types the REST consumer should be aware of
-   *         when presenting entry data
+   * @return a list of enumeration types the REST consumer should be aware of when
+   *         presenting entry data
    */
   Stream<Class<? extends Enum<?>>> getEnums();
 

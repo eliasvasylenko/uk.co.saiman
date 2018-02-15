@@ -1,14 +1,14 @@
-package uk.co.saiman.comms.impl;
+package uk.co.saiman.comms;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
 
-public class InvalidSerialPort implements CommsPort {
+public class InvalidCommsPort implements CommsPort {
   private final String name;
 
-  public InvalidSerialPort(String name) {
+  public InvalidCommsPort(String name) {
     this.name = name;
   }
 
@@ -23,7 +23,7 @@ public class InvalidSerialPort implements CommsPort {
   }
 
   @Override
-  public void close() {}
+  public void kill() {}
 
   @Override
   public CommsChannel openChannel() {

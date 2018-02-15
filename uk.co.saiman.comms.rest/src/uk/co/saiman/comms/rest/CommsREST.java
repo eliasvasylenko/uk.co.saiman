@@ -30,8 +30,6 @@ package uk.co.saiman.comms.rest;
 import java.util.Locale;
 import java.util.Optional;
 
-import uk.co.saiman.comms.Comms.CommsStatus;
-
 /**
  * A view of a comms device to adapt its functionality over a common REST
  * interface.
@@ -52,14 +50,12 @@ public interface CommsREST {
   /**
    * Open the comms device
    */
-  ControllerREST openController();
+  ActionTableREST getActions();
 
   /**
    * Reset the comms device
    */
   void reset();
-
-  CommsStatus getStatus();
 
   Optional<String> getFaultText();
 

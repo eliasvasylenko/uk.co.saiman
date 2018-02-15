@@ -27,8 +27,22 @@
  */
 package uk.co.saiman.comms.copley;
 
-public interface CopleyController {
-  int getAxisCount();
+import java.util.stream.Stream;
 
-  CopleyAxis getAxis(int i);
+import uk.co.saiman.comms.CommsPort;
+
+public interface CopleyController {
+  int HEADER_SIZE = 4;
+  byte CHECKSUM = 0x5A;
+  int WORD_SIZE = 2;
+
+  /**
+   * Attempt to reset the comms is they are in an error state. If everything is
+   * working, invocation does nothing.
+   */
+  void reset();
+
+  CommsPort getPort();
+
+  Stream<CopleyNode> getNodes();
 }

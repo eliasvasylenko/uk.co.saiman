@@ -33,7 +33,7 @@ import static uk.co.saiman.comms.copley.VariableBank.STORED;
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.co.saiman.comms.ByteConverter;
+import uk.co.saiman.bytes.ByteConverter;
 import uk.co.saiman.comms.copley.VariableBank;
 
 class ReferenceVariable<T> implements SimulatedVariable {

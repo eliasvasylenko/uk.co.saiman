@@ -80,7 +80,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.ByteConverters;
-import uk.co.saiman.comms.Comms;
+import uk.co.saiman.comms.CommsService;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.SimpleComms;
@@ -107,7 +107,7 @@ import uk.co.saiman.comms.saint.impl.SaintCommsImpl.SaintCommsConfiguration;
 @Designate(ocd = SaintCommsConfiguration.class, factory = true)
 @Component(configurationPid = SaintCommsImpl.CONFIGURATION_PID, configurationPolicy = REQUIRE)
 public class SaintCommsImpl extends SimpleComms<SaintController>
-    implements SaintComms, Comms<SaintController> {
+    implements SaintComms, CommsService<SaintController> {
   public static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint";
 
   @SuppressWarnings("javadoc")

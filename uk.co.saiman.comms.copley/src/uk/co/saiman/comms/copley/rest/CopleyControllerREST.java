@@ -46,11 +46,11 @@ import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.TrajectoryCommand;
 import uk.co.saiman.comms.copley.TrajectoryProfileMode;
 import uk.co.saiman.comms.copley.VariableBank;
-import uk.co.saiman.comms.rest.ControllerREST;
+import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
-public class CopleyControllerREST implements ControllerREST {
+public class CopleyControllerREST implements ActionTableREST {
   static final String READ_VALUE = "readValue";
   static final String WRITE_VALUE = "writeValue";
   static final String SWITCH_BANK = "switchBank";

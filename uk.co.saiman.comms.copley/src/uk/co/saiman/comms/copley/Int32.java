@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.comms.copley;
 
-import uk.co.saiman.comms.Bit;
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.Bits;
 
 public class Int32 {
   public Int32() {}

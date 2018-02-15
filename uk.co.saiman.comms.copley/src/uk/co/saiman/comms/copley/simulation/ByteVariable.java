@@ -29,7 +29,7 @@ package uk.co.saiman.comms.copley.simulation;
 
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
-import static uk.co.saiman.comms.copley.impl.CopleyCommsImpl.WORD_SIZE;
+import static uk.co.saiman.comms.copley.impl.CopleyControllerImpl.WORD_SIZE;
 
 import java.util.ArrayList;
 import java.util.List;

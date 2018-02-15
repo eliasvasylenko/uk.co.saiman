@@ -33,7 +33,7 @@ import java.nio.channels.ByteChannel;
 
 import uk.co.saiman.observable.Observable;
 
-public interface CommsChannel extends ByteChannel, Observable<CommsChannel> {
+public interface CommsChannel extends ByteChannel, AutoCloseable, Observable<CommsChannel> {
   int bytesAvailable();
 
   default ByteBuffer read() throws IOException {

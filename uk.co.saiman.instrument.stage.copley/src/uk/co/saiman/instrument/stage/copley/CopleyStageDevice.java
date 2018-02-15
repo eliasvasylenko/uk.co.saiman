@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
-import static uk.co.saiman.comms.Comms.CommsStatus.OPEN;
+import static uk.co.saiman.comms.CommsService.CommsStatus.OPEN;
 import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
 import static uk.co.saiman.instrument.DeviceConnection.DISCONNECTED;
 import static uk.co.saiman.instrument.stage.StageState.POSITION_REACHED;

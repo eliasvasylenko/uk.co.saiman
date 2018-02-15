@@ -1,5 +1,9 @@
 [
 	{
+		"service.pid": "uk.co.saiman.console.log",
+		"maximumLevel": "2"
+	},
+	{
 		"service.pid": "uk.co.saiman.simulation.adc.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.simulation.adc",
 		"signalToNoiseRatio": "120",
@@ -36,24 +40,24 @@
 		"service.pid": "uk.co.saiman.comms.copley.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.copley",
 		"node": 0,
-		"#TODO#port.target": "(name=/saiman/copley)"
+		"port.target": "(name=/saiman/copley)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.copley.simulation",
 		"axes": 2,
 		"node": 0,
-		"#TODO#port.target": "(name=/saiman/copley.partner)"
+		"port.target": "(name=/saiman/copley.partner)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.saint.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.saint",
-		"#TODO#port.target": "(name=/saiman/saint)"
+		"port.target": "(name=/saiman/saint)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.saint.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.saint.simulation",
-		"#TODO#port.target": "(name=/saiman/saint.partner)"
+		"port.target": "(name=/saiman/saint.partner)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.simulation.saintsimulation",

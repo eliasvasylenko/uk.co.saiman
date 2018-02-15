@@ -70,7 +70,7 @@ public class JSerialCommsPort implements CommsPort {
   }
 
   @Override
-  public synchronized void close() {
+  public synchronized void kill() {
     closeChannel();
   }
 

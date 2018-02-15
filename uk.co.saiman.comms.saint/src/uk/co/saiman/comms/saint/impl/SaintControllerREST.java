@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 
 import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.rest.ControllerREST;
+import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 import uk.co.saiman.comms.saint.SaintController;
@@ -53,7 +53,7 @@ import uk.co.saiman.comms.saint.Value;
 import uk.co.saiman.comms.saint.ValueReadback;
 import uk.co.saiman.comms.saint.ValueRequest;
 
-final class SaintControllerREST implements ControllerREST {
+final class SaintControllerREST implements ActionTableREST {
   static final String GET_ACTUAL_VALUE = "getActual";
   static final String SET_REQUESTED_VALUE = "setRequested";
   static final String GET_REQUESTED_VALUE = "getRequested";

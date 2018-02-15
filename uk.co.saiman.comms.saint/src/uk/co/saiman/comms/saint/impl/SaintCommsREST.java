@@ -30,7 +30,7 @@ package uk.co.saiman.comms.saint.impl;
 import java.util.Locale;
 
 import osgi.enroute.dto.api.DTOs;
-import uk.co.saiman.comms.rest.ControllerREST;
+import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.SimpleCommsREST;
 import uk.co.saiman.comms.saint.SaintComms;
 import uk.co.saiman.comms.saint.SaintController;
@@ -49,7 +49,7 @@ public class SaintCommsREST extends SimpleCommsREST<SaintComms, SaintController>
   }
 
   @Override
-  public ControllerREST createControllerREST(SaintController controller) {
+  public ActionTableREST createControllerREST(SaintController controller) {
     return new SaintControllerREST(getName(), controller, dtos);
   }
 

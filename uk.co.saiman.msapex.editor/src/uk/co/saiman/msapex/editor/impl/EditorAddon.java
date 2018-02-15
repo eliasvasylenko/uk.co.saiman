@@ -199,11 +199,12 @@ public class EditorAddon implements EditorService {
   public void registerProvider(EditorProvider provider) {
     editorProviders.put(provider.getId(), provider);
     List<MPart> orphans = orphanedEditors.remove(provider.getId());
-    for (MPart part : orphans) {
-      Object resource = provider.loadEditorResource(part);
-      partResources.put(part, resource);
-      resourceParts.put(resource, part);
-    }
+    if (orphans != null)
+      for (MPart part : orphans) {
+        Object resource = provider.loadEditorResource(part);
+        partResources.put(part, resource);
+        resourceParts.put(resource, part);
+      }
   }
 
   @Override

@@ -25,12 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms;
-
-public interface ByteConverter<T> {
-	T create();
-
-	T fromBytes(byte[] bytes);
-
-	byte[] toBytes(T object);
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.bytes;

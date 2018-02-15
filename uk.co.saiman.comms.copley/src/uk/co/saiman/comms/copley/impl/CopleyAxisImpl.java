@@ -4,9 +4,14 @@ import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
 import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_ANGULAR_RESOLUTION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_DIRECTION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_LINEAR_RESOLUTION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_UNITS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+import static uk.co.saiman.comms.copley.VariableBank.STORED;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,6 +20,7 @@ import uk.co.saiman.comms.copley.AmplifierState;
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.EventStatusRegister;
+import uk.co.saiman.comms.copley.Int16;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.comms.copley.TrajectoryProfile;
 import uk.co.saiman.comms.copley.Variable;
@@ -22,11 +28,11 @@ import uk.co.saiman.comms.copley.VariableBank;
 import uk.co.saiman.comms.copley.WritableVariable;
 
 public class CopleyAxisImpl implements CopleyAxis {
-  private final CopleyControllerImpl controller;
+  private final CopleyNodeImpl controller;
   private final int axis;
   private final Map<CopleyVariableID, VariableImpl<?>> variables;
 
-  public CopleyAxisImpl(CopleyControllerImpl controller, int axis) {
+  public CopleyAxisImpl(CopleyNodeImpl controller, int axis) {
     this.controller = controller;
     this.axis = axis;
     this.variables = new LinkedHashMap<>();
@@ -37,6 +43,10 @@ public class CopleyAxisImpl implements CopleyAxis {
     addBankedVariable(TRAJECTORY_POSITION_COUNTS, Int32.class);
     addBankedVariable(AMPLIFIER_STATE, AmplifierState.class);
     addWritableVariable(ACTUAL_POSITION, Int32.class, ACTIVE);
+    addWritableVariable(MOTOR_ENCODER_UNITS, Int16.class, STORED);
+    addWritableVariable(MOTOR_ENCODER_ANGULAR_RESOLUTION, Int32.class, STORED);
+    addWritableVariable(MOTOR_ENCODER_LINEAR_RESOLUTION, Int16.class, STORED);
+    addWritableVariable(MOTOR_ENCODER_DIRECTION, Int16.class, STORED);
   }
 
   @Override

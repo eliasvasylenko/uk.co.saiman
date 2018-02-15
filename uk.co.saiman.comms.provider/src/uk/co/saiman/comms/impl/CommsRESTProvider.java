@@ -30,7 +30,7 @@ package uk.co.saiman.comms.impl;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static uk.co.saiman.comms.Comms.CommsStatus.CLOSED;
+import static uk.co.saiman.comms.CommsStatus.CLOSED;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.POLLABLE;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.RECEIVES_INPUT_DATA;
@@ -60,7 +60,7 @@ import osgi.enroute.rest.api.REST;
 import osgi.enroute.rest.api.RequireRestImplementation;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.CommsREST;
-import uk.co.saiman.comms.rest.ControllerREST;
+import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
@@ -96,7 +96,7 @@ public class CommsRESTProvider implements REST {
   private static final String TRACE_KEY = "trace";
 
   private Map<CommsREST, Bundle> commsInterfaces;
-  private Map<CommsREST, ControllerREST> controllers;
+  private Map<CommsREST, ActionTableREST> controllers;
   private ServiceTracker<CommsREST, CommsREST> commsInterfaceTracker;
 
   @Reference
@@ -177,7 +177,7 @@ public class CommsRESTProvider implements REST {
     return getConnectionInfo(comms);
   }
 
-  private ControllerREST getController(CommsREST comms) {
+  private ActionTableREST getController(CommsREST comms) {
     if (comms.getStatus() == CLOSED)
       throw new IllegalStateException(
           "Cannot access controller while comms is closed " + comms.getName());
@@ -206,21 +206,26 @@ public class CommsRESTProvider implements REST {
     return getControllerInfoImpl(getController(getNamedComms(commsName)));
   }
 
-  private Map<String, Object> getControllerInfoImpl(ControllerREST controller) {
+  private Map<String, Object> getControllerInfoImpl(ActionTableREST controller) {
     Map<String, Object> info = new HashMap<>();
 
-    info.put(
-        ENTRIES_KEY,
-        controller.getEntries().map(ControllerRESTEntry::getID).collect(toList()));
-    info.put(
-        ACTIONS_KEY,
-        controller.getActions().map(ControllerRESTAction::getID).collect(toList()));
-    info.put(
-        ENUMS_KEY,
-        controller.getEnums().collect(
-            toMap(
-                Class::getName,
-                e -> stream(e.getEnumConstants()).map(Enum::name).collect(toList()))));
+    info
+        .put(
+            ENTRIES_KEY,
+            controller.getEntries().map(ControllerRESTEntry::getID).collect(toList()));
+    info
+        .put(
+            ACTIONS_KEY,
+            controller.getActions().map(ControllerRESTAction::getID).collect(toList()));
+    info
+        .put(
+            ENUMS_KEY,
+            controller
+                .getEnums()
+                .collect(
+                    toMap(
+                        Class::getName,
+                        e -> stream(e.getEnumConstants()).map(Enum::name).collect(toList()))));
 
     return info;
   }
@@ -247,8 +252,9 @@ public class CommsRESTProvider implements REST {
 
   public Map<String, Map<String, Object>> getEntriesInfo(String commsName) {
     CommsREST comms = getNamedComms(commsName);
-    return getController(comms).getEntries().collect(
-        toMap(c -> c.getID(), c -> getEntryInfoImpl(c)));
+    return getController(comms)
+        .getEntries()
+        .collect(toMap(c -> c.getID(), c -> getEntryInfoImpl(c)));
   }
 
   private Map<String, Object> getEntryInfoImpl(ControllerRESTEntry entry) {
@@ -263,8 +269,9 @@ public class CommsRESTProvider implements REST {
 
   public Map<String, Map<String, Object>> getActionsInfo(String commsName) {
     CommsREST comms = getNamedComms(commsName);
-    return getController(comms).getActions().collect(
-        toMap(c -> c.getID(), c -> getActionInfoImpl(c)));
+    return getController(comms)
+        .getActions()
+        .collect(toMap(c -> c.getID(), c -> getActionInfoImpl(c)));
   }
 
   private Map<String, Object> getActionInfoImpl(ControllerRESTAction action) {

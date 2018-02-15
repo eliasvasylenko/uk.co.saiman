@@ -27,10 +27,9 @@
  */
 package uk.co.saiman.comms;
 
-import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
 import uk.co.saiman.observable.Observable;
 
-public interface CommsStream extends Closeable, Observable<ByteBuffer>, WritableByteChannel {}
+public interface CommsStream extends AutoCloseable, Observable<ByteBuffer>, WritableByteChannel {}

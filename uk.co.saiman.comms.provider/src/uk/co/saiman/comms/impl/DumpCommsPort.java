@@ -10,11 +10,11 @@ import uk.co.saiman.comms.CommsStream;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observer;
 
-public class DumpSerialPort implements CommsPort {
+public class DumpCommsPort implements CommsPort {
   private final String name;
   private boolean open;
 
-  public DumpSerialPort(String name) {
+  public DumpCommsPort(String name) {
     this.name = name;
   }
 
@@ -29,7 +29,7 @@ public class DumpSerialPort implements CommsPort {
   }
 
   @Override
-  public void close() {
+  public void kill() {
     open = false;
   }
 

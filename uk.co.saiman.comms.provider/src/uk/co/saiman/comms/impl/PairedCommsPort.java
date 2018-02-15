@@ -15,24 +15,24 @@ import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observer;
 
-public class PairedSerialPort implements CommsPort {
+public class PairedCommsPort implements CommsPort {
   private static final int BUFFER_SIZE = 1024;
 
-  private final PairedSerialPort partner;
+  private final PairedCommsPort partner;
   private final String name;
   private final ByteBuffer buffer;
   private final HotObservable<CommsChannel> updated;
   private CommsChannel channel;
 
-  public PairedSerialPort(String name, String partnerName) {
-    this.partner = new PairedSerialPort(partnerName, this);
+  public PairedCommsPort(String name, String partnerName) {
+    this.partner = new PairedCommsPort(partnerName, this);
     this.name = name;
     this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
     this.updated = new HotObservable<>();
     updated.complete();
   }
 
-  public PairedSerialPort(String name, PairedSerialPort partner) {
+  public PairedCommsPort(String name, PairedCommsPort partner) {
     this.partner = partner;
     this.name = name;
     this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
@@ -51,7 +51,7 @@ public class PairedSerialPort implements CommsPort {
   }
 
   @Override
-  public synchronized void close() {
+  public synchronized void kill() {
     if (channel != null) {
       channel.close();
     }
@@ -189,11 +189,16 @@ public class PairedSerialPort implements CommsPort {
     };
   }
 
-  public PairedSerialPort getPartner() {
+  public PairedCommsPort getPartner() {
     return partner;
   }
 
   public List<CommsPort> asList() {
     return Arrays.asList(this, getPartner());
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + " " + getName();
   }
 }

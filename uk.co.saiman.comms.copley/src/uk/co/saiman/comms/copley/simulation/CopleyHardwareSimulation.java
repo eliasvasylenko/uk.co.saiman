@@ -28,25 +28,27 @@
 package uk.co.saiman.comms.copley.simulation;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static uk.co.saiman.comms.copley.CopleyComms.HEADER_SIZE;
+import static uk.co.saiman.comms.copley.CopleyController.HEADER_SIZE;
+import static uk.co.saiman.comms.copley.CopleyController.WORD_SIZE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
 import static uk.co.saiman.comms.copley.CopleyVariableID.AMPLIFIER_STATE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.LATCHED_EVENT_STATUS;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_ANGULAR_RESOLUTION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_DIRECTION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_LINEAR_RESOLUTION;
+import static uk.co.saiman.comms.copley.CopleyVariableID.MOTOR_ENCODER_UNITS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_POSITION_COUNTS;
 import static uk.co.saiman.comms.copley.CopleyVariableID.TRAJECTORY_PROFILE_MODE;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
-import static uk.co.saiman.comms.copley.impl.CopleyCommsImpl.NODE_ID_MASK;
-import static uk.co.saiman.comms.copley.impl.CopleyCommsImpl.WORD_SIZE;
+import static uk.co.saiman.comms.copley.impl.CopleyNodeImpl.NODE_ID_MASK;
 import static uk.co.saiman.log.Log.Level.ERROR;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -57,7 +59,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.comms.ByteConverters;
+import uk.co.saiman.bytes.ByteConverters;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
@@ -66,7 +68,7 @@ import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.ErrorCode;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.comms.copley.VariableIdentifier;
-import uk.co.saiman.comms.copley.impl.CopleyCommsImpl;
+import uk.co.saiman.comms.copley.impl.CopleyControllerImpl;
 import uk.co.saiman.comms.copley.simulation.CopleyHardwareSimulation.CopleyHardwareSimulationConfiguration;
 import uk.co.saiman.log.Log;
 
@@ -92,11 +94,9 @@ public class CopleyHardwareSimulation {
     String port_target();
 
     @AttributeDefinition(
-        name = "Node Number",
-        description = "The node number for multi-drop mode dispatch, or 0 for the directly connected node")
-    int node()
-
-    default 0;
+        name = "Node Count",
+        description = "The number of nodes for multi-drop mode dispatch, or 0 for one direct connection")
+    int nodes() default 0;
 
     @AttributeDefinition(
         name = "Axis Count",
@@ -104,8 +104,8 @@ public class CopleyHardwareSimulation {
     int axes() default 1;
   }
 
-  @Reference(policy = DYNAMIC)
-  volatile Log log;
+  @Reference
+  private Log log;
 
   @Reference
   ByteConverters converters;
@@ -120,12 +120,10 @@ public class CopleyHardwareSimulation {
   private CopleyOperationID operation;
   private ByteBuffer message;
 
-  private int node;
+  private int nodes;
   private int axes;
 
   private Map<CopleyVariableID, SimulatedVariable> variables = new HashMap<>();
-
-  private ReferenceVariable<Int32> requestedPosition;
 
   @Activate
   void activate(CopleyHardwareSimulationConfiguration configuration) throws IOException {
@@ -136,7 +134,7 @@ public class CopleyHardwareSimulation {
   @Modified
   void configure(CopleyHardwareSimulationConfiguration configuration) throws IOException {
     try {
-      node = configuration.node();
+      nodes = configuration.nodes();
       axes = configuration.axes();
       variables.clear();
 
@@ -145,7 +143,9 @@ public class CopleyHardwareSimulation {
       variables.put(AMPLIFIER_STATE, new ByteVariable(axes, 1));
       variables.put(TRAJECTORY_PROFILE_MODE, new ByteVariable(axes, 1));
 
-      requestedPosition = new ReferenceVariable<>(axes, converters.getConverter(Int32.class));
+      ReferenceVariable<Int32> requestedPosition = new ReferenceVariable<>(
+          axes,
+          converters.getConverter(Int32.class));
       variables.put(TRAJECTORY_POSITION_COUNTS, requestedPosition);
       variables
           .put(
@@ -156,12 +156,13 @@ public class CopleyHardwareSimulation {
                   MOTOR_SPEED_UNITS_PER_MILLISECOND,
                   i -> (double) i.value,
                   d -> new Int32(d.intValue())));
+
+      variables.put(MOTOR_ENCODER_UNITS, new ByteVariable(axes, 1));
+      variables.put(MOTOR_ENCODER_ANGULAR_RESOLUTION, new ByteVariable(axes, 2));
+      variables.put(MOTOR_ENCODER_LINEAR_RESOLUTION, new ByteVariable(axes, 1));
+      variables.put(MOTOR_ENCODER_DIRECTION, new ByteVariable(axes, 1));
     } catch (Exception e) {
-      Log log = this.log;
-      if (log != null)
-        log.log(ERROR, e);
-      else
-        e.printStackTrace();
+      log.log(ERROR, e);
     }
   }
 
@@ -171,29 +172,33 @@ public class CopleyHardwareSimulation {
   }
 
   private synchronized void openPort() {
-    stream = port.openStream();
-    stream.observe(buffer -> {
-      do {
-        boolean onHeader = message == null;
-        ByteBuffer currentBuffer = onHeader ? header : message;
-
+    try {
+      stream = port.openStream();
+      stream.observe(buffer -> {
         do {
-          currentBuffer.put(buffer.get());
-        } while (currentBuffer.hasRemaining() && buffer.hasRemaining());
+          boolean onHeader = message == null;
+          ByteBuffer currentBuffer = onHeader ? header : message;
 
-        if (!currentBuffer.hasRemaining()) {
-          currentBuffer.flip();
+          do {
+            currentBuffer.put(buffer.get());
+          } while (currentBuffer.hasRemaining() && buffer.hasRemaining());
 
-          if (onHeader) {
-            receiveHeader();
-            if (message.capacity() == 0)
+          if (!currentBuffer.hasRemaining()) {
+            currentBuffer.flip();
+
+            if (onHeader) {
+              receiveHeader();
+              if (message.capacity() == 0)
+                receiveMessage();
+            } else {
               receiveMessage();
-          } else {
-            receiveMessage();
+            }
           }
-        }
-      } while (buffer.hasRemaining());
-    });
+        } while (buffer.hasRemaining());
+      });
+    } catch (Exception e) {
+      log.log(ERROR, e);
+    }
   }
 
   private synchronized void closePort() throws IOException {
@@ -215,7 +220,7 @@ public class CopleyHardwareSimulation {
     byte[] result = new byte[] {};
     ErrorCode errorCode = ErrorCode.SUCCESS;
 
-    if (node == currentNode) {
+    if (nodes == currentNode) {
       try {
         VariableIdentifier variable;
         CopleyVariableID id;
@@ -280,7 +285,7 @@ public class CopleyHardwareSimulation {
           throw new IllegalArgumentException("Unexpected operation " + operation);
         }
 
-        byte checksum = (byte) (CopleyCommsImpl.CHECKSUM ^ result.length);
+        byte checksum = (byte) (CopleyControllerImpl.CHECKSUM ^ result.length);
         for (byte item : result)
           checksum ^= item;
 
@@ -294,15 +299,12 @@ public class CopleyHardwareSimulation {
 
         stream.write(response);
       } catch (Exception e) {
-        Optional
-            .ofNullable(log)
-            .ifPresent(
-                l -> l
-                    .log(
-                        ERROR,
-                        new CommsException(
-                            "Unable to send simulated hardware response: " + e.getMessage(),
-                            e)));
+        log
+            .log(
+                ERROR,
+                new CommsException(
+                    "Unable to send simulated hardware response: " + e.getMessage(),
+                    e));
       }
     }
 

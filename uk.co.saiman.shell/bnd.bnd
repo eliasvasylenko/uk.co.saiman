@@ -8,7 +8,7 @@ Bundle-Description: \
 	org.apache.felix.gogo.runtime,\
 	org.apache.felix.gogo.shell,\
 \
-	uk.co.saiman.utilities;version=snapshot
+	uk.co.saiman.bytes;version=snapshot
 
 Export-Package: \
 	uk.co.saiman.shell,\

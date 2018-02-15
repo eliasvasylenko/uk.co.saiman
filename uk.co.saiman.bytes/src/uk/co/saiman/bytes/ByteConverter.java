@@ -25,16 +25,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.comms;
+package uk.co.saiman.bytes;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+public interface ByteConverter<T> {
+	T create();
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+	T fromBytes(byte[] bytes);
 
-@Retention(RUNTIME)
-@Target(TYPE)
-public @interface Bytes {
-	int value() default 1;
+	byte[] toBytes(T object);
 }

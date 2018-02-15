@@ -63,14 +63,14 @@ public class ConsoleLog implements LogListener {
       description = "The console log provides a listener over the OSGi log service which directs output to stdout")
   public @interface ConsoleLogConfiguration {
     @AttributeDefinition(
-        name = "Enable Console Log",
-        description = "Enable console output for the OSGi log service")
-    boolean enabled();
+        name = "Maximum Console Log Level",
+        description = "Enable console output for log messages of a maximum level, where 1 is an error, 2 is a warning, 3 is information, and 4 is debug output")
+    int maximumLevel() default LogService.LOG_INFO;
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.console.log";
 
-  private boolean enabled = false;
+  private int maximum = 0;
 
   @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
   @SuppressWarnings("javadoc")
@@ -86,12 +86,12 @@ public class ConsoleLog implements LogListener {
   @Activate
   @Modified
   void updated(ConsoleLogConfiguration configuration) {
-    enabled = configuration.enabled();
+    maximum = configuration.maximumLevel();
   }
 
   @Override
   public void logged(LogEntry entry) {
-    if (enabled) {
+    if (entry.getLevel() <= maximum) {
       String level = formatLevel(entry.getLevel());
       String bundle = formatIfPresent(entry.getBundle());
       String service = formatIfPresent(entry.getServiceReference());
