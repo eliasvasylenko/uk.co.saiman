@@ -47,7 +47,8 @@ import java.util.stream.Stream;
 import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.copley.BankedVariable;
-import uk.co.saiman.comms.copley.CopleyController;
+import uk.co.saiman.comms.copley.CopleyAxis;
+import uk.co.saiman.comms.copley.CopleyNode;
 import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;
@@ -60,7 +61,7 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
   private final Map<String, Object> inputData = new LinkedHashMap<>();
   private final Map<String, Object> outputData = new LinkedHashMap<>();
 
-  private final CopleyController controller;
+  private final CopleyNode node;
   private final CopleyVariableID id;
   private final DTOs dtos;
 
@@ -68,16 +69,16 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
   private final boolean banked;
   private VariableBank bank;
 
-  public VariableCommsRESTEntry(CopleyController controller, CopleyVariableID id, DTOs dtos) {
-    this.controller = controller;
+  public VariableCommsRESTEntry(CopleyNode node, CopleyVariableID id, DTOs dtos) {
+    this.node = node;
     this.id = id;
     this.dtos = dtos;
 
-    Variable<?> variable = controller.getAxis(0).variable(id);
+    Variable<?> variable = node.getAxes().findAny().get().variable(id);
     this.writable = variable instanceof WritableVariable<?>;
     this.banked = variable instanceof BankedVariable<?>;
     bank = variable.getBank();
-    
+
     readValue(true);
   }
 
@@ -106,7 +107,7 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
   public void readValue(boolean updateOutput) {
     Map<String, List<Object>> inputData = new LinkedHashMap<>();
 
-    for (int axis = 0; axis < controller.getAxisCount(); axis++) {
+    node.getAxes().forEach(axis -> {
       Object value = getVariable(axis).get();
 
       try {
@@ -121,7 +122,7 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
       } catch (Exception e) {
         throw new CommsException("Cannot convert " + value + " to map", e);
       }
-    }
+    });
 
     if (updateOutput && writable) {
       outputData.clear();
@@ -134,8 +135,8 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
       this.inputData.put(BANK_VALUE, bank);
   }
 
-  private Variable<?> getVariable(int axis) {
-    Variable<?> variable = controller.getAxis(axis).variable(id);
+  private Variable<?> getVariable(CopleyAxis axis) {
+    Variable<?> variable = axis.variable(id);
     if (banked)
       variable = ((BankedVariable<?>) variable).forBank(bank);
     return variable;
@@ -143,7 +144,7 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
 
   @SuppressWarnings("unchecked")
   public void writeValue() {
-    for (int axis = 0; axis < controller.getAxisCount(); axis++) {
+    node.getAxes().forEach(axis -> {
       Variable<?> variable = getVariable(axis);
       Object value;
 
@@ -160,7 +161,7 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
             e);
       }
       ((WritableVariable<Object>) variable).set(value);
-    }
+    });
   }
 
   public void switchBank() {

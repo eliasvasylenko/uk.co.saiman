@@ -137,6 +137,7 @@ should-be-first-in-runbundles-to-fix-some-startup-problems: \
 	uk.co.saiman.camera;version=snapshot,\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.bytes;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
 	uk.co.saiman.comms.provider;version=snapshot,\

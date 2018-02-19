@@ -46,7 +46,7 @@
 		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.copley.simulation",
 		"axes": 2,
-		"node": 0,
+		"nodes": 0,
 		"port.target": "(name=/saiman/copley.partner)"
 	},
 	{

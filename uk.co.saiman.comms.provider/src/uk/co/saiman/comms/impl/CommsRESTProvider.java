@@ -30,7 +30,6 @@ package uk.co.saiman.comms.impl;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static uk.co.saiman.comms.CommsStatus.CLOSED;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.POLLABLE;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.RECEIVES_INPUT_DATA;
@@ -59,8 +58,8 @@ import osgi.enroute.dto.api.DTOs;
 import osgi.enroute.rest.api.REST;
 import osgi.enroute.rest.api.RequireRestImplementation;
 import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.rest.ActionTableREST;
+import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
@@ -70,6 +69,8 @@ public class CommsRESTProvider implements REST {
   private static final String NAME_KEY = "name";
   private static final String CONNECTION_KEY = "connection";
   private static final String STATUS_KEY = "status";
+  private static final String STATUS_CONNECTED = "connected";
+  private static final String STATUS_FAULT = "fault";
   private static final String STATUS_FAULT_KEY = "fault";
   private static final String CHANNEL_KEY = "channel";
   private static final String BUNDLE_KEY = "bundle";
@@ -96,7 +97,6 @@ public class CommsRESTProvider implements REST {
   private static final String TRACE_KEY = "trace";
 
   private Map<CommsREST, Bundle> commsInterfaces;
-  private Map<CommsREST, ActionTableREST> controllers;
   private ServiceTracker<CommsREST, CommsREST> commsInterfaceTracker;
 
   @Reference
@@ -105,7 +105,6 @@ public class CommsRESTProvider implements REST {
   @Activate
   void activate(BundleContext context) {
     commsInterfaces = new LinkedHashMap<>();
-    controllers = new HashMap<>();
 
     commsInterfaceTracker = new ServiceTracker<>(
         context,
@@ -170,20 +169,8 @@ public class CommsRESTProvider implements REST {
     return getCommsInfoImpl(getNamedComms(name));
   }
 
-  public Map<String, Object> postOpenComms(String name) {
-    CommsREST comms = getNamedComms(name);
-    comms.openController();
-    getController(comms);
-    return getConnectionInfo(comms);
-  }
-
   private ActionTableREST getController(CommsREST comms) {
-    if (comms.getStatus() == CLOSED)
-      throw new IllegalStateException(
-          "Cannot access controller while comms is closed " + comms.getName());
-
-    controllers.put(comms, comms.openController());
-    return controllers.get(comms);
+    return comms.getActions();
   }
 
   public Map<String, Object> postResetComms(String name) {
@@ -233,9 +220,14 @@ public class CommsRESTProvider implements REST {
   private Map<String, Object> getConnectionInfo(CommsREST comms) {
     Map<String, Object> info = new HashMap<>();
 
-    info.put(STATUS_KEY, comms.getStatus());
     info.put(CHANNEL_KEY, comms.getPort());
-    comms.getFaultText().ifPresent(fault -> info.put(STATUS_FAULT_KEY, fault));
+    try {
+      comms.getActions();
+      info.put(STATUS_KEY, STATUS_CONNECTED);
+    } catch (Exception e) {
+      info.put(STATUS_KEY, STATUS_FAULT);
+      info.put(STATUS_FAULT_KEY, e.getMessage());
+    }
 
     return info;
   }

@@ -42,6 +42,7 @@ import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.comms.copley.AmplifierMode;
 import uk.co.saiman.comms.copley.CopleyController;
+import uk.co.saiman.comms.copley.CopleyNode;
 import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.TrajectoryCommand;
 import uk.co.saiman.comms.copley.TrajectoryProfileMode;
@@ -63,11 +64,13 @@ public class CopleyControllerREST implements ActionTableREST {
 
   public CopleyControllerREST(CopleyController controller, DTOs dtos) {
     this.variableEntries = new LinkedHashMap<>();
+    CopleyNode node = controller.getNodes().findFirst().get();
+
     Arrays
         .stream(CopleyVariableID.values())
         .forEach(
             variable -> variableEntries
-                .put(variable.toString(), new VariableCommsRESTEntry(controller, variable, dtos)));
+                .put(variable.toString(), new VariableCommsRESTEntry(node, variable, dtos)));
 
     readValue = new ControllerRESTAction() {
       @Override

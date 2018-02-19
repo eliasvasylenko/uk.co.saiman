@@ -28,6 +28,9 @@
 package uk.co.saiman.comms.saint.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static org.osgi.service.component.annotations.ReferencePolicy.STATIC;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.CMOS_REF;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_1_ADC;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.CURRENT_READBACK_2_ADC;
@@ -79,12 +82,10 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.comms.ByteConverters;
-import uk.co.saiman.comms.CommsService;
+import uk.co.saiman.bytes.ByteConverters;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
-import uk.co.saiman.comms.SimpleComms;
-import uk.co.saiman.comms.SimpleController;
+import uk.co.saiman.comms.SimpleCommsController;
 import uk.co.saiman.comms.saint.ADC;
 import uk.co.saiman.comms.saint.HighVoltageReadback;
 import uk.co.saiman.comms.saint.HighVoltageStatus;
@@ -93,7 +94,6 @@ import uk.co.saiman.comms.saint.LEDStatus;
 import uk.co.saiman.comms.saint.MotorStatus;
 import uk.co.saiman.comms.saint.SaintCommandAddress;
 import uk.co.saiman.comms.saint.SaintCommandType;
-import uk.co.saiman.comms.saint.SaintComms;
 import uk.co.saiman.comms.saint.SaintController;
 import uk.co.saiman.comms.saint.TurboControl;
 import uk.co.saiman.comms.saint.TurboReadbacks;
@@ -102,12 +102,11 @@ import uk.co.saiman.comms.saint.VacuumReadback;
 import uk.co.saiman.comms.saint.Value;
 import uk.co.saiman.comms.saint.ValueReadback;
 import uk.co.saiman.comms.saint.ValueRequest;
-import uk.co.saiman.comms.saint.impl.SaintCommsImpl.SaintCommsConfiguration;
+import uk.co.saiman.comms.saint.impl.SaintControllerImpl.SaintCommsConfiguration;
 
 @Designate(ocd = SaintCommsConfiguration.class, factory = true)
-@Component(configurationPid = SaintCommsImpl.CONFIGURATION_PID, configurationPolicy = REQUIRE)
-public class SaintCommsImpl extends SimpleComms<SaintController>
-    implements SaintComms, CommsService<SaintController> {
+@Component(configurationPid = SaintControllerImpl.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+public class SaintControllerImpl extends SimpleCommsController implements SaintController {
   public static final String CONFIGURATION_PID = "uk.co.saiman.comms.saint";
 
   @SuppressWarnings("javadoc")
@@ -176,7 +175,7 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
     }
   }
 
-  @Reference
+  @Reference(cardinality = OPTIONAL, policy = STATIC, policyOption = GREEDY)
   private CommsPort port;
 
   @Reference
@@ -227,8 +226,8 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
   }
 
   @Activate
-  void activate(SaintCommsConfiguration configuration) throws IOException {
-    super.setComms(port);
+  protected void activate(SaintCommsConfiguration configuration) throws IOException {
+    super.activate(port);
 
     ledStatus = inOutBlock(LEDStatus.class, LED_PORT, LED_LAT);
     vacuumStatus = inOutBlock(VacuumControl.class, VACUUM_PORT, VACUUM_LAT);
@@ -265,20 +264,28 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
     turboReadbacks = inBlock(TurboReadbacks.class, TURBO_READBACKS);
   }
 
+  @Override
+  public void reset() {
+    super.reset();
+  }
+
   @Deactivate
-  void deactivate() throws IOException {
-    unsetComms();
+  @Override
+  protected void deactivate() {
+    super.deactivate();
   }
 
   @Override
   protected void checkComms() {
-    ping();
-  }
-
-  private void ping() {
     useChannel(
         channel -> executeSaintCommand(PING, NULL, channel, new byte[NULL.getBytes().length]));
   }
+
+  @Override
+  protected void commsOpened() {}
+
+  @Override
+  protected void commsClosed() {}
 
   private byte[] executeSaintCommand(
       SaintCommandType command,
@@ -329,199 +336,142 @@ public class SaintCommsImpl extends SimpleComms<SaintController>
   }
 
   @Override
-  protected SimpleController<SaintController> createController() {
-    SaintControllerImpl controller = new SaintControllerImpl();
-    return new SimpleController<SaintController>() {
-      @Override
-      public SaintController getController() {
-        return controller;
-      }
-
-      @Override
-      public void closeController() {
-        controller.close();
-      }
-    };
+  public Value<LEDStatus> statusLED() {
+    return ledStatus;
   }
 
-  class SaintControllerImpl implements SaintController {
-    private boolean closed = false;
+  @Override
+  public Value<VacuumControl> vacuum() {
+    return vacuumStatus;
+  }
 
-    void close() {
-      closed = true;
-    }
+  @Override
+  public ValueRequest<HighVoltageStatus> highVoltage() {
+    return highVoltageStatus;
+  }
 
-    void checkOpen() {
-      if (closed)
-        throw new IllegalStateException("SAINT comms controller was reset");
-    }
+  @Override
+  public Value<MotorStatus> motorStatus() {
+    return motorStatus;
+  }
 
-    @Override
-    public Value<LEDStatus> statusLED() {
-      checkOpen();
-      return ledStatus;
-    }
+  @Override
+  public Value<VacuumReadback> vacuumReadback() {
+    return vacuumReadback;
+  }
 
-    @Override
-    public Value<VacuumControl> vacuum() {
-      checkOpen();
-      return vacuumStatus;
-    }
+  @Override
+  public Value<HighVoltageReadback> highVoltageReadback() {
+    return highVoltageReadback;
+  }
 
-    @Override
-    public ValueRequest<HighVoltageStatus> highVoltage() {
-      checkOpen();
-      return highVoltageStatus;
-    }
+  @Override
+  public ValueRequest<I2C> highVoltageDAC1() {
+    return highVoltageDAC1;
+  }
 
-    @Override
-    public Value<MotorStatus> motorStatus() {
-      checkOpen();
-      return motorStatus;
-    }
+  @Override
+  public ValueRequest<I2C> highVoltageDAC2() {
+    return highVoltageDAC2;
+  }
 
-    @Override
-    public Value<VacuumReadback> vacuumReadback() {
-      checkOpen();
-      return vacuumReadback;
-    }
+  @Override
+  public ValueRequest<I2C> highVoltageDAC3() {
+    return highVoltageDAC3;
+  }
 
-    @Override
-    public Value<HighVoltageReadback> highVoltageReadback() {
-      checkOpen();
-      return highVoltageReadback;
-    }
+  @Override
+  public ValueRequest<I2C> highVoltageDAC4() {
+    return highVoltageDAC4;
+  }
 
-    @Override
-    public ValueRequest<I2C> highVoltageDAC1() {
-      checkOpen();
-      return highVoltageDAC1;
-    }
+  @Override
+  public ValueRequest<I2C> cmosRef() {
+    return cmosRef;
+  }
 
-    @Override
-    public ValueRequest<I2C> highVoltageDAC2() {
-      checkOpen();
-      return highVoltageDAC2;
-    }
+  @Override
+  public ValueRequest<I2C> laserDetectRef() {
+    return laserDetectRef;
+  }
 
-    @Override
-    public ValueRequest<I2C> highVoltageDAC3() {
-      checkOpen();
-      return highVoltageDAC3;
-    }
+  @Override
+  public ValueReadback<ADC> piraniReadback() {
+    return piraniReadback;
+  }
 
-    @Override
-    public ValueRequest<I2C> highVoltageDAC4() {
-      checkOpen();
-      return highVoltageDAC4;
-    }
+  @Override
+  public ValueReadback<ADC> magnetronReadback() {
+    return magnetronReadback;
+  }
 
-    @Override
-    public ValueRequest<I2C> cmosRef() {
-      checkOpen();
-      return cmosRef;
-    }
+  @Override
+  public ValueReadback<ADC> spareMon1() {
+    return spareMon1;
+  }
 
-    @Override
-    public ValueRequest<I2C> laserDetectRef() {
-      checkOpen();
-      return laserDetectRef;
-    }
+  @Override
+  public ValueReadback<ADC> spareMon2() {
+    return spareMon2;
+  }
 
-    @Override
-    public ValueReadback<ADC> piraniReadback() {
-      checkOpen();
-      return piraniReadback;
-    }
+  @Override
+  public ValueReadback<ADC> spareMon3() {
+    return spareMon3;
+  }
 
-    @Override
-    public ValueReadback<ADC> magnetronReadback() {
-      checkOpen();
-      return magnetronReadback;
-    }
+  @Override
+  public ValueReadback<ADC> spareMon4() {
+    return spareMon4;
+  }
 
-    @Override
-    public ValueReadback<ADC> spareMon1() {
-      checkOpen();
-      return spareMon1;
-    }
+  @Override
+  public ValueReadback<ADC> currentReadback1() {
+    return currentReadback1;
+  }
 
-    @Override
-    public ValueReadback<ADC> spareMon2() {
-      checkOpen();
-      return spareMon2;
-    }
+  @Override
+  public ValueReadback<ADC> currentReadback2() {
+    return currentReadback2;
+  }
 
-    @Override
-    public ValueReadback<ADC> spareMon3() {
-      checkOpen();
-      return spareMon3;
-    }
+  @Override
+  public ValueReadback<ADC> currentReadback3() {
+    return currentReadback3;
+  }
 
-    @Override
-    public ValueReadback<ADC> spareMon4() {
-      checkOpen();
-      return spareMon4;
-    }
+  @Override
+  public ValueReadback<ADC> currentReadback4() {
+    return currentReadback4;
+  }
 
-    @Override
-    public ValueReadback<ADC> currentReadback1() {
-      checkOpen();
-      return currentReadback1;
-    }
+  @Override
+  public ValueReadback<ADC> voltageReadback1() {
+    return voltageReadback1;
+  }
 
-    @Override
-    public ValueReadback<ADC> currentReadback2() {
-      checkOpen();
-      return currentReadback2;
-    }
+  @Override
+  public ValueReadback<ADC> voltageReadback2() {
+    return voltageReadback2;
+  }
 
-    @Override
-    public ValueReadback<ADC> currentReadback3() {
-      checkOpen();
-      return currentReadback3;
-    }
+  @Override
+  public ValueReadback<ADC> voltageReadback3() {
+    return voltageReadback3;
+  }
 
-    @Override
-    public ValueReadback<ADC> currentReadback4() {
-      checkOpen();
-      return currentReadback4;
-    }
+  @Override
+  public ValueReadback<ADC> voltageReadback4() {
+    return voltageReadback4;
+  }
 
-    @Override
-    public ValueReadback<ADC> voltageReadback1() {
-      checkOpen();
-      return voltageReadback1;
-    }
+  @Override
+  public ValueRequest<TurboControl> turboControl() {
+    return turboControl;
+  }
 
-    @Override
-    public ValueReadback<ADC> voltageReadback2() {
-      checkOpen();
-      return voltageReadback2;
-    }
-
-    @Override
-    public ValueReadback<ADC> voltageReadback3() {
-      checkOpen();
-      return voltageReadback3;
-    }
-
-    @Override
-    public ValueReadback<ADC> voltageReadback4() {
-      checkOpen();
-      return voltageReadback4;
-    }
-
-    @Override
-    public ValueRequest<TurboControl> turboControl() {
-      checkOpen();
-      return turboControl;
-    }
-
-    @Override
-    public ValueReadback<TurboReadbacks> turboReadbacks() {
-      checkOpen();
-      return turboReadbacks;
-    }
+  @Override
+  public ValueReadback<TurboReadbacks> turboReadbacks() {
+    return turboReadbacks;
   }
 }

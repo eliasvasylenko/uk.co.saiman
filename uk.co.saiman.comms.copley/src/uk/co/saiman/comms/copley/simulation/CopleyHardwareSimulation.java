@@ -163,6 +163,7 @@ public class CopleyHardwareSimulation {
       variables.put(MOTOR_ENCODER_DIRECTION, new ByteVariable(axes, 1));
     } catch (Exception e) {
       log.log(ERROR, e);
+      e.printStackTrace();
     }
   }
 

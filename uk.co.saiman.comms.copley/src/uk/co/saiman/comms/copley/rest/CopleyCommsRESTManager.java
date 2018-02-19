@@ -43,13 +43,13 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import osgi.enroute.dto.api.DTOs;
-import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.rest.CommsREST;
 
 @Component
 public class CopleyCommsRESTManager {
-  private final Set<CopleyComms> comms = new HashSet<>();
-  private final Map<CopleyComms, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
+  private final Set<CopleyController> comms = new HashSet<>();
+  private final Map<CopleyController, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
   private BundleContext context;
 
   @Reference(cardinality = MANDATORY)
@@ -61,13 +61,13 @@ public class CopleyCommsRESTManager {
     comms.stream().forEach(e -> register(e));
   }
 
-  void register(CopleyComms comms) {
+  void register(CopleyController comms) {
     CommsREST rest = new CopleyCommsREST(comms, dtos);
     serviceRegistrations.put(comms, context.registerService(CommsREST.class, rest, null));
   }
 
   @Reference(policy = DYNAMIC, cardinality = MULTIPLE)
-  synchronized void addComms(CopleyComms comms) {
+  synchronized void addComms(CopleyController comms) {
     try {
       this.comms.add(comms);
 
@@ -79,7 +79,7 @@ public class CopleyCommsRESTManager {
     }
   }
 
-  synchronized void removeComms(CopleyComms comms) {
+  synchronized void removeComms(CopleyController comms) {
     this.comms.remove(comms);
     ServiceRegistration<?> restService = serviceRegistrations.remove(comms);
     if (restService != null) {

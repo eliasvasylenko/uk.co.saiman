@@ -28,15 +28,12 @@
 package uk.co.saiman.instrument.stage.copley;
 
 import static uk.co.saiman.comms.CommsService.CommsStatus.OPEN;
-import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
-import static uk.co.saiman.instrument.DeviceConnection.DISCONNECTED;
 import static uk.co.saiman.instrument.stage.StageState.POSITION_REACHED;
 
+import java.util.List;
 import java.util.Optional;
 
 import uk.co.saiman.comms.copley.CopleyAxis;
-import uk.co.saiman.comms.copley.CopleyComms;
-import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.instrument.DeviceConnection;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.StageDevice;
@@ -50,22 +47,12 @@ public abstract class CopleyStageDevice implements StageDevice {
   private final ObservableValue<StageState> state = new ObservablePropertyImpl<>(POSITION_REACHED);
 
   private Instrument instrument;
-  private CopleyComms commsX;
-  private CopleyComms commsY;
-  private CopleyController controllerX;
-  private CopleyController controllerY;
+  private List<CopleyAxis> axes;
 
-  void initialize(
-      Instrument instrument,
-      CopleyComms commsX,
-      CopleyComms commsY,
-      PropertyLoader loader) {
+  void initialize(Instrument instrument, List<CopleyAxis> axes, PropertyLoader loader) {
     this.instrument = instrument;
-    this.commsX = commsX;
-    this.commsY = commsY;
+    this.axes = axes;
     this.properties = loader.getProperties(CopleyStageProperties.class);
-
-    reset();
 
     instrument.addDevice(this);
   }
@@ -78,28 +65,13 @@ public abstract class CopleyStageDevice implements StageDevice {
     return properties;
   }
 
-  public Optional<CopleyController> getController() {
-    return Optional.ofNullable(controller);
-  }
-
-  public Optional<CopleyAxis> getAxis(int axis) {
-    return Optional.ofNullable(controller).map(c -> c.getAxis(axis));
+  public Optional<CopleyAxis> getAxis(int index) {
+    return Optional.ofNullable(axes.get(index));
   }
 
   @Override
   public String getName() {
     return properties.copleyXYStageName().get();
-  }
-
-  public boolean reset() {
-    commsX.reset();
-    commsY.reset();
-    try {
-      this.controller = comms.openController();
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
   }
 
   @Override

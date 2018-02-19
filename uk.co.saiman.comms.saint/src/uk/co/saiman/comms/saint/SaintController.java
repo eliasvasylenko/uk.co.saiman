@@ -27,7 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
+import uk.co.saiman.comms.CommsPort;
+
 public interface SaintController {
+  /**
+   * The message size in bytes for the SAINT comms interface, for both sending and
+   * receiving messages.
+   */
+  int MESSAGE_SIZE = 4;
+
   Value<LEDStatus> statusLED();
 
   Value<VacuumControl> vacuum();
@@ -83,4 +91,8 @@ public interface SaintController {
   ValueRequest<TurboControl> turboControl();
 
   ValueReadback<TurboReadbacks> turboReadbacks();
+
+  CommsPort getPort();
+
+  void reset();
 }

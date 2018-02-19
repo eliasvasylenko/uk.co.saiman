@@ -28,6 +28,7 @@
 package uk.co.saiman.instrument.stage.copley.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -40,7 +41,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.raster.RasterDevice;
 import uk.co.saiman.instrument.raster.RasterPattern;
@@ -107,8 +108,10 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
   @Reference
   Units units;
 
-  @Reference
-  CopleyComms comms;
+  @Reference(cardinality = OPTIONAL)
+  CopleyAxis xAxis;
+  @Reference(cardinality = OPTIONAL)
+  CopleyAxis yAxis;
 
   private RasterPattern rasterPattern;
   private RasterPosition rasterPosition;
@@ -124,7 +127,7 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
   void activate(
       CopleyXYStageRasterConfiguration rasterConfiguration,
       CopleyXYStageConfiguration configuration) {
-    initialize(instrument, comms, loader);
+    initialize(instrument, xAxis, yAxis, loader);
     configure(configuration, units);
   }
 
@@ -143,7 +146,7 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
   public RasterPattern getRasterPattern() {
     return rasterPattern;
   }
-  
+
   public void setRasterResolution(Quantity<Length> x, Quantity<Length> y) {
     this.rasterResolutionX = x;
     this.rasterResolutionY = y;

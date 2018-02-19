@@ -31,30 +31,45 @@ import java.util.Locale;
 
 import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.rest.ActionTableREST;
-import uk.co.saiman.comms.rest.SimpleCommsREST;
-import uk.co.saiman.comms.saint.SaintComms;
+import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.saint.SaintController;
 
-public class SaintCommsREST extends SimpleCommsREST<SaintComms, SaintController> {
+public class SaintCommsREST implements CommsREST {
+  private final SaintController controller;
   private final DTOs dtos;
 
-  public SaintCommsREST(SaintComms comms, DTOs dtos) {
-    super(comms);
+  public SaintCommsREST(SaintController controller, DTOs dtos) {
+    this.controller = controller;
     this.dtos = dtos;
   }
 
   @Override
-  public String getCategoryName() {
+  public String getName() {
     return "SAINT Comms";
   }
 
   @Override
-  public ActionTableREST createControllerREST(SaintController controller) {
+  public String getID() {
+    return SaintController.class.getName();
+  }
+
+  @Override
+  public ActionTableREST getActions() {
     return new SaintControllerREST(getName(), controller, dtos);
   }
 
   @Override
   public String getLocalisedText(String key, Locale locale) {
     return key;
+  }
+
+  @Override
+  public void reset() {
+    controller.reset();
+  }
+
+  @Override
+  public String getPort() {
+    return controller.getPort().toString();
   }
 }

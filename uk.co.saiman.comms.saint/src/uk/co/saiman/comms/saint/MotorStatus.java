@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bit;
+import uk.co.saiman.bytes.Bit;
 
 public class MotorStatus {
 	@Bit(0)

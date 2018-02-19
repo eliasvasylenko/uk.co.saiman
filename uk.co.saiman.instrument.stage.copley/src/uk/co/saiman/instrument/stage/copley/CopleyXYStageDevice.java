@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
+import static java.util.Arrays.asList;
 import static uk.co.saiman.instrument.InstrumentLifecycleState.BEGIN_OPERATION;
 import static uk.co.saiman.observable.Observable.merge;
 
@@ -36,7 +37,7 @@ import javax.measure.quantity.Length;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.StageDimension;
 import uk.co.saiman.instrument.stage.XYStageDevice;
@@ -89,9 +90,12 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
   private boolean requestedExchange;
   private boolean requestedHome;
 
-  @Override
-  protected void initialize(Instrument instrument, CopleyComms comms, PropertyLoader loader) {
-    super.initialize(instrument, comms, loader);
+  protected void initialize(
+      Instrument instrument,
+      CopleyAxis xAxis,
+      CopleyAxis yAxis,
+      PropertyLoader loader) {
+    super.initialize(instrument, asList(xAxis, yAxis), loader);
     instrument.lifecycleState().filter(BEGIN_OPERATION::equals).observe(o -> moveToHome());
   }
 

@@ -30,22 +30,17 @@ package uk.co.saiman.comms.copley.rest;
 import java.util.Locale;
 
 import osgi.enroute.dto.api.DTOs;
-import uk.co.saiman.comms.copley.CopleyComms;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.rest.ActionTableREST;
-import uk.co.saiman.comms.rest.SimpleCommsREST;
+import uk.co.saiman.comms.rest.CommsREST;
 
-public class CopleyCommsREST extends SimpleCommsREST<CopleyComms, CopleyController> {
+public class CopleyCommsREST implements CommsREST {
+  private final CopleyController controller;
   private final DTOs dtos;
 
-  public CopleyCommsREST(CopleyComms comms, DTOs dtos) {
-    super(comms);
+  public CopleyCommsREST(CopleyController controller, DTOs dtos) {
+    this.controller = controller;
     this.dtos = dtos;
-  }
-
-  @Override
-  public String getCategoryName() {
-    return "Copley Comms";
   }
 
   @Override
@@ -54,7 +49,27 @@ public class CopleyCommsREST extends SimpleCommsREST<CopleyComms, CopleyControll
   }
 
   @Override
-  public ActionTableREST createControllerREST(CopleyController controller) {
+  public String getID() {
+    return CopleyController.class.getName();
+  }
+
+  @Override
+  public String getName() {
+    return "Copley Comms";
+  }
+
+  @Override
+  public ActionTableREST getActions() {
     return new CopleyControllerREST(controller, dtos);
+  }
+
+  @Override
+  public void reset() {
+    controller.reset();
+  }
+
+  @Override
+  public String getPort() {
+    return controller.getPort().toString();
   }
 }

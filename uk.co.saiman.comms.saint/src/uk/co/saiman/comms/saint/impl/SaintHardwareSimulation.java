@@ -64,7 +64,7 @@ import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
 import uk.co.saiman.comms.saint.SaintCommandAddress;
 import uk.co.saiman.comms.saint.SaintCommandType;
-import uk.co.saiman.comms.saint.SaintComms;
+import uk.co.saiman.comms.saint.SaintController;
 import uk.co.saiman.comms.saint.impl.SaintHardwareSimulation.SaintHardwareSimulationConfiguration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
@@ -127,9 +127,9 @@ public class SaintHardwareSimulation {
   }
 
   private synchronized void openPort() {
-    ByteBuffer messageBuffer = ByteBuffer.allocate(SaintComms.MESSAGE_SIZE);
+    ByteBuffer messageBuffer = ByteBuffer.allocate(SaintController.MESSAGE_SIZE);
 
-    stream = port.openStream(SaintComms.MESSAGE_SIZE);
+    stream = port.openStream(SaintController.MESSAGE_SIZE);
     stream.observe(buffer -> {
       do {
         boolean filled = false;

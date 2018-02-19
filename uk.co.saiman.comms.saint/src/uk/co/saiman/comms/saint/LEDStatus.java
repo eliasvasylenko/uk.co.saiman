@@ -29,7 +29,7 @@ package uk.co.saiman.comms.saint;
 
 import java.util.Arrays;
 
-import uk.co.saiman.comms.Bit;
+import uk.co.saiman.bytes.Bit;
 
 public class LEDStatus {
 	@Bit(0)

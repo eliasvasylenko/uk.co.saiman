@@ -44,12 +44,12 @@ import org.osgi.service.component.annotations.Reference;
 
 import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.rest.CommsREST;
-import uk.co.saiman.comms.saint.SaintComms;
+import uk.co.saiman.comms.saint.SaintController;
 
 @Component
 public class SaintCommsRESTManager {
-  private final Set<SaintComms> comms = new HashSet<>();
-  private final Map<SaintComms, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
+  private final Set<SaintController> comms = new HashSet<>();
+  private final Map<SaintController, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
   private BundleContext context;
 
   @Reference(cardinality = MANDATORY)
@@ -61,13 +61,13 @@ public class SaintCommsRESTManager {
     comms.stream().forEach(e -> register(e));
   }
 
-  void register(SaintComms comms) {
+  void register(SaintController comms) {
     CommsREST rest = new SaintCommsREST(comms, dtos);
     serviceRegistrations.put(comms, context.registerService(CommsREST.class, rest, null));
   }
 
   @Reference(policy = DYNAMIC, cardinality = MULTIPLE)
-  synchronized void addComms(SaintComms comms) {
+  synchronized void addComms(SaintController comms) {
     try {
       this.comms.add(comms);
 
@@ -79,7 +79,7 @@ public class SaintCommsRESTManager {
     }
   }
 
-  synchronized void removeComms(SaintComms comms) {
+  synchronized void removeComms(SaintController comms) {
     this.comms.remove(comms);
     ServiceRegistration<?> restService = serviceRegistrations.remove(comms);
     if (restService != null) {

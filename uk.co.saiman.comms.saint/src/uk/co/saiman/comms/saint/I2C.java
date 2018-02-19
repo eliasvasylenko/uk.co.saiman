@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bit;
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.Bits;
 
 public class I2C {
 	@Bits(value = 4)

@@ -28,6 +28,7 @@
 package uk.co.saiman.instrument.stage.copley.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -35,7 +36,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 
-import uk.co.saiman.comms.copley.CopleyComms;
+import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice;
@@ -59,15 +60,14 @@ public class CopleyXYStageDeviceService extends CopleyXYStageDevice implements X
   @Reference
   Units units;
 
-  @Reference
-  CopleyComms commsX;
-
-  @Reference
-  CopleyComms commsY;
+  @Reference(cardinality = OPTIONAL)
+  CopleyAxis xAxis;
+  @Reference(cardinality = OPTIONAL)
+  CopleyAxis yAxis;
 
   @Activate
   void activate(CopleyXYStageConfiguration configuration) {
-    initialize(instrument, commsX, commsY, loader);
+    initialize(instrument, xAxis, yAxis, loader);
     configure(configuration, units);
   }
 
