@@ -43,11 +43,11 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.data.function.SparseSampledContinuousFunction;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
+import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.impl.TDCSimulation.TDCSimulationConfiguration;
 
 /**
@@ -57,7 +57,7 @@ import uk.co.saiman.simulation.instrument.impl.TDCSimulation.TDCSimulationConfig
  */
 @Designate(ocd = TDCSimulationConfiguration.class, factory = true)
 @Component(configurationPid = TDCSimulation.CONFIGURATION_PID, configurationPolicy = REQUIRE)
-public class TDCSimulation implements DetectorSimulation {
+public class TDCSimulation implements DetectorSimulationService {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "TDC Simulation Configuration",
@@ -100,20 +100,22 @@ public class TDCSimulation implements DetectorSimulation {
   }
 
   @Override
-  public SampledContinuousFunction<Time, Dimensionless> acquire(
+  public DetectorSimulation getDetectorSimulation(
       SampledDomain<Time> domain,
       Unit<Dimensionless> intensityUnits) {
-    int hits = random.nextInt(updateMaximumHitsPerSpectrum());
+    return () -> {
+      int hits = random.nextInt(updateMaximumHitsPerSpectrum());
 
-    /*
-     * TODO distribute "hits" number of hits
-     */
+      /*
+       * TODO distribute "hits" number of hits
+       */
 
-    return new SparseSampledContinuousFunction<>(
-        domain,
-        intensityUnits,
-        hits,
-        hitIndices,
-        hitIntensities);
+      return new SparseSampledContinuousFunction<>(
+          domain,
+          intensityUnits,
+          hits,
+          hitIndices,
+          hitIntensities);
+    };
   }
 }

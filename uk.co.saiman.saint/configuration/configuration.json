@@ -34,6 +34,8 @@
 		"lowerBoundY": "-20mm",
 		"upperBoundX": "27.5mm",
 		"upperBoundY": "20mm",
+		"xAxis.target": "(&(drive.name=x)(comms.service.pid=uk.co.saiman.comms.copley.saintsimulation))",
+		"yAxis.target": "(&(drive.name=y)(comms.service.pid=uk.co.saiman.comms.copley.saintsimulation))",
 		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.copley.saintsimulation)"
 	},
 	{

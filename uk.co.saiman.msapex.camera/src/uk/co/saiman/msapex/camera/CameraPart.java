@@ -30,7 +30,7 @@ package uk.co.saiman.msapex.camera;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 import static uk.co.saiman.observable.Observer.onObservation;
-import static uk.co.saiman.observable.Observer.singleUse;
+import static uk.co.saiman.observable.Observer.forObservation;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -139,7 +139,7 @@ public class CameraPart {
           .reduceBackpressure((a, b) -> b)
           .executeOn(Platform::runLater)
           .then(onObservation(o -> o.requestNext()))
-          .then(singleUse(o -> m -> o.requestNext()))
+          .then(forObservation(o -> m -> o.requestNext()))
           .observe(this::setImage);
       setImage(connection.getImage());
     }

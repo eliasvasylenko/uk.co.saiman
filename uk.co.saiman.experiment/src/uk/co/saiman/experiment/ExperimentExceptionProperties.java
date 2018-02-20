@@ -64,7 +64,9 @@ public interface ExperimentExceptionProperties {
 
   String cannotCreateWorkspace(Workspace experimentWorkspace);
 
-  String cannotLoadExperiment();
+  String cannotLoadExperiment(String id, String typeId);
+
+  String cannotLoadExperiments();
 
   String duplicateExperimentName(String name);
 

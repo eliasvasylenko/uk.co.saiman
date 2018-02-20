@@ -124,18 +124,27 @@ public class CopleyXYStageRasterDeviceService extends CopleyXYStageDevice
   }
 
   @Activate
-  void activate(
-      CopleyXYStageRasterConfiguration rasterConfiguration,
-      CopleyXYStageConfiguration configuration) {
+  void activate(CopleyXYStageRasterConfiguration configuration) {
     initialize(instrument, xAxis, yAxis, loader);
-    configure(configuration, units);
+    modified(configuration);
   }
 
   @Modified
-  void modified(
-      CopleyXYStageRasterConfiguration rasterConfiguration,
-      CopleyXYStageConfiguration configuration) {
-    configure(configuration, units);
+  void modified(CopleyXYStageRasterConfiguration configuration) {
+    configure(
+        parseLength(configuration.lowerBoundX()),
+        parseLength(configuration.lowerBoundY()),
+        parseLength(configuration.upperBoundX()),
+        parseLength(configuration.upperBoundY()),
+        parseLength(configuration.homePositionX()),
+        parseLength(configuration.homePositionY()),
+        parseLength(configuration.exchangePositionX()),
+        parseLength(configuration.exchangePositionY()),
+        units);
+  }
+
+  Quantity<Length> parseLength(String string) {
+    return units.parseQuantity(string).asType(Length.class);
   }
 
   public void setRasterPattern(RasterPattern mode) {

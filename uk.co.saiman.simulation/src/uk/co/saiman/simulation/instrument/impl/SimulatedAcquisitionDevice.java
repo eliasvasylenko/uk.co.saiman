@@ -29,9 +29,14 @@ package uk.co.saiman.simulation.instrument.impl;
 
 import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.currentThread;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
 import static uk.co.saiman.log.Log.Level.ERROR;
+import static uk.co.saiman.observable.Observer.forObservation;
+import static uk.co.saiman.observable.Observer.onObservation;
 
 import java.util.Optional;
 
@@ -52,7 +57,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.function.SampledContinuousFunction;
-import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceConnection;
 import uk.co.saiman.instrument.Instrument;
@@ -62,8 +66,10 @@ import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.observable.Observation;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
+import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.AcquisitionSimulationConfiguration;
 import uk.co.saiman.text.properties.PropertyLoader;
 
@@ -91,14 +97,16 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.instrument.acquisition";
 
   private class ExperimentConfiguration {
-    private final SampledDomain<Time> domain;
-
+    private final DetectorSimulation detector;
     private int counter;
 
     public ExperimentConfiguration() {
-      domain = getSampleDomain();
-
+      detector = getDetector();
       counter = getAcquisitionCount();
+
+      if (detector == null) {
+        throw new AcquisitionException(text.acquisition().exceptions().failedToConnectDetector());
+      }
       if (counter <= 0) {
         throw new AcquisitionException(text.acquisition().exceptions().countMustBePositive());
       }
@@ -161,8 +169,9 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   private int acquisitionCount;
   private Quantity<Time> resolution;
 
-  @Reference
-  private DetectorSimulation detector;
+  @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
+  private volatile DetectorSimulationService detectorService;
+  private volatile DetectorSimulation detector;
 
   /*
    * External Acquisition State
@@ -201,10 +210,22 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     setAcquisitionTime(units.second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
     setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
-    acquisitionBuffer.observe(this::acquired);
+    acquisitionBuffer
+        .aggregateBackpressure()
+        .concatMap(Observable::of)
+        .executeOn(newSingleThreadExecutor())
+        .then(onObservation(Observation::requestNext))
+        .then(forObservation(o -> m -> o.requestNext()))
+        .observe(this::acquired);
     new Thread(this::acquire).start();
 
     instrumentSubscription = instrument.addDevice(this);
+
+    initializeDetector();
+  }
+
+  private void initializeDetector() {
+    detector = detectorService.getDetectorSimulation(getSampleDomain(), getSampleIntensityUnits());
   }
 
   @Deactivate
@@ -223,32 +244,9 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     return text.acquisitionSimulationDeviceName().toString();
   }
 
-  /*
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * 
-   * TODO
-   * 
-   * 
-   * TODO
-   * 
-   * 
-   * 
-   * TODO have a buffer pool of SoftReferenced arrays we can re-use when the
-   * previous WeakReferenced ContinuousFunction which used the array is garbage
-   * collected. This way we mostly mitigate unnecessary memory allocation while
-   * keeping a nice API and immutability.
-   * 
-   * 
-   * 
-   * 
-   */
+  protected DetectorSimulation getDetector() {
+    return detector;
+  }
 
   @Override
   public void startAcquisition() {
@@ -270,13 +268,13 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
           this.experiment = Optional.of(new ExperimentConfiguration());
 
           // wait for the new experiment to reach the end of the buffer
-          while (!acquiring) {
+          while (!acquiring && acquisitionListeners.isLive()) {
             acquiringLock.wait();
           }
         }
       } catch (InterruptedException e) {
-        this.experiment = Optional.empty();
-        throw new AcquisitionException(text.acquisition().exceptions().experimentInterrupted(), e);
+        exception(
+            new AcquisitionException(text.acquisition().exceptions().experimentInterrupted(), e));
       }
     }
   }
@@ -302,18 +300,14 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     currentThread().setPriority(MAX_PRIORITY);
 
     while (!disposed) {
-      SampledDomain<Time> domain;
+      DetectorSimulation detector;
       int counter;
 
       try {
-        /*
-         * These may remain blocking after an attempt to start an experiment, but this
-         * is okay as the experiment should have failed anyway if this is blocked:
-         */
-        domain = experiment.map(e -> e.domain).orElse(getSampleDomain());
+        detector = experiment.map(e -> e.detector).orElse(getDetector());
         counter = experiment.map(e -> --e.counter).orElse(-1);
 
-        acquisitionData = detector.acquire(domain, getSampleIntensityUnits());
+        acquisitionData = detector.acquire();
         acquisitionBuffer.next(new Acquisition(counter, acquisitionData));
 
         synchronized (acquiringLock) {
@@ -322,6 +316,8 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
             acquiringLock.notifyAll();
           }
         }
+        if (!dataListeners.isLive())
+          dataListeners.start();
       } catch (AcquisitionException e) {
         exception(e);
       } catch (Exception e) {
@@ -340,9 +336,17 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   }
 
   private void exception(AcquisitionException exception) {
-    dataListeners.fail(exception);
-    acquisitionListeners.fail(exception);
-    log.log(ERROR, exception);
+    synchronized (acquiringLock) {
+      this.experiment = Optional.empty();
+      if (acquisitionListeners.isLive()) {
+        acquisitionListeners.fail(exception);
+        acquiringLock.notifyAll();
+      }
+    }
+    if (dataListeners.isLive()) {
+      dataListeners.fail(exception);
+      log.log(ERROR, exception);
+    }
   }
 
   @Override
@@ -389,6 +393,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   public void setAcquisitionTime(Quantity<Time> time) {
     synchronized (startingLock) {
       acquisitionDepth = time.divide(getSampleResolution()).getValue().intValue();
+      initializeDetector();
     }
   }
 
@@ -401,6 +406,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   public void setSampleDepth(int depth) {
     synchronized (startingLock) {
       acquisitionDepth = depth;
+      initializeDetector();
     }
   }
 

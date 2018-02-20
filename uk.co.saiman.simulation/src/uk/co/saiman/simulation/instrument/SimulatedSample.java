@@ -34,7 +34,7 @@ import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice;
 
 /**
  * A description of a physical, chemical sample, which can be turned into a
- * simulated acquisition signal by way of a {@link DetectorSimulation} and an
+ * simulated acquisition signal by way of a {@link DetectorSimulationService} and an
  * {@link SimulatedAcquisitionDevice}.
  * 
  * @author Elias N Vasylenko

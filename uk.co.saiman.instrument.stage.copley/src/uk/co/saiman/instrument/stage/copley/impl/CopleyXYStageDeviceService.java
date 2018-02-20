@@ -30,17 +30,22 @@ package uk.co.saiman.instrument.stage.copley.impl;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.XYStageDevice;
 import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice;
-import uk.co.saiman.instrument.stage.copley.CopleyXYStageDevice.CopleyXYStageConfiguration;
+import uk.co.saiman.instrument.stage.copley.impl.CopleyXYStageDeviceService.CopleyXYStageConfiguration;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.text.properties.PropertyLoader;
 
@@ -50,6 +55,30 @@ import uk.co.saiman.text.properties.PropertyLoader;
     configurationPolicy = REQUIRE)
 public class CopleyXYStageDeviceService extends CopleyXYStageDevice implements XYStageDevice {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.xy";
+
+  @ObjectClassDefinition(
+      name = "Copley XY Stage Configuration",
+      description = "An implementation of an XY stage device interface based on copley motor hardware")
+  public @interface CopleyXYStageConfiguration {
+    @AttributeDefinition(
+        name = "Copley Comms",
+        description = "The OSGi reference filter for the comms interface")
+    String lowerBoundX();
+
+    String lowerBoundY();
+
+    String upperBoundX();
+
+    String upperBoundY();
+
+    String homePositionX();
+
+    String homePositionY();
+
+    String exchangePositionX();
+
+    String exchangePositionY();
+  }
 
   @Reference
   Instrument instrument;
@@ -68,12 +97,32 @@ public class CopleyXYStageDeviceService extends CopleyXYStageDevice implements X
   @Activate
   void activate(CopleyXYStageConfiguration configuration) {
     initialize(instrument, xAxis, yAxis, loader);
-    configure(configuration, units);
+    modified(configuration);
   }
+
+  /*
+   * TODO restructure this whole mess into using constructor injection, then at
+   * that time, restructure into having a general XYStageDeviceService which
+   * has @Requirements on StageDimension services, and have a DS service factory
+   * CopleyLinearDimension.
+   */
 
   @Modified
   void modified(CopleyXYStageConfiguration configuration) {
-    configure(configuration, units);
+    configure(
+        parseLength(configuration.lowerBoundX()),
+        parseLength(configuration.lowerBoundY()),
+        parseLength(configuration.upperBoundX()),
+        parseLength(configuration.upperBoundY()),
+        parseLength(configuration.homePositionX()),
+        parseLength(configuration.homePositionY()),
+        parseLength(configuration.exchangePositionX()),
+        parseLength(configuration.exchangePositionY()),
+        units);
+  }
+
+  Quantity<Length> parseLength(String string) {
+    return units.parseQuantity(string).asType(Length.class);
   }
 
   @Override

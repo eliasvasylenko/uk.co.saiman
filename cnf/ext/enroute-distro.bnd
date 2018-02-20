@@ -14,6 +14,43 @@
 		name=Distro; \
 		location=${build}/cache/enroute-distro.xml
 
+-pluginR7.enroute = \
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
+		releaseUrls=https://repo1.maven.org/maven2/; \
+		revision=org.osgi.enroute:debug-bundles:7.0.0-SNAPSHOT; \
+		name=enRoute Debug; \
+		location=${build}/cache/debug-bundles.xml,\
+\
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
+		releaseUrls=https://repo1.maven.org/maven2/; \
+		revision=org.osgi.enroute:enterprise-api:7.0.0-SNAPSHOT; \
+		name=enRoute Enterprise API; \
+		location=${build}/cache/enterprise-api.xml,\
+\
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
+		releaseUrls=https://repo1.maven.org/maven2/; \
+		revision=org.osgi.enroute:impl-index:7.0.0-SNAPSHOT; \
+		name=enRoute Implementation; \
+		location=${build}/cache/impl-index.xml,\
+\
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
+		releaseUrls=https://repo1.maven.org/maven2/; \
+		revision=org.osgi.enroute:osgi-api:7.0.0-SNAPSHOT; \
+		name=enRoute API; \
+		location=${build}/cache/osgi-api.xml,\
+\
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
+		releaseUrls=https://repo1.maven.org/maven2/; \
+		revision=org.osgi.enroute:test-bundles:7.0.0-SNAPSHOT; \
+		name=enRoute Test; \
+		location=${build}/cache/test-bundles.xml
+
+
 -runblacklist.enroute:	\
 	osgi.identity;filter:='(osgi.identity=osgi.enroute.base.api)', \
 	osgi.identity;filter:='(osgi.identity=osgi.cmpn)', \

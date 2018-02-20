@@ -27,6 +27,11 @@
  */
 package uk.co.saiman.msapex.instrument.stage;
 
+import static java.util.Arrays.asList;
+
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
+
 /*-
  * 
  * Options:
@@ -40,4 +45,20 @@ package uk.co.saiman.msapex.instrument.stage;
  *       custom UI for selecting e.g. different MALDI plates
  * 
  */
-public abstract class XYStageDiagram extends StageDiagram {}
+public abstract class XYStageDiagram extends StageDiagram {
+  public Quantity<Length> getXCoordinateAtPixel(int pixelX, int pixelY) {
+    return getCoordinatesAtPixel(pixelX, pixelY).findFirst().get().asType(Length.class);
+  }
+
+  public Quantity<Length> getYCoordinateAtPixel(int pixelX, int pixelY) {
+    return getCoordinatesAtPixel(pixelX, pixelY).skip(1).findFirst().get().asType(Length.class);
+  }
+
+  public int getPixelXAtCoordinates(Quantity<Length> x, Quantity<Length> y) {
+    return getPixelXAtCoordinates(asList(x, y));
+  }
+
+  public int getPixelYAtCoordinates(Quantity<Length> x, Quantity<Length> y) {
+    return getPixelXAtCoordinates(asList(x, y));
+  }
+}

@@ -178,8 +178,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   protected void loadChildNodes() {
-    try {
-      persistedExperiment.getChildren().forEach(node -> {
+    persistedExperiment.getChildren().forEach(node -> {
+      try {
         ExperimentType<?, ?> type = getPersistenceManager()
             .getExperimentTypes()
             .filter(e -> e.getId().equals(node.getTypeId()))
@@ -187,14 +187,14 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
             .orElseGet(() -> new MissingExperimentTypeImpl<>(getText(), node.getTypeId()));
 
         new ExperimentNodeImpl<>(this, type, node);
-      });
-    } catch (Exception e) {
-      ExperimentException ee = new ExperimentException(
-          getText().exception().cannotLoadExperiment(),
-          e);
-      getLog().log(Level.ERROR, ee);
-      throw ee;
-    }
+      } catch (Exception e) {
+        ExperimentException ee = new ExperimentException(
+            getText().exception().cannotLoadExperiment(node.getId(), node.getTypeId()),
+            e);
+        getLog().log(Level.ERROR, ee);
+        throw ee;
+      }
+    });
   }
 
   private static void validateChild(ExperimentNodeImpl<?, ?> parent, ExperimentType<?, ?> type) {

@@ -1,0 +1,159 @@
+package uk.co.saiman.acquisition;
+
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
+
+import uk.co.saiman.data.function.ContinuousFunction;
+import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.data.function.SampledDomain;
+import uk.co.saiman.data.function.SampledRange;
+
+/**
+ * A continuous function factory backed internally by a shared pool of arrays to
+ * avoid unnecessary memory allocation.
+ * <p>
+ * Previously allocated arrays are stored by soft reference such that they can
+ * be GCd if and when necessary to free heap space, but otherwise will remain
+ * available for immediate reuse as soon as the previous continuous function
+ * they were used for becomes unreachable.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class AcquisitionBufferPool {
+  private static final int DEFAULT_CACHE_DEPTH = 512;
+
+  class IntensitiesReference {
+    private final SoftReference<double[]> reference;
+    private final double[] data;
+
+    public IntensitiesReference(double[] data, SoftReference<double[]> reference) {
+      this.data = data;
+      this.reference = reference;
+    }
+
+    public IntensitiesReference(double[] data) {
+      this(data, new SoftReference<>(data));
+    }
+  }
+
+  class ClearingReference extends WeakReference<ContinuousFunction<?, ?>> {
+    private boolean cleared;
+
+    public ClearingReference(ContinuousFunction<?, ?> referent) {
+      super(referent, queue);
+    }
+  }
+
+  private final SampledDomain<Time> domain;
+  private final Unit<Dimensionless> intensityUnits;
+
+  private final int sparesToKeep;
+  private final ReferenceQueue<ContinuousFunction<?, ?>> queue = new ReferenceQueue<>();
+  private final Map<SoftReference<double[]>, ClearingReference> availableBuffers;
+
+  public AcquisitionBufferPool(SampledDomain<Time> domain, Unit<Dimensionless> intensityUnits) {
+    this(domain, intensityUnits, DEFAULT_CACHE_DEPTH);
+  }
+
+  public AcquisitionBufferPool(
+      SampledDomain<Time> domain,
+      Unit<Dimensionless> intensityUnits,
+      int sparesToKeep) {
+    this.domain = domain;
+    this.intensityUnits = intensityUnits;
+    this.sparesToKeep = sparesToKeep;
+    this.availableBuffers = new HashMap<>();
+  }
+
+  public SampledContinuousFunction<Time, Dimensionless> fillNextBuffer(
+      Consumer<double[]> fillBuffer) {
+    IntensitiesReference intensities = getAvailableBuffer();
+
+    fillBuffer.accept(intensities.data);
+
+    SampledContinuousFunction<Time, Dimensionless> function = createContinuousFunction(
+        domain,
+        intensityUnits,
+        intensities.data);
+
+    availableBuffers.put(intensities.reference, new ClearingReference(function));
+
+    return function;
+  }
+
+  private static SampledContinuousFunction<Time, Dimensionless> createContinuousFunction(
+      SampledDomain<Time> domain,
+      Unit<Dimensionless> intensityUnits,
+      double[] intensities) {
+    return new SampledContinuousFunction<Time, Dimensionless>() {
+      @Override
+      public SampledDomain<Time> domain() {
+        return domain;
+      }
+
+      @Override
+      public SampledRange<Dimensionless> range() {
+        return new SampledRange<Dimensionless>(this) {
+          @Override
+          public double getSample(int index) {
+            return intensities[index];
+          }
+
+          @Override
+          public int getDepth() {
+            return domain.getDepth();
+          }
+
+          @Override
+          public Unit<Dimensionless> getUnit() {
+            return intensityUnits;
+          }
+        };
+      }
+
+      @Override
+      public int getDepth() {
+        return domain.getDepth();
+      }
+    };
+  }
+
+  private IntensitiesReference getAvailableBuffer() {
+    Reference<? extends ContinuousFunction<?, ?>> reference;
+    while ((reference = queue.poll()) != null) {
+      ((ClearingReference) reference).cleared = true;
+    }
+
+    int sparesToKeep = this.sparesToKeep;
+    double[] intensities = null;
+    SoftReference<double[]> intensitiesReference = null;
+
+    for (SoftReference<double[]> buffer : new ArrayList<>(availableBuffers.keySet())) {
+      if (availableBuffers.get(buffer).cleared) {
+        if (intensities == null) {
+          intensitiesReference = buffer;
+          intensities = buffer.get();
+        }
+        if (buffer.get() == null || sparesToKeep-- <= 0) {
+          availableBuffers.remove(buffer);
+        }
+      }
+    }
+
+    if (intensities != null) {
+      return new IntensitiesReference(intensities, intensitiesReference);
+    }
+
+    return new IntensitiesReference(new double[domain.getDepth()]);
+  }
+}

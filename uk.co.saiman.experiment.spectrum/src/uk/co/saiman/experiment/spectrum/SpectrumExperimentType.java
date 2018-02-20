@@ -87,7 +87,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
     return properties.spectrumExperimentName().toString();
   }
 
-  protected abstract AcquisitionDevice getAcquisitionDevice();
+  public abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
   public Spectrum process(ProcessingContext<T, Spectrum> context) {

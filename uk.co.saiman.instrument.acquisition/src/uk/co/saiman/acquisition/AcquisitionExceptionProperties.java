@@ -52,4 +52,6 @@ public interface AcquisitionExceptionProperties {
 	String experimentInterrupted();
 
 	String unexpectedException();
+
+  String failedToConnectDetector();
 }

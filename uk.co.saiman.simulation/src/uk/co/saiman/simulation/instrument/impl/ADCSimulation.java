@@ -43,11 +43,11 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.data.function.ArraySampledContinuousFunction;
-import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.acquisition.AcquisitionBufferPool;
 import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
+import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
 import uk.co.saiman.simulation.instrument.impl.ADCSimulation.ADCSimulationConfiguration;
 
@@ -58,7 +58,7 @@ import uk.co.saiman.simulation.instrument.impl.ADCSimulation.ADCSimulationConfig
  */
 @Designate(ocd = ADCSimulationConfiguration.class, factory = true)
 @Component(configurationPid = ADCSimulation.CONFIGURATION_PID, configurationPolicy = REQUIRE)
-public class ADCSimulation implements DetectorSimulation {
+public class ADCSimulation implements DetectorSimulationService {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "ADC Simulation Configuration",
@@ -76,7 +76,6 @@ public class ADCSimulation implements DetectorSimulation {
   @Reference
   Units units;
 
-  private double[] intensities = new double[0];
   private double signalToNoise;
 
   private final Random random = new Random();
@@ -88,24 +87,20 @@ public class ADCSimulation implements DetectorSimulation {
   }
 
   @Override
-  public SampledContinuousFunction<Time, Dimensionless> acquire(
+  public DetectorSimulation getDetectorSimulation(
       SampledDomain<Time> domain,
       Unit<Dimensionless> intensityUnits) {
-    if (this.intensities.length != domain.getDepth()) {
-      intensities = new double[domain.getDepth()];
-    }
+    AcquisitionBufferPool bufferPool = new AcquisitionBufferPool(domain, intensityUnits);
 
-    double[] intensities = this.intensities;
+    return () -> bufferPool.fillNextBuffer(intensities -> {
+      double scale = 0;
+      double scaleDelta = 1d / domain.getDepth();
 
-    double scale = 0;
-    double scaleDelta = 1d / domain.getDepth();
-
-    for (int j = 0; j < intensities.length; j++) {
-      scale += scaleDelta;
-      intensities[j] = 0.01
-          + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
-    }
-
-    return new ArraySampledContinuousFunction<>(domain, intensityUnits, intensities);
+      for (int j = 0; j < intensities.length; j++) {
+        scale += scaleDelta;
+        intensities[j] = 0.01
+            + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
+      }
+    });
   }
 }

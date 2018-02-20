@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.saint.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
@@ -58,7 +59,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   @Reference
   XYStageExperimentType<SaintXYStageConfiguration> stageExperiment;
 
-  @Reference
+  @Reference(cardinality = OPTIONAL)
   AcquisitionDevice acquisitionDevice;
 
   @Reference
@@ -89,7 +90,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   }
 
   @Override
-  protected AcquisitionDevice getAcquisitionDevice() {
+  public AcquisitionDevice getAcquisitionDevice() {
     return acquisitionDevice;
   }
 

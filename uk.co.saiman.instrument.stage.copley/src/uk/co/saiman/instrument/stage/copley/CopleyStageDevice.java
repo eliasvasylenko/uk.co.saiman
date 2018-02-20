@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
-import static uk.co.saiman.comms.CommsService.CommsStatus.OPEN;
 import static uk.co.saiman.instrument.stage.StageState.POSITION_REACHED;
 
 import java.util.List;
@@ -38,6 +37,7 @@ import uk.co.saiman.instrument.DeviceConnection;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.StageDevice;
 import uk.co.saiman.instrument.stage.StageState;
+import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.text.properties.PropertyLoader;
@@ -76,7 +76,7 @@ public abstract class CopleyStageDevice implements StageDevice {
 
   @Override
   public ObservableValue<DeviceConnection> connectionState() {
-    return comms.status().map(s -> s == OPEN ? CONNECTED : DISCONNECTED).toValue();
+    return ObservableProperty.over(DeviceConnection.CONNECTED); // TODO
   }
 
   @Override

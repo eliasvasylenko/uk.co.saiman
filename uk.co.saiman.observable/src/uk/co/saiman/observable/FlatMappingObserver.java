@@ -58,11 +58,13 @@ public class FlatMappingObserver<T, U> extends PassthroughObserver<T, U> {
 
   private void allocateRequests() {
     synchronized (getMutex()) {
-      if (observations.isEmpty()) {
-        upstreamObservation.requestNext();
-      } else {
-        outstandingRequests = requestAllocator
-            .allocateRequests(outstandingRequests, new ArrayList<>(observations.values()));
+      if (outstandingRequests > 0) {
+        if (observations.isEmpty()) {
+          upstreamObservation.requestNext();
+        } else {
+          outstandingRequests = requestAllocator
+              .allocateRequests(outstandingRequests, new ArrayList<>(observations.values()));
+        }
       }
     }
   }

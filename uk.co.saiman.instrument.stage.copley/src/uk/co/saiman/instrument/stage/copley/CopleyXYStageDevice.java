@@ -34,9 +34,6 @@ import static uk.co.saiman.observable.Observable.merge;
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.StageDimension;
@@ -45,39 +42,6 @@ import uk.co.saiman.measurement.Units;
 import uk.co.saiman.text.properties.PropertyLoader;
 
 public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDevice {
-  @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      name = "Copley XY Stage Configuration",
-      description = "An implementation of an XY stage device interface based on copley motor hardware")
-  public @interface CopleyXYStageConfiguration {
-    @AttributeDefinition(
-        name = "Copley Comms",
-        description = "The OSGi reference filter for the comms interface")
-    String comms_target() default "(objectClass=uk.co.saiman.comms.copley.CopleyComms)";
-
-    String lowerBoundX();
-
-    String lowerBoundY();
-
-    String upperBoundX();
-
-    String upperBoundY();
-
-    String homePositionX();
-
-    String homePositionY();
-
-    String exchangePositionX();
-
-    String exchangePositionY();
-  }
-
-  private Quantity<Length> lowerBoundX;
-  private Quantity<Length> lowerBoundY;
-
-  private Quantity<Length> upperBoundX;
-  private Quantity<Length> upperBoundY;
-
   private Quantity<Length> homeX;
   private Quantity<Length> homeY;
 
@@ -99,18 +63,20 @@ public class CopleyXYStageDevice extends CopleyStageDevice implements XYStageDev
     instrument.lifecycleState().filter(BEGIN_OPERATION::equals).observe(o -> moveToHome());
   }
 
-  protected void configure(CopleyXYStageConfiguration configuration, Units units) {
-    lowerBoundX = units.parseQuantity(configuration.lowerBoundX()).asType(Length.class);
-    lowerBoundY = units.parseQuantity(configuration.lowerBoundY()).asType(Length.class);
-
-    upperBoundX = units.parseQuantity(configuration.upperBoundX()).asType(Length.class);
-    upperBoundY = units.parseQuantity(configuration.upperBoundY()).asType(Length.class);
-
-    homeX = units.parseQuantity(configuration.homePositionX()).asType(Length.class);
-    homeY = units.parseQuantity(configuration.homePositionY()).asType(Length.class);
-
-    exchangeX = units.parseQuantity(configuration.exchangePositionX()).asType(Length.class);
-    exchangeY = units.parseQuantity(configuration.exchangePositionY()).asType(Length.class);
+  protected void configure(
+      Quantity<Length> lowerBoundX,
+      Quantity<Length> lowerBoundY,
+      Quantity<Length> upperBoundX,
+      Quantity<Length> upperBoundY,
+      Quantity<Length> homeX,
+      Quantity<Length> homeY,
+      Quantity<Length> exchangeX,
+      Quantity<Length> exchangeY,
+      Units units) {
+    this.homeX = homeX;
+    this.homeY = homeY;
+    this.exchangeX = exchangeX;
+    this.exchangeY = exchangeY;
 
     xAxis = new CopleyLinearDimension(
         units,

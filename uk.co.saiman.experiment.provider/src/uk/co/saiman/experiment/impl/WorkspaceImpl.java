@@ -104,17 +104,27 @@ public class WorkspaceImpl implements Workspace {
   }
 
   protected void loadExperiments() {
+    Stream<PersistedExperiment> experiments;
     try {
-      persistenceManager
-          .getExperiments()
-          .forEach(s -> experiments.add(new ExperimentImpl(this, s)));
+      experiments = persistenceManager.getExperiments();
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
-          getText().exception().cannotLoadExperiment(),
+          getText().exception().cannotLoadExperiments(),
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;
     }
+    experiments.forEach(s -> {
+      try {
+        this.experiments.add(new ExperimentImpl(this, s));
+      } catch (Exception e) {
+        ExperimentException ee = new ExperimentException(
+            getText().exception().cannotLoadExperiment(s.getId(), s.getTypeId()),
+            e);
+        getLog().log(Level.ERROR, ee);
+        throw ee;
+      }
+    });
   }
 
   protected Log getLog() {

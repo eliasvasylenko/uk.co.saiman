@@ -90,7 +90,7 @@ public interface Observer<T> {
     };
   }
 
-  static <T> Observer<T> singleUse(Function<Observation, Observer<T>> observerProvider) {
+  static <T> Observer<T> forObservation(Function<Observation, Observer<T>> observerProvider) {
     return new Observer<T>() {
       Observer<T> observer;
 

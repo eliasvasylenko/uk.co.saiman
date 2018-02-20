@@ -35,37 +35,37 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
+import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 
 @Component(immediate = true)
-public class SpectrumConfigurationAdapterFactory implements IAdapterFactory {
-	@Reference
-	private IAdapterManager adapterManager;
+public class SpectrumExperimentAdapterFactory implements IAdapterFactory {
+  @Reference
+  private IAdapterManager adapterManager;
 
-	@Activate
-	public void register() {
-		adapterManager.registerAdapters(this, SpectrumConfiguration.class);
-	}
+  @Activate
+  public void register() {
+    adapterManager.registerAdapters(this, SpectrumExperimentType.class);
+  }
 
-	@Deactivate
-	public void unregister() {
-		adapterManager.unregisterAdapters(this);
-	}
+  @Deactivate
+  public void unregister() {
+    adapterManager.unregisterAdapters(this);
+  }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-		SpectrumConfiguration configuration = (SpectrumConfiguration) adaptableObject;
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+    SpectrumExperimentType<?> configuration = (SpectrumExperimentType<?>) adaptableObject;
 
-		if (adapterType == AcquisitionDevice.class) {
-			return (T) configuration.getAcquisitionDevice();
-		}
+    if (adapterType == AcquisitionDevice.class) {
+      return (T) configuration.getAcquisitionDevice();
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	@Override
-	public Class<?>[] getAdapterList() {
-		return new Class<?>[] { AcquisitionDevice.class };
-	}
+  @Override
+  public Class<?>[] getAdapterList() {
+    return new Class<?>[] { AcquisitionDevice.class };
+  }
 }

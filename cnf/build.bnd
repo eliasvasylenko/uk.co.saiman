@@ -91,6 +91,17 @@ Import-Package:\
 	osgi.enroute.hamcrest.wrapper,\
 	org.hamcrest:java-hamcrest
 
+-buildpathR7.base=\
+	osgi.annotation;version=latest,\
+	osgi.cmpn;version=latest,\
+	osgi.core;version=latest
+
+-testpathR7.base=\
+	org.jmockit:jmockit,\
+	org.apache.servicemix.bundles.junit,\
+	org.hamcrest:hamcrest-core,\
+	org.hamcrest:java-hamcrest
+
 ## Fix warnings
 -fixupmessages.res: "Bndtools: Found source folder 'res' that is not on bnd's source path 'src'"
 -fixupmessages.sub: "Eclipse: The Bundle Symbolic * is a sub-bundle *.bnd but uses the project name"

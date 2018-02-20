@@ -29,8 +29,9 @@ package uk.co.saiman.data.spectrum;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static uk.co.saiman.observable.Observer.onCompletion;
+import static uk.co.saiman.observable.Observer.onFailure;
 import static uk.co.saiman.observable.Observer.onObservation;
-import static uk.co.saiman.observable.Observer.singleUse;
+import static uk.co.saiman.observable.Observer.forObservation;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -60,7 +61,9 @@ import uk.co.saiman.observable.Observation;
  *          the type of the units of measurement of values in the range
  */
 public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Quantity<UR>> {
+  private Throwable failure;
   private final CountDownLatch complete;
+
   private final SampledDomain<UD> domain;
   private final Unit<UR> unitRange;
   private double[] intensities;
@@ -86,8 +89,9 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
         .executeOn(newSingleThreadExecutor())
         .map(this::aggregateArray)
         .then(onObservation(Observation::requestNext))
-        .then(singleUse(o -> m -> o.requestNext()))
-        .then(onCompletion(complete::countDown))
+        .then(forObservation(o -> m -> o.requestNext()))
+        .then(onCompletion(this::complete))
+        .then(onFailure(this::fail))
         .invalidateLazyRevalidate()
         .reemit()
         .map(m -> m.map(i -> {
@@ -95,6 +99,15 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
             return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
           }
         }));
+  }
+
+  private void complete() {
+    complete.countDown();
+  }
+
+  private void fail(Throwable t) {
+    failure = t;
+    complete.countDown();
   }
 
   private double[] aggregateArray(List<SampledContinuousFunction<UD, UR>> next) {
@@ -124,12 +137,14 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
 
   public SampledContinuousFunction<UD, UR> getAccumulation() {
     try {
-      System.out.println("wait!");
+      System.out.println("waiting...");
       complete.await();
-      System.out.println("waited!");
+      System.out.println("waited");
     } catch (InterruptedException e) {
       new LockException(e);
     }
+    if (failure != null)
+      throw new IllegalStateException("Failed to accumulate", failure);
     return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
   }
 }

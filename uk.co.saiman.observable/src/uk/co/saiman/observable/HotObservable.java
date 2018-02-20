@@ -143,7 +143,7 @@ public class HotObservable<M> implements Observable<M> {
     }
   }
 
-  boolean isLive() {
+  public synchronized boolean isLive() {
     return live;
   }
 

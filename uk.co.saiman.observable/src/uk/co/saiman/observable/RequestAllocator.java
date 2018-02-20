@@ -56,6 +56,8 @@ public interface RequestAllocator {
 
   static RequestAllocator sequential() {
     return (count, observations) -> {
+      if (observations.isEmpty())
+        return count;
       observations.get(0).request(count);
       return count == Long.MAX_VALUE ? Long.MAX_VALUE : 0;
     };
