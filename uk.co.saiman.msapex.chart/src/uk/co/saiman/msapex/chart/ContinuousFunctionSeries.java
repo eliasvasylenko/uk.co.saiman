@@ -28,12 +28,15 @@
 package uk.co.saiman.msapex.chart;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.measure.Quantity;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import uk.co.saiman.data.function.ContinuousFunction;
@@ -41,6 +44,8 @@ import uk.co.saiman.data.function.RegularSampledDomain;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.mathematics.Interval;
+import uk.co.saiman.msapex.annotations.Annotation;
+import uk.co.saiman.msapex.annotations.AnnotationLayer;
 import uk.co.saiman.observable.Invalidation;
 
 /**
@@ -54,14 +59,14 @@ import uk.co.saiman.observable.Invalidation;
  * 
  * @author Elias N Vasylenko
  */
-public class ContinuousFunctionSeries {
+public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<Y>> {
   private final ContinuousFunctionChartController controller;
 
   /*
    * Continuous function data
    */
-  private Invalidation<ContinuousFunction<?, ?>> latestContinuousFunction;
-  private ContinuousFunction<?, ?> lastRenderedContinuousFunction;
+  private Invalidation<ContinuousFunction<X, Y>> latestContinuousFunction;
+  private ContinuousFunction<X, Y> lastPreparedContinuousFunction;
   private boolean dirty;
 
   /*
@@ -69,6 +74,12 @@ public class ContinuousFunctionSeries {
    */
   private final ObservableList<Data<Number, Number>> data;
   private final Series<Number, Number> series;
+
+  /*
+   * Annotation data
+   */
+  private final ObservableSet<Annotation<X, Y>> annotations;
+  private AnnotationLayer<X, Y> annotationLayer;
 
   /**
    * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
@@ -81,8 +92,21 @@ public class ContinuousFunctionSeries {
   public ContinuousFunctionSeries(ContinuousFunctionChartController controller) {
     this.controller = controller;
 
+    annotations = FXCollections.observableSet(new HashSet<>());
     data = FXCollections.observableArrayList();
     series = new Series<>(data);
+
+    annotations.addListener((SetChangeListener<Annotation<X, Y>>) change -> {
+      AnnotationLayer<X, Y> layer = annotationLayer;
+      synchronized (layer) {
+        if (layer != null) {
+          if (change.wasAdded())
+            layer.getAnnotations().add(change.getElementAdded());
+          if (change.wasRemoved())
+            layer.getAnnotations().remove(change.getElementRemoved());
+        }
+      }
+    });
   }
 
   /**
@@ -109,12 +133,16 @@ public class ContinuousFunctionSeries {
     return dirty;
   }
 
-  public synchronized void setContinuousFunction(ContinuousFunction<?, ?> function) {
+  public ObservableSet<Annotation<X, Y>> getAnnotations() {
+    return annotations;
+  }
+
+  public synchronized void setContinuousFunction(ContinuousFunction<X, Y> function) {
     dirty = true;
     latestContinuousFunction = () -> function;
   }
 
-  public synchronized void setContinuousFunction(Invalidation<ContinuousFunction<?, ?>> function) {
+  public synchronized void setContinuousFunction(Invalidation<ContinuousFunction<X, Y>> function) {
     dirty = true;
     latestContinuousFunction = function;
   }
@@ -123,15 +151,32 @@ public class ContinuousFunctionSeries {
     if (dirty) {
       dirty = false;
       try {
-        lastRenderedContinuousFunction = latestContinuousFunction.revalidate();
+        lastPreparedContinuousFunction = latestContinuousFunction.revalidate();
       } catch (Exception e) {
-        lastRenderedContinuousFunction = null;
+        lastPreparedContinuousFunction = null;
         /*
          * TODO deal properly with the exception. Perhaps display a message on the chart
          */
       }
     }
-    return lastRenderedContinuousFunction;
+    return lastPreparedContinuousFunction;
+  }
+
+  private void setAnnotationLayer(AnnotationLayer<X, Y> annotationLayer) {
+    AnnotationLayer<X, Y> previousLayer = this.annotationLayer;
+    if (previousLayer != null) {
+      this.annotationLayer = null;
+      synchronized (previousLayer) {
+        previousLayer.getAnnotations().clear();
+      }
+    }
+    this.annotationLayer = annotationLayer;
+    this.annotationLayer.getAnnotations().addAll(annotations);
+    updateAnnotations();
+  }
+
+  void updateAnnotations() {
+
   }
 
   /**
@@ -144,13 +189,13 @@ public class ContinuousFunctionSeries {
    *          the resolution to render at in the domain
    */
   public synchronized void render(Interval<Double> domain, int resolution) {
-    if (lastRenderedContinuousFunction == null) {
+    if (lastPreparedContinuousFunction == null) {
       data.clear();
       return;
     }
 
     SampledContinuousFunction<?, ?> sampledContinuousFunction = resampleLastRendered(
-        lastRenderedContinuousFunction,
+        lastPreparedContinuousFunction,
         domain,
         resolution);
 
@@ -193,8 +238,8 @@ public class ContinuousFunctionSeries {
   /**
    * @return the latest continuous function prepared for rendering
    */
-  public ContinuousFunction<?, ?> getLatestPreparedContinuousFunction() {
-    return lastRenderedContinuousFunction;
+  public ContinuousFunction<X, Y> getLatestPreparedContinuousFunction() {
+    return lastPreparedContinuousFunction;
   }
 
   /**

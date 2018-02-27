@@ -40,6 +40,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.LocalInstance;
@@ -132,7 +134,7 @@ public class AcquisitionPart {
     /*
      * Add latest data to chart controller
      */
-    ContinuousFunctionSeries series = chartController.addSeries();
+    ContinuousFunctionSeries<Time, Dimensionless> series = chartController.addSeries();
     acquisitionDevice.dataEvents().observe(series::setContinuousFunction);
   }
 

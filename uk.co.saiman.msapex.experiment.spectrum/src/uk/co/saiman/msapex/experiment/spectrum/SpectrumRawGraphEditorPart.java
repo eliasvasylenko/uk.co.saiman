@@ -31,6 +31,8 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
@@ -57,7 +59,7 @@ public class SpectrumRawGraphEditorPart {
 
   @FXML
   private ContinuousFunctionChartController spectrumGraphController;
-  private ContinuousFunctionSeries series;
+  private ContinuousFunctionSeries<Time, Dimensionless> series;
 
   @PostConstruct
   void postConstruct(

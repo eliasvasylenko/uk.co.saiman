@@ -27,29 +27,22 @@
  */
 package uk.co.saiman.msapex.chart;
 
-import javafx.scene.Node;
+import javax.measure.Quantity;
+
+import uk.co.saiman.data.function.ContinuousFunction;
+import uk.co.saiman.msapex.annotations.Annotation;
+import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
- * An annotation handler applies to all annotation of its type. It translates a
- * conceptual annotation into an UI representation.
+ * A typed data annotation on a chart at a specific location.
  * 
  * @author Elias N Vasylenko
  *
  * @param <T>
- *          The type of the annotation to be handled by this handler
+ *          The type of the data of the annotation
  */
-public interface AnnotationHandler<T> {
-	/**
-	 * @return The data type of annotation to handle
-	 */
-	TypeToken<T> getDataType();
-
-	/**
-	 * @param annotationData
-	 *          The data of an annotation
-	 * @return The {@link Node} representation of the annotation to apply to the
-	 *         scene
-	 */
-	Node handle(T annotationData);
+public interface ContinuousFunctionChartAnnotator {
+  <X extends Quantity<X>, Y extends Quantity<Y>> Annotation<X, Y> annotate(
+      ContinuousFunction<X, Y> continuousFunction);
 }

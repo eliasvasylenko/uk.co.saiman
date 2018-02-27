@@ -25,42 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.measurement;
-
-import java.text.NumberFormat;
-
-import javax.measure.Quantity;
-import javax.measure.Unit;
-import javax.measure.quantity.AmountOfSubstance;
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Length;
-import javax.measure.quantity.Mass;
-import javax.measure.quantity.Time;
-
-public interface Units {
-  Unit<?> parseUnit(String unit);
-
-  String formatUnit(Unit<?> unit);
-
-  Quantity<?> parseQuantity(String quantity);
-
-  String formatQuantity(Quantity<?> quantity);
-
-  String formatQuantity(Quantity<?> quantity, NumberFormat format);
-
-  <T extends Quantity<T>> UnitBuilder<T> with(Unit<T> unit);
-
-  UnitBuilder<Dimensionless> count();
-
-  UnitBuilder<Dimensionless> percent();
-
-  UnitBuilder<Mass> dalton();
-
-  UnitBuilder<Mass> gram();
-
-  UnitBuilder<Length> metre();
-
-  UnitBuilder<Time> second();
-
-  UnitBuilder<AmountOfSubstance> mole();
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.measurement.fx;

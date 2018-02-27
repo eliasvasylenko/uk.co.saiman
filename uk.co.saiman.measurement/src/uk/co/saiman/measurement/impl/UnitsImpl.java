@@ -55,127 +55,127 @@ import uk.co.saiman.text.properties.LocaleProvider;
 
 @Component
 public class UnitsImpl implements uk.co.saiman.measurement.Units {
-	@Reference
-	LocaleProvider localeProvider;
-	private Locale locale;
-	private UnitFormat unitFormat;
-	private QuantityFormat quantityFormat;
+  @Reference
+  LocaleProvider localeProvider;
+  private Locale locale;
+  private UnitFormat unitFormat;
+  private QuantityFormat quantityFormat;
 
-	private static final Unit<Dimensionless> COUNT = AbstractUnit.ONE;
+  private static final Unit<Dimensionless> COUNT = AbstractUnit.ONE;
 
-	protected <T extends Quantity<T>> UnitBuilder<T> over(Unit<T> unit) {
-		return new UnitBuilderImpl<>(this, unit);
-	}
+  public <T extends Quantity<T>> UnitBuilder<T> with(Unit<T> unit) {
+    return new UnitBuilderImpl<>(this, unit);
+  }
 
-	@Override
-	public UnitBuilder<Length> metre() {
-		return over(SI.METRE);
-	}
+  @Override
+  public UnitBuilder<Length> metre() {
+    return with(SI.METRE);
+  }
 
-	@Override
-	public UnitBuilder<Dimensionless> count() {
-		return over(COUNT);
-	}
+  @Override
+  public UnitBuilder<Dimensionless> count() {
+    return with(COUNT);
+  }
 
-	@Override
-	public UnitBuilder<Time> second() {
-		return over(SI.SECOND);
-	}
+  @Override
+  public UnitBuilder<Time> second() {
+    return with(SI.SECOND);
+  }
 
-	@Override
-	public UnitBuilder<Dimensionless> percent() {
-		return over(SI.PERCENT);
-	}
+  @Override
+  public UnitBuilder<Dimensionless> percent() {
+    return with(SI.PERCENT);
+  }
 
-	@Override
-	public UnitBuilder<Mass> dalton() {
-		return over(SI.UNIFIED_ATOMIC_MASS);
-	}
+  @Override
+  public UnitBuilder<Mass> dalton() {
+    return with(SI.UNIFIED_ATOMIC_MASS);
+  }
 
-	@Override
-	public UnitBuilder<AmountOfSubstance> mole() {
-		return over(SI.MOLE);
-	}
+  @Override
+  public UnitBuilder<AmountOfSubstance> mole() {
+    return with(SI.MOLE);
+  }
 
-	@Override
-	public UnitBuilder<Mass> gram() {
-		return over(SI.GRAM);
-	}
+  @Override
+  public UnitBuilder<Mass> gram() {
+    return with(SI.GRAM);
+  }
 
-	@Override
-	public Unit<?> parseUnit(String unit) {
-		return getUnitFormat().parse(unit);
-	}
+  @Override
+  public Unit<?> parseUnit(String unit) {
+    return getUnitFormat().parse(unit);
+  }
 
-	@Override
-	public String formatUnit(Unit<?> unit) {
-		return getUnitFormat().format(unit);
-	}
+  @Override
+  public String formatUnit(Unit<?> unit) {
+    return getUnitFormat().format(unit);
+  }
 
-	@Override
-	public Quantity<?> parseQuantity(String unit) {
-		return getQuantityFormat().parse(unit);
-	}
+  @Override
+  public Quantity<?> parseQuantity(String unit) {
+    return getQuantityFormat().parse(unit);
+  }
 
-	@Override
-	public String formatQuantity(Quantity<?> quantity) {
-		return getQuantityFormat().format(quantity);
-	}
+  @Override
+  public String formatQuantity(Quantity<?> quantity) {
+    return getQuantityFormat().format(quantity);
+  }
 
-	@Override
-	public String formatQuantity(Quantity<?> quantity, NumberFormat format) {
-		return QuantityFormat.getInstance(format, getUnitFormat()).format(quantity);
-	}
+  @Override
+  public String formatQuantity(Quantity<?> quantity, NumberFormat format) {
+    return QuantityFormat.getInstance(format, getUnitFormat()).format(quantity);
+  }
 
-	private UnitFormat getUnitFormat() {
-		updateFormats();
-		return unitFormat;
-	}
+  private UnitFormat getUnitFormat() {
+    updateFormats();
+    return unitFormat;
+  }
 
-	private QuantityFormat getQuantityFormat() {
-		updateFormats();
-		return quantityFormat;
-	}
+  private QuantityFormat getQuantityFormat() {
+    updateFormats();
+    return quantityFormat;
+  }
 
-	private void updateFormats() {
-		Locale locale = localeProvider.getLocale();
-		if (this.locale == null) {
-			this.locale = locale;
+  private void updateFormats() {
+    Locale locale = localeProvider.getLocale();
+    if (this.locale == null) {
+      this.locale = locale;
 
-			unitFormat = addLabels(SimpleUnitFormat.getInstance());
-			quantityFormat = new PatchedNumberSpaceQuantityFormat(NumberFormat.getInstance(), unitFormat);
-		}
-	}
+      unitFormat = addLabels(SimpleUnitFormat.getInstance());
+      quantityFormat = new PatchedNumberSpaceQuantityFormat(NumberFormat.getInstance(), unitFormat);
+    }
+  }
 
-	private SimpleUnitFormat addLabels(SimpleUnitFormat instance) {
-		Unit<?> Da = dalton().get();
-		instance.label(Da, "Da");
+  private SimpleUnitFormat addLabels(SimpleUnitFormat instance) {
+    Unit<?> Da = dalton().get();
+    instance.label(Da, "Da");
 
-		return instance;
-	}
+    return instance;
+  }
 
-	private void updateFormatsLocal() {
-		Locale locale = localeProvider.getLocale();
-		if (!locale.equals(this.locale)) {
-			this.locale = locale;
+  private void updateFormatsLocal() {
+    Locale locale = localeProvider.getLocale();
+    if (!locale.equals(this.locale)) {
+      this.locale = locale;
 
-			unitFormat = addLabels(LocalUnitFormat.getInstance(locale));
-			quantityFormat = QuantityFormat.getInstance(NumberFormat.getInstance(locale), unitFormat);
-		}
-	}
+      unitFormat = addLabels(LocalUnitFormat.getInstance(locale));
+      quantityFormat = QuantityFormat.getInstance(NumberFormat.getInstance(locale), unitFormat);
+    }
+  }
 
-	private LocalUnitFormat addLabels(LocalUnitFormat instance) {
-		try {
-			Method getSymbolsMethod = instance.getClass().getDeclaredMethod("getSymbols");
-			getSymbolsMethod.setAccessible(true);
-			SymbolMap symbolMap = (SymbolMap) getSymbolsMethod.invoke(instance);
+  private LocalUnitFormat addLabels(LocalUnitFormat instance) {
+    try {
+      Method getSymbolsMethod = instance.getClass().getDeclaredMethod("getSymbols");
+      getSymbolsMethod.setAccessible(true);
+      SymbolMap symbolMap = (SymbolMap) getSymbolsMethod.invoke(instance);
 
-			Unit<?> Da = dalton().get();
-			symbolMap.label(Da, "Da");
+      Unit<?> Da = dalton().get();
+      symbolMap.label(Da, "Da");
 
-			return instance;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+      return instance;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

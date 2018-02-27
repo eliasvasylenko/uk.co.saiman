@@ -30,6 +30,7 @@ package uk.co.saiman.msapex.chemistry;
 import static java.util.Collections.emptySet;
 import static javafx.collections.FXCollections.observableArrayList;
 import static uk.co.saiman.chemistry.Element.Group.NONE;
+import static uk.co.saiman.data.function.ContinuousFunction.empty;
 
 import javax.annotation.PostConstruct;
 import javax.measure.Unit;
@@ -47,7 +48,6 @@ import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
 import uk.co.saiman.chemistry.Isotope;
 import uk.co.saiman.chemistry.PeriodicTable;
-import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.GaussianFunctionFactory;
 import uk.co.saiman.data.function.PeakShapeFunctionFactory;
 import uk.co.saiman.data.function.PeakShapeImpulseConvolutionFunction;
@@ -83,15 +83,14 @@ public class ChemicalElementPanelController {
   private TableColumn<Isotope, Double> abundanceColumn;
 
   private PeakShapeFunctionFactory peakFunction;
-  private ContinuousFunctionSeries isotopeSeries;
+  private ContinuousFunctionSeries<Mass, Dimensionless> isotopeSeries;
   private Unit<Dimensionless> abundanceUnit;
   private Unit<Mass> massUnit;
 
   @FXML
   void initialize() {
     peakFunction = new GaussianFunctionFactory(VARIANCE);
-    isotopeSeries = isotopeChartController.addSeries();
-    isotopeSeries.setContinuousFunction(ContinuousFunction.empty(massUnit, abundanceUnit));
+    isotopeSeries = isotopeChartController.addSeries(empty(massUnit, abundanceUnit));
 
     setElement(null);
 

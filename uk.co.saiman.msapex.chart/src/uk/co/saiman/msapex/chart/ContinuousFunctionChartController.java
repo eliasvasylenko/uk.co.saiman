@@ -42,6 +42,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import javafx.animation.AnimationTimer;
@@ -89,7 +90,7 @@ public class ContinuousFunctionChartController {
   @FXML
   private HBox extraAxesContainer;
 
-  private final Set<ContinuousFunctionSeries> series;
+  private final Set<ContinuousFunctionSeries<?, ?>> series;
 
   private boolean zoomed;
   private Interval<Double> domain = Interval.bounded(0d, 100d);
@@ -110,10 +111,8 @@ public class ContinuousFunctionChartController {
   @FXML
   private AnchorPane annotationPane;
 
-  private ObservableSet<ChartAnnotation<?>> annotations;
-
-  private Map<TypeToken<?>, AnnotationHandler<?>> annotationHandlers;
-  private Map<ChartAnnotation<?>, Node> annotationNodes;
+  private ObservableSet<ContinuousFunctionChartAnnotator> annotators;
+  private Map<ContinuousFunctionChartAnnotator, Node> annotationNodes;
 
   @Inject
   Units units;
@@ -127,8 +126,7 @@ public class ContinuousFunctionChartController {
     rangeGroups = new HashMap<>();
     extraYAxes = new ArrayList<>();
 
-    annotations = FXCollections.observableSet(new LinkedHashSet<>());
-    annotationHandlers = new HashMap<>();
+    annotators = FXCollections.observableSet(new LinkedHashSet<>());
     annotationNodes = new HashMap<>();
 
     refreshTimer = new AnimationTimer() {
@@ -149,21 +147,22 @@ public class ContinuousFunctionChartController {
   @FXML
   void initialize() {
     getXAxis().upperBoundProperty().addListener(num -> updateAnnotations());
-    getXAxis().scaleProperty().addListener(num -> updateAnnotations());
+    getXAxis().lowerBoundProperty().addListener(num -> updateAnnotations());
 
     getYAxis().upperBoundProperty().addListener(num -> updateAnnotations());
-    getYAxis().scaleProperty().addListener(num -> updateAnnotations());
-
-    annotations.addListener(this::annotationsChanged);
+    getYAxis().lowerBoundProperty().addListener(num -> updateAnnotations());
 
     getXAxis().scaleProperty().addListener(num -> updateAxis(getXAxis()));
     getYAxis().scaleProperty().addListener(num -> updateAxis(getYAxis()));
 
     resetZoomDomain();
     updateAxisUnits();
-    updateAnnotations();
 
     noChartDataLabel.textProperty().bind(wrap(properties.noChartData()));
+  }
+
+  private void updateAnnotations() {
+    series.forEach(ContinuousFunctionSeries::updateAnnotations);
   }
 
   @Override
@@ -201,14 +200,7 @@ public class ContinuousFunctionChartController {
     lineChart.setTitle(title);
   }
 
-  /**
-   * @return The annotations on the chart
-   */
-  public ObservableSet<ChartAnnotation<?>> getAnnotations() {
-    return annotations;
-  }
-
-  private Stream<ContinuousFunctionSeries> series() {
+  private Stream<ContinuousFunctionSeries<?, ?>> series() {
     return series.stream();
   }
 
@@ -471,27 +463,8 @@ public class ContinuousFunctionChartController {
     getRangeGroups().forEach(g -> g.updateRangeZoom(domain, reset));
   }
 
-  private void annotationsChanged(Change<? extends ChartAnnotation<?>> c) {
-    if (c.wasAdded()) {
-      ChartAnnotation<?> annotation = c.getElementAdded();
-
-      @SuppressWarnings("unchecked")
-      AnnotationHandler<Object> handler = (AnnotationHandler<Object>) annotationHandlers
-          .get(annotation.getDataType());
-      Node annotationNode = handler.handle(annotation.getData());
-
-      annotationNodes.put(annotation, annotationNode);
-
-      annotationPane.getChildren().add(annotationNode);
-    } else if (c.wasRemoved()) {
-      annotationPane.getChildren().remove(annotationNodes.get(c.getElementRemoved()));
-    }
-
-    updateAnnotations();
-  }
-
-  public ContinuousFunctionSeries addSeries() {
-    ContinuousFunctionSeries continuousFunctionSeries = new ContinuousFunctionSeries(this);
+  public <X extends Quantity<X>, Y extends Quantity<Y>> ContinuousFunctionSeries<X, Y> addSeries() {
+    ContinuousFunctionSeries<X, Y> continuousFunctionSeries = new ContinuousFunctionSeries<>(this);
 
     series.add(continuousFunctionSeries);
     lineChart.getData().add(continuousFunctionSeries.getSeries());
@@ -501,7 +474,14 @@ public class ContinuousFunctionChartController {
     return continuousFunctionSeries;
   }
 
-  void removeSeries(ContinuousFunctionSeries series) {
+  public <X extends Quantity<X>, Y extends Quantity<Y>> ContinuousFunctionSeries<X, Y> addSeries(
+      ContinuousFunction<X, Y> function) {
+    ContinuousFunctionSeries<X, Y> series = addSeries();
+    series.setContinuousFunction(function);
+    return series;
+  }
+
+  void removeSeries(ContinuousFunctionSeries<?, ?> series) {
     if (this.series.remove(series)) {
       lineChart.getData().remove(series.getSeries());
 
@@ -515,8 +495,6 @@ public class ContinuousFunctionChartController {
     }
 
     noChartDataLabel.setVisible(lineChart.getData().isEmpty());
-
-    updateAnnotations();
   }
 
   private void triggerRefresh() {
@@ -559,7 +537,7 @@ public class ContinuousFunctionChartController {
         group.clearContinuousFunctions();
       }
 
-      for (ContinuousFunctionSeries series : this.series) {
+      for (ContinuousFunctionSeries<?, ?> series : this.series) {
         ContinuousFunction<?, ?> preparedFunction = series.getLatestPreparedContinuousFunction();
         if (preparedFunction != null) {
           Unit<?> functionXUnit = preparedFunction.domain().getUnit();
@@ -633,22 +611,5 @@ public class ContinuousFunctionChartController {
      * 
      */
 
-  }
-
-  private void updateAnnotations() {
-    for (ChartAnnotation<?> annotation : new ArrayList<>(annotations)) {
-      Node node = annotationNodes.get(annotation);
-
-      double x = getXAxis()
-          .localToParent(getXAxis().getDisplayPosition(annotation.getX()), 0)
-          .getX() + lineChart.getPadding().getLeft();
-      double y = getYAxis()
-          .localToParent(0, getYAxis().getDisplayPosition(annotation.getY()))
-          .getY() + lineChart.getPadding().getTop();
-
-      node.autosize();
-      node.setLayoutX(x);
-      node.setLayoutY(y - node.prefHeight(Integer.MAX_VALUE));
-    }
   }
 }

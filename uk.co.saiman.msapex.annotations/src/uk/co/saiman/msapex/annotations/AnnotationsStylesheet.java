@@ -25,42 +25,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.chart;
+package uk.co.saiman.msapex.annotations;
 
-import uk.co.saiman.reflection.token.TypeArgument;
-import uk.co.saiman.reflection.token.TypeToken;
+import java.net.URL;
+
+import org.eclipse.fx.ui.services.theme.Stylesheet;
+import org.eclipse.fx.ui.services.theme.Theme;
+import org.osgi.service.component.annotations.Component;
 
 /**
- * A typed data annotation on a chart at a specific location.
+ * Default stylesheet for data charts.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- *          The type of the data of the annotation
  */
-public interface ChartAnnotation<T> {
-  /**
-   * @return The data of the annotation
-   */
-  T getData();
+@Component
+public class AnnotationsStylesheet implements Stylesheet {
+	@Override
+	public boolean appliesToTheme(Theme t) {
+		return true;
+	}
 
-  /**
-   * @return The type of the data of the annotation
-   */
-  TypeToken<T> getDataType();
-
-  default TypeToken<ChartAnnotation<T>> getThisTypeToken() {
-    return new TypeToken<ChartAnnotation<T>>() {}
-        .withTypeArguments(new TypeArgument<T>(getDataType()) {});
-  }
-
-  /**
-   * @return The position in the domain of the chart data
-   */
-  double getX();
-
-  /**
-   * @return The position in the codomain of the chart data
-   */
-  double getY();
+	@Override
+	public URL getURL(Theme t) {
+		return AnnotationsStylesheet.class.getClassLoader().getResource("css/annotations.css");
+	}
 }

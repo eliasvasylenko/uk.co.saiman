@@ -2,6 +2,7 @@
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
 \
 	javax.measure.unit-api;version=latest,\
 	tec.uom.se;version=latest,\

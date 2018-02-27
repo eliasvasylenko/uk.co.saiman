@@ -26,6 +26,16 @@ import uk.co.saiman.data.function.SampledRange;
  * be GCd if and when necessary to free heap space, but otherwise will remain
  * available for immediate reuse as soon as the previous continuous function
  * they were used for becomes unreachable.
+ * <p>
+ * Due to the large default cache depth, this can appear to use a huge amount of
+ * memory, but this is not really the case. Firstly the amount allocated will
+ * never exceed the peak amount allocated without using the buffer, and secondly
+ * almost all the allocated memory at any given time should be unreachable and
+ * therefore available for collection if there is enough pressure on the GC.
+ * <p>
+ * TODO Different deployments are likely to have different GC behavior so it may
+ * be wise at some point to provide a service with configurable cache depth and
+ * trace logging.
  * 
  * @author Elias N Vasylenko
  */

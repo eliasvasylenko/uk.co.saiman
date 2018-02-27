@@ -27,8 +27,11 @@
  */
 package uk.co.saiman.fx;
 
+import static java.util.stream.Collectors.toList;
+
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -126,7 +129,43 @@ public class FxUtilities {
    *         that list transformed according to the given function
    */
   public static <T, U> ObservableList<T> map(ObservableList<U> component, Function<U, T> mapper) {
+    return map(component, mapper, null);
+  }
+
+  public static <T, U> ObservableList<T> map(
+      ObservableList<U> component,
+      Function<U, T> mapper,
+      Function<T, U> reverseMapper) {
     return new TransformationList<T, U>(component) {
+      void assertReversible() {
+        if (reverseMapper == null)
+          throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public T set(int index, T element) {
+        assertReversible();
+        return mapper.apply(component.set(index, reverseMapper.apply(element)));
+      }
+
+      @Override
+      public void add(int index, T element) {
+        assertReversible();
+        component.add(index, reverseMapper.apply(element));
+      }
+
+      @Override
+      public T remove(int index) {
+        assertReversible();
+        return mapper.apply(component.remove(index));
+      }
+
+      @Override
+      public boolean setAll(Collection<? extends T> col) {
+        assertReversible();
+        return component.setAll(col.stream().map(reverseMapper).collect(toList()));
+      }
+
       @Override
       public T get(int index) {
         return mapper.apply(getSource().get(index));
@@ -397,8 +436,11 @@ public class FxUtilities {
    * @return The URL for the resource associated with the given controller class.
    */
   public static URL getResource(Class<?> controllerClass, String resourceName) {
-    String resourceLocation = "/" + controllerClass.getPackage().getName().replace('.', '/') + "/"
-        + resourceName + ".fxml";
+    String resourceLocation = "/"
+        + controllerClass.getPackage().getName().replace('.', '/')
+        + "/"
+        + resourceName
+        + ".fxml";
 
     return controllerClass.getResource(resourceLocation);
   }
