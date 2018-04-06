@@ -34,130 +34,141 @@ import javax.measure.Unit;
 
 import tec.uom.se.quantity.Quantities;
 import tec.uom.se.unit.MetricPrefix;
+import uk.co.saiman.measurement.MetricUnitBuilder;
 import uk.co.saiman.measurement.UnitBuilder;
 
-public class UnitBuilderImpl<T extends Quantity<T>> implements UnitBuilder<T> {
+public class UnitBuilderImpl<T extends Quantity<T>> implements MetricUnitBuilder<T> {
   private final UnitsImpl unitsImpl;
   private final Unit<T> unit;
+  private final MetricPrefix prefix;
 
-  public UnitBuilderImpl(UnitsImpl unitsImpl, Unit<T> unit) {
+  public UnitBuilderImpl(UnitsImpl unitsImpl, Unit<T> unit, MetricPrefix prefix) {
     this.unitsImpl = unitsImpl;
     this.unit = unit;
+    this.prefix = prefix;
   }
 
   @Override
   public UnitBuilder<?> multiply(Function<uk.co.saiman.measurement.Units, UnitBuilder<?>> unit) {
-    return new UnitBuilderImpl<>(unitsImpl, this.unit.multiply(unit.apply(unitsImpl).get()));
+    return new UnitBuilderImpl<>(
+        unitsImpl,
+        this.unit.multiply(unit.apply(unitsImpl).get()),
+        prefix);
   }
 
   @Override
-  public UnitBuilder<?> divide(Function<uk.co.saiman.measurement.Units, UnitBuilder<?>> unit) {
-    return new UnitBuilderImpl<>(unitsImpl, this.unit.divide(unit.apply(unitsImpl).get()));
+  public UnitBuilderImpl<?> divide(Function<uk.co.saiman.measurement.Units, UnitBuilder<?>> unit) {
+    return new UnitBuilderImpl<>(unitsImpl, this.unit.divide(unit.apply(unitsImpl).get()), prefix);
   }
 
   @Override
-  public UnitBuilder<T> yotta() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.YOTTA(unit));
+  public UnitBuilderImpl<T> yotta() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.YOTTA);
   }
 
   @Override
-  public UnitBuilder<T> zetta() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.ZETTA(unit));
+  public UnitBuilderImpl<T> zetta() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.ZETTA);
   }
 
   @Override
-  public UnitBuilder<T> exa() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.EXA(unit));
+  public UnitBuilderImpl<T> exa() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.EXA);
   }
 
   @Override
-  public UnitBuilder<T> peta() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.PETA(unit));
+  public UnitBuilderImpl<T> peta() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.PETA);
   }
 
   @Override
-  public UnitBuilder<T> tera() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.TERA(unit));
+  public UnitBuilderImpl<T> tera() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.TERA);
   }
 
   @Override
-  public UnitBuilder<T> giga() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.GIGA(unit));
+  public UnitBuilderImpl<T> giga() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.GIGA);
   }
 
   @Override
-  public UnitBuilder<T> mega() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.MEGA(unit));
+  public UnitBuilderImpl<T> mega() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.MEGA);
   }
 
   @Override
-  public UnitBuilder<T> kilo() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.KILO(unit));
+  public UnitBuilderImpl<T> kilo() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.KILO);
   }
 
   @Override
-  public UnitBuilder<T> hecto() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.HECTO(unit));
+  public UnitBuilderImpl<T> hecto() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.HECTO);
   }
 
   @Override
-  public UnitBuilder<T> deka() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.DEKA(unit));
+  public UnitBuilderImpl<T> deka() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.DEKA);
   }
 
   @Override
-  public UnitBuilder<T> deci() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.DECI(unit));
+  public MetricUnitBuilder<T> none() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, null);
   }
 
   @Override
-  public UnitBuilder<T> centi() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.CENTI(unit));
+  public UnitBuilderImpl<T> deci() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.DECI);
   }
 
   @Override
-  public UnitBuilder<T> milli() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.MILLI(unit));
+  public UnitBuilderImpl<T> centi() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.CENTI);
   }
 
   @Override
-  public UnitBuilder<T> micro() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.MICRO(unit));
+  public UnitBuilderImpl<T> milli() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.MILLI);
   }
 
   @Override
-  public UnitBuilder<T> nano() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.NANO(unit));
+  public UnitBuilderImpl<T> micro() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.MICRO);
   }
 
   @Override
-  public UnitBuilder<T> pico() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.PICO(unit));
+  public UnitBuilderImpl<T> nano() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.NANO);
   }
 
   @Override
-  public UnitBuilder<T> femto() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.FEMTO(unit));
+  public UnitBuilderImpl<T> pico() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.PICO);
   }
 
   @Override
-  public UnitBuilder<T> atto() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.ATTO(unit));
+  public UnitBuilderImpl<T> femto() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.FEMTO);
   }
 
   @Override
-  public UnitBuilder<T> zepto() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.ZEPTO(unit));
+  public UnitBuilderImpl<T> atto() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.ATTO);
   }
 
   @Override
-  public UnitBuilder<T> yocto() {
-    return new UnitBuilderImpl<>(unitsImpl, MetricPrefix.YOCTO(unit));
+  public UnitBuilderImpl<T> zepto() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.ZEPTO);
+  }
+
+  @Override
+  public UnitBuilderImpl<T> yocto() {
+    return new UnitBuilderImpl<>(unitsImpl, unit, MetricPrefix.YOCTO);
   }
 
   @Override
   public Unit<T> get() {
-    return unit;
+    return prefix == null ? unit : unit.transform(prefix.getConverter());
   }
 
   @Override

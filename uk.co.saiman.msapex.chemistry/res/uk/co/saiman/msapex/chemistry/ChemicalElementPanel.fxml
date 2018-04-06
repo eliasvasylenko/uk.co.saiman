@@ -8,6 +8,7 @@
 <?import uk.co.saiman.msapex.chemistry.ChemicalElementTile?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.BorderPane?>
 
 <VBox
 	xmlns="http://javafx.com/javafx/8"
@@ -32,9 +33,7 @@
 			</children>
 		</HBox>
 
-		<fx:include
-			fx:id="isotopeChart"
-			source="/uk/co/saiman/msapex/chart/ContinuousFunctionChart.fxml" />
+		<BorderPane fx:id="isotopeChartPane" />
 
 		<TableView fx:id="isotopeTable">
 			<columns>

@@ -29,6 +29,7 @@ package uk.co.saiman.data.function;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.log;
+import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 
 import java.util.function.Function;
@@ -39,70 +40,74 @@ import java.util.function.Function;
  * @author Elias N Vasylenko
  */
 public class GaussianFunctionFactory implements PeakShapeFunctionFactory {
-	private final Function<Double, Double> varianceAtPosition;
+  private final Function<Double, Double> varianceAtPosition;
 
-	/**
-	 * @param variance
-	 *          the uniform variance for peaks at any point across the entire
-	 *          domain
-	 */
-	public GaussianFunctionFactory(double variance) {
-		varianceAtPosition = p -> variance;
-	}
+  /**
+   * @param variance
+   *          the uniform variance for peaks at any point across the entire domain
+   */
+  public GaussianFunctionFactory(double variance) {
+    varianceAtPosition = p -> variance;
+  }
 
-	@Override
-	public PeakShapeFunction atPeakPosition(double mean, double intensity) {
-		return new PeakShapeFunction() {
-			private final double standardDeviation = Math.sqrt(varianceAtPosition.apply(mean));
-			private final double fullWidthHalfMaximum = standardDeviation * 2 * sqrt(2 * log(2));
-			private final double peakHeightReciprocal = standardDeviation * sqrt(2 * PI);
+  @Override
+  public PeakShapeFunction atPeakPosition(double mean, double intensity) {
+    return new PeakShapeFunction() {
+      private final double standardDeviation = Math.sqrt(varianceAtPosition.apply(mean));
+      private final double fullWidthHalfMaximum = standardDeviation * 2 * sqrt(2 * log(2));
+      private final double peakHeightReciprocal = standardDeviation * sqrt(2 * PI);
 
-			private final double domainStart = mean - standardDeviation * 4;
-			private final double domainEnd = mean + standardDeviation * 4;
+      private final double domainStart = mean - standardDeviation * 4;
+      private final double domainEnd = mean + standardDeviation * 4;
 
-			@Override
-			public double sample(double value) {
-				double powerNumerator = value - mean;
-				powerNumerator *= -powerNumerator;
+      @Override
+      public double sample(double value) {
+        if (value <= domainStart || value >= domainEnd)
+          return 0;
 
-				double powerDenominator = standardDeviation;
-				powerDenominator *= powerDenominator * 2;
+        double powerNumerator = value - mean;
+        powerNumerator *= -powerNumerator;
 
-				double sampleFromItem = Math.pow(Math.E, powerNumerator / powerDenominator) / peakHeightReciprocal * intensity;
+        double powerDenominator = standardDeviation;
+        powerDenominator *= powerDenominator * 2;
 
-				// if near edges then interpolate to 0 for smoother fall-off.
-				double difference = Math.abs(value - mean);
-				if (difference > standardDeviation * 3) {
-					sampleFromItem *= 4 - difference / standardDeviation;
-				}
+        double sampleFromItem = Math.pow(Math.E, powerNumerator / powerDenominator)
+            / peakHeightReciprocal
+            * intensity;
 
-				return sampleFromItem;
-			}
+        // if near edges then interpolate to 0 for smoother fall-off.
+        double difference = Math.abs(value - mean);
+        if (difference > standardDeviation * 3) {
+          sampleFromItem *= max(0, 4 - difference / standardDeviation);
+        }
 
-			@Override
-			public double maximum() {
-				return mean;
-			}
+        return sampleFromItem;
+      }
 
-			@Override
-			public double mean() {
-				return mean;
-			}
+      @Override
+      public double maximum() {
+        return mean;
+      }
 
-			@Override
-			public double fullWidthAtHalfMaximum() {
-				return fullWidthHalfMaximum;
-			}
+      @Override
+      public double mean() {
+        return mean;
+      }
 
-			@Override
-			public double effectiveDomainStart() {
-				return domainStart;
-			}
+      @Override
+      public double fullWidthAtHalfMaximum() {
+        return fullWidthHalfMaximum;
+      }
 
-			@Override
-			public double effectiveDomainEnd() {
-				return domainEnd;
-			}
-		};
-	}
+      @Override
+      public double effectiveDomainStart() {
+        return domainStart;
+      }
+
+      @Override
+      public double effectiveDomainEnd() {
+        return domainEnd;
+      }
+    };
+  }
 }

@@ -50,27 +50,8 @@ public class PatchedNumberSpaceQuantityFormat extends QuantityFormat {
 		this.unitFormat = unitFormat;
 	}
 
-	static int getFractionDigitsCount(double d) {
-		if (d >= 1.0) {
-			d -= (long) d;
-		}
-		if (d == 0.0) {
-			return 0;
-		}
-		int count;
-		for (d *= 10.0, count = 1; d - (long) d != 0.0; d *= 10.0, ++count) {}
-		return count;
-	}
-
 	@Override
 	public Appendable format(Quantity<?> quantity, Appendable dest) throws IOException {
-		int fract = 0;
-		if (quantity != null && quantity.getValue() != null) {
-			fract = getFractionDigitsCount(quantity.getValue().doubleValue());
-		}
-		if (fract > 1) {
-			this.numberFormat.setMaximumFractionDigits(fract + 1);
-		}
 		dest.append(this.numberFormat.format(quantity.getValue()));
 		if (quantity.getUnit().equals(AbstractUnit.ONE)) {
 			return dest;

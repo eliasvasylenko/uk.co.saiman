@@ -31,9 +31,18 @@ import static com.fazecast.jSerialComm.SerialPort.NO_PARITY;
 import static com.fazecast.jSerialComm.SerialPort.ONE_STOP_BIT;
 import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_READ_BLOCKING;
 import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_WRITE_BLOCKING;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static uk.co.saiman.log.Log.Level.ERROR;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
@@ -44,6 +53,8 @@ import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
+import uk.co.saiman.comms.impl.JSerialPortService.JSerialPortConfiguration;
+import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observer;
@@ -54,19 +65,54 @@ import uk.co.saiman.observable.Observer;
  * 
  * @author Elias N Vasylenko
  */
-public class JSerialCommsPort implements CommsPort {
-  private final SerialPort serialPort;
+@Designate(ocd = JSerialPortConfiguration.class, factory = true)
+@Component(configurationPid = JSerialPortService.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+public class JSerialPortService implements CommsPort {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "JSerialPort Comms Configuration",
+      description = "The JSerialPort component provides native serial port interfaces")
+  public @interface JSerialPortConfiguration {
+    @AttributeDefinition(name = "Port Name", description = "The name of the port to provide")
+    String name();
+  }
+
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.jserialport";
+  static final String NAME = "name";
+
+  @Reference
+  private Log log;
+
+  private SerialPort serialPort;
 
   private CommsChannel openChannel;
 
-  protected JSerialCommsPort(SerialPort serialPort) {
-    this.serialPort = serialPort;
+  // TODO constructor injection with R7
+  JSerialPortService() {}
 
-    serialPort.setNumDataBits(Byte.SIZE);
-    serialPort.setBaudRate(9600);
-    serialPort.setNumStopBits(ONE_STOP_BIT);
-    serialPort.setParity(NO_PARITY);
-    serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 1000, 1000);
+  JSerialPortService(SerialPort serialPort) {
+    serialPort = initializePort(serialPort);
+  }
+
+  @Activate
+  void activate(JSerialPortConfiguration configuration) {
+    serialPort = initializePort(SerialPort.getCommPort(configuration.name()));
+  }
+
+  private SerialPort initializePort(SerialPort serialPort) {
+    try {
+      serialPort.setNumDataBits(Byte.SIZE);
+      serialPort.setBaudRate(9600);
+      serialPort.setNumStopBits(ONE_STOP_BIT);
+      serialPort.setParity(NO_PARITY);
+      serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 1000, 1000);
+      return serialPort;
+    } catch (Exception e) {
+      Log log = this.log;
+      if (log != null)
+        log.log(ERROR, e);
+      throw e;
+    }
   }
 
   @Override

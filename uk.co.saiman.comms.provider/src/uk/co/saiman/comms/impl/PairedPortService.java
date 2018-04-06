@@ -27,16 +27,11 @@
  */
 package uk.co.saiman.comms.impl;
 
-import static com.fazecast.jSerialComm.SerialPort.getCommPorts;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
-import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.log.Log.Level.ERROR;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -48,48 +43,43 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import com.fazecast.jSerialComm.SerialPort;
-
 import uk.co.saiman.comms.CommsPort;
-import uk.co.saiman.comms.impl.JSerialCommsImpl.JSerialPortConfiguration;
+import uk.co.saiman.comms.impl.PairedPortService.PairedCommsPortConfiguration;
 import uk.co.saiman.log.Log;
 
-@Designate(ocd = JSerialPortConfiguration.class)
-@Component(
-    immediate = true,
-    configurationPid = JSerialCommsImpl.CONFIGURATION_PID,
-    configurationPolicy = OPTIONAL)
-public class JSerialCommsImpl {
+@Designate(ocd = PairedCommsPortConfiguration.class, factory = true)
+@Component(configurationPid = PairedPortService.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+public class PairedPortService {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
-      name = "JSerialPort Comms Configuration",
-      description = "The JSerialPort component provides native serial port interfaces")
-  public @interface JSerialPortConfiguration {
+      name = "Paired Port Configuration",
+      description = "A simple simulation of a pair of serial ports connected in a two-way pipe")
+  public @interface PairedCommsPortConfiguration {
+    @AttributeDefinition(name = "Port Name", description = "The name of the port to provide")
+    String name();
+
     @AttributeDefinition(
-        name = "Named Ports",
-        description = "A list of extra port names to provide alongside any automatically detected ports")
-    String[] namedPorts() default {};
+        name = "Partner Port Name",
+        description = "The name of the partner port to provide")
+    String partnerName();
   }
 
-  static final String CONFIGURATION_PID = "uk.co.saiman.comms.jserialport";
-  public static final String NAME = "name";
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.simulation.paired";
+  static final String NAME = "name";
 
   @Reference
   private Log log;
 
-  private List<ServiceRegistration<CommsPort>> ports;
+  private ServiceRegistration<CommsPort> portService;
+  private ServiceRegistration<CommsPort> pairedPortService;
 
   @Activate
-  void activate(BundleContext context, JSerialPortConfiguration configuration) {
+  void activate(BundleContext context, PairedCommsPortConfiguration configuration) {
     try {
-      String[] namedPorts = configuration.namedPorts();
-      namedPorts = namedPorts == null ? new String[] {} : namedPorts;
+      PairedCommsPort port = new PairedCommsPort(configuration.name(), configuration.partnerName());
 
-      ports = Stream
-          .concat(stream(getCommPorts()), stream(namedPorts).map(SerialPort::getCommPort))
-          .map(JSerialCommsPort::new)
-          .map(port -> context.registerService(CommsPort.class, port, getProperties(port)))
-          .collect(toList());
+      portService = registerService(context, port);
+      pairedPortService = registerService(context, port.getPartner());
     } catch (Exception e) {
       Log log = this.log;
       if (log != null)
@@ -98,16 +88,19 @@ public class JSerialCommsImpl {
     }
   }
 
-  private Dictionary<String, String> getProperties(JSerialCommsPort port) {
+  private ServiceRegistration<CommsPort> registerService(
+      BundleContext context,
+      PairedCommsPort port) {
     Dictionary<String, String> properties = new Hashtable<>();
     properties.put(NAME, port.getName());
-    return properties;
+    return context.registerService(CommsPort.class, port, properties);
   }
 
   @Deactivate
-  void deactivate(BundleContext context) {
-    for (ServiceRegistration<CommsPort> port : ports) {
-      port.unregister();
-    }
+  void deactivate() {
+    if (portService != null)
+      portService.unregister();
+    if (pairedPortService != null)
+      pairedPortService.unregister();
   }
 }

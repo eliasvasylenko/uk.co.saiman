@@ -11,6 +11,9 @@ Bundle-Name: SAI :: Chemistry
 \
 	javax.measure.unit-api
 
+-includeresource: \
+	res
+
 Export-Package: \
 	uk.co.saiman.chemistry.analysis,\
 	uk.co.saiman.chemistry.isotope,\

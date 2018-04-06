@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.data.function;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -50,9 +52,9 @@ public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends 
   private final SampledRange<UR> range;
 
   /**
-   * Instantiate with the given number of samples, values, and intensities.
-   * Arrays are copied into the function, truncated to the sample length given,
-   * or padded with 0s.
+   * Instantiate with the given number of samples, values, and intensities. Arrays
+   * are copied into the function, truncated to the sample length given, or padded
+   * with 0s.
    * 
    * @param domain
    *          the domain of the function
@@ -65,12 +67,12 @@ public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends 
       SampledDomain<UD> domain,
       Unit<UR> rangeUnit,
       double[] intensities) {
-    this.domain = domain;
-    this.rangeUnit = rangeUnit;
+    this.domain = requireNonNull(domain);
+    this.rangeUnit = requireNonNull(rangeUnit);
     /*
      * TODO sort values
      */
-    double[] intensitiesCopy = Arrays.copyOf(intensities, domain.getDepth());
+    double[] intensitiesCopy = Arrays.copyOf(requireNonNull(intensities), domain.getDepth());
     this.range = createDefaultRange(i -> intensitiesCopy[i]);
   }
 

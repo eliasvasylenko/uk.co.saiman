@@ -34,50 +34,6 @@ import javax.measure.Unit;
 
 public interface UnitBuilder<T extends Quantity<T>> {
   /*
-   * metric prefixes
-   */
-
-  UnitBuilder<T> yotta();
-
-  UnitBuilder<T> zetta();
-
-  UnitBuilder<T> exa();
-
-  UnitBuilder<T> peta();
-
-  UnitBuilder<T> tera();
-
-  UnitBuilder<T> giga();
-
-  UnitBuilder<T> mega();
-
-  UnitBuilder<T> kilo();
-
-  UnitBuilder<T> hecto();
-
-  UnitBuilder<T> deka();
-
-  UnitBuilder<T> deci();
-
-  UnitBuilder<T> centi();
-
-  UnitBuilder<T> milli();
-
-  UnitBuilder<T> micro();
-
-  UnitBuilder<T> nano();
-
-  UnitBuilder<T> pico();
-
-  UnitBuilder<T> femto();
-
-  UnitBuilder<T> atto();
-
-  UnitBuilder<T> zepto();
-
-  UnitBuilder<T> yocto();
-
-  /*
    * products and powers
    */
 

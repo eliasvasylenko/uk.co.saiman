@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.acquisition;
 
+import static java.util.Objects.requireNonNull;
+
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -106,8 +108,8 @@ public class AcquisitionBufferPool {
       SampledDomain<Time> domain,
       Unit<Dimensionless> intensityUnits,
       int sparesToKeep) {
-    this.domain = domain;
-    this.intensityUnits = intensityUnits;
+    this.domain = requireNonNull(domain);
+    this.intensityUnits = requireNonNull(intensityUnits);
     this.sparesToKeep = sparesToKeep;
     this.availableBuffers = new HashMap<>();
   }

@@ -28,11 +28,13 @@
 package uk.co.saiman.experiment.spectrum;
 
 import uk.co.saiman.text.properties.Localized;
+import uk.co.saiman.text.properties.Nested;
 import uk.co.saiman.text.properties.PropertyConfiguration;
 import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
 
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SpectrumProperties {
+  @Nested
   SpectrumExceptionProperties exception();
 
   Localized<String> spectrumExperimentName();

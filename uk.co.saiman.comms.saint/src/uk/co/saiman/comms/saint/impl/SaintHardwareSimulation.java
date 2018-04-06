@@ -28,6 +28,7 @@
 package uk.co.saiman.comms.saint.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_LAT;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_PORT;
 import static uk.co.saiman.comms.saint.SaintCommandAddress.HV_RB_LAT;
@@ -92,7 +93,7 @@ public class SaintHardwareSimulation {
   @Reference
   private Log log;
 
-  @Reference
+  @Reference(policyOption = GREEDY)
   private CommsPort port;
   private CommsStream stream;
 

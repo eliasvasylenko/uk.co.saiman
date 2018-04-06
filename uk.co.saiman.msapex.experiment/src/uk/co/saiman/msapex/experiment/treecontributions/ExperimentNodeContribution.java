@@ -113,6 +113,7 @@ public class ExperimentNodeContribution implements TreeContribution {
     new PseudoClassContributor(entry.data().lifecycleState().get().toString())
         .configureCell(lifecycleIndicator);
     node.getChildren().add(lifecycleIndicator);
+
     entry
         .data()
         .lifecycleState()

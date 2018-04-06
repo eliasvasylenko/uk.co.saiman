@@ -27,17 +27,19 @@
  */
 package uk.co.saiman.measurement.fx;
 
-import static javafx.beans.binding.Bindings.createDoubleBinding;
-import static javafx.beans.binding.Bindings.createObjectBinding;
+import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
-import javax.measure.UnitConverter;
 
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
+/**
+ * A utility class containing static methods to build conversion bindings.
+ * 
+ * @author Elias N Vasylenko
+ */
 public final class QuantityBindings {
   private QuantityBindings() {}
 
@@ -46,16 +48,16 @@ public final class QuantityBindings {
   }
 
   public static <T extends Quantity<T>> QuantityConverter<T> toUnit(
-      ObservableValue<? extends Unit<T>> unit) {
-    return fromUnit -> {
-      ObjectBinding<UnitConverter> converter = createObjectBinding(
-          () -> unit.getValue().getConverterTo(unit.getValue()),
-          unit);
+      ObservableValue<? extends Unit<T>> toUnit) {
+    return () -> toUnit;
+  }
 
-      return value -> createDoubleBinding(
-          () -> converter.getValue().convert(value.getValue()).doubleValue(),
-          converter,
-          value);
-    };
+  static <T extends Quantity<T>> Function<Number, Number> getConverter(
+      Unit<T> fromUnit,
+      Unit<T> toUnit) {
+    if (fromUnit == null || toUnit == null) {
+      return i -> i;
+    }
+    return fromUnit.getConverterTo(toUnit)::convert;
   }
 }

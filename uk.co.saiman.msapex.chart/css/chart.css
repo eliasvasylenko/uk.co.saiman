@@ -1,13 +1,9 @@
-#msapexDataChart .chart-series-line {    
+#continuousFunctionChart .chart-series-line {    
     -fx-stroke-width: 1.0px;
     -fx-effect: null;
 }
 
-#msapexDataChart .chart-line-symbol {
-    visibility: hidden;
-}
-
-#msapexDataChart:focused {
+#continuousFunctionChart:focused {
     -fx-border-color: -fx-focus-color;
     -fx-padding: -1;
 }

@@ -4,14 +4,13 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
 
-<StackPane
+<BorderPane
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml">
 
-	<children>
-		<fx:include
-			fx:id="spectrumGraph"
-			source="/uk/co/saiman/msapex/chart/ContinuousFunctionChart.fxml" />
-	</children>
-</StackPane>
+	<center>
+		<BorderPane fx:id="spectrumGraphPane" />
+	</center>
+</BorderPane>

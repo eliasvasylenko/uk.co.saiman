@@ -30,10 +30,6 @@ package uk.co.saiman.msapex.chart;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.measure.Unit;
-
-import javafx.scene.chart.NumberAxis;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.mathematics.Interval;
 
 /**
@@ -47,25 +43,21 @@ class RangeGroup {
 
   private static final double ZOOM_PADDING = 1.1;
 
-  private final Units units;
-  private final Unit<?> unit;
+  private final QuantityAxis<?> axis;
 
-  private final Set<ContinuousFunctionSeries> continuousFunctions;
+  private final Set<ContinuousFunctionSeries<?, ?>> continuousFunctions;
   private Interval<Double> visibleZoomRange;
   private Interval<Double> totalZoomRange;
 
-  private NumberAxis axis;
-
-  public RangeGroup(Units units, Unit<?> unit) {
-    this.units = units;
-    this.unit = unit;
+  public RangeGroup(QuantityAxis<?> axis) {
+    this.axis = axis;
 
     continuousFunctions = new HashSet<>();
     visibleZoomRange = Interval.bounded(0d, 100d);
     totalZoomRange = Interval.bounded(0d, 100d);
   }
 
-  public void addContinuousFunction(ContinuousFunctionSeries function) {
+  public void addContinuousFunction(ContinuousFunctionSeries<?, ?> function) {
     continuousFunctions.add(function);
   }
 
@@ -74,26 +66,12 @@ class RangeGroup {
   }
 
   /**
-   * Sometimes the axis a range group is responsible for may change. We can't
-   * just move the same {@link NumberAxis} instance to a different place in the
-   * graph as the graph's own
-   * {@link ContinuousFunctionChartController#getYAxis() y axis} is fixed.
-   * 
-   * @param axis
-   *          the new axis component this range group should configure
-   */
-  public void setAxis(NumberAxis axis) {
-    this.axis = axis;
-    axis.setLabel(units.formatUnit(unit));
-  }
-
-  /**
-   * Update the zoom over the codomain to contain the visible range of all
-   * member functions.
+   * Update the zoom over the codomain to contain the visible range of all member
+   * functions.
    * 
    * @param domain
-   *          the currently visible domain whose associated range we wish to
-   *          focus on
+   *          the currently visible domain whose associated range we wish to focus
+   *          on
    * @param reset
    *          If true, we reset to the exact needed size, otherwise we keep the
    *          current size so long as its 'close enough' to within a certain
@@ -111,8 +89,10 @@ class RangeGroup {
     // the zoom over all data
     totalZoomRange = updateRangeZoom(reset, totalDataRange, totalZoomRange);
 
-    if (continuousFunctions.stream().allMatch(
-        c -> domain.contains(c.getLatestPreparedContinuousFunction().domain().getInterval()))) {
+    if (continuousFunctions
+        .stream()
+        .allMatch(
+            c -> domain.contains(c.getLatestPreparedContinuousFunction().domain().getInterval()))) {
 
       visibleZoomRange = totalZoomRange;
     } else {

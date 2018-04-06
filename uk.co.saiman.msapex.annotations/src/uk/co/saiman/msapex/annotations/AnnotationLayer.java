@@ -27,62 +27,95 @@
  */
 package uk.co.saiman.msapex.annotations;
 
-import static uk.co.saiman.fx.FxUtilities.asSet;
-import static uk.co.saiman.fx.FxUtilities.map;
+import static javafx.collections.FXCollections.observableSet;
+
+import java.util.HashSet;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableSet;
 import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
+import javafx.scene.shape.Rectangle;
 
 public class AnnotationLayer<X extends Quantity<X>, Y extends Quantity<Y>> extends Region {
-  /*
-   * TODO this is needed for the Bindings.select(...) statements in Annotation.
-   * Frankly it is an utterly stupid API, hopefully Oracle will update this with
-   * something type-safe.
-   */
-  static final String MEASUREMENT_BOUNDS = "measurementBounds";
+  private final ObjectProperty<Unit<X>> unitX;
+  private final ObjectProperty<Unit<Y>> unitY;
 
-  private final Unit<X> unitX;
-  private final Unit<Y> unitY;
+  private final ObservableSet<Annotation<X, Y>> annotations;
+  private final ObjectProperty<Bounds> measurementBounds;
 
-  private final ObjectProperty<BoundingBox> measurementBounds;
+  public AnnotationLayer(ObservableValue<Unit<X>> unitX, ObservableValue<Unit<Y>> unitY) {
+    this(unitX.getValue(), unitY.getValue());
+    this.unitX.bind(unitX);
+    this.unitY.bind(unitY);
+  }
 
-  protected AnnotationLayer(Unit<X> unitX, Unit<Y> unitY) {
-    this.unitX = unitX;
-    this.unitY = unitY;
+  public AnnotationLayer(Unit<X> unitX, Unit<Y> unitY) {
+    this.unitX = new SimpleObjectProperty<>(unitX);
+    this.unitY = new SimpleObjectProperty<>(unitY);
+    this.annotations = observableSet(new HashSet<>());
 
     measurementBounds = new SimpleObjectProperty<>(new BoundingBox(0, 0, 1, 1));
+
+    annotations.addListener(new WeakInvalidationListener(i -> {
+      getChildren().retainAll(annotations);
+      getChildren().addAll(annotations);
+    }));
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+  public void resizeRelocate(double x, double y, double width, double height) {
+    super.resizeRelocate(x, y, width, height);
+    setClip(new Rectangle(0, 0, width, height));
+  }
+
   public ObservableSet<Annotation<X, Y>> getAnnotations() {
-    return asSet(map(super.getChildren(), c -> (Annotation<X, Y>) c, c -> c));
+    return annotations;
   }
 
-  public ObjectProperty<BoundingBox> measurementBoundsProperty() {
+  public ObjectProperty<Bounds> measurementBoundsProperty() {
     return measurementBounds;
   }
 
-  public BoundingBox getMeasurementBounds() {
+  public Bounds getMeasurementBounds() {
     return measurementBounds.getValue();
   }
 
-  public void setMeasurementBounds(BoundingBox value) {
-    measurementBounds.setValue(value);
+  public void setMeasurementBounds(Bounds value) {
+    if (!measurementBounds.getValue().equals(value))
+      measurementBounds.setValue(value);
   }
 
-  public Unit<X> getUnitX() {
+  public ObjectProperty<Unit<X>> unitXProperty() {
     return unitX;
   }
 
-  public Unit<Y> getUnitY() {
+  public Unit<X> getUnitX() {
+    return unitX.get();
+  }
+
+  public void setUnitX(Unit<X> value) {
+    unitX.set(value);
+  }
+
+  public ObjectProperty<Unit<Y>> unitYProperty() {
     return unitY;
+  }
+
+  public Unit<Y> getUnitY() {
+    return unitY.get();
+  }
+
+  public void setUnitY(Unit<Y> value) {
+    unitY.set(value);
   }
 
   public double measurementToLocalWidth(double measurement) {

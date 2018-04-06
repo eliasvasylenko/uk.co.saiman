@@ -28,6 +28,7 @@
 package uk.co.saiman.comms.copley.simulation;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.comms.copley.CopleyController.HEADER_SIZE;
 import static uk.co.saiman.comms.copley.CopleyController.WORD_SIZE;
 import static uk.co.saiman.comms.copley.CopleyVariableID.ACTUAL_POSITION;
@@ -110,7 +111,7 @@ public class CopleyHardwareSimulation {
   @Reference
   ByteConverters converters;
 
-  @Reference
+  @Reference(policyOption = GREEDY)
   private CommsPort port;
   private CommsStream stream;
 

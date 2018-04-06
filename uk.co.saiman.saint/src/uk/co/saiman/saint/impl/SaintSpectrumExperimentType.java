@@ -35,6 +35,9 @@ import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSING_KEY;
 
 import java.util.List;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Mass;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -50,24 +53,43 @@ import uk.co.saiman.experiment.processing.ProcessorService;
 import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
+import uk.co.saiman.experiment.spectrum.SpectrumProperties;
+import uk.co.saiman.measurement.Units;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
+import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
 public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpectrumConfiguration>
     implements ExperimentType<SaintSpectrumConfiguration, Spectrum> {
   @Reference
-  XYStageExperimentType<SaintXYStageConfiguration> stageExperiment;
+  private XYStageExperimentType<SaintXYStageConfiguration> stageExperiment;
 
   @Reference(cardinality = OPTIONAL)
-  AcquisitionDevice acquisitionDevice;
+  private AcquisitionDevice acquisitionDevice;
 
   @Reference
-  ProcessorService processors;
+  private ProcessorService processors;
+
+  @Reference
+  private PropertyLoader properties;
+
+  @Reference
+  private Units units;
 
   @Override
   public String getId() {
     return getClass().getName();
+  }
+
+  @Override
+  protected SpectrumProperties getProperties() {
+    return properties.getProperties(SpectrumProperties.class);
+  }
+
+  @Override
+  protected Unit<Mass> getMassUnit() {
+    return units.dalton().get();
   }
 
   @Override

@@ -28,24 +28,18 @@
 package uk.co.saiman.msapex.chart;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.measure.Quantity;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.RegularSampledDomain;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
-import uk.co.saiman.mathematics.Interval;
-import uk.co.saiman.msapex.annotations.Annotation;
-import uk.co.saiman.msapex.annotations.AnnotationLayer;
 import uk.co.saiman.observable.Invalidation;
 
 /**
@@ -60,26 +54,44 @@ import uk.co.saiman.observable.Invalidation;
  * @author Elias N Vasylenko
  */
 public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<Y>> {
-  private final ContinuousFunctionChartController controller;
-
   /*
    * Continuous function data
    */
   private Invalidation<ContinuousFunction<X, Y>> latestContinuousFunction;
   private ContinuousFunction<X, Y> lastPreparedContinuousFunction;
-  private boolean dirty;
+  private RenderInformation lastRenderInformation;
+
+  private class RenderInformation {
+    private final double lowerBound;
+    private final double upperBound;
+    private final double pixelLength;
+
+    public RenderInformation(Range<X> domain, Range<Y> range) {
+      lowerBound = domain.lowerBound();
+      upperBound = domain.upperBound();
+      pixelLength = domain.pixelLength();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this)
+        return true;
+
+      if (!(obj instanceof ContinuousFunctionSeries<?, ?>.RenderInformation))
+        return false;
+
+      ContinuousFunctionSeries<?, ?>.RenderInformation that = (ContinuousFunctionSeries<?, ?>.RenderInformation) obj;
+
+      return this.lowerBound == that.lowerBound
+          && this.upperBound == that.upperBound
+          && this.pixelLength == that.pixelLength;
+    }
+  }
 
   /*
    * Series data
    */
-  private final ObservableList<Data<Number, Number>> data;
   private final Series<Number, Number> series;
-
-  /*
-   * Annotation data
-   */
-  private final ObservableSet<Annotation<X, Y>> annotations;
-  private AnnotationLayer<X, Y> annotationLayer;
 
   /**
    * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
@@ -89,24 +101,8 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
    * @param sourceContinuousFunction
    *          the backing function
    */
-  public ContinuousFunctionSeries(ContinuousFunctionChartController controller) {
-    this.controller = controller;
-
-    annotations = FXCollections.observableSet(new HashSet<>());
-    data = FXCollections.observableArrayList();
-    series = new Series<>(data);
-
-    annotations.addListener((SetChangeListener<Annotation<X, Y>>) change -> {
-      AnnotationLayer<X, Y> layer = annotationLayer;
-      synchronized (layer) {
-        if (layer != null) {
-          if (change.wasAdded())
-            layer.getAnnotations().add(change.getElementAdded());
-          if (change.wasRemoved())
-            layer.getAnnotations().remove(change.getElementRemoved());
-        }
-      }
-    });
+  public ContinuousFunctionSeries() {
+    series = new Series<>(FXCollections.observableArrayList());
   }
 
   /**
@@ -119,37 +115,21 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
    * @param name
    *          the name of the series
    */
-  public ContinuousFunctionSeries(ContinuousFunctionChartController controller, String name) {
-    this(controller);
-
+  public ContinuousFunctionSeries(String name) {
+    this();
     series.setName(name);
   }
 
-  public void remove() {
-    controller.removeSeries(this);
-  }
-
-  public synchronized boolean isDirty() {
-    return dirty;
-  }
-
-  public ObservableSet<Annotation<X, Y>> getAnnotations() {
-    return annotations;
-  }
-
   public synchronized void setContinuousFunction(ContinuousFunction<X, Y> function) {
-    dirty = true;
     latestContinuousFunction = () -> function;
   }
 
   public synchronized void setContinuousFunction(Invalidation<ContinuousFunction<X, Y>> function) {
-    dirty = true;
     latestContinuousFunction = function;
   }
 
-  public synchronized ContinuousFunction<?, ?> prepare() {
-    if (dirty) {
-      dirty = false;
+  public synchronized boolean prepare() {
+    if (latestContinuousFunction != null) {
       try {
         lastPreparedContinuousFunction = latestContinuousFunction.revalidate();
       } catch (Exception e) {
@@ -158,25 +138,13 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
          * TODO deal properly with the exception. Perhaps display a message on the chart
          */
       }
+      latestContinuousFunction = null;
+
+      lastRenderInformation = null;
+
+      return true;
     }
-    return lastPreparedContinuousFunction;
-  }
-
-  private void setAnnotationLayer(AnnotationLayer<X, Y> annotationLayer) {
-    AnnotationLayer<X, Y> previousLayer = this.annotationLayer;
-    if (previousLayer != null) {
-      this.annotationLayer = null;
-      synchronized (previousLayer) {
-        previousLayer.getAnnotations().clear();
-      }
-    }
-    this.annotationLayer = annotationLayer;
-    this.annotationLayer.getAnnotations().addAll(annotations);
-    updateAnnotations();
-  }
-
-  void updateAnnotations() {
-
+    return false;
   }
 
   /**
@@ -188,16 +156,28 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
    * @param resolution
    *          the resolution to render at in the domain
    */
-  public synchronized void render(Interval<Double> domain, int resolution) {
-    if (lastPreparedContinuousFunction == null) {
-      data.clear();
-      return;
+  public void render(Range<X> domain, Range<Y> range) {
+    ContinuousFunction<X, Y> lastPreparedContinuousFunction;
+    synchronized (this) {
+      lastPreparedContinuousFunction = this.lastPreparedContinuousFunction;
+
+      if (lastPreparedContinuousFunction == null) {
+        series.setData(FXCollections.observableArrayList());
+        return;
+      }
+
+      RenderInformation renderInformation = new RenderInformation(domain, range);
+      if (lastRenderInformation != null && renderInformation.equals(lastRenderInformation)) {
+        return;
+      }
+      lastRenderInformation = renderInformation;
     }
 
     SampledContinuousFunction<?, ?> sampledContinuousFunction = resampleLastRendered(
         lastPreparedContinuousFunction,
-        domain,
-        resolution);
+        domain);
+
+    ObservableList<Data<Number, Number>> data = series.getData();
 
     if (data.size() > sampledContinuousFunction.getDepth()) {
       data.remove(sampledContinuousFunction.getDepth(), data.size());
@@ -211,6 +191,7 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
     int remainingData = sampledContinuousFunction.getDepth() - data.size();
     if (remainingData > 0) {
       List<Data<Number, Number>> dataTemp = new ArrayList<>(remainingData);
+
       for (int i = data.size(); i < sampledContinuousFunction.getDepth(); i++) {
         dataTemp
             .add(
@@ -218,19 +199,19 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
                     sampledContinuousFunction.domain().getSample(i),
                     sampledContinuousFunction.range().getSample(i)));
       }
+
       data.addAll(dataTemp);
     }
   }
 
-  private <U extends Quantity<U>> SampledContinuousFunction<U, ?> resampleLastRendered(
-      ContinuousFunction<U, ?> latestRenderedContinuousFunction,
-      Interval<Double> domain,
-      int resolution) {
-    SampledDomain<U> resolvableDomain = new RegularSampledDomain<>(
-        latestRenderedContinuousFunction.domain().getUnit(),
-        resolution,
-        resolution / (domain.getRightEndpoint() - domain.getLeftEndpoint()),
-        domain.getLeftEndpoint());
+  private SampledContinuousFunction<X, ?> resampleLastRendered(
+      ContinuousFunction<X, ?> latestRenderedContinuousFunction,
+      Range<X> range) {
+    SampledDomain<X> resolvableDomain = new RegularSampledDomain<X>(
+        range.tickUnit().unit(),
+        (int) range.pixelLength(),
+        range.pixelLength() / (range.upperBound() - range.lowerBound()),
+        range.lowerBound());
 
     return latestRenderedContinuousFunction.resample(resolvableDomain);
   }

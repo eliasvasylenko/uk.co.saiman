@@ -45,6 +45,7 @@ import javax.measure.quantity.Time;
 
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.LocalInstance;
+import org.eclipse.fx.core.di.Service;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -56,8 +57,11 @@ import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
+import uk.co.saiman.measurement.Units;
+import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
+import uk.co.saiman.msapex.chart.MetricTickUnits;
+import uk.co.saiman.msapex.chart.QuantityAxis;
 
 /**
  * An Eclipse part for management and display of acquisition devices.
@@ -77,11 +81,15 @@ public class AcquisitionPart {
   private Label noSelectionLabel;
 
   private Set<AcquisitionDevice> currentSelection;
-  private Map<AcquisitionDevice, ContinuousFunctionChartController> controllers = new HashMap<>();
+  private Map<AcquisitionDevice, ContinuousFunctionChart<Time, Dimensionless>> controllers = new HashMap<>();
 
   @Inject
   @LocalInstance
   private FXMLLoader loaderProvider;
+
+  @Inject
+  @Service
+  private Units units;
 
   @Inject
   synchronized void updateSelectedDevices(@Optional AcquisitionDeviceSelection devices) {
@@ -123,13 +131,15 @@ public class AcquisitionPart {
     /*
      * New chart controller for device
      */
-    ContinuousFunctionChartController chartController = buildWith(loaderProvider)
-        .controller(ContinuousFunctionChartController.class)
-        .loadController();
+
+    ContinuousFunctionChart<Time, Dimensionless> chartController = new ContinuousFunctionChart<Time, Dimensionless>(
+        new QuantityAxis<>(new MetricTickUnits<>(units, Units::second)),
+        new QuantityAxis<>(new MetricTickUnits<>(units, Units::count)).setPaddingApplied(true));
+
     chartController.setTitle(acquisitionDevice.getName());
     controllers.put(acquisitionDevice, chartController);
-    chartPane.getChildren().add(chartController.getRoot());
-    HBox.setHgrow(chartController.getRoot(), Priority.ALWAYS);
+    chartPane.getChildren().add(chartController);
+    HBox.setHgrow(chartController, Priority.ALWAYS);
 
     /*
      * Add latest data to chart controller
@@ -139,9 +149,9 @@ public class AcquisitionPart {
   }
 
   private void deselectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {
-    ContinuousFunctionChartController controller = controllers.remove(acquisitionDevice);
+    ContinuousFunctionChart<Time, Dimensionless> controller = controllers.remove(acquisitionDevice);
 
-    chartPane.getChildren().remove(controller.getRoot());
+    chartPane.getChildren().remove(controller);
 
     noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
   }

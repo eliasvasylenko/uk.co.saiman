@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.data.function;
 
+import static java.util.Objects.requireNonNull;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
@@ -39,45 +41,45 @@ import javax.measure.Unit;
  * @author Elias N Vasylenko
  */
 public class RegularSampledDomain<U extends Quantity<U>> implements SampledDomain<U> {
-	private final Unit<U> unit;
+  private final Unit<U> unit;
 
-	private final int depth;
-	private final double frequency;
-	private final double start;
+  private final int depth;
+  private final double frequency;
+  private final double start;
 
-	public RegularSampledDomain(Unit<U> unit, int depth, double frequency, double start) {
-		this.unit = unit;
-		this.depth = depth;
-		this.frequency = frequency;
-		this.start = start;
-	}
+  public RegularSampledDomain(Unit<U> unit, int depth, double frequency, double start) {
+    this.unit = requireNonNull(unit);
+    this.depth = depth;
+    this.frequency = frequency;
+    this.start = start;
+  }
 
-	@Override
-	public double getSample(int index) {
-		if (index < 0 || index > getDepth())
-			throw new ArrayIndexOutOfBoundsException(index);
-		return index / getFrequency() + start;
-	}
+  @Override
+  public double getSample(int index) {
+    if (index < 0 || index > getDepth())
+      throw new ArrayIndexOutOfBoundsException(index);
+    return index / getFrequency() + start;
+  }
 
-	@Override
-	public int getIndexBelow(double xValue) {
-		return (int) (xValue * getFrequency());
-	}
+  @Override
+  public int getIndexBelow(double xValue) {
+    return (int) (xValue * getFrequency());
+  }
 
-	@Override
-	public Unit<U> getUnit() {
-		return unit;
-	}
+  @Override
+  public Unit<U> getUnit() {
+    return unit;
+  }
 
-	@Override
-	public int getDepth() {
-		return depth;
-	}
+  @Override
+  public int getDepth() {
+    return depth;
+  }
 
-	/**
-	 * @return The number of samples per unit in the domain
-	 */
-	public double getFrequency() {
-		return frequency;
-	}
+  /**
+   * @return The number of samples per unit in the domain
+   */
+  public double getFrequency() {
+    return frequency;
+  }
 }

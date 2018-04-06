@@ -27,10 +27,15 @@
  */
 package uk.co.saiman.data.function;
 
+import static java.lang.Math.abs;
+import static java.util.Arrays.binarySearch;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
+import javax.measure.UnitConverter;
 
 import uk.co.saiman.mathematics.Interval;
 
@@ -56,8 +61,8 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
   private final PeakShapeFunction[] peakFunctions;
 
   /**
-   * Define a new function by way of convolution of the given samples by the
-   * given peak shape description.
+   * Define a new function by way of convolution of the given samples by the given
+   * peak shape description.
    * 
    * @param unitDomain
    *          the units of measurement of values in the domain
@@ -79,21 +84,26 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
       double[] values,
       double[] intensities,
       PeakShapeFunctionFactory peakFunctionFactory) {
+    requireNonNull(intensities);
+    requireNonNull(unitDomain);
+    rangeUnit = requireNonNull(unitRange);
+
     /*
      * TODO sort values
      */
-    this.values = Arrays.copyOf(values, samples);
+    this.values = Arrays.copyOf(requireNonNull(values), samples);
 
     peakFunctions = new PeakShapeFunction[samples];
     for (int i = 0; i < samples; i++) {
       peakFunctions[i] = peakFunctionFactory.atPeakPosition(values[i], intensities[i]);
     }
 
-    Interval<Double> domainExtent = Interval.bounded(
-        peakFunctions[0].effectiveDomainStart(),
-        peakFunctions[samples - 1].effectiveDomainEnd());
-    domain = new Domain<UD>() {
+    Interval<Double> domainExtent = Interval
+        .bounded(
+            peakFunctions[0].effectiveDomainStart(),
+            peakFunctions[samples - 1].effectiveDomainEnd());
 
+    domain = new Domain<UD>() {
       @Override
       public Interval<Double> getInterval() {
         return domainExtent;
@@ -105,7 +115,6 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
       }
     };
 
-    rangeUnit = unitRange;
     range = getRangeExtent();
   }
 
@@ -131,9 +140,21 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
     return getRangeExtentBetween(values[startIndex], values[endIndex], startIndex, endIndex);
   }
 
+  private Range<UR> getRangeExtentBetween(double startX, double endX) {
+    int startIndex = abs(binarySearch(values, startX) + 1);
+    int endIndex = abs(binarySearch(values, endX) + 1) - 1;
+
+    if (startIndex < 0)
+      startIndex = 0;
+    if (endIndex >= values.length)
+      endIndex = values.length - 1;
+
+    return getRangeExtentBetween(startX, endX, startIndex, endIndex);
+  }
+
   /*
-   * Estimate range in codomain by sampling at the centre of each stick
-   * position, and at various points between each stick position.
+   * Estimate range in codomain by sampling at the centre of each stick position,
+   * and at various points between each stick position.
    */
   private Range<UR> getRangeExtentBetween(
       double startX,
@@ -205,7 +226,7 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
 
       @Override
       public Range<UR> between(double domainStart, double domainEnd) {
-        return getRangeExtentBetween(0, getSamples() - 1);
+        return getRangeExtentBetween(domainStart, domainEnd);
       }
     };
   }
@@ -214,17 +235,18 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
   public double sample(double xPosition) {
     double sample = 0;
     for (int i = 0; i < getSamples(); i++) {
-      if (peakFunctions[i].effectiveDomainEnd() > xPosition)
-        sample += peakFunctions[i].sample(xPosition);
-
       if (peakFunctions[i].effectiveDomainStart() > xPosition)
         break;
+
+      sample += peakFunctions[i].sample(xPosition);
     }
     return sample;
   }
 
   @Override
   public SampledContinuousFunction<UD, UR> resample(SampledDomain<UD> resolvableSampleDomain) {
+    UnitConverter converter = resolvableSampleDomain.getUnit().getConverterTo(domain.getUnit());
+
     int maximumLength = resolvableSampleDomain.getDepth() * 3 + 1;
     double[] values = new double[maximumLength];
     double[] intensities = new double[maximumLength];
@@ -237,7 +259,7 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
       samplePosition = resolvableSampleDomain.getSample(i);
 
       values[sampleCount] = previousSamplePosition;
-      intensities[sampleCount] = sample(previousSamplePosition);
+      intensities[sampleCount] = sample(converter.convert(previousSamplePosition));
       sampleCount++;
 
       // TODO maxima & minima in interval
@@ -247,7 +269,7 @@ public class PeakShapeImpulseConvolutionFunction<UD extends Quantity<UD>, UR ext
 
     previousSamplePosition = resolvableSampleDomain.getInterval().getRightEndpoint();
     values[sampleCount] = previousSamplePosition;
-    intensities[sampleCount] = sample(previousSamplePosition);
+    intensities[sampleCount] = sample(converter.convert(previousSamplePosition));
 
     return new ArraySampledContinuousFunction<>(
         new IrregularSampledDomain<>(domain.getUnit(), Arrays.copyOf(values, sampleCount)),

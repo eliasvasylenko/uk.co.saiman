@@ -1,70 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?>
-<repository increment="1510749553000" name="Local Index" xmlns="http://www.osgi.org/xmlns/repository/v1.0.0">
+<?xml version='1.0' encoding='UTF-8'?>
+<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local Index" increment="1510749553000">
   <resource>
     <capability namespace="osgi.identity">
+      <attribute name="license" value="http://www.opensource.org/licenses/eclipse-1.0.php"/>
       <attribute name="osgi.identity" value="bndtools.runtime.eclipse.applaunch"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" type="Version" value="0.1.0"/>
-    </capability>
-    <capability namespace="osgi.content">
-      <attribute name="osgi.content" value="6D2BE98032533A8D1BDEF6AAD6CC4A71A2FF6F083D3E2E491BBFEC3014A961DC"/>
-      <attribute name="url" value="bndtools.runtime.eclipse.applaunch/bndtools.runtime.eclipse.applaunch-0.1.0.jar"/>
-      <attribute name="size" type="Long" value="14079"/>
-      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+      <attribute name="version" value="0.1.0" type="Version"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
+      <attribute name="bundle-version" value="0.1.0" type="Version"/>
       <attribute name="osgi.wiring.bundle" value="bndtools.runtime.eclipse.applaunch"/>
-      <attribute name="bundle-version" type="Version" value="0.1.0"/>
     </capability>
     <capability namespace="osgi.wiring.host">
+      <attribute name="bundle-version" value="0.1.0" type="Version"/>
       <attribute name="osgi.wiring.host" value="bndtools.runtime.eclipse.applaunch"/>
-      <attribute name="bundle-version" type="Version" value="0.1.0"/>
+    </capability>
+    <capability namespace="osgi.content">
+      <attribute name="size" value="14079" type="Long"/>
+      <attribute name="url" value="bndtools.runtime.eclipse.applaunch/bndtools.runtime.eclipse.applaunch-0.1.0.jar"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+      <attribute name="osgi.content" value="6D2BE98032533A8D1BDEF6AAD6CC4A71A2FF6F083D3E2E491BBFEC3014A961DC"/>
     </capability>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.eclipse.osgi.service.runnable)(version&gt;=1.1.0)(!(version&gt;=2.0.0)))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.eclipse.osgi.service.runnable)(&amp;(version&gt;=1.1.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.osgi.framework)(version&gt;=1.5.0)(!(version&gt;=2.0.0)))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.osgi.framework)(&amp;(version&gt;=1.5.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.osgi.util.tracker)(version&gt;=1.4.0)(!(version&gt;=2.0.0)))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.osgi.util.tracker)(&amp;(version&gt;=1.4.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
   </resource>
   <resource>
     <capability namespace="osgi.identity">
+      <attribute name="license" value="GPL; link = http://www.gnu.org/licenses/"/>
       <attribute name="osgi.identity" value="uk.co.saiman.babel.transpiler"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" type="Version" value="1.0.0.201706181304"/>
-    </capability>
-    <capability namespace="osgi.content">
-      <attribute name="osgi.content" value="8B9A0EE73A4305A5817D3C55CE10725EA94729464B5AAE8374DD84B0B9CFBA4D"/>
-      <attribute name="url" value="uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar"/>
-      <attribute name="size" type="Long" value="629186"/>
-      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+      <attribute name="version" value="1.0.0.201706181304" type="Version"/>
+      <attribute name="documentation" value="https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
+      <attribute name="bundle-version" value="1.0.0.201706181304" type="Version"/>
       <attribute name="osgi.wiring.bundle" value="uk.co.saiman.babel.transpiler"/>
-      <attribute name="bundle-version" type="Version" value="1.0.0.201706181304"/>
     </capability>
     <capability namespace="osgi.wiring.host">
+      <attribute name="bundle-version" value="1.0.0.201706181304" type="Version"/>
       <attribute name="osgi.wiring.host" value="uk.co.saiman.babel.transpiler"/>
-      <attribute name="bundle-version" type="Version" value="1.0.0.201706181304"/>
     </capability>
     <capability namespace="osgi.wiring.package">
-      <attribute name="osgi.wiring.package" value="uk.co.saiman.babel.transpiler"/>
-      <attribute name="version" type="Version" value="1.0.0"/>
-      <attribute name="bundle-symbolic-name" value="uk.co.saiman.babel.transpiler"/>
-      <attribute name="bundle-version" type="Version" value="1.0.0.201706181304"/>
       <directive name="uses" value="aQute.bnd.osgi,aQute.bnd.service"/>
+      <attribute name="version" value="1.0.0" type="Version"/>
+      <attribute name="osgi.wiring.package" value="uk.co.saiman.babel.transpiler"/>
+    </capability>
+    <capability namespace="osgi.content">
+      <attribute name="size" value="629186" type="Long"/>
+      <attribute name="url" value="uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+      <attribute name="osgi.content" value="8B9A0EE73A4305A5817D3C55CE10725EA94729464B5AAE8374DD84B0B9CFBA4D"/>
     </capability>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.osgi)(version&gt;=2.8.0)(!(version&gt;=3.0.0)))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.osgi)(&amp;(version&gt;=2.8.0)(!(version&gt;=3.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.service)(version&gt;=4.3.0)(!(version&gt;=5.0.0)))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.service)(&amp;(version&gt;=4.3.0)(!(version&gt;=5.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(osgi.wiring.package=javax.script)"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=javax.script))"/>
     </requirement>
     <requirement namespace="osgi.ee">
       <directive name="filter" value="(&amp;(osgi.ee=JavaSE)(version=1.8))"/>

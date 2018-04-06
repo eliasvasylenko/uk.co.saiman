@@ -568,16 +568,13 @@ public interface Observable<M> {
   /**
    * Create an invalidate/lazy-revalidate reactive observable.
    * <p>
-   * 
-   * <p>
-   * The created downstream observable technically does not support backpressure
-   * regardless of whether the upstream does, however it does provide similar
-   * control and guarantees about message delivery to the downstream observer.
-   * <p>
-   * Downstream observers should not signal interest in further messages via the
-   * usual {@link Observation#request(long) request method and similar}, but
-   * instead by invoking {@link Invalidation#revalidate()}, which will return the
-   * most recent message from upstream.
+   * The created downstream observable does not support backpressure in the
+   * traditional sense, however it does provide similar control and guarantees
+   * about message delivery to the downstream observer. Downstream observers
+   * should not signal interest in further messages via the usual
+   * {@link Observation#request(long) request method and similar}, but instead by
+   * invoking {@link Invalidation#revalidate()}, which will return the most recent
+   * message from upstream.
    * 
    * @param <R>
    *          the resulting reduction type

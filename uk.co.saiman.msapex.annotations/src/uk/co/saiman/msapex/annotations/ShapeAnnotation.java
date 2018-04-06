@@ -27,25 +27,28 @@
  */
 package uk.co.saiman.msapex.annotations;
 
-import static uk.co.saiman.measurement.fx.QuantityBindings.toUnit;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.Group;
 import javafx.scene.shape.Shape;
-import uk.co.saiman.measurement.fx.ValueConverter;
+import javafx.scene.transform.Scale;
 
 public class ShapeAnnotation<X extends Quantity<X>, Y extends Quantity<Y>>
     extends XYAnnotation<X, Y> {
-  public ShapeAnnotation(Shape shape, Unit<X> unitX, Unit<Y> unitY) {
-    getChildren().add(shape);
+  public ShapeAnnotation(Unit<X> unitX, Unit<Y> unitY, Shape shape) {
+    super(unitX, unitY);
 
-    ValueConverter xConverter = toUnit(unitXProperty()).fromUnit(unitX);
-    ValueConverter yConverter = toUnit(unitYProperty()).fromUnit(unitY);
+    Scale scale = new Scale();
+    scale.setPivotX(0);
+    scale.setPivotY(0);
+    scale.xProperty().bind(measurementToLayoutWidth(new SimpleDoubleProperty(1)));
+    scale.yProperty().bind(measurementToLayoutHeight(new SimpleDoubleProperty(1)));
 
-    layoutXProperty().bind(measurementToLayoutX(xConverter.convert(0)));
-    layoutYProperty().bind(measurementToLayoutY(yConverter.convert(0)));
-    scaleXProperty().bind(measurementToLayoutWidth(xConverter.convertInterval(1)));
-    scaleYProperty().bind(measurementToLayoutHeight(yConverter.convertInterval(1)));
+    Group transformationGroup = new Group(shape);
+    transformationGroup.getTransforms().add(scale);
+
+    getChildren().add(transformationGroup);
   }
 }

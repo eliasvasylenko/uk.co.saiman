@@ -59,7 +59,7 @@ public class PairedCommsPort implements CommsPort {
     updated.complete();
   }
 
-  public PairedCommsPort(String name, PairedCommsPort partner) {
+  private PairedCommsPort(String name, PairedCommsPort partner) {
     this.partner = partner;
     this.name = name;
     this.buffer = ByteBuffer.allocate(BUFFER_SIZE);

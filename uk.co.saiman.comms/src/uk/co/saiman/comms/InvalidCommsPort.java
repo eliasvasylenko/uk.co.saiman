@@ -27,11 +27,6 @@
  */
 package uk.co.saiman.comms;
 
-import uk.co.saiman.comms.CommsChannel;
-import uk.co.saiman.comms.CommsException;
-import uk.co.saiman.comms.CommsPort;
-import uk.co.saiman.comms.CommsStream;
-
 public class InvalidCommsPort implements CommsPort {
   private final String name;
 

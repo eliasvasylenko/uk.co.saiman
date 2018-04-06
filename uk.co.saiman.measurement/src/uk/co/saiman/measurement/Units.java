@@ -44,23 +44,25 @@ public interface Units {
 
   Quantity<?> parseQuantity(String quantity);
 
+  Quantity<?> parseQuantity(String quantity, NumberFormat format);
+
   String formatQuantity(Quantity<?> quantity);
 
   String formatQuantity(Quantity<?> quantity, NumberFormat format);
 
-  <T extends Quantity<T>> UnitBuilder<T> with(Unit<T> unit);
+  <T extends Quantity<T>> Quantity<T> getQuantity(Unit<T> unit, Number amount);
 
-  UnitBuilder<Dimensionless> count();
+  MetricUnitBuilder<Dimensionless> count();
 
   UnitBuilder<Dimensionless> percent();
 
-  UnitBuilder<Mass> dalton();
+  MetricUnitBuilder<Mass> dalton();
 
-  UnitBuilder<Mass> gram();
+  MetricUnitBuilder<Mass> gram();
 
-  UnitBuilder<Length> metre();
+  MetricUnitBuilder<Length> metre();
 
-  UnitBuilder<Time> second();
+  MetricUnitBuilder<Time> second();
 
-  UnitBuilder<AmountOfSubstance> mole();
+  MetricUnitBuilder<AmountOfSubstance> mole();
 }

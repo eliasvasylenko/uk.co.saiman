@@ -27,25 +27,33 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
+
 import java.util.Optional;
 
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Invalidation;
 import uk.co.saiman.observable.MissingValueException;
 import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.ObservableProperty;
+import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.reflection.token.TypeToken;
 
 public class ResultImpl<T> implements Result<T> {
   private final ExperimentNodeImpl<?, T> node;
   private T value;
 
-  private final HotObservable<Invalidation<T>> invalidations;
+  private final ObservableProperty<Invalidation<T>> invalidations;
   private Invalidation<T> invalidation;
 
   public ResultImpl(ExperimentNodeImpl<?, T> node) {
     this.node = node;
-    this.invalidations = new HotObservable<>();
+    this.invalidations = new ObservablePropertyImpl<>(new Invalidation<T>() {
+      @Override
+      public T revalidate() {
+        throw new MissingValueException(new NullPointerException());
+      }
+    });
   }
 
   @Override
@@ -61,7 +69,7 @@ public class ResultImpl<T> implements Result<T> {
   void setValue(T value) {
     this.value = value;
     invalidation = null;
-    invalidations.next(new Invalidation<T>() {
+    invalidations.set(new Invalidation<T>() {
       @Override
       public T revalidate() {
         return value;
@@ -72,7 +80,7 @@ public class ResultImpl<T> implements Result<T> {
   void unsetValue() {
     value = null;
     invalidation = null;
-    invalidations.next(new Invalidation<T>() {
+    invalidations.set(new Invalidation<T>() {
       @Override
       public T revalidate() {
         throw new MissingValueException(new NullPointerException());
@@ -82,7 +90,7 @@ public class ResultImpl<T> implements Result<T> {
 
   void setInvalidation(Invalidation<T> invalidation) {
     this.invalidation = invalidation;
-    invalidations.next(invalidation);
+    invalidations.set(invalidation);
   }
 
   @Override
@@ -101,6 +109,9 @@ public class ResultImpl<T> implements Result<T> {
 
   @Override
   public Observable<Invalidation<T>> invalidations() {
-    return invalidations.invalidateLazyRevalidate().map(i -> i.map(Invalidation::revalidate));
+    return invalidations
+        .invalidateLazyRevalidate()
+        .executeOn(newSingleThreadExecutor())
+        .map(i -> (Invalidation<T>) () -> i.revalidate().revalidate());
   }
 }

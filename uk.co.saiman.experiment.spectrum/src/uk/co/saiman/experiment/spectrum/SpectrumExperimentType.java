@@ -28,7 +28,6 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
-import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
@@ -60,31 +59,13 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
     implements ExperimentType<T, Spectrum> {
   private static final String SPECTRUM_DATA_NAME = "spectrum";
 
-  private SpectrumProperties properties;
+  protected abstract SpectrumProperties getProperties();
 
-  public SpectrumExperimentType() {
-    this(getDefaultProperties(SpectrumProperties.class));
-  }
-
-  /*
-   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to make
-   * this possible ...
-   */
-  public SpectrumExperimentType(SpectrumProperties properties) {
-    this.properties = properties;
-  }
-
-  protected void setProperties(SpectrumProperties properties) {
-    this.properties = properties;
-  }
-
-  protected SpectrumProperties getProperties() {
-    return properties;
-  }
+  protected abstract Unit<Mass> getMassUnit();
 
   @Override
   public String getName() {
-    return properties.spectrumExperimentName().toString();
+    return getProperties().spectrumExperimentName().toString();
   }
 
   public abstract AcquisitionDevice getAcquisitionDevice();
@@ -116,7 +97,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
 
       @Override
       public Unit<Mass> getMassUnit() {
-        return null;
+        return SpectrumExperimentType.this.getMassUnit();
       }
 
       @Override

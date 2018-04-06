@@ -116,18 +116,24 @@ public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Q
     double resolvedUnitX = resolvableSampleDomain.getInterval().getLeftEndpoint();
 
     int lastIndex;
-    int minIndex;
+
     double minY;
-    int maxIndex;
     double maxY;
+
+    int minIndex;
+    int maxIndex;
+
+    double sampleX;
+    double sampleY;
+
     lastIndex = minIndex = maxIndex = indexFrom;
     minY = maxY = range().getSample(lastIndex);
     for (int index = indexFrom + 1; index < indexTo; index++) {
       /*
        * Get sample location at index
        */
-      double sampleX = domain().getSample(index);
-      double sampleY = range().getSample(index);
+      sampleX = domain().getSample(index);
+      sampleY = range().getSample(index);
 
       /*
        * Check if passed resolution boundary (or last position)

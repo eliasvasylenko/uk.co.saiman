@@ -50,6 +50,7 @@ import tec.uom.se.format.PatchedNumberSpaceQuantityFormat;
 import tec.uom.se.format.QuantityFormat;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.format.SymbolMap;
+import uk.co.saiman.measurement.MetricUnitBuilder;
 import uk.co.saiman.measurement.UnitBuilder;
 import uk.co.saiman.text.properties.LocaleProvider;
 
@@ -63,43 +64,43 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 
   private static final Unit<Dimensionless> COUNT = AbstractUnit.ONE;
 
-  public <T extends Quantity<T>> UnitBuilder<T> with(Unit<T> unit) {
-    return new UnitBuilderImpl<>(this, unit);
+  private <T extends Quantity<T>> MetricUnitBuilder<T> withMetric(Unit<T> unit) {
+    return new UnitBuilderImpl<>(this, unit, null);
   }
 
   @Override
-  public UnitBuilder<Length> metre() {
-    return with(SI.METRE);
+  public MetricUnitBuilder<Length> metre() {
+    return withMetric(SI.METRE);
   }
 
   @Override
-  public UnitBuilder<Dimensionless> count() {
-    return with(COUNT);
+  public MetricUnitBuilder<Dimensionless> count() {
+    return withMetric(COUNT);
   }
 
   @Override
-  public UnitBuilder<Time> second() {
-    return with(SI.SECOND);
+  public MetricUnitBuilder<Time> second() {
+    return withMetric(SI.SECOND);
   }
 
   @Override
   public UnitBuilder<Dimensionless> percent() {
-    return with(SI.PERCENT);
+    return withMetric(SI.PERCENT);
   }
 
   @Override
-  public UnitBuilder<Mass> dalton() {
-    return with(SI.UNIFIED_ATOMIC_MASS);
+  public MetricUnitBuilder<Mass> dalton() {
+    return withMetric(SI.UNIFIED_ATOMIC_MASS);
   }
 
   @Override
-  public UnitBuilder<AmountOfSubstance> mole() {
-    return with(SI.MOLE);
+  public MetricUnitBuilder<AmountOfSubstance> mole() {
+    return withMetric(SI.MOLE);
   }
 
   @Override
-  public UnitBuilder<Mass> gram() {
-    return with(SI.GRAM);
+  public MetricUnitBuilder<Mass> gram() {
+    return withMetric(SI.GRAM);
   }
 
   @Override
@@ -113,8 +114,18 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
   }
 
   @Override
-  public Quantity<?> parseQuantity(String unit) {
-    return getQuantityFormat().parse(unit);
+  public Quantity<?> parseQuantity(String quantity) {
+    return getQuantityFormat().parse(quantity);
+  }
+
+  @Override
+  public Quantity<?> parseQuantity(String quantity, NumberFormat format) {
+    return new PatchedNumberSpaceQuantityFormat(format, getUnitFormat()).parse(quantity);
+  }
+
+  @Override
+  public <T extends Quantity<T>> Quantity<T> getQuantity(Unit<T> unit, Number amount) {
+    return withMetric(unit).getQuantity(amount);
   }
 
   @Override
@@ -124,7 +135,7 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
 
   @Override
   public String formatQuantity(Quantity<?> quantity, NumberFormat format) {
-    return QuantityFormat.getInstance(format, getUnitFormat()).format(quantity);
+    return new PatchedNumberSpaceQuantityFormat(format, getUnitFormat()).format(quantity);
   }
 
   private UnitFormat getUnitFormat() {
@@ -137,6 +148,13 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
     return quantityFormat;
   }
 
+  private SimpleUnitFormat addLabels(SimpleUnitFormat instance) {
+    Unit<?> Da = dalton().get();
+    instance.label(Da, "Da");
+
+    return instance;
+  }
+
   private void updateFormats() {
     Locale locale = localeProvider.getLocale();
     if (this.locale == null) {
@@ -147,20 +165,15 @@ public class UnitsImpl implements uk.co.saiman.measurement.Units {
     }
   }
 
-  private SimpleUnitFormat addLabels(SimpleUnitFormat instance) {
-    Unit<?> Da = dalton().get();
-    instance.label(Da, "Da");
-
-    return instance;
-  }
-
   private void updateFormatsLocal() {
     Locale locale = localeProvider.getLocale();
     if (!locale.equals(this.locale)) {
       this.locale = locale;
 
       unitFormat = addLabels(LocalUnitFormat.getInstance(locale));
-      quantityFormat = QuantityFormat.getInstance(NumberFormat.getInstance(locale), unitFormat);
+      quantityFormat = new PatchedNumberSpaceQuantityFormat(
+          NumberFormat.getInstance(locale),
+          unitFormat);
     }
   }
 

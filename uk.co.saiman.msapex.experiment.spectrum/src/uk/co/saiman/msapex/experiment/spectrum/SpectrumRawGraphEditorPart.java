@@ -29,56 +29,48 @@ package uk.co.saiman.msapex.experiment.spectrum;
 
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.model.application.ui.MDirtyable;
 import org.eclipse.fx.core.di.LocalInstance;
+import org.eclipse.fx.core.di.Service;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.data.spectrum.Spectrum;
-import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.Result;
-import uk.co.saiman.experiment.spectrum.SpectrumProperties;
-import uk.co.saiman.msapex.chart.ContinuousFunctionChartController;
+import uk.co.saiman.measurement.Units;
+import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
+import uk.co.saiman.msapex.chart.MetricTickUnits;
+import uk.co.saiman.msapex.chart.QuantityAxis;
 import uk.co.saiman.observable.Invalidation;
 
 public class SpectrumRawGraphEditorPart {
-  @Inject
-  @Localize
-  SpectrumProperties properties;
-
-  @Inject
-  MDirtyable dirty;
-
   @FXML
-  private ContinuousFunctionChartController spectrumGraphController;
-  private ContinuousFunctionSeries<Time, Dimensionless> series;
+  private BorderPane spectrumGraphPane;
 
-  @PostConstruct
-  void postConstruct(
+  private final ContinuousFunctionSeries<Time, Dimensionless> series;
+
+  @Inject
+  SpectrumRawGraphEditorPart(
       BorderPane container,
       @LocalInstance FXMLLoader loaderProvider,
-      IEclipseContext context,
-      Result<Spectrum> result,
-      Invalidation<Spectrum> value) {
+      @Service Units units) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
-    series = spectrumGraphController.addSeries();
-    result.getValue().map(Spectrum::getTimeData).ifPresent(series::setContinuousFunction);
+    ContinuousFunctionChart<Time, Dimensionless> spectrumGraphController = new ContinuousFunctionChart<>(
+        new QuantityAxis<>(new MetricTickUnits<>(units, Units::second)),
+        new QuantityAxis<>(new MetricTickUnits<>(units, Units::count)).setPaddingApplied(true));
+    spectrumGraphPane.setCenter(spectrumGraphController);
 
-    value(value);
+    series = spectrumGraphController.addSeries();
   }
 
   @Inject
   void value(Invalidation<Spectrum> value) {
-    if (value != null && series != null) {
+    if (value != null) {
       series.setContinuousFunction(value.map(Spectrum::getTimeData));
     }
   }

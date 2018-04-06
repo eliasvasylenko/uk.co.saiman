@@ -27,22 +27,45 @@
  */
 package uk.co.saiman.comms.impl;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
+import uk.co.saiman.comms.impl.DumpPortService.DumpCommsPortConfiguration;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observer;
 
-public class DumpCommsPort implements CommsPort {
-  private final String name;
+@Designate(ocd = DumpCommsPortConfiguration.class, factory = true)
+@Component(configurationPid = DumpPortService.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+public class DumpPortService implements CommsPort {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "Dump Port Configuration",
+      description = "A simple simulation of a serial port which discards all data put in and puts no data out")
+  public @interface DumpCommsPortConfiguration {
+    @AttributeDefinition(name = "Port Name", description = "The name of the port to provide")
+    String name();
+  }
+
+  static final String CONFIGURATION_PID = "uk.co.saiman.comms.simulation.dump";
+
+  private String name;
   private boolean open;
 
-  public DumpCommsPort(String name) {
-    this.name = name;
+  @Activate
+  void activate(DumpCommsPortConfiguration configuration) {
+    this.name = configuration.name();
   }
 
   @Override

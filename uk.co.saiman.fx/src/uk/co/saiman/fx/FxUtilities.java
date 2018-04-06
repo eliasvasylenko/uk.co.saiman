@@ -28,9 +28,12 @@
 package uk.co.saiman.fx;
 
 import static java.util.stream.Collectors.toList;
+import static javafx.collections.FXCollections.observableArrayList;
+import static javafx.collections.FXCollections.unmodifiableObservableList;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -39,6 +42,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javafx.application.Platform;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -422,6 +426,37 @@ public class FxUtilities {
     }
 
     return resourceName;
+  }
+
+  public static <T> ObjectBinding<T> createStrongBinding(
+      Supplier<T> supplier,
+      javafx.beans.Observable... observables) {
+    return new ObjectBinding<T>() {
+      private final List<javafx.beans.Observable> references = Arrays.asList(observables);
+
+      {
+        for (javafx.beans.Observable reference : references)
+          bind(reference);
+      }
+
+      @Override
+      protected T computeValue() {
+        for (javafx.beans.Observable reference : references)
+          ((ObservableValue<?>) reference).getValue();
+        return supplier.get();
+      }
+
+      @Override
+      public void dispose() {
+        for (javafx.beans.Observable reference : references)
+          unbind(reference);
+      }
+
+      @Override
+      public ObservableList<?> getDependencies() {
+        return unmodifiableObservableList(observableArrayList(references));
+      }
+    };
   }
 
   /**

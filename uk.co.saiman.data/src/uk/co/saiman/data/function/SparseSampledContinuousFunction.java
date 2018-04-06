@@ -29,6 +29,7 @@ package uk.co.saiman.data.function;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -59,8 +60,8 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
 
   /**
    * Instantiate based on the given significant sample indices and intensities.
-   * Samples at indices other than those given are assumed to be of intensity 0
-   * in the codomain.
+   * Samples at indices other than those given are assumed to be of intensity 0 in
+   * the codomain.
    * 
    * @param domain
    *          the domain of the function
@@ -82,15 +83,14 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
     /*
      * TODO sort the indices & intensities here
      */
-    this.intensityIndices = Arrays.copyOf(indices, samples);
-    this.intensities = Arrays.copyOf(intensities, samples);
-    this.domain = domain;
-    this.range = createDefaultRange(i -> intensities[i]);
+    this.intensityIndices = Arrays.copyOf(requireNonNull(indices), samples);
+    this.intensities = Arrays.copyOf(requireNonNull(intensities), samples);
+    this.domain = requireNonNull(domain);
+    this.range = createDefaultRange(i -> intensities[i], unitRange);
   }
 
   /**
-   * Create a memory efficient view of the given array, with the given
-   * frequency.
+   * Create a memory efficient view of the given array, with the given frequency.
    * 
    * @param domain
    *          the domain of the function
@@ -124,14 +124,19 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
     }
 
     this.domain = domain;
-    this.range = createDefaultRange(i -> intensities[i]);
+    this.range = createDefaultRange(i -> intensities[i], unitRange);
   }
 
-  protected SampledRange<UR> createDefaultRange(Function<Integer, Double> intensityAtIndex) {
+  protected SampledRange<UR> createDefaultRange(
+      Function<Integer, Double> intensityAtIndex,
+      Unit<UR> unitRange) {
+    requireNonNull(intensityAtIndex);
+    requireNonNull(unitRange);
+
     return new SampledRange<UR>(this) {
       @Override
       public Unit<UR> getUnit() {
-        return range().getUnit();
+        return unitRange;
       }
 
       @Override
@@ -223,8 +228,9 @@ public class SparseSampledContinuousFunction<UD extends Quantity<UD>, UR extends
         || domain().getSample(intensityIndices[sourceSamples - 1]) < resolvableSampleDomain
             .getInterval()
             .getLeftEndpoint()
-        || domain().getSample(
-            intensityIndices[0]) > resolvableSampleDomain.getInterval().getRightEndpoint()) {
+        || domain().getSample(intensityIndices[0]) > resolvableSampleDomain
+            .getInterval()
+            .getRightEndpoint()) {
       double from = max(resolvableSampleDomain.getInterval().getLeftEndpoint(), 0);
       double to = min(
           resolvableSampleDomain.getInterval().getRightEndpoint(),

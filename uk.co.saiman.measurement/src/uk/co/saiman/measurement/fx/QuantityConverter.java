@@ -27,37 +27,63 @@
  */
 package uk.co.saiman.measurement.fx;
 
+import static java.util.Objects.requireNonNull;
 import static javafx.beans.binding.Bindings.createDoubleBinding;
+import static javafx.beans.binding.Bindings.createObjectBinding;
+import static uk.co.saiman.measurement.fx.QuantityBindings.getConverter;
+
+import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
 public interface QuantityConverter<T extends Quantity<T>> {
   default ValueConverter fromUnit(Unit<T> unit) {
+    requireNonNull(unit);
     return fromUnit(new SimpleObjectProperty<>(unit));
   }
 
-  ValueConverter fromUnit(ObservableValue<? extends Unit<T>> unit);
+  default ValueConverter fromUnit(ObservableValue<? extends Unit<T>> fromUnit) {
+    ObjectBinding<Function<Number, Number>> converter = createObjectBinding(
+        () -> getConverter(fromUnit.getValue(), getToUnit().getValue()),
+        fromUnit,
+        getToUnit());
 
-  default DoubleBinding convert(Quantity<T> value) {
-    return convert(new SimpleObjectProperty<>(value));
-  }
-
-  default DoubleBinding convert(ObservableValue<? extends Quantity<T>> value) {
-    return createDoubleBinding(
-        () -> fromUnit(value.getValue().getUnit()).convert(value.getValue().getValue()).get(),
+    return value -> createDoubleBinding(
+        () -> converter.getValue().apply(value.getValue()).doubleValue(),
+        converter,
         value);
   }
 
+  ObservableValue<? extends Unit<T>> getToUnit();
+
+  default DoubleBinding convert(Quantity<T> value) {
+    requireNonNull(value);
+    return convert(new SimpleObjectProperty<>(value));
+  }
+
+  default DoubleBinding convert(ObservableValue<? extends Quantity<T>> fromValue) {
+    requireNonNull(fromValue);
+    return createDoubleBinding(
+        () -> getConverter(fromValue.getValue().getUnit(), getToUnit().getValue())
+            .apply(fromValue.getValue().getValue())
+            .doubleValue(),
+        fromValue,
+        getToUnit());
+  }
+
   default DoubleBinding convertInterval(Quantity<T> value) {
+    requireNonNull(value);
     return convertInterval(new SimpleObjectProperty<>(value));
   }
 
   default DoubleBinding convertInterval(ObservableValue<? extends Quantity<T>> value) {
+    requireNonNull(value);
     return convert(value).subtract(convert(value.getValue().multiply(0)));
   }
 }

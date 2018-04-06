@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.data.function;
 
+import static java.util.Objects.requireNonNull;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
@@ -39,56 +41,56 @@ import javax.measure.Unit;
  * @author Elias N Vasylenko
  */
 public class IrregularSampledDomain<U extends Quantity<U>> implements SampledDomain<U> {
-	private final Unit<U> unit;
+  private final Unit<U> unit;
 
-	private final double[] values;
+  private final double[] values;
 
-	public IrregularSampledDomain(Unit<U> unit, double[] values) {
-		this.unit = unit;
-		this.values = values.clone();
-	}
+  public IrregularSampledDomain(Unit<U> unit, double[] values) {
+    this.unit = requireNonNull(unit);
+    this.values = requireNonNull(values).clone();
+  }
 
-	@Override
-	public double getSample(int index) {
-		return values[index];
-	}
+  @Override
+  public double getSample(int index) {
+    return values[index];
+  }
 
-	@Override
-	public int getIndexBelow(double xValue) {
-		int from = 0;
-		int to = values.length - 1;
+  @Override
+  public int getIndexBelow(double xValue) {
+    int from = 0;
+    int to = values.length - 1;
 
-		if (to < 0) {
-			return -1;
-		}
+    if (to < 0) {
+      return -1;
+    }
 
-		do {
-			if (values[to] <= xValue) {
-				return to;
-			} else if (values[from] > xValue) {
-				return -1;
-			} else if (values[from] == xValue) {
-				return from;
-			} else {
-				int mid = (to + from) / 2;
-				if (values[mid] > xValue) {
-					to = mid;
-				} else {
-					from = mid;
-				}
-			}
-		} while (to - from > 1);
+    do {
+      if (values[to] <= xValue) {
+        return to;
+      } else if (values[from] > xValue) {
+        return -1;
+      } else if (values[from] == xValue) {
+        return from;
+      } else {
+        int mid = (to + from) / 2;
+        if (values[mid] > xValue) {
+          to = mid;
+        } else {
+          from = mid;
+        }
+      }
+    } while (to - from > 1);
 
-		return from;
-	}
+    return from;
+  }
 
-	@Override
-	public Unit<U> getUnit() {
-		return unit;
-	}
+  @Override
+  public Unit<U> getUnit() {
+    return unit;
+  }
 
-	@Override
-	public int getDepth() {
-		return values.length;
-	}
+  @Override
+  public int getDepth() {
+    return values.length;
+  }
 }

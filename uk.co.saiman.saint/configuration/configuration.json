@@ -49,7 +49,7 @@
 		"service.factoryPid": "uk.co.saiman.comms.copley.simulation",
 		"axes": 2,
 		"nodes": 0,
-		"port.target": "(name=/saiman/copley.partner)"
+		"port.target": "(name=/saiman/copley.simulation)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.saint.saintsimulation",
@@ -59,14 +59,18 @@
 	{
 		"service.pid": "uk.co.saiman.comms.saint.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.saint.simulation",
-		"port.target": "(name=/saiman/saint.partner)"
+		"port.target": "(name=/saiman/saint.simulation)"
 	},
 	{
-		"service.pid": "uk.co.saiman.comms.simulation.saintsimulation",
-		"service.factoryPid": "uk.co.saiman.comms.simulation",
-		"pairedPorts": [
-			"/saiman/copley",
-			"/saiman/saint"
-		]
+		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.simulation.paired",
+		"name": "/saiman/copley",
+		"partnerName": "/saiman/copley.simulation"
+	},
+	{
+		"service.pid": "uk.co.saiman.comms.saint.simulation.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.simulation.paired",
+		"name": "/saiman/saint",
+		"partnerName": "/saiman/saint.simulation"
 	}
 ]
