@@ -28,11 +28,11 @@
 package uk.co.saiman.experiment.sample;
 
 import uk.co.saiman.experiment.VoidExecutionContext;
-import uk.co.saiman.instrument.stage.PolarStageDevice;
+import uk.co.saiman.instrument.stage.PolarStage;
 
 /**
- * An {@link SampleExperimentType experiment type} for {@link PolarStageDevice
- * radial stage devices}.
+ * An {@link SampleExperimentType experiment type} for {@link PolarStage radial
+ * stage devices}.
  * 
  * @author Elias N Vasylenko
  *
@@ -46,11 +46,10 @@ public interface PolarStageExperimentType<T extends PolarStageConfiguration>
     return "Radial Sample Stage";
   }
 
-  PolarStageDevice device();
+  PolarStage device();
 
   @Override
   default void executeVoid(VoidExecutionContext<T> context) {
-    device().getRadius().requestedPosition().set(context.node().getState().getRadius());
-    device().getAngle().requestedPosition().set(context.node().getState().getAngle());
+    device().requestedLocation().set(context.node().getState().location());
   }
 }

@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.saint.impl;
 
+import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static uk.co.saiman.measurement.Quantities.quantityFormat;
+import static uk.co.saiman.measurement.Units.metre;
+
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
@@ -36,8 +40,8 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
-import uk.co.saiman.instrument.stage.XYStageDevice;
-import uk.co.saiman.measurement.Units;
+import uk.co.saiman.instrument.stage.XYStage;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.property.Property;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 
@@ -47,11 +51,8 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
   private static final String X_STATE = "xOffset";
   private static final String Y_STATE = "yOffset";
 
-  @Reference
-  XYStageDevice stageDevice;
-
-  @Reference
-  Units units;
+  @Reference(cardinality = OPTIONAL)
+  private XYStage stageDevice;
 
   @Override
   public String getId() {
@@ -71,8 +72,8 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
         return context
             .persistedState()
             .forString(value)
-            .map(l -> units.parseQuantity(l).asType(Length.class), units::formatQuantity)
-            .setDefault(() -> units.metre().micro().getQuantity(0));
+            .map(l -> quantityFormat().parse(l).asType(Length.class), quantityFormat()::format)
+            .setDefault(() -> metre().micro().getQuantity(0));
       }
 
       @Override
@@ -81,39 +82,34 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
       }
 
       @Override
-      public XYStageDevice stageDevice() {
+      public XYStage stageDevice() {
         return stageDevice;
       }
 
       @Override
-      public void setX(Quantity<Length> offset) {
-        x.set(offset);
+      public XYCoordinate<Length> location() {
+        return new XYCoordinate<>(x.get(), y.get());
       }
 
       @Override
-      public void setY(Quantity<Length> offset) {
-        y.set(offset);
-      }
-
-      @Override
-      public Quantity<Length> getX() {
-        return x.get();
-      }
-
-      @Override
-      public Quantity<Length> getY() {
-        return y.get();
+      public void setLocation(XYCoordinate<Length> location) {
+        x.set(location.getX());
+        y.set(location.getY());
       }
 
       @Override
       public String toString() {
-        return "(" + units.formatQuantity(getX()) + ", " + units.formatQuantity(getY()) + ")";
+        return "("
+            + quantityFormat().format(location().getX())
+            + ", "
+            + quantityFormat().format(location().getY())
+            + ")";
       }
     };
   }
 
   @Override
-  public XYStageDevice device() {
+  public XYStage device() {
     return stageDevice;
   }
 }

@@ -57,5 +57,5 @@ public interface Device {
    * 
    * @return the connection state
    */
-  ObservableValue<DeviceConnection> connectionState();
+  ObservableValue<ConnectionState> connectionState();
 }

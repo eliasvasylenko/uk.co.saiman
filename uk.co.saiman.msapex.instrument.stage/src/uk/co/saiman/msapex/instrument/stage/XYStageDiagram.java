@@ -27,10 +27,13 @@
  */
 package uk.co.saiman.msapex.instrument.stage;
 
-import static java.util.Arrays.asList;
+import static uk.co.saiman.measurement.Units.metre;
 
-import javax.measure.Quantity;
 import javax.measure.quantity.Length;
+
+import javafx.geometry.BoundingBox;
+import uk.co.saiman.instrument.stage.XYStage;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
 /*-
  * 
@@ -45,20 +48,35 @@ import javax.measure.quantity.Length;
  *       custom UI for selecting e.g. different MALDI plates
  * 
  */
-public abstract class XYStageDiagram extends StageDiagram {
-  public Quantity<Length> getXCoordinateAtPixel(int pixelX, int pixelY) {
-    return getCoordinatesAtPixel(pixelX, pixelY).findFirst().get().asType(Length.class);
+public abstract class XYStageDiagram extends StageDiagram<XYCoordinate<Length>> {
+  @Override
+  public abstract XYStage getStageDevice();
+
+  protected void initialize() {
+    XYStage stageDevice = getStageDevice();
+    initialize(metre().micro().getUnit());
+
+    XYCoordinate<Length> lower = getCoordinatesAtStageLocation(
+        new XYCoordinate<>(stageDevice.getLowerBound().getX(), stageDevice.getLowerBound().getY()));
+    XYCoordinate<Length> upper = getCoordinatesAtStageLocation(
+        new XYCoordinate<>(stageDevice.getUpperBound().getX(), stageDevice.getUpperBound().getY()));
+
+    getAnnotationLayer()
+        .setMeasurementBounds(
+            new BoundingBox(
+                lower.getX().getValue().doubleValue(),
+                lower.getY().getValue().doubleValue(),
+                upper.getX().getValue().doubleValue() - lower.getX().getValue().doubleValue(),
+                upper.getY().getValue().doubleValue() - lower.getY().getValue().doubleValue()));
   }
 
-  public Quantity<Length> getYCoordinateAtPixel(int pixelX, int pixelY) {
-    return getCoordinatesAtPixel(pixelX, pixelY).skip(1).findFirst().get().asType(Length.class);
+  @Override
+  public XYCoordinate<Length> getStageLocationAtCoordinates(XYCoordinate<Length> coordinates) {
+    return coordinates;
   }
 
-  public int getPixelXAtCoordinates(Quantity<Length> x, Quantity<Length> y) {
-    return getPixelXAtCoordinates(asList(x, y));
-  }
-
-  public int getPixelYAtCoordinates(Quantity<Length> x, Quantity<Length> y) {
-    return getPixelXAtCoordinates(asList(x, y));
+  @Override
+  public XYCoordinate<Length> getCoordinatesAtStageLocation(XYCoordinate<Length> location) {
+    return location;
   }
 }

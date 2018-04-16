@@ -29,11 +29,10 @@ package uk.co.saiman.msapex.annotations;
 
 import static javafx.beans.binding.Bindings.createDoubleBinding;
 import static javafx.beans.binding.Bindings.select;
-import static uk.co.saiman.fx.FxUtilities.createStrongBinding;
-import static uk.co.saiman.measurement.fx.QuantityBindings.toUnit;
+import static javafx.beans.binding.Bindings.selectDouble;
+import static uk.co.saiman.measurement.fx.QuantityBindings.createQuantityBinding;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -43,44 +42,34 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
 
 public abstract class Annotation<X extends Quantity<X>, Y extends Quantity<Y>> extends Group {
-  private final Unit<X> unitX;
-  private final Unit<Y> unitY;
-
   private final IntegerProperty priority;
 
-  private final ObjectBinding<Optional<AnnotationLayer<X, Y>>> annotationLayer;
+  private final ObjectBinding<Unit<X>> layoutUnitX;
+  private final ObjectBinding<Unit<Y>> layoutUnitY;
+  private final DoubleBinding layoutWidth;
+  private final DoubleBinding layoutHeight;
+  private final ObjectBinding<Bounds> measurementBounds;
 
-  public Annotation(Unit<X> unitX, Unit<Y> unitY) {
-    this.unitX = unitX;
-    this.unitY = unitY;
-
+  public Annotation() {
     priority = new SimpleIntegerProperty();
 
-    annotationLayer = createStrongBinding(
-        this::getAnnotationLayer,
-        select(parentProperty(), "unitX"),
-        select(parentProperty(), "unitY"),
-        select(parentProperty(), "width"),
-        select(parentProperty(), "measurementBounds"));
+    layoutUnitX = select(parentProperty(), "unitX");
+    layoutUnitY = select(parentProperty(), "unitY");
+    layoutWidth = selectDouble(parentProperty(), "width");
+    layoutHeight = selectDouble(parentProperty(), "height");
+    measurementBounds = select(parentProperty(), "measurementBounds");
   }
 
-  public Unit<X> getUnitX() {
-    return unitX;
+  public ObjectBinding<Unit<X>> layoutUnitX() {
+    return layoutUnitX;
   }
 
-  public Unit<Y> getUnitY() {
-    return unitY;
-  }
-
-  public Unit<X> getLayoutUnitX() {
-    return getAnnotationLayer().map(AnnotationLayer::getUnitX).orElse(getUnitX());
-  }
-
-  public Unit<Y> getLayoutUnitY() {
-    return getAnnotationLayer().map(AnnotationLayer::getUnitY).orElse(getUnitY());
+  public ObjectBinding<Unit<Y>> layoutUnitY() {
+    return layoutUnitY;
   }
 
   @SuppressWarnings("unchecked")
@@ -91,63 +80,44 @@ public abstract class Annotation<X extends Quantity<X>, Y extends Quantity<Y>> e
       return Optional.empty();
   }
 
-  private DoubleBinding measurementConversion(
-      BiFunction<AnnotationLayer<X, Y>, Double, Double> function,
-      ObservableValue<? extends Number> value) {
-    return createDoubleBinding(() -> {
-      return annotationLayer
-          .get()
-          .map(p -> function.apply(p, value.getValue().doubleValue()))
-          .orElse(0d);
-    }, annotationLayer);
+  protected DoubleBinding measurementToLayoutX(ObservableValue<? extends Quantity<X>> value) {
+    DoubleBinding amount = createQuantityBinding(value).convertTo(layoutUnitX).getDoubleAmount();
+    return createDoubleBinding(
+        () -> getAnnotationLayer().map(p -> p.measurementToLocalX(amount.get())).orElse(0d),
+        measurementBounds,
+        layoutWidth,
+        amount);
   }
 
-  protected DoubleBinding measurementToLayoutWidth(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::measurementToLocalWidth,
-        toUnit(getLayoutUnitX()).fromUnit(unitX).convertInterval(value));
+  protected DoubleBinding measurementToLayoutY(ObservableValue<? extends Quantity<Y>> value) {
+    DoubleBinding amount = createQuantityBinding(value).convertTo(layoutUnitY).getDoubleAmount();
+    return createDoubleBinding(
+        () -> getAnnotationLayer().map(p -> p.measurementToLocalY(amount.get())).orElse(0d),
+        measurementBounds,
+        layoutHeight,
+        amount);
   }
 
-  protected DoubleBinding measurementToLayoutHeight(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::measurementToLocalHeight,
-        toUnit(getLayoutUnitY()).fromUnit(unitY).convertInterval(value));
+  protected DoubleBinding measurementToLayoutWidth(ObservableValue<? extends Quantity<X>> value) {
+    DoubleBinding amount = createQuantityBinding(value)
+        .convertIntervalTo(layoutUnitX)
+        .getDoubleAmount();
+    return createDoubleBinding(
+        () -> getAnnotationLayer().map(p -> p.measurementToLocalWidth(amount.get())).orElse(0d),
+        measurementBounds,
+        layoutWidth,
+        amount);
   }
 
-  protected DoubleBinding layoutWidthToMeasurement(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::localWidthToMeasurement,
-        toUnit(unitX).fromUnit(getLayoutUnitX()).convertInterval(value));
-  }
-
-  protected DoubleBinding layoutHeightToMeasurement(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::localHeightToMeasurement,
-        toUnit(unitY).fromUnit(getLayoutUnitY()).convertInterval(value));
-  }
-
-  protected DoubleBinding measurementToLayoutX(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::measurementToLocalX,
-        toUnit(getLayoutUnitX()).fromUnit(unitX).convert(value));
-  }
-
-  protected DoubleBinding measurementToLayoutY(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::measurementToLocalY,
-        toUnit(getLayoutUnitY()).fromUnit(unitY).convert(value));
-  }
-
-  protected DoubleBinding layoutXToMeasurement(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::localXToMeasurement,
-        toUnit(unitX).fromUnit(getLayoutUnitX()).convert(value));
-  }
-
-  protected DoubleBinding layoutYToMeasurement(ObservableValue<? extends Number> value) {
-    return measurementConversion(
-        AnnotationLayer::localYToMeasurement,
-        toUnit(unitY).fromUnit(getLayoutUnitY()).convert(value));
+  protected DoubleBinding measurementToLayoutHeight(ObservableValue<? extends Quantity<Y>> value) {
+    DoubleBinding amount = createQuantityBinding(value)
+        .convertIntervalTo(layoutUnitY)
+        .getDoubleAmount();
+    return createDoubleBinding(
+        () -> getAnnotationLayer().map(p -> p.measurementToLocalHeight(amount.get())).orElse(0d),
+        measurementBounds,
+        layoutHeight,
+        amount);
   }
 
   /**

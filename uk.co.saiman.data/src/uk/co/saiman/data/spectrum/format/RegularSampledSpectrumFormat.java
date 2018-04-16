@@ -28,6 +28,7 @@
 package uk.co.saiman.data.spectrum.format;
 
 import static uk.co.saiman.data.function.format.RegularSampledContinuousFunctionFormat.overEncodedDomain;
+import static uk.co.saiman.measurement.Units.unitFormat;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -39,7 +40,6 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.Payload;
@@ -50,9 +50,6 @@ import uk.co.saiman.measurement.Units;
 @Component
 public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
   private static final String ID = "uk.co.saiman.experiment.spectrum.sampled.regular.format";
-
-  @Reference
-  Units units;
 
   RegularSampledSpectrumFormat() {}
 
@@ -87,10 +84,10 @@ public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
     Unit<Dimensionless> rangeUnits = payload.data.getTimeData().range().getUnit();
 
     byte[] bytes;
-    bytes = units.formatUnit(domainUnits).getBytes();
+    bytes = unitFormat().format(domainUnits).getBytes();
     outputChannel.write(ByteBuffer.wrap(bytes));
     outputChannel.write(ByteBuffer.wrap(new byte[] { 0 }));
-    bytes = units.formatUnit(rangeUnits).getBytes();
+    bytes = unitFormat().format(rangeUnits).getBytes();
     outputChannel.write(ByteBuffer.wrap(bytes));
     outputChannel.write(ByteBuffer.wrap(new byte[] { 0 }));
 

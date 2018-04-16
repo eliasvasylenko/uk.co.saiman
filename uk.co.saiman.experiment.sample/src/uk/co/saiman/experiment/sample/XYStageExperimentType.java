@@ -28,11 +28,11 @@
 package uk.co.saiman.experiment.sample;
 
 import uk.co.saiman.experiment.VoidExecutionContext;
-import uk.co.saiman.instrument.stage.XYStageDevice;
+import uk.co.saiman.instrument.stage.XYStage;
 
 /**
- * An {@link SampleExperimentType experiment type} for {@link XYStageDevice XY
- * stage devices}.
+ * An {@link SampleExperimentType experiment type} for {@link XYStage XY stage
+ * devices}.
  * 
  * @author Elias N Vasylenko
  *
@@ -46,12 +46,11 @@ public interface XYStageExperimentType<T extends XYStageConfiguration>
     return "XY Sample Stage";
   }
 
-  XYStageDevice device();
+  XYStage device();
 
   @Override
   default void executeVoid(VoidExecutionContext<T> context) {
-    device().getXAxis().requestedPosition().set(context.node().getState().getX());
-    device().getYAxis().requestedPosition().set(context.node().getState().getY());
+    device().requestedLocation().set(context.node().getState().location());
 
     /*
      * TODO listen for interruption of the stage position and cancel/fail/warn if it

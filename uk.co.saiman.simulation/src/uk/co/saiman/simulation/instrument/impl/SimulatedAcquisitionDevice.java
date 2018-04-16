@@ -33,8 +33,11 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static uk.co.saiman.instrument.DeviceConnection.CONNECTED;
+import static uk.co.saiman.instrument.ConnectionState.CONNECTED;
 import static uk.co.saiman.log.Log.Level.ERROR;
+import static uk.co.saiman.measurement.Quantities.quantityFormat;
+import static uk.co.saiman.measurement.Units.count;
+import static uk.co.saiman.measurement.Units.second;
 import static uk.co.saiman.observable.Observer.forObservation;
 import static uk.co.saiman.observable.Observer.onObservation;
 
@@ -58,7 +61,7 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.DeviceConnection;
+import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.Units;
@@ -203,11 +206,11 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   synchronized void activate(AcquisitionSimulationConfiguration configuration) {
     text = loader.getProperties(SimulationProperties.class);
 
-    intensityUnits = units.count().get();
-    timeUnits = units.second().get();
+    intensityUnits = count().getUnit();
+    timeUnits = second().getUnit();
 
-    resolution = units.parseQuantity(configuration.acquisitionResolution()).asType(Time.class);
-    setAcquisitionTime(units.second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
+    resolution = quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class);
+    setAcquisitionTime(second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
     setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
     acquisitionBuffer
@@ -225,7 +228,9 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   }
 
   private void initializeDetector() {
-    detector = detectorService.getDetectorSimulation(getSampleDomain(), getSampleIntensityUnits());
+    detector = detectorService == null
+        ? null
+        : detectorService.getDetectorSimulation(getSampleDomain(), getSampleIntensityUnits());
   }
 
   @Deactivate
@@ -444,7 +449,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   }
 
   @Override
-  public ObservableValue<DeviceConnection> connectionState() {
+  public ObservableValue<ConnectionState> connectionState() {
     return Observable.value(CONNECTED);
   }
 }

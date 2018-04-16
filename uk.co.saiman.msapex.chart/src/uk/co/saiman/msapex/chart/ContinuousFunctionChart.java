@@ -28,7 +28,7 @@ import uk.co.saiman.msapex.annotations.AnnotationLayer;
 
 public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y>>
     extends LineChart<Number, Number> {
-  private static final int REPEAT_RATE = 4;
+  private static final int REPEAT_RATE = 8;
   private static final String CONTINUOUS_FUNCTION_CHART_PSEUDO_CLASS = "continuousFunctionChart";
 
   private static final double ZOOM_STEP_PERCENTAGE = 20;

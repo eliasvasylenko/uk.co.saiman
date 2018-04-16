@@ -3,14 +3,12 @@ package uk.co.saiman.msapex.chart;
 import static java.lang.Math.floor;
 import static java.lang.Math.log10;
 import static java.lang.Math.pow;
-import static uk.co.saiman.measurement.fx.QuantityFormatter.basicQuantityFormatter;
-import static uk.co.saiman.measurement.fx.QuantityFormatter.quantityFormatter;
+import static uk.co.saiman.measurement.fx.QuantityFormatter.defaultQuantityFormatter;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import javafx.util.StringConverter;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.measurement.fx.QuantityFormatter;
 
 public class ScalingTickUnits<T extends Quantity<T>> implements TickUnits<T> {
@@ -78,16 +76,12 @@ public class ScalingTickUnits<T extends Quantity<T>> implements TickUnits<T> {
   private final StringConverter<Number> formatter;
   private final Unit<T> unit;
 
-  public ScalingTickUnits(Units units, Unit<T> unit) {
-    this(quantityFormatter(units), unit);
+  public ScalingTickUnits(Unit<T> unit) {
+    this(defaultQuantityFormatter(), unit);
   }
 
   public ScalingTickUnits(QuantityFormatter formatter, Unit<T> unit) {
     this(formatter.quantityFormatter(unit), unit);
-  }
-
-  public ScalingTickUnits(Unit<T> unit) {
-    this(basicQuantityFormatter(), unit);
   }
 
   public ScalingTickUnits(StringConverter<Number> formatter, Unit<T> unit) {

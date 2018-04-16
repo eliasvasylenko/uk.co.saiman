@@ -28,6 +28,7 @@
 package uk.co.saiman.observable;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import uk.co.saiman.property.Property;
 

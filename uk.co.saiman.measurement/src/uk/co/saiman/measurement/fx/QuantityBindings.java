@@ -27,13 +27,22 @@
  */
 package uk.co.saiman.measurement.fx;
 
-import java.util.function.Function;
+import static java.util.Arrays.asList;
+import static javafx.beans.binding.Bindings.createObjectBinding;
+import static javafx.collections.FXCollections.observableList;
+import static javafx.collections.FXCollections.unmodifiableObservableList;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import uk.co.saiman.measurement.Quantities;
 
 /**
  * A utility class containing static methods to build conversion bindings.
@@ -41,23 +50,103 @@ import javafx.beans.value.ObservableValue;
  * @author Elias N Vasylenko
  */
 public final class QuantityBindings {
+  static class QuantityBindingImpl<T extends Quantity<T>> extends ObjectBinding<Quantity<T>>
+      implements QuantityBinding<T> {
+    private final ObservableValue<? extends Unit<T>> unit;
+    private final ObservableValue<? extends Number> amount;
+
+    public QuantityBindingImpl(
+        ObservableValue<? extends Unit<T>> unit,
+        ObservableValue<? extends Number> amount) {
+      this.unit = unit;
+      this.amount = amount;
+      bind(unit, amount);
+    }
+
+    @Override
+    protected Quantity<T> computeValue() {
+      try {
+        return Quantities.getQuantity(unit.getValue(), amount.getValue());
+      } catch (Exception e) {
+        return null;
+      }
+    }
+
+    @Override
+    public void dispose() {
+      super.unbind(unit, amount);
+    }
+
+    @Override
+    public ObservableList<?> getDependencies() {
+      return unmodifiableObservableList(observableList(asList(unit, amount)));
+    }
+
+    @Override
+    public QuantityBinding<T> convertTo(ObservableValue<? extends Unit<T>> unit) {
+      return createQuantityBinding(
+          unit,
+          createObjectBinding(
+              () -> this.unit.getValue().getConverterTo(unit.getValue()).convert(amount.getValue()),
+              this.unit,
+              unit,
+              amount));
+    }
+
+    @Override
+    public QuantityBinding<T> convertIntervalTo(ObservableValue<? extends Unit<T>> unit) {
+      return createQuantityBinding(
+          unit,
+          createObjectBinding(
+              () -> this.unit.getValue().getConverterTo(unit.getValue()).convert(amount.getValue()),
+              this.unit,
+              unit,
+              amount));
+    }
+
+    @Override
+    public DoubleBinding getDoubleAmount() {
+      return Bindings.createDoubleBinding(() -> amount.getValue().doubleValue(), amount);
+    }
+
+    @Override
+    public Binding<Unit<T>> getUnit() {
+      return Bindings.createObjectBinding(() -> unit.getValue(), unit);
+    }
+  }
+
   private QuantityBindings() {}
 
-  public static <T extends Quantity<T>> QuantityConverter<T> toUnit(Unit<T> unit) {
-    return toUnit(new SimpleObjectProperty<>(unit));
+  public static <T extends Quantity<T>> QuantityBinding<T> createQuantityBinding(
+      ObservableValue<? extends Quantity<T>> quantity) {
+    return new QuantityBindingImpl<>(
+        createObjectBinding(() -> quantity.getValue().getUnit(), quantity),
+        createObjectBinding(() -> quantity.getValue().getValue(), quantity));
   }
 
-  public static <T extends Quantity<T>> QuantityConverter<T> toUnit(
-      ObservableValue<? extends Unit<T>> toUnit) {
-    return () -> toUnit;
+  public static <T extends Quantity<T>> QuantityBinding<T> createQuantityBinding(
+      ObservableValue<? extends Unit<T>> unit,
+      ObservableValue<? extends Number> amount) {
+    return new QuantityBindingImpl<>(unit, amount);
   }
 
-  static <T extends Quantity<T>> Function<Number, Number> getConverter(
-      Unit<T> fromUnit,
-      Unit<T> toUnit) {
-    if (fromUnit == null || toUnit == null) {
-      return i -> i;
-    }
-    return fromUnit.getConverterTo(toUnit)::convert;
+  public static <T extends Quantity<T>> QuantityBinding<T> createQuantityBinding(
+      ObservableValue<? extends Unit<T>> unit,
+      Number amount) {
+    return createQuantityBinding(unit, new SimpleObjectProperty<>(amount));
+  }
+
+  public static <T extends Quantity<T>> QuantityBinding<T> createQuantityBinding(
+      Unit<T> unit,
+      ObservableValue<? extends Number> amount) {
+    return createQuantityBinding(new SimpleObjectProperty<>(unit), amount);
+  }
+
+  public static <T extends Quantity<T>> QuantityBinding<T> createQuantityBinding(
+      Unit<T> unit,
+      Number amount) {
+    return createQuantityBinding(
+        new SimpleObjectProperty<>(unit),
+        new SimpleObjectProperty<>(amount));
   }
 }

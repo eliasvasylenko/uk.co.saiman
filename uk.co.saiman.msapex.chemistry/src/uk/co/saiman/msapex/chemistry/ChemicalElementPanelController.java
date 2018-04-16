@@ -31,20 +31,19 @@ import static java.util.Collections.emptySet;
 import static javafx.collections.FXCollections.observableArrayList;
 import static uk.co.saiman.chemistry.Element.Group.NONE;
 import static uk.co.saiman.data.function.ContinuousFunction.empty;
+import static uk.co.saiman.measurement.Units.count;
+import static uk.co.saiman.measurement.Units.dalton;
+import static uk.co.saiman.measurement.Units.percent;
 
-import javax.inject.Inject;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
-
-import org.eclipse.fx.core.di.Service;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.shape.Circle;
 import uk.co.saiman.chemistry.Element;
 import uk.co.saiman.chemistry.Element.Group;
 import uk.co.saiman.chemistry.Isotope;
@@ -52,8 +51,6 @@ import uk.co.saiman.chemistry.PeriodicTable;
 import uk.co.saiman.data.function.GaussianFunctionFactory;
 import uk.co.saiman.data.function.PeakShapeFunctionFactory;
 import uk.co.saiman.data.function.PeakShapeImpulseConvolutionFunction;
-import uk.co.saiman.measurement.Units;
-import uk.co.saiman.msapex.annotations.ShapeAnnotation;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 import uk.co.saiman.msapex.chart.MetricTickUnits;
@@ -88,20 +85,17 @@ public class ChemicalElementPanelController {
   private PeakShapeFunctionFactory peakFunction;
   private ContinuousFunctionSeries<Mass, Dimensionless> isotopeSeries;
 
-  @Inject
-  @Service
-  private Units units;
   private Unit<Dimensionless> abundanceUnit;
   private Unit<Mass> massUnit;
 
   @FXML
   void initialize() {
-    massUnit = units.dalton().get();
-    abundanceUnit = units.percent().get();
+    massUnit = dalton().getUnit();
+    abundanceUnit = percent().getUnit();
 
     isotopeChart = new ContinuousFunctionChart<>(
-        new QuantityAxis<>(new MetricTickUnits<>(units, Units::dalton)),
-        new QuantityAxis<>(units.count().get())
+        new QuantityAxis<>(new MetricTickUnits<>(dalton())),
+        new QuantityAxis<>(count().getUnit())
             .setForceZeroInRange(true)
             .setPaddingApplied(true)
             .setSnapRangeToMajorTick(true));

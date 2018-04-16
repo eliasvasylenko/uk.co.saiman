@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.measurement;
 
-import java.util.function.Function;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
@@ -37,15 +35,15 @@ public interface UnitBuilder<T extends Quantity<T>> {
    * products and powers
    */
 
-  UnitBuilder<?> multiply(Function<Units, UnitBuilder<?>> unit);
+  UnitBuilder<?> multiply(UnitBuilder<?> unit);
 
-  UnitBuilder<?> divide(Function<Units, UnitBuilder<?>> unit);
+  UnitBuilder<?> divide(UnitBuilder<?> unit);
 
   /*
    * build
    */
 
-  Unit<T> get();
+  Unit<T> getUnit();
 
   Quantity<T> getQuantity(Number amount);
 }

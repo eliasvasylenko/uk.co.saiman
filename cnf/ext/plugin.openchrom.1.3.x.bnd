@@ -1,0 +1,5 @@
+#-plugin.openchrom.1.3.x: \
+#\
+#		aQute.bnd.repository.p2.provider.P2Repository;\
+#			name				=		"Openchrom 1.3.x";\
+#			url					=       http://update.openchrom.net/repositories/community/1.3.x/repository

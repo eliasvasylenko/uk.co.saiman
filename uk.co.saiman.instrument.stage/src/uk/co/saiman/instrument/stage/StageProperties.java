@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.instrument.stage;
 
-import uk.co.saiman.text.properties.Localized;
+import uk.co.saiman.instrument.sample.SampleDeviceProperties;
 import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.SaiProperties;
 import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.text.properties.SaiProperties;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -40,7 +40,7 @@ import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
 @SuppressWarnings("javadoc")
 @PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface StageProperties {
-	SaiProperties sai();
+  SaiProperties sai();
 
-	Localized<String> noStageDevices();
+  SampleDeviceProperties sample();
 }

@@ -27,28 +27,38 @@
  */
 package uk.co.saiman.msapex.annotations;
 
+import static uk.co.saiman.measurement.fx.QuantityBindings.createQuantityBinding;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.shape.Shape;
 import javafx.scene.transform.Scale;
+import uk.co.saiman.measurement.fx.QuantityBinding;
 
 public class ShapeAnnotation<X extends Quantity<X>, Y extends Quantity<Y>>
     extends XYAnnotation<X, Y> {
   public ShapeAnnotation(Unit<X> unitX, Unit<Y> unitY, Shape shape) {
-    super(unitX, unitY);
-
     Scale scale = new Scale();
     scale.setPivotX(0);
     scale.setPivotY(0);
-    scale.xProperty().bind(measurementToLayoutWidth(new SimpleDoubleProperty(1)));
-    scale.yProperty().bind(measurementToLayoutHeight(new SimpleDoubleProperty(1)));
+
+    QuantityBinding<X> relativeWidth = createQuantityBinding(unitX, 1)
+        .convertIntervalTo(layoutUnitX());
+    scale.xProperty().bind(measurementToLayoutWidth(relativeWidth));
+
+    QuantityBinding<Y> relativeHeight = createQuantityBinding(unitY, 1)
+        .convertIntervalTo(layoutUnitY());
+    scale.yProperty().bind(measurementToLayoutHeight(relativeHeight));
 
     Group transformationGroup = new Group(shape);
     transformationGroup.getTransforms().add(scale);
 
     getChildren().add(transformationGroup);
+  }
+
+  public ShapeAnnotation(Shape shape) {
+    getChildren().add(shape);
   }
 }

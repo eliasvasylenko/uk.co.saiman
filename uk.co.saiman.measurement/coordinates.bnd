@@ -1,0 +1,3 @@
+Bundle-Name: SAI :: Measurement :: Coordinates
+
+Export-Package: uk.co.saiman.measurement.coordinate

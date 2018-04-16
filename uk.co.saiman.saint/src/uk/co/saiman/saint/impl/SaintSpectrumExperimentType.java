@@ -32,6 +32,7 @@ import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
 import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSING_KEY;
+import static uk.co.saiman.measurement.Units.dalton;
 
 import java.util.List;
 
@@ -54,7 +55,6 @@ import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 import uk.co.saiman.text.properties.PropertyLoader;
@@ -74,9 +74,6 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   @Reference
   private PropertyLoader properties;
 
-  @Reference
-  private Units units;
-
   @Override
   public String getId() {
     return getClass().getName();
@@ -89,7 +86,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
 
   @Override
   protected Unit<Mass> getMassUnit() {
-    return units.dalton().get();
+    return dalton().getUnit();
   }
 
   @Override

@@ -1,8 +1,10 @@
 package uk.co.saiman.measurement.fx;
 
-import java.text.DecimalFormat;
+import static uk.co.saiman.measurement.Quantities.getQuantity;
+import static uk.co.saiman.measurement.Quantities.quantityFormat;
+import static uk.co.saiman.measurement.Units.unitFormat;
+
 import java.text.NumberFormat;
-import java.text.ParseException;
 
 import javax.measure.IncommensurableException;
 import javax.measure.Quantity;
@@ -11,7 +13,6 @@ import javax.measure.Unit;
 import javax.measure.UnitConverter;
 
 import javafx.util.StringConverter;
-import uk.co.saiman.measurement.Units;
 
 public interface QuantityFormatter {
   StringConverter<Number> quantityFormatter(Unit<?> unit);
@@ -20,66 +21,19 @@ public interface QuantityFormatter {
 
   StringConverter<Unit<?>> unitFormatter();
 
-  static QuantityFormatter basicQuantityFormatter() {
-    return new QuantityFormatter() {
-      @Override
-      public StringConverter<Unit<?>> unitFormatter() {
-        return new StringConverter<Unit<?>>() {
-          @Override
-          public String toString(Unit<?> object) {
-            return object.toString();
-          }
-
-          @Override
-          public Unit<?> fromString(String string) {
-            throw new UnsupportedOperationException();
-          }
-        };
-      }
-
-      @Override
-      public StringConverter<Number> quantityFormatter(Unit<?> unit, NumberFormat numberFormat) {
-        return new StringConverter<Number>() {
-          @Override
-          public String toString(Number object) {
-            return numberFormat.format(object) + " " + unit.toString();
-          }
-
-          @Override
-          public Number fromString(String string) {
-            String[] split = string.split(" ");
-            if (!split[1].equals(unit.toString())) {
-              throw new IllegalArgumentException(string);
-            }
-            try {
-              return numberFormat.parse(split[0]);
-            } catch (ParseException e) {
-              throw new IllegalArgumentException(string, e);
-            }
-          }
-        };
-      }
-
-      @Override
-      public StringConverter<Number> quantityFormatter(Unit<?> unit) {
-        return quantityFormatter(unit, new DecimalFormat());
-      }
-    };
-  }
-
-  static QuantityFormatter quantityFormatter(Units units) {
+  static QuantityFormatter defaultQuantityFormatter() {
     return new QuantityFormatter() {
       @Override
       public StringConverter<Number> quantityFormatter(Unit<?> unit) {
         return new StringConverter<Number>() {
           @Override
           public String toString(Number object) {
-            return units.formatQuantity(units.getQuantity(unit, object));
+            return quantityFormat().format(getQuantity(unit, object));
           }
 
           @Override
           public Number fromString(String string) {
-            Quantity<?> quantity = units.parseQuantity(string);
+            Quantity<?> quantity = quantityFormat().parse(string);
             UnitConverter converter;
             try {
               converter = quantity.getUnit().getConverterToAny(unit);
@@ -96,12 +50,14 @@ public interface QuantityFormatter {
         return new StringConverter<Number>() {
           @Override
           public String toString(Number object) {
-            return units.formatQuantity(units.getQuantity(unit, object), numberFormat);
+            return quantityFormat()
+                .withNumberFormat(numberFormat)
+                .format(getQuantity(unit, object));
           }
 
           @Override
           public Number fromString(String string) {
-            Quantity<?> quantity = units.parseQuantity(string, numberFormat);
+            Quantity<?> quantity = quantityFormat().withNumberFormat(numberFormat).parse(string);
             UnitConverter converter;
             try {
               converter = quantity.getUnit().getConverterToAny(unit);
@@ -118,12 +74,12 @@ public interface QuantityFormatter {
         return new StringConverter<Unit<?>>() {
           @Override
           public String toString(Unit<?> object) {
-            return units.formatUnit(object);
+            return unitFormat().format(object);
           }
 
           @Override
           public Unit<?> fromString(String string) {
-            return units.parseUnit(string);
+            return unitFormat().parse(string);
           }
         };
       }

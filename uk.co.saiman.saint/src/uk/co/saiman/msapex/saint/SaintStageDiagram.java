@@ -27,38 +27,33 @@
  */
 package uk.co.saiman.msapex.saint;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
-import javax.measure.Quantity;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.msapex.instrument.stage.StageDiagramSampleConfiguration;
 import uk.co.saiman.msapex.instrument.stage.XYStageDiagram;
 
+@Component
 public class SaintStageDiagram extends XYStageDiagram {
-  
+  @Reference
+  private XYStage stageDevice;
 
-  @Override
-  public Stream<Quantity<?>> getCoordinatesAtPixel(int pixelX, int pixelY) {
-    // TODO Auto-generated method stub
-    return null;
+  @Activate
+  void activate() {
+    initialize();
   }
 
   @Override
-  public int getPixelXAtCoordinates(Collection<? extends Quantity<?>> coordinates) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public int getPixelYAtCoordinates(Collection<? extends Quantity<?>> coordinates) {
-    // TODO Auto-generated method stub
-    return 0;
+  public XYStage getStageDevice() {
+    return stageDevice;
   }
 
   @Override
   public Stream<? extends StageDiagramSampleConfiguration> getSampleConfigurations() {
-    // TODO Auto-generated method stub
-    return null;
+    return Stream.empty();
   }
 }

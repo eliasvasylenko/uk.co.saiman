@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: MSApex :: Chart
+Bundle-Name: SAI :: MSApex :: Annotations
 
 -include:\
 	${build}/include/eclipse.platform.oxygen.bnd,\

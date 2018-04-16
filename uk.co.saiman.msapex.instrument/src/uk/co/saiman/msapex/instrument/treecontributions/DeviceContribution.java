@@ -40,7 +40,7 @@ import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.DeviceConnection;
+import uk.co.saiman.instrument.ConnectionState;
 
 @Component(scope = ServiceScope.PROTOTYPE)
 public class DeviceContribution implements TreeContribution {
@@ -48,7 +48,7 @@ public class DeviceContribution implements TreeContribution {
 
   @AboutToShow
   public void prepare(HBox node, TreeEntry<Device> item) {
-    DeviceConnection state = item.data().connectionState().get();
+    ConnectionState state = item.data().connectionState().get();
 
     pseudoClass.configureCell(node);
     new PseudoClassContributor(state.toString()).configureCell(node);

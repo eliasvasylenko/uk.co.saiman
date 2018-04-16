@@ -29,11 +29,14 @@ package uk.co.saiman.simulation.instrument.impl;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static uk.co.saiman.measurement.Quantities.quantityFormat;
+import static uk.co.saiman.measurement.Units.count;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Dimensionless;
@@ -53,9 +56,8 @@ import uk.co.saiman.camera.CameraImage;
 import uk.co.saiman.camera.CameraProperties;
 import uk.co.saiman.camera.CameraResolution;
 import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.saiman.instrument.stage.StageDimension;
-import uk.co.saiman.instrument.stage.XYStageDevice;
-import uk.co.saiman.measurement.Units;
+import uk.co.saiman.instrument.stage.XYStage;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.PassthroughObserver;
@@ -68,10 +70,10 @@ import uk.co.saiman.simulation.instrument.impl.XYStageSimulatedSampleSource.XYSt
 import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
- * A software component to attach to a {@link XYStageDevice two dimensional,
- * linear stage} and {@link SimulatedSampleSource simulate a sample source}
- * using the position of the device to index into a sample image. The stage
- * device itself may or may not be a simulation.
+ * A software component to attach to a {@link XYStage two dimensional, linear
+ * stage} and {@link SimulatedSampleSource simulate a sample source} using the
+ * position of the device to index into a sample image. The stage device itself
+ * may or may not be a simulation.
  * <p>
  * The component also simulates a camera view of the stage.
  * 
@@ -153,7 +155,7 @@ public class XYStageSimulatedSampleSource
   };
 
   @Reference
-  XYStageDevice stageDevice;
+  XYStage stageDevice;
 
   private ChemicalComposition redChemical;
   private ChemicalComposition greenChemical;
@@ -219,36 +221,36 @@ public class XYStageSimulatedSampleSource
     };
 
     Quantity<Length> sampleImagePixelWidth = stageDevice
-        .getXAxis()
-        .getBounds()
-        .getRightEndpoint()
-        .subtract(stageDevice.getXAxis().getBounds().getLeftEndpoint())
+        .getUpperBound()
+        .getX()
+        .subtract(stageDevice.getLowerBound().getX())
         .divide(sampleImage.getWidth());
 
     Quantity<Length> sampleImagePixelHeight = stageDevice
-        .getYAxis()
-        .getBounds()
-        .getRightEndpoint()
-        .subtract(stageDevice.getYAxis().getBounds().getLeftEndpoint())
+        .getUpperBound()
+        .getY()
+        .subtract(stageDevice.getLowerBound().getY())
         .divide(sampleImage.getHeight());
 
-    Quantity<Length> viewAreaWidth = units.parseQuantity(configuration.viewAreaWidth()).asType(
-        Length.class);
+    Quantity<Length> viewAreaWidth = quantityFormat()
+        .parse(configuration.viewAreaWidth())
+        .asType(Length.class);
     cameraImageZoomX = viewAreaWidth
         .divide(sampleImagePixelWidth)
         .divide(cameraResolution.getWidth())
         .asType(Dimensionless.class)
-        .to(units.count().get())
+        .to(count().getUnit())
         .getValue()
         .doubleValue();
 
-    Quantity<Length> viewAreaHeight = viewAreaWidth.divide(cameraResolution.getWidth()).multiply(
-        cameraResolution.getHeight());
+    Quantity<Length> viewAreaHeight = viewAreaWidth
+        .divide(cameraResolution.getWidth())
+        .multiply(cameraResolution.getHeight());
     cameraImageZoomY = viewAreaHeight
         .divide(sampleImagePixelHeight)
         .divide(cameraResolution.getHeight())
         .asType(Dimensionless.class)
-        .to(units.count().get())
+        .to(count().getUnit())
         .getValue()
         .doubleValue();
   }
@@ -282,30 +284,30 @@ public class XYStageSimulatedSampleSource
     this.sampleImage = DEFAULT_SAMPLE_IMAGE;
   }
 
-  @Reference
-  Units units;
+  private double getSampleAreaPosition(
+      Function<XYCoordinate<Length>, Quantity<Length>> stageDimension) {
+    Quantity<Length> range = stageDimension
+        .apply(stageDevice.getUpperBound())
+        .subtract(stageDimension.apply(stageDevice.getLowerBound()));
 
-  private double getSampleAreaPosition(StageDimension<Length> stageDimension) {
-    Quantity<Length> range = stageDimension.getBounds().getRightEndpoint().subtract(
-        stageDimension.getBounds().getLeftEndpoint());
-
-    Quantity<Length> offset = stageDimension.actualPosition().get().subtract(
-        stageDimension.getBounds().getLeftEndpoint());
+    Quantity<Length> offset = stageDimension
+        .apply(stageDevice.actualLocation().get())
+        .subtract(stageDimension.apply(stageDevice.getLowerBound()));
 
     return offset
         .divide(range)
         .asType(Dimensionless.class)
-        .to(units.count().get())
+        .to(count().getUnit())
         .getValue()
         .doubleValue();
   }
 
   int getImageX() {
-    return (int) (sampleImage.getWidth() * getSampleAreaPosition(stageDevice.getXAxis()));
+    return (int) (sampleImage.getWidth() * getSampleAreaPosition(XYCoordinate::getX));
   }
 
   int getImageY() {
-    return (int) (sampleImage.getHeight() * getSampleAreaPosition(stageDevice.getYAxis()));
+    return (int) (sampleImage.getHeight() * getSampleAreaPosition(XYCoordinate::getX));
   }
 
   @Override
@@ -315,7 +317,9 @@ public class XYStageSimulatedSampleSource
 
     Map<ChemicalComposition, Double> sampleChemicals = new HashMap<>();
 
-    if (imageX >= 0 && imageX < sampleImage.getWidth() && imageY >= 0
+    if (imageX >= 0
+        && imageX < sampleImage.getWidth()
+        && imageY >= 0
         && imageY < sampleImage.getHeight()) {
       sampleChemicals.put(redChemical, sampleImage.getRed(imageX, imageY));
       sampleChemicals.put(greenChemical, sampleImage.getGreen(imageX, imageY));

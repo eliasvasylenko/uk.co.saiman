@@ -27,19 +27,17 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import java.util.stream.Stream;
-
-import javax.measure.Quantity;
-
-import uk.co.saiman.instrument.stage.StageDevice;
+import uk.co.saiman.instrument.stage.Stage;
 
 /**
  * A base interface for sample stage configuration.
  * 
  * @author Elias N Vasylenko
  */
-public interface StageConfiguration extends SampleConfiguration {
-  StageDevice stageDevice();
+public interface StageConfiguration<T> extends SampleConfiguration {
+  Stage<T> stageDevice();
 
-  Stream<Quantity<?>> coordinates();
+  T location();
+
+  void setLocation(T location);
 }

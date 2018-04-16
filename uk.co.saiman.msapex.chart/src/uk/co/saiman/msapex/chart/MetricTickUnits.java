@@ -3,19 +3,17 @@ package uk.co.saiman.msapex.chart;
 import static java.lang.Math.floor;
 import static java.lang.Math.log10;
 import static java.lang.Math.pow;
-import static uk.co.saiman.measurement.fx.QuantityFormatter.quantityFormatter;
+import static uk.co.saiman.measurement.fx.QuantityFormatter.defaultQuantityFormatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import javafx.util.StringConverter;
 import uk.co.saiman.measurement.MetricUnitBuilder;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.measurement.fx.QuantityFormatter;
 
 public class MetricTickUnits<T extends Quantity<T>> implements TickUnits<T> {
@@ -85,25 +83,25 @@ public class MetricTickUnits<T extends Quantity<T>> implements TickUnits<T> {
   private final List<Unit<T>> prefixesBelow;
   private final List<Unit<T>> prefixesAbove;
 
-  public MetricTickUnits(Units units, Function<Units, MetricUnitBuilder<T>> unitBuilder) {
-    formatter = quantityFormatter(units);
-    MetricUnitBuilder<T> builder = unitBuilder.apply(units).none();
-    baseUnit = builder.get();
-    prefixesBelow = createPrefixesBelow(builder);
-    prefixesAbove = createPrefixesAbove(builder);
+  public MetricTickUnits(MetricUnitBuilder<T> unitBuilder) {
+    formatter = defaultQuantityFormatter();
+    unitBuilder = unitBuilder.none();
+    baseUnit = unitBuilder.getUnit();
+    prefixesBelow = createPrefixesBelow(unitBuilder);
+    prefixesAbove = createPrefixesAbove(unitBuilder);
   }
 
   static <T extends Quantity<T>> List<Unit<T>> createPrefixesBelow(
       MetricUnitBuilder<T> unitBuilder) {
     ArrayList<Unit<T>> prefixedUnits = new ArrayList<>();
-    prefixedUnits.add(unitBuilder.milli().get());
-    prefixedUnits.add(unitBuilder.micro().get());
-    prefixedUnits.add(unitBuilder.nano().get());
-    prefixedUnits.add(unitBuilder.pico().get());
-    prefixedUnits.add(unitBuilder.femto().get());
-    prefixedUnits.add(unitBuilder.atto().get());
-    prefixedUnits.add(unitBuilder.zepto().get());
-    prefixedUnits.add(unitBuilder.yocto().get());
+    prefixedUnits.add(unitBuilder.milli().getUnit());
+    prefixedUnits.add(unitBuilder.micro().getUnit());
+    prefixedUnits.add(unitBuilder.nano().getUnit());
+    prefixedUnits.add(unitBuilder.pico().getUnit());
+    prefixedUnits.add(unitBuilder.femto().getUnit());
+    prefixedUnits.add(unitBuilder.atto().getUnit());
+    prefixedUnits.add(unitBuilder.zepto().getUnit());
+    prefixedUnits.add(unitBuilder.yocto().getUnit());
     prefixedUnits.trimToSize();
     return Collections.unmodifiableList(prefixedUnits);
   }
@@ -111,14 +109,14 @@ public class MetricTickUnits<T extends Quantity<T>> implements TickUnits<T> {
   static <T extends Quantity<T>> List<Unit<T>> createPrefixesAbove(
       MetricUnitBuilder<T> unitBuilder) {
     ArrayList<Unit<T>> prefixedUnits = new ArrayList<>();
-    prefixedUnits.add(unitBuilder.kilo().get());
-    prefixedUnits.add(unitBuilder.mega().get());
-    prefixedUnits.add(unitBuilder.giga().get());
-    prefixedUnits.add(unitBuilder.tera().get());
-    prefixedUnits.add(unitBuilder.peta().get());
-    prefixedUnits.add(unitBuilder.exa().get());
-    prefixedUnits.add(unitBuilder.zetta().get());
-    prefixedUnits.add(unitBuilder.yotta().get());
+    prefixedUnits.add(unitBuilder.kilo().getUnit());
+    prefixedUnits.add(unitBuilder.mega().getUnit());
+    prefixedUnits.add(unitBuilder.giga().getUnit());
+    prefixedUnits.add(unitBuilder.tera().getUnit());
+    prefixedUnits.add(unitBuilder.peta().getUnit());
+    prefixedUnits.add(unitBuilder.exa().getUnit());
+    prefixedUnits.add(unitBuilder.zetta().getUnit());
+    prefixedUnits.add(unitBuilder.yotta().getUnit());
     prefixedUnits.trimToSize();
     return Collections.unmodifiableList(prefixedUnits);
   }

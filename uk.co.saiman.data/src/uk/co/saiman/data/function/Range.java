@@ -29,8 +29,6 @@ package uk.co.saiman.data.function;
 
 import javax.measure.Quantity;
 
-import uk.co.saiman.mathematics.Interval;
-
 public interface Range<U extends Quantity<U>> extends Dimension<U> {
   /**
    * Find the interval between the smallest to the largest value of the codomain

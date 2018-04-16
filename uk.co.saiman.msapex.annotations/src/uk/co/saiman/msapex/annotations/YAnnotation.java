@@ -28,31 +28,28 @@
 package uk.co.saiman.msapex.annotations;
 
 import javax.measure.Quantity;
-import javax.measure.Unit;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 public class YAnnotation<X extends Quantity<X>, Y extends Quantity<Y>> extends Annotation<X, Y> {
-  private final DoubleProperty measurementY;
+  private final ObjectProperty<Quantity<Y>> measurementY;
 
-  public YAnnotation(Unit<X> unitX, Unit<Y> unitY) {
-    super(unitX, unitY);
-
-    this.measurementY = new SimpleDoubleProperty(0);
+  public YAnnotation() {
+    this.measurementY = new SimpleObjectProperty<>(null);
 
     layoutYProperty().bind(measurementToLayoutY(measurementY));
   }
 
-  public DoubleProperty measurementYProperty() {
+  public ObjectProperty<Quantity<Y>> measurementYProperty() {
     return measurementY;
   }
 
-  public double getMeasurementY() {
-    return measurementY.getValue();
+  public Quantity<Y> getMeasurementY() {
+    return measurementY.get();
   }
 
-  public void setMeasurementY(double value) {
-    measurementY.setValue(value);
+  public void setMeasurementY(Quantity<Y> value) {
+    measurementY.set(value);
   }
 }

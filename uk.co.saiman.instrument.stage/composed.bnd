@@ -1,0 +1,3 @@
+Bundle-Name: SAI :: Instrument :: Stage :: Composed
+
+Export-Package: uk.co.saiman.instrument.stage.composed

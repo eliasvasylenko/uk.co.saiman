@@ -28,46 +28,43 @@
 package uk.co.saiman.msapex.annotations;
 
 import javax.measure.Quantity;
-import javax.measure.Unit;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 public class XYAnnotation<X extends Quantity<X>, Y extends Quantity<Y>> extends Annotation<X, Y> {
-  private final DoubleProperty measurementX;
-  private final DoubleProperty measurementY;
+  private final ObjectProperty<Quantity<X>> measurementX;
+  private final ObjectProperty<Quantity<Y>> measurementY;
 
-  public XYAnnotation(Unit<X> unitX, Unit<Y> unitY) {
-    super(unitX, unitY);
-
-    this.measurementX = new SimpleDoubleProperty(0);
-    this.measurementY = new SimpleDoubleProperty(0);
+  public XYAnnotation() {
+    this.measurementX = new SimpleObjectProperty<>(null);
+    this.measurementY = new SimpleObjectProperty<>(null);
 
     layoutXProperty().bind(measurementToLayoutX(measurementX));
     layoutYProperty().bind(measurementToLayoutY(measurementY));
   }
 
-  public DoubleProperty measurementXProperty() {
+  public ObjectProperty<Quantity<X>> measurementXProperty() {
     return measurementX;
   }
 
-  public double getMeasurementX() {
-    return measurementX.getValue();
+  public Quantity<X> getMeasurementX() {
+    return measurementX.get();
   }
 
-  public void setMeasurementX(double value) {
-    measurementX.setValue(value);
+  public void setMeasurementX(Quantity<X> value) {
+    measurementX.set(value);
   }
 
-  public DoubleProperty measurementYProperty() {
+  public ObjectProperty<Quantity<Y>> measurementYProperty() {
     return measurementY;
   }
 
-  public double getMeasurementY() {
-    return measurementY.getValue();
+  public Quantity<Y> getMeasurementY() {
+    return measurementY.get();
   }
 
-  public void setMeasurementY(double value) {
-    measurementY.setValue(value);
+  public void setMeasurementY(Quantity<Y> value) {
+    measurementY.set(value);
   }
 }

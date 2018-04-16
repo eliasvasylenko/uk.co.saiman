@@ -6,6 +6,7 @@ Bundle-Name: SAI :: MSApex :: Stage
 	${build}/include/fugue.icons.bnd
 
 -buildpath: \
+	uk.co.saiman.msapex.annotations;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
@@ -17,9 +18,12 @@ Bundle-Name: SAI :: MSApex :: Stage
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
+	uk.co.saiman.measurement.coordinates;version=snapshot,\
+	uk.co.saiman.measurement.fx;version=snapshot,\
 \
 	javax.measure.unit-api
 

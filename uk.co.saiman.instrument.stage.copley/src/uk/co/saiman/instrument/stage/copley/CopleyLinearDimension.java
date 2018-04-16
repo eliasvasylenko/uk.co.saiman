@@ -27,43 +27,40 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
-import static java.util.Comparator.comparing;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static uk.co.saiman.mathematics.Interval.bounded;
+import static uk.co.saiman.measurement.Units.metre;
 import static uk.co.saiman.observable.Observable.fixedRate;
 
 import java.util.function.Supplier;
 
 import javax.measure.Quantity;
-import javax.measure.Unit;
 import javax.measure.quantity.Length;
 
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.Int32;
-import uk.co.saiman.instrument.stage.StageDimension;
-import uk.co.saiman.mathematics.Interval;
-import uk.co.saiman.measurement.Units;
+import uk.co.saiman.instrument.ConnectionState;
+import uk.co.saiman.instrument.sample.SampleState;
+import uk.co.saiman.instrument.stage.composed.StageAxis;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 
-public class CopleyLinearDimension implements StageDimension<Length> {
-  private final Units units;
+public class CopleyLinearDimension implements StageAxis<Length> {
   private final Supplier<CopleyAxis> axis;
-  private Interval<Quantity<Length>> bounds;
+  private final Quantity<Length> lowerBound;
+  private final Quantity<Length> upperBound;
   private final ObservableProperty<Quantity<Length>> requestedPosition;
   private final ObservableProperty<Quantity<Length>> actualPosition;
 
   public CopleyLinearDimension(
-      Units units,
       Supplier<CopleyAxis> axis,
-      Quantity<Length> minimum,
-      Quantity<Length> maximum) {
-    this.units = units;
+      Quantity<Length> lowerBound,
+      Quantity<Length> upperBound) {
     this.axis = axis;
-    this.bounds = bounded(minimum, maximum, comparing(q -> q.getValue().doubleValue()));
-    this.requestedPosition = new ObservablePropertyImpl<>(minimum);
-    this.actualPosition = new ObservablePropertyImpl<>(minimum);
+    this.lowerBound = lowerBound;
+    this.upperBound = upperBound;
+    this.requestedPosition = new ObservablePropertyImpl<>(lowerBound);
+    this.actualPosition = new ObservablePropertyImpl<>(lowerBound);
 
     this.requestedPosition.observe(this::positionRequested);
     fixedRate(0, 50, MILLISECONDS).observe(o -> updateActualPosition());
@@ -82,21 +79,21 @@ public class CopleyLinearDimension implements StageDimension<Length> {
   }
 
   @Override
-  public Unit<Length> getUnit() {
-    return units.metre().get();
+  public Quantity<Length> getLowerBound() {
+    return lowerBound;
   }
 
   @Override
-  public Interval<Quantity<Length>> getBounds() {
-    return bounds;
+  public Quantity<Length> getUpperBound() {
+    return upperBound;
   }
 
   public int getStepsFromLength(Quantity<Length> length) {
-    return length.to(units.metre().micro().get()).getValue().intValue();
+    return length.to(metre().micro().getUnit()).getValue().intValue();
   }
 
   public Quantity<Length> getLengthFromSteps(int steps) {
-    return units.metre().micro().getQuantity(steps);
+    return metre().micro().getQuantity(steps);
   }
 
   @Override
@@ -107,5 +104,23 @@ public class CopleyLinearDimension implements StageDimension<Length> {
   @Override
   public ObservableValue<Quantity<Length>> actualPosition() {
     return actualPosition;
+  }
+
+  @Override
+  public ObservableValue<ConnectionState> connectionState() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ObservableValue<SampleState> sampleState() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void abortRequest() {
+    // TODO Auto-generated method stub
+
   }
 }

@@ -9,12 +9,15 @@ Export-Package: uk.co.saiman.experiment.sample
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+	uk.co.saiman.measurement.coordinates;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 \
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
+	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\

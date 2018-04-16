@@ -52,6 +52,10 @@ public class AnnotationLayer<X extends Quantity<X>, Y extends Quantity<Y>> exten
   private final ObservableSet<Annotation<X, Y>> annotations;
   private final ObjectProperty<Bounds> measurementBounds;
 
+  public AnnotationLayer() {
+    this((Unit<X>) null, (Unit<Y>) null);
+  }
+
   public AnnotationLayer(ObservableValue<Unit<X>> unitX, ObservableValue<Unit<Y>> unitY) {
     this(unitX.getValue(), unitY.getValue());
     this.unitX.bind(unitX);

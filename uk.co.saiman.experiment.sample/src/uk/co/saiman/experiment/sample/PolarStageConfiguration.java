@@ -27,22 +27,17 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import javax.measure.Quantity;
-import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.instrument.stage.PolarStageDevice;
+import uk.co.saiman.instrument.stage.PolarStage;
+import uk.co.saiman.measurement.coordinate.PolarCoordinate;
 
 /**
  * A simple polar coordinate stage configuration.
  * 
  * @author Elias N Vasylenko
  */
-public interface PolarStageConfiguration extends StageConfiguration {
-  Quantity<Length> getRadius();
-
-  Quantity<Angle> getAngle();
-
+public interface PolarStageConfiguration extends StageConfiguration<PolarCoordinate<Length>> {
   @Override
-  PolarStageDevice stageDevice();
+  PolarStage stageDevice();
 }

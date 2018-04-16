@@ -28,19 +28,20 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
+import static uk.co.saiman.measurement.Units.count;
+import static uk.co.saiman.measurement.Units.second;
 
 import javax.inject.Inject;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.LocalInstance;
-import org.eclipse.fx.core.di.Service;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.data.spectrum.Spectrum;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 import uk.co.saiman.msapex.chart.MetricTickUnits;
@@ -54,21 +55,19 @@ public class SpectrumRawGraphEditorPart {
   private final ContinuousFunctionSeries<Time, Dimensionless> series;
 
   @Inject
-  SpectrumRawGraphEditorPart(
-      BorderPane container,
-      @LocalInstance FXMLLoader loaderProvider,
-      @Service Units units) {
+  SpectrumRawGraphEditorPart(BorderPane container, @LocalInstance FXMLLoader loaderProvider) {
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
 
     ContinuousFunctionChart<Time, Dimensionless> spectrumGraphController = new ContinuousFunctionChart<>(
-        new QuantityAxis<>(new MetricTickUnits<>(units, Units::second)),
-        new QuantityAxis<>(new MetricTickUnits<>(units, Units::count)).setPaddingApplied(true));
+        new QuantityAxis<>(new MetricTickUnits<>(second())),
+        new QuantityAxis<>(new MetricTickUnits<>(count())).setPaddingApplied(true));
     spectrumGraphPane.setCenter(spectrumGraphController);
 
     series = spectrumGraphController.addSeries();
   }
 
   @Inject
+  @Optional
   void value(Invalidation<Spectrum> value) {
     if (value != null) {
       series.setContinuousFunction(value.map(Spectrum::getTimeData));

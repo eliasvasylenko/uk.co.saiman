@@ -27,34 +27,81 @@
  */
 package uk.co.saiman.msapex.instrument.stage;
 
-import java.util.Collection;
+import static javafx.beans.binding.Bindings.createObjectBinding;
+import static uk.co.saiman.fx.FxUtilities.wrap;
+import static uk.co.saiman.measurement.fx.CoordinateBindings.createCoordinateBinding;
+
 import java.util.stream.Stream;
 
-import javax.measure.Quantity;
+import javax.measure.Unit;
+import javax.measure.quantity.Length;
 
+import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
-import uk.co.saiman.instrument.stage.StageDevice;
+import javafx.scene.shape.Circle;
+import uk.co.saiman.instrument.stage.Stage;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import uk.co.saiman.measurement.fx.XYCoordinateBinding;
+import uk.co.saiman.msapex.annotations.AnnotationLayer;
+import uk.co.saiman.msapex.annotations.ShapeAnnotation;
+import uk.co.saiman.msapex.annotations.XYAnnotation;
 
-/*-
+/**
+ * A visualization of the sample area of a stage mapped into cartesian
+ * coordinates.
  * 
- * Options:
- * 
- * - ONE stage diagram available per stage (highest rank is chosen, default provided with low rank)
- * - Stage device wired to a diagram via OSGi
- * 
- *     pros:
- *       straightforward to get the diagram for a stage
- *     cons:
- *       custom UI for selecting e.g. different MALDI plates
- * 
+ * @author Elias N Vasylenko
+ *
+ * @param <X>
+ *          the unit of the X axis of the diagram in the UI
+ * @param <Y>
+ *          the unit of the Y axis of the diagram in the UI
+ * @param <A>
+ *          the unit of the first axis of the stage
+ * @param <B>
+ *          the unit of the second axis of the stage
  */
-public abstract class StageDiagram {
-  private StageDevice stageDevice;
+public abstract class StageDiagram<T> {
   private Image image;
 
-  public StageDevice getStageDevice() {
-    return stageDevice;
+  private AnnotationLayer<Length, Length> annotationLayer;
+  private XYCoordinateBinding<Length> requestedCoordinates;
+  private XYCoordinateBinding<Length> actualCoordinates;
+
+  protected void initialize(Unit<Length> unit) {
+    this.annotationLayer = new AnnotationLayer<>(unit, unit);
+    Stage<T> stageDevice = getStageDevice();
+
+    requestedCoordinates = stageLocationToCoordinates(wrap(stageDevice.requestedLocation()));
+    actualCoordinates = stageLocationToCoordinates(wrap(stageDevice.actualLocation()));
+
+    XYAnnotation<Length, Length> requestedPosition = new ShapeAnnotation<>(new Circle(4));
+    annotationLayer.getAnnotations().add(requestedPosition);
+    requestedPosition.measurementXProperty().bind(requestedCoordinates.getX());
+    requestedPosition.measurementYProperty().bind(requestedCoordinates.getY());
+
+    XYAnnotation<Length, Length> actualPosition = new ShapeAnnotation<>(new Circle(4));
+    annotationLayer.getAnnotations().add(actualPosition);
+    actualPosition.measurementXProperty().bind(actualCoordinates.getX());
+    actualPosition.measurementYProperty().bind(actualCoordinates.getY());
+
   }
+
+  public XYCoordinateBinding<Length> getRequestedCoordinates() {
+    return requestedCoordinates;
+  }
+
+  public XYCoordinateBinding<Length> getActualCoordinates() {
+    return actualCoordinates;
+  }
+
+  public XYCoordinateBinding<Length> stageLocationToCoordinates(
+      ObservableValue<? extends T> location) {
+    return createCoordinateBinding(
+        createObjectBinding(() -> getCoordinatesAtStageLocation(location.getValue()), location));
+  }
+
+  public abstract Stage<T> getStageDevice();
 
   public Image getImage() {
     return image;
@@ -64,11 +111,13 @@ public abstract class StageDiagram {
     this.image = image;
   }
 
-  public abstract Stream<Quantity<?>> getCoordinatesAtPixel(int pixelX, int pixelY);
+  public AnnotationLayer<Length, Length> getAnnotationLayer() {
+    return annotationLayer;
+  }
 
-  public abstract int getPixelXAtCoordinates(Collection<? extends Quantity<?>> coordinates);
+  public abstract T getStageLocationAtCoordinates(XYCoordinate<Length> coordinates);
 
-  public abstract int getPixelYAtCoordinates(Collection<? extends Quantity<?>> coordinates);
+  public abstract XYCoordinate<Length> getCoordinatesAtStageLocation(T location);
 
   public abstract Stream<? extends StageDiagramSampleConfiguration> getSampleConfigurations();
 }

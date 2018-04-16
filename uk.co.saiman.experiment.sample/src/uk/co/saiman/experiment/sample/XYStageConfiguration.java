@@ -27,32 +27,17 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import java.util.stream.Stream;
-
-import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.instrument.stage.XYStageDevice;
+import uk.co.saiman.instrument.stage.XYStage;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
 /**
  * A simple Cartesian coordinate stage configuration.
  * 
  * @author Elias N Vasylenko
  */
-public interface XYStageConfiguration extends StageConfiguration {
-  Quantity<Length> getX();
-
-  void setX(Quantity<Length> offset);
-
-  Quantity<Length> getY();
-
-  void setY(Quantity<Length> offset);
-
+public interface XYStageConfiguration extends StageConfiguration<XYCoordinate<Length>> {
   @Override
-  XYStageDevice stageDevice();
-
-  @Override
-  default Stream<Quantity<?>> coordinates() {
-    return Stream.of(getX(), getY());
-  }
+  XYStage stageDevice();
 }

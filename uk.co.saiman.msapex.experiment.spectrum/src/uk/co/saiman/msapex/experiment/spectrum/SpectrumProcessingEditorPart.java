@@ -32,10 +32,8 @@ import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
@@ -58,11 +56,10 @@ public class SpectrumProcessingEditorPart {
   @FXML
   private ModularTreeController modularTreeController;
 
-  @PostConstruct
-  void postConstruct(
+  @Inject
+  SpectrumProcessingEditorPart(
       BorderPane container,
       @LocalInstance FXMLLoader loader,
-      IEclipseContext context,
       ExperimentNode<? extends SpectrumResultConfiguration, Spectrum> result) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
