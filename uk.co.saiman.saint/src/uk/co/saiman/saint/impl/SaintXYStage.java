@@ -1,7 +1,6 @@
 package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static uk.co.saiman.measurement.Quantities.quantityFormat;
 
 import javax.measure.quantity.Length;
 

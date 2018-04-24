@@ -11,4 +11,6 @@ Private-Package:\
 	si.uom.*,\
 	tec.uom.*
 
-Export-Package: uk.co.saiman.measurement
+Export-Package:\
+	uk.co.saiman.measurement,\
+	uk.co.saiman.measurement.scalar

@@ -44,6 +44,4 @@ public interface UnitBuilder<T extends Quantity<T>> {
    */
 
   Unit<T> getUnit();
-
-  Quantity<T> getQuantity(Number amount);
 }

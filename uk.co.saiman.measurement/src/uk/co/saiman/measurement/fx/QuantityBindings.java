@@ -32,7 +32,6 @@ import static java.util.Optional.ofNullable;
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static javafx.collections.FXCollections.observableList;
 import static javafx.collections.FXCollections.unmodifiableObservableList;
-import static uk.co.saiman.measurement.Quantities.getQuantity;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -44,6 +43,7 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import uk.co.saiman.measurement.scalar.Scalar;
 
 /**
  * A utility class containing static methods to build conversion bindings.
@@ -70,7 +70,7 @@ public final class QuantityBindings {
         Unit<T> unit = this.unit.getValue();
         Number amount = this.amount.getValue();
 
-        return unit != null && amount != null ? getQuantity(unit, amount) : null;
+        return unit != null && amount != null ? new Scalar<>(unit, amount) : null;
       } catch (Exception e) {
         return null;
       }

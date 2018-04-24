@@ -1,6 +1,5 @@
 package uk.co.saiman.measurement.fx;
 
-import static uk.co.saiman.measurement.Quantities.getQuantity;
 import static uk.co.saiman.measurement.Quantities.quantityFormat;
 import static uk.co.saiman.measurement.Units.unitFormat;
 
@@ -13,6 +12,7 @@ import javax.measure.Unit;
 import javax.measure.UnitConverter;
 
 import javafx.util.StringConverter;
+import uk.co.saiman.measurement.scalar.Scalar;
 
 public interface QuantityFormatter {
   StringConverter<Number> quantityFormatter(Unit<?> unit);
@@ -28,7 +28,7 @@ public interface QuantityFormatter {
         return new StringConverter<Number>() {
           @Override
           public String toString(Number object) {
-            return quantityFormat().format(getQuantity(unit, object));
+            return quantityFormat().format(new Scalar<>(unit, object));
           }
 
           @Override
@@ -52,7 +52,7 @@ public interface QuantityFormatter {
           public String toString(Number object) {
             return quantityFormat()
                 .withNumberFormat(numberFormat)
-                .format(getQuantity(unit, object));
+                .format(new Scalar<>(unit, object));
           }
 
           @Override

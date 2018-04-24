@@ -43,6 +43,7 @@ import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.sample.SampleLocationUnknown;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.composed.StageAxis;
+import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
@@ -107,7 +108,7 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   }
 
   public Quantity<Length> getLengthFromSteps(int steps) {
-    return metre().micro().getQuantity(steps);
+    return new Scalar<>(metre().micro(), steps);
   }
 
   @Override

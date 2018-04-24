@@ -27,17 +27,8 @@
  */
 package uk.co.saiman.measurement;
 
-import static uk.co.saiman.measurement.Units.withUnit;
-
-import javax.measure.Quantity;
-import javax.measure.Unit;
-
 public final class Quantities {
   public static QuantityFormat quantityFormat() {
     return new QuantityFormatImpl();
-  }
-
-  public static <T extends Quantity<T>> Quantity<T> getQuantity(Unit<T> unit, Number amount) {
-    return withUnit(unit).getQuantity(amount);
   }
 }

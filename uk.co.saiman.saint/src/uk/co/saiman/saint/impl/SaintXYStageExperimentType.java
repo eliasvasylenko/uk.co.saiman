@@ -42,6 +42,7 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.property.Property;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 
@@ -73,7 +74,7 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
             .persistedState()
             .forString(value)
             .map(l -> quantityFormat().parse(l).asType(Length.class), quantityFormat()::format)
-            .setDefault(() -> metre().micro().getQuantity(0));
+            .setDefault(() -> new Scalar<>(metre().micro(), 0));
       }
 
       @Override

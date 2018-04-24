@@ -30,7 +30,6 @@ package uk.co.saiman.measurement;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import tec.uom.se.quantity.Quantities;
 import tec.uom.se.unit.MetricPrefix;
 
 class UnitBuilderImpl<T extends Quantity<T>> implements MetricUnitBuilder<T> {
@@ -160,10 +159,5 @@ class UnitBuilderImpl<T extends Quantity<T>> implements MetricUnitBuilder<T> {
   @Override
   public Unit<T> getUnit() {
     return prefix == null ? unit : unit.transform(prefix.getConverter());
-  }
-
-  @Override
-  public Quantity<T> getQuantity(Number amount) {
-    return Quantities.getQuantity(amount, unit);
   }
 }

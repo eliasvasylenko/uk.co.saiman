@@ -1,10 +1,10 @@
 package uk.co.saiman.measurement.coordinate;
 
-import static uk.co.saiman.measurement.Quantities.getQuantity;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Angle;
+
+import uk.co.saiman.measurement.scalar.Scalar;
 
 public class PolarCoordinate<R extends Quantity<R>> {
   private final Quantity<R> r;
@@ -16,8 +16,8 @@ public class PolarCoordinate<R extends Quantity<R>> {
   }
 
   public PolarCoordinate(Unit<R> unitR, Unit<Angle> unitTheta, double r, double theta) {
-    this.r = getQuantity(unitR, r);
-    this.theta = getQuantity(unitTheta, theta);
+    this.r = new Scalar<>(unitR, r);
+    this.theta = new Scalar<>(unitTheta, theta);
   }
 
   public Quantity<R> getR() {

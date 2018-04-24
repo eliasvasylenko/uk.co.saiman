@@ -1,12 +1,12 @@
 package uk.co.saiman.measurement.coordinate;
 
-import static uk.co.saiman.measurement.Quantities.getQuantity;
 import static uk.co.saiman.measurement.Quantities.quantityFormat;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import uk.co.saiman.measurement.QuantityFormat;
+import uk.co.saiman.measurement.scalar.Scalar;
 
 /**
  * A Cartesian coordinate in two dimensions.
@@ -26,7 +26,7 @@ public class XYCoordinate<T extends Quantity<T>> {
   }
 
   public XYCoordinate(Unit<T> unit, double x, double y) {
-    this(getQuantity(unit, x), getQuantity(unit, y));
+    this(new Scalar<>(unit, x), new Scalar<>(unit, y));
   }
 
   public Quantity<T> getX() {

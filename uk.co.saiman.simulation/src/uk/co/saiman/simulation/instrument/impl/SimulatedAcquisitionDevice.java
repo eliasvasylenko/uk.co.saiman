@@ -64,6 +64,7 @@ import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.log.Log;
+import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -207,7 +208,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     timeUnits = second().getUnit();
 
     resolution = quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class);
-    setAcquisitionTime(second().getQuantity(DEFAULT_ACQUISITION_TIME_SECONDS));
+    setAcquisitionTime(new Scalar<>(second(), DEFAULT_ACQUISITION_TIME_SECONDS));
     setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
     acquisitionBuffer
