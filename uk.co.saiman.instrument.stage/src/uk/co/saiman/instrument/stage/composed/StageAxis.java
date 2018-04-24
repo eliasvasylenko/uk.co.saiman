@@ -31,21 +31,29 @@ import javax.measure.Quantity;
 
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.sample.SampleState;
-import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
 public interface StageAxis<T extends Quantity<T>> {
-  Quantity<T> getLowerBound();
-
-  Quantity<T> getUpperBound();
-
   ObservableValue<ConnectionState> connectionState();
 
   ObservableValue<SampleState> sampleState();
 
-  ObservableProperty<Quantity<T>> requestedPosition();
+  /**
+   * Initiate a request and return immediately. Throws an exception if the axis is
+   * currently attempting to fulfill a previous request (i.e.
+   * {@link SampleState#ANALYSIS_LOCATION_REQUESTED} or
+   * {@link SampleState#EXCHANGE_REQUESTED}).
+   * 
+   * @param location
+   */
+  void requestLocation(Quantity<T> location);
 
-  ObservableValue<Quantity<T>> actualPosition();
-
+  /**
+   * Attempt to abort any request in progress. Is a no-op if no request is being
+   * fulfilled, if the request completes regardless, or if the hardware does not
+   * support abort.
+   */
   void abortRequest();
+
+  ObservableValue<Quantity<T>> actualLocation();
 }

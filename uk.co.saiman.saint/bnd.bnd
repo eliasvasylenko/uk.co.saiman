@@ -34,6 +34,7 @@
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
+	uk.co.saiman.instrument.stage.composed;version=snapshot,\
 	uk.co.saiman.msapex.annotations;version=snapshot,\
 	uk.co.saiman.msapex.camera;version=snapshot,\
 	uk.co.saiman.msapex.chemistry;version=snapshot,\

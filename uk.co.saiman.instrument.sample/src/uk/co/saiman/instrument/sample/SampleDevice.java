@@ -28,7 +28,6 @@
 package uk.co.saiman.instrument.sample;
 
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
 /**
@@ -41,7 +40,7 @@ import uk.co.saiman.observable.ObservableValue;
  * @author Elias N Vasylenko
  *
  * @param <T>
- *          The sample location space.
+ *          The analysis location space.
  */
 public interface SampleDevice<T> extends Device {
   ObservableValue<SampleState> sampleState();
@@ -57,15 +56,56 @@ public interface SampleDevice<T> extends Device {
    */
   boolean isLocationReachable(T location);
 
-  ObservableProperty<T> requestedLocation();
+  ObservableValue<T> requestedLocation();
 
+  /**
+   * The actual measured sample location.
+   * <p>
+   * For certain configurations of hardware and definitions of "location" the
+   * implementation may define an error tolerance for the measured location
+   * compared to the requested location.
+   * 
+   * @return an observable over the actual sample location
+   */
   ObservableValue<T> actualLocation();
 
   /**
+   * Request that the sample be prepared for exchange.
+   * <p>
+   * Invocation blocks until the sample is prepared or a stable failure state is
+   * reached.
+   * 
    * Typically the exchange position for a given piece of hardware means that e.g.
    * the sample are is at atmosphere and/or any inlet valves are shut.
+   * 
+   * @return the resulting state, either {@link SampleState#EXCHANGE_FAILED} or
+   *         {@link SampleState#EXCHANGE}
    */
-  void requestExchange();
+  SampleState requestExchange();
 
-  void requestAnalysis();
+  /**
+   * Request that the sample be prepared for analysis.
+   * <p>
+   * Invocation blocks until the sample is prepared or a stable failure state is
+   * reached.
+   * 
+   * @return the resulting state, either
+   *         {@link SampleState#ANALYSIS_LOCATION_FAILED} or
+   *         {@link SampleState#ANALYSIS}
+   */
+  SampleState requestAnalysis();
+
+  /**
+   * Request analysis at the given sample location.
+   * <p>
+   * Invocation blocks until the sample is prepared or a stable failure state is
+   * reached.
+   * 
+   * @param location
+   *          the location to analyze
+   * @return the resulting state, either
+   *         {@link SampleState#ANALYSIS_LOCATION_FAILED} or
+   *         {@link SampleState#ANALYSIS}
+   */
+  SampleState requestLocation(T location);
 }

@@ -71,7 +71,11 @@ public class AnnotationLayer<X extends Quantity<X>, Y extends Quantity<Y>> exten
 
     annotations.addListener(new WeakInvalidationListener(i -> {
       getChildren().retainAll(annotations);
-      getChildren().addAll(annotations);
+      for (Annotation<X, Y> annotation : annotations) {
+        if (!getChildren().contains(annotation)) {
+          getChildren().add(annotation);
+        }
+      }
     }));
   }
 

@@ -28,14 +28,25 @@
 package uk.co.saiman.msapex.addons;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainerElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.fx.ui.workbench.renderers.base.services.DnDService;
+import org.eclipse.fx.ui.workbench.renderers.base.widget.WDragTargetWidget.BasicDropLocation;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WDragTargetWidget.DropLocation;
 
 public class DragAndDropAddon implements DnDService {
   private static final Object SEGREGATED_DND = "segregatedDnD";
+
+  @Inject
+  EModelService modelService;
 
   @PostConstruct
   void initialize(IEclipseContext context) {
@@ -102,6 +113,45 @@ public class DragAndDropAddon implements DnDService {
       MUIElement reference,
       MUIElement sourceElement,
       DropLocation dropLocation) {
-    return false;
+    MElementContainer<MUIElement> parent = reference.getParent();
+    if ((MUIElement) parent instanceof MPartStack) {
+      split(parent, sourceElement, dropLocation);
+    }
+    return true;
+  }
+
+  private void split(MUIElement toSplit, MUIElement child, DropLocation dropType) {
+    // remove the moved element from its parent
+    child.setParent(null);
+
+    // remember the index to insert
+    MElementContainer<MUIElement> owner = toSplit.getParent();
+    int index = owner.getChildren().indexOf(toSplit);
+
+    // remove the split from the parent
+    owner.getChildren().remove(toSplit);
+
+    MPartSashContainer container = this.modelService.createModelElement(MPartSashContainer.class);
+    container.setContainerData(toSplit.getContainerData());
+
+    MPartStack childContainer = this.modelService.createModelElement(MPartStack.class);
+    childContainer.getChildren().add((MStackElement) child);
+
+    toSplit.setContainerData(null);
+    childContainer.setContainerData(null);
+
+    container.setToBeRendered(true);
+    container.setVisible(true);
+    container
+        .setHorizontal(
+            dropType == BasicDropLocation.SPLIT_LEFT || dropType == BasicDropLocation.SPLIT_RIGHT);
+    if (dropType == BasicDropLocation.SPLIT_TOP || dropType == BasicDropLocation.SPLIT_LEFT) {
+      container.getChildren().add(childContainer);
+      container.getChildren().add((MPartSashContainerElement) toSplit);
+    } else {
+      container.getChildren().add((MPartSashContainerElement) toSplit);
+      container.getChildren().add(childContainer);
+    }
+    owner.getChildren().add(index, container);
   }
 }

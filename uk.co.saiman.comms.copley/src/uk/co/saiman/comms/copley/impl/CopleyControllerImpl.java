@@ -89,10 +89,10 @@ public class CopleyControllerImpl extends SimpleCommsController implements Cople
   private CommsPort port;
 
   @Reference
-  ByteConverters converters;
+  private ByteConverters converters;
 
-  Map<CopleyNodeImpl, ServiceRegistration<CopleyNode>> nodes = new LinkedHashMap<>();
-  Map<CopleyAxis, ServiceRegistration<CopleyAxis>> axes = new LinkedHashMap<>();
+  private final Map<CopleyNodeImpl, ServiceRegistration<CopleyNode>> nodes = new LinkedHashMap<>();
+  private final Map<CopleyAxis, ServiceRegistration<CopleyAxis>> axes = new LinkedHashMap<>();
 
   private BundleContext context;
 

@@ -60,11 +60,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.function.SampledContinuousFunction;
-import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.ConnectionState;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -153,8 +152,6 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
 
   @Reference
   private Log log;
-  @Reference
-  private Units units;
   private Unit<Dimensionless> intensityUnits;
   private Unit<Time> timeUnits;
   @Reference
@@ -250,6 +247,8 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   }
 
   protected DetectorSimulation getDetector() {
+    if (detector == null)
+      initializeDetector();
     return detector;
   }
 
@@ -321,6 +320,9 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
             acquiringLock.notifyAll();
           }
         }
+
+        Thread.sleep(1);
+
         if (!dataListeners.isLive())
           dataListeners.start();
       } catch (AcquisitionException e) {
@@ -328,12 +330,6 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
       } catch (Exception e) {
         exception(
             new AcquisitionException(text.acquisition().exceptions().unexpectedException(), e));
-      }
-
-      try {
-        Thread.sleep(1);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
       }
     }
 
@@ -352,6 +348,9 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
       dataListeners.fail(exception);
       log.log(ERROR, exception);
     }
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {}
   }
 
   @Override

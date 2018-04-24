@@ -30,12 +30,12 @@ package uk.co.saiman.instrument.stage.composed;
 import static java.util.Arrays.asList;
 import static uk.co.saiman.instrument.ConnectionState.CONNECTED;
 import static uk.co.saiman.instrument.ConnectionState.DISCONNECTED;
+import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS;
+import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_LOCATION_FAILED;
+import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_LOCATION_REQUESTED;
+import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_FAILED;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_REQUESTED;
-import static uk.co.saiman.instrument.sample.SampleState.EXCHANGING;
-import static uk.co.saiman.instrument.sample.SampleState.LOCATION_FAILED;
-import static uk.co.saiman.instrument.sample.SampleState.LOCATION_REACHED;
-import static uk.co.saiman.instrument.sample.SampleState.LOCATION_REQUESTED;
 import static uk.co.saiman.observable.ObservableProperty.over;
 
 import java.util.HashSet;
@@ -77,7 +77,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
     this.connectionState = over(DISCONNECTED);
     this.axes.forEach(a -> a.connectionState().observe(s -> updateConnectionState()));
 
-    this.sampleState = over(LOCATION_FAILED);
+    this.sampleState = over(ANALYSIS_LOCATION_FAILED);
     this.axes.forEach(a -> a.sampleState().observe(s -> updateSampleState()));
 
     this.analysisLocation = analysisLocation;
@@ -87,8 +87,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
     actualLocation = over(exchangeLocation);
     this.axes
         .forEach(
-            a -> a.actualPosition().observe(p -> actualLocation.set(getActualLocationForImpl())));
-    requestExchange();
+            a -> a.actualLocation().observe(p -> actualLocation.set(getActualLocationImpl())));
 
     instrument.addDevice(this);
   }
@@ -113,13 +112,13 @@ public abstract class ComposedStage<T> implements Stage<T> {
             (a, b) -> precedence(
                 a,
                 b,
-                LOCATION_REQUESTED,
+                ANALYSIS_LOCATION_REQUESTED,
                 EXCHANGE_REQUESTED,
-                LOCATION_FAILED,
+                ANALYSIS_LOCATION_FAILED,
                 EXCHANGE_FAILED,
-                LOCATION_REACHED,
-                EXCHANGING))
-        .orElse(LOCATION_REQUESTED);
+                ANALYSIS,
+                EXCHANGE))
+        .orElse(ANALYSIS_LOCATION_REQUESTED);
 
     this.sampleState.set(sampleState);
   }
@@ -143,52 +142,42 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   @Override
-  public void requestExchange() {
+  public SampleState requestExchange() {
     if (!exchangeRequested) {
       setRequestedLocationImpl(exchangeLocation);
 
       exchangeRequested = true;
       analysisRequested = false;
 
-      SampleState result = sampleState().filter(s -> EXCHANGE_REQUESTED != s).get();
-      if (result == EXCHANGING) {
-        // success
-      } else {
-        // failed
-      }
+      return sampleState().filter(s -> EXCHANGE_REQUESTED != s).get();
+    } else {
+      return sampleState().get();
     }
   }
 
   @Override
-  public void requestAnalysis() {
+  public SampleState requestAnalysis() {
     if (!analysisRequested) {
-      setRequestedLocation(analysisLocation);
+      setRequestedLocationImpl(analysisLocation);
 
       analysisRequested = true;
       exchangeRequested = false;
 
-      SampleState result = sampleState().filter(s -> LOCATION_REQUESTED != s).get();
-      if (result == EXCHANGING) {
-        // success
-      } else {
-        // failed
-      }
+      return sampleState().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
+    } else {
+      return sampleState().get();
     }
   }
 
-  protected synchronized void setRequestedLocation(T location) {
+  @Override
+  public synchronized SampleState requestLocation(T location) {
     if (!isLocationReachable(location)) {
       throw new IllegalArgumentException("Location unreachable " + location);
     }
-    sampleState.set(LOCATION_REQUESTED);
+    sampleState.set(ANALYSIS_LOCATION_REQUESTED);
     setRequestedLocationImpl(location);
 
-    SampleState result = sampleState().filter(s -> LOCATION_REQUESTED != s).get();
-    if (result == EXCHANGING) {
-      // success
-    } else {
-      // failed
-    }
+    return sampleState().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
   }
 
   @Override
@@ -202,7 +191,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   @Override
-  public ObservableProperty<T> requestedLocation() {
+  public ObservableValue<T> requestedLocation() {
     return requestedLocation;
   }
 
@@ -216,7 +205,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
     axes.forEach(StageAxis::abortRequest);
   }
 
-  protected abstract T getActualLocationForImpl();
+  protected abstract T getActualLocationImpl();
 
   protected abstract void setRequestedLocationImpl(T location);
 }

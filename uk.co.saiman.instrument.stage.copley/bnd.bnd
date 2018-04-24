@@ -20,8 +20,11 @@ Bundle-Name: SAI :: Instrument :: Stage :: Copley
 \
 	javax.measure.unit-api
 
-Private-Package: \
+Export-Package: \
 	uk.co.saiman.instrument.stage.copley
+
+Private-Package: \
+	uk.co.saiman.instrument.stage.copley.impl
 
 -includeresource: \
 	l10n

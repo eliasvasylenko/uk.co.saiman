@@ -28,6 +28,7 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 Export-Package: uk.co.saiman.msapex.instrument.acquisition
 
 -includeresource: \
-	{fragment.e4xmi},\
+	{always.e4xmi},\
+	{initial.e4xmi},\
 	res,\
 	{css=css}

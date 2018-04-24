@@ -36,4 +36,4 @@ Export-Package: uk.co.saiman.msapex.experiment.chemicalmap
 -includeresource:\
 	{css=css},\
 	res,\
-	{fragment.e4xmi}
+	{always.e4xmi}

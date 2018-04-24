@@ -81,7 +81,7 @@ Import-Package:\
 -runrequires.base:\
 	bnd.identity; id=osgi.enroute.logger.simple.provider
 
-## Build path groups:
+# Build path groups:
 -buildpath.base=\
 	osgi.enroute.base.api;version=latest
 

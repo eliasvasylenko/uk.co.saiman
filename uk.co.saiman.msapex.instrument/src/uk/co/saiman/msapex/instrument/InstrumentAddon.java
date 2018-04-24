@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.msapex.instrument;
 
+import static org.eclipse.e4.ui.workbench.UIEvents.ALL_ELEMENT_ID;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -45,12 +47,6 @@ import uk.co.saiman.log.Log;
  * @author Elias N Vasylenko
  */
 public class InstrumentAddon {
-  public static final String INSTRUMENT_TOOLBAR_OPERATE = "uk.co.saiman.msapex.instrument.handledtoolitem.operate";
-  public static final String INSTRUMENT_TOOLBAR_STANDBY = "uk.co.saiman.msapex.instrument.handledtoolitem.standby";
-
-  public static final String INSTRUMENT_MENU_OPERATE = "uk.co.saiman.msapex.instrument.handledmenuitem.operate";
-  public static final String INSTRUMENT_MENU_STANDBY = "uk.co.saiman.msapex.instrument.handledmenuitem.standby";
-
   @Inject
   @Service
   private Instrument instrument;
@@ -67,10 +63,7 @@ public class InstrumentAddon {
     context.set(Instrument.class, instrument);
 
     instrument.lifecycleState().observe(s -> {
-      eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, INSTRUMENT_TOOLBAR_OPERATE);
-      eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, INSTRUMENT_TOOLBAR_STANDBY);
-      eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, INSTRUMENT_MENU_OPERATE);
-      eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, INSTRUMENT_MENU_STANDBY);
+      eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, ALL_ELEMENT_ID);
     });
   }
 }

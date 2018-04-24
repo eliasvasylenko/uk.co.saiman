@@ -18,6 +18,7 @@ Bundle-Name: SAI :: MSApex :: Sample
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
 \
@@ -26,6 +27,7 @@ Bundle-Name: SAI :: MSApex :: Sample
 Export-Package: uk.co.saiman.msapex.instrument.sample
 
 -includeresource: \
-	{fragment.e4xmi},\
+	{always.e4xmi},\
+	{initial.e4xmi},\
 	res,\
 	{css=css}

@@ -1,4 +1,5 @@
 -buildpath: \
+	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

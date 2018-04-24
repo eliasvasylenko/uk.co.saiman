@@ -1,0 +1,33 @@
+{
+	"uk.co.saiman.instrument.stage.composed.xy.rastering~saintsimulation": {
+		"exchangePosition": "0mm",
+		"exchangePositionY": "-100mm",
+		"homePositionX": "0mm",
+		"homePositionY": "0mm",
+		"xAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.linear~saintsimulation.x)",
+		"yAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.linear~saintsimulation.y)"
+	},
+	"uk.co.saiman.instrument.stage.copley.linear~saintsimulation.x": {
+		"lowerBound": "-27.5mm",
+		"upperBound": "27.5mm",
+		"axis": 0,
+		"comms.target": "(service.pid=uk.co.saiman.comms.copley~saintsimulation)"
+	},
+	"uk.co.saiman.instrument.stage.copley.linear~saintsimulation.y": {
+		"lowerBound": "-20mm",
+		"upperBound": "20mm",
+		"axis": 1,
+		"comms.target": "(service.pid=uk.co.saiman.comms.copley~saintsimulation)"
+	},
+	"uk.co.saiman.comms.copley~saintsimulation": {
+		"port.target": "(name=/saiman/copley)"
+	},
+	"uk.co.saiman.comms.copley.simulation~saintsimulation": {
+		"axes": 2,
+		"port.target": "(name=/saiman/copley.simulation)"
+	},
+	"uk.co.saiman.comms.simulation.paired~saintsimulation.copley": {
+		"name": "/saiman/copley",
+		"partnerName": "/saiman/copley.simulation"
+	}
+}

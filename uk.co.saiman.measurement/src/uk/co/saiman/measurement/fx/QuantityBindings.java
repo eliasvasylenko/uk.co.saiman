@@ -28,9 +28,11 @@
 package uk.co.saiman.measurement.fx;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static javafx.collections.FXCollections.observableList;
 import static javafx.collections.FXCollections.unmodifiableObservableList;
+import static uk.co.saiman.measurement.Quantities.getQuantity;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -42,7 +44,6 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import uk.co.saiman.measurement.Quantities;
 
 /**
  * A utility class containing static methods to build conversion bindings.
@@ -66,7 +67,10 @@ public final class QuantityBindings {
     @Override
     protected Quantity<T> computeValue() {
       try {
-        return Quantities.getQuantity(unit.getValue(), amount.getValue());
+        Unit<T> unit = this.unit.getValue();
+        Number amount = this.amount.getValue();
+
+        return unit != null && amount != null ? getQuantity(unit, amount) : null;
       } catch (Exception e) {
         return null;
       }
@@ -84,34 +88,52 @@ public final class QuantityBindings {
 
     @Override
     public QuantityBinding<T> convertTo(ObservableValue<? extends Unit<T>> unit) {
-      return createQuantityBinding(
-          unit,
-          createObjectBinding(
-              () -> this.unit.getValue().getConverterTo(unit.getValue()).convert(amount.getValue()),
-              this.unit,
-              unit,
-              amount));
+      return createQuantityBinding(unit, createObjectBinding(() -> {
+
+        Unit<T> from = this.unit.getValue();
+        Unit<T> to = unit.getValue();
+        Number amount = this.amount.getValue();
+
+        if (from != null && to != null && amount != null) {
+          return from.getConverterTo(to).convert(amount);
+
+        } else {
+          return null;
+        }
+
+      }, this.unit, unit, amount));
     }
 
     @Override
     public QuantityBinding<T> convertIntervalTo(ObservableValue<? extends Unit<T>> unit) {
-      return createQuantityBinding(
-          unit,
-          createObjectBinding(
-              () -> this.unit.getValue().getConverterTo(unit.getValue()).convert(amount.getValue()),
-              this.unit,
-              unit,
-              amount));
+      return createQuantityBinding(unit, createObjectBinding(() -> {
+
+        Unit<T> from = this.unit.getValue();
+        Unit<T> to = unit.getValue();
+        Number amount = this.amount.getValue();
+
+        if (from != null && to != null && amount != null) {
+          return from.getConverterTo(to).convert(amount);
+
+        } else {
+          return null;
+        }
+
+      }, this.unit, unit, amount));
     }
 
     @Override
     public DoubleBinding getDoubleAmount() {
-      return Bindings.createDoubleBinding(() -> amount.getValue().doubleValue(), amount);
+      return Bindings
+          .createDoubleBinding(
+              () -> amount.getValue() == null ? 0 : amount.getValue().doubleValue(),
+              amount);
     }
 
     @Override
     public Binding<Unit<T>> getUnit() {
-      return Bindings.createObjectBinding(() -> unit.getValue(), unit);
+      return Bindings
+          .createObjectBinding(() -> unit.getValue() == null ? null : unit.getValue(), unit);
     }
   }
 
@@ -120,8 +142,12 @@ public final class QuantityBindings {
   public static <T extends Quantity<T>> QuantityBinding<T> createQuantityBinding(
       ObservableValue<? extends Quantity<T>> quantity) {
     return new QuantityBindingImpl<>(
-        createObjectBinding(() -> quantity.getValue().getUnit(), quantity),
-        createObjectBinding(() -> quantity.getValue().getValue(), quantity));
+        createObjectBinding(
+            () -> ofNullable(quantity.getValue()).map(Quantity::getUnit).orElse(null),
+            quantity),
+        createObjectBinding(
+            () -> ofNullable(quantity.getValue()).map(Quantity::getValue).orElse(null),
+            quantity));
   }
 
   public static <T extends Quantity<T>> QuantityBinding<T> createQuantityBinding(

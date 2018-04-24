@@ -25,17 +25,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.instrument.acquisition;
+package uk.co.saiman.msapex.instrument.sample;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
+import static java.util.Optional.ofNullable;
 import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -52,24 +47,24 @@ import org.eclipse.fx.core.di.Service;
 
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.service.ObservableService;
 import uk.co.saiman.instrument.Device;
+import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.log.Log;
 
 /**
- * Register an acquisition device selection in the application context and
- * persist the selection between runs.
+ * Register a sample device selection in the application context and persist the
+ * selection between runs.
  *
  * @author Elias N Vasylenko
  */
-public class AcquisitionAddon {
+public class SampleAddon {
   private static final String SELECTED_DEVICES_KEY = "selected.devices";
 
   @Inject
   @ObservableService
-  private ObservableList<AcquisitionDevice> availableDevices;
+  private ObservableList<SampleDevice<?>> availableDevices;
 
   @Inject
   private IEclipseContext context;
@@ -80,42 +75,31 @@ public class AcquisitionAddon {
 
   @Inject
   private MAddon addon;
-  private List<String> defaultDeviceSelection;
+  private String defaultDeviceSelection;
 
   @PostConstruct
   void initialize(MApplication app) {
     context = app.getContext();
 
-    String defaultDeviceSelectionString = addon.getPersistedState().get(SELECTED_DEVICES_KEY);
+    defaultDeviceSelection = addon.getPersistedState().get(SELECTED_DEVICES_KEY);
 
-    defaultDeviceSelection = defaultDeviceSelectionString == null
-        ? emptyList()
-        : asList(defaultDeviceSelectionString.split(","));
-
-    context.declareModifiable(AcquisitionDeviceSelection.class);
+    context.declareModifiable(SampleDevice.class);
 
     // Track updates to camera and connection...
     context.runAndTrack(new RunAndTrack() {
       @Override
       public boolean changed(IEclipseContext context) {
-        AcquisitionDeviceSelection devices = context.get(AcquisitionDeviceSelection.class);
+        SampleDevice<?> device = context.get(SampleDevice.class);
 
         // Set the default camera device to the last one which was selected
-        if (devices != null && devices.getSelectedDevices().findAny().isPresent()) {
-          defaultDeviceSelection = devices
-              .getSelectedDevices()
-              .map(Device::getName)
-              .collect(toList());
+        defaultDeviceSelection = ofNullable(device).map(Device::getName).orElse(null);
 
-          /*
-           * TODO keep items waiting in the default device selection if they are not in
-           * the available devices list yet...
-           */
+        /*
+         * TODO keep items waiting in the default device selection if they are not in
+         * the available devices list yet...
+         */
 
-          addon
-              .getPersistedState()
-              .put(SELECTED_DEVICES_KEY, defaultDeviceSelection.stream().collect(joining(",")));
-        }
+        addon.getPersistedState().put(SELECTED_DEVICES_KEY, defaultDeviceSelection);
 
         return true;
       }
@@ -126,43 +110,31 @@ public class AcquisitionAddon {
   }
 
   private synchronized void updateSelectedDevices() {
-    Set<AcquisitionDevice> availableDevices = new HashSet<>(this.availableDevices);
+    Set<SampleDevice<?>> availableDevices = new HashSet<>(this.availableDevices);
 
-    AcquisitionDeviceSelection selection = context.get(AcquisitionDeviceSelection.class);
-    Set<AcquisitionDevice> selectedDevices = selection == null
-        ? new HashSet<>()
-        : selection.getSelectedDevices().collect(toCollection(HashSet::new));
-
-    boolean added = false;
-    for (AcquisitionDevice device : availableDevices) {
-      if (defaultDeviceSelection.contains(device.getName())) {
-        if (selectedDevices.add(device))
-          added = true;
-      }
-    }
-
-    if (selectedDevices.retainAll(availableDevices) || added) {
-      context
-          .modify(
-              AcquisitionDeviceSelection.class,
-              new AcquisitionDeviceSelection(selectedDevices));
-      context.processWaiting();
+    SampleDevice<?> selectedDevice = context.get(SampleDevice.class);
+    if (selectedDevice == null) {
+      availableDevices
+          .stream()
+          .filter(d -> d.getName().equals(defaultDeviceSelection))
+          .findAny()
+          .ifPresent(s -> {
+            context.modify(SampleDevice.class, s);
+            context.processWaiting();
+          });
     }
   }
 
   @Inject
   synchronized void setSelection(
-      @Optional @AdaptNamed(ACTIVE_SELECTION) AcquisitionDevice device,
+      @Optional @AdaptNamed(ACTIVE_SELECTION) SampleDevice<?> device,
       EPartService partService,
-      @Optional AcquisitionDeviceSelection selection) {
+      @Optional SampleDevice<?> selection) {
     if (device != null) {
-      if (selection == null || !selection.getSelectedDevices().anyMatch(device::equals)) {
-        context
-            .modify(
-                AcquisitionDeviceSelection.class,
-                new AcquisitionDeviceSelection(asList(device)));
+      if (selection != device) {
+        context.modify(SampleDevice.class, device);
       }
-      partService.showPart(AcquisitionPart.ID, PartState.ACTIVATE);
+      partService.showPart(SamplePart.ID, PartState.ACTIVATE);
     }
   }
 }

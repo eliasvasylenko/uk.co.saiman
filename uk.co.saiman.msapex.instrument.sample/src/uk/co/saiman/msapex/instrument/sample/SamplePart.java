@@ -48,6 +48,8 @@ import uk.co.saiman.eclipse.localization.Localize;
  * @author Elias N Vasylenko
  */
 public class SamplePart {
+  static final String ID = "uk.co.saiman.msapex.instrument.sample.part";
+
   @Localize
   @Inject
   SamplePartProperties text;

@@ -43,4 +43,9 @@ public class PolarCoordinate<R extends Quantity<R>> {
   public double getThetaValue() {
     return theta.getValue().doubleValue();
   }
+
+  @Override
+  public String toString() {
+    return "(" + r + ", " + theta + ")";
+  }
 }

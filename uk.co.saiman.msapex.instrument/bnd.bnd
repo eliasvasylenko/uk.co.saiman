@@ -33,6 +33,7 @@ Private-Package: \
 	uk.co.saiman.msapex.instrument.treecontributions
 
 -includeresource: \
-	{fragment.e4xmi},\
+	{always.e4xmi},\
+	{initial.e4xmi},\
 	res,\
 	{css=css}

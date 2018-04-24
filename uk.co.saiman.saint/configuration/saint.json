@@ -1,0 +1,12 @@
+{
+	"uk.co.saiman.comms.saint~saintsimulation": {
+		"port.target": "(name=/saiman/saint)"
+	},
+	"uk.co.saiman.comms.saint.simulation~saintsimulation": {
+		"port.target": "(name=/saiman/saint.simulation)"
+	},
+	"uk.co.saiman.comms.simulation.paired~saintsimulation.saint": {
+		"name": "/saiman/saint",
+		"partnerName": "/saiman/saint.simulation"
+	}
+}

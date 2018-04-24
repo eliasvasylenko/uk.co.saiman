@@ -10,45 +10,53 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>> impleme
   private final StageAxis<Length> xAxis;
   private final StageAxis<Length> yAxis;
 
+  private final XYCoordinate<Length> lowerBound;
+  private final XYCoordinate<Length> upperBound;
+
   public ComposedXYStage(
       String name,
       Instrument instrument,
       StageAxis<Length> xAxis,
       StageAxis<Length> yAxis,
+      XYCoordinate<Length> lowerBound,
+      XYCoordinate<Length> upperBound,
       XYCoordinate<Length> analysisLocation,
       XYCoordinate<Length> exchangeLocation) {
     super(name, instrument, analysisLocation, exchangeLocation);
 
     this.xAxis = xAxis;
     this.yAxis = yAxis;
+
+    this.lowerBound = lowerBound;
+    this.upperBound = upperBound;
   }
 
   @Override
   public XYCoordinate<Length> getLowerBound() {
-    return new XYCoordinate<>(xAxis.getLowerBound(), yAxis.getLowerBound());
+    return lowerBound;
   }
 
   @Override
   public XYCoordinate<Length> getUpperBound() {
-    return new XYCoordinate<>(xAxis.getUpperBound(), yAxis.getUpperBound());
+    return upperBound;
   }
 
   @Override
-  public boolean isLocationReachable(XYCoordinate<Length> position) {
-    return (getLowerBound().getX().subtract(position.getX()).getValue().doubleValue() <= 0)
-        && (getLowerBound().getY().subtract(position.getY()).getValue().doubleValue() <= 0)
-        && (getUpperBound().getX().subtract(position.getX()).getValue().doubleValue() >= 0)
-        && (getUpperBound().getY().subtract(position.getY()).getValue().doubleValue() >= 0);
+  public boolean isLocationReachable(XYCoordinate<Length> location) {
+    return (getLowerBound().getX().subtract(location.getX()).getValue().doubleValue() <= 0)
+        && (getLowerBound().getY().subtract(location.getY()).getValue().doubleValue() <= 0)
+        && (getUpperBound().getX().subtract(location.getX()).getValue().doubleValue() >= 0)
+        && (getUpperBound().getY().subtract(location.getY()).getValue().doubleValue() >= 0);
   }
 
   @Override
-  protected XYCoordinate<Length> getActualLocationForImpl() {
-    return new XYCoordinate<>(xAxis.actualPosition().get(), yAxis.actualPosition().get());
+  protected XYCoordinate<Length> getActualLocationImpl() {
+    return new XYCoordinate<>(xAxis.actualLocation().get(), yAxis.actualLocation().get());
   }
 
   @Override
   protected void setRequestedLocationImpl(XYCoordinate<Length> location) {
-    xAxis.requestedPosition().set(location.getX());
-    yAxis.requestedPosition().set(location.getY());
+    xAxis.requestLocation(location.getX());
+    yAxis.requestLocation(location.getY());
   }
 }

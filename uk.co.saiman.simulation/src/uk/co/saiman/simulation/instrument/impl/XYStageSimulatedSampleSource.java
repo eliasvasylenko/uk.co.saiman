@@ -97,7 +97,7 @@ public class XYStageSimulatedSampleSource
     @AttributeDefinition(
         name = "Stage Device",
         description = "The OSGi reference filter for the stage")
-    String stageDevice_target() default "(objectClass=uk.co.saiman.instrument.stage.XYStageDevice)";
+    String stageDevice_target() default "(objectClass=uk.co.saiman.instrument.stage.XYStage)";
 
     @AttributeDefinition(
         name = "Horizontal camera resolution",
@@ -155,7 +155,7 @@ public class XYStageSimulatedSampleSource
   };
 
   @Reference
-  XYStage stageDevice;
+  private XYStage stageDevice;
 
   private ChemicalComposition redChemical;
   private ChemicalComposition greenChemical;
@@ -163,7 +163,7 @@ public class XYStageSimulatedSampleSource
   private SimulatedSampleImage sampleImage;
 
   @Reference
-  PropertyLoader propertyLoader;
+  private PropertyLoader propertyLoader;
   private SimulationProperties simulationProperties;
   private CameraProperties cameraProperties;
 

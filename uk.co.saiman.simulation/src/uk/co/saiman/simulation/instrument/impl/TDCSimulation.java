@@ -38,14 +38,12 @@ import javax.measure.quantity.Time;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.data.function.SparseSampledContinuousFunction;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.impl.TDCSimulation.TDCSimulationConfiguration;
@@ -70,9 +68,6 @@ public class TDCSimulation implements DetectorSimulationService {
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.tdc";
-
-  @Reference
-  Units units;
 
   private int maximumHits = 10;
   private int[] hitIndices;

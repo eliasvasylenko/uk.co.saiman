@@ -27,24 +27,30 @@
  */
 package uk.co.saiman.instrument.sample;
 
+/**
+ * An enumeration of the possible states for a {@link SampleDevice sample
+ * device}.
+ * 
+ * The {@link #EXCHANGE_REQUESTED} state may only be succeeded by
+ * {@link #EXCHANGE} or {@link #EXCHANGE_FAILED}, while the
+ * {@link #ANALYSIS_LOCATION_REQUESTED} state may only be succeeded by
+ * {@link #ANALYSIS} or {@link #ANALYSIS_LOCATION_FAILED}.
+ * 
+ * The {@link #EXCHANGE_REQUESTED} and {@link #ANALYSIS_LOCATION_REQUESTED}
+ * states may only be preceded by a state in which the hardware is stopped.
+ * 
+ * Conversely, a state in which the hardware is stopped should typically be
+ * stable, i.e. should only be succeeded by {@link #EXCHANGE_REQUESTED} or
+ * {@link #ANALYSIS_LOCATION_REQUESTED}. However in the event of hardware
+ * failure or physical interference it is possible for the {@link #EXCHANGE} or
+ * {@link #ANALYSIS} states to transition directly into {@link #EXCHANGE_FAILED}
+ * or {@link #ANALYSIS_LOCATION_FAILED} respectively.
+ * 
+ * @author Elias N Vasylenko
+ */
 public enum SampleState {
   /**
-   * Moving into position or moving out of exchange. Hardware may be operational.
-   */
-  LOCATION_REQUESTED,
-
-  /**
-   * Requested position not reached. Hardware stopped.
-   */
-  LOCATION_FAILED,
-
-  /**
-   * Requested position reached. Hardware stopped.
-   */
-  LOCATION_REACHED,
-
-  /**
-   * Moving into exchange position. Hardware may be operational.
+   * Moving into exchange configuration. Hardware may be operational.
    */
   EXCHANGE_REQUESTED,
 
@@ -54,7 +60,28 @@ public enum SampleState {
   EXCHANGE_FAILED,
 
   /**
-   * Exchange position reached. Hardware stopped.
+   * Exchange configuration reached. Hardware stopped.
    */
-  EXCHANGING
+  EXCHANGE,
+
+  /**
+   * Moving into analysis configuration. Hardware may be operational.
+   */
+  ANALYSIS_LOCATION_REQUESTED,
+
+  /**
+   * Analysis configuration not reached. Hardware stopped.
+   */
+  ANALYSIS_LOCATION_FAILED,
+
+  /**
+   * Analysis configuration reached. Hardware stopped.
+   * <p>
+   * Depending on the type of hardware this may only indicate that the analysis
+   * location is reached within a certain tolerance. Therefore this state does not
+   * necessarily indicate that the {@link SampleDevice#actualLocation() requested}
+   * and {@link SampleDevice#requestedLocation() actual} locations are
+   * {@link #equals(Object) exactly equal}.
+   */
+  ANALYSIS
 }

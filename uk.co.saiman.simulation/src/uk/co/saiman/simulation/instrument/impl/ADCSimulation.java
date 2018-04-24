@@ -45,7 +45,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.acquisition.AcquisitionBufferPool;
 import uk.co.saiman.data.function.SampledDomain;
-import uk.co.saiman.measurement.Units;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
@@ -72,9 +71,6 @@ public class ADCSimulation implements DetectorSimulationService {
 
   @Reference
   SimulatedSampleSource sampleSource;
-
-  @Reference
-  Units units;
 
   private double signalToNoise;
 

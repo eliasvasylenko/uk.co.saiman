@@ -56,10 +56,8 @@ public abstract class XYStageDiagram extends StageDiagram<XYCoordinate<Length>> 
     XYStage stageDevice = getStageDevice();
     initialize(metre().micro().getUnit());
 
-    XYCoordinate<Length> lower = getCoordinatesAtStageLocation(
-        new XYCoordinate<>(stageDevice.getLowerBound().getX(), stageDevice.getLowerBound().getY()));
-    XYCoordinate<Length> upper = getCoordinatesAtStageLocation(
-        new XYCoordinate<>(stageDevice.getUpperBound().getX(), stageDevice.getUpperBound().getY()));
+    XYCoordinate<Length> lower = getCoordinatesAtStageLocation(stageDevice.getLowerBound());
+    XYCoordinate<Length> upper = getCoordinatesAtStageLocation(stageDevice.getUpperBound());
 
     getAnnotationLayer()
         .setMeasurementBounds(

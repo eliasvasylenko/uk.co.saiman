@@ -24,32 +24,48 @@
 		"#TODO#stageDevice.target": "(service.pid=uk.co.saiman.instrument.stage.copley.xy.rastering.saintsimulation)"
 	},
 	{
-		"service.pid": "uk.co.saiman.instrument.stage.copley.xy.rastering.saintsimulation",
-		"service.factoryPid": "uk.co.saiman.instrument.stage.copley.xy.rastering",
-		"exchangePositionX": "0mm",
-		"exchangePositionY": "-100mm",
-		"homePositionX": "0mm",
-		"homePositionY": "0mm",
-		"lowerBoundX": "-27.5mm",
-		"lowerBoundY": "-20mm",
-		"upperBoundX": "27.5mm",
-		"upperBoundY": "20mm",
-		"xAxis.target": "(&(drive.name=x)(comms.service.pid=uk.co.saiman.comms.copley.saintsimulation))",
-		"yAxis.target": "(&(drive.name=y)(comms.service.pid=uk.co.saiman.comms.copley.saintsimulation))",
+		"service.pid": "uk.co.saiman.instrument.stage.composed.xy.rastering.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.instrument.stage.composed.xy",
+		"name": "SAINT Copley Stage",
+		"exchangeLocationX": "0mm",
+		"exchangeLocationY": "-100mm",
+		"analysisLocationX": "0mm",
+		"analysisLocationY": "0mm",
+		"#TODO#xAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.x)",
+		"#TODO#yAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.y)"
+	},
+	{
+		"service.pid": "uk.co.saiman.instrument.stage.copley.x",
+		"service.factoryPid": "uk.co.saiman.instrument.stage.copley.linear",
+		"lowerBound": "-27.5mm",
+		"upperBound": "27.5mm",
+		"axis": 0,
+		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.copley.saintsimulation)"
+	},
+	{
+		"service.pid": "uk.co.saiman.instrument.stage.copley.y",
+		"service.factoryPid": "uk.co.saiman.instrument.stage.copley.linear",
+		"lowerBound": "-20mm",
+		"upperBound": "20mm",
+		"axis": 1,
 		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.copley.saintsimulation)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.copley.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.copley",
-		"node": 0,
 		"port.target": "(name=/saiman/copley)"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.copley.simulation",
 		"axes": 2,
-		"nodes": 0,
 		"port.target": "(name=/saiman/copley.simulation)"
+	},
+	{
+		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.comms.simulation.paired",
+		"name": "/saiman/copley",
+		"partnerName": "/saiman/copley.simulation"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.saint.saintsimulation",
@@ -60,12 +76,6 @@
 		"service.pid": "uk.co.saiman.comms.saint.simulation.saintsimulation",
 		"service.factoryPid": "uk.co.saiman.comms.saint.simulation",
 		"port.target": "(name=/saiman/saint.simulation)"
-	},
-	{
-		"service.pid": "uk.co.saiman.comms.copley.simulation.saintsimulation",
-		"service.factoryPid": "uk.co.saiman.comms.simulation.paired",
-		"name": "/saiman/copley",
-		"partnerName": "/saiman/copley.simulation"
 	},
 	{
 		"service.pid": "uk.co.saiman.comms.saint.simulation.saintsimulation",

@@ -31,61 +31,75 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static uk.co.saiman.measurement.Units.metre;
 import static uk.co.saiman.observable.Observable.fixedRate;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 import uk.co.saiman.comms.copley.CopleyAxis;
+import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.instrument.ConnectionState;
+import uk.co.saiman.instrument.sample.SampleLocationUnknown;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.composed.StageAxis;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 
-public class CopleyLinearDimension implements StageAxis<Length> {
-  private final Supplier<CopleyAxis> axis;
-  private final Quantity<Length> lowerBound;
-  private final Quantity<Length> upperBound;
-  private final ObservableProperty<Quantity<Length>> requestedPosition;
-  private final ObservableProperty<Quantity<Length>> actualPosition;
+public class CopleyLinearAxis implements StageAxis<Length> {
+  private final CopleyController comms;
+  private final int node;
+  private final int axis;
 
-  public CopleyLinearDimension(
-      Supplier<CopleyAxis> axis,
-      Quantity<Length> lowerBound,
-      Quantity<Length> upperBound) {
+  private final ObservableProperty<Quantity<Length>> actualLocation;
+
+  public CopleyLinearAxis(CopleyController comms, int node, int axis) {
+    this.comms = comms;
+    this.node = node;
     this.axis = axis;
-    this.lowerBound = lowerBound;
-    this.upperBound = upperBound;
-    this.requestedPosition = new ObservablePropertyImpl<>(lowerBound);
-    this.actualPosition = new ObservablePropertyImpl<>(lowerBound);
 
-    this.requestedPosition.observe(this::positionRequested);
-    fixedRate(0, 50, MILLISECONDS).observe(o -> updateActualPosition());
+    this.actualLocation = new ObservablePropertyImpl<>(new SampleLocationUnknown());
+    updateActualLocation();
+    fixedRate(0, 50, MILLISECONDS).observe(o -> updateActualLocation());
   }
 
-  void positionRequested(Quantity<Length> position) {
-    CopleyAxis axis = this.axis.get();
-    if (axis != null)
-      axis.requestedPosition().set(new Int32(getStepsFromLength(position)));
+  protected void withAxis(Consumer<CopleyAxis> action, Runnable failure) {
+    CopleyAxis axis = comms
+        .getNodes()
+        .filter(n -> n.getIndex() == node)
+        .findFirst()
+        .flatMap(n -> n.getAxes().filter(a -> a.getAxisNumber() == this.axis).findFirst())
+        .orElse(null);
+
+    if (axis != null) {
+      action.accept(axis);
+    } else {
+      failure.run();
+    }
   }
 
-  void updateActualPosition() {
-    CopleyAxis axis = this.axis.get();
-    if (axis != null)
-      actualPosition.set(getLengthFromSteps(axis.actualPosition().get().value));
+  void requestLocationImpl(Quantity<Length> location) {
+    withAxis(
+        axis -> axis.requestedPosition().set(new Int32(getStepsFromLength(location))),
+        () -> {});
   }
 
   @Override
-  public Quantity<Length> getLowerBound() {
-    return lowerBound;
+  public void requestLocation(Quantity<Length> location) {
+    requestLocationImpl(location);
   }
 
   @Override
-  public Quantity<Length> getUpperBound() {
-    return upperBound;
+  public void abortRequest() {
+    // TODO Auto-generated method stub
+
+  }
+
+  void updateActualLocation() {
+    withAxis(
+        axis -> actualLocation.set(getLengthFromSteps(axis.actualPosition().get().value)),
+        () -> actualLocation.setProblem(new SampleLocationUnknown()));
   }
 
   public int getStepsFromLength(Quantity<Length> length) {
@@ -97,13 +111,8 @@ public class CopleyLinearDimension implements StageAxis<Length> {
   }
 
   @Override
-  public ObservableProperty<Quantity<Length>> requestedPosition() {
-    return requestedPosition;
-  }
-
-  @Override
-  public ObservableValue<Quantity<Length>> actualPosition() {
-    return actualPosition;
+  public ObservableValue<Quantity<Length>> actualLocation() {
+    return actualLocation;
   }
 
   @Override
@@ -116,11 +125,5 @@ public class CopleyLinearDimension implements StageAxis<Length> {
   public ObservableValue<SampleState> sampleState() {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  @Override
-  public void abortRequest() {
-    // TODO Auto-generated method stub
-
   }
 }
