@@ -28,18 +28,20 @@
 package uk.co.saiman.instrument.stage.composed;
 
 public enum AxisState {
+  DISCONNECTED,
+
   /**
    * Moving into position or moving out of exchange.
    */
-  POSITION_REQUESTED,
+  LOCATION_REQUESTED,
 
   /**
    * Requested position reached. Motors not moving.
    */
-  POSITION_REACHED,
+  LOCATION_REACHED,
 
   /**
    * Requested position reached. Motors not moving.
    */
-  POSITION_FAILED,
+  LOCATION_FAILED,
 }

@@ -28,7 +28,6 @@
 package uk.co.saiman.instrument.stage.composed;
 
 import static java.util.Arrays.asList;
-import static uk.co.saiman.instrument.ConnectionState.CONNECTED;
 import static uk.co.saiman.instrument.ConnectionState.DISCONNECTED;
 import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS;
 import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_LOCATION_FAILED;
@@ -36,10 +35,12 @@ import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_LOCATION_REQUE
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_FAILED;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_REQUESTED;
+import static uk.co.saiman.instrument.stage.composed.ComposedStage.Mode.ANALYSING;
 import static uk.co.saiman.observable.ObservableProperty.over;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Instrument;
@@ -49,20 +50,23 @@ import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
 public abstract class ComposedStage<T> implements Stage<T> {
+  enum Mode {
+    ANALYSING, EXCHANGING
+  }
+
   private final String name;
   private final Instrument instrument;
   private final Set<StageAxis<?>> axes;
+
+  private final T analysisLocation;
+  private final T exchangeLocation;
+  private Mode mode;
 
   private final ObservableProperty<ConnectionState> connectionState;
   private final ObservableProperty<SampleState> sampleState;
 
   private final ObservableProperty<T> requestedLocation;
   private final ObservableProperty<T> actualLocation;
-
-  private final T analysisLocation;
-  private boolean analysisRequested;
-  private final T exchangeLocation;
-  private boolean exchangeRequested;
 
   public ComposedStage(
       String name,
@@ -73,62 +77,79 @@ public abstract class ComposedStage<T> implements Stage<T> {
     this.name = name;
     this.instrument = instrument;
     this.axes = new HashSet<>(asList(axes));
-
-    this.connectionState = over(DISCONNECTED);
-    this.axes.forEach(a -> a.connectionState().observe(s -> updateConnectionState()));
-
-    this.sampleState = over(ANALYSIS_LOCATION_FAILED);
-    this.axes.forEach(a -> a.sampleState().observe(s -> updateSampleState()));
-
     this.analysisLocation = analysisLocation;
     this.exchangeLocation = exchangeLocation;
-    requestedLocation = over(exchangeLocation);
-    requestedLocation.observe(this::setRequestedLocationImpl);
-    actualLocation = over(exchangeLocation);
+    this.mode = ANALYSING;
+
+    this.connectionState = over(DISCONNECTED);
+    this.sampleState = over(ANALYSIS_LOCATION_FAILED);
+    this.axes.forEach(a -> System.out.println(a));
+    this.axes.forEach(a -> a.axisState().observe(s -> updateState()));
+
+    this.requestedLocation = ObservableProperty.over(exchangeLocation);
+    this.requestedLocation.observe(this::setRequestedLocationImpl);
+    this.actualLocation = ObservableProperty.over(exchangeLocation);
     this.axes
-        .forEach(
-            a -> a.actualLocation().observe(p -> actualLocation.set(getActualLocationImpl())));
+        .forEach(a -> a.actualLocation().observe(p -> actualLocation.set(getActualLocationImpl())));
 
     instrument.addDevice(this);
   }
 
-  private void updateConnectionState() {
-    ConnectionState connectionState = axes
-        .stream()
-        .map(StageAxis::connectionState)
-        .map(ObservableValue::get)
-        .reduce((a, b) -> precedence(a, b, DISCONNECTED, CONNECTED))
-        .orElse(DISCONNECTED);
+  private void updateState() {
+    try {
+      AxisState axisState = axes
+          .stream()
+          .map(StageAxis::axisState)
+          .map(ObservableValue::get)
+          .reduce(
+              precedence(
+                  AxisState.DISCONNECTED,
+                  AxisState.LOCATION_REQUESTED,
+                  AxisState.LOCATION_FAILED,
+                  AxisState.LOCATION_REACHED))
+          .orElse(AxisState.DISCONNECTED);
+
+      updateConnectionState(axisState);
+      updateSampleState(axisState);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void updateConnectionState(AxisState axisState) {
+    ConnectionState connectionState = (axisState == AxisState.DISCONNECTED)
+        ? ConnectionState.DISCONNECTED
+        : ConnectionState.CONNECTED;
 
     this.connectionState.set(connectionState);
   }
 
-  private void updateSampleState() {
-    SampleState sampleState = axes
-        .stream()
-        .map(StageAxis::sampleState)
-        .map(ObservableValue::get)
-        .reduce(
-            (a, b) -> precedence(
-                a,
-                b,
-                ANALYSIS_LOCATION_REQUESTED,
-                EXCHANGE_REQUESTED,
-                ANALYSIS_LOCATION_FAILED,
-                EXCHANGE_FAILED,
-                ANALYSIS,
-                EXCHANGE))
-        .orElse(ANALYSIS_LOCATION_REQUESTED);
+  private void updateSampleState(AxisState axisState) {
+    SampleState sampleState;
+
+    switch (axisState) {
+    case LOCATION_REACHED:
+      sampleState = mode == Mode.ANALYSING ? ANALYSIS : EXCHANGE;
+      break;
+    case LOCATION_REQUESTED:
+      sampleState = mode == Mode.ANALYSING ? ANALYSIS_LOCATION_REQUESTED : EXCHANGE_REQUESTED;
+      break;
+    default:
+      sampleState = mode == Mode.ANALYSING ? ANALYSIS_LOCATION_FAILED : EXCHANGE_FAILED;
+      break;
+    }
 
     this.sampleState.set(sampleState);
   }
 
   @SafeVarargs
-  private final <U> U precedence(U a, U b, U... precedence) {
-    for (U option : precedence)
-      if (a == option || b == option)
-        return option;
-    return precedence[0];
+  private final <U> BinaryOperator<U> precedence(U... precedence) {
+    return (a, b) -> {
+      for (U option : precedence)
+        if (a == option || b == option)
+          return option;
+      return precedence[0];
+    };
   }
 
   @Override
@@ -142,12 +163,10 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   @Override
-  public SampleState requestExchange() {
-    if (!exchangeRequested) {
+  public synchronized SampleState requestExchange() {
+    if (mode != Mode.EXCHANGING) {
+      mode = Mode.EXCHANGING;
       setRequestedLocationImpl(exchangeLocation);
-
-      exchangeRequested = true;
-      analysisRequested = false;
 
       return sampleState().filter(s -> EXCHANGE_REQUESTED != s).get();
     } else {
@@ -156,12 +175,10 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   @Override
-  public SampleState requestAnalysis() {
-    if (!analysisRequested) {
+  public synchronized SampleState requestAnalysis() {
+    if (mode != Mode.ANALYSING) {
+      mode = Mode.ANALYSING;
       setRequestedLocationImpl(analysisLocation);
-
-      analysisRequested = true;
-      exchangeRequested = false;
 
       return sampleState().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
     } else {
@@ -170,11 +187,12 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   @Override
-  public synchronized SampleState requestLocation(T location) {
+  public synchronized SampleState requestAnalysisLocation(T location) {
     if (!isLocationReachable(location)) {
       throw new IllegalArgumentException("Location unreachable " + location);
     }
-    sampleState.set(ANALYSIS_LOCATION_REQUESTED);
+
+    mode = Mode.ANALYSING;
     setRequestedLocationImpl(location);
 
     return sampleState().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();

@@ -29,14 +29,11 @@ package uk.co.saiman.instrument.stage.composed;
 
 import javax.measure.Quantity;
 
-import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.observable.ObservableValue;
 
 public interface StageAxis<T extends Quantity<T>> {
-  ObservableValue<ConnectionState> connectionState();
-
-  ObservableValue<SampleState> sampleState();
+  ObservableValue<AxisState> axisState();
 
   /**
    * Initiate a request and return immediately. Throws an exception if the axis is

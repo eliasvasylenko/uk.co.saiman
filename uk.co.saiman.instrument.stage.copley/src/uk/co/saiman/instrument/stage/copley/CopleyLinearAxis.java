@@ -28,6 +28,8 @@
 package uk.co.saiman.instrument.stage.copley;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static uk.co.saiman.instrument.stage.composed.AxisState.DISCONNECTED;
+import static uk.co.saiman.instrument.stage.composed.AxisState.LOCATION_REQUESTED;
 import static uk.co.saiman.measurement.Units.metre;
 import static uk.co.saiman.observable.Observable.fixedRate;
 
@@ -39,9 +41,8 @@ import javax.measure.quantity.Length;
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.Int32;
-import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.sample.SampleLocationUnknown;
-import uk.co.saiman.instrument.sample.SampleState;
+import uk.co.saiman.instrument.stage.composed.AxisState;
 import uk.co.saiman.instrument.stage.composed.StageAxis;
 import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.ObservableProperty;
@@ -55,6 +56,8 @@ public class CopleyLinearAxis implements StageAxis<Length> {
 
   private final ObservableProperty<Quantity<Length>> actualLocation;
 
+  private final ObservableProperty<AxisState> axisState;
+
   public CopleyLinearAxis(CopleyController comms, int node, int axis) {
     this.comms = comms;
     this.node = node;
@@ -63,6 +66,9 @@ public class CopleyLinearAxis implements StageAxis<Length> {
     this.actualLocation = new ObservablePropertyImpl<>(new SampleLocationUnknown());
     updateActualLocation();
     fixedRate(0, 50, MILLISECONDS).observe(o -> updateActualLocation());
+
+    this.axisState = new ObservablePropertyImpl<>(DISCONNECTED);
+    axisState.observe(s -> System.out.println(s));
   }
 
   protected void withAxis(Consumer<CopleyAxis> action, Runnable failure) {
@@ -80,15 +86,16 @@ public class CopleyLinearAxis implements StageAxis<Length> {
     }
   }
 
-  void requestLocationImpl(Quantity<Length> location) {
+  @Override
+  public synchronized void requestLocation(Quantity<Length> location) {
+    if (axisState.isEqual(LOCATION_REQUESTED))
+      throw new IllegalStateException("location already requested");
+
+    axisState.set(LOCATION_REQUESTED);
+
     withAxis(
         axis -> axis.requestedPosition().set(new Int32(getStepsFromLength(location))),
         () -> {});
-  }
-
-  @Override
-  public void requestLocation(Quantity<Length> location) {
-    requestLocationImpl(location);
   }
 
   @Override
@@ -117,14 +124,7 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   }
 
   @Override
-  public ObservableValue<ConnectionState> connectionState() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public ObservableValue<SampleState> sampleState() {
-    // TODO Auto-generated method stub
-    return null;
+  public ObservableValue<AxisState> axisState() {
+    return axisState;
   }
 }

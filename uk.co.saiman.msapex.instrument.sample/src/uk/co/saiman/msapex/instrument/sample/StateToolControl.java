@@ -27,6 +27,7 @@ public class StateToolControl {
     if (this.device != null) {
       requestedLocation.cancel();
       actualLocation.cancel();
+      sampleState.cancel();
     }
 
     this.device = device;

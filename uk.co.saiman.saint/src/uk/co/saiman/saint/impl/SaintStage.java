@@ -27,21 +27,21 @@ import uk.co.saiman.observable.ObservableValue;
  * 
  * @author Elias N Vasylenko
  */
-@Designate(ocd = SaintXYStage.SaintXYStageConfiguration.class, factory = true)
+@Designate(ocd = SaintStage.SaintStageConfiguration.class, factory = true)
 @Component(
-    name = SaintXYStage.CONFIGURATION_PID,
-    configurationPid = SaintXYStage.CONFIGURATION_PID,
+    name = SaintStage.CONFIGURATION_PID,
+    configurationPid = SaintStage.CONFIGURATION_PID,
     configurationPolicy = REQUIRE)
-public class SaintXYStage
+public class SaintStage
     implements SampleDevice<XYCoordinate<Length>>, Stage<XYCoordinate<Length>>, XYStage {
-  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.composed.xy";
+  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.saint";
 
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       id = CONFIGURATION_PID,
       name = "SAINT Stage Configuration",
       description = "The configuration for a modular stage composed of an x axis and a y axis")
-  public @interface SaintXYStageConfiguration {
+  public @interface SaintStageConfiguration {
     String name();
 
     String lowerBound();
@@ -65,7 +65,7 @@ public class SaintXYStage
   private ComposedXYStage stage;
 
   @Activate
-  void activate(SaintXYStageConfiguration configuration) {
+  void activate(SaintStageConfiguration configuration) {
     this.stage = new ComposedXYStage(
         configuration.name(),
         instrument,
@@ -138,7 +138,7 @@ public class SaintXYStage
   }
 
   @Override
-  public SampleState requestLocation(XYCoordinate<Length> location) {
-    return stage.requestLocation(location);
+  public SampleState requestAnalysisLocation(XYCoordinate<Length> location) {
+    return stage.requestAnalysisLocation(location);
   }
 }

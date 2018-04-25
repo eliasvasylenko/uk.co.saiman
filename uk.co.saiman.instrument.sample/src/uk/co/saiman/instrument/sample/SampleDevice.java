@@ -107,5 +107,5 @@ public interface SampleDevice<T> extends Device {
    *         {@link SampleState#ANALYSIS_LOCATION_FAILED} or
    *         {@link SampleState#ANALYSIS}
    */
-  SampleState requestLocation(T location);
+  SampleState requestAnalysisLocation(T location);
 }

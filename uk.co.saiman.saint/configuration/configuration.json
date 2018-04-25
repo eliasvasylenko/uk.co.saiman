@@ -24,29 +24,27 @@
 		"#TODO#stageDevice.target": "(service.pid=uk.co.saiman.instrument.stage.copley.xy.rastering.saintsimulation)"
 	},
 	{
-		"service.pid": "uk.co.saiman.instrument.stage.composed.xy.rastering.saintsimulation",
-		"service.factoryPid": "uk.co.saiman.instrument.stage.composed.xy",
+		"service.pid": "uk.co.saiman.instrument.stage.stage.saintsimulation",
+		"service.factoryPid": "uk.co.saiman.instrument.stage.saint",
 		"name": "SAINT Copley Stage",
-		"exchangeLocationX": "0mm",
-		"exchangeLocationY": "-100mm",
-		"analysisLocationX": "0mm",
-		"analysisLocationY": "0mm",
-		"#TODO#xAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.x)",
-		"#TODO#yAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.y)"
+		"lowerBound": "-27.5mm, -20mm",
+		"upperBound": "27.5mm, 20mm",
+		"exchangeLocation": "0mm, -100mm",
+		"analysisLocation": "0mm, 0mm",
+		"xAxis.target": "(axis=0)",
+		"yAxis.target": "(axis=1)"
 	},
 	{
 		"service.pid": "uk.co.saiman.instrument.stage.copley.x",
+		"TODO.testid": "uk.co.saiman.instrument.stage.copley.x",
 		"service.factoryPid": "uk.co.saiman.instrument.stage.copley.linear",
-		"lowerBound": "-27.5mm",
-		"upperBound": "27.5mm",
 		"axis": 0,
 		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.copley.saintsimulation)"
 	},
 	{
 		"service.pid": "uk.co.saiman.instrument.stage.copley.y",
+		"TODO.testid": "uk.co.saiman.instrument.stage.copley.y",
 		"service.factoryPid": "uk.co.saiman.instrument.stage.copley.linear",
-		"lowerBound": "-20mm",
-		"upperBound": "20mm",
 		"axis": 1,
 		"#TODO#comms.target": "(service.pid=uk.co.saiman.comms.copley.saintsimulation)"
 	},

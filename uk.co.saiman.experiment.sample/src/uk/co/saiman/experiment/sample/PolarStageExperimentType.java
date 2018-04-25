@@ -50,6 +50,6 @@ public interface PolarStageExperimentType<T extends PolarStageConfiguration>
 
   @Override
   default void executeVoid(VoidExecutionContext<T> context) {
-    device().requestLocation(context.node().getState().location());
+    device().requestAnalysisLocation(context.node().getState().location());
   }
 }

@@ -60,8 +60,10 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
 
   @Override
   public Observable<Change<T>> changes() {
-    return observer -> backingObservable.materialize().repeating().observe(
-        new PassthroughObserver<Observable<T>, Change<T>>(observer) {
+    return observer -> backingObservable
+        .materialize()
+        .repeating()
+        .observe(new PassthroughObserver<Observable<T>, Change<T>>(observer) {
           private ObservableValue<T> previousValue;
 
           @Override
@@ -117,21 +119,21 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
     if (failure == null && Objects.equals(this.value, value))
       return value;
 
-    backingObservable.next(value);
-
     T previous = this.value;
     failure = null;
     this.value = value;
+
+    backingObservable.next(value);
 
     return previous;
   }
 
   @Override
   public synchronized void setProblem(Throwable t) {
-    backingObservable.fail(t);
-
     value = null;
     failure = t;
+
+    backingObservable.fail(t);
 
     backingObservable.start();
   }

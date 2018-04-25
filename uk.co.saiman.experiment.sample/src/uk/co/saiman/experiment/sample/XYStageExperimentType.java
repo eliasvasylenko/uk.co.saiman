@@ -50,7 +50,7 @@ public interface XYStageExperimentType<T extends XYStageConfiguration>
 
   @Override
   default void executeVoid(VoidExecutionContext<T> context) {
-    device().requestLocation(context.node().getState().location());
+    device().requestAnalysisLocation(context.node().getState().location());
 
     /*
      * TODO listen for interruption of the stage position and cancel/fail/warn if it

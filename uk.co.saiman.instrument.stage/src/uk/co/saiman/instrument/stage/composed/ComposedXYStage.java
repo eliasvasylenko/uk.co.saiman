@@ -22,7 +22,7 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>> impleme
       XYCoordinate<Length> upperBound,
       XYCoordinate<Length> analysisLocation,
       XYCoordinate<Length> exchangeLocation) {
-    super(name, instrument, analysisLocation, exchangeLocation);
+    super(name, instrument, analysisLocation, exchangeLocation, xAxis, yAxis);
 
     this.xAxis = xAxis;
     this.yAxis = yAxis;

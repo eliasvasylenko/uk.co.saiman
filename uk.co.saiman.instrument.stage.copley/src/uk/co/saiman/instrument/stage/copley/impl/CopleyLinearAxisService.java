@@ -40,8 +40,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.copley.CopleyController;
-import uk.co.saiman.instrument.ConnectionState;
-import uk.co.saiman.instrument.sample.SampleState;
+import uk.co.saiman.instrument.stage.composed.AxisState;
 import uk.co.saiman.instrument.stage.composed.StageAxis;
 import uk.co.saiman.instrument.stage.copley.CopleyLinearAxis;
 import uk.co.saiman.observable.ObservableValue;
@@ -92,13 +91,8 @@ public class CopleyLinearAxisService implements StageAxis<Length> {
   }
 
   @Override
-  public ObservableValue<ConnectionState> connectionState() {
-    return axis.connectionState();
-  }
-
-  @Override
-  public ObservableValue<SampleState> sampleState() {
-    return axis.sampleState();
+  public ObservableValue<AxisState> axisState() {
+    return axis.axisState();
   }
 
   @Override
