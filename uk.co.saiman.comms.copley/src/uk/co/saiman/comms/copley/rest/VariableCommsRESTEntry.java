@@ -44,7 +44,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import osgi.enroute.dto.api.DTOs;
+import org.osgi.util.converter.Converter;
+import org.osgi.util.converter.TypeReference;
+
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.copley.BankedVariable;
 import uk.co.saiman.comms.copley.CopleyAxis;
@@ -63,16 +65,16 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
 
   private final CopleyNode node;
   private final CopleyVariableID id;
-  private final DTOs dtos;
+  private final Converter converter;
 
   private final boolean writable;
   private final boolean banked;
   private VariableBank bank;
 
-  public VariableCommsRESTEntry(CopleyNode node, CopleyVariableID id, DTOs dtos) {
+  public VariableCommsRESTEntry(CopleyNode node, CopleyVariableID id, Converter converter) {
     this.node = node;
     this.id = id;
-    this.dtos = dtos;
+    this.converter = converter;
 
     Variable<?> variable = node.getAxes().findAny().get().variable(id);
     this.writable = variable instanceof WritableVariable<?>;
@@ -111,8 +113,9 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
       Object value = getVariable(axis).get();
 
       try {
-        dtos
-            .asMap(value)
+        converter
+            .convert(value)
+            .to(new TypeReference<Map<String, String>>() {})
             .entrySet()
             .stream()
             .forEach(
@@ -154,7 +157,7 @@ public class VariableCommsRESTEntry implements ControllerRESTEntry {
           .collect(toMap(Entry::getKey, e -> ((List<?>) e.getValue()).get(variable.getAxis())));
 
       try {
-        value = dtos.convert(axisOutput).to(variable.getType());
+        value = converter.convert(axisOutput).to(variable.getType());
       } catch (Exception e) {
         throw new CommsException(
             "Cannot convert output data map to " + variable.getType().getSimpleName(),

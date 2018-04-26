@@ -82,21 +82,21 @@ Import-Package:\
 	bnd.identity; id=osgi.enroute.logger.simple.provider
 
 # Build path groups:
+#-buildpath.base=\
+#	osgi.enroute.base.api;version=latest
+
+#-testpath.base=\
+#	org.jmockit:jmockit,\
+#	osgi.enroute.junit.wrapper,\
+#	osgi.enroute.hamcrest.wrapper,\
+#	org.hamcrest:java-hamcrest
+
 -buildpath.base=\
-	osgi.enroute.base.api;version=latest
-
--testpath.base=\
-	org.jmockit:jmockit,\
-	osgi.enroute.junit.wrapper,\
-	osgi.enroute.hamcrest.wrapper,\
-	org.hamcrest:java-hamcrest
-
--buildpathR7.base=\
 	osgi.annotation;version=latest,\
 	osgi.cmpn;version=latest,\
 	osgi.core;version=latest
 
--testpathR7.base=\
+-testpath.base=\
 	org.jmockit:jmockit,\
 	org.apache.servicemix.bundles.junit,\
 	org.hamcrest:hamcrest-core,\

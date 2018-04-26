@@ -20,8 +20,11 @@
     connectionOpen : "\${comms.action.open}",
     connectionClose : "\${comms.action.close}"
   }
+</script>
+<script>
   require.config({
     baseUrl : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/",
+    baseUrlNew : "/static/${provider-bsn}/${provider-Bundle-Version}/",
     paths : {
       "app" : "\${pluginRoot}/res/sai"
     }
@@ -30,3 +33,5 @@
     "app/comms"
   ])
 </script>
+<script
+  src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/require.js"></script>

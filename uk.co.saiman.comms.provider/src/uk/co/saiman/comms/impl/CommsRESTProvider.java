@@ -51,6 +51,9 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.jaxrs.whiteboard.annotations.RequireJaxrsWhiteboard;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.osgi.util.converter.Converter;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -63,7 +66,7 @@ import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
-@RequireRestImplementation
+@JaxrsResource
 @Component(property = REST.ENDPOINT + "=/api/comms/*")
 public class CommsRESTProvider implements REST {
   private static final String NAME_KEY = "name";
@@ -100,7 +103,7 @@ public class CommsRESTProvider implements REST {
   private ServiceTracker<CommsREST, CommsREST> commsInterfaceTracker;
 
   @Reference
-  private DTOs dtos;
+  private Converter converter;
 
   @Activate
   void activate(BundleContext context) {

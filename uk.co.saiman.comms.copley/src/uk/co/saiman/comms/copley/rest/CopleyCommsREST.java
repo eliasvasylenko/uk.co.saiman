@@ -29,18 +29,19 @@ package uk.co.saiman.comms.copley.rest;
 
 import java.util.Locale;
 
-import osgi.enroute.dto.api.DTOs;
+import org.osgi.util.converter.Converter;
+
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.CommsREST;
 
 public class CopleyCommsREST implements CommsREST {
   private final CopleyController controller;
-  private final DTOs dtos;
+  private final Converter converter;
 
-  public CopleyCommsREST(CopleyController controller, DTOs dtos) {
+  public CopleyCommsREST(CopleyController controller, Converter converter) {
     this.controller = controller;
-    this.dtos = dtos;
+    this.converter = converter;
   }
 
   @Override
@@ -60,7 +61,7 @@ public class CopleyCommsREST implements CommsREST {
 
   @Override
   public ActionTableREST getActions() {
-    return new CopleyControllerREST(controller, dtos);
+    return new CopleyControllerREST(controller, converter);
   }
 
   @Override

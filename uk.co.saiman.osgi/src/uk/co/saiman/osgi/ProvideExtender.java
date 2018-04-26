@@ -32,7 +32,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import aQute.bnd.annotation.headers.ProvideCapability;
+import org.osgi.annotation.bundle.Capability;
 
 /**
  * Provide an OSGi extender capability of the given name and version.
@@ -44,7 +44,7 @@ import aQute.bnd.annotation.headers.ProvideCapability;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-@ProvideCapability(ns = ExtenderManager.OSGI_EXTENDER)
+@Capability(namespace = ExtenderManager.OSGI_EXTENDER)
 public @interface ProvideExtender {
 	/**
 	 * @return The name of the extender provision

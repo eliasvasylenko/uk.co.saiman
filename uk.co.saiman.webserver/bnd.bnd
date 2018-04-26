@@ -1,0 +1,10 @@
+Bundle-Name: SAI :: WebJars :: NPM
+
+Bundle-Description: \
+	Provides NPM WebJars
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+\
+	org.apache.felix.webconsole

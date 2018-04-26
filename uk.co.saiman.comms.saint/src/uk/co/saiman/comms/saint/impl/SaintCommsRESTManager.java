@@ -41,8 +41,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.util.converter.Converter;
 
-import osgi.enroute.dto.api.DTOs;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.saint.SaintController;
 
@@ -53,7 +53,7 @@ public class SaintCommsRESTManager {
   private BundleContext context;
 
   @Reference(cardinality = MANDATORY)
-  private DTOs dtos;
+  private Converter converter;
 
   @Activate
   synchronized void activate(BundleContext context) {
@@ -62,7 +62,7 @@ public class SaintCommsRESTManager {
   }
 
   void register(SaintController comms) {
-    CommsREST rest = new SaintCommsREST(comms, dtos);
+    CommsREST rest = new SaintCommsREST(comms, converter);
     serviceRegistrations.put(comms, context.registerService(CommsREST.class, rest, null));
   }
 

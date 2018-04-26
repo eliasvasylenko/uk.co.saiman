@@ -30,13 +30,15 @@ package uk.co.saiman.axios;
 import static uk.co.saiman.axios.AxiosConstants.AXIOS_WEB_RESOURCE_NAME;
 import static uk.co.saiman.axios.AxiosConstants.AXIOS_WEB_RESOURCE_VERSION;
 
+import org.osgi.annotation.bundle.Capability;
+
 import aQute.bnd.annotation.headers.ProvideCapability;
 import osgi.enroute.namespace.WebResourceNamespace;
 
-@ProvideCapability(
-    ns = WebResourceNamespace.NS,
+@Capability(
+    namespace = WebResourceNamespace.NS,
     version = AXIOS_WEB_RESOURCE_VERSION,
-    value = ("root=/META-INF/resources/webjars/axios/" + AXIOS_WEB_RESOURCE_VERSION) + ";"
+    attribute = ("root=/META-INF/resources/webjars/axios/" + AXIOS_WEB_RESOURCE_VERSION) + ";"
         + (WebResourceNamespace.NS + "=" + AXIOS_WEB_RESOURCE_NAME))
 public interface AxiosConstants {
   final String AXIOS_WEB_RESOURCE_NAME = "/axios/axios";

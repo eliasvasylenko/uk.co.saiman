@@ -29,18 +29,19 @@ package uk.co.saiman.comms.saint.impl;
 
 import java.util.Locale;
 
-import osgi.enroute.dto.api.DTOs;
+import org.osgi.util.converter.Converter;
+
 import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.saint.SaintController;
 
 public class SaintCommsREST implements CommsREST {
   private final SaintController controller;
-  private final DTOs dtos;
+  private final Converter converter;
 
-  public SaintCommsREST(SaintController controller, DTOs dtos) {
+  public SaintCommsREST(SaintController controller, Converter converter) {
     this.controller = controller;
-    this.dtos = dtos;
+    this.converter = converter;
   }
 
   @Override
@@ -55,7 +56,7 @@ public class SaintCommsREST implements CommsREST {
 
   @Override
   public ActionTableREST getActions() {
-    return new SaintControllerREST(getName(), controller, dtos);
+    return new SaintControllerREST(getName(), controller, converter);
   }
 
   @Override

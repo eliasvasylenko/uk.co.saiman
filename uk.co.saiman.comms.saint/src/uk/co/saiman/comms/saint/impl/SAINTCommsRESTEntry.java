@@ -38,14 +38,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import osgi.enroute.dto.api.DTOs;
+import org.osgi.util.converter.Converter;
+import org.osgi.util.converter.TypeReference;
+
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 import uk.co.saiman.comms.saint.ValueReadback;
 import uk.co.saiman.comms.saint.ValueRequest;
 
 class SAINTCommsRESTEntry implements ControllerRESTEntry {
-  private final DTOs dtos;
+  private final Converter converter;
 
   private final Map<String, Object> inputData = new HashMap<>();
   private final Map<String, Object> outputData = new HashMap<>();
@@ -58,11 +60,11 @@ class SAINTCommsRESTEntry implements ControllerRESTEntry {
       String name,
       ValueReadback<?> readback,
       ValueRequest<?> request,
-      DTOs dtos) {
+      Converter converter) {
     this.id = name;
     this.readback = readback;
     this.request = request;
-    this.dtos = dtos;
+    this.converter = converter;
   }
 
   @Override
@@ -94,7 +96,7 @@ class SAINTCommsRESTEntry implements ControllerRESTEntry {
   private <T> void setRequestedValue(ValueRequest<T> request) {
     T value;
     try {
-      value = dtos.convert(outputData).to(request.getType());
+      value = converter.convert(outputData).to(request.getType());
     } catch (Exception e) {
       throw new CommsException(
           "Cannot convert output data map to " + request.getType().getSimpleName(),
@@ -107,7 +109,7 @@ class SAINTCommsRESTEntry implements ControllerRESTEntry {
     Object requested = request.getRequested();
     Map<String, Object> outputData;
     try {
-      outputData = dtos.asMap(requested);
+      outputData = converter.convert(requested).to(new TypeReference<Map<String, Object>>() {});
     } catch (Exception e) {
       throw new CommsException("Cannot convert " + requested + " to map", e);
     }
@@ -119,7 +121,7 @@ class SAINTCommsRESTEntry implements ControllerRESTEntry {
     Object actual = readback.getActual();
     Map<String, Object> inputData;
     try {
-      inputData = dtos.asMap(actual);
+      inputData = converter.convert(actual).to(new TypeReference<Map<String, Object>>() {});
     } catch (Exception e) {
       throw new CommsException("Cannot convert " + actual + " to map", e);
     }

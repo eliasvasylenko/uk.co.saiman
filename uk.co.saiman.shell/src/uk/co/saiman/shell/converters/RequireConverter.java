@@ -34,10 +34,10 @@ import static org.osgi.resource.Namespace.EFFECTIVE_ACTIVE;
 
 import java.lang.annotation.Retention;
 
-import aQute.bnd.annotation.headers.RequireCapability;
+import org.osgi.annotation.bundle.Requirement;
 
-@RequireCapability(
-    ns = SERVICE_NAMESPACE,
+@Requirement(
+    namespace = SERVICE_NAMESPACE,
     filter = "(&("
         + CAPABILITY_OBJECTCLASS_ATTRIBUTE
         + "=org.apache.felix.service.command.Converter)("

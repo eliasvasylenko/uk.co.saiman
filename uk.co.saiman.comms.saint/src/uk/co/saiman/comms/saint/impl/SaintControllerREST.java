@@ -43,7 +43,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import osgi.enroute.dto.api.DTOs;
+import org.osgi.util.converter.Converter;
+
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
@@ -63,17 +64,19 @@ final class SaintControllerREST implements ActionTableREST {
   private final ControllerRESTAction getRequested;
   private final Map<String, SAINTCommsRESTEntry> namedEntries = new LinkedHashMap<>();
 
-  SaintControllerREST(String name, SaintController controller, DTOs dtos) {
+  SaintControllerREST(String name, SaintController controller, Converter converter) {
     /*
      * It's a bit naff to use reflection for this, but it keeps the API tidy and
      * makes evolution easier so sue me
      */
 
     Set<SAINTCommsRESTEntry> entries = new TreeSet<>(
-        Comparator.comparing(
-            e -> 0xFF & (e.request != null
-                ? e.request.getRequestedValueAddress()
-                : e.readback.getActualValueAddress()).getBytes()[0]));
+        Comparator
+            .comparing(
+                e -> 0xFF
+                    & (e.request != null
+                        ? e.request.getRequestedValueAddress()
+                        : e.readback.getActualValueAddress()).getBytes()[0]));
 
     try {
       for (Method method : SaintController.class.getDeclaredMethods()) {
@@ -81,23 +84,25 @@ final class SaintControllerREST implements ActionTableREST {
 
         if (method.getReturnType() == Value.class) {
           Value<?> value = (Value<?>) method.invoke(controller);
-          entries.add(new SAINTCommsRESTEntry(methodName, value, value, dtos));
+          entries.add(new SAINTCommsRESTEntry(methodName, value, value, converter));
 
         } else if (method.getReturnType() == ValueReadback.class) {
-          entries.add(
-              new SAINTCommsRESTEntry(
-                  methodName,
-                  (ValueReadback<?>) method.invoke(controller),
-                  null,
-                  dtos));
+          entries
+              .add(
+                  new SAINTCommsRESTEntry(
+                      methodName,
+                      (ValueReadback<?>) method.invoke(controller),
+                      null,
+                      converter));
 
         } else if (method.getReturnType() == ValueRequest.class) {
-          entries.add(
-              new SAINTCommsRESTEntry(
-                  methodName,
-                  null,
-                  (ValueRequest<?>) method.invoke(controller),
-                  dtos));
+          entries
+              .add(
+                  new SAINTCommsRESTEntry(
+                      methodName,
+                      null,
+                      (ValueRequest<?>) method.invoke(controller),
+                      converter));
         }
       }
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -155,8 +160,11 @@ final class SaintControllerREST implements ActionTableREST {
       }
     };
 
-    namedEntries.values().stream().filter(e -> e.request != null).forEach(
-        SAINTCommsRESTEntry::getRequestedValue);
+    namedEntries
+        .values()
+        .stream()
+        .filter(e -> e.request != null)
+        .forEach(SAINTCommsRESTEntry::getRequestedValue);
   }
 
   @Override

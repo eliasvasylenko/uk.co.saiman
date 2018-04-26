@@ -29,7 +29,8 @@ Bundle-Name: SAI :: Comms :: Provider
 	org.apache.felix.gogo.command,\
 	org.apache.felix.gogo.runtime,\
 	org.apache.felix.gogo.shell,\
-	org.apache.felix.webconsole
+	org.apache.felix.webconsole,\
+	org.apache.felix.http.servlet-api
 
 -includeresource: \
 	@${repo;com.fazecast:jSerialComm}!/Android/*,\

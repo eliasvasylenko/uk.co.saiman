@@ -38,6 +38,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -69,21 +70,14 @@ public class SpectrumProcessingExperimentType
   @Reference
   ProcessorService processors;
 
-  private SpectrumProperties properties;
+  private final SpectrumProperties properties;
 
   public SpectrumProcessingExperimentType() {
     this(getDefaultProperties(SpectrumProperties.class));
   }
 
-  /*
-   * TODO this parameter really should be injected by DS. Hurry up OSGi r7 to make
-   * this possible ...
-   */
-  public SpectrumProcessingExperimentType(SpectrumProperties properties) {
-    this.properties = properties;
-  }
-
-  protected void setProperties(SpectrumProperties properties) {
+  @Activate
+  public SpectrumProcessingExperimentType(@Reference SpectrumProperties properties) {
     this.properties = properties;
   }
 

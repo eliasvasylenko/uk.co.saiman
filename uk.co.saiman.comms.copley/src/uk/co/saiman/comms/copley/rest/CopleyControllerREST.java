@@ -38,7 +38,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import osgi.enroute.dto.api.DTOs;
+import org.osgi.util.converter.Converter;
+
 import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.comms.copley.AmplifierMode;
 import uk.co.saiman.comms.copley.CopleyController;
@@ -62,7 +63,7 @@ public class CopleyControllerREST implements ActionTableREST {
   private final ControllerRESTAction writeValue;
   private final ControllerRESTAction switchBank;
 
-  public CopleyControllerREST(CopleyController controller, DTOs dtos) {
+  public CopleyControllerREST(CopleyController controller, Converter converter) {
     this.variableEntries = new LinkedHashMap<>();
     CopleyNode node = controller.getNodes().findFirst().get();
 
@@ -70,7 +71,7 @@ public class CopleyControllerREST implements ActionTableREST {
         .stream(CopleyVariableID.values())
         .forEach(
             variable -> variableEntries
-                .put(variable.toString(), new VariableCommsRESTEntry(node, variable, dtos)));
+                .put(variable.toString(), new VariableCommsRESTEntry(node, variable, converter)));
 
     readValue = new ControllerRESTAction() {
       @Override

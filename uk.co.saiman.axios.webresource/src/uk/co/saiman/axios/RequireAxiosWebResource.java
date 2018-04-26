@@ -33,14 +33,16 @@ import static uk.co.saiman.axios.AxiosConstants.AXIOS_WEB_RESOURCE_VERSION;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.osgi.annotation.bundle.Requirement;
+
 import aQute.bnd.annotation.headers.RequireCapability;
 import osgi.enroute.namespace.WebResourceNamespace;
 
 /**
  * A Web Resource that provides RequireJS javascript files.
  */
-@RequireCapability(
-    ns = WebResourceNamespace.NS,
+@Requirement(
+    namespace = WebResourceNamespace.NS,
     filter = "(&(" + WebResourceNamespace.NS + "=" + AXIOS_WEB_RESOURCE_NAME + ")${frange;"
         + AXIOS_WEB_RESOURCE_VERSION + "})")
 @Retention(RetentionPolicy.CLASS)

@@ -41,13 +41,44 @@ import osgi.enroute.namespace.WebResourceNamespace;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
-@BundleCategory(value = Category.bus, custom = SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION)
+@BundleCategory(custom = SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION)
 @ProvideCapability(
-		ns = WebResourceNamespace.NS,
-		version = SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION,
-		value = ("root=/static" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME) + ";"
-				+ (WebResourceNamespace.NS + "=" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME))
+    ns = WebResourceNamespace.NS,
+    version = SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION,
+    value = ("root=/static" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME)
+        + ";"
+        + (WebResourceNamespace.NS + "=" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME))
 public interface SAIWebConsoleConstants {
-	final String SAI_WEB_CONSOLE_WEB_RESOURCE_NAME = "/sai/webconsole";
-	final String SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION = "1.0.0";
+  final String SAI_WEB_CONSOLE_WEB_RESOURCE_NAME = "/sai/webconsole";
+  final String SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION = "1.0.0";
 }
+
+/*
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * TODO create extender service thingy for picking up webjars with attached
+ * metadata in manifest. Do we want to wrap each webjar individually ... or can
+ * we have a magic repository implementation which does it for us? That would be
+ * pretty great.
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */

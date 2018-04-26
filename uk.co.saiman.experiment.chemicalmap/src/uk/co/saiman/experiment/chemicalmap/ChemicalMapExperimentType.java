@@ -47,22 +47,13 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
     implements ExperimentType<T, ChemicalMap> {
   private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
 
-  private ChemicalMapProperties properties;
+  private final ChemicalMapProperties properties;
 
   public ChemicalMapExperimentType() {
     this(PropertyLoader.getDefaultProperties(ChemicalMapProperties.class));
   }
 
   public ChemicalMapExperimentType(ChemicalMapProperties properties) {
-    this.properties = properties;
-  }
-
-  /*
-   * TODO this really should be moved to the constructor, and the 'properties'
-   * and 'spectrumResult' fields should both be final ... hurry up OSGi r7 to
-   * sort this mess out
-   */
-  protected void setProperties(ChemicalMapProperties properties) {
     this.properties = properties;
   }
 
@@ -87,7 +78,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
     /*- TODO
     Consumer<Spectrum> writer = new CumulativeChemicalMapFormat()
         .getWriter(rasterDevice.getRasterPattern());
-
+    
     CompletableFuture<SampledSpectrum> acquisition = acquisitionDevice
         .acquisitionDataEvents()
         .reduce(

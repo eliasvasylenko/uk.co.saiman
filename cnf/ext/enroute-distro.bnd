@@ -6,15 +6,15 @@
 
 -runfw: org.eclipse.osgi
 
--plugin.enroute.distro = \
-	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
-		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
-		releaseUrls=https://repo1.maven.org/maven2/; \
-		revision=org.osgi:osgi.enroute.pom.distro:2.1.0-SNAPSHOT; \
-		name=Distro; \
-		location=${build}/cache/enroute-distro.xml
+#-plugin.enroute.distro = \
+#	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+#		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
+#		releaseUrls=https://repo1.maven.org/maven2/; \
+#		revision=org.osgi:osgi.enroute.pom.distro:2.1.0-SNAPSHOT; \
+#		name=Distro; \
+#		location=${build}/cache/enroute-distro.xml
 
--pluginR7.enroute = \
+-plugin.enroute = \
 	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
 		snapshotUrls=https://oss.sonatype.org/content/groups/osgi; \
 		releaseUrls=https://repo1.maven.org/maven2/; \

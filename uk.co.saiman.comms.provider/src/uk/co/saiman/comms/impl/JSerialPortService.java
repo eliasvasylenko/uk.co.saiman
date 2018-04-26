@@ -83,20 +83,17 @@ public class JSerialPortService implements CommsPort {
   @Reference
   private Log log;
 
-  private SerialPort serialPort;
+  private final SerialPort serialPort;
 
   private CommsChannel openChannel;
 
-  // TODO constructor injection with R7
-  JSerialPortService() {}
-
-  JSerialPortService(SerialPort serialPort) {
-    serialPort = initializePort(serialPort);
+  @Activate
+  JSerialPortService(JSerialPortConfiguration configuration) {
+    this(SerialPort.getCommPort(configuration.name()));
   }
 
-  @Activate
-  void activate(JSerialPortConfiguration configuration) {
-    serialPort = initializePort(SerialPort.getCommPort(configuration.name()));
+  JSerialPortService(SerialPort serialPort) {
+    this.serialPort = initializePort(serialPort);
   }
 
   private SerialPort initializePort(SerialPort serialPort) {
