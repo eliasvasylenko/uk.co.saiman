@@ -1,0 +1,19 @@
+Bundle-Name: SAI :: Babel :: Transpiler
+
+-buildpath: \
+	biz.aQute.bndlib;version=latest
+
+standalone.version = 6.24.0
+
+-includeresource: \
+	@${repo;org.webjars.npm:babel-standalone;${standalone.version}}!/META-INF/resources/*
+
+Import-Package: \
+	*
+
+Export-Package: \
+	uk.co.saiman.babel.transpiler
+
+Require-Capability: \
+	osgi.compile.time.only;\
+		filter:="(&(must.not.resolve=*)(!(must.not.resolve=*)))"

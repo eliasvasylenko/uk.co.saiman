@@ -1,9 +1,0 @@
--buildpath: \
-	osgi.enroute.web.simple.provider,\
-	biz.aQute.bndlib;version=latest
-
--sub: *.bnd
-
-standalone.version = 6.24.0
-
-core.version = 6.24.1

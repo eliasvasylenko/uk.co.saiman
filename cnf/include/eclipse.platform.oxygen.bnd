@@ -24,3 +24,6 @@
 	org.eclipse.osgi,\
 	org.eclipse.osgi.services,\
 	org.eclipse.ui.workbench
+
+Import-Package:\
+	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!
