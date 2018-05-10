@@ -1,0 +1,27 @@
+Bundle-Name: SAI :: CommonJS :: Bnd Repository Plugin
+
+Bundle-Description: \
+	Provides Bnd repository implementation for CommonJS repositories
+
+Private-Package: \
+	org.apache.commons.compress.utils,\
+	org.apache.commons.compress.archivers,\
+	org.apache.commons.compress.compressors,\
+	org.apache.commons.compress.archivers.tar,\
+	org.apache.commons.compress.archivers.zip,\
+	org.apache.commons.compress.compressors.gzip,\
+	org.json,\
+	org.osgi.util.converter,\
+	uk.co.saiman.log,\
+	uk.co.saiman.text,\
+	uk.co.saiman.bytes,\
+	uk.co.saiman.webmodules.semver,\
+	uk.co.saiman.webmodules.commonjs.registry,\
+	uk.co.saiman.webmodules.commonjs.registry.impl,\
+	uk.co.saiman.webmodules.commonjs.repository,\
+	uk.co.saiman.webmodules.commonjs.repository.bnd
+
+-dsannotations:
+Require-Capability: \
+	osgi.compile.time.only;\
+		filter:="(&(must.not.resolve=*)(!(must.not.resolve=*)))"

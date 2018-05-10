@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: Axios :: Web Module
+
+Bundle-Description: \
+	Provides web resources for Axios applications
+
+axios.version = 0.16.1
+
+-buildpath: \
+	uk.co.saiman.webmodules
+
+-includeresource: \
+	@${repo;org.webjars.npm:axios;${axios.version}}!/META-INF/resources/*
+
+Export-Package: uk.co.saiman.axios

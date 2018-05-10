@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.shell.converters;
 
-import static uk.co.saiman.bytes.ByteBuffers.fromHexString;
-import static uk.co.saiman.bytes.ByteBuffers.toHexString;
+import static uk.co.saiman.bytes.ByteBuffers.fromPrefixedHexString;
+import static uk.co.saiman.bytes.ByteBuffers.toPrefixedHexString;
 import static uk.co.saiman.shell.converters.RequireConverter.TYPE;
 
 import java.nio.ByteBuffer;
@@ -47,7 +47,11 @@ public class HexConverterService implements Converter {
   public ByteBuffer convert(Class<?> type, Object object) {
     if (type.isAssignableFrom(ByteBuffer.class)) {
       if (object instanceof CharSequence) {
-        return fromHexString(object.toString());
+        try {
+          return fromPrefixedHexString(object.toString());
+        } catch (Exception e) {
+          return null;
+        }
       }
     }
 
@@ -57,7 +61,7 @@ public class HexConverterService implements Converter {
   @Override
   public String format(Object object, int p1, Converter p2) {
     if (object instanceof ByteBuffer) {
-      return toHexString((ByteBuffer) object);
+      return toPrefixedHexString((ByteBuffer) object);
     }
 
     return null;

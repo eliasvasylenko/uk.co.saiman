@@ -1,4 +1,5 @@
 -buildpath: \
+	uk.co.saiman.webmodules;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 \

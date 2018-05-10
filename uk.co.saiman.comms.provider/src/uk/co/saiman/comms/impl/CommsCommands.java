@@ -29,8 +29,6 @@ package uk.co.saiman.comms.impl;
 
 import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static osgi.enroute.debug.api.Debug.COMMAND_FUNCTION;
-import static osgi.enroute.debug.api.Debug.COMMAND_SCOPE;
 import static uk.co.saiman.text.properties.SaiProperties.SAI_COMMAND_SCOPE;
 
 import java.io.IOException;
@@ -59,13 +57,13 @@ import uk.co.saiman.shell.converters.RequireConverter;
     immediate = true,
     service = CommsCommands.class, // not sure why this seems to be needed ...
     property = {
-        COMMAND_SCOPE + "=" + SAI_COMMAND_SCOPE,
-        COMMAND_FUNCTION + "=openPort",
-        COMMAND_FUNCTION + "=closePort",
-        COMMAND_FUNCTION + "=readPort",
-        COMMAND_FUNCTION + "=writePort",
-        COMMAND_FUNCTION + "=listPorts",
-        COMMAND_FUNCTION + "=inspectPort" })
+        "osgi.command.scope" + "=" + SAI_COMMAND_SCOPE,
+        "osgi.command.function" + "=openPort",
+        "osgi.command.function" + "=closePort",
+        "osgi.command.function" + "=readPort",
+        "osgi.command.function" + "=writePort",
+        "osgi.command.function" + "=listPorts",
+        "osgi.command.function" + "=inspectPort" })
 public class CommsCommands {
   @Reference(policy = DYNAMIC)
   private volatile List<CommsPort> ports = new CopyOnWriteArrayList<>();

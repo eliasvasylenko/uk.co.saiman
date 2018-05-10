@@ -32,9 +32,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 	javax.measure.unit-api
 
 Export-Package: \
-	uk.co.saiman.msapex.experiment.spectrum,\
 	uk.co.saiman.msapex.experiment.processing.treecontributions
 
 -includeresource:\
-	{css=css},\
-	res
+	{css=css}

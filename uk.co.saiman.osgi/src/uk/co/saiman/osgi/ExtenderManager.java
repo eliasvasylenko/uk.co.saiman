@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.osgi;
 
+import static org.osgi.namespace.extender.ExtenderNamespace.EXTENDER_NAMESPACE;
 import static uk.co.saiman.log.Log.forwardingLog;
 
 import java.util.HashMap;
@@ -61,11 +62,6 @@ import uk.co.saiman.log.Log.Level;
  * @author Elias N Vasylenko
  */
 public abstract class ExtenderManager implements BundleListener {
-  /**
-   * The OSGi capability namespace for an extender.
-   */
-  public static final String OSGI_EXTENDER = "osgi.extender";
-
   private BundleContext context;
   private BundleCapability capability;
   private Log log;
@@ -79,7 +75,7 @@ public abstract class ExtenderManager implements BundleListener {
     List<BundleCapability> extenderCapabilities = context
         .getBundle()
         .adapt(BundleWiring.class)
-        .getCapabilities(OSGI_EXTENDER);
+        .getCapabilities(EXTENDER_NAMESPACE);
 
     if (extenderCapabilities.isEmpty()) {
       throw new IllegalStateException(
@@ -136,7 +132,7 @@ public abstract class ExtenderManager implements BundleListener {
     try {
       boolean registerable = bundle
           .adapt(BundleWiring.class)
-          .getRequirements(OSGI_EXTENDER)
+          .getRequirements(EXTENDER_NAMESPACE)
           .stream()
           .anyMatch(r -> r.matches(capability));
 

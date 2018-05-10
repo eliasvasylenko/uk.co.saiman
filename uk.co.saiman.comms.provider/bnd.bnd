@@ -5,16 +5,6 @@ Bundle-Name: SAI :: Comms :: Provider
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.rest;version=snapshot,\
 \
-	uk.co.saiman.facebook.react.proptypes.webresource;version=snapshot,\
-	uk.co.saiman.facebook.react.webresource;version=snapshot,\
-	uk.co.saiman.facebook.react.dom.webresource;version=snapshot,\
-	uk.co.saiman.facebook.react.redux.webresource;version=snapshot,\
-	uk.co.saiman.axios.webresource;version=snapshot,\
-	uk.co.saiman.redux.webresource;version=snapshot,\
-	uk.co.saiman.redux.thunk.webresource;version=snapshot,\
-	uk.co.saiman.instrument;version=snapshot,\
-	uk.co.saiman.requirejs.webresource;version=snapshot,\
-\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.webconsole.webresource;version=snapshot,\
@@ -23,14 +13,26 @@ Bundle-Name: SAI :: Comms :: Provider
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
-	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
 \
 	com.fazecast:jSerialComm,\
 	org.apache.felix.gogo.command,\
 	org.apache.felix.gogo.runtime,\
 	org.apache.felix.gogo.shell,\
 	org.apache.felix.webconsole,\
-	org.apache.felix.http.servlet-api
+	org.apache.felix.http.servlet-api,\
+\
+	org.apache.aries.javax.jax.rs-api
+#,\
+#\
+#	uk.co.saiman.facebook.react.proptypes.webmodule;version=snapshot,\
+#	uk.co.saiman.facebook.react.webmodule;version=snapshot,\
+#	uk.co.saiman.facebook.react.dom.webmodule;version=snapshot,\
+#	uk.co.saiman.facebook.react.redux.webmodule;version=snapshot,\
+#	uk.co.saiman.axios.webmodule;version=snapshot,\
+#	uk.co.saiman.redux.webmodule;version=snapshot,\
+#	uk.co.saiman.redux.thunk.webmodule;version=snapshot,\
+#	uk.co.saiman.requirejs.webmodule;version=snapshot,\
 
 -includeresource: \
 	@${repo;com.fazecast:jSerialComm}!/Android/*,\

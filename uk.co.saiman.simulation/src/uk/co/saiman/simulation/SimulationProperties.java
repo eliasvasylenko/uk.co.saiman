@@ -30,7 +30,6 @@ package uk.co.saiman.simulation;
 import java.util.List;
 
 import uk.co.saiman.acquisition.AcquisitionProperties;
-import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.text.properties.Localized;
 import uk.co.saiman.text.properties.Nested;
 import uk.co.saiman.text.properties.PropertyConfiguration;
@@ -44,9 +43,6 @@ public interface SimulationProperties {
 
 	@Nested
 	AcquisitionProperties acquisition();
-
-	@Nested
-	ExperimentProperties experiment();
 
 	@Nested
 	SaiProperties sai();

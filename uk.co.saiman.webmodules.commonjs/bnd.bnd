@@ -1,0 +1,14 @@
+-sub: *.bnd
+
+-buildpath: \
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.webmodules.semver;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+\
+	biz.aQute.bndlib;version=latest,\
+	biz.aQute.repository;version=latest,\
+\
+	json;version=latest,\
+	org.apache.commons.compress;version=latest

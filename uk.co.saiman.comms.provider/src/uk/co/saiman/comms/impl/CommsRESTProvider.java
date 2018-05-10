@@ -42,6 +42,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -51,15 +56,11 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jaxrs.whiteboard.annotations.RequireJaxrsWhiteboard;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import osgi.enroute.dto.api.DTOs;
-import osgi.enroute.rest.api.REST;
-import osgi.enroute.rest.api.RequireRestImplementation;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.rest.ActionTableREST;
 import uk.co.saiman.comms.rest.CommsREST;
@@ -67,8 +68,9 @@ import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
 @JaxrsResource
-@Component(property = REST.ENDPOINT + "=/api/comms/*")
-public class CommsRESTProvider implements REST {
+@Path("comms")
+@Component(service = CommsRESTProvider.class)
+public class CommsRESTProvider {
   private static final String NAME_KEY = "name";
   private static final String CONNECTION_KEY = "connection";
   private static final String STATUS_KEY = "status";
@@ -160,15 +162,14 @@ public class CommsRESTProvider implements REST {
         .orElseThrow(() -> new CommsException("Comms interface not found " + name));
   }
 
-  public List<String> getAvailableComms() {
-    return commsInterfaces.keySet().stream().map(CommsREST::getID).collect(toList());
-  }
-
+  @GET
   public List<Map<String, Object>> getCommsInfo() {
     return commsInterfaces.keySet().stream().map(this::getCommsInfoImpl).collect(toList());
   }
 
-  public Map<String, Object> getCommsInfo(String name) {
+  @Path("{name}")
+  @GET
+  public Map<String, Object> getCommsInfo(@PathParam("name") String name) {
     return getCommsInfoImpl(getNamedComms(name));
   }
 
@@ -176,7 +177,10 @@ public class CommsRESTProvider implements REST {
     return comms.getActions();
   }
 
-  public Map<String, Object> postResetComms(String name) {
+  // TODO bad practice REST API... is "reset" really a resource?
+  @Path("{name}/reset")
+  @POST
+  public Map<String, Object> resetComms(@PathParam("name") String name) {
     CommsREST comms = getNamedComms(name);
     comms.reset();
     return getConnectionInfo(comms);
@@ -189,16 +193,7 @@ public class CommsRESTProvider implements REST {
     info.put(CONNECTION_KEY, getConnectionInfo(comms));
     info.put(BUNDLE_KEY, getBundleInfoImpl(commsInterfaces.get(comms)));
 
-    return info;
-  }
-
-  public Map<String, Object> getControllerInfo(String commsName) {
-    return getControllerInfoImpl(getController(getNamedComms(commsName)));
-  }
-
-  private Map<String, Object> getControllerInfoImpl(ActionTableREST controller) {
-    Map<String, Object> info = new HashMap<>();
-
+    ActionTableREST controller = getController(comms);
     info
         .put(
             ENTRIES_KEY,
@@ -245,7 +240,9 @@ public class CommsRESTProvider implements REST {
     return info;
   }
 
-  public Map<String, Map<String, Object>> getEntriesInfo(String commsName) {
+  @Path("{name}/entries")
+  @GET
+  public Map<String, Map<String, Object>> getEntriesInfo(@PathParam("name") String commsName) {
     CommsREST comms = getNamedComms(commsName);
     return getController(comms)
         .getEntries()
@@ -262,7 +259,9 @@ public class CommsRESTProvider implements REST {
     return info;
   }
 
-  public Map<String, Map<String, Object>> getActionsInfo(String commsName) {
+  @Path("{name}/actions")
+  @GET
+  public Map<String, Map<String, Object>> getActionsInfo(@PathParam("name") String commsName) {
     CommsREST comms = getNamedComms(commsName);
     return getController(comms)
         .getActions()
@@ -281,11 +280,13 @@ public class CommsRESTProvider implements REST {
     return info;
   }
 
+  @Path("{name}/entries/{entry}/actions/{action}")
+  @POST
   public Map<String, Object> postActionInvocation(
       Map<String, Object> output,
-      String commsID,
-      String entryID,
-      String actionID) {
+      @PathParam("name") String commsID,
+      @PathParam("entry") String entryID,
+      @PathParam("action") String actionID) {
     CommsREST comms = getNamedComms(commsID);
     ControllerRESTEntry entry = getController(comms).getEntry(entryID).get();
     ControllerRESTAction action = getController(comms).getAction(actionID).get();

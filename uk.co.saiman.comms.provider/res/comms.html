@@ -1,37 +1,56 @@
-<script
-  src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/require.js"></script>
 <script>
-  const commsRestID = "\${comms.rest.id}"
-  const commsRestName = "\${comms.rest.name}"
-  const appRoot = "\${appRoot}"
-  const pluginRoot = "\${pluginRoot}"
-  var i18n = {
-    infoHeader : "\${comms.info.header}",
-    name : "\${comms.name}",
-    status : "\${comms.status}",
-    channel : "\${comms.channel}",
-    bundle : "\${comms.bundle}",
-    entryID : "\${entry.id}",
-    entryOutput : "\${entry.output}",
-    entryInput : "\${entry.input}",
-    entryActions : "\${entry.actions}",
-    pollStop : "\${entry.poll.stop}",
-    pollStart : "\${entry.poll.start}",
-    connectionOpen : "\${comms.action.open}",
-    connectionClose : "\${comms.action.close}"
-  }
-</script>
-<script>
-  require.config({
-    baseUrl : "/osgi.enroute.webresource/${bsn}/${Bundle-Version}/dist/",
-    baseUrlNew : "/static/${provider-bsn}/${provider-Bundle-Version}/",
-    paths : {
-      "app" : "\${pluginRoot}/res/sai"
-    }
-  })
-  require([
-    "app/comms"
-  ])
+	const commsRestID = "\${comms.rest.id}"
+	const commsRestName = "\${comms.rest.name}"
+	const appRoot = "\${appRoot}"
+	const pluginRoot = "\${pluginRoot}"
+	var i18n = {
+		infoHeader : "\${comms.info.header}",
+		name : "\${comms.name}",
+		status : "\${comms.status}",
+		channel : "\${comms.channel}",
+		bundle : "\${comms.bundle}",
+		entryID : "\${entry.id}",
+		entryOutput : "\${entry.output}",
+		entryInput : "\${entry.input}",
+		entryActions : "\${entry.actions}",
+		pollStop : "\${entry.poll.stop}",
+		pollStart : "\${entry.poll.start}",
+		connectionOpen : "\${comms.action.open}",
+		connectionClose : "\${comms.action.close}"
+	}
+	require([ "app/comms" ])
 </script>
 <script
-  src="/osgi.enroute.webresource/${bsn}/${Bundle-Version}/require.js"></script>
+	src="/uk.co.saiman.moduleserver.provision/${bsn}/${Bundle-Version}"></script>
+<script src="\${pluginRoot}/res/sai/app/comms.js"></script>
+
+
+
+
+
+
+
+The following require.js include and require.config should be generated
+by the OSGi backend...
+
+<script
+	src="/uk.co.saiman.moduleserver/require/requirejs/${requirejs-Bundle-Version}/require.js"></script>
+<script>
+	require.config({
+		baseUrl : "/uk.co.saiman.moduleserver/require/",
+		paths : {
+			"app" : "app/${app-provider-Bundle-Version}/res/sai""
+		}
+	})
+</script>
+
+...from a tag like this:
+
+<script
+	src="/uk.co.saiman.moduleserver/provision/${bsn}/${Bundle-Version}"></script>
+	
+then load a module with (eventually will be normal ES6 module loading syntax):
+
+<script>
+	require([ "app/comms" ])
+</script>

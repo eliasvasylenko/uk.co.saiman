@@ -37,60 +37,50 @@ import java.nio.file.Path;
 import java.util.Collections;
 
 public class Jar {
-	private static final String MANIFEST_PATH = "/META-INF/MANIFEST.MF";
+  private final FileSystem fileSystem;
 
-	private final FileSystem fileSystem;
+  protected Jar(URI jarLocation) {
+    try {
+      if (new File(jarLocation).isFile() && !jarLocation.toString().startsWith("jar:")) {
+        jarLocation = new URI("jar:" + jarLocation);
+      }
+      FileSystem fileSystem;
+      try {
+        fileSystem = FileSystems.getFileSystem(jarLocation);
+      } catch (Exception e) {
+        fileSystem = FileSystems.newFileSystem(jarLocation, Collections.emptyMap());
+      }
+      this.fileSystem = fileSystem;
+    } catch (IOException | URISyntaxException e) {
+      throw new RuntimeException("Creating file system for jar " + jarLocation + " failed", e);
+    }
+  }
 
-	protected Jar(URI jarLocation) {
-		try {
-			if (new File(jarLocation).isFile() && !jarLocation.toString().startsWith("jar:")) {
-				jarLocation = new URI("jar:" + jarLocation);
-			}
-			FileSystem fileSystem;
-			try {
-				fileSystem = FileSystems.getFileSystem(jarLocation);
-			} catch (Exception e) {
-				fileSystem = FileSystems.newFileSystem(jarLocation, Collections.emptyMap());
-			}
-			this.fileSystem = fileSystem;
-		} catch (IOException | URISyntaxException e) {
-			throw new RuntimeException("Creating file system for jar " + jarLocation + " failed", e);
-		}
-	}
+  public static Jar getContainingJar(Class<?> clazz) {
+    return getJar(getContainingJarLocation(clazz));
+  }
 
-	public static Jar getContainingJar(Class<?> clazz) {
-		return getJar(getContainingJarLocation(clazz));
-	}
+  public static Jar getJar(URI location) {
+    return new Jar(location);
+  }
 
-	public static Jar getJar(URI location) {
-		return new Jar(location);
-	}
+  public static URI getContainingJarLocation(Class<?> clazz) {
+    try {
+      return clazz.getProtectionDomain().getCodeSource().getLocation().toURI();
+    } catch (Exception e) {
+      throw new RuntimeException("Loading MANIFEST for class " + clazz + " failed", e);
+    }
+  }
 
-	public static URI getContainingJarLocation(Class<?> clazz) {
-		try {
-			return clazz.getProtectionDomain().getCodeSource().getLocation().toURI();
-		} catch (Exception e) {
-			throw new RuntimeException("Loading MANIFEST for class " + clazz + " failed", e);
-		}
-	}
+  public FileSystem getFileSystem() {
+    return fileSystem;
+  }
 
-	public FileSystem getFileSystem() {
-		return fileSystem;
-	}
+  public Path getRootPath() {
+    return fileSystem.getRootDirectories().iterator().next();
+  }
 
-	public Path getRootPath() {
-		return fileSystem.getRootDirectories().iterator().next();
-	}
-
-	public Path getPackagePath(Package jarPackage) {
-		return getFileSystem().getPath(jarPackage.getName().replace('.', '/'));
-	}
-
-	public JarManifest getManifest() {
-		return new JarManifest(fileSystem.getPath(MANIFEST_PATH));
-	}
-
-	public JarManifest getManifest(ManifestAttributeParser parser) {
-		return new JarManifest(fileSystem.getPath(MANIFEST_PATH), parser);
-	}
+  public Path getPackagePath(Package jarPackage) {
+    return getFileSystem().getPath(jarPackage.getName().replace('.', '/'));
+  }
 }

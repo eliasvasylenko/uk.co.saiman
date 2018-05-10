@@ -67,17 +67,18 @@ import uk.co.saiman.experiment.processing.ProcessorState;
 @Component(service = ExperimentType.class)
 public class SpectrumProcessingExperimentType
     implements ProcessingType<SpectrumResultConfiguration, Spectrum, Spectrum> {
-  @Reference
-  ProcessorService processors;
-
+  private final ProcessorService processors;
   private final SpectrumProperties properties;
 
-  public SpectrumProcessingExperimentType() {
-    this(getDefaultProperties(SpectrumProperties.class));
+  public SpectrumProcessingExperimentType(ProcessorService processors) {
+    this(processors, getDefaultProperties(SpectrumProperties.class));
   }
 
   @Activate
-  public SpectrumProcessingExperimentType(@Reference SpectrumProperties properties) {
+  public SpectrumProcessingExperimentType(
+      @Reference ProcessorService processors,
+      @Reference SpectrumProperties properties) {
+    this.processors = processors;
     this.properties = properties;
   }
 

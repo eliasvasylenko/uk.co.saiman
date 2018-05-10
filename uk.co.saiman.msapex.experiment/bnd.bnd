@@ -23,8 +23,6 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.provider;version=snapshot,\
-	uk.co.saiman.experiment.sample;version=snapshot,\
-	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\

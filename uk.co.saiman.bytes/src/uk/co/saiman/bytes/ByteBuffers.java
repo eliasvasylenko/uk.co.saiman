@@ -36,14 +36,20 @@ public final class ByteBuffers {
 
   private ByteBuffers() {}
 
-  public static ByteBuffer fromHexString(String object) {
+  public static ByteBuffer fromPrefixedHexString(String object) {
     String hexString = object.toString().trim();
 
     if (!hexString.startsWith("0x")) {
-      return null;
+      throw new IllegalArgumentException("Invalid format, missing 0x prefix");
     }
 
     hexString = hexString.substring(2);
+
+    return fromHexString(object);
+  }
+
+  public static ByteBuffer fromHexString(String object) {
+    String hexString = object.toString().trim();
 
     int len = hexString.length();
     byte[] data = new byte[len / 2];
@@ -53,6 +59,10 @@ public final class ByteBuffers {
     }
 
     return ByteBuffer.wrap(data);
+  }
+
+  public static String toPrefixedHexString(ByteBuffer buffer) {
+    return "0x" + toHexString(buffer);
   }
 
   public static String toHexString(ByteBuffer buffer) {
@@ -66,6 +76,6 @@ public final class ByteBuffers {
       hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
     }
 
-    return "0x" + new String(hexChars);
+    return new String(hexChars);
   }
 }

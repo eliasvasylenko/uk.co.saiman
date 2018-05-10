@@ -15,7 +15,7 @@ Git-SHA:			${system-allow-fail;git rev-list -1 HEAD}
 -sources: true
 
 -include: ${workspace}/copyright.properties
-copyright.work.name = ${project.name}
+copyright.work.name = ${project.nameT}
 copyright.year = ${tstamp;yyyy}
 copyright = Copyright (c) ${copyright.holder.name} (2015, ${copyright.year}). All Rights Reserved.
 
@@ -65,11 +65,10 @@ Bundle-Developers:\
 		location=${build}/cache/central.xml
 
 -plugin.Bnd: \
-	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
-		name=Bnd; \
-		snapshotUrls=https://bndtools.ci.cloudbees.com/job/bnd.master/lastBuild/artifact/dist/bundles/;\
-		pom=${build}/bnd.xml;\
-		location=${build}/cache/bnd.xml
+\
+		aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"Bnd";\
+			url					=       "https://bndtools.ci.cloudbees.com/job/bndtools.master/lastSuccessfulBuild/artifact/build/generated/p2"
 
 -plugin.Local:\
 \

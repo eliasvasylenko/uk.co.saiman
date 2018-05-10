@@ -27,13 +27,10 @@
  */
 package uk.co.saiman.webconsole;
 
-import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_RESOURCE_NAME;
-import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION;
+import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_NAME;
+import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
 
-import aQute.bnd.annotation.headers.BundleCategory;
-import aQute.bnd.annotation.headers.Category;
-import aQute.bnd.annotation.headers.ProvideCapability;
-import osgi.enroute.namespace.WebResourceNamespace;
+import uk.co.saiman.webmodules.ProvideWebModule;
 
 /**
  * Annotation to generate requirement to SAI web console utilities.
@@ -41,44 +38,12 @@ import osgi.enroute.namespace.WebResourceNamespace;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
-@BundleCategory(custom = SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION)
-@ProvideCapability(
-    ns = WebResourceNamespace.NS,
-    version = SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION,
-    value = ("root=/static" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME)
-        + ";"
-        + (WebResourceNamespace.NS + "=" + SAI_WEB_CONSOLE_WEB_RESOURCE_NAME))
+@ProvideWebModule(
+    name = SAI_WEB_CONSOLE_WEB_MODULE_NAME,
+    version = SAI_WEB_CONSOLE_WEB_MODULE_VERSION,
+    main = "dist/sai-webconsole.js",
+    root = "/static/" + SAI_WEB_CONSOLE_WEB_MODULE_NAME)
 public interface SAIWebConsoleConstants {
-  final String SAI_WEB_CONSOLE_WEB_RESOURCE_NAME = "/sai/webconsole";
-  final String SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION = "1.0.0";
+  final String SAI_WEB_CONSOLE_WEB_MODULE_NAME = "sai/webconsole";
+  final String SAI_WEB_CONSOLE_WEB_MODULE_VERSION = "1.0.0";
 }
-
-/*
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * TODO create extender service thingy for picking up webjars with attached
- * metadata in manifest. Do we want to wrap each webjar individually ... or can
- * we have a magic repository implementation which does it for us? That would be
- * pretty great.
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */

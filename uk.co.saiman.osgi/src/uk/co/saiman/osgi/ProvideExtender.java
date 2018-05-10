@@ -33,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.osgi.annotation.bundle.Capability;
+import org.osgi.namespace.extender.ExtenderNamespace;
 
 /**
  * Provide an OSGi extender capability of the given name and version.
@@ -44,7 +45,7 @@ import org.osgi.annotation.bundle.Capability;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-@Capability(namespace = ExtenderManager.OSGI_EXTENDER)
+@Capability(namespace = ExtenderNamespace.EXTENDER_NAMESPACE)
 public @interface ProvideExtender {
 	/**
 	 * @return The name of the extender provision

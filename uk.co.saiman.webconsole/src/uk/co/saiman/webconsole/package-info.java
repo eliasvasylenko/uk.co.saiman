@@ -25,5 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-@org.osgi.annotation.versioning.Version(uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_RESOURCE_VERSION)
+@org.osgi.annotation.versioning.Version(SAI_WEB_CONSOLE_WEB_MODULE_VERSION)
 package uk.co.saiman.webconsole;
+
+import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
