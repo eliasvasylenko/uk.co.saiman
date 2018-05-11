@@ -45,7 +45,10 @@ public class CommonJsBundleVersion {
     this.packageVersion = version;
     this.version = version.getVersion().toOsgiVersion();
 
-    this.cache = new CommonJsCache(this);
+    this.cache = new CommonJsCache(
+        bundle.getRepository().getCache(),
+        bundle.getModuleName(),
+        version.getVersion());
   }
 
   protected static Filter parseSemverRange(String versionRangeString) {

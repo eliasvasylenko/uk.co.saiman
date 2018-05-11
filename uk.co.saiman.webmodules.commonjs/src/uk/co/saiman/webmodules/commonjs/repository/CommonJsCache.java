@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodules.semver.Version;
 
 /**
  * A shared local cache for resources derived from CommonJS registry packages.
@@ -23,29 +25,43 @@ public class CommonJsCache {
   private static final int BUFFER_SIZE = 1024;
   private static final String SHASUM_CACHE = "shasum";
 
-  private final CommonJsBundleVersion bundleVersion;
+  private final Path cacheRoot;
+  private final String moduleName;
+  private final Version moduleVersion;
 
-  public CommonJsCache(CommonJsBundleVersion bundleVersion) {
-    this.bundleVersion = bundleVersion;
+  private final Optional<String> sha1;
+
+  public CommonJsCache(Path cacheRoot, String moduleName, Version moduleVersion) {
+    this(cacheRoot, moduleName, moduleVersion, Optional.empty());
   }
 
-  CommonJsBundleVersion getBundleVersion() {
-    return bundleVersion;
+  public CommonJsCache(Path cacheRoot, String moduleName, Version moduleVersion, String sha1) {
+    this(cacheRoot, moduleName, moduleVersion, Optional.of(sha1));
   }
 
-  CommonJsBundle getBundle() {
-    return bundleVersion.getBundle();
+  private CommonJsCache(
+      Path cacheRoot,
+      String moduleName,
+      Version moduleVersion,
+      Optional<String> sha1) {
+    this.cacheRoot = cacheRoot;
+    this.moduleName = moduleName;
+    this.moduleVersion = moduleVersion;
+    this.sha1 = sha1;
+  }
+
+  public String getModuleName() {
+    return moduleName;
+  }
+
+  public Optional<String> getSha1() {
+    return sha1;
   }
 
   public Path getCacheRoot() {
-    Path cacheRoot = getBundle().getRepository().getCache();
-    return bundleVersion
-        .getSha1()
+    return sha1
         .map(sha1 -> cacheRoot.resolve(SHASUM_CACHE).resolve(sha1))
-        .orElse(
-            cacheRoot
-                .resolve(getBundle().getModuleName())
-                .resolve(getBundleVersion().getSemver().toString()));
+        .orElse(cacheRoot.resolve(moduleName).resolve(moduleVersion.toString()));
   }
 
   public Path fetchResource(String resourceName, Consumer<CacheEntry> prepare) {
@@ -60,7 +76,7 @@ public class CommonJsCache {
     Path destination = getCacheRoot().resolve(resourceName);
 
     if (Files.exists(destination)) {
-      if (getBundleVersion().getSha1().isPresent() && stable) {
+      if (sha1.isPresent() && stable) {
         return destination;
       } else {
         try {
