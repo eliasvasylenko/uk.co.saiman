@@ -30,7 +30,7 @@ package uk.co.saiman.text;
 import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.Theory;
 
-import uk.co.saiman.utility.Enumeration;
+import uk.co.saiman.utility.Enums;
 
 /**
  * Careful design is necessary here, as in some cases we are testing what
@@ -46,8 +46,8 @@ public class StringEscaperTest {
 	public static final String SENTENCE = "The small brown dog.";
 
 	/**
-	 * Confirm that {@link Enumeration}s are properly initialised when accessed
-	 * first by literal, rather than via {@link Enumeration#getConstants(Class)}.
+	 * Confirm that {@link Enums}s are properly initialised when accessed
+	 * first by literal, rather than via {@link Enums#getConstants(Class)}.
 	 * This is significant because of the odd initialisation logic to enforce
 	 * instantiation only inside static initialisers.
 	 */
@@ -55,7 +55,7 @@ public class StringEscaperTest {
 	public void testEnumLiteralAccess() {}
 
 	/**
-	 * Confirm that an {@link Enumeration} works as an inner class (implementation
+	 * Confirm that an {@link Enums} works as an inner class (implementation
 	 * may perform stack trace examination).
 	 */
 	@Theory

@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.chemistry;
 
-import static uk.co.saiman.utility.Enumeration.next;
+import static uk.co.saiman.utility.Enums.next;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +41,6 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 
 import uk.co.saiman.msapex.chemistry.ChemicalElementTile.Size;
-import uk.co.saiman.utility.Enumeration;
 
 /**
  * Toggle available size options for the periodic table
@@ -64,7 +63,7 @@ public class PeriodicTableResize {
 
     for (Size size : Arrays.asList(Size.values())) {
       MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-      moduleItem.setLabel(Enumeration.readableName(size));
+      moduleItem.setLabel(size.toString());
       moduleItem.setType(ItemType.RADIO);
       moduleItem.setSelected(periodicTablePart.getPeriodicTableController().getTileSize() == size);
       moduleItem.setObject(new Object() {
