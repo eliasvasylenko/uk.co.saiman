@@ -1,5 +1,0 @@
--buildpath: \
-	osgi.enroute.web.simple.provider,\
-	uk.co.saiman.redux.webresource
-
--sub: *.bnd

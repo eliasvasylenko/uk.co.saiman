@@ -89,7 +89,7 @@ Bundle-Developers:\
 		snapshotUrl			=	http://oss.jfrog.org/oss-snapshot-local
 
 -pluginpath.commonjs.repository: ${build}/local/uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-1.0.0.jar
--pluginno.NPM:\
+-plugin.NPM:\
 \
 	uk.co.saiman.webmodules.commonjs.repository.bnd.CommonJsRepositoryPlugin;\
 		name				=	"NPM";\
@@ -109,15 +109,6 @@ Bundle-Developers:\
 	org.apache.felix.framework
 
 # Build path groups:
-#-buildpath.base=\
-#	osgi.enroute.base.api;version=latest
-
-#-testpath.base=\
-#	org.jmockit:jmockit,\
-#	osgi.enroute.junit.wrapper,\
-#	osgi.enroute.hamcrest.wrapper,\
-#	org.hamcrest:java-hamcrest
-
 -buildpath.base=\
 	osgi.annotation;version=latest,\
 	osgi.cmpn;version=latest,\

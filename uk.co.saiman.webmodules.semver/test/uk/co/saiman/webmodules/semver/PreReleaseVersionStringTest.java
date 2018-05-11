@@ -30,6 +30,8 @@ package uk.co.saiman.webmodules.semver;
 import org.junit.Assert;
 import org.junit.Test;
 
+import uk.co.saiman.webmodules.semver.PreReleaseVersion;
+
 public class PreReleaseVersionStringTest {
   @Test(expected = IllegalArgumentException.class)
   public void parseWithInnerSpace() {

@@ -27,11 +27,8 @@
  */
 package uk.co.saiman.webmodules.commonjs.repository;
 
-import static java.nio.file.Files.createDirectories;
-import static java.nio.file.Files.newInputStream;
-import static java.nio.file.Files.newOutputStream;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 import static org.osgi.framework.Constants.VERSION_ATTRIBUTE;
 import static org.osgi.namespace.extender.ExtenderNamespace.EXTENDER_NAMESPACE;
 import static org.osgi.resource.Namespace.REQUIREMENT_FILTER_DIRECTIVE;
@@ -40,90 +37,46 @@ import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_EXTENDER_NA
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_EXTENDER_VERSION;
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_MAIN_ATTRIBUTE;
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_ROOT_ATTRIBUTE;
+import static uk.co.saiman.webmodules.commonjs.repository.CommonJsBundleVersion.RESOURCE_ROOT;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.osgi.framework.Filter;
-import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
+import aQute.bnd.osgi.resource.CapReqBuilder;
 import aQute.bnd.osgi.resource.CapabilityBuilder;
 import aQute.bnd.osgi.resource.RequirementBuilder;
 import aQute.bnd.version.VersionRange;
-import uk.co.saiman.webmodules.commonjs.registry.Archive;
-import uk.co.saiman.webmodules.commonjs.registry.ArchiveType;
-import uk.co.saiman.webmodules.commonjs.registry.PackageVersion;
 import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
-import uk.co.saiman.webmodules.commonjs.repository.CommonJsRepository.CommonJsBundle;
-import uk.co.saiman.webmodules.semver.Range;
 
 public class CommonJsResource implements Resource {
-  private static final int BUFFER_SIZE = 1024;
+  private final CommonJsBundleVersion bundleVersion;
 
-  private static final String SHASUM_CACHE = "shasum";
+  private List<CapReqBuilder> requirements;
+  private List<CapReqBuilder> capabilities;
 
-  private static final String PACKAGE_SOURCE = "package/";
-  private static final String PACKAGE_JSON = "package.json";
-
-  private final CommonJsBundle bundle;
-  private final PackageVersion packageVersion;
-  private final Version version;
-
-  private final Capability moduleCapability;
-  private final Requirement extenderRequirement;
-  private final List<Requirement> dependencyRequirements;
-
-  public CommonJsResource(CommonJsBundle bundle, PackageVersion version) {
-    this.bundle = bundle;
-    this.packageVersion = version;
-    this.version = parseSemver(version.getVersion());
-
-    JSONObject packageJson = openPackageJson();
-
-    this.moduleCapability = createModuleCapability(packageJson);
-    this.extenderRequirement = createExtenderRequirement();
-    this.dependencyRequirements = createDependencyRequirements(packageJson);
+  public CommonJsResource(CommonJsBundleVersion bundleVersion) {
+    this.bundleVersion = bundleVersion;
   }
 
-  public CommonJsBundle getBundle() {
-    return bundle;
-  }
-
-  private Path getDistCache() {
-    Path cacheRoot = getBundle().getRepository().getCache();
-    return hasSha1()
-        ? cacheRoot.resolve(SHASUM_CACHE).resolve(getSha1())
-        : cacheRoot.resolve(getBundle().getModuleName()).resolve(packageVersion.getVersion());
-  }
-
-  private Capability createModuleCapability(JSONObject packageJson) {
+  private CapReqBuilder createModuleCapability(JSONObject packageJson) {
     try {
       return new CapabilityBuilder(this, WEB_MODULE_CAPABILITY)
           .setResource(this)
           .addAttribute(WEB_MODULE_MAIN_ATTRIBUTE, packageJson.getString(WEB_MODULE_MAIN_ATTRIBUTE))
-          .addAttribute(WEB_MODULE_ROOT_ATTRIBUTE, "static")
-          .addAttribute(WEB_MODULE_CAPABILITY, bundle.getModuleName())
-          .addAttribute(VERSION_ATTRIBUTE, version)
-          .buildCapability();
+          .addAttribute(WEB_MODULE_ROOT_ATTRIBUTE, RESOURCE_ROOT)
+          .addAttribute(WEB_MODULE_CAPABILITY, bundleVersion.getBundle().getModuleName())
+          .addAttribute(VERSION_ATTRIBUTE, bundleVersion.getVersion());
     } catch (Exception e) {
       throw new RegistryResolutionException("Failed to generate module capability", e);
     }
   }
 
-  private Requirement createExtenderRequirement() {
+  private CapReqBuilder createExtenderRequirement() {
     try {
       aQute.bnd.version.Version version = new aQute.bnd.version.Version(
           WEB_MODULE_EXTENDER_VERSION);
@@ -134,132 +87,66 @@ public class CommonJsResource implements Resource {
       return new RequirementBuilder(EXTENDER_NAMESPACE)
           .setResource(this)
           .addAttribute(EXTENDER_NAMESPACE, WEB_MODULE_EXTENDER_NAME)
-          .addDirective(REQUIREMENT_FILTER_DIRECTIVE, versionRange.toFilter())
-          .buildRequirement();
+          .addDirective(REQUIREMENT_FILTER_DIRECTIVE, versionRange.toFilter());
     } catch (Exception e) {
       throw new RegistryResolutionException("Failed to generate extender requirement", e);
     }
   }
 
-  private List<Requirement> createDependencyRequirements(JSONObject packageJson) {
+  private Stream<CapReqBuilder> createDependencyRequirements(JSONObject packageJson) {
     try {
       // TODO Auto-generated method stub
-      return Collections.emptyList();
+      return Stream.empty();
     } catch (Exception e) {
       throw new RegistryResolutionException("Failed to generate dependency requirements", e);
     }
   }
 
-  private boolean hasSha1() {
-    return packageVersion.getSha1().isPresent();
+  /*-
+   * For the moment we'll not bother requiring an execution
+   * environment and instead rely on the one specified by whomever
+   * is wired to fulfill the extender requirement. This saves us
+   * from implementing any complex support for minimized jigsaw
+   * environments.
+   *  
+  private CapReqBuilder createExecutionEnvironmentRequirement() {
+    return new RequirementBuilder(EXECUTION_ENVIRONMENT_NAMESPACE)
+        .setResource(this)
+        .addDirective(FILTER_DIRECTIVE, JAVA.J2SE5.getFilter());
+  }
+   */
+
+  public Stream<CapReqBuilder> getCapabilities() {
+    if (capabilities == null) {
+      capabilities = Stream
+          .of(createModuleCapability(bundleVersion.getPackageJson()))
+          .collect(toList());
+    }
+    return capabilities.stream();
   }
 
-  private String getSha1() {
-    return packageVersion.getSha1().map(String::toUpperCase).orElse(null);
-  }
-
-  private JSONObject openPackageJson() {
-    try {
-      return new JSONObject(new JSONTokener(newInputStream(getPackageJson())));
-    } catch (JSONException | IOException e) {
-      throw new RegistryResolutionException("Failed to open " + PACKAGE_JSON, e);
+  public Stream<CapReqBuilder> getRequirements() {
+    if (requirements == null) {
+      requirements = concat(
+          Stream.of(createExtenderRequirement()),
+          createDependencyRequirements(bundleVersion.getPackageJson())).collect(toList());
     }
-  }
-
-  private Path getPackageJson() {
-    if (hasSha1()) {
-      Path cachedPackage = getDistCache().resolve(PACKAGE_JSON);
-
-      if (Files.exists(cachedPackage)) {
-        return cachedPackage;
-      }
-    }
-
-    byte[] bytes;
-
-    if (packageVersion.getArchives().anyMatch(ArchiveType.TARBALL::equals)) {
-      bytes = extractTarballPackageJson(packageVersion.getArchive(ArchiveType.TARBALL));
-
-    } else {
-      throw new RegistryResolutionException(
-          "No supported archive types amongst candidates "
-              + packageVersion.getArchives().collect(toList()));
-    }
-
-    return writeBytesToCache(PACKAGE_JSON, bytes);
-  }
-
-  private byte[] extractTarballPackageJson(Archive archive) {
-    try (TarGzInputStream input = new TarGzInputStream(archive.getURL().openStream(), getSha1())) {
-      input.findEntry(PACKAGE_SOURCE + PACKAGE_JSON);
-
-      try (ByteArrayOutputStream buffered = new ByteArrayOutputStream()) {
-        byte[] readBuffer = new byte[BUFFER_SIZE];
-        int len = 0;
-        while ((len = input.read(readBuffer)) != -1) {
-          buffered.write(readBuffer, 0, len);
-        }
-
-        return buffered.toByteArray();
-      }
-    } catch (IOException e) {
-      throw new RegistryResolutionException(
-          "Failed to extract archive from URL " + packageVersion.getUrl(),
-          e);
-    }
-  }
-
-  private Path writeBytesToCache(String fileName, byte[] bytes) {
-    try {
-      Path destination = getDistCache().resolve(fileName);
-      createDirectories(destination.getParent());
-
-      try (BufferedOutputStream buffered = new BufferedOutputStream(newOutputStream(destination))) {
-        buffered.write(bytes);
-      }
-
-      return destination;
-    } catch (IOException e) {
-      throw new RegistryResolutionException(
-          "Failed to write to cache directory " + getDistCache(),
-          e);
-    }
+    return requirements.stream();
   }
 
   @Override
   public List<Capability> getCapabilities(String namespace) {
-    return asList(moduleCapability);
+    return getCapabilities()
+        .filter(c -> namespace == null || c.getNamespace().equals(namespace))
+        .map(CapReqBuilder::buildCapability)
+        .collect(toList());
   }
 
   @Override
   public List<Requirement> getRequirements(String namespace) {
-    ArrayList<Requirement> requirements = new ArrayList<>(dependencyRequirements.size() + 1);
-    requirements.addAll(dependencyRequirements);
-    requirements.add(extenderRequirement);
-    return Collections.unmodifiableList(requirements);
-  }
-
-  protected static Version parseSemver(String versionString) {
-    org.osgi.framework.Version osgiVersion = new uk.co.saiman.webmodules.semver.Version(
-        versionString).toOsgiVersion();
-
-    return new Version(
-        osgiVersion.getMajor(),
-        osgiVersion.getMinor(),
-        osgiVersion.getMicro(),
-        osgiVersion.getQualifier());
-  }
-
-  protected static Filter parseSemverRange(String versionRangeString) {
-    return new Range(versionRangeString).toOsgiFilter();
-  }
-
-  protected Stream<String> getDependencies() {
-    // TODO Auto-generated method stub
-    return Stream.empty();
-  }
-
-  public Version getVersion() {
-    return version;
+    return getRequirements()
+        .filter(c -> namespace == null || c.getNamespace().equals(namespace))
+        .map(CapReqBuilder::buildRequirement)
+        .collect(toList());
   }
 }

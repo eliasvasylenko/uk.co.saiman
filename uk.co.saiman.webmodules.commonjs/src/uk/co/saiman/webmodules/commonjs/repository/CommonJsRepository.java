@@ -41,7 +41,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.service.component.annotations.Component;
@@ -55,7 +54,6 @@ import aQute.bnd.osgi.repository.BaseRepository;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.webmodules.commonjs.registry.PackageRoot;
-import uk.co.saiman.webmodules.commonjs.registry.PackageVersion;
 import uk.co.saiman.webmodules.commonjs.registry.Registry;
 
 @Designate(ocd = CommonJsRepository.CommonJsRepositoryConfiguration.class, factory = true)
@@ -134,8 +132,16 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     log.log(Level.WARN, "inited!");
   }
 
+  Log getLog() {
+    return log;
+  }
+
   public Path getCache() {
     return cache;
+  }
+
+  public String getBundleSymbolicNamePrefix() {
+    return bsnPrefix;
   }
 
   private synchronized void initialize() {
@@ -171,7 +177,7 @@ public class CommonJsRepository extends BaseRepository implements Repository {
         .collect(toMap(identity(), this::findProviders, (a, b) -> a, HashMap::new));
   }
 
-  private Stream<PackageRoot> findPackageRoot(String name) {
+  Stream<PackageRoot> findPackageRoot(String name) {
     try {
       return Stream.of(registry.getPackageRoot(name));
     } catch (Exception e) {
@@ -180,9 +186,10 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     }
   }
 
-  private CommonJsBundle loadBundle(PackageRoot packageRoot) {
+  CommonJsBundle loadBundle(PackageRoot packageRoot) {
     synchronized (resources) {
-      return resources.computeIfAbsent(packageRoot.getName(), n -> new CommonJsBundle(packageRoot));
+      return resources
+          .computeIfAbsent(packageRoot.getName(), n -> new CommonJsBundle(this, packageRoot));
     }
   }
 
@@ -192,7 +199,8 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     return resources
         .values()
         .stream()
-        .flatMap(CommonJsBundle::getResources)
+        .flatMap(CommonJsBundle::getBundleVersions)
+        .map(CommonJsBundleVersion::getResource)
         .flatMap(resource -> resource.getCapabilities(requirement.getNamespace()).stream())
         .filter(capability -> matches(requirement, capability))
         .collect(toSet());
@@ -214,89 +222,5 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     initialize();
 
     return Optional.ofNullable(resources.get(moduleName));
-  }
-
-  public class CommonJsBundle {
-    private final PackageRoot packageRoot;
-    private final String bundleName;
-    private final Map<Version, CommonJsResource> resources;
-
-    public CommonJsBundle(PackageRoot packageRoot) {
-      this.bundleName = bsnPrefix + "." + packageRoot.getName();
-      this.packageRoot = packageRoot;
-      this.resources = new HashMap<>();
-    }
-
-    public CommonJsRepository getRepository() {
-      return CommonJsRepository.this;
-    }
-
-    public String getModuleName() {
-      return packageRoot.getName();
-    }
-
-    public String getBundleSymbolicName() {
-      return bundleName;
-    }
-
-    public Stream<Version> getVersions() {
-      return resources.keySet().stream();
-    }
-
-    public Stream<CommonJsResource> getResources() {
-      return resources.values().stream();
-    }
-
-    public Optional<CommonJsResource> getResource(Version version) {
-      return Optional.ofNullable(resources.get(version));
-    }
-
-    private void fetchAllVersions() {
-      packageRoot
-          .getPackageVersions()
-          .parallel()
-          .flatMap(v -> findPackageVersion(packageRoot, v))
-          .flatMap(v -> loadResource(v))
-          .forEach(resource -> {
-            add(resource);
-            resource
-                .getDependencies()
-                .parallel()
-                .map(registry::getPackageRoot)
-                .map(CommonJsRepository.this::loadBundle)
-                .forEach(CommonJsBundle::fetchAllVersions);
-          });
-    }
-
-    private void add(CommonJsResource resource) {
-      synchronized (resources) {
-        resources.put(resource.getVersion(), resource);
-      }
-    }
-
-    private Stream<PackageVersion> findPackageVersion(PackageRoot root, String version) {
-      try {
-        return Stream.of(root.getPackageVersion(version));
-      } catch (Exception e) {
-        log.log(Level.WARN, "Cannot locate package version " + root.getName() + " - " + version, e);
-        return Stream.empty();
-      }
-    }
-
-    private Stream<CommonJsResource> loadResource(PackageVersion packageVersion) {
-      try {
-        return Stream.of(new CommonJsResource(this, packageVersion));
-      } catch (Exception e) {
-        log
-            .log(
-                Level.WARN,
-                "Cannot load resource "
-                    + packageVersion.getName()
-                    + " - "
-                    + packageVersion.getVersion(),
-                e);
-        return Stream.empty();
-      }
-    }
   }
 }

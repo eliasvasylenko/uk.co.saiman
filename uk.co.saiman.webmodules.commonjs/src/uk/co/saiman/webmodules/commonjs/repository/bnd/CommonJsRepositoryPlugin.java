@@ -29,6 +29,7 @@ package uk.co.saiman.webmodules.commonjs.repository.bnd;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptyNavigableMap;
 import static java.util.Collections.emptySortedSet;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
@@ -76,8 +77,8 @@ import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.text.Glob;
 import uk.co.saiman.webmodules.commonjs.registry.impl.RegistryImpl;
 import uk.co.saiman.webmodules.commonjs.repository.CommonJsRepository;
-import uk.co.saiman.webmodules.commonjs.repository.CommonJsRepository.CommonJsBundle;
-import uk.co.saiman.webmodules.commonjs.repository.CommonJsResource;
+import uk.co.saiman.webmodules.commonjs.repository.CommonJsBundle;
+import uk.co.saiman.webmodules.commonjs.repository.CommonJsBundleVersion;
 
 @BndPlugin(name = "CommonJS", parameters = CommonJsRepositoryPluginConfiguration.class)
 public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, RegistryPlugin,
@@ -311,10 +312,14 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
     return getResources(bsn).navigableKeySet();
   }
 
-  private NavigableMap<Version, CommonJsResource> getResources(String bsn) {
-    NavigableMap<Version, CommonJsResource> packageVersions = new TreeMap<>();
+  private NavigableMap<Version, CommonJsBundleVersion> getResources(String bsn) {
+    if (!bundles.containsKey(bsn)) {
+      return emptyNavigableMap();
+    }
 
-    bundles.get(bsn).getResources().forEach(resource -> {
+    NavigableMap<Version, CommonJsBundleVersion> packageVersions = new TreeMap<>();
+
+    bundles.get(bsn).getBundleVersions().forEach(resource -> {
       org.osgi.framework.Version version = resource.getVersion();
       packageVersions
           .put(
@@ -349,10 +354,10 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       return null;
     }
 
-    CommonJsResource resource;
+    CommonJsBundleVersion resource;
 
     if (VERSION_SNAPSHOT.equals(version) || VERSION_LATEST.equals(version)) {
-      NavigableMap<Version, CommonJsResource> resources = getResources(bsn);
+      NavigableMap<Version, CommonJsBundleVersion> resources = getResources(bsn);
 
       if (resources.isEmpty()) {
         return null;
@@ -367,7 +372,7 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
         return null;
       }
 
-      NavigableMap<Version, CommonJsResource> versions = getResources(bsn);
+      NavigableMap<Version, CommonJsBundleVersion> versions = getResources(bsn);
       versions = versions
           .subMap(range.getLow(), range.includeLow(), range.getHigh(), range.includeHigh());
 
@@ -387,7 +392,7 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
     return getHandle(resource);
   }
 
-  private ResourceHandle getHandle(CommonJsResource resource) {
+  private ResourceHandle getHandle(CommonJsBundleVersion resource) {
     log
         .log(
             Level.WARN,
@@ -399,20 +404,17 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
     return new ResourceHandle() {
       @Override
       public File request() throws IOException, Exception {
-        // TODO Auto-generated method stub
-        return null;
+        return resource.getBundleJar().toFile();
       }
 
       @Override
       public String getName() {
-        // TODO Auto-generated method stub
-        return null;
+        return resource.getBundle().getBundleSymbolicName();
       }
 
       @Override
       public Location getLocation() {
-        // TODO Auto-generated method stub
-        return null;
+        return Location.remote;
       }
     };
   }
