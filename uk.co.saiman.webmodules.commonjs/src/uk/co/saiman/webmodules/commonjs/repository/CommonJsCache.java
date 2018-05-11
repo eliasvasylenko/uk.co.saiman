@@ -29,7 +29,11 @@ public class CommonJsCache {
     this.bundleVersion = bundleVersion;
   }
 
-  public CommonJsBundle getBundle() {
+  CommonJsBundleVersion getBundleVersion() {
+    return bundleVersion;
+  }
+
+  CommonJsBundle getBundle() {
     return bundleVersion.getBundle();
   }
 
@@ -38,7 +42,10 @@ public class CommonJsCache {
     return bundleVersion
         .getSha1()
         .map(sha1 -> cacheRoot.resolve(SHASUM_CACHE).resolve(sha1))
-        .orElse(cacheRoot.resolve(getBundle().getModuleName()).resolve(bundleVersion.getSemver()));
+        .orElse(
+            cacheRoot
+                .resolve(getBundle().getModuleName())
+                .resolve(getBundleVersion().getSemver().toString()));
   }
 
   public Path fetchResource(String resourceName, Consumer<CacheEntry> prepare) {
@@ -53,7 +60,7 @@ public class CommonJsCache {
     Path destination = getCacheRoot().resolve(resourceName);
 
     if (Files.exists(destination)) {
-      if (bundleVersion.getSha1().isPresent() && stable) {
+      if (getBundleVersion().getSha1().isPresent() && stable) {
         return destination;
       } else {
         try {

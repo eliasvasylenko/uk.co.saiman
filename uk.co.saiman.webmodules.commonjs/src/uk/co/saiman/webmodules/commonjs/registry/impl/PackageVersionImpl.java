@@ -45,6 +45,7 @@ import uk.co.saiman.webmodules.commonjs.registry.Archive;
 import uk.co.saiman.webmodules.commonjs.registry.ArchiveType;
 import uk.co.saiman.webmodules.commonjs.registry.PackageVersion;
 import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodules.semver.Version;
 
 public class PackageVersionImpl implements PackageVersion {
   private static final String DIST_KEY = "dist";
@@ -52,7 +53,7 @@ public class PackageVersionImpl implements PackageVersion {
 
   private final URL url;
   private final String name;
-  private final String version;
+  private final Version version;
   private final String sha1;
   private final Map<ArchiveType, String> archives;
 
@@ -71,7 +72,12 @@ public class PackageVersionImpl implements PackageVersion {
     }
 
     this.name = name;
-    this.version = version;
+
+    try {
+      this.version = new Version(version);
+    } catch (Exception e) {
+      throw new RegistryResolutionException("Failed to parse version at URL " + this.url, e);
+    }
 
     try (InputStream inputStream = url.openStream()) {
       JSONObject object = new JSONObject(new JSONTokener(inputStream));
@@ -97,7 +103,7 @@ public class PackageVersionImpl implements PackageVersion {
   }
 
   @Override
-  public String getVersion() {
+  public Version getVersion() {
     return version;
   }
 

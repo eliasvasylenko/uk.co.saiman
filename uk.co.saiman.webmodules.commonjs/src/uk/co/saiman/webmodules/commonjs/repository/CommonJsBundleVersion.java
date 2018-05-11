@@ -43,20 +43,9 @@ public class CommonJsBundleVersion {
   public CommonJsBundleVersion(CommonJsBundle bundle, PackageVersion version) {
     this.bundle = bundle;
     this.packageVersion = version;
-    this.version = parseSemver(version.getVersion());
+    this.version = version.getVersion().toOsgiVersion();
 
     this.cache = new CommonJsCache(this);
-  }
-
-  protected static Version parseSemver(String versionString) {
-    org.osgi.framework.Version osgiVersion = new uk.co.saiman.webmodules.semver.Version(
-        versionString).toOsgiVersion();
-
-    return new Version(
-        osgiVersion.getMajor(),
-        osgiVersion.getMinor(),
-        osgiVersion.getMicro(),
-        osgiVersion.getQualifier());
   }
 
   protected static Filter parseSemverRange(String versionRangeString) {
@@ -67,7 +56,7 @@ public class CommonJsBundleVersion {
     return bundle;
   }
 
-  public String getSemver() {
+  public uk.co.saiman.webmodules.semver.Version getSemver() {
     return packageVersion.getVersion();
   }
 

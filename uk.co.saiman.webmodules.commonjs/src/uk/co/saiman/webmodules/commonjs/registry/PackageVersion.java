@@ -31,10 +31,12 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import uk.co.saiman.webmodules.semver.Version;
+
 public interface PackageVersion {
   String getName();
 
-  String getVersion();
+  Version getVersion();
 
   URL getUrl();
 

@@ -18,7 +18,7 @@ public class CommonJsBundle {
   private final PackageRoot packageRoot;
   private final String bundleName;
 
-  private final Map<String, CommonJsBundleVersion> resources;
+  private final Map<uk.co.saiman.webmodules.semver.Version, CommonJsBundleVersion> resources;
 
   public CommonJsBundle(CommonJsRepository repository, PackageRoot packageRoot) {
     this.repository = repository;
@@ -49,7 +49,7 @@ public class CommonJsBundle {
         + stream(packageRoot.getName().split("[^a-zA-Z0-9_-]")).collect(joining("_"));
   }
 
-  public Stream<String> getSemvers() {
+  public Stream<uk.co.saiman.webmodules.semver.Version> getSemvers() {
     return resources.keySet().stream();
   }
 
@@ -57,7 +57,8 @@ public class CommonJsBundle {
     return resources.values().stream();
   }
 
-  public Optional<CommonJsBundleVersion> getBundleVersion(String semver) {
+  public Optional<CommonJsBundleVersion> getBundleVersion(
+      uk.co.saiman.webmodules.semver.Version semver) {
     return Optional.ofNullable(resources.get(semver));
   }
 
