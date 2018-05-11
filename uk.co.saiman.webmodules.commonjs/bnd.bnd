@@ -11,4 +11,5 @@
 	biz.aQute.repository;version=latest,\
 \
 	json;version=latest,\
-	org.apache.commons.compress;version=latest
+	org.apache.commons.compress;version=latest,\
+	net.bytebuddy.byte-buddy;version=latest

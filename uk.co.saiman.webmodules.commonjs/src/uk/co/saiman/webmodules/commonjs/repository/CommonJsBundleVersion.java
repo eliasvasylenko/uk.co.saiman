@@ -1,30 +1,21 @@
 package uk.co.saiman.webmodules.commonjs.repository;
 
 import static java.nio.file.Files.newInputStream;
-import static java.nio.file.Files.walk;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.webmodules.commonjs.repository.CommonJsCache.getBytes;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.stream.Stream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.Version;
 
-import aQute.bnd.header.Parameters;
-import aQute.bnd.osgi.FileResource;
-import aQute.bnd.osgi.Jar;
 import uk.co.saiman.webmodules.commonjs.registry.Archive;
 import uk.co.saiman.webmodules.commonjs.registry.ArchiveType;
 import uk.co.saiman.webmodules.commonjs.registry.PackageVersion;
@@ -32,13 +23,11 @@ import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
 import uk.co.saiman.webmodules.semver.Range;
 
 public class CommonJsBundleVersion {
-  private static final String PACKAGE_ROOT = "package/";
+  static final String PACKAGE_ROOT = "package/";
   private static final String PACKAGE_JSON = "package.json";
   private static final String DIST = "dist";
 
   static final String RESOURCE_ROOT = "static";
-
-  private static final String JAR = ".jar";
 
   private final CommonJsBundle bundle;
   private final PackageVersion packageVersion;
@@ -49,7 +38,7 @@ public class CommonJsBundleVersion {
   private JSONObject packageJson;
   private CommonJsResource resource;
   private Path packageDist;
-  private Path bundleJar;
+  private CommonJsJar bundleJar;
 
   public CommonJsBundleVersion(CommonJsBundle bundle, PackageVersion version) {
     this.bundle = bundle;
@@ -97,7 +86,7 @@ public class CommonJsBundleVersion {
 
   public synchronized CommonJsResource getResource() {
     if (resource == null) {
-      resource = new CommonJsResource(this);
+      resource = new CommonJsResource(getBundle().getModuleName(), getVersion(), getPackageJson());
     }
     return resource;
   }
@@ -180,67 +169,17 @@ public class CommonJsBundleVersion {
     }
   }
 
-  public synchronized Path getBundleJar() {
+  public synchronized CommonJsJar getJar() {
     if (bundleJar == null) {
-      bundleJar = writeBundleJar();
+      bundleJar = new CommonJsJar(
+          cache,
+          getResource(),
+          getPackageDist(),
+          getBundle().getModuleName(),
+          getBundle().getBundleSymbolicName(),
+          getVersion(),
+          getBundle().getRepository().getBundleSymbolicNamePrefix());
     }
     return bundleJar;
-  }
-
-  public Path writeBundleJar() {
-    return cache.fetchUnstableResource(getBundle().getBundleSymbolicName() + JAR, entry -> {
-      try (Jar jar = new Jar(getBundle().getBundleSymbolicName())) {
-
-        jar.setManifest(generateManifest());
-
-        Path dist = getPackageDist();
-        walk(dist).filter(Files::isRegularFile).forEach(file -> {
-          try {
-            String location = Paths
-                .get(RESOURCE_ROOT)
-                .resolve(dist.resolve(PACKAGE_ROOT).relativize(file))
-                .toString();
-            jar.putResource(location, new FileResource(file));
-          } catch (IOException e) {
-            throw new RegistryResolutionException(
-                "Failed to write dist file to jar " + entry.getLocation(),
-                e);
-          }
-        });
-
-        jar.write(entry.getLocation().toFile());
-      } catch (Exception e) {
-        throw new RegistryResolutionException(
-            "Failed to write jar to cache directory " + entry.getLocation(),
-            e);
-      }
-    });
-  }
-
-  private Manifest generateManifest() {
-    Manifest manifest = new Manifest();
-    Attributes main = manifest.getMainAttributes();
-
-    main.put(Attributes.Name.MANIFEST_VERSION, "1.0");
-    main.putValue(Constants.BUNDLE_MANIFESTVERSION, "2");
-    main.putValue(Constants.BUNDLE_NAME, getBundle().getModuleName());
-    main.putValue(Constants.BUNDLE_SYMBOLICNAME, getBundle().getBundleSymbolicName());
-    main.putValue(Constants.BUNDLE_VERSION, getVersion().toString());
-    main.putValue(Constants.EXPORT_PACKAGE, getBundle().getBundleSymbolicName());
-
-    Parameters requirements = new Parameters();
-    Parameters capabilities = new Parameters();
-
-    getResource()
-        .getRequirements()
-        .forEach(req -> requirements.add(req.getNamespace(), req.toAttrs()));
-    getResource()
-        .getCapabilities()
-        .forEach(cap -> capabilities.add(cap.getNamespace(), cap.toAttrs()));
-
-    main.putValue(Constants.REQUIRE_CAPABILITY, requirements.toString());
-    main.putValue(Constants.PROVIDE_CAPABILITY, capabilities.toString());
-
-    return manifest;
   }
 }

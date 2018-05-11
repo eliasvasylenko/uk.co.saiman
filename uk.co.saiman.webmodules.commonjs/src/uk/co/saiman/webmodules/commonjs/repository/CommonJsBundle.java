@@ -1,5 +1,8 @@
 package uk.co.saiman.webmodules.commonjs.repository;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,8 +22,8 @@ public class CommonJsBundle {
 
   public CommonJsBundle(CommonJsRepository repository, PackageRoot packageRoot) {
     this.repository = repository;
-    this.bundleName = repository.getBundleSymbolicNamePrefix() + "." + packageRoot.getName();
     this.packageRoot = packageRoot;
+    this.bundleName = createBundleSymbolicName();
     this.resources = new HashMap<>();
   }
 
@@ -38,6 +41,12 @@ public class CommonJsBundle {
 
   public String getBundleSymbolicName() {
     return bundleName;
+  }
+
+  private String createBundleSymbolicName() {
+    return repository.getBundleSymbolicNamePrefix()
+        + "."
+        + stream(packageRoot.getName().split("[^a-zA-Z0-9_-]")).collect(joining("_"));
   }
 
   public Stream<String> getSemvers() {

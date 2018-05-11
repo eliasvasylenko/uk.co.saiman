@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.json.JSONObject;
+import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -54,13 +55,17 @@ import aQute.bnd.version.VersionRange;
 import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
 
 public class CommonJsResource implements Resource {
-  private final CommonJsBundleVersion bundleVersion;
+  private final String name;
+  private final Version version;
+  private final JSONObject json;
 
   private List<CapReqBuilder> requirements;
   private List<CapReqBuilder> capabilities;
 
-  public CommonJsResource(CommonJsBundleVersion bundleVersion) {
-    this.bundleVersion = bundleVersion;
+  CommonJsResource(String name, Version version, JSONObject json) {
+    this.name = name;
+    this.version = version;
+    this.json = json;
   }
 
   private CapReqBuilder createModuleCapability(JSONObject packageJson) {
@@ -69,8 +74,8 @@ public class CommonJsResource implements Resource {
           .setResource(this)
           .addAttribute(WEB_MODULE_MAIN_ATTRIBUTE, packageJson.getString(WEB_MODULE_MAIN_ATTRIBUTE))
           .addAttribute(WEB_MODULE_ROOT_ATTRIBUTE, RESOURCE_ROOT)
-          .addAttribute(WEB_MODULE_CAPABILITY, bundleVersion.getBundle().getModuleName())
-          .addAttribute(VERSION_ATTRIBUTE, bundleVersion.getVersion());
+          .addAttribute(WEB_MODULE_CAPABILITY, name)
+          .addAttribute(VERSION_ATTRIBUTE, version);
     } catch (Exception e) {
       throw new RegistryResolutionException("Failed to generate module capability", e);
     }
@@ -118,9 +123,7 @@ public class CommonJsResource implements Resource {
 
   public Stream<CapReqBuilder> getCapabilities() {
     if (capabilities == null) {
-      capabilities = Stream
-          .of(createModuleCapability(bundleVersion.getPackageJson()))
-          .collect(toList());
+      capabilities = Stream.of(createModuleCapability(json)).collect(toList());
     }
     return capabilities.stream();
   }
@@ -129,7 +132,7 @@ public class CommonJsResource implements Resource {
     if (requirements == null) {
       requirements = concat(
           Stream.of(createExtenderRequirement()),
-          createDependencyRequirements(bundleVersion.getPackageJson())).collect(toList());
+          createDependencyRequirements(json)).collect(toList());
     }
     return requirements.stream();
   }

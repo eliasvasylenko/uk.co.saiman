@@ -45,6 +45,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.webmodule.react.RequireReactWebModule;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.webconsole.RequireSAIWebConsoleWebModule;
 
@@ -53,6 +54,7 @@ import uk.co.saiman.webconsole.RequireSAIWebConsoleWebModule;
  */
 // @RequirePropTypesWebResource 
 @RequireSAIWebConsoleWebModule
+@RequireReactWebModule
 // @RequireReduxWebResource
 // @RequireAxiosWebModule
 // @RequireReduxThunkWebResource

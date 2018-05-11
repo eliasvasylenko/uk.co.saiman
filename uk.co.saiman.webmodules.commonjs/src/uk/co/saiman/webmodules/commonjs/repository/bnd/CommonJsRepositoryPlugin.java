@@ -148,11 +148,9 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       name = configuration.name("CommonJS-" + configuration.url());
       cache = configuration.cache("cnf/cache/CommonJS/" + name);
     }
-    log.log(Level.WARN, "config: " + configuration + " " + success + " - " + map);
   }
 
   protected synchronized boolean initialize() {
-    log.log(Level.WARN, "try init: " + initialized + " " + configuration);
     if (initialized) {
       return true;
     }
@@ -170,8 +168,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
         modules.add(module);
       }
     }
-
-    log.log(Level.WARN, "modules to initialize... " + modules);
 
     try {
       cachePath = bndWorkspace.getFile(this.cache).toPath();
@@ -199,8 +195,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       return false;
     }
 
-    log.log(Level.WARN, "successfully initialized? " + bundles);
-
     return true;
   }
 
@@ -223,13 +217,11 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
 
   @Override
   public String getName() {
-    log.log(Level.WARN, "get name! " + name);
     return name;
   }
 
   @Override
   public String getLocation() {
-    log.log(Level.WARN, "get location!");
     if (!initialize()) {
       return null;
     }
@@ -239,7 +231,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
 
   @Override
   public PutResult put(InputStream stream, PutOptions options) throws Exception {
-    log.log(Level.WARN, "put!");
     throw new UnsupportedOperationException("Read-only repository.");
   }
 
@@ -249,7 +240,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       Version version,
       Map<String, String> properties,
       DownloadListener... listeners) throws Exception {
-    log.log(Level.WARN, "get!" + bsn + " " + version + " " + properties);
     if (!initialize()) {
       return null;
     }
@@ -279,13 +269,11 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
 
   @Override
   public boolean canWrite() {
-    log.log(Level.WARN, "can write!");
     return false;
   }
 
   @Override
   public List<String> list(String pattern) throws Exception {
-    log.log(Level.WARN, "list!" + pattern);
     if (!initialize()) {
       return emptyList();
     }
@@ -304,7 +292,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
 
   @Override
   public SortedSet<Version> versions(String bsn) throws Exception {
-    log.log(Level.WARN, "versions!" + bsn);
     if (!initialize()) {
       return emptySortedSet();
     }
@@ -339,7 +326,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       String version,
       Strategy strategy,
       Map<String, String> properties) throws Exception {
-    log.log(Level.WARN, "get handle!" + bsn + " - " + version + " " + strategy + " " + properties);
     if (!initialize()) {
       throw new IllegalArgumentException("Cannot initialize repository");
     }
@@ -393,18 +379,10 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
   }
 
   private ResourceHandle getHandle(CommonJsBundleVersion resource) {
-    log
-        .log(
-            Level.WARN,
-            "get handle for package version!"
-                + resource.getBundle().getBundleSymbolicName()
-                + " / "
-                + resource.getVersion());
-
     return new ResourceHandle() {
       @Override
       public File request() throws IOException, Exception {
-        return resource.getBundleJar().toFile();
+        return resource.getJar().getPath().toFile();
       }
 
       @Override
@@ -433,7 +411,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
 
   @Override
   public File getRoot() throws Exception {
-    log.log(Level.WARN, "get root!");
     if (!initialize()) {
       return null;
     }
@@ -443,7 +420,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
 
   @Override
   public synchronized boolean refresh() throws Exception {
-    log.log(Level.WARN, "refresh!");
     initialized = false;
     initialize();
     return true;
@@ -452,7 +428,6 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
   @Override
   public Map<Requirement, Collection<Capability>> findProviders(
       Collection<? extends Requirement> requirements) {
-    log.log(Level.WARN, "find providers!");
     if (!initialize()) {
       return emptyMap();
     }
@@ -462,13 +437,11 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
 
   @Override
   public void close() throws IOException {
-    log.log(Level.WARN, "close!");
     clearRepository();
   }
 
   @Override
   public String toString() {
-    log.log(Level.WARN, "toString!");
     return "CommonJSRepositoryPlugin [" + getName() + "]";
   }
 }

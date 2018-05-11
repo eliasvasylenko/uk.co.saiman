@@ -22,11 +22,10 @@ Bundle-Name: SAI :: Comms :: Provider
 	org.apache.felix.webconsole,\
 	org.apache.felix.http.servlet-api,\
 \
-	org.apache.aries.javax.jax.rs-api
-#,\
-#\
+	org.apache.aries.javax.jax.rs-api,\
+\
+	uk.co.saiman.webmodule.react;version=latest
 #	uk.co.saiman.facebook.react.proptypes.webmodule;version=snapshot,\
-#	uk.co.saiman.facebook.react.webmodule;version=snapshot,\
 #	uk.co.saiman.facebook.react.dom.webmodule;version=snapshot,\
 #	uk.co.saiman.facebook.react.redux.webmodule;version=snapshot,\
 #	uk.co.saiman.axios.webmodule;version=snapshot,\

@@ -10,8 +10,12 @@ Private-Package: \
 	org.apache.commons.compress.archivers.tar,\
 	org.apache.commons.compress.archivers.zip,\
 	org.apache.commons.compress.compressors.gzip,\
+\
 	org.json,\
 	org.osgi.util.converter,\
+\
+	net.bytebuddy.*,\
+\
 	uk.co.saiman.log,\
 	uk.co.saiman.text,\
 	uk.co.saiman.bytes,\
@@ -19,7 +23,7 @@ Private-Package: \
 	uk.co.saiman.webmodules.commonjs.registry,\
 	uk.co.saiman.webmodules.commonjs.registry.impl,\
 	uk.co.saiman.webmodules.commonjs.repository,\
-	uk.co.saiman.webmodules.commonjs.repository.bnd
+	uk.co.saiman.webmodules.commonjs.repository.bnd,\
 
 -dsannotations:
 Require-Capability: \
