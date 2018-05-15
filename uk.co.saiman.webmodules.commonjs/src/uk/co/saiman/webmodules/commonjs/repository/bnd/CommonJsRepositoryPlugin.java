@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.webmodules.commonjs.repository.bnd;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptyNavigableMap;
@@ -43,14 +44,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
@@ -76,15 +76,15 @@ import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.text.Glob;
 import uk.co.saiman.webmodules.commonjs.registry.impl.RegistryImpl;
-import uk.co.saiman.webmodules.commonjs.repository.CommonJsRepository;
 import uk.co.saiman.webmodules.commonjs.repository.CommonJsBundle;
 import uk.co.saiman.webmodules.commonjs.repository.CommonJsBundleVersion;
+import uk.co.saiman.webmodules.commonjs.repository.CommonJsRepository;
 
 @BndPlugin(name = "CommonJS", parameters = CommonJsRepositoryPluginConfiguration.class)
 public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, RegistryPlugin,
     RepositoryPlugin, Refreshable, Closeable, RegistryDonePlugin {
   private static final String URL_KEY = "url";
-  private static final String MODULES_KEY = "modules";
+  private static final String INITIAL_DEPENDENCIES_KEY = "initialDependencies";
   private static final String BSN_PREFIX_KEY = "bsnPrefix";
 
   private static final String VERSION_KEY = "version";
@@ -130,8 +130,13 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       success = false;
     }
 
-    if (!map.containsKey(MODULES_KEY)) {
-      log.log(ERROR, "Must provide comma-separated module list \"" + MODULES_KEY + "\"");
+    if (!map.containsKey(INITIAL_DEPENDENCIES_KEY)) {
+      log
+          .log(
+              ERROR,
+              "Must provide path to initial dependencies JSON \""
+                  + INITIAL_DEPENDENCIES_KEY
+                  + "\"");
       success = false;
     }
 
@@ -161,12 +166,13 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
   }
 
   private synchronized boolean initializeImpl() {
-    Set<String> modules = new HashSet<>();
-    String modulesString = configuration.modules().trim();
-    if (!modulesString.isEmpty()) {
-      for (String module : modulesString.split("\\s+")) {
-        modules.add(module);
-      }
+    Path initialDependenciesPath;
+    String initialDependenciesString = configuration.initialDependencies();
+    if (initialDependenciesString != null) {
+      initialDependenciesPath = Paths.get(initialDependenciesString.trim());
+    } else {
+      log.log(Level.ERROR, "Unable to resolve initial dependencies");
+      return false;
     }
 
     try {
@@ -180,11 +186,13 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
     try {
       URL url = configuration.url().toURL();
       repository = new CommonJsRepository(
-          new RegistryImpl(url),
+          new RegistryImpl(url, cachePath),
           log,
-          modules,
+          initialDependenciesPath,
           cachePath,
-          configuration.bsnPrefix());
+          configuration.bsnPrefix(),
+          configuration.requiredAttributes(asList("main")),
+          configuration.optionalAttributes(emptyList()));
       bundles
           .putAll(
               repository

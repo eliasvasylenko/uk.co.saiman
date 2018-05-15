@@ -28,10 +28,13 @@
 package uk.co.saiman.webmodules.commonjs.repository;
 
 import static aQute.bnd.osgi.resource.ResourceUtils.matches;
+import static java.nio.file.Files.newInputStream;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_MAIN_ATTRIBUTE;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,6 +44,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.service.component.annotations.Component;
@@ -55,6 +60,8 @@ import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.webmodules.commonjs.registry.PackageRoot;
 import uk.co.saiman.webmodules.commonjs.registry.Registry;
+import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodules.semver.Range;
 
 @Designate(ocd = CommonJsRepository.CommonJsRepositoryConfiguration.class, factory = true)
 @Component(
@@ -67,9 +74,9 @@ public class CommonJsRepository extends BaseRepository implements Repository {
       description = "The CommonJS repository service provides OSGi bundles containing javascript module resources, and the capabilities to resolve them")
   public @interface CommonJsRepositoryConfiguration {
     @AttributeDefinition(
-        name = "Module Names",
-        description = "A list of module names to query and retrieve from the registry")
-    String[] moduleNames();
+        name = "Initial Dependencies",
+        description = "A path to a JSON file in the format of the value of a \"dependencies\" attribute as specified by CommonJS/NPM")
+    String initialDependencies();
 
     @AttributeDefinition(
         name = "Local Cache",
@@ -78,17 +85,29 @@ public class CommonJsRepository extends BaseRepository implements Repository {
 
     @AttributeDefinition(
         name = "BSN Prefix",
-        description = "The prefix for the BSNs of generated bundles")
+        description = "The prefix for the BSNs and packages of generated bundles")
     String bsnPrefix();
+
+    @AttributeDefinition(
+        name = "Required Attributes",
+        description = "The attributes required to be attached to the capabilities and dependency requirements")
+    String[] requiredAttributes() default WEB_MODULE_MAIN_ATTRIBUTE;
+
+    @AttributeDefinition(
+        name = "Optional Attributes",
+        description = "The attributes to be attached to the capabilities if present")
+    String[] optionalAttributes() default {};
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.webmodules.commonsjs.repository";
 
   private final Registry registry;
   private final Log log;
-  private final Set<String> primaryModules;
+  private final Map<String, Range> initialDependencies;
   private final Path cache;
   private final String bsnPrefix;
+  private final Set<String> requiredAttributes;
+  private final Set<String> optionalAttributes;
 
   private boolean initialized;
   private final Map<String, String> dependencies = new HashMap<>();
@@ -103,6 +122,8 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     this.registry = registry;
     this.log = log;
     this.primaryModules = new HashSet<>(asList(configuration.moduleNames()));
+    // TODO load initial dependencies
+    configuration.initialDependencies();?
     this.cache = Paths.get(configuration.localCache());
     this.bsnPrefix = configuration.bsnPrefix();
   
@@ -118,18 +139,54 @@ public class CommonJsRepository extends BaseRepository implements Repository {
   public CommonJsRepository(
       Registry registry,
       Log log,
-      Collection<? extends String> primaryModules,
+      Path initialDependencies,
       Path cache,
-      String bsnPrefix) {
+      String bsnPrefix,
+      Collection<String> requiredAttributes,
+      Collection<String> optionalAttributes) {
+    this(
+        registry,
+        log,
+        loadInitialDependencies(initialDependencies),
+        cache,
+        bsnPrefix,
+        requiredAttributes,
+        optionalAttributes);
+  }
+
+  public CommonJsRepository(
+      Registry registry,
+      Log log,
+      Map<String, Range> initialDependencies,
+      Path cache,
+      String bsnPrefix,
+      Collection<String> requiredAttributes,
+      Collection<String> optionalAttributes) {
     this.registry = registry;
     this.log = log;
-    this.primaryModules = new HashSet<>(primaryModules);
+    this.initialDependencies = new HashMap<>(initialDependencies);
     this.cache = cache;
     this.bsnPrefix = bsnPrefix;
+    this.requiredAttributes = new HashSet<>(requiredAttributes);
+    this.optionalAttributes = new HashSet<>(optionalAttributes);
 
-    log.log(Level.WARN, "init... c: " + cache + " b: " + bsnPrefix + " m: " + primaryModules);
     initialize();
-    log.log(Level.WARN, "inited!");
+  }
+
+  private static Map<String, Range> loadInitialDependencies(Path initialDependencies) {
+    try (InputStream inputStream = newInputStream(initialDependencies)) {
+      JSONObject object = new JSONObject(new JSONTokener(inputStream));
+
+      Map<String, Range> dependencies = new HashMap<>();
+      for (String dependency : object.keySet()) {
+        dependencies.put(dependency, Range.parse(object.getString(dependency)));
+      }
+      return dependencies;
+    } catch (Exception e) {
+      throw new RegistryResolutionException(
+          "Failed to load initial dependencies from path " + initialDependencies,
+          e);
+    }
   }
 
   Log getLog() {
@@ -144,6 +201,14 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     return bsnPrefix;
   }
 
+  public Stream<String> getRequiredAttributes() {
+    return requiredAttributes.stream();
+  }
+
+  public Stream<String> getOptionalAttributes() {
+    return optionalAttributes.stream();
+  }
+
   private synchronized void initialize() {
     if (!initialized) {
       refresh();
@@ -155,14 +220,41 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     dependencies.clear();
     resources.clear();
     try {
-      primaryModules
-          .parallelStream()
-          .flatMap(this::findPackageRoot)
-          .map(this::loadBundle)
-          .forEach(CommonJsBundle::fetchAllVersions);
+      fetchDependencies(initialDependencies);
     } catch (Throwable t) {
       log.log(Level.ERROR, t);
       throw t;
+    }
+  }
+
+  private void fetchDependencies(Map<String, Range> dependencies) {
+    dependencies
+        .keySet()
+        .parallelStream()
+        .flatMap(this::getOrLoadBundle)
+        .flatMap(b -> b.fetchDependencies(dependencies.get(b.getModuleName())))
+        .map(v -> v.getDependencies().collect(toMap(identity(), v::getDependencyRange)))
+        .forEach(this::fetchDependencies);
+  }
+
+  private Stream<CommonJsBundle> getOrLoadBundle(String moduleName) {
+    return Optional
+        .ofNullable(resources.get(moduleName))
+        .map(Stream::of)
+        .orElseGet(() -> loadBundle(moduleName));
+  }
+
+  private Stream<CommonJsBundle> loadBundle(String moduleName) {
+    try {
+      PackageRoot packageRoot = registry.getPackageRoot(moduleName);
+
+      synchronized (resources) {
+        return Stream
+            .of(resources.computeIfAbsent(moduleName, n -> new CommonJsBundle(this, packageRoot)));
+      }
+    } catch (Exception e) {
+      getLog().log(Level.WARN, "Cannot load bundle " + moduleName, e);
+      return Stream.empty();
     }
   }
 
@@ -175,22 +267,6 @@ public class CommonJsRepository extends BaseRepository implements Repository {
         .stream()
         .distinct()
         .collect(toMap(identity(), this::findProviders, (a, b) -> a, HashMap::new));
-  }
-
-  Stream<PackageRoot> findPackageRoot(String name) {
-    try {
-      return Stream.of(registry.getPackageRoot(name));
-    } catch (Exception e) {
-      log.log(Level.WARN, "Cannot locate package root " + name, e);
-      return Stream.empty();
-    }
-  }
-
-  CommonJsBundle loadBundle(PackageRoot packageRoot) {
-    synchronized (resources) {
-      return resources
-          .computeIfAbsent(packageRoot.getName(), n -> new CommonJsBundle(this, packageRoot));
-    }
   }
 
   public Set<Capability> findProviders(Requirement requirement) {

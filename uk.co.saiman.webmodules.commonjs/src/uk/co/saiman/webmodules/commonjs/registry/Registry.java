@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.webmodules.commonjs.registry;
 
+import java.net.URL;
+
 public interface Registry {
   PackageRoot getPackageRoot(String name);
+
+  URL getURL();
 }

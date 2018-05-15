@@ -2,7 +2,7 @@ package uk.co.saiman.webmodules.commonjs.repository;
 
 import static java.nio.file.Files.newInputStream;
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.webmodules.commonjs.repository.CommonJsCache.getBytes;
+import static uk.co.saiman.webmodules.commonjs.registry.cache.Cache.getBytes;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -13,16 +13,19 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.osgi.framework.Filter;
 import org.osgi.framework.Version;
 
 import uk.co.saiman.webmodules.commonjs.registry.Archive;
 import uk.co.saiman.webmodules.commonjs.registry.ArchiveType;
 import uk.co.saiman.webmodules.commonjs.registry.PackageVersion;
 import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodules.commonjs.registry.cache.Cache;
+import uk.co.saiman.webmodules.commonjs.registry.cache.CacheEntry;
 import uk.co.saiman.webmodules.semver.Range;
 
 public class CommonJsBundleVersion {
+  private static final String SHASUM_CACHE = ".shasum";
+
   static final String PACKAGE_ROOT = "package/";
   private static final String PACKAGE_JSON = "package.json";
   private static final String DIST = "dist";
@@ -33,7 +36,7 @@ public class CommonJsBundleVersion {
   private final PackageVersion packageVersion;
   private final Version version;
 
-  private final CommonJsCache cache;
+  private final Cache cache;
 
   private JSONObject packageJson;
   private CommonJsResource resource;
@@ -45,14 +48,16 @@ public class CommonJsBundleVersion {
     this.packageVersion = version;
     this.version = version.getVersion().toOsgiVersion();
 
-    this.cache = new CommonJsCache(
-        bundle.getRepository().getCache(),
-        bundle.getModuleName(),
-        version.getVersion());
-  }
+    Path cacheRoot = bundle.getRepository().getCache();
+    Path cachePath = getSha1()
+        .map(sha1 -> cacheRoot.resolve(SHASUM_CACHE).resolve(sha1))
+        .orElse(cacheRoot.resolve(bundle.getModuleName()).resolve(version.getVersion().toString()));
 
-  protected static Filter parseSemverRange(String versionRangeString) {
-    return new Range(versionRangeString).toOsgiFilter();
+    this.cache = new Cache(cachePath);
+
+    // bundle.getRepository().getCache(),
+    // bundle.getModuleName(),
+    // version.getVersion());
   }
 
   public CommonJsBundle getBundle() {
@@ -67,9 +72,12 @@ public class CommonJsBundleVersion {
     return version;
   }
 
-  protected Stream<String> getDependencies() {
-    // TODO Auto-generated method stub
-    return Stream.empty();
+  public Stream<String> getDependencies() {
+    return packageVersion.getDependencies();
+  }
+
+  public Range getDependencyRange(String module) {
+    return packageVersion.getDependencyRange(module);
   }
 
   public Optional<String> getSha1() {
@@ -78,7 +86,12 @@ public class CommonJsBundleVersion {
 
   public synchronized CommonJsResource getResource() {
     if (resource == null) {
-      resource = new CommonJsResource(getBundle().getModuleName(), getVersion(), getPackageJson());
+      resource = new CommonJsResource(
+          getBundle().getModuleName(),
+          getVersion(),
+          getPackageJson(),
+          getBundle().getRepository().getRequiredAttributes().collect(toList()),
+          getBundle().getRepository().getOptionalAttributes().collect(toList()));
     }
     return resource;
   }
@@ -94,7 +107,7 @@ public class CommonJsBundleVersion {
     return packageJson;
   }
 
-  private Path fetchPackageJson() {
+  private Path fetchPackageJson() throws IOException {
     return cache.fetchResource(PACKAGE_JSON, entry -> {
       if (packageVersion.getArchives().anyMatch(ArchiveType.TARBALL::equals)) {
         extractTarballPackageJson(packageVersion.getArchive(ArchiveType.TARBALL), entry);
@@ -124,12 +137,16 @@ public class CommonJsBundleVersion {
 
   public synchronized Path getPackageDist() {
     if (packageDist == null) {
-      packageDist = fetchPackageDist();
+      try {
+        packageDist = fetchPackageDist();
+      } catch (JSONException | IOException e) {
+        throw new RegistryResolutionException("Failed to open " + DIST, e);
+      }
     }
     return packageDist;
   }
 
-  private Path fetchPackageDist() {
+  private Path fetchPackageDist() throws IOException {
     return cache.fetchResource(DIST, entry -> {
       if (packageVersion.getArchives().anyMatch(ArchiveType.TARBALL::equals)) {
         extractTarballPackageDist(packageVersion.getArchive(ArchiveType.TARBALL), entry);

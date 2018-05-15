@@ -28,9 +28,11 @@
 package uk.co.saiman.webmodules.commonjs.registry;
 
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import uk.co.saiman.webmodules.semver.Range;
 import uk.co.saiman.webmodules.semver.Version;
 
 public interface PackageVersion {
@@ -40,9 +42,15 @@ public interface PackageVersion {
 
   URL getUrl();
 
+  Path getLocal();
+
   Stream<ArchiveType> getArchives();
 
   Archive getArchive(ArchiveType type);
 
   Optional<String> getSha1();
+
+  Stream<String> getDependencies();
+
+  Range getDependencyRange(String module);
 }

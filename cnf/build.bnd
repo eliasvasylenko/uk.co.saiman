@@ -95,10 +95,7 @@ Bundle-Developers:\
 		name				=	"NPM";\
 		url					=	http://registry.npmjs.org/;\
 		bsnPrefix			=	uk.co.saiman.webmodule;\
-		modules				=\
-			angular \
-			gulp \
-			react
+		initialDependencies	=	${build}/npm.json
 
 ## Run requirement groups:
 -runrequires.base:\

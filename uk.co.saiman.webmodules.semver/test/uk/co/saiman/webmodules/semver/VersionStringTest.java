@@ -34,49 +34,54 @@ import uk.co.saiman.webmodules.semver.Version;
 
 public class VersionStringTest {
   @Test(expected = IllegalArgumentException.class)
+  public void parseEmptyString() {
+    Version.parse("");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void parseMajorWithTrailingSpace() {
-    new Version("0 .0.0");
+    Version.parse("0 .0.0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseMinorWithLeadingSpace() {
-    new Version("0. 0.0");
+    Version.parse("0. 0.0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseMinorWithTrailingSpace() {
-    new Version("0.0 .0");
+    Version.parse("0.0 .0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseMicroWithLeadingSpace() {
-    new Version("0.0. 0");
+    Version.parse("0.0. 0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseMicroWithTrailingSpace() {
-    new Version("0.0.0 -0");
+    Version.parse("0.0.0 -0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseMajorWithLetters() {
-    new Version("0a.0.0");
+    Version.parse("0a.0.0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseMinorWithLetters() {
-    new Version("0.0a.0");
+    Version.parse("0.0a.0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseMicroWithLetters() {
-    new Version("0.0.0a");
+    Version.parse("0.0.0a");
   }
 
   @Test
   public void parseAllZeroRelease() {
     String string = "0.0.0";
-    Version version = new Version(string);
+    Version version = Version.parse(string);
 
     Assert.assertEquals(0, version.getMajor());
     Assert.assertEquals(0, version.getMinor());
@@ -90,7 +95,7 @@ public class VersionStringTest {
   @Test
   public void parseAllZeroPreRelease() {
     String string = "0.0.0-0";
-    Version version = new Version(string);
+    Version version = Version.parse(string);
 
     Assert.assertEquals(0, version.getMajor());
     Assert.assertEquals(0, version.getMinor());
@@ -104,7 +109,7 @@ public class VersionStringTest {
   @Test
   public void parseAllZeroReleaseWithBuildInfo() {
     String string = "0.0.0+0";
-    Version version = new Version(string);
+    Version version = Version.parse(string);
 
     Assert.assertEquals(0, version.getMajor());
     Assert.assertEquals(0, version.getMinor());
@@ -118,7 +123,7 @@ public class VersionStringTest {
   @Test
   public void parseAllZeroPreReleaseWithBuildInfo() {
     String string = "0.0.0-0+0";
-    Version version = new Version(string);
+    Version version = Version.parse(string);
 
     Assert.assertEquals(0, version.getMajor());
     Assert.assertEquals(0, version.getMinor());
@@ -131,18 +136,18 @@ public class VersionStringTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void parseTooManyComponents() {
-    new Version("0.0.0.0");
+    Version.parse("0.0.0.0");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void parseTooFewComponents() {
-    new Version("0.0");
+    Version.parse("0.0");
   }
 
   @Test
   public void parseLargeNumbers() {
     String string = "123.456.789";
-    Version version = new Version(string);
+    Version version = Version.parse(string);
 
     Assert.assertEquals(123, version.getMajor());
     Assert.assertEquals(456, version.getMinor());
@@ -154,7 +159,7 @@ public class VersionStringTest {
   @Test
   public void parsePreReleaseWithExtraDashes() {
     String string = "0.0.0-a-b-c";
-    Version version = new Version(string);
+    Version version = Version.parse(string);
 
     Assert.assertEquals(version.getPreRelease().get().toString(), "a-b-c");
     Assert.assertFalse(version.getBuildInformation().isPresent());
@@ -165,7 +170,7 @@ public class VersionStringTest {
   @Test
   public void parseBuildInformationWithExtraDashes() {
     String string = "0.0.0+a-b-c";
-    Version version = new Version(string);
+    Version version = Version.parse(string);
 
     Assert.assertFalse(version.getPreRelease().isPresent());
     Assert.assertEquals(version.getBuildInformation().get(), "a-b-c");

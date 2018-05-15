@@ -27,8 +27,11 @@
  */
 package uk.co.saiman.webmodules.commonjs.registry.impl;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,6 +59,9 @@ public class RegistryImpl implements Registry {
   public @interface CommonJsRegistryConfiguration {
     @AttributeDefinition(name = "Registry Root URL")
     String registryRootUrl();
+
+    @AttributeDefinition(name = "Local Cache Path")
+    String localCachePath();
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.webmodules.commonsjs.registry";
@@ -63,15 +69,24 @@ public class RegistryImpl implements Registry {
   private final Map<String, Object> packageLocks = new HashMap<>();
   private final Map<String, PackageRoot> packageRoots = new HashMap<>();
 
-  private URL registryRootURL;
+  private final URL registryRoot;
+  private final Path localCache;
 
-  public RegistryImpl(URL registryRootURL) {
-    this.registryRootURL = registryRootURL;
+  public RegistryImpl(URL registryRoot, Path localCache) {
+    this.registryRoot = registryRoot;
+    this.localCache = localCache;
   }
 
   @Activate
-  public RegistryImpl(CommonJsRegistryConfiguration configuration) throws MalformedURLException {
-    this.registryRootURL = new URL(configuration.registryRootUrl());
+  public RegistryImpl(CommonJsRegistryConfiguration configuration) throws IOException {
+    this.registryRoot = new URL(configuration.registryRootUrl());
+    this.localCache = Paths.get(configuration.localCachePath());
+    Files.createDirectories(this.localCache);
+  }
+
+  @Override
+  public URL getURL() {
+    return registryRoot;
   }
 
   @Override
@@ -86,7 +101,7 @@ public class RegistryImpl implements Registry {
       synchronized (lock) {
         root = packageRoots.get(name);
         if (root == null) {
-          root = new PackageRootImpl(registryRootURL, name);
+          root = new PackageRootImpl(registryRoot, localCache, name);
           synchronized (packageLocks) {
             packageRoots.put(name, root);
             packageLocks.remove(name);

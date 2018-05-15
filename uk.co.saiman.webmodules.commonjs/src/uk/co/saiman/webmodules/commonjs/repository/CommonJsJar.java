@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static org.osgi.framework.Constants.VERSION_ATTRIBUTE;
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_CAPABILITY;
+import static uk.co.saiman.webmodules.commonjs.registry.cache.Retention.WEAK;
 import static uk.co.saiman.webmodules.commonjs.repository.CommonJsBundleVersion.PACKAGE_ROOT;
 import static uk.co.saiman.webmodules.commonjs.repository.CommonJsBundleVersion.RESOURCE_ROOT;
 
@@ -43,6 +44,7 @@ import net.bytebuddy.description.enumeration.EnumerationDescription.ForLoadedEnu
 import net.bytebuddy.description.type.TypeDescription.ForLoadedType;
 import net.bytebuddy.dynamic.DynamicType.Unloaded;
 import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodules.commonjs.registry.cache.Cache;
 
 public class CommonJsJar {
   private static final String REQUIREMENT_ANNOTATION_NAME = "Require%sWebModule";
@@ -63,7 +65,7 @@ public class CommonJsJar {
   private final Path path;
 
   public CommonJsJar(
-      CommonJsCache cache,
+      Cache cache,
       CommonJsResource resource,
       Path resources,
       String name,
@@ -123,67 +125,68 @@ public class CommonJsJar {
     return manifest;
   }
 
-  private Path writeBundleJar(CommonJsCache cache, Path resources) {
-    return cache.fetchUnstableResource(bsn + JAR_EXTENSION, entry -> {
-      try (Jar jar = new Jar(bsn)) {
+  private Path writeBundleJar(Cache cache, Path resources) {
+    try {
+      return cache.fetchResource(bsn + JAR_EXTENSION, entry -> {
+        try (Jar jar = new Jar(bsn)) {
+          jar.setManifest(manifest);
 
-        jar.setManifest(manifest);
+          walk(resources).filter(Files::isRegularFile).forEach(file -> {
+            try {
+              String location = Paths
+                  .get(RESOURCE_ROOT)
+                  .resolve(resources.resolve(PACKAGE_ROOT).relativize(file))
+                  .toString();
+              jar.putResource(location, new FileResource(file));
+            } catch (IOException e) {
+              throw new RegistryResolutionException(
+                  "Failed to write dist file to jar " + entry.getLocation(),
+                  e);
+            }
+          });
 
-        walk(resources).filter(Files::isRegularFile).forEach(file -> {
-          try {
-            String location = Paths
-                .get(RESOURCE_ROOT)
-                .resolve(resources.resolve(PACKAGE_ROOT).relativize(file))
-                .toString();
-            jar.putResource(location, new FileResource(file));
-          } catch (IOException e) {
-            throw new RegistryResolutionException(
-                "Failed to write dist file to jar " + entry.getLocation(),
-                e);
-          }
-        });
+          Unloaded<? extends Annotation> annotationBytes = new ByteBuddy()
+              .makeAnnotation()
+              .name(getJavaAnnotationNames().collect(joining(".")))
+              .annotateType(
+                  AnnotationDescription.Builder
+                      .ofType(Retention.class)
+                      .define("value", RetentionPolicy.CLASS)
+                      .build())
+              .annotateType(
+                  AnnotationDescription.Builder
+                      .ofType(Target.class)
+                      .define(
+                          "value",
+                          AnnotationValue.ForDescriptionArray
+                              .of(
+                                  new ForLoadedType(ElementType.class),
+                                  new EnumerationDescription[] {
+                                      new ForLoadedEnumeration(ElementType.TYPE),
+                                      new ForLoadedEnumeration(ElementType.PACKAGE) }))
+                      .build())
+              .annotateType(
+                  AnnotationDescription.Builder
+                      .ofType(Requirement.class)
+                      .define(REQUIREMENT_ANNOTATION_NAMESPACE_ATTRIBUTE, WEB_MODULE_CAPABILITY)
+                      .define(REQUIREMENT_ANNOTATION_NAME_ATTRIBUTE, name)
+                      .define(VERSION_ATTRIBUTE, version.toString())
+                      .build())
+              .make();
 
-        Unloaded<? extends Annotation> annotationBytes = new ByteBuddy()
-            .makeAnnotation()
-            .name(getJavaAnnotationNames().collect(joining(".")))
-            .annotateType(
-                AnnotationDescription.Builder
-                    .ofType(Retention.class)
-                    .define("value", RetentionPolicy.CLASS)
-                    .build())
-            .annotateType(
-                AnnotationDescription.Builder
-                    .ofType(Target.class)
-                    .define(
-                        "value",
-                        AnnotationValue.ForDescriptionArray
-                            .of(
-                                new ForLoadedType(ElementType.class),
-                                new EnumerationDescription[] {
-                                    new ForLoadedEnumeration(ElementType.TYPE),
-                                    new ForLoadedEnumeration(ElementType.PACKAGE) }))
-                    .build())
-            .annotateType(
-                AnnotationDescription.Builder
-                    .ofType(Requirement.class)
-                    .define(REQUIREMENT_ANNOTATION_NAMESPACE_ATTRIBUTE, WEB_MODULE_CAPABILITY)
-                    .define(REQUIREMENT_ANNOTATION_NAME_ATTRIBUTE, name)
-                    .define(VERSION_ATTRIBUTE, version.toString())
-                    .build())
-            .make();
+          jar
+              .putResource(
+                  getJavaAnnotationNames().collect(joining("/", "/", CLASS_EXTENSION)),
+                  new EmbeddedResource(annotationBytes.getBytes(), 0));
 
-        jar
-            .putResource(
-                getJavaAnnotationNames().collect(joining("/", "/", CLASS_EXTENSION)),
-                new EmbeddedResource(annotationBytes.getBytes(), 0));
-
-        jar.write(entry.getLocation().toFile());
-      } catch (Exception e) {
-        throw new RegistryResolutionException(
-            "Failed to write jar to cache directory " + entry.getLocation(),
-            e);
-      }
-    });
+          jar.write(entry.getLocation().toFile());
+        }
+      }, WEAK);
+    } catch (Exception e) {
+      throw new RegistryResolutionException(
+          "Failed to write jar to cache directory " + cache.getCacheRoot(),
+          e);
+    }
   }
 
   public Stream<String> getJavaPackageNames() {

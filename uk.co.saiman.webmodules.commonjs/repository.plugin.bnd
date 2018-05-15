@@ -18,9 +18,11 @@ Private-Package: \
 \
 	uk.co.saiman.log,\
 	uk.co.saiman.text,\
+	uk.co.saiman.function,\
 	uk.co.saiman.bytes,\
 	uk.co.saiman.webmodules.semver,\
 	uk.co.saiman.webmodules.commonjs.registry,\
+	uk.co.saiman.webmodules.commonjs.registry.cache,\
 	uk.co.saiman.webmodules.commonjs.registry.impl,\
 	uk.co.saiman.webmodules.commonjs.repository,\
 	uk.co.saiman.webmodules.commonjs.repository.bnd,\

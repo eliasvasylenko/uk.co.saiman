@@ -27,8 +27,11 @@
  */
 package uk.co.saiman.webmodules.semver;
 
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,27 +43,36 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
 public class Range {
+  public static final Range UNBOUNDED = new Range(
+      new ComparatorSet(
+          new AdvancedComparator.PrimitiveRange(
+              new PrimitiveComparator(
+                  Operator.GREATER_THAN_OR_EQUAL,
+                  new Version(0, 0, 0).withPreRelease("0")))));
+
   private final List<ComparatorSet> comparatorSets;
 
-  public Range(String versionRangeString) {
-    versionRangeString = versionRangeString.trim();
-
-    ArrayList<ComparatorSet> comparatorSets = new ArrayList<>();
-
-    for (String comparatorSet : versionRangeString.split("\\s+||\\s+")) {
-      comparatorSets.add(new ComparatorSet(comparatorSet));
-    }
-    comparatorSets.trimToSize();
-
-    this.comparatorSets = unmodifiableList(comparatorSets);
+  public static Range parse(String versionRangeString) {
+    return new Range(
+        stream(versionRangeString.trim().split("\\s+\\|\\|\\s+"))
+            .map(ComparatorSet::parse)
+            .collect(toList()));
   }
 
   public Range(Collection<? extends ComparatorSet> comparatorSets) {
     this.comparatorSets = unmodifiableList(new ArrayList<>(comparatorSets));
   }
 
+  public Range(ComparatorSet... comparatorSets) {
+    this(asList(comparatorSets));
+  }
+
   public Stream<ComparatorSet> getComparatorSets() {
     return comparatorSets.stream();
+  }
+
+  public boolean matches(Version version) {
+    return comparatorSets.stream().anyMatch(s -> s.matches(version));
   }
 
   public Filter toOsgiFilter() {
@@ -84,5 +96,10 @@ public class Range {
         .stream()
         .map(ComparatorSet::toOsgiFilterString)
         .collect(joining("", "(|", ")"));
+  }
+
+  @Override
+  public String toString() {
+    return comparatorSets.stream().map(Object::toString).collect(joining(" || "));
   }
 }

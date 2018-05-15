@@ -35,7 +35,6 @@ import static org.osgi.resource.Namespace.REQUIREMENT_FILTER_DIRECTIVE;
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_CAPABILITY;
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_EXTENDER_NAME;
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_EXTENDER_VERSION;
-import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_MAIN_ATTRIBUTE;
 import static uk.co.saiman.webmodules.WebModulesConstants.WEB_MODULE_ROOT_ATTRIBUTE;
 import static uk.co.saiman.webmodules.commonjs.repository.CommonJsBundleVersion.RESOURCE_ROOT;
 
@@ -59,23 +58,43 @@ public class CommonJsResource implements Resource {
   private final Version version;
   private final JSONObject json;
 
+  private final List<String> requiredAttributes;
+  private final List<String> optionalAttributes;
+
   private List<CapReqBuilder> requirements;
   private List<CapReqBuilder> capabilities;
 
-  CommonJsResource(String name, Version version, JSONObject json) {
+  CommonJsResource(
+      String name,
+      Version version,
+      JSONObject json,
+      List<String> requiredAttributes,
+      List<String> optionalAttributes) {
     this.name = name;
     this.version = version;
     this.json = json;
+    this.requiredAttributes = requiredAttributes;
+    this.optionalAttributes = optionalAttributes;
   }
 
   private CapReqBuilder createModuleCapability(JSONObject packageJson) {
     try {
-      return new CapabilityBuilder(this, WEB_MODULE_CAPABILITY)
+      CapReqBuilder builder = new CapabilityBuilder(this, WEB_MODULE_CAPABILITY)
           .setResource(this)
-          .addAttribute(WEB_MODULE_MAIN_ATTRIBUTE, packageJson.getString(WEB_MODULE_MAIN_ATTRIBUTE))
           .addAttribute(WEB_MODULE_ROOT_ATTRIBUTE, RESOURCE_ROOT)
           .addAttribute(WEB_MODULE_CAPABILITY, name)
           .addAttribute(VERSION_ATTRIBUTE, version);
+      for (String requiredAttribute : requiredAttributes) {
+        builder = builder.addAttribute(requiredAttribute, packageJson.getString(requiredAttribute));
+      }
+      for (String optionalAttribute : optionalAttributes) {
+        if (packageJson.has(optionalAttribute)) {
+          builder = builder
+              .addAttribute(optionalAttribute, packageJson.getString(optionalAttribute));
+        }
+      }
+
+      return builder;
     } catch (Exception e) {
       throw new RegistryResolutionException("Failed to generate module capability", e);
     }

@@ -4,4 +4,5 @@ Bundle-Description: \
 	Provides Java API for interacting with CommonsJS registries
 
 Export-Package: \
-	uk.co.saiman.webmodules.commonjs.registry
+	uk.co.saiman.webmodules.commonjs.registry,\
+	uk.co.saiman.webmodules.commonjs.registry.cache

@@ -12,6 +12,8 @@ import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.webmodules.commonjs.registry.PackageRoot;
 import uk.co.saiman.webmodules.commonjs.registry.PackageVersion;
+import uk.co.saiman.webmodules.semver.Range;
+import uk.co.saiman.webmodules.semver.Version;
 
 public class CommonJsBundle {
   private final CommonJsRepository repository;
@@ -62,50 +64,32 @@ public class CommonJsBundle {
     return Optional.ofNullable(resources.get(semver));
   }
 
-  void fetchAllVersions() {
-    packageRoot
+  Stream<CommonJsBundleVersion> fetchDependencies(Range range) {
+    return packageRoot
         .getPackageVersions()
         .parallel()
-        .flatMap(v -> findPackageVersion(packageRoot, v))
-        .flatMap(v -> loadResource(v))
-        .forEach(resource -> {
-          add(resource);
-          resource
-              .getDependencies()
-              .parallel()
-              .flatMap(repository::findPackageRoot)
-              .map(repository::loadBundle)
-              .forEach(CommonJsBundle::fetchAllVersions);
-        });
+        .filter(range::matches)
+        .filter(v -> !resources.containsKey(v))
+        .flatMap(this::loadBundleVersion);
   }
 
-  private void add(CommonJsBundleVersion resource) {
-    synchronized (resources) {
-      resources.put(resource.getSemver(), resource);
-    }
-  }
-
-  private Stream<PackageVersion> findPackageVersion(PackageRoot root, String version) {
+  private Stream<CommonJsBundleVersion> loadBundleVersion(Version version) {
     try {
-      return Stream.of(root.getPackageVersion(version));
-    } catch (Exception e) {
-      getLog()
-          .log(Level.WARN, "Cannot locate package version " + root.getName() + " - " + version, e);
-      return Stream.empty();
-    }
-  }
+      PackageVersion packageVersion = packageRoot.getPackageVersion(version);
 
-  private Stream<CommonJsBundleVersion> loadResource(PackageVersion packageVersion) {
-    try {
-      return Stream.of(new CommonJsBundleVersion(this, packageVersion));
+      synchronized (resources) {
+        return Stream
+            .of(
+                resources
+                    .computeIfAbsent(
+                        packageVersion.getVersion(),
+                        v -> new CommonJsBundleVersion(this, packageVersion)));
+      }
     } catch (Exception e) {
       getLog()
           .log(
               Level.WARN,
-              "Cannot load resource "
-                  + packageVersion.getName()
-                  + " - "
-                  + packageVersion.getVersion(),
+              "Cannot load bundle version " + packageRoot.getName() + " - " + version,
               e);
       return Stream.empty();
     }

@@ -3,6 +3,13 @@
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 \
-	org.apache.felix.webconsole
+	org.apache.felix.webconsole,\
+\
+	uk.co.saiman.webmodule.axios;version=latest,\
+	uk.co.saiman.webmodule.react;version=latest,\
+	uk.co.saiman.webmodule.react-dom;version=latest,\
+	uk.co.saiman.webmodule.prop-types;version=latest,\
+	uk.co.saiman.webmodule.react-redux;version=latest,\
+	uk.co.saiman.webmodule.redux-thunk;version=latest
 
 -sub: *.bnd

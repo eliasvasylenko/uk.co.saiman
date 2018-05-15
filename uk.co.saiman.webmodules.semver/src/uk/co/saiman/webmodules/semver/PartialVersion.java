@@ -183,4 +183,18 @@ public class PartialVersion {
 
     return Optional.of(new PrimitiveComparator(LESS_THAN_OR_EQUAL, upperBound));
   }
+
+  @Override
+  public String toString() {
+    return major == null
+        ? "*"
+        : major
+            + (minor == null
+                ? ""
+                : "."
+                    + minor
+                    + (micro == null
+                        ? ""
+                        : "." + micro + (preRelease == null ? "" : "-" + preRelease)));
+  }
 }

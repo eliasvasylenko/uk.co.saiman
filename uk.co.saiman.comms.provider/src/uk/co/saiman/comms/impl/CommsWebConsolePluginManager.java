@@ -45,23 +45,13 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.webmodule.react.RequireReactWebModule;
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.webconsole.RequireSAIWebConsoleWebModule;
 
 /*
  * TODO generate requirement annotations in webbundle bundles
  */
-// @RequirePropTypesWebResource 
 @RequireSAIWebConsoleWebModule
-@RequireReactWebModule
-// @RequireReduxWebResource
-// @RequireAxiosWebModule
-// @RequireReduxThunkWebResource
-// @RequireRequireJSWebResource
-// @RequireReactWebResource
-// @RequireReactDOMWebResource
-// @RequireReactReduxWebResource
 @Component
 public class CommsWebConsolePluginManager {
   static final String WEBCONSOLE_LABEL = "felix.webconsole.label";

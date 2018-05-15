@@ -27,8 +27,11 @@
  */
 package uk.co.saiman.webmodules.semver;
 
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,25 +45,28 @@ import org.osgi.framework.InvalidSyntaxException;
 public class ComparatorSet {
   private final List<AdvancedComparator> comparators;
 
-  public ComparatorSet(String comparatorSetString) {
-    comparatorSetString = comparatorSetString.trim();
-
-    ArrayList<AdvancedComparator> comparators = new ArrayList<>();
-
-    for (String comparator : comparatorSetString.split("(?!\\s+-\\s+)\\s+")) {
-      comparators.add(new AdvancedComparator(comparator));
-    }
-    comparators.trimToSize();
-
-    this.comparators = unmodifiableList(comparators);
+  public static ComparatorSet parse(String comparatorSetString) {
+    System.out.println(" ----- " + comparatorSetString);
+    return new ComparatorSet(
+        stream(comparatorSetString.trim().split("(?!\\s+-\\s+)\\s+"))
+            .map(AdvancedComparator::parse)
+            .collect(toList()));
   }
 
   public ComparatorSet(Collection<? extends AdvancedComparator> comparators) {
     this.comparators = unmodifiableList(new ArrayList<>(comparators));
   }
 
+  public ComparatorSet(AdvancedComparator... comparators) {
+    this(asList(comparators));
+  }
+
   public Stream<AdvancedComparator> getAdvancedComparators() {
     return comparators.stream();
+  }
+
+  public boolean matches(Version version) {
+    return comparators.stream().allMatch(c -> c.matches(version));
   }
 
   public Filter toOsgiFilter() throws InvalidSyntaxException {
@@ -80,5 +86,10 @@ public class ComparatorSet {
         .stream()
         .map(AdvancedComparator::toOsgiFilterString)
         .collect(joining("", "(&", ")"));
+  }
+
+  @Override
+  public String toString() {
+    return comparators.stream().map(Object::toString).collect(joining(" "));
   }
 }

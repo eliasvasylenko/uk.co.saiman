@@ -28,14 +28,19 @@
 package uk.co.saiman.webmodules.commonjs.registry;
 
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.stream.Stream;
+
+import uk.co.saiman.webmodules.semver.Version;
 
 public interface PackageRoot {
   String getName();
 
   URL getUrl();
 
-  Stream<String> getPackageVersions();
+  Path getLocal();
 
-  PackageVersion getPackageVersion(String version);
+  Stream<Version> getPackageVersions();
+
+  PackageVersion getPackageVersion(Version version);
 }

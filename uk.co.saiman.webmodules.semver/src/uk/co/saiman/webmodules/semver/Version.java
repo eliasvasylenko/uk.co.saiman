@@ -63,7 +63,13 @@ public class Version implements Comparable<Version> {
     this.buildInformation = buildInformation;
   }
 
-  public Version(String versionString) {
+  public static Version parse(String versionString) {
+    int major;
+    int minor;
+    int micro;
+    PreReleaseVersion preRelease;
+    String buildInformation;
+
     if (versionString.startsWith("="))
       versionString = versionString.substring(1);
 
@@ -98,6 +104,13 @@ public class Version implements Comparable<Version> {
     major = parseInt(components[0], versionString);
     minor = parseInt(components[1], versionString);
     micro = parseInt(components[2], versionString);
+
+    Version version = new Version(major, minor, micro);
+    if (preRelease != null)
+      version = version.withPreRelease(preRelease);
+    if (buildInformation != null)
+      version = version.withBuildInformation(buildInformation);
+    return version;
   }
 
   private static int parseInt(String value, String version) {

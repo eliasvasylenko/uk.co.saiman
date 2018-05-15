@@ -27,10 +27,16 @@
  */
 package uk.co.saiman.webmodules.commonjs.registry.impl;
 
+import static java.util.stream.Collectors.toSet;
+import static uk.co.saiman.webmodules.commonjs.registry.cache.Cache.getBytes;
+import static uk.co.saiman.webmodules.commonjs.registry.cache.Retention.STRONG;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashSet;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -40,31 +46,58 @@ import org.json.JSONTokener;
 import uk.co.saiman.webmodules.commonjs.registry.PackageRoot;
 import uk.co.saiman.webmodules.commonjs.registry.PackageVersion;
 import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodules.commonjs.registry.cache.Cache;
+import uk.co.saiman.webmodules.semver.Version;
 
 public class PackageRootImpl implements PackageRoot {
+  private static final String LOCAL_FILE = "packageRoot.json";
   private static final String VERSIONS_KEY = "versions";
 
-  private final URL url;
+  private final URL remote;
+  private final Path local;
   private final String name;
-  private final Set<String> versions;
+  private final Set<Version> versions;
 
-  public PackageRootImpl(URL registryRootUrl, String name) {
+  public PackageRootImpl(URL remote, Path local, String name) {
+    this.name = name;
+
     try {
-      this.url = new URL(registryRootUrl, name);
+      this.remote = new URL(remote, name);
     } catch (MalformedURLException e) {
       throw new RegistryResolutionException(
-          "Failed to resolve package root " + name + " from URL " + registryRootUrl,
+          "Failed to resolve package root " + name + " from URL " + remote,
           e);
     }
 
-    this.name = name;
+    Path file;
+    try {
+      this.local = local.resolve(name);
+      Files.createDirectories(local);
 
-    try (InputStream inputStream = url.openStream()) {
-      JSONObject object = new JSONObject(new JSONTokener(inputStream));
+      file = new Cache(this.local)
+          .fetchResource(
+              LOCAL_FILE,
+              entry -> entry.writeBytes(getBytes(this.remote.openStream())),
+              STRONG);
+    } catch (IOException e) {
+      throw new RegistryResolutionException(
+          "Failed to cache package root " + name + " at " + local,
+          e);
+    }
 
-      this.versions = new HashSet<>(object.getJSONObject(VERSIONS_KEY).keySet());
-    } catch (Exception e) {
-      throw new RegistryResolutionException("Failed to load package root from URL " + url, e);
+    try (InputStream input = Files.newInputStream(file)) {
+      JSONObject object = new JSONObject(new JSONTokener(input));
+
+      this.versions = object
+          .getJSONObject(VERSIONS_KEY)
+          .keySet()
+          .stream()
+          .map(Version::parse)
+          .collect(toSet());
+    } catch (IOException e) {
+      throw new RegistryResolutionException(
+          "Failed to load package root " + name + " from " + file,
+          e);
     }
   }
 
@@ -75,18 +108,24 @@ public class PackageRootImpl implements PackageRoot {
 
   @Override
   public URL getUrl() {
-    return url;
+    return remote;
   }
 
   @Override
-  public synchronized Stream<String> getPackageVersions() {
+  public Path getLocal() {
+    return local.resolve(LOCAL_FILE);
+  }
+
+  @Override
+  public synchronized Stream<Version> getPackageVersions() {
     return versions.stream();
   }
 
   @Override
-  public PackageVersion getPackageVersion(String version) {
+  public PackageVersion getPackageVersion(Version version) {
     return new PackageVersionImpl(
-        url,
+        remote,
+        local,
         name,
         versions
             .stream()

@@ -28,15 +28,20 @@
 package uk.co.saiman.webmodules.commonjs.repository.bnd;
 
 import java.net.URI;
+import java.util.List;
 
 public interface CommonJsRepositoryPluginConfiguration {
   String name(String string);
 
   URI url();
 
-  String modules();
+  String initialDependencies();
 
   String bsnPrefix();
+
+  List<String> requiredAttributes(List<String> attributes);
+
+  List<String> optionalAttributes(List<String> attributes);
 
   String cache(String string);
 }

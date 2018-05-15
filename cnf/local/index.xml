@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local Index" increment="1526051282000">
+<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local Index" increment="1526381783000">
   <resource>
     <capability namespace="osgi.identity">
       <attribute name="license" value="http://www.opensource.org/licenses/eclipse-1.0.php"/>
@@ -36,22 +36,27 @@
       <attribute name="license" value="GPL; link = http://www.gnu.org/licenses/"/>
       <attribute name="osgi.identity" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" value="1.0.0.201805111505" type="Version"/>
+      <attribute name="version" value="1.0.0.201805151055" type="Version"/>
       <attribute name="documentation" value="https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
-      <attribute name="bundle-version" value="1.0.0.201805111505" type="Version"/>
+      <attribute name="bundle-version" value="1.0.0.201805151055" type="Version"/>
       <attribute name="osgi.wiring.bundle" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
     <capability namespace="osgi.wiring.host">
-      <attribute name="bundle-version" value="1.0.0.201805111505" type="Version"/>
+      <attribute name="bundle-version" value="1.0.0.201805151055" type="Version"/>
       <attribute name="osgi.wiring.host" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
+    <capability namespace="osgi.wiring.package">
+      <directive name="uses" value="org.osgi.framework"/>
+      <attribute name="version" value="1.0.0" type="Version"/>
+      <attribute name="osgi.wiring.package" value="uk.co.saiman.webmodules.semver"/>
+    </capability>
     <capability namespace="osgi.content">
-      <attribute name="size" value="3582573" type="Long"/>
+      <attribute name="size" value="3609079" type="Long"/>
       <attribute name="url" value="uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-1.0.0.jar"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>
-      <attribute name="osgi.content" value="3353BD21A5AD90DCE356C64820F88E5C065385DA08469995AB931BC8E8C19CED"/>
+      <attribute name="osgi.content" value="AD5C1C153009ECEB357B44F56077A8878AEF0088F072D98E28D7804E146086F5"/>
     </capability>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.annotation.plugin)(&amp;(version&gt;=1.0.0)(!(version&gt;=2.0.0))))"/>
@@ -63,7 +68,7 @@
       <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.header)(&amp;(version&gt;=2.0.0)(!(version&gt;=3.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.osgi)(&amp;(version&gt;=4.0.0)(!(version&gt;=5.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.osgi)(&amp;(version&gt;=4.1.0)(!(version&gt;=5.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.osgi.repository)(&amp;(version&gt;=1.5.0)(!(version&gt;=2.0.0))))"/>
@@ -154,6 +159,9 @@
     </requirement>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=uk.co.saiman.reflection))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=uk.co.saiman.webmodules.semver)(&amp;(version&gt;=1.0.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.compile.time.only">
       <directive name="filter" value="(&amp;(must.not.resolve=*)(!(must.not.resolve=*)))"/>

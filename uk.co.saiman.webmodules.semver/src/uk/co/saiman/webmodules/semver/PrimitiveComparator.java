@@ -39,10 +39,10 @@ public class PrimitiveComparator {
   private final Operator operator;
   private final Version version;
 
-  public PrimitiveComparator(String comparatorString) {
+  public static PrimitiveComparator parse(String comparatorString) {
     requireNonNull(comparatorString);
 
-    operator = stream(Operator.values())
+    Operator operator = stream(Operator.values())
         .filter(o -> comparatorString.startsWith(o.getSymbol()))
         .findAny()
         .orElseThrow(
@@ -51,7 +51,9 @@ public class PrimitiveComparator {
 
     String versionString = comparatorString.substring(operator.getSymbol().length());
 
-    version = new Version(versionString);
+    Version version = Version.parse(versionString);
+
+    return new PrimitiveComparator(operator, version);
   }
 
   public PrimitiveComparator(Operator operator, Version version) {
@@ -70,15 +72,15 @@ public class PrimitiveComparator {
   public boolean matches(Version version) {
     switch (operator) {
     case EQUAL:
-      return this.version.equals(version);
+      return version.equals(this.version);
     case GREATER_THAN:
-      return this.version.compareTo(version) > 0;
+      return version.compareTo(this.version) > 0;
     case GREATER_THAN_OR_EQUAL:
-      return this.version.compareTo(version) >= 0;
+      return version.compareTo(this.version) >= 0;
     case LESS_THAN:
-      return this.version.compareTo(version) < 0;
+      return version.compareTo(this.version) < 0;
     case LESS_THAN_OR_EQUAL:
-      return this.version.compareTo(version) <= 0;
+      return version.compareTo(this.version) <= 0;
     default:
       return false;
     }

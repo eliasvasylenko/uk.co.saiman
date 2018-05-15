@@ -30,6 +30,12 @@ package uk.co.saiman.webconsole;
 import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_NAME;
 import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
 
+import uk.co.saiman.webmodule.axios.RequireAxiosWebModule;
+import uk.co.saiman.webmodule.prop.types.RequirePropTypesWebModule;
+import uk.co.saiman.webmodule.react.RequireReactWebModule;
+import uk.co.saiman.webmodule.react.dom.RequireReactDomWebModule;
+import uk.co.saiman.webmodule.react.redux.RequireReactReduxWebModule;
+import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
 import uk.co.saiman.webmodules.ProvideWebModule;
 
 /**
@@ -37,6 +43,12 @@ import uk.co.saiman.webmodules.ProvideWebModule;
  * 
  * @author Elias N Vasylenko
  */
+@RequirePropTypesWebModule
+@RequireReactWebModule
+@RequireAxiosWebModule
+@RequireReduxThunkWebModule
+@RequireReactDomWebModule
+@RequireReactReduxWebModule
 @SuppressWarnings("javadoc")
 @ProvideWebModule(
     name = SAI_WEB_CONSOLE_WEB_MODULE_NAME,
