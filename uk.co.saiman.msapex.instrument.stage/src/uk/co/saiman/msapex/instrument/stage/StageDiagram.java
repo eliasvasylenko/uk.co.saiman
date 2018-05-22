@@ -84,7 +84,6 @@ public abstract class StageDiagram<T> {
     annotationLayer.getAnnotations().add(actualPosition);
     actualPosition.measurementXProperty().bind(actualCoordinates.getX());
     actualPosition.measurementYProperty().bind(actualCoordinates.getY());
-
   }
 
   public XYCoordinateBinding<Length> getRequestedCoordinates() {

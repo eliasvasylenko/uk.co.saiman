@@ -38,7 +38,6 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -67,20 +66,27 @@ import uk.co.saiman.experiment.processing.ProcessorState;
 @Component(service = ExperimentType.class)
 public class SpectrumProcessingExperimentType
     implements ProcessingType<SpectrumResultConfiguration, Spectrum, Spectrum> {
-  private final ProcessorService processors;
+  @Reference
+  private ProcessorService processors;
   private final SpectrumProperties properties;
 
+  public SpectrumProcessingExperimentType() {
+    properties = getDefaultProperties(SpectrumProperties.class);
+  }
+
+  /*-
   public SpectrumProcessingExperimentType(ProcessorService processors) {
     this(processors, getDefaultProperties(SpectrumProperties.class));
   }
 
-  @Activate
+  // @Activate TODO
   public SpectrumProcessingExperimentType(
       @Reference ProcessorService processors,
       @Reference SpectrumProperties properties) {
     this.processors = processors;
     this.properties = properties;
   }
+   */
 
   protected SpectrumProperties getProperties() {
     return properties;

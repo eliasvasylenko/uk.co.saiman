@@ -1,0 +1,9 @@
+-plugin.eclipse.platform.photon:\
+\
+		aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"Eclipse Photon Updates";\
+			url					=		http://download.eclipse.org/eclipse/updates/4.8,\
+\
+		aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"Eclipse Photon Simultaneous Release";\
+			url					=		http://download.eclipse.org/releases/photon

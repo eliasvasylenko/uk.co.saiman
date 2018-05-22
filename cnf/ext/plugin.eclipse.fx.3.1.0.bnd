@@ -1,5 +1,5 @@
--plugin.eclipse.fx.3.1.0: \
-\
-		aQute.bnd.repository.p2.provider.P2Repository;\
-			name				=		"E(fx)clipse Runtime 3.1.0";\
-			url					=       http://download.eclipse.org/efxclipse/runtime-released/3.1.0/site/
+#-plugin.eclipse.fx.3.1.0: \
+#\
+#		aQute.bnd.repository.p2.provider.P2Repository;\
+#			name				=		"E(fx)clipse Runtime 3.1.0";\
+#			url					=       http://download.eclipse.org/efxclipse/runtime-released/3.1.0/site/

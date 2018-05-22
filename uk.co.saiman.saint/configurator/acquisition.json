@@ -11,6 +11,6 @@
 		"cameraResolutionWidth": 320,
 		"cameraResolutionHeight": 240,
 		"viewAreaWidth": "20mm",
-		"stageDevice.target": "(service.pid=uk.co.saiman.instrument.stage.copley.xy.rastering~saintsimulation)"
+		"stageDevice.target": "(service.pid=uk.co.saiman.instrument.stage.saint~saintsimulation)"
 	}
 }

@@ -1,7 +1,7 @@
 Private-Package: {{basePackageName}}
 
 -include:\
-	\${build}/include/eclipse.platform.oxygen.bnd,\
+	\${build}/include/eclipse.platform.bnd,\
 	\${build}/include/eclipse.fx.3.0.0.bnd,\
 	\${build}/include/eclipse.plugin.bnd,\
 	\${build}/include/fugue.icons.bnd

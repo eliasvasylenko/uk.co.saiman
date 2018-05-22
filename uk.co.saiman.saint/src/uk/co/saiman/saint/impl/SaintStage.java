@@ -48,12 +48,6 @@ import uk.co.saiman.instrument.stage.composed.StageAxis;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.observable.ObservableValue;
 
-/**
- * TODO this class should not need to exist. Fold the annotations into
- * {@link CopleyLinearAxis} using constructor injection with R7.
- * 
- * @author Elias N Vasylenko
- */
 @Designate(ocd = SaintStage.SaintStageConfiguration.class, factory = true)
 @Component(
     name = SaintStage.CONFIGURATION_PID,

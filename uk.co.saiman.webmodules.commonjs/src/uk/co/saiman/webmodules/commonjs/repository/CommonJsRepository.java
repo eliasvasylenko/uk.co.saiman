@@ -276,10 +276,27 @@ public class CommonJsRepository extends BaseRepository implements Repository {
         .values()
         .stream()
         .flatMap(CommonJsBundle::getBundleVersions)
-        .map(CommonJsBundleVersion::getResource)
-        .flatMap(resource -> resource.getCapabilities(requirement.getNamespace()).stream())
+        .flatMap(version -> getCapabilities(version, requirement))
         .filter(capability -> matches(requirement, capability))
         .collect(toSet());
+  }
+
+  private Stream<Capability> getCapabilities(
+      CommonJsBundleVersion version,
+      Requirement requirement) {
+    try {
+      return version.getResource().getCapabilities(requirement.getNamespace()).stream();
+    } catch (Exception e) {
+      getLog()
+          .log(
+              Level.WARN,
+              "Cannot get capabilities "
+                  + version.getBundle().getModuleName()
+                  + " - "
+                  + version.getSemver(),
+              e);
+      return Stream.empty();
+    }
   }
 
   public Stream<String> getModules() {

@@ -1,21 +1,18 @@
 {
-	"uk.co.saiman.instrument.stage.composed.xy.rastering~saintsimulation": {
-		"exchangePosition": "0mm",
-		"exchangePositionY": "-100mm",
-		"homePositionX": "0mm",
-		"homePositionY": "0mm",
+	"uk.co.saiman.instrument.stage.saint~saintsimulation": {
+		"name": "SAINT Stage",
+		"exchangeLocation": "0mm, -100mm",
+		"analysisLocation": "0mm, 0mm",
+		"lowerBound": "-27.5mm, -20mm",
+		"upperBound": "27.5mm, 20mm",
 		"xAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.linear~saintsimulation.x)",
 		"yAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.linear~saintsimulation.y)"
 	},
 	"uk.co.saiman.instrument.stage.copley.linear~saintsimulation.x": {
-		"lowerBound": "-27.5mm",
-		"upperBound": "27.5mm",
 		"axis": 0,
 		"comms.target": "(service.pid=uk.co.saiman.comms.copley~saintsimulation)"
 	},
 	"uk.co.saiman.instrument.stage.copley.linear~saintsimulation.y": {
-		"lowerBound": "-20mm",
-		"upperBound": "20mm",
 		"axis": 1,
 		"comms.target": "(service.pid=uk.co.saiman.comms.copley~saintsimulation)"
 	},

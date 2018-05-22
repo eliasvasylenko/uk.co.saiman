@@ -70,7 +70,7 @@ public class ADCSimulation implements DetectorSimulationService {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.adc";
 
   @Reference
-  SimulatedSampleSource sampleSource;
+  private SimulatedSampleSource sampleSource;
 
   private double signalToNoise;
 

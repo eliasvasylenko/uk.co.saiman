@@ -56,13 +56,12 @@ import uk.co.saiman.webmodules.commonjs.registry.RegistryResolutionException;
 public class CommonJsResource implements Resource {
   private final String name;
   private final Version version;
-  private final JSONObject json;
 
   private final List<String> requiredAttributes;
   private final List<String> optionalAttributes;
 
-  private List<CapReqBuilder> requirements;
-  private List<CapReqBuilder> capabilities;
+  private final List<CapReqBuilder> requirements;
+  private final List<CapReqBuilder> capabilities;
 
   CommonJsResource(
       String name,
@@ -72,9 +71,13 @@ public class CommonJsResource implements Resource {
       List<String> optionalAttributes) {
     this.name = name;
     this.version = version;
-    this.json = json;
     this.requiredAttributes = requiredAttributes;
     this.optionalAttributes = optionalAttributes;
+
+    this.requirements = concat(
+        Stream.of(createExtenderRequirement()),
+        createDependencyRequirements(json)).collect(toList());
+    this.capabilities = Stream.of(createModuleCapability(json)).collect(toList());
   }
 
   private CapReqBuilder createModuleCapability(JSONObject packageJson) {
@@ -141,18 +144,10 @@ public class CommonJsResource implements Resource {
    */
 
   public Stream<CapReqBuilder> getCapabilities() {
-    if (capabilities == null) {
-      capabilities = Stream.of(createModuleCapability(json)).collect(toList());
-    }
     return capabilities.stream();
   }
 
   public Stream<CapReqBuilder> getRequirements() {
-    if (requirements == null) {
-      requirements = concat(
-          Stream.of(createExtenderRequirement()),
-          createDependencyRequirements(json)).collect(toList());
-    }
     return requirements.stream();
   }
 

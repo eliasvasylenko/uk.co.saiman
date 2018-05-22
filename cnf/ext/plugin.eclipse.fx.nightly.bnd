@@ -1,0 +1,5 @@
+-plugin.eclipse.fx.nightly: \
+\
+		aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"E(fx)clipse Runtime Nightly (3.3.0+)";\
+			url					=       http://download.eclipse.org/efxclipse/runtime-nightly/site/

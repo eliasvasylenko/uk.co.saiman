@@ -4,4 +4,4 @@ Private-Package: \
 	uk.co.saiman.saint.simulation
 
 -includeresource: \
-	configuration=configuration
+	OSGI-INF/configurator=configurator

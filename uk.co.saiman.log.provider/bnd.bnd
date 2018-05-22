@@ -7,3 +7,8 @@ Bundle-Description: \
 
 Private-Package: \
 	uk.co.saiman.log.provider
+
+# TODO this is nonsense, a workaround for some e(fx)clipse bundles with broken imports
+Export-Package: \
+	org.osgi.service.component.annotations;version=1.4.0
+

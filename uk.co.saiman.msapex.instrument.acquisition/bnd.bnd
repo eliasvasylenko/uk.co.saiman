@@ -2,8 +2,8 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
-	${build}/include/eclipse.platform.oxygen.bnd,\
-	${build}/include/eclipse.fx.3.1.0.bnd,\
+	${build}/include/eclipse.platform.bnd,\
+	${build}/include/eclipse.fx.bnd,\
 	${build}/include/fugue.icons.bnd
 
 -buildpath: \

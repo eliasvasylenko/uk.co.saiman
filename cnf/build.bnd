@@ -102,8 +102,6 @@ Bundle-Developers:\
 	bnd.identity; id=org.apache.felix.log
 
 -runee:					JavaSE-1.8
--runfw:\
-	org.apache.felix.framework
 
 # Build path groups:
 -buildpath.base=\
