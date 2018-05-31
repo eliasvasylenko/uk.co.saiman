@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.comms.saint.impl;
 
-import static org.osgi.service.component.annotations.ReferenceCardinality.MANDATORY;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
@@ -42,6 +41,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.converter.Converter;
+import org.osgi.util.converter.Converters;
 
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.saint.SaintController;
@@ -52,8 +52,7 @@ public class SaintCommsRESTManager {
   private final Map<SaintController, ServiceRegistration<CommsREST>> serviceRegistrations = new HashMap<>();
   private BundleContext context;
 
-  @Reference(cardinality = MANDATORY)
-  private Converter converter;
+  private final Converter converter = Converters.standardConverter();
 
   @Activate
   synchronized void activate(BundleContext context) {

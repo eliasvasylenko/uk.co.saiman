@@ -3,5 +3,4 @@ Bundle-Name: SAI :: CommonJS :: Registry :: Provider
 Bundle-Description: \
 	Provides a Java implementation for interacting with CommonsJS registries
 
-Private-Package: \
-	uk.co.saiman.webmodules.commonjs.registry.impl
+Private-Package: uk.co.saiman.webmodule.commonjs.registry.impl

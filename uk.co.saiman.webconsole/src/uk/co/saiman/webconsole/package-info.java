@@ -28,4 +28,4 @@
 @org.osgi.annotation.versioning.Version(SAI_WEB_CONSOLE_WEB_MODULE_VERSION)
 package uk.co.saiman.webconsole;
 
-import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
+import static uk.co.saiman.webconsole.SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;

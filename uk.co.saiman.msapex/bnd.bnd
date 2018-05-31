@@ -17,4 +17,4 @@ Private-Package:\
 	{Application.e4xmi},\
 	{css=css},\
 	res,\
-	OSGI-INf/configurator=configurator
+	OSGI-INF/configurator=configurator

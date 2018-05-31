@@ -40,11 +40,11 @@ import java.util.function.Supplier;
  * @param <E>
  *          the type of exception which may be thrown
  */
-public interface ThrowingSupplier<T, E extends Exception> {
-	/**
-	 * @return an instance of the expected type
-	 * @throws E
-	 *           an exception thrown by the implementor
-	 */
-	T get() throws E;
+public interface ThrowingSupplier<T, E extends Throwable> {
+  /**
+   * @return an instance of the expected type
+   * @throws E
+   *           an exception thrown by the implementor
+   */
+  T get() throws E;
 }

@@ -1,3 +1,4 @@
+<script src="/webmodules/${bsn}/${Bundle-Version}"></script>
 <script>
 	const commsRestID = "\${comms.rest.id}"
 	const commsRestName = "\${comms.rest.name}"
@@ -18,39 +19,5 @@
 		connectionOpen : "\${comms.action.open}",
 		connectionClose : "\${comms.action.close}"
 	}
-	require([ "app/comms" ])
-</script>
-<script
-	src="/uk.co.saiman.moduleserver.provision/${bsn}/${Bundle-Version}"></script>
-<script src="\${pluginRoot}/res/sai/app/comms.js"></script>
-
-
-
-
-
-
-
-The following require.js include and require.config should be generated
-by the OSGi backend...
-
-<script
-	src="/uk.co.saiman.moduleserver/require/requirejs/${requirejs-Bundle-Version}/require.js"></script>
-<script>
-	require.config({
-		baseUrl : "/uk.co.saiman.moduleserver/require/",
-		paths : {
-			"app" : "app/${app-provider-Bundle-Version}/res/sai""
-		}
-	})
-</script>
-
-...from a tag like this:
-
-<script
-	src="/uk.co.saiman.moduleserver/provision/${bsn}/${Bundle-Version}"></script>
-	
-then load a module with (eventually will be normal ES6 module loading syntax):
-
-<script>
-	require([ "app/comms" ])
+	importModule("@saiman/comms")
 </script>

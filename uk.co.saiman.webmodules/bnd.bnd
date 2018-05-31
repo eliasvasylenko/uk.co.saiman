@@ -9,10 +9,16 @@ Bundle-Description: \
 	uk.co.saiman.osgi;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 \
-	org.apache.felix.http.servlet-api
+	org.apache.felix.http.servlet-api,\
+	json;version=latest
 
 Export-Package: \
-	uk.co.saiman.webmodules
+	uk.co.saiman.webmodule,\
+	uk.co.saiman.webmodule.extender
 
-Private-Package: \
-	uk.co.saiman.webmodules.impl
+Private-Package: uk.co.saiman.webmodule.impl
+
+requirejs.version = 2.3.5.REL
+-includeresource: \
+	static=static,\
+	@${repo;uk.co.saiman.webmodule.requirejs;${requirejs.version}}!/static/*

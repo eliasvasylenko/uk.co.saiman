@@ -40,12 +40,12 @@ import java.util.function.Consumer;
  * @param <E>
  *          the type of exception which may be thrown
  */
-public interface ThrowingConsumer<T, E extends Exception> {
-	/**
-	 * @param value
-	 *          an instance of the expected type
-	 * @throws E
-	 *           an exception thrown by the implementor
-	 */
-	void accept(T value) throws E;
+public interface ThrowingConsumer<T, E extends Throwable> {
+  /**
+   * @param value
+   *          an instance of the expected type
+   * @throws E
+   *           an exception thrown by the implementor
+   */
+  void accept(T value) throws E;
 }

@@ -1,6 +1,8 @@
-[
-	{
-		"service.pid": "uk.co.saiman.console.log",
+{
+	"uk.co.saiman.console.log": {
 		"enabled": false
+	},
+	"uk.co.saiman.webmodules.server~msapex": {
+		"osgi.http.whiteboard.servlet.pattern": "/webmodules/*"
 	}
-]
+}

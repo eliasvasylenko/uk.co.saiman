@@ -1,8 +1,17 @@
 {
-	"react": "^16.3.0",
+	"react": {
+		"version": "^16.3.0",
+		"entryPoints": {
+			"amd": "umd/react.development.js"
+		}
+	},
 	"react-redux": "^5.0.0",
 	"redux-thunk": "^2.1.0",
+	"redux": "^4.0.0",
 	"prop-types": "^15.0.0",
 	"react-dom": "^16.3.0",
-	"axios": "0"
+	"axios": "0",
+	"requirejs": "^2.3.5",
+	"systemjs": "^0.21.3",
+	"babel-standalone": "^6.24.0"
 }

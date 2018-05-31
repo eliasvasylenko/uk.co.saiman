@@ -1,10 +1,10 @@
-import React from 'react';
+import * as React from 'react';
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 
-import { ConsoleComponent } from 'sai-webconsole'
+import { ConsoleComponent } from '@saiman/webconsole'
 
 import { requestInfo } from './actions'
 import commsApp from './reducers'

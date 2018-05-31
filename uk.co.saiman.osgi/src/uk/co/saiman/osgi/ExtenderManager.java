@@ -30,16 +30,14 @@ package uk.co.saiman.osgi;
 import static org.osgi.namespace.extender.ExtenderNamespace.EXTENDER_NAMESPACE;
 import static uk.co.saiman.log.Log.forwardingLog;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.ComponentContext;
@@ -61,11 +59,11 @@ import uk.co.saiman.log.Log.Level;
  * 
  * @author Elias N Vasylenko
  */
-public abstract class ExtenderManager implements BundleListener {
+public abstract class ExtenderManager implements SynchronousBundleListener {
   private BundleContext context;
   private BundleCapability capability;
   private Log log;
-  private final Map<Bundle, Lock> added = new HashMap<>();
+  private final Set<Bundle> extendedBundles = new HashSet<>();
 
   @Activate
   protected void activate(ComponentContext cc) {
@@ -108,76 +106,79 @@ public abstract class ExtenderManager implements BundleListener {
   @Override
   public void bundleChanged(BundleEvent event) {
     switch (event.getType()) {
-    case BundleEvent.STARTED:
+    case BundleEvent.STARTING:
       tryRegister(event.getBundle());
       break;
 
-    case BundleEvent.STOPPED:
+    case BundleEvent.STOPPING:
       tryUnregister(event.getBundle());
+      break;
+
+    case BundleEvent.UPDATED:
+      tryUpdate(event.getBundle());
       break;
     }
   }
 
-  private void tryRegister(Bundle bundle) {
-    Lock lock;
-    synchronized (added) {
-      if (added.containsKey(bundle)) {
-        return;
-      }
-      lock = new ReentrantLock();
-      lock.lock();
-      added.put(bundle, lock);
-    }
-
+  protected void tryUpdate(Bundle bundle) {
     try {
-      boolean registerable = bundle
-          .adapt(BundleWiring.class)
-          .getRequirements(EXTENDER_NAMESPACE)
-          .stream()
-          .anyMatch(r -> r.matches(capability));
-
-      if (!registerable || !register(bundle)) {
-        synchronized (added) {
-          added.remove(bundle);
-        }
+      if (extendedBundles.contains(bundle)) {
+        update(bundle);
       }
     } catch (Exception e) {
-      synchronized (added) {
-        added.remove(bundle);
-      }
       getLog()
           .log(
               Level.ERROR,
-              "Cannot register bundle '"
+              "Problem updating bundle '"
                   + bundle.getSymbolicName()
                   + "' with extension manager '"
                   + this
                   + "'",
               e);
-    } finally {
-      lock.unlock();
     }
   }
 
-  private void tryUnregister(Bundle bundle) {
-    Lock lock;
-    synchronized (added) {
-      lock = added.get(bundle);
-      if (lock == null) {
-        return;
-      }
-    }
-    lock.lock();
+  protected void tryRegister(Bundle bundle) {
     try {
-      boolean removed;
-      synchronized (added) {
-        removed = added.remove(bundle) != null;
+      if (isExtensible(bundle) && register(bundle)) {
+        extendedBundles.add(bundle);
       }
-      if (removed) {
+    } catch (Exception e) {
+      getLog()
+          .log(
+              Level.ERROR,
+              "Problem registering bundle '"
+                  + bundle.getSymbolicName()
+                  + "' with extension manager '"
+                  + this
+                  + "'",
+              e);
+    }
+  }
+
+  private boolean isExtensible(Bundle bundle) {
+    return bundle
+        .adapt(BundleWiring.class)
+        .getRequirements(EXTENDER_NAMESPACE)
+        .stream()
+        .anyMatch(r -> r.matches(capability));
+  }
+
+  private void tryUnregister(Bundle bundle) {
+    try {
+      if (extendedBundles.remove(bundle)) {
         unregister(bundle);
       }
-    } finally {
-      lock.unlock();
+    } catch (Exception e) {
+      getLog()
+          .log(
+              Level.ERROR,
+              "Problem unregistering bundle '"
+                  + bundle.getSymbolicName()
+                  + "' with extension manager '"
+                  + this
+                  + "'",
+              e);
     }
   }
 
@@ -192,6 +193,8 @@ public abstract class ExtenderManager implements BundleListener {
   }
 
   protected abstract boolean register(Bundle bundle);
+
+  protected abstract void update(Bundle bundle);
 
   protected abstract void unregister(Bundle bundle);
 }

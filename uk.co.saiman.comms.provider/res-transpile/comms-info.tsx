@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 
-import { ConsoleComponent, MapTable, StatLine } from 'sai-webconsole'
+import { ConsoleComponent, MapTable, StatLine } from '@saiman/webconsole'
 
 import { openConnection, closeConnection, CONNECTION_STATES } from './actions'
 

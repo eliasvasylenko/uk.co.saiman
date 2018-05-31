@@ -1,6 +1,7 @@
 ########################
 ## BND BUILD SETTINGS ##
 ########################
+
 ## Java Compiler Options
 javac.source:		1.8
 javac.target:		1.8
@@ -91,11 +92,12 @@ Bundle-Developers:\
 -pluginpath.commonjs.repository: ${build}/local/uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-1.0.0.jar
 -plugin.NPM:\
 \
-	uk.co.saiman.webmodules.commonjs.repository.bnd.CommonJsRepositoryPlugin;\
+	uk.co.saiman.webmodule.commonjs.repository.bnd.CommonJsRepositoryPlugin;\
 		name				=	"NPM";\
-		url					=	http://registry.npmjs.org/;\
+		url					=	https://registry.npmjs.org/;\
 		bsnPrefix			=	uk.co.saiman.webmodule;\
-		initialDependencies	=	${build}/npm.json
+		initialDependencies	=	${build}/npm.json;\
+		optionalAttributes	=	"main, description"
 
 ## Run requirement groups:
 -runrequires.base:\

@@ -36,10 +36,10 @@ package uk.co.saiman.function;
  * @param <E>
  *          the type of exception which may be thrown
  */
-public interface ThrowingRunnable<E extends Exception> {
-	/**
-	 * @throws E
-	 *           an exception thrown by the implementor
-	 */
-	void run() throws E;
+public interface ThrowingRunnable<E extends Throwable> {
+  /**
+   * @throws E
+   *           an exception thrown by the implementor
+   */
+  void run() throws E;
 }

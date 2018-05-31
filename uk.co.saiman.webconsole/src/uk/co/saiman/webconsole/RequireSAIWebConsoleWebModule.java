@@ -27,19 +27,28 @@
  */
 package uk.co.saiman.webconsole;
 
-import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_NAME;
-import static uk.co.saiman.webconsole.SAIWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
+import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
+import static uk.co.saiman.webconsole.SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_NAME;
+import static uk.co.saiman.webconsole.SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
+import static uk.co.saiman.webmodule.WebModuleConstants.ID_ATTRIBUTE;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION_ATTRIBUTE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import uk.co.saiman.webmodules.RequireWebModule;
+import org.osgi.annotation.bundle.Requirement;
+
+import uk.co.saiman.webmodule.react.RequireReactWebModule;
 
 /**
  * A Web Resource that provides RequireJS javascript files.
  */
-@RequireWebModule(
-    name = SAI_WEB_CONSOLE_WEB_MODULE_NAME,
-    version = SAI_WEB_CONSOLE_WEB_MODULE_VERSION)
+@RequireReactWebModule
+@Requirement(
+    namespace = SERVICE_NAMESPACE,
+    filter = "(" + ID_ATTRIBUTE + "=" + SAI_WEB_CONSOLE_WEB_MODULE_NAME + ")",
+    version = SAI_WEB_CONSOLE_WEB_MODULE_VERSION,
+    attribute = EXTENDER_VERSION_ATTRIBUTE + "=" + EXTENDER_VERSION)
 @Retention(RetentionPolicy.CLASS)
 public @interface RequireSAIWebConsoleWebModule {}

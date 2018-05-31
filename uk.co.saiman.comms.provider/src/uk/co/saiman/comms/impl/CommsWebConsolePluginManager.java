@@ -47,10 +47,25 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.webconsole.RequireSAIWebConsoleWebModule;
+import uk.co.saiman.webmodule.ProvideWebModule;
+import uk.co.saiman.webmodule.axios.RequireAxiosWebModule;
+import uk.co.saiman.webmodule.react.RequireReactWebModule;
+import uk.co.saiman.webmodule.react.dom.RequireReactDomWebModule;
+import uk.co.saiman.webmodule.react.redux.RequireReactReduxWebModule;
+import uk.co.saiman.webmodule.redux.RequireReduxWebModule;
+import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
 
-/*
- * TODO generate requirement annotations in webbundle bundles
- */
+@ProvideWebModule(
+    id = "@saiman/comms",
+    version = "1.0.0",
+    esmEntryPoint = "comms.js",
+    root = "static")
+@RequireReactWebModule
+@RequireReactDomWebModule
+@RequireReactReduxWebModule
+@RequireReduxThunkWebModule
+@RequireReduxWebModule
+@RequireAxiosWebModule
 @RequireSAIWebConsoleWebModule
 @Component
 public class CommsWebConsolePluginManager {

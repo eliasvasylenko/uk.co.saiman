@@ -7,7 +7,8 @@ Bundle-Name: SAI :: Comms :: Provider
 \
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.shell;version=snapshot,\
-	uk.co.saiman.webconsole.webresource;version=snapshot,\
+	uk.co.saiman.webconsole;version=snapshot,\
+	uk.co.saiman.webmodules;version=snapshot,\
 \
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
@@ -22,7 +23,15 @@ Bundle-Name: SAI :: Comms :: Provider
 	org.apache.felix.webconsole,\
 	org.apache.felix.http.servlet-api,\
 \
-	org.apache.aries.javax.jax.rs-api
+	org.apache.aries.javax.jax.rs-api,\
+\
+	uk.co.saiman.webmodule.axios;version=latest,\
+	uk.co.saiman.webmodule.react;version=latest,\
+	uk.co.saiman.webmodule.react-dom;version=latest,\
+	uk.co.saiman.webmodule.prop-types;version=latest,\
+	uk.co.saiman.webmodule.react-redux;version=latest,\
+	uk.co.saiman.webmodule.redux-thunk;version=latest,\
+	uk.co.saiman.webmodule.redux;version=latest
 
 -includeresource: \
 	@${repo;com.fazecast:jSerialComm}!/Android/*,\
@@ -30,12 +39,12 @@ Bundle-Name: SAI :: Comms :: Provider
 	@${repo;com.fazecast:jSerialComm}!/OSX/*,\
 	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
 	l10n,\
-	{res/sai=res},\
-	res/sai/comms.js=res-transpile/comms.js,\
-	res/sai/actions.js=res-transpile/actions.js,\
-	res/sai/reducers.js=res-transpile/reducers.js,\
-	res/sai/comms-table.js=res-transpile/comms-table.js,\
-	res/sai/comms-info.js=res-transpile/comms-info.js
+	{static=res},\
+	static/comms.js=res-transpile/comms.js,\
+	static/actions.js=res-transpile/actions.js,\
+	static/reducers.js=res-transpile/reducers.js,\
+	static/comms-table.js=res-transpile/comms-table.js,\
+	static/comms-info.js=res-transpile/comms-info.js
 
 Import-Package: \
 	*

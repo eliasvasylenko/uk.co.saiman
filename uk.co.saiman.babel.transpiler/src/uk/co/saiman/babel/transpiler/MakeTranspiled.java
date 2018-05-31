@@ -31,7 +31,6 @@ import static java.lang.String.format;
 import static java.nio.file.Files.readAllBytes;
 import static java.util.Arrays.asList;
 import static javax.script.ScriptContext.ENGINE_SCOPE;
-import static uk.co.saiman.babel.transpiler.BabelStandaloneConstants.BABEL_STANDALONE_WEB_RESOURCE_VERSION;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,10 +51,8 @@ import aQute.bnd.osgi.Resource;
 import aQute.bnd.service.MakePlugin;
 
 public class MakeTranspiled implements MakePlugin {
-  private static final String RESOURCSE_ROOT = "/META-INF/resources/webjars/babel-standalone/"
-      + BABEL_STANDALONE_WEB_RESOURCE_VERSION
-      + "/";
-  private static final String BABEL_SCRIPT = RESOURCSE_ROOT + "babel.js";
+  private static final String RESOURCE_ROOT = "/static/";
+  private static final String BABEL_SCRIPT = RESOURCE_ROOT + "babel.js";
   private static final String ENGINE_NAME = "nashorn";
 
   private static final String TRANSPILE_TYPE = "transpile";
@@ -118,6 +115,7 @@ public class MakeTranspiled implements MakePlugin {
       String[] plugins,
       String[] presets) throws ScriptException, IOException {
     if (ENGINE == null) {
+      System.setProperty("nashorn.args", "--language=es6");
       ScriptEngine engine = new ScriptEngineManager().getEngineByName(ENGINE_NAME);
       ScriptContext context = new SimpleScriptContext();
       context.setBindings(engine.createBindings(), ENGINE_SCOPE);

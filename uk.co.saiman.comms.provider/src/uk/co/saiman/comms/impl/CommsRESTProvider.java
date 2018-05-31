@@ -104,9 +104,6 @@ public class CommsRESTProvider {
   private Map<CommsREST, Bundle> commsInterfaces;
   private ServiceTracker<CommsREST, CommsREST> commsInterfaceTracker;
 
-  @Reference
-  private Converter converter;
-
   @Activate
   void activate(BundleContext context) {
     commsInterfaces = new LinkedHashMap<>();

@@ -138,12 +138,13 @@ public class StreamUtilities {
     return ofNullable(optional).map(Stream::of).orElse(Stream.empty());
   }
 
-  public static <T> Optional<T> tryOptional(ThrowingSupplier<? extends T, ?> attempt) {
+  public static <T> Optional<T> tryOptional(
+      ThrowingSupplier<? extends T, ? extends Exception> attempt) {
     return tryOptional(attempt, e -> {}, e -> {});
   }
 
   @SuppressWarnings("unchecked")
-  public static <T, E extends Exception> Optional<T> tryOptional(
+  public static <T, E extends Throwable> Optional<T> tryOptional(
       ThrowingSupplier<? extends T, E> attempt,
       Consumer<? super Exception> runtimeExceptions,
       Consumer<? super E> checkedExceptions) {
@@ -152,7 +153,7 @@ public class StreamUtilities {
     } catch (RuntimeException e) {
       runtimeExceptions.accept(e);
       return Optional.empty();
-    } catch (Exception e) {
+    } catch (Throwable e) {
       checkedExceptions.accept((E) e);
       return Optional.empty();
     }

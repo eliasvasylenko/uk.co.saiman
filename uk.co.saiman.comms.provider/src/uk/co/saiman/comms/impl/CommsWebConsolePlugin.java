@@ -48,8 +48,8 @@ class CommsWebConsolePlugin extends SimpleWebConsolePlugin {
 	private final String template;
 
 	public CommsWebConsolePlugin(String id, String name) {
-		super(id, name, INSTRUMENT_CATEGORY, new String[] { "${pluginRoot}/res/sai/comms.css" });
-		this.template = this.readTemplateFile("/res/sai/comms.html");
+		super(id, name, INSTRUMENT_CATEGORY, new String[] { "${pluginRoot}/static/comms.css" });
+		this.template = this.readTemplateFile("/static/comms.html");
 	}
 
 	@SuppressWarnings("unchecked")

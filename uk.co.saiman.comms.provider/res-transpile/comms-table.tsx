@@ -7,7 +7,7 @@ import {
   TableControls,
   ArrayTable,
   StatLine
-} from 'sai-webconsole'
+} from '@saiman/webconsole'
 
 import {
   setFilter,
