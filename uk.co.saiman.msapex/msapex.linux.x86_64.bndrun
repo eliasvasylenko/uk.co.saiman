@@ -17,6 +17,8 @@ runplatform: linux64
 	uk.co.saiman.log.provider;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.webmodules.extender;version=snapshot,\
+	uk.co.saiman.webmodules.server;version=snapshot,\
 	org.apache.felix.log;version='[1.0.1,1.0.2)',\
 	org.osgi.service.log;version='[1.4.0,1.4.1)',\
 	org.osgi.service.wireadmin;version='[1.0.1,1.0.2)',\
@@ -217,4 +219,5 @@ runplatform: linux64
 	uk.co.saiman.webmodule.redux-thunk;version=latest,\
 	uk.co.saiman.webmodule.react-dom;version=latest,\
 	uk.co.saiman.webmodule.react-redux;version=latest,\
+	uk.co.saiman.webmodule.fbjs;version=latest,\
 	org.apache.aries.javax.annotation-api;version='[0.0.1,0.0.2)'

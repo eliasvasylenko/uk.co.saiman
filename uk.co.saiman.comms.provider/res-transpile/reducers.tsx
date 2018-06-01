@@ -20,7 +20,7 @@ import {
   RECEIVE_POLL_RESPONSE,
   SEND_EXECUTION_REQUEST,
   RECEIVE_EXECUTION_RESPONSE
-} from "./actions"
+} from "./actions.js"
 
 const UNKNOWN_TEXT = "..."
 const initialState = {

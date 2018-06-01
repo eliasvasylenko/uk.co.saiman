@@ -1,0 +1,21 @@
+Bundle-Name: SAI :: Web Modules :: Server
+
+Bundle-Description: \
+	Provides a web server implementation for uk.co.saiman.webmodules
+
+-buildpath: \
+	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.reflection.resource;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+\
+	org.apache.felix.http.servlet-api,\
+	json;version=latest
+
+Private-Package: uk.co.saiman.webmodule.server
+
+systemjs.version = 0.21.3.REL
+-includeresource: \
+	static=static,\
+	@${repo;uk.co.saiman.webmodule.systemjs;${systemjs.version}}!/static/dist/system.js

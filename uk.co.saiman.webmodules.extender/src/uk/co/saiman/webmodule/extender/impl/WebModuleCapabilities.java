@@ -1,4 +1,4 @@
-package uk.co.saiman.webmodule.impl;
+package uk.co.saiman.webmodule.extender.impl;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;

@@ -1,4 +1,4 @@
-package uk.co.saiman.webmodule.impl;
+package uk.co.saiman.webmodule.extender.impl;
 
 import static org.osgi.framework.FrameworkUtil.createFilter;
 

@@ -1,4 +1,4 @@
-package uk.co.saiman.webmodule.impl;
+package uk.co.saiman.webmodule.extender.impl;
 
 import static java.util.stream.Collectors.toList;
 import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;

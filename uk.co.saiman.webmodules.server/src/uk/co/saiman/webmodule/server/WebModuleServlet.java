@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.webmodule.impl;
+package uk.co.saiman.webmodule.server;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toCollection;
@@ -44,6 +44,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Deque;
 import java.util.HashMap;
@@ -70,7 +71,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -184,14 +184,15 @@ public class WebModuleServlet extends HttpServlet {
       return;
     }
 
-    response.setContentType("application/javascript");
+    BundleConfiguration configuration = new BundleConfiguration(bundle, request.getServletPath());
 
-    String pathRoot = request.getServletPath();
-    JSONObject paths = getPaths(pathRoot, bundle);
-    writeResource(response, "require.js");
-    writeResource(response, "importer.js");
-    writeResource(response, "loader.js");
-    writeConfig(response, paths);
+    System.out.println(configuration);
+
+    response.setContentType("application/javascript");
+    writeResource(response, "dist/system.js");
+    writeResource(response, "static-config.js");
+
+    configuration.writeConfig(response.getOutputStream());
   }
 
   private void writeResource(HttpServletResponse response, String resource) throws IOException {
@@ -210,100 +211,6 @@ public class WebModuleServlet extends HttpServlet {
       }
 
       out.flush();
-    }
-  }
-
-  private JSONObject getPaths(String pathRoot, Bundle bundle) throws IOException {
-    JSONObject paths = new JSONObject();
-
-    Deque<WebModule> webModules = getVisibleWebModules(bundle)
-        .collect(toCollection(LinkedList::new));
-    Set<WebModule> processed = new HashSet<>();
-
-    while (!webModules.isEmpty()) {
-      WebModule webModule = webModules.poll();
-
-      if (processed.add(webModule)) {
-        paths.put(webModule.id().toString(), getPath(pathRoot, webModule));
-
-        webModule.dependencies().forEach(webModules::add);
-      }
-    }
-
-    System.out.println(bundle.getSymbolicName());
-    System.out.println(getVisibleWebModules(bundle).collect(toList()));
-    System.out.println(processed);
-    System.out.println("        %%%%%%5");
-    System.out.println(paths.toString(4));
-
-    return paths;
-  }
-
-  private Stream<WebModule> getVisibleWebModules(Bundle bundle) {
-    return concat(stream(bundle.getRegisteredServices()), stream(bundle.getServicesInUse()))
-        .filter(this::isWebModule)
-        .map(reference -> bundle.getBundleContext().getService(reference))
-        .map(service -> (WebModule) service);
-  }
-
-  private boolean isWebModule(ServiceReference<?> reference) {
-    Object classes = reference.getProperty(CAPABILITY_OBJECTCLASS_ATTRIBUTE);
-
-    if (classes instanceof String[]) {
-      return stream((String[]) classes).anyMatch(WebModule.class.getName()::equals);
-
-    } else if (classes instanceof String) {
-      return WebModule.class.getName().equals((String) classes);
-
-    } else {
-      return false;
-    }
-  }
-
-  private void writeConfig(HttpServletResponse response, JSONObject paths) throws IOException {
-    JSONObject map = new JSONObject();
-    map.put("*", paths);
-
-    JSONObject config = new JSONObject();
-    config.put("map", map);
-
-    Writer out = new OutputStreamWriter(response.getOutputStream());
-
-    out.write("require.config(");
-    config.write(out);
-    out.write(")");
-    out.flush();
-  }
-
-  private String getPath(String pathRoot, WebModule webModule) throws IOException {
-    String name = webModule.id().toString();
-    name = name.replaceAll("/", "%2F");
-    String version = webModule.version().toString();
-
-    String location = pathRoot + "/" + name + "/" + version + "/";
-
-    Set<ModuleFormat> formats = webModule.formats().collect(toSet());
-    if (formats.contains(AMD_FORMAT)) {
-      return location + webModule.entryPoints().getEntryPoint(AMD_FORMAT).path();
-
-    } else if (formats.contains(CJS_FORMAT)) {
-      return location + webModule.entryPoints().getEntryPoint(CJS_FORMAT).path();
-
-    } else if (formats.contains(ESM_FORMAT)) {
-      /*
-       * TODO we need to do some crazy babel transpilation here. We also need to cache
-       * the result have the "modules" map contain some internal object not just a
-       * service reference to deal with all this.
-       */
-      return location + webModule.entryPoints().getEntryPoint(ESM_FORMAT).path();
-
-    } else {
-      /*
-       * This could be handled a little better. We should perhaps link to a generated
-       * module which outputs an error to the browser console. But this works and the
-       * error is traceable at least.
-       */
-      return "Can't find supported module type amongst candidates: " + formats;
     }
   }
 
@@ -351,7 +258,11 @@ public class WebModuleServlet extends HttpServlet {
     System.out.println(module.formats().collect(toList()));
     System.out.println(resource);
 
-    try (InputStream in = module.resource(resource).openStream()) {
+    URL resourceUrl = module.resource(resource);
+    if (resourceUrl == null) {
+      resourceUrl = module.resource(resource + ".js");
+    }
+    try (InputStream in = resourceUrl.openStream()) {
       if (in == null) {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;

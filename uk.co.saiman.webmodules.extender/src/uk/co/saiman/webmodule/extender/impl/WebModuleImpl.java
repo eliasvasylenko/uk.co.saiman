@@ -1,4 +1,4 @@
-package uk.co.saiman.webmodule.impl;
+package uk.co.saiman.webmodule.extender.impl;
 
 import static uk.co.saiman.webmodule.WebModuleConstants.ID_ATTRIBUTE;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;

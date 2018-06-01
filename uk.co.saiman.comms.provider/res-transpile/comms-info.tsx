@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 import { ConsoleComponent, MapTable, StatLine } from '@saiman/webconsole'
 
-import { openConnection, closeConnection, CONNECTION_STATES } from './actions'
+import { openConnection, closeConnection, CONNECTION_STATES } from './actions.js'
 
 const CommsInformation = ({ name, connection, bundle, setConnectionOpen }) => {
   const entries = {

@@ -6,10 +6,10 @@ import thunk from 'redux-thunk'
 
 import { ConsoleComponent } from '@saiman/webconsole'
 
-import { requestInfo } from './actions'
-import commsApp from './reducers'
-import CommsInformationController from './comms-info'
-import CommsTableController from './comms-table'
+import { requestInfo } from './actions.js'
+import commsApp from './reducers.js'
+import CommsInformationController from './comms-info.js'
+import CommsTableController from './comms-table.js'
 
 const store = createStore(commsApp, applyMiddleware(thunk))
 store.dispatch(requestInfo())

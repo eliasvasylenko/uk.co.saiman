@@ -16,7 +16,7 @@ import {
   sendExecutionRequest,
   changeOutputValue,
   POLLING_STATES
-} from './actions'
+} from './actions.js'
 
 const CommsData = (enums, items = {}, changeValue) =>
   <div className="commsData">

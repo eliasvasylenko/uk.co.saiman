@@ -58,7 +58,7 @@ import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
 @ProvideWebModule(
     id = "@saiman/comms",
     version = "1.0.0",
-    esmEntryPoint = "comms.js",
+    amdEntryPoint = "comms.js",
     root = "static")
 @RequireReactWebModule
 @RequireReactDomWebModule

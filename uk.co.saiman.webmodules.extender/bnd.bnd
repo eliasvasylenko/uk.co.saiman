@@ -1,0 +1,10 @@
+Bundle-Name: SAI :: Web Modules
+
+Bundle-Description: \
+	Provides ES6 modules with OSGi powered dependency management and resolution
+
+-buildpath: \
+	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot
+
+Private-Package: uk.co.saiman.webmodule.extender.impl

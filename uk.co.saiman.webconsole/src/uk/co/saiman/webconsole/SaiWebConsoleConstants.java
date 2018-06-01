@@ -54,7 +54,7 @@ import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
     id = SAI_WEB_CONSOLE_WEB_MODULE_NAME,
     version = SAI_WEB_CONSOLE_WEB_MODULE_VERSION,
     root = "static",
-    esmEntryPoint = "index.js")
+    amdEntryPoint = "index.js")
 public interface SaiWebConsoleConstants {
   final String SAI_WEB_CONSOLE_WEB_MODULE_NAME = "@saiman/webconsole";
   final String SAI_WEB_CONSOLE_WEB_MODULE_VERSION = "1.0.0";
