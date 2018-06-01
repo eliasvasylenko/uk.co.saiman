@@ -1,7 +1,7 @@
 package uk.co.saiman.webmodule.server;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
@@ -17,7 +17,6 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
@@ -32,6 +31,9 @@ public class BundleConfiguration {
   private final Bundle bundle;
   private final String pathRoot;
 
+  private final Set<WebModule> visibleModules;
+  private final Set<WebModule> visibleModulesClosure;
+
   private final JSONObject meta;
   private final JSONObject paths;
   private final JSONObject globalMap;
@@ -40,6 +42,9 @@ public class BundleConfiguration {
   public BundleConfiguration(Bundle bundle, String pathRoot) {
     this.bundle = bundle;
     this.pathRoot = pathRoot;
+
+    this.visibleModules = getVisibleWebModules(bundle);
+    this.visibleModulesClosure = getVisibleWebModulesClosure();
 
     meta = configureMeta();
     paths = configurePaths();
@@ -71,6 +76,32 @@ public class BundleConfiguration {
     out.flush();
   }
 
+  private Set<WebModule> getVisibleWebModules(Bundle bundle) {
+    return unmodifiableSet(
+        concat(stream(bundle.getRegisteredServices()), stream(bundle.getServicesInUse()))
+            .filter(this::isWebModule)
+            .map(reference -> bundle.getBundleContext().getService(reference))
+            .map(service -> (WebModule) service)
+            .collect(toSet()));
+  }
+
+  private Set<WebModule> getVisibleWebModulesClosure() {
+    Deque<WebModule> queue = new LinkedList<>(visibleModules);
+    Set<WebModule> visitied = new HashSet<>();
+
+    while (!queue.isEmpty()) {
+      WebModule webModule = queue.poll();
+
+      if (visitied.add(webModule)) {
+        paths.put(getVersionedModuleName(webModule), getPath(webModule));
+
+        webModule.dependencies().forEach(queue::add);
+      }
+    }
+
+    return unmodifiableSet(visitied);
+  }
+
   private ModuleFormat getBestFormat(WebModule webModule) {
     Set<ModuleFormat> formats = webModule.formats().collect(toSet());
     if (formats.contains(AMD_FORMAT)) {
@@ -95,18 +126,8 @@ public class BundleConfiguration {
     JSONObject paths = new JSONObject();
     configuration.put("paths", paths);
 
-    Deque<WebModule> webModules = getVisibleWebModules(bundle)
-        .collect(toCollection(LinkedList::new));
-    Set<WebModule> processed = new HashSet<>();
-
-    while (!webModules.isEmpty()) {
-      WebModule webModule = webModules.poll();
-
-      if (processed.add(webModule)) {
-        paths.put(getVersionedModuleName(webModule), getPath(webModule));
-
-        webModule.dependencies().forEach(webModules::add);
-      }
+    for (WebModule webModule : visibleModulesClosure) {
+      paths.put(getVersionedModuleName(webModule), getPath(webModule));
     }
 
     return configuration;
@@ -118,20 +139,10 @@ public class BundleConfiguration {
     JSONObject meta = new JSONObject();
     configuration.put("meta", meta);
 
-    Deque<WebModule> webModules = getVisibleWebModules(bundle)
-        .collect(toCollection(LinkedList::new));
-    Set<WebModule> processed = new HashSet<>();
-
-    while (!webModules.isEmpty()) {
-      WebModule webModule = webModules.poll();
-
-      if (processed.add(webModule)) {
-        JSONObject format = new JSONObject();
-        format.put("format", getBestFormat(webModule));
-        meta.put(pathRoot + "/" + getVersionedModuleName(webModule) + "/*", format);
-
-        webModule.dependencies().forEach(webModules::add);
-      }
+    for (WebModule webModule : visibleModulesClosure) {
+      JSONObject format = new JSONObject();
+      format.put("format", getBestFormat(webModule));
+      meta.put(pathRoot + "/" + getVersionedModuleName(webModule) + "/*", format);
     }
 
     return configuration;
@@ -143,31 +154,17 @@ public class BundleConfiguration {
     JSONObject maps = new JSONObject();
     configuration.put("map", maps);
 
-    Deque<WebModule> webModules = getVisibleWebModules(bundle)
-        .collect(toCollection(LinkedList::new));
-    Set<WebModule> processed = new HashSet<>();
+    for (WebModule webModule : visibleModulesClosure) {
+      JSONObject map = new JSONObject();
 
-    while (!webModules.isEmpty()) {
-      WebModule webModule = webModules.poll();
+      webModule.dependencies().forEach(m -> {
+        map.put(m.id().toString(), getVersionedModuleName(m));
+      });
 
-      if (processed.add(webModule)) {
-        maps.put(getVersionedModuleName(webModule), getMap(webModule));
-
-        webModule.dependencies().forEach(webModules::add);
-      }
+      maps.put(getVersionedModuleName(webModule), map);
     }
 
     return configuration;
-  }
-
-  private JSONObject getMap(WebModule webModule) {
-    JSONObject map = new JSONObject();
-
-    webModule.dependencies().forEach(m -> {
-      map.put(m.id().toString(), getVersionedModuleName(m));
-    });
-
-    return map;
   }
 
   private JSONObject configureGlobalMap() {
@@ -181,13 +178,6 @@ public class BundleConfiguration {
     });
 
     return configuration;
-  }
-
-  private Stream<WebModule> getVisibleWebModules(Bundle bundle) {
-    return concat(stream(bundle.getRegisteredServices()), stream(bundle.getServicesInUse()))
-        .filter(this::isWebModule)
-        .map(reference -> bundle.getBundleContext().getService(reference))
-        .map(service -> (WebModule) service);
   }
 
   private boolean isWebModule(ServiceReference<?> reference) {
