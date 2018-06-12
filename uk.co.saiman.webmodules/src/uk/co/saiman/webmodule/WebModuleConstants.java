@@ -36,6 +36,8 @@ public class WebModuleConstants {
   public static final String ID_ATTRIBUTE = "id";
   public static final String VERSION_ATTRIBUTE = "version";
 
+  public static final String DEFAULT_ROOT_RESOURCE = "index.js";
+
   public static final String ESM = "esm";
   public static final ModuleFormat ESM_FORMAT = new ModuleFormat(ESM);
   public static final String CJS = "cjs";

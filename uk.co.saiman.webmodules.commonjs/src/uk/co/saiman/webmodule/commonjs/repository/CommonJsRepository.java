@@ -28,13 +28,10 @@
 package uk.co.saiman.webmodule.commonjs.repository;
 
 import static aQute.bnd.osgi.resource.ResourceUtils.matches;
-import static java.nio.file.Files.newInputStream;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,8 +40,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.service.component.annotations.Component;
@@ -60,9 +55,36 @@ import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.commonjs.registry.PackageRoot;
 import uk.co.saiman.webmodule.commonjs.registry.Registry;
-import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
 import uk.co.saiman.webmodule.semver.Range;
 
+/**
+ * An OSGi repository implementation backed by a CommonJS registry.
+ * <p>
+ * As NPM is the CommonJS registry provider in widest use support has been
+ * provided for certain attempts by NPM to extend the registry to support module
+ * formats other than CommonJS.
+ * <p>
+ * Initial contents are assumed to be configured in the CommonJS module format
+ * by default. When resolving the format of the dependencies of a given parent
+ * module, we search for the appropriate configuration according to the
+ * following precedence:
+ * <ol>
+ * <li>The configuration in the root which matches the format of the parent and
+ * whose version intersects with the version range of the specified
+ * dependency.</li>
+ * 
+ * <li>The first configuration found in the root whose version intersects with
+ * the version range of the specified dependency.</li>
+ * 
+ * <li>Assume a default configuration of CommonJS module format.</li>
+ * </ol>
+ * 
+ * This strategy requires some manual configuration, but it avoids contending
+ * with the many conflicting and often under-specified strategies employed
+ * within the NPM ecosystem.
+ * 
+ * @author Elias N Vasylenko
+ */
 @Designate(ocd = CommonJsRepository.CommonJsRepositoryConfiguration.class, factory = true)
 @Component(
     immediate = true,
@@ -93,7 +115,7 @@ public class CommonJsRepository extends BaseRepository implements Repository {
 
   private final Registry registry;
   private final Log log;
-  private final Map<PackageId, Range> initialDependencies;
+  private final RepositoryConfiguration configuration;
   private final Path cache;
   private final String bsnPrefix;
 
@@ -129,48 +151,22 @@ public class CommonJsRepository extends BaseRepository implements Repository {
       Path initialDependencies,
       Path cache,
       String bsnPrefix) {
-    this(registry, log, loadInitialDependencies(initialDependencies), cache, bsnPrefix);
+    this(registry, log, RepositoryConfiguration.loadPath(initialDependencies), cache, bsnPrefix);
   }
 
   public CommonJsRepository(
       Registry registry,
       Log log,
-      Map<PackageId, Range> initialDependencies,
+      RepositoryConfiguration configuration,
       Path cache,
       String bsnPrefix) {
     this.registry = registry;
     this.log = log;
-    this.initialDependencies = new HashMap<>(initialDependencies);
+    this.configuration = configuration;
     this.cache = cache;
     this.bsnPrefix = bsnPrefix;
 
     initialize();
-  }
-
-  private static Map<PackageId, Range> loadInitialDependencies(Path initialDependencies) {
-    try (InputStream inputStream = newInputStream(initialDependencies)) {
-      JSONObject object = new JSONObject(new JSONTokener(inputStream));
-
-      Map<PackageId, Range> dependencies = new HashMap<>();
-      for (String dependency : object.keySet()) {
-        Object dependencySpec = object.get(dependency);
-        String version;
-        if (dependencySpec instanceof String) {
-          version = (String) dependencySpec;
-        } else if (dependencySpec instanceof JSONObject) {
-          version = ((JSONObject) dependencySpec).getString(VERSION_ATTRIBUTE);
-        } else {
-          throw new IllegalArgumentException("Unrecognised dependency specifier " + dependencySpec);
-        }
-
-        dependencies.put(PackageId.parseId(dependency), Range.parse(version));
-      }
-      return dependencies;
-    } catch (Exception e) {
-      throw new RegistryResolutionException(
-          "Failed to load initial dependencies from path " + initialDependencies,
-          e);
-    }
   }
 
   Log getLog() {
@@ -195,42 +191,49 @@ public class CommonJsRepository extends BaseRepository implements Repository {
   public synchronized void refresh() {
     resources.clear();
     try {
-      fetchDependencies(initialDependencies);
+      configureInitialBundles();
     } catch (Throwable t) {
       log.log(Level.ERROR, t);
       throw t;
     }
   }
 
-  private void fetchDependencies(Map<PackageId, Range> dependencies) {
-    dependencies
-        .keySet()
-        .parallelStream()
-        .flatMap(this::getOrLoadBundle)
-        .flatMap(b -> b.fetchDependencies(dependencies.get(b.getModuleName())))
-        .map(v -> v.getDependencies().collect(toMap(identity(), v::getDependencyRange)))
-        .forEach(this::fetchDependencies);
+  private void configureInitialBundles() {
+    configuration
+        .getInitialBundleConfigurations()
+        .parallel()
+        .forEach(c -> configureBundle(c.getId(), c.getInitialVersionConfigurationRange()));
   }
 
-  private Stream<CommonJsBundle> getOrLoadBundle(PackageId moduleName) {
-    return Optional
-        .ofNullable(resources.get(moduleName))
-        .map(Stream::of)
-        .orElseGet(() -> loadBundle(moduleName));
-  }
+  void configureBundle(PackageId id, Range range) {
+    CommonJsBundle bundle = resources.get(id);
 
-  private Stream<CommonJsBundle> loadBundle(PackageId moduleName) {
-    try {
-      PackageRoot packageRoot = registry.getPackageRoot(moduleName);
-
-      synchronized (resources) {
-        return Stream
-            .of(resources.computeIfAbsent(moduleName, n -> new CommonJsBundle(this, packageRoot)));
+    if (bundle == null) {
+      try {
+        bundle = fetchBundle(id);
+      } catch (Exception e) {
+        getLog().log(Level.WARN, "Cannot initialize bundles " + configuration, e);
+        return;
       }
-    } catch (Exception e) {
-      getLog().log(Level.WARN, "Cannot load bundle " + moduleName, e);
-      return Stream.empty();
     }
+
+    bundle.configureVersions(range);
+  }
+
+  private CommonJsBundle fetchBundle(PackageId id) {
+    BundleConfiguration configuration = this.configuration.getBundleConfiguration(id);
+    PackageRoot packageRoot = registry.getPackageRoot(id);
+    CommonJsBundle bundle = new CommonJsBundle(this, packageRoot, configuration);
+
+    synchronized (resources) {
+      if (resources.containsKey(id)) {
+        bundle = resources.get(id);
+      } else {
+        resources.put(id, bundle);
+      }
+    }
+
+    return bundle;
   }
 
   @Override
@@ -260,7 +263,9 @@ public class CommonJsRepository extends BaseRepository implements Repository {
       CommonJsBundleVersion version,
       Requirement requirement) {
     try {
-      return version.getResource().getCapabilities(requirement.getNamespace()).stream();
+      return version
+          .getResources()
+          .flatMap(r -> r.getCapabilities(requirement.getNamespace()).stream());
     } catch (Exception e) {
       getLog()
           .log(

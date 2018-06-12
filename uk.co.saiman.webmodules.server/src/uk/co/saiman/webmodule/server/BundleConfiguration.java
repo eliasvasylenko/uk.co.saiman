@@ -1,3 +1,30 @@
+/*
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.webmodules.server.
+ *
+ * uk.co.saiman.webmodules.server is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.webmodules.server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.webmodule.server;
 
 import static java.util.Arrays.stream;
@@ -6,7 +33,6 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
 import static uk.co.saiman.webmodule.WebModuleConstants.AMD_FORMAT;
-import static uk.co.saiman.webmodule.WebModuleConstants.CJS_FORMAT;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM_FORMAT;
 
 import java.io.IOException;
@@ -27,6 +53,7 @@ import uk.co.saiman.webmodule.WebModule;
 
 public class BundleConfiguration {
   private static final int STRING_INDENTATION = 4;
+  private static final String ESCAPED_SLASH = "%2F";
 
   private final Bundle bundle;
   private final String pathRoot;
@@ -44,7 +71,7 @@ public class BundleConfiguration {
     this.pathRoot = pathRoot;
 
     this.visibleModules = getVisibleWebModules(bundle);
-    this.visibleModulesClosure = getVisibleWebModulesClosure();
+    this.visibleModulesClosure = getVisibleWebModulesClosure(visibleModules);
 
     meta = configureMeta();
     paths = configurePaths();
@@ -76,16 +103,30 @@ public class BundleConfiguration {
     out.flush();
   }
 
-  private Set<WebModule> getVisibleWebModules(Bundle bundle) {
+  private static boolean isWebModule(ServiceReference<?> reference) {
+    Object classes = reference.getProperty(CAPABILITY_OBJECTCLASS_ATTRIBUTE);
+
+    if (classes instanceof String[]) {
+      return stream((String[]) classes).anyMatch(WebModule.class.getName()::equals);
+
+    } else if (classes instanceof String) {
+      return WebModule.class.getName().equals((String) classes);
+
+    } else {
+      return false;
+    }
+  }
+
+  private static Set<WebModule> getVisibleWebModules(Bundle bundle) {
     return unmodifiableSet(
         concat(stream(bundle.getRegisteredServices()), stream(bundle.getServicesInUse()))
-            .filter(this::isWebModule)
+            .filter(BundleConfiguration::isWebModule)
             .map(reference -> bundle.getBundleContext().getService(reference))
             .map(service -> (WebModule) service)
             .collect(toSet()));
   }
 
-  private Set<WebModule> getVisibleWebModulesClosure() {
+  private static Set<WebModule> getVisibleWebModulesClosure(Set<WebModule> visibleModules) {
     Deque<WebModule> queue = new LinkedList<>(visibleModules);
     Set<WebModule> visitied = new HashSet<>();
 
@@ -93,29 +134,11 @@ public class BundleConfiguration {
       WebModule webModule = queue.poll();
 
       if (visitied.add(webModule)) {
-        paths.put(getVersionedModuleName(webModule), getPath(webModule));
-
         webModule.dependencies().forEach(queue::add);
       }
     }
 
     return unmodifiableSet(visitied);
-  }
-
-  private ModuleFormat getBestFormat(WebModule webModule) {
-    Set<ModuleFormat> formats = webModule.formats().collect(toSet());
-    if (formats.contains(AMD_FORMAT)) {
-      return AMD_FORMAT;
-
-    } else if (formats.contains(CJS_FORMAT)) {
-      return CJS_FORMAT;
-
-    } else if (formats.contains(ESM_FORMAT)) {
-      return ESM_FORMAT;
-
-    } else {
-      throw new IllegalArgumentException("Can't find supported module type for " + webModule);
-    }
   }
 
   private JSONObject configurePaths() {
@@ -127,7 +150,10 @@ public class BundleConfiguration {
     configuration.put("paths", paths);
 
     for (WebModule webModule : visibleModulesClosure) {
-      paths.put(getVersionedModuleName(webModule), getPath(webModule));
+      paths
+          .put(
+              getVersionedModuleName(webModule),
+              getModulePath(webModule) + "/" + webModule.entryPoint());
     }
 
     return configuration;
@@ -136,13 +162,17 @@ public class BundleConfiguration {
   private JSONObject configureMeta() {
     JSONObject configuration = new JSONObject();
 
-    JSONObject meta = new JSONObject();
-    configuration.put("meta", meta);
+    JSONObject metas = new JSONObject();
+    configuration.put("meta", metas);
 
     for (WebModule webModule : visibleModulesClosure) {
-      JSONObject format = new JSONObject();
-      format.put("format", getBestFormat(webModule));
-      meta.put(pathRoot + "/" + getVersionedModuleName(webModule) + "/*", format);
+      JSONObject meta = new JSONObject();
+      ModuleFormat format = webModule.format();
+      if (format.equals(ESM_FORMAT)) {
+        format = AMD_FORMAT;
+      }
+      meta.put("format", format.toString());
+      metas.put(pathRoot + "/" + getModulePath(webModule) + "/*", meta);
     }
 
     return configuration;
@@ -180,38 +210,15 @@ public class BundleConfiguration {
     return configuration;
   }
 
-  private boolean isWebModule(ServiceReference<?> reference) {
-    Object classes = reference.getProperty(CAPABILITY_OBJECTCLASS_ATTRIBUTE);
+  private String getModulePath(WebModule webModule) {
+    return getEscapedModuleName(webModule) + "/" + webModule.version();
+  }
 
-    if (classes instanceof String[]) {
-      return stream((String[]) classes).anyMatch(WebModule.class.getName()::equals);
-
-    } else if (classes instanceof String) {
-      return WebModule.class.getName().equals((String) classes);
-
-    } else {
-      return false;
-    }
+  private String getEscapedModuleName(WebModule webModule) {
+    return webModule.id().toString().replaceAll("/", ESCAPED_SLASH);
   }
 
   private String getVersionedModuleName(WebModule webModule) {
-    String name = webModule.id().toString();
-    name = name.replaceAll("/", "%2F");
-    String version = webModule.version().toString();
-
-    return name + "/" + version;
-  }
-
-  private String getPath(WebModule webModule) {
-    ModuleFormat format = getBestFormat(webModule);
-
-    /*
-     * TODO we need to do some crazy babel transpilation for ES6 modules. We also
-     * need to cache the result have the "modules" map contain some internal object
-     * not just a service reference to deal with all this.
-     */
-    return getVersionedModuleName(webModule)
-        + "/"
-        + webModule.entryPoints().getEntryPoint(format).path();
+    return getEscapedModuleName(webModule) + ESCAPED_SLASH + webModule.version();
   }
 }

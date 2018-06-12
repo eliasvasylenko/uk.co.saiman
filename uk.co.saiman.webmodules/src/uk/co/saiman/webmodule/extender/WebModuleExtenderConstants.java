@@ -40,7 +40,9 @@ public class WebModuleExtenderConstants {
 
   public static final String EXTENDER_VERSION_ATTRIBUTE = EXTENDER_NAME + ".version";
   public static final String RESOURCE_ROOT_ATTRIBUTE = "resource.root";
-  public static final String ENTRY_POINT_ATTRIBUTE_PREFIX = "entry.point.";
+  public static final String FORMAT_ATTRIBUTE = "format";
+  public static final String ENTRY_POINT_ATTRIBUTE = "entry.point";
+  public static final String DEPENDENCIES_ATTRIBUTE = "dependencies";
 
   /**
    * The current version

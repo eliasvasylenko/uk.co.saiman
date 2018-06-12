@@ -50,6 +50,13 @@ public class Range {
                   Operator.GREATER_THAN_OR_EQUAL,
                   new Version(0, 0, 0).withPreRelease("0")))));
 
+  public static final Range EMPTY = new Range(
+      new ComparatorSet(
+          new AdvancedComparator.PrimitiveRange(
+              new PrimitiveComparator(
+                  Operator.LESS_THAN,
+                  new Version(0, 0, 0).withPreRelease("0")))));
+
   private final List<ComparatorSet> comparatorSets;
 
   public static Range parse(String versionRangeString) {

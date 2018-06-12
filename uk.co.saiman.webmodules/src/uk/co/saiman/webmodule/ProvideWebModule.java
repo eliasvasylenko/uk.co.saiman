@@ -29,13 +29,12 @@ package uk.co.saiman.webmodule;
 
 import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
 import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
-import static uk.co.saiman.webmodule.WebModuleConstants.AMD;
-import static uk.co.saiman.webmodule.WebModuleConstants.CJS;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
-import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE_PREFIX;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION_ATTRIBUTE;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.FORMAT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.RESOURCE_ROOT_ATTRIBUTE;
 
 import java.lang.annotation.Retention;
@@ -61,14 +60,11 @@ public @interface ProvideWebModule {
   String version();
 
   @Attribute(RESOURCE_ROOT_ATTRIBUTE)
-  String root() default "static";
+  String resourceRoot() default "static";
 
-  @Attribute(ENTRY_POINT_ATTRIBUTE_PREFIX + ESM)
-  String esmEntryPoint() default "";
+  @Attribute(ENTRY_POINT_ATTRIBUTE)
+  String entryPoint() default "index.js";
 
-  @Attribute(ENTRY_POINT_ATTRIBUTE_PREFIX + CJS)
-  String cjsEntryPoint() default "";
-
-  @Attribute(ENTRY_POINT_ATTRIBUTE_PREFIX + AMD)
-  String amdEntryPoint() default "";
+  @Attribute(FORMAT_ATTRIBUTE)
+  String format() default ESM;
 }

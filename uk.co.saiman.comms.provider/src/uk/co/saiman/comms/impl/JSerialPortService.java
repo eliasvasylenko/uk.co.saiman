@@ -60,8 +60,8 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observer;
 
 /**
- * A {@link uk.co.saiman.comms.serial.SerialPort serial port} implementation
- * based on the JSerialComms library.
+ * A {@link uk.co.saiman.comms.CommsPort serial port} implementation based on
+ * the JSerialComms library.
  * 
  * @author Elias N Vasylenko
  */

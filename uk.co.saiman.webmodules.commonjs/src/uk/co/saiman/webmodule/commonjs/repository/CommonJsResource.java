@@ -33,15 +33,14 @@ import static org.osgi.namespace.extender.ExtenderNamespace.EXTENDER_NAMESPACE;
 import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
 import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
 import static org.osgi.resource.Namespace.REQUIREMENT_FILTER_DIRECTIVE;
-import static uk.co.saiman.webmodule.WebModuleConstants.CJS;
-import static uk.co.saiman.webmodule.WebModuleConstants.ESM;
 import static uk.co.saiman.webmodule.WebModuleConstants.ID_ATTRIBUTE;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
 import static uk.co.saiman.webmodule.commonjs.repository.CommonJsBundleVersion.RESOURCE_ROOT;
-import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE_PREFIX;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_NAME;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION_ATTRIBUTE;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.FORMAT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.RESOURCE_ROOT_ATTRIBUTE;
 
 import java.util.List;
@@ -57,17 +56,17 @@ import aQute.bnd.osgi.resource.CapReqBuilder;
 import aQute.bnd.osgi.resource.CapabilityBuilder;
 import aQute.bnd.osgi.resource.RequirementBuilder;
 import aQute.bnd.version.VersionRange;
-import uk.co.saiman.webmodule.EntryPoints;
+import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.WebModule;
+import uk.co.saiman.webmodule.WebModuleConstants;
 import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
 
 public class CommonJsResource implements Resource {
   private final PackageId name;
   private final Version version;
-
-  private final String main;
-  private final String module;
+  private final ModuleFormat format;
+  private final String entryPoint;
 
   private final List<CapReqBuilder> requirements;
   private final List<CapReqBuilder> capabilities;
@@ -75,14 +74,12 @@ public class CommonJsResource implements Resource {
   CommonJsResource(
       PackageId name,
       Version version,
-      EntryPoints explicitEntryPoints,
+      BundleVersionConfiguration configuration,
       JSONObject json) {
     this.name = name;
     this.version = version;
-
-    String main = formatPath(json, "main"); // TODO the mjs nonsense
-    this.main = main;
-    this.module = formatPath(json, "module", "jsnext:main", "es2015");
+    this.format = configuration.format();
+    this.entryPoint = getEntryPoint(json, configuration);
 
     /*
      * 
@@ -98,9 +95,20 @@ public class CommonJsResource implements Resource {
     this.capabilities = Stream.of(createModuleServiceCapability(json)).collect(toList());
   }
 
+  private String getEntryPoint(JSONObject json, BundleVersionConfiguration configuration) {
+    return configuration.entryPoint().orElseGet(() -> {
+      switch (configuration.format().getId()) {
+      case WebModuleConstants.ESM:
+        return formatPath(json, "module", "jsnext:main", "es2015");
+      default:
+        return formatPath(json, "main");
+      }
+    });
+  }
+
   private String formatPath(JSONObject json, String... attributes) {
     for (String attribute : attributes) {
-      String path = json.optString(attribute);
+      String path = json.optString(attribute, null);
       if (path != null) {
         if (path.startsWith("./"))
           path = path.substring(2);
@@ -120,10 +128,8 @@ public class CommonJsResource implements Resource {
           .addAttribute(VERSION_ATTRIBUTE, version)
           .addAttribute(EXTENDER_VERSION_ATTRIBUTE, EXTENDER_VERSION)
           .addAttribute(RESOURCE_ROOT_ATTRIBUTE, RESOURCE_ROOT)
-          .addAttribute(ENTRY_POINT_ATTRIBUTE_PREFIX + CJS, main);
-      if (module != null) {
-        builder = builder.addAttribute(ENTRY_POINT_ATTRIBUTE_PREFIX + ESM, module);
-      }
+          .addAttribute(ENTRY_POINT_ATTRIBUTE, entryPoint)
+          .addAttribute(FORMAT_ATTRIBUTE, format.toString());
 
       return builder;
     } catch (Exception e) {
@@ -168,6 +174,14 @@ public class CommonJsResource implements Resource {
         .addDirective(FILTER_DIRECTIVE, JAVA.J2SE5.getFilter());
   }
    */
+
+  public ModuleFormat getFormat() {
+    return format;
+  }
+
+  public String getEntryPoint() {
+    return entryPoint;
+  }
 
   public Stream<CapReqBuilder> getCapabilities() {
     return capabilities.stream();

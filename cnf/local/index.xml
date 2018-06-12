@@ -1,5 +1,50 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local Index" increment="1527697174000">
+<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local Index" increment="1528795736000">
+  <resource>
+    <capability namespace="osgi.identity">
+      <attribute name="license" value="GPL; link = http://www.gnu.org/licenses/"/>
+      <attribute name="osgi.identity" value="uk.co.saiman.babel.transpiler.plugin"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" value="1.0.0.201806120919" type="Version"/>
+      <attribute name="documentation" value="https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki"/>
+    </capability>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="bundle-version" value="1.0.0.201806120919" type="Version"/>
+      <attribute name="osgi.wiring.bundle" value="uk.co.saiman.babel.transpiler.plugin"/>
+    </capability>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="bundle-version" value="1.0.0.201806120919" type="Version"/>
+      <attribute name="osgi.wiring.host" value="uk.co.saiman.babel.transpiler.plugin"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="version" value="1.0.0" type="Version"/>
+      <attribute name="osgi.wiring.package" value="jdk.nashorn.api.scripting"/>
+    </capability>
+    <capability namespace="osgi.content">
+      <attribute name="size" value="626259" type="Long"/>
+      <attribute name="url" value="uk.co.saiman.babel.transpiler.plugin/uk.co.saiman.babel.transpiler.plugin-1.0.0.jar"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+      <attribute name="osgi.content" value="35CFBF57C100F1EBBEAC7E0B980A33CB7EF7632FFAD1C5E0A76DCA786C0C029D"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.osgi)(&amp;(version&gt;=4.1.0)(!(version&gt;=5.0.0))))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.service)(&amp;(version&gt;=4.3.0)(!(version&gt;=5.0.0))))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.service.reporter)(&amp;(version&gt;=1.0.0)(!(version&gt;=2.0.0))))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=javax.script))"/>
+    </requirement>
+    <requirement namespace="osgi.compile.time.only">
+      <directive name="filter" value="(&amp;(must.not.resolve=*)(!(must.not.resolve=*)))"/>
+    </requirement>
+    <requirement namespace="osgi.ee">
+      <directive name="filter" value="(&amp;(osgi.ee=JavaSE)(version=1.8))"/>
+    </requirement>
+  </resource>
   <resource>
     <capability namespace="osgi.identity">
       <attribute name="license" value="http://www.opensource.org/licenses/eclipse-1.0.php"/>
@@ -36,15 +81,15 @@
       <attribute name="license" value="GPL; link = http://www.gnu.org/licenses/"/>
       <attribute name="osgi.identity" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" value="1.0.0.201805301619" type="Version"/>
+      <attribute name="version" value="1.0.0.201806111536" type="Version"/>
       <attribute name="documentation" value="https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
-      <attribute name="bundle-version" value="1.0.0.201805301619" type="Version"/>
+      <attribute name="bundle-version" value="1.0.0.201806111536" type="Version"/>
       <attribute name="osgi.wiring.bundle" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
     <capability namespace="osgi.wiring.host">
-      <attribute name="bundle-version" value="1.0.0.201805301619" type="Version"/>
+      <attribute name="bundle-version" value="1.0.0.201806111536" type="Version"/>
       <attribute name="osgi.wiring.host" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
     <capability namespace="osgi.wiring.package">
@@ -53,10 +98,10 @@
       <attribute name="osgi.wiring.package" value="uk.co.saiman.webmodule.semver"/>
     </capability>
     <capability namespace="osgi.content">
-      <attribute name="size" value="3649673" type="Long"/>
+      <attribute name="size" value="3660319" type="Long"/>
       <attribute name="url" value="uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-1.0.0.jar"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>
-      <attribute name="osgi.content" value="3E6CC79B53782B55D1CF560A0893E2AD4ACEF7161172BC6A7AF4EC92503B6295"/>
+      <attribute name="osgi.content" value="1C0DD27FCED3BB44E67A94396C6A74D773A0C1AE7ECF101A580BD40831815832"/>
     </capability>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.annotation.plugin)(&amp;(version&gt;=1.0.0)(!(version&gt;=2.0.0))))"/>
@@ -178,15 +223,15 @@
       <attribute name="license" value="GPL; link = http://www.gnu.org/licenses/"/>
       <attribute name="osgi.identity" value="uk.co.saiman.babel.transpiler"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" value="1.0.0.201805291100" type="Version"/>
+      <attribute name="version" value="1.0.0.201806111551" type="Version"/>
       <attribute name="documentation" value="https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
-      <attribute name="bundle-version" value="1.0.0.201805291100" type="Version"/>
+      <attribute name="bundle-version" value="1.0.0.201806111551" type="Version"/>
       <attribute name="osgi.wiring.bundle" value="uk.co.saiman.babel.transpiler"/>
     </capability>
     <capability namespace="osgi.wiring.host">
-      <attribute name="bundle-version" value="1.0.0.201805291100" type="Version"/>
+      <attribute name="bundle-version" value="1.0.0.201806111551" type="Version"/>
       <attribute name="osgi.wiring.host" value="uk.co.saiman.babel.transpiler"/>
     </capability>
     <capability namespace="osgi.wiring.package">
@@ -199,10 +244,10 @@
       <attribute name="osgi.wiring.package" value="jdk.nashorn.api.scripting"/>
     </capability>
     <capability namespace="osgi.content">
-      <attribute name="size" value="623846" type="Long"/>
+      <attribute name="size" value="623844" type="Long"/>
       <attribute name="url" value="uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>
-      <attribute name="osgi.content" value="90809D0FEF4EE9EFC43EF8FA1BFB34AD988A46242B6678DD690B604872BE211B"/>
+      <attribute name="osgi.content" value="88AE02F0F5DA1B958D28D38656A9CBA1061F86ABCE6BC30056EADDE5303911C3"/>
     </capability>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.osgi)(&amp;(version&gt;=4.1.0)(!(version&gt;=5.0.0))))"/>

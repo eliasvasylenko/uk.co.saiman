@@ -44,7 +44,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +51,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
@@ -74,9 +74,11 @@ import aQute.service.reporter.Reporter;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.text.Glob;
+import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.commonjs.registry.impl.RegistryImpl;
 import uk.co.saiman.webmodule.commonjs.repository.CommonJsBundle;
 import uk.co.saiman.webmodule.commonjs.repository.CommonJsBundleVersion;
+import uk.co.saiman.webmodule.commonjs.repository.CommonJsJar;
 import uk.co.saiman.webmodule.commonjs.repository.CommonJsRepository;
 
 @BndPlugin(name = "CommonJS", parameters = CommonJsRepositoryPluginConfiguration.class)
@@ -90,6 +92,8 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
   private static final String VERSION_LATEST = "latest";
   private static final String VERSION_SNAPSHOT = "snapshot";
   private static final String VERSION_PROJECT = "project";
+
+  private static final ModuleFormat NO_FORMAT = new ModuleFormat(" ");
 
   private Registry bndRegistry;
   private Reporter bndReporter;
@@ -189,7 +193,7 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
           .putAll(
               repository
                   .getBundles()
-                  .collect(toMap(CommonJsBundle::getBundleSymbolicName, identity())));
+                  .collect(toMap(b -> b.getBundleSymbolicName(NO_FORMAT), identity())));
     } catch (Exception e) {
       log.log(Level.ERROR, "Unable to initialize registry", e);
       return false;
@@ -278,16 +282,20 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       return emptyList();
     }
 
-    List<String> result;
+    Predicate<String> matcher;
 
     if (pattern != null) {
-      Glob glob = new Glob(pattern);
-      result = bundles.keySet().stream().filter(glob::matches).collect(toList());
+      matcher = new Glob(pattern)::matches;
     } else {
-      result = new ArrayList<>(bundles.keySet());
+      matcher = s -> true;
     }
 
-    return result;
+    return bundles
+        .values()
+        .stream()
+        .flatMap(b -> b.getFormats().map(b::getBundleSymbolicName))
+        .filter(matcher::test)
+        .collect(toList());
   }
 
   @Override
@@ -296,26 +304,34 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       return emptySortedSet();
     }
 
-    return getResources(bsn).navigableKeySet();
+    return getVersions(bsn).navigableKeySet();
   }
 
-  private NavigableMap<Version, CommonJsBundleVersion> getResources(String bsn) {
-    if (!bundles.containsKey(bsn)) {
+  private ModuleFormat getModuleFormat(String bsn) {
+    int lastDot = bsn.lastIndexOf('.');
+    return new ModuleFormat(bsn.substring(lastDot + 1));
+  }
+
+  private NavigableMap<Version, CommonJsBundleVersion> getVersions(String bsn) {
+    int lastDot = bsn.lastIndexOf('.');
+
+    if (lastDot == -1) {
+      return emptyNavigableMap();
+    }
+
+    String prefix = bsn.substring(0, lastDot + 1) + NO_FORMAT;
+    ModuleFormat format = getModuleFormat(bsn);
+
+    if (!bundles.containsKey(prefix)) {
       return emptyNavigableMap();
     }
 
     NavigableMap<Version, CommonJsBundleVersion> packageVersions = new TreeMap<>();
 
-    bundles.get(bsn).getBundleVersions().forEach(resource -> {
-      org.osgi.framework.Version version = resource.getVersion();
+    bundles.get(prefix).getBundleVersions(format).forEach(version -> {
+      org.osgi.framework.Version v = version.getVersion();
       packageVersions
-          .put(
-              new Version(
-                  version.getMajor(),
-                  version.getMinor(),
-                  version.getMicro(),
-                  version.getQualifier()),
-              resource);
+          .put(new Version(v.getMajor(), v.getMinor(), v.getMicro(), v.getQualifier()), version);
     });
 
     return packageVersions;
@@ -343,7 +359,7 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
     CommonJsBundleVersion resource;
 
     if (VERSION_SNAPSHOT.equals(version) || VERSION_LATEST.equals(version)) {
-      NavigableMap<Version, CommonJsBundleVersion> resources = getResources(bsn);
+      NavigableMap<Version, CommonJsBundleVersion> resources = getVersions(bsn);
 
       if (resources.isEmpty()) {
         return null;
@@ -358,7 +374,7 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
         return null;
       }
 
-      NavigableMap<Version, CommonJsBundleVersion> versions = getResources(bsn);
+      NavigableMap<Version, CommonJsBundleVersion> versions = getVersions(bsn);
       versions = versions
           .subMap(range.getLow(), range.includeLow(), range.getHigh(), range.includeHigh());
 
@@ -375,19 +391,19 @@ public class CommonJsRepositoryPlugin extends BaseRepository implements Plugin, 
       }
     }
 
-    return getHandle(resource);
+    return getHandle(resource.getJar(getModuleFormat(bsn)).get());
   }
 
-  private ResourceHandle getHandle(CommonJsBundleVersion resource) {
+  private ResourceHandle getHandle(CommonJsJar resource) {
     return new ResourceHandle() {
       @Override
       public File request() throws IOException, Exception {
-        return resource.getJar().getPath().toFile();
+        return resource.getPath().toFile();
       }
 
       @Override
       public String getName() {
-        return resource.getBundle().getBundleSymbolicName();
+        return resource.getBsn();
       }
 
       @Override

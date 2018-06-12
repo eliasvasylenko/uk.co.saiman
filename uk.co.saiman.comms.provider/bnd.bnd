@@ -25,13 +25,13 @@ Bundle-Name: SAI :: Comms :: Provider
 \
 	org.apache.aries.javax.jax.rs-api,\
 \
-	uk.co.saiman.webmodule.axios;version=latest,\
-	uk.co.saiman.webmodule.react;version=latest,\
-	uk.co.saiman.webmodule.react-dom;version=latest,\
-	uk.co.saiman.webmodule.prop-types;version=latest,\
-	uk.co.saiman.webmodule.react-redux;version=latest,\
-	uk.co.saiman.webmodule.redux-thunk;version=latest,\
-	uk.co.saiman.webmodule.redux;version=latest
+	uk.co.saiman.webmodule.axios.amd;version=latest,\
+	uk.co.saiman.webmodule.react.amd;version=latest,\
+	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
+	uk.co.saiman.webmodule.prop-types.cjs;version=latest,\
+	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
+	uk.co.saiman.webmodule.redux-thunk.amd;version=latest,\
+	uk.co.saiman.webmodule.redux.amd;version=latest
 
 -includeresource: \
 	@${repo;com.fazecast:jSerialComm}!/Android/*,\

@@ -81,9 +81,9 @@ public class CommsCommands {
       throw new CommsException("No port is open here");
   }
 
-  private static final String PORT_NAME = "the system name of the serial port";
+  public static final String PORT_NAME = "the system name of the serial port";
 
-  private static final String OPEN_PORT_DESCRIPTOR = "open the given port";
+  public static final String OPEN_PORT_DESCRIPTOR = "open the given port";
 
   private CommsPort getPort(String portName) {
     return ports
@@ -112,7 +112,7 @@ public class CommsCommands {
     openPort = port;
   }
 
-  private static final String CLOSE_PORT_DESCRIPTOR = "close the given port";
+  public static final String CLOSE_PORT_DESCRIPTOR = "close the given port";
 
   /**
    * Command: {@value #CLOSE_PORT_DESCRIPTOR}
@@ -129,8 +129,8 @@ public class CommsCommands {
     channel.close();
   }
 
-  private static final String READ_PORT_BYTES_DESCRIPTOR = "read a number of bytes from the given port";
-  private static final String READ_PORT_BYTE_COUNT = "the number of bytes to read";
+  public static final String READ_PORT_BYTES_DESCRIPTOR = "read a number of bytes from the given port";
+  public static final String READ_PORT_BYTE_COUNT = "the number of bytes to read";
 
   /**
    * Command: {@value #READ_PORT_BYTES_DESCRIPTOR}
@@ -152,7 +152,7 @@ public class CommsCommands {
     return buffer;
   }
 
-  private static final String READ_PORT_DESCRIPTOR = "read all available bytes from the given port";
+  public static final String READ_PORT_DESCRIPTOR = "read all available bytes from the given port";
 
   /**
    * Command: {@value #READ_PORT_DESCRIPTOR}
@@ -172,8 +172,8 @@ public class CommsCommands {
     return buffer;
   }
 
-  private static final String WRITE_PORT_DESCRIPTOR = "write the given byte to the given port";
-  private static final String WRITE_PORT_DATA = "the byte to write to the port";
+  public static final String WRITE_PORT_DESCRIPTOR = "write the given byte to the given port";
+  public static final String WRITE_PORT_DATA = "the byte to write to the port";
 
   /**
    * Command: {@value #WRITE_PORT_DESCRIPTOR}
@@ -190,7 +190,7 @@ public class CommsCommands {
     openChannel.write(data);
   }
 
-  private static final String LIST_PORTS_DESCRIPTOR = "list all available ports by their system names";
+  public static final String LIST_PORTS_DESCRIPTOR = "list all available ports by their system names";
 
   /**
    * Command: {@value #LIST_PORTS_DESCRIPTOR}
@@ -206,7 +206,7 @@ public class CommsCommands {
         .collect(toList());
   }
 
-  private static final String INSPECT_PORT_DESCRIPTOR = "inspect known details of the given port";
+  public static final String INSPECT_PORT_DESCRIPTOR = "inspect known details of the given port";
 
   /**
    * Command: {@value #INSPECT_PORT_DESCRIPTOR}

@@ -27,7 +27,8 @@
  */
 package uk.co.saiman.webmodule;
 
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.stream.Stream;
 
 import org.osgi.framework.Version;
@@ -37,11 +38,11 @@ public interface WebModule {
 
   Version version();
 
-  Stream<ModuleFormat> formats();
+  ModuleFormat format();
 
-  EntryPoints entryPoints();
+  String entryPoint();
 
-  URL resource(String name);
+  InputStream openResource(String name) throws IOException;
 
   Stream<WebModule> dependencies();
 }

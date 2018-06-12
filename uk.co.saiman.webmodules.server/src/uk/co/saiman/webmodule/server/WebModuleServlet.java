@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.webmodules.
+ * This file is part of uk.co.saiman.webmodules.server.
  *
- * uk.co.saiman.webmodules is free software: you can redistribute it and/or modify
+ * uk.co.saiman.webmodules.server is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.webmodules is distributed in the hope that it will be useful,
+ * uk.co.saiman.webmodules.server is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,14 +27,21 @@
  */
 package uk.co.saiman.webmodule.server;
 
+import static java.lang.String.format;
+import static java.lang.System.lineSeparator;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
+import static uk.co.saiman.webmodule.WebModuleConstants.ESM_FORMAT;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URL;
+import java.io.OutputStreamWriter;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +49,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.script.ScriptException;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -61,6 +69,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.babel.transpiler.Transpiler;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.WebModule;
@@ -86,7 +95,10 @@ public class WebModuleServlet extends HttpServlet {
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.webmodules.server";
+  private static final String JS_EXTENSION = ".js";
+  private static final String TRANSPILATION_FAILED = "Failed to transpile ES6 resource %s";
 
+  private final Transpiler transpiler = new Transpiler();
   private ModuleServerConfiguration config;
   private BundleContext context;
 
@@ -233,34 +245,34 @@ public class WebModuleServlet extends HttpServlet {
       }
     }
 
-    response.setContentType("application/javascript");
-
     System.out.println("££££££££££");
     System.out.println(module);
     System.out.println(module.id());
     System.out.println(module.dependencies().collect(toList()));
-    System.out.println(module.formats().collect(toList()));
+    System.out.println(module.format());
     System.out.println(resource);
 
-    URL resourceUrl = module.resource(resource);
-    if (resourceUrl == null) {
-      resourceUrl = module.resource(resource + ".js");
-    }
-    try (InputStream in = resourceUrl.openStream()) {
+    try (InputStream in = module.openResource(resource)) {
       if (in == null) {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
 
-      OutputStream out = response.getOutputStream();
-
-      byte[] buffer = new byte[4096];
-      int length;
-      while ((length = in.read(buffer)) > 0) {
-        out.write(buffer, 0, length);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+      String source = reader.lines().collect(joining(lineSeparator()));
+      if (module.format().equals(ESM_FORMAT) && resource.endsWith(JS_EXTENSION)) {
+        try {
+          source = transpiler
+              .transpile(source, asList("transform-es2015-modules-amd"), asList("es2015"));
+        } catch (ScriptException e) {
+          throw new IOException(format(TRANSPILATION_FAILED, module.id()), e);
+        }
       }
 
-      out.flush();
+      response.setContentType("application/javascript");
+      OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream());
+      writer.write(source);
+      writer.flush();
     }
   }
 }

@@ -1,16 +1,43 @@
+/*
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.webmodules.extender.
+ *
+ * uk.co.saiman.webmodules.extender is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.webmodules.extender is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.webmodule.extender.impl;
 
 import static uk.co.saiman.webmodule.WebModuleConstants.ID_ATTRIBUTE;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
-import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE_PREFIX;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.FORMAT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.RESOURCE_ROOT_ATTRIBUTE;
 
-import java.net.URL;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -19,8 +46,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleCapability;
 
-import uk.co.saiman.webmodule.EntryPoint;
-import uk.co.saiman.webmodule.EntryPoints;
 import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.WebModule;
@@ -30,8 +55,8 @@ class WebModuleImpl implements WebModule {
   private final Version version;
   private final String root;
   private final Bundle bundle;
-  private final List<ModuleFormat> formats;
-  private final EntryPoints entryPoints;
+  private final ModuleFormat format;
+  private final String entryPoint;
   private final Set<WebModule> dependencies;
 
   public WebModuleImpl(BundleCapability capability, Collection<? extends WebModule> dependencies) {
@@ -40,26 +65,9 @@ class WebModuleImpl implements WebModule {
     this.id = getId(attributes);
     this.version = getVersion(attributes);
     this.root = getRoot(attributes);
+    this.format = getFormat(attributes);
+    this.entryPoint = getEntryPoint(attributes);
     this.bundle = capability.getResource().getBundle();
-
-    List<ModuleFormat> formats = new ArrayList<>();
-    EntryPoints entryPoints = EntryPoints.empty();
-
-    for (String attribute : attributes.keySet()) {
-      if (attribute.startsWith(ENTRY_POINT_ATTRIBUTE_PREFIX)) {
-
-        ModuleFormat format = new ModuleFormat(
-            attribute.substring(ENTRY_POINT_ATTRIBUTE_PREFIX.length()));
-        String entryPoint = attributes.get(attribute).toString();
-
-        entryPoints = entryPoints.withEntryPoint(new EntryPoint(format, entryPoint));
-        formats.add(format);
-      }
-    }
-
-    this.formats = new ArrayList<>(formats);
-    this.entryPoints = entryPoints;
-
     this.dependencies = new HashSet<>(dependencies);
   }
 
@@ -78,6 +86,17 @@ class WebModuleImpl implements WebModule {
     return root;
   }
 
+  private ModuleFormat getFormat(Map<String, Object> attributes) {
+    return new ModuleFormat((String) attributes.get(FORMAT_ATTRIBUTE));
+  }
+
+  private String getEntryPoint(Map<String, Object> attributes) {
+    String entryPoint = (String) attributes.get(ENTRY_POINT_ATTRIBUTE);
+    if (entryPoint.startsWith("./"))
+      entryPoint = entryPoint.substring(2);
+    return entryPoint;
+  }
+
   @Override
   public PackageId id() {
     return id;
@@ -89,21 +108,21 @@ class WebModuleImpl implements WebModule {
   }
 
   @Override
-  public Stream<ModuleFormat> formats() {
-    return formats.stream();
+  public ModuleFormat format() {
+    return format;
   }
 
   @Override
-  public EntryPoints entryPoints() {
-    return entryPoints;
+  public String entryPoint() {
+    return entryPoint;
   }
 
   @Override
-  public URL resource(String name) {
+  public InputStream openResource(String name) throws IOException {
     System.out.println("GET!!!!!!");
     System.out.println(bundle);
     System.out.println(root + "/" + name);
-    return bundle.getResource(root + "/" + name);
+    return bundle.getResource(root + "/" + name).openStream();
   }
 
   @Override

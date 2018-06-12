@@ -29,6 +29,7 @@ package uk.co.saiman.comms.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
+import static uk.co.saiman.webmodule.WebModuleConstants.ESM;
 
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -58,8 +59,9 @@ import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
 @ProvideWebModule(
     id = "@saiman/comms",
     version = "1.0.0",
-    amdEntryPoint = "comms.js",
-    root = "static")
+    entryPoint = "comms.js",
+    resourceRoot = "static",
+    format = ESM)
 @RequireReactWebModule
 @RequireReactDomWebModule
 @RequireReactReduxWebModule

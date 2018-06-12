@@ -80,7 +80,7 @@ public class Transpiler {
   public String transpile(
       String source,
       Collection<? extends String> plugins,
-      Collection<? extends String> presets) throws Exception {
+      Collection<? extends String> presets) throws ScriptException {
     context.getBindings(ENGINE_SCOPE).put(INPUT_KEY, source);
     putArray(PLUGINS_KEY, plugins);
     putArray(PRESETS_KEY, presets);

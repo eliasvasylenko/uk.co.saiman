@@ -100,6 +100,13 @@ public class PartialVersion {
     major = parseInt(components, 0, versionString);
   }
 
+  public PartialVersion(Version version) {
+    this.major = version.getMajor();
+    this.minor = version.getMinor();
+    this.micro = version.getMicro();
+    this.preRelease = version.getPreRelease().orElse(null);
+  }
+
   private Integer parseInt(String[] values, int index, String version) {
     if (values.length <= index
         || values[index].equals("*")
