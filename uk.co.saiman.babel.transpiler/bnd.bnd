@@ -1,20 +1,11 @@
 Bundle-Name: SAI :: Babel :: Transpiler
 
--buildpath: \
-	biz.aQute.bndlib;version=latest,\
-	uk.co.saiman.webmodule.babel-standalone;version=${standalone.version}
-
 standalone.version = 6.24.0
 -includeresource: \
-	@${repo;uk.co.saiman.webmodule.babel-standalone;${standalone.version};lowest}!/static/*
+	@${repo;uk.co.saiman.webmodule.babel-standalone.cjs;${standalone.version};lowest}!/static/*
 
 Import-Package: \
 	*
 
 Export-Package: \
-	jdk.nashorn.api.scripting,\
 	uk.co.saiman.babel.transpiler
-
-Require-Capability: \
-	osgi.compile.time.only;\
-		filter:="(&(must.not.resolve=*)(!(must.not.resolve=*)))"

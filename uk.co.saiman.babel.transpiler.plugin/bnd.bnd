@@ -1,0 +1,22 @@
+Bundle-Name: SAI :: Babel :: Transpiler :: Plugin
+
+-buildpath: \
+	uk.co.saiman.babel.transpiler;version=snapshot,\
+	biz.aQute.bndlib;version=latest
+
+-includeresource: \
+	@${repo;uk.co.saiman.babel.transpiler;snapshot}!/static/*,\
+	@${repo;uk.co.saiman.babel.transpiler;snapshot}!/uk/co/saiman/babel/transpiler/*
+
+Import-Package: \
+	*
+
+Export-Package: \
+	jdk.nashorn.api.scripting
+
+Private-Package: \
+	uk.co.saiman.babel.transpiler.plugin
+
+Require-Capability: \
+	osgi.compile.time.only;\
+		filter:="(&(must.not.resolve=*)(!(must.not.resolve=*)))"

@@ -125,11 +125,11 @@ test-cases: 			${classes;NAMED;*Test}
 -fixupmessages.sub: "Eclipse: The Bundle Symbolic * is a sub-bundle *.bnd but uses the project name"
 
 # TODO Once a baseline release has been made this should point to it, and the local repo copy removed
--pluginpath.babel.transpiler: ${build}/local/uk.co.saiman.babel.transpiler/uk.co.saiman.babel.transpiler-1.0.0.jar
--plugin: uk.co.saiman.babel.transpiler.MakeTranspiled
+-pluginpath.babel.transpiler: ${build}/local/uk.co.saiman.babel.transpiler.plugin/uk.co.saiman.babel.transpiler.plugin-1.0.0.jar
+-plugin: uk.co.saiman.babel.transpiler.plugin.MakeTranspiled
 -make:\
 	(*).js;\
 		type=transpile;\
 		source="$1.tsx";\
-		presets="react, es2015";\
-		plugins="transform-es2015-modules-amd, transform-object-rest-spread"
+		presets="react";\
+		plugins="transform-object-rest-spread"

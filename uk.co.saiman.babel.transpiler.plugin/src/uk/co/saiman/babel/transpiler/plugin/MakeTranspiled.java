@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.babel.transpiler.
+ * This file is part of uk.co.saiman.babel.transpiler.plugin.
  *
- * uk.co.saiman.babel.transpiler is free software: you can redistribute it and/or modify
+ * uk.co.saiman.babel.transpiler.plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.babel.transpiler is distributed in the hope that it will be useful,
+ * uk.co.saiman.babel.transpiler.plugin is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,57 +25,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.babel.transpiler;
+package uk.co.saiman.babel.transpiler.plugin;
 
-import static java.lang.String.format;
 import static java.nio.file.Files.readAllBytes;
 import static java.util.Arrays.asList;
-import static javax.script.ScriptContext.ENGINE_SCOPE;
+import static java.util.Collections.emptySet;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Map;
 
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.script.SimpleScriptContext;
 
 import aQute.bnd.osgi.Builder;
 import aQute.bnd.osgi.EmbeddedResource;
 import aQute.bnd.osgi.Resource;
 import aQute.bnd.service.MakePlugin;
+import uk.co.saiman.babel.transpiler.Transpiler;
 
 public class MakeTranspiled implements MakePlugin {
-  private static final String RESOURCE_ROOT = "/static/";
-  private static final String BABEL_SCRIPT = RESOURCE_ROOT + "babel.js";
-  private static final String ENGINE_NAME = "nashorn";
-
   private static final String TRANSPILE_TYPE = "transpile";
 
   private static final String TYPE_KEY = "type";
   private static final String SOURCE_KEY = "source";
   private static final String PLUGINS_KEY = "plugins";
   private static final String PRESETS_KEY = "presets";
-  private static final String INPUT_KEY = "input";
-
-  private static final String TEMP_ARRAY = "tempArray";
-  private static final String ASSIGN_FROM_TEMP_ARRAY = "%s=Java.from(" + TEMP_ARRAY + ")";
-  private static final String TRANSFORM_SCRIPT = "Babel.transform(input, { plugins: plugins, presets: presets }).code";
 
   private static final String NO_SOURCE_ERROR = "No 'source' field in transpile %s";
   private static final String INVALID_SOURCE_ERROR = "Source file %s is invalid in transpile";
   private static final String NO_PLUGINS_ERROR = "No 'plugins' or 'presets' field in transpile %s";
   private static final String ERROR_TRANSPILING = "Error transpiling source %s";
   private static final String ERROR_CREATING_RESOURCE = "Error creating resource %s";
-  private static final String ERROR_INITIALIZING_BABEL = "Error initialising Babel";
 
-  private static ScriptEngine ENGINE;
-  private static ScriptContext CONTEXT;
+  private static Transpiler TRANSPILER;
 
   @Override
   public Resource make(Builder builder, String destination, Map<String, String> arguments)
@@ -105,30 +89,15 @@ public class MakeTranspiled implements MakePlugin {
     return transpile(
         builder,
         sourceFile,
-        plugins == null ? new String[] {} : plugins.trim().split("\\s*,\\s*"),
-        presets == null ? new String[] {} : presets.trim().split("\\s*,\\s*"));
+        plugins == null ? emptySet() : asList(plugins.trim().split("\\s*,\\s*")),
+        presets == null ? emptySet() : asList(presets.trim().split("\\s*,\\s*")));
   }
 
   private static synchronized Resource transpile(
       Builder builder,
       Path source,
-      String[] plugins,
-      String[] presets) throws ScriptException, IOException {
-    if (ENGINE == null) {
-      System.setProperty("nashorn.args", "--language=es6");
-      ScriptEngine engine = new ScriptEngineManager().getEngineByName(ENGINE_NAME);
-      ScriptContext context = new SimpleScriptContext();
-      context.setBindings(engine.createBindings(), ENGINE_SCOPE);
-      try (InputStream babelScript = MakeTranspiled.class.getResourceAsStream(BABEL_SCRIPT)) {
-        engine.eval(new InputStreamReader(babelScript), context);
-      } catch (Throwable e) {
-        builder.error(ERROR_INITIALIZING_BABEL, e);
-        return null;
-      }
-      ENGINE = engine;
-      CONTEXT = context;
-    }
-
+      Collection<? extends String> plugins,
+      Collection<? extends String> presets) throws ScriptException, IOException {
     String sourceString;
     try {
       sourceString = new String(readAllBytes(source));
@@ -139,7 +108,10 @@ public class MakeTranspiled implements MakePlugin {
 
     String result;
     try {
-      result = transpile(ENGINE, CONTEXT, sourceString, plugins, presets);
+      if (TRANSPILER == null) {
+        TRANSPILER = new Transpiler();
+      }
+      result = TRANSPILER.transpile(sourceString, plugins, presets);
     } catch (Throwable e) {
       builder.error(ERROR_TRANSPILING, e, source);
       return null;
@@ -151,28 +123,5 @@ public class MakeTranspiled implements MakePlugin {
       builder.error(ERROR_CREATING_RESOURCE, e, source);
       return null;
     }
-  }
-
-  private static String transpile(
-      ScriptEngine engine,
-      ScriptContext context,
-      String source,
-      String[] plugins,
-      String[] presets) throws Exception {
-    context.getBindings(ENGINE_SCOPE).put(INPUT_KEY, source);
-    putArray(engine, context, PLUGINS_KEY, plugins);
-    putArray(engine, context, PRESETS_KEY, presets);
-
-    return engine.eval(TRANSFORM_SCRIPT, context).toString();
-  }
-
-  private static void putArray(
-      ScriptEngine engine,
-      ScriptContext context,
-      String name,
-      String[] array) throws ScriptException {
-    context.getBindings(ENGINE_SCOPE).put(TEMP_ARRAY, asList(array));
-    engine.eval(format(ASSIGN_FROM_TEMP_ARRAY, name), context);
-    context.getBindings(ENGINE_SCOPE).remove(TEMP_ARRAY);
   }
 }
