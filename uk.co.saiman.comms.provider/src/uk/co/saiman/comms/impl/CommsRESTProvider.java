@@ -30,6 +30,7 @@ package uk.co.saiman.comms.impl;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.MODIFIES_OUTPUT_DATA;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.POLLABLE;
 import static uk.co.saiman.comms.rest.ControllerRESTAction.Behaviour.RECEIVES_INPUT_DATA;
@@ -46,6 +47,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -65,8 +67,10 @@ import uk.co.saiman.comms.rest.CommsREST;
 import uk.co.saiman.comms.rest.ControllerRESTAction;
 import uk.co.saiman.comms.rest.ControllerRESTEntry;
 
+@Produces(APPLICATION_JSON)
 @JaxrsResource
 @Path("comms")
+// @JSONRequired TODO aries doesn't provide this capability header yet
 @Component(service = CommsRESTProvider.class)
 public class CommsRESTProvider {
   private static final String NAME_KEY = "name";
@@ -164,6 +168,7 @@ public class CommsRESTProvider {
 
   @Path("{name}")
   @GET
+  @Produces({ APPLICATION_JSON })
   public Map<String, Object> getCommsInfo(@PathParam("name") String name) {
     return getCommsInfoImpl(getNamedComms(name));
   }

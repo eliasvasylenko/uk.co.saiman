@@ -34,76 +34,96 @@ import static uk.co.saiman.reflection.Types.wrapPrimitive;
 import java.lang.reflect.Type;
 
 public class PrimitiveBitConverters implements BitConverterFactory {
-	@Override
-	public BitConverter<?> getBitConverter(Type type) {
-		Class<?> erasedType = getErasedType(type);
+  @Override
+  public BitConverter<?> getBitConverter(Type type) {
+    Class<?> erasedType = getErasedType(type);
 
-		if (matchPrimitive(int.class, erasedType)) {
-			return new Ints();
+    if (matchPrimitive(byte.class, erasedType)) {
+      return new Bytes();
 
-		} else if (matchPrimitive(byte.class, erasedType)) {
-			return new Bytes();
+    } else if (matchPrimitive(short.class, erasedType)) {
+      return new Shorts();
 
-		} else if (matchPrimitive(boolean.class, erasedType)) {
-			return new Booleans();
-		}
+    } else if (matchPrimitive(int.class, erasedType)) {
+      return new Ints();
 
-		return null;
-	}
+    } else if (matchPrimitive(boolean.class, erasedType)) {
+      return new Booleans();
+    }
 
-	private boolean matchPrimitive(Class<?> primitive, Class<?> erasedType) {
-		return wrapPrimitive(primitive).isAssignableFrom(erasedType)
-				|| unwrapPrimitive(primitive).isAssignableFrom(erasedType);
-	}
+    return null;
+  }
 
-	public static class Booleans implements BitConverter<Boolean> {
-		@Override
-		public int getDefaultBits() {
-			return 1;
-		}
+  private boolean matchPrimitive(Class<?> primitive, Class<?> erasedType) {
+    return wrapPrimitive(primitive).isAssignableFrom(erasedType)
+        || unwrapPrimitive(primitive).isAssignableFrom(erasedType);
+  }
 
-		@Override
-		public Boolean toObject(BitArray bits) {
-			return bits.resize(1).get(0);
-		}
+  public static class Booleans implements BitConverter<Boolean> {
+    @Override
+    public int getDefaultBits() {
+      return 1;
+    }
 
-		@Override
-		public BitArray toBits(Boolean object, int size) {
-			return new BitArray(1).with(0, object).resize(size);
-		}
-	}
+    @Override
+    public Boolean toObject(BitArray bits) {
+      return bits.resize(1).get(0);
+    }
 
-	public static class Bytes implements BitConverter<Byte> {
-		@Override
-		public int getDefaultBits() {
-			return Byte.SIZE;
-		}
+    @Override
+    public BitArray toBits(Boolean object, int size) {
+      return new BitArray(1).with(0, object).resize(size);
+    }
+  }
 
-		@Override
-		public Byte toObject(BitArray bits) {
-			return bits.toByte();
-		}
+  public static class Bytes implements BitConverter<Byte> {
+    @Override
+    public int getDefaultBits() {
+      return Byte.SIZE;
+    }
 
-		@Override
-		public BitArray toBits(Byte object, int size) {
-			return BitArray.fromByte(object).resize(size);
-		}
-	}
+    @Override
+    public Byte toObject(BitArray bits) {
+      return bits.toByte();
+    }
 
-	public static class Ints implements BitConverter<Integer> {
-		@Override
-		public int getDefaultBits() {
-			return Integer.SIZE;
-		}
+    @Override
+    public BitArray toBits(Byte object, int size) {
+      return BitArray.fromByte(object).resize(size);
+    }
+  }
 
-		@Override
-		public Integer toObject(BitArray bits) {
-			return bits.toInt();
-		}
+  public static class Shorts implements BitConverter<Short> {
+    @Override
+    public int getDefaultBits() {
+      return Short.SIZE;
+    }
 
-		@Override
-		public BitArray toBits(Integer object, int size) {
-			return BitArray.fromInt(object).resize(size);
-		}
-	}
+    @Override
+    public Short toObject(BitArray bits) {
+      return bits.toShort();
+    }
+
+    @Override
+    public BitArray toBits(Short object, int size) {
+      return BitArray.fromShort(object).resize(size);
+    }
+  }
+
+  public static class Ints implements BitConverter<Integer> {
+    @Override
+    public int getDefaultBits() {
+      return Integer.SIZE;
+    }
+
+    @Override
+    public Integer toObject(BitArray bits) {
+      return bits.toInt();
+    }
+
+    @Override
+    public BitArray toBits(Integer object, int size) {
+      return BitArray.fromInt(object).resize(size);
+    }
+  }
 }

@@ -291,6 +291,16 @@ public class BitArray {
     return bytes.length == 0 ? 0 : bytes[bytes.length - 1];
   }
 
+  public static BitArray fromShort(short value) {
+    ByteBuffer bytes = allocate(Short.BYTES).putShort(value);
+    bytes.flip();
+    return fromByteBuffer(bytes);
+  }
+
+  public short toShort() {
+    return resize(Short.SIZE).toByteBuffer().getShort();
+  }
+
   public static BitArray fromInt(int value) {
     ByteBuffer bytes = allocate(Integer.BYTES).putInt(value);
     bytes.flip();
