@@ -40,11 +40,11 @@ Bundle-Name: SAI :: Comms :: Provider
 	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
 	l10n,\
 	{static=res},\
-	static/comms.js=res-transpile/comms.js,\
-	static/actions.js=res-transpile/actions.js,\
-	static/reducers.js=res-transpile/reducers.js,\
-	static/comms-table.js=res-transpile/comms-table.js,\
-	static/comms-info.js=res-transpile/comms-info.js
+	static/comms.js=res/comms.js,\
+	static/actions.js=res/actions.js,\
+	static/reducers.js=res/reducers.js,\
+	static/comms-table.js=res/comms-table.js,\
+	static/comms-info.js=res/comms-info.js
 
 Import-Package: \
 	*

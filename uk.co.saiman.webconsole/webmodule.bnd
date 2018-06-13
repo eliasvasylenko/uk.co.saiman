@@ -5,7 +5,7 @@ Bundle-Description: \
 	Provides web console console utilities for SAI system administration.
 
 -includeresource: \
-	/static/index.js=static/index.js,\
+	/static/index.js=res/index.js,\
 	/META-INF/webconsole.components.properties=properties/webconsole.components.properties
 
 Import-Package: \

@@ -130,6 +130,6 @@ test-cases: 			${classes;NAMED;*Test}
 -make:\
 	(*).js;\
 		type=transpile;\
-		source="$1.tsx";\
+		source="$1.jsx";\
 		presets="react";\
 		plugins="transform-object-rest-spread"
