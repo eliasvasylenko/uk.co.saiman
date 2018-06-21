@@ -176,8 +176,9 @@ public class PairedCommsPort implements CommsPort {
       inputBuffer.get(bytes);
       buffer.put(bytes, 0, written);
 
-      if (channel != null)
+      if (channel != null) {
         updated.next(channel);
+      }
 
       return written;
     }

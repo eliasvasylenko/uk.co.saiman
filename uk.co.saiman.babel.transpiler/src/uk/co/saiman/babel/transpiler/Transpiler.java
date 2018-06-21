@@ -28,11 +28,11 @@
 package uk.co.saiman.babel.transpiler;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static javax.script.ScriptContext.ENGINE_SCOPE;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.script.ScriptContext;
@@ -46,13 +46,9 @@ public class Transpiler {
   private static final String BABEL_SCRIPT = RESOURCE_ROOT + "babel.js";
   private static final String ENGINE_NAME = "nashorn";
 
-  private static final String PLUGINS_KEY = "plugins";
-  private static final String PRESETS_KEY = "presets";
   private static final String INPUT_KEY = "input";
 
-  private static final String TEMP_ARRAY = "tempArray";
-  private static final String ASSIGN_FROM_TEMP_ARRAY = "%s=Java.from(" + TEMP_ARRAY + ")";
-  private static final String TRANSFORM_SCRIPT = "Babel.transform(input, { plugins: plugins, presets: presets }).code";
+  private static final String TRANSFORM_SCRIPT = "Babel.transform(input, { plugins: %s, presets: %s }).code";
 
   private static final String ERROR_INITIALIZING_BABEL = "Error initialising Babel";
 
@@ -77,20 +73,22 @@ public class Transpiler {
     }
   }
 
-  public String transpile(
+  public synchronized String transpile(
       String source,
       Collection<? extends String> plugins,
       Collection<? extends String> presets) throws ScriptException {
     context.getBindings(ENGINE_SCOPE).put(INPUT_KEY, source);
-    putArray(PLUGINS_KEY, plugins);
-    putArray(PRESETS_KEY, presets);
 
-    return engine.eval(TRANSFORM_SCRIPT, context).toString();
+    return engine.eval(getTransformScriptString(plugins, presets), context).toString();
   }
 
-  private void putArray(String name, Collection<? extends String> array) throws ScriptException {
-    context.getBindings(ENGINE_SCOPE).put(TEMP_ARRAY, new ArrayList<>(array));
-    engine.eval(format(ASSIGN_FROM_TEMP_ARRAY, name), context);
-    context.getBindings(ENGINE_SCOPE).remove(TEMP_ARRAY);
+  private String getTransformScriptString(
+      Collection<? extends String> plugins,
+      Collection<? extends String> presets) {
+    return format(TRANSFORM_SCRIPT, getArrayString(plugins), getArrayString(presets));
+  }
+
+  private Object getArrayString(Collection<? extends String> items) {
+    return items.stream().map(item -> "\"" + item + "\"").collect(joining(",", "[", "]"));
   }
 }

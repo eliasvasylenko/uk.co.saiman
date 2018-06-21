@@ -74,7 +74,7 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   protected void withAxis(Consumer<CopleyAxis> action, Runnable failure) {
     CopleyAxis axis = comms
         .getNodes()
-        .filter(n -> n.getIndex() == node)
+        .filter(n -> n.getId() == node)
         .findFirst()
         .flatMap(n -> n.getAxes().filter(a -> a.getAxisNumber() == this.axis).findFirst())
         .orElse(null);

@@ -1,0 +1,42 @@
+Bundle-Name: SAI :: Copley :: Web Console
+
+-buildpath:\
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.comms;version=snapshot,\
+	uk.co.saiman.comms.webmodule;version=snapshot,\
+	uk.co.saiman.comms.copley;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+\
+	javax.measure.unit-api,\
+	uk.co.saiman.measurement;version=snapshot,\
+\
+	org.apache.felix.webconsole,\
+	org.apache.felix.http.servlet-api,\
+	uk.co.saiman.webconsole;version=snapshot,\
+	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.webmodules.i18n;version=snapshot,\
+	uk.co.saiman.webmodule.axios.amd;version=latest,\
+	uk.co.saiman.webmodule.react.amd;version=latest,\
+	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
+	uk.co.saiman.webmodule.prop-types.cjs;version=latest,\
+	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
+	uk.co.saiman.webmodule.redux-thunk.amd;version=latest,\
+	uk.co.saiman.webmodule.redux.amd;version=latest
+
+Private-Package: \
+	uk.co.saiman.comms.copley.webmodule
+
+webmodule.root: OSGI-INF/uk.co.saiman.webmodule
+
+-includeresource: \
+	{static=static},\
+	l10n,\
+	${webmodule.root}/index.js=webmodule/index.js,\
+	${webmodule.root}/actions.js=webmodule/actions.js,\
+	${webmodule.root}/reducers.js=webmodule/reducers.js,\
+	${webmodule.root}/controllers.js=webmodule/controllers.js,\
+	${webmodule.root}/variables.js=webmodule/variables.js

@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.comms;
 
-import java.nio.channels.ByteChannel;
-
 import uk.co.saiman.function.ThrowingFunction;
 
 public abstract class SimpleCommsController {
@@ -62,7 +60,17 @@ public abstract class SimpleCommsController {
       if (channel == null) {
         channel = port.openChannel();
         channel.read();
-        commsOpened();
+        try {
+          commsOpened();
+        } catch (Exception e) {
+          try {
+            channel.close();
+            channel = null;
+          } catch (Exception e2) {
+            e.addSuppressed(e2);
+          }
+          throw e;
+        }
       }
 
       checkComms();
@@ -88,7 +96,7 @@ public abstract class SimpleCommsController {
     return port;
   }
 
-  protected synchronized <U> U useChannel(ThrowingFunction<ByteChannel, U, Exception> action) {
+  protected synchronized <U> U useChannel(ThrowingFunction<CommsChannel, U, Exception> action) {
     try {
       if (fault != null)
         throw fault;

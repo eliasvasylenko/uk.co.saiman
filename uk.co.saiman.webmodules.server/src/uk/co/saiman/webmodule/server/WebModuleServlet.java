@@ -28,18 +28,14 @@
 package uk.co.saiman.webmodule.server;
 
 import static java.lang.String.format;
-import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM_FORMAT;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URLDecoder;
@@ -252,27 +248,19 @@ public class WebModuleServlet extends HttpServlet {
     System.out.println(module.format());
     System.out.println(resource);
 
-    try (InputStream in = module.openResource(resource)) {
-      if (in == null) {
-        response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        return;
+    String source = module.openResource(resource);
+    if (module.format().equals(ESM_FORMAT) && resource.endsWith(JS_EXTENSION)) {
+      try {
+        source = transpiler
+            .transpile(source, asList("transform-es2015-modules-amd"), asList("es2015"));
+      } catch (ScriptException e) {
+        throw new IOException(format(TRANSPILATION_FAILED, module.id()), e);
       }
-
-      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-      String source = reader.lines().collect(joining(lineSeparator()));
-      if (module.format().equals(ESM_FORMAT) && resource.endsWith(JS_EXTENSION)) {
-        try {
-          source = transpiler
-              .transpile(source, asList("transform-es2015-modules-amd"), asList("es2015"));
-        } catch (ScriptException e) {
-          throw new IOException(format(TRANSPILATION_FAILED, module.id()), e);
-        }
-      }
-
-      response.setContentType("application/javascript");
-      OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream());
-      writer.write(source);
-      writer.flush();
     }
+
+    response.setContentType("application/javascript");
+    OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream());
+    writer.write(source);
+    writer.flush();
   }
 }

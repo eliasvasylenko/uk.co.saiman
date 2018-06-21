@@ -3,7 +3,6 @@ Bundle-Name: SAI :: Comms :: SAINT
 -buildpath:\
 	uk.co.saiman.bytes;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
-	uk.co.saiman.comms.rest;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 \
 	uk.co.saiman.collections;version=snapshot,\
@@ -13,8 +12,7 @@ Bundle-Name: SAI :: Comms :: SAINT
 	org.eclipse.equinox.metatype
 	
 
-Private-Package:\
-	uk.co.saiman.comms.saint.impl
+Private-Package: uk.co.saiman.comms.saint.OLD
 
 Export-Package:\
 	uk.co.saiman.comms.saint

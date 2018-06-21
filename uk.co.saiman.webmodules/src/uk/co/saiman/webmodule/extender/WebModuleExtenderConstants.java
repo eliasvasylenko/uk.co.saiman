@@ -44,6 +44,8 @@ public class WebModuleExtenderConstants {
   public static final String ENTRY_POINT_ATTRIBUTE = "entry.point";
   public static final String DEPENDENCIES_ATTRIBUTE = "dependencies";
 
+  public static final String DEFAULT_RESOURCE_ROOT = "OSGI-INF/uk.co.saiman.webmodule";
+
   /**
    * The current version
    */

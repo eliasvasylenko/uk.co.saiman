@@ -29,8 +29,10 @@ package uk.co.saiman.webmodule;
 
 import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
 import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
+import static uk.co.saiman.webmodule.WebModuleConstants.DEFAULT_ENTRY_POINT;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.DEFAULT_RESOURCE_ROOT;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION_ATTRIBUTE;
@@ -60,10 +62,10 @@ public @interface ProvideWebModule {
   String version();
 
   @Attribute(RESOURCE_ROOT_ATTRIBUTE)
-  String resourceRoot() default "static";
+  String resourceRoot() default DEFAULT_RESOURCE_ROOT;
 
   @Attribute(ENTRY_POINT_ATTRIBUTE)
-  String entryPoint() default "index.js";
+  String entryPoint() default DEFAULT_ENTRY_POINT;
 
   @Attribute(FORMAT_ATTRIBUTE)
   String format() default ESM;

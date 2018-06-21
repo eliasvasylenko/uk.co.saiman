@@ -30,7 +30,7 @@ package uk.co.saiman.comms.copley;
 import java.util.stream.Stream;
 
 public interface CopleyNode {
-  int getIndex();
+  int getId();
 
   OperatingMode getOperatingMode();
 

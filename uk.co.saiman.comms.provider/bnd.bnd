@@ -3,7 +3,6 @@ Bundle-Name: SAI :: Comms :: Provider
 -buildpath: \
 	uk.co.saiman.bytes;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
-	uk.co.saiman.comms.rest;version=snapshot,\
 \
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.shell;version=snapshot,\
@@ -19,32 +18,14 @@ Bundle-Name: SAI :: Comms :: Provider
 	com.fazecast:jSerialComm,\
 	org.apache.felix.gogo.command,\
 	org.apache.felix.gogo.runtime,\
-	org.apache.felix.gogo.shell,\
-	org.apache.felix.webconsole,\
-	org.apache.felix.http.servlet-api,\
-\
-	org.apache.aries.javax.jax.rs-api,\
-\
-	uk.co.saiman.webmodule.axios.amd;version=latest,\
-	uk.co.saiman.webmodule.react.amd;version=latest,\
-	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
-	uk.co.saiman.webmodule.prop-types.cjs;version=latest,\
-	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
-	uk.co.saiman.webmodule.redux-thunk.amd;version=latest,\
-	uk.co.saiman.webmodule.redux.amd;version=latest
+	org.apache.felix.gogo.shell
 
 -includeresource: \
 	@${repo;com.fazecast:jSerialComm}!/Android/*,\
 	@${repo;com.fazecast:jSerialComm}!/Linux/*,\
 	@${repo;com.fazecast:jSerialComm}!/OSX/*,\
 	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
-	l10n,\
-	{static=res},\
-	static/comms.js=res/comms.js,\
-	static/actions.js=res/actions.js,\
-	static/reducers.js=res/reducers.js,\
-	static/comms-table.js=res/comms-table.js,\
-	static/comms-info.js=res/comms-info.js
+	l10n
 
 Import-Package: \
 	*

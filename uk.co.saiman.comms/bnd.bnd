@@ -8,4 +8,5 @@ Bundle-Name: SAI :: Comms
 	uk.co.saiman.utilities;version=snapshot
 
 Export-Package: \
-	uk.co.saiman.comms
+	uk.co.saiman.comms,\
+	uk.co.saiman.comms.rest

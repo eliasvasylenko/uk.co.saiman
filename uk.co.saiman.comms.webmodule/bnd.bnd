@@ -1,0 +1,26 @@
+Bundle-Name: SAI :: Comms :: Web Module
+
+-buildpath: \
+	uk.co.saiman.webconsole;version=snapshot,\
+	uk.co.saiman.webmodules;version=snapshot,\
+\
+	uk.co.saiman.webmodule.axios.amd;version=latest,\
+	uk.co.saiman.webmodule.react.amd;version=latest,\
+	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
+	uk.co.saiman.webmodule.prop-types.cjs;version=latest,\
+	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
+	uk.co.saiman.webmodule.redux-thunk.amd;version=latest,\
+	uk.co.saiman.webmodule.redux.amd;version=latest
+
+webmodule.root: OSGI-INF/uk.co.saiman.webmodule
+
+-includeresource: \
+	{static=res},\
+	${webmodule.root}/index.js=webmodule/index.js,\
+	${webmodule.root}/actions.js=webmodule/actions.js,\
+	${webmodule.root}/reducers.js=webmodule/reducers.js,\
+	${webmodule.root}/comms-table.js=webmodule/comms-table.js,\
+	${webmodule.root}/comms-info.js=webmodule/comms-info.js
+
+Export-Package: \
+	uk.co.saiman.comms.webmodule

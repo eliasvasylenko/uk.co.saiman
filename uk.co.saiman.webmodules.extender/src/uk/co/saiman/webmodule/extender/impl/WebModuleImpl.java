@@ -27,14 +27,20 @@
  */
 package uk.co.saiman.webmodule.extender.impl;
 
+import static java.lang.System.lineSeparator;
+import static java.util.stream.Collectors.joining;
 import static uk.co.saiman.webmodule.WebModuleConstants.ID_ATTRIBUTE;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.ENTRY_POINT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.FORMAT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.RESOURCE_ROOT_ATTRIBUTE;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -118,11 +124,16 @@ class WebModuleImpl implements WebModule {
   }
 
   @Override
-  public InputStream openResource(String name) throws IOException {
-    System.out.println("GET!!!!!!");
-    System.out.println(bundle);
-    System.out.println(root + "/" + name);
-    return bundle.getResource(root + "/" + name).openStream();
+  public String openResource(String name) throws IOException {
+    URL resource = bundle.getResource(root + "/" + name);
+    if (resource == null) {
+      throw new FileNotFoundException(name);
+    }
+
+    try (InputStream in = resource.openStream()) {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+      return reader.lines().collect(joining(lineSeparator()));
+    }
   }
 
   @Override

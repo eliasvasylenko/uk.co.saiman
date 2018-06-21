@@ -29,7 +29,9 @@ package uk.co.saiman.webconsole;
 
 import static uk.co.saiman.webconsole.SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_NAME;
 import static uk.co.saiman.webconsole.SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
+import static uk.co.saiman.webmodule.WebModuleConstants.DEFAULT_ENTRY_POINT;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM;
+import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.DEFAULT_RESOURCE_ROOT;
 
 import uk.co.saiman.webmodule.ProvideWebModule;
 import uk.co.saiman.webmodule.axios.RequireAxiosWebModule;
@@ -54,8 +56,8 @@ import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
 @ProvideWebModule(
     id = SAI_WEB_CONSOLE_WEB_MODULE_NAME,
     version = SAI_WEB_CONSOLE_WEB_MODULE_VERSION,
-    resourceRoot = "static",
-    entryPoint = "index.js",
+    resourceRoot = DEFAULT_RESOURCE_ROOT,
+    entryPoint = DEFAULT_ENTRY_POINT,
     format = ESM)
 public interface SaiWebConsoleConstants {
   final String SAI_WEB_CONSOLE_WEB_MODULE_NAME = "@saiman/webconsole";

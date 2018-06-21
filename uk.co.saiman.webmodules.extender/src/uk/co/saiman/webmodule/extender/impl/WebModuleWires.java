@@ -99,7 +99,7 @@ class WebModuleWires extends ServiceTracker<WebModule, WebModule> {
   @Override
   public void removedService(ServiceReference<WebModule> reference, WebModule service) {
     synchronized (references) {
-      references.remove(wire, service);
+      references.remove(reference);
       context.ungetService(reference);
     }
 

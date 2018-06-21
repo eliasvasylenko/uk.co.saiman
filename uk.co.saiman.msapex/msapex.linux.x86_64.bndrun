@@ -17,6 +17,7 @@ runplatform: linux64
 	uk.co.saiman.log.provider;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.webmodules.i18n;version=snapshot,\
 	uk.co.saiman.webmodules.extender;version=snapshot,\
 	uk.co.saiman.webmodules.server;version=snapshot,\
 	org.apache.felix.log;version='[1.0.1,1.0.2)',\
@@ -139,9 +140,11 @@ runplatform: linux64
 	uk.co.saiman.bytes;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
+	uk.co.saiman.comms.copley.provider;version=snapshot,\
+	uk.co.saiman.comms.copley.webconsole;version=snapshot,\
 	uk.co.saiman.comms.provider;version=snapshot,\
-	uk.co.saiman.comms.rest;version=snapshot,\
 	uk.co.saiman.comms.saint;version=snapshot,\
+	uk.co.saiman.comms.webmodule;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
 	uk.co.saiman.data.spectrum;version=snapshot,\

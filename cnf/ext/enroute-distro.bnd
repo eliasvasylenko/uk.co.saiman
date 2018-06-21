@@ -12,6 +12,15 @@
 		pom=${build}/apache.xml; \
 		location=${build}/cache/apache.xml
 
+-plugin.eclipse.platform.photon:\
+\
+		aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"Eclipse Photon Simultaneous Release";\
+			url					=		http://download.eclipse.org/releases/photon
+
+#			url					=		${fileuri;${build}/eclipse.platform.target};\
+#			targetPlatform		=		true
+
 -plugin.enroute = \
 	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
 		name=enRoute API; \

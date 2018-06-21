@@ -1,9 +1,0 @@
-#-plugin.eclipse.platform.oxygen:\
-#\
-#		aQute.bnd.repository.p2.provider.P2Repository;\
-#			name				=		"Eclipse Oxygen Updates";\
-#			url					=		http://download.eclipse.org/eclipse/updates/4.7,\
-#\
-#		aQute.bnd.repository.p2.provider.P2Repository;\
-#			name				=		"Eclipse Oxygen Simultaneous Release";\
-#			url					=		http://download.eclipse.org/releases/oxygen
