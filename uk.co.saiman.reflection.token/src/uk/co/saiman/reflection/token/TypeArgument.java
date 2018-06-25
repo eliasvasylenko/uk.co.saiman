@@ -27,13 +27,12 @@
  */
 package uk.co.saiman.reflection.token;
 
+import static uk.co.saiman.reflection.Types.resolveSupertype;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-
-import uk.co.saiman.reflection.TypeHierarchy;
 
 public abstract class TypeArgument<T> {
   private final TypeParameter<T> parameter;
@@ -56,8 +55,9 @@ public abstract class TypeArgument<T> {
 
   @SuppressWarnings("unchecked")
   private TypeParameter<T> resolveSupertypeParameter() {
-    Type type = ((ParameterizedType) new TypeHierarchy(getClass().getGenericSuperclass())
-        .resolveSupertype(TypeArgument.class)).getActualTypeArguments()[0];
+    Type type = ((ParameterizedType) resolveSupertype(
+        getClass().getGenericSuperclass(),
+        TypeArgument.class)).getActualTypeArguments()[0];
 
     if (!(type instanceof TypeVariable<?>))
       throw new IllegalArgumentException();

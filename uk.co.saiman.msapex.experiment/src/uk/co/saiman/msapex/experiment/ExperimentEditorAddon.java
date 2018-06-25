@@ -100,14 +100,15 @@ public class ExperimentEditorAddon implements EditorProvider {
       if (className == null)
         return true;
 
-      ClassLoader classLoader = type.getErasedType().getClassLoader();
+      Class<?> erasedType = type.getErasedType();
+      ClassLoader classLoader = erasedType.getClassLoader();
 
       if (classLoader == null)
         return false;
 
       try {
         Class<?> superClass = classLoader.loadClass(className);
-        return type.isAssignableTo(superClass);
+        return superClass.isAssignableFrom(erasedType);
       } catch (ClassNotFoundException e) {
         return false;
       }

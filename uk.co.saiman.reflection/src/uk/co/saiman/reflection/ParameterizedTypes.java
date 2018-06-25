@@ -29,7 +29,6 @@ package uk.co.saiman.reflection;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
-import static uk.co.saiman.reflection.ReflectionException.REFLECTION_PROPERTIES;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -87,10 +86,6 @@ public class ParameterizedTypes {
 
     @Override
     public String toString() {
-      return toString(Imports.empty());
-    }
-
-    public synchronized String toString(Imports imports) {
       StringBuilder builder = new StringBuilder();
       if (ownerType != null) {
         builder.append(ownerType).append(".");
@@ -110,19 +105,19 @@ public class ParameterizedTypes {
       if (hashCode == null || hashCode == PROCESSING) {
         synchronized (this) {
           /*
-           * This way the hash code will return 0 if we encounter it again in
-           * the parameters, rather than recurring infinitely:
+           * This way the hash code will return 0 if we encounter it again in the
+           * parameters, rather than recurring infinitely:
            * 
-           * (this is not a problem for other threads as hashCode is
-           * synchronized until given a proper result)
+           * (this is not a problem for other threads as hashCode is synchronized until
+           * given a proper result)
            */
           hashCode = PROCESSING;
 
           /*
-           * Calculate the hash code properly, now we're guarded against
-           * recursion:
+           * Calculate the hash code properly, now we're guarded against recursion:
            */
-          this.hashCode = Objects.hashCode(ownerType) ^ Objects.hashCode(rawType)
+          this.hashCode = Objects.hashCode(ownerType)
+              ^ Objects.hashCode(rawType)
               ^ Objects.hashCode(typeArguments);
         }
       }
@@ -132,10 +127,16 @@ public class ParameterizedTypes {
 
     @Override
     public boolean equals(Object other) {
-      if (!(other instanceof Type))
+      if (other == this)
+        return true;
+      if (!(other instanceof ParameterizedType))
         return false;
-      else
-        return Types.equals(this, (Type) other);
+
+      ParameterizedType that = (ParameterizedType) other;
+
+      return Objects.equals(this.getRawType(), that.getRawType())
+          && Objects.equals(this.getOwnerType(), that.getOwnerType())
+          && Objects.equals(this.getActualTypeArguments(), that.getActualTypeArguments());
     }
   }
 
@@ -167,8 +168,8 @@ public class ParameterizedTypes {
    *
    * @param type
    *          The type whose generic type arguments we wish to determine.
-   * @return A mapping of all type variables to their arguments in the context
-   *         of the given type.
+   * @return A mapping of all type variables to their arguments in the context of
+   *         the given type.
    */
   public static Stream<Map.Entry<TypeVariable<?>, Type>> getAllTypeArguments(
       ParameterizedType type) {
@@ -179,10 +180,15 @@ public class ParameterizedTypes {
       TypeVariable<?>[] typeParameters = rawType.getTypeParameters();
       Type[] actualTypeArguments = type.getActualTypeArguments();
 
-      typeArguments = Stream.concat(
-          IntStream.range(0, typeParameters.length).mapToObj(
-              i -> new AbstractMap.SimpleEntry<>(typeParameters[i], actualTypeArguments[i])),
-          typeArguments);
+      typeArguments = Stream
+          .concat(
+              IntStream
+                  .range(0, typeParameters.length)
+                  .mapToObj(
+                      i -> new AbstractMap.SimpleEntry<>(
+                          typeParameters[i],
+                          actualTypeArguments[i])),
+              typeArguments);
 
       type = type.getOwnerType() instanceof ParameterizedType
           ? (ParameterizedType) type.getOwnerType()
@@ -191,10 +197,12 @@ public class ParameterizedTypes {
 
       if (rawType != null && type == null) {
         do {
-          typeArguments = Stream.concat(
-              typeArguments,
-              Arrays.stream(rawType.getTypeParameters()).map(
-                  p -> new AbstractMap.SimpleEntry<>(p, p)));
+          typeArguments = Stream
+              .concat(
+                  typeArguments,
+                  Arrays
+                      .stream(rawType.getTypeParameters())
+                      .map(p -> new AbstractMap.SimpleEntry<>(p, p)));
         } while ((rawType = Types.isStatic(rawType) ? null : rawType.getEnclosingClass()) != null);
       }
     } while (type != null && rawType != null);
@@ -204,8 +212,8 @@ public class ParameterizedTypes {
 
   /**
    * Derive an instance of {@link ParameterizedType} from a raw {@link Class}
-   * using the given generic type arguments and owning type. Type parameters
-   * with no provided argument will be parameterized with the type variables
+   * using the given generic type arguments and owning type. Type parameters with
+   * no provided argument will be parameterized with the type variables
    * themselves.
    * 
    * @param ownerType
@@ -245,9 +253,11 @@ public class ParameterizedTypes {
     List<TypeVariable<?>> parameters = getAllTypeParameters(rawType).collect(Collectors.toList());
 
     if (parameters.size() != typeArguments.size()) {
-      throw new ReflectionException(
-          REFLECTION_PROPERTIES
-              .incorrectTypeArgumentCount(asList(rawType.getTypeParameters()), typeArguments));
+      throw new IllegalArgumentException(
+          "Arguments don't match parameters "
+              + typeArguments
+              + " - "
+              + asList(rawType.getTypeParameters()));
     }
 
     return parameterizeUncheckedImpl(rawType, typeArguments);
@@ -292,7 +302,7 @@ public class ParameterizedTypes {
     if (enclosing == null || Types.isStatic(rawType)) {
       ownerType = enclosing;
     } else {
-      ownerType = parameterizeUncheckedImpl(enclosing, argumentsForOwner(rawType, typeArguments));
+      ownerType = parameterizeUncheckedImpl(enclosing, typeArguments);
     }
 
     if ((ownerType == null || ownerType instanceof Class)
@@ -345,8 +355,8 @@ public class ParameterizedTypes {
    *          statically enclosing type which is itself generic.
    * @param typeArguments
    *          A list of {@link Type}s to substitute as type arguments for the
-   *          given generic class. There should be exactly as many type
-   *          arguments as there are type parameters for the given class.
+   *          given generic class. There should be exactly as many type arguments
+   *          as there are type parameters for the given class.
    * @return A {@link ParameterizedType} instance over the given class,
    *         parameterized with the given type arguments, in order
    */
@@ -364,8 +374,8 @@ public class ParameterizedTypes {
    *          statically enclosing type which is itself generic.
    * @param typeArguments
    *          A list of {@link Type}s to substitute as type arguments for the
-   *          given generic class. There should be exactly as many type
-   *          arguments as there are type parameters for the given class.
+   *          given generic class. There should be exactly as many type arguments
+   *          as there are type parameters for the given class.
    * @return A {@link ParameterizedType} instance over the given class,
    *         parameterized with the given type arguments, in order
    */
@@ -376,30 +386,6 @@ public class ParameterizedTypes {
   protected static ParameterizedType validate(ParameterizedType type) {
     // TODO validation of ParameterizedTypeImpl parameters
     return type;
-  }
-
-  /*
-   * An enclosing type of a method local or constructor local type, such as an
-   * anonymous type, cannot be parameterized.
-   */
-  private static Function<? super TypeVariable<?>, ? extends Type> argumentsForOwner(
-      Class<?> enclosedClass,
-      Function<? super TypeVariable<?>, ? extends Type> typeArguments) {
-
-    if (enclosedClass.getEnclosingConstructor() != null
-        || enclosedClass.getEnclosingMethod() != null) {
-      return t -> {
-        Type argument = typeArguments.apply(t);
-        if (argument != t && argument != null) {
-          throw new ReflectionException(
-              REFLECTION_PROPERTIES.cannotParameterizeEnclosingExecutable(enclosedClass));
-        }
-        return argument;
-      };
-
-    } else {
-      return typeArguments;
-    }
   }
 
   private static List<Type> argumentsForClass(

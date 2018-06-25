@@ -29,7 +29,6 @@ package uk.co.saiman.reflection;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Stream.of;
-import static uk.co.saiman.reflection.ReflectionException.REFLECTION_PROPERTIES;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -43,10 +42,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
-
-import uk.co.saiman.utility.Isomorphism;
 
 /**
  * A collection of general utility methods relating to the Java type system.
@@ -86,8 +82,8 @@ public final class Types {
   private Types() {}
 
   /**
-   * Determine whether a {@link Class} represents a generic class or an array
-   * with a generic class as a component type.
+   * Determine whether a {@link Class} represents a generic class or an array with
+   * a generic class as a component type.
    * 
    * @param type
    *          the type we wish to classify
@@ -113,11 +109,24 @@ public final class Types {
    * 
    * @param type
    *          the type we wish to classify
-   * @return true if the given class is raw or if a non-statically enclosing
-   *         class is raw, false otherwise
+   * @return true if the given class is raw or if a non-statically enclosing class
+   *         is raw, false otherwise
    */
   public static boolean isRaw(Type type) {
-    return type instanceof Class<?> && isGeneric((Class<?>) type);
+    return isErasure(type) && isGeneric((Class<?>) type);
+  }
+
+  /**
+   * Determine whether a type is the erasure of itself, i.e. if it is either raw
+   * or a non-generic type.
+   * 
+   * @param type
+   *          the type we wish to classify
+   * @return true if the given class is raw or if a non-statically enclosing class
+   *         is raw, false otherwise
+   */
+  public static boolean isErasure(Type type) {
+    return type instanceof Class<?>;
   }
 
   /**
@@ -178,25 +187,6 @@ public final class Types {
   }
 
   /**
-   * Find the lower bounds of a given type.
-   * 
-   * @param type
-   *          The type whose bounds we wish to discover.
-   * @return The lower bounds of the given type, or null if no such bounds
-   *         exist.
-   */
-  public static Stream<Type> getLowerBounds(Type type) {
-    Type[] types;
-
-    if (type instanceof WildcardType)
-      types = ((WildcardType) type).getLowerBounds();
-    else
-      types = new Type[] { type };
-
-    return Arrays.stream(types);
-  }
-
-  /**
    * Get all primitive type classes
    * 
    * @return A set containing all primitive types.
@@ -228,8 +218,7 @@ public final class Types {
   }
 
   /**
-   * If this TypeToken is a primitive type, determine the wrapped primitive
-   * type.
+   * If this TypeToken is a primitive type, determine the wrapped primitive type.
    * 
    * @param <T>
    *          The type we wish to wrap.
@@ -266,39 +255,6 @@ public final class Types {
   }
 
   /**
-   * Determine whether a given class is abstract.
-   * 
-   * @param rawType
-   *          The type we wish to classify.
-   * @return True if the type is abstract, false otherwise.
-   */
-  public static boolean isAbstract(Class<?> rawType) {
-    return Modifier.isAbstract(rawType.getModifiers());
-  }
-
-  /**
-   * Determine whether a given class is final.
-   * 
-   * @param rawType
-   *          The type we wish to classify.
-   * @return True if the type is final, false otherwise.
-   */
-  public static boolean isFinal(Class<?> rawType) {
-    return Modifier.isFinal(rawType.getModifiers());
-  }
-
-  /**
-   * Determine whether a given class is an interface.
-   * 
-   * @param rawType
-   *          The type we wish to classify.
-   * @return True if the type is an interface, false otherwise.
-   */
-  public static boolean isInterface(Class<?> rawType) {
-    return Modifier.isInterface(rawType.getModifiers());
-  }
-
-  /**
    * Determine whether a given class is static.
    * 
    * @param rawType
@@ -307,226 +263,6 @@ public final class Types {
    */
   public static boolean isStatic(Class<?> rawType) {
     return Modifier.isStatic(rawType.getModifiers());
-  }
-
-  /**
-   * Find the component type of the given type, if the given {@link Type}
-   * instance is an array {@link Class} or an instance of
-   * {@link GenericArrayType}.
-   * 
-   * @param type
-   *          The type of which we wish to determine the component type.
-   * @return The component type of the given type, if it is an array type,
-   *         otherwise null.
-   */
-  public static Type getComponentType(Type type) {
-    if (type instanceof Class)
-      return ((Class<?>) type).getComponentType();
-    else if (type instanceof GenericArrayType)
-      return ((GenericArrayType) type).getGenericComponentType();
-    else
-      return null;
-  }
-
-  /**
-   * Find the innermost component type of the given type, if the given
-   * {@link Type} instance is an array {@link Class} or an instance of
-   * {@link GenericArrayType} with any number of dimensions.
-   * 
-   * @param type
-   *          The type of which we wish to determine the component type.
-   * @return The component type of the given type if it is an array type,
-   *         otherwise null.
-   */
-  public static Type getInnerComponentType(Type type) {
-    Type component = null;
-
-    if (type instanceof Class)
-      while ((type = ((Class<?>) type).getComponentType()) != null)
-        component = type;
-    else
-      while (type instanceof GenericArrayType
-          && (type = ((GenericArrayType) type).getGenericComponentType()) != null)
-        component = type;
-
-    return component;
-  }
-
-  /**
-   * Determine the number of array dimensions exist on the given type.
-   * 
-   * @param type
-   *          A type which may or may not be an array.
-   * @return The number of dimensions on the given type, or 0 if it is not an
-   *         array type.
-   */
-  public static int getArrayDimensions(Type type) {
-    int count = 0;
-
-    if (type instanceof Class)
-      while ((type = ((Class<?>) type).getComponentType()) != null)
-        count++;
-    else
-      while (type instanceof GenericArrayType
-          && (type = ((GenericArrayType) type).getGenericComponentType()) != null)
-        count++;
-
-    return count;
-  }
-
-  /**
-   * Determine if a given type, {@code to}, is legally castable from another
-   * given type, {@code from}.
-   * 
-   * @param from
-   *          The type from which we wish to determine castability.
-   * @param to
-   *          The type to which we wish to determine castability.
-   * @return True if the types are castable, false otherwise.
-   */
-  public static boolean isCastable(Type from, Type to) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * If a given object is assignable to a given raw type, it will be converted
-   * to that type. Generally this is an identity conversion, but for wrapped
-   * primitive types the extra step is taken to make conversions to which are
-   * consistent with widening primitive conversions.
-   * 
-   * @param <T>
-   *          the type to which we wish to assign
-   * @param object
-   *          the type from which we wish to assign
-   * @param type
-   *          the type to which we wish to assign
-   * @return true if the types are assignable, false otherwise
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> T assign(Object object, Class<T> type) {
-    Class<?> currentType = unwrapPrimitive(object.getClass());
-    Class<?> rawTargetType = unwrapPrimitive(getErasedType(type));
-
-    if (isStrictInvocationContextCompatible(currentType, rawTargetType)) {
-      if (isPrimitive(rawTargetType)) {
-        /*
-         * If assignable primitives:
-         */
-        if (rawTargetType.equals(double.class)) {
-          object = ((Number) object).doubleValue();
-        } else if (rawTargetType.equals(float.class)) {
-          object = ((Number) object).floatValue();
-        } else if (rawTargetType.equals(long.class)) {
-          object = ((Number) object).longValue();
-        } else if (rawTargetType.equals(int.class)) {
-          object = ((Number) object).intValue();
-        } else if (rawTargetType.equals(short.class)) {
-          object = ((Number) object).shortValue();
-        }
-      }
-    } else {
-      Object finalObject = object; // Get your shit together Eclipse ffs.
-      throw new ReflectionException(
-          REFLECTION_PROPERTIES.invalidAssignmentObject(finalObject, type));
-    }
-
-    return (T) object;
-  }
-
-  private static class EqualityRelation {
-    private Type a, b;
-
-    public EqualityRelation(Type a, Type b) {
-      this.a = a;
-      this.b = b;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof EqualityRelation))
-        return false;
-
-      EqualityRelation that = (EqualityRelation) obj;
-      return (a == that.a && b == that.b) || (a == that.b && b == that.a);
-    }
-
-    @Override
-    public int hashCode() {
-      return System.identityHashCode(a) ^ (System.identityHashCode(b) * 7);
-    }
-  }
-
-  /**
-   * Test whether two types are equal to one another.
-   * 
-   * @param a
-   *          the first type
-   * @param b
-   *          the second type
-   * @return true if the two given types are equal, false otherwise
-   */
-  public static boolean equals(Type a, Type b) {
-    return equals(a, b, new Isomorphism());
-  }
-
-  private static boolean equals(Type[] first, Type[] second, Isomorphism isomorphism) {
-    if (first.length != second.length) {
-      return false;
-    } else if (first.length == 0) {
-      return true;
-    } else if (first.length == 1) {
-      return equals(first[0], second[0], isomorphism);
-    } else {
-      return stream(first).allMatch(f -> stream(second).anyMatch(s -> equals(f, s, isomorphism)));
-    }
-  }
-
-  private static boolean equals(Type first, Type second, Isomorphism isomorphism) {
-    if (first == second) {
-      return true;
-    } else if (first == null || second == null) {
-      return false;
-    }
-
-    return isomorphism
-        .byEquality()
-        .getPartialMapping(new EqualityRelation(first, second), () -> true, e -> {
-          if (first == second) {
-            return true;
-
-          } else if (first instanceof ParameterizedType) {
-            return second instanceof ParameterizedType && parameterizedTypeEquals(
-                (ParameterizedType) first,
-                (ParameterizedType) second,
-                isomorphism);
-
-          } else if (first instanceof Class) {
-            return first.equals(second);
-
-          } else if (first instanceof WildcardType) {
-            return second instanceof WildcardType
-                && equals(
-                    ((WildcardType) first).getUpperBounds(),
-                    ((WildcardType) second).getUpperBounds(),
-                    isomorphism)
-                && equals(
-                    ((WildcardType) first).getLowerBounds(),
-                    ((WildcardType) second).getLowerBounds(),
-                    isomorphism);
-
-          } else {
-            return first.equals(second);
-          }
-        });
-  }
-
-  private static boolean parameterizedTypeEquals(
-      ParameterizedType a,
-      ParameterizedType b,
-      Isomorphism isomorphism) {
-    return Objects.equals(a.getRawType(), b.getRawType())
-        && equals(a.getOwnerType(), b.getOwnerType(), isomorphism)
-        && equals(a.getActualTypeArguments(), b.getActualTypeArguments(), isomorphism);
   }
 
   /**
@@ -544,43 +280,42 @@ public final class Types {
    * @return true if {@code from} <em>contains</em> {@code to}, false otherwise
    */
   public static boolean isContainedBy(Type from, Type to) {
-    return isContainedBy(from, to, new Isomorphism());
+    boolean contained;
+
+    if (to.equals(from)) {
+      contained = true;
+    } else if (to instanceof WildcardType) {
+      WildcardType toWildcard = (WildcardType) to;
+
+      contained = isSubtype(from, toWildcard.getUpperBounds());
+
+      contained = contained
+          && (toWildcard.getLowerBounds().length == 0
+              || isSubtype(toWildcard.getLowerBounds(), from));
+    } else {
+      contained = isSubtype(from, to) && isSubtype(to, from);
+    }
+
+    return contained;
   }
 
-  private static class SubtypeRelation {
-    private Type from, to;
+  private static boolean isSubtype(Type subtype, Type[] supertypes) {
+    return Arrays.stream(supertypes).allMatch(t -> isSubtype(subtype, t));
+  }
 
-    public SubtypeRelation(Type from, Type to) {
-      this.from = from;
-      this.to = to;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof SubtypeRelation))
-        return false;
-
-      SubtypeRelation that = (SubtypeRelation) obj;
-      return this.from == that.from && this.to == that.to;
-    }
-
-    @Override
-    public int hashCode() {
-      return System.identityHashCode(from) ^ (System.identityHashCode(to) * 7);
-    }
-
-    @Override
-    public String toString() {
-      return from + "@" + System.identityHashCode(from) + " <: " + to + "@"
-          + System.identityHashCode(to);
+  private static boolean isSubtype(Type[] subtypes, Type supertype) {
+    if (subtypes.length == 0) {
+      return isSubtype(Object.class, supertype);
+    } else {
+      return Arrays.stream(subtypes).anyMatch(f -> isSubtype(f, supertype));
     }
   }
 
   /**
    * Determine if a given type, {@code supertype}, is a subtype of another given
-   * type, {@code subtype}. Or in other words, if {@code supertype} is a
-   * supertype of {@code subtype}. Types are considered assignable if they
-   * involve unchecked generic casts.
+   * type, {@code subtype}. Or in other words, if {@code supertype} is a supertype
+   * of {@code subtype}. Types are considered assignable if they involve unchecked
+   * generic casts.
    * 
    * @param subtype
    *          the type from which we wish to determine assignability
@@ -589,73 +324,48 @@ public final class Types {
    * @return true if the types are assignable, false otherwise
    */
   public static boolean isSubtype(Type subtype, Type supertype) {
-    return isSubtype(subtype, supertype, new Isomorphism());
-  }
-
-  private static boolean isSubtype(Type subtype, Type[] supertypes, Isomorphism isomorphism) {
-    return Arrays.stream(supertypes).allMatch(t -> isSubtype(subtype, t, isomorphism));
-  }
-
-  private static boolean isSubtype(Type[] subtypes, Type supertype, Isomorphism isomorphism) {
-    if (subtypes.length == 0) {
-      return isSubtype(Object.class, supertype, isomorphism);
-    } else {
-      return Arrays.stream(subtypes).anyMatch(f -> isSubtype(f, supertype, isomorphism));
-    }
-  }
-
-  private static boolean isSubtype(Type subtype, Type supertype, Isomorphism isomorphism) {
-    return isomorphism
-        .byEquality()
-        .getPartialMapping(new SubtypeRelation(subtype, supertype), (a, partial) -> {
-          partial.accept(() -> true);
-
-          return isSubtypeImpl(a.from, a.to, isomorphism);
-        });
-  }
-
-  private static Boolean isSubtypeImpl(Type subtype, Type supertype, Isomorphism isomorphism) {
     boolean assignable;
 
-    if (subtype == null || supertype == null || supertype.equals(Object.class)
+    if (subtype == null
+        || supertype == null
+        || supertype.equals(Object.class)
         || subtype == supertype) {
       /*
-       * We can always assign to or from 'null', and we can always assign to
-       * Object.
+       * We can always assign to or from 'null', and we can always assign to Object.
        */
       assignable = true;
     } else if (subtype instanceof WildcardType) {
       /*
-       * We must be able to assign from at least one of the upper bounds,
-       * including the implied upper bound of Object, to the target type.
+       * We must be able to assign from at least one of the upper bounds, including
+       * the implied upper bound of Object, to the target type.
        */
       Type[] upperBounds = ((WildcardType) subtype).getUpperBounds();
 
-      assignable = isSubtype(upperBounds, supertype, isomorphism);
+      assignable = isSubtype(upperBounds, supertype);
     } else if (supertype instanceof WildcardType) {
       /*
-       * If there are no lower bounds the target may be arbitrarily specific, so
-       * we can never assign to it. Otherwise we must be able to assign to each
-       * lower bound.
+       * If there are no lower bounds the target may be arbitrarily specific, so we
+       * can never assign to it. Otherwise we must be able to assign to each lower
+       * bound.
        */
       Type[] lowerBounds = ((WildcardType) supertype).getLowerBounds();
 
       if (lowerBounds.length == 0)
         assignable = false;
       else
-        assignable = isSubtype(subtype, lowerBounds, isomorphism);
+        assignable = isSubtype(subtype, lowerBounds);
     } else if (subtype instanceof TypeVariable) {
       /*
-       * We must be able to assign from at least one of the upper bound,
-       * including the implied upper bound of Object, to the target type.
+       * We must be able to assign from at least one of the upper bound, including the
+       * implied upper bound of Object, to the target type.
        */
       Type[] upperBounds = ((TypeVariable<?>) subtype).getBounds();
 
-      assignable = isSubtype(upperBounds, supertype, isomorphism);
+      assignable = isSubtype(upperBounds, supertype);
     } else if (supertype instanceof TypeVariable) {
       /*
-       * We can only assign to a type variable if it is from the exact same
-       * type, or explicitly mentioned in an upper bound or intersection type.
+       * We can only assign to a type variable if it is from the exact same type, or
+       * explicitly mentioned in an upper bound or intersection type.
        */
       assignable = false;
 
@@ -665,27 +375,22 @@ public final class Types {
       if (supertype instanceof Class<?>) {
         Class<?> toClass = (Class<?>) supertype;
 
-        assignable = toClass.isArray() && isSubtype(
-            fromArray.getGenericComponentType(),
-            toClass.getComponentType(),
-            isomorphism);
+        assignable = toClass.isArray()
+            && isSubtype(fromArray.getGenericComponentType(), toClass.getComponentType());
       } else if (supertype instanceof GenericArrayType) {
         GenericArrayType toArray = (GenericArrayType) supertype;
 
         assignable = isSubtype(
             fromArray.getGenericComponentType(),
-            toArray.getGenericComponentType(),
-            isomorphism);
+            toArray.getGenericComponentType());
       } else
         assignable = false;
     } else if (supertype instanceof GenericArrayType) {
       GenericArrayType toArray = (GenericArrayType) supertype;
       if (subtype instanceof Class<?>) {
         Class<?> fromClass = (Class<?>) subtype;
-        assignable = fromClass.isArray() && isSubtype(
-            fromClass.getComponentType(),
-            toArray.getGenericComponentType(),
-            isomorphism);
+        assignable = fromClass.isArray()
+            && isSubtype(fromClass.getComponentType(), toArray.getGenericComponentType());
       } else
         assignable = false;
     } else if (supertype instanceof Class<?>) {
@@ -696,7 +401,7 @@ public final class Types {
       if (!matchedClass.isAssignableFrom(getErasedType(subtype))) {
         assignable = false;
       } else {
-        Type subtypeParameterization = new TypeHierarchy(subtype).resolveSupertype(matchedClass);
+        Type subtypeParameterization = resolveSupertype(subtype, matchedClass);
 
         if (!(subtypeParameterization instanceof ParameterizedType))
           assignable = false;
@@ -712,7 +417,7 @@ public final class Types {
 
           assignable = true;
           while (toTypeArguments.hasNext()) {
-            if (!isContainedBy(fromTypeArguments.next(), toTypeArguments.next(), isomorphism))
+            if (!isContainedBy(fromTypeArguments.next(), toTypeArguments.next()))
               assignable = false;
           }
         }
@@ -724,28 +429,15 @@ public final class Types {
     return assignable;
   }
 
-  private static boolean isContainedBy(Type from, Type to, Isomorphism isomorphism) {
-    boolean contained;
+  public static Type resolveSupertype(Type subtype, Class<?> superClass) {
 
-    if (to.equals(from)) {
-      contained = true;
-    } else if (to instanceof WildcardType) {
-      WildcardType toWildcard = (WildcardType) to;
-
-      contained = isSubtype(from, toWildcard.getUpperBounds(), isomorphism);
-
-      contained = contained && (toWildcard.getLowerBounds().length == 0
-          || isSubtype(toWildcard.getLowerBounds(), from, isomorphism));
-    } else {
-      contained = isSubtype(from, to, isomorphism) && isSubtype(to, from, isomorphism);
-    }
-
-    return contained;
+    // TODO Auto-generated method stub
+    return null;
   }
 
   /**
-   * Determine if a given type, {@code to}, is assignable from another given
-   * type, {@code from}. Or in other words, if {@code to} is a supertype of
+   * Determine if a given type, {@code to}, is assignable from another given type,
+   * {@code from}. Or in other words, if {@code to} is a supertype of
    * {@code from}. Types are considered assignable if they involve unchecked
    * generic casts.
    * 
@@ -764,7 +456,6 @@ public final class Types {
    * Determine whether a given type, {@code from}, is compatible with a given
    * type, {@code to}, within a strict invocation context.
    * 
-   * 
    * <p>
    * Types are considered so compatible if assignment is possible through
    * application of the following conversions:
@@ -779,8 +470,8 @@ public final class Types {
    *          The type from which to determine compatibility.
    * @param to
    *          The type to which to determine compatibility.
-   * @return True if the type {@code from} is compatible with the type
-   *         {@code to}, false otherwise.
+   * @return True if the type {@code from} is compatible with the type {@code to},
+   *         false otherwise.
    */
   public static boolean isStrictInvocationContextCompatible(Type from, Type to) {
     if (isPrimitive(from)) {
@@ -832,8 +523,8 @@ public final class Types {
    *          The type from which to determine compatibility.
    * @param to
    *          The type to which to determine compatibility.
-   * @return True if the type {@code from} is compatible with the type
-   *         {@code to}, false otherwise.
+   * @return True if the type {@code from} is compatible with the type {@code to},
+   *         false otherwise.
    */
   public static boolean isLooseInvocationContextCompatible(Type from, Type to) {
     if (from instanceof Class<?> && isGeneric((Class<?>) from)) {

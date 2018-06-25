@@ -27,13 +27,9 @@
  */
 package uk.co.saiman.reflection.token;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.empty;
-import static uk.co.saiman.collection.StreamUtilities.entriesToMap;
 import static uk.co.saiman.collection.StreamUtilities.zip;
-import static uk.co.saiman.reflection.ReflectionException.REFLECTION_PROPERTIES;
 import static uk.co.saiman.reflection.token.TypeParameter.forTypeVariable;
 
 import java.lang.reflect.Executable;
@@ -41,19 +37,14 @@ import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import uk.co.saiman.reflection.ParameterizedTypes;
-import uk.co.saiman.reflection.ReflectionException;
-import uk.co.saiman.reflection.TypeHierarchy;
 import uk.co.saiman.reflection.TypeSubstitution;
 import uk.co.saiman.reflection.Types;
 
@@ -161,7 +152,7 @@ public class TypeToken<T> {
    */
   @SuppressWarnings("unchecked")
   public Class<? super T> getErasedType() {
-    return (Class<? super T>) getErasedUpperBounds().findFirst().orElse(Object.class);
+    return (Class<? super T>) Types.getErasedType(type);
   }
 
   /**
@@ -171,44 +162,12 @@ public class TypeToken<T> {
    */
   @SuppressWarnings("unchecked")
   public TypeToken<? super T> getErasedTypeToken() {
-    if (isRaw()) {
-      return this;
-    } else {
-      return (TypeToken<? super T>) forType(
-          getErasedUpperBounds().findFirst().orElse(Object.class));
-    }
-  }
-
-  /**
-   * Find the upper bounding classes and parameterized types of a given type.
-   * Unlike {@link Types#getUpperBounds(Type)} this respects bounds on the
-   * inference variables in this resolver.
-   * 
-   * @return the upper bounds of the type represented by this TypeToken
-   */
-  public Stream<Type> getUpperBounds() {
-    List<Type> upperBounds = Types.getUpperBounds(getType()).collect(toList());
-
-    if (upperBounds.isEmpty())
-      upperBounds.add(Object.class);
-
-    return upperBounds.stream();
-  }
-
-  /**
-   * Determine the raw types of a given type, accounting for inference variables
-   * which may have instantiations or upper bounds within the context of this
-   * resolver.
-   * 
-   * @return the raw types of the type represented by this TypeToken
-   */
-  public Stream<Class<?>> getErasedUpperBounds() {
-    return getUpperBounds().map(Types::getErasedType);
+    return (TypeToken<? super T>) forType(Types.getErasedType(type));
   }
 
   @Override
   public String toString() {
-    return type.toString();
+    return type.getTypeName();
   }
 
   /**
@@ -218,95 +177,6 @@ public class TypeToken<T> {
    */
   public Type getType() {
     return type;
-  }
-
-  /**
-   * Is the type a primitive type as per the Java type system.
-   * 
-   * @return True if the type is primitive, false otherwise.
-   */
-  public boolean isPrimitive() {
-    return Types.isPrimitive(getType());
-  }
-
-  /**
-   * Is the type a wrapper for a primitive type as per the Java type system.
-   * 
-   * @return True if the type is a primitive wrapper, false otherwise.
-   */
-  public boolean isPrimitiveWrapper() {
-    return Types.isPrimitiveWrapper(getType());
-  }
-
-  /**
-   * If this TypeToken is a primitive type, determine the wrapped primitive type.
-   * 
-   * @return The wrapper type of the primitive type this TypeToken represents,
-   *         otherwise this TypeToken itself.
-   */
-  @SuppressWarnings("unchecked")
-  public TypeToken<T> wrapPrimitive() {
-    if (isPrimitive())
-      return (TypeToken<T>) forType(Types.wrapPrimitive(getErasedType()));
-    else
-      return this;
-  }
-
-  /**
-   * If this TypeToken is a wrapper of a primitive type, determine the unwrapped
-   * primitive type.
-   * 
-   * @return The primitive type wrapped by this TypeToken, otherwise this
-   *         TypeToken itself.
-   */
-  @SuppressWarnings("unchecked")
-  public TypeToken<T> unwrapPrimitive() {
-    if (isPrimitiveWrapper())
-      return (TypeToken<T>) forType(Types.unwrapPrimitive(getErasedType()));
-    else
-      return this;
-  }
-
-  /**
-   * If the declaration is raw, parameterize it with its own type parameters,
-   * otherwise return the declaration itself.
-   * 
-   * @return the parameterized version of the declaration where applicable, else
-   *         the unmodified declaration
-   */
-  @SuppressWarnings("unchecked")
-  public TypeToken<? extends T> parameterize() {
-    if (isRaw()) {
-      return (TypeToken<T>) forType(ParameterizedTypes.parameterize(getErasedType()));
-    } else {
-      return this;
-    }
-  }
-
-  /**
-   * @return true if the declaration represents a raw type or invocation, false
-   *         otherwise
-   */
-  public boolean isRaw() {
-    return getType() instanceof Class<?> && ((Class<?>) getType()).getTypeParameters().length > 0;
-  }
-
-  /**
-   * @return true if the declaration is generic, false otherwise
-   */
-  public boolean isGeneric() {
-    return isRaw() || getType() instanceof ParameterizedType;
-  }
-
-  /**
-   * @return the count of the generic type parameters of the declaration.
-   */
-  public int getTypeParameterCount() {
-    if (getType() instanceof ParameterizedType) {
-      return ((ParameterizedType) getType()).getActualTypeArguments().length;
-    } else {
-      return 0;
-    }
   }
 
   /**
@@ -338,56 +208,6 @@ public class TypeToken<T> {
     } else {
       return Stream.empty();
     }
-  }
-
-  /**
-   * Derive a new {@link TypeToken} instance from this, with types substituted
-   * according to the given arguments.
-   * 
-   * <p>
-   * More specifically, each of the given arguments represents a type variable and
-   * an instantiation for that type variable. Occurrences of those type variables
-   * in the declaration will be substituted for their instantiations in the
-   * derived declaration.
-   * 
-   * <p>
-   * The substitution will only succeed if it results in a valid parameterization
-   * of the declaration.
-   * 
-   * <p>
-   * For example, the following method could be used to derive instances of
-   * TypeToken over different parameterizations of {@code List<?>} at runtime.
-   * 
-   * <pre>
-   * <code>
-   * public TypeToken&lt;List&lt;T&gt;&gt; getListType(TypeToken&lt;T&gt; elementType)} {
-   *   return new TypeToken&lt;T&gt;()} {}.withTypeArguments(new TypeParameter&lt;T&gt;() {}.as(elementType));
-   * }
-   * </code>
-   * </pre>
-   * 
-   * @param arguments
-   *          the type variable instantiations
-   * @return a new derived {@link TypeToken} instance with the given instantiation
-   *         substituted for the given type variable
-   */
-  public TypeToken<T> withTypeArguments(Collection<? extends TypeArgument<?>> arguments) {
-    Map<TypeVariable<?>, Type> argumentMap = arguments
-        .stream()
-        .collect(toMap(a -> a.getParameter().getType(), TypeArgument::getType));
-
-    return new TypeToken<>(new TypeSubstitution(argumentMap).resolve(getType()));
-  }
-
-  public TypeToken<T> withTypeArguments(
-      Function<? super TypeVariable<?>, ? extends Type> arguments) {
-    Map<TypeVariable<?>, Type> argumentMap = getTypeParameters()
-        .map(TypeParameter::getType)
-        .map(p -> new SimpleEntry<>(p, arguments.apply(p)))
-        .filter(e -> e.getValue() != null)
-        .collect(entriesToMap());
-
-    return new TypeToken<>(new TypeSubstitution(argumentMap).resolve(getType()));
   }
 
   /**
@@ -441,59 +261,8 @@ public class TypeToken<T> {
    */
   @SuppressWarnings({ "unchecked", "javadoc" })
   public TypeToken<? super T> resolveSupertype(Class<?> superclass) {
-    TypeToken<?> superType = forType(new TypeHierarchy(getType()).resolveSupertype(superclass));
+    TypeToken<?> superType = forType(Types.resolveSupertype(getType(), superclass));
     return (TypeToken<? super T>) superType;
-  }
-
-  /**
-   * As @see {@link #withAllTypeArguments(List)}, but only providing arguments for
-   * the parameters occurring directly on the declaration.
-   */
-  public TypeToken<T> withTypeArguments(List<Type> typeArguments) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /**
-   * Derive a new {@link TypeToken} instance with the given type argument
-   * parameterization.
-   * 
-   * <p>
-   * The types in the given list correspond, in order, to the
-   * {@link #getTypeParameters() type parameters} of this declaration. The current
-   * parameterization of the declaration is substituted for that given.
-   * 
-   * <p>
-   * This behavior is different from {@link #withTypeArguments(Collection)}, which
-   * performs a substitution for arbitrary type variables rather than
-   * re-instantiating every parameter on the declaration.
-   * 
-   * @param typeArguments
-   *          a list of arguments for each generic type parameter of the
-   *          underlying declaration
-   * @return a new derived {@link TypeToken} instance with the given
-   *         instantiations substituted for each generic type parameter, in order
-   */
-  public TypeToken<T> withAllTypeArguments(List<Type> typeArguments) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public TypeToken<T> withTypeArguments(Type... typeArguments) {
-    return withTypeArguments(asList(typeArguments));
-  }
-
-  public TypeToken<T> withAllTypeArguments(Type... typeArguments) {
-    return withAllTypeArguments(asList(typeArguments));
-  }
-
-  /**
-   * @return the count of all generic type parameters of the declaration and any
-   *         enclosing declarations
-   */
-  public int getAllTypeParameterCount() {
-    return getTypeParameterCount()
-        + getOwningType().map(TypeToken::getAllTypeParameterCount).orElse(0);
   }
 
   /**
@@ -512,13 +281,52 @@ public class TypeToken<T> {
    *         their inference variables if not yet instantiated.
    */
   public Stream<TypeArgument<?>> getAllTypeArguments() {
-    if (isRaw())
+    if (Types.isErasure(type))
       return Stream.empty();
     else
       return Stream
           .concat(
               getTypeArguments(),
               getOwningType().map(TypeToken::getAllTypeArguments).orElse(empty()));
+  }
+
+  /**
+   * Derive a new {@link TypeToken} instance from this, with types substituted
+   * according to the given arguments.
+   * 
+   * <p>
+   * More specifically, each of the given arguments represents a type variable and
+   * an instantiation for that type variable. Occurrences of those type variables
+   * in the declaration will be substituted for their instantiations in the
+   * derived declaration.
+   * 
+   * <p>
+   * The substitution will only succeed if it results in a valid parameterization
+   * of the declaration.
+   * 
+   * <p>
+   * For example, the following method could be used to derive instances of
+   * TypeToken over different parameterizations of {@code List<?>} at runtime.
+   * 
+   * <pre>
+   * <code>
+   * public TypeToken&lt;List&lt;T&gt;&gt; getListType(TypeToken&lt;T&gt; elementType)} {
+   *   return new TypeToken&lt;T&gt;()} {}.withTypeArguments(new TypeParameter&lt;T&gt;() {}.as(elementType));
+   * }
+   * </code>
+   * </pre>
+   * 
+   * @param arguments
+   *          the type variable instantiations
+   * @return a new derived {@link TypeToken} instance with the given instantiation
+   *         substituted for the given type variable
+   */
+  public TypeToken<T> withTypeArguments(Collection<? extends TypeArgument<?>> arguments) {
+    Map<TypeVariable<?>, Type> argumentMap = arguments
+        .stream()
+        .collect(toMap(a -> a.getParameter().getType(), TypeArgument::getType));
+
+    return new TypeToken<>(new TypeSubstitution(argumentMap).resolve(getType()));
   }
 
   /**
@@ -538,7 +346,7 @@ public class TypeToken<T> {
    * </pre>
    * 
    * <p>
-   * This behavior is different from {@link #withTypeArguments(List)}, which
+   * This behavior is different from {@link #withTypeArguments(Collection)}, which
    * re-instantiates every parameter on the declaration rather than performing a
    * substitution for arbitrary type variables.
    * 
@@ -568,16 +376,8 @@ public class TypeToken<T> {
         .findAny()
         .map(p -> (TypeArgument<U>) p)
         .orElseThrow(
-            () -> new ReflectionException(
-                REFLECTION_PROPERTIES.cannotResolveTypeVariable(parameter.getType(), this)));
-  }
-
-  /**
-   * @see #resolveTypeArgument(TypeParameter)
-   */
-  @SuppressWarnings("javadoc")
-  public Type resolveTypeArgument(TypeVariable<?> parameter) {
-    return resolveTypeArgument(forTypeVariable(parameter)).getType();
+            () -> new IllegalArgumentException(
+                "Cannot find parameter " + parameter.getType() + " on type " + type));
   }
 
   public boolean isAssignableTo(Type type) {
