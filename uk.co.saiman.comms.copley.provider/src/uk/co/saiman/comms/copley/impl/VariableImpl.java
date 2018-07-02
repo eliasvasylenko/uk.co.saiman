@@ -90,7 +90,7 @@ class VariableImpl<U> implements Variable<U> {
 
     byte[] inputBytes = controller.executeCopleyCommand(GET_VARIABLE, outputBytes);
 
-    return controller.getConverter(variableClass).fromBytes(inputBytes);
+    return controller.getConverter(variableClass).toObject(inputBytes);
   }
 
   public void set(U output) {

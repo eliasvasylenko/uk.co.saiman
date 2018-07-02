@@ -226,7 +226,7 @@ public class ParameterizedTypes {
    * @return A {@link ParameterizedType} instance over the given class,
    *         parameterized with the given type arguments.
    */
-  public static ParameterizedType parameterizeUnchecked(
+  public static ParameterizedType parameterize(
       Type ownerType,
       Class<?> rawType,
       List<Type> typeArguments) {
@@ -238,8 +238,8 @@ public class ParameterizedTypes {
    * arguments for consistency.
    */
   @SuppressWarnings("javadoc")
-  public static ParameterizedType parameterizeUnchecked(Class<?> rawType, Type... typeArguments) {
-    return parameterizeUnchecked(rawType, Arrays.asList(typeArguments));
+  public static ParameterizedType parameterize(Class<?> rawType, Type... typeArguments) {
+    return parameterize(rawType, Arrays.asList(typeArguments));
   }
 
   /**
@@ -247,9 +247,7 @@ public class ParameterizedTypes {
    * arguments for consistency.
    */
   @SuppressWarnings("javadoc")
-  public static ParameterizedType parameterizeUnchecked(
-      Class<?> rawType,
-      List<Type> typeArguments) {
+  public static ParameterizedType parameterize(Class<?> rawType, List<Type> typeArguments) {
     List<TypeVariable<?>> parameters = getAllTypeParameters(rawType).collect(Collectors.toList());
 
     if (parameters.size() != typeArguments.size()) {
@@ -260,12 +258,10 @@ public class ParameterizedTypes {
               + asList(rawType.getTypeParameters()));
     }
 
-    return parameterizeUncheckedImpl(rawType, typeArguments);
+    return parameterizeImpl(rawType, typeArguments);
   }
 
-  private static ParameterizedType parameterizeUncheckedImpl(
-      Class<?> rawType,
-      List<Type> typeArguments) {
+  private static ParameterizedType parameterizeImpl(Class<?> rawType, List<Type> typeArguments) {
     int totalArgumentCount = typeArguments.size();
     int parametersOnTypeCount = rawType.getTypeParameters().length;
     int parametersOnOwnerCount = totalArgumentCount - parametersOnTypeCount;
@@ -273,14 +269,12 @@ public class ParameterizedTypes {
     Type owner = rawType.getEnclosingClass();
 
     if (totalArgumentCount > parametersOnTypeCount) {
-      owner = parameterizeUncheckedImpl(
-          (Class<?>) owner,
-          typeArguments.subList(0, parametersOnOwnerCount));
+      owner = parameterizeImpl((Class<?>) owner, typeArguments.subList(0, parametersOnOwnerCount));
 
       typeArguments = typeArguments.subList(parametersOnOwnerCount, totalArgumentCount);
     }
 
-    return parameterizeUnchecked(owner, rawType, typeArguments);
+    return parameterize(owner, rawType, typeArguments);
   }
 
   /**
@@ -288,13 +282,13 @@ public class ParameterizedTypes {
    * arguments for consistency.
    */
   @SuppressWarnings("javadoc")
-  public static <T> ParameterizedType parameterizeUnchecked(
+  public static <T> ParameterizedType parameterize(
       Class<T> rawType,
       Function<? super TypeVariable<?>, ? extends Type> typeArguments) {
-    return (ParameterizedType) parameterizeUncheckedImpl(rawType, typeArguments);
+    return (ParameterizedType) parameterizeImpl(rawType, typeArguments);
   }
 
-  private static <T> Type parameterizeUncheckedImpl(
+  private static <T> Type parameterizeImpl(
       Class<T> rawType,
       Function<? super TypeVariable<?>, ? extends Type> typeArguments) {
     Class<?> enclosing = rawType.getEnclosingClass();
@@ -302,7 +296,7 @@ public class ParameterizedTypes {
     if (enclosing == null || Types.isStatic(rawType)) {
       ownerType = enclosing;
     } else {
-      ownerType = parameterizeUncheckedImpl(enclosing, typeArguments);
+      ownerType = parameterizeImpl(enclosing, typeArguments);
     }
 
     if ((ownerType == null || ownerType instanceof Class)
@@ -323,69 +317,7 @@ public class ParameterizedTypes {
    * @return A {@link ParameterizedType} instance over the given class.
    */
   public static ParameterizedType parameterize(Class<?> rawType) {
-    return parameterizeUnchecked(rawType, i -> null);
-  }
-
-  /**
-   * Derive an instance of {@link ParameterizedType} from a raw {@link Class}
-   * using the given generic type arguments. Type parameters with no provided
-   * argument will be parameterized with the type variables themselves.
-   * 
-   * @param rawType
-   *          A raw {@link Class} from which we wish to determine a
-   *          {@link ParameterizedType}.
-   * @param typeArguments
-   *          A mapping of generic type variables to arguments.
-   * @return A {@link ParameterizedType} instance over the given class,
-   *         parameterized with the given type arguments.
-   */
-  public static ParameterizedType parameterize(
-      Class<?> rawType,
-      Function<? super TypeVariable<?>, ? extends Type> typeArguments) {
-    return validate(parameterizeUnchecked(rawType, typeArguments));
-  }
-
-  /**
-   * Derive an instance of {@link ParameterizedType} from a raw {@link Class}
-   * using the given generic type arguments, in the order given.
-   * 
-   * @param rawType
-   *          A raw {@link Class} from which we wish to determine a
-   *          {@link ParameterizedType}. The raw type must not have a non
-   *          statically enclosing type which is itself generic.
-   * @param typeArguments
-   *          A list of {@link Type}s to substitute as type arguments for the
-   *          given generic class. There should be exactly as many type arguments
-   *          as there are type parameters for the given class.
-   * @return A {@link ParameterizedType} instance over the given class,
-   *         parameterized with the given type arguments, in order
-   */
-  public static ParameterizedType parameterize(Class<?> rawType, Type... typeArguments) {
-    return parameterize(rawType, Arrays.asList(typeArguments));
-  }
-
-  /**
-   * Derive an instance of {@link ParameterizedType} from a raw {@link Class}
-   * using the given generic type arguments, in the order given.
-   * 
-   * @param rawType
-   *          A raw {@link Class} from which we wish to determine a
-   *          {@link ParameterizedType}. The raw type must not have a non
-   *          statically enclosing type which is itself generic.
-   * @param typeArguments
-   *          A list of {@link Type}s to substitute as type arguments for the
-   *          given generic class. There should be exactly as many type arguments
-   *          as there are type parameters for the given class.
-   * @return A {@link ParameterizedType} instance over the given class,
-   *         parameterized with the given type arguments, in order
-   */
-  public static ParameterizedType parameterize(Class<?> rawType, List<Type> typeArguments) {
-    return validate(parameterizeUnchecked(rawType, typeArguments));
-  }
-
-  protected static ParameterizedType validate(ParameterizedType type) {
-    // TODO validation of ParameterizedTypeImpl parameters
-    return type;
+    return parameterize(rawType, i -> null);
   }
 
   private static List<Type> argumentsForClass(

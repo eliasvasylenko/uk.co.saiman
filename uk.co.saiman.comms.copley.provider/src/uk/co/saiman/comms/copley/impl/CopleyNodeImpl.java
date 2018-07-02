@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import uk.co.saiman.bytes.ByteConverter;
+import uk.co.saiman.bytes.conversion.ByteConverter;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyNode;

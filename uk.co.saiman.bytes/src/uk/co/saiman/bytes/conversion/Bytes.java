@@ -25,12 +25,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.conversion;
 
-public interface ByteConverter<T> {
-	T create();
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.TYPE_USE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-	T fromBytes(byte[] bytes);
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-	byte[] toBytes(T object);
+/**
+ * For annotating a {@link DTO DTO class} to specify the total number of bytes
+ * instances should be converter to and from.
+ * 
+ * @author Elias N Vasylenko
+ */
+@Convertible
+@Retention(RUNTIME)
+@Target({ TYPE_USE, TYPE })
+public @interface Bytes {
+  int value();
 }

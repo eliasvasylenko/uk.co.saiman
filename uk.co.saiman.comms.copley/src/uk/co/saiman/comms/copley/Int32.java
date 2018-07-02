@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.comms.copley;
 
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class Int32 {
   public Int32() {}
@@ -37,7 +37,7 @@ public class Int32 {
     this.value = value;
   }
 
-  @Bit(0)
-  @Bits(value = 32)
+  @Offset(0)
+  @Size(value = 32)
   public int value;
 }

@@ -25,36 +25,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.conversion;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+import static java.lang.annotation.ElementType.TYPE_USE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-public class ByteShape {
-	private final List<String> bits;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-	public ByteShape(
-			String bit0,
-			String bit1,
-			String bit2,
-			String bit3,
-			String bit4,
-			String bit5,
-			String bit6,
-			String bit7) {
-		bits = new ArrayList<>(8);
-		bits.add(bit0);
-		bits.add(bit1);
-		bits.add(bit2);
-		bits.add(bit3);
-		bits.add(bit4);
-		bits.add(bit5);
-		bits.add(bit6);
-		bits.add(bit7);
-	}
-
-	public Stream<String> getBits() {
-		return bits.stream();
-	}
+/**
+ * A byte conversion
+ * 
+ * @author Elias N Vasylenko
+ */
+@Convertible
+@Retention(RUNTIME)
+@Target({ TYPE_USE, ElementType.TYPE })
+public @interface Size {
+  /**
+   * The bit size of the data. If unspecified, the default is given by the
+   * converter class used.
+   * 
+   * @return the size of the data, or a negative number to denote unspecified.
+   */
+  int value() default -1;
 }

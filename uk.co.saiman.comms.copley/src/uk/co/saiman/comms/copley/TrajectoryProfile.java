@@ -27,27 +27,9 @@
  */
 package uk.co.saiman.comms.copley;
 
-import java.lang.reflect.Type;
-
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.BitConverter;
-import uk.co.saiman.bytes.BitConverterFactory;
-import uk.co.saiman.bytes.Bits;
-import uk.co.saiman.bytes.PrimitiveBitConverters;
-
+@TrajectoryProfileByteConverter.Marker
 public class TrajectoryProfile {
-	@Bit(0)
-	@Bits(value = 3, converter = TrajectoryProfileModeConverter.class)
-	public TrajectoryProfileMode mode;
+  public TrajectoryProfileMode mode;
 
-	@Bit(8)
-	public boolean relative;
-}
-
-class TrajectoryProfileModeConverter implements BitConverterFactory {
-	@Override
-	public BitConverter<TrajectoryProfileMode> getBitConverter(Type type) {
-		return new PrimitiveBitConverters.Ints()
-				.map(TrajectoryProfileMode::forCode, TrajectoryProfileMode::getCode);
-	}
+  public boolean relative;
 }

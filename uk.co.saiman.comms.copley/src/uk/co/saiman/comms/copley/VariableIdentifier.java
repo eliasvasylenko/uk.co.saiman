@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.comms.copley;
 
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class VariableIdentifier {
   public VariableIdentifier() {}
@@ -39,13 +39,13 @@ public class VariableIdentifier {
     this.bank = bank.getBit();
   }
 
-  @Bit(0)
+  @Offset(0)
   public byte variableID;
 
-  @Bit(12)
+  @Offset(12)
   public boolean bank;
 
-  @Bit(13)
-  @Bits(value = 3)
+  @Offset(13)
+  @Size(value = 3)
   public byte axis;
 }

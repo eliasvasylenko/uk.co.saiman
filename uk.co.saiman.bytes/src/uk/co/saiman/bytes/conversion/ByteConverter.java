@@ -25,54 +25,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.conversion;
+
+import static uk.co.saiman.bytes.BitArray.fromByteArray;
 
 import java.util.function.Function;
 
-public interface BitConverter<T> {
-	int getDefaultBits();
+import uk.co.saiman.bytes.BitArray;
 
-	BitArray toBits(T object, int bits);
+public interface ByteConverter<T> {
+  BitArray toBits(T object);
 
-	T toObject(BitArray bits);
+  default byte[] toBytes(T object) {
+    return toBits(object).toByteArray();
+  }
 
-	default <U> BitConverter<U> map(Function<T, U> toObject, Function<U, T> toBits) {
-		BitConverter<T> base = BitConverter.this;
-		return new BitConverter<U>() {
-			@Override
-			public int getDefaultBits() {
-				return base.getDefaultBits();
-			}
+  T toObject(BitArray bits);
 
-			@Override
-			public BitArray toBits(U object, int bits) {
-				return base.toBits(toBits.apply(object), bits);
-			}
+  default T toObject(byte[] bytes) {
+    return toObject(fromByteArray(bytes));
+  }
 
-			@Override
-			public U toObject(BitArray bits) {
-				return toObject.apply(base.toObject(bits));
-			}
-		};
-	}
+  static <T> ByteConverter<T> byteConverter(
+      Class<T> type,
+      Function<T, BitArray> toBits,
+      Function<BitArray, T> toObject) {
+    return new ByteConverter<T>() {
+      @Override
+      public BitArray toBits(T object) {
+        return toBits.apply(object);
+      }
 
-	default BitConverter<T> withDefaultBits(int bits) {
-		BitConverter<T> base = BitConverter.this;
-		return new BitConverter<T>() {
-			@Override
-			public int getDefaultBits() {
-				return bits;
-			}
+      @Override
+      public T toObject(BitArray bits) {
+        return toObject.apply(bits);
+      }
+    };
+  }
 
-			@Override
-			public BitArray toBits(T object, int bits) {
-				return base.toBits(object, bits);
-			}
+  default <U> ByteConverter<U> map(Function<T, U> toObject, Function<U, T> toBits) {
+    ByteConverter<T> base = ByteConverter.this;
+    return new ByteConverter<U>() {
+      @Override
+      public BitArray toBits(U object) {
+        return base.toBits(toBits.apply(object));
+      }
 
-			@Override
-			public T toObject(BitArray bits) {
-				return base.toObject(bits);
-			}
-		};
-	}
+      @Override
+      public U toObject(BitArray bits) {
+        return toObject.apply(base.toObject(bits));
+      }
+    };
+  }
 }

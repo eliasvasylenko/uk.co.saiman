@@ -27,48 +27,55 @@
  */
 package uk.co.saiman.bytes;
 
-import static java.nio.ByteBuffer.allocate;
 import static uk.co.saiman.bytes.ByteBuffers.toPrefixedHexString;
+import static uk.co.saiman.bytes.Endianness.BIG_ENDIAN;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
- * TODO flatten into long array like BitSet. Shame the API for that is so awful
- * and it doesn't understand size.
- * 
- * In all conversion operations, bit 0 represents the least significant bit and
- * all representations are big endian with both bytes and bits.
+ * A bit array has no intrinsic notion of endianness. Endianness is a component
+ * of the <em>interpretation</em> of the binary data, and a bit array is simply
+ * an ordered sequence of bits with no further semantics.
+ * <p>
+ * For the purposes of discussion, bit ordering is notionally held to start on
+ * the "left" and end on the "right". That is to say, the address index of zero
+ * is referred to as the leftmost bit.
  * 
  * @author Elias N Vasylenko
  */
 public class BitArray {
-  byte[] bytes;
-  int length;
+  private static final long FILLED_LONG = -1L;
+
+  private final long[] bits;
+  private final int length;
 
   /**
-   * Create a bit array of the given length, initialized with 0 fill
+   * Create a big-endian bit array of the given length, initialized with 0 fill.
    * 
    * @param length
    *          the number of bits
    */
   public BitArray(int length) {
-    this.bytes = new byte[minimumContainingBytes(length)];
+    this.bits = new long[minimumContainingUnits(length, Long.SIZE)];
     this.length = length;
   }
 
-  protected BitArray(byte[] bytes) {
-    this.bytes = Arrays.copyOf(bytes, bytes.length);
-    this.length = bytes.length * Byte.SIZE;
+  protected BitArray(long[] bits, int length) {
+    this.bits = bits;
+    this.length = length;
   }
 
-  protected BitArray(BitArray base) {
-    this.bytes = base.bytes;
-    this.length = base.length;
+  void clearTail() {
+    int bitInLastLong = ((length + Long.SIZE - 1) % Long.SIZE) + 1;
+    for (int i = bitInLastLong; i < Long.SIZE; i++) {
+      bits[bits.length - 1] &= ~getLongMask(i);
+    }
   }
 
-  int minimumContainingBytes(int bits) {
-    return bits / Byte.SIZE + ((bits % Byte.SIZE > 0) ? 1 : 0);
+  static int minimumContainingUnits(int bits, int unitSize) {
+    return bits / unitSize + ((bits % unitSize > 0) ? 1 : 0);
   }
 
   @Override
@@ -83,12 +90,16 @@ public class BitArray {
     if (!(obj instanceof BitArray))
       return false;
     BitArray that = (BitArray) obj;
-    return Arrays.equals(bytes, that.bytes) && length == that.length;
+    return Arrays.equals(this.bits, that.bits) && this.length == that.length;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.hashCode(bytes) ^ length;
+    return Arrays.hashCode(bits) ^ length;
+  }
+
+  long[] getBits() {
+    return Arrays.copyOf(bits, bits.length);
   }
 
   /**
@@ -98,35 +109,34 @@ public class BitArray {
     return length;
   }
 
-  private int getByteIndex(int index) {
-    return bytes.length - 1 - index / Byte.SIZE;
+  public boolean isEmpty() {
+    return length == 0;
   }
 
-  private int getBitMask(int index) {
-    return 0x01 << (index % Byte.SIZE);
+  int getLongIndex(int index) {
+    return index / Long.SIZE;
   }
 
-  private void validateIndex(int index) {
+  long getLongMask(int index) {
+    return 0x01L << (Long.SIZE - 1 - index % Long.SIZE);
+  }
+
+  void validateIndex(int index) {
     if (index < 0 || index >= length)
       throw new IndexOutOfBoundsException(Integer.toString(index));
   }
 
-  /**
-   * @param index
-   *          the bit index, where 0 is the least significant bit
-   * @return the value of the bit at the given index
-   */
   public boolean get(int index) {
     validateIndex(index);
-    return (bytes[getByteIndex(index)] & getBitMask(index)) > 0;
+    return (bits[getLongIndex(index)] & getLongMask(index)) != 0;
   }
 
   protected BitArray set(int index, boolean value) {
     validateIndex(index);
     if (value)
-      bytes[getByteIndex(index)] |= getBitMask(index);
+      bits[getLongIndex(index)] |= getLongMask(index);
     else
-      bytes[getByteIndex(index)] &= ~getBitMask(index);
+      bits[getLongIndex(index)] &= ~getLongMask(index);
     return this;
   }
 
@@ -135,65 +145,55 @@ public class BitArray {
    * to the given value for the given bit index.
    * 
    * @param index
-   *          the bit index, where 0 is the least significant bit
+   *          the bit index
    * @param value
    *          the value for the bit in the derived array
    * @return the derived bit array
    */
   public BitArray with(int index, boolean value) {
-    return new BitArray(this).set(index, value);
+    return new BitArray(bits, length).set(index, value);
   }
 
   /**
-   * Derive a new bit array of the given length.
-   * <p>
-   * If the given length is positive, changes are made by truncating from or
-   * appending to the end of the most significant bit. If the given length is
-   * negative, changes are made by truncating from or prepending to the least
-   * significant bit.
+   * Derive a bit array from the receiver, whose contents are modified according
+   * to the given value for the given bit index.
+   * 
+   * @param from
+   *          the start bit index
+   * @param to
+   *          the end bit index
+   * @param value
+   *          the value for the bit in the derived array
+   * @return the derived bit array
+   */
+  public BitArray with(int from, int to, boolean value) {
+    BitArray array = new BitArray(bits, length);
+    for (int i = from; i < to; i++) {
+      array.set(i, value);
+    }
+    return array;
+  }
+
+  /**
+   * Derive a new bit array of the given length. Changes are made by truncating
+   * from or appending to the end of the sequence.
    * 
    * @param length
    *          the new length
    * @return a derived bit array
    */
   public BitArray resize(int length) {
-    boolean positive = length > 0;
-    length = positive ? length : -length;
-    int difference = length - length();
+    int longs = minimumContainingUnits(length, Long.SIZE);
+    BitArray resized = new BitArray(Arrays.copyOf(bits, longs), length);
 
-    if (difference > 0) {
-      return positive ? append(new BitArray(difference)) : prepend(new BitArray(difference));
+    resized.clearTail();
 
-    } else {
-      BitArray tail = new BitArray(length);
-      difference = positive ? 0 : -difference;
-
-      for (int i = 0; i < length; i++) {
-        tail.set(i, get(i + difference));
-      }
-
-      return tail;
-    }
-  }
-
-  /**
-   * @param size
-   *          the
-   * @return a derived bit array, truncated or 0 filled to the new length
-   */
-  public BitArray trim(int size) {
-    if (size < 0)
-      return resize(-length() - size);
-    else
-      return resize(length() - size);
+    return resized;
   }
 
   public BitArray append(BitArray bits) {
-    BitArray appended = new BitArray(length() + bits.length());
+    BitArray appended = resize(length() + bits.length());
 
-    for (int i = 0; i < length(); i++) {
-      appended.set(i, get(i));
-    }
     for (int i = 0; i < bits.length(); i++) {
       appended.set(i + length(), bits.get(i));
     }
@@ -205,8 +205,22 @@ public class BitArray {
     return bits.append(this);
   }
 
+  public BitArray slice(int from, int to) {
+    BitArray sliced = new BitArray(to - from);
+
+    int fromBounded = from > 0 ? from : 0;
+    int toBounded = to < length ? to : length;
+
+    for (int i = fromBounded; i < toBounded; i++) {
+      sliced.set(i - from, get(i));
+    }
+
+    return sliced;
+  }
+
   public BitArray splice(int at, BitArray bitArray) {
-    BitArray spliced = new BitArray(this);
+    int length = Math.max(length(), at + bitArray.length());
+    BitArray spliced = new BitArray(length);
 
     for (int i = 0; i < bitArray.length(); i++) {
       spliced.set(i + at, bitArray.get(i));
@@ -217,11 +231,8 @@ public class BitArray {
 
   public BitArray remove(int from, int to) {
     int range = to - from;
-    BitArray removed = new BitArray(length() - range);
+    BitArray removed = resize(length() - range);
 
-    for (int i = 0; i < from; i++) {
-      removed.set(i, get(i));
-    }
     for (int i = to; i < length(); i++) {
       removed.set(i - range, get(i));
     }
@@ -230,11 +241,8 @@ public class BitArray {
   }
 
   public BitArray insert(int at, BitArray bitArray) {
-    BitArray inserted = new BitArray(length() + bitArray.length());
+    BitArray inserted = resize(length() + bitArray.length());
 
-    for (int i = 0; i < at; i++) {
-      inserted.set(i, get(i));
-    }
     for (int i = 0; i < bitArray.length(); i++) {
       inserted.set(i + at, bitArray.get(i));
     }
@@ -265,14 +273,6 @@ public class BitArray {
     return inverted;
   }
 
-  public static BitArray fromByteArray(byte[] bytes) {
-    return new BitArray(bytes);
-  }
-
-  public byte[] toByteArray() {
-    return Arrays.copyOf(bytes, bytes.length);
-  }
-
   public static BitArray fromByteBuffer(ByteBuffer bytes) {
     byte[] array = new byte[bytes.remaining()];
     bytes.get(array);
@@ -280,35 +280,131 @@ public class BitArray {
   }
 
   public ByteBuffer toByteBuffer() {
-    return ByteBuffer.wrap(Arrays.copyOf(bytes, bytes.length));
+    byte[] array = toByteArray();
+    return ByteBuffer.wrap(Arrays.copyOf(array, array.length));
+  }
+
+  /*
+   * Byte array:
+   */
+
+  public static BitArray fromByteArray(byte[] bytes) {
+    return fromByteArray(bytes, BIG_ENDIAN);
+  }
+
+  public static BitArray fromByteArray(byte[] bytes, Endianness endianness) {
+    BitArray bits = new BitArray(bytes.length * Byte.SIZE);
+
+    int bytesPerLong = Long.SIZE / Byte.SIZE;
+
+    for (int i = 0; i < bytes.length; i++) {
+      int longIndex = i / Long.SIZE;
+      int byteIndex = i % bytesPerLong;
+      bits.bits[i] = (byte) (bits.bits[longIndex] >> ((bytesPerLong - 1 - byteIndex) * Byte.SIZE));
+    }
+
+    throw new UnsupportedOperationException();
+  }
+
+  public byte[] toByteArray() {
+    return toByteArray(BIG_ENDIAN);
+  }
+
+  public byte[] toByteArray(Endianness endianness) {
+    BitArray bits = endianness == BIG_ENDIAN ? this : reverse();
+
+    byte[] bytes = new byte[minimumContainingUnits(bits.length(), Byte.SIZE)];
+
+    int bytesPerLong = (Long.SIZE / Byte.SIZE);
+
+    for (int i = 0; i < bytes.length; i++) {
+      int longIndex = i / Long.SIZE;
+      int byteIndex = i % bytesPerLong;
+      bytes[i] = (byte) (this.bits[longIndex] >> ((bytesPerLong - 1 - byteIndex) * Byte.SIZE));
+    }
+
+    return bytes;
   }
 
   public static BitArray fromByte(byte value) {
-    return fromByteArray(new byte[] { value });
+    return fromNumber(value, Byte.SIZE);
   }
 
   public byte toByte() {
-    return bytes.length == 0 ? 0 : bytes[bytes.length - 1];
+    return (byte) toNumber(Byte.SIZE);
   }
 
   public static BitArray fromShort(short value) {
-    ByteBuffer bytes = allocate(Short.BYTES).putShort(value);
-    bytes.flip();
-    return fromByteBuffer(bytes);
+    return fromNumber(value, Short.SIZE);
   }
 
   public short toShort() {
-    return resize(Short.SIZE).toByteBuffer().getShort();
+    return (short) toNumber(Short.SIZE);
   }
 
   public static BitArray fromInt(int value) {
-    ByteBuffer bytes = allocate(Integer.BYTES).putInt(value);
-    bytes.flip();
-    return fromByteBuffer(bytes);
+    return fromNumber(value, Integer.SIZE);
   }
 
   public int toInt() {
-    return resize(Integer.SIZE).toByteBuffer().getInt();
+    return (int) toNumber(Integer.SIZE);
+  }
+
+  public static BitArray fromLong(long value) {
+    return fromNumber(value, Long.SIZE);
+  }
+
+  public long toLong() {
+    return toNumber(Long.SIZE);
+  }
+
+  /*
+   * Number:
+   */
+
+  public static BitArray fromNumber(long value, int size) {
+    return fromNumber(value, size, BIG_ENDIAN);
+  }
+
+  public static BitArray fromNumber(long value, int size, Endianness endianness) {
+    long longValue = 0;
+
+    switch (endianness) {
+    case BIG_ENDIAN:
+      longValue = (long) value << (Long.SIZE - size);
+    case LITTLE_ENDIAN:
+      longValue = Long.reverse(value & (FILLED_LONG >> (Long.SIZE - size)));
+    }
+
+    return new BitArray(new long[] { longValue }, size);
+  }
+
+  public long toNumber(int size) {
+    return toNumber(size, BIG_ENDIAN);
+  }
+
+  public long toNumber(int size, Endianness endianness) {
+    if (!isEmpty()) {
+      switch (endianness) {
+      case BIG_ENDIAN:
+        return (bits[0] >> (Long.SIZE - size));
+      case LITTLE_ENDIAN:
+        return Long.reverse(bits[0]) & (FILLED_LONG >> (Long.SIZE - size));
+      }
+    }
+    throw new IndexOutOfBoundsException("No value available at " + 0);
+  }
+
+  /*
+   * Boolean:
+   */
+
+  public static BitArray fromBooleanArray(boolean[] array) {
+    BitArray bits = new BitArray(array.length);
+    for (int i = 0; i < array.length; i++) {
+      bits.set(i, array[i]);
+    }
+    return bits;
   }
 
   public boolean[] toBooleanArray() {
@@ -317,5 +413,10 @@ public class BitArray {
       array[i] = get(i);
     }
     return array;
+  }
+
+  public Stream<Boolean> stream() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

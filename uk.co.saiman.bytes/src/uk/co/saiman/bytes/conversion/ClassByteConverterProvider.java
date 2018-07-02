@@ -25,8 +25,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.conversion;
 
-public interface ByteConverters {
-	<T> ByteConverter<T> getConverter(Class<T> type);
+import java.lang.reflect.AnnotatedType;
+
+public abstract class ClassByteConverterProvider<T> implements ByteConverterProvider {
+  private final Class<T> type;
+
+  public ClassByteConverterProvider(Class<T> type) {
+    this.type = type;
+  }
+
+  @Override
+  public ByteConverter<?> getConverter(
+      AnnotatedType type,
+      ByteConversionAnnotations annotations,
+      ByteConverterService converters) {
+    if (this.type == type.getType()) {
+      return getClassConverter(type, annotations, converters);
+    }
+    return null;
+  }
+
+  public abstract ByteConverter<T> getClassConverter(
+      AnnotatedType type,
+      ByteConversionAnnotations annotations,
+      ByteConverterService converters);
 }

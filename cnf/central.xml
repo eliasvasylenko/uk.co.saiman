@@ -11,6 +11,14 @@
 	<packaging>pom</packaging>
 
 	<dependencies>
+		<!-- Native Interop -->
+
+		<dependency>
+			<groupId>com.github.jnr</groupId>
+			<artifactId>jnr-ffi</artifactId>
+			<version>2.1.8</version>
+		</dependency>
+
 		<!-- OSGi -->
 
 		<dependency>

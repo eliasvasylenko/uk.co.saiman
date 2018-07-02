@@ -25,42 +25,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.conversion;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * For annotating fields of a class representing a comms data packet. This
- * annotation declares the number of contiguous bits represented by the field,
- * and the class used to convert the field.
- * <p>
- * To specify the bit position of the field in the data packet, use the
- * {@link Bit} annotation.
+ * Apply to an array or collection type to indicate the data should be bound to
+ * and from a static number of elements.
  * 
  * @author Elias N Vasylenko
  */
+@Convertible
 @Retention(RUNTIME)
-@Target({ FIELD, METHOD })
-public @interface Bits {
-	/**
-	 * The bit size of the data. If unspecified, the default is given by the
-	 * converter class used.
-	 * 
-	 * @return the size of the data, or a negative number to denote unspecified.
-	 */
-	int value() default -1;
-
-	/**
-	 * The factory used to find a converter for the field. If unspecified, the
-	 * default is determined automatically according to the type of the field.
-	 * 
-	 * @return the factory to use, or {@link BitConverterFactory} to denote
-	 *         unspecified.
-	 */
-	Class<? extends BitConverterFactory> converter() default BitConverterFactory.class;
+@Target({ TYPE_USE, ElementType.TYPE })
+public @interface Elements {
+  int value();
 }

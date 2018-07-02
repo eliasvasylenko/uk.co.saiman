@@ -27,15 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class I2C {
-	@Bits(value = 4)
-	@Bit(value = 20)
+	@Size(value = 4)
+	@Offset(value = 20)
 	public byte command;
 
-	@Bits(value = 12)
-	@Bit(value = 4)
+	@Size(value = 12)
+	@Offset(value = 4)
 	public int value;
 }

@@ -27,69 +27,69 @@
  */
 package uk.co.saiman.comms.copley;
 
-import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.conversion.Offset;
 
 public class EventStatusRegister {
-	@Bit(0)
+	@Offset(0)
 	public boolean shortCircuitDetected;
-	@Bit(1)
+	@Offset(1)
 	public boolean driveOverTemperature;
-	@Bit(2)
+	@Offset(2)
 	public boolean overVoltage;
-	@Bit(3)
+	@Offset(3)
 	public boolean underVoltage;
-	@Bit(4)
+	@Offset(4)
 	public boolean motorTemperatureSensorActive;
-	@Bit(5)
+	@Offset(5)
 	public boolean encoderFeedbackError;
-	@Bit(6)
+	@Offset(6)
 	public boolean motorPhasingError;
-	@Bit(7)
+	@Offset(7)
 	public boolean currentOutputLimited;
-	@Bit(8)
+	@Offset(8)
 	public boolean voltageOutputLimited;
-	@Bit(9)
+	@Offset(9)
 	public boolean positiveLimitSwitchActive;
-	@Bit(10)
+	@Offset(10)
 	public boolean negativeLimitSwitchActive;
-	@Bit(11)
+	@Offset(11)
 	public boolean enableInputNotActive;
-	@Bit(12)
+	@Offset(12)
 	public boolean driveDisabledBySoftware;
-	@Bit(13)
+	@Offset(13)
 	public boolean attemptingMotorStop;
-	@Bit(14)
+	@Offset(14)
 	public boolean motorBrakeActivated;
-	@Bit(15)
+	@Offset(15)
 	public boolean pwmOutputsDisabled;
-	@Bit(16)
+	@Offset(16)
 	public boolean positiveSoftwareLimit;
-	@Bit(17)
+	@Offset(17)
 	public boolean negativeSoftwareLimit;
-	@Bit(18)
+	@Offset(18)
 	public boolean trackingError;
-	@Bit(19)
+	@Offset(19)
 	public boolean trackingWarning;
-	@Bit(20)
+	@Offset(20)
 	public boolean driveResetCondition;
-	@Bit(21)
+	@Offset(21)
 	public boolean positionValueOverflow;
-	@Bit(22)
+	@Offset(22)
 	public boolean driveFault;
-	@Bit(23)
+	@Offset(23)
 	public boolean velocityLimit;
-	@Bit(24)
+	@Offset(24)
 	public boolean accelerationLimit;
-	@Bit(25)
+	@Offset(25)
 	public boolean trackingErrorExceedsBounds;
-	@Bit(26)
+	@Offset(26)
 	public boolean homeSwitchActive;
-	@Bit(27)
+	@Offset(27)
 	public boolean motionActive;
-	@Bit(28)
+	@Offset(28)
 	public boolean velocityErrorExceedsBounds;
-	@Bit(29)
+	@Offset(29)
 	public boolean phaseUninitialized;
-	@Bit(30)
+	@Offset(30)
 	public boolean commandFault;
 }

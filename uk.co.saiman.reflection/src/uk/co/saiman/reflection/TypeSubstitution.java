@@ -30,7 +30,7 @@ package uk.co.saiman.reflection;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.reflection.ArrayTypes.arrayFromComponent;
-import static uk.co.saiman.reflection.ParameterizedTypes.parameterizeUnchecked;
+import static uk.co.saiman.reflection.ParameterizedTypes.parameterize;
 import static uk.co.saiman.reflection.WildcardTypes.wildcardExtending;
 import static uk.co.saiman.reflection.WildcardTypes.wildcardSuper;
 
@@ -267,7 +267,7 @@ public class TypeSubstitution {
       Type owner = resolve(type.getOwnerType(), changed);
 
       if (changed.get()) {
-        return parameterizeUnchecked(owner, (Class<?>) type.getRawType(), arguments);
+        return parameterize(owner, (Class<?>) type.getRawType(), arguments);
       } else {
         return type;
       }

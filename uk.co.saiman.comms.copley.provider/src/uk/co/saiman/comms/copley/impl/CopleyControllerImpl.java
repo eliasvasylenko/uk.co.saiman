@@ -55,7 +55,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.bytes.ByteConverters;
+import uk.co.saiman.bytes.conversion.ByteConverterService;
 import uk.co.saiman.comms.CommsChannel;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
@@ -88,7 +88,7 @@ public class CopleyControllerImpl extends SimpleCommsController implements Cople
   private CommsPort port;
 
   @Reference
-  private ByteConverters converters;
+  private ByteConverterService converters;
 
   private final Map<CopleyNodeImpl, ServiceRegistration<CopleyNode>> nodes = new LinkedHashMap<>();
   private final Map<CopleyAxis, ServiceRegistration<CopleyAxis>> axes = new LinkedHashMap<>();
@@ -185,7 +185,7 @@ public class CopleyControllerImpl extends SimpleCommsController implements Cople
     return nodes;
   }
 
-  ByteConverters getConverters() {
+  ByteConverterService getConverters() {
     return converters;
   }
 

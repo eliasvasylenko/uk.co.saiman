@@ -25,53 +25,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.impl;
 
-import static uk.co.saiman.bytes.BitArray.fromInt;
+import static uk.co.saiman.bytes.conversion.ByteConverter.byteConverter;
 import static uk.co.saiman.reflection.Types.getErasedType;
+import static uk.co.saiman.reflection.Types.unwrapPrimitive;
 
-import java.lang.reflect.Type;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedType;
 
 import org.osgi.service.component.annotations.Component;
 
+import uk.co.saiman.bytes.BitArray;
+import uk.co.saiman.bytes.conversion.ByteConversionAnnotations;
+import uk.co.saiman.bytes.conversion.ByteConverter;
+import uk.co.saiman.bytes.conversion.ByteConverterProvider;
+import uk.co.saiman.bytes.conversion.ByteConverterService;
+import uk.co.saiman.bytes.conversion.Size;
+
 @Component
-public class EnumBitConverters implements BitConverterFactory {
-	@SuppressWarnings("unchecked")
-	@Override
-	public BitConverter<?> getBitConverter(Type type) {
-		if (Enum.class.isAssignableFrom(getErasedType(type))) {
-			Class<? extends Enum<?>> enumType = (Class<? extends Enum<?>>) (Class<?>) type;
-			return new EnumBitConverter<>(enumType);
-		}
-		return null;
-	}
+public class BooleanByteConverters implements ByteConverterProvider {
+  @Override
+  public ByteConverter<?> getConverter(
+      AnnotatedType type,
+      ByteConversionAnnotations annotations,
+      ByteConverterService converters) {
+    Class<?> erasedType = getErasedType(type.getType());
 
-	class EnumBitConverter<T extends Enum<?>> implements BitConverter<T> {
-		private final Class<T> type;
+    int size = annotations.get(Size.class).map(Size::value).orElse(1);
 
-		public EnumBitConverter(Class<T> type) {
-			this.type = type;
-		}
+    if (boolean.class == unwrapPrimitive(erasedType)) {
+      return byteConverter(
+          boolean.class,
+          b -> new BitArray(size).with(0, size, b),
+          b -> b.stream().reduce((h, t) -> h || t).orElse(false));
+    }
 
-		private int log2(int number) {
-			if (number <= 0)
-				throw new IllegalArgumentException();
-			return 31 - Integer.numberOfLeadingZeros(number);
-		}
+    return null;
+  }
 
-		@Override
-		public int getDefaultBits() {
-			return log2(type.getEnumConstants().length);
-		}
-
-		@Override
-		public T toObject(BitArray bits) {
-			return type.getEnumConstants()[bits.toInt()];
-		}
-
-		@Override
-		public BitArray toBits(T object, int size) {
-			return fromInt(object.ordinal()).resize(size);
-		}
-	}
+  @Override
+  public boolean supportsAnnotation(Class<? extends Annotation> annotationType) {
+    return annotationType == Size.class;
+  }
 }

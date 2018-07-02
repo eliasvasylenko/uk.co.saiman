@@ -29,7 +29,7 @@
 @Export
 package uk.co.saiman.comms.copley.rest;
 
-import static uk.co.saiman.comms.copley.rest.CopleyRestServiceConstants.VERSION;
+import static uk.co.saiman.comms.copley.rest.CopleyRestConstants.VERSION;
 
 import org.osgi.annotation.bundle.Export;
 import org.osgi.annotation.versioning.Version;

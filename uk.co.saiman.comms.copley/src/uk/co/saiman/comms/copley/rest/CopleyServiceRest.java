@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.comms.copley.rest;
 
-import static uk.co.saiman.comms.copley.rest.CopleyRestServiceConstants.APPLICATION_COPLEY_JSON;
-import static uk.co.saiman.comms.copley.rest.CopleyRestServiceConstants.ENDPOINT;
+import static uk.co.saiman.comms.copley.rest.CopleyRestConstants.CONTENT_TYPE;
+import static uk.co.saiman.comms.copley.rest.CopleyRestConstants.ENDPOINT;
 
 import java.util.List;
 
@@ -37,8 +37,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-@Produces(APPLICATION_COPLEY_JSON)
-@Consumes(APPLICATION_COPLEY_JSON)
+@Produces(CONTENT_TYPE)
+@Consumes(CONTENT_TYPE)
 @Path(ENDPOINT)
 public interface CopleyServiceRest {
   @GET

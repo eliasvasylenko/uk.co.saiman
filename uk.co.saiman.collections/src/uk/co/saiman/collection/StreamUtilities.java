@@ -384,6 +384,15 @@ public class StreamUtilities {
     return stream.flatMap(s -> concat(of(s), flatMapRecursive(mapping.apply(s), mapping)));
   }
 
+  public static <T> Stream<T> flatMapRecursive(
+      Stream<? extends T> stream,
+      Function<? super T, ? extends Stream<? extends T>> mapping,
+      Predicate<? super T> filter) {
+    return stream
+        .filter(filter)
+        .flatMap(s -> concat(of(s), flatMapRecursive(mapping.apply(s), mapping, filter)));
+  }
+
   /**
    * Generate a stream which recursively traverses depth-first over the elements
    * of some nested data structure starting from its root.

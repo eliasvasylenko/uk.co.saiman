@@ -82,7 +82,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.bytes.ByteConverters;
+import uk.co.saiman.bytes.conversion.ByteConverterService;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.SimpleCommsController;
@@ -161,7 +161,7 @@ public class SaintControllerImpl extends SimpleCommsController implements SaintC
       return useChannel(channel -> {
         byte[] outputBytes = new byte[address.getBytes().length];
         byte[] inputBytes = executeSaintCommand(INPUT, address, channel, outputBytes);
-        return converters.getConverter(type).fromBytes(inputBytes);
+        return converters.getConverter(type).toObject(inputBytes);
       });
     }
 
@@ -179,7 +179,7 @@ public class SaintControllerImpl extends SimpleCommsController implements SaintC
   private CommsPort port;
 
   @Reference
-  private ByteConverters converters;
+  private ByteConverterService converters;
 
   private Value<LEDStatus> ledStatus;
   private Value<VacuumControl> vacuumStatus;

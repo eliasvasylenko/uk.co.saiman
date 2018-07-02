@@ -27,23 +27,23 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.conversion.Offset;
 
 public class MotorStatus {
-	@Bit(0)
+	@Offset(0)
 	public boolean lockMotorBreak;
-	@Bit(1)
+	@Offset(1)
 	public boolean lockMotorPhase;
-	@Bit(2)
+	@Offset(2)
 	public boolean lockMotorMode;
-	@Bit(3)
+	@Offset(3)
 	public boolean lockMotorEnable;
-	@Bit(4)
+	@Offset(4)
 	public boolean lockFullyOpen;
-	@Bit(5)
+	@Offset(5)
 	public boolean lockFullyClosed;
-	@Bit(6)
+	@Offset(6)
 	public boolean lockOpen;
-	@Bit(7)
+	@Offset(7)
 	public boolean lockClose;
 }

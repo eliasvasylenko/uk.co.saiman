@@ -27,11 +27,11 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class ADC {
-	@Bits(value = 16)
-	@Bit(value = 0)
+	@Size(value = 16)
+	@Offset(value = 0)
 	public int value;
 }

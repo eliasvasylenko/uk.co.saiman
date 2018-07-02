@@ -25,31 +25,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.conversion;
 
 import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * For annotating fields of a class representing a comms data packet. This
- * annotation declares the bit position of the data represented by the field.
- * <p>
- * To specify how the bits at this position are converted, use the {@link Bits}
- * annotation.
- * <p>
- * If the field represents an array, the annotation can be repeated for each
- * element in the array via {@link ElementBits}.
+ * For annotating fields of a {@link DTO DTO class} to specify the offset from 0
+ * of each bit conversion.
+ * 
+ * TODO more sensible default behavior when Amber data classes give us a
+ * predictable field ordering.
  * 
  * @author Elias N Vasylenko
  */
-@Repeatable(ElementBits.class)
+@Convertible
 @Retention(RUNTIME)
-@Target({ FIELD, METHOD })
-public @interface Bit {
-  int value() default -1;
+@Target({ FIELD })
+public @interface Offset {
+  int value();
 }

@@ -48,7 +48,6 @@ import static uk.co.saiman.log.Log.Level.ERROR;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.bytes.ByteConverters;
+import uk.co.saiman.bytes.conversion.ByteConverterService;
 import uk.co.saiman.comms.CommsException;
 import uk.co.saiman.comms.CommsPort;
 import uk.co.saiman.comms.CommsStream;
@@ -110,7 +109,7 @@ public class CopleyHardwareSimulation {
   private Log log;
 
   @Reference
-  ByteConverters converters;
+  ByteConverterService converters;
 
   @Reference(policyOption = GREEDY)
   private CommsPort port;
@@ -149,7 +148,8 @@ public class CopleyHardwareSimulation {
 
       ReferenceVariable<Int32> requestedPosition = new ReferenceVariable<>(
           axes,
-          converters.getConverter(Int32.class));
+          converters.getConverter(Int32.class),
+          new Int32(0));
       variables.put(TRAJECTORY_POSITION_COUNTS, requestedPosition);
       variables
           .put(
@@ -234,7 +234,7 @@ public class CopleyHardwareSimulation {
           variable = getVariableIdentifier();
           id = CopleyVariableID.forCode(variable.variableID);
           if (variable.axis < 0 || variable.axis >= axes) {
-            result = new byte[getVariable(id).size()];
+            result = new byte[0];
             errorCode = ErrorCode.ILLEGAL_AXIS_NUMBER;
           } else {
             result = getVariable(id).get(variable.axis, variable.bank ? STORED : ACTIVE);
@@ -325,6 +325,6 @@ public class CopleyHardwareSimulation {
   private VariableIdentifier getVariableIdentifier() {
     byte[] bytes = new byte[WORD_SIZE];
     message.get(bytes);
-    return converters.getConverter(VariableIdentifier.class).fromBytes(bytes);
+    return converters.getConverter(VariableIdentifier.class).toObject(bytes);
   }
 }

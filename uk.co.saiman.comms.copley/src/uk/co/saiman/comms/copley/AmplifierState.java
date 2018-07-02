@@ -27,27 +27,7 @@
  */
 package uk.co.saiman.comms.copley;
 
-import java.lang.reflect.Type;
-
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.BitConverter;
-import uk.co.saiman.bytes.BitConverterFactory;
-import uk.co.saiman.bytes.Bits;
-import uk.co.saiman.bytes.Bytes;
-import uk.co.saiman.bytes.PrimitiveBitConverters;
-
-@Bytes(2)
+@AmplifierStateByteConverter.Marker
 public class AmplifierState {
-	@Bit(0)
-	@Bits(converter = AmplifierModeConverter.class)
-	public AmplifierMode mode;
-}
-
-class AmplifierModeConverter implements BitConverterFactory {
-	@Override
-	public BitConverter<AmplifierMode> getBitConverter(Type type) {
-		return new PrimitiveBitConverters.Ints()
-				.map(AmplifierMode::forCode, AmplifierMode::getCode)
-				.withDefaultBits(16);
-	}
+  public AmplifierMode mode;
 }

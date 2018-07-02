@@ -27,15 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class HighVoltageReadback {
-	@Bits(value = 4)
-	@Bit(0)
+	@Size(value = 4)
+	@Offset(0)
 	public byte current;
 
-	@Bits(value = 4)
-	@Bit(4)
+	@Size(value = 4)
+	@Offset(4)
 	public byte voltage;
 }

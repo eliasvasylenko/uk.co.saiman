@@ -32,6 +32,8 @@ import static java.util.stream.Stream.empty;
 import static uk.co.saiman.collection.StreamUtilities.zip;
 import static uk.co.saiman.reflection.token.TypeParameter.forTypeVariable;
 
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Executable;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.ParameterizedType;
@@ -39,7 +41,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -67,48 +68,49 @@ import uk.co.saiman.reflection.Types;
  *          This is the type which the TypeToken object references.
  */
 public class TypeToken<T> {
+  @SuppressWarnings("unused")
+  private static final Object ANNOTATED_OBJECT_FIELD = null;
+  private static final AnnotatedType ANNOTATED_OBJECT_TYPE;
+  static {
+    try {
+      ANNOTATED_OBJECT_TYPE = TypeToken.class
+          .getDeclaredField("ANNOTATED_OBJECT_FIELD")
+          .getAnnotatedType();
+    } catch (NoSuchFieldException | SecurityException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
   private final Type type;
 
   protected TypeToken() {
-    this.type = resolveSuperclassParameter();
+    AnnotatedType annotatedType = resolveSuperclassParameter();
+    this.type = annotatedType.getType();
+
   }
 
   protected TypeToken(Type type) {
     this.type = type;
   }
 
-  private Type resolveSuperclassParameter() {
+  protected AnnotatedType resolveSuperclassParameter() {
     Class<?> subclass = getClass();
 
-    Type type;
+    for (;;) {
+      Class<?> superclass = subclass.getSuperclass();
 
-    final Map<TypeVariable<?>, Type> resolvedParameters = new HashMap<>();
-    final TypeSubstitution resolvedParameterSubstitution = new TypeSubstitution()
-        .where(t -> t instanceof TypeVariable, t -> resolvedParameters.get(t));
+      if (superclass.equals(TypeToken.class))
+        break;
 
-    do {
-      Type annotatedType = subclass.getGenericSuperclass();
+      subclass = superclass;
+    }
 
-      if (annotatedType instanceof ParameterizedType) {
-        if (!resolvedParameters.isEmpty()) {
-          type = resolvedParameterSubstitution.resolve(annotatedType);
-        } else
-          type = annotatedType;
-
-        resolvedParameters.clear();
-        ParameterizedTypes
-            .getAllTypeArguments((ParameterizedType) type)
-            .forEach(e -> resolvedParameters.put(e.getKey(), e.getValue()));
-      } else {
-        type = annotatedType;
-
-        resolvedParameters.clear();
-      }
-
-      subclass = subclass.getSuperclass();
-    } while (!subclass.equals(TypeToken.class));
-
-    return resolvedParameters.values().iterator().next();
+    AnnotatedType superType = subclass.getAnnotatedSuperclass();
+    if (superType instanceof AnnotatedParameterizedType) {
+      return ((AnnotatedParameterizedType) superType).getAnnotatedActualTypeArguments()[0];
+    } else {
+      return ANNOTATED_OBJECT_TYPE;
+    }
   }
 
   /**
@@ -395,5 +397,4 @@ public class TypeToken<T> {
   public boolean isAssignableFrom(TypeToken<?> type) {
     return Types.isAssignable(type.type, this.type);
   }
-
 }

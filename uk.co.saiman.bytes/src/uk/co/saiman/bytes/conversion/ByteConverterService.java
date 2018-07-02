@@ -25,10 +25,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes;
+package uk.co.saiman.bytes.conversion;
 
-import java.lang.reflect.Type;
+import uk.co.saiman.reflection.token.AnnotatedTypeToken;
 
-public interface BitConverterFactory {
-	BitConverter<?> getBitConverter(Type type);
+/**
+ * A service for fetching or creating byte converters for given types. Typically
+ * implementations may aggregate a number of {@link ByteConverterProvider
+ * provider implementations}.
+ * 
+ * @author Elias N Vasylenko
+ */
+public interface ByteConverterService {
+  <T> ByteConverter<T> getConverter(Class<T> type);
+
+  <T> ByteConverter<T> getConverter(AnnotatedTypeToken<T> type);
 }

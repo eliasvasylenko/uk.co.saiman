@@ -2,7 +2,7 @@ package uk.co.saiman.comms.copley.impl;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.valueOf;
-import static uk.co.saiman.comms.copley.rest.CopleyRestServiceConstants.COPLEY_MEDIA_TYPE;
+import static uk.co.saiman.comms.copley.rest.CopleyRestConstants.MEDIA_TYPE;
 
 import java.io.IOException;
 
@@ -34,7 +34,7 @@ public class CopleyRestJsonProvider<T> implements WriterInterceptor, ReaderInter
   }
 
   private void intercept(InterceptorContext context) {
-    if (context.getMediaType().equals(COPLEY_MEDIA_TYPE)) {
+    if (context.getMediaType().equals(MEDIA_TYPE)) {
       context.setMediaType(valueOf(APPLICATION_JSON));
     }
   }

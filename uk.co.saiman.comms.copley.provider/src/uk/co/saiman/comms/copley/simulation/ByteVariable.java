@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.comms.copley.simulation;
 
+import static uk.co.saiman.comms.copley.CopleyController.WORD_SIZE;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
 import static uk.co.saiman.comms.copley.VariableBank.STORED;
-import static uk.co.saiman.comms.copley.impl.CopleyControllerImpl.WORD_SIZE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,6 @@ import java.util.List;
 import uk.co.saiman.comms.copley.VariableBank;
 
 class ByteVariable implements SimulatedVariable {
-  private final int size;
   private final List<byte[]> active;
   private final List<byte[]> defaults;
 
@@ -45,17 +44,12 @@ class ByteVariable implements SimulatedVariable {
     active = new ArrayList<>(axes);
     defaults = new ArrayList<>(axes);
 
-    size = words * WORD_SIZE;
+    int size = words * WORD_SIZE;
     byte[] identity = new byte[size];
     for (int i = 0; i < axes; i++) {
       active.add(identity);
       defaults.add(identity);
     }
-  }
-
-  @Override
-  public int size() {
-    return size;
   }
 
   @Override

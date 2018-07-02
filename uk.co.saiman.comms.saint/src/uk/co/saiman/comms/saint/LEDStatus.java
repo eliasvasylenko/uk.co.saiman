@@ -29,21 +29,13 @@ package uk.co.saiman.comms.saint;
 
 import java.util.Arrays;
 
-import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.conversion.Elements;
 
 public class LEDStatus {
-	@Bit(0)
-	@Bit(1)
-	@Bit(2)
-	@Bit(3)
-	@Bit(4)
-	@Bit(5)
-	@Bit(6)
-	@Bit(7)
-	public boolean[] led;
+  public boolean @Elements(8) [] led;
 
-	@Override
-	public String toString() {
-		return Arrays.toString(led);
-	}
+  @Override
+  public String toString() {
+    return Arrays.toString(led);
+  }
 }

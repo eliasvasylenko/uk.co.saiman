@@ -27,10 +27,9 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.bytes.Bit;
+import uk.co.saiman.bytes.conversion.Elements;
+import uk.co.saiman.bytes.conversion.Offset;
 
 public class TurboControl {
-	@Bit(0)
-	@Bit(1)
-	public boolean[] control;
+  public @Offset(1) boolean @Elements(2) [] control;
 }

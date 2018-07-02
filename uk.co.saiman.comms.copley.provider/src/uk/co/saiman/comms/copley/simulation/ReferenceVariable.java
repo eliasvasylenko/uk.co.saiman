@@ -33,20 +33,16 @@ import static uk.co.saiman.comms.copley.VariableBank.STORED;
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.co.saiman.bytes.ByteConverter;
+import uk.co.saiman.bytes.conversion.ByteConverter;
 import uk.co.saiman.comms.copley.VariableBank;
 
 class ReferenceVariable<T> implements SimulatedVariable {
-  private final int size;
   private final ByteConverter<T> converter;
   private final List<T> active;
   private final List<T> defaults;
 
-  public ReferenceVariable(int axes, ByteConverter<T> converter) {
-    T identity = converter.create();
-
+  public ReferenceVariable(int axes, ByteConverter<T> converter, T identity) {
     this.converter = converter;
-    this.size = converter.toBytes(identity).length;
 
     active = new ArrayList<>(axes);
     defaults = new ArrayList<>(axes);
@@ -59,11 +55,6 @@ class ReferenceVariable<T> implements SimulatedVariable {
 
   ByteConverter<T> getConverter() {
     return converter;
-  }
-
-  @Override
-  public int size() {
-    return size;
   }
 
   public T getReference(int axis, VariableBank bank) {
@@ -97,7 +88,7 @@ class ReferenceVariable<T> implements SimulatedVariable {
 
   @Override
   public void set(int axis, VariableBank bank, byte[] value) {
-    setReference(axis, bank, converter.fromBytes(value));
+    setReference(axis, bank, converter.toObject(value));
   }
 
   @Override

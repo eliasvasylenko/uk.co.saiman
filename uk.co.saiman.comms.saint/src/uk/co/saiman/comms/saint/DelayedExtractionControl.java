@@ -27,11 +27,11 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.bytes.Bit;
-import uk.co.saiman.bytes.Bits;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class DelayedExtractionControl {
-	@Bit(0)
-	@Bits(value = 8)
+	@Offset(0)
+	@Size(value = 8)
 	int delay;
 }
