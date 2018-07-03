@@ -27,36 +27,29 @@
  */
 package uk.co.saiman.properties;
 
-import java.util.Locale;
+import java.util.List;
+import java.util.Optional;
 
-final class DefaultPropertyLoaderProperties extends StaticPropertyAccessor<PropertyLoaderProperties>
-    implements PropertyLoaderProperties {
-  private static final String TRANSLATION_NOT_FOUND_MESSAGE = "Translation not found for key %s";
-  private static final String MUST_BE_INTERFACE = "Localization accessor %s must be an interface";
-  private static final String ILLEGAL_RETURN_TYPE = "Illegal return type %s for key %s";
-  private static final String LOCALE_CHANGED = "Locale changed to %s";
+import uk.co.saiman.properties.Nested;
 
-  public DefaultPropertyLoaderProperties() {
-    super(Locale.ENGLISH);
+@SuppressWarnings("javadoc")
+public interface TestProperties {
+  String simple();
+
+  String substitution(String item);
+
+  String multipleSubstitution(String first, String second);
+
+  default String defaultMethod() {
+    return substitution("default");
   }
 
-  @Override
-  public String translationNotFoundMessage(String key) {
-    return format(TRANSLATION_NOT_FOUND_MESSAGE, key);
-  }
+  @Nested
+  NestedTestProperties nesting();
 
-  @Override
-  public String mustBeInterface(Class<?> accessor) {
-    return format(MUST_BE_INTERFACE, accessor);
-  }
+  Optional<String> optional();
 
-  @Override
-  public String propertyValueTypeNotSupported(String typeName, String key) {
-    return format(ILLEGAL_RETURN_TYPE, typeName, key);
-  }
+  Optional<String> optionalMissing();
 
-  @Override
-  public String localeChanged(LocaleProvider manager, Locale locale) {
-    return format(LOCALE_CHANGED, locale);
-  }
+  List<String> list();
 }

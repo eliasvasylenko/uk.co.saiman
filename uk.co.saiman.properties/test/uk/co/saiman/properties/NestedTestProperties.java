@@ -27,36 +27,12 @@
  */
 package uk.co.saiman.properties;
 
-import java.util.Locale;
+import uk.co.saiman.properties.Nested;
 
-final class DefaultPropertyLoaderProperties extends StaticPropertyAccessor<PropertyLoaderProperties>
-    implements PropertyLoaderProperties {
-  private static final String TRANSLATION_NOT_FOUND_MESSAGE = "Translation not found for key %s";
-  private static final String MUST_BE_INTERFACE = "Localization accessor %s must be an interface";
-  private static final String ILLEGAL_RETURN_TYPE = "Illegal return type %s for key %s";
-  private static final String LOCALE_CHANGED = "Locale changed to %s";
+@SuppressWarnings("javadoc")
+public interface NestedTestProperties {
+  String nestedText();
 
-  public DefaultPropertyLoaderProperties() {
-    super(Locale.ENGLISH);
-  }
-
-  @Override
-  public String translationNotFoundMessage(String key) {
-    return format(TRANSLATION_NOT_FOUND_MESSAGE, key);
-  }
-
-  @Override
-  public String mustBeInterface(Class<?> accessor) {
-    return format(MUST_BE_INTERFACE, accessor);
-  }
-
-  @Override
-  public String propertyValueTypeNotSupported(String typeName, String key) {
-    return format(ILLEGAL_RETURN_TYPE, typeName, key);
-  }
-
-  @Override
-  public String localeChanged(LocaleProvider manager, Locale locale) {
-    return format(LOCALE_CHANGED, locale);
-  }
+  @Nested
+  DeeplyNestedTestProperties deeply();
 }
