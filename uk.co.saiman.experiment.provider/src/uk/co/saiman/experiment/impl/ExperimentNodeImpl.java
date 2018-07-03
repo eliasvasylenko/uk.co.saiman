@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.DISPOSED;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
@@ -107,7 +108,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       this.persistedExperiment = getPersistenceManager().addExperiment(id, type.getId());
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
-          getText().exception().cannotCreateExperiment(parent),
+          format("Failed to persist new experiment %s", parent.getId()),
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;
@@ -129,11 +130,12 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     this.type = type;
     this.parent = parent;
     this.persistedExperiment = persistedExperiment;
-    this.parent.children.put(persistedExperiment, this);
 
     this.state = createState(persistedExperiment.getId());
 
     loadChildNodes();
+
+    this.parent.children.put(persistedExperiment, this);
   }
 
   /**
@@ -168,7 +170,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
           .addChild(child.getId(), child.getType().getId(), state, index);
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
-          getText().exception().cannotCreateExperiment(parent),
+          format("Failed to persist new child experiment %s", parent.getId()),
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;
@@ -189,7 +191,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
         new ExperimentNodeImpl<>(this, type, node);
       } catch (Exception e) {
         ExperimentException ee = new ExperimentException(
-            getText().exception().cannotLoadExperiment(node.getId(), node.getTypeId()),
+            format("Failed to load experiment %s of type %s", node.getId(), node.getTypeId()),
             e);
         getLog().log(Level.ERROR, ee);
         throw ee;
@@ -203,7 +205,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
     ExperimentNodeConstraint parentConstraint = type.mayComeAfter(parent);
     if (parentConstraint == VIOLATED) {
-      throw new ExperimentException(parent.getText().exception().typeMayNotSucceed(type, parent));
+      throw new ExperimentException(
+          format("Experiment of type %s violates constraint on parent node %s", type, parent));
     } else if (parentConstraint == ASSUME_ALL_FULFILLED) {
       assumeAllFulfilled = true;
     } else if (parentConstraint == UNFULFILLED) {
@@ -214,7 +217,10 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       ExperimentNodeConstraint ancestorConstraint = ancestor.type.mayComeBefore(parent, type);
       if (ancestorConstraint == VIOLATED) {
         throw new ExperimentException(
-            parent.getText().exception().typeMayNotSucceed(type, ancestor));
+            format(
+                "Experiment of type %s violates constraint on ancestor node %s",
+                type,
+                ancestor));
       } else if (ancestorConstraint == ASSUME_ALL_FULFILLED) {
         assumeAllFulfilled = true;
       } else if (ancestorConstraint == UNFULFILLED) {
@@ -224,7 +230,10 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
     if (!assumeAllFulfilled && unfulfilled != null) {
       throw new ExperimentException(
-          parent.getText().exception().typeMayNotSucceed(type, unfulfilled));
+          format(
+              "Experiment of type %s does not fulfil constraint on ancestor node %s",
+              type,
+              unfulfilled));
     }
   }
 
@@ -245,7 +254,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     S state = type.createState(createConfigurationContext());
 
     if (getId() == null) {
-      throw new ExperimentException(getText().exception().invalidExperimentName(null));
+      throw new ExperimentException("Cannot initialise experiment state with null id");
     }
 
     return state;
@@ -325,7 +334,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       parent.persistedExperiment.removeChild(getId(), getType().getId());
     } catch (IOException e) {
       ExperimentException ee = new ExperimentException(
-          getText().exception().cannotRemoveExperiment(this),
+          format("Failed to persist removal of experiment %s", getId()),
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;
@@ -333,7 +342,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
     if (parent.children.remove(persistedExperiment) == null) {
       ExperimentException e = new ExperimentException(
-          getText().exception().experimentDoesNotExist(getId()));
+          format("Failed to remove experiment %s from parent, does not exist"));
       getLog().log(Level.ERROR, e);
       throw e;
     }
@@ -348,7 +357,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
   protected void assertAvailable() {
     if (lifecycleState.get() == DISPOSED) {
-      throw new ExperimentException(getText().exception().experimentIsDisposed(this));
+      throw new ExperimentException(format("Experiment %s is disposed", getId()));
     }
   }
 
@@ -382,8 +391,10 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   public ExperimentNode<S, T> copy(ExperimentNode<?, ?> parent, int index) {
     assertAvailable();
 
-    if (parent.getWorkspace() != getWorkspace())
-      throw new ExperimentException(getText().exception().cannotCopyFromOutsideWorkspace());
+    if (parent.getWorkspace() != getWorkspace()) {
+      throw new ExperimentException(
+          format("Cannot copy experiment node %s between workspaces", getId()));
+    }
 
     return new ExperimentNodeImpl<S, T>(
         ((ExperimentNodeImpl<?, ?>) parent),
@@ -396,8 +407,10 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   public void move(ExperimentNode<?, ?> parent, int index) {
     assertAvailable();
 
-    if (parent.getWorkspace() != getWorkspace())
-      throw new ExperimentException(getText().exception().cannotCopyFromOutsideWorkspace());
+    if (parent.getWorkspace() != getWorkspace()) {
+      throw new ExperimentException(
+          format("Cannot move experiment node %s between workspaces", getId()));
+    }
 
     removeImpl();
 
@@ -423,7 +436,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       getLog()
           .log(
               Level.ERROR,
-              new ExperimentException(getText().exception().failedExperimentExecution(this), e));
+              new ExperimentException(format("Failed to process experiment %s", getId()), e));
       lifecycleState.set(ExperimentLifecycleState.FAILURE);
     }
   }
@@ -445,9 +458,6 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   private void processImpl(Runnable processChildren) {
     lifecycleState.set(ExperimentLifecycleState.PROCESSING);
 
-    if (persistedExperiment.getId() == null) {
-      throw new ExperimentException(getText().exception().invalidExperimentName(null));
-    }
     if (parent != null) {
       validateChild(parent, type);
     }
@@ -499,7 +509,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
           return getLocationManager().getLocation(ExperimentNodeImpl.this);
         } catch (IOException e) {
           throw new ExperimentException(
-              getText().exception().cannotPrepareLocation(ExperimentNodeImpl.this),
+              format("Failed to prepare location for experiment %s", getId()),
               e);
         }
       }
@@ -578,17 +588,17 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       return;
 
     } else if (!ExperimentConfiguration.isNameValid(id)) {
-      throw new ExperimentException(getText().exception().invalidExperimentName(id));
+      throw new ExperimentException(format("Invalid experiment name %s", id));
 
     } else if (getSiblings().anyMatch(s -> id.equals(s.getId()))) {
-      throw new ExperimentException(getText().exception().duplicateExperimentName(id));
+      throw new ExperimentException(format("Experiment name already exists %s", id));
 
     } else {
       try {
         getLocationManager().updateLocation(this, id);
         persistedExperiment.setId(id);
       } catch (IOException e) {
-        throw new ExperimentException(getText().exception().cannotRenameExperiment(this, id), e);
+        throw new ExperimentException(format("Failed to set experiment name %s", id));
       }
     }
   }

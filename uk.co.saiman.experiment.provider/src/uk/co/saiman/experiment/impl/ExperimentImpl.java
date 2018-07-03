@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.util.stream.Stream;
 
@@ -97,7 +99,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
   public void removeImpl() {
     if (!getWorkspace().removeExperiment(getExperiment())) {
       ExperimentException e = new ExperimentException(
-          getText().exception().experimentDoesNotExist(getId()));
+          format("Experiment %s does not exist", getId()));
       getLog().log(Level.ERROR, e);
       throw e;
     }
@@ -107,7 +109,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
       getPersistenceManager().removeExperiment(getPersistedExperiment());
     } catch (IOException e) {
       ExperimentException ee = new ExperimentException(
-          getText().exception().cannotRemoveExperiment(this),
+          format("Cannot remove experiment %s", getId()),
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;

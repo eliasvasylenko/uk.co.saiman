@@ -46,9 +46,6 @@ public interface ExperimentProperties {
   @Nested
   SaiProperties sai();
 
-  @Nested
-  ExperimentExceptionProperties exception();
-
   Localized<String> newExperiment();
 
   Localized<String> newExperimentName();

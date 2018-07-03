@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.lang.String.format;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
 import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
 
@@ -62,10 +63,10 @@ public class WorkspaceImpl implements Workspace {
   /**
    * Try to create a new experiment workspace over the given root path
    * 
-   * @param factory
-   *          the factory which produces the workspace
-   * @param workspaceRoot
-   *          the path of the workspace data
+   * @param locationManager
+   *          the result location management implementation
+   * @param persistenceManager
+   *          the configuration persistence management implementation
    */
   public WorkspaceImpl(
       ExperimentLocationManager locationManager,
@@ -81,10 +82,10 @@ public class WorkspaceImpl implements Workspace {
   /**
    * Try to create a new experiment workspace over the given root path
    * 
-   * @param factory
-   *          the factory which produces the workspace
-   * @param workspaceRoot
-   *          the path of the workspace data
+   * @param locationManager
+   *          the result location management implementation
+   * @param persistenceManager
+   *          the configuration persistence management implementation
    * @param text
    *          a localized text accessor implementation
    */
@@ -108,9 +109,7 @@ public class WorkspaceImpl implements Workspace {
     try {
       experiments = persistenceManager.getExperiments();
     } catch (Exception e) {
-      ExperimentException ee = new ExperimentException(
-          getText().exception().cannotLoadExperiments(),
-          e);
+      ExperimentException ee = new ExperimentException("Failed to load root experiments", e);
       getLog().log(Level.ERROR, ee);
       throw ee;
     }
@@ -119,7 +118,7 @@ public class WorkspaceImpl implements Workspace {
         this.experiments.add(new ExperimentImpl(this, s));
       } catch (Exception e) {
         ExperimentException ee = new ExperimentException(
-            getText().exception().cannotLoadExperiment(s.getId(), s.getTypeId()),
+            format("Failed to instantiate experiment %s of type %s", s.getId(), s.getTypeId()),
             e);
         getLog().log(Level.ERROR, ee);
         throw ee;

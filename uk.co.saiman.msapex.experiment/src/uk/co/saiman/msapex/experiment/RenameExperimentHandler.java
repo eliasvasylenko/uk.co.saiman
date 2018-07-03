@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.lang.String.format;
 import static java.util.Comparator.reverseOrder;
 import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import static uk.co.saiman.fx.FxUtilities.wrap;
@@ -78,7 +79,8 @@ public class RenameExperimentHandler {
           text.renameExperiment(),
           text.renameExperimentName(named.getName())).ifPresent(name -> {
             if (workspace.getExperiment(name).isPresent()) {
-              throw new ExperimentException(text.exception().experimentAlreadyExists(name));
+              // this should have been detected in the requestExperimentNameDialog logic.
+              throw new ExperimentException(format("Experiment already exists with id %s", name));
             }
 
             /*
@@ -132,10 +134,12 @@ public class RenameExperimentHandler {
         try {
           Files.walk(newLocation).sorted(reverseOrder()).map(Path::toFile).forEach(File::delete);
         } catch (IOException e) {
-          throw new ExperimentException(text.exception().cannotDelete(newLocation), e);
+          throw new ExperimentException(
+              format("Unable to delete existing data at %s", newLocation),
+              e);
         }
       } else {
-        throw new ExperimentException(text.exception().userCancelledSetExperimentName());
+        throw new ExperimentException("Cancelled choose experiment name");
       }
     }
   }

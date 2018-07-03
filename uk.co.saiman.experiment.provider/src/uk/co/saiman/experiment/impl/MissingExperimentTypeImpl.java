@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.lang.String.format;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.Map;
@@ -51,13 +52,14 @@ public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
     return text.missingExperimentType(id).toString();
   }
 
+  @Override
   public String getMissingTypeID() {
     return id;
   }
 
   @Override
   public T process(ProcessingContext<Map<String, Object>, T> context) {
-    throw new ExperimentException(text.exception().cannotExecuteMissingExperimentType(id));
+    throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
   }
 
   @SuppressWarnings("unchecked")

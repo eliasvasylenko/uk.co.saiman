@@ -159,6 +159,7 @@ runplatform: linux64
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.icons.fugue;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.instrument.acquisition.adq;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.provider;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
@@ -216,6 +217,7 @@ runplatform: linux64
 	org.apache.aries.javax.jax.rs-api;version='[0.0.1,0.0.2)',\
 	org.apache.aries.jax.rs.whiteboard;version='[0.0.1,0.0.2)',\
 	org.apache.aries.jax.rs.jsonb;version='[0.0.1,0.0.2)',\
+	org.apache.servicemix.specs.annotation-api-1.3;version='[1.3.0,1.3.1)',\
 	javax.json.bind-api;version='[1.0.0,1.0.1)',\
 	javax.json-api;version='[1.1.2,1.1.3)',\
 	uk.co.saiman.babel.transpiler;version=latest,\
@@ -227,4 +229,5 @@ runplatform: linux64
 	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
 	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
 	uk.co.saiman.webmodule.fbjs.cjs;version=latest,\
-	org.apache.aries.javax.annotation-api;version='[0.0.1,0.0.2)'
+	com.sun.jna;version='[4.5.1,4.5.2)'
+
