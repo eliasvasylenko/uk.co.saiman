@@ -35,7 +35,6 @@ runplatform: linux64
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
 	uk.co.saiman.reflection.resource;version=snapshot,\
-	uk.co.saiman.text;version=snapshot,\
 	org.apache.felix.webconsole;version='[4.3.4,4.3.5)',\
 	org.apache.felix.webconsole.plugins.ds;version='[2.0.8,2.0.9)',\
 	org.apache.felix.webconsole.plugins.event;version='[1.1.8,1.1.9)',\
@@ -197,8 +196,8 @@ runplatform: linux64
 	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.simulation;version=snapshot,\
 	uk.co.saiman.simulation.provider;version=snapshot,\
-	uk.co.saiman.text;version=snapshot,\
-	uk.co.saiman.text.provider;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.properties.provider;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.webconsole.branding;version=snapshot,\
 	uk.co.saiman.webconsole;version=snapshot,\

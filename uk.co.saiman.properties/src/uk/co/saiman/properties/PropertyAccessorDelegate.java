@@ -37,7 +37,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
 
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -68,6 +70,23 @@ public class PropertyAccessorDelegate<A> {
 
   private static Set<Method> getDirectMethods() {
     return unmodifiableSet(new HashSet<>(asList(Object.class.getDeclaredMethods())));
+  }
+
+  private static final Constructor<MethodHandles.Lookup> METHOD_HANDLE_CONSTRUCTOR = getMethodHandleConstructor();
+
+  private static Constructor<Lookup> getMethodHandleConstructor() {
+    try {
+      Constructor<Lookup> constructor = MethodHandles.Lookup.class
+          .getDeclaredConstructor(Class.class, int.class);
+
+      if (!constructor.isAccessible()) {
+        constructor.setAccessible(true);
+      }
+
+      return constructor;
+    } catch (NoSuchMethodException | SecurityException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private final PropertyLoader loader;
@@ -198,8 +217,8 @@ public class PropertyAccessorDelegate<A> {
               }
 
               if (method.isDefault()) {
-                return MethodHandles
-                    .privateLookupIn(accessor, MethodHandles.lookup())
+                return METHOD_HANDLE_CONSTRUCTOR
+                    .newInstance(method.getDeclaringClass(), MethodHandles.Lookup.PRIVATE)
                     .unreflectSpecial(method, method.getDeclaringClass())
                     .bindTo(p)
                     .invokeWithArguments(args);
