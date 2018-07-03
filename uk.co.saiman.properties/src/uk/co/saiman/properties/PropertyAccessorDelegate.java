@@ -89,7 +89,7 @@ public class PropertyAccessorDelegate<A> {
     }
   }
 
-  private final PropertyLoader loader;
+  private final PropertyLoaderImpl loader;
   private final Log log;
   private final Class<A> source;
   private final A proxy;
@@ -108,7 +108,7 @@ public class PropertyAccessorDelegate<A> {
    *          the property accessor class and configuration
    */
   public PropertyAccessorDelegate(
-      PropertyLoader loader,
+      PropertyLoaderImpl loader,
       PropertyResource propertyResource,
       Log log,
       Class<A> source) {

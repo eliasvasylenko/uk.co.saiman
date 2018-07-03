@@ -96,11 +96,6 @@ public interface PropertyLoader {
   <T> T getProperties(Class<T> accessor);
 
   /**
-   * @return the properties associated directly with the property loader itself
-   */
-  PropertyLoaderProperties getProperties();
-
-  /**
    * Generate an implementing instance of the given accessor interface class,
    * according to the rules described by {@link Properties}.
    * 

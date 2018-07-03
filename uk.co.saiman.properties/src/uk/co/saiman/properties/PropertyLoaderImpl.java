@@ -79,7 +79,6 @@ class PropertyLoaderImpl implements PropertyLoader {
     }
   }
 
-  @Override
   public PropertyLoaderProperties getProperties() {
     return text;
   }

@@ -39,6 +39,9 @@
 	bnd.identity; id=uk.co.saiman.webconsole.branding,\
 	bnd.identity; id=uk.co.saiman.webconsole.webresource
 
+-runfw:\
+	org.eclipse.osgi
+
 -runvm.msapex:\
 	-Xmx1024m
 

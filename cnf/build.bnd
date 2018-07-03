@@ -99,6 +99,22 @@ Bundle-Developers:\
 		initialDependencies	=	${build}/npm.json;\
 		optionalAttributes	=	"main, description"
 
+-plugin.Apache:  \
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+		name=Apache; \
+		snapshotUrls=https://repository.apache.org/content/groups/snapshots; \
+		releaseUrls=https://repository.apache.org/content/groups/public; \
+		pom=${build}/apache.xml; \
+		location=${build}/cache/apache.xml
+
+-plugin.eclipse.platform.photon:\
+\
+		aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"Eclipse Photon Simultaneous Release";\
+			url					=		http://download.eclipse.org/releases/photon
+#			url					=		${fileuri;${build}/eclipse.platform.target};\
+#			targetPlatform		=		true
+
 ## Run requirement groups:
 -runrequires.base:\
 	bnd.identity; id=org.apache.felix.log
