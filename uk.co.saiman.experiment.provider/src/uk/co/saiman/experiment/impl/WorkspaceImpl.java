@@ -29,7 +29,7 @@ package uk.co.saiman.experiment.impl;
 
 import static java.lang.String.format;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
-import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
+import static uk.co.saiman.properties.PropertyLoader.getDefaultProperties;
 
 import java.util.ArrayList;
 import java.util.List;

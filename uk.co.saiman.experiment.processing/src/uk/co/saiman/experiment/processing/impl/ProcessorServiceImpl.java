@@ -43,7 +43,7 @@ import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.experiment.processing.ProcessorService;
 import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.experiment.processing.ProcessorType;
-import uk.co.saiman.text.properties.PropertyLoader;
+import uk.co.saiman.properties.PropertyLoader;
 
 @Component
 public class ProcessorServiceImpl implements ProcessorService {

@@ -27,8 +27,4 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
-
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SpectrumExceptionProperties {}

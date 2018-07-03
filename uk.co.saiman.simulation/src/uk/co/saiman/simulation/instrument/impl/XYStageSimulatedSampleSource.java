@@ -61,13 +61,13 @@ import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.PassthroughObserver;
+import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.ImageSimulatedSampleSource;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
 import uk.co.saiman.simulation.instrument.impl.XYStageSimulatedSampleSource.XYStageSimulatedSampleSourceConfiguration;
-import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
  * A software component to attach to a {@link XYStage two dimensional, linear

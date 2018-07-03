@@ -55,9 +55,9 @@ import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
+import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
-import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
 public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpectrumConfiguration>

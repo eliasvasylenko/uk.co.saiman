@@ -41,8 +41,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.text.properties.PropertyLoader;
-import uk.co.saiman.text.properties.PropertyLoaderException;
+import uk.co.saiman.properties.PropertyLoader;
+import uk.co.saiman.properties.PropertyLoaderException;
 
 /**
  * Supplier for Eclipse DI contexts, to provide localization implementations of

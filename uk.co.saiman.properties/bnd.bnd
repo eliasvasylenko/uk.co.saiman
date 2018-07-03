@@ -1,0 +1,15 @@
+Export-Package: \
+	uk.co.saiman.properties
+
+Bundle-Name: SAI :: Properties
+
+Bundle-Description: \
+	Common Java utilities for dealing with property files and i18n.
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot
+
+-includeresource: \
+	OSGI-INF/l10n=l10n

@@ -41,7 +41,7 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.experiment.processing.ProcessorType;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
-import uk.co.saiman.text.properties.Localized;
+import uk.co.saiman.properties.LocalizedString;
 
 public class AddProcessorHandler {
   @Execute
@@ -62,8 +62,8 @@ public class AddProcessorHandler {
 
   static java.util.Optional<ProcessorType<?>> requestProcessorType(
       @Service List<ProcessorType<?>> processors,
-      Localized<String> title,
-      Localized<String> header) {
+      LocalizedString title,
+      LocalizedString header) {
     ChoiceDialog<ProcessorType<?>> nameDialog = processors.isEmpty()
         ? new ChoiceDialog<>()
         : new ChoiceDialog<>(processors.get(0), processors);

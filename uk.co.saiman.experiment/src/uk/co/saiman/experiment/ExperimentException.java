@@ -27,31 +27,19 @@
  */
 package uk.co.saiman.experiment;
 
-import uk.co.saiman.text.properties.Localized;
-
 /**
  * A problem with experiment configuration or processing.
  * 
  * @author Elias N Vasylenko
  */
 public class ExperimentException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	/**
-	 * @param message
-	 *          a {@link Localized} describing the exception
-	 * @param cause
-	 *          the exception cause
-	 */
-	public ExperimentException(String message, Throwable cause) {
-		super(message, cause);
-	}
+  public ExperimentException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-	/**
-	 * @param message
-	 *          a {@link Localized} describing the exception
-	 */
-	public ExperimentException(String message) {
-		super(message);
-	}
+  public ExperimentException(String message) {
+    super(message);
+  }
 }

@@ -27,10 +27,8 @@
  */
 package uk.co.saiman.instrument.sample;
 
-import uk.co.saiman.text.properties.Localized;
-import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.SaiProperties;
-import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.SaiProperties;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -38,9 +36,8 @@ import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SampleDeviceProperties {
-	SaiProperties sai();
+  SaiProperties sai();
 
-	Localized<String> noSampleDevices();
+  LocalizedString noSampleDevices();
 }

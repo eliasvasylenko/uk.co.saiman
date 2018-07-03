@@ -28,9 +28,7 @@
 package uk.co.saiman.instrument.stage;
 
 import uk.co.saiman.instrument.sample.SampleDeviceProperties;
-import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
-import uk.co.saiman.text.properties.SaiProperties;
+import uk.co.saiman.properties.SaiProperties;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -38,7 +36,6 @@ import uk.co.saiman.text.properties.SaiProperties;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface StageProperties {
   SaiProperties sai();
 

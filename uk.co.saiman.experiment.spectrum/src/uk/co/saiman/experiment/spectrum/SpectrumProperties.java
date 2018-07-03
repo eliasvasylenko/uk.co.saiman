@@ -27,23 +27,20 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import uk.co.saiman.text.properties.Localized;
-import uk.co.saiman.text.properties.Nested;
-import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.Nested;
 
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SpectrumProperties {
   @Nested
   SpectrumExceptionProperties exception();
 
-  Localized<String> spectrumExperimentName();
+  LocalizedString spectrumExperimentName();
 
-  Localized<String> spectrumResultName();
+  LocalizedString spectrumResultName();
 
-  Localized<String> defaultSpectrumName();
+  LocalizedString defaultSpectrumName();
 
-  Localized<String> spectrumGraphEditor();
+  LocalizedString spectrumGraphEditor();
 
-  Localized<String> spectrumProcessingExperimentName();
+  LocalizedString spectrumProcessingExperimentName();
 }

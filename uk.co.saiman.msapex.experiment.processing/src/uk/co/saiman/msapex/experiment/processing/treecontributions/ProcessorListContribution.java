@@ -52,7 +52,7 @@ import uk.co.saiman.experiment.persistence.json.JsonPersistedStateFormat;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.experiment.processing.ProcessorService;
 import uk.co.saiman.experiment.processing.ProcessorState;
-import uk.co.saiman.text.properties.PropertyLoader;
+import uk.co.saiman.properties.PropertyLoader;
 
 @Component(property = Constants.SERVICE_RANKING + ":Integer=" + -100)
 public class ProcessorListContribution implements TreeContribution {

@@ -29,7 +29,7 @@ package uk.co.saiman.comms.impl;
 
 import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static uk.co.saiman.text.properties.SaiProperties.SAI_COMMAND_SCOPE;
+import static uk.co.saiman.properties.SaiProperties.SAI_COMMAND_SCOPE;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

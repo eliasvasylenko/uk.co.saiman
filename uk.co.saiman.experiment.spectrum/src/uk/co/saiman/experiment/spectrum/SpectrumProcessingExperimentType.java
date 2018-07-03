@@ -29,7 +29,7 @@ package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSING_KEY;
-import static uk.co.saiman.text.properties.PropertyLoader.getDefaultProperties;
+import static uk.co.saiman.properties.PropertyLoader.getDefaultProperties;
 
 import java.util.List;
 import java.util.Random;
@@ -59,9 +59,6 @@ import uk.co.saiman.experiment.processing.ProcessorState;
  * that they operate on the configured sample.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
- *          the type of sample configuration for the instrument
  */
 @Component(service = ExperimentType.class)
 public class SpectrumProcessingExperimentType
@@ -78,7 +75,7 @@ public class SpectrumProcessingExperimentType
   public SpectrumProcessingExperimentType(ProcessorService processors) {
     this(processors, getDefaultProperties(SpectrumProperties.class));
   }
-
+  
   // @Activate TODO
   public SpectrumProcessingExperimentType(
       @Reference ProcessorService processors,

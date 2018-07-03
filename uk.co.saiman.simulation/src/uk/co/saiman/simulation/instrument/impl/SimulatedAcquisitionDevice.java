@@ -70,11 +70,11 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.observable.Observation;
+import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.AcquisitionSimulationConfiguration;
-import uk.co.saiman.text.properties.PropertyLoader;
 
 /**
  * Implementation of a simulation of an acquisition device.

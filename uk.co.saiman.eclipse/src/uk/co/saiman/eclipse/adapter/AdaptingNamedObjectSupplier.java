@@ -46,7 +46,7 @@ import org.eclipse.e4.core.services.adapter.Adapter;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
-import uk.co.saiman.text.properties.PropertyLoader;
+import uk.co.saiman.properties.PropertyLoader;
 
 /**
  * Supplier for Eclipse DI contexts, to provide localization implementations of

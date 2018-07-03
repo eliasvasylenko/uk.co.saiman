@@ -36,8 +36,8 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.experiment.processing.BoxFilter.State;
+import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.property.Property;
-import uk.co.saiman.text.properties.PropertyLoader;
 
 @Component
 public class BoxFilter implements ProcessorType<State> {

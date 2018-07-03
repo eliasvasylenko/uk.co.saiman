@@ -6,7 +6,7 @@ Bundle-Name: SAI :: Eclipse
 
 -buildpath: \
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\

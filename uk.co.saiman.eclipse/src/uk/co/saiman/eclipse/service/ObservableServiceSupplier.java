@@ -60,7 +60,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import uk.co.saiman.fx.FxUtilities;
 import uk.co.saiman.osgi.ServiceWiringException;
-import uk.co.saiman.text.properties.PropertyLoader;
+import uk.co.saiman.properties.PropertyLoader;
 
 /**
  * Supplier for {@link Service}

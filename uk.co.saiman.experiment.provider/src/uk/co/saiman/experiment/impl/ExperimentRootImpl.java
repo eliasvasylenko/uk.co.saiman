@@ -43,8 +43,6 @@ import uk.co.saiman.experiment.VoidExecutionContext;
 import uk.co.saiman.property.Property;
 
 /**
- * The root experiment type implementation for {@link FileSystemWorkspace}.
- * 
  * @author Elias N Vasylenko
  */
 public class ExperimentRootImpl implements ExperimentRoot {

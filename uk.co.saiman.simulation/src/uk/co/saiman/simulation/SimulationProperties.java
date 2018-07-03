@@ -30,36 +30,33 @@ package uk.co.saiman.simulation;
 import java.util.List;
 
 import uk.co.saiman.acquisition.AcquisitionProperties;
-import uk.co.saiman.text.properties.Localized;
-import uk.co.saiman.text.properties.Nested;
-import uk.co.saiman.text.properties.PropertyConfiguration;
-import uk.co.saiman.text.properties.PropertyConfiguration.KeyCase;
-import uk.co.saiman.text.properties.SaiProperties;
+import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.Nested;
+import uk.co.saiman.properties.SaiProperties;
 
 @SuppressWarnings("javadoc")
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SimulationProperties {
-	Localized<String> acquisitionSimulationDeviceName();
+  LocalizedString acquisitionSimulationDeviceName();
 
-	@Nested
-	AcquisitionProperties acquisition();
+  @Nested
+  AcquisitionProperties acquisition();
 
-	@Nested
-	SaiProperties sai();
+  @Nested
+  SaiProperties sai();
 
-	Localized<String> sampleImage();
+  LocalizedString sampleImage();
 
-	Localized<String> redChemical();
+  LocalizedString redChemical();
 
-	Localized<String> greenChemical();
+  LocalizedString greenChemical();
 
-	Localized<String> blueChemical();
+  LocalizedString blueChemical();
 
-	Localized<String> loadSampleImageTitle();
+  LocalizedString loadSampleImageTitle();
 
-	Localized<String> imageFileFilterTitle();
+  LocalizedString imageFileFilterTitle();
 
-	List<String> imageFileFilter();
+  List<String> imageFileFilter();
 
-	String invalidAcquisitionCount(int count);
+  String invalidAcquisitionCount(int count);
 }

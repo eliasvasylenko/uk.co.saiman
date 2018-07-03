@@ -14,9 +14,8 @@ Bundle-Name: SAI :: MSApex :: Simulation
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.resource;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
-	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-\
 	uk.co.saiman.camera;version=snapshot,\
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
@@ -30,7 +29,6 @@ Bundle-Name: SAI :: MSApex :: Simulation
 	uk.co.saiman.msapex.chemistry;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
-	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.simulation;version=snapshot,\
 	javax.measure.unit-api
 
