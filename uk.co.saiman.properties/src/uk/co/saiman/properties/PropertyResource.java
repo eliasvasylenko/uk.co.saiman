@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.properties;
 
+import static java.util.Collections.emptySet;
+
 import java.util.Locale;
-import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
@@ -72,42 +72,17 @@ public interface PropertyResource {
    */
   String getValue(String key, Locale locale);
 
-  /**
-   * @return the property resource configuration
-   */
-  Class<?> getAccessor();
+  static PropertyResource empty() {
+    return new PropertyResource() {
+      @Override
+      public String getValue(String key, Locale locale) {
+        return null;
+      }
 
-  /**
-   * Create a {@link PropertyResource localizing resource bundle} over the given
-   * configuration.
-   * 
-   * 
-   * 
-   * 
-   * TODO
-   * 
-   * 
-   * 
-   * The created resource bundle will behave as a delegate to a series of
-   * {@link ResourceBundle resource bundles} , which in turn will behave according
-   * to {@link ResourceBundle#getBundle(String, Locale, ClassLoader)} with the
-   * given class loader, using the given locations as base names, and using the
-   * current locale of the {@link PropertyResource}. This locale may change, and
-   * the delegate resource bundles will be updated accordingly.
-   * 
-   * @param accessor
-   *          the base names of properties files to load, and the class loaders
-   *          they exist in
-   * @param resource
-   *          the resource location setting from the appropriate
-   *          {@link Properties}
-   * @return a resource bundle over all resources at each given location
-   */
-  public static <T> PropertyResource getBundle(Class<T> accessor, String resource) {
-    return new PropertyResourceBundle(accessor, resource);
-  }
-
-  public static <T> PropertyResource getBundle(Class<T> accessor) {
-    return new PropertyResourceBundle(accessor);
+      @Override
+      public Set<String> getKeys(Locale locale) {
+        return emptySet();
+      }
+    };
   }
 }

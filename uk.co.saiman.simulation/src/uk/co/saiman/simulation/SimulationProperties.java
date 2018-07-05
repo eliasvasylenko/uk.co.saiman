@@ -29,32 +29,23 @@ package uk.co.saiman.simulation;
 
 import java.util.List;
 
-import uk.co.saiman.acquisition.AcquisitionProperties;
-import uk.co.saiman.properties.LocalizedString;
-import uk.co.saiman.properties.Nested;
-import uk.co.saiman.properties.SaiProperties;
+import uk.co.saiman.properties.Localized;
 
 @SuppressWarnings("javadoc")
 public interface SimulationProperties {
-  LocalizedString acquisitionSimulationDeviceName();
+  Localized<String> acquisitionSimulationDeviceName();
 
-  @Nested
-  AcquisitionProperties acquisition();
+  Localized<String> sampleImage();
 
-  @Nested
-  SaiProperties sai();
+  Localized<String> redChemical();
 
-  LocalizedString sampleImage();
+  Localized<String> greenChemical();
 
-  LocalizedString redChemical();
+  Localized<String> blueChemical();
 
-  LocalizedString greenChemical();
+  Localized<String> loadSampleImageTitle();
 
-  LocalizedString blueChemical();
-
-  LocalizedString loadSampleImageTitle();
-
-  LocalizedString imageFileFilterTitle();
+  Localized<String> imageFileFilterTitle();
 
   List<String> imageFileFilter();
 

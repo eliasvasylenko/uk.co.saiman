@@ -27,9 +27,7 @@
  */
 package uk.co.saiman.acquisition;
 
-import uk.co.saiman.properties.LocalizedString;
-import uk.co.saiman.properties.Nested;
-import uk.co.saiman.properties.SaiProperties;
+import uk.co.saiman.properties.Localized;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -38,21 +36,15 @@ import uk.co.saiman.properties.SaiProperties;
  */
 @SuppressWarnings("javadoc")
 public interface AcquisitionProperties {
-  @Nested
-  SaiProperties sai();
+  Localized<String> device();
 
-  @Nested
-  AcquisitionExceptionProperties exceptions();
+  Localized<String> devices();
 
-  LocalizedString device();
+  Localized<String> noDevices();
 
-  LocalizedString devices();
+  Localized<String> countMustBePositive();
 
-  LocalizedString noDevices();
+  Localized<String> noSignal();
 
-  LocalizedString countMustBePositive();
-
-  LocalizedString noSignal();
-
-  LocalizedString noAcquisitionDevices();
+  Localized<String> noAcquisitionDevices();
 }

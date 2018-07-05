@@ -576,9 +576,6 @@ public interface Observable<M> {
    * invoking {@link Invalidation#revalidate()}, which will return the most recent
    * message from upstream.
    * 
-   * @param <R>
-   *          the resulting reduction type
-   * 
    * @param identity
    *          the identity value for the accumulating function
    * @param accumulator

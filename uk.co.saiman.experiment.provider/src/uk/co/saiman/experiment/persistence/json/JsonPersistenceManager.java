@@ -82,8 +82,10 @@ public class JsonPersistenceManager implements ExperimentPersistenceManager {
 
       for (Path path : stream) {
         JsonPersistedStateDocument document = new JsonPersistedStateDocument(path);
+        document.load();
 
         PersistedExperiment experiment = new PersistedExperimentImpl(document.getPersistedState()) {
+          @Override
           public void setId(String id) throws IOException {
             moveExperiment(this, id);
           }
@@ -115,6 +117,7 @@ public class JsonPersistenceManager implements ExperimentPersistenceManager {
         document.getPersistedState(),
         id,
         typeId) {
+      @Override
       public void setId(String id) throws IOException {
         super.setId(id);
         moveExperiment(this, id);

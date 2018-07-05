@@ -36,14 +36,10 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
 public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, Void>
     implements Experiment {
-  private final WorkspaceImpl workspace;
-
   /**
    * Create a root experiment.
    * 
@@ -52,8 +48,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
    * @param id
    */
   protected ExperimentImpl(WorkspaceImpl workspace, String id) {
-    super(workspace.getExperimentRootType(), id);
-    this.workspace = workspace;
+    super(workspace, workspace.getExperimentRootType(), id);
   }
 
   /**
@@ -64,35 +59,9 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
    * @param id
    */
   protected ExperimentImpl(WorkspaceImpl workspace, PersistedExperiment persistedExperiment) {
-    super(workspace.getExperimentRootType(), persistedExperiment);
-    this.workspace = workspace;
+    super(workspace, workspace.getExperimentRootType(), persistedExperiment);
 
     loadChildNodes();
-  }
-
-  @Override
-  public WorkspaceImpl getWorkspace() {
-    return workspace;
-  }
-
-  @Override
-  protected ExperimentProperties getText() {
-    return workspace.getText();
-  }
-
-  @Override
-  protected Log getLog() {
-    return workspace.getLog();
-  }
-
-  @Override
-  protected ExperimentLocationManager getLocationManager() {
-    return workspace.getLocationManager();
-  }
-
-  @Override
-  protected ExperimentPersistenceManager getPersistenceManager() {
-    return workspace.getPersistenceManager();
   }
 
   @Override

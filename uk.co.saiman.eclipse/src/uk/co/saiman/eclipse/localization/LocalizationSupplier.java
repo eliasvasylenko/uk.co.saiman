@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.eclipse.localization;
 
+import static java.lang.String.format;
+
 import java.lang.reflect.Type;
 
 import org.eclipse.e4.core.di.suppliers.ExtendedObjectSupplier;
@@ -37,7 +39,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -57,12 +58,6 @@ import uk.co.saiman.properties.PropertyLoaderException;
 public class LocalizationSupplier extends ExtendedObjectSupplier {
   @Reference
   PropertyLoader generalLocalizer;
-  private LocalizationSupplierProperties text;
-
-  @Activate
-  void activate() {
-    text = generalLocalizer.getProperties(LocalizationSupplierProperties.class);
-  }
 
   @Override
   public Object get(
@@ -75,13 +70,20 @@ public class LocalizationSupplier extends ExtendedObjectSupplier {
 
       if (validateAccessorType(accessor)) {
         return localizeAccessor(requestor, (Class<?>) accessor);
+
       } else {
-        throw new PropertyLoaderException(text.illegalInjectionTarget());
+        throw new PropertyLoaderException(
+            format(
+                "Illegal %s injection target %s must be an interface",
+                Localize.class.getTypeName(),
+                accessor.getTypeName()));
       }
     } catch (PropertyLoaderException e) {
       throw e;
     } catch (Exception e) {
-      throw new PropertyLoaderException(text.unexpectedError(), e);
+      throw new PropertyLoaderException(
+          "An unexpected problem was encountered providing a localized text service",
+          e);
     }
   }
 

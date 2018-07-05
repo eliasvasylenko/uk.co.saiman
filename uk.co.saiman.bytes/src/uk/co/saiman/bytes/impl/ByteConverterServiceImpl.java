@@ -46,7 +46,7 @@ import uk.co.saiman.reflection.token.AnnotatedTypeToken;
 @Component
 public class ByteConverterServiceImpl implements ByteConverterService {
   @Reference(policy = DYNAMIC, policyOption = GREEDY)
-  volatile Map<Map<?, ?>, ByteConverterProvider> byteConverterProviders;
+  volatile Map<Map<String, ?>, ByteConverterProvider> byteConverterProviders;
 
   private final Map<AnnotatedTypeToken<?>, CompositeByteConverter<?>> typedByteConverters = Collections
       .synchronizedMap(new HashMap<>());

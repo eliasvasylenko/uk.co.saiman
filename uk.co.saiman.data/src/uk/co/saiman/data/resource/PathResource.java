@@ -58,10 +58,8 @@ public class PathResource implements Resource {
   }
 
   @Override
-  public String getExtension() {
-    String name = path.getFileName().toString();
-    int lastDot = name.lastIndexOf('.');
-    return lastDot > 0 ? name.substring(lastDot) : "";
+  public boolean hasExtension(String extension) {
+    return path.getFileName().toString().endsWith("." + extension);
   }
 
   @Override

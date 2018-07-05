@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.msapex.instrument.sample;
 
-import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.Localized;
 
 public interface SamplePartProperties {
-  LocalizedString noSampleSources();
+  Localized<String> noSampleSources();
 }

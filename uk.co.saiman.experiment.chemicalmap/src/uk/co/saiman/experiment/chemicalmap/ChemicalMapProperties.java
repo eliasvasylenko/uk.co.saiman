@@ -28,16 +28,16 @@
 package uk.co.saiman.experiment.chemicalmap;
 
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.Localized;
 
 public interface ChemicalMapProperties {
   ExperimentProperties experiment();
 
-  LocalizedString chemicalMapExperimentName();
+  Localized<String> chemicalMapExperimentName();
 
-  LocalizedString chemicalMapResultName();
+  Localized<String> chemicalMapResultName();
 
-  LocalizedString defaultChemicalMapName();
+  Localized<String> defaultChemicalMapName();
 
-  LocalizedString chemicalMapGraphEditor();
+  Localized<String> chemicalMapGraphEditor();
 }

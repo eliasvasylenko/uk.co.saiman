@@ -55,11 +55,11 @@ public abstract class StaticPropertyAccessor<S> {
    *          the string to create a localized view of
    * @param arguments
    *          the arguments to substitute into the string
-   * @return a {@link LocalizedString} instance over the given string and the
-   *         static locale
+   * @return a {@link Localized} instance over the given string and the static
+   *         locale
    */
-  protected LocalizedString localize(String string, Object... arguments) {
-    return LocalizedString.forStaticLocale(format(string, arguments), locale);
+  protected Localized<String> localize(String string, Object... arguments) {
+    return Localized.forStaticLocale(format(string, arguments), locale);
   }
 
   protected String format(String string, Object... arguments) {
@@ -69,10 +69,10 @@ public abstract class StaticPropertyAccessor<S> {
   /**
    * @param property
    *          the property to create a localized view of
-   * @return a {@link LocalizedString} instance over the given string and the
-   *         static locale
+   * @return a {@link Localized} instance over the given string and the static
+   *         locale
    */
-  protected LocalizedString localize(String property) {
-    return LocalizedString.forStaticLocale(property, locale);
+  protected Localized<String> localize(String property) {
+    return Localized.forStaticLocale(property, locale);
   }
 }

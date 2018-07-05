@@ -27,20 +27,16 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import uk.co.saiman.properties.LocalizedString;
-import uk.co.saiman.properties.Nested;
+import uk.co.saiman.properties.Localized;
 
 public interface SpectrumProperties {
-  @Nested
-  SpectrumExceptionProperties exception();
+  Localized<String> spectrumExperimentName();
 
-  LocalizedString spectrumExperimentName();
+  Localized<String> spectrumResultName();
 
-  LocalizedString spectrumResultName();
+  Localized<String> defaultSpectrumName();
 
-  LocalizedString defaultSpectrumName();
+  Localized<String> spectrumGraphEditor();
 
-  LocalizedString spectrumGraphEditor();
-
-  LocalizedString spectrumProcessingExperimentName();
+  Localized<String> spectrumProcessingExperimentName();
 }

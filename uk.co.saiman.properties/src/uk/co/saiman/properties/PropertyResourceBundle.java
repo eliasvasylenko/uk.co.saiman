@@ -27,10 +27,12 @@
  */
 package uk.co.saiman.properties;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.list;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -48,45 +50,52 @@ import java.util.Set;
  * @author Elias N Vasylenko
  */
 public class PropertyResourceBundle implements PropertyResource {
+  private static class ResourceBundleDescriptor {
+    private final ClassLoader classLoader;
+    private final String location;
+
+    public ResourceBundleDescriptor(ClassLoader classLoader, String location) {
+      this.classLoader = classLoader;
+      this.location = location;
+    }
+
+    public ClassLoader getClassLoader() {
+      return classLoader;
+    }
+
+    public String getLocation() {
+      return location;
+    }
+  }
+
   private static final String PROPERTIES_POSTFIX = "Properties";
 
   private final Class<?> accessor;
-  private final Set<ResourceBundleDescriptor> resources;
+  private final List<ResourceBundleDescriptor> resources;
   private final Map<Locale, List<ResourceBundle>> localizedResourceBundles;
 
   public PropertyResourceBundle(Class<?> accessor) {
-    this(accessor, getDefaultResource(accessor));
+    this(accessor, accessor.getClassLoader(), asList(getDefaultResource(accessor)));
   }
 
   /**
    * Create a resource bundle with the given initial locale.
    * 
-   * @param strategy
-   *          the strategy responsible for initializing this resource from the
-   *          appropriate {@link Properties}
    * @param accessor
    *          the accessor class type
-   * @param resource
-   *          the resource location setting from the appropriate
-   *          {@link Properties}
+   * @param resources
+   *          the resource locations
    */
-  protected PropertyResourceBundle(Class<?> accessor, String resource) {
+  public PropertyResourceBundle(
+      Class<?> accessor,
+      ClassLoader classLoader,
+      Collection<? extends String> resources) {
     this.accessor = accessor;
-    localizedResourceBundles = new HashMap<>();
-
-    resources = new LinkedHashSet<>(getResources(accessor, resource));
-
-    if (getResourceBundles(Locale.ROOT).isEmpty()) {
-      throw new MissingResourceException(
-          "Cannot find resources for any of " + resources + " for " + accessor,
-          accessor.toString(),
-          "");
-    }
-  }
-
-  @Override
-  public Class<?> getAccessor() {
-    return accessor;
+    this.localizedResourceBundles = new HashMap<>();
+    this.resources = resources
+        .stream()
+        .map(resource -> new ResourceBundleDescriptor(classLoader, resource))
+        .collect(toList());
   }
 
   @Override
@@ -118,7 +127,7 @@ public class PropertyResourceBundle implements PropertyResource {
             + " for "
             + accessor,
         accessor.toString(),
-        "");
+        key);
   }
 
   protected synchronized List<ResourceBundle> getResourceBundles(Locale locale) {
@@ -141,10 +150,6 @@ public class PropertyResourceBundle implements PropertyResource {
     }
   }
 
-  protected <T> List<ResourceBundleDescriptor> getResources(Class<T> accessor, String resource) {
-    return Arrays.asList(new ResourceBundleDescriptor(accessor.getClassLoader(), resource));
-  }
-
   /**
    * @param name
    *          the string to remove the postfix from
@@ -159,7 +164,7 @@ public class PropertyResourceBundle implements PropertyResource {
     return name;
   }
 
-  private static String getDefaultResource(Class<?> accessor) {
+  public static String getDefaultResource(Class<?> accessor) {
     uk.co.saiman.properties.Properties properties = accessor
         .getAnnotation(uk.co.saiman.properties.Properties.class);
 

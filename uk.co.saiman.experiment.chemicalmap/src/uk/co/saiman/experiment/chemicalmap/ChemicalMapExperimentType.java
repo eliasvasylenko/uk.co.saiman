@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
+import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
+
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
@@ -50,7 +52,7 @@ public abstract class ChemicalMapExperimentType<T extends ChemicalMapConfigurati
   private final ChemicalMapProperties properties;
 
   public ChemicalMapExperimentType() {
-    this(PropertyLoader.getDefaultProperties(ChemicalMapProperties.class));
+    this(getDefaultPropertyLoader().getProperties(ChemicalMapProperties.class));
   }
 
   public ChemicalMapExperimentType(ChemicalMapProperties properties) {

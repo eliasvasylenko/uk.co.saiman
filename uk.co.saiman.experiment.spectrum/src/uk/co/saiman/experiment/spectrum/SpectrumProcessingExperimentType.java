@@ -29,7 +29,7 @@ package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSING_KEY;
-import static uk.co.saiman.properties.PropertyLoader.getDefaultProperties;
+import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
 import java.util.List;
 import java.util.Random;
@@ -68,7 +68,7 @@ public class SpectrumProcessingExperimentType
   private final SpectrumProperties properties;
 
   public SpectrumProcessingExperimentType() {
-    properties = getDefaultProperties(SpectrumProperties.class);
+    properties = getDefaultPropertyLoader().getProperties(SpectrumProperties.class);
   }
 
   /*-
@@ -76,7 +76,7 @@ public class SpectrumProcessingExperimentType
     this(processors, getDefaultProperties(SpectrumProperties.class));
   }
   
-  // @Activate TODO
+  @Activate TODO
   public SpectrumProcessingExperimentType(
       @Reference ProcessorService processors,
       @Reference SpectrumProperties properties) {

@@ -64,6 +64,25 @@ public interface LocaleProvider extends ObservableValue<Locale> {
   static LocaleProvider getDefaultProvider() {
     return DEFAULT_PROVIDER;
   }
+
+  static LocaleProvider getStaticProvider(Locale locale) {
+    return new LocaleProvider() {
+      @Override
+      public Disposable observe(Observer<? super Locale> observer) {
+        return Observable.of(locale).observe(observer);
+      }
+
+      @Override
+      public Locale get() {
+        return locale;
+      }
+
+      @Override
+      public Observable<Change<Locale>> changes() {
+        return Observable.<Change<Locale>>empty();
+      }
+    };
+  }
 }
 
 class DefaultLocaleProvider implements LocaleProvider {

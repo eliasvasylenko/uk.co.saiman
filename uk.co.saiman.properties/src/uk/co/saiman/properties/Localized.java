@@ -41,21 +41,21 @@ import uk.co.saiman.observable.Observer;
  * 
  * @author Elias N Vasylenko
  */
-public interface LocalizedString extends ObservableValue<String> {
+public interface Localized<T> extends ObservableValue<T> {
   /**
    * @return the current locale of the string
    */
   ObservableValue<Locale> locale();
 
   @Override
-  String get();
+  T get();
 
   /**
    * @param locale
    *          the locale to translate to
    * @return the localized string value according to the given locale
    */
-  String get(Locale locale);
+  T get(Locale locale);
 
   /**
    * Create a localized view of a value with a static locale.
@@ -66,10 +66,10 @@ public interface LocalizedString extends ObservableValue<String> {
    *          the locale of the given text
    * @return a localized string over the given text and locale
    */
-  static LocalizedString forStaticLocale(String value, Locale locale) {
-    return new LocalizedString() {
+  static <T> Localized<T> forStaticLocale(T value, Locale locale) {
+    return new Localized<T>() {
       @Override
-      public String get() {
+      public T get() {
         return value;
       }
 
@@ -79,12 +79,12 @@ public interface LocalizedString extends ObservableValue<String> {
       }
 
       @Override
-      public String get(Locale locale) {
+      public T get(Locale locale) {
         return get();
       }
 
       @Override
-      public Disposable observe(Observer<? super String> observer) {
+      public Disposable observe(Observer<? super T> observer) {
         Observation observation = new Observation() {
           @Override
           public void cancel() {}
@@ -107,7 +107,7 @@ public interface LocalizedString extends ObservableValue<String> {
       }
 
       @Override
-      public Observable<Change<String>> changes() {
+      public Observable<Change<T>> changes() {
         return Observable.empty();
       }
     };

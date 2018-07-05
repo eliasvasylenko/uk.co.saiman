@@ -25,25 +25,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.properties;
+package uk.co.saiman.properties.impl;
 
 import static java.util.Objects.requireNonNull;
-
-import java.util.Locale;
 
 import uk.co.saiman.collection.computingmap.CacheComputingMap;
 import uk.co.saiman.collection.computingmap.ComputingMap;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
-import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.properties.LocaleProvider;
+import uk.co.saiman.properties.PropertyLoader;
+import uk.co.saiman.properties.PropertyResourceLoader;
+import uk.co.saiman.properties.PropertyValueConverter;
 
-class PropertyLoaderImpl implements PropertyLoader {
+public class PropertyLoaderImpl implements PropertyLoader {
   private final ComputingMap<Class<?>, Object> localizationCache;
 
   private final LocaleProvider locale;
-  private Log log;
-
-  private final PropertyLoaderProperties text;
+  private final PropertyResourceLoader resourceLoader;
+  private final PropertyValueConverter valueConverter;
+  private final Log log;
 
   /**
    * Create a new {@link PropertyLoader} instance for the given initial locale.
@@ -53,51 +54,42 @@ class PropertyLoaderImpl implements PropertyLoader {
    * @param log
    *          the log for localization
    */
-  public PropertyLoaderImpl(LocaleProvider locale, Log log) {
-    localizationCache = new CacheComputingMap<>(c -> instantiateProperties(c), true);
+  public PropertyLoaderImpl(
+      LocaleProvider locale,
+      PropertyResourceLoader resourceLoader,
+      PropertyValueConverter valueConverter,
+      Log log) {
+    localizationCache = new CacheComputingMap<>(
+        c -> new PropertyAccessorDelegate<>(this, c).getProxy(),
+        true);
 
     this.locale = locale;
+    this.resourceLoader = resourceLoader;
+    this.valueConverter = valueConverter;
     this.log = requireNonNull(log);
 
-    PropertyLoaderProperties text;
-    try {
-      text = getProperties(PropertyLoaderProperties.class);
-    } catch (Exception e) {
-      text = new DefaultPropertyLoaderProperties();
-    }
-    this.text = text;
-
     if (log != null) {
-      locale().observe(l -> {
-        log.log(Level.INFO, getProperties().localeChanged(locale, getLocale()).toString());
+      getLocaleProvider().observe(l -> {
+        log.log(Level.INFO, String.format("Locale changed %s", l));
       });
     }
   }
 
-  public PropertyLoaderProperties getProperties() {
-    return text;
-  }
-
-  Log getLog() {
-    return log;
-  }
-
   @Override
-  public Locale getLocale() {
-    return locale.getLocale();
-  }
-
-  @Override
-  public ObservableValue<Locale> locale() {
+  public LocaleProvider getLocaleProvider() {
     return locale;
   }
 
-  protected <T> T instantiateProperties(Class<T> source) {
-    return new PropertyAccessorDelegate<>(
-        this,
-        PropertyResource.getBundle(source),
-        getLog(),
-        source).getProxy();
+  protected PropertyResourceLoader getResourceLoader() {
+    return resourceLoader;
+  }
+
+  protected PropertyValueConverter getValueConverter() {
+    return valueConverter;
+  }
+
+  protected Log getLog() {
+    return log;
   }
 
   @Override

@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.instrument.acquisition.
+ * This file is part of uk.co.saiman.properties.
  *
- * uk.co.saiman.instrument.acquisition is free software: you can redistribute it and/or modify
+ * uk.co.saiman.properties is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.instrument.acquisition is distributed in the hope that it will be useful,
+ * uk.co.saiman.properties is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,30 +25,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.acquisition;
+package uk.co.saiman.properties;
 
-import uk.co.saiman.properties.Nested;
-import uk.co.saiman.properties.SaiProperties;
+import java.util.List;
 
-/**
- * Localized text resource accessor for acquisition engine items.
- * 
- * @author Elias N Vasylenko
- */
-@SuppressWarnings("javadoc")
-public interface AcquisitionExceptionProperties {
-	@Nested
-	SaiProperties sai();
-
-	String countMustBePositive();
-
-	String noSignal();
-
-	String alreadyAcquiring();
-
-	String experimentInterrupted();
-
-	String unexpectedException();
-
-  String failedToConnectDetector();
+public interface PropertyValueConversion<T> {
+  T applyConversion(List<?> arguments);
 }

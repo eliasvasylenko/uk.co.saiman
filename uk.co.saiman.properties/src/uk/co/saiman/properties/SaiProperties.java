@@ -48,5 +48,5 @@ public interface SaiProperties {
 
   int copyrightYear();
 
-  LocalizedString copyrightMessage();
+  Localized<String> copyrightMessage();
 }

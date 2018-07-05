@@ -29,9 +29,7 @@ package uk.co.saiman.experiment;
 
 import java.nio.file.Path;
 
-import uk.co.saiman.properties.LocalizedString;
-import uk.co.saiman.properties.Nested;
-import uk.co.saiman.properties.SaiProperties;
+import uk.co.saiman.properties.Localized;
 
 /**
  * Properties interface for texts relating to experiments.
@@ -40,19 +38,16 @@ import uk.co.saiman.properties.SaiProperties;
  */
 @SuppressWarnings("javadoc")
 public interface ExperimentProperties {
-  @Nested
-  SaiProperties sai();
+  Localized<String> newExperiment();
 
-  LocalizedString newExperiment();
-
-  LocalizedString newExperimentName();
+  Localized<String> newExperimentName();
 
   /**
    * @param state
    *          the state to localize
    * @return localized name of the state
    */
-  default LocalizedString lifecycleState(ExperimentLifecycleState state) {
+  default Localized<String> lifecycleState(ExperimentLifecycleState state) {
     switch (state) {
     case COMPLETION:
       return lifecycleStateCompletion();
@@ -72,39 +67,39 @@ public interface ExperimentProperties {
     throw new AssertionError();
   }
 
-  LocalizedString lifecycleStateCompletion();
+  Localized<String> lifecycleStateCompletion();
 
-  LocalizedString lifecycleStateConfiguration();
+  Localized<String> lifecycleStateConfiguration();
 
-  LocalizedString lifecycleStateDisposed();
+  Localized<String> lifecycleStateDisposed();
 
-  LocalizedString lifecycleStatefailure();
+  Localized<String> lifecycleStatefailure();
 
-  LocalizedString lifecycleStatePreparation();
+  Localized<String> lifecycleStatePreparation();
 
-  LocalizedString lifecycleStateProcessing();
+  Localized<String> lifecycleStateProcessing();
 
-  LocalizedString lifecycleStateWaiting();
+  Localized<String> lifecycleStateWaiting();
 
-  LocalizedString configuration();
+  Localized<String> configuration();
 
-  LocalizedString missingResult();
+  Localized<String> missingResult();
 
-  LocalizedString missingExperimentType(String id);
+  Localized<String> missingExperimentType(String id);
 
-  LocalizedString experimentRoot();
+  Localized<String> experimentRoot();
 
-  LocalizedString overwriteData();
+  Localized<String> overwriteData();
 
-  LocalizedString overwriteDataConfirmation(Path newLocation);
+  Localized<String> overwriteDataConfirmation(Path newLocation);
 
-  LocalizedString renameExperiment();
+  Localized<String> renameExperiment();
 
-  LocalizedString renameExperimentName(String name);
+  Localized<String> renameExperimentName(String name);
 
-  LocalizedString cannotCreateWorkspace(Workspace experimentWorkspace);
+  Localized<String> cannotCreateWorkspace(Workspace experimentWorkspace);
 
-  LocalizedString addSpectrumProcessor();
+  Localized<String> addSpectrumProcessor();
 
-  LocalizedString addSpectrumProcessorDescription();
+  Localized<String> addSpectrumProcessorDescription();
 }

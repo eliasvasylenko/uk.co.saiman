@@ -27,36 +27,18 @@
  */
 package uk.co.saiman.properties;
 
-import java.util.Locale;
+import java.lang.reflect.AnnotatedType;
 
-final class DefaultPropertyLoaderProperties extends StaticPropertyAccessor<PropertyLoaderProperties>
-    implements PropertyLoaderProperties {
-  private static final String TRANSLATION_NOT_FOUND_MESSAGE = "Translation not found for key %s";
-  private static final String MUST_BE_INTERFACE = "Localization accessor %s must be an interface";
-  private static final String ILLEGAL_RETURN_TYPE = "Illegal return type %s for key %s";
-  private static final String LOCALE_CHANGED = "Locale changed to %s";
+import uk.co.saiman.properties.impl.PropertyValueConverterImpl;
 
-  public DefaultPropertyLoaderProperties() {
-    super(Locale.ENGLISH);
-  }
+public interface PropertyValueConverter {
+  PropertyValueConversion<?> getConversion(
+      LocaleProvider localeProvider,
+      PropertyResource propertyResource,
+      AnnotatedType type,
+      String key);
 
-  @Override
-  public String translationNotFoundMessage(String key) {
-    return format(TRANSLATION_NOT_FOUND_MESSAGE, key);
-  }
-
-  @Override
-  public String mustBeInterface(Class<?> accessor) {
-    return format(MUST_BE_INTERFACE, accessor);
-  }
-
-  @Override
-  public String propertyValueTypeNotSupported(String typeName, String key) {
-    return format(ILLEGAL_RETURN_TYPE, typeName, key);
-  }
-
-  @Override
-  public String localeChanged(LocaleProvider manager, Locale locale) {
-    return format(LOCALE_CHANGED, locale);
+  static PropertyValueConverter getDefaultValueConverter() {
+    return new PropertyValueConverterImpl();
   }
 }

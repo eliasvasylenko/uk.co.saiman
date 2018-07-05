@@ -55,7 +55,7 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.Localized;
 import uk.co.saiman.utility.Named;
 
 /**
@@ -96,8 +96,8 @@ public class RenameExperimentHandler {
 
   static Optional<String> requestExperimentNameDialog(
       Workspace workspace,
-      LocalizedString title,
-      LocalizedString header) {
+      Localized<String> title,
+      Localized<String> header) {
     TextInputDialog nameDialog = new TextInputDialog();
     nameDialog.titleProperty().bind(wrap(title));
     nameDialog.headerTextProperty().bind(wrap(header));

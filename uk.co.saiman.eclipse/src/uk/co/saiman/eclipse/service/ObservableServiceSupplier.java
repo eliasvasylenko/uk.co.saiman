@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.eclipse.service;
 
+import static java.lang.String.format;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -48,9 +50,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -60,7 +60,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import uk.co.saiman.fx.FxUtilities;
 import uk.co.saiman.osgi.ServiceWiringException;
-import uk.co.saiman.properties.PropertyLoader;
 
 /**
  * Supplier for {@link Service}
@@ -157,15 +156,6 @@ public class ObservableServiceSupplier extends ExtendedObjectSupplier {
     }
   }
 
-  @Reference
-  PropertyLoader generalLocalizer;
-  private ObservableServiceSupplierProperties text;
-
-  @Activate
-  void activate() {
-    text = generalLocalizer.getProperties(ObservableServiceSupplierProperties.class);
-  }
-
   @Override
   public Object get(
       IObjectDescriptor descriptor,
@@ -195,11 +185,17 @@ public class ObservableServiceSupplier extends ExtendedObjectSupplier {
         }
       }
 
-      throw new ServiceWiringException(text.illegalInjectionTarget());
+      throw new ServiceWiringException(
+          format(
+              "Illegal %s injection target %s",
+              ObservableService.class.getTypeName(),
+              descriptor.getDesiredType().getTypeName()));
     } catch (ServiceWiringException e) {
       throw e;
     } catch (Exception e) {
-      throw new ServiceWiringException(text.unexpectedError(), e);
+      throw new ServiceWiringException(
+          "An unexpected problem was encountered attempting to provide an observable service supplier",
+          e);
     }
   }
 }

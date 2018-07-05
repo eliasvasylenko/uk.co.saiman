@@ -44,7 +44,6 @@ runplatform: linux64
 	org.apache.felix.webconsole.plugins.useradmin;version='[1.0.2,1.0.3)',\
 	org.apache.felix.gogo.shell;version='[1.1.0,1.1.1)',\
 	org.apache.felix.gogo.runtime;version='[1.1.0,1.1.1)',\
-	org.apache.felix.gogo.jline;version='[1.1.0,1.1.1)',\
 	org.apache.felix.gogo.command;version='[1.0.2,1.0.3)',\
 	org.jline;version='[3.8.0,3.8.1)',\
 	json;version='[20171018.0.0,20171018.0.1)',\

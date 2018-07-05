@@ -25,30 +25,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.properties;
+package uk.co.saiman.properties.impl;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
-import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.properties.Key;
+import uk.co.saiman.properties.PropertyLoader;
+import uk.co.saiman.properties.PropertyLoaderException;
+import uk.co.saiman.properties.PropertyResource;
+import uk.co.saiman.properties.PropertyValueConversion;
 
 /**
  * Delegate implementation object for proxy instances of property accessor
@@ -85,121 +84,73 @@ public class PropertyAccessorDelegate<A> {
   }
 
   private final PropertyLoaderImpl loader;
-  private final Log log;
   private final Class<A> source;
-  private final A proxy;
-
   private final PropertyResource propertyResource;
-  private final Map<Method, PropertyValueDelegate<A>> valueDelegates = new ConcurrentHashMap<>();
+
+  private final A proxy;
+  private final Map<Method, PropertyValueConversion<?>> valueConversions = new ConcurrentHashMap<>();
 
   /**
    * @param loader
    *          which created the delegate, to call back to
-   * @param propertyResource
-   *          the resource for the properties backing the accessor
-   * @param log
-   *          the log, or null
    * @param source
    *          the property accessor class and configuration
    */
-  public PropertyAccessorDelegate(
-      PropertyLoaderImpl loader,
-      PropertyResource propertyResource,
-      Log log,
-      Class<A> source) {
+  public PropertyAccessorDelegate(PropertyLoaderImpl loader, Class<A> source) {
     this.loader = loader;
-    this.log = Log.forwardingLog(log);
     this.source = source;
-    this.propertyResource = propertyResource;
+    this.propertyResource = loader.getResourceLoader().loadResource(source);
 
     if (!source.isInterface()) {
-      PropertyLoaderException e = new PropertyLoaderException(getText().mustBeInterface(source));
-      log.log(Level.ERROR, e);
+      PropertyLoaderException e = new PropertyLoaderException(
+          format("Property accessor class %s must be an interface", source));
+      loader.getLog().log(Level.ERROR, e);
       throw e;
     }
 
-    proxy = createProxy(source);
+    this.proxy = createProxy(source);
 
-    initialize();
-  }
-
-  PropertyLoader getLoader() {
-    return loader;
-  }
-
-  Class<A> getSource() {
-    return source;
-  }
-
-  private PropertyLoaderProperties getText() {
-    return loader.getProperties();
-  }
-
-  private void initialize() {
     for (Method method : source.getMethods()) {
       if (!DIRECT_METHODS.contains(method) && !method.isDefault()) {
-        loadPropertyValueDelegate(method);
+        loadPropertyConversion(method);
       }
     }
   }
 
-  private PropertyValueDelegate<A> loadPropertyValueDelegate(Method method) {
-    return valueDelegates.computeIfAbsent(method, s -> new PropertyValueDelegate<>(this, s));
+  private PropertyValueConversion<?> loadPropertyConversion(Method method) {
+    AnnotatedType type = method.getAnnotatedReturnType();
+    String key = getKey(source, method);
+
+    return valueConversions
+        .computeIfAbsent(
+            method,
+            s -> loader
+                .getValueConverter()
+                .getConversion(loader.getLocaleProvider(), propertyResource, type, key));
   }
 
-  private Object getInstantiatedPropertyValue(Method method, Object... arguments) {
-    List<?> argumentList;
-    if (arguments == null) {
-      argumentList = emptyList();
+  private String getKey(Class<A> source, Method method) {
+    Key key = method.getAnnotation(Key.class);
+    if (key == null) {
+      key = source.getAnnotation(Key.class);
+    }
+    String keyString;
+    if (key != null) {
+      keyString = key.value();
     } else {
-      argumentList = asList(arguments);
+      keyString = Key.UNQUALIFIED_DOTTED;
     }
 
-    try {
-      return loadPropertyValueDelegate(method).getValue(argumentList);
-    } catch (Exception e) {
-      /*
-       * Extra layer of protection for internal properties, so things can still
-       * function if there is a problem retrieving them...
-       */
-      if (source.equals(PropertyLoaderProperties.class)) {
-        try {
-          return method.invoke(new DefaultPropertyLoaderProperties(), arguments);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
-          throw new RuntimeException(e1);
-        }
-      } else {
-        throw e;
-      }
-    }
+    Object[] substitution = new String[3];
+    substitution[0] = source.getPackage().getName();
+    substitution[1] = source.getSimpleName();
+    substitution[2] = method.getName();
+
+    return String.format(keyString, substitution);
   }
 
   @SuppressWarnings("unchecked")
-  <T> Function<List<?>, T> parseValueString(AnnotatedType propertyType, String key, Locale locale) {
-    PropertyValueLoader provider = null;
-
-    try {
-      String valueString = loadValueString(source, key, locale);
-
-      return arguments -> (T) provider.load(propertyType, key, valueString, arguments);
-    } catch (MissingResourceException e) {
-      if (provider.providesDefault()) {
-        return arguments -> (T) provider.getDefault(propertyType, key, arguments);
-      }
-      PropertyLoaderException ple = new PropertyLoaderException(
-          getText().translationNotFoundMessage(key),
-          e);
-      log.log(Level.WARN, ple);
-      throw ple;
-    }
-  }
-
-  private String loadValueString(Class<?> source, String key, Locale locale) {
-    return propertyResource.getValue(key, locale);
-  }
-
-  @SuppressWarnings("unchecked")
-  A createProxy(Class<A> accessor) {
+  private A createProxy(Class<A> accessor) {
     ClassLoader classLoader = new PropertyAccessorClassLoader(accessor.getClassLoader());
 
     return (A) Proxy
@@ -219,7 +170,13 @@ public class PropertyAccessorDelegate<A> {
                     .invokeWithArguments(args);
               }
 
-              return getInstantiatedPropertyValue(method, args);
+              PropertyValueConversion<?> conversion = loadPropertyConversion(method);
+
+              if (args == null) {
+                args = new Object[] {};
+              }
+
+              return conversion.applyConversion(asList(args));
             });
   }
 

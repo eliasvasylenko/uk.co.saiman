@@ -50,7 +50,6 @@ public class JsonPersistedStateDocument {
     this.resource = resource;
     this.persistedState = new PersistedState();
     persistedState.changes().observe(m -> save());
-    load();
   }
 
   public JsonPersistedStateDocument setPath(Path path) {

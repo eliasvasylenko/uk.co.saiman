@@ -28,6 +28,9 @@
 package uk.co.saiman.properties;
 
 import static uk.co.saiman.log.Log.discardingLog;
+import static uk.co.saiman.properties.LocaleProvider.getDefaultProvider;
+import static uk.co.saiman.properties.PropertyResourceLoader.getDefaultResourceLoader;
+import static uk.co.saiman.properties.PropertyValueConverter.getDefaultValueConverter;
 
 import java.util.Locale;
 import java.util.Properties;
@@ -35,7 +38,7 @@ import java.util.ResourceBundle;
 
 import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.properties.impl.PropertyLoaderImpl;
 
 /**
  * This interface represents a simple but powerful system for
@@ -58,25 +61,17 @@ import uk.co.saiman.observable.ObservableValue;
  * <p>
  * A {@link Properties} instance is {@link Observable} over changes to its
  * locale, with the instance itself being passed as the message to observers.
- * <p>
- * For an example of how to use this interface, users may wish to take a look at
- * the {@link PropertyLoaderProperties} interface.
  * 
  * @author Elias N Vasylenko
  */
 public interface PropertyLoader {
-  PropertyLoader DEFAULT_PROPERTY_LOADER = newPropertyLoader(LocaleProvider.getDefaultProvider());
+  PropertyLoader DEFAULT_PROPERTY_LOADER = newPropertyLoader(
+      getDefaultProvider(),
+      getDefaultResourceLoader(),
+      getDefaultValueConverter(),
+      discardingLog());
 
-  /**
-   * @return the current locale of all localized texts implemented by this
-   *         {@link PropertyLoader}
-   */
-  Locale getLocale();
-
-  /**
-   * @return an observable over changes to the locale
-   */
-  ObservableValue<Locale> locale();
+  LocaleProvider getLocaleProvider();
 
   /**
    * Generate an implementing instance of the given accessor interface class,
@@ -90,43 +85,25 @@ public interface PropertyLoader {
    */
   <T> T getProperties(Class<T> accessor);
 
-  /**
-   * Generate an implementing instance of the given accessor interface class,
-   * according to the rules described by {@link Properties}.
-   * 
-   * @param <T>
-   *          the type of the localization text accessor interface
-   * @param accessor
-   *          the sub-interface of {@link Properties} we wish to implement
-   * @return an implementation of the accessor interface
-   */
-  static <T> T getDefaultProperties(Class<T> accessor) {
-    return DEFAULT_PROPERTY_LOADER.getProperties(accessor);
+  static PropertyLoader getDefaultPropertyLoader() {
+    return DEFAULT_PROPERTY_LOADER;
   }
 
   /**
    * Get a simple {@link PropertyLoader} implementation over the given locale
    * provider.
    * 
-   * @param provider
-   *          a provider to establish a locale setting
-   * @return a {@link PropertyLoader} for the given locale
-   */
-  static PropertyLoader newPropertyLoader(LocaleProvider provider) {
-    return newPropertyLoader(provider, discardingLog());
-  }
-
-  /**
-   * Get a simple {@link PropertyLoader} implementation over the given locale
-   * provider.
-   * 
-   * @param provider
+   * @param localeProvider
    *          a provider to establish a locale setting
    * @param log
    *          a log for localization information
    * @return a {@link PropertyLoader} for the given locale
    */
-  static PropertyLoader newPropertyLoader(LocaleProvider provider, Log log) {
-    return new PropertyLoaderImpl(provider, log);
+  static PropertyLoader newPropertyLoader(
+      LocaleProvider localeProvider,
+      PropertyResourceLoader resourceLoader,
+      PropertyValueConverter valueConverter,
+      Log log) {
+    return new PropertyLoaderImpl(localeProvider, resourceLoader, valueConverter, log);
   }
 }

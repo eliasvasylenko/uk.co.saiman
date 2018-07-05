@@ -27,26 +27,26 @@
  */
 package uk.co.saiman.experiment.processing;
 
-import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.Localized;
 
 public interface ProcessingProperties {
-  LocalizedString convolutionProcessor();
+  Localized<String> convolutionProcessor();
 
-  LocalizedString convolutionProcessorDescription();
+  Localized<String> convolutionProcessorDescription();
 
-  LocalizedString gaussianSmoothProcessor();
+  Localized<String> gaussianSmoothProcessor();
 
-  LocalizedString boxFilterProcessor();
+  Localized<String> boxFilterProcessor();
 
-  LocalizedString missingProcessor();
+  Localized<String> missingProcessor();
 
-  LocalizedString standardDeviationLabel();
+  Localized<String> standardDeviationLabel();
 
-  LocalizedString widthLabel();
+  Localized<String> widthLabel();
 
-  LocalizedString vectorLabel();
+  Localized<String> vectorLabel();
 
-  LocalizedString centreLabel();
+  Localized<String> centreLabel();
 
-  LocalizedString processing();
+  Localized<String> processing();
 }

@@ -58,7 +58,6 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
@@ -70,6 +69,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   private final PersistedExperiment persistedExperiment;
   private final ExperimentType<S, T> type;
 
+  private final WorkspaceImpl workspace;
   private final ExperimentNodeImpl<?, ?> parent;
   private final Map<PersistedExperiment, ExperimentNodeImpl<?, ?>> children = new HashMap<>();
 
@@ -87,7 +87,11 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
    * @param type
    * @param id
    */
-  ExperimentNodeImpl(ExperimentType<S, T> type, PersistedExperiment persistedExperiment) {
+  ExperimentNodeImpl(
+      WorkspaceImpl workspace,
+      ExperimentType<S, T> type,
+      PersistedExperiment persistedExperiment) {
+    this.workspace = workspace;
     this.type = type;
     this.parent = null;
     this.persistedExperiment = persistedExperiment;
@@ -101,14 +105,15 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
    * @param type
    * @param id
    */
-  ExperimentNodeImpl(ExperimentType<S, T> type, String id) {
+  ExperimentNodeImpl(WorkspaceImpl workspace, ExperimentType<S, T> type, String id) {
+    this.workspace = workspace;
     this.type = type;
     this.parent = null;
     try {
       this.persistedExperiment = getPersistenceManager().addExperiment(id, type.getId());
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
-          format("Failed to persist new experiment %s", parent.getId()),
+          format("Failed to persist new experiment %s", id),
           e);
       getLog().log(Level.ERROR, ee);
       throw ee;
@@ -127,6 +132,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       ExperimentNodeImpl<?, ?> parent,
       ExperimentType<S, T> type,
       PersistedExperiment persistedExperiment) {
+    this.workspace = parent.workspace;
     this.type = type;
     this.parent = parent;
     this.persistedExperiment = persistedExperiment;
@@ -153,6 +159,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     if (index < 0 || index > parent.children.size())
       throw new IndexOutOfBoundsException(index + " in " + parent.children.size());
 
+    this.workspace = parent.workspace;
     this.type = type;
     this.parent = parent;
     this.persistedExperiment = this.parent.addChildImpl(this, initialState, index);
@@ -275,24 +282,24 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   protected ExperimentProperties getText() {
-    return parent.getText();
+    return workspace.getText();
   }
 
   protected Log getLog() {
-    return parent.getLog();
+    return workspace.getLog();
   }
 
   protected ExperimentLocationManager getLocationManager() {
-    return parent.getLocationManager();
+    return workspace.getLocationManager();
   }
 
   protected ExperimentPersistenceManager getPersistenceManager() {
-    return parent.getPersistenceManager();
+    return workspace.getPersistenceManager();
   }
 
   @Override
-  public Workspace getWorkspace() {
-    return getParentImpl().get().getWorkspace();
+  public WorkspaceImpl getWorkspace() {
+    return workspace;
   }
 
   protected Stream<? extends ExperimentNode<?, ?>> getSiblings() {

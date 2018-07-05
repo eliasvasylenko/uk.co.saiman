@@ -27,8 +27,14 @@
  */
 package uk.co.saiman.reflection;
 
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
+import static uk.co.saiman.collection.StreamUtilities.entriesToMap;
+import static uk.co.saiman.collection.StreamUtilities.streamNullable;
+import static uk.co.saiman.reflection.ParameterizedTypes.getAllTypeArguments;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -42,7 +48,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import uk.co.saiman.collection.StreamUtilities;
 
 /**
  * A collection of general utility methods relating to the Java type system.
@@ -429,10 +438,30 @@ public final class Types {
     return assignable;
   }
 
-  public static Type resolveSupertype(Type subtype, Class<?> superClass) {
+  public static Type resolveSupertype(Type type, Class<?> superClass) {
+    Type subtype = type;
+    Class<?> erasedSubtype;
 
-    // TODO Auto-generated method stub
-    return null;
+    while ((erasedSubtype = getErasedType(subtype)) != superClass) {
+      Type genericType = concat(
+          streamNullable(erasedSubtype.getGenericSuperclass()),
+          Stream.of(erasedSubtype.getGenericInterfaces()))
+              .filter(t -> superClass.isAssignableFrom(getErasedType(t)))
+              .findFirst()
+              .orElseThrow(
+                  () -> new IllegalArgumentException(
+                      format("Cannot find class %s on type %s", superClass, type)));
+
+      if (subtype instanceof ParameterizedType) {
+        subtype = new TypeSubstitution(
+            getAllTypeArguments((ParameterizedType) subtype).collect(entriesToMap()))
+                .resolve(genericType);
+      } else {
+        subtype = genericType;
+      }
+    }
+
+    return subtype;
   }
 
   /**

@@ -37,7 +37,7 @@ public interface Resource {
 
   String getName();
 
-  String getExtension();
+  boolean hasExtension(String extension);
 
   ReadableByteChannel read() throws IOException;
 

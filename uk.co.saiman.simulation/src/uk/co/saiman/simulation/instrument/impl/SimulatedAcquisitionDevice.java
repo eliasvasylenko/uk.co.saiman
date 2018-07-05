@@ -59,6 +59,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
+import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
@@ -108,10 +109,11 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
       counter = getAcquisitionCount();
 
       if (detector == null) {
-        throw new AcquisitionException(text.acquisition().exceptions().failedToConnectDetector());
+        throw new AcquisitionException(
+            "Failed to connect acquisition simulation to detector simulation");
       }
       if (counter <= 0) {
-        throw new AcquisitionException(text.acquisition().exceptions().countMustBePositive());
+        throw new AcquisitionException("Requested acquisition count must be positive");
       }
     }
   }
@@ -157,7 +159,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   private Unit<Time> timeUnits;
   @Reference
   private PropertyLoader loader;
-  private SimulationProperties text;
+  private SimulationProperties simulationProperties;
   @Reference
   private Instrument instrument;
   private boolean disposed;
@@ -202,7 +204,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
 
   @Activate
   synchronized void activate(AcquisitionSimulationConfiguration configuration) {
-    text = loader.getProperties(SimulationProperties.class);
+    simulationProperties = loader.getProperties(SimulationProperties.class);
 
     intensityUnits = count().getUnit();
     timeUnits = second().getUnit();
@@ -244,7 +246,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
 
   @Override
   public String getName() {
-    return text.acquisitionSimulationDeviceName().toString();
+    return simulationProperties.acquisitionSimulationDeviceName().toString();
   }
 
   protected DetectorSimulation getDetector() {
@@ -259,7 +261,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
       try {
         synchronized (startingLock) {
           this.experiment.ifPresent(e -> {
-            throw new AcquisitionException(text.acquisition().exceptions().alreadyAcquiring());
+            throw new AcquisitionException("Cannot begin acquisition; already acquiring");
           });
 
           // wait any previous experiment to flush from the buffer
@@ -278,8 +280,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
           }
         }
       } catch (InterruptedException e) {
-        exception(
-            new AcquisitionException(text.acquisition().exceptions().experimentInterrupted(), e));
+        exception(new AcquisitionException("Acquisition interrupted", e));
       }
     }
   }
@@ -329,8 +330,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
       } catch (AcquisitionException e) {
         exception(e);
       } catch (Exception e) {
-        exception(
-            new AcquisitionException(text.acquisition().exceptions().unexpectedException(), e));
+        exception(new AcquisitionException("Unexpected acquisition failure", e));
       }
     }
 
@@ -423,7 +423,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   @Override
   public void setAcquisitionCount(int count) {
     if (count <= 0) {
-      throw new AcquisitionException(text.invalidAcquisitionCount(count));
+      throw new AcquisitionException(simulationProperties.invalidAcquisitionCount(count));
     }
     acquisitionCount = count;
   }

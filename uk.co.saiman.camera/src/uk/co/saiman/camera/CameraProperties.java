@@ -27,19 +27,14 @@
  */
 package uk.co.saiman.camera;
 
-import uk.co.saiman.properties.LocalizedString;
-import uk.co.saiman.properties.Nested;
-import uk.co.saiman.properties.SaiProperties;
+import uk.co.saiman.properties.Localized;
 
 public interface CameraProperties {
-  @Nested
-  SaiProperties sai();
+  Localized<String> cameraDevice();
 
-  LocalizedString cameraDevice();
+  Localized<String> noCameraDevices();
 
-  LocalizedString noCameraDevices();
+  Localized<String> noCameraConnection();
 
-  LocalizedString noCameraConnection();
-
-  LocalizedString simulatedCameraName(String qualifier);
+  Localized<String> simulatedCameraName(String qualifier);
 }

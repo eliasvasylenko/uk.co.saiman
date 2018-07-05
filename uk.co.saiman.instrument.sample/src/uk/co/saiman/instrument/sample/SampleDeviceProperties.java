@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.instrument.sample;
 
-import uk.co.saiman.properties.LocalizedString;
+import uk.co.saiman.properties.Localized;
 import uk.co.saiman.properties.SaiProperties;
 
 /**
@@ -39,5 +39,5 @@ import uk.co.saiman.properties.SaiProperties;
 public interface SampleDeviceProperties {
   SaiProperties sai();
 
-  LocalizedString noSampleDevices();
+  Localized<String> noSampleDevices();
 }
