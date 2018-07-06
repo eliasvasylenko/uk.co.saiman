@@ -107,6 +107,14 @@ Bundle-Developers:\
 		pom=${build}/apache.xml; \
 		location=${build}/cache/apache.xml
 
+-plugin.JavaFX:  \
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
+		name="Java FX"; \
+		snapshotUrls=https://oss.sonatype.org/content/repositories/snapshots; \
+		releaseUrls=https://oss.sonatype.org/content/repositories/public; \
+		pom=${build}/javafx.xml; \
+		location=${build}/cache/javafx.xml
+
 -plugin.eclipse.platform.photon:\
 \
 		aQute.bnd.repository.p2.provider.P2Repository;\

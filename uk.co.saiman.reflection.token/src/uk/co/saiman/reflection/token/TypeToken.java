@@ -84,7 +84,11 @@ public class TypeToken<T> {
   private final Type type;
 
   protected TypeToken() {
-    AnnotatedType annotatedType = resolveSuperclassParameter();
+    this(TypeToken.class);
+  }
+
+  protected TypeToken(Class<?> rawSuperclass) {
+    AnnotatedType annotatedType = resolveSuperclassParameter(rawSuperclass);
     this.type = annotatedType.getType();
 
   }
@@ -93,13 +97,13 @@ public class TypeToken<T> {
     this.type = type;
   }
 
-  protected AnnotatedType resolveSuperclassParameter() {
+  protected AnnotatedType resolveSuperclassParameter(Class<?> rawSuperclass) {
     Class<?> subclass = getClass();
 
     for (;;) {
       Class<?> superclass = subclass.getSuperclass();
 
-      if (superclass.equals(TypeToken.class))
+      if (superclass.equals(rawSuperclass))
         break;
 
       subclass = superclass;
@@ -134,7 +138,7 @@ public class TypeToken<T> {
    * @return a TypeToken over the requested type
    */
   public static <T> TypeToken<T> forType(Class<T> type) {
-    return new TypeToken<>(type);
+    return new TypeToken<>((Type) type);
   }
 
   @Override

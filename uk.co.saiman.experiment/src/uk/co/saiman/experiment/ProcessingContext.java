@@ -86,7 +86,7 @@ public interface ProcessingContext<T, R> {
    * This method may be invoked multiple times during processing. The purpose is
    * to support live-updating of result data, and any values passed to this method
    * will be overridden by the return value of
-   * {@link ExperimentType#process(ExecutionContext) execution} once processing
+   * {@link ExperimentType#process(ProcessingContext) execution} once processing
    * completes.
    * 
    * @param value
@@ -100,7 +100,7 @@ public interface ProcessingContext<T, R> {
    * This method may be invoked multiple times during processing. The purpose is
    * to support live-updating of result data, and any values passed to this method
    * will be overridden by the return value of
-   * {@link ExperimentType#process(ExecutionContext) execution} once processing
+   * {@link ExperimentType#process(ProcessingContext) execution} once processing
    * completes.
    * 
    * @param value
@@ -110,7 +110,7 @@ public interface ProcessingContext<T, R> {
 
   /**
    * Set the result data for this execution. If the value of the given data
-   * matches the return value of {@link ExperimentType#process(ExecutionContext)
+   * matches the return value of {@link ExperimentType#process(ProcessingContext)
    * execution} once it completes it does not have to be rewritten. This means
    * that expensive disk IO can be performed during the experiment process rather
    * than saved until the end.
@@ -118,14 +118,12 @@ public interface ProcessingContext<T, R> {
    * This method may be invoked at most once during any given execution, and this
    * precludes invocation of {@link #setResultFormat(String, DataFormat)} or
    * {@link #setResultFormat(String, String)} during the same execution.
-   * 
-   * @return a wrapper around the given data item
    */
   void setResultData(Data<R> data);
 
   /**
    * Set the result format for this execution. If invoked, then once the
-   * {@link ExperimentType#process(ExecutionContext) execution} is complete the
+   * {@link ExperimentType#process(ProcessingContext) execution} is complete the
    * returned value will be persisted according to the given file name and format.
    * <p>
    * This method may be invoked at most once during any given execution, and this
@@ -141,7 +139,7 @@ public interface ProcessingContext<T, R> {
 
   /**
    * Set the result format extensions for this execution. If invoked, then once
-   * the {@link ExperimentType#process(ExecutionContext) execution} is complete
+   * the {@link ExperimentType#process(ProcessingContext) execution} is complete
    * the returned value will be persisted according to the given file name and a
    * format matching the given extension.
    * <p>

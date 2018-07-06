@@ -41,14 +41,15 @@ public class JsonPersistedStateDocument {
   private Resource resource;
   private final PersistedState persistedState;
 
-  public JsonPersistedStateDocument(Path path) throws IOException {
-    this(new PathResource(path));
+  public JsonPersistedStateDocument(Resource resource) throws IOException {
+    this(resource, new PersistedState());
   }
 
-  public JsonPersistedStateDocument(Resource resource) throws IOException {
+  public JsonPersistedStateDocument(Resource resource, PersistedState persistedState)
+      throws IOException {
     this.format = new JsonPersistedStateFormat();
     this.resource = resource;
-    this.persistedState = new PersistedState();
+    this.persistedState = persistedState;
     persistedState.changes().observe(m -> save());
   }
 

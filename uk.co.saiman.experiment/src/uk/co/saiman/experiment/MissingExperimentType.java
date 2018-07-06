@@ -27,10 +27,12 @@
  */
 package uk.co.saiman.experiment;
 
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static uk.co.saiman.collection.StreamUtilities.mapToEntry;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFILLED;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
@@ -47,12 +49,15 @@ public interface MissingExperimentType<T> extends ExperimentType<Map<String, Obj
     return MissingExperimentType.class;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  default String getId() {
-    return MissingExperimentType.class.getName();
+  default TypeToken<T> getResultType() {
+    /*
+     * TODO best effort at result type by loading any persisted result data and
+     * using the type of that?
+     */
+    return (TypeToken<T>) forType(void.class);
   }
-
-  String getMissingTypeID();
 
   @Override
   default Map<String, Object> createState(ConfigurationContext<Map<String, Object>> context) {
@@ -80,7 +85,7 @@ public interface MissingExperimentType<T> extends ExperimentType<Map<String, Obj
                                 .stream()
                                 .map(e -> persistedStateMap(e))
                                 .collect(toList()))))
-            .flatMap(v -> v)
+            .flatMap(identity())
             .collect(toSet());
       }
     };
@@ -102,7 +107,4 @@ public interface MissingExperimentType<T> extends ExperimentType<Map<String, Obj
   default TypeToken<Map<String, Object>> getStateType() {
     return new TypeToken<Map<String, Object>>() {};
   }
-
-  @Override
-  TypeToken<T> getResultType();
 }

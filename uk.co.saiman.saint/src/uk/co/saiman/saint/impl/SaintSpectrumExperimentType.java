@@ -76,7 +76,7 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
 
   @Override
   public String getId() {
-    return getClass().getName();
+    return SaintSpectrumExperimentType.class.getName();
   }
 
   @Override

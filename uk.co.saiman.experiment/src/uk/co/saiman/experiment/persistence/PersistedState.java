@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.persistence;
 
-import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +72,8 @@ public class PersistedState implements Copyable<PersistedState> {
   }
 
   boolean isEmpty() {
-    return strings.isEmpty() && maps.values().stream().allMatch(p -> p.get().isEmpty())
+    return strings.isEmpty()
+        && maps.values().stream().allMatch(p -> p.get().isEmpty())
         && mapLists.values().stream().allMatch(p -> p.get().isEmpty());
   }
 
@@ -98,7 +99,7 @@ public class PersistedState implements Copyable<PersistedState> {
 
   public void setMap(String id, PersistedState map) {
     PersistedStateSubscription subscription = new PersistedStateSubscription(this::update, map);
-    of(maps.put(id, subscription)).ifPresent(Disposable::cancel);
+    ofNullable(maps.put(id, subscription)).ifPresent(Disposable::cancel);
   }
 
   public Stream<String> getMapLists() {
@@ -115,7 +116,7 @@ public class PersistedState implements Copyable<PersistedState> {
     PersistedStateListSubscription subscription = new PersistedStateListSubscription(
         this::update,
         list);
-    of(mapLists.put(id, subscription)).ifPresent(Disposable::cancel);
+    ofNullable(mapLists.put(id, subscription)).ifPresent(Disposable::cancel);
   }
 
   @Override

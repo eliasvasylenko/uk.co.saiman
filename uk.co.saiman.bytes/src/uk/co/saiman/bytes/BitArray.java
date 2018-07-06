@@ -32,6 +32,7 @@ import static uk.co.saiman.bytes.Endianness.BIG_ENDIAN;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -300,10 +301,12 @@ public class BitArray {
     for (int i = 0; i < bytes.length; i++) {
       int longIndex = i / Long.SIZE;
       int byteIndex = i % bytesPerLong;
-      bits.bits[i] = (byte) (bits.bits[longIndex] >> ((bytesPerLong - 1 - byteIndex) * Byte.SIZE));
+      bits.bits[longIndex] = bits.bits[longIndex] |= ((long) bytes[i] << ((bytesPerLong
+          - 1
+          - byteIndex) * Byte.SIZE));
     }
 
-    throw new UnsupportedOperationException();
+    return bits;
   }
 
   public byte[] toByteArray() {
@@ -416,7 +419,7 @@ public class BitArray {
   }
 
   public Stream<Boolean> stream() {
-    // TODO Auto-generated method stub
-    return null;
+    boolean[] booleans = toBooleanArray();
+    return IntStream.range(0, booleans.length).mapToObj(i -> booleans[i]);
   }
 }

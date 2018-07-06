@@ -31,13 +31,15 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.persistence.PersistedState;
 
 public interface ExperimentPersistenceManager {
   Stream<ExperimentType<?, ?>> getExperimentTypes();
 
   Stream<PersistedExperiment> getExperiments() throws IOException;
 
-  PersistedExperiment addExperiment(String id, String typeId) throws IOException;
+  PersistedExperiment addExperiment(String id, String typeId, PersistedState configuration)
+      throws IOException;
 
   void removeExperiment(PersistedExperiment experiment) throws IOException;
 }

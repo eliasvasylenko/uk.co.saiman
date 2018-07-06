@@ -27,16 +27,11 @@
  */
 package uk.co.saiman.experiment;
 
-import java.lang.reflect.Type;
-
 public interface ExperimentRoot extends VoidExperimentType<ExperimentConfiguration> {
-  @Override
-  default Type getThisType() {
-    return ExperimentRoot.class;
-  }
+  String EXPERIMENT_ROOT_PID = "uk.co.saiman.experiment.type.root";
 
   @Override
   default String getId() {
-    return ExperimentRoot.class.getName();
+    return EXPERIMENT_ROOT_PID;
   }
 }

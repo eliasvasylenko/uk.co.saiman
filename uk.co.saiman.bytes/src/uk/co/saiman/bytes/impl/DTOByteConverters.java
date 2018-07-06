@@ -65,6 +65,9 @@ public class DTOByteConverters implements ByteConverterProvider {
       AnnotatedType type,
       ByteConversionAnnotations annotations,
       ByteConverterService converters) {
+    if (!annotations.get(DTO.class).isPresent())
+      return null;
+
     return (DTOByteConverter<?>) typeConverters
         .computeIfAbsent(type, t -> new DTOByteConverter<>(forType(t), annotations, converters));
   }

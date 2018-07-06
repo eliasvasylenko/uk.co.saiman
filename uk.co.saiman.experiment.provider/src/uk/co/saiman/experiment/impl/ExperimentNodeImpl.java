@@ -34,6 +34,7 @@ import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
 import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
+import static uk.co.saiman.experiment.ExperimentRoot.EXPERIMENT_ROOT_PID;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -96,6 +97,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     this.parent = null;
     this.persistedExperiment = persistedExperiment;
     this.state = createState(persistedExperiment.getId());
+
+    loadChildNodes();
   }
 
   /**
@@ -110,7 +113,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     this.type = type;
     this.parent = null;
     try {
-      this.persistedExperiment = getPersistenceManager().addExperiment(id, type.getId());
+      this.persistedExperiment = getPersistenceManager()
+          .addExperiment(id, EXPERIMENT_ROOT_PID, new PersistedState());
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
           format("Failed to persist new experiment %s", id),
@@ -174,7 +178,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     PersistedExperiment persistedExperiment;
     try {
       persistedExperiment = this.persistedExperiment
-          .addChild(child.getId(), child.getType().getId(), state, index);
+          .addChild(child.getId(), child.getTypeId(), state, index);
     } catch (Exception e) {
       ExperimentException ee = new ExperimentException(
           format("Failed to persist new child experiment %s", parent.getId()),
@@ -272,6 +276,11 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     return persistedExperiment != null ? persistedExperiment.getId() : null;
   }
 
+  @Override
+  public String getTypeId() {
+    return persistedExperiment != null ? persistedExperiment.getTypeId() : null;
+  }
+
   protected Stream<ExperimentNodeImpl<?, ?>> getAncestorsImpl() {
     return getAncestors().map(a -> (ExperimentNodeImpl<?, ?>) a);
   }
@@ -338,7 +347,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
   protected void removeImpl() {
     try {
-      parent.persistedExperiment.removeChild(getId(), getType().getId());
+      parent.persistedExperiment.removeChild(getId(), getTypeId());
     } catch (IOException e) {
       ExperimentException ee = new ExperimentException(
           format("Failed to persist removal of experiment %s", getId()),

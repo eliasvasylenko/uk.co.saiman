@@ -29,7 +29,6 @@ package uk.co.saiman.reflection;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static uk.co.saiman.collection.StreamUtilities.entriesToMap;
@@ -48,10 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
-
-import uk.co.saiman.collection.StreamUtilities;
 
 /**
  * A collection of general utility methods relating to the Java type system.

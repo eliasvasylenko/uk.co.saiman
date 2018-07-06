@@ -36,6 +36,7 @@ import static uk.co.saiman.reflection.Types.unwrapPrimitive;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -60,37 +61,47 @@ public class IntegerByteConverters implements ByteConverterProvider {
     Endianness endianness = annotations.get(Order.class).map(Order::value).orElse(BIG_ENDIAN);
 
     int bits;
-    Class<?> primitive;
+    Class<? extends Number> primitive;
+    Function<Number, Number> asNumber;
 
     if (byte.class == unwrapPrimitive(erasedType)) {
       bits = size.orElse(Byte.SIZE);
       primitive = byte.class;
+      asNumber = Number::byteValue;
 
     } else if (short.class == unwrapPrimitive(erasedType)) {
       bits = size.orElse(Short.SIZE);
       primitive = short.class;
+      asNumber = Number::shortValue;
 
     } else if (int.class == unwrapPrimitive(erasedType)) {
       bits = size.orElse(Integer.SIZE);
       primitive = int.class;
+      asNumber = Number::intValue;
 
     } else if (long.class == unwrapPrimitive(erasedType)) {
       bits = size.orElse(Long.SIZE);
       primitive = long.class;
+      asNumber = Number::longValue;
 
     } else {
       return null;
 
     }
 
-    return getConverter(primitive, bits, endianness);
+    return getConverter(primitive, asNumber, bits, endianness);
   }
 
-  public <T> ByteConverter<T> getConverter(Class<T> primitive, int bits, Endianness endianness) {
+  @SuppressWarnings("unchecked")
+  public <T extends Number> ByteConverter<T> getConverter(
+      Class<T> primitive,
+      Function<? super Number, ? extends Number> asNumber,
+      int bits,
+      Endianness endianness) {
     return byteConverter(
         primitive,
-        b -> fromNumber((long) b, bits, endianness),
-        a -> primitive.cast(a.toNumber(bits, endianness)));
+        b -> fromNumber(b.longValue(), bits, endianness),
+        a -> (T) asNumber.apply(a.toNumber(bits, endianness)));
   }
 
   @Override

@@ -27,9 +27,11 @@
  */
 package uk.co.saiman.comms.copley;
 
+import uk.co.saiman.bytes.conversion.DTO;
 import uk.co.saiman.bytes.conversion.Offset;
 import uk.co.saiman.bytes.conversion.Size;
 
+@DTO
 public class VariableIdentifier {
   public VariableIdentifier() {}
 

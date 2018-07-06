@@ -29,7 +29,6 @@ package uk.co.saiman.experiment;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -59,6 +58,11 @@ public interface ExperimentNode<S, T> {
    *         The ID should be unique amongst the children of a node's parent.
    */
   String getId();
+
+  /**
+   * @return the ID of the type of the experiment
+   */
+  String getTypeId();
 
   /**
    * @return the experiment workspace containing this experiment
@@ -121,36 +125,16 @@ public interface ExperimentNode<S, T> {
 
   /**
    * Get the nearest available ancestor node of the processing experiment node
-   * which is of one of the given {@link ExperimentType experiment types}.
+   * which is of the given {@link ExperimentType experiment type}.
    * 
-   * @param types
-   *          the possible types of the ancestor we wish to inspect
+   * @param type
+   *          the type of the ancestor we wish to inspect
    * @return the nearest ancestor of the given type, or an empty optional if no
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  default <U, V> Optional<ExperimentNode<? extends U, ? extends V>> findAncestor(
-      Collection<? extends ExperimentType<? extends U, ? extends V>> types) {
-    return getAncestors()
-        .filter(a -> types.contains(a.getType()))
-        .findFirst()
-        .map(a -> (ExperimentNode<? extends U, ? extends V>) a);
-  }
-
-  /**
-   * Get the ancestor nodes of the processing experiment node which are of one of
-   * the given {@link ExperimentType experiment types}.
-   * 
-   * @param types
-   *          the possible types of the ancestor we wish to inspect
-   * @return a stream of ancestor nodes of the given type, from the nearest
-   */
-  @SuppressWarnings("unchecked")
-  default <U, V> Stream<ExperimentNode<? extends U, ? extends V>> findAncestors(
-      Collection<? extends ExperimentType<? extends U, ? extends V>> types) {
-    return getAncestors()
-        .filter(a -> types.contains(a.getType()))
-        .map(a -> (ExperimentNode<? extends U, ? extends V>) a);
+  default <U, V> Stream<ExperimentNode<U, V>> findAncestors(ExperimentType<U, V> type) {
+    return getAncestors().filter(a -> type.equals(a.getType())).map(a -> (ExperimentNode<U, V>) a);
   }
 
   /**
@@ -237,7 +221,6 @@ public interface ExperimentNode<S, T> {
    *          the parent of the new copy
    * @param index
    *          the positional index at which to add the child
-   * @return a new child experiment part of the same type and with the same state
    */
   void move(ExperimentNode<?, ?> parent, int index);
 

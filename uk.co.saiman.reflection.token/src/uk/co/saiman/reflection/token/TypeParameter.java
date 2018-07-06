@@ -46,6 +46,7 @@ public class TypeParameter<T> extends TypeToken<T> {
    * uninstantiated type variable.
    */
   protected TypeParameter() {
+    super(TypeParameter.class);
     if (!(super.getType() instanceof TypeVariable))
       throw new IllegalArgumentException();
   }

@@ -47,7 +47,7 @@ public class CopleyServiceRestImpl implements CopleyServiceRest {
   public CopleyServiceDTO getService() {
     CopleyServiceDTO serviceDto = new CopleyServiceDTO();
 
-    serviceDto.controllers = service.getControllers().map(service::getId).collect(toList());
+    serviceDto.controllers = service.getIds().collect(toList());
 
     return serviceDto;
   }

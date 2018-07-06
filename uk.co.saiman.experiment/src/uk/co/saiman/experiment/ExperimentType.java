@@ -52,7 +52,7 @@ import uk.co.saiman.reflection.token.TypeToken;
  */
 public interface ExperimentType<S, R> {
   /**
-   * @return the unique and persistent ID of the experiment type
+   * @return the ID of the type of the experiment
    */
   String getId();
 

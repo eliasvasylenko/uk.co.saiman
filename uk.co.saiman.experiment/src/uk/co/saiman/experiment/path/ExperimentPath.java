@@ -94,7 +94,7 @@ public class ExperimentPath {
     }
 
     return stream(string.split(SEPARATOR))
-        .reduce(path, (e, s) -> e.match(ExperimentMatcher.fromString(s)), throwingMerger());
+        .reduce(path, (e, s) -> e.resolve(ExperimentMatcher.fromString(s)), throwingMerger());
   }
 
   @Override
@@ -114,13 +114,13 @@ public class ExperimentPath {
     }
   }
 
-  public ExperimentPath id(String id) {
+  public ExperimentPath resolve(String id) {
     List<ExperimentMatcher> matchers = new ArrayList<>(this.matchers.size() + 1);
     matchers.add(new ExperimentMatcher(id));
     return new ExperimentPath(ancestors, matchers);
   }
 
-  public ExperimentPath match(ExperimentMatcher matcher) {
+  public ExperimentPath resolve(ExperimentMatcher matcher) {
     List<ExperimentMatcher> matchers = new ArrayList<>(this.matchers.size() + 1);
     matchers.addAll(this.matchers);
     matchers.add(matcher);

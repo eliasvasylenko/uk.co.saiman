@@ -128,6 +128,8 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
      * 
      * The problem is how to pass this through the Result API to users without
      * losing the laziness so we can request at e.g. the monitor refresh rate.
+     * 
+     * Perhaps the observable type should be `Result<T>` rather than `T`? 
      */
 
     System.out.println("get result");

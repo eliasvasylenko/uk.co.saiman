@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.bytes.impl;
 
+import static java.util.Collections.synchronizedSortedMap;
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.reflection.token.AnnotatedTypeToken.forType;
@@ -34,8 +36,10 @@ import static uk.co.saiman.reflection.token.AnnotatedTypeToken.forType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -45,11 +49,24 @@ import uk.co.saiman.reflection.token.AnnotatedTypeToken;
 
 @Component
 public class ByteConverterServiceImpl implements ByteConverterService {
-  @Reference(policy = DYNAMIC, policyOption = GREEDY)
-  volatile Map<Map<String, ?>, ByteConverterProvider> byteConverterProviders;
+  volatile Map<ServiceReference<ByteConverterProvider>, ByteConverterProvider> byteConverterProviders = synchronizedSortedMap(
+      new TreeMap<>());
 
   private final Map<AnnotatedTypeToken<?>, CompositeByteConverter<?>> typedByteConverters = Collections
       .synchronizedMap(new HashMap<>());
+
+  @Reference(policy = DYNAMIC, policyOption = GREEDY, cardinality = MULTIPLE)
+  void addConverter(
+      ServiceReference<ByteConverterProvider> reference,
+      ByteConverterProvider converter) {
+    byteConverterProviders.put(reference, converter);
+  }
+
+  void removeConverter(
+      ServiceReference<ByteConverterProvider> reference,
+      ByteConverterProvider converter) {
+    byteConverterProviders.remove(reference, converter);
+  }
 
   public Stream<ByteConverterProvider> getProviders() {
     return byteConverterProviders.values().stream();

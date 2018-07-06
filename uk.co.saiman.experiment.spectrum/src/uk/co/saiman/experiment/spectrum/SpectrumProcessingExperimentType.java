@@ -71,12 +71,17 @@ public class SpectrumProcessingExperimentType
     properties = getDefaultPropertyLoader().getProperties(SpectrumProperties.class);
   }
 
+  @Override
+  public String getId() {
+    return getClass().getName();
+  }
+
   /*-
   public SpectrumProcessingExperimentType(ProcessorService processors) {
     this(processors, getDefaultProperties(SpectrumProperties.class));
   }
   
-  @Activate TODO
+  @Activate TODO R7 constructor injection
   public SpectrumProcessingExperimentType(
       @Reference ProcessorService processors,
       @Reference SpectrumProperties properties) {
@@ -92,11 +97,6 @@ public class SpectrumProcessingExperimentType
   @Override
   public String getName() {
     return properties.spectrumProcessingExperimentName().toString();
-  }
-
-  @Override
-  public String getId() {
-    return getClass().getName();
   }
 
   @Override

@@ -60,8 +60,6 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
    */
   protected ExperimentImpl(WorkspaceImpl workspace, PersistedExperiment persistedExperiment) {
     super(workspace, workspace.getExperimentRootType(), persistedExperiment);
-
-    loadChildNodes();
   }
 
   @Override

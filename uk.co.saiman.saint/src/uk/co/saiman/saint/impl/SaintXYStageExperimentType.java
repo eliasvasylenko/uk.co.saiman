@@ -57,7 +57,7 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
 
   @Override
   public String getId() {
-    return getClass().getName();
+    return SaintSpectrumExperimentType.class.getName();
   }
 
   @Override

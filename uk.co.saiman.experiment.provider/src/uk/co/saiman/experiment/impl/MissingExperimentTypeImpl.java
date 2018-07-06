@@ -28,15 +28,13 @@
 package uk.co.saiman.experiment.impl;
 
 import static java.lang.String.format;
-import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.util.Map;
 
-import uk.co.saiman.experiment.ProcessingContext;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.MissingExperimentType;
-import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.experiment.ProcessingContext;
 
 public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   private final ExperimentProperties text;
@@ -53,22 +51,12 @@ public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   }
 
   @Override
-  public String getMissingTypeID() {
+  public String getId() {
     return id;
   }
 
   @Override
   public T process(ProcessingContext<Map<String, Object>, T> context) {
     throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public TypeToken<T> getResultType() {
-    /*
-     * TODO best effort at result type by loading any persisted result data and
-     * using the type of that.
-     */
-    return (TypeToken<T>) forType(void.class);
   }
 }

@@ -42,9 +42,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.PathResource;
+import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.impl.ExperimentPersistenceManager;
 import uk.co.saiman.experiment.impl.PersistedExperiment;
+import uk.co.saiman.experiment.persistence.PersistedState;
 import uk.co.saiman.experiment.persistence.impl.PersistedExperimentImpl;
 
 public class JsonPersistenceManager implements ExperimentPersistenceManager {
@@ -81,7 +83,8 @@ public class JsonPersistenceManager implements ExperimentPersistenceManager {
         file -> isRegularFile(file) && fileMatcher.matches(file))) {
 
       for (Path path : stream) {
-        JsonPersistedStateDocument document = new JsonPersistedStateDocument(path);
+        JsonPersistedStateDocument document = new JsonPersistedStateDocument(
+            new PathResource(path));
         document.load();
 
         PersistedExperiment experiment = new PersistedExperimentImpl(document.getPersistedState()) {
@@ -110,8 +113,14 @@ public class JsonPersistenceManager implements ExperimentPersistenceManager {
   }
 
   @Override
-  public PersistedExperiment addExperiment(String id, String typeId) throws IOException {
-    JsonPersistedStateDocument document = new JsonPersistedStateDocument(getPath(id));
+  public PersistedExperiment addExperiment(String id, String typeId, PersistedState configuration)
+      throws IOException {
+    if (configuration == null)
+      configuration = new PersistedState();
+
+    JsonPersistedStateDocument document = new JsonPersistedStateDocument(
+        getResource(id),
+        configuration);
 
     PersistedExperiment experiment = new PersistedExperimentImpl(
         document.getPersistedState(),
@@ -142,7 +151,7 @@ public class JsonPersistenceManager implements ExperimentPersistenceManager {
     rootDocuments.get(experiment).getResource().delete();
   }
 
-  protected Path getPath(String id) {
-    return rootPath.resolve(id + FILE_EXTENSION);
+  protected Resource getResource(String id) {
+    return new PathResource(rootPath.resolve(id + FILE_EXTENSION));
   }
 }

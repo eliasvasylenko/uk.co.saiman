@@ -137,30 +137,6 @@ class ByteConversionAnnotationsImpl implements ByteConversionAnnotations {
 
   @Override
   public ByteConversionAnnotations and(ByteConversionAnnotations more) {
-    return new ByteConversionAnnotations() {
-      @Override
-      public Stream<Annotation> getAll() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public <T extends Annotation> Stream<T> getAll(Class<T> type) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public <T extends Annotation> Optional<T> get(Class<T> type) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public ByteConversionAnnotations and(ByteConversionAnnotations more) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-    };
+    return new AggregatedByteConversionAnnotations(this, more);
   }
 }
