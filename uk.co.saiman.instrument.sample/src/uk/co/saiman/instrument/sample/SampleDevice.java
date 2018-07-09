@@ -46,13 +46,14 @@ public interface SampleDevice<T> extends Device {
   ObservableValue<SampleState> sampleState();
 
   /**
-   * Generally this should be a straightforward check that the given position is
-   * within the {@link #getLowerBound() lower} and {@link #getUpperBound() upper}
-   * bounds of the stage, but sometimes the bounds may take different shapes.
-   * Implementations of this method should be idempotent and free of side-effects.
+   * Generally for a positional stage this should be a straightforward check that
+   * the given position is within the bounds of the stage, or is otherwise a valid
+   * sample location. Implementations of this method should be idempotent and free
+   * of side-effects.
    * 
    * @param position
-   * @return
+   * @return true if the given sample location is valid for analysis and can be
+   *         reached, false otherwise
    */
   boolean isLocationReachable(T location);
 

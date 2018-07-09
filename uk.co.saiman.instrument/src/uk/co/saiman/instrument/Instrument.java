@@ -29,7 +29,6 @@ package uk.co.saiman.instrument;
 
 import java.util.stream.Stream;
 
-import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.ObservableValue;
 
 /**
@@ -48,7 +47,11 @@ public interface Instrument {
 
   ObservableValue<InstrumentLifecycleState> lifecycleState();
 
-  Stream<Device> getDevices();
+  default Stream<? extends Device> getDevices() {
+    return getRegistrations().map(DeviceRegistration::getDevice);
+  }
 
-  Disposable addDevice(Device device);
+  Stream<? extends DeviceRegistration> getRegistrations();
+
+  InstrumentRegistration registerDevice(Device device);
 }

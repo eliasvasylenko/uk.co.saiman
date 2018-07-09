@@ -35,10 +35,10 @@ import uk.co.saiman.measurement.coordinate.PolarCoordinate;
 public interface PolarStage extends Stage<PolarCoordinate<Length>> {
   /**
    * @return The minimally containing radial upper bound of all
-   *         {@link #isPositionReachable(Object) reachable} positions of the
-   *         stage. The location of the bound itself may not be reachable at every
-   *         angle. Implementations of this method should be idempotent and free
-   *         of side-effects.
+   *         {@link #isLocationReachable(PolarCoordinate) reachable} positions of
+   *         the stage. The location of the bound itself may not be reachable at
+   *         every angle. Implementations of this method should be idempotent and
+   *         free of side-effects.
    */
   Quantity<Length> getUpperBound();
 }

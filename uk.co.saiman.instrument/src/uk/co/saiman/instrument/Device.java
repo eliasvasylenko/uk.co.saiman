@@ -43,13 +43,13 @@ public interface Device {
   String getName();
 
   /**
-   * Devices should only return an instrument they are added to, and should only
-   * add themselves to a single instrument.
+   * Devices should only ever be registered to a single instrument, and must
+   * always be registered when created. This method should therefore always return
+   * the same registration.
    * 
-   * @return the instrument this device is a part of, or null if it is not a part
-   *         of an instrument
+   * @return the instrument registration for the device
    */
-  Instrument getInstrument();
+  DeviceRegistration getRegistration();
 
   /**
    * Get an observable value over the state of the connection to the hardware

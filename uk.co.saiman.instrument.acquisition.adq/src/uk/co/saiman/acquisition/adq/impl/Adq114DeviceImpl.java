@@ -37,7 +37,7 @@ import uk.co.saiman.acquisition.adq.Adq114Device;
 import uk.co.saiman.acquisition.adq.AdqHardwareInterface;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ConnectionState;
-import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
 
@@ -149,7 +149,7 @@ public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
   }
 
   @Override
-  public Instrument getInstrument() {
+  public DeviceRegistration getRegistration() {
     // TODO Auto-generated method stub
     return null;
   }

@@ -39,9 +39,10 @@ import java.util.stream.Stream;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.instrument.Device;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
-import uk.co.saiman.observable.Disposable;
+import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
@@ -57,7 +58,7 @@ import uk.co.saiman.observable.ObservableValue;
  */
 @Component
 public class InstrumentImpl implements Instrument {
-  private final Set<Device> devices;
+  private final Set<DeviceRegistration> devices;
   private final ObservableProperty<InstrumentLifecycleState> state;
 
   /**
@@ -69,14 +70,44 @@ public class InstrumentImpl implements Instrument {
   }
 
   @Override
-  public Stream<Device> getDevices() {
+  public Stream<? extends DeviceRegistration> getRegistrations() {
     return devices.stream();
   }
 
   @Override
-  public synchronized Disposable addDevice(Device device) {
-    devices.add(device);
-    return () -> devices.remove(device);
+  public synchronized InstrumentRegistration registerDevice(Device device) {
+    DeviceRegistration deviceRegistration = new DeviceRegistration() {
+      @Override
+      public boolean isRegistered() {
+        return devices.contains(this);
+      }
+
+      @Override
+      public Instrument getInstrument() {
+        return InstrumentImpl.this;
+      }
+
+      @Override
+      public Device getDevice() {
+        return device;
+      }
+    };
+
+    InstrumentRegistration instrumentRegistration = new InstrumentRegistration() {
+      @Override
+      public void unregister() {
+        devices.remove(deviceRegistration);
+      }
+
+      @Override
+      public DeviceRegistration getDeviceRegistration() {
+        return deviceRegistration;
+      }
+    };
+
+    devices.add(deviceRegistration);
+
+    return instrumentRegistration;
   }
 
   @Override

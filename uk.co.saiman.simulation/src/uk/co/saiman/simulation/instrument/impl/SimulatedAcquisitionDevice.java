@@ -59,14 +59,14 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
-import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.scalar.Scalar;
-import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
@@ -162,8 +162,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   private SimulationProperties simulationProperties;
   @Reference
   private Instrument instrument;
-  private boolean disposed;
-  private Disposable instrumentSubscription;
+  private InstrumentRegistration instrumentRegistration;
 
   /*
    * Instrument Configuration
@@ -222,7 +221,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
         .observe(this::acquired);
     new Thread(this::acquire).start();
 
-    instrumentSubscription = instrument.addDevice(this);
+    instrumentRegistration = instrument.registerDevice(this);
 
     initializeDetector();
   }
@@ -235,13 +234,12 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
 
   @Deactivate
   public void dispose() {
-    disposed = true;
-    instrumentSubscription.cancel();
+    instrumentRegistration.unregister();
   }
 
   @Override
-  public Instrument getInstrument() {
-    return instrument;
+  public DeviceRegistration getRegistration() {
+    return instrumentRegistration.getDeviceRegistration();
   }
 
   @Override
@@ -305,7 +303,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   private void acquire() {
     currentThread().setPriority(MAX_PRIORITY);
 
-    while (!disposed) {
+    while (getRegistration().isRegistered()) {
       DetectorSimulation detector;
       int counter;
 

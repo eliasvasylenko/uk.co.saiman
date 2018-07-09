@@ -48,6 +48,12 @@ import uk.co.saiman.instrument.stage.composed.StageAxis;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.observable.ObservableValue;
 
+/**
+ * TODO This should be refactored to inherit from {@link ComposedXYStage} using
+ * constructor injection.
+ * 
+ * @author Elias N Vasylenko
+ */
 @Designate(ocd = SaintStage.SaintStageConfiguration.class, factory = true)
 @Component(
     name = SaintStage.CONFIGURATION_PID,
