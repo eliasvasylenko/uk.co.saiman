@@ -31,19 +31,17 @@ import java.net.URL;
 
 import org.eclipse.fx.ui.services.theme.Stylesheet;
 import org.eclipse.fx.ui.services.theme.Theme;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 /**
  * Default stylesheet for experiment interface components.
  * 
  * @author Elias N Vasylenko
  */
-@Component(property = Constants.SERVICE_RANKING + ":Integer=" + ModularTreeStylesheet.RANKING)
+@ServiceRanking(0)
+@Component
 public class ModularTreeStylesheet implements Stylesheet {
-  @SuppressWarnings("javadoc")
-  public static final int RANKING = 0;
-
   @Override
   public boolean appliesToTheme(Theme t) {
     return true;

@@ -39,6 +39,8 @@ import javafx.scene.control.TreeView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.PickResult;
+import uk.co.saiman.eclipse.treeview.impl.ModularTreeCell;
+import uk.co.saiman.eclipse.treeview.impl.ModularTreeItem;
 import uk.co.saiman.fx.FxmlLoadBuilder;
 
 /**

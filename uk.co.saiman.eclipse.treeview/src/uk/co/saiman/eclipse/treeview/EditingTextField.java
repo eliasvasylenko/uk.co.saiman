@@ -37,12 +37,12 @@ import javafx.scene.layout.Priority;
 public class EditingTextField extends TextField {
   public EditingTextField(
       String value,
-      TreeEditor<?> editor,
+      Consumer<String> setValue,
       Consumer<EditingTextField> setParent) {
     super(value);
 
     setOnAction(event -> {
-      editor.commitEdit();
+      setValue.accept(getText());
       event.consume();
     });
     setParent.accept(this);

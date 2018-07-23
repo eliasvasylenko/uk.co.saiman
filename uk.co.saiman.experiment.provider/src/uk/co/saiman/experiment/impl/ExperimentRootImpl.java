@@ -27,25 +27,24 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
+import static uk.co.saiman.experiment.persistence.Accessor.stringAccessor;
 
 import java.util.Optional;
 
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentNodeConstraint;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.VoidExecutionContext;
-import uk.co.saiman.property.Property;
+import uk.co.saiman.experiment.persistence.Accessor.PropertyAccessor;
 
 /**
  * @author Elias N Vasylenko
  */
 public class ExperimentRootImpl implements ExperimentRoot {
+  private static final PropertyAccessor<String> NOTES = stringAccessor("notes");
+
   private final ExperimentProperties text;
 
   public ExperimentRootImpl(ExperimentProperties text) {
@@ -60,8 +59,9 @@ public class ExperimentRootImpl implements ExperimentRoot {
   @Override
   public ExperimentConfiguration createState(
       ConfigurationContext<ExperimentConfiguration> configuration) {
+    configuration.state().withDefault(NOTES, "");
+
     return new ExperimentConfiguration() {
-      private Property<String> notes = configuration.persistedState().forString("notes");
 
       @Override
       public String getName() {
@@ -75,17 +75,18 @@ public class ExperimentRootImpl implements ExperimentRoot {
 
       @Override
       public Optional<String> getNotes() {
-        return notes.tryGet();
+        String notes = configuration.state().get(NOTES);
+        return notes.isEmpty() ? Optional.empty() : Optional.of(notes);
       }
 
       @Override
       public void setNotes(String notes) {
-        this.notes.set(notes);
+        configuration.update(state -> state.with(NOTES, notes));
       }
 
       @Override
       public void clearNotes() {
-        notes = null;
+        configuration.update(state -> state.remove(NOTES));
       }
     };
   }
@@ -96,14 +97,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
   }
 
   @Override
-  public ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return VIOLATED;
-  }
-
-  @Override
-  public ExperimentNodeConstraint mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?, ?> descendantNodeType) {
-    return FULFILLED;
+  public boolean mayComeAfter(ExperimentType<?, ?> parentType) {
+    return false;
   }
 }

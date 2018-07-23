@@ -27,11 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
-
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentNodeConstraint;
+import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.VoidExperimentType;
 
@@ -46,26 +42,15 @@ import uk.co.saiman.experiment.VoidExperimentType;
  *          the type of sample configuration for the instrument
  */
 public interface SampleExperimentType<T extends SampleConfiguration> extends VoidExperimentType<T> {
+  ExperimentRoot experimentRoot();
+
   @Override
   default String getName() {
     return "Sample";
   }
 
   @Override
-  default ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    /*
-     * by default, must be a direct descendant of the experiment root
-     */
-    return parentNode.getParent().isPresent() ? UNFULFILLED : FULFILLED;
-  }
-
-  @Override
-  default ExperimentNodeConstraint mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?, ?> descendantNodeType) {
-    /*
-     * by default, no restrictions
-     */
-    return FULFILLED;
+  default boolean mayComeAfter(ExperimentType<?, ?> parentType) {
+    return parentType == experimentRoot();
   }
 }

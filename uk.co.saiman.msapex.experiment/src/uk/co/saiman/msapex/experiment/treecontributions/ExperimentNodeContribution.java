@@ -35,9 +35,9 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -48,9 +48,10 @@ import uk.co.saiman.eclipse.treeview.ActionContributor;
 import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.MenuContributor;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeChildren;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.eclipse.treeview.TreeEntryChild;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.msapex.editor.EditorPrototype;
@@ -61,9 +62,8 @@ import uk.co.saiman.msapex.editor.EditorService;
  * 
  * @author Elias N Vasylenko
  */
-@Component(
-    scope = ServiceScope.PROTOTYPE,
-    property = Constants.SERVICE_RANKING + ":Integer=" + -100)
+@ServiceRanking(-100)
+@Component(scope = ServiceScope.PROTOTYPE)
 public class ExperimentNodeContribution implements TreeContribution {
   private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
 
@@ -86,7 +86,10 @@ public class ExperimentNodeContribution implements TreeContribution {
   }
 
   @AboutToShow
-  public void prepare(HBox node, TreeChildren children, TreeEntry<ExperimentNode<?, ?>> entry) {
+  public void prepare(
+      HBox node,
+      TreeEntryChildren children,
+      TreeEntry<ExperimentNode<?, ?>> entry) {
     /*
      * configure label
      */
@@ -140,7 +143,12 @@ public class ExperimentNodeContribution implements TreeContribution {
     /*
      * add children
      */
-    entry.data().getChildren().map(ExperimentNode::asTypedObject).forEach(children::addChild);
+    entry
+        .data()
+        .getChildren()
+        .map(ExperimentNode::asTypedObject)
+        .map(TreeEntryChild::typedChild)
+        .forEach(children::add);
 
     /*
      * pseudo class

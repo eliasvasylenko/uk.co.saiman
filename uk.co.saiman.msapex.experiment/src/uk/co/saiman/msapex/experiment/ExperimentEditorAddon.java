@@ -245,4 +245,14 @@ public class ExperimentEditorAddon implements EditorProvider {
     context.declareModifiable(Invalidation.class);
     experiment.getResult().invalidations().observe(o -> context.modify(Invalidation.class, o));
   }
+
+  @Override
+  public void initializeMissingResourceEditorPart(MPart part) {
+    String pathString = part.getPersistedState().get(EDITOR_EXPERIMENT_PATH);
+    if (pathString != null) {
+      part.setLabel("Missing resource: " + pathString);
+    } else {
+      part.setLabel("Unknown resource");
+    }
+  }
 }

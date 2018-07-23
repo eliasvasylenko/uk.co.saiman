@@ -33,73 +33,95 @@ import static uk.co.saiman.eclipse.treeview.TreeTransferMode.COPY;
 import static uk.co.saiman.eclipse.treeview.TreeTransferMode.DISCARD;
 import static uk.co.saiman.eclipse.treeview.TreeTransferMode.MOVE;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeChildren;
-import uk.co.saiman.eclipse.treeview.TreeClipboard;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
+import uk.co.saiman.eclipse.treeview.TreeDragCandidate;
+import uk.co.saiman.eclipse.treeview.TreeDropCandidate;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
-import uk.co.saiman.experiment.persistence.json.JsonPersistedStateFormat;
+import uk.co.saiman.eclipse.treeview.TreeEntryChild;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
+import uk.co.saiman.eclipse.treeview.TreeEntryClipboard;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
+import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.processing.ProcessorService;
-import uk.co.saiman.experiment.processing.ProcessorState;
+import uk.co.saiman.msapex.experiment.persistence.JsonPersistedStateFormat;
 import uk.co.saiman.properties.PropertyLoader;
 
-@Component(property = Constants.SERVICE_RANKING + ":Integer=" + -100)
+@ServiceRanking(-100)
+@Component
 public class ProcessorListContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
   @Reference
-  ProcessorService processors;
+  private ProcessorService processors;
 
   @Reference
-  PropertyLoader properties;
+  private PropertyLoader properties;
 
   @AboutToShow
   public void prepare(
       HBox node,
-      TreeChildren children,
-      TreeEntry<List<? extends ProcessorState>> entry,
-      @Optional TreeEntry<List<ProcessorState>> mutableEntry,
-      TreeClipboard<ProcessorState> dragAndDrop) {
+      TreeEntry<List<Processor<?>>> entry,
+      TreeEntryChildren children,
+      TreeEntryClipboard<Processor<?>> dragAndDrop) {
     setLabel(node, properties.getProperties(ProcessingProperties.class).processing().toString());
 
-    entry.data().forEach(children::addChild);
+    entry
+        .data()
+        .stream()
+        .map(Processor::getRerefence)
+        .map(TreeEntryChild::typedChild)
+        .forEach(children::add);
 
     dragAndDrop
         .addDataFormat(
             new JsonPersistedStateFormat(),
-            ProcessorState::getPersistedState,
-            processors::loadProcessorState);
+            Processor::getState,
+            processors::loadProcessor);
+
     dragAndDrop.addDragHandler(candidate -> {}, COPY);
-    if (mutableEntry != null) {
-      dragAndDrop
-          .addDragHandler(candidate -> mutableEntry.data().remove(candidate.data()), MOVE, DISCARD);
-      dragAndDrop.addDropHandler(candidate -> {
-        int index;
-        switch (candidate.position()) {
-        case AFTER_CHILD:
-          index = entry.data().indexOf(candidate.adjacentEntry().data()) + 1;
-          break;
-        case BEFORE_CHILD:
-          index = entry.data().indexOf(candidate.adjacentEntry().data());
-          break;
-        default:
-          index = entry.data().size();
-        }
-        mutableEntry.data().addAll(index, candidate.data().collect(toList()));
-      }, MOVE, COPY);
-    }
+    dragAndDrop.addDragHandler(candidate -> handleDrag(entry, candidate), MOVE, DISCARD);
+    dragAndDrop.addDropHandler(candidate -> handleDrop(entry, candidate), MOVE, COPY);
 
     pseudoClass.configureCell(node);
+  }
+
+  private void handleDrop(
+      TreeEntry<List<Processor<?>>> entry,
+      TreeDropCandidate<? extends Processor<?>> candidate) {
+    List<Processor<?>> data = new ArrayList<>(entry.data());
+
+    int index;
+    switch (candidate.position()) {
+    case AFTER_CHILD:
+      index = data.indexOf(candidate.adjacentEntry().data()) + 1;
+      break;
+    case BEFORE_CHILD:
+      index = data.indexOf(candidate.adjacentEntry().data());
+      break;
+    default:
+      index = data.size();
+    }
+
+    data.addAll(index, candidate.data().collect(toList()));
+    entry.update(data);
+  }
+
+  void handleDrag(
+      TreeEntry<List<Processor<?>>> entry,
+      TreeDragCandidate<? extends Processor<?>> candidate) {
+    List<Processor<?>> data = new ArrayList<>(entry.data());
+    data.remove(candidate.data());
+    entry.update(data);
   }
 }

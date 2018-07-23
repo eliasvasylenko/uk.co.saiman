@@ -132,4 +132,9 @@ public class FileEditorAddon implements EditorProvider {
     Path path = adapter.adapt(resource, Path.class);
     part.getPersistedState().put(EDITOR_FILE_NAME, path.toString());
   }
+
+  @Override
+  public void initializeMissingResourceEditorPart(MPart part) {
+    String missingResource = part.getPersistedState().get(EDITOR_FILE_NAME);
+  }
 }

@@ -27,31 +27,44 @@
  */
 package uk.co.saiman.experiment.processing;
 
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 import static uk.co.saiman.data.function.processing.DataProcessor.arrayProcessor;
+import static uk.co.saiman.experiment.persistence.Accessor.booleanAccessor;
+import static uk.co.saiman.experiment.persistence.Accessor.doubleAccessor;
+import static uk.co.saiman.experiment.persistence.Accessor.intAccessor;
 
-import java.util.Objects;
+import java.util.stream.DoubleStream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.persistence.PersistedState;
-import uk.co.saiman.experiment.processing.Convolution.State;
+import uk.co.saiman.experiment.persistence.Accessor;
+import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.properties.PropertyLoader;
-import uk.co.saiman.property.Property;
 
 @Component
-public class Convolution implements ProcessorType<State> {
-  protected static final double[] NO_OP = new double[] { 1 };
-
-  private static final String VECTOR_KEY = "vector";
-  private static final String CENTRE_KEY = "centre";
-  private static final String EXTEND_KEY = "extend";
+public class Convolution implements Processor<Convolution> {
+  private static final Accessor<double[], ?> VECTOR = doubleAccessor("vector")
+      .toStreamAccessor()
+      .map(s -> s.mapToDouble(e -> e).toArray(), a -> DoubleStream.of(a).mapToObj(e -> e));
+  private static final Accessor<Integer, ?> CENTRE = intAccessor("centre");
+  private static final Accessor<Boolean, ?> EXTEND = booleanAccessor("extend");
 
   @Reference
   PropertyLoader propertyLoader;
+
+  private final StateMap state;
+
+  public Convolution() {
+    this(StateMap.empty());
+  }
+
+  public Convolution(StateMap state) {
+    this.state = state
+        .withDefault(VECTOR, new double[] { 1 })
+        .withDefault(CENTRE, 0)
+        .withDefault(EXTEND, true);
+  }
 
   @Override
   public String getName() {
@@ -59,63 +72,51 @@ public class Convolution implements ProcessorType<State> {
   }
 
   @Override
-  public State configure(PersistedState state) {
-    return new State(state);
+  public Convolution withState(StateMap state) {
+    return new Convolution(state);
   }
 
-  public class State extends ProcessorState {
-    private final Property<double[]> vector;
-    private final Property<Integer> centre;
-    private final Property<Boolean> extend;
+  @Override
+  public StateMap getState() {
+    return state;
+  }
 
-    public State(PersistedState state) {
-      super(Convolution.this, state);
-      vector = state
-          .forString(VECTOR_KEY)
-          .map(
-              v -> stream(v.split(",")).mapToDouble(Double::parseDouble).toArray(),
-              v -> stream(v).mapToObj(Double::toString).collect(joining(",")))
-          .setDefault(() -> NO_OP);
-      centre = state
-          .forString(CENTRE_KEY)
-          .map(Integer::parseInt, Objects::toString)
-          .setDefault(() -> 0);
-      extend = state
-          .forString(EXTEND_KEY)
-          .map(Boolean::parseBoolean, Objects::toString)
-          .setDefault(() -> true);
-    }
+  public Convolution withConvolutionVector(double[] vector) {
+    return withState(state.with(VECTOR, vector));
+  }
 
-    public void setConvolutionVector(double[] vector, int centre) {
-      this.vector.set(vector);
-      this.centre.set(centre);
-    }
+  public Convolution withConvolutionVectorCentre(int centre) {
+    return withState(state.with(CENTRE, centre));
+  }
 
-    public double[] getConvolutionVector() {
-      return vector.get();
-    }
+  public Convolution withConvolutionVector(double[] vector, int centre) {
+    return withState(state.with(VECTOR, vector).with(CENTRE, centre));
+  }
 
-    public int getConvolutionVectorCentre() {
-      return centre.get();
-    }
+  public double[] getConvolutionVector() {
+    return state.get(VECTOR);
+  }
 
-    public void setDomainExtended(boolean extend) {
-      this.extend.set(extend);
-    }
+  public int getConvolutionVectorCentre() {
+    return state.get(CENTRE);
+  }
 
-    public boolean isDomainExtended() {
-      return extend.get();
-    }
+  public Convolution withDomainExtended(boolean extend) {
+    return withState(state.withDefault(EXTEND, extend));
+  }
 
-    @Override
-    public DataProcessor getProcessor() {
-      double[] vector = getConvolutionVector();
-      return isDomainExtended()
-          ? arrayProcessor(
-              data -> process(data, vector, getConvolutionVectorCentre()),
-              getConvolutionVectorCentre())
-          : arrayProcessor(data -> process(data, vector), getConvolutionVectorCentre());
-    }
+  public boolean isDomainExtended() {
+    return state.get(EXTEND);
+  }
+
+  @Override
+  public DataProcessor getProcessor() {
+    double[] vector = getConvolutionVector();
+    return isDomainExtended()
+        ? arrayProcessor(
+            data -> process(data, vector, getConvolutionVectorCentre()),
+            getConvolutionVectorCentre())
+        : arrayProcessor(data -> process(data, vector), getConvolutionVectorCentre());
   }
 
   public static double[] process(double[] data, double[] convolutionVector) {
@@ -152,5 +153,10 @@ public class Convolution implements ProcessorType<State> {
       }
     }
     return convoluted;
+  }
+
+  @Override
+  public Class<Convolution> getType() {
+    return Convolution.class;
   }
 }

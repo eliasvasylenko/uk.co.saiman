@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.lang.String.format;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
 import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
@@ -36,94 +35,71 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ResultStorage;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceEvent;
+import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
+import uk.co.saiman.properties.PropertyLoader;
 
 /**
  * Reference implementation of {@link Workspace}.
  * 
  * @author Elias N Vasylenko
  */
+@Component
 public class WorkspaceImpl implements Workspace {
-  private final ExperimentLocationManager locationManager;
-  private final ExperimentPersistenceManager persistenceManager;
-
   private final ExperimentRoot experimentRootType;
   private final List<ExperimentImpl> experiments = new ArrayList<>();
 
-  private final ExperimentProperties text;
-  private final Log log;
+  @Reference
+  private PropertyLoader loader;
+  private ExperimentProperties text;
 
-  /**
-   * Try to create a new experiment workspace over the given root path
-   * 
-   * @param locationManager
-   *          the result location management implementation
-   * @param persistenceManager
-   *          the configuration persistence management implementation
+  @Activate
+  void activate() {
+    text = loader.getProperties(ExperimentProperties.class);
+  }
+
+  @Reference
+  private Log log;
+
+  private final HotObservable<WorkspaceEvent> events = new HotObservable<>();
+
+  /*
+   * TODO Replace with constructor injection with R7
    */
-  public WorkspaceImpl(
-      ExperimentLocationManager locationManager,
-      ExperimentPersistenceManager persistenceManager,
-      Log log) {
-    this(
-        locationManager,
-        persistenceManager,
-        log,
-        getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
+  public WorkspaceImpl() {
+    this.experimentRootType = new ExperimentRootImpl(text);
   }
 
   /**
-   * Try to create a new experiment workspace over the given root path
+   * Try to create a new experiment workspace
+   */
+  public WorkspaceImpl(Log log) {
+    this(log, getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
+  }
+
+  /**
+   * Try to create a new experiment workspace
    * 
-   * @param locationManager
-   *          the result location management implementation
-   * @param persistenceManager
-   *          the configuration persistence management implementation
    * @param text
    *          a localized text accessor implementation
    */
-  public WorkspaceImpl(
-      ExperimentLocationManager locationManager,
-      ExperimentPersistenceManager persistenceManager,
-      Log log,
-      ExperimentProperties text) {
-    this.locationManager = locationManager;
-    this.persistenceManager = persistenceManager;
+  public WorkspaceImpl(Log log, ExperimentProperties text) {
     this.log = log;
     this.text = text;
 
     this.experimentRootType = new ExperimentRootImpl(text);
-
-    loadExperiments();
-  }
-
-  protected void loadExperiments() {
-    Stream<PersistedExperiment> experiments;
-    try {
-      experiments = persistenceManager.getExperiments();
-    } catch (Exception e) {
-      ExperimentException ee = new ExperimentException("Failed to load root experiments", e);
-      getLog().log(Level.ERROR, ee);
-      throw ee;
-    }
-    experiments.forEach(s -> {
-      try {
-        this.experiments.add(new ExperimentImpl(this, s));
-      } catch (Exception e) {
-        ExperimentException ee = new ExperimentException(
-            format("Failed to instantiate experiment %s of type %s", s.getId(), s.getTypeId()),
-            e);
-        getLog().log(Level.ERROR, ee);
-        throw ee;
-      }
-    });
   }
 
   protected Log getLog() {
@@ -132,14 +108,6 @@ public class WorkspaceImpl implements Workspace {
 
   protected ExperimentProperties getText() {
     return text;
-  }
-
-  protected ExperimentLocationManager getLocationManager() {
-    return locationManager;
-  }
-
-  protected ExperimentPersistenceManager getPersistenceManager() {
-    return persistenceManager;
   }
 
   /*
@@ -174,13 +142,18 @@ public class WorkspaceImpl implements Workspace {
    */
 
   @Override
-  public Experiment addExperiment(String name) {
-    experiments.add(new ExperimentImpl(this, name));
-    return null;
+  public Experiment addExperiment(String id, ResultStorage locationManager) {
+    ExperimentImpl experiment = new ExperimentImpl(locationManager, id, StateMap.empty(), this);
+    experiments.add(experiment);
+    return experiment;
   }
 
+  /*
+   * Events
+   */
+
   @Override
-  public Stream<ExperimentType<?, ?>> getExperimentTypes() {
-    return persistenceManager.getExperimentTypes();
+  public Observable<WorkspaceEvent> events() {
+    return events;
   }
 }

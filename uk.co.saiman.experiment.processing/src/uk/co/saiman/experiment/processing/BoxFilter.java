@@ -29,27 +29,32 @@ package uk.co.saiman.experiment.processing;
 
 import static java.util.Arrays.fill;
 import static uk.co.saiman.data.function.processing.DataProcessor.arrayProcessor;
+import static uk.co.saiman.experiment.persistence.Accessor.intAccessor;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.persistence.PersistedState;
-import uk.co.saiman.experiment.processing.BoxFilter.State;
+import uk.co.saiman.experiment.persistence.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.properties.PropertyLoader;
-import uk.co.saiman.property.Property;
 
 @Component
-public class BoxFilter implements ProcessorType<State> {
-  private static final String WIDTH_KEY = "width";
+public class BoxFilter implements Processor<BoxFilter> {
+  private static final PropertyAccessor<Integer> WIDTH = intAccessor("width");
   protected static final int NO_OP = 1;
 
   @Reference
   PropertyLoader propertyLoader;
 
-  @Override
-  public String getId() {
-    return getClass().getName();
+  private final StateMap state;
+
+  public BoxFilter() {
+    this(StateMap.empty());
+  }
+
+  public BoxFilter(StateMap state) {
+    this.state = state.withDefault(WIDTH, () -> NO_OP);
   }
 
   @Override
@@ -57,7 +62,25 @@ public class BoxFilter implements ProcessorType<State> {
     return propertyLoader.getProperties(ProcessingProperties.class).boxFilterProcessor().get();
   }
 
-  public static void apply(double[] data, int boxWidth) {
+  @Override
+  public BoxFilter withState(StateMap state) {
+    return new BoxFilter(state);
+  }
+
+  @Override
+  public StateMap getState() {
+    return state;
+  }
+
+  public int getWidth() {
+    return state.get(WIDTH);
+  }
+
+  public BoxFilter withWidth(int width) {
+    return withState(state.with(WIDTH, width));
+  }
+
+  public static void applyInPlace(double[] data, int boxWidth) {
     if (boxWidth <= 0)
       throw new IllegalArgumentException();
     if (boxWidth == 1)
@@ -92,38 +115,18 @@ public class BoxFilter implements ProcessorType<State> {
   }
 
   @Override
-  public State configure(PersistedState state) {
-    return new State(state);
+  public DataProcessor getProcessor() {
+    int width = getWidth();
+
+    return arrayProcessor(data -> {
+      data = data.clone();
+      applyInPlace(data, width);
+      return data;
+    }, width / 2);
   }
 
-  public class State extends ProcessorState {
-    private final Property<Integer> width;
-
-    public State(PersistedState state) {
-      super(BoxFilter.this, state);
-      width = state
-          .forString(WIDTH_KEY)
-          .map(Integer::parseInt, Object::toString)
-          .setDefault(() -> NO_OP);
-    }
-
-    public int getWidth() {
-      return width.get();
-    }
-
-    public void setWidth(int width) {
-      this.width.set(width);
-    }
-
-    @Override
-    public DataProcessor getProcessor() {
-      int width = getWidth();
-
-      return arrayProcessor(data -> {
-        data = data.clone();
-        apply(data, width);
-        return data;
-      }, width / 2);
-    }
+  @Override
+  public Class<BoxFilter> getType() {
+    return BoxFilter.class;
   }
 }

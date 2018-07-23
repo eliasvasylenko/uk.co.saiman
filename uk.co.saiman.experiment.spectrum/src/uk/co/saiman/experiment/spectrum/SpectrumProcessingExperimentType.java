@@ -28,11 +28,14 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
-import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSING_KEY;
+import static uk.co.saiman.experiment.persistence.Accessor.mapAccessor;
 import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -49,9 +52,10 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingType;
-import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.persistence.Accessor.ListAccessor;
+import uk.co.saiman.experiment.persistence.Accessor.MapAccessor;
+import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.processing.ProcessorService;
-import uk.co.saiman.experiment.processing.ProcessorState;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -66,6 +70,12 @@ public class SpectrumProcessingExperimentType
   @Reference
   private ProcessorService processors;
   private final SpectrumProperties properties;
+
+  private final MapAccessor<Processor<?>> processor = mapAccessor(
+      "processing",
+      s -> processors.loadProcessor(s),
+      Processor::getState);
+  private final ListAccessor<List<Processor<?>>> processorList = processor.toListAccessor();
 
   public SpectrumProcessingExperimentType() {
     properties = getDefaultPropertyLoader().getProperties(SpectrumProperties.class);
@@ -103,7 +113,6 @@ public class SpectrumProcessingExperimentType
   public SpectrumResultConfiguration createState(
       ConfigurationContext<SpectrumResultConfiguration> context) {
     return new SpectrumResultConfiguration() {
-      private final List<ProcessorState> processors = createProcessorList(context.persistedState());
       private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
 
       @Override
@@ -118,8 +127,13 @@ public class SpectrumProcessingExperimentType
       }
 
       @Override
-      public List<ProcessorState> getProcessing() {
-        return processors;
+      public Stream<Processor<?>> getProcessing() {
+        return context.state().get(processorList).stream();
+      }
+
+      @Override
+      public void setProcessing(Collection<? extends Processor<?>> processors) {
+        context.update(state -> state.with(processorList, new ArrayList<>(processors)));
       }
     };
   }
@@ -128,8 +142,7 @@ public class SpectrumProcessingExperimentType
   public Spectrum process(SpectrumResultConfiguration state, Spectrum input) {
     DataProcessor processor = state
         .getProcessing()
-        .stream()
-        .map(ProcessorState::getProcessor)
+        .map(Processor::getProcessor)
         .reduce(identity(), DataProcessor::andThen);
 
     SampledContinuousFunction<Mass, Dimensionless> massData = processor
@@ -156,11 +169,5 @@ public class SpectrumProcessingExperimentType
         return input.getCalibration();
       }
     };
-  }
-
-  protected List<ProcessorState> createProcessorList(PersistedState persistedState) {
-    return persistedState
-        .getMapList(PROCESSING_KEY)
-        .map(processors::loadProcessorState, ProcessorState::getPersistedState);
   }
 }

@@ -44,11 +44,16 @@ public class PathLocation implements Location {
   @Override
   public Stream<Resource> getResources() {
     // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Resource getResource(String name, String extension) {
     return new PathResource(path.resolve(name + "." + extension));
+  }
+
+  @Override
+  public String toString() {
+    return Path.class.getName() + ": " + path;
   }
 }

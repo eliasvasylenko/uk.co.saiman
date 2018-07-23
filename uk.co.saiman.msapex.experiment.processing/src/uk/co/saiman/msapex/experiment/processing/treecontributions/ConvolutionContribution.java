@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 
@@ -38,16 +36,14 @@ import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.Contributor;
-import uk.co.saiman.eclipse.treeview.EditingTextField;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
-import uk.co.saiman.eclipse.treeview.TreeEditor;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.eclipse.treeview.TreeEntryChild;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
 import uk.co.saiman.experiment.processing.Convolution;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 
@@ -56,71 +52,37 @@ public class ConvolutionContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
   @AboutToShow
-  public void prepare(HBox node, TreeEntry<Convolution.State> entry, TreeChildren children) {
+  public void prepare(HBox node, TreeEntry<Convolution> entry, TreeEntryChildren children) {
     setSupplemental(node, Arrays.toString(entry.data().getConvolutionVector()));
 
-    children.addChild(new TreeContribution() {
-      @AboutToShow
-      public void prepare(
-          HBox centreNode,
-          TreeEditor<TreeContribution> editor,
-          @Localize ProcessingProperties properties) {
-        setLabel(centreNode, properties.centreLabel().get());
+    children
+        .add(
+            TreeEntryChild
+                .withType(int.class)
+                .withGetter(() -> entry.data().getConvolutionVectorCentre())
+                .withSetter(
+                    result -> entry.update(data -> data.withConvolutionVectorCentre(result)))
+                .withContribution(new TreeContribution() {
+                  @AboutToShow
+                  public void prepare(HBox vectorNode, @Localize ProcessingProperties properties) {
+                    setLabel(vectorNode, properties.vectorLabel().get());
+                  }
+                })
+                .build());
 
-        String centreString = Integer.toString(entry.data().getConvolutionVectorCentre());
-
-        if (editor.isEditing()) {
-          TextField widthField = new EditingTextField(
-              centreString,
-              editor,
-              centreNode.getChildren()::add);
-
-          editor
-              .addEditListener(
-                  () -> entry
-                      .data()
-                      .setConvolutionVector(
-                          entry.data().getConvolutionVector(),
-                          Integer.parseInt(widthField.getText())));
-        } else {
-          setSupplemental(centreNode, centreString);
-        }
-      }
-    });
-
-    children.addChild(new TreeContribution() {
-      @AboutToShow
-      public void prepare(
-          HBox vectorNode,
-          TreeEditor<TreeContribution> editor,
-          @Localize ProcessingProperties properties) {
-        setLabel(vectorNode, properties.vectorLabel().get());
-
-        String vectorString = Arrays
-            .stream(entry.data().getConvolutionVector())
-            .mapToObj(d -> Double.toString(d))
-            .collect(joining(", "));
-
-        if (editor.isEditing()) {
-          TextField vectorField = new EditingTextField(
-              vectorString,
-              editor,
-              vectorNode.getChildren()::add);
-
-          editor
-              .addEditListener(
-                  () -> entry
-                      .data()
-                      .setConvolutionVector(
-                          stream(vectorField.getText().split(","))
-                              .mapToDouble(Double::parseDouble)
-                              .toArray(),
-                          entry.data().getConvolutionVectorCentre()));
-        } else {
-          setSupplemental(vectorNode, vectorString);
-        }
-      }
-    });
+    children
+        .add(
+            TreeEntryChild
+                .withType(double[].class)
+                .withGetter(() -> entry.data().getConvolutionVector())
+                .withSetter(result -> entry.update(data -> data.withConvolutionVector(result)))
+                .withContribution(new TreeContribution() {
+                  @AboutToShow
+                  public void prepare(HBox vectorNode, @Localize ProcessingProperties properties) {
+                    setLabel(vectorNode, properties.vectorLabel().get());
+                  }
+                })
+                .build());
 
     pseudoClass.configureCell(node);
   }

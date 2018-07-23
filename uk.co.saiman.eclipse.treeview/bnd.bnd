@@ -20,6 +20,9 @@ Bundle-Name: SAI :: Eclipse :: Tree View
 Bundle-Description: \
 	Tree view extension to the e4 model
 
+Private-Package: \
+	uk.co.saiman.eclipse.treeview.impl
+
 Export-Package: \
 	uk.co.saiman.eclipse.treeview
 

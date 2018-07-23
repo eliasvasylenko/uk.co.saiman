@@ -27,33 +27,23 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
-
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.fx.core.di.LocalInstance;
 import org.eclipse.fx.core.di.Service;
-import org.eclipse.osgi.service.datalocation.Location;
+import org.osgi.service.cm.ConfigurationAdmin;
 
-import javafx.fxml.FXMLLoader;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.filesystem.FileSystemLocationManager;
-import uk.co.saiman.experiment.impl.WorkspaceImpl;
-import uk.co.saiman.experiment.persistence.json.JsonPersistenceManager;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -65,8 +55,6 @@ import uk.co.saiman.log.Log.Level;
  * @author Elias N Vasylenko
  */
 public class WorkspaceAddon {
-  static final String OSGI_SERVICE = "osgi.service";
-
   @Inject
   private IEclipseContext context;
 
@@ -81,17 +69,22 @@ public class WorkspaceAddon {
   @Localize
   private ExperimentProperties text;
 
+  @Inject
+  @Service
+  private ConfigurationAdmin configurationAdmin;
+
+  @Inject
+  @Service
+  private Workspace workspace;
+  @Inject
+  @Service
   private List<ExperimentType<?, ?>> experimentTypes;
 
   @PostConstruct
-  void initialize(
-      @LocalInstance FXMLLoader loader,
-      @Named(INSTANCE_LOCATION) Location instanceLocation,
-      @Service List<ExperimentType<?, ?>> experimentTypes) {
-    this.experimentTypes = new ArrayList<>(experimentTypes);
+  void initialize() {
+    context.set(Workspace.class, workspace);
 
     try {
-      initializeWorkspace(instanceLocation);
       initializeAdapters();
     } catch (Exception e) {
       log.log(Level.ERROR, e);
@@ -99,30 +92,20 @@ public class WorkspaceAddon {
     }
   }
 
+  private Stream<ExperimentType<?, ?>> getExperimentTypes() {
+    return Stream
+        .concat(
+            Stream.of(workspace.getExperimentRootType()),
+            new ArrayList<>(experimentTypes).stream());
+  }
+
   private void initializeAdapters() {
-    List<ExperimentType<?, ?>> experimentTypes = new ArrayList<>(this.experimentTypes.size() + 1);
-    experimentTypes.addAll(this.experimentTypes);
-    experimentTypes.add(context.get(Workspace.class).getExperimentRootType());
     experimentNodeAdapterFactory = new ExperimentNodeAdapterFactory(
         adapterManager,
-        experimentTypes);
+        this::getExperimentTypes);
     experimentAdapterFactory = new ExperimentAdapterFactory(
         adapterManager,
         experimentNodeAdapterFactory);
-  }
-
-  private Workspace initializeWorkspace(Location instanceLocation) throws URISyntaxException {
-    Path workspaceLocation = Paths.get(instanceLocation.getURL().toURI());
-
-    Workspace workspace = new WorkspaceImpl(
-        new FileSystemLocationManager(workspaceLocation),
-        new JsonPersistenceManager(workspaceLocation, experimentTypes),
-        log,
-        text);
-
-    context.set(Workspace.class, workspace);
-
-    return workspace;
   }
 
   @PreDestroy

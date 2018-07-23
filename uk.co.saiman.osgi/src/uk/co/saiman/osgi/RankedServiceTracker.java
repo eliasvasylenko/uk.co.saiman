@@ -144,7 +144,7 @@ public class RankedServiceTracker<T> extends ServiceTracker<T, RankedService<T>>
 			}
 
 			private int getRank(ServiceReference<?> reference) {
-				Object property = reference.getProperty(SERVICE_RANKING);
+        Object property = reference.getProperty(SERVICE_RANKING);
 				return (property instanceof Integer) ? ((Integer) property).intValue() : 0;
 			}
 		});

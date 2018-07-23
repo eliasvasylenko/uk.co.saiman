@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static java.lang.Double.parseDouble;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 
@@ -35,16 +34,14 @@ import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.Contributor;
-import uk.co.saiman.eclipse.treeview.EditingTextField;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
-import uk.co.saiman.eclipse.treeview.TreeEditor;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.eclipse.treeview.TreeEntryChild;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
 import uk.co.saiman.experiment.processing.GaussianSmooth;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 
@@ -53,34 +50,22 @@ public class GaussianSmoothContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
   @AboutToShow
-  public void prepare(
-      HBox node,
-      TreeEntry<GaussianSmooth.State> entry,
-      TreeChildren children,
-      @Localize ProcessingProperties properties) {
-    setSupplemental(node, "(" + entry.data().getStandardDeviation() + ")");
+  public void prepare(HBox node, TreeEntry<GaussianSmooth> entry, TreeEntryChildren children) {
+    setSupplemental(node, Double.toString(entry.data().getStandardDeviation()));
 
-    children.addChild(new TreeContribution() {
-      @AboutToShow
-      void prepare(HBox deviationNode, TreeEditor<TreeContribution> editor) {
-        setLabel(deviationNode, properties.standardDeviationLabel().get());
-
-        String deviationString = Double.toString(entry.data().getStandardDeviation());
-
-        if (editor.isEditing()) {
-          TextField deviationField = new EditingTextField(
-              deviationString,
-              editor,
-              deviationNode.getChildren()::add);
-
-          editor
-              .addEditListener(
-                  () -> entry.data().setStandardDeviation(parseDouble(deviationField.getText())));
-        } else {
-          setSupplemental(deviationNode, deviationString);
-        }
-      }
-    });
+    children
+        .add(
+            TreeEntryChild
+                .withType(double.class)
+                .withGetter(() -> entry.data().getStandardDeviation())
+                .withSetter(result -> entry.update(data -> data.withStandardDeviation(result)))
+                .withContribution(new TreeContribution() {
+                  @AboutToShow
+                  void prepare(HBox deviationNode, @Localize ProcessingProperties properties) {
+                    setLabel(deviationNode, properties.standardDeviationLabel().get());
+                  }
+                })
+                .build());
 
     pseudoClass.configureCell(node);
   }

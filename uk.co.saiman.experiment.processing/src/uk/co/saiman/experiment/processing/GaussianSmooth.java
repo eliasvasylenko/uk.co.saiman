@@ -29,82 +29,91 @@ package uk.co.saiman.experiment.processing;
 
 import static java.lang.Math.floor;
 import static java.lang.Math.sqrt;
+import static uk.co.saiman.experiment.persistence.Accessor.doubleAccessor;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.persistence.PersistedState;
-import uk.co.saiman.experiment.processing.GaussianSmooth.State;
+import uk.co.saiman.experiment.persistence.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.properties.PropertyLoader;
-import uk.co.saiman.property.Property;
 
 @Component
-public class GaussianSmooth implements ProcessorType<State> {
-  private static final String STANDARD_DEVIATION_KEY = "standardDeviation";
+public class GaussianSmooth implements Processor<GaussianSmooth> {
+  private static final PropertyAccessor<Double> STANDARD_DEVIATION = doubleAccessor(
+      "standardDeviation");
   private static final int BOX_ITERATIONS = 5;
 
   @Reference
   PropertyLoader propertyLoader;
+
+  private final StateMap state;
+
+  public GaussianSmooth() {
+    this(StateMap.empty());
+  }
+
+  public GaussianSmooth(StateMap state) {
+    this.state = state.withDefault(STANDARD_DEVIATION, () -> 10d);
+  }
 
   @Override
   public String getName() {
     return propertyLoader.getProperties(ProcessingProperties.class).gaussianSmoothProcessor().get();
   }
 
-  @Override
-  public State configure(PersistedState state) {
-    return new State(state);
+  public double getStandardDeviation() {
+    return state.get(STANDARD_DEVIATION);
   }
 
-  public class State extends ProcessorState {
-    private final Property<Double> standardDeviation;
+  public GaussianSmooth withStandardDeviation(double standardDeviation) {
+    return withState(state.with(STANDARD_DEVIATION, standardDeviation));
+  }
 
-    public State(PersistedState state) {
-      super(GaussianSmooth.this, state);
-      standardDeviation = state
-          .forString(STANDARD_DEVIATION_KEY)
-          .map(Double::parseDouble, Object::toString)
-          .setDefault(() -> 10d);
-    }
+  @Override
+  public StateMap getState() {
+    return state;
+  }
 
-    public double getStandardDeviation() {
-      return standardDeviation.get();
-    }
+  @Override
+  public GaussianSmooth withState(StateMap state) {
+    return new GaussianSmooth(state);
+  }
 
-    public void setStandardDeviation(double standardDeviation) {
-      this.standardDeviation.set(standardDeviation);
-    }
+  @Override
+  public DataProcessor getProcessor() {
+    /*
+     * This is a little dense to properly document in place. For more information,
+     * the implementation is based on the report "Fast Almost-Gaussian Filtering" by
+     * Peter Kovesi.
+     */
 
-    @Override
-    public DataProcessor getProcessor() {
-      /*
-       * This is a little dense to properly document in place. For more information,
-       * the implementation is based on the report "Fast Almost-Gaussian Filtering" by
-       * Peter Kovesi.
-       */
+    double stdDevSquared12 = (getStandardDeviation() * getStandardDeviation()) * 12d;
+    double idealBoxWidth = sqrt((stdDevSquared12 / BOX_ITERATIONS) + 1);
 
-      double stdDevSquared12 = (getStandardDeviation() * getStandardDeviation()) * 12d;
-      double idealBoxWidth = sqrt((stdDevSquared12 / BOX_ITERATIONS) + 1);
+    int lowerBoxWidth = (int) floor(idealBoxWidth / 2) * 2 - 1;
+    int lowerIterations = (int) ((BOX_ITERATIONS * (lowerBoxWidth * (lowerBoxWidth + 4) + 3)
+        - stdDevSquared12) / (4 * lowerBoxWidth + 4));
 
-      int lowerBoxWidth = (int) floor(idealBoxWidth / 2) * 2 - 1;
-      int lowerIterations = (int) ((BOX_ITERATIONS * (lowerBoxWidth * (lowerBoxWidth + 4) + 3)
-          - stdDevSquared12) / (4 * lowerBoxWidth + 4));
+    int higherBoxWidth = lowerBoxWidth + 2;
+    int higherIterations = BOX_ITERATIONS - lowerIterations;
 
-      int higherBoxWidth = lowerBoxWidth + 2;
-      int higherIterations = BOX_ITERATIONS - lowerIterations;
+    return DataProcessor.arrayProcessor(data -> {
+      data = data.clone();
 
-      return DataProcessor.arrayProcessor(data -> {
-        data = data.clone();
+      for (int i = 0; i < lowerIterations; i++)
+        BoxFilter.applyInPlace(data, lowerBoxWidth);
 
-        for (int i = 0; i < lowerIterations; i++)
-          BoxFilter.apply(data, lowerBoxWidth);
+      for (int i = 0; i < higherIterations; i++)
+        BoxFilter.applyInPlace(data, higherBoxWidth);
 
-        for (int i = 0; i < higherIterations; i++)
-          BoxFilter.apply(data, higherBoxWidth);
+      return data;
+    }, 0);
+  }
 
-        return data;
-      }, 0);
-    }
+  @Override
+  public Class<GaussianSmooth> getType() {
+    return GaussianSmooth.class;
   }
 }

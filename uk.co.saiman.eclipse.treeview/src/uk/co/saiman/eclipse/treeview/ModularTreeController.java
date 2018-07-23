@@ -34,7 +34,6 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.services.adapter.Adapter;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -42,7 +41,9 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.TreeItem;
 import uk.co.saiman.eclipse.service.ObservableService;
+import uk.co.saiman.eclipse.treeview.impl.ModularTreeItem;
 import uk.co.saiman.reflection.token.TypedReference;
 
 /**
@@ -70,9 +71,6 @@ public class ModularTreeController {
 
   @Inject
   private ESelectionService selectionService;
-
-  @Inject
-  private Adapter adapter;
 
   /**
    * Instantiate a controller with the default id - the simple name of the class -
@@ -145,8 +143,8 @@ public class ModularTreeController {
   /**
    * @return the currently selected tree item
    */
-  public ModularTreeItem<?> getSelection() {
-    return (ModularTreeItem<?>) modularTreeView.getSelectionModel().getSelectedItem();
+  public TreeItem<TreeEntry<?>> getSelection() {
+    return modularTreeView.getSelectionModel().getSelectedItem();
   }
 
   /**
@@ -181,11 +179,7 @@ public class ModularTreeController {
   }
 
   protected ModularTreeItem<?> createRoot(TypedReference<?> root) {
-    return new ModularTreeItem<>(root, this);
-  }
-
-  <U> U adapt(TreeEntry<?> treeEntry, Class<U> adapterType) {
-    return adapter.adapt(treeEntry.data(), adapterType);
+    return new ModularTreeItem<>(context, root, this);
   }
 
   IEclipseContext getContext() {

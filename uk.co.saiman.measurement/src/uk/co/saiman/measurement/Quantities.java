@@ -28,7 +28,9 @@
 package uk.co.saiman.measurement;
 
 public final class Quantities {
+  private static final QuantityFormat QUANTITY_FORMAT = new QuantityFormatImpl();
+
   public static QuantityFormat quantityFormat() {
-    return new QuantityFormatImpl();
+    return QUANTITY_FORMAT;
   }
 }

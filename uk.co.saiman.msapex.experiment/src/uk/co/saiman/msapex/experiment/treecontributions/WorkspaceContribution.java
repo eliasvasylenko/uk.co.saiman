@@ -27,19 +27,25 @@
  */
 package uk.co.saiman.msapex.experiment.treecontributions;
 
+import static uk.co.saiman.eclipse.treeview.TreeEntryChild.withType;
+
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.eclipse.treeview.TreeChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Workspace;
 
 @Component
 public class WorkspaceContribution implements TreeContribution {
   @AboutToShow
-  public void prepare(TreeChildren children, TreeEntry<Workspace> entry) {
-    entry.data().getExperiments().forEach(e -> children.addChild(e, Experiment.class));
+  public void prepare(TreeEntryChildren children, TreeEntry<Workspace> entry) {
+    entry
+        .data()
+        .getExperiments()
+        .map(e -> withType(Experiment.class).withValue(e).build())
+        .forEach(children::add);
   }
 }

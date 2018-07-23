@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.collection.StreamUtilities;
+import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -91,6 +92,19 @@ public interface ExperimentNode<S, T> {
   default int getIndex() {
     return getParent().get().getChildren().collect(toList()).indexOf(this);
   }
+
+  /**
+   * Remove this experiment node from its current parent and add it as a child of
+   * the given parent at the given index.
+   * <p>
+   * This operation will {@link #clearResult() clear} any result data.
+   * 
+   * @param parent
+   *          the parent of the new copy
+   * @param index
+   *          the positional index at which to add the child
+   */
+  void move(ExperimentNode<?, ?> parent, int index);
 
   /**
    * @return the root part of the experiment tree this part occurs in
@@ -154,9 +168,15 @@ public interface ExperimentNode<S, T> {
   Optional<ExperimentNode<?, ?>> getChild(String id);
 
   /**
-   * @return All known available child experiment types
+   * Add an experiment node of the given type as the last child of this node.
+   * 
+   * @param childType
+   *          the type of experiment
+   * @return a new child experiment part of the given type
    */
-  Stream<ExperimentType<?, ?>> getAvailableChildExperimentTypes();
+  default <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType) {
+    return addChild(childType, StateMap.empty());
+  }
 
   /**
    * Add an experiment node of the given type as the last child of this node.
@@ -165,8 +185,8 @@ public interface ExperimentNode<S, T> {
    *          the type of experiment
    * @return a new child experiment part of the given type
    */
-  default <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType) {
-    return addChild(childType, (int) getChildren().count());
+  default <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType, StateMap state) {
+    return addChild((int) getChildren().count(), childType, state);
   }
 
   /**
@@ -178,51 +198,20 @@ public interface ExperimentNode<S, T> {
    *          the positional index at which to add the child
    * @return a new child experiment part of the given type
    */
-  <U, V> ExperimentNode<U, V> addChild(ExperimentType<U, V> childType, int index);
-
-  /**
-   * Add a copy of this experiment node as the last child of the given parent.
-   * 
-   * @param parent
-   *          the parent of the new copy
-   * @return a new child experiment part of the same type and with the same state
-   */
-  default ExperimentNode<S, T> copy(ExperimentNode<?, ?> parent) {
-    return copy(parent, (int) parent.getChildren().count());
+  default <U, V> ExperimentNode<U, V> addChild(int index, ExperimentType<U, V> childType) {
+    return addChild(index, childType, StateMap.empty());
   }
 
   /**
-   * Add a copy of this experiment node as a child of the given parent.
+   * Add an experiment node of the given type as a child of this node.
    * 
-   * @param parent
-   *          the parent of the new copy
+   * @param childType
+   *          the type of experiment
    * @param index
    *          the positional index at which to add the child
-   * @return a new child experiment part of the same type and with the same state
+   * @return a new child experiment part of the given type
    */
-  ExperimentNode<S, T> copy(ExperimentNode<?, ?> parent, int index);
-
-  /**
-   * Remove this experiment node from its current parent and add it as the last
-   * child of the given parent.
-   * 
-   * @param parent
-   *          the new parent
-   */
-  default void move(ExperimentNode<?, ?> parent) {
-    move(parent, (int) parent.getChildren().count());
-  }
-
-  /**
-   * Remove this experiment node from its current parent and add it as a chidl of
-   * the given parent.
-   * 
-   * @param parent
-   *          the parent of the new copy
-   * @param index
-   *          the positional index at which to add the child
-   */
-  void move(ExperimentNode<?, ?> parent, int index);
+  <U, V> ExperimentNode<U, V> addChild(int index, ExperimentType<U, V> childType, StateMap state);
 
   /**
    * @return the current processing lifecycle state of the experiment part

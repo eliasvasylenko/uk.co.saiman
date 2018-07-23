@@ -27,27 +27,30 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
+import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 
 import java.util.List;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.eclipse.treeview.TreeEntryChild;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.processing.ProcessorState;
+import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
 import uk.co.saiman.reflection.token.TypeToken;
 
-@Component(property = Constants.SERVICE_RANKING + ":Integer=" + 10)
+@ServiceRanking(10)
+@Component
 public class SpectrumProcessingExperimentNodeContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
@@ -55,15 +58,17 @@ public class SpectrumProcessingExperimentNodeContribution implements TreeContrib
   public void prepare(
       HBox node,
       TreeEntry<ExperimentNode<? extends SpectrumResultConfiguration, ?>> data,
-      TreeChildren children) {
+      TreeEntryChildren children) {
     setLabel(node, data.data().getType().getName());
     setSupplemental(node, data.data().getState().getSpectrumName());
 
     children
-        .addChild(
+        .add(
             0,
-            data.data().getState().getProcessing(),
-            new TypeToken<List<ProcessorState>>() {});
+            TreeEntryChild
+                .withType(new TypeToken<List<Processor<?>>>() {})
+                .withValue(data.data().getState().getProcessing().collect(toList()))
+                .build());
 
     pseudoClass.configureCell(node);
   }

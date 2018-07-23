@@ -33,9 +33,9 @@ import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 import javax.inject.Inject;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
@@ -51,7 +51,8 @@ import uk.co.saiman.experiment.ExperimentProperties;
  * 
  * @author Elias N Vasylenko
  */
-@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 50)
+@ServiceRanking(50)
+@Component(scope = ServiceScope.PROTOTYPE)
 public class ExperimentContribution implements TreeContribution {
   @Inject
   @Localize

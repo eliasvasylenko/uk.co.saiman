@@ -28,6 +28,7 @@
 package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static uk.co.saiman.experiment.persistence.Accessor.stringAccessor;
 import static uk.co.saiman.measurement.Quantities.quantityFormat;
 import static uk.co.saiman.measurement.Units.metre;
 
@@ -38,19 +39,29 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.ConfigurationContext;
+import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.persistence.Accessor.PropertyAccessor;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.measurement.scalar.Scalar;
-import uk.co.saiman.property.Property;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 
 @Component
 public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXYStageConfiguration>,
     ExperimentType<SaintXYStageConfiguration, Void> {
-  private static final String X_STATE = "xOffset";
-  private static final String Y_STATE = "yOffset";
+  private static final PropertyAccessor<Quantity<Length>> X = lengthAccessor("xOffset");
+  private static final PropertyAccessor<Quantity<Length>> Y = lengthAccessor("yOffset");
+
+  private static PropertyAccessor<Quantity<Length>> lengthAccessor(String value) {
+    return stringAccessor(value)
+        .map(l -> quantityFormat().parse(l).asType(Length.class), quantityFormat()::format);
+  }
+
+  @Reference
+  private Workspace workspace;
 
   @Reference(cardinality = OPTIONAL)
   private XYStage stageDevice;
@@ -66,15 +77,12 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
     String id = context.getId(() -> "A1");
 
     return new SaintXYStageConfiguration() {
-      private final Property<Quantity<Length>> x = getLength(X_STATE);
-      private final Property<Quantity<Length>> y = getLength(Y_STATE);
-
-      private Property<Quantity<Length>> getLength(String value) {
-        return context
-            .persistedState()
-            .forString(value)
-            .map(l -> quantityFormat().parse(l).asType(Length.class), quantityFormat()::format)
-            .setDefault(() -> new Scalar<>(metre().micro(), 0));
+      {
+        context
+            .update(
+                state -> state
+                    .withDefault(X, () -> new Scalar<>(metre().micro(), 0))
+                    .withDefault(Y, () -> new Scalar<>(metre().micro(), 0)));
       }
 
       @Override
@@ -89,13 +97,12 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
 
       @Override
       public XYCoordinate<Length> location() {
-        return new XYCoordinate<>(x.get(), y.get());
+        return new XYCoordinate<>(context.state().get(X), context.state().get(Y));
       }
 
       @Override
       public void setLocation(XYCoordinate<Length> location) {
-        x.set(location.getX());
-        y.set(location.getY());
+        context.update(state -> state.with(X, location.getX()).with(Y, location.getY()));
       }
 
       @Override
@@ -112,5 +119,10 @@ public class SaintXYStageExperimentType implements XYStageExperimentType<SaintXY
   @Override
   public XYStage device() {
     return stageDevice;
+  }
+
+  @Override
+  public ExperimentRoot experimentRoot() {
+    return workspace.getExperimentRootType();
   }
 }

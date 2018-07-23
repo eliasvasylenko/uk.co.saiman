@@ -65,7 +65,7 @@ public interface ExperimentType<S, R> {
     return false;
   }
 
-  default boolean isExecutionContextDependent() {
+  default boolean isProcessingContextDependent() {
     return true;
   }
 
@@ -86,33 +86,14 @@ public interface ExperimentType<S, R> {
   R process(ProcessingContext<S, R> context);
 
   /**
-   * Test whether a node of this type may follow from the given directly preceding
-   * node and be validly added as its child.
+   * Test whether a node of this type may directly succeed a node of the given
+   * type.
    * 
-   * @param parentNode
-   *          the candidate parent node
+   * @param parentType
+   *          the candidate parent node type
    * @return true if a node of this type may be added as a child, false otherwise
    */
-  ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode);
-
-  /**
-   * Test whether a node of the given type may follow from the given node and be
-   * validly added as its child. The penultimate descendant node should be a
-   * descendant of a node of this type.
-   * <p>
-   * This test is performed on all ancestors when an attempt is made to add a new
-   * node.
-   * 
-   * @param penultimateDescendantNode
-   *          the candidate parent node
-   * @param descendantNodeType
-   *          the candidate child node
-   * @return true if a node of the given type may be added as a child of the given
-   *         node, false otherwise
-   */
-  ExperimentNodeConstraint mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?, ?> descendantNodeType);
+  boolean mayComeAfter(ExperimentType<?, ?> parentType);
 
   /**
    * @return the exact generic type of the configuration interface

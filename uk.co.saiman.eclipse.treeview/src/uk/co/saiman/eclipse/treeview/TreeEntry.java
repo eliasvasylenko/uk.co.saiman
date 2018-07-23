@@ -28,6 +28,7 @@
 package uk.co.saiman.eclipse.treeview;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javafx.scene.control.TreeItem;
@@ -56,6 +57,27 @@ public interface TreeEntry<T> {
    */
   default T data() {
     return typedData().getObject();
+  }
+
+  /**
+   * Mark the data as having been updated/mutated
+   */
+  void update();
+
+  /**
+   * @param data
+   *          Mark the data as having been updated, and replace with the given
+   *          data
+   */
+  void update(T data);
+
+  /**
+   * @param data
+   *          Mark the data as having been updated, and replace with the result of
+   *          application of the function to the current data
+   */
+  default void update(Function<? super T, ? extends T> function) {
+    update(function.apply(data()));
   }
 
   /**

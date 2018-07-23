@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
+import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
@@ -43,7 +44,7 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.ModularTreeController;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.processing.ProcessorState;
+import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -66,8 +67,8 @@ public class SpectrumProcessingEditorPart {
     modularTreeController
         .setRootData(
             typedObject(
-                new TypeToken<List<ProcessorState>>() {},
-                result.getState().getProcessing()));
+                new TypeToken<List<Processor<?>>>() {},
+                result.getState().getProcessing().collect(toList())));
   }
 
   public ModularTreeController getProcessingTreeController() {

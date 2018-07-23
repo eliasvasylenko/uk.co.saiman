@@ -31,15 +31,21 @@ import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import uk.co.saiman.eclipse.treeview.TreeChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.eclipse.treeview.TreeEntryChild;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.Instrument;
 
 @Component(scope = ServiceScope.PROTOTYPE)
 public class InstrumentContribution implements TreeContribution {
   @AboutToShow
-  public void prepare(TreeEntry<Instrument> data, TreeChildren children) {
-    data.data().getDevices().forEach(children::addChild);
+  public void prepare(TreeEntry<Instrument> data, TreeEntryChildren children) {
+    data
+        .data()
+        .getDevices()
+        .map(d -> TreeEntryChild.withType(Device.class).withValue(d).build())
+        .forEach(children::add);
   }
 }

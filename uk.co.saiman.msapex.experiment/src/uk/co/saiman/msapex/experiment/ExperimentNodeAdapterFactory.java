@@ -32,8 +32,8 @@ import static java.util.stream.Stream.of;
 import static uk.co.saiman.collection.StreamUtilities.streamOptional;
 import static uk.co.saiman.collection.StreamUtilities.tryOptional;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdapterFactory;
@@ -47,11 +47,11 @@ import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
-  private final List<ExperimentType<?, ?>> experimentTypes;
+  private final Supplier<? extends Stream<? extends ExperimentType<?, ?>>> experimentTypes;
 
   public ExperimentNodeAdapterFactory(
       IAdapterManager adapterManager,
-      List<ExperimentType<?, ?>> experimentTypes) {
+      Supplier<? extends Stream<? extends ExperimentType<?, ?>>> experimentTypes) {
     this.adapterManager = adapterManager;
     this.experimentTypes = experimentTypes;
     adapterManager.registerAdapters(this, ExperimentNode.class);
@@ -101,7 +101,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
     return concat(
         of(ExperimentType.class, Experiment.class, Workspace.class),
         experimentTypes
-            .stream()
+            .get()
             .map(type -> type.getStateType().getErasedType())
             .flatMap(this::getTransitive)).toArray(Class<?>[]::new);
   }

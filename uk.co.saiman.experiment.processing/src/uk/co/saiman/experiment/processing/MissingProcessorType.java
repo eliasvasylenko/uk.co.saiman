@@ -29,15 +29,21 @@ package uk.co.saiman.experiment.processing;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.persistence.StateMap;
 
-public class MissingProcessorType implements ProcessorType<ProcessorState> {
+public class MissingProcessorType implements Processor<MissingProcessorType> {
   private final String id;
   private final ProcessingProperties text;
+  private final StateMap state;
 
   public MissingProcessorType(String id, ProcessingProperties text) {
+    this(id, text, StateMap.empty());
+  }
+
+  public MissingProcessorType(String id, ProcessingProperties text, StateMap state) {
     this.id = id;
     this.text = text;
+    this.state = state;
   }
 
   @Override
@@ -51,12 +57,22 @@ public class MissingProcessorType implements ProcessorType<ProcessorState> {
   }
 
   @Override
-  public ProcessorState configure(PersistedState state) {
-    return new ProcessorState(MissingProcessorType.this, state) {
-      @Override
-      public DataProcessor getProcessor() {
-        throw new ExperimentException("Cannot find processor " + id);
-      }
-    };
+  public StateMap getState() {
+    return state;
+  }
+
+  @Override
+  public MissingProcessorType withState(StateMap state) {
+    return new MissingProcessorType(id, text, state);
+  }
+
+  @Override
+  public DataProcessor getProcessor() {
+    throw new ExperimentException("Cannot find processor " + id);
+  }
+
+  @Override
+  public Class<MissingProcessorType> getType() {
+    return MissingProcessorType.class;
   }
 }

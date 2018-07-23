@@ -60,7 +60,9 @@ public interface DataProcessor {
    *          corresponding indices in the original array
    * @return a data processor implementing the given behaviour
    */
-  static DataProcessor arrayProcessor(Function<double[], double[]> process, int offset) {
+  static DataProcessor arrayProcessor(
+      Function<? super double[], ? extends double[]> process,
+      int offset) {
     return new DataProcessor() {
       @Override
       public <UD extends Quantity<UD>, UR extends Quantity<UR>> SampledContinuousFunction<UD, UR> process(

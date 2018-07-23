@@ -27,24 +27,25 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
+import static org.osgi.service.component.annotations.ServiceScope.PROTOTYPE;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
 import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.treeview.Contributor;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeChildren;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 
-@Component(scope = ServiceScope.PROTOTYPE, property = Constants.SERVICE_RANKING + ":Integer=" + 10)
+@ServiceRanking(10)
+@Component(scope = PROTOTYPE)
 public class SpectrumExperimentNodeContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
@@ -52,7 +53,7 @@ public class SpectrumExperimentNodeContribution implements TreeContribution {
   public void prepare(
       HBox node,
       TreeEntry<ExperimentNode<? extends SpectrumConfiguration, ?>> data,
-      TreeChildren children) {
+      TreeEntryChildren children) {
     setLabel(node, data.data().getType().getName());
     setSupplemental(node, data.data().getState().getSpectrumName());
 

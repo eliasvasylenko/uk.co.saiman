@@ -27,23 +27,14 @@
  */
 package uk.co.saiman.experiment;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static uk.co.saiman.collection.StreamUtilities.mapToEntry;
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.ASSUME_ALL_FULFILLED;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.Type;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public interface MissingExperimentType<T> extends ExperimentType<Map<String, Object>, T> {
+public interface MissingExperimentType<T> extends ExperimentType<StateMap, T> {
   @Override
   default Type getThisType() {
     return MissingExperimentType.class;
@@ -60,51 +51,17 @@ public interface MissingExperimentType<T> extends ExperimentType<Map<String, Obj
   }
 
   @Override
-  default Map<String, Object> createState(ConfigurationContext<Map<String, Object>> context) {
-    return persistedStateMap(context.persistedState());
-  }
-
-  default Map<String, Object> persistedStateMap(PersistedState persistedState) {
-    return new AbstractMap<String, Object>() {
-      @Override
-      public Set<Entry<String, Object>> entrySet() {
-        return Stream
-            .of(
-                persistedState
-                    .getStrings()
-                    .map(mapToEntry(s -> (Object) persistedState.forString(s).get())),
-                persistedState
-                    .getMaps()
-                    .map(mapToEntry(s -> (Object) persistedStateMap(persistedState.getMap(s)))),
-                persistedState
-                    .getMapLists()
-                    .map(
-                        mapToEntry(
-                            s -> (Object) persistedState
-                                .getMapList(s)
-                                .stream()
-                                .map(e -> persistedStateMap(e))
-                                .collect(toList()))))
-            .flatMap(identity())
-            .collect(toSet());
-      }
-    };
+  default StateMap createState(ConfigurationContext<StateMap> context) {
+    return context.state();
   }
 
   @Override
-  default ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return ASSUME_ALL_FULFILLED;
+  default TypeToken<StateMap> getStateType() {
+    return new TypeToken<StateMap>() {};
   }
 
   @Override
-  default ExperimentNodeConstraint mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?, ?> descendantNodeType) {
-    return ASSUME_ALL_FULFILLED;
-  }
-
-  @Override
-  default TypeToken<Map<String, Object>> getStateType() {
-    return new TypeToken<Map<String, Object>>() {};
+  default boolean mayComeAfter(ExperimentType<?, ?> parentType) {
+    return true;
   }
 }

@@ -164,9 +164,14 @@ public class EditorAddon implements EditorService {
   }
 
   private void prepareEditorPartContext(MPart part) {
-    Object resource = partResources.get(part);
     EditorProvider provider = editorProviders.get(part.getPersistedState().get(PROVIDER_ID));
-    provider.initializeEditorPart(part, resource);
+
+    Object resource = partResources.get(part);
+    if (resource != null) {
+      provider.initializeEditorPart(part, resource);
+    } else {
+      provider.initializeMissingResourceEditorPart(part);
+    }
   }
 
   private void prepareEditorChildPartContext(IEclipseContext context) {
@@ -201,9 +206,14 @@ public class EditorAddon implements EditorService {
     List<MPart> orphans = orphanedEditors.remove(provider.getId());
     if (orphans != null)
       for (MPart part : orphans) {
-        Object resource = provider.loadEditorResource(part);
-        partResources.put(part, resource);
-        resourceParts.put(resource, part);
+        try {
+          Object resource = provider.loadEditorResource(part);
+
+          partResources.put(part, resource);
+          resourceParts.put(resource, part);
+        } catch (Exception e) {
+          log.log(Level.ERROR, e);
+        }
       }
   }
 

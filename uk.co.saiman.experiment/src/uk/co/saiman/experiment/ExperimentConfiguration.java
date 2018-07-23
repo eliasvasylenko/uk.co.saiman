@@ -31,12 +31,6 @@ import java.util.Optional;
 
 import uk.co.saiman.utility.Named;
 
-/**
- * General configuration interface for experiment root nodes, as created via
- * {@link Workspace#addExperiment(String)}
- * 
- * @author Elias N Vasylenko
- */
 public interface ExperimentConfiguration extends Named {
   /**
    * @return the notes of the experiment

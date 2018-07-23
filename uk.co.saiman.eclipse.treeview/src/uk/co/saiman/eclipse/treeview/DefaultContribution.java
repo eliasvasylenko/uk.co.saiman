@@ -30,8 +30,8 @@ package uk.co.saiman.eclipse.treeview;
 import static javafx.geometry.Pos.CENTER_LEFT;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -44,7 +44,8 @@ import javafx.scene.layout.Priority;
  * 
  * @author Elias N Vasylenko
  */
-@Component(property = Constants.SERVICE_RANKING + ":Integer=" + Integer.MIN_VALUE)
+@ServiceRanking(Integer.MIN_VALUE)
+@Component
 public class DefaultContribution implements TreeContribution {
   public static final String TEXT_ID = "text";
   public static final String SUPPLEMENTAL_TEXT_ID = "supplementalText";

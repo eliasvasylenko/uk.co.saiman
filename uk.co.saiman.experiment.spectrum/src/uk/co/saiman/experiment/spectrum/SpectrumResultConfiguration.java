@@ -27,9 +27,10 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.processing.ProcessorState;
+import uk.co.saiman.experiment.processing.Processor;
 
 /**
  * TODO
@@ -41,5 +42,7 @@ public interface SpectrumResultConfiguration {
 
   void setSpectrumName(String name);
 
-  List<ProcessorState> getProcessing();
+  Stream<Processor<?>> getProcessing();
+
+  void setProcessing(Collection<? extends Processor<?>> processors);
 }

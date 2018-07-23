@@ -31,17 +31,19 @@ import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
+import org.eclipse.fx.core.di.Service;
 
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.eclipse.treeview.ModularTreeItem;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentType;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -50,27 +52,33 @@ import uk.co.saiman.experiment.ExperimentNode;
  * @author Elias N Vasylenko
  */
 public class AddNodeMenu {
+  @Inject
+  @Service
+  private List<ExperimentType<?, ?>> experimentTypes;
+
   @AboutToShow
   void aboutToShow(
       List<MMenuElement> items,
-      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      @Optional @AdaptNamed(ACTIVE_SELECTION) ModularTreeItem<?> item) {
-    selectedNode.getAvailableChildExperimentTypes().forEach(childType -> {
-      MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-      moduleItem.setLabel(childType.getName());
-      moduleItem.setType(ItemType.PUSH);
-      moduleItem.setObject(new Object() {
-        @Execute
-        public void execute() {
-          selectedNode.addChild(childType);
-          if (item != null) {
-            item.getEntry().refresh(true);
-            item.setExpanded(true);
-          }
-        }
-      });
+      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode) {
+    experimentTypes
+        .stream()
+        .filter(t -> t.mayComeAfter(selectedNode.getType()))
+        .map(t -> createMenuItem(selectedNode, t))
+        .forEach(items::add);
+  }
 
-      items.add(moduleItem);
+  MDirectMenuItem createMenuItem(
+      ExperimentNode<?, ?> selectedNode,
+      ExperimentType<?, ?> childType) {
+    MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
+    moduleItem.setLabel(childType.getName());
+    moduleItem.setType(ItemType.PUSH);
+    moduleItem.setObject(new Object() {
+      @Execute
+      public void execute() {
+        selectedNode.addChild(childType);
+      }
     });
+    return moduleItem;
   }
 }

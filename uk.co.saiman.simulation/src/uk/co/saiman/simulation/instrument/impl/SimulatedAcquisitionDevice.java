@@ -219,11 +219,12 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
         .then(onObservation(Observation::requestNext))
         .then(forObservation(o -> m -> o.requestNext()))
         .observe(this::acquired);
-    new Thread(this::acquire).start();
 
     instrumentRegistration = instrument.registerDevice(this);
 
     initializeDetector();
+
+    new Thread(this::acquire).start();
   }
 
   private void initializeDetector() {

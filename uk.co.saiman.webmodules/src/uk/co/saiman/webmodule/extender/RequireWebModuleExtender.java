@@ -35,17 +35,9 @@ import org.osgi.namespace.extender.ExtenderNamespace;
 
 import uk.co.saiman.webmodule.extender.WebModuleExtenderConstants;
 
-/**
- * 
- */
 @Requirement(
     namespace = ExtenderNamespace.EXTENDER_NAMESPACE,
-    filter = "(&("
-        + ExtenderNamespace.EXTENDER_NAMESPACE
-        + "="
-        + WebModuleExtenderConstants.EXTENDER_NAME
-        + ")${frange;"
-        + WebModuleExtenderConstants.EXTENDER_VERSION
-        + "})")
+    version = WebModuleExtenderConstants.EXTENDER_VERSION,
+    name = WebModuleExtenderConstants.EXTENDER_NAME)
 @Retention(RetentionPolicy.CLASS)
 public @interface RequireWebModuleExtender {}

@@ -36,9 +36,9 @@ import java.util.Enumeration;
 import org.apache.felix.cm.PersistenceManager;
 import org.apache.felix.cm.file.FilePersistenceManager;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 /**
  * Simple persistence manager implementation since the default doesn't support
@@ -51,56 +51,59 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Elias N Vasylenko
  */
-@Component(immediate = true, property = Constants.SERVICE_RANKING + ":Integer=" + 100)
+@ServiceRanking(100)
+@Component(immediate = true)
 public class PersistenceManagerImpl implements PersistenceManager {
-	public static final String PERSISTENCE_CONFIGURATION = "uk.co.saiman.configadmin.persistence";
-	public static final String DEFAULT_PERSISTENCE_CONFIGURATION = "~/.saiman/config";
-	private static final String USER_HOME = "user.home";
+  public static final String PERSISTENCE_CONFIGURATION = "uk.co.saiman.configadmin.persistence";
+  public static final String DEFAULT_PERSISTENCE_CONFIGURATION = "~/.saiman/config";
+  private static final String USER_HOME = "user.home";
 
-	private FilePersistenceManager filePersistenceManager;
+  private FilePersistenceManager filePersistenceManager;
 
-	@Activate
-	void activate(BundleContext context) {
-		String persistenceLocation = context.getProperty(PERSISTENCE_CONFIGURATION);
+  @Activate
+  void activate(BundleContext context) {
+    String persistenceLocation = context.getProperty(PERSISTENCE_CONFIGURATION);
 
-		if (persistenceLocation==null) {
-			persistenceLocation = DEFAULT_PERSISTENCE_CONFIGURATION;
-		}
+    if (persistenceLocation == null) {
+      persistenceLocation = DEFAULT_PERSISTENCE_CONFIGURATION;
+    }
 
-		Path persistencePath = Paths.get(persistenceLocation);
-		Path homeContraction = Paths.get("~");
+    Path persistencePath = Paths.get(persistenceLocation);
+    Path homeContraction = Paths.get("~");
 
-		if (persistencePath.startsWith(homeContraction)) {
-			persistencePath = Paths.get(System.getProperty(USER_HOME)).resolve(homeContraction.relativize(persistencePath));
-		}
+    if (persistencePath.startsWith(homeContraction)) {
+      persistencePath = Paths
+          .get(System.getProperty(USER_HOME))
+          .resolve(homeContraction.relativize(persistencePath));
+    }
 
-		filePersistenceManager = new FilePersistenceManager(persistencePath.toString());
-	}
+    filePersistenceManager = new FilePersistenceManager(persistencePath.toString());
+  }
 
-	@Override
-	public void delete(String pid) throws IOException {
-		filePersistenceManager.delete(pid);
-	}
+  @Override
+  public void delete(String pid) throws IOException {
+    filePersistenceManager.delete(pid);
+  }
 
-	@Override
-	public boolean exists(String pid) {
-		return filePersistenceManager.exists(pid);
-	}
+  @Override
+  public boolean exists(String pid) {
+    return filePersistenceManager.exists(pid);
+  }
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public Enumeration getDictionaries() throws IOException {
-		return filePersistenceManager.getDictionaries();
-	}
+  @SuppressWarnings("rawtypes")
+  @Override
+  public Enumeration getDictionaries() throws IOException {
+    return filePersistenceManager.getDictionaries();
+  }
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public Dictionary load(String pid) throws IOException {
-		return filePersistenceManager.load(pid);
-	}
+  @SuppressWarnings("rawtypes")
+  @Override
+  public Dictionary load(String pid) throws IOException {
+    return filePersistenceManager.load(pid);
+  }
 
-	@Override
-	public void store(String pid, @SuppressWarnings("rawtypes") Dictionary props) throws IOException {
-		filePersistenceManager.store(pid, props);
-	}
+  @Override
+  public void store(String pid, @SuppressWarnings("rawtypes") Dictionary props) throws IOException {
+    filePersistenceManager.store(pid, props);
+  }
 }

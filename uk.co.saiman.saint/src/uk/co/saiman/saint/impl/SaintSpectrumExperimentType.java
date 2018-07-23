@@ -28,13 +28,14 @@
 package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.FULFILLED;
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.UNFULFILLED;
-import static uk.co.saiman.experiment.ExperimentNodeConstraint.VIOLATED;
-import static uk.co.saiman.experiment.processing.ProcessorState.PROCESSING_KEY;
+import static uk.co.saiman.experiment.persistence.Accessor.mapAccessor;
 import static uk.co.saiman.measurement.Units.dalton;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Mass;
@@ -45,13 +46,11 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.experiment.ConfigurationContext;
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentNodeConstraint;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.ProcessingType;
-import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.persistence.Accessor.ListAccessor;
+import uk.co.saiman.experiment.persistence.Accessor.MapAccessor;
+import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.processing.ProcessorService;
-import uk.co.saiman.experiment.processing.ProcessorState;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
@@ -89,33 +88,53 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
     return dalton().getUnit();
   }
 
+  private final MapAccessor<Processor<?>> processor = mapAccessor(
+      "processing",
+      s -> processors.loadProcessor(s),
+      Processor::getState);
+  private final ListAccessor<List<Processor<?>>> processorList = processor.toListAccessor();
+
   @Override
   public SaintSpectrumConfiguration createState(
       ConfigurationContext<SaintSpectrumConfiguration> context) {
-    SaintSpectrumConfiguration configuration = new SaintSpectrumConfigurationImpl(this, context);
-    return configuration;
+    return new SaintSpectrumConfiguration() {
+      private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
+
+      @Override
+      public void setSpectrumName(String name) {
+        this.name = name;
+        context.setId(name);
+      }
+
+      @Override
+      public String getSpectrumName() {
+        return name;
+      }
+
+      @Override
+      public AcquisitionDevice getAcquisitionDevice() {
+        return acquisitionDevice;
+      }
+
+      @Override
+      public Stream<Processor<?>> getProcessing() {
+        return context.state().get(processorList).stream();
+      }
+
+      @Override
+      public void setProcessing(Collection<? extends Processor<?>> processors) {
+        context.update(state -> state.with(processorList, new ArrayList<>(processors)));
+      }
+    };
   }
 
   @Override
-  public ExperimentNodeConstraint mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return parentNode.findAncestor(stageExperiment).isPresent() ? FULFILLED : UNFULFILLED;
-  }
-
-  @Override
-  public ExperimentNodeConstraint mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?, ?> descendantNodeType) {
-    return descendantNodeType instanceof ProcessingType<?, ?, ?> ? FULFILLED : VIOLATED;
+  public boolean mayComeAfter(ExperimentType<?, ?> parentType) {
+    return parentType == stageExperiment;
   }
 
   @Override
   public AcquisitionDevice getAcquisitionDevice() {
     return acquisitionDevice;
-  }
-
-  protected List<ProcessorState> createProcessorList(PersistedState persistedState) {
-    return persistedState
-        .getMapList(PROCESSING_KEY)
-        .map(processors::loadProcessorState, ProcessorState::getPersistedState);
   }
 }

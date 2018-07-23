@@ -34,16 +34,14 @@ import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.treeview.Contributor;
-import uk.co.saiman.eclipse.treeview.EditingTextField;
 import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeChildren;
 import uk.co.saiman.eclipse.treeview.TreeContribution;
-import uk.co.saiman.eclipse.treeview.TreeEditor;
 import uk.co.saiman.eclipse.treeview.TreeEntry;
+import uk.co.saiman.eclipse.treeview.TreeEntryChild;
+import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
 import uk.co.saiman.experiment.processing.BoxFilter;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 
@@ -52,32 +50,22 @@ public class BoxFilterContribution implements TreeContribution {
   private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
 
   @AboutToShow
-  public void prepare(HBox node, TreeEntry<BoxFilter.State> entry, TreeChildren children) {
-    setSupplemental(node, "(" + entry.data().getWidth() + ")");
+  public void prepare(HBox node, TreeEntry<BoxFilter> entry, TreeEntryChildren children) {
+    setSupplemental(node, Integer.toString(entry.data().getWidth()));
 
-    children.addChild(new TreeContribution() {
-      @AboutToShow
-      public void prepare(
-          HBox widthNode,
-          TreeEditor<TreeContribution> editor,
-          @Localize ProcessingProperties properties) {
-        setLabel(widthNode, properties.widthLabel().get());
-
-        String widthString = Integer.toString(entry.data().getWidth());
-
-        if (editor.isEditing()) {
-          TextField widthField = new EditingTextField(
-              widthString,
-              editor,
-              widthNode.getChildren()::add);
-
-          editor
-              .addEditListener(() -> entry.data().setWidth(Integer.parseInt(widthField.getText())));
-        } else {
-          setSupplemental(widthNode, widthString);
-        }
-      }
-    });
+    children
+        .add(
+            TreeEntryChild
+                .withType(int.class)
+                .withGetter(() -> entry.data().getWidth())
+                .withSetter(result -> entry.update(data -> data.withWidth(result)))
+                .withContribution(new TreeContribution() {
+                  @AboutToShow
+                  void prepare(HBox deviationNode, @Localize ProcessingProperties properties) {
+                    setLabel(deviationNode, properties.widthLabel().get());
+                  }
+                })
+                .build());
 
     pseudoClass.configureCell(node);
   }

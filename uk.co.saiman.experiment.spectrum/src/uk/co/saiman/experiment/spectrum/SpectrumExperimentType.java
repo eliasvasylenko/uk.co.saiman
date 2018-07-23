@@ -43,7 +43,7 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
-import uk.co.saiman.experiment.processing.ProcessorState;
+import uk.co.saiman.experiment.processing.Processor;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -84,8 +84,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
         .node()
         .getState()
         .getProcessing()
-        .stream()
-        .map(ProcessorState::getProcessor)
+        .map(Processor::getProcessor)
         .reduce(identity(), DataProcessor::andThen);
 
     System.out.println("fetching calibration");
@@ -129,7 +128,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
      * The problem is how to pass this through the Result API to users without
      * losing the laziness so we can request at e.g. the monitor refresh rate.
      * 
-     * Perhaps the observable type should be `Result<T>` rather than `T`? 
+     * Perhaps the observable type should be `Result<T>` rather than `T`?
      */
 
     System.out.println("get result");

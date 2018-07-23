@@ -33,4 +33,11 @@ public interface Location {
   Stream<Resource> getResources();
 
   Resource getResource(String name, String extension);
+
+  /**
+   * @return a string indicating the type of location and specifying it if
+   *         possible
+   */
+  @Override
+  String toString();
 }

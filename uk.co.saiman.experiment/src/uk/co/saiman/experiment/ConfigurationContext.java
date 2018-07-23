@@ -27,9 +27,10 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.persistence.StateMap;
 
 /**
  * The context of an experiment node's initial configuration. When a workspace
@@ -53,23 +54,6 @@ public interface ConfigurationContext<T> {
   ExperimentNode<T, ?> node();
 
   /**
-   * This map represents the state of the experiment node associated with this
-   * configuration context. This data should be persisted by the workspace
-   * according to the format of an experiment file.
-   * <p>
-   * The map is coupled directly with the persisted data, with changes of the
-   * map being immediately stored.
-   * <p>
-   * There is no standard enforced for the format of the value strings.
-   * <p>
-   * The execution of an experiment should generally not affect its persisted
-   * state, directly or otherwise.
-   * 
-   * @return a map containing persisted key/value pairs
-   */
-  PersistedState persistedState();
-
-  /**
    * Get the ID of the node.
    * 
    * @return the ID of the node, or an empty optional if it has not yet been set
@@ -77,13 +61,13 @@ public interface ConfigurationContext<T> {
   String getId();
 
   /**
-   * {@link #getId() Get} the ID of the node, or {@link #setId(String) set} the
-   * ID to the given default if it is not already set.
+   * {@link #getId() Get} the ID of the node, or {@link #setId(String) set} the ID
+   * to the given default if it is not already set.
    * <p>
    * If the node is newly created an id must be set before the end of
    * {@link ExperimentType#createState(ConfigurationContext)}. If the node is
-   * loaded from the persisted workspace, it is strongly recommended that it
-   * keep the previously ID, as per the behavior of this method.
+   * loaded from the persisted workspace, it is strongly recommended that it keep
+   * the previously ID, as per the behavior of this method.
    * 
    * @return the ID for the node
    */
@@ -93,12 +77,32 @@ public interface ConfigurationContext<T> {
    * Set the ID of the node. The ID must be unique amongst all sibling nodes of
    * the same {@link ExperimentType experiment type}.
    * <p>
-   * Typically the ID may be used to determine the location of
-   * {@link #persistedState() persisted state} of an experiment, and so changing
-   * the ID may result in the movement or modification of data.
+   * Typically the ID may be used to determine the location of {@link #state()
+   * persisted state} of an experiment, and so changing the ID may result in the
+   * movement or modification of data.
    * 
    * @param id
    *          the ID for the node
    */
   void setId(String id);
+
+  /**
+   * This map represents the state of the experiment node associated with this
+   * configuration context. This data should be persisted by the workspace
+   * according to the format of an experiment file.
+   * <p>
+   * There is no standard enforced for the format of the value strings.
+   * <p>
+   * The execution of an experiment should generally not affect its persisted
+   * state, directly or otherwise.
+   * 
+   * @return a map containing persisted key/value pairs
+   */
+  StateMap state();
+
+  void update(StateMap state);
+
+  default void update(Function<? super StateMap, ? extends StateMap> function) {
+    update(function.apply(state()));
+  }
 }

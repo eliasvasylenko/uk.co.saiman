@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.impl;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.persistence.PersistedState;
+import uk.co.saiman.experiment.persistence.StateMap;
 
 /**
  * implementations do not need to maintain identity or keep unique instances for
@@ -46,11 +46,11 @@ public interface PersistedExperiment {
 
   String getTypeId();
 
-  PersistedState getPersistedState();
+  StateMap getPersistedState();
 
   Stream<? extends PersistedExperiment> getChildren();
 
-  PersistedExperiment addChild(String id, String typeId, PersistedState configuration, int index)
+  PersistedExperiment addChild(int index, String id, String typeId, StateMap configuration)
       throws IOException;
 
   void removeChild(String id, String typeId) throws IOException;

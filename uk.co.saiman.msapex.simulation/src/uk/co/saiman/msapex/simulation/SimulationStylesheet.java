@@ -31,26 +31,24 @@ import java.net.URL;
 
 import org.eclipse.fx.ui.services.theme.Stylesheet;
 import org.eclipse.fx.ui.services.theme.Theme;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
 /**
  * Default stylesheet for experiment interface components.
  * 
  * @author Elias N Vasylenko
  */
-@Component(property = Constants.SERVICE_RANKING + ":Integer=" + SimulationStylesheet.RANKING)
+@ServiceRanking(10)
+@Component
 public class SimulationStylesheet implements Stylesheet {
-	@SuppressWarnings("javadoc")
-	public static final int RANKING = 10;
+  @Override
+  public boolean appliesToTheme(Theme t) {
+    return true;
+  }
 
-	@Override
-	public boolean appliesToTheme(Theme t) {
-		return true;
-	}
-
-	@Override
-	public URL getURL(Theme t) {
-		return SimulationStylesheet.class.getClassLoader().getResource("css/simulation.css");
-	}
+  @Override
+  public URL getURL(Theme t) {
+    return SimulationStylesheet.class.getClassLoader().getResource("css/simulation.css");
+  }
 }

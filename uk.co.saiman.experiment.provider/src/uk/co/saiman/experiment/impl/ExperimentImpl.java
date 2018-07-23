@@ -36,20 +36,13 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ResultStorage;
+import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.log.Log.Level;
 
 public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, Void>
     implements Experiment {
-  /**
-   * Create a root experiment.
-   * 
-   * @param workspace
-   * @param type
-   * @param id
-   */
-  protected ExperimentImpl(WorkspaceImpl workspace, String id) {
-    super(workspace, workspace.getExperimentRootType(), id);
-  }
+  private final ResultStorage locationManager;
 
   /**
    * Load a root experiment.
@@ -58,8 +51,18 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
    * @param type
    * @param id
    */
-  protected ExperimentImpl(WorkspaceImpl workspace, PersistedExperiment persistedExperiment) {
-    super(workspace, workspace.getExperimentRootType(), persistedExperiment);
+  protected ExperimentImpl(
+      ResultStorage locationManager,
+      String id,
+      StateMap persistedState,
+      WorkspaceImpl workspace) {
+    super(id, workspace.getExperimentRootType(), persistedState, workspace);
+    this.locationManager = locationManager;
+  }
+
+  @Override
+  public ResultStorage getLocationManager() {
+    return locationManager;
   }
 
   @Override
@@ -73,7 +76,6 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
 
     try {
       getLocationManager().removeLocation(this);
-      getPersistenceManager().removeExperiment(getPersistedExperiment());
     } catch (IOException e) {
       ExperimentException ee = new ExperimentException(
           format("Cannot remove experiment %s", getId()),

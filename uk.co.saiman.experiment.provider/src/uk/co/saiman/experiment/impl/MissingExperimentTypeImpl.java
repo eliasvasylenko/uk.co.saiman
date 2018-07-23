@@ -29,12 +29,11 @@ package uk.co.saiman.experiment.impl;
 
 import static java.lang.String.format;
 
-import java.util.Map;
-
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.MissingExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
+import uk.co.saiman.experiment.persistence.StateMap;
 
 public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   private final ExperimentProperties text;
@@ -56,7 +55,7 @@ public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   }
 
   @Override
-  public T process(ProcessingContext<Map<String, Object>, T> context) {
+  public T process(ProcessingContext<StateMap, T> context) {
     throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
   }
 }

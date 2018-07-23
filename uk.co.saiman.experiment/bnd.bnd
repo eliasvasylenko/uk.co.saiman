@@ -13,6 +13,7 @@ Bundle-Name: SAI :: Experiment
 
 Export-Package: \
 	uk.co.saiman.experiment,\
+	uk.co.saiman.experiment.filesystem,\
 	uk.co.saiman.experiment.path,\
 	uk.co.saiman.experiment.persistence
 

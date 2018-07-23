@@ -100,9 +100,9 @@ public interface EditorProvider {
    * persisted application model.
    * <p>
    * The management system is guaranteed to only invoke this method for a part
-   * which has been {@link #createEditorPart(String) created via an id} which has
-   * been {@link #getCompatibleResource(String, Object) verified to be compatible}
-   * with the given resource.
+   * which has been {@link #createEditorPart(String, Object) created via an id}
+   * which has been {@link #isEditorApplicable(String, Object) verified to be
+   * compatible} with the given resource.
    * <p>
    * It is also guaranteed that this method will be invoked after the part's
    * {@link IEclipseContext context} has been initialized, but before the part's
@@ -114,4 +114,9 @@ public interface EditorProvider {
    *          the object to edit
    */
   void initializeEditorPart(MPart part, Object resource);
+
+  /**
+   * Initialize an editor part for a missing resource.
+   */
+  void initializeMissingResourceEditorPart(MPart part);
 }

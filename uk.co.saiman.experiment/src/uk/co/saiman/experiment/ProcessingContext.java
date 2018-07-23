@@ -33,7 +33,7 @@ import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.observable.Invalidation;
 
 /**
- * The context of an {@link ExperimentType#process(ExecutionContext) experiment
+ * The context of an {@link ExperimentType#process(ProcessingContext) experiment
  * execution}, providing information about the current state, and enabling
  * modification of that state.
  * 
@@ -62,7 +62,6 @@ public interface ProcessingContext<T, R> {
    * complete once the execution of all the child nodes are complete, and if and
    * of the child nodes fail then this node will also fail.
    * 
-   * @return true if the children were processed successfully
    * @throws ExperimentException
    *           if invoked multiple times
    */

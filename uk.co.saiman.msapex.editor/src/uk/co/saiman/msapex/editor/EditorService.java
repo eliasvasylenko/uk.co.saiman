@@ -41,7 +41,7 @@ public interface EditorService {
    * <p>
    * The strategy for determining the precedence is left to the implementer, but
    * generally it may be in order of the editors most recently
-   * {@link EditorPrototype#showPart shown}.
+   * {@link EditorPrototype#openEditor() opened}.
    * 
    * @param resource
    *          the resource data object to edit

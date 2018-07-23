@@ -38,6 +38,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.instrument.ConnectionState;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.instrument.sample.SampleState;
@@ -110,8 +111,13 @@ public class SaintStage
   }
 
   @Override
-  public Instrument getInstrument() {
-    return stage.getInstrument();
+  public DeviceRegistration getRegistration() {
+    /*
+     * TODO This is broken! Requires R7 features. The registration is for the
+     * instance of ComposedXYStage not SaintStage. See notes above regarding
+     * refactoring.
+     */
+    return stage.getRegistration();
   }
 
   @Override
