@@ -28,11 +28,9 @@
 package uk.co.saiman.eclipse.treeview.impl;
 
 import static javafx.css.PseudoClass.getPseudoClass;
-import static uk.co.saiman.eclipse.treeview.TreeDropPosition.AFTER_CHILD;
-import static uk.co.saiman.eclipse.treeview.TreeDropPosition.BEFORE_CHILD;
-import static uk.co.saiman.eclipse.treeview.TreeDropPosition.OVER;
-import static uk.co.saiman.fx.FxUtilities.getResource;
-import static uk.co.saiman.fx.FxmlLoadBuilder.build;
+import static uk.co.saiman.eclipse.ui.TransferInPosition.AFTER_CHILD;
+import static uk.co.saiman.eclipse.ui.TransferInPosition.BEFORE_CHILD;
+import static uk.co.saiman.eclipse.ui.TransferInPosition.OVER;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,14 +42,9 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import uk.co.saiman.collection.StreamUtilities;
-import uk.co.saiman.eclipse.treeview.ModularTreeView;
-import uk.co.saiman.eclipse.treeview.TreeDropPosition;
-import uk.co.saiman.eclipse.treeview.TreeEntry;
-import uk.co.saiman.eclipse.treeview.TreeTransferMode;
-import uk.co.saiman.eclipse.treeview.impl.TreeClipboardManager.TreeDragCandidateImpl;
-import uk.co.saiman.eclipse.treeview.impl.TreeClipboardManager.TreeDropCandidates;
+import uk.co.saiman.eclipse.ui.TransferMode;
+import uk.co.saiman.eclipse.ui.TransferInPosition;
 import uk.co.saiman.fx.FxUtilities;
 
 /**
@@ -63,36 +56,33 @@ import uk.co.saiman.fx.FxUtilities;
  * 
  * @author Elias N Vasylenko
  */
-public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
+public class ModularTreeCell extends TreeCell<Object> {
   private static final String STYLE_CLASS = "ModularTreeCell";
   private static final PseudoClass DRAG_OVER_CLASS = getPseudoClass("drag-over");
   private static final PseudoClass DRAG_BEFORE_CLASS = getPseudoClass("drag-before");
   private static final PseudoClass DRAG_AFTER_CLASS = getPseudoClass("drag-after");
 
-  private TreeDragCandidateImpl<?> dragCandidate;
-  private final Map<TreeDropPosition, TreeDropCandidates> dropCandidates = new HashMap<>();
+  private TransferOutImpl<?> dragCandidate;
+  private final Map<TransferInPosition, TransfersIn> dropCandidates = new HashMap<>();
 
   /**
    * Load a new instance from the FXML located according to
    * {@link FxUtilities#getResource(Class)} for this class.
-   * 
-   * @param tree
-   *          the owning tree view
    */
-  public ModularTreeCell(ModularTreeView tree) {
+  public ModularTreeCell() {
     getStyleClass().add(STYLE_CLASS);
     initializeEvents();
   }
 
   @Override
-  protected void updateItem(TreeEntry<?> item, boolean empty) {
-    super.updateItem(item, empty);
+  protected void updateItem(Object data, boolean empty) {
+    super.updateItem(data, empty);
 
-    if (empty || item == null) {
+    if (empty || data == null) {
       clearItem();
     } else {
       updateItem();
-      commitEdit(item);
+      commitEdit(data);
     }
   }
 
@@ -120,7 +110,7 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
                 .stream()
                 .map(this::toJavaFXTransferMode)
                 .flatMap(StreamUtilities::streamOptional)
-                .toArray(TransferMode[]::new));
+                .toArray(javafx.scene.input.TransferMode[]::new));
         db.setContent(dragCandidate.getClipboardContent());
       }
     });
@@ -128,16 +118,16 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
       if (event.isAccepted()) {
         event.consume();
 
-        ModularTreeItem<?> parent = getModularTreeItem().getModularParent().get();
+        TreeItemImpl<?> parent = getModularTreeItem().getModularParent().get();
         dragCandidate.handleDrag(fromJavaFXTransferMode(event.getTransferMode()));
         dragCandidate = null;
-        parent.getEntry().refresh(true);
+        parent.requestRefresh();
       }
     });
 
     setOnDragOver(event -> {
       if (getModularTreeItem() != null && event.getGestureSource() != this) {
-        TreeDropPosition position = getDropPosition(event);
+        TransferInPosition position = getDropPosition(event);
         if (position != null) {
           event.consume();
           event
@@ -148,7 +138,7 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
                       .stream()
                       .map(this::toJavaFXTransferMode)
                       .flatMap(StreamUtilities::streamOptional)
-                      .toArray(TransferMode[]::new));
+                      .toArray(javafx.scene.input.TransferMode[]::new));
 
           decorateDrag(position);
         } else {
@@ -158,8 +148,8 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
     });
     setOnDragEntered(event -> {
       if (getModularTreeItem() != null) {
-        for (TreeDropPosition position : TreeDropPosition.values()) {
-          TreeDropCandidates candidate = getModularTreeItem()
+        for (TransferInPosition position : TransferInPosition.values()) {
+          TransfersIn candidate = getModularTreeItem()
               .getDropCandidates(event.getDragboard(), position);
           if (!candidate.getCandidateTransferModes().isEmpty()) {
             dropCandidates.put(position, candidate);
@@ -182,21 +172,21 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
         event.consume();
         event.setDropCompleted(true);
 
-        TreeDropPosition position = getDropPosition(event);
+        TransferInPosition position = getDropPosition(event);
         dropCandidates
             .get(position)
             .getCandidate(fromJavaFXTransferMode(event.getAcceptedTransferMode()))
             .handleDrop();
         if (position == OVER) {
-          getModularTreeItem().getEntry().refresh(true);
+          getModularTreeItem().requestRefresh();
         } else {
-          getModularTreeItem().getModularParent().get().getEntry().refresh(true);
+          getModularTreeItem().getModularParent().get().requestRefresh();
         }
       }
     });
   }
 
-  private void decorateDrag(TreeDropPosition position) {
+  private void decorateDrag(TransferInPosition position) {
     pseudoClassStateChanged(DRAG_OVER_CLASS, position == OVER);
     pseudoClassStateChanged(DRAG_BEFORE_CLASS, position == BEFORE_CHILD);
     pseudoClassStateChanged(DRAG_AFTER_CLASS, position == AFTER_CHILD);
@@ -208,14 +198,14 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
     pseudoClassStateChanged(DRAG_AFTER_CLASS, false);
   }
 
-  private Optional<TransferMode> toJavaFXTransferMode(TreeTransferMode from) {
+  private Optional<javafx.scene.input.TransferMode> toJavaFXTransferMode(TransferMode from) {
     switch (from) {
     case COPY:
-      return Optional.of(TransferMode.COPY);
+      return Optional.of(javafx.scene.input.TransferMode.COPY);
     case LINK:
-      return Optional.of(TransferMode.LINK);
+      return Optional.of(javafx.scene.input.TransferMode.LINK);
     case MOVE:
-      return Optional.of(TransferMode.MOVE);
+      return Optional.of(javafx.scene.input.TransferMode.MOVE);
     case DISCARD:
       return Optional.empty();
     default:
@@ -223,20 +213,20 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
     }
   }
 
-  private TreeTransferMode fromJavaFXTransferMode(TransferMode from) {
+  private TransferMode fromJavaFXTransferMode(javafx.scene.input.TransferMode from) {
     switch (from) {
     case COPY:
-      return TreeTransferMode.COPY;
+      return TransferMode.COPY;
     case LINK:
-      return TreeTransferMode.LINK;
+      return TransferMode.LINK;
     case MOVE:
-      return TreeTransferMode.MOVE;
+      return TransferMode.MOVE;
     default:
       throw new AssertionError();
     }
   }
 
-  private TreeDropPosition getDropPosition(DragEvent event) {
+  private TransferInPosition getDropPosition(DragEvent event) {
     Point2D sceneCoordinates = localToScene(0d, 0d);
     double height = getHeight();
     double y = event.getSceneY() - (sceneCoordinates.getY());
@@ -263,8 +253,8 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
     return null;
   }
 
-  ModularTreeItem<?> getModularTreeItem() {
-    return (ModularTreeItem<?>) getTreeItem();
+  TreeItemImpl<?> getModularTreeItem() {
+    return (TreeItemImpl<?>) getTreeItem();
   }
 
   @Override
@@ -276,7 +266,7 @@ public class ModularTreeCell extends TreeCell<TreeEntry<?>> {
   }
 
   @Override
-  public void commitEdit(TreeEntry<?> newValue) {
+  public void commitEdit(Object newValue) {
     boolean editing = this.isEditing();
     super.commitEdit(newValue);
     if (editing) {

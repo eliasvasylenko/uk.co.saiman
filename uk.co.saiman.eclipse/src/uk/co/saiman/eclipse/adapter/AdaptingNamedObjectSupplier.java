@@ -27,25 +27,16 @@
  */
 package uk.co.saiman.eclipse.adapter;
 
-import static java.util.Collections.synchronizedMap;
-import static java.util.Objects.hash;
 import static uk.co.saiman.reflection.Types.getErasedType;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.di.suppliers.ExtendedObjectSupplier;
 import org.eclipse.e4.core.di.suppliers.IObjectDescriptor;
 import org.eclipse.e4.core.di.suppliers.IRequestor;
-import org.eclipse.e4.core.internal.contexts.ContextObjectSupplier;
-import org.eclipse.e4.core.internal.di.Requestor;
 import org.eclipse.e4.core.services.adapter.Adapter;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 
+import uk.co.saiman.eclipse.utilities.TransformingNamedObjectSupplier;
 import uk.co.saiman.properties.PropertyLoader;
 
 /**
@@ -58,133 +49,30 @@ import uk.co.saiman.properties.PropertyLoader;
     service = ExtendedObjectSupplier.class,
     property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.adapter.AdaptNamed",
     immediate = true)
-public class AdaptingNamedObjectSupplier extends ExtendedObjectSupplier {
-  class Request {
+public class AdaptingNamedObjectSupplier extends TransformingNamedObjectSupplier<AdaptNamed> {
+  class NamedVariableRequest extends AdaptingNamedObjectSupplier.Request {
     private final String name;
     private final Class<?> adapterType;
 
-    private final IRequestor requestor;
-    private final IEclipseContext context;
+    public NamedVariableRequest(IObjectDescriptor descriptor, IRequestor requestor) {
+      super(descriptor, requestor);
 
-    public Request(IObjectDescriptor descriptor, IRequestor requestor) {
-      this.name = descriptor.getQualifier(AdaptNamed.class).value();
+      this.name = getQualifier().value();
       this.adapterType = getErasedType(descriptor.getDesiredType());
-
-      this.requestor = requestor;
-      this.context = ((ContextObjectSupplier) ((Requestor<?>) requestor).getPrimarySupplier())
-          .getContext();
     }
 
-    public String getName() {
-      return name;
-    }
-
-    public IEclipseContext getContext() {
-      return context;
-    }
-
-    public Tracker getTracker() {
-      return trackers.computeIfAbsent(this, Tracker::new);
-    }
-
-    public void disposeTracker() {
-      Tracker tracker = trackers.remove(this);
-      tracker.dispose();
-    }
-
-    public Object get() {
-      return get(context);
-    }
-
-    private Object get(IEclipseContext context) {
+    @Override
+    protected Object get(IEclipseContext context) {
       return context.get(Adapter.class).adapt(context.get(name), adapterType);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj)
-        return true;
-      if (!(obj instanceof Request))
-        return false;
-
-      Request that = (Request) obj;
-
-      return Objects.equals(this.name, that.name)
-          && Objects.equals(this.adapterType, that.adapterType)
-          && Objects.equals(this.requestor, that.requestor);
-    }
-
-    @Override
-    public int hashCode() {
-      return hash(name, requestor);
-    }
-
-    @Override
-    public String toString() {
-      return name + " : " + adapterType + " @ " + requestor.getRequestingObject();
-    }
   }
 
-  class Tracker {
-    private final Request request;
-    private boolean disposed = false;
-    private Object namedObject;
-
-    public Tracker(Request request) {
-      request.getContext().runAndTrack(new RunAndTrack() {
-        @Override
-        public boolean changed(IEclipseContext context) {
-          if (disposed) {
-            return false;
-          }
-
-          Object namedObject = request.get(context);
-
-          if (!Objects.equals(Tracker.this.namedObject, namedObject)) {
-            Tracker.this.namedObject = namedObject;
-
-            // if this is not the first time ...
-            if (Tracker.this.request != null) {
-              request.requestor.resolveArguments(false);
-              request.requestor.execute();
-            }
-          }
-
-          return true;
-        }
-      });
-      this.request = request;
-    }
-
-    public void dispose() {
-      disposed = true;
-    }
-
-    public Object get() {
-      return namedObject;
-    }
+  public AdaptingNamedObjectSupplier() {
+    super(AdaptNamed.class);
   }
-
-  private final Map<Request, Tracker> trackers = synchronizedMap(new HashMap<>());
 
   @Override
-  public Object get(
-      IObjectDescriptor descriptor,
-      IRequestor requestor,
-      boolean track,
-      boolean group) {
-    Request request = new Request(descriptor, requestor);
-
-    if (!requestor.isValid()) {
-      request.disposeTracker();
-      return null;
-    }
-
-    return track ? request.getTracker().get() : request.get();
-  }
-
-  @Deactivate
-  public void dispose() {
-    trackers.values().forEach(Tracker::dispose);
+  protected NamedVariableRequest getRequest(IObjectDescriptor descriptor, IRequestor requestor) {
+    return new NamedVariableRequest(descriptor, requestor);
   }
 }

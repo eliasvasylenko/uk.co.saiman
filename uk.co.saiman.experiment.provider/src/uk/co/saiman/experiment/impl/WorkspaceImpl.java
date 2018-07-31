@@ -28,6 +28,8 @@
 package uk.co.saiman.experiment.impl;
 
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
+import static uk.co.saiman.experiment.WorkspaceEvent.workspaceEvent;
+import static uk.co.saiman.experiment.WorkspaceEventKind.ADD;
 import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
 import java.util.ArrayList;
@@ -47,6 +49,7 @@ import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.WorkspaceEvent;
 import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.log.Log;
+import uk.co.saiman.observable.Cancellation;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.properties.PropertyLoader;
@@ -144,6 +147,11 @@ public class WorkspaceImpl implements Workspace {
   @Override
   public Experiment addExperiment(String id, ResultStorage locationManager) {
     ExperimentImpl experiment = new ExperimentImpl(locationManager, id, StateMap.empty(), this);
+
+    Cancellation cancellation = new Cancellation();
+    events.next(workspaceEvent(experiment, ADD, cancellation::cancel));
+    cancellation.completeOrThrow();
+
     experiments.add(experiment);
     return experiment;
   }

@@ -5,6 +5,7 @@ Bundle-Name: SAI :: Eclipse
 	${build}/include/eclipse.fx.bnd
 
 -buildpath: \
+	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
@@ -19,10 +20,14 @@ Bundle-Description: \
 
 Export-Package: \
 	uk.co.saiman.eclipse,\
+	uk.co.saiman.eclipse.utilities,\
 	uk.co.saiman.eclipse.adapter,\
+	uk.co.saiman.eclipse.variable,\
 	uk.co.saiman.eclipse.localization,\
-	uk.co.saiman.eclipse.model,\
-	uk.co.saiman.eclipse.service
+	uk.co.saiman.eclipse.ui.model,\
+	uk.co.saiman.eclipse.service,\
+	uk.co.saiman.eclipse.ui,\
+	uk.co.saiman.eclipse.ui.fx
 
 Private-Package: \
 	org.eclipse.osgi.compatibility.state,\

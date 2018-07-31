@@ -32,7 +32,6 @@ import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentNode;
 
 /**
@@ -42,14 +41,12 @@ import uk.co.saiman.experiment.ExperimentNode;
  */
 public class RemoveNodeHandler {
   @Execute
-  void execute(
-      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode,
-      @AdaptNamed(ACTIVE_SELECTION) TreeEntry<?> entry) {
+  void execute(@AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode) {
     /*
-     * TODO an "are you sure?" dialog. This is permanent!
+     * TODO an "are you sure?" dialog. This is currently permanent! Ideally the
+     * experiment node data would be copied out into an undo history so it could be
+     * put back.
      */
-
     selectedNode.remove();
-    entry.parent().get().refresh(true);
   }
 }

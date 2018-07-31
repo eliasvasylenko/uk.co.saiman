@@ -31,29 +31,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import uk.co.saiman.eclipse.treeview.TreeEntryChild;
-import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
+import uk.co.saiman.eclipse.ui.ListItemConfiguration;
+import uk.co.saiman.eclipse.ui.ListItems;
 
-public final class TreeEntryChildrenImpl implements TreeEntryChildren {
-  private final List<TreeEntryChild<?>> children = new ArrayList<>();
+public final class TreeEntryChildrenImpl implements ListItems {
+  private final List<ListItemConfigurationImpl<?>> children = new ArrayList<>();
 
   @Override
-  public void add(int index, TreeEntryChild<?> child) {
-    children.add(index, child);
+  public <T> ListItemConfiguration<T> getConfiguration(String id) {
+    ListItemConfigurationImpl<T> child = new ListItemConfigurationImpl<>();
+    children.add(child);
+    return child;
   }
 
   @Override
-  public Stream<TreeEntryChild<?>> stream() {
+  public Stream<ListItemConfigurationImpl<?>> configurations() {
     return children.stream();
-  }
-
-  @Override
-  public void remove(int index) {
-    children.remove(index);
-  }
-
-  @Override
-  public boolean remove(TreeEntryChild<?> child) {
-    return children.remove(child);
   }
 }

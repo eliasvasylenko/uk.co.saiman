@@ -43,9 +43,10 @@ import javafx.scene.control.Control;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import uk.co.saiman.eclipse.ui.model.MCell;
 
 /**
- * A tree cell contribution intended to be supplied via {@link TreeContribution}
+ * A tree cell contribution intended to be supplied via {@link MCell}
  * so as to be injected according to an eclipse context.
  * <p>
  * This contribution registers an E4 popup menu to the cell, which can be
@@ -68,6 +69,10 @@ public class MenuContributor {
   MApplication application;
 
   public Contributor forMenu(String menuId) {
+    if (true)
+      throw new UnsupportedOperationException(
+          "This should be moved to the model, put an attribute on MCellSpecializer");
+
     Control menuControl = new Control() {};
 
     MMenu menu = (MMenu) modelService.cloneSnippet(application, menuId, null);

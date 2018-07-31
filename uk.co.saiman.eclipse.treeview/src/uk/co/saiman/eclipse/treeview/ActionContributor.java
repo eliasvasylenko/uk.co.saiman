@@ -32,9 +32,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import uk.co.saiman.eclipse.ui.model.MCell;
 
 /**
- * A tree cell contribution intended to be supplied via {@link TreeContribution}
+ * A tree cell contribution intended to be supplied via {@link MCell}
  * so as to be injected according to an eclipse context.
  * <p>
  * This contribution registers an action to the cell, which can be activated via

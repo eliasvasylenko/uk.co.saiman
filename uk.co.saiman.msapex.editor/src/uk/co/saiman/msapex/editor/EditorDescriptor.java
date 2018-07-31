@@ -36,5 +36,5 @@ public interface EditorDescriptor {
 
   boolean isApplicable(Object resource);
 
-  EditorPrototype getPrototype(Object resource);
+  Editor getInstance(Object resource);
 }

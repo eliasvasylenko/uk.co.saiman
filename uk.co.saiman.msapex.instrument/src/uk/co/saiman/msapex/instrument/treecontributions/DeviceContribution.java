@@ -27,33 +27,38 @@
  */
 package uk.co.saiman.msapex.instrument.treecontributions;
 
-import static uk.co.saiman.eclipse.treeview.DefaultContribution.setLabel;
-import static uk.co.saiman.eclipse.treeview.DefaultContribution.setSupplemental;
+import static javafx.css.PseudoClass.getPseudoClass;
+import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+
+import javax.inject.Named;
 
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.treeview.Contributor;
-import uk.co.saiman.eclipse.treeview.PseudoClassContributor;
-import uk.co.saiman.eclipse.treeview.TreeContribution;
-import uk.co.saiman.eclipse.treeview.TreeEntry;
-import uk.co.saiman.instrument.Device;
+import uk.co.saiman.eclipse.ui.model.MCell;
+import uk.co.saiman.eclipse.ui.model.MCellImpl;
 import uk.co.saiman.instrument.ConnectionState;
+import uk.co.saiman.instrument.Device;
 
-@Component(scope = ServiceScope.PROTOTYPE)
-public class DeviceContribution implements TreeContribution {
-  private final Contributor pseudoClass = new PseudoClassContributor(getClass().getSimpleName());
+@Component(name = DeviceContribution.ID, service = MCell.class)
+public class DeviceContribution extends MCellImpl {
+  public static final String ID = "uk.co.saiman.instrument.cell.device";
 
-  @AboutToShow
-  public void prepare(HBox node, TreeEntry<Device> item) {
-    ConnectionState state = item.data().connectionState().get();
+  public DeviceContribution() {
+    super(ID, Contribution.class);
+  }
 
-    pseudoClass.configureCell(node);
-    new PseudoClassContributor(state.toString()).configureCell(node);
+  public class Contribution {
+    @AboutToShow
+    public void prepare(HBox node, @Named(ENTRY_DATA) Device item) {
+      ConnectionState state = item.connectionState().get();
 
-    setLabel(node, item.data().getName());
-    setSupplemental(node, state.toString());
+      node.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
+
+      setLabel(node, item.getName());
+      setSupplemental(node, state.toString());
+    }
   }
 }

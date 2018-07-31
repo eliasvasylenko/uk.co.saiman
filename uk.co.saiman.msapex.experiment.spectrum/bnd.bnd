@@ -30,14 +30,14 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 	uk.co.saiman.msapex.annotations;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
+	uk.co.saiman.msapex.experiment.processing;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
 \
 	javax.measure.unit-api
 
 Export-Package: \
-	uk.co.saiman.msapex.experiment.spectrum,\
-	uk.co.saiman.msapex.experiment.spectrum.treecontributions
+	uk.co.saiman.msapex.experiment.spectrum
 
 -includeresource:\
 	{css=css},\

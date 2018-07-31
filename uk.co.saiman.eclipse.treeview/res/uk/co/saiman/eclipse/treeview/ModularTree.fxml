@@ -7,9 +7,14 @@
 <?import uk.co.saiman.eclipse.*?>
 <?import uk.co.saiman.eclipse.treeview.*?>
 
-<ModularTreeView
-	fx:id="modularTreeView"
+<TreeView
+	fx:id="treeView"
 	xmlns="http://javafx.com/javafx/8"
 	xmlns:fx="http://javafx.com/fxml"
-	fx:controller="uk.co.saiman.eclipse.treeview.ModularTreeController">
-</ModularTreeView>
+	fx:controller="uk.co.saiman.eclipse.treeview.ModularTreeController"
+	minWidth="0"
+	prefWidth="0"
+	editable="true"
+	onKeyPressed="#onKeyPressed"
+	onKeyReleased="#onKeyReleased">
+</TreeView>

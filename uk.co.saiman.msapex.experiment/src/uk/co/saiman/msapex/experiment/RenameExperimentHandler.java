@@ -49,7 +49,6 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.eclipse.treeview.TreeEntry;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
@@ -68,8 +67,7 @@ public class RenameExperimentHandler {
   void execute(
       Workspace workspace,
       @Localize ExperimentProperties text,
-      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> node,
-      @AdaptNamed(ACTIVE_SELECTION) TreeEntry<?> entry) {
+      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> node) {
     Object state = node.getState();
     if (state instanceof Named) {
       Named named = (Named) state;
@@ -89,7 +87,6 @@ public class RenameExperimentHandler {
              */
 
             named.setName(name);
-            entry.refresh(false);
           });
     }
   }

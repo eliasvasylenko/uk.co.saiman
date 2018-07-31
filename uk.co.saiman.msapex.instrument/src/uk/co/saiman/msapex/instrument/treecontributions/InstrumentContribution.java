@@ -27,25 +27,40 @@
  */
 package uk.co.saiman.msapex.instrument.treecontributions;
 
+import static java.util.stream.Collectors.toList;
+import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
+
+import javax.inject.Named;
+
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.eclipse.treeview.TreeContribution;
-import uk.co.saiman.eclipse.treeview.TreeEntry;
-import uk.co.saiman.eclipse.treeview.TreeEntryChild;
-import uk.co.saiman.eclipse.treeview.TreeEntryChildren;
-import uk.co.saiman.instrument.Device;
+import uk.co.saiman.eclipse.ui.ListItems;
+import uk.co.saiman.eclipse.ui.model.MCell;
+import uk.co.saiman.eclipse.ui.model.MCellImpl;
 import uk.co.saiman.instrument.Instrument;
 
-@Component(scope = ServiceScope.PROTOTYPE)
-public class InstrumentContribution implements TreeContribution {
-  @AboutToShow
-  public void prepare(TreeEntry<Instrument> data, TreeEntryChildren children) {
-    data
-        .data()
-        .getDevices()
-        .map(d -> TreeEntryChild.withType(Device.class).withValue(d).build())
-        .forEach(children::add);
+@Component(name = InstrumentContribution.ID, service = MCell.class)
+public class InstrumentContribution extends MCellImpl {
+  public static final String ID = "uk.co.saiman.instrument.cell";
+  public static final String DEVICES_ID = ID + ".devices";
+
+  public InstrumentContribution() {
+    super(ID, Contribution.class);
+  }
+
+  @Reference(target = "(" + COMPONENT_NAME + "=" + DeviceContribution.ID + ")")
+  public void setChild(MCell nodes) {
+    MCellImpl child = new MCellImpl(DEVICES_ID, null);
+    child.setSpecialized(nodes);
+    child.setParent(this);
+  }
+
+  public class Contribution {
+    @AboutToShow
+    public void prepare(@Named(ENTRY_DATA) Instrument data, ListItems children) {
+      children.getConfiguration(DEVICES_ID).setObjects(data.getDevices().collect(toList()));
+    }
   }
 }

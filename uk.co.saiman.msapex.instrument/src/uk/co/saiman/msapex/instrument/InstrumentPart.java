@@ -50,7 +50,7 @@ public class InstrumentPart {
   static final String OSGI_SERVICE = "osgi.service";
 
   @FXML
-  private ModularTreeController modularTreeController;
+  private ModularTreeController<Instrument> modularTreeController;
 
   @Inject
   private Instrument instrument;
@@ -62,7 +62,7 @@ public class InstrumentPart {
     modularTreeController.setRootData(instrument);
   }
 
-  public ModularTreeController getExperimentTreeController() {
+  public ModularTreeController<Instrument> getExperimentTreeController() {
     return modularTreeController;
   }
 }

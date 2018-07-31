@@ -51,6 +51,10 @@ public class CommandContributor {
   ECommandService commandService;
 
   protected ActionContributor forCommand(String commandId) {
+    if (true)
+      throw new UnsupportedOperationException(
+          "This should be moved to the model, put an attribute on MCellSpecializer");
+
     ParameterizedCommand command = commandService.createCommand(commandId, emptyMap());
     return node -> {
       handlerService.executeHandler(command);

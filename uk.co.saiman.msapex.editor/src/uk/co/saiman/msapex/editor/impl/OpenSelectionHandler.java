@@ -39,7 +39,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.msapex.editor.EditorProperties;
-import uk.co.saiman.msapex.editor.EditorPrototype;
+import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorService;
 
 public class OpenSelectionHandler {
@@ -60,6 +60,6 @@ public class OpenSelectionHandler {
       @Localize EditorProperties text,
       @AdaptNamed(ACTIVE_SELECTION) Object selection) {
     editorService.getApplicableEditors(selection).findFirst().ifPresent(
-        EditorPrototype::openEditor);
+        Editor::openPart);
   }
 }

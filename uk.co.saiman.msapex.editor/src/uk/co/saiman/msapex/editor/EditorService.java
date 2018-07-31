@@ -41,14 +41,14 @@ public interface EditorService {
    * <p>
    * The strategy for determining the precedence is left to the implementer, but
    * generally it may be in order of the editors most recently
-   * {@link EditorPrototype#openEditor() opened}.
+   * {@link Editor#openPart() opened}.
    * 
    * @param resource
    *          the resource data object to edit
    * @return The current editors applicable to the given resource in order of
    *         precedence.
    */
-  Stream<EditorPrototype> getApplicableEditors(Object resource);
+  Stream<Editor> getApplicableEditors(Object resource);
 
   Stream<EditorDescriptor> getEditors();
 

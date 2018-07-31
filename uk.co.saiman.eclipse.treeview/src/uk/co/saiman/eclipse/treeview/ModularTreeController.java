@@ -27,6 +27,12 @@
  */
 package uk.co.saiman.eclipse.treeview;
 
+import static java.util.Collections.reverse;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
@@ -35,39 +41,50 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.fx.core.di.Service;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.PickResult;
 import uk.co.saiman.eclipse.service.ObservableService;
-import uk.co.saiman.eclipse.treeview.impl.ModularTreeItem;
-import uk.co.saiman.reflection.token.TypedReference;
+import uk.co.saiman.eclipse.treeview.impl.Item;
+import uk.co.saiman.eclipse.treeview.impl.ItemGroup;
+import uk.co.saiman.eclipse.treeview.impl.ModularTreeCell;
+import uk.co.saiman.eclipse.treeview.impl.TreeItemImpl;
+import uk.co.saiman.eclipse.ui.FormatConverter;
+import uk.co.saiman.eclipse.ui.model.MCell;
 
 /**
- * A controller over a {@link ModularTreeView modular tree view} for use within
- * an Eclipse RCP environment.
+ * A controller over a modular tree view for use within an Eclipse RCP
+ * environment.
  * <p>
- * This class allows {@link TreeContribution tree contributions} to be
- * contributed via {@link TreeContribution contributors} so that the
+ * This class allows {@link MCell tree contributions} to be
+ * contributed via {@link MCell contributors} so that the
  * contributions are instantiated according to an Eclipse injection context.
  * 
  * @author Elias N Vasylenko
  */
-public class ModularTreeController {
+public class ModularTreeController<T> {
   private final StringProperty tableId = new SimpleStringProperty();
 
   @FXML
-  private ModularTreeView modularTreeView;
+  private TreeView<Object> treeView;
 
   @Inject
   private IEclipseContext context;
 
   @Inject
-  @ObservableService
-  private ObservableList<TreeContribution> contributors;
+  @Service
+  private List<MCell> contributors;
 
   @Inject
   private ESelectionService selectionService;
@@ -90,16 +107,8 @@ public class ModularTreeController {
 
   @FXML
   void initialize() {
-    contributors.addListener((ListChangeListener<TreeContribution>) change -> {
-      while (change.next()) {
-        if (change.wasAdded())
-          change.getAddedSubList().forEach(this::prepareContribution);
-      }
-      refresh();
-    });
-    contributors.stream().forEach(this::prepareContribution);
-
-    modularTreeView
+    treeView.setCellFactory(v -> new ModularTreeCell());
+    treeView
         .getSelectionModel()
         .selectedItemProperty()
         .addListener((observable, oldValue, newValue) -> {
@@ -108,12 +117,57 @@ public class ModularTreeController {
 
   }
 
+  public void onKeyPressed(KeyEvent event) {
+    switch (event.getCode()) {
+    case DELETE:
+      event.consume();
+      List<TreeItem<?>> selection = new ArrayList<>(
+          treeView.getSelectionModel().getSelectedItems());
+      reverse(selection);
+      for (TreeItem<?> treeItem : selection) {
+        ((TreeItemImpl<?>) treeItem).delete();
+      }
+    default:
+      break;
+    }
+  }
+
+  public void onKeyReleased(KeyEvent event) {
+    switch (event.getCode()) {
+    case CONTEXT_MENU:
+      event.consume();
+      Node selectionBounds = treeView;
+
+      Bounds sceneBounds = selectionBounds.localToScene(selectionBounds.getLayoutBounds());
+      Bounds screenBounds = selectionBounds.localToScreen(selectionBounds.getLayoutBounds());
+
+      PickResult pickResult = new PickResult(
+          selectionBounds,
+          sceneBounds.getMaxX(),
+          sceneBounds.getMaxY());
+
+      treeView
+          .fireEvent(
+              new ContextMenuEvent(
+                  ContextMenuEvent.CONTEXT_MENU_REQUESTED,
+                  sceneBounds.getMaxX(),
+                  sceneBounds.getMaxY(),
+                  screenBounds.getMaxX(),
+                  screenBounds.getMaxY(),
+                  true,
+                  pickResult));
+      break;
+    default:
+      break;
+    }
+  }
+
   @PreDestroy
   void destroy() {}
 
   /**
    * @return The ID property of the controller. This is used to allow
-   *         {@link TreeContribution contributions} to filter which controllers
+   *         {@link MCell contributions} to filter which controllers
    *         they wish to contribute to.
    */
   public StringProperty getTableIdProperty() {
@@ -135,66 +189,107 @@ public class ModularTreeController {
     tableId.set(id);
   }
 
-  protected void prepareContribution(TreeContribution contribution) {
-    context.set(ModularTreeController.class, this);
-    ContextInjectionFactory.inject(contribution, context);
-  }
-
   /**
    * @return the currently selected tree item
    */
-  public TreeItem<TreeEntry<?>> getSelection() {
-    return modularTreeView.getSelectionModel().getSelectedItem();
+  public TreeItem<Object> getSelection() {
+    return treeView.getSelectionModel().getSelectedItem();
   }
 
   /**
    * @return the currently selected tree item data
    */
-  public TreeEntry<?> getSelectionData() {
+  public Object getSelectionData() {
     return getSelection().getValue();
+  }
+
+  @SuppressWarnings("unchecked")
+  public T getRootData() {
+    return (T) getRoot().getData();
   }
 
   /**
    * @param root
    *          the root object supplemented with its exact generic type
    */
-  public void setRootData(TypedReference<?> root) {
-    ModularTreeItem<?> rootItem = createRoot(root);
+  public void setRootData(T root) {
+    TreeItemImpl<?> rootItem = createRoot(root);
     rootItem.setExpanded(true);
-    modularTreeView.setShowRoot(false);
+    treeView.setShowRoot(false);
 
     // add root
-    modularTreeView.setRoot(rootItem);
+    treeView.setRoot(rootItem);
 
-    modularTreeView.refresh();
+    treeView.refresh();
   }
 
-  @SuppressWarnings("unchecked")
-  /**
-   * @param root
-   *          the root object
-   */
-  public void setRootData(Object root) {
-    setRootData(TypedReference.typedObject((Class<Object>) root.getClass(), root));
-  }
+  protected TreeItemImpl<?> createRoot(T root) {
+    return new TreeItemImpl<>(new Item<T>() {
+      @Override
+      public T object() {
+        return root;
+      }
 
-  protected ModularTreeItem<?> createRoot(TypedReference<?> root) {
-    return new ModularTreeItem<>(context, root, this);
+      @Override
+      public void setObject(T object) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public ItemGroup<T> group() {
+        return new ItemGroup<T>() {
+          @Override
+          public boolean isSettable() {
+            return false;
+          }
+
+          @Override
+          public Optional<String> contributionId() {
+            // TODO Auto-generated method stub
+            return null;
+          }
+
+          @Override
+          public Optional<Object> anonymousContribution() {
+            // TODO Auto-generated method stub
+            return null;
+          }
+
+          @Override
+          public Stream<FormatConverter<T>> formatConverters() {
+            // TODO Auto-generated method stub
+            return null;
+          }
+
+          @Override
+          public Stream<DragHandler<T>> dragHandlers() {
+            // TODO Auto-generated method stub
+            return null;
+          }
+
+          @Override
+          public Stream<DropHandler<T>> dropHandlers() {
+            // TODO Auto-generated method stub
+            return null;
+          }
+        };
+      }
+    }, context, this);
   }
 
   IEclipseContext getContext() {
     return context;
   }
 
-  protected ModularTreeItem<?> getRoot() {
-    return (ModularTreeItem<?>) modularTreeView.getRoot();
+  protected TreeItemImpl<?> getRoot() {
+    return (TreeItemImpl<?>) treeView.getRoot();
   }
 
   public void refresh() {
-    getRoot().getEntry().refresh(true);
+    getRoot().requestRefresh();
   }
 
-  public Stream<TreeContribution> getContributors() {
+  public Stream<MCell> getContributors() {
     return contributors.stream();
   }
 }

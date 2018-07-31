@@ -18,6 +18,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Sample
 	uk.co.saiman.eclipse.treeview;version=snapshot,\
 \
 	uk.co.saiman.experiment;version=snapshot,\
+	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

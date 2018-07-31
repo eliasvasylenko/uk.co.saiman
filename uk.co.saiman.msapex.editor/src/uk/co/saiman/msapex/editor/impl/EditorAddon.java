@@ -65,7 +65,7 @@ import org.osgi.service.event.Event;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.editor.EditorDescriptor;
-import uk.co.saiman.msapex.editor.EditorPrototype;
+import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
@@ -183,13 +183,13 @@ public class EditorAddon implements EditorService {
   }
 
   @Override
-  public Stream<EditorPrototype> getApplicableEditors(Object resource) {
+  public Stream<Editor> getApplicableEditors(Object resource) {
     List<EditorDescriptor> existingPrecedence = new ArrayList<>(editorPrecedence);
 
     /*
      * TODO deal with precedence
      */
-    return getEditors().filter(e -> e.isApplicable(resource)).map(e -> e.getPrototype(resource));
+    return getEditors().filter(e -> e.isApplicable(resource)).map(e -> e.getInstance(resource));
   }
 
   @Override
@@ -280,7 +280,7 @@ public class EditorAddon implements EditorService {
     }
 
     @Override
-    public EditorPrototype getPrototype(Object resource) {
+    public Editor getInstance(Object resource) {
       return new EditorPrototypeImpl(resource, this);
     }
 
@@ -290,7 +290,7 @@ public class EditorAddon implements EditorService {
     }
   }
 
-  public class EditorPrototypeImpl implements EditorPrototype {
+  public class EditorPrototypeImpl implements Editor {
     private final Object resource;
     private final EditorDescriptor descriptor;
 
@@ -310,7 +310,7 @@ public class EditorAddon implements EditorService {
     }
 
     @Override
-    public MPart openEditor() {
+    public MPart openPart() {
       /*
        * TODO this should only move the editor preference before other editors which
        * were actually applicable to the resource!!!
