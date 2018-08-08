@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.collection.StreamUtilities;
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;

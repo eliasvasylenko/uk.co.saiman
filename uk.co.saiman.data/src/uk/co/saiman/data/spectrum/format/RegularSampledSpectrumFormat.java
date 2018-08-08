@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.stream.Stream;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
@@ -42,6 +43,7 @@ import javax.measure.quantity.Time;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.spectrum.Spectrum;
@@ -49,19 +51,12 @@ import uk.co.saiman.measurement.Units;
 
 @Component
 public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
-  private static final String ID = "uk.co.saiman.experiment.spectrum.sampled.regular.format";
-
   RegularSampledSpectrumFormat() {}
 
   public RegularSampledSpectrumFormat(Units units) {}
 
   @Override
-  public String getId() {
-    return ID;
-  }
-
-  @Override
-  public String getMimeType() {
+  public Stream<MediaType> getMediaTypes() {
     // TODO Auto-generated method stub
     return null;
   }

@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment.path;
 
 import static java.lang.Math.max;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.nCopies;
@@ -38,6 +39,7 @@ import static uk.co.saiman.collection.StreamUtilities.reverse;
 import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -120,14 +122,18 @@ public class ExperimentPath {
     return new ExperimentPath(ancestors, matchers);
   }
 
-  public ExperimentPath resolve(ExperimentMatcher matcher) {
-    List<ExperimentMatcher> matchers = new ArrayList<>(this.matchers.size() + 1);
-    matchers.addAll(this.matchers);
-    matchers.add(matcher);
-    return new ExperimentPath(ancestors, matchers);
+  public ExperimentPath resolve(Collection<? extends ExperimentMatcher> matchers) {
+    List<ExperimentMatcher> concat = new ArrayList<>(this.matchers.size() + matchers.size());
+    concat.addAll(this.matchers);
+    concat.addAll(matchers);
+    return new ExperimentPath(ancestors, concat);
   }
 
-  public ExperimentPath path(ExperimentPath path) {
+  public ExperimentPath resolve(ExperimentMatcher... matcher) {
+    return resolve(asList(matcher));
+  }
+
+  public ExperimentPath resolve(ExperimentPath path) {
     if (path.isAbsolute()) {
       return path;
 

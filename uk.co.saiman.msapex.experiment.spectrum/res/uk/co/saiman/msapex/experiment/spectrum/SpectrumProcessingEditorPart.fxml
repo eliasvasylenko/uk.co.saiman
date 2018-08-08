@@ -14,13 +14,6 @@
 			fx:id="processingTreeScrollPane"
 			fitToWidth="true"
 			fitToHeight="true"
-			hbarPolicy="NEVER">
-
-			<content>
-				<fx:include
-					fx:id="modularTree"
-					source="/uk/co/saiman/eclipse/treeview/ModularTree.fxml" />
-			</content>
-		</ScrollPane>
+			hbarPolicy="NEVER" />
 	</center>
 </BorderPane>

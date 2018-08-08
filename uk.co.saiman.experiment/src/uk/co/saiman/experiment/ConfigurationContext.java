@@ -30,7 +30,7 @@ package uk.co.saiman.experiment;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 
 /**
  * The context of an experiment node's initial configuration. When a workspace

@@ -29,9 +29,13 @@ package uk.co.saiman.eclipse.ui.model;
 
 import java.util.List;
 
-import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
+import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
+
+import uk.co.saiman.data.format.MediaType;
+import uk.co.saiman.eclipse.ui.TransferFormat;
 
 /**
  * This interface represents a specialization of a UI cell, for example in a
@@ -52,7 +56,7 @@ import org.eclipse.e4.ui.model.application.MApplicationElement;
  * @author Elias N Vasylenko
  */
 public interface MCell {
-  String ENTRY_DATA = "uk.co.saiman.eclipse.model.entry.data";
+  String ENTRY_DATA = "uk.co.saiman.eclipse.ui.model.entry.data";
 
   String getElementId();
 
@@ -80,6 +84,10 @@ public interface MCell {
 
   void setSpecialized(MCell specialized);
 
+  MPopupMenu getPopupMenu();
+
+  void setPopupMenu(MPopupMenu popupMenu);
+
   /**
    * Get the available specializations of this contribution. The inverse of
    * {@link #getSpecialized()}.
@@ -91,8 +99,8 @@ public interface MCell {
 
   /**
    * An editable tree contribution is modally editable and should be
-   * {@link Execute re-executed upon entering or exiting the editing mode}. A tree
-   * contribution may be modifiable without being editable.
+   * {@link AboutToShow re-initialized} upon entering or exiting the editing mode.
+   * A tree contribution may be modifiable without being editable.
    * 
    * @return true if this contribution implements an editing mode for an item it
    *         is applied to
@@ -102,4 +110,25 @@ public interface MCell {
   void setEditable(boolean editable);
 
   Class<?> getContributionClass();
+
+  Object getObject();
+
+  /**
+   * @return a list of media types the cell should support for conversion
+   */
+  List<MediaType> getMediaTypes();
+
+  /**
+   * Transfer formats are used to serialize and deserialize a cell's data in order
+   * to facilitate, for example, drag-and-drop or copy-and-paste functionality.
+   * <p>
+   * A set of transfer formats is populated automatically to satisfy the
+   * {@link #getMediaTypes() media types} accepted by the cell. It can be modified
+   * manually to customize serialization behavior.
+   * 
+   * @return a list of supported transfer formats in order of precedence
+   */
+  List<TransferFormat<?>> getTransferFormats();
+
+  IEclipseContext getContext();
 }

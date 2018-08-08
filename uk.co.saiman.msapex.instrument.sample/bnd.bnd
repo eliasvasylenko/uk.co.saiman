@@ -8,21 +8,18 @@ Bundle-Name: SAI :: MSApex :: Sample
 
 -buildpath: \
 	uk.co.saiman.eclipse;version=snapshot,\
-	uk.co.saiman.eclipse.treeview;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-\
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
-\
 	javax.measure.unit-api
 
 Export-Package: uk.co.saiman.msapex.instrument.sample

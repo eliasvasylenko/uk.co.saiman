@@ -37,7 +37,7 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ResultStorage;
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log.Level;
 
 public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, Void>

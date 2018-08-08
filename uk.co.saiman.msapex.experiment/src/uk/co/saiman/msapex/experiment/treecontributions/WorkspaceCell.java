@@ -60,9 +60,7 @@ public class WorkspaceCell extends MCellImpl {
   public static class Contribution {
     @AboutToShow
     public void prepare(ListItems children, @Named(ENTRY_DATA) Workspace workspace) {
-      children
-          .getConfiguration(EXPERIMENTS_ID)
-          .setObjects(workspace.getExperiments().collect(toList()));
+      children.addItems(EXPERIMENTS_ID, workspace.getExperiments().collect(toList()));
     }
   }
 }

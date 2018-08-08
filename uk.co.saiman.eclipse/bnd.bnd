@@ -1,10 +1,13 @@
 Bundle-Name: SAI :: Eclipse
 
--include: \
+-include:\
+	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd
+	${build}/include/eclipse.fx.bnd,\
+	${build}/include/fugue.icons.bnd
 
 -buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
@@ -12,6 +15,7 @@ Bundle-Name: SAI :: Eclipse
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
 	org.eclipse.osgi.compatibility.state
 
@@ -30,11 +34,15 @@ Export-Package: \
 	uk.co.saiman.eclipse.ui.fx
 
 Private-Package: \
+	uk.co.saiman.eclipse.ui.fx.impl,\
 	org.eclipse.osgi.compatibility.state,\
 	org.eclipse.osgi.internal.container,\
 	org.eclipse.osgi.internal.module,\
 	org.eclipse.osgi.internal.resolver,\
 	org.eclipse.osgi.internal.util
 
-Import-Package: \
-	*
+-includeresource: \
+	{css=css},\
+	OSGI-INF/l10n=l10n,\
+	{always.e4xmi},\
+	res

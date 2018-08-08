@@ -16,8 +16,6 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
-	uk.co.saiman.eclipse.treeview;version=snapshot,\
-\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.editor;version=snapshot,\
@@ -30,8 +28,7 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.measurement;version=snapshot,\
 \
 	javax.measure.unit-api,\
-	org.eclipse.emf.common,\
-	json;version=latest
+	org.eclipse.emf.common
 
 #Private-Package: \
 #	uk.co.saiman.msapex.experiment,\
@@ -39,7 +36,6 @@ Bundle-Name: SAI :: MSApex :: Experiment
 
 Export-Package: \
 	uk.co.saiman.msapex.experiment,\
-	uk.co.saiman.msapex.experiment.persistence,\
 	uk.co.saiman.msapex.experiment.locations,\
 	uk.co.saiman.msapex.experiment.treecontributions
 

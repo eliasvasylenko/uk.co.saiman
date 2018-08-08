@@ -36,9 +36,6 @@ import java.util.Arrays;
  * Enum static utilities.
  * 
  * @author Elias N Vasylenko
- *
- * @param <S>
- *          Self bounding on the type of the enumeration class.
  */
 public final class Enums {
   private Enums() {}

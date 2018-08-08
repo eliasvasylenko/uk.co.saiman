@@ -29,8 +29,6 @@ package uk.co.saiman.log.provider;
 
 import java.util.function.Function;
 
-import uk.co.saiman.log.provider.ConsoleLog.ConsoleLogConfiguration;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -39,12 +37,14 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogReaderService;
-import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+import uk.co.saiman.log.provider.ConsoleLog.ConsoleLogConfiguration;
 
 /**
  * {@link LogListener} implementation dumping all logs to console
@@ -64,13 +64,13 @@ public class ConsoleLog implements LogListener {
   public @interface ConsoleLogConfiguration {
     @AttributeDefinition(
         name = "Maximum Console Log Level",
-        description = "Enable console output for log messages of a maximum level, where 1 is an error, 2 is a warning, 3 is information, and 4 is debug output")
-    int maximumLevel() default LogService.LOG_INFO;
+        description = "Enable console output for log messages of a minimum level of significance")
+    LogLevel minimumLevel() default LogLevel.INFO;
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.console.log";
 
-  private int maximum = 0;
+  private LogLevel minimum = LogLevel.INFO;
 
   @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
   @SuppressWarnings("javadoc")
@@ -86,13 +86,13 @@ public class ConsoleLog implements LogListener {
   @Activate
   @Modified
   void updated(ConsoleLogConfiguration configuration) {
-    maximum = configuration.maximumLevel();
+    minimum = configuration.minimumLevel();
   }
 
   @Override
   public void logged(LogEntry entry) {
-    if (entry.getLevel() <= maximum) {
-      String level = formatLevel(entry.getLevel());
+    if (entry.getLogLevel().implies(minimum)) {
+      String level = entry.getLogLevel().name();
       String bundle = formatIfPresent(entry.getBundle());
       String service = formatIfPresent(entry.getServiceReference());
 
@@ -102,29 +102,6 @@ public class ConsoleLog implements LogListener {
         entry.getException().printStackTrace();
       }
     }
-  }
-
-  private String formatLevel(int level) {
-    String levelString;
-
-    switch (level) {
-    case LogService.LOG_ERROR:
-      levelString = "ERROR  ";
-      break;
-    case LogService.LOG_WARNING:
-      levelString = "WARNING";
-      break;
-    case LogService.LOG_INFO:
-      levelString = "INFO   ";
-      break;
-    case LogService.LOG_DEBUG:
-      levelString = "DEBUG  ";
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected log level");
-    }
-
-    return levelString;
   }
 
   private String formatIfPresent(Object object) {

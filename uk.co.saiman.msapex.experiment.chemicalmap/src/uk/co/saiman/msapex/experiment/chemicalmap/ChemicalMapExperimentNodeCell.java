@@ -28,8 +28,8 @@
 package uk.co.saiman.msapex.experiment.chemicalmap;
 
 import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import javax.inject.Named;
 

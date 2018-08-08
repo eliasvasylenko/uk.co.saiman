@@ -36,8 +36,10 @@ import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.eclipse.treeview.ModularTreeController;
+import uk.co.saiman.eclipse.ui.fx.TreeService;
 import uk.co.saiman.instrument.Instrument;
 
 /**
@@ -50,19 +52,17 @@ public class InstrumentPart {
   static final String OSGI_SERVICE = "osgi.service";
 
   @FXML
-  private ModularTreeController<Instrument> modularTreeController;
+  private ScrollPane instrumentTreeScrollPane;
+  private TreeView<?> instrumentTree;
 
   @Inject
   private Instrument instrument;
 
   @PostConstruct
-  void initialize(BorderPane container, @LocalInstance FXMLLoader loader) {
+  void initialize(BorderPane container, TreeService treeService, @LocalInstance FXMLLoader loader) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    modularTreeController.setRootData(instrument);
-  }
-
-  public ModularTreeController<Instrument> getExperimentTreeController() {
-    return modularTreeController;
+    instrumentTree = treeService.createTree(InstrumentTree.ID, instrument);
+    instrumentTreeScrollPane.setContent(instrumentTree);
   }
 }

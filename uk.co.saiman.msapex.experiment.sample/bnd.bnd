@@ -7,6 +7,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Sample
 
 -buildpath:\
 	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
@@ -15,8 +16,6 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Sample
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
-	uk.co.saiman.eclipse.treeview;version=snapshot,\
-\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\

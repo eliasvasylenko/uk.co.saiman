@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static org.osgi.framework.Constants.SERVICE_PID;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import java.util.Arrays;
 
@@ -60,7 +60,7 @@ public class ConvolutionCell extends MCellImpl {
     new MCellImpl(CENTRE_ID, Centre.class).setParent(this);
   }
 
-  @Reference(target = "(" + SERVICE_PID + "=" + ProcessorCell.ID + ")")
+  @Reference(target = "(" + COMPONENT_NAME + "=" + ProcessorCell.ID + ")")
   @Override
   public void setSpecialized(MCell specialized) {
     super.setSpecialized(specialized);
@@ -75,15 +75,16 @@ public class ConvolutionCell extends MCellImpl {
       setSupplemental(node, Arrays.toString(entry.get().getConvolutionVector()));
 
       children
-          .<double[]>getConfiguration(VECTOR_ID)
-          .setObject(entry.get().getConvolutionVector())
-          .setUpdateFunction((i, result) -> entry.set(entry.get().withConvolutionVector(result)));
+          .addItem(
+              VECTOR_ID,
+              entry.get().getConvolutionVector(),
+              result -> entry.set(entry.get().withConvolutionVector(result)));
 
       children
-          .<Integer>getConfiguration(CENTRE_ID)
-          .setObject(entry.get().getConvolutionVectorCentre())
-          .setUpdateFunction(
-              (i, result) -> entry.set(entry.get().withConvolutionVectorCentre(result)));
+          .addItem(
+              CENTRE_ID,
+              entry.get().getConvolutionVectorCentre(),
+              result -> entry.set(entry.get().withConvolutionVectorCentre(result)));
     }
   }
 

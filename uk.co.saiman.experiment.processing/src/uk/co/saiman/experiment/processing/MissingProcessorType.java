@@ -29,7 +29,7 @@ package uk.co.saiman.experiment.processing;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 
 public class MissingProcessorType implements Processor<MissingProcessorType> {
   private final String id;

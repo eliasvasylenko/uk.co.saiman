@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import javax.inject.Named;
 
@@ -40,6 +40,7 @@ import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.ui.model.MCell;
 import uk.co.saiman.eclipse.ui.model.MCellImpl;
 import uk.co.saiman.experiment.processing.Processor;
+import uk.co.saiman.experiment.processing.ProcessorFormat;
 
 @ServiceRanking(-100)
 @Component(name = ProcessorCell.ID, service = MCell.class)
@@ -47,7 +48,7 @@ public class ProcessorCell extends MCellImpl {
   public static final String ID = "uk.co.saiman.experiment.processing.cell";
 
   public ProcessorCell() {
-    super(ID, Contribution.class);
+    super(ID, Contribution.class, ProcessorFormat.MEDIA_TYPE);
   }
 
   public class Contribution {

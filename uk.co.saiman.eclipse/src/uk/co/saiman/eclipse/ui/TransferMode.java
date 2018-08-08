@@ -28,5 +28,15 @@
 package uk.co.saiman.eclipse.ui;
 
 public enum TransferMode {
-  COPY, MOVE, LINK, DISCARD
+  COPY(false), MOVE(true), LINK(false), DISCARD(true);
+
+  private final boolean destructive;
+
+  private TransferMode(boolean destructive) {
+    this.destructive = destructive;
+  }
+
+  public boolean isDestructive() {
+    return destructive;
+  }
 }

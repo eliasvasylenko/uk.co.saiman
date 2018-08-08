@@ -27,11 +27,29 @@
  */
 package uk.co.saiman.eclipse.ui.model;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.eclipse.core.commands.ParameterizedCommand;
+import org.eclipse.e4.core.commands.ECommandService;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.commands.MCommand;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.osgi.service.component.annotations.Deactivate;
+
+import uk.co.saiman.data.format.MediaType;
+import uk.co.saiman.eclipse.ui.TransferFormat;
 
 /**
  * A basic implementation of a cell specialization. Ultimately, according to the
@@ -40,11 +58,13 @@ import org.osgi.service.component.annotations.Deactivate;
  * 
  * @author Elias N Vasylenko
  */
-public class MCellImpl implements MCell {
+public class MCellImpl implements MHandledCell {
   private final String id;
   private final Class<?> contributionClass;
+  private final List<MediaType> mediaTypes;
 
   private boolean editable;
+  private List<TransferFormat<?>> transferFormats;
 
   private MCellImpl specialized;
   private LinkedHashSet<MCellImpl> specializations;
@@ -52,10 +72,103 @@ public class MCellImpl implements MCell {
   private MCellImpl parent;
   private List<MCellImpl> children;
 
-  public MCellImpl(String id, Class<?> contributionClass) {
-    this.id = id;
+  private final String popupMenuId;
+  private MPopupMenu popupMenu;
+  private final String commandId;
+  private MCommand command;
+  private ParameterizedCommand parameterizedCommand;
+
+  private IEclipseContext context;
+  private Object contributionObject;
+
+  public MCellImpl(String id, Class<?> contributionClass, MediaType... mediaTypes) {
+    this(id, contributionClass, null, null, mediaTypes);
+  }
+
+  public MCellImpl(
+      String id,
+      Class<?> contributionClass,
+      String popupMenuId,
+      String commandId,
+      MediaType... mediaTypes) {
+    this.id = requireNonNull(id);
     this.contributionClass = contributionClass;
+    this.mediaTypes = unmodifiableList(asList(mediaTypes));
+    this.transferFormats = new ArrayList<>();
+    this.specializations = new LinkedHashSet<>();
     this.children = new ArrayList<>();
+    this.popupMenuId = popupMenuId;
+    this.commandId = commandId;
+  }
+
+  void initialize(IEclipseContext context) {
+    if (this.context == null) {
+      context = context.createChild(id);
+      this.context = context;
+
+      context.set(MCell.class, this);
+
+      initializeMediaTypes();
+      initializeCommand();
+      initializePopupMenu();
+      initializeContribution();
+      initializeChildren();
+    }
+  }
+
+  private void initializeMediaTypes() {
+    for (MediaType mediaType : mediaTypes) {
+      // TODO find a transferformat which fulfils this and add it.
+    }
+  }
+
+  private void initializeCommand() {
+    if (commandId != null) {
+      EModelService modelService = context.get(EModelService.class);
+      ECommandService commandService = context.get(ECommandService.class);
+      MPart part = context.get(MPart.class);
+      setCommand(modelService.findElements(part, commandId, MCommand.class, emptyList()).get(0));
+      setWbCommand(commandService.createCommand(commandId, emptyMap()));
+    }
+  }
+
+  private void initializePopupMenu() {
+    if (popupMenuId != null) {
+      EModelService modelService = context.get(EModelService.class);
+      setPopupMenu(
+          (MPopupMenu) modelService
+              .cloneSnippet(context.get(MApplication.class), popupMenuId, null));
+    }
+  }
+
+  private void initializeContribution() {
+    if (contributionClass != null) {
+      this.contributionObject = ContextInjectionFactory.make(contributionClass, context);
+    }
+  }
+
+  private void initializeChildren() {
+    for (MCellImpl specialization : specializations) {
+      specialization.initialize(context);
+    }
+    for (MCellImpl child : children) {
+      child.initialize(context);
+    }
+  }
+
+  @Override
+  public Class<?> getContributionClass() {
+    return contributionClass;
+  }
+
+  @Override
+  public IEclipseContext getContext() {
+    return context;
+  }
+
+  @Override
+  public Object getObject() {
+    return contributionObject;
   }
 
   @Deactivate
@@ -111,11 +224,6 @@ public class MCellImpl implements MCell {
   }
 
   @Override
-  public Class<?> getContributionClass() {
-    return contributionClass;
-  }
-
-  @Override
   public List<MCell> getChildren() {
     return new ArrayList<>(children);
   }
@@ -145,5 +253,45 @@ public class MCellImpl implements MCell {
 
   private void removeChild(MCell child) {
     children.remove(child);
+  }
+
+  @Override
+  public List<MediaType> getMediaTypes() {
+    return mediaTypes;
+  }
+
+  @Override
+  public List<TransferFormat<?>> getTransferFormats() {
+    return transferFormats;
+  }
+
+  @Override
+  public MPopupMenu getPopupMenu() {
+    return popupMenu;
+  }
+
+  @Override
+  public void setPopupMenu(MPopupMenu popupMenu) {
+    this.popupMenu = popupMenu;
+  }
+
+  @Override
+  public MCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public void setCommand(MCommand command) {
+    this.command = command;
+  }
+
+  @Override
+  public ParameterizedCommand getWbCommand() {
+    return parameterizedCommand;
+  }
+
+  @Override
+  public void setWbCommand(ParameterizedCommand parameterizedCommand) {
+    this.parameterizedCommand = parameterizedCommand;
   }
 }

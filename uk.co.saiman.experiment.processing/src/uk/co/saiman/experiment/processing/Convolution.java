@@ -28,9 +28,9 @@
 package uk.co.saiman.experiment.processing;
 
 import static uk.co.saiman.data.function.processing.DataProcessor.arrayProcessor;
-import static uk.co.saiman.experiment.persistence.Accessor.booleanAccessor;
-import static uk.co.saiman.experiment.persistence.Accessor.doubleAccessor;
-import static uk.co.saiman.experiment.persistence.Accessor.intAccessor;
+import static uk.co.saiman.experiment.state.Accessor.booleanAccessor;
+import static uk.co.saiman.experiment.state.Accessor.doubleAccessor;
+import static uk.co.saiman.experiment.state.Accessor.intAccessor;
 
 import java.util.stream.DoubleStream;
 
@@ -38,8 +38,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.persistence.Accessor;
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.Accessor;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.properties.PropertyLoader;
 
 @Component

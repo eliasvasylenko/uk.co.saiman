@@ -29,8 +29,8 @@ package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import javax.inject.Named;
 
@@ -82,7 +82,7 @@ public class SpectrumProcessingExperimentNodeCell extends MCellImpl {
       setLabel(node, data.getType().getName());
       setSupplemental(node, state.getSpectrumName());
 
-      children.getConfiguration(PROCESSORS_ID).setObject(state.getProcessing().collect(toList()));
+      children.addItems(PROCESSORS_ID, state.getProcessing().collect(toList()));
     }
   }
 }

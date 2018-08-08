@@ -31,7 +31,7 @@ import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.Type;
 
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.reflection.token.TypeToken;
 
 public interface MissingExperimentType<T> extends ExperimentType<StateMap, T> {

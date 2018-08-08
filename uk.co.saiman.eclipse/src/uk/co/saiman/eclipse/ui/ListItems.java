@@ -27,10 +27,43 @@
  */
 package uk.co.saiman.eclipse.ui;
 
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.function.Consumer;
 
 public interface ListItems {
-  <T> ListItemConfiguration<T> getConfiguration(String id);
+  /*
+   * TODO drag and drop handlers automatically by update function??
+   * 
+   * Update simply passes back a new List containing the dropped-in item and/or
+   * without the dragged-out item.
+   * 
+   * How can this encode copy/move semantics? Doesn't always matter. Copying is
+   * done through by serialising/marshalling via the data format.
+   * 
+   * Case study for complex custom move/copy implementation requirements,
+   * ExperimentNode children:
+   * 
+   * the data format can simply encode as a location in the tree (as well as a
+   * full serialization). If it comes from the same tree, the object dropped is
+   * fetched from that location, otherwise it's fully deserialized. Presumably the
+   * mechanism of serialization is a combination of node type id & persisted state
+   * json.
+   * 
+   * The drop logic then knows whether it needs to copy or move based on whether
+   * the object still has a parent node (as drop is resolved first), or whether it
+   * exists multiple times in the new list (if it's dropped into the same set of
+   * children).
+   * 
+   */
 
-  Stream<? extends ListItemConfiguration<?>> configurations();
+  <T> void addItem(String id, T child);
+
+  <T> void addItem(String id, T child, Consumer<? super T> update);
+
+  <T> void addItems(String id, List<? extends T> children);
+
+  <T> void addItems(
+      String id,
+      List<? extends T> children,
+      Consumer<? super List<? extends T>> update);
 }

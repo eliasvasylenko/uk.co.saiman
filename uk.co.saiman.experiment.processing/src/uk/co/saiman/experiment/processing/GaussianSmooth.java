@@ -29,14 +29,14 @@ package uk.co.saiman.experiment.processing;
 
 import static java.lang.Math.floor;
 import static java.lang.Math.sqrt;
-import static uk.co.saiman.experiment.persistence.Accessor.doubleAccessor;
+import static uk.co.saiman.experiment.state.Accessor.doubleAccessor;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.persistence.Accessor.PropertyAccessor;
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 import uk.co.saiman.properties.PropertyLoader;
 
 @Component

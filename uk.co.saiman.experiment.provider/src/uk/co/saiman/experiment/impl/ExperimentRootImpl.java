@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static uk.co.saiman.experiment.persistence.Accessor.stringAccessor;
+import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
 
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.VoidExecutionContext;
-import uk.co.saiman.experiment.persistence.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 
 /**
  * @author Elias N Vasylenko

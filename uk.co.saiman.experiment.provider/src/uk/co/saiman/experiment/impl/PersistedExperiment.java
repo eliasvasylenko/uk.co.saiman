@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.impl;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 
 /**
  * implementations do not need to maintain identity or keep unique instances for

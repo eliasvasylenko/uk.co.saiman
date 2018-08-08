@@ -37,11 +37,11 @@ import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.persistence.StateMap;
 import uk.co.saiman.experiment.processing.MissingProcessorType;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.processing.ProcessorService;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.properties.PropertyLoader;
 
 @Component

@@ -171,7 +171,12 @@ public class StreamUtilities {
   }
 
   public static <A, B> Collector<Entry<? extends A, ? extends B>, ?, Map<A, B>> entriesToMap() {
-    return Collectors.toMap(Entry::getKey, Entry::getValue, throwingMerger(), LinkedHashMap::new);
+    return entriesToMap(throwingMerger());
+  }
+
+  public static <A, B> Collector<Entry<? extends A, ? extends B>, ?, Map<A, B>> entriesToMap(
+      BinaryOperator<B> merge) {
+    return Collectors.toMap(Entry::getKey, Entry::getValue, merge, LinkedHashMap::new);
   }
 
   public static <T, V> Function<T, Entry<T, V>> mapToEntry(Function<T, V> value) {

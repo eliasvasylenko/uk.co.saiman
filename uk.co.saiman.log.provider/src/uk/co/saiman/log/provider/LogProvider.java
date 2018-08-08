@@ -36,7 +36,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.log.LogListener;
-import org.osgi.service.log.LogService;
+import org.osgi.service.log.Logger;
+import org.osgi.service.log.LoggerFactory;
 
 import uk.co.saiman.log.Log;
 
@@ -50,16 +51,19 @@ import uk.co.saiman.log.Log;
 public class LogProvider implements Log {
   private Bundle usingBundle;
 
-  private ServiceReference<LogService> logServiceReference;
-  @Reference
-  LogService logService;
+  private ServiceReference<LoggerFactory> logServiceReference;
+  @Reference(service = LoggerFactory.class)
+  Logger logService;
 
   @Activate
   public void activate(ComponentContext context) {
     usingBundle = context.getUsingBundle();
-    logServiceReference = usingBundle.getBundleContext().getServiceReference(LogService.class);
+    logServiceReference = usingBundle.getBundleContext().getServiceReference(LoggerFactory.class);
     if (logServiceReference != null)
-      logService = usingBundle.getBundleContext().getService(logServiceReference);
+      logService = usingBundle
+          .getBundleContext()
+          .getService(logServiceReference)
+          .getLogger(usingBundle, usingBundle.getSymbolicName(), Logger.class);
   }
 
   @Deactivate
@@ -69,35 +73,36 @@ public class LogProvider implements Log {
     }
   }
 
-  private int getLogServiceLevel(Level level) {
+  @Override
+  public void log(Level level, String message) {
     switch (level) {
     case TRACE:
-      return LogService.LOG_DEBUG;
+      logService.trace(message);
+      break;
     case DEBUG:
-      return LogService.LOG_DEBUG;
+      logService.debug(message);
+      break;
     case INFO:
-      return LogService.LOG_INFO;
+      logService.info(message);
+      break;
     case WARN:
-      return LogService.LOG_WARNING;
+      logService.warn(message);
+      break;
     case ERROR:
-      return LogService.LOG_ERROR;
+      logService.error(message);
+      break;
     default:
       throw new AssertionError();
     }
   }
 
   @Override
-  public void log(Level level, String message) {
-    logService.log(getLogServiceLevel(level), message);
-  }
-
-  @Override
   public void log(Level level, Throwable exception) {
-    logService.log(getLogServiceLevel(level), exception.getMessage(), exception);
+    log(level, exception.getMessage());
   }
 
   @Override
   public void log(Level level, String message, Throwable exception) {
-    logService.log(getLogServiceLevel(level), message, exception);
+    log(level, message + " (" + exception.getMessage() + ")");
   }
 }

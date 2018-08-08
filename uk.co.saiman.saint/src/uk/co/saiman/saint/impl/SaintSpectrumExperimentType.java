@@ -28,7 +28,7 @@
 package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static uk.co.saiman.experiment.persistence.Accessor.mapAccessor;
+import static uk.co.saiman.experiment.state.Accessor.mapAccessor;
 import static uk.co.saiman.measurement.Units.dalton;
 
 import java.util.ArrayList;
@@ -47,13 +47,13 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
-import uk.co.saiman.experiment.persistence.Accessor.ListAccessor;
-import uk.co.saiman.experiment.persistence.Accessor.MapAccessor;
 import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.processing.ProcessorService;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
+import uk.co.saiman.experiment.state.Accessor.ListAccessor;
+import uk.co.saiman.experiment.state.Accessor.MapAccessor;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;

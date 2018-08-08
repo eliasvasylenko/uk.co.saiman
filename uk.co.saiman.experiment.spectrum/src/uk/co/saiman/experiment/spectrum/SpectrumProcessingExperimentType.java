@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
-import static uk.co.saiman.experiment.persistence.Accessor.mapAccessor;
+import static uk.co.saiman.experiment.state.Accessor.mapAccessor;
 import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
 import java.util.ArrayList;
@@ -52,10 +52,10 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingType;
-import uk.co.saiman.experiment.persistence.Accessor.ListAccessor;
-import uk.co.saiman.experiment.persistence.Accessor.MapAccessor;
 import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.processing.ProcessorService;
+import uk.co.saiman.experiment.state.Accessor.ListAccessor;
+import uk.co.saiman.experiment.state.Accessor.MapAccessor;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most

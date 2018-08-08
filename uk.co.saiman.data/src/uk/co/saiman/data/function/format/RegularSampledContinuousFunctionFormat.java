@@ -34,11 +34,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.function.ArraySampledContinuousFunction;
 import uk.co.saiman.data.function.RegularSampledDomain;
@@ -68,18 +70,12 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
   }
 
   @Override
-  public String getId() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public String getExtension() {
     return MASS_SPECTRUM_RANGE_EXTENSION;
   }
 
   @Override
-  public String getMimeType() {
+  public Stream<MediaType> getMediaTypes() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -116,13 +112,7 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
       }
 
       @Override
-      public String getId() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public String getMimeType() {
+      public Stream<MediaType> getMediaTypes() {
         // TODO Auto-generated method stub
         return null;
       }
@@ -179,7 +169,8 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
             dataDomain.getInterval().getLeftEndpoint(),
             domain.getInterval().getLeftEndpoint())) {
       throw new IllegalArgumentException(
-          dataDomain.getInterval().getLeftEndpoint() + " != "
+          dataDomain.getInterval().getLeftEndpoint()
+              + " != "
               + domain.getInterval().getLeftEndpoint());
     }
     if (dataDomain.getDepth() != domain.getDepth()) {

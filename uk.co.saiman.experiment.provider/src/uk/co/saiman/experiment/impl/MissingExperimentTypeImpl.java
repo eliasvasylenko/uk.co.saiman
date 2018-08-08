@@ -33,7 +33,7 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.MissingExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 
 public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
   private final ExperimentProperties text;

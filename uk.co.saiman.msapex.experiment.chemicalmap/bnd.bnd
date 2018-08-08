@@ -14,8 +14,6 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Chemical Map
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
-	uk.co.saiman.eclipse.treeview;version=snapshot,\
-\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\

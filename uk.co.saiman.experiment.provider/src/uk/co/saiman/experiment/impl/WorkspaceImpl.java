@@ -47,7 +47,7 @@ import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ResultStorage;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.WorkspaceEvent;
-import uk.co.saiman.experiment.persistence.StateMap;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.Cancellation;
 import uk.co.saiman.observable.HotObservable;

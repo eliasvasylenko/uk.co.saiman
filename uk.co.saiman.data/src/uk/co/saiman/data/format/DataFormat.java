@@ -27,11 +27,11 @@
  */
 package uk.co.saiman.data.format;
 
-import static uk.co.saiman.reflection.token.TypeToken.forType;
-
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -45,23 +45,46 @@ import uk.co.saiman.reflection.token.TypeToken;
  *          the type of data
  */
 public interface DataFormat<T> {
-  String getId();
-
   /**
    * @return the default path extension for files of this format
    */
   String getExtension();
 
   /**
-   * @return the default mime type for files of this format
+   * @return the mime types which may be associated with files of this format
    */
-  String getMimeType();
+  Stream<MediaType> getMediaTypes();
 
   default TypeToken<T> getType() {
-    return forType(getClass())
+    return TypeToken
+        .forType(getClass())
         .resolveSupertype(DataFormat.class)
         .resolveTypeArgument(new TypeParameter<T>() {})
         .getTypeToken();
+  }
+
+  @SuppressWarnings("unchecked")
+  default <U> Optional<? extends DataFormat<U>> forType(TypeToken<U> type) {
+    if (!getType().equals(type)) {
+      return Optional.empty();
+    }
+    return Optional.of((DataFormat<U>) this);
+  }
+
+  @SuppressWarnings("unchecked")
+  default <U> Optional<? extends DataFormat<? extends U>> forInputType(TypeToken<U> type) {
+    if (!getType().isAssignableTo(type)) {
+      return Optional.empty();
+    }
+    return Optional.of((DataFormat<U>) this);
+  }
+
+  @SuppressWarnings("unchecked")
+  default <U> Optional<? extends DataFormat<? super U>> forOutputType(TypeToken<U> type) {
+    if (!getType().isAssignableFrom(type)) {
+      return Optional.empty();
+    }
+    return Optional.of((DataFormat<U>) this);
   }
 
   /**

@@ -29,7 +29,7 @@ package uk.co.saiman.collection;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -95,7 +95,7 @@ public class EquivalenceComparator<T> implements Comparator<T> {
   }
 
   @Override
-  public int compare(EquivalenceComparator<T>this,T first, T second) {
+  public int compare(EquivalenceComparator<T> this, T first, T second) {
     clean();
 
     if (equality.test(first, second)) {
@@ -109,8 +109,8 @@ public class EquivalenceComparator<T> implements Comparator<T> {
       return secondHash - firstHash;
     }
 
-    IDReference firstReference = new IDReference(first, firstHash, referenceQueue);
-    IDReference secondReference = new IDReference(second, secondHash, referenceQueue);
+    IDReference firstReference = new IDReference(first, firstHash);
+    IDReference secondReference = new IDReference(second, secondHash);
 
     List<IDReference> collisions = collisionMap.get(firstHash);
     if (collisions == null) {
@@ -145,7 +145,7 @@ public class EquivalenceComparator<T> implements Comparator<T> {
    * map. It is also called automatically
    */
   @SuppressWarnings("unchecked")
-  public void clean(EquivalenceComparator<T>this) {
+  public void clean(EquivalenceComparator<T> this) {
     IDReference oldReference;
     while ((oldReference = (IDReference) referenceQueue.poll()) != null) {
       List<IDReference> collisions = collisionMap.get(oldReference.getId());
@@ -158,11 +158,11 @@ public class EquivalenceComparator<T> implements Comparator<T> {
     }
   }
 
-  protected class IDReference extends WeakReference<T> {
+  protected class IDReference extends SoftReference<T> {
     private final int id;
 
-    public IDReference(T referent, int id, ReferenceQueue<? super T> q) {
-      super(referent, q);
+    public IDReference(T referent, int id) {
+      super(referent, referenceQueue);
 
       this.id = id;
     }
@@ -187,7 +187,7 @@ public class EquivalenceComparator<T> implements Comparator<T> {
 
     @Override
     public int hashCode() {
-      return get().hashCode();
+      throw new UnsupportedOperationException();
     }
   }
 }

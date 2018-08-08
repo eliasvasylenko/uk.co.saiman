@@ -30,20 +30,19 @@ package uk.co.saiman.msapex.experiment.spectrum;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.eclipse.treeview.ModularTreeController;
+import uk.co.saiman.eclipse.ui.fx.TreeService;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.spectrum.SpectrumProperties;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
 
@@ -53,19 +52,19 @@ public class SpectrumProcessingEditorPart {
   private SpectrumProperties properties;
 
   @FXML
-  private ModularTreeController<List<Processor<?>>> modularTreeController;
+  private ScrollPane processingTreeScrollPane;
+  private TreeView<?> processingTree;
 
   @Inject
   SpectrumProcessingEditorPart(
       BorderPane container,
+      TreeService treeService,
       @LocalInstance FXMLLoader loader,
       ExperimentNode<? extends SpectrumResultConfiguration, Spectrum> result) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    modularTreeController.setRootData(result.getState().getProcessing().collect(toList()));
-  }
-
-  public ModularTreeController<?> getProcessingTreeController() {
-    return modularTreeController;
+    processingTree = treeService
+        .createTree(ProcessingTree.ID, result.getState().getProcessing().collect(toList()));
+    processingTreeScrollPane.setContent(processingTree);
   }
 }

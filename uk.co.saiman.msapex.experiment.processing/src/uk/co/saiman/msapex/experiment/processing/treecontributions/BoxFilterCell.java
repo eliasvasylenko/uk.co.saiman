@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static org.osgi.framework.Constants.SERVICE_PID;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
@@ -56,7 +56,7 @@ public class BoxFilterCell extends MCellImpl {
     new MCellImpl(WIDTH_ID, Width.class).setParent(this);
   }
 
-  @Reference(target = "(" + SERVICE_PID + "=" + ProcessorCell.ID + ")")
+  @Reference(target = "(" + COMPONENT_NAME + "=" + ProcessorCell.ID + ")")
   @Override
   public void setSpecialized(MCell specialized) {
     super.setSpecialized(specialized);
@@ -71,9 +71,10 @@ public class BoxFilterCell extends MCellImpl {
       setSupplemental(node, Integer.toString(entry.get().getWidth()));
 
       children
-          .<Integer>getConfiguration(WIDTH_ID)
-          .setObject(entry.get().getWidth())
-          .setUpdateFunction((i, result) -> entry.set(entry.get().withWidth(result)));
+          .addItem(
+              WIDTH_ID,
+              entry.get().getWidth(),
+              result -> entry.set(entry.get().withWidth(result)));
     }
   }
 

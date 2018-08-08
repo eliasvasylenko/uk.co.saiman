@@ -28,8 +28,8 @@
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
 import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.osgi.service.component.annotations.Component;
@@ -71,9 +71,10 @@ public class GaussianSmoothCell extends MCellImpl {
       setSupplemental(node, Double.toString(entry.get().getStandardDeviation()));
 
       children
-          .<Double>getConfiguration(STANDARD_DEVIATION_ID)
-          .setObject(entry.get().getStandardDeviation())
-          .setUpdateFunction((i, result) -> entry.set(entry.get().withStandardDeviation(result)));
+          .addItem(
+              STANDARD_DEVIATION_ID,
+              entry.get().getStandardDeviation(),
+              result -> entry.set(entry.get().withStandardDeviation(result)));
     }
   }
 

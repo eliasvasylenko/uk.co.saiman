@@ -29,18 +29,16 @@ package uk.co.saiman.msapex.experiment.treecontributions;
 
 import static java.util.stream.Collectors.toList;
 import static javafx.css.PseudoClass.getPseudoClass;
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TableService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
+import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.control.Label;
@@ -48,9 +46,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.eclipse.treeview.ActionContributor;
-import uk.co.saiman.eclipse.treeview.Contributor;
-import uk.co.saiman.eclipse.treeview.MenuContributor;
 import uk.co.saiman.eclipse.ui.ListItems;
 import uk.co.saiman.eclipse.ui.model.MCell;
 import uk.co.saiman.eclipse.ui.model.MCellImpl;
@@ -73,13 +68,10 @@ public class ExperimentNodeCell extends MCellImpl {
   private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
 
   public ExperimentNodeCell() {
-    super(ID, Contribution.class);
-  }
+    super(ID, Contribution.class, EXPERIMENT_TREE_POPUP_MENU, null);
 
-  @Reference(target = "(" + COMPONENT_NAME + "=" + ExperimentNodeCell.ID + ")")
-  public void setChild(MCell nodes) {
     MCellImpl child = new MCellImpl(CHILD_NODES_ID, null);
-    child.setSpecialized(nodes);
+    child.setSpecialized(this);
     child.setParent(this);
   }
 
@@ -91,14 +83,12 @@ public class ExperimentNodeCell extends MCellImpl {
     @Inject
     EditorService editorService;
 
-    private Contributor menuContributor;
-
     @Inject
     EPartService partService;
 
-    @PostConstruct
-    public void initialize(MenuContributor menuContributor) {
-      this.menuContributor = menuContributor.forMenu(EXPERIMENT_TREE_POPUP_MENU);
+    @Execute
+    public void execute(@Named(ENTRY_DATA) ExperimentNode<?, ?> experiment) {
+      editorService.getApplicableEditors(experiment).findFirst().map(Editor::openPart).isPresent();
     }
 
     @AboutToShow
@@ -137,26 +127,9 @@ public class ExperimentNodeCell extends MCellImpl {
           .observe(m -> m.owner().pseudoClassStateChanged(getPseudoClass(m.toString()), true));
 
       /*
-       * add popup menu
-       */
-      menuContributor.configureCell(node);
-
-      /*
-       * add editor open if applicable
-       */
-      ActionContributor action = n -> editorService
-          .getApplicableEditors(experiment)
-          .findFirst()
-          .map(Editor::openPart)
-          .isPresent();
-      action.configureCell(node);
-
-      /*
        * add children
        */
-      children
-          .getConfiguration(CHILD_NODES_ID)
-          .setObjects(experiment.getChildren().collect(toList()));
+      children.addItems(CHILD_NODES_ID, experiment.getChildren().collect(toList()));
     }
   }
 }

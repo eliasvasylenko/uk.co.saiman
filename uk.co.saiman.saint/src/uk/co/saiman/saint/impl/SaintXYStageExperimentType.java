@@ -28,7 +28,7 @@
 package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static uk.co.saiman.experiment.persistence.Accessor.stringAccessor;
+import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
 import static uk.co.saiman.measurement.Quantities.quantityFormat;
 import static uk.co.saiman.measurement.Units.metre;
 
@@ -42,8 +42,8 @@ import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.persistence.Accessor.PropertyAccessor;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
+import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.measurement.scalar.Scalar;

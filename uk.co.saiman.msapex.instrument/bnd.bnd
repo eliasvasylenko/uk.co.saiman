@@ -7,17 +7,16 @@ Bundle-Name: SAI :: MSApex :: Instrument
 	${build}/include/fugue.icons.bnd
 
 -buildpath: \
-	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
-	uk.co.saiman.eclipse.treeview;version=snapshot,\
-\
+	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
@@ -29,8 +28,7 @@ Bundle-Name: SAI :: MSApex :: Instrument
 	javax.measure.unit-api
 
 Private-Package: \
-	uk.co.saiman.msapex.instrument,\
-	uk.co.saiman.msapex.instrument.treecontributions
+	uk.co.saiman.msapex.instrument
 
 -includeresource: \
 	{always.e4xmi},\
