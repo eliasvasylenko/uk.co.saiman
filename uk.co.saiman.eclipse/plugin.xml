@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
 
-	<extension
-		id="modelContribution"
-    	point="org.eclipse.e4.workbench.model">
-
-		<fragment
-			apply="always"
-			uri="always.e4xmi" />
-    </extension>
-
 </plugin> 

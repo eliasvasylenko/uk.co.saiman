@@ -46,5 +46,5 @@ public interface AcquisitionProperties {
 
   Localized<String> noSignal();
 
-  Localized<String> noAcquisitionDevices();
+  Localized<String> noDevicesSelected();
 }

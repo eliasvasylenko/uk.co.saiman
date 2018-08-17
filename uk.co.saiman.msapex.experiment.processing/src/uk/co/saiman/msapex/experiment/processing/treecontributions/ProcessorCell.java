@@ -27,35 +27,21 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 
 import javax.inject.Named;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.propertytypes.ServiceRanking;
 
-import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.ui.model.MCell;
-import uk.co.saiman.eclipse.ui.model.MCellImpl;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.experiment.processing.Processor;
-import uk.co.saiman.experiment.processing.ProcessorFormat;
 
-@ServiceRanking(-100)
-@Component(name = ProcessorCell.ID, service = MCell.class)
-public class ProcessorCell extends MCellImpl {
+public class ProcessorCell {
   public static final String ID = "uk.co.saiman.experiment.processing.cell";
 
-  public ProcessorCell() {
-    super(ID, Contribution.class, ProcessorFormat.MEDIA_TYPE);
-  }
-
-  public class Contribution {
-    @AboutToShow
-    public void prepare(HBox node, @Named(ENTRY_DATA) Processor<?> entry) {
-      setLabel(node, entry.getId());
-      setSupplemental(node, "");
-    }
+  @AboutToShow
+  public void prepare(Cell cell, @Named(ITEM_DATA) Processor<?> entry) {
+    cell.setLabel(entry.getId());
+    // TODO cell.setSupplemental("");
   }
 }

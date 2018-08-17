@@ -28,61 +28,50 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
+import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
 import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.propertytypes.ServiceRanking;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.ui.model.MCell;
-import uk.co.saiman.eclipse.ui.model.MCellImpl;
+import uk.co.saiman.eclipse.variable.NamedVariable;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
-import uk.co.saiman.msapex.experiment.processing.treecontributions.ProcessorListCell;
-import uk.co.saiman.msapex.experiment.treecontributions.ExperimentNodeCell;
+import uk.co.saiman.property.Property;
 
-@ServiceRanking(10)
-@Component(name = SpectrumProcessingExperimentNodeCell.ID, service = MCell.class)
-public class SpectrumProcessingExperimentNodeCell extends MCellImpl {
+public class SpectrumProcessingExperimentNodeCell {
   public static final String ID = "uk.co.saiman.experiment.spectrum.cell.processing";
-  public static final String PROCESSORS_ID = ID + ".processor";
 
-  public SpectrumProcessingExperimentNodeCell() {
-    super(ID, Contribution.class);
+  @AboutToShow
+  public void prepare(
+      HBox node,
+      @Named(ITEM_DATA) ExperimentNode<?, ?> data,
+      @AdaptNamed(ITEM_DATA) SpectrumResultConfiguration state,
+      ListItems children) {
+    setLabel(node, data.getType().getName());
+    setSupplemental(node, state.getSpectrumName());
+
+    children.addItems(Processors.ID, state.getProcessing().collect(toList()));
   }
 
-  @Reference(target = "(" + COMPONENT_NAME + "=" + ExperimentNodeCell.ID + ")")
-  @Override
-  public void setSpecialized(MCell specialized) {
-    super.setSpecialized(specialized);
-  }
+  static class Processors {
+    public static final String ID = SpectrumProcessingExperimentNodeCell.ID + ".processors";
 
-  @Reference(target = "(" + COMPONENT_NAME + "=" + ProcessorListCell.ID + ")")
-  public void setChild(MCell processors) {
-    MCellImpl child = new MCellImpl(PROCESSORS_ID, null);
-    child.setSpecialized(processors);
-    child.setParent(this);
-  }
-
-  public class Contribution {
     @AboutToShow
     public void prepare(
-        HBox node,
-        @Named(ENTRY_DATA) ExperimentNode<?, ?> data,
-        @AdaptNamed(ENTRY_DATA) SpectrumResultConfiguration state,
+        @NamedVariable(ITEM_DATA) Property<List<Processor<?>>> entry,
         ListItems children) {
-      setLabel(node, data.getType().getName());
-      setSupplemental(node, state.getSpectrumName());
 
-      children.addItems(PROCESSORS_ID, state.getProcessing().collect(toList()));
+      children.addItems(ID, entry.get(), r -> entry.set(new ArrayList<>(r)));
     }
   }
 }

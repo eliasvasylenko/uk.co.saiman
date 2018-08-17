@@ -27,42 +27,20 @@
  */
 package uk.co.saiman.msapex.experiment.sample.treecontributions;
 
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.propertytypes.ServiceRanking;
 
-import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.eclipse.ui.model.MCell;
-import uk.co.saiman.eclipse.ui.model.MCellImpl;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.experiment.sample.SampleConfiguration;
-import uk.co.saiman.msapex.experiment.treecontributions.ExperimentNodeCell;
 
-@ServiceRanking(100)
-@Component(name = SampleExperimentNodeCell.ID, service = MCell.class)
-public class SampleExperimentNodeCell extends MCellImpl {
+public class SampleExperimentNodeCell {
   public static final String ID = "uk.co.saiman.experiment.sample.cell";
 
-  public SampleExperimentNodeCell() {
-    super(ID, Contribution.class);
-  }
-
-  @Reference(target = "(" + COMPONENT_NAME + "=" + ExperimentNodeCell.ID + ")")
-  @Override
-  public void setSpecialized(MCell specialized) {
-    super.setSpecialized(specialized);
-  }
-
-  public class Contribution {
-    @AboutToShow
-    public void prepare(HBox node, @AdaptNamed(ENTRY_DATA) SampleConfiguration data) {
-      setLabel(node, data.getName());
-      setSupplemental(node, data.toString());
-    }
+  @AboutToShow
+  public void prepare(Cell cell, @AdaptNamed(ITEM_DATA) SampleConfiguration data) {
+    cell.setLabel(data.getName());
+    // TODO setSupplemental(data.toString());
   }
 }

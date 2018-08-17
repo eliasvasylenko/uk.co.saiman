@@ -12,12 +12,11 @@ Bundle-Name: SAI :: Eclipse
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
-	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
-	uk.co.saiman.reflection.token;version=snapshot,\
-	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
-	org.eclipse.osgi.compatibility.state
+	org.eclipse.osgi.compatibility.state,\
+	org.eclipse.emf.common,\
+	org.eclipse.emf.ecore
 
 Bundle-Description: \
 	Classes for working with Eclipse RCP and IDE projects with JavaFX.
@@ -27,14 +26,9 @@ Export-Package: \
 	uk.co.saiman.eclipse.utilities,\
 	uk.co.saiman.eclipse.adapter,\
 	uk.co.saiman.eclipse.variable,\
-	uk.co.saiman.eclipse.localization,\
-	uk.co.saiman.eclipse.ui.model,\
-	uk.co.saiman.eclipse.service,\
-	uk.co.saiman.eclipse.ui,\
-	uk.co.saiman.eclipse.ui.fx
+	uk.co.saiman.eclipse.localization
 
 Private-Package: \
-	uk.co.saiman.eclipse.ui.fx.impl,\
 	org.eclipse.osgi.compatibility.state,\
 	org.eclipse.osgi.internal.container,\
 	org.eclipse.osgi.internal.module,\
@@ -42,7 +36,4 @@ Private-Package: \
 	org.eclipse.osgi.internal.util
 
 -includeresource: \
-	{css=css},\
-	OSGI-INF/l10n=l10n,\
-	{always.e4xmi},\
-	res
+	OSGI-INF/l10n=l10n

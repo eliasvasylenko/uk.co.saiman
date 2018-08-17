@@ -459,6 +459,11 @@ public interface Observable<M> {
     return observer -> observe(new TakeWhileObserver<>(observer, condition));
   }
 
+  default Observable<M> take(long count) {
+    AtomicLong counter = new AtomicLong(count);
+    return takeWhile(item -> counter.decrementAndGet() >= 0);
+  }
+
   /**
    * Derive an observable which completes and disposes itself after receiving a
    * message which matches the given condition.
@@ -469,6 +474,11 @@ public interface Observable<M> {
    */
   default Observable<M> dropWhile(Predicate<? super M> condition) {
     return observer -> observe(new DropWhileObserver<>(observer, condition));
+  }
+
+  default Observable<M> drop(long count) {
+    AtomicLong counter = new AtomicLong(count);
+    return dropWhile(item -> counter.decrementAndGet() >= 0);
   }
 
   default Observable<M> synchronize() {

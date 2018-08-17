@@ -118,7 +118,7 @@ public class AcquisitionPart {
 
   @FXML
   void initialize() {
-    noSelectionLabel.textProperty().bind(wrap(text.noAcquisitionDevices()));
+    noSelectionLabel.textProperty().bind(wrap(text.noDevicesSelected()));
   }
 
   private void selectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {

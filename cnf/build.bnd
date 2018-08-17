@@ -24,8 +24,8 @@ copyright = Copyright (c) ${copyright.holder.name} (2015, ${copyright.year}). Al
 -groupid:	uk.co.saiman
 -pom:		version=${versionmask;===s;${@version}}-SNAPSHOT
 
-saiman-version:					1.0.0
-saiman-version-ceiling:			2.0.0
+saiman-version:					0.0.1
+saiman-version-ceiling:			1.0.0
 Bundle-Version:					${saiman-version}.${tstamp}
 Bundle-Localization:			bundle
 
@@ -122,6 +122,12 @@ Bundle-Developers:\
 			url					=		http://download.eclipse.org/releases/photon
 #			url					=		${fileuri;${build}/eclipse.platform.target};\
 #			targetPlatform		=		true
+
+-plugin.eclipse.fx.nightly: \
+\
+		aQute.bnd.repository.p2.provider.P2Repository;\
+			name				=		"E(fx)clipse Runtime Nightly (3.3.0+)";\
+			url					=       http://download.eclipse.org/efxclipse/runtime-nightly/site/
 
 ## Run requirement groups:
 -runrequires.base:\

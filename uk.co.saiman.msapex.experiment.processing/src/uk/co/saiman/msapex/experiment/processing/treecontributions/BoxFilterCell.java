@@ -27,61 +27,42 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.ui.model.MCell;
-import uk.co.saiman.eclipse.ui.model.MCellImpl;
 import uk.co.saiman.eclipse.variable.NamedVariable;
 import uk.co.saiman.experiment.processing.BoxFilter;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.property.Property;
 
-@Component(name = BoxFilterCell.ID, service = MCell.class)
-public class BoxFilterCell extends MCellImpl {
+public class BoxFilterCell {
   public static final String ID = "uk.co.saiman.experiment.processing.cell.boxfilter";
-  public static final String WIDTH_ID = ID + ".width";
 
-  public BoxFilterCell() {
-    super(ID, Contribution.class);
+  @AboutToShow
+  public void prepare(
+      HBox node,
+      @NamedVariable(ITEM_DATA) Property<BoxFilter> entry,
+      ListItems children) {
+    // TODO setSupplemental(node, Integer.toString(entry.get().getWidth()));
 
-    new MCellImpl(WIDTH_ID, Width.class).setParent(this);
-  }
-
-  @Reference(target = "(" + COMPONENT_NAME + "=" + ProcessorCell.ID + ")")
-  @Override
-  public void setSpecialized(MCell specialized) {
-    super.setSpecialized(specialized);
-  }
-
-  public class Contribution {
-    @AboutToShow
-    public void prepare(
-        HBox node,
-        @NamedVariable(ENTRY_DATA) Property<BoxFilter> entry,
-        ListItems children) {
-      setSupplemental(node, Integer.toString(entry.get().getWidth()));
-
-      children
-          .addItem(
-              WIDTH_ID,
-              entry.get().getWidth(),
-              result -> entry.set(entry.get().withWidth(result)));
-    }
+    children
+        .addItem(
+            Width.ID,
+            entry.get().getWidth(),
+            result -> entry.set(entry.get().withWidth(result)));
   }
 
   static class Width {
+    public static final String ID = BoxFilterCell.ID + ".width";
+
     @AboutToShow
-    void prepare(HBox deviationNode, @Localize ProcessingProperties properties) {
-      setLabel(deviationNode, properties.widthLabel().get());
+    void prepare(Cell cell, @Localize ProcessingProperties properties) {
+      cell.setLabel(properties.widthLabel().get());
     }
   }
 }

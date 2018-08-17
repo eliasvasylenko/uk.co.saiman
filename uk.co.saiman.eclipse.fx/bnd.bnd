@@ -1,0 +1,36 @@
+Bundle-Name: SAI :: Eclipse
+
+-include:\
+	${build}/include/eclipse.plugin.bnd,\
+	${build}/include/eclipse.platform.bnd,\
+	${build}/include/eclipse.fx.bnd,\
+	${build}/include/fugue.icons.bnd
+
+-buildpath: \
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
+	org.eclipse.osgi.compatibility.state,\
+	org.eclipse.emf.common,\
+	org.eclipse.emf.ecore
+
+Bundle-Description: \
+	Classes for working with Eclipse RCP and IDE projects with JavaFX.
+
+Export-Package: \
+	uk.co.saiman.eclipse.service,\
+	uk.co.saiman.eclipse.ui.fx
+
+Private-Package: \
+	uk.co.saiman.eclipse.ui.fx.impl
+
+-includeresource: \
+	{css=css},\
+	{always.e4xmi},\
+	res

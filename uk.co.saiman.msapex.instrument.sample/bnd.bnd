@@ -8,6 +8,8 @@ Bundle-Name: SAI :: MSApex :: Sample
 
 -buildpath: \
 	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.eclipse.fx;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\

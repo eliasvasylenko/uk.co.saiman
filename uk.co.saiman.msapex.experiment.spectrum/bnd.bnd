@@ -16,6 +16,8 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.eclipse.fx;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
 	uk.co.saiman.data.spectrum;version=snapshot,\

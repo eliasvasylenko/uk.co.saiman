@@ -27,50 +27,28 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 
 import javax.inject.Named;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.propertytypes.ServiceRanking;
 
-import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.ui.model.MCell;
-import uk.co.saiman.eclipse.ui.model.MCellImpl;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
-import uk.co.saiman.msapex.experiment.treecontributions.ExperimentNodeCell;
 
-@ServiceRanking(10)
-@Component(name = SpectrumExperimentNodeCell.ID, service = MCell.class)
-public class SpectrumExperimentNodeCell extends MCellImpl {
+public class SpectrumExperimentNodeCell {
   public static final String ID = "uk.co.saiman.experiment.spectrum.cell";
 
-  public SpectrumExperimentNodeCell() {
-    super(ID, Contribution.class);
-  }
-
-  @Reference(target = "(" + COMPONENT_NAME + "=" + ExperimentNodeCell.ID + ")")
-  @Override
-  public void setSpecialized(MCell specialized) {
-    super.setSpecialized(specialized);
-  }
-
-  public class Contribution {
-    @AboutToShow
-    public void prepare(
-        HBox node,
-        @Named(ENTRY_DATA) ExperimentNode<?, ?> data,
-        @AdaptNamed(ENTRY_DATA) SpectrumConfiguration state,
-        ListItems children) {
-      setLabel(node, data.getType().getName());
-      setSupplemental(node, state.getSpectrumName());
-    }
+  @AboutToShow
+  public void prepare(
+      Cell cell,
+      @Named(ITEM_DATA) ExperimentNode<?, ?> data,
+      @AdaptNamed(ITEM_DATA) SpectrumConfiguration state,
+      ListItems children) {
+    cell.setLabel(data.getType().getName());
+    // TODO cell.setSupplemental(state.getSpectrumName());
   }
 }

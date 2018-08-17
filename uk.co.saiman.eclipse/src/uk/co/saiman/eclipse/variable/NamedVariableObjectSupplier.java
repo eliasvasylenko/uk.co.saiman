@@ -39,8 +39,6 @@ import org.eclipse.e4.core.di.suppliers.IObjectDescriptor;
 import org.eclipse.e4.core.di.suppliers.IRequestor;
 import org.osgi.service.component.annotations.Component;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import uk.co.saiman.eclipse.utilities.TransformingNamedObjectSupplier;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.property.IdentityProperty;
@@ -73,11 +71,6 @@ public class NamedVariableObjectSupplier extends TransformingNamedObjectSupplier
 
       if (propertyType.isAssignableFrom(Property.class)) {
         Property<Object> property = new IdentityProperty<>();
-        this.update = property::set;
-        this.propertyObject = property;
-
-      } else if (propertyType.isAssignableFrom(ObjectProperty.class)) {
-        ObjectProperty<Object> property = new SimpleObjectProperty<>();
         this.update = property::set;
         this.propertyObject = property;
 

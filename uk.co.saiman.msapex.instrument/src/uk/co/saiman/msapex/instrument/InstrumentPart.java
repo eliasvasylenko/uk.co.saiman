@@ -30,17 +30,15 @@ package uk.co.saiman.msapex.instrument;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Control;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
-import uk.co.saiman.instrument.Instrument;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -53,16 +51,13 @@ public class InstrumentPart {
 
   @FXML
   private ScrollPane instrumentTreeScrollPane;
-  private TreeView<?> instrumentTree;
-
-  @Inject
-  private Instrument instrument;
+  private Control instrumentTree;
 
   @PostConstruct
   void initialize(BorderPane container, TreeService treeService, @LocalInstance FXMLLoader loader) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    instrumentTree = treeService.createTree(InstrumentTree.ID, instrument);
+    instrumentTree = treeService.createTree(InstrumentTree.ID, instrumentTreeScrollPane);
     instrumentTreeScrollPane.setContent(instrumentTree);
   }
 }

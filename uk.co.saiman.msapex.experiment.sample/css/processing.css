@@ -1,6 +1,3 @@
-.ModularTreeCell :ProcessorContribution #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/gear-small.png");
-}
-.ModularTreeCell :ProcessorListContribution #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/gear.png");
+.ModularTreeCell :uk-co-saiman-experiment-sample-cell #text {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/flask.png");
 }

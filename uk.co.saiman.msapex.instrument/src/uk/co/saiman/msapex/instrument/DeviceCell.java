@@ -28,37 +28,27 @@
 package uk.co.saiman.msapex.instrument;
 
 import static javafx.css.PseudoClass.getPseudoClass;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
+import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 
 import javax.inject.Named;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.service.component.annotations.Component;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.ui.model.MCell;
-import uk.co.saiman.eclipse.ui.model.MCellImpl;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
 
-@Component(name = DeviceCell.ID, service = MCell.class)
-public class DeviceCell extends MCellImpl {
+public class DeviceCell {
   public static final String ID = "uk.co.saiman.instrument.cell.device";
 
-  public DeviceCell() {
-    super(ID, Contribution.class);
-  }
+  @AboutToShow
+  public void prepare(HBox node, Cell cell, @Named(ITEM_DATA) Device item) {
+    ConnectionState state = item.connectionState().get();
 
-  public static class Contribution {
-    @AboutToShow
-    public void prepare(HBox node, @Named(ENTRY_DATA) Device item) {
-      ConnectionState state = item.connectionState().get();
+    node.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
 
-      node.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
-
-      setLabel(node, item.getName());
-      setSupplemental(node, state.toString());
-    }
+    cell.setLabel(item.getName());
+    // TODO cell.setSupplemental(state.toString());
   }
 }

@@ -27,78 +27,58 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
-
-import java.util.Arrays;
+import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.ui.model.MCell;
-import uk.co.saiman.eclipse.ui.model.MCellImpl;
 import uk.co.saiman.eclipse.variable.NamedVariable;
 import uk.co.saiman.experiment.processing.Convolution;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.property.Property;
 
-@Component(name = ConvolutionCell.ID, service = MCell.class)
-public class ConvolutionCell extends MCellImpl {
+public class ConvolutionCell {
   public static final String ID = "uk.co.saiman.experiment.processing.cell.convolution";
-  public static final String VECTOR_ID = ID + ".vector";
-  public static final String CENTRE_ID = ID + ".centre";
 
-  public ConvolutionCell() {
-    super(ID, Contribution.class);
+  @AboutToShow
+  public void prepare(
+      HBox node,
+      @NamedVariable(ITEM_DATA) Property<Convolution> entry,
+      ListItems children) {
+    // TODO setSupplemental(node,
+    // Arrays.toString(entry.get().getConvolutionVector()));
 
-    new MCellImpl(VECTOR_ID, Vector.class).setParent(this);
-    new MCellImpl(CENTRE_ID, Centre.class).setParent(this);
-  }
+    children
+        .addItem(
+            Vector.ID,
+            entry.get().getConvolutionVector(),
+            result -> entry.set(entry.get().withConvolutionVector(result)));
 
-  @Reference(target = "(" + COMPONENT_NAME + "=" + ProcessorCell.ID + ")")
-  @Override
-  public void setSpecialized(MCell specialized) {
-    super.setSpecialized(specialized);
-  }
-
-  public class Contribution {
-    @AboutToShow
-    public void prepare(
-        HBox node,
-        @NamedVariable(ENTRY_DATA) Property<Convolution> entry,
-        ListItems children) {
-      setSupplemental(node, Arrays.toString(entry.get().getConvolutionVector()));
-
-      children
-          .addItem(
-              VECTOR_ID,
-              entry.get().getConvolutionVector(),
-              result -> entry.set(entry.get().withConvolutionVector(result)));
-
-      children
-          .addItem(
-              CENTRE_ID,
-              entry.get().getConvolutionVectorCentre(),
-              result -> entry.set(entry.get().withConvolutionVectorCentre(result)));
-    }
+    children
+        .addItem(
+            Centre.ID,
+            entry.get().getConvolutionVectorCentre(),
+            result -> entry.set(entry.get().withConvolutionVectorCentre(result)));
   }
 
   static class Vector {
+    public static final String ID = ConvolutionCell.ID + ".convolution";
+
     @AboutToShow
-    public void prepare(HBox vectorNode, @Localize ProcessingProperties properties) {
-      setLabel(vectorNode, properties.vectorLabel().get());
+    public void prepare(Cell cell, @Localize ProcessingProperties properties) {
+      cell.setLabel(properties.vectorLabel().get());
     }
   }
 
   static class Centre {
+    public static final String ID = ConvolutionCell.ID + ".centre";
+
     @AboutToShow
-    public void prepare(HBox vectorNode, @Localize ProcessingProperties properties) {
-      setLabel(vectorNode, properties.centreLabel().get());
+    public void prepare(Cell cell, @Localize ProcessingProperties properties) {
+      cell.setLabel(properties.centreLabel().get());
     }
   }
 }

@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1534252140425
+Bundle-Copyright: Copyright (c) Scientific Analysis Instruments Limite
+ d (2015, 2018). All Rights Reserved.
+Bundle-Description: Common Java utilities for SAI projects, including 
+ generic pseudo-enums, fast, in-memory caches, tuples, functional help
+ ers, and more.
+Bundle-Developers: eliasvasylenko;email = eliasvasylenko@gmail.com; na
+ me = "Elias N Vasylenko"; organization = "Scientific Analysis Instrum
+ ents Limited"; organizationUrl = http://www.saiman.co.uk; roles = "ar
+ chitect,developer"
+Bundle-DocURL: https://github.com/Scientific-Analysis-Instruments/uk.c
+ o.saiman/wiki
+Bundle-License: GPL; link = http://www.gnu.org/licenses/
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: SAI :: Utilities
+Bundle-SCM: url = https://github.com/Scientific-Analysis-Instruments/u
+ k.co.saiman, connection = scm:git:https://github.com/Scientific-Analy
+ sis-Instruments/uk.co.saiman.git, developerConnection = scm:git:git@g
+ ithub.com:Scientific-Analysis-Instruments/uk.co.saiman.git
+Bundle-SymbolicName: uk.co.saiman.utilities
+Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saim
+ an.co.uk/
+Bundle-Version: 1.0.0.201808141309
+Created-By: 1.8.0_162 (Oracle Corporation)
+Export-Package: uk.co.saiman.flowcontrol;version="1.0.0",uk.co.saiman.
+ function;version="1.0.0",uk.co.saiman.log;version="1.0.0",uk.co.saima
+ n.reflection.classloading;version="1.0.0",uk.co.saiman.utility;versio
+ n="1.0.0",uk.co.saiman.property;version="1.0.0"
+Git-Descriptor: 65881614-dirty
+Git-SHA: 658816144933ba86d31521380bac59e7df2047b8
+Import-Package: uk.co.saiman.property
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Tool: Bnd-4.1.0.201808140636-SNAPSHOT
+

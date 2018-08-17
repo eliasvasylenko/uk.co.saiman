@@ -36,8 +36,8 @@ import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Control;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.eclipse.localization.Localize;
@@ -53,7 +53,7 @@ public class SpectrumProcessingEditorPart {
 
   @FXML
   private ScrollPane processingTreeScrollPane;
-  private TreeView<?> processingTree;
+  private Control processingTree;
 
   @Inject
   SpectrumProcessingEditorPart(
@@ -63,8 +63,10 @@ public class SpectrumProcessingEditorPart {
       ExperimentNode<? extends SpectrumResultConfiguration, Spectrum> result) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    processingTree = treeService
-        .createTree(ProcessingTree.ID, result.getState().getProcessing().collect(toList()));
+    // TODO add to context
+    result.getState().getProcessing().collect(toList());
+
+    processingTree = treeService.createTree(ProcessingTree.ID, processingTreeScrollPane);
     processingTreeScrollPane.setContent(processingTree);
   }
 }

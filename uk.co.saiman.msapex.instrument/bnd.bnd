@@ -17,6 +17,8 @@ Bundle-Name: SAI :: MSApex :: Instrument
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.eclipse.fx;version=snapshot,\
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\

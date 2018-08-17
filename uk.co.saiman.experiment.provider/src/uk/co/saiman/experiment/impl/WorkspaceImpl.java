@@ -82,7 +82,8 @@ public class WorkspaceImpl implements Workspace {
    * TODO Replace with constructor injection with R7
    */
   public WorkspaceImpl() {
-    this.experimentRootType = new ExperimentRootImpl(text);
+    this.experimentRootType = new ExperimentRootImpl(
+        getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
   }
 
   /**
