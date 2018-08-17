@@ -25,5 +25,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Some kind of test
+ */
 @org.osgi.annotation.versioning.Version("1.0.0")
 package uk.co.saiman.observable;

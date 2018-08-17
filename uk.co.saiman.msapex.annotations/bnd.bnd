@@ -25,5 +25,4 @@ Bundle-Name: SAI :: MSApex :: Annotations
 Export-Package: uk.co.saiman.msapex.annotations
 
 -includeresource: \
-	res,\
 	{css=css}

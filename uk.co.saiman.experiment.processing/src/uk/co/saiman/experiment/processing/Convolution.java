@@ -61,9 +61,9 @@ public class Convolution implements Processor<Convolution> {
 
   public Convolution(StateMap state) {
     this.state = state
-        .withDefault(VECTOR, new double[] { 1 })
-        .withDefault(CENTRE, 0)
-        .withDefault(EXTEND, true);
+        .withDefault(VECTOR, () -> new double[] { 1 })
+        .withDefault(CENTRE, () -> 0)
+        .withDefault(EXTEND, () -> true);
   }
 
   @Override
@@ -102,7 +102,7 @@ public class Convolution implements Processor<Convolution> {
   }
 
   public Convolution withDomainExtended(boolean extend) {
-    return withState(state.withDefault(EXTEND, extend));
+    return withState(state.withDefault(EXTEND, () -> extend));
   }
 
   public boolean isDomainExtended() {

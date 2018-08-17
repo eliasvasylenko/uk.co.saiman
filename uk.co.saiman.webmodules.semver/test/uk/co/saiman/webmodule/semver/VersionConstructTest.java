@@ -30,8 +30,6 @@ package uk.co.saiman.webmodule.semver;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uk.co.saiman.webmodule.semver.Version;
-
 public class VersionConstructTest {
   @Test
   public void constructAllZeroRelease() {

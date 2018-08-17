@@ -32,9 +32,6 @@ import org.junit.Test;
 
 import mockit.Expectations;
 import mockit.Injectable;
-import uk.co.saiman.webmodule.semver.Operator;
-import uk.co.saiman.webmodule.semver.PrimitiveComparator;
-import uk.co.saiman.webmodule.semver.Version;
 
 public class PrimitiveComparatorTest {
   @Test

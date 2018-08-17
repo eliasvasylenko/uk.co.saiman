@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.webconsole;
 
-import static uk.co.saiman.webconsole.SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_NAME;
-import static uk.co.saiman.webconsole.SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION;
 import static uk.co.saiman.webmodule.WebModuleConstants.DEFAULT_ENTRY_POINT;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.DEFAULT_RESOURCE_ROOT;
@@ -54,8 +52,8 @@ import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
 @RequireReactReduxWebModule
 @SuppressWarnings("javadoc")
 @ProvideWebModule(
-    id = SAI_WEB_CONSOLE_WEB_MODULE_NAME,
-    version = SAI_WEB_CONSOLE_WEB_MODULE_VERSION,
+    id = SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_NAME,
+    version = SaiWebConsoleConstants.SAI_WEB_CONSOLE_WEB_MODULE_VERSION,
     resourceRoot = DEFAULT_RESOURCE_ROOT,
     entryPoint = DEFAULT_ENTRY_POINT,
     format = ESM)

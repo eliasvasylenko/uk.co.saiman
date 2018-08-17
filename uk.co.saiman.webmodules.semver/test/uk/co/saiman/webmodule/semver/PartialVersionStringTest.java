@@ -30,12 +30,16 @@ package uk.co.saiman.webmodule.semver;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uk.co.saiman.webmodule.semver.PartialVersion;
-
 public class PartialVersionStringTest {
-  @Test(expected = IllegalArgumentException.class)
   public void parseEmptyString() {
-    new PartialVersion("");
+    String string = "";
+    PartialVersion version = new PartialVersion(string);
+
+    Assert.assertFalse(version.getMajor().isPresent());
+    Assert.assertFalse(version.getMinor().isPresent());
+    Assert.assertFalse(version.getMicro().isPresent());
+
+    Assert.assertEquals("*", version.toString());
   }
 
   @Test(expected = IllegalArgumentException.class)

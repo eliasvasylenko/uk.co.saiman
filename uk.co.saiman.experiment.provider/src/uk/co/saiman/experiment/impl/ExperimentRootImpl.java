@@ -59,7 +59,7 @@ public class ExperimentRootImpl implements ExperimentRoot {
   @Override
   public ExperimentConfiguration createState(
       ConfigurationContext<ExperimentConfiguration> configuration) {
-    configuration.state().withDefault(NOTES, "");
+    configuration.state().withDefault(NOTES, () -> "");
 
     return new ExperimentConfiguration() {
 

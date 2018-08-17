@@ -62,10 +62,6 @@ public class StateMap implements State {
     return new StateMap(entries);
   }
 
-  public StateMap withDefault(String id, State value) {
-    return withDefault(id, () -> value);
-  }
-
   public StateMap withDefault(String id, Supplier<? extends State> value) {
     if (entries.containsKey(id)) {
       return this;
@@ -91,10 +87,6 @@ public class StateMap implements State {
 
   public <T> StateMap with(Accessor<T, ?> accessor, T value) {
     return with(accessor.id(), accessor.write(value));
-  }
-
-  public <T> StateMap withDefault(Accessor<T, ?> accessor, T value) {
-    return withDefault(accessor, (Supplier<T>) () -> value);
   }
 
   public <T> StateMap withDefault(Accessor<T, ?> accessor, Supplier<? extends T> value) {
