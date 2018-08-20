@@ -1,6 +1,0 @@
-Bundle-Name: SAI :: CommonJS :: Repository
-
-Bundle-Description: \
-	Provides Java API for generating and resolving OSGi repository resources from CommonJS registries
-
-Private-Package: uk.co.saiman.webmodule.commonjs.repository

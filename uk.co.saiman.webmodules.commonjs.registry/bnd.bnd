@@ -1,0 +1,15 @@
+Bundle-Name: SAI :: CommonJS :: Registry :: API
+
+Bundle-Description: \
+	Provides Java API for interacting with CommonsJS registries
+
+Export-Package: \
+	uk.co.saiman.webmodule.commonjs.registry,\
+	uk.co.saiman.webmodule.commonjs.registry.cache
+
+-buildpath: \
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.webmodules.semver;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot

@@ -1,0 +1,48 @@
+Bundle-Name: SAI :: CommonJS :: Bnd Repository Plugin
+
+Bundle-Description: \
+	Provides Bnd repository implementation for CommonJS repositories
+
+Private-Package: \
+	org.apache.commons.compress.utils,\
+	org.apache.commons.compress.archivers,\
+	org.apache.commons.compress.compressors,\
+	org.apache.commons.compress.archivers.tar,\
+	org.apache.commons.compress.archivers.zip,\
+	org.apache.commons.compress.compressors.gzip,\
+	org.json,\
+	net.bytebuddy.*,\
+	org.osgi.annotation.bundle;-split-package:=first,\
+	org.osgi.util.converter;-split-package:=first,\
+	uk.co.saiman.log,\
+	uk.co.saiman.text,\
+	uk.co.saiman.function,\
+	uk.co.saiman.bytes,\
+	uk.co.saiman.webmodule,\
+	uk.co.saiman.webmodule.extender,\
+	uk.co.saiman.webmodule.semver,\
+	uk.co.saiman.webmodule.commonjs.registry,\
+	uk.co.saiman.webmodule.commonjs.registry.cache,\
+	uk.co.saiman.webmodule.commonjs.registry.impl,\
+	uk.co.saiman.webmodule.commonjs.repository,\
+	uk.co.saiman.webmodule.commonjs.repository.bnd
+
+-buildpath: \
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.webmodules;version=snapshot,\
+	uk.co.saiman.webmodules.semver;version=snapshot,\
+	uk.co.saiman.webmodules.commonjs.registry;version=snapshot,\
+	uk.co.saiman.webmodules.commonjs.registry.provider;version=snapshot,\
+	uk.co.saiman.webmodules.commonjs.repository;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	biz.aQute.bndlib;version=latest,\
+	biz.aQute.repository;version=latest,\
+	json;version=latest,\
+	org.apache.commons.compress;version=latest,\
+	net.bytebuddy.byte-buddy;version=latest
+
+-dsannotations:
+Require-Capability: \
+	osgi.compile.time.only;\
+		filter:="(&(must.not.resolve=*)(!(must.not.resolve=*)))"
