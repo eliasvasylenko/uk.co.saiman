@@ -27,9 +27,15 @@
  */
 package uk.co.saiman.webmodule.semver;
 
-import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static org.osgi.framework.Constants.VERSION_ATTRIBUTE;
+import static uk.co.saiman.webmodule.semver.Operator.EQUAL;
+import static uk.co.saiman.webmodule.semver.Operator.GREATER_THAN;
+import static uk.co.saiman.webmodule.semver.Operator.GREATER_THAN_OR_EQUAL;
+import static uk.co.saiman.webmodule.semver.Operator.LESS_THAN;
+import static uk.co.saiman.webmodule.semver.Operator.LESS_THAN_OR_EQUAL;
+
+import java.util.stream.Stream;
 
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
@@ -42,16 +48,17 @@ public class PrimitiveComparator {
   public static PrimitiveComparator parse(String comparatorString) {
     requireNonNull(comparatorString);
 
-    Operator operator = stream(Operator.values())
+    // we do them in this order so we don't match e.g. ">" when we see a ">=".
+    Operator operator = Stream
+        .of(GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL, GREATER_THAN, LESS_THAN, EQUAL)
         .filter(o -> comparatorString.startsWith(o.getSymbol()))
         .findAny()
         .orElseThrow(
             () -> new IllegalArgumentException(
                 "invalid primitive comparator \"" + comparatorString + "\": invalid format"));
 
-    String versionString = comparatorString.substring(operator.getSymbol().length());
-
-    Version version = Version.parse(versionString);
+    Version version = Version
+        .parse(comparatorString.substring(operator.getSymbol().length()).trim());
 
     return new PrimitiveComparator(operator, version);
   }

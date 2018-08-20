@@ -47,7 +47,7 @@ public class ComparatorSet {
 
   public static ComparatorSet parse(String comparatorSetString) {
     return new ComparatorSet(
-        stream(comparatorSetString.trim().split("(?!\\s+-\\s+)\\s+"))
+        stream(comparatorSetString.trim().split("(?!\\s+-\\s+)(?<!=)(?<!>)(?<!<)\\s+"))
             .map(AdvancedComparator::parse)
             .collect(toList()));
   }
