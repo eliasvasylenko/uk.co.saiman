@@ -57,10 +57,29 @@ public class PrimitiveComparator {
             () -> new IllegalArgumentException(
                 "invalid primitive comparator \"" + comparatorString + "\": invalid format"));
 
-    Version version = Version
-        .parse(comparatorString.substring(operator.getSymbol().length()).trim());
+    String versionString = comparatorString.substring(operator.getSymbol().length()).trim();
 
-    return new PrimitiveComparator(operator, version);
+    PartialVersion partialVersion = new PartialVersion(versionString);
+
+    Version version;
+    if (partialVersion.getMicro().isPresent()) {
+      version = Version.parse(versionString);
+      return new PrimitiveComparator(operator, version);
+    }
+
+    switch (operator) {
+    case GREATER_THAN_OR_EQUAL:
+      return partialVersion.getLowerBound();
+    case GREATER_THAN:
+      return partialVersion.getLowerBoundExclusive().get();
+    case LESS_THAN_OR_EQUAL:
+      return partialVersion.getUpperBound().get();
+    case LESS_THAN:
+      return partialVersion.getUpperBoundExclusive();
+    default:
+      throw new IllegalArgumentException(
+          "invalid version \"" + versionString + "\": invalid format");
+    }
   }
 
   public PrimitiveComparator(Operator operator, Version version) {

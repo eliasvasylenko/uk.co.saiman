@@ -28,6 +28,7 @@
 package uk.co.saiman.webmodule.semver;
 
 import static java.util.Objects.requireNonNull;
+import static uk.co.saiman.webmodule.semver.Operator.GREATER_THAN;
 import static uk.co.saiman.webmodule.semver.Operator.GREATER_THAN_OR_EQUAL;
 import static uk.co.saiman.webmodule.semver.Operator.LESS_THAN;
 import static uk.co.saiman.webmodule.semver.Operator.LESS_THAN_OR_EQUAL;
@@ -161,6 +162,22 @@ public class PartialVersion {
   }
 
   public PrimitiveComparator getLowerBound() {
+    return getBottomBound(false);
+  }
+
+  public Optional<PrimitiveComparator> getLowerBoundExclusive() {
+    return getTopBound(false);
+  }
+
+  public Optional<PrimitiveComparator> getUpperBound() {
+    return getTopBound(true);
+  }
+
+  public PrimitiveComparator getUpperBoundExclusive() {
+    return getBottomBound(true);
+  }
+
+  private PrimitiveComparator getBottomBound(boolean upper) {
     Version lowerBound = new Version(
         getMajor().orElse(0),
         getMinor().orElse(0),
@@ -170,20 +187,28 @@ public class PartialVersion {
       lowerBound = lowerBound.withPreRelease(preRelease);
     }
 
-    return new PrimitiveComparator(GREATER_THAN_OR_EQUAL, lowerBound);
+    return new PrimitiveComparator(upper ? LESS_THAN : GREATER_THAN_OR_EQUAL, lowerBound);
   }
 
-  public Optional<PrimitiveComparator> getUpperBound() {
+  private Optional<PrimitiveComparator> getTopBound(boolean upper) {
     if (!getMajor().isPresent()) {
       return Optional.empty();
     }
 
     if (!getMinor().isPresent()) {
-      return Optional.of(new PrimitiveComparator(LESS_THAN, new Version(major + 1, 0, 0)));
+      return Optional
+          .of(
+              new PrimitiveComparator(
+                  upper ? LESS_THAN : GREATER_THAN_OR_EQUAL,
+                  new Version(major + 1, 0, 0)));
     }
 
     if (!getMicro().isPresent()) {
-      return Optional.of(new PrimitiveComparator(LESS_THAN, new Version(major, minor + 1, 0)));
+      return Optional
+          .of(
+              new PrimitiveComparator(
+                  upper ? LESS_THAN : GREATER_THAN_OR_EQUAL,
+                  new Version(major, minor + 1, 0)));
     }
 
     Version upperBound = new Version(major, minor, micro);
@@ -192,7 +217,8 @@ public class PartialVersion {
       upperBound = upperBound.withPreRelease(preRelease);
     }
 
-    return Optional.of(new PrimitiveComparator(LESS_THAN_OR_EQUAL, upperBound));
+    return Optional
+        .of(new PrimitiveComparator(upper ? LESS_THAN_OR_EQUAL : GREATER_THAN, upperBound));
   }
 
   @Override
