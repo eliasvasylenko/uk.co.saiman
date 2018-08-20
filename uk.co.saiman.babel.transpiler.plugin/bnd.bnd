@@ -8,9 +8,6 @@ Bundle-Name: SAI :: Babel :: Transpiler :: Plugin
 	@${repo;uk.co.saiman.babel.transpiler;snapshot}!/static/*,\
 	@${repo;uk.co.saiman.babel.transpiler;snapshot}!/uk/co/saiman/babel/transpiler/*
 
-Import-Package: \
-	*
-
 Export-Package: \
 	jdk.nashorn.api.scripting
 

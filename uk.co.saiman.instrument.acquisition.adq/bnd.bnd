@@ -33,9 +33,9 @@ Bundle-NativeCode:\
 		osname=linux
 
 no:\
-	win32-x86/libadq.so;\
+	win32-x86/libadq.dll;\
 		processor=x86;\
-		osname=linux,\
-	win32-x86-64/libadq.so;\
+		osname=windows,\
+	win32-x86-64/libadq.dll;\
 		processor=x86_64;\
-		osname=linux \
+		osname=windows \
