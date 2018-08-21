@@ -19,7 +19,7 @@
 
 			<property
 				name="cssTheme"
-				value="theme.default" />
+				value="theme.msapex" />
 		</product>
 	</extension>
 

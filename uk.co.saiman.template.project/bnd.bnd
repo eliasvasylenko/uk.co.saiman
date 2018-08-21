@@ -19,10 +19,10 @@ saiman.project.template:\
 Provide-Capability: \
 	${foreach;\
 		saiman.project.template;\
-			api			\\;		API Project;\
-			provider	\\;		Implementation Project;\
-			split		\\;		Split Project;\
-			msapex		\\;		MSApex Project}
+			api\\;API Project;\
+			provider\\;Implementation Project;\
+			split\\;Split Project;\
+			msapex\\;MSApex Project}
 
 saiman.project.resources:\
 	{${1}/=res/${1}},\

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,32 +27,17 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.instrument.stage.XYStageDevice;
+import uk.co.saiman.instrument.stage.XYStage;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
 /**
  * A simple Cartesian coordinate stage configuration.
  * 
  * @author Elias N Vasylenko
  */
-public interface XYStageConfiguration extends SampleConfiguration {
-	Quantity<Length> getMinimumX();
-
-	Quantity<Length> getMaximumX();
-
-	Quantity<Length> getMinimumY();
-
-	Quantity<Length> getMaximumY();
-
-	Quantity<Length> getX();
-
-	void setX(Quantity<Length> offset);
-
-	Quantity<Length> getY();
-
-	void setY(Quantity<Length> offset);
-
-	XYStageDevice stageDevice();
+public interface XYStageConfiguration extends StageConfiguration<XYCoordinate<Length>> {
+  @Override
+  XYStage stageDevice();
 }

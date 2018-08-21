@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -30,19 +30,19 @@ package uk.co.saiman.simulation.instrument;
 import java.util.Map;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDeviceImpl;
+import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice;
 
 /**
- * A description of a simulated physical sample, which can be turned into a
- * simulated acquisition signal by way of a {@link DetectorSimulation} and an
- * {@link SimulatedAcquisitionDeviceImpl}.
+ * A description of a physical, chemical sample, which can be turned into a
+ * simulated acquisition signal by way of a {@link DetectorSimulationService} and an
+ * {@link SimulatedAcquisitionDevice}.
  * 
  * @author Elias N Vasylenko
  */
 public interface SimulatedSample {
-	/**
-	 * @return a mapping from chemicals which constitute the sample to their
-	 *         intensities
-	 */
-	Map<ChemicalComposition, Double> chemicalIntensities();
+  /**
+   * @return a mapping from chemicals which constitute the sample to their
+   *         intensities
+   */
+  Map<ChemicalComposition, Double> chemicalIntensities();
 }

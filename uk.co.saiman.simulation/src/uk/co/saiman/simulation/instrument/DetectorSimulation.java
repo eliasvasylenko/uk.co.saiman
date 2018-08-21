@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,12 +27,10 @@
  */
 package uk.co.saiman.simulation.instrument;
 
-import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
+import uk.co.saiman.data.function.SampledContinuousFunction;
 
 /**
  * A simulation of a signal function derived from a given resolution, depth, and
@@ -41,10 +39,5 @@ import uk.co.saiman.data.SampledDomain;
  * @author Elias N Vasylenko
  */
 public interface DetectorSimulation {
-	String getId();
-
-	SampledContinuousFunction<Time, Dimensionless> acquire(
-			SampledDomain<Time> domain,
-			Unit<Dimensionless> intensityUnits,
-			SimulatedSample nextSample);
+  SampledContinuousFunction<Time, Dimensionless> acquire();
 }

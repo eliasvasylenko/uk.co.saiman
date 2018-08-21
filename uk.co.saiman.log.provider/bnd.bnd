@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: OSGi Utilities :: Provider
+Bundle-Description: \
+	Logging utilities for OSGi systems.
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot
+
+Private-Package: \
+	uk.co.saiman.log.provider
+
+# TODO this is nonsense, a workaround for some e(fx)clipse bundles with broken imports
+Export-Package: \
+	org.osgi.service.component.annotations;version=1.4.0
+

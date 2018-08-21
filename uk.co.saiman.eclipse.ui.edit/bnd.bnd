@@ -1,0 +1,36 @@
+Bundle-Name: SAI :: Eclipse :: Edit
+Bundle-Description: \
+	Editors for Eclipse E4 model components
+
+-include:\
+	${build}/include/eclipse.plugin.bnd,\
+	${build}/include/eclipse.platform.bnd,\
+	${build}/include/eclipse.fx.bnd,\
+	${build}/include/fugue.icons.bnd
+
+-buildpath: \
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
+	org.eclipse.emf.common,\
+	org.eclipse.emf.ecore,\
+	org.eclipse.emf.edit
+
+Export-Package: \
+	uk.co.saiman.eclipse.model.ui.provider
+
+-includeresource: \
+	OSGI-INF/l10n/bundle.properties=plugin.properties,\
+	plugin.xml,\
+	icons=icons
+
+# entries below copied from PDE generated manifest
+Require-Bundle:\
+	org.eclipse.core.runtime,\
+	uk.co.saiman.eclipse.ui;visibility:=reexport,\
+	org.eclipse.emf.edit;visibility:=reexport,\
+	org.eclipse.e4.ui.model.workbench;visibility:=reexport
+Bundle-Activator: uk.co.saiman.eclipse.model.ui.provider.UISaimanEditPlugin$Implementation
+ 

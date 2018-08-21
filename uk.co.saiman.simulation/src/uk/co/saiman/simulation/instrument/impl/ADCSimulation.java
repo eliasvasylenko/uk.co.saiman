@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,59 +27,76 @@
  */
 package uk.co.saiman.simulation.instrument.impl;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+
 import java.util.Random;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.data.ArraySampledContinuousFunction;
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
+import uk.co.saiman.acquisition.AcquisitionBufferPool;
+import uk.co.saiman.data.function.SampledDomain;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
-import uk.co.saiman.simulation.instrument.SimulatedSample;
+import uk.co.saiman.simulation.instrument.DetectorSimulationService;
+import uk.co.saiman.simulation.instrument.SimulatedSampleSource;
+import uk.co.saiman.simulation.instrument.impl.ADCSimulation.ADCSimulationConfiguration;
 
 /**
  * A simulation of an acquisition data signal from an ADC.
  * 
  * @author Elias N Vasylenko
  */
-@Designate(ocd = ADCSimulationConfiguration.class)
-@Component(configurationPid = ADCSimulation.CONFIGURATION_PID)
-public class ADCSimulation implements DetectorSimulation {
-	static final String CONFIGURATION_PID = "uk.co.saiman.simulation.adc";
+@Designate(ocd = ADCSimulationConfiguration.class, factory = true)
+@Component(configurationPid = ADCSimulation.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+public class ADCSimulation implements DetectorSimulationService {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "ADC Simulation Configuration",
+      description = "The ADC simulation provides an implementation of a detector interface simulating an analogue-to-digital converter")
+  public @interface ADCSimulationConfiguration {
+    @AttributeDefinition(name = "SNR", description = "Set the simulated signal-to-noise-ratio")
+    double signalToNoiseRatio() default 0.95;
+  }
 
-	private double[] intensities = new double[0];
+  static final String CONFIGURATION_PID = "uk.co.saiman.simulation.adc";
 
-	private final Random random = new Random();
+  @Reference
+  private SimulatedSampleSource sampleSource;
 
-	@Override
-	public String getId() {
-		return CONFIGURATION_PID;
-	}
+  private double signalToNoise;
 
-	@Override
-	public SampledContinuousFunction<Time, Dimensionless> acquire(
-			SampledDomain<Time> domain,
-			Unit<Dimensionless> intensityUnits,
-			SimulatedSample nextSample) {
-		if (this.intensities.length != domain.getDepth()) {
-			intensities = new double[domain.getDepth()];
-		}
+  private final Random random = new Random();
 
-		double[] intensities = this.intensities;
+  @Activate
+  @Modified
+  void configure(ADCSimulationConfiguration configuration) {
+    signalToNoise = configuration.signalToNoiseRatio();
+  }
 
-		double scale = 0;
-		double scaleDelta = 1d / domain.getDepth();
+  @Override
+  public DetectorSimulation getDetectorSimulation(
+      SampledDomain<Time> domain,
+      Unit<Dimensionless> intensityUnits) {
+    AcquisitionBufferPool bufferPool = new AcquisitionBufferPool(domain, intensityUnits);
 
-		for (int j = 0; j < intensities.length; j++) {
-			scale += scaleDelta;
-			intensities[j] = 0.01 + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
-		}
+    return () -> bufferPool.fillNextBuffer(intensities -> {
+      double scale = 0;
+      double scaleDelta = 1d / domain.getDepth();
 
-		return new ArraySampledContinuousFunction<>(domain, intensityUnits, intensities);
-	}
+      for (int j = 0; j < intensities.length; j++) {
+        scale += scaleDelta;
+        intensities[j] = 0.01
+            + scale * (1 - scale + random.nextDouble() * Math.max(0, (int) (scale * 20) % 4 - 1));
+      }
+    });
+  }
 }

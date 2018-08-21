@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,18 +27,16 @@
  */
 package uk.co.saiman.acquisition;
 
-import java.util.Optional;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.data.RegularSampledDomain;
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.strangeskies.observable.Observable;
+import uk.co.saiman.data.function.RegularSampledDomain;
+import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.instrument.Device;
+import uk.co.saiman.observable.Observable;
 
 /**
  * Software module for acquisition of {@link SampledContinuousFunction} data
@@ -47,152 +45,149 @@ import uk.co.strangeskies.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface AcquisitionDevice extends HardwareDevice {
-	/**
-	 * Begin an acquisition experiment with the current configuration, and wait
-	 * until it is complete.
-	 * 
-	 * @throws IllegalStateException
-	 *           if acquisition is already in progress
-	 */
-	void startAcquisition();
+public interface AcquisitionDevice extends Device {
+  /**
+   * Begin an acquisition experiment with the current configuration.
+   * 
+   * @throws IllegalStateException
+   *           if acquisition is already in progress
+   */
+  void startAcquisition();
 
-	/**
-	 * Stop any acquisition experiment that may be in progress.
-	 */
-	void stopAcquisition();
+  /**
+   * Stop any acquisition experiment that may be in progress.
+   */
+  void stopAcquisition();
 
-	@Override
-	default void abortOperation() {
-		stopAcquisition();
-	}
+  /**
+   * @return true if the module is currently in acquisition, false otherwise
+   */
+  boolean isAcquiring();
 
-	/**
-	 * @return true if the module is currently in acquisition, false otherwise
-	 */
-	boolean isAcquiring();
+  /**
+   * @return the units of measurement of sample intensities
+   */
+  Unit<Dimensionless> getSampleIntensityUnits();
 
-	/**
-	 * @return the units of measurement of sample intensities
-	 */
-	Unit<Dimensionless> getSampleIntensityUnits();
+  /**
+   * @return the units of measurement of sample times
+   */
+  Unit<Time> getSampleTimeUnits();
 
-	/**
-	 * @return the units of measurement of sample times
-	 */
-	Unit<Time> getSampleTimeUnits();
+  /**
+   * @return The last acquired acquisition data. This leaves the format of the
+   *         acquired data to the discretion of the implementing hardware
+   *         module.
+   */
+  SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData();
 
-	/**
-	 * @return The last acquired acquisition data. This leaves the format of the
-	 *         acquired data to the discretion of the implementing hardware
-	 *         module.
-	 */
-	SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData();
+  /**
+   * Add or remove data event observers.
+   * <p>
+   * The observers may be triggered with data events that happen outside the
+   * scope of an actual acquisition experiment, in the case of an "always on"
+   * instrument setup. In this case, the {@link #isAcquiring()} method will
+   * indicate whether the event is related to an experiment if invoked by a
+   * listener to a data event.
+   * 
+   * @return an observable interface for registering data event listeners
+   */
+  Observable<SampledContinuousFunction<Time, Dimensionless>> dataEvents();
 
-	/**
-	 * Add or remove data event observers.
-	 * <p>
-	 * The observers may be triggered with data events that happen outside the
-	 * scope of an actual acquisition experiment, in the case of an "always on"
-	 * instrument setup. In this case, the {@link #isAcquiring()} method will
-	 * indicate whether the event is related to an experiment if invoked by a
-	 * listener to a data event.
-	 * 
-	 * @return an observable interface for registering data event listeners
-	 */
-	Observable<SampledContinuousFunction<Time, Dimensionless>> dataEvents();
+  /**
+   * Add or remove acquisition data event observers.
+   * <p>
+   * This method operates as {@link #dataEvents()} except that the observation
+   * does not begin until the next acquisition is in progress, and does not end
+   * until that acquisition is complete.
+   * 
+   * @return an observable interface for registering data event listeners
+   */
+  default Observable<SampledContinuousFunction<Time, Dimensionless>> acquisitionDataEvents() {
+    return dataEvents().dropWhile(m -> !isAcquiring()).takeWhile(m -> isAcquiring());
+  }
 
-	/**
-	 * Listener for experiment start events.
-	 * <p>
-	 * During listener invocation for a start event, the device state is
-	 * guaranteed to reflect the configuration of the starting experiment, e.g.
-	 * {@link #getAcquisitionCount()}, {@link #getSampleDepth()}, etc.
-	 * 
-	 * @return an observable interface for registering start event listeners
-	 */
-	Observable<AcquisitionDevice> startEvents();
+  /**
+   * Set the total acquisition count for a single experiment.
+   * 
+   * @param count
+   *          the number of continua to acquire for a single experiment
+   */
+  void setAcquisitionCount(int count);
 
-	Observable<Optional<AcquisitionException>> endEvents();
+  /**
+   * Get the total acquisition count for a single experiment.
+   * 
+   * @return the number of continua to acquire for a single experiment
+   */
+  int getAcquisitionCount();
 
-	@Override
-	Observable<AcquisitionException> errors();
+  /**
+   * Get the time resolution between each sample in the acquired sampled
+   * continuous function. Unless otherwise specified by a subclass this may be
+   * considered to be a constant.
+   * 
+   * @return the sample resolution in milliseconds
+   */
+  Quantity<Time> getSampleResolution();
 
-	/**
-	 * Set the total acquisition count for a single experiment.
-	 * 
-	 * @param count
-	 *          the number of continua to acquire for a single experiment
-	 */
-	void setAcquisitionCount(int count);
+  /**
+   * Get the sample frequency in the acquired sampled continuous function.
+   * Unless otherwise specified by a subclass this may be considered to be a
+   * constant.
+   * 
+   * @return the sample frequency
+   */
+  Quantity<Frequency> getSampleFrequency();
 
-	/**
-	 * Get the total acquisition count for a single experiment.
-	 * 
-	 * @return the number of continua to acquire for a single experiment
-	 */
-	int getAcquisitionCount();
+  /**
+   * Set the active sampling duration for a single data acquisition event. This
+   * may adjust the acquisition depth to fit according to the current
+   * acquisition resolution.
+   * 
+   * @param time
+   *          the time an acquisition will last in milliseconds
+   */
+  void setAcquisitionTime(Quantity<Time> time);
 
-	/**
-	 * Get the time resolution between each sample in the acquired sampled
-	 * continuous function. Unless otherwise specified by a subclass this may be
-	 * considered to be a constant.
-	 * 
-	 * @return the sample resolution in milliseconds
-	 */
-	Quantity<Time> getSampleResolution();
+  /**
+   * Get the active sampling duration for a single data acquisition event.
+   * 
+   * @return the time an acquisition will last in milliseconds
+   */
+  Quantity<Time> getAcquisitionTime();
 
-	/**
-	 * Get the sample frequency in the acquired sampled continuous function.
-	 * Unless otherwise specified by a subclass this may be considered to be a
-	 * constant.
-	 * 
-	 * @return the sample frequency
-	 */
-	Quantity<Frequency> getSampleFrequency();
+  /**
+   * Set the number of samples in an acquired sampled continuous function. This
+   * may adjust the acquisition time to fit according to the current acquisition
+   * resolution.
+   * 
+   * @param depth
+   *          the sample depth for an acquired data array
+   */
+  void setSampleDepth(int depth);
 
-	/**
-	 * Set the active sampling duration for a single data acquisition event. This
-	 * may adjust the acquisition depth to fit according to the current
-	 * acquisition resolution.
-	 * 
-	 * @param time
-	 *          the time an acquisition will last in milliseconds
-	 */
-	void setAcquisitionTime(Quantity<Time> time);
+  /**
+   * Get the number of samples in an acquired sampled continuous function.
+   * 
+   * @return the sample depth for an acquired data array
+   */
+  int getSampleDepth();
 
-	/**
-	 * Get the active sampling duration for a single data acquisition event.
-	 * 
-	 * @return the time an acquisition will last in milliseconds
-	 */
-	Quantity<Time> getAcquisitionTime();
-
-	/**
-	 * Set the number of samples in an acquired sampled continuous function. This
-	 * may adjust the acquisition time to fit according to the current acquisition
-	 * resolution.
-	 * 
-	 * @param depth
-	 *          the sample depth for an acquired data array
-	 */
-	void setSampleDepth(int depth);
-
-	/**
-	 * Get the number of samples in an acquired sampled continuous function.
-	 * 
-	 * @return the sample depth for an acquired data array
-	 */
-	int getSampleDepth();
-
-	default RegularSampledDomain<Time> getSampleDomain() {
-		return new RegularSampledDomain<>(
-				getSampleTimeUnits(),
-				getSampleDepth(),
-				getSampleFrequency()
-						.to(getSampleTimeUnits().inverse().asType(Frequency.class))
-						.getValue()
-						.doubleValue(),
-				0);
-	}
+  /**
+   * Get the sample domain of an acquired spectrum.
+   * 
+   * @return a {@link RegularSampledDomain} object which will be consistent with
+   *         any acquired spectra
+   */
+  default RegularSampledDomain<Time> getSampleDomain() {
+    return new RegularSampledDomain<>(
+        getSampleTimeUnits(),
+        getSampleDepth(),
+        getSampleFrequency()
+            .to(getSampleTimeUnits().inverse().asType(Frequency.class))
+            .getValue()
+            .doubleValue(),
+        0);
+  }
 }

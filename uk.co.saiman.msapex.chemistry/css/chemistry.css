@@ -1,0 +1,112 @@
+#uk-co-saiman-msapex-chemistry-periodictable-handledtoolitem-size {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/magnifier.png");
+}
+
+#uk-co-saiman-msapex-chemistry-periodictable-directtoolitem-tables {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/application-table.png");
+}
+
+/*
+ * Global
+ */
+.ChemicalElementTile {
+	-fx-border-width: 2.0px;
+	-fx-background-color: #CCCCCC;
+	-fx-border-color: rgba(255.0, 255.0, 255.0, 0.4);
+}
+.ChemicalElementTile:focused {
+	-fx-border-color: rgba(64.0, 64.0, 64.0, 0.6);
+}
+.ChemicalElementTile:hover {
+	-fx-border-color: rgba(64.0, 64.0, 64.0, 0.4);
+}
+
+/*
+ * Sized
+ */
+.ChemicalElementTile:LARGE {
+	-fx-max-width: 42.0pt;
+	-fx-min-width: 42.0pt;
+	-fx-max-height: 42.0pt;
+	-fx-min-height: 42.0pt;
+}
+.ChemicalElementTile:LARGE #atomicNumberText {
+	-fx-font-size: 7.0pt;
+}
+.ChemicalElementTile:LARGE #nameText {
+	-fx-font-size: 7.0pt;
+}
+.ChemicalElementTile:LARGE #symbolNameText {
+	-fx-font-size: 17.0pt;
+}
+.ChemicalElementTile:NORMAL {
+	-fx-max-width: 32.0pt;
+	-fx-min-width: 32.0pt;
+	-fx-max-height: 32.0pt;
+	-fx-min-height: 32.0pt;
+}
+.ChemicalElementTile:NORMAL #atomicNumberText {
+	-fx-font-size: 7.0pt;
+}
+.ChemicalElementTile:NORMAL #nameText {
+	visibility: hidden;
+	-fx-font-size: 0.0pt;
+}
+.ChemicalElementTile:NORMAL #symbolNameText {
+	-fx-padding: 9.0pt 0.0pt 0.0pt 0.0pt;
+	-fx-font-size: 14.5pt;
+}
+.ChemicalElementTile:SMALL {
+	-fx-max-width: 25.0pt;
+	-fx-min-width: 25.0pt;
+	-fx-max-height: 25.0pt;
+	-fx-min-height: 25.0pt;
+}
+.ChemicalElementTile:SMALL #atomicNumberText {
+	visibility: hidden;
+	-fx-font-size: 0.0pt;
+}
+.ChemicalElementTile:SMALL #nameText {
+	visibility: hidden;
+	-fx-font-size: 0.0pt;
+}
+.ChemicalElementTile:SMALL #symbolNameText {
+	-fx-font-size: 12.0pt;
+}
+
+/*
+ * Group colours
+ */
+.ChemicalElementTile:NONE {
+	-fx-background-color: #999999;
+}
+.ChemicalElementTile:ALKALI {
+	-fx-background-color: #80FFFF;
+}
+.ChemicalElementTile:ALKALINE {
+	-fx-background-color: #66FF99;
+}
+.ChemicalElementTile:LANTHANIDE {
+	-fx-background-color: #FFBF66;
+}
+.ChemicalElementTile:ACTINIDE {
+	-fx-background-color: #FF8080;
+}
+.ChemicalElementTile:TRANSITION {
+	-fx-background-color: #FFFF66;
+}
+.ChemicalElementTile:POOR_METAL {
+	-fx-background-color: #BFFFE4;
+}
+.ChemicalElementTile:METALLOID {
+	-fx-background-color: #B3FF66;
+}
+.ChemicalElementTile:NONMETAL {
+	-fx-background-color: #BB99FF;
+}
+.ChemicalElementTile:HALOGEN {
+	-fx-background-color: #FF80FF;
+}
+.ChemicalElementTile:NOBLE_GAS {
+	-fx-background-color: #668CFF;
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import uk.co.saiman.fx.*?>
+<?import uk.co.saiman.eclipse.*?>
+
+<BorderPane
+	xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml">
+
+	<center>
+		<ScrollPane
+			fx:id="instrumentTreeScrollPane"
+			fitToWidth="true"
+			fitToHeight="true"
+			hbarPolicy="NEVER">
+		</ScrollPane>
+	</center>
+</BorderPane>

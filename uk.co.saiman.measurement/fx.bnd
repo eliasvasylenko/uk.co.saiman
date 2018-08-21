@@ -1,0 +1,3 @@
+Bundle-Name: SAI :: Measurement :: FX
+
+Export-Package: uk.co.saiman.measurement.fx

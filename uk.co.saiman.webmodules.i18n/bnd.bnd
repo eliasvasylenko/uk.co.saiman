@@ -1,0 +1,11 @@
+Bundle-Name: SAI :: Web Modules :: i18n
+
+Bundle-Description: \
+	Provides simple internationalization modules \
+	for uk.co.saiman.webmodules, backed by \
+	java.util.ResourceBundle
+
+-buildpath: \
+	uk.co.saiman.webmodules;version=snapshot
+
+Export-Package: uk.co.saiman.webmodule.i18n

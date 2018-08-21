@@ -1,0 +1,93 @@
+## Run path groups:
+-runpath.eclipse:\
+	${def;runpath.eclipse.${runplatform}},\
+\
+	org.eclipse.osgi,\
+	org.eclipse.osgi.compatibility.state
+
+runpath.eclipse.win64:\
+	org.eclipse.equinox.launcher.win32.win32.x86_64
+
+runpath.eclipse.linux64:\
+	org.eclipse.equinox.launcher.gtk.linux.x86_64
+
+-augment.org.eclipse.core.runtime:\
+	org.eclipse.core.runtime;\
+		capability:="osgi.service;objectClass:List<String>=org.eclipse.core.runtime.IAdapterManager;effective:=active"
+
+## Run requirement groups:
+-runrequires.eclipse:\
+	bnd.identity; id=bndtools.runtime.eclipse.applaunch,\
+\
+	${def;runrequires.eclipse.${runplatform}},\
+	${if;${runrequires.eclipse.help};${runrequires.eclipse.help.addon},}\
+	${if;${runrequires.eclipse.sdk};${runrequires.eclipse.sdk.addon},}\
+	${if;${runrequires.eclipse.p2};${runrequires.eclipse.p2.addon},}\
+\
+	bnd.identity; id=org.eclipse.core.databinding.beans,\
+	bnd.identity; id=org.eclipse.emf.databinding,\
+	bnd.identity; id=org.eclipse.equinox.app,\
+	bnd.identity; id=org.eclipse.equinox.concurrent,\
+	bnd.identity; id=org.eclipse.equinox.console,\
+	bnd.identity; id=org.eclipse.equinox.event,\
+	bnd.identity; id=org.eclipse.equinox.launcher,\
+	bnd.identity; id=org.eclipse.e4.ui.bindings
+
+runrequires.eclipse.win64:\
+	bnd.identity; id=org.eclipse.core.filesystem.win32.x86_64,\
+	bnd.identity; id=org.eclipse.core.resources.win32.x86_64,\
+	bnd.identity; id=org.eclipse.equinox.security.win32.x86_64,\
+	bnd.identity; id=org.eclipse.equinox.launcher.win32.win32.x86_64
+
+runrequires.eclipse.linux64:\
+	bnd.identity; id=org.eclipse.core.filesystem.linux.x86_64,\
+	bnd.identity; id=org.eclipse.core.net.linux.x86_64,\
+	bnd.identity; id=org.eclipse.equinox.launcher.gtk.linux.x86_64
+
+runrequires.eclipse.help: false
+
+runrequires.eclipse.help.addon:\
+	bnd.identity\\; id=javax.el,\
+	bnd.identity\\; id=javax.servlet,\
+	bnd.identity\\; id=javax.servlet.jsp,\
+	bnd.identity\\; id=org.apache.commons.logging,\
+	bnd.identity\\; id=org.apache.lucene.analysis,\
+	bnd.identity\\; id=org.apache.lucene.core,\
+	bnd.identity\\; id=org.eclipse.ant.core,\
+	bnd.identity\\; id=org.eclipse.equinox.http.jetty,\
+	bnd.identity\\; id=org.eclipse.equinox.http.registry,\
+	bnd.identity\\; id=org.eclipse.equinox.http.servlet,\
+	bnd.identity\\; id=org.eclipse.equinox.jsp.jasper,\
+	bnd.identity\\; id=org.eclipse.equinox.jsp.jasper.registry,\
+	bnd.identity\\; id=org.eclipse.help,\
+	bnd.identity\\; id=org.eclipse.help.base,\
+	bnd.identity\\; id=org.eclipse.help.ui,\
+	bnd.identity\\; id=org.eclipse.help.webapp,\
+	bnd.identity\\; id=org.eclipse.platform.doc.user,\
+	bnd.identity\\; id=org.eclipse.search,\
+	bnd.identity\\; id=org.eclipse.ui.cheatsheets,\
+	bnd.identity\\; id=org.eclipse.ui.net
+
+runrequires.eclipse.sdk: false
+
+runrequires.eclipse.sdk.addon:\
+	bnd.identity\\; id=org.eclipse.pde.runtime},\
+	bnd.identity\\; id=org.eclipse.sdk}
+
+runrequires.eclipse.p2: false
+
+runrequires.eclipse.p2.addon:\
+	bnd.identity\\; id=org.eclipse.equinox.p2.core,\
+	bnd.identity\\; id=org.eclipse.equinox.p2.engine,\
+	bnd.identity\\; id=org.eclipse.equinox.p2.jarprocessor,\
+	bnd.identity\\; id=org.eclipse.equinox.p2.metadata,\
+	bnd.identity\\; id=org.eclipse.equinox.p2.metadata.repository,\
+	bnd.identity\\; id=org.eclipse.equinox.p2.repository
+
+## Run properties groups:
+-runproperties.eclipse:\
+	osgi.console=,\
+	eclipse.consoleLog=true,\
+	equinox.use.ds=true,\
+	osgi.instance.area.default=./workspace,\
+	osgi.console.enable.builtin=true

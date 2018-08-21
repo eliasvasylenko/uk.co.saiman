@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,23 +27,23 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.bytes.conversion.Offset;
 
 public class VacuumControl {
-	@Bits(0)
+	@Offset(0)
 	public boolean intermediate;
-	@Bits(1)
+	@Offset(1)
 	public boolean backing;
-	@Bits(2)
+	@Offset(2)
 	public boolean inlet;
-	@Bits(3)
+	@Offset(3)
 	public boolean vent;
-	@Bits(4)
+	@Offset(4)
 	public boolean diaphragm;
-	@Bits(5)
-	public boolean magnatron;
-	@Bits(6)
-	public boolean magnatronTrip;
-	@Bits(7)
+	@Offset(5)
+	public boolean magnetron;
+	@Offset(6)
+	public boolean magnetronTrip;
+	@Offset(7)
 	public boolean piraniTrip;
 }

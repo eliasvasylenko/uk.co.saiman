@@ -1,24 +1,15 @@
-Bundle-Name: SAI :: Web Console
-
-Bundle-Description: \
-	Provides a web console for SAI system administration
-
-EnRoute-Application: \
-	system/console
-
 -buildpath: \
+	uk.co.saiman.webmodules;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
 \
-	uk.co.strangeskies.utilities;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
+	org.apache.felix.webconsole,\
 \
-	org.apache.felix.webconsole
+	uk.co.saiman.webmodule.axios.amd;version=latest,\
+	uk.co.saiman.webmodule.react.amd;version=latest,\
+	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
+	uk.co.saiman.webmodule.prop-types.cjs;version=latest,\
+	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
+	uk.co.saiman.webmodule.redux-thunk.amd;version=latest
 
-Import-Package: \
-	*
-
-Private-Package: \
-	uk.co.saiman.webconsole
-
--includeresource: \
-	res=res
+-sub: *.bnd

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,17 +27,66 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.lang.String.format;
+
+import java.io.IOException;
+import java.util.stream.Stream;
+
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentRoot;
+import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ResultStorage;
+import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.log.Log.Level;
 
-public class ExperimentImpl extends ExperimentNodeImpl<ExperimentRoot, ExperimentConfiguration>
+public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, Void>
     implements Experiment {
+  private final ResultStorage locationManager;
+
+  /**
+   * Load a root experiment.
+   * 
+   * @param workspace
+   * @param type
+   * @param id
+   */
   protected ExperimentImpl(
-      ExperimentRoot type,
+      ResultStorage locationManager,
       String id,
-      ExperimentWorkspaceImpl workspace,
-      PersistedStateImpl persistedState) {
-    super(type, id, workspace, persistedState);
+      StateMap persistedState,
+      WorkspaceImpl workspace) {
+    super(id, workspace.getExperimentRootType(), persistedState, workspace);
+    this.locationManager = locationManager;
+  }
+
+  @Override
+  public ResultStorage getLocationManager() {
+    return locationManager;
+  }
+
+  @Override
+  public void removeImpl() {
+    if (!getWorkspace().removeExperiment(getExperiment())) {
+      ExperimentException e = new ExperimentException(
+          format("Experiment %s does not exist", getId()));
+      getLog().log(Level.ERROR, e);
+      throw e;
+    }
+
+    try {
+      getLocationManager().removeLocation(this);
+    } catch (IOException e) {
+      ExperimentException ee = new ExperimentException(
+          format("Cannot remove experiment %s", getId()),
+          e);
+      getLog().log(Level.ERROR, ee);
+      throw ee;
+    }
+  }
+
+  @Override
+  protected Stream<? extends ExperimentNode<?, ?>> getSiblings() {
+    return getWorkspace().getExperiments();
   }
 }

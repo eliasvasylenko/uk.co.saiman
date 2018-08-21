@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,82 +27,77 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Optional.ofNullable;
+import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
 
-import java.util.Objects;
 import java.util.Optional;
 
+import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentConfigurationContext;
-import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.VoidExecutionContext;
+import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 
 /**
- * The root experiment type implementation for {@link ExperimentWorkspaceImpl}.
- * 
  * @author Elias N Vasylenko
  */
 public class ExperimentRootImpl implements ExperimentRoot {
-  private final ExperimentWorkspaceImpl workspace;
+  private static final PropertyAccessor<String> NOTES = stringAccessor("notes");
 
-  protected ExperimentRootImpl(ExperimentWorkspaceImpl workspace) {
-    this.workspace = workspace;
+  private final ExperimentProperties text;
+
+  public ExperimentRootImpl(ExperimentProperties text) {
+    this.text = text;
   }
 
   @Override
   public String getName() {
-    return workspace.getText().experimentRoot().toString();
+    return text.experimentRoot().toString();
   }
 
   @Override
   public ExperimentConfiguration createState(
-      ExperimentConfigurationContext<ExperimentConfiguration> configuration) {
+      ConfigurationContext<ExperimentConfiguration> configuration) {
+    configuration.state().withDefault(NOTES, () -> "");
+
     return new ExperimentConfiguration() {
-      private String notes = configuration.persistedState().getString("notes").orElse(null);
 
       @Override
       public String getName() {
-        return configuration.node().getID();
+        return configuration.node().getId();
       }
 
       @Override
       public void setName(String name) {
-        configuration.setID(name);
+        configuration.setId(name);
       }
 
       @Override
       public Optional<String> getNotes() {
-        return ofNullable(notes);
+        String notes = configuration.state().get(NOTES);
+        return notes.isEmpty() ? Optional.empty() : Optional.of(notes);
       }
 
       @Override
       public void setNotes(String notes) {
-        Objects.requireNonNull(notes);
-        this.notes = notes;
-        configuration.persistedState().putString("notes", notes);
+        configuration.update(state -> state.with(NOTES, notes));
       }
 
       @Override
       public void clearNotes() {
-        notes = null;
+        configuration.update(state -> state.remove(NOTES));
       }
     };
   }
 
   @Override
-  public void execute(ExperimentExecutionContext<ExperimentConfiguration> context) {}
-
-  @Override
-  public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return false;
+  public void executeVoid(VoidExecutionContext<ExperimentConfiguration> context) {
+    context.processChildren();
   }
 
   @Override
-  public boolean mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?> descendantNodeType) {
-    return true;
+  public boolean mayComeAfter(ExperimentType<?, ?> parentType) {
+    return false;
   }
 }

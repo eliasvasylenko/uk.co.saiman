@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,19 +27,16 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.PropertyConfiguration;
-import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.properties.Localized;
 
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SpectrumProperties {
-	Localized<String> spectrumExperimentName();
+  Localized<String> spectrumExperimentName();
 
-	Localized<String> spectrumResultName();
+  Localized<String> spectrumResultName();
 
-	Localized<String> defaultSpectrumName();
+  Localized<String> defaultSpectrumName();
 
-	Localized<String> spectrumGraphEditor();
+  Localized<String> spectrumGraphEditor();
 
-	Localized<String> experimentInterrupted();
+  Localized<String> spectrumProcessingExperimentName();
 }

@@ -1,3 +1,16 @@
 Bundle-Name: SAI :: Measurement :: API
+Bundle-SymbolicName: uk.co.saiman.measurement
 
-Export-Package: uk.co.saiman.measurement
+-includeresource:\
+	@${repo;tec.uom.se},\
+	@${repo;si.uom:si-units-java8},\
+	@${repo;si.uom.si-quantity},\
+	@${repo;tec.uom.lib:uom-lib-common}
+
+Private-Package:\
+	si.uom.*,\
+	tec.uom.*
+
+Export-Package:\
+	uk.co.saiman.measurement,\
+	uk.co.saiman.measurement.scalar

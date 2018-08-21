@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_4s_PwKHXEeeDWfjziciHZg">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_bSAjAKHYEeeDWfjziciHZg" featurename="children" parentElementId="uk.co.saiman.msapex.toolbar.actions">
+    <elements xsi:type="menu:HandledToolItem" xmi:id="_m5gKkKHYEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handledtoolitem.operate" label="Operate" command="_rmrrYKHYEeeDWfjziciHZg"/>
+    <elements xsi:type="menu:HandledToolItem" xmi:id="_rP40oKHbEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handledtoolitem.standby" label="Standby" command="_9TUFMKHYEeeDWfjziciHZg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_otrd8KHYEeeDWfjziciHZg" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Command" xmi:id="_rmrrYKHYEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.command.operate" commandName="Operate" description="Enter instrument operating mode" category="_x3DdQKHYEeeDWfjziciHZg"/>
+    <elements xsi:type="commands:Command" xmi:id="_9TUFMKHYEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.command.standby" commandName="Standby" description="Enter instrument standby mode" category="_x3DdQKHYEeeDWfjziciHZg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_tNml4KHYEeeDWfjziciHZg" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Category" xmi:id="_x3DdQKHYEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.category.instrument" name="Instrument" description="Instrument inspection and operation"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_C25pkKHZEeeDWfjziciHZg" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Handler" xmi:id="_ESYwIKHZEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handler.operate" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentOperateHandler" command="_rmrrYKHYEeeDWfjziciHZg"/>
+    <elements xsi:type="commands:Handler" xmi:id="_h1mWYKHZEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handler.standby" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentStandbyHandler" command="_9TUFMKHYEeeDWfjziciHZg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_E6PvcKHbEeeDWfjziciHZg" featurename="children" parentElementId="uk.co.saiman.msapex.menu" positionInList="after:uk.co.saiman.msapex.menu.file">
+    <elements xsi:type="menu:Menu" xmi:id="_QMEpAKHbEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.menu.instrument" label="Instrument">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_R7NrYKHbEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handledmenuitem.operate" label="Operate" command="_rmrrYKHYEeeDWfjziciHZg"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_TkFGoKHbEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handledmenuitem.standby" label="Standby" command="_9TUFMKHYEeeDWfjziciHZg"/>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_PG9v4KgiEeep8ofnuPrwwg" featurename="addons" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="application:Addon" xmi:id="_QybzMKgiEeep8ofnuPrwwg" elementId="uk.co.saiman.msapex.instrument.addon" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentAddon"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_zij0QELjEeiiI42mgJDa-A" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
+    <elements xsi:type="basic:Part" xmi:id="_liUsUELmEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.part" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentPart" label="Instrument">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_XbhUQELnEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.toolbar.0"/>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

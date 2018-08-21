@@ -1,40 +1,50 @@
 -include:\
-	${include.ss}/felix.bndrun,\
-	${include.ss}/utilities.bnd,\
-	${include.ss}/eclipse.platform.neon.bndrun,\
-	${include.ss}/eclipse.fx.2.4.0.bndrun
+	${build}/include/felix.bndrun,\
+	${build}/include/utilities.bnd,\
+	${build}/include/eclipse.platform.bndrun,\
+	${build}/include/eclipse.fx.bndrun
 
--runblacklist.msapex: \
-	osgi.identity;filter:='(&(osgi.identity=org.eclipse.equinox.common)(!(version>=3.8.0)))',\
-	osgi.identity;filter:='(&(osgi.identity=org.eclipse.emf.common)(!(version>=2.12.0)))',\
-	osgi.identity;filter:='(osgi.identity=javax.annotation-api)'
+-runrequires.msapex: \
+	bnd.identity; id=org.apache.felix.configadmin,\
+	bnd.identity; id=org.apache.felix.configurator,\
+	bnd.identity; id=org.apache.felix.metatype,\
+\
+	bnd.identity; id=org.apache.felix.webconsole,\
+	bnd.identity; id=org.apache.felix.webconsole.plugins.ds,\
+	bnd.identity; id=org.apache.felix.webconsole.plugins.event,\
+	bnd.identity; id=org.apache.felix.webconsole.plugins.memoryusage,\
+\
+	bnd.identity; id=uk.co.saiman.comms.copley,\
+	bnd.identity; id=uk.co.saiman.comms.saint,\
+	bnd.identity; id=uk.co.saiman.configadmin.persistence,\
+	bnd.identity; id=uk.co.saiman.icons.fugue,\
+	bnd.identity; id=uk.co.saiman.instrument.provider,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.stage,\
+	bnd.identity; id=uk.co.saiman.msapex,\
+	bnd.identity; id=uk.co.saiman.msapex.camera,\
+	bnd.identity; id=uk.co.saiman.msapex.chemistry,\
+	bnd.identity; id=uk.co.saiman.msapex.experiment,\
+	bnd.identity; id=uk.co.saiman.msapex.experiment.chemicalmap,\
+	bnd.identity; id=uk.co.saiman.msapex.experiment.spectrum,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.acquisition,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.sample,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.stage,\
+	bnd.identity; id=uk.co.saiman.msapex.simulation,\
+	bnd.identity; id=uk.co.saiman.saint.msapex,\
+	bnd.identity; id=uk.co.saiman.saint.provider,\
+	bnd.identity; id=uk.co.saiman.saint.simulation,\
+	bnd.identity; id=uk.co.saiman.shell,\
+	bnd.identity; id=uk.co.saiman.simulation.provider,\
+	bnd.identity; id=uk.co.saiman.webconsole.branding,\
+	bnd.identity; id=uk.co.saiman.webconsole.webresource
 
--runrequires.msapex:\
-	${req;org.apache.felix.configadmin},\
-	${req;uk.co.saiman.chemistry.msapex},\
-	${req;uk.co.saiman.comms.saint},\
-	${req;uk.co.saiman.experiment.spectrum.msapex},\
-	${req;uk.co.saiman.experiment.chemicalmap.msapex},\
-	${req;uk.co.saiman.icons.fugue},\
-	${req;uk.co.saiman.instrument.acquisition.msapex},\
-	${req;uk.co.saiman.instrument.provider},\
-	${req;uk.co.saiman.instrument.stage.msapex},\
-	${req;uk.co.saiman.msapex},\
-	${req;uk.co.saiman.msapex.camera},\
-	${req;uk.co.saiman.simulation.msapex},\
-	${req;uk.co.saiman.simulation.provider},\
-	${req;uk.co.saiman.webconsole},\
-	${req;uk.co.strangeskies.configadmin.persistence}
+-runfw:\
+	org.eclipse.osgi
 
 -runvm.msapex:\
 	-Xmx1024m
 
--runfw.msapex:\
-	org.eclipse.osgi
-
--runee.msapex:\
-	JavaSE-1.8
-
 -runproperties.msapex:\
 	eclipse.product=uk.co.saiman.msapex.product,\
-	uk.co.strangeskies.configadmin.persistence=~/.saiman/config
+	uk.co.saiman.configadmin.persistence=~/.saiman/config

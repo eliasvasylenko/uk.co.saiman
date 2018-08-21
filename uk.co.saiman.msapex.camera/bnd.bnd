@@ -1,25 +1,27 @@
 Bundle-Name: SAI :: MSApex :: Camera
 
-Export-Package: uk.co.saiman.msapex.camera
-
-Private-Package: uk.co.saiman.msapex.camera.impl
-
 -include:\
-	${include.ss}/eclipse.plugin.bnd,\
-	${include.ss}/eclipse.platform.neon.bnd,\
-	${include.ss}/eclipse.fx.2.4.0.bnd,\
+	${build}/include/eclipse.plugin.bnd,\
+	${build}/include/eclipse.platform.bnd,\
+	${build}/include/eclipse.fx.bnd,\
 	${build}/include/fugue.icons.bnd
 
 -buildpath:\
-	uk.co.strangeskies.eclipse;version=latest,\
-	uk.co.strangeskies.fx;version=latest,\
-	uk.co.strangeskies.observable;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
-	uk.co.strangeskies.utilities;version=latest,\
+	uk.co.saiman.camera;version=snapshot,\
+\
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.fx;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
 \
 	com.github.sarxos.webcam-capture
 
 -includeresource:\
-	{fragment.e4xmi},\
+	{always.e4xmi},\
+	{initial.e4xmi},\
 	res,\
 	{css=css}
+
+Private-Package: uk.co.saiman.msapex.camera

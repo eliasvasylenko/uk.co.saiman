@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,17 +27,27 @@
  */
 package uk.co.saiman.comms.copley;
 
-import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.BitsConversion;
+import uk.co.saiman.bytes.conversion.DTO;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
+@DTO
 public class VariableIdentifier {
-	@Bits(0)
-	public byte variableID;
+  public VariableIdentifier() {}
 
-	@Bits(12)
-	public boolean bank;
+  public VariableIdentifier(CopleyVariableID variable, int axis, VariableBank bank) {
+    this.axis = (byte) axis;
+    this.variableID = (byte) variable.getCode();
+    this.bank = bank.getBit();
+  }
 
-	@Bits(13)
-	@BitsConversion(size = 3)
-	public byte axis;
+  @Offset(0)
+  public byte variableID;
+
+  @Offset(12)
+  public boolean bank;
+
+  @Offset(13)
+  @Size(value = 3)
+  public byte axis;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,15 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.BitsConversion;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class HighVoltageReadback {
-	@BitsConversion(size = 4)
-	@Bits(0)
+	@Size(value = 4)
+	@Offset(0)
 	public byte current;
 
-	@BitsConversion(size = 4)
-	@Bits(4)
+	@Size(value = 4)
+	@Offset(4)
 	public byte voltage;
 }

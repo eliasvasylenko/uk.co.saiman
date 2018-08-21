@@ -1,0 +1,7 @@
+Bundle-Name: SAI :: SAINT :: Provider
+
+Private-Package: \
+	uk.co.saiman.saint.simulation
+
+-includeresource: \
+	OSGI-INF/configurator=configurator

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,15 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.BitsConversion;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class VacuumReadback {
-	@Bits(0)
+	@Offset(0)
 	public boolean pirani;
-	@Bits(1)
+	@Offset(1)
 	public boolean magnetron;
-	@BitsConversion(size = 4)
-	@Bits(value = 2)
+	@Size(value = 4)
+	@Offset(value = 2)
 	public byte spare;
 }

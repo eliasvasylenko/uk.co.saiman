@@ -1,0 +1,16 @@
+{
+	"uk.co.saiman.simulation.adc~saintsimulation": {
+		"signalToNoiseRatio": "120",
+		"sampleSource.target": "(service.pid=uk.co.saiman.simulation.samplesource.xystage~saintsimulation)"
+	},
+	"uk.co.saiman.simulation.instrument.acquisition~saintsimulation": {
+		"acquisitionResolution": "2.5E-7s",
+		"detector.target": "(service.pid=uk.co.saiman.simulation.adc~saintsimulation)"
+	},
+	"uk.co.saiman.simulation.samplesource.xystage~saintsimulation": {
+		"cameraResolutionWidth": 320,
+		"cameraResolutionHeight": 240,
+		"viewAreaWidth": "20mm",
+		"stageDevice.target": "(service.pid=uk.co.saiman.instrument.stage.saint~saintsimulation)"
+	}
+}

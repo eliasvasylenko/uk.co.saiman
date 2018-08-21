@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -34,7 +34,7 @@ import java.util.Set;
 import javax.measure.Quantity;
 import javax.measure.quantity.Mass;
 
-import uk.co.strangeskies.mathematics.Range;
+import uk.co.saiman.mathematics.Interval;
 
 public class EmptyChemicalDatabaseQuery implements ChemicalDatabaseQuery {
 	private static final ChemicalDatabaseQuery INSTANCE = new EmptyChemicalDatabaseQuery();
@@ -42,7 +42,7 @@ public class EmptyChemicalDatabaseQuery implements ChemicalDatabaseQuery {
 	private EmptyChemicalDatabaseQuery() {}
 
 	@Override
-	public ChemicalDatabaseQuery withMass(Range<Quantity<Mass>> massRange) {
+	public ChemicalDatabaseQuery withMass(Interval<Quantity<Mass>> massRange) {
 		return this;
 	}
 

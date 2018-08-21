@@ -1,0 +1,11 @@
+Bundle-Name: SAI :: Web Console :: Branding
+
+Bundle-Description: \
+	Provides web console branding for SAI system administration
+
+Fragment-Host: \
+	org.apache.felix.webconsole
+
+-includeresource: \
+	res=res,\
+	/META-INF/webconsole.properties=properties/webconsole.properties

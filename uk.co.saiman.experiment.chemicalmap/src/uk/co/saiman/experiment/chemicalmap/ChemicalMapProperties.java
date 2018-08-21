@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,17 +27,17 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
-import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.PropertyConfiguration;
-import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.properties.Localized;
 
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface ChemicalMapProperties {
-	Localized<String> chemicalMapExperimentName();
+  ExperimentProperties experiment();
 
-	Localized<String> chemicalMapResultName();
+  Localized<String> chemicalMapExperimentName();
 
-	Localized<String> defaultChemicalMapName();
+  Localized<String> chemicalMapResultName();
 
-	Localized<String> chemicalMapGraphEditor();
+  Localized<String> defaultChemicalMapName();
+
+  Localized<String> chemicalMapGraphEditor();
 }

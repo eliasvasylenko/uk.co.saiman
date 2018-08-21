@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+	<extension
+		id="modelContribution"
+    	point="org.eclipse.e4.workbench.model">
+
+		<fragment
+			apply="always"
+			uri="always.e4xmi" />
+    </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated UISaiman -->
+      <package
+            uri="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui"
+            class="uk.co.saiman.eclipse.model.ui.Package"
+            genModel="model/UISaiman.genmodel"/>
+   </extension>
+
+</plugin> 

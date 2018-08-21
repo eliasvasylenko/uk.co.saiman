@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -28,48 +28,26 @@
 package uk.co.saiman.simulation;
 
 import java.util.List;
-import java.util.Set;
 
-import uk.co.saiman.SaiProperties;
-import uk.co.saiman.acquisition.AcquisitionProperties;
-import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.simulation.instrument.DetectorSimulation;
-import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Nested;
-import uk.co.strangeskies.text.properties.PropertyConfiguration;
-import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.properties.Localized;
 
 @SuppressWarnings("javadoc")
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface SimulationProperties {
-	Localized<String> xyRasterStageSimulationDeviceName();
+  Localized<String> acquisitionSimulationDeviceName();
 
-	Localized<String> acquisitionSimulationDeviceName();
+  Localized<String> sampleImage();
 
-	@Nested
-	AcquisitionProperties acquisition();
+  Localized<String> redChemical();
 
-	@Nested
-	ExperimentProperties experiment();
+  Localized<String> greenChemical();
 
-	@Nested
-	SaiProperties sai();
+  Localized<String> blueChemical();
 
-	Localized<String> sampleImage();
+  Localized<String> loadSampleImageTitle();
 
-	Localized<String> redChemical();
+  Localized<String> imageFileFilterTitle();
 
-	Localized<String> greenChemical();
+  List<String> imageFileFilter();
 
-	Localized<String> blueChemical();
-
-	Localized<String> loadSampleImageTitle();
-
-	Localized<String> imageFileFilterTitle();
-
-	List<String> imageFileFilter();
-
-	Localized<String> invalidAcquisitionCount(int count);
-
-	Localized<String> cannotFindDetector(String detectorName, Set<DetectorSimulation> availableDetectors);
+  String invalidAcquisitionCount(int count);
 }

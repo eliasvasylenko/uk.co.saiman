@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -28,16 +28,18 @@
 package uk.co.saiman.comms;
 
 public class CommsException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public CommsException(String message) {
-		super(message);
-	}
+  public CommsException(String message) {
+    super(message);
+  }
 
-	public CommsException(String message, Exception exception) {
-		super(
-				message + ": " + (exception.getMessage() != null ? exception.getMessage()
-						: exception.getClass().getName()),
-				exception);
-	}
+  public CommsException(String message, Throwable exception) {
+    super(
+        message + ": "
+            + (exception.getMessage() != null
+                ? exception.getMessage()
+                : exception.getClass().getName()),
+        exception);
+  }
 }

@@ -1,0 +1,9 @@
+Bundle-Name: SAI :: Observable
+Bundle-Description: \
+	A small set of classes and interfaces for supporting the observer pattern.
+
+Export-Package: \
+	uk.co.saiman.observable
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot

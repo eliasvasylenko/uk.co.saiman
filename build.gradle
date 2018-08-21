@@ -28,7 +28,7 @@ buildscript {
 
 task wrapper(type: Wrapper) {
   jarFile = rootProject.file('.gradle-wrapper/gradle-wrapper.jar')
-  gradleVersion = '3.5'
+  gradleVersion = '4.5'
 }
 
 /* Initialize the bnd workspace */

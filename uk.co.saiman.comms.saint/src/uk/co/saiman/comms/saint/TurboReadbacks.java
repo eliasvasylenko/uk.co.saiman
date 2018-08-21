@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,17 +27,17 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.BitsConversion;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class TurboReadbacks {
-	@Bits(16)
-	@BitsConversion(size = 16)
+	@Offset(16)
+	@Size(value = 16)
 	public int speed;
-	@Bits(8)
-	@BitsConversion(size = 8)
+	@Offset(8)
+	@Size(value = 8)
 	public int temperature;
-	@Bits(0)
-	@BitsConversion(size = 8)
+	@Offset(0)
+	@Size(value = 8)
 	public int poduleTemperature;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,39 +27,23 @@
  */
 package uk.co.saiman.instrument.raster;
 
-import java.util.Set;
+import uk.co.saiman.instrument.Device;
+import uk.co.saiman.observable.Observable;
 
-import uk.co.saiman.instrument.HardwareDevice;
-import uk.co.strangeskies.observable.Observable;
+public interface RasterDevice extends Device {
+  int getRasterWidth();
 
-public interface RasterDevice extends HardwareDevice {
-	Set<RasterPattern> availableRasterModes();
+  int getRasterHeight();
 
-	RasterPattern getRasterPattern();
+  default int getRasterLength() {
+    return getRasterHeight() * getRasterWidth();
+  }
 
-	void setRasterPattern(RasterPattern mode);
+  boolean isRasterOperating();
 
-	void setRasterSize(int width, int height);
+  RasterPosition getRasterPosition();
 
-	int getRasterWidth();
+  Observable<RasterPosition> rasterPositionEvents();
 
-	int getRasterHeight();
-
-	default int getRasterLength() {
-		return getRasterHeight() * getRasterWidth();
-	}
-
-	void setRasterDwell(int dwell);
-
-	int getRasterDwell();
-
-	void startRasterOperation();
-
-	boolean isOperating();
-
-	RasterPosition getRasterPosition();
-
-	Observable<RasterPosition> rasterPositionEvents();
-
-	Observable<RasterDevice> startEvents();
+  RasterPattern getRasterPattern();
 }

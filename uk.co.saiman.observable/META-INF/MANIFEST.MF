@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1534252143249
+Bundle-Copyright: Copyright (c) Scientific Analysis Instruments Limite
+ d (2015, 2018). All Rights Reserved.
+Bundle-Description: A small set of classes and interfaces for supporti
+ ng the observer pattern.
+Bundle-Developers: eliasvasylenko;email = eliasvasylenko@gmail.com; na
+ me = "Elias N Vasylenko"; organization = "Scientific Analysis Instrum
+ ents Limited"; organizationUrl = http://www.saiman.co.uk; roles = "ar
+ chitect,developer"
+Bundle-DocURL: https://github.com/Scientific-Analysis-Instruments/uk.c
+ o.saiman/wiki
+Bundle-License: GPL; link = http://www.gnu.org/licenses/
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: SAI :: Observable
+Bundle-SCM: url = https://github.com/Scientific-Analysis-Instruments/u
+ k.co.saiman, connection = scm:git:https://github.com/Scientific-Analy
+ sis-Instruments/uk.co.saiman.git, developerConnection = scm:git:git@g
+ ithub.com:Scientific-Analysis-Instruments/uk.co.saiman.git
+Bundle-SymbolicName: uk.co.saiman.observable
+Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saim
+ an.co.uk/
+Bundle-Version: 1.0.0.201808141309
+Created-By: 1.8.0_162 (Oracle Corporation)
+Export-Package: uk.co.saiman.observable;version="1.0.0";uses:="uk.co.s
+ aiman.property"
+Git-Descriptor: 65881614-dirty
+Git-SHA: 658816144933ba86d31521380bac59e7df2047b8
+Import-Package: uk.co.saiman.property;version="[1.0,2)"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Tool: Bnd-4.1.0.201808140636-SNAPSHOT
+

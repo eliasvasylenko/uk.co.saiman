@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.simulation.instrument.impl;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+
 import java.util.Random;
 
 import javax.measure.Unit;
@@ -36,65 +38,79 @@ import javax.measure.quantity.Time;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.data.SampledContinuousFunction;
-import uk.co.saiman.data.SampledDomain;
-import uk.co.saiman.data.SparseSampledContinuousFunction;
+import uk.co.saiman.data.function.SampledDomain;
+import uk.co.saiman.data.function.SparseSampledContinuousFunction;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
-import uk.co.saiman.simulation.instrument.SimulatedSample;
+import uk.co.saiman.simulation.instrument.DetectorSimulationService;
+import uk.co.saiman.simulation.instrument.impl.TDCSimulation.TDCSimulationConfiguration;
 
 /**
  * A simulation of an acquisition data signal from a TDC.
  * 
  * @author Elias N Vasylenko
  */
-@Designate(ocd = TDCSimulationConfiguration.class)
-@Component(configurationPid = TDCSimulation.CONFIGURATION_PID)
-public class TDCSimulation implements DetectorSimulation {
-	static final String CONFIGURATION_PID = "uk.co.saiman.simulation.tdc";
+@Designate(ocd = TDCSimulationConfiguration.class, factory = true)
+@Component(configurationPid = TDCSimulation.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+public class TDCSimulation implements DetectorSimulationService {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "TDC Simulation Configuration",
+      description = "The TDC simulation provides an implementation of a detector interface simulating a time-to-digital converter")
+  public @interface TDCSimulationConfiguration {
+    @AttributeDefinition(
+        name = "Maximum Hits Per Spectrum",
+        description = "Set the maximum number of hit events per detector event")
+    int maximumHitsPerSpectrum() default 10;
+  }
 
-	private int maximumHits = 10;
-	private int[] hitIndices;
-	private double[] hitIntensities;
+  static final String CONFIGURATION_PID = "uk.co.saiman.simulation.tdc";
 
-	private final Random random = new Random();
+  private int maximumHits = 10;
+  private int[] hitIndices;
+  private double[] hitIntensities;
 
-	@Override
-	public String getId() {
-		return CONFIGURATION_PID;
-	}
+  private final Random random = new Random();
 
-	@Activate
-	@Modified
-	void configure(TDCSimulationConfiguration configuration) {
-		maximumHits = configuration.maximumHitsPerSpectrum();
-	}
+  @Activate
+  @Modified
+  void configure(TDCSimulationConfiguration configuration) {
+    maximumHits = configuration.maximumHitsPerSpectrum();
+  }
 
-	private int updateMaximumHitsPerSpectrum() {
-		int currentMaximumHits = hitIndices.length;
+  private int updateMaximumHitsPerSpectrum() {
+    int currentMaximumHits = hitIndices.length;
 
-		if (currentMaximumHits != maximumHits) {
-			currentMaximumHits = maximumHits;
+    if (currentMaximumHits != maximumHits) {
+      currentMaximumHits = maximumHits;
 
-			hitIndices = new int[currentMaximumHits];
-			hitIntensities = new double[currentMaximumHits];
-		}
+      hitIndices = new int[currentMaximumHits];
+      hitIntensities = new double[currentMaximumHits];
+    }
 
-		return currentMaximumHits;
-	}
+    return currentMaximumHits;
+  }
 
-	@Override
-	public SampledContinuousFunction<Time, Dimensionless> acquire(
-			SampledDomain<Time> domain,
-			Unit<Dimensionless> intensityUnits,
-			SimulatedSample nextSample) {
-		int hits = random.nextInt(updateMaximumHitsPerSpectrum());
+  @Override
+  public DetectorSimulation getDetectorSimulation(
+      SampledDomain<Time> domain,
+      Unit<Dimensionless> intensityUnits) {
+    return () -> {
+      int hits = random.nextInt(updateMaximumHitsPerSpectrum());
 
-		/*
-		 * TODO distribute "hits" number of hits
-		 */
+      /*
+       * TODO distribute "hits" number of hits
+       */
 
-		return new SparseSampledContinuousFunction<>(domain, intensityUnits, hits, hitIndices, hitIntensities);
-	}
+      return new SparseSampledContinuousFunction<>(
+          domain,
+          intensityUnits,
+          hits,
+          hitIndices,
+          hitIntensities);
+    };
+  }
 }

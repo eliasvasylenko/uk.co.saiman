@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -29,21 +29,13 @@ package uk.co.saiman.comms.saint;
 
 import java.util.Arrays;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.bytes.conversion.Elements;
 
 public class LEDStatus {
-	@Bits(0)
-	@Bits(1)
-	@Bits(2)
-	@Bits(3)
-	@Bits(4)
-	@Bits(5)
-	@Bits(6)
-	@Bits(7)
-	public boolean[] led;
+  public boolean @Elements(8) [] led;
 
-	@Override
-	public String toString() {
-		return Arrays.toString(led);
-	}
+  @Override
+  public String toString() {
+    return Arrays.toString(led);
+  }
 }

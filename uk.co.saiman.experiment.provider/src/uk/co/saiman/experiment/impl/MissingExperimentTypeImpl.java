@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,62 +27,35 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Collections.unmodifiableMap;
+import static java.lang.String.format;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import uk.co.saiman.experiment.ExperimentConfigurationContext;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.MissingExperimentType;
+import uk.co.saiman.experiment.ProcessingContext;
+import uk.co.saiman.experiment.state.StateMap;
 
-public class MissingExperimentTypeImpl implements MissingExperimentType {
-  private final ExperimentWorkspaceImpl workspace;
+public class MissingExperimentTypeImpl<T> implements MissingExperimentType<T> {
+  private final ExperimentProperties text;
   private final String id;
 
-  protected MissingExperimentTypeImpl(ExperimentWorkspaceImpl workspace, String id) {
-    this.workspace = workspace;
+  protected MissingExperimentTypeImpl(ExperimentProperties text, String id) {
+    this.text = text;
     this.id = id;
   }
 
   @Override
   public String getName() {
-    return workspace.getText().missingExperimentType(id).toString();
+    return text.missingExperimentType(id).toString();
   }
 
-  public String getMissingTypeID() {
+  @Override
+  public String getId() {
     return id;
   }
 
   @Override
-  public Map<String, String> createState(
-      ExperimentConfigurationContext<Map<String, String>> context) {
-    Map<String, String> state = new HashMap<>();
-
-    context.persistedState().putString(getID(), getMissingTypeID());
-    context.persistedState().getStrings().forEach(
-        string -> state.put(string, context.persistedState().getString(string).get()));
-
-    return unmodifiableMap(state);
-  }
-
-  @Override
-  public void execute(ExperimentExecutionContext<Map<String, String>> context) {
-    throw new ExperimentException(workspace.getText().cannotExecuteMissingExperimentType(id));
-  }
-
-  @Override
-  public boolean mayComeAfter(ExperimentNode<?, ?> parentNode) {
-    return true;
-  }
-
-  @Override
-  public boolean mayComeBefore(
-      ExperimentNode<?, ?> penultimateDescendantNode,
-      ExperimentType<?> descendantNodeType) {
-    return true;
+  public T process(ProcessingContext<StateMap, T> context) {
+    throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
   }
 }

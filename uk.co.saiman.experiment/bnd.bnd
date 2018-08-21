@@ -1,0 +1,21 @@
+Bundle-Name: SAI :: Experiment
+
+-buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	json;version=latest
+
+Export-Package: \
+	uk.co.saiman.experiment,\
+	uk.co.saiman.experiment.filesystem,\
+	uk.co.saiman.experiment.path,\
+	uk.co.saiman.experiment.state
+
+-includeresource: \
+	l10n

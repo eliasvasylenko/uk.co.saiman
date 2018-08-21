@@ -1,0 +1,6 @@
+Bundle-Name: SAI :: Web Modules :: Semantic Versions
+Bundle-Description: \
+	Provides Java API for dealing with semantic versions in OSGi
+
+Export-Package: \
+	uk.co.saiman.webmodule.semver

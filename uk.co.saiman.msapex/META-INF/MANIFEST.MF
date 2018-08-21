@@ -1,0 +1,54 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1534431514191
+Bundle-Copyright: Copyright (c) Scientific Analysis Instruments Limite
+ d (2015, 2018). All Rights Reserved.
+Bundle-Developers: eliasvasylenko;email = eliasvasylenko@gmail.com; na
+ me = "Elias N Vasylenko"; organization = "Scientific Analysis Instrum
+ ents Limited"; organizationUrl = http://www.saiman.co.uk; roles = "ar
+ chitect,developer"
+Bundle-DocURL: https://github.com/Scientific-Analysis-Instruments/uk.c
+ o.saiman/wiki
+Bundle-License: GPL; link = http://www.gnu.org/licenses/
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: SAI :: MSApex
+Bundle-SCM: url = https://github.com/Scientific-Analysis-Instruments/u
+ k.co.saiman, connection = scm:git:https://github.com/Scientific-Analy
+ sis-Instruments/uk.co.saiman.git, developerConnection = scm:git:git@g
+ ithub.com:Scientific-Analysis-Instruments/uk.co.saiman.git
+Bundle-SymbolicName: uk.co.saiman.msapex;singleton:=true
+Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saim
+ an.co.uk/
+Bundle-Version: 1.0.0.201808161458
+Created-By: 1.8.0_162 (Oracle Corporation)
+Export-Package: uk.co.saiman.msapex.addons;uses:="org.eclipse.e4.ui.mo
+ del.application.ui,org.eclipse.fx.ui.workbench.renderers.base.service
+ s,org.eclipse.fx.ui.workbench.renderers.base.widget";version="1.0.0",
+ uk.co.saiman.msapex.model;version="1.0.0"
+Git-Descriptor: 65881614-dirty
+Git-SHA: 658816144933ba86d31521380bac59e7df2047b8
+Import-Package: javax.annotation,javax.inject;version="[1.0,2)",org.ec
+ lipse.e4.core.contexts;version="[1.6,2)",org.eclipse.e4.ui.model.appl
+ ication,org.eclipse.e4.ui.model.application.ui,org.eclipse.e4.ui.mode
+ l.application.ui.basic,org.eclipse.e4.ui.workbench.modeling,org.eclip
+ se.fx.ui.services.theme;version="[3.3,4)",org.eclipse.fx.ui.theme;ver
+ sion="[3.3,4)",org.eclipse.fx.ui.workbench.renderers.base.services;ve
+ rsion="[3.3,4)",org.eclipse.fx.ui.workbench.renderers.base.widget;ver
+ sion="[3.3,4)"
+Private-Package: uk.co.saiman.msapex,css
+Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse
+ .fx.ui.services.theme.Theme"
+Require-Capability: osgi.extender;filter:="(&(osgi.extender=osgi.compo
+ nent)(version>=1.3.0)(!(version>=2.0.0)))",osgi.service;filter:="(obj
+ ectClass=org.eclipse.fx.ui.services.theme.MultiURLStylesheet)";effect
+ ive:=active;resolution:=optional;cardinality:=multiple,osgi.service;f
+ ilter:="(objectClass=org.eclipse.fx.ui.services.theme.Stylesheet)";ef
+ fective:=active;resolution:=optional;cardinality:=multiple,osgi.exten
+ der;filter:="(&(osgi.extender=osgi.component)(&(version>=1.4.0)(!(ver
+ sion>=2.0.0))))",osgi.extender;filter:="(&(osgi.extender=osgi.configu
+ rator)(&(version>=1.0.0)(!(version>=2.0.0))))",osgi.ee;filter:="(&(os
+ gi.ee=JavaSE)(version=1.8))"
+Require-Bundle: uk.co.saiman.eclipse.ui
+Service-Component: OSGI-INF/uk.co.saiman.msapex.MSApexTheme.xml
+Tool: Bnd-4.1.0.201808140636-SNAPSHOT
+

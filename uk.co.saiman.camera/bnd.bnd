@@ -1,0 +1,10 @@
+Bundle-Name: SAI :: Camera
+
+Export-Package: uk.co.saiman.camera
+
+-buildpath:\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+\
+	com.github.sarxos.webcam-capture

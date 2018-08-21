@@ -1,0 +1,14 @@
+Export-Package: \
+	uk.co.saiman.collection,\
+	uk.co.saiman.collection.computingmap,\
+	uk.co.saiman.collection.multimap,\
+	uk.co.saiman.collection.stream,\
+	uk.co.saiman.collection.tuple
+
+Bundle-Name: SAI :: Collections
+Bundle-Description: \
+	Common utilities to extend and facilitate use of the Java\
+	collections framework and related classes.
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot

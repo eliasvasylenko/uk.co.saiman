@@ -1,0 +1,40 @@
+#optionalData {
+	margin: 0;
+	padding: 0;
+}
+
+.bName {
+	display: inline-block;
+}
+
+.tableControls {
+	display: flex;
+}
+.tableControlsLeft { margin-left: 1.0em; }
+.tableControlsRight {	flex-grow: 1; }
+
+.ui-state-info-text {
+	color: grey;
+}
+
+.symName { font-style: italic }
+.symName:before { content: " (" }
+.symName:after { content: ")" }
+
+.filterClear {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.commsData { display: table; }
+.commsDataItem { display: table-row; }
+.commsDataItem label { display: table-cell; }
+.commsDataItem span {
+	display: table-cell;
+	width: 100%;
+	padding-left: 0.2em;
+}
+.commsDataItem select { width: 100%; }
+.commsDataItem input[type="number"] { width: 100%; }
+.commsDataItem input[type="text"] { width: 100%; }
+.commsDataItem input { margin-left: 0.1em; }

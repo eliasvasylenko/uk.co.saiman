@@ -1,0 +1,6 @@
+Bundle-Name: SAI :: Data :: Function
+
+Export-Package: \
+	uk.co.saiman.data.function,\
+	uk.co.saiman.data.function.format,\
+	uk.co.saiman.data.function.processing

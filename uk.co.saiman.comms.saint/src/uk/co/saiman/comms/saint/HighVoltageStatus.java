@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,15 +27,13 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.bytes.conversion.Elements;
+import uk.co.saiman.bytes.conversion.Offset;
 
 public class HighVoltageStatus {
-	@Bits(0)
-	public boolean switched24;
+  @Offset(0)
+  public boolean switched24;
 
-	@Bits(1)
-	@Bits(2)
-	@Bits(3)
-	@Bits(4)
-	public boolean[] enable;
+  @Offset(1)
+  public boolean @Elements(4) [] enable;
 }

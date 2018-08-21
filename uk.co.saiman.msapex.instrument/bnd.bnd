@@ -1,0 +1,39 @@
+Bundle-Name: SAI :: MSApex :: Instrument
+
+-include:\
+	${build}/include/eclipse.plugin.bnd,\
+	${build}/include/eclipse.platform.bnd,\
+	${build}/include/eclipse.fx.bnd,\
+	${build}/include/fugue.icons.bnd
+
+-buildpath: \
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.eclipse.fx;version=snapshot,\
+	uk.co.saiman.msapex;version=snapshot,\
+	uk.co.saiman.experiment;version=snapshot,\
+	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.instrument.stage;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+\
+	javax.measure.unit-api
+
+Private-Package: \
+	uk.co.saiman.msapex.instrument
+
+-includeresource: \
+	{always.e4xmi},\
+	{initial.e4xmi},\
+	res,\
+	{css=css}

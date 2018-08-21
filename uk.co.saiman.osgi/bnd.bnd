@@ -1,0 +1,5 @@
+-buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
+
+-sub: *.bnd

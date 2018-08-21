@@ -1,0 +1,28 @@
+Bundle-Name: SAI :: MSApex :: Annotations
+
+-include:\
+	${build}/include/eclipse.platform.bnd,\
+	${build}/include/eclipse.fx.bnd
+
+-buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.data.function;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+	uk.co.saiman.measurement.fx;version=snapshot,\
+\
+	javax.measure.unit-api
+
+Export-Package: uk.co.saiman.msapex.annotations
+
+-includeresource: \
+	{css=css}

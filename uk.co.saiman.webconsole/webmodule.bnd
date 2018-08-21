@@ -1,0 +1,14 @@
+Bundle-Name: SAI :: Web Console
+Bundle-SymbolicName: uk.co.saiman.webconsole
+
+Bundle-Description: \
+	Provides web console console utilities for SAI system administration.
+
+-includeresource: \
+	/OSGI-INF/uk.co.saiman.webmodule/index.js=webmodule/index.js
+
+Import-Package: \
+	org.apache.felix.webconsole
+
+Export-Package: \
+	uk.co.saiman.webconsole

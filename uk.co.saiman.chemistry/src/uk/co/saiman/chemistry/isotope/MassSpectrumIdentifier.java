@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -34,13 +34,13 @@ import java.util.Map;
 import java.util.Vector;
 
 import uk.co.saiman.chemistry.ChemicalComposition;
-import uk.co.strangeskies.mathematics.Range;
+import uk.co.saiman.mathematics.Interval;
 
 public class MassSpectrumIdentifier {
 	private final Vector<MoleculeCompositionConstraint> constraints;
 
 	public MassSpectrumIdentifier() {
-		constraints = new Vector<MoleculeCompositionConstraint>();
+		constraints = new Vector<>();
 	}
 
 	public void clearConstraints() {
@@ -73,7 +73,7 @@ public class MassSpectrumIdentifier {
 	 */
 	public HashMap<HashSet<IsotopeDistribution>, Double> identify(IdealMassSpectrum spectrum) {
 		// preliminary ungrouped results for each constraint
-		HashSet<HashMap<IsotopeDistribution, Double>> ungroupedResults = new HashSet<HashMap<IsotopeDistribution, Double>>();
+		HashSet<HashMap<IsotopeDistribution, Double>> ungroupedResults = new HashSet<>();
 		HashMap<IsotopeDistribution, Double> constraintResult;
 
 		// go through each constraint and find best matches within them
@@ -82,7 +82,7 @@ public class MassSpectrumIdentifier {
 		while (constraintIterator.hasNext()) {
 			constraint = constraintIterator.next();
 
-			constraintResult = new HashMap<IsotopeDistribution, Double>();
+			constraintResult = new HashMap<>();
 
 			// go through each possible molecule from this constraint
 
@@ -113,7 +113,7 @@ public class MassSpectrumIdentifier {
 		 */
 
 		// tree map to return
-		HashMap<HashSet<IsotopeDistribution>, Double> result = new HashMap<HashSet<IsotopeDistribution>, Double>();
+		HashMap<HashSet<IsotopeDistribution>, Double> result = new HashMap<>();
 
 		// TODO make this do it properly...
 		Iterator<Map.Entry<IsotopeDistribution, Double>> constraintResultIterator = ungroupedResults.iterator().next()
@@ -122,7 +122,7 @@ public class MassSpectrumIdentifier {
 			Map.Entry<IsotopeDistribution, Double> entry = constraintResultIterator.next();
 
 			// a result suggesting a distribution combination
-			HashSet<IsotopeDistribution> combinationSet = new HashSet<IsotopeDistribution>();
+			HashSet<IsotopeDistribution> combinationSet = new HashSet<>();
 			if (entry != null && entry.getKey() != null && entry.getValue() != null) {
 				combinationSet.add(entry.getKey());
 				result.put(combinationSet, entry.getValue());
@@ -147,7 +147,7 @@ public class MassSpectrumIdentifier {
 		double scalingFactor = spectrum.getNormalisingConstant() * comparisonSpectrum.getNormalisingConstant();
 
 		// range of intersection
-		Range<Double> intersectionRange = spectrum.getRange().getIntersectionWith(comparisonSpectrum.getRange());
+		Interval<Double> intersectionRange = spectrum.getRange().getIntersectionWith(comparisonSpectrum.getRange());
 
 		double similaritySum = 0;
 		if (!intersectionRange.isEmpty()) {

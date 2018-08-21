@@ -1,0 +1,8 @@
+Bundle-Name: SAI :: Data
+Bundle-SymbolicName: uk.co.saiman.data
+
+Export-Package: \
+	uk.co.saiman.data,\
+	uk.co.saiman.data.format,\
+	uk.co.saiman.data.resource
+

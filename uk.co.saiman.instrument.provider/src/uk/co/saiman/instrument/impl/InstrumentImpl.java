@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,130 +27,112 @@
  */
 package uk.co.saiman.instrument.impl;
 
+import static uk.co.saiman.instrument.InstrumentLifecycleState.BEGIN_OPERATION;
+import static uk.co.saiman.instrument.InstrumentLifecycleState.END_OPERATION;
+import static uk.co.saiman.instrument.InstrumentLifecycleState.OPERATING;
+import static uk.co.saiman.instrument.InstrumentLifecycleState.STANDBY;
+
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 
+import uk.co.saiman.instrument.Device;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
-import uk.co.saiman.instrument.InstrumentLifecycleParticipant;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
-import uk.co.strangeskies.utility.IdentityProperty;
+import uk.co.saiman.instrument.InstrumentRegistration;
+import uk.co.saiman.observable.ObservableProperty;
+import uk.co.saiman.observable.ObservablePropertyImpl;
+import uk.co.saiman.observable.ObservableValue;
 
 /**
  * Reference implementation of {@link Instrument}, as an OSGi service.
+ * 
+ * If more than one instrument exists within the framework, each instance is
+ * responsible for making sure it contains the correct devices. This may be
+ * achieved by e.g. filtering on device components or by subsystem isolation.
  * 
  * @author Elias N Vasylenko
  */
 @Component
 public class InstrumentImpl implements Instrument {
-	private InstrumentLifecycleState state;
-	private final Set<InstrumentLifecycleParticipant> participants;
+  private final Set<DeviceRegistration> devices;
+  private final ObservableProperty<InstrumentLifecycleState> state;
 
-	/**
-	 * Create an empty instrument in standby.
-	 */
-	public InstrumentImpl() {
-		state = InstrumentLifecycleState.STANDBY;
-		participants = new HashSet<>();
-	}
+  /**
+   * Create an empty instrument in standby.
+   */
+  public InstrumentImpl() {
+    devices = new HashSet<>();
+    state = new ObservablePropertyImpl<>(STANDBY);
+  }
 
-	@Override
-	public InstrumentLifecycleState state() {
-		return state;
-	}
+  @Override
+  public Stream<? extends DeviceRegistration> getRegistrations() {
+    return devices.stream();
+  }
 
-	@Override
-	@Reference(cardinality = ReferenceCardinality.MULTIPLE)
-	public synchronized void registerLifecycleParticipant(
-			InstrumentLifecycleParticipant participant) {
-		participants.add(participant);
-		participant.initialise(this);
-	}
+  @Override
+  public synchronized InstrumentRegistration registerDevice(Device device) {
+    DeviceRegistration deviceRegistration = new DeviceRegistration() {
+      @Override
+      public boolean isRegistered() {
+        return devices.contains(this);
+      }
 
-	@Override
-	public synchronized void unregisterLifecycleParticipant(
-			InstrumentLifecycleParticipant participant) {
-		participants.remove(participant);
-	}
+      @Override
+      public Instrument getInstrument() {
+        return InstrumentImpl.this;
+      }
 
-	@Override
-	public synchronized boolean operate() {
-		if (state == InstrumentLifecycleState.OPERATING)
-			return true;
-		else if (transitionToState(InstrumentLifecycleState.BEGIN_OPERATION))
-			return transitionToState(InstrumentLifecycleState.OPERATING);
-		else
-			return false;
-	}
+      @Override
+      public Device getDevice() {
+        return device;
+      }
+    };
 
-	@Override
-	public synchronized void standby() {
-		if (state == InstrumentLifecycleState.OPERATING)
-			if (transitionToState(InstrumentLifecycleState.END_OPERATION))
-				transitionToState(InstrumentLifecycleState.STANDBY);
-	}
+    InstrumentRegistration instrumentRegistration = new InstrumentRegistration() {
+      @Override
+      public void unregister() {
+        devices.remove(deviceRegistration);
+      }
 
-	private synchronized boolean transitionToState(InstrumentLifecycleState state) {
-		return transitionToStateImpl(state);
-	}
+      @Override
+      public DeviceRegistration getDeviceRegistration() {
+        return deviceRegistration;
+      }
+    };
 
-	private boolean transitionToStateImpl(InstrumentLifecycleState state) {
-		IdentityProperty<Boolean> success = new IdentityProperty<>(true);
+    devices.add(deviceRegistration);
 
-		if (this.state == state) {
-			success.set(false);
-		} else {
-			Set<Thread> participatingThreads = new HashSet<>();
+    return instrumentRegistration;
+  }
 
-			for (InstrumentLifecycleParticipant participant : participants) {
-				Thread participatingThread = new Thread(() -> {
-					try {
-						participant.transition(this.state, state);
-					} catch (RuntimeException exception) {
-						synchronized (success) {
-							if (success.get()) {
-								success.set(false);
-								for (Thread executingThread : participatingThreads) {
-									executingThread.interrupt();
-								}
-								this.state = state;
-								transitionToStateImpl(InstrumentLifecycleState.STANDBY);
-							}
-						}
-					}
-				});
-				synchronized (success) {
-					if (success.get()) {
-						participatingThreads.add(participatingThread);
-						participatingThread.start();
-					} else {
-						break;
-					}
-				}
-			}
+  @Override
+  public synchronized void requestOperation() {
+    if (!state.isEqual(OPERATING))
+      if (transitionToState(BEGIN_OPERATION))
+        transitionToState(OPERATING);
+      else
+        transitionToState(STANDBY);
+  }
 
-			for (Thread thread : participatingThreads) {
-				try {
-					/*
-					 * TODO some sort of timeout here: If not in standby, try fall back to
-					 * it. If already going to standby, more severe failure.
-					 */
-					thread.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+  @Override
+  public synchronized void requestStandby() {
+    if (state.isEqual(OPERATING))
+      if (transitionToState(END_OPERATION))
+        transitionToState(STANDBY);
+  }
 
-			synchronized (success) {
-				if (success.get()) {
-					this.state = state;
-				}
-			}
-		}
+  private synchronized boolean transitionToState(InstrumentLifecycleState state) {
+    this.state.set(state);
+    return this.state.isValid();
+  }
 
-		return success.get();
-	}
+  @Override
+  public ObservableValue<InstrumentLifecycleState> lifecycleState() {
+    return state;
+  }
 }

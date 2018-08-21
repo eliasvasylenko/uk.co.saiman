@@ -1,0 +1,8 @@
+Bundle-Name: SAI :: Build
+Bundle-Description: \
+	Scripts and utilities to be available on the build path.
+
+-resourceonly: true
+-includeresource:\
+	ext=${build}/ext,\
+	include=${build}/include

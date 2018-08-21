@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -28,9 +28,9 @@
 package uk.co.saiman.comms.copley;
 
 public enum VariableBank {
-	ACTIVE, DEFAULT;
+	ACTIVE, STORED;
 
 	public boolean getBit() {
-		return this == DEFAULT;
+		return this == STORED;
 	}
 }

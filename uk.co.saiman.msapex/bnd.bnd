@@ -1,15 +1,20 @@
 Bundle-Name: SAI :: MSApex
-Bundle-SymbolicName: ${p};singleton:=true
 
 Export-Package:\
+	uk.co.saiman.msapex.model,\
+	uk.co.saiman.msapex.addons
+
+Private-Package:\
 	uk.co.saiman.msapex
 
 -include:\
-	${include.ss}/eclipse.platform.neon.bnd,\
-	${include.ss}/eclipse.fx.2.4.0.bnd
+	${build}/include/eclipse.platform.bnd,\
+	${build}/include/eclipse.plugin.bnd,\
+	${build}/include/eclipse.fx.bnd,\
+	${build}/include/fugue.icons.bnd
 
 -includeresource:\
-	plugin.xml,\
 	{Application.e4xmi},\
-	css=css,\
-	configuration=configuration
+	{css=css},\
+	res,\
+	OSGI-INF/configurator=configurator

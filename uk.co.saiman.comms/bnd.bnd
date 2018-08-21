@@ -1,40 +1,12 @@
 Bundle-Name: SAI :: Comms
 
 -buildpath: \
-	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.instrument.api;version=snapshot,\
-\
-	uk.co.strangeskies.collections;version=latest,\
-	uk.co.strangeskies.utilities;version=latest,\
-	uk.co.strangeskies.observable;version=latest,\
-	uk.co.strangeskies.reflection;version=latest,\
-	uk.co.strangeskies.text;version=latest,\
-\
-	com.fazecast:jSerialComm,\
-	org.apache.felix.gogo.command,\
-	org.apache.felix.gogo.runtime,\
-	org.apache.felix.gogo.shell,\
-	org.apache.felix.webconsole,\
-	osgi.enroute.gogo.shell.provider
-
--includeresource: \
-	@${repo;com.fazecast:jSerialComm}!/Android/*,\
-	@${repo;com.fazecast:jSerialComm}!/Linux/*,\
-	@${repo;com.fazecast:jSerialComm}!/OSX/*,\
-	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
-	l10n,\
-	static/sai=static
-
-Import-Package: \
-	*
-
-Private-Package: \
-	uk.co.saiman.comms.impl,\
-	uk.co.saiman.comms.serial.impl,\
-\
-	com.fazecast.jSerialComm
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot
 
 Export-Package: \
 	uk.co.saiman.comms,\
-	uk.co.saiman.comms.serial,\
 	uk.co.saiman.comms.rest

@@ -1,0 +1,11 @@
+Bundle-Name: SAI :: Babel :: Transpiler
+
+standalone.version = 6.24.0
+-includeresource: \
+	@${repo;uk.co.saiman.webmodule.babel-standalone.cjs;${standalone.version};lowest}!/static/*
+
+Import-Package: \
+	*
+
+Export-Package: \
+	uk.co.saiman.babel.transpiler

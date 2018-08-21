@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,28 +27,36 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.instrument.stage.XYStageDevice;
+import uk.co.saiman.experiment.VoidExecutionContext;
+import uk.co.saiman.instrument.stage.XYStage;
 
 /**
- * An {@link SampleExperimentType experiment type} for {@link XYStageDevice XY
- * stage devices}.
+ * An {@link SampleExperimentType experiment type} for {@link XYStage XY stage
+ * devices}.
  * 
  * @author Elias N Vasylenko
  *
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public interface XYStageExperimentType<T extends XYStageConfiguration> extends SampleExperimentType<T> {
-	@Override
-	default String getName() {
-		return "XY Sample Stage";
-	}
+public interface XYStageExperimentType<T extends XYStageConfiguration>
+    extends SampleExperimentType<T> {
+  @Override
+  default String getName() {
+    return "XY Sample Stage";
+  }
 
-	XYStageDevice device();
+  XYStage device();
 
-	@Override
-	default void execute(ExperimentExecutionContext<T> context) {
-		device().requestStageOffset(context.node().getState().getX(), context.node().getState().getY());
-	}
+  @Override
+  default void executeVoid(VoidExecutionContext<T> context) {
+    device().requestAnalysisLocation(context.node().getState().location());
+
+    /*
+     * TODO listen for interruption of the stage position and cancel/fail/warn if it
+     * is disturbed. Possibly acquire some sort of lock?
+     */
+
+    context.processChildren();
+  }
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="63927f67-1fd4-4375-aa80-637888daa353">
+  <imports xsi:type="commands:Command" xmi:id="_lO2E4LsZEeel5-btXoqucA" elementId="uk.co.saiman.msapex.command.openselection"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_ri0p8LP-Eeea0psSVURp7w" featurename="addons" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="application:Addon" xmi:id="_t9i_8LP-Eeea0psSVURp7w" elementId="uk.co.saiman.msapex.editor.addon.editor" contributionURI="bundleclass://uk.co.saiman.msapex.editor/uk.co.saiman.msapex.editor.impl.EditorAddon"/>
+    <elements xsi:type="application:Addon" xmi:id="_DfrKoLsQEeel5-btXoqucA" elementId="uk.co.saiman.msapex.editor.addon.editor.file" contributionURI="bundleclass://uk.co.saiman.msapex.editor/uk.co.saiman.msapex.editor.impl.FileEditorAddon"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_h4HZoLsZEeel5-btXoqucA" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Handler" xmi:id="_jl5KELsZEeel5-btXoqucA" elementId="uk.co.saiman.msapex.editor.handler.openselection" contributionURI="bundleclass://uk.co.saiman.msapex.editor/uk.co.saiman.msapex.editor.impl.OpenSelectionHandler" command="_lO2E4LsZEeel5-btXoqucA"/>
+  </fragments>
+</fragment:ModelFragments>

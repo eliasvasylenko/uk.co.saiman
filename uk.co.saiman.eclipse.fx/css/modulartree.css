@@ -1,0 +1,18 @@
+.ModularTreeCell {
+	-fx-padding: 0.2em;
+}
+.ModularTreeCell:drag-over {
+	-fx-border-width: 0.15em;
+	-fx-padding: 0.05em;
+	-fx-border-color: orange;
+}
+.ModularTreeCell:drag-before {
+	-fx-border-width: 0.15em 0 0 0;
+	-fx-padding: 0.05em 0.2em 0.2em 0.2em;
+	-fx-border-color: orange;
+}
+.ModularTreeCell:drag-after {
+	-fx-border-width: 0 0 0.15em 0;
+	-fx-padding: 0.2em 0.2em 0.05em 0.2em;
+	-fx-border-color: orange;
+}

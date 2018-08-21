@@ -1,0 +1,18 @@
+Bundle-Name: SAI :: Mathematics
+Bundle-Description: \
+	A collection of mathematical utilities for Java. Included is a flexible \
+	and performant graph API, and a rich set of composable logic and value \
+	expressions, built on the uk.co.saiman.expressions library.
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.text;version=snapshot
+
+Export-Package: \
+	uk.co.saiman.mathematics,\
+	uk.co.saiman.mathematics.logic,\
+	uk.co.saiman.mathematics.operation,\
+	uk.co.saiman.mathematics.values,\
+	uk.co.saiman.mathematics.values.quantities

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,13 +27,22 @@
  */
 package uk.co.saiman.comms;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 
-import uk.co.strangeskies.observable.Observable;
+import uk.co.saiman.observable.Observable;
 
-public interface CommsChannel extends ByteChannel, Observable<CommsChannel> {
-	int bytesAvailable();
+public interface CommsChannel extends ByteChannel, AutoCloseable, Observable<CommsChannel> {
+  int bytesAvailable();
 
-	@Override
-	void close();
+  default ByteBuffer read() throws IOException {
+    ByteBuffer bytes = ByteBuffer.allocate(bytesAvailable());
+    read(bytes);
+    bytes.flip();
+    return bytes;
+  }
+
+  @Override
+  void close();
 }

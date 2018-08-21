@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,15 +27,15 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
-import uk.co.saiman.comms.BitsConversion;
+import uk.co.saiman.bytes.conversion.Offset;
+import uk.co.saiman.bytes.conversion.Size;
 
 public class I2C {
-	@BitsConversion(size = 4)
-	@Bits(value = 20)
+	@Size(value = 4)
+	@Offset(value = 20)
 	public byte command;
 
-	@BitsConversion(size = 12)
-	@Bits(value = 4)
+	@Size(value = 12)
+	@Offset(value = 4)
 	public int value;
 }

@@ -1,0 +1,15 @@
+Bundle-Name: SAI :: Instrument
+
+-buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.data;version=snapshot
+
+Export-Package: \
+	uk.co.saiman.instrument

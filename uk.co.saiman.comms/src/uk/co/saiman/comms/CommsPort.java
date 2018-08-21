@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,44 +27,50 @@
  */
 package uk.co.saiman.comms;
 
+import java.io.Closeable;
+
 /**
  * Some sort of comms interface which can be opened as a byte channel.
  * 
  * @author Elias N Vasylenko
  */
 public interface CommsPort {
-	String getName();
+  String getName();
 
-	/**
-	 * @return a human readable name for the channel, where available
-	 */
-	@Override
-	String toString();
+  /**
+   * @return a human readable name for the channel, where available
+   */
+  @Override
+  String toString();
 
-	/**
-	 * @return the current status of the channel
-	 */
-	boolean isOpen();
+  /**
+   * @return the current status of the channel
+   */
+  boolean isOpen();
 
-	/**
-	 * Kill any open streams of channels and reset the comms system to it's basic
-	 * disconnected state.
-	 */
-	void close();
+  /**
+   * Kill any open {@link #openChannel() channel} or {@link #openStream() stream}
+   * and reset the comms system to it's basic disconnected state. Generally an
+   * open port should be closed by invoking {@link Closeable#close()} on the open
+   * channel or stream, so as to allow the user to manage their own connection.
+   * This method is only provided to deal with unresponsive or uncooperative
+   * users.
+   */
+  void kill();
 
-	/**
-	 * Open a byte channel over the comms interface. The caller is responsible for
-	 * closing the channel, and has exclusive access to it until this time.
-	 * Successive invocations will fail until the previously returned channel is
-	 * closed.
-	 * 
-	 * @return the opened byte channel
-	 */
-	CommsChannel openChannel();
+  /**
+   * Open a byte channel over the comms interface. The caller is responsible for
+   * closing the channel, and has exclusive access to it until this time.
+   * Successive invocations will fail until the previously returned channel is
+   * closed.
+   * 
+   * @return the opened byte channel
+   */
+  CommsChannel openChannel();
 
-	default CommsStream openStream() {
-		return openStream(0);
-	}
+  default CommsStream openStream() {
+    return openStream(0);
+  }
 
-	CommsStream openStream(int packetSize);
+  CommsStream openStream(int packetSize);
 }

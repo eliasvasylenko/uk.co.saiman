@@ -1,0 +1,10 @@
+Bundle-Name: SAI :: Properties :: Provider
+Bundle-Description: \
+	Service provider for text utilities.
+
+-buildpath: \
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot
+
+Private-Package: uk.co.saiman.properties.provider

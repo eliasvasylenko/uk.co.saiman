@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.measurement;
 
-import java.text.NumberFormat;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.AmountOfSubstance;
@@ -37,28 +35,49 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
-public interface Units {
-	Unit<?> parseUnit(String unit);
+import si.uom.SI;
+import tec.uom.se.AbstractUnit;
 
-	String formatUnit(Unit<?> unit);
+public final class Units {
+  private static final Unit<Dimensionless> COUNT = AbstractUnit.ONE;
 
-	Quantity<?> parseQuantity(String quantity);
+  private static <T extends Quantity<T>> MetricUnitBuilder<T> withMetricUnit(Unit<T> unit) {
+    return new UnitBuilderImpl<>(unit, null);
+  }
 
-	String formatQuantity(Quantity<?> quantity);
+  static <T extends Quantity<T>> UnitBuilder<T> withUnit(Unit<T> unit) {
+    return new UnitBuilderImpl<>(unit, null);
+  }
 
-	String formatQuantity(Quantity<?> quantity, NumberFormat format);
+  public static MetricUnitBuilder<Length> metre() {
+    return withMetricUnit(SI.METRE);
+  }
 
-	UnitBuilder<Dimensionless> count();
+  public static MetricUnitBuilder<Dimensionless> count() {
+    return withMetricUnit(COUNT);
+  }
 
-	UnitBuilder<Dimensionless> percent();
+  public static MetricUnitBuilder<Time> second() {
+    return withMetricUnit(SI.SECOND);
+  }
 
-	UnitBuilder<Mass> dalton();
+  public static UnitBuilder<Dimensionless> percent() {
+    return withMetricUnit(SI.PERCENT);
+  }
 
-	UnitBuilder<Mass> gram();
+  public static MetricUnitBuilder<Mass> dalton() {
+    return withMetricUnit(SI.UNIFIED_ATOMIC_MASS);
+  }
 
-	UnitBuilder<Length> metre();
+  public static MetricUnitBuilder<AmountOfSubstance> mole() {
+    return withMetricUnit(SI.MOLE);
+  }
 
-	UnitBuilder<Time> second();
+  public static MetricUnitBuilder<Mass> gram() {
+    return withMetricUnit(SI.GRAM);
+  }
 
-	UnitBuilder<AmountOfSubstance> mole();
+  public static UnitFormat unitFormat() {
+    return new UnitFormatImpl();
+  }
 }

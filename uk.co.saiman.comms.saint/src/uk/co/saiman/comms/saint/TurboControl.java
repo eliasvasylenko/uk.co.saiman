@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,10 +27,9 @@
  */
 package uk.co.saiman.comms.saint;
 
-import uk.co.saiman.comms.Bits;
+import uk.co.saiman.bytes.conversion.Elements;
+import uk.co.saiman.bytes.conversion.Offset;
 
 public class TurboControl {
-	@Bits(0)
-	@Bits(1)
-	public boolean[] control;
+  public @Offset(1) boolean @Elements(2) [] control;
 }

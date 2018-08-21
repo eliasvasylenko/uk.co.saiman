@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,69 +27,21 @@
  */
 package uk.co.saiman.measurement;
 
-import java.util.function.Function;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
 public interface UnitBuilder<T extends Quantity<T>> {
-	/*
-	 * metric prefixes
-	 */
+  /*
+   * products and powers
+   */
 
-	UnitBuilder<T> yotta();
+  UnitBuilder<?> multiply(UnitBuilder<?> unit);
 
-	UnitBuilder<T> zetta();
+  UnitBuilder<?> divide(UnitBuilder<?> unit);
 
-	UnitBuilder<T> exa();
+  /*
+   * build
+   */
 
-	UnitBuilder<T> peta();
-
-	UnitBuilder<T> tera();
-
-	UnitBuilder<T> giga();
-
-	UnitBuilder<T> mega();
-
-	UnitBuilder<T> kilo();
-
-	UnitBuilder<T> hecto();
-
-	UnitBuilder<T> deka();
-
-	UnitBuilder<T> deci();
-
-	UnitBuilder<T> centi();
-
-	UnitBuilder<T> milli();
-
-	UnitBuilder<T> micro();
-
-	UnitBuilder<T> nano();
-
-	UnitBuilder<T> pico();
-
-	UnitBuilder<T> femto();
-
-	UnitBuilder<T> atto();
-
-	UnitBuilder<T> zepto();
-
-	UnitBuilder<T> yocto();
-
-	/*
-	 * products and powers
-	 */
-
-	UnitBuilder<?> multiply(Function<Units, UnitBuilder<?>> unit);
-
-	UnitBuilder<?> divide(Function<Units, UnitBuilder<?>> unit);
-
-	/*
-	 * build
-	 */
-
-	Unit<T> get();
-
-	Quantity<T> getQuantity(Number amount);
+  Unit<T> getUnit();
 }

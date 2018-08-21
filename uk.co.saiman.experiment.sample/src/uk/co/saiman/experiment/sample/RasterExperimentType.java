@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,8 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.ExperimentExecutionContext;
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.VoidExperimentType;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**
@@ -40,16 +39,11 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public interface RasterExperimentType<T extends RasterConfiguration> extends ExperimentType<T> {
-	@Override
-	default String getName() {
-		return "XY Raster";
-	}
+public interface RasterExperimentType<T extends RasterConfiguration> extends VoidExperimentType<T> {
+  @Override
+  default String getName() {
+    return "XY Raster";
+  }
 
-	RasterDevice device();
-
-	@Override
-	default void execute(ExperimentExecutionContext<T> context) {
-		device().setRasterSize(context.node().getState().getXSteps(), context.node().getState().getYSteps());
-	}
+  RasterDevice device();
 }

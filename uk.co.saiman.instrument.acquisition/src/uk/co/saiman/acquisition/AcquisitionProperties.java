@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,11 +27,7 @@
  */
 package uk.co.saiman.acquisition;
 
-import uk.co.saiman.SaiProperties;
-import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.Nested;
-import uk.co.strangeskies.text.properties.PropertyConfiguration;
-import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.properties.Localized;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -39,26 +35,16 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface AcquisitionProperties {
-	@Nested
-	SaiProperties sai();
+  Localized<String> device();
 
-	Localized<String> device();
+  Localized<String> devices();
 
-	Localized<String> devices();
+  Localized<String> noDevices();
 
-	Localized<String> noDevices();
+  Localized<String> countMustBePositive();
 
-	Localized<String> alreadyAcquiring();
+  Localized<String> noSignal();
 
-	Localized<String> experimentInterrupted();
-
-	Localized<String> unexpectedException();
-
-	Localized<String> countMustBePositive();
-
-	Localized<String> noSignal();
-
-	Localized<String> noAcquisitionDevices();
+  Localized<String> noDevicesSelected();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -27,10 +27,8 @@
  */
 package uk.co.saiman.instrument.stage;
 
-import uk.co.saiman.SaiProperties;
-import uk.co.strangeskies.text.properties.Localized;
-import uk.co.strangeskies.text.properties.PropertyConfiguration;
-import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
+import uk.co.saiman.instrument.sample.SampleDeviceProperties;
+import uk.co.saiman.properties.SaiProperties;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -38,9 +36,8 @@ import uk.co.strangeskies.text.properties.PropertyConfiguration.KeyCase;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
-@PropertyConfiguration(keyCase = KeyCase.LOWER, keySplitString = ".")
 public interface StageProperties {
-	SaiProperties sai();
+  SaiProperties sai();
 
-	Localized<String> noStageDevices();
+  SampleDeviceProperties sample();
 }

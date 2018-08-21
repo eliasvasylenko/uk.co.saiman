@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1534252146962
+Bundle-Copyright: Copyright (c) Scientific Analysis Instruments Limite
+ d (2015, 2018). All Rights Reserved.
+Bundle-Description: A number of powerful reflective utilities over the
+  Java 8 type system, including an implementation of the JLS type infe
+ rence algorithm. Rich and type safe reflection over generic types is 
+ also provided, up to and including generic method/constructor overloa
+ d resolution and invocation type inference.
+Bundle-Developers: eliasvasylenko;email = eliasvasylenko@gmail.com; na
+ me = "Elias N Vasylenko"; organization = "Scientific Analysis Instrum
+ ents Limited"; organizationUrl = http://www.saiman.co.uk; roles = "ar
+ chitect,developer"
+Bundle-DocURL: https://github.com/Scientific-Analysis-Instruments/uk.c
+ o.saiman/wiki
+Bundle-License: GPL; link = http://www.gnu.org/licenses/
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: SAI :: Reflection :: Types
+Bundle-SCM: url = https://github.com/Scientific-Analysis-Instruments/u
+ k.co.saiman, connection = scm:git:https://github.com/Scientific-Analy
+ sis-Instruments/uk.co.saiman.git, developerConnection = scm:git:git@g
+ ithub.com:Scientific-Analysis-Instruments/uk.co.saiman.git
+Bundle-SymbolicName: uk.co.saiman.reflection.token
+Bundle-Vendor: Scientific Analysis Instruments Limited http://www.saim
+ an.co.uk/
+Bundle-Version: 1.0.0.201808141309
+Created-By: 1.8.0_162 (Oracle Corporation)
+Export-Package: uk.co.saiman.reflection.token;version="1.0.0"
+Git-Descriptor: 65881614-dirty
+Git-SHA: 658816144933ba86d31521380bac59e7df2047b8
+Import-Package: uk.co.saiman.collection;version="[1.0,2)",uk.co.saiman
+ .reflection;version="[1.0,2)"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Tool: Bnd-4.1.0.201808140636-SNAPSHOT
+
