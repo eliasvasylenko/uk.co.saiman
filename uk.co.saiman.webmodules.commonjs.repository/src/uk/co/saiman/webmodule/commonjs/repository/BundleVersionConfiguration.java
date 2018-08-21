@@ -41,23 +41,23 @@ import org.json.JSONObject;
 
 import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.PackageId;
-import uk.co.saiman.webmodule.semver.Range;
+import uk.co.saiman.webmodule.commonjs.Dependency;
 
 public class BundleVersionConfiguration {
-  private final Range version;
+  private final Dependency version;
   private final String entryPoint;
   private final ModuleFormat format;
-  private final Map<PackageId, Range> dependencies;
+  private final Map<PackageId, Dependency> dependencies;
 
-  public BundleVersionConfiguration(Range version, ModuleFormat format) {
+  public BundleVersionConfiguration(Dependency version, ModuleFormat format) {
     this(version, null, format, null);
   }
 
   private BundleVersionConfiguration(
-      Range version,
+      Dependency version,
       String entryPoint,
       ModuleFormat format,
-      Map<PackageId, Range> dependencies) {
+      Map<PackageId, Dependency> dependencies) {
     this.version = requireNonNull(version);
     this.entryPoint = entryPoint;
     this.format = requireNonNull(format);
@@ -65,25 +65,26 @@ public class BundleVersionConfiguration {
   }
 
   public static BundleVersionConfiguration loadJson(
+      PackageId id,
       JSONObject configuration,
       ModuleFormat defaultFormat) {
     return new BundleVersionConfiguration(
-        loadVersion(configuration),
+        loadVersion(id, configuration),
         loadEntryPoint(configuration),
         loadFormat(configuration, defaultFormat),
         loadDependencies(configuration));
   }
 
-  public static BundleVersionConfiguration getDefault(ModuleFormat defaultFormat) {
-    return new BundleVersionConfiguration(Range.EMPTY, defaultFormat);
+  public static BundleVersionConfiguration getDefault(PackageId id, ModuleFormat defaultFormat) {
+    return new BundleVersionConfiguration(Dependency.empty(id), defaultFormat);
   }
 
-  private static Range loadVersion(JSONObject configuration) {
+  private static Dependency loadVersion(PackageId id, JSONObject configuration) {
     String range = configuration.optString(VERSION_ATTRIBUTE, null);
     if (range == null) {
       return null;
     } else {
-      return Range.parse(range);
+      return Dependency.parse(id, range);
     }
   }
 
@@ -100,21 +101,23 @@ public class BundleVersionConfiguration {
     }
   }
 
-  private static Map<PackageId, Range> loadDependencies(JSONObject configuration) {
+  private static Map<PackageId, Dependency> loadDependencies(JSONObject configuration) {
     JSONObject dependencies = configuration.optJSONObject(DEPENDENCIES_ATTRIBUTE);
     if (dependencies == null) {
       return null;
     } else {
-      Map<PackageId, Range> dependencyVersions = new HashMap<>();
-      for (String dependency : dependencies.keySet()) {
-        dependencyVersions
-            .put(PackageId.parseId(dependency), Range.parse(dependencies.getString(dependency)));
+      Map<PackageId, Dependency> dependencyVersions = new HashMap<>();
+      for (String dependencyString : dependencies.keySet()) {
+        PackageId id = PackageId.parseId(dependencyString);
+        Dependency dependency = Dependency.parse(id, dependencies.getString(dependencyString));
+
+        dependencyVersions.put(id, dependency);
       }
       return dependencyVersions;
     }
   }
 
-  Range version() {
+  Dependency version() {
     return version;
   }
 
@@ -126,7 +129,7 @@ public class BundleVersionConfiguration {
     return format;
   }
 
-  public Optional<Map<PackageId, Range>> dependencies() {
+  public Optional<Map<PackageId, Dependency>> dependencies() {
     return Optional.ofNullable(dependencies);
   }
 }

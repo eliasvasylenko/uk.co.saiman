@@ -29,7 +29,7 @@ package uk.co.saiman.webmodule.commonjs.repository;
 
 import static java.nio.file.Files.newInputStream;
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.webmodule.commonjs.registry.cache.Cache.getBytes;
+import static uk.co.saiman.webmodule.commonjs.cache.Cache.getBytes;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -47,13 +47,13 @@ import org.osgi.framework.Version;
 
 import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.PackageId;
-import uk.co.saiman.webmodule.commonjs.registry.Archive;
-import uk.co.saiman.webmodule.commonjs.registry.ArchiveType;
-import uk.co.saiman.webmodule.commonjs.registry.PackageVersion;
-import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
-import uk.co.saiman.webmodule.commonjs.registry.cache.Cache;
-import uk.co.saiman.webmodule.commonjs.registry.cache.CacheEntry;
-import uk.co.saiman.webmodule.semver.Range;
+import uk.co.saiman.webmodule.commonjs.Dependency;
+import uk.co.saiman.webmodule.commonjs.PackageVersion;
+import uk.co.saiman.webmodule.commonjs.RegistryResolutionException;
+import uk.co.saiman.webmodule.commonjs.Resource;
+import uk.co.saiman.webmodule.commonjs.ResourceType;
+import uk.co.saiman.webmodule.commonjs.cache.Cache;
+import uk.co.saiman.webmodule.commonjs.cache.CacheEntry;
 
 public class CommonJsBundleVersion {
   private static final String SHASUM_CACHE = ".shasum";
@@ -69,6 +69,7 @@ public class CommonJsBundleVersion {
 
   private final Version version;
 
+  private final ResourceType resourceType;
   private final Cache cache;
   private JSONObject packageJson;
   private Path packageDist;
@@ -85,7 +86,7 @@ public class CommonJsBundleVersion {
     this.packageVersion = version;
 
     this.version = version.getVersion().toOsgiVersion();
-
+    this.resourceType = ResourceType.TARBALL;
     Path cacheRoot = bundle.getRepository().getCache();
     Path cachePath = getSha1()
         .map(sha1 -> cacheRoot.resolve(SHASUM_CACHE).resolve(sha1))
@@ -175,12 +176,12 @@ public class CommonJsBundleVersion {
     return packageVersion.getDependencies();
   }
 
-  public Range getDependencyRange(PackageId module) {
-    return packageVersion.getDependencyRange(module);
+  public Dependency getDependencyVersion(PackageId module) {
+    return packageVersion.getDependency(module);
   }
 
-  public Optional<String> getSha1() {
-    return packageVersion.getSha1().map(String::toUpperCase);
+  private Optional<String> getSha1() {
+    return packageVersion.getResource(resourceType).getSha1();
   }
 
   synchronized JSONObject getPackageJson() {
@@ -196,18 +197,19 @@ public class CommonJsBundleVersion {
 
   private Path fetchPackageJson() throws IOException {
     return cache.fetchResource(PACKAGE_JSON, entry -> {
-      if (packageVersion.getArchives().anyMatch(ArchiveType.TARBALL::equals)) {
-        extractTarballPackageJson(packageVersion.getArchive(ArchiveType.TARBALL), entry);
+      switch (resourceType) {
+      case TARBALL:
+        extractTarballPackageJson(packageVersion.getResource(ResourceType.TARBALL), entry);
 
-      } else {
+      default:
         throw new RegistryResolutionException(
             "No supported archive types amongst candidates "
-                + packageVersion.getArchives().collect(toList()));
+                + packageVersion.getResources().collect(toList()));
       }
     });
   }
 
-  private void extractTarballPackageJson(Archive archive, CacheEntry entry) {
+  private void extractTarballPackageJson(Resource archive, CacheEntry entry) {
     try (TarGzInputStream input = new TarGzInputStream(
         archive.getUrl().openStream(),
         getSha1().orElse(null))) {
@@ -235,18 +237,18 @@ public class CommonJsBundleVersion {
 
   private Path fetchPackageDist() throws IOException {
     return cache.fetchResource(DIST, entry -> {
-      if (packageVersion.getArchives().anyMatch(ArchiveType.TARBALL::equals)) {
-        extractTarballPackageDist(packageVersion.getArchive(ArchiveType.TARBALL), entry);
+      if (packageVersion.getResources().anyMatch(ResourceType.TARBALL::equals)) {
+        extractTarballPackageDist(packageVersion.getResource(ResourceType.TARBALL), entry);
 
       } else {
         throw new RegistryResolutionException(
             "No supported archive types amongst candidates "
-                + packageVersion.getArchives().collect(toList()));
+                + packageVersion.getResources().collect(toList()));
       }
     });
   }
 
-  private void extractTarballPackageDist(Archive archive, CacheEntry entry) {
+  private void extractTarballPackageDist(Resource archive, CacheEntry entry) {
     try (TarGzInputStream input = new TarGzInputStream(
         archive.getUrl().openStream(),
         getSha1().orElse(null))) {

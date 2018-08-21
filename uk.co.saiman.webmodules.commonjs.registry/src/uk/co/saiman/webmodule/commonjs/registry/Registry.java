@@ -30,8 +30,9 @@ package uk.co.saiman.webmodule.commonjs.registry;
 import java.net.URL;
 
 import uk.co.saiman.webmodule.PackageId;
+import uk.co.saiman.webmodule.commonjs.Resolver;
 
-public interface Registry {
+public interface Registry extends Resolver {
   PackageRoot getPackageRoot(PackageId name);
 
   URL getURL();

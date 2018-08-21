@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.webmodules.commonjs.registry.provider.
+ * This file is part of uk.co.saiman.webmodules.commonjs.registry.
  *
- * uk.co.saiman.webmodules.commonjs.registry.provider is free software: you can redistribute it and/or modify
+ * uk.co.saiman.webmodules.commonjs.registry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.webmodules.commonjs.registry.provider is distributed in the hope that it will be useful,
+ * uk.co.saiman.webmodules.commonjs.registry is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.webmodule.commonjs.registry.impl;
+package uk.co.saiman.webmodule.commonjs.registry;
 
 import java.io.IOException;
 import java.net.URL;
@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -44,8 +45,9 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.webmodule.PackageId;
-import uk.co.saiman.webmodule.commonjs.registry.PackageRoot;
-import uk.co.saiman.webmodule.commonjs.registry.Registry;
+import uk.co.saiman.webmodule.commonjs.Dependency;
+import uk.co.saiman.webmodule.commonjs.DependencyKind;
+import uk.co.saiman.webmodule.commonjs.PackageVersion;
 
 @RequireHttpWhiteboard
 @Designate(ocd = RegistryImpl.CommonJsRegistryConfiguration.class, factory = true)
@@ -102,7 +104,7 @@ public class RegistryImpl implements Registry {
       synchronized (lock) {
         root = packageRoots.get(name);
         if (root == null) {
-          root = new PackageRootImpl(registryRoot, localCache, name);
+          root = new RegistryPackageRoot(registryRoot, localCache, name);
           synchronized (packageLocks) {
             packageRoots.put(name, root);
             packageLocks.remove(name);
@@ -111,5 +113,13 @@ public class RegistryImpl implements Registry {
       }
     }
     return root;
+  }
+
+  @Override
+  public Stream<PackageVersion> resolve(Dependency dependency) {
+    return dependency.getVersion(DependencyKind.VERSION_RANGE).map(range -> {
+      PackageRoot root = getPackageRoot(dependency.getPackageId());
+      return root.getPackageVersions().filter(range::matches).map(root::getPackageVersion);
+    }).orElse(Stream.empty());
   }
 }

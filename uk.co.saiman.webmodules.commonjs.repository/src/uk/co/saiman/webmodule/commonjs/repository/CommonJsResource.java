@@ -60,7 +60,7 @@ import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.WebModule;
 import uk.co.saiman.webmodule.WebModuleConstants;
-import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodule.commonjs.RegistryResolutionException;
 
 public class CommonJsResource implements Resource {
   private final PackageId name;

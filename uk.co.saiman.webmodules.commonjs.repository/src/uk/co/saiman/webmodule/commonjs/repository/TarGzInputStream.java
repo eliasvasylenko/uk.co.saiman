@@ -40,7 +40,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
-import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
+import uk.co.saiman.webmodule.commonjs.RegistryResolutionException;
 
 class TarGzInputStream extends TarArchiveInputStream {
   private static final int BUFFER_SIZE = 1024;

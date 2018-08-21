@@ -27,10 +27,16 @@
  */
 package uk.co.saiman.webmodule.commonjs.repository;
 
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.log.Log.Level.WARN;
+import static uk.co.saiman.webmodule.commonjs.DependencyKind.GIT;
+import static uk.co.saiman.webmodule.commonjs.DependencyKind.URI;
+import static uk.co.saiman.webmodule.commonjs.DependencyKind.VERSION_RANGE;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +44,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.log.Log;
-import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.PackageId;
+import uk.co.saiman.webmodule.commonjs.Dependency;
+import uk.co.saiman.webmodule.commonjs.PackageVersion;
 import uk.co.saiman.webmodule.commonjs.registry.PackageRoot;
-import uk.co.saiman.webmodule.commonjs.registry.PackageVersion;
 import uk.co.saiman.webmodule.semver.Range;
 import uk.co.saiman.webmodule.semver.Version;
 
@@ -64,12 +70,32 @@ public class CommonJsBundle {
     this.resources = new HashMap<>();
   }
 
+  void configureDependency(Dependency dependency) {
+    if (dependency.getKind() == VERSION_RANGE) {
+      configureVersions(dependency.getVersion(VERSION_RANGE).get());
+
+    } else if (dependency.getKind() == GIT) {
+      configureGit(dependency.getVersion(GIT).get());
+
+    } else if (dependency.getKind() == URI) {
+      configureGit(dependency.getVersion(URI).get());
+    }
+  }
+
   void configureVersions(Range version) {
     packageRoot
         .getPackageVersions()
         .parallel()
         .filter(version::matches)
         .forEach(this::configureVersion);
+  }
+
+  void configureGit(URI gitUri) {
+    getLog().log(WARN, format("Unsupported git dependency %s in repo %s", gitUri, getRepository()));
+  }
+
+  void configureUri(URI uri) {
+    getLog().log(WARN, format("Unsupported URI dependency %s in repo %s", uri, getRepository()));
   }
 
   private void configureVersion(Version version) {
@@ -79,14 +105,15 @@ public class CommonJsBundle {
       try {
         bundleVersion = fetchVersion(version);
       } catch (Exception e) {
-        getLog().log(Level.WARN, "Cannot initialize version " + version, e);
+        getLog().log(WARN, "Cannot initialize version " + version, e);
         return;
       }
 
       CommonJsBundleVersion bundleVersionFinal = bundleVersion;
-      bundleVersionFinal.getDependencies().forEach(dependency -> {
-        repository.configureBundle(dependency, bundleVersionFinal.getDependencyRange(dependency));
-      });
+      bundleVersionFinal
+          .getDependencies()
+          .map(bundleVersionFinal::getDependencyVersion)
+          .forEach(repository::configureBundle);
     }
   }
 

@@ -75,7 +75,7 @@ import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.text.Glob;
 import uk.co.saiman.webmodule.ModuleFormat;
-import uk.co.saiman.webmodule.commonjs.registry.impl.RegistryImpl;
+import uk.co.saiman.webmodule.commonjs.registry.RegistryImpl;
 import uk.co.saiman.webmodule.commonjs.repository.CommonJsBundle;
 import uk.co.saiman.webmodule.commonjs.repository.CommonJsBundleVersion;
 import uk.co.saiman.webmodule.commonjs.repository.CommonJsJar;

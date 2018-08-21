@@ -29,7 +29,6 @@ package uk.co.saiman.webmodule.commonjs.repository;
 
 import static java.lang.Character.isBmpCodePoint;
 import static java.lang.String.format;
-import static java.nio.file.Files.walk;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
@@ -37,7 +36,7 @@ import static org.osgi.framework.Constants.FILTER_DIRECTIVE;
 import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
 import static uk.co.saiman.webmodule.WebModuleConstants.ID_ATTRIBUTE;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
-import static uk.co.saiman.webmodule.commonjs.registry.cache.Retention.WEAK;
+import static uk.co.saiman.webmodule.commonjs.cache.Retention.WEAK;
 import static uk.co.saiman.webmodule.commonjs.repository.CommonJsBundleVersion.PACKAGE_ROOT;
 import static uk.co.saiman.webmodule.commonjs.repository.CommonJsBundleVersion.RESOURCE_ROOT;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION;
@@ -77,8 +76,8 @@ import net.bytebuddy.description.type.TypeDescription.ForLoadedType;
 import net.bytebuddy.dynamic.DynamicType.Unloaded;
 import net.bytebuddy.implementation.attribute.AnnotationValueFilter;
 import uk.co.saiman.webmodule.PackageId;
-import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
-import uk.co.saiman.webmodule.commonjs.registry.cache.Cache;
+import uk.co.saiman.webmodule.commonjs.RegistryResolutionException;
+import uk.co.saiman.webmodule.commonjs.cache.Cache;
 import uk.co.saiman.webmodule.extender.RequireWebModuleExtender;
 
 public class CommonJsJar {
@@ -166,7 +165,7 @@ public class CommonJsJar {
         try (Jar jar = new Jar(bsn)) {
           jar.setManifest(manifest);
 
-          walk(resources).filter(Files::isRegularFile).forEach(file -> {
+          Files.walk(resources).filter(Files::isRegularFile).forEach(file -> {
             try {
               String location = Paths
                   .get(RESOURCE_ROOT)

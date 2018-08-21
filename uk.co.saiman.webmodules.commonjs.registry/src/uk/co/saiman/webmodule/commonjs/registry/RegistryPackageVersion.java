@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.webmodules.commonjs.registry.provider.
+ * This file is part of uk.co.saiman.webmodules.commonjs.registry.
  *
- * uk.co.saiman.webmodules.commonjs.registry.provider is free software: you can redistribute it and/or modify
+ * uk.co.saiman.webmodules.commonjs.registry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.webmodules.commonjs.registry.provider is distributed in the hope that it will be useful,
+ * uk.co.saiman.webmodules.commonjs.registry is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,11 +25,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.webmodule.commonjs.registry.impl;
+package uk.co.saiman.webmodule.commonjs.registry;
 
 import static java.util.Arrays.stream;
-import static uk.co.saiman.webmodule.commonjs.registry.cache.Cache.getBytes;
-import static uk.co.saiman.webmodule.commonjs.registry.cache.Retention.STRONG;
+import static uk.co.saiman.webmodule.commonjs.cache.Cache.getBytes;
+import static uk.co.saiman.webmodule.commonjs.cache.Retention.STRONG;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,22 +40,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import uk.co.saiman.webmodule.PackageId;
-import uk.co.saiman.webmodule.commonjs.registry.Archive;
-import uk.co.saiman.webmodule.commonjs.registry.ArchiveType;
-import uk.co.saiman.webmodule.commonjs.registry.PackageVersion;
-import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
-import uk.co.saiman.webmodule.commonjs.registry.cache.Cache;
-import uk.co.saiman.webmodule.semver.Range;
+import uk.co.saiman.webmodule.commonjs.Dependency;
+import uk.co.saiman.webmodule.commonjs.PackageVersion;
+import uk.co.saiman.webmodule.commonjs.RegistryResolutionException;
+import uk.co.saiman.webmodule.commonjs.Resource;
+import uk.co.saiman.webmodule.commonjs.ResourceType;
+import uk.co.saiman.webmodule.commonjs.cache.Cache;
 import uk.co.saiman.webmodule.semver.Version;
 
-public class PackageVersionImpl implements PackageVersion {
+public class RegistryPackageVersion implements PackageVersion {
   private static final String LOCAL_FILE = "packageVersion.json";
   private static final String DEPENDENCIES_KEY = "dependencies";
   private static final String DIST_KEY = "dist";
@@ -64,10 +63,10 @@ public class PackageVersionImpl implements PackageVersion {
   private final PackageId name;
   private final Version version;
   private final String sha1;
-  private final Map<ArchiveType, String> archives;
-  private final Map<PackageId, Range> dependencies;
+  private final Map<ResourceType, String> archives;
+  private final Map<PackageId, Dependency> dependencies;
 
-  public PackageVersionImpl(JSONObject object, PackageId name, Version version) {
+  public RegistryPackageVersion(JSONObject object, PackageId name, Version version) {
     this.name = name;
     this.version = version;
 
@@ -76,7 +75,7 @@ public class PackageVersionImpl implements PackageVersion {
     this.sha1 = loadObject(object);
   }
 
-  public PackageVersionImpl(URL remote, Path local, PackageId name, Version version) {
+  public RegistryPackageVersion(URL remote, Path local, PackageId name, Version version) {
     this.name = name;
     this.version = version;
 
@@ -122,16 +121,18 @@ public class PackageVersionImpl implements PackageVersion {
   private String loadObject(JSONObject object) {
     JSONObject dependencies = object.optJSONObject(DEPENDENCIES_KEY);
     if (dependencies != null) {
-      for (String dependency : dependencies.keySet()) {
-        this.dependencies
-            .put(PackageId.parseId(dependency), Range.parse(dependencies.getString(dependency)));
+      for (String dependencyId : dependencies.keySet()) {
+        PackageId id = PackageId.parseId(dependencyId);
+        Dependency dependency = Dependency.parse(id, dependencies.getString(dependencyId));
+
+        this.dependencies.put(id, dependency);
       }
     }
 
     JSONObject dist = object.optJSONObject(DIST_KEY);
     if (dist != null) {
       for (String archiveType : dist.keySet()) {
-        stream(ArchiveType.values())
+        stream(ResourceType.values())
             .filter(a -> a.typeName().equals(archiveType.trim()))
             .findFirst()
             .ifPresent(type -> archives.put(type, dist.getString(archiveType)));
@@ -152,24 +153,21 @@ public class PackageVersionImpl implements PackageVersion {
   }
 
   @Override
-  public Optional<String> getSha1() {
-    return Optional.ofNullable(sha1);
-  }
-
-  @Override
-  public Stream<ArchiveType> getArchives() {
+  public Stream<ResourceType> getResources() {
     return archives.keySet().stream();
   }
 
   @Override
-  public synchronized Archive getArchive(ArchiveType type) {
+  public synchronized Resource getResource(ResourceType type) {
     String archiveUrl = archives.get(type);
 
     if (archiveUrl == null) {
       throw new RegistryResolutionException("Cannot locate archive type " + type);
     }
 
-    return new ArchiveImpl(archiveUrl, type);
+    return sha1 == null
+        ? new RegistryResource(archiveUrl, type)
+        : new RegistryResource(archiveUrl, type, sha1);
   }
 
   @Override
@@ -178,8 +176,8 @@ public class PackageVersionImpl implements PackageVersion {
   }
 
   @Override
-  public Range getDependencyRange(PackageId module) {
-    Range range = dependencies.get(module);
+  public Dependency getDependency(PackageId module) {
+    Dependency range = dependencies.get(module);
 
     if (range == null) {
       throw new RegistryResolutionException("Cannot locate dependency " + module);

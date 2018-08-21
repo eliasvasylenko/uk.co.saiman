@@ -11,6 +11,7 @@ Export-Package: uk.co.saiman.webmodule.commonjs.repository
 	uk.co.saiman.webmodules.semver;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.webmodules.commonjs;version=snapshot,\
 	uk.co.saiman.webmodules.commonjs.registry;version=snapshot,\
 \
 	biz.aQute.bndlib;version=latest,\

@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.webmodules.commonjs.registry.provider.
+ * This file is part of uk.co.saiman.webmodules.commonjs.registry.
  *
- * uk.co.saiman.webmodules.commonjs.registry.provider is free software: you can redistribute it and/or modify
+ * uk.co.saiman.webmodules.commonjs.registry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.webmodules.commonjs.registry.provider is distributed in the hope that it will be useful,
+ * uk.co.saiman.webmodules.commonjs.registry is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,10 +25,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.webmodule.commonjs.registry.impl;
+package uk.co.saiman.webmodule.commonjs.registry;
 
-import static uk.co.saiman.webmodule.commonjs.registry.cache.Cache.getBytes;
-import static uk.co.saiman.webmodule.commonjs.registry.cache.Retention.STRONG;
+import static uk.co.saiman.webmodule.commonjs.cache.Cache.getBytes;
+import static uk.co.saiman.webmodule.commonjs.cache.Retention.STRONG;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,13 +47,12 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import uk.co.saiman.webmodule.PackageId;
-import uk.co.saiman.webmodule.commonjs.registry.PackageRoot;
-import uk.co.saiman.webmodule.commonjs.registry.PackageVersion;
-import uk.co.saiman.webmodule.commonjs.registry.RegistryResolutionException;
-import uk.co.saiman.webmodule.commonjs.registry.cache.Cache;
+import uk.co.saiman.webmodule.commonjs.PackageVersion;
+import uk.co.saiman.webmodule.commonjs.RegistryResolutionException;
+import uk.co.saiman.webmodule.commonjs.cache.Cache;
 import uk.co.saiman.webmodule.semver.Version;
 
-public class PackageRootImpl implements PackageRoot {
+public class RegistryPackageRoot implements PackageRoot {
   private static final String LOCAL_FILE = "packageRoot.json";
   private static final String VERSIONS_KEY = "versions";
 
@@ -61,9 +60,9 @@ public class PackageRootImpl implements PackageRoot {
   private final Path local;
   private final PackageId name;
   private final Set<Version> versions;
-  private final Map<Version, PackageVersionImpl> inlineVersions;
+  private final Map<Version, RegistryPackageVersion> inlineVersions;
 
-  public PackageRootImpl(URL remote, Path local, PackageId name) {
+  public RegistryPackageRoot(URL remote, Path local, PackageId name) {
     this.name = name;
 
     try {
@@ -112,7 +111,7 @@ public class PackageRootImpl implements PackageRoot {
 
       JSONObject packageVersion = versions.optJSONObject(versionString);
       if (packageVersion != null) {
-        this.inlineVersions.put(version, new PackageVersionImpl(packageVersion, name, version));
+        this.inlineVersions.put(version, new RegistryPackageVersion(packageVersion, name, version));
       }
     }
   }
@@ -128,18 +127,13 @@ public class PackageRootImpl implements PackageRoot {
   }
 
   @Override
-  public Path getLocal() {
-    return local.resolve(LOCAL_FILE);
-  }
-
-  @Override
   public synchronized Stream<Version> getPackageVersions() {
     return versions.stream();
   }
 
   @Override
   public PackageVersion getPackageVersion(Version version) {
-    PackageVersionImpl inlineVersion = inlineVersions.get(version);
+    RegistryPackageVersion inlineVersion = inlineVersions.get(version);
     if (inlineVersion != null) {
       return inlineVersion;
     }
@@ -148,6 +142,6 @@ public class PackageRootImpl implements PackageRoot {
       throw new RegistryResolutionException("Cannot locate package version " + version);
     }
 
-    return new PackageVersionImpl(remote, local, name, version);
+    return new RegistryPackageVersion(remote, local, name, version);
   }
 }

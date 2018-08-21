@@ -53,9 +53,9 @@ import aQute.bnd.osgi.repository.BaseRepository;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.webmodule.PackageId;
+import uk.co.saiman.webmodule.commonjs.Dependency;
 import uk.co.saiman.webmodule.commonjs.registry.PackageRoot;
 import uk.co.saiman.webmodule.commonjs.registry.Registry;
-import uk.co.saiman.webmodule.semver.Range;
 
 /**
  * An OSGi repository implementation backed by a CommonJS registry.
@@ -202,22 +202,22 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     configuration
         .getInitialBundleConfigurations()
         .parallel()
-        .forEach(c -> configureBundle(c.getId(), c.getInitialVersionConfigurationRange()));
+        .forEach(c -> configureBundle(c.getInitialVersionConfigurationRange()));
   }
 
-  void configureBundle(PackageId id, Range range) {
-    CommonJsBundle bundle = resources.get(id);
+  void configureBundle(Dependency dependency) {
+    CommonJsBundle bundle = resources.get(dependency.getPackageId());
 
     if (bundle == null) {
       try {
-        bundle = fetchBundle(id);
+        bundle = fetchBundle(dependency.getPackageId());
       } catch (Exception e) {
         getLog().log(Level.WARN, "Cannot initialize bundles " + configuration, e);
         return;
       }
     }
 
-    bundle.configureVersions(range);
+    bundle.configureDependency(dependency);
   }
 
   private CommonJsBundle fetchBundle(PackageId id) {

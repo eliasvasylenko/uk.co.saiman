@@ -21,9 +21,9 @@ Private-Package: \
 	uk.co.saiman.webmodule,\
 	uk.co.saiman.webmodule.extender,\
 	uk.co.saiman.webmodule.semver,\
+	uk.co.saiman.webmodule.commonjs,\
+	uk.co.saiman.webmodule.commonjs.cache,\
 	uk.co.saiman.webmodule.commonjs.registry,\
-	uk.co.saiman.webmodule.commonjs.registry.cache,\
-	uk.co.saiman.webmodule.commonjs.registry.impl,\
 	uk.co.saiman.webmodule.commonjs.repository,\
 	uk.co.saiman.webmodule.commonjs.repository.bnd
 
@@ -31,8 +31,8 @@ Private-Package: \
 	uk.co.saiman.bytes;version=snapshot,\
 	uk.co.saiman.webmodules;version=snapshot,\
 	uk.co.saiman.webmodules.semver;version=snapshot,\
+	uk.co.saiman.webmodules.commonjs;version=snapshot,\
 	uk.co.saiman.webmodules.commonjs.registry;version=snapshot,\
-	uk.co.saiman.webmodules.commonjs.registry.provider;version=snapshot,\
 	uk.co.saiman.webmodules.commonjs.repository;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
