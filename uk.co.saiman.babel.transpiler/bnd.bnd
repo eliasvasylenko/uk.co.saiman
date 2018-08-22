@@ -2,7 +2,7 @@ Bundle-Name: SAI :: Babel :: Transpiler
 
 standalone.version = 6.24.0
 -includeresource: \
-	@${repo;uk.co.saiman.webmodule.babel-standalone.cjs;${standalone.version};lowest}!/static/*
+	@${repo;uk.co.saiman.webmodule.babel-standalone.cjs;${standalone.version}}!/static/*
 
 Import-Package: \
 	*
