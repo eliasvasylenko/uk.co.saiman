@@ -119,7 +119,8 @@ Bundle-Developers:\
 \
 		aQute.bnd.repository.p2.provider.P2Repository;\
 			name				=		"Eclipse Photon Simultaneous Release";\
-			url					=		http://download.eclipse.org/releases/photon
+			url					=		http://download.eclipse.org/releases/photon;\
+			location			=		${build}/cache/eclipse-platform
 #			url					=		${fileuri;${build}/eclipse.platform.target};\
 #			targetPlatform		=		true
 
@@ -127,7 +128,8 @@ Bundle-Developers:\
 \
 		aQute.bnd.repository.p2.provider.P2Repository;\
 			name				=		"E(fx)clipse Runtime Nightly (3.3.0+)";\
-			url					=       http://download.eclipse.org/efxclipse/runtime-nightly/site/
+			url					=       http://download.eclipse.org/efxclipse/runtime-nightly/site/;\
+			location			=		${build}/cache/eclipse-fx
 
 ## Run requirement groups:
 -runrequires.base:\
