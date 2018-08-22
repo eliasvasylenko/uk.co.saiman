@@ -1,11 +1,10 @@
-Bundle-Name: SAI :: CommonJS :: Registry :: API
+Bundle-Name: SAI :: CommonJS :: API
 
 Bundle-Description: \
 	Provides Java API for interacting with CommonsJS registries
 
 Export-Package: \
 	uk.co.saiman.webmodule.commonjs,\
-	uk.co.saiman.webmodule.commonjs.registry,\
 	uk.co.saiman.webmodule.commonjs.cache
 
 -buildpath: \

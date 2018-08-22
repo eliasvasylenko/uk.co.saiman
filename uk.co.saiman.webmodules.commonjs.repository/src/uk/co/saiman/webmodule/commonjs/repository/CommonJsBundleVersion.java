@@ -200,6 +200,7 @@ public class CommonJsBundleVersion {
       switch (resourceType) {
       case TARBALL:
         extractTarballPackageJson(packageVersion.getResource(ResourceType.TARBALL), entry);
+        break;
 
       default:
         throw new RegistryResolutionException(
