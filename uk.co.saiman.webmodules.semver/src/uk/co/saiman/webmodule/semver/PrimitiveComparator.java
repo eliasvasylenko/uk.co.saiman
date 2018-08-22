@@ -52,7 +52,7 @@ public class PrimitiveComparator {
     Operator operator = Stream
         .of(GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL, GREATER_THAN, LESS_THAN, EQUAL)
         .filter(o -> comparatorString.startsWith(o.getSymbol()))
-        .findAny()
+        .findFirst()
         .orElseThrow(
             () -> new IllegalArgumentException(
                 "invalid primitive comparator \"" + comparatorString + "\": invalid format"));

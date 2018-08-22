@@ -65,7 +65,19 @@ public class ComparatorSet {
   }
 
   public boolean matches(Version version) {
-    return comparators.stream().allMatch(c -> c.matches(version));
+    return comparators.stream().allMatch(c -> c.matches(version))
+        && filterPreReleaseVersions(version);
+  }
+
+  private boolean filterPreReleaseVersions(Version version) {
+    if (version.isRelease())
+      return true;
+
+    return comparators
+        .stream()
+        .flatMap(AdvancedComparator::getPrimitiveComparators)
+        .map(PrimitiveComparator::getVersion)
+        .anyMatch(v -> !v.isRelease() && v.withoutPreRelease().equals(version.withoutPreRelease()));
   }
 
   public Filter toOsgiFilter() throws InvalidSyntaxException {
