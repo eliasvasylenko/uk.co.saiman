@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: CommonJS :: Registry :: API
+Bundle-Name: SAI :: CommonJS :: API
 
 Bundle-Description: \
 	Provides Java API for interacting with CommonsJS registries
