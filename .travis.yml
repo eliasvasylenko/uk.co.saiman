@@ -33,3 +33,5 @@ after_success:
 cache:
   directories:
     - ./cnf/cache
+    - $HOME/.bnd/
+    - $HOME/.p2/
