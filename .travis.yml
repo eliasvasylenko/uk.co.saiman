@@ -34,3 +34,5 @@ cache:
   directories:
     - ./cnf/cache
     - $HOME/.bnd/
+    - $HOME/.m2/
+    - $HOME/.p2/
