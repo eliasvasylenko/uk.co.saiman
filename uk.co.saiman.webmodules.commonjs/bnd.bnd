@@ -5,7 +5,6 @@ Bundle-Description: \
 
 Export-Package: \
 	uk.co.saiman.webmodule.commonjs,\
-	uk.co.saiman.webmodule.commonjs.registry,\
 	uk.co.saiman.webmodule.commonjs.cache
 
 -buildpath: \

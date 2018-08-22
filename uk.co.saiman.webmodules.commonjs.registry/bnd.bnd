@@ -3,7 +3,8 @@ Bundle-Name: SAI :: CommonJS :: Registry :: Provider
 Bundle-Description: \
 	Provides a Java implementation for interacting with CommonsJS registries
 
-Export-Package: uk.co.saiman.webmodule.commonjs.registry
+Export-Package: \
+	uk.co.saiman.webmodule.commonjs.registry
 
 -buildpath: \
 	uk.co.saiman.bytes;version=snapshot,\
@@ -12,5 +13,4 @@ Export-Package: uk.co.saiman.webmodule.commonjs.registry
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.webmodules.commonjs;version=snapshot,\
-\
 	json;version=latest
