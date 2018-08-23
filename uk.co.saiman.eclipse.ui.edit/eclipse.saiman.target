@@ -408,10 +408,10 @@
 		<plugin id="org.eclipse.help.webapp"/>
 		<plugin id="org.eclipse.help.webapp.source"/>
 		<plugin id="org.eclipse.jdt"/>
-		<plugin id="org.eclipse.jdt.annotation" version="2.2.100.v20180626-0953"/>
 		<plugin id="org.eclipse.jdt.annotation" version="1.1.300.v20180612-0641"/>
-		<plugin id="org.eclipse.jdt.annotation.source" version="2.2.100.v20180626-0953"/>
+		<plugin id="org.eclipse.jdt.annotation" version="2.2.100.v20180626-0953"/>
 		<plugin id="org.eclipse.jdt.annotation.source" version="1.1.300.v20180612-0641"/>
+		<plugin id="org.eclipse.jdt.annotation.source" version="2.2.100.v20180626-0953"/>
 		<plugin id="org.eclipse.jdt.apt.core"/>
 		<plugin id="org.eclipse.jdt.apt.core.source"/>
 		<plugin id="org.eclipse.jdt.apt.pluggable.core"/>
@@ -797,10 +797,10 @@
 		<plugin id="uk.co.saiman.data"/>
 		<plugin id="org.w3c.dom.svg"/>
 		<plugin id="uk.co.saiman.collections"/>
-		<plugin id="uk.co.saiman.eclipse.ui.edit"/>
 		<plugin id="uk.co.saiman.utilities"/>
 		<plugin id="uk.co.saiman.reflection.token"/>
 		<plugin id="uk.co.saiman.reflection"/>
 		<plugin id="uk.co.saiman.eclipse.ui"/>
+		<plugin id="uk.co.saiman.eclipse.ui.edit"/>
 	</includeBundles>
 </target>

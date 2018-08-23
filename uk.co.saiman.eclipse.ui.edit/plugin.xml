@@ -19,4 +19,21 @@
                org.eclipse.emf.edit.provider.IItemPropertySource"/>
    </extension>
 
+   <extension
+         point="org.eclipse.e4.tools.emf.ui.editors">
+      <contributionClassCreator
+            class="uk.co.saiman.eclipse.model.ui.provider.editor.ContributionClassCreator">
+      </contributionClassCreator>
+      <editor
+            descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.TreeEditorDescriptor">
+      </editor>
+   </extension>
+
+   <extension
+         point="org.eclipse.e4.workbench.model.definition.enrichment">
+      <definitionEnrichment
+            ePackageNS="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui">
+      </definitionEnrichment>
+   </extension>
+
 </plugin>

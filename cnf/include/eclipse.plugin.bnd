@@ -6,6 +6,11 @@
 # We do this so we can add singleton:=true on the end for silly equinox.
 Bundle-SymbolicName: ${p}${bsn.sub.bundle};singleton:=true
 
+# Some internals expect this location specifically, for some reason
+Bundle-Localization: plugin
+
+Bundle-ActivationPolicy: lazy
+
 # bnd.bnd files seem to error on ${thisfile}, which is no good
 -fixupmessages.thisfile:\
 	\\\\$\\{thisfile\\} executed on a processor without a properties file,\

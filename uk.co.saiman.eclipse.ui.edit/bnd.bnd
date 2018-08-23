@@ -16,13 +16,26 @@ Bundle-Description: \
 	uk.co.saiman.osgi;version=snapshot,\
 	org.eclipse.emf.common,\
 	org.eclipse.emf.ecore,\
-	org.eclipse.emf.edit
+	org.eclipse.emf.edit,\
+	org.eclipse.emf.databinding,\
+	org.eclipse.emf.databinding.edit,\
+	org.eclipse.e4.tools,\
+	org.eclipse.e4.tools.services,\
+	org.eclipse.e4.tools.emf.ui,\
+	org.eclipse.e4.tools.emf.editor3x,\
+	org.eclipse.pde.core,\
+	org.eclipse.core.resources,\
+	org.eclipse.swt.gtk.linux.x86_64,\
+	org.eclipse.jdt.ui,\
+	org.eclipse.jdt.core,\
+	org.eclipse.jface.databinding
 
 Export-Package: \
-	uk.co.saiman.eclipse.model.ui.provider
+	uk.co.saiman.eclipse.model.ui.provider,\
+	uk.co.saiman.eclipse.model.ui.provider.editor
 
 -includeresource: \
-	OSGI-INF/l10n/bundle.properties=plugin.properties,\
+	plugin.properties,\
 	plugin.xml,\
 	icons=icons
 
@@ -32,5 +45,6 @@ Require-Bundle:\
 	uk.co.saiman.eclipse.ui;visibility:=reexport,\
 	org.eclipse.emf.edit;visibility:=reexport,\
 	org.eclipse.e4.ui.model.workbench;visibility:=reexport
+
 Bundle-Activator: uk.co.saiman.eclipse.model.ui.provider.UISaimanEditPlugin$Implementation
  
