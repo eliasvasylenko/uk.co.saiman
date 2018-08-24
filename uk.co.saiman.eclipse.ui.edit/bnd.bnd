@@ -24,6 +24,7 @@ Bundle-Description: \
 	org.eclipse.e4.tools.emf.ui,\
 	org.eclipse.e4.tools.emf.editor3x,\
 	org.eclipse.pde.core,\
+	org.eclipse.core.jobs,\
 	org.eclipse.core.resources,\
 	org.eclipse.swt.gtk.linux.x86_64,\
 	org.eclipse.jdt.ui,\
@@ -47,4 +48,3 @@ Require-Bundle:\
 	org.eclipse.e4.ui.model.workbench;visibility:=reexport
 
 Bundle-Activator: uk.co.saiman.eclipse.model.ui.provider.UISaimanEditPlugin$Implementation
- 
