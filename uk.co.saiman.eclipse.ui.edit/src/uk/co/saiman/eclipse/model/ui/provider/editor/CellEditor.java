@@ -1,3 +1,30 @@
+/*
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.eclipse.ui.edit.
+ *
+ * uk.co.saiman.eclipse.ui.edit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.eclipse.ui.edit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
 import static java.util.stream.Collectors.toList;
@@ -65,7 +92,8 @@ public class CellEditor extends AbstractEditor {
 
   private static final String VIRTUAL_CELL_CONTRIBUTIONS_MENU = "uk.co.saiman.eclipse.model.ui.cell.contributions.virtual";
 
-  private static final IValueProperty POPUP_MENU = EMFProperties
+  @SuppressWarnings("unchecked")
+  private static final IValueProperty<Cell, ?> POPUP_MENU = EMFProperties
       .value(Package.eINSTANCE.getCell_PopupMenu());
   private Button createRemovePopupMenu;
 
@@ -331,13 +359,16 @@ public class CellEditor extends AbstractEditor {
       }
     });
 
-    POPUP_MENU.observe(element).addValueChangeListener(event -> {
+    final Cell cell = (Cell) element;
+    if (cell.getPopupMenu() != null) {
+      list.add(0, cell.getPopupMenu());
+    }
+    POPUP_MENU.observe(cell).addValueChangeListener(event -> {
       if (event.diff.getOldValue() != null) {
         list.remove(event.diff.getOldValue());
         if (getMaster().getValue() == element && !createRemovePopupMenu.isDisposed()) {
           createRemovePopupMenu.setSelection(false);
         }
-
       }
 
       if (event.diff.getNewValue() != null) {
