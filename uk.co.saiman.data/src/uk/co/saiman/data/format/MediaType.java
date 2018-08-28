@@ -28,6 +28,7 @@
 package uk.co.saiman.data.format;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
 import static uk.co.saiman.data.format.RegistrationTree.STANDARDS;
 
 import java.io.Serializable;
@@ -84,7 +85,7 @@ public class MediaType implements Serializable {
     this.parameters = parameters;
   }
 
-  public static MediaType parse(String string) {
+  public static MediaType valueOf(String string) {
     // work in from left
 
     int slash = string.indexOf('/');
@@ -106,16 +107,16 @@ public class MediaType implements Serializable {
     int semicolon;
     ArrayList<String> parameters = new ArrayList<>();
     while ((semicolon = string.lastIndexOf(';')) >= 0) {
-      String parameter = string.substring(semicolon + 1, string.length());
-      string = string.substring(semicolon);
-      parameters.add(parameter);
+      String parameter = string.substring(semicolon + 1);
+      string = string.substring(0, semicolon);
+      parameters.add(0, parameter);
     }
 
     int plus = string.indexOf('+');
     String suffix;
     if (plus >= 0) {
-      suffix = string.substring(plus + 1, string.length());
-      string = string.substring(plus);
+      suffix = string.substring(plus + 1);
+      string = string.substring(0, plus);
     } else {
       suffix = null;
     }
@@ -124,6 +125,16 @@ public class MediaType implements Serializable {
 
     // TODO Auto-generated method stub
     return new MediaType(type, subtype, registrationTree, suffix, parameters);
+  }
+
+  @Override
+  public String toString() {
+    return type()
+        + "/"
+        + registrationTree().prefix().map(p -> p + ".").orElse("")
+        + subtype()
+        + suffix().map(s -> "+" + s).orElse("")
+        + parameters().map(s -> ";" + s).collect(joining());
   }
 
   public String type() {

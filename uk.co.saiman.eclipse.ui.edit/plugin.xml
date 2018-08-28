@@ -21,11 +21,21 @@
 
    <extension
          point="org.eclipse.e4.tools.emf.ui.editors">
-      <contributionClassCreator
-            class="uk.co.saiman.eclipse.model.ui.provider.editor.ContributionClassCreator">
-      </contributionClassCreator>
+      <virtualeditor
+            id="uk.co.saiman.eclipse.model.ui.cell.contributions.virtual"
+            class="uk.co.saiman.eclipse.model.ui.provider.editor.VCellContributionsEditor">
+      </virtualeditor>
       <editor
             descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.TreeEditorDescriptor">
+      </editor>
+      <editor
+            descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.CellEditorDescriptor">
+      </editor>
+      <editor
+            descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.HandledCellEditorDescriptor">
+      </editor>
+      <editor
+            descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.CellContributionEditorDescriptor">
       </editor>
    </extension>
 

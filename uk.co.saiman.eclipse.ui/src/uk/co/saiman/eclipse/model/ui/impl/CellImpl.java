@@ -69,7 +69,6 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
 import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
-import org.eclipse.emf.ecore.util.EObjectWithInverseResolvingEList;
 import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.InternalEList;
@@ -583,7 +582,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected boolean editable = EDITABLE_EDEFAULT;
 
   /**
-   * The cached value of the '{@link #getContributions() <em>Contributions</em>}' reference list.
+   * The cached value of the '{@link #getContributions() <em>Contributions</em>}' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @see #getContributions()
@@ -593,7 +592,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected EList<CellContribution> contributions;
 
   /**
-   * The cached value of the '{@link #getPopupMenu() <em>Popup Menu</em>}' reference.
+   * The cached value of the '{@link #getPopupMenu() <em>Popup Menu</em>}' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @see #getPopupMenu()
@@ -601,15 +600,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @ordered
    */
   protected MPopupMenu popupMenu;
-
-  /**
-   * This is true if the Popup Menu reference has been set.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  protected boolean popupMenuESet;
 
   /**
    * The cached value of the '{@link #getTransferFormats() <em>Transfer Formats</em>}' attribute list.
@@ -1320,7 +1310,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public EList<CellContribution> getContributions() {
     if (contributions == null) {
-      contributions = new EObjectWithInverseResolvingEList<CellContribution>(CellContribution.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT);
+      contributions = new EObjectContainmentWithInverseEList<CellContribution>(CellContribution.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT);
     }
     return contributions;
   }
@@ -1332,14 +1322,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    */
   @Override
   public MPopupMenu getPopupMenu() {
-    if (popupMenu != null && ((EObject)popupMenu).eIsProxy()) {
-      InternalEObject oldPopupMenu = (InternalEObject)popupMenu;
-      popupMenu = (MPopupMenu)eResolveProxy(oldPopupMenu);
-      if (popupMenu != oldPopupMenu) {
-        if (eNotificationRequired())
-          eNotify(new ENotificationImpl(this, Notification.RESOLVE, uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, oldPopupMenu, popupMenu));
-      }
-    }
     return popupMenu;
   }
 
@@ -1348,8 +1330,14 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  public MPopupMenu basicGetPopupMenu() {
-    return popupMenu;
+  public NotificationChain basicSetPopupMenu(MPopupMenu newPopupMenu, NotificationChain msgs) {
+    MPopupMenu oldPopupMenu = popupMenu;
+    popupMenu = newPopupMenu;
+    if (eNotificationRequired()) {
+      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, oldPopupMenu, newPopupMenu);
+      if (msgs == null) msgs = notification; else msgs.add(notification);
+    }
+    return msgs;
   }
 
   /**
@@ -1359,37 +1347,17 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    */
   @Override
   public void setPopupMenu(MPopupMenu newPopupMenu) {
-    MPopupMenu oldPopupMenu = popupMenu;
-    popupMenu = newPopupMenu;
-    boolean oldPopupMenuESet = popupMenuESet;
-    popupMenuESet = true;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, oldPopupMenu, popupMenu, !oldPopupMenuESet));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void unsetPopupMenu() {
-    MPopupMenu oldPopupMenu = popupMenu;
-    boolean oldPopupMenuESet = popupMenuESet;
-    popupMenu = null;
-    popupMenuESet = false;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.UNSET, uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, oldPopupMenu, null, oldPopupMenuESet));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public boolean isSetPopupMenu() {
-    return popupMenuESet;
+    if (newPopupMenu != popupMenu) {
+      NotificationChain msgs = null;
+      if (popupMenu != null)
+        msgs = ((InternalEObject)popupMenu).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, null, msgs);
+      if (newPopupMenu != null)
+        msgs = ((InternalEObject)newPopupMenu).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, null, msgs);
+      msgs = basicSetPopupMenu(newPopupMenu, msgs);
+      if (msgs != null) msgs.dispatch();
+    }
+    else if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, newPopupMenu, newPopupMenu));
   }
 
   /**
@@ -1460,6 +1428,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return ((InternalEList<?>)getChildren()).basicRemove(otherEnd, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         return ((InternalEList<?>)getContributions()).basicRemove(otherEnd, msgs);
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
+        return basicSetPopupMenu(null, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
   }
@@ -1554,8 +1524,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         return getContributions();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
-        if (resolve) return getPopupMenu();
-        return basicGetPopupMenu();
+        return getPopupMenu();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
         return getTransferFormats();
     }
@@ -1764,7 +1733,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         getContributions().clear();
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
-        unsetPopupMenu();
+        setPopupMenu((MPopupMenu)null);
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
         getTransferFormats().clear();
@@ -1844,7 +1813,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         return contributions != null && !contributions.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
-        return isSetPopupMenu();
+        return popupMenu != null;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
         return transferFormats != null && !transferFormats.isEmpty();
     }

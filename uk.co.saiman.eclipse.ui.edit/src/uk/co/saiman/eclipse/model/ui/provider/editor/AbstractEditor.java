@@ -1,5 +1,7 @@
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
+import static uk.co.saiman.eclipse.model.ui.provider.UISaimanEditPlugin.INSTANCE;
+
 import javax.inject.Inject;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -11,8 +13,10 @@ import org.eclipse.e4.tools.emf.ui.common.Util;
 import org.eclipse.e4.tools.emf.ui.common.component.AbstractComponentEditor;
 import org.eclipse.e4.tools.emf.ui.internal.common.component.ControlFactory;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
+import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
 import org.eclipse.emf.databinding.EMFDataBindingContext;
 import org.eclipse.emf.databinding.FeaturePath;
+import org.eclipse.emf.databinding.edit.EMFEditProperties;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.databinding.swt.IWidgetValueProperty;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -34,7 +38,7 @@ public abstract class AbstractEditor extends AbstractComponentEditor {
   private IProject project;
 
   @Inject
-  IEclipseContext eclipseContext;
+  private IEclipseContext eclipseContext;
 
   private StackLayout stackLayout;
 
@@ -74,8 +78,13 @@ public abstract class AbstractEditor extends AbstractComponentEditor {
     }
 
     getMaster().setValue(object);
+
+    refreshEditor();
+
     return composite;
   }
+
+  protected void refreshEditor() {}
 
   protected Composite createForm(
       Composite parent,
@@ -117,6 +126,76 @@ public abstract class AbstractEditor extends AbstractComponentEditor {
     folder.setSelection(0);
 
     return folder;
+  }
+
+  protected void createElementIdControl(
+      Composite parent,
+      EMFDataBindingContext context,
+      IObservableValue<?> master,
+      IWidgetValueProperty textProp) {
+    ControlFactory
+        .createTextField(
+            parent,
+            Messages.ModelTooling_Common_Id,
+            master,
+            context,
+            textProp,
+            EMFEditProperties
+                .value(
+                    getEditingDomain(),
+                    ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__ELEMENT_ID));
+  }
+
+  protected void createContributionControl(Composite parent, EMFDataBindingContext context) {
+    ControlFactory
+        .createClassURIField(
+            parent,
+            Messages,
+            this,
+            Messages.AddonsEditor_ClassURI,
+            ApplicationPackageImpl.Literals.CONTRIBUTION__CONTRIBUTION_URI,
+            getEditor().getContributionCreator(ApplicationPackageImpl.Literals.ADDON),
+            getProject(),
+            context,
+            eclipseContext);
+  }
+
+  protected void createPersistedStateControl(Composite parent) {
+    ControlFactory
+        .createMapProperties(
+            parent,
+            Messages,
+            this,
+            Messages.ModelTooling_Contribution_PersistedState,
+            ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__PERSISTED_STATE,
+            VERTICAL_LIST_WIDGET_INDENT);
+  }
+
+  protected void createContextVariablesControl(Composite parent) {
+    ControlFactory
+        .createStringListWidget(
+            parent,
+            Messages,
+            this,
+            Messages.ModelTooling_Context_Variables,
+            Messages.ModelTooling_Context_Variables_Tooltip,
+            UiPackageImpl.Literals.CONTEXT__VARIABLES,
+            VERTICAL_LIST_WIDGET_INDENT);
+  }
+
+  protected void createTagsControl(Composite parent) {
+    ControlFactory
+        .createStringListWidget(
+            parent,
+            Messages,
+            this,
+            Messages.CategoryEditor_Tags,
+            ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__TAGS,
+            VERTICAL_LIST_WIDGET_INDENT);
+  }
+
+  protected String getString(String key) {
+    return INSTANCE.getPluginResourceLocator().getString(key);
   }
 
   public IProject getProject() {

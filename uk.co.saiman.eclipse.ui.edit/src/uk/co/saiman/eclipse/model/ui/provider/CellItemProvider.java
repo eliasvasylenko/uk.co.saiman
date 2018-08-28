@@ -726,6 +726,7 @@ public class CellItemProvider
       childrenFeatures.add(ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__PERSISTED_STATE);
       childrenFeatures.add(UiPackageImpl.Literals.UI_ELEMENT__VISIBLE_WHEN);
       childrenFeatures.add(UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN);
+      childrenFeatures.add(uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__CONTRIBUTIONS);
     }
     return childrenFeatures;
   }

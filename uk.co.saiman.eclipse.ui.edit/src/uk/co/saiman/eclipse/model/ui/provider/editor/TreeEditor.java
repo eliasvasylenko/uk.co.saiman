@@ -1,33 +1,60 @@
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
-import static uk.co.saiman.eclipse.model.ui.provider.UISaimanEditPlugin.INSTANCE;
+import static uk.co.saiman.eclipse.model.ui.Package.eINSTANCE;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.property.list.IListProperty;
-import org.eclipse.e4.tools.emf.ui.common.Util;
-import org.eclipse.e4.tools.emf.ui.internal.common.VirtualEntry;
-import org.eclipse.e4.tools.emf.ui.internal.common.component.ControlFactory;
 import org.eclipse.e4.ui.model.application.MContribution;
-import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
 import org.eclipse.emf.databinding.EMFDataBindingContext;
 import org.eclipse.emf.databinding.EMFProperties;
-import org.eclipse.emf.databinding.edit.EMFEditProperties;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.databinding.swt.IWidgetValueProperty;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Composite;
 
+import uk.co.saiman.eclipse.model.ui.provider.editor.ListComponentManager.Type;
+
 public class TreeEditor extends AbstractEditor {
-  private static final String VIRTUAL_TREE_CHILDREN_MENU = "uk.co.saiman.eclipse.model.ui.tree.children.virtual";
-
-  private final IListProperty<?, ?> CHILDREN = EMFProperties
+  private ListComponentManager childrenComponent;
+  @SuppressWarnings("rawtypes")
+  private final IListProperty CHILDREN = EMFProperties
       .list(UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN);
-  // TODO .list(eINSTANCE.getTree().getEStructuralFeature(TREE__CHILDREN));
 
-  protected String getString(String key) {
-    return INSTANCE.getPluginResourceLocator().getString(key);
+  @PostConstruct
+  void init() {
+    childrenComponent = new ListComponentManager(
+        this,
+        Messages,
+        UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
+        this::handleCreate,
+        new Type(
+            getString("_UI_Cell_type"),
+            ImageDescriptor.createFromFile(VListEditor.class, "/icons/full/obj16/Cell.gif"),
+            eINSTANCE.getCell()),
+        new Type(
+            getString("_UI_HandledCell_type"),
+            ImageDescriptor.createFromFile(VListEditor.class, "/icons/full/obj16/HandledCell.gif"),
+            eINSTANCE.getHandledCell()));
+  }
+
+  @Override
+  protected void refreshEditor() {
+    // listEditor.getViewer().setInput(o.getList());
+  }
+
+  private EObject handleCreate(Type type) {
+    final EObject handler = EcoreUtil.create(type.eClass);
+    setElementId(handler);
+    return handler;
   }
 
   @Override
@@ -51,90 +78,39 @@ public class TreeEditor extends AbstractEditor {
     return getString("_UI_Tree_editor_description");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   protected void createDefaultControls(
       Composite parent,
       EMFDataBindingContext context,
       IObservableValue<?> master,
       IWidgetValueProperty textProp) {
+    createElementIdControl(parent, context, master, textProp);
 
-    ControlFactory
-        .createTextField(
-            parent,
-            Messages.ModelTooling_Common_Id,
-            master,
-            context,
-            textProp,
-            EMFEditProperties
-                .value(
-                    getEditingDomain(),
-                    ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__ELEMENT_ID));
+    createContributionControl(parent, context);
 
-    ControlFactory
-        .createClassURIField(
-            parent,
-            Messages,
-            this,
-            Messages.AddonsEditor_ClassURI,
-            ApplicationPackageImpl.Literals.CONTRIBUTION__CONTRIBUTION_URI,
-            getEditor().getContributionCreator(ApplicationPackageImpl.Literals.ADDON),
-            getProject(),
-            context,
-            eclipseContext);
+    childrenComponent.createForm(parent);
+    childrenComponent.getViewer().setInput(CHILDREN.observeDetail(getMaster()));
 
-    ControlFactory
-        .createMapProperties(
-            parent,
-            Messages,
-            this,
-            Messages.ModelTooling_Contribution_PersistedState,
-            ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__PERSISTED_STATE,
-            VERTICAL_LIST_WIDGET_INDENT);
+    createPersistedStateControl(parent);
   }
 
   @Override
   protected void createSupplementaryControls(Composite parent) {
-    ControlFactory
-        .createStringListWidget(
-            parent,
-            Messages,
-            this,
-            Messages.ModelTooling_Context_Variables,
-            Messages.ModelTooling_Context_Variables_Tooltip,
-            UiPackageImpl.Literals.CONTEXT__VARIABLES,
-            VERTICAL_LIST_WIDGET_INDENT);
-
-    ControlFactory
-        .createStringListWidget(
-            parent,
-            Messages,
-            this,
-            Messages.CategoryEditor_Tags,
-            ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__TAGS,
-            VERTICAL_LIST_WIDGET_INDENT);
+    createContextVariablesControl(parent);
+    createTagsControl(parent);
   }
 
   @Override
-  public IObservableList<?> getChildList(final Object element) {
-    final WritableList<VirtualEntry<?>> list = new WritableList<>();
+  public List<Action> getActions(Object element) {
+    List<Action> actions = new ArrayList<>(super.getActions(element));
+    actions.addAll(childrenComponent.getActions());
+    return actions;
+  }
 
-    if (getEditor().isModelFragment() && Util.isImport((EObject) element)) {
-      return list;
-    }
-
-    list
-        .add(
-            new VirtualEntry<Object>(
-                VIRTUAL_TREE_CHILDREN_MENU,
-                CHILDREN,
-                element,
-                getString("_UI_children")) {
-              @Override
-              protected boolean accepted(Object o) {
-                return true;
-              }
-            });
-
-    return list;
+  @SuppressWarnings("unchecked")
+  @Override
+  public IObservableList<?> getChildList(Object element) {
+    return CHILDREN.observe(element);
   }
 }

@@ -16,6 +16,7 @@ Bundle-Description: \
 	uk.co.saiman.osgi;version=snapshot,\
 	org.eclipse.emf.common,\
 	org.eclipse.emf.ecore,\
+	org.eclipse.emf.ecore.xmi,\
 	org.eclipse.emf.edit,\
 	org.eclipse.emf.databinding,\
 	org.eclipse.emf.databinding.edit,\
@@ -23,6 +24,7 @@ Bundle-Description: \
 	org.eclipse.e4.tools.services,\
 	org.eclipse.e4.tools.emf.ui,\
 	org.eclipse.e4.tools.emf.editor3x,\
+	org.eclipse.e4.ui.dialogs,\
 	org.eclipse.pde.core,\
 	org.eclipse.core.jobs,\
 	org.eclipse.core.resources,\

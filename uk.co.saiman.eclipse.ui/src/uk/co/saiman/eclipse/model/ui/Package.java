@@ -394,7 +394,7 @@ public interface Package extends EPackage {
   int CELL__EDITABLE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 24;
 
   /**
-   * The feature id for the '<em><b>Contributions</b></em>' reference list.
+   * The feature id for the '<em><b>Contributions</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -403,7 +403,7 @@ public interface Package extends EPackage {
   int CELL__CONTRIBUTIONS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 25;
 
   /**
-   * The feature id for the '<em><b>Popup Menu</b></em>' reference.
+   * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -836,7 +836,7 @@ public interface Package extends EPackage {
   int CELL_CONTRIBUTION__OBJECT = UiPackageImpl.CONTEXT_FEATURE_COUNT + 6;
 
   /**
-   * The feature id for the '<em><b>Parent</b></em>' reference.
+   * The feature id for the '<em><b>Parent</b></em>' container reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -1171,7 +1171,7 @@ public interface Package extends EPackage {
   int HANDLED_CELL__EDITABLE = CELL__EDITABLE;
 
   /**
-   * The feature id for the '<em><b>Contributions</b></em>' reference list.
+   * The feature id for the '<em><b>Contributions</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -1180,7 +1180,7 @@ public interface Package extends EPackage {
   int HANDLED_CELL__CONTRIBUTIONS = CELL__CONTRIBUTIONS;
 
   /**
-   * The feature id for the '<em><b>Popup Menu</b></em>' reference.
+   * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -1350,10 +1350,10 @@ public interface Package extends EPackage {
   EAttribute getCell_Editable();
 
   /**
-   * Returns the meta object for the reference list '{@link uk.co.saiman.eclipse.model.ui.Cell#getContributions <em>Contributions</em>}'.
+   * Returns the meta object for the containment reference list '{@link uk.co.saiman.eclipse.model.ui.Cell#getContributions <em>Contributions</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the reference list '<em>Contributions</em>'.
+   * @return the meta object for the containment reference list '<em>Contributions</em>'.
    * @see uk.co.saiman.eclipse.model.ui.Cell#getContributions()
    * @see #getCell()
    * @generated
@@ -1361,10 +1361,10 @@ public interface Package extends EPackage {
   EReference getCell_Contributions();
 
   /**
-   * Returns the meta object for the reference '{@link uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu <em>Popup Menu</em>}'.
+   * Returns the meta object for the containment reference '{@link uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu <em>Popup Menu</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the reference '<em>Popup Menu</em>'.
+   * @return the meta object for the containment reference '<em>Popup Menu</em>'.
    * @see uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu()
    * @see #getCell()
    * @generated
@@ -1414,10 +1414,10 @@ public interface Package extends EPackage {
   EClass getCellContribution();
 
   /**
-   * Returns the meta object for the reference '{@link uk.co.saiman.eclipse.model.ui.CellContribution#getParent <em>Parent</em>}'.
+   * Returns the meta object for the container reference '{@link uk.co.saiman.eclipse.model.ui.CellContribution#getParent <em>Parent</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the reference '<em>Parent</em>'.
+   * @return the meta object for the container reference '<em>Parent</em>'.
    * @see uk.co.saiman.eclipse.model.ui.CellContribution#getParent()
    * @see #getCellContribution()
    * @generated
@@ -1525,7 +1525,7 @@ public interface Package extends EPackage {
     EAttribute CELL__EDITABLE = eINSTANCE.getCell_Editable();
 
     /**
-     * The meta object literal for the '<em><b>Contributions</b></em>' reference list feature.
+     * The meta object literal for the '<em><b>Contributions</b></em>' containment reference list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
@@ -1533,7 +1533,7 @@ public interface Package extends EPackage {
     EReference CELL__CONTRIBUTIONS = eINSTANCE.getCell_Contributions();
 
     /**
-     * The meta object literal for the '<em><b>Popup Menu</b></em>' reference feature.
+     * The meta object literal for the '<em><b>Popup Menu</b></em>' containment reference feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
@@ -1577,7 +1577,7 @@ public interface Package extends EPackage {
     EClass CELL_CONTRIBUTION = eINSTANCE.getCellContribution();
 
     /**
-     * The meta object literal for the '<em><b>Parent</b></em>' reference feature.
+     * The meta object literal for the '<em><b>Parent</b></em>' container reference feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated

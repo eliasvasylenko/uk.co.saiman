@@ -44,6 +44,6 @@ public class MediaTypes {
   }
 
   public static Stream<MediaType> fromDataFormat(DataFormat dataFormat) {
-    return dataFormat.getIdentifiers().stream().map(MediaType::parse);
+    return dataFormat.getIdentifiers().stream().map(MediaType::valueOf);
   }
 }

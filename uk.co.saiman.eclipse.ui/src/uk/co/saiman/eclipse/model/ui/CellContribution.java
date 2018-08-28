@@ -51,7 +51,7 @@ import org.eclipse.e4.ui.model.application.ui.MContext;
  */
 public interface CellContribution extends MContext, MContribution {
   /**
-   * Returns the value of the '<em><b>Parent</b></em>' reference.
+   * Returns the value of the '<em><b>Parent</b></em>' container reference.
    * It is bidirectional and its opposite is '{@link uk.co.saiman.eclipse.model.ui.Cell#getContributions <em>Contributions</em>}'.
    * <!-- begin-user-doc -->
    * <p>
@@ -59,20 +59,20 @@ public interface CellContribution extends MContext, MContribution {
    * there really should be more of a description here...
    * </p>
    * <!-- end-user-doc -->
-   * @return the value of the '<em>Parent</em>' reference.
+   * @return the value of the '<em>Parent</em>' container reference.
    * @see #setParent(Cell)
    * @see uk.co.saiman.eclipse.model.ui.Package#getCellContribution_Parent()
    * @see uk.co.saiman.eclipse.model.ui.Cell#getContributions
-   * @model opposite="contributions"
+   * @model opposite="contributions" transient="false"
    * @generated
    */
   Cell getParent();
 
   /**
-   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.CellContribution#getParent <em>Parent</em>}' reference.
+   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.CellContribution#getParent <em>Parent</em>}' container reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @param value the new value of the '<em>Parent</em>' reference.
+   * @param value the new value of the '<em>Parent</em>' container reference.
    * @see #getParent()
    * @generated
    */

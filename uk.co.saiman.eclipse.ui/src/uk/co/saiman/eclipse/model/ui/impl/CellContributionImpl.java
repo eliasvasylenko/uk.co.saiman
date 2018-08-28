@@ -57,6 +57,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
 import org.eclipse.emf.ecore.util.EcoreEMap;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
@@ -237,16 +238,6 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
    * @ordered
    */
   protected Object object = OBJECT_EDEFAULT;
-
-  /**
-   * The cached value of the '{@link #getParent() <em>Parent</em>}' reference.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getParent()
-   * @generated
-   * @ordered
-   */
-  protected Cell parent;
 
   /**
    * <!-- begin-user-doc -->
@@ -440,24 +431,8 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
    * @generated
    */
   public Cell getParent() {
-    if (parent != null && ((EObject)parent).eIsProxy()) {
-      InternalEObject oldParent = (InternalEObject)parent;
-      parent = (Cell)eResolveProxy(oldParent);
-      if (parent != oldParent) {
-        if (eNotificationRequired())
-          eNotify(new ENotificationImpl(this, Notification.RESOLVE, uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT, oldParent, parent));
-      }
-    }
-    return parent;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public Cell basicGetParent() {
-    return parent;
+    if (eContainerFeatureID() != uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT) return null;
+    return (Cell)eInternalContainer();
   }
 
   /**
@@ -466,12 +441,7 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
    * @generated
    */
   public NotificationChain basicSetParent(Cell newParent, NotificationChain msgs) {
-    Cell oldParent = parent;
-    parent = newParent;
-    if (eNotificationRequired()) {
-      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT, oldParent, newParent);
-      if (msgs == null) msgs = notification; else msgs.add(notification);
-    }
+    msgs = eBasicSetContainer((InternalEObject)newParent, uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT, msgs);
     return msgs;
   }
 
@@ -481,10 +451,12 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
    * @generated
    */
   public void setParent(Cell newParent) {
-    if (newParent != parent) {
+    if (newParent != eInternalContainer() || (eContainerFeatureID() != uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT && newParent != null)) {
+      if (EcoreUtil.isAncestor(this, (EObject)newParent))
+        throw new IllegalArgumentException("Recursive containment not allowed for " + toString());
       NotificationChain msgs = null;
-      if (parent != null)
-        msgs = ((InternalEObject)parent).eInverseRemove(this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, Cell.class, msgs);
+      if (eInternalContainer() != null)
+        msgs = eBasicRemoveFromContainer(msgs);
       if (newParent != null)
         msgs = ((InternalEObject)newParent).eInverseAdd(this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, Cell.class, msgs);
       msgs = basicSetParent(newParent, msgs);
@@ -503,8 +475,8 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
   public NotificationChain eInverseAdd(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
     switch (featureID) {
       case uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT:
-        if (parent != null)
-          msgs = ((InternalEObject)parent).eInverseRemove(this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, Cell.class, msgs);
+        if (eInternalContainer() != null)
+          msgs = eBasicRemoveFromContainer(msgs);
         return basicSetParent((Cell)otherEnd, msgs);
     }
     return super.eInverseAdd(otherEnd, featureID, msgs);
@@ -528,6 +500,20 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
         return basicSetParent(null, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public NotificationChain eBasicRemoveFromContainerFeature(NotificationChain msgs) {
+    switch (eContainerFeatureID()) {
+      case uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT:
+        return eInternalContainer().eInverseRemove(this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, Cell.class, msgs);
+    }
+    return super.eBasicRemoveFromContainerFeature(msgs);
   }
 
   /**
@@ -562,8 +548,7 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
       case uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__OBJECT:
         return getObject();
       case uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT:
-        if (resolve) return getParent();
-        return basicGetParent();
+        return getParent();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -690,7 +675,7 @@ public class CellContributionImpl extends org.eclipse.emf.ecore.impl.MinimalEObj
       case uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__OBJECT:
         return OBJECT_EDEFAULT == null ? object != null : !OBJECT_EDEFAULT.equals(object);
       case uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT:
-        return parent != null;
+        return getParent() != null;
     }
     return super.eIsSet(featureID);
   }
