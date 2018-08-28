@@ -41,9 +41,11 @@ import org.eclipse.e4.ui.model.application.MContribution;
 import org.eclipse.emf.databinding.EMFDataBindingContext;
 import org.eclipse.emf.databinding.edit.EMFEditProperties;
 import org.eclipse.jface.databinding.swt.IWidgetValueProperty;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -60,6 +62,13 @@ public class CellContributionEditor extends AbstractEditor {
   @Override
   public String getLabel(Object element) {
     return getString("_UI_CellContribution_type");
+  }
+
+  @Override
+  public Image getImage(Object element) {
+    return ImageDescriptor
+        .createFromFile(VListEditor.class, "/icons/full/obj16/CellContribution.gif")
+        .createImage();
   }
 
   @Override

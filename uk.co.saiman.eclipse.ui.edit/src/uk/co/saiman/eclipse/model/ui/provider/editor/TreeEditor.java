@@ -37,15 +37,19 @@ import javax.annotation.PostConstruct;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.property.list.IListProperty;
+import org.eclipse.e4.tools.emf.ui.internal.common.component.ControlFactory;
 import org.eclipse.e4.ui.model.application.MContribution;
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
 import org.eclipse.emf.databinding.EMFDataBindingContext;
 import org.eclipse.emf.databinding.EMFProperties;
+import org.eclipse.emf.databinding.edit.EMFEditProperties;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.databinding.swt.IWidgetValueProperty;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
 import uk.co.saiman.eclipse.model.ui.provider.editor.ListComponentManager.Type;
@@ -90,6 +94,13 @@ public class TreeEditor extends AbstractEditor {
   }
 
   @Override
+  public Image getImage(Object element) {
+    return ImageDescriptor
+        .createFromFile(VListEditor.class, "/icons/full/obj16/Tree.gif")
+        .createImage();
+  }
+
+  @Override
   public String getDetailLabel(Object element) {
     final MContribution contrib = (MContribution) element;
     if (contrib.getContributionURI() != null && contrib.getContributionURI().trim().length() > 0) {
@@ -105,7 +116,6 @@ public class TreeEditor extends AbstractEditor {
     return getString("_UI_Tree_editor_description");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void createDefaultControls(
       Composite parent,
@@ -113,13 +123,27 @@ public class TreeEditor extends AbstractEditor {
       IObservableValue<?> master,
       IWidgetValueProperty textProp) {
     createElementIdControl(parent, context, master, textProp);
-
     createContributionControl(parent, context);
+    createEditableControl(parent, context);
+    createChildrenControl(parent);
+    createPersistedStateControl(parent);
+  }
 
+  @SuppressWarnings("unchecked")
+  private void createChildrenControl(Composite parent) {
     childrenComponent.createForm(parent);
     childrenComponent.getViewer().setInput(CHILDREN.observeDetail(getMaster()));
+  }
 
-    createPersistedStateControl(parent);
+  private void createEditableControl(Composite parent, EMFDataBindingContext context) {
+    ControlFactory
+        .createCheckBox(
+            parent,
+            getString("_UI_Cell_editable_feature"),
+            getMaster(),
+            context,
+            WidgetProperties.selection(),
+            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getTree_Editable()));
   }
 
   @Override
