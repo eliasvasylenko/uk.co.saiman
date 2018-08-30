@@ -14,6 +14,9 @@ Thumbs.db
 /*/bin/**
 /*/bin_test/**
 /*/generated/**
+/*/bin/
+/*/bin_test/
+/*/generated/
 
 # Local configuration file (sdk path, etc) #
 ############################################

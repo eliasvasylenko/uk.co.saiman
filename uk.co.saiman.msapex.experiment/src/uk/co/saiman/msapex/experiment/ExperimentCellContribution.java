@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.treecontributions;
+package uk.co.saiman.msapex.experiment;
 
 /**
  * Contribution for root experiment nodes in the experiment tree

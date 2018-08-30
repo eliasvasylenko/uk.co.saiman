@@ -30,13 +30,11 @@ package uk.co.saiman.eclipse.model.ui.provider.editor;
 import javax.inject.Inject;
 
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.e4.tools.emf.ui.common.CommandToStringConverter;
 import org.eclipse.e4.tools.emf.ui.common.IModelResource;
-import org.eclipse.e4.tools.emf.ui.internal.Messages;
 import org.eclipse.e4.tools.emf.ui.internal.ResourceProvider;
 import org.eclipse.e4.tools.emf.ui.internal.common.ModelEditor;
 import org.eclipse.e4.tools.emf.ui.internal.common.VirtualEntry;
@@ -48,9 +46,6 @@ import org.eclipse.e4.ui.model.application.ui.menu.impl.MenuPackageImpl;
 import org.eclipse.emf.databinding.EMFDataBindingContext;
 import org.eclipse.emf.databinding.edit.EMFEditProperties;
 import org.eclipse.emf.databinding.edit.IEMFEditListProperty;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.databinding.swt.IWidgetValueProperty;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -110,11 +105,11 @@ public class HandledCellEditor extends CellEditor {
       EMFDataBindingContext context,
       IObservableValue<?> master,
       IWidgetValueProperty textProp) {
-    final Label l = new Label(parent, SWT.NONE);
+    Label l = new Label(parent, SWT.NONE);
     l.setText(Messages.HandledMenuItemEditor_Command);
     l.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
-    final Text t = new Text(parent, SWT.BORDER);
+    Text t = new Text(parent, SWT.BORDER);
     TextPasteHandler.createFor(t);
     t.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     t.setEditable(false);
@@ -127,7 +122,7 @@ public class HandledCellEditor extends CellEditor {
             new UpdateValueStrategy(),
             new UpdateValueStrategy().setConverter(new CommandToStringConverter(Messages)));
 
-    final Button b = new Button(parent, SWT.PUSH | SWT.FLAT);
+    Button b = new Button(parent, SWT.PUSH | SWT.FLAT);
     b.setText(Messages.ModelTooling_Common_FindEllipsis);
     b.setImage(createImage(ResourceProvider.IMG_Obj16_zoom));
     b.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
@@ -163,40 +158,5 @@ public class HandledCellEditor extends CellEditor {
             });
 
     return list;
-  }
-
-  static class EObject2EClass extends Converter {
-    Messages Messages;
-
-    public EObject2EClass(Messages Messages) {
-      super(EObject.class, EClass.class);
-      this.Messages = Messages;
-    }
-
-    @Override
-    public Object convert(Object fromObject) {
-      if (fromObject == null) {
-        return Messages.MenuItemEditor_NoExpression;
-      }
-      return ((EObject) fromObject).eClass();
-    }
-  }
-
-  static class EClass2EObject extends Converter {
-    Messages Messages;
-
-    public EClass2EObject(Messages Messages) {
-      super(EClass.class, EObject.class);
-      this.Messages = Messages;
-    }
-
-    @Override
-    public Object convert(Object fromObject) {
-      if (fromObject == null
-          || fromObject.toString().equals(Messages.MenuItemEditor_NoExpression)) {
-        return null;
-      }
-      return EcoreUtil.create((EClass) fromObject);
-    }
   }
 }

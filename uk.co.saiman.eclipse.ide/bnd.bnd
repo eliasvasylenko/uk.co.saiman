@@ -1,0 +1,3 @@
+-includeresource: \
+	feature.properties,\
+	feature.xml

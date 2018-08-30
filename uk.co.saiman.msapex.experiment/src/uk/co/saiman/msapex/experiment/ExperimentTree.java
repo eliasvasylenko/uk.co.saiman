@@ -34,10 +34,9 @@ import javax.annotation.PostConstruct;
 import uk.co.saiman.eclipse.ui.Invalidator;
 import uk.co.saiman.eclipse.ui.ListItems;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.msapex.experiment.treecontributions.ExperimentNodeCell;
 
 public class ExperimentTree {
-  public static final String ID = "uk.co.saiman.experiment.tree";
+  public static final String ID = "uk.co.saiman.msapex.experiment.tree";
 
   @PostConstruct
   void initialize(Workspace workspace, Invalidator invalidator, ListItems children) {

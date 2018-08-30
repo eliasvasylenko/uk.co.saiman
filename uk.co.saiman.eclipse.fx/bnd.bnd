@@ -25,9 +25,7 @@ Bundle-Description: \
 
 Export-Package: \
 	uk.co.saiman.eclipse.service,\
-	uk.co.saiman.eclipse.ui.fx
-
-Private-Package: \
+	uk.co.saiman.eclipse.ui.fx,\
 	uk.co.saiman.eclipse.ui.fx.impl
 
 -includeresource: \

@@ -151,7 +151,6 @@ runplatform: linux64
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.eclipse.fx;version=snapshot,\
 	uk.co.saiman.eclipse.ui;version=snapshot,\
-	uk.co.saiman.eclipse.ui.edit;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\

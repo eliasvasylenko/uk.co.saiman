@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -91,8 +92,6 @@ import org.eclipse.swt.widgets.Text;
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.Package;
-import uk.co.saiman.eclipse.model.ui.provider.editor.HandledCellEditor.EClass2EObject;
-import uk.co.saiman.eclipse.model.ui.provider.editor.HandledCellEditor.EObject2EClass;
 import uk.co.saiman.eclipse.model.ui.provider.editor.ListComponentManager.Type;
 
 public class CellEditor extends AbstractEditor {
@@ -248,8 +247,8 @@ public class CellEditor extends AbstractEditor {
             EMFEditProperties
                 .value(getEditingDomain(), UiPackageImpl.Literals.UI_ELEMENT__VISIBLE_WHEN)
                 .observeDetail(getMaster()),
-            new UpdateValueStrategy().setConverter(new EClass2EObject(Messages)),
-            new UpdateValueStrategy().setConverter(new EObject2EClass(Messages)));
+            new UpdateValueStrategy().setConverter(new EClass2EObject()),
+            new UpdateValueStrategy().setConverter(new EObject2EClass()));
   }
 
   @SuppressWarnings("unchecked")
@@ -496,5 +495,34 @@ public class CellEditor extends AbstractEditor {
     });
 
     return list;
+  }
+
+  class EObject2EClass extends Converter {
+    public EObject2EClass() {
+      super(EObject.class, EClass.class);
+    }
+
+    @Override
+    public Object convert(Object fromObject) {
+      if (fromObject == null) {
+        return Messages.MenuItemEditor_NoExpression;
+      }
+      return ((EObject) fromObject).eClass();
+    }
+  }
+
+  class EClass2EObject extends Converter {
+    public EClass2EObject() {
+      super(EClass.class, EObject.class);
+    }
+
+    @Override
+    public Object convert(Object fromObject) {
+      if (fromObject == null
+          || fromObject.toString().equals(Messages.MenuItemEditor_NoExpression)) {
+        return null;
+      }
+      return EcoreUtil.create((EClass) fromObject);
+    }
   }
 }

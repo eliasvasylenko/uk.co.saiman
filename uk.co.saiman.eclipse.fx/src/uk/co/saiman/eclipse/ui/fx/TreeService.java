@@ -39,9 +39,7 @@ public interface TreeService {
 
   Control createTree(Tree treeModel, Parent owner);
 
-  default Control createTree(String treeModelId, Parent owner) {
-    return createTree(getTree(treeModelId), owner);
-  }
+  Control createTree(String treeModelId, Parent owner);
 
   Tree getTree(String treeModelId);
 

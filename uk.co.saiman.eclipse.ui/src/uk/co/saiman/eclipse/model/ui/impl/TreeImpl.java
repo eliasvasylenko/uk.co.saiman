@@ -498,6 +498,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public IEclipseContext getContext() {
     return context;
   }
@@ -507,6 +508,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setContext(IEclipseContext newContext) {
     IEclipseContext oldContext = context;
     context = newContext;
@@ -519,6 +521,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public List<String> getVariables() {
     if (variables == null) {
       variables = new EDataTypeUniqueEList<String>(String.class, this, uk.co.saiman.eclipse.model.ui.Package.TREE__VARIABLES);
@@ -531,6 +534,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public Map<String, String> getProperties() {
     if (properties == null) {
       properties = new EcoreEMap<String,String>(ApplicationPackageImpl.Literals.STRING_TO_STRING_MAP, StringToStringMapImpl.class, this, uk.co.saiman.eclipse.model.ui.Package.TREE__PROPERTIES);
@@ -543,6 +547,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public String getElementId() {
     return elementId;
   }
@@ -552,6 +557,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setElementId(String newElementId) {
     String oldElementId = elementId;
     elementId = newElementId;
@@ -564,6 +570,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public Map<String, String> getPersistedState() {
     if (persistedState == null) {
       persistedState = new EcoreEMap<String,String>(ApplicationPackageImpl.Literals.STRING_TO_STRING_MAP, StringToStringMapImpl.class, this, uk.co.saiman.eclipse.model.ui.Package.TREE__PERSISTED_STATE);
@@ -576,6 +583,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public List<String> getTags() {
     if (tags == null) {
       tags = new EDataTypeUniqueEList<String>(String.class, this, uk.co.saiman.eclipse.model.ui.Package.TREE__TAGS);
@@ -588,6 +596,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public String getContributorURI() {
     return contributorURI;
   }
@@ -597,6 +606,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setContributorURI(String newContributorURI) {
     String oldContributorURI = contributorURI;
     contributorURI = newContributorURI;
@@ -609,6 +619,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public Map<String, Object> getTransientData() {
     if (transientData == null) {
       transientData = new EcoreEMap<String,Object>(ApplicationPackageImpl.Literals.STRING_TO_OBJECT_MAP, StringToObjectMapImpl.class, this, uk.co.saiman.eclipse.model.ui.Package.TREE__TRANSIENT_DATA);
@@ -622,6 +633,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @since 1.0
    * @generated
    */
+  @Override
   public String getContributionURI() {
     return contributionURI;
   }
@@ -632,6 +644,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @since 1.0
    * @generated
    */
+  @Override
   public void setContributionURI(String newContributionURI) {
     String oldContributionURI = contributionURI;
     contributionURI = newContributionURI;
@@ -644,6 +657,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public Object getObject() {
     return object;
   }
@@ -653,6 +667,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setObject(Object newObject) {
     Object oldObject = object;
     object = newObject;
@@ -665,6 +680,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public Object getWidget() {
     return widget;
   }
@@ -674,6 +690,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setWidget(Object newWidget) {
     Object oldWidget = widget;
     widget = newWidget;
@@ -686,6 +703,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public Object getRenderer() {
     return renderer;
   }
@@ -695,6 +713,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setRenderer(Object newRenderer) {
     Object oldRenderer = renderer;
     renderer = newRenderer;
@@ -707,6 +726,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public boolean isToBeRendered() {
     return toBeRendered;
   }
@@ -716,6 +736,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setToBeRendered(boolean newToBeRendered) {
     boolean oldToBeRendered = toBeRendered;
     toBeRendered = newToBeRendered;
@@ -728,6 +749,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public boolean isOnTop() {
     return onTop;
   }
@@ -737,6 +759,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setOnTop(boolean newOnTop) {
     boolean oldOnTop = onTop;
     onTop = newOnTop;
@@ -749,6 +772,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public boolean isVisible() {
     return visible;
   }
@@ -758,6 +782,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setVisible(boolean newVisible) {
     boolean oldVisible = visible;
     visible = newVisible;
@@ -770,6 +795,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   @SuppressWarnings("unchecked")
   public MElementContainer<MUIElement> getParent() {
     if (eContainerFeatureID() != uk.co.saiman.eclipse.model.ui.Package.TREE__PARENT) return null;
@@ -791,6 +817,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setParent(MElementContainer<MUIElement> newParent) {
     if (newParent != eInternalContainer() || (eContainerFeatureID() != uk.co.saiman.eclipse.model.ui.Package.TREE__PARENT && newParent != null)) {
       if (EcoreUtil.isAncestor(this, (EObject)newParent))
@@ -812,6 +839,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public String getContainerData() {
     return containerData;
   }
@@ -821,6 +849,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setContainerData(String newContainerData) {
     String oldContainerData = containerData;
     containerData = newContainerData;
@@ -833,6 +862,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public MPlaceholder getCurSharedRef() {
     if (curSharedRef != null && ((EObject)curSharedRef).eIsProxy()) {
       InternalEObject oldCurSharedRef = (InternalEObject)curSharedRef;
@@ -859,6 +889,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setCurSharedRef(MPlaceholder newCurSharedRef) {
     MPlaceholder oldCurSharedRef = curSharedRef;
     curSharedRef = newCurSharedRef;
@@ -871,6 +902,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public MExpression getVisibleWhen() {
     return visibleWhen;
   }
@@ -895,6 +927,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setVisibleWhen(MExpression newVisibleWhen) {
     if (newVisibleWhen != visibleWhen) {
       NotificationChain msgs = null;
@@ -914,6 +947,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public String getAccessibilityPhrase() {
     return accessibilityPhrase;
   }
@@ -923,6 +957,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setAccessibilityPhrase(String newAccessibilityPhrase) {
     String oldAccessibilityPhrase = accessibilityPhrase;
     accessibilityPhrase = newAccessibilityPhrase;
@@ -933,12 +968,15 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
+   * \@generated
    */
+  @Override
   public String getLocalizedAccessibilityPhrase() {
     // TODO: implement this method to return the 'Localized Accessibility Phrase' attribute
     // Ensure that you remove @generated or mark it @generated NOT
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
+
+    return getAccessibilityPhrase();
   }
 
   /**
@@ -946,6 +984,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public List<Cell> getChildren() {
     if (children == null) {
       children = new EObjectContainmentWithInverseEList<Cell>(Cell.class, this, uk.co.saiman.eclipse.model.ui.Package.TREE__CHILDREN, UiPackageImpl.UI_ELEMENT__PARENT) { private static final long serialVersionUID = 1L; @Override public Class<?> getInverseFeatureClass() { return MUIElement.class; } };
@@ -958,6 +997,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public Cell getSelectedElement() {
     if (selectedElement != null && ((EObject)selectedElement).eIsProxy()) {
       InternalEObject oldSelectedElement = (InternalEObject)selectedElement;
@@ -984,6 +1024,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setSelectedElement(Cell newSelectedElement) {
     Cell oldSelectedElement = selectedElement;
     selectedElement = newSelectedElement;
@@ -996,6 +1037,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public boolean isEditable() {
     return editable;
   }
@@ -1005,6 +1047,7 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setEditable(boolean newEditable) {
     boolean oldEditable = editable;
     editable = newEditable;
@@ -1015,12 +1058,13 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
+   * \@generated
    */
+  @Override
   public void updateLocalization() {
     // TODO: implement this method
     // Ensure that you remove @generated or mark it @generated NOT
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
   }
 
   /**

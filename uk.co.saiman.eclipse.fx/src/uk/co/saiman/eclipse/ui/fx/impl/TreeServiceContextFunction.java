@@ -29,12 +29,15 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.extensions.OSGiBundle;
+import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Component;
 
 import javafx.scene.Parent;
 import javafx.scene.control.Control;
@@ -42,33 +45,57 @@ import javafx.scene.control.TreeView;
 import uk.co.saiman.eclipse.model.ui.Tree;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
 
-@Creatable
-public class TreeServiceImpl implements TreeService {
-  @Inject
-  private IEclipseContext context;
+@Component(
+    property = IContextFunction.SERVICE_CONTEXT_KEY
+        + "="
+        + TreeServiceContextFunction.TREE_SERVICE_KEY)
+public class TreeServiceContextFunction implements IContextFunction {
+  static final String TREE_SERVICE_KEY = "uk.co.saiman.eclipse.ui.fx.TreeService";
 
-  @Inject
-  private MWindow window;
+  public static class TreeServiceImpl implements TreeService {
+    @Inject
+    private IEclipseContext context;
 
-  @Inject
-  private EModelService modelService;
+    @Inject
+    private MApplication application;
 
-  @Inject
-  @OSGiBundle
-  private Bundle bundle;
+    @Inject
+    private MWindow window;
 
-  @Override
-  public Control createTree(Tree treeModel, Parent owner) {
-    Tree tree = (Tree) treeModel;
+    @Inject
+    private EModelService modelService;
 
-    modelService.hostElement(tree, window, owner, context);
+    @Inject
+    @OSGiBundle
+    private Bundle bundle;
 
-    TreeView<?> treeView = (TreeView<?>) tree.getWidget();
-    return treeView;
+    @Override
+    public Control createTree(Tree treeModel, Parent owner) {
+      Tree tree = (Tree) treeModel;
+
+      modelService.hostElement(tree, window, owner, context);
+
+      TreeView<?> treeView = (TreeView<?>) tree.getWidget();
+      return treeView;
+    }
+
+    @Override
+    public Control createTree(String treeModelId, Parent owner) {
+      return createTree(getTree(treeModelId), owner);
+    }
+
+    @Override
+    public Tree getTree(String treeModelId) {
+      return (Tree) modelService.cloneSnippet(application, treeModelId, window);
+    }
   }
 
   @Override
-  public Tree getTree(String treeModelId) {
-    return (Tree) modelService.cloneSnippet(window, treeModelId, window);
+  public TreeService compute(IEclipseContext context, String contextKey) {
+    if (!TREE_SERVICE_KEY.equals(contextKey)) {
+      return null;
+    }
+
+    return ContextInjectionFactory.make(TreeServiceImpl.class, context);
   }
 }

@@ -708,25 +708,29 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
+   * \@generated
    */
   @Override
   public String getLocalizedLabel() {
     // TODO: implement this method to return the 'Localized Label' attribute
     // Ensure that you remove @generated or mark it @generated NOT
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
+
+    return getLabel();
   }
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
+   * \@generated
    */
   @Override
   public String getLocalizedTooltip() {
     // TODO: implement this method to return the 'Localized Tooltip' attribute
     // Ensure that you remove @generated or mark it @generated NOT
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
+
+    return getTooltip();
   }
 
   /**
@@ -1204,13 +1208,15 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
+   * \@generated
    */
   @Override
   public String getLocalizedAccessibilityPhrase() {
     // TODO: implement this method to return the 'Localized Accessibility Phrase' attribute
     // Ensure that you remove @generated or mark it @generated NOT
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
+
+    return getAccessibilityPhrase();
   }
 
   /**
@@ -1363,7 +1369,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
+   * \@generated
    */
   @Override
   public EList<TransferFormat<? extends Object>> getTransferFormats() {
@@ -1382,7 +1388,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   public void updateLocalization() {
     // TODO: implement this method
     // Ensure that you remove @generated or mark it @generated NOT
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
   }
 
   /**

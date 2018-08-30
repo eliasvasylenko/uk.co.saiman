@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="uk.co.saiman.eclipse.ide"
+      label="MSApex IDE"
+      version="0.0.1.qualifier"
+      provider-name="Scientific Analysis Instruments"
+      os="linux,macosx,win32"
+      arch="x86,x86_64">
+
+   <description url="http://www.example.com/description">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.emf.ecore"/>
+      <import plugin="org.eclipse.e4.ui.model.workbench"/>
+      <import plugin="org.eclipse.emf.edit"/>
+   </requires>
+
+   <plugin
+         id="uk.co.saiman.reflection"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201808221517"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.data"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201808281027"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.utilities"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201808221517"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.eclipse.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201808291108"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.collections"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201808221517"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.eclipse.ui.edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201808291109"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.reflection.token"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201808221517"
+         unpack="false"/>
+
+</feature>
