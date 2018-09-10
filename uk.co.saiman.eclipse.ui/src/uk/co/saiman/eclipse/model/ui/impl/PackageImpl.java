@@ -29,6 +29,7 @@
  */
 package uk.co.saiman.eclipse.model.ui.impl;
 
+import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
@@ -91,13 +92,6 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * @generated
    */
   private EDataType mediaTypeEDataType = null;
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  private EDataType objectEDataType = null;
 
   /**
    * <!-- begin-user-doc -->
@@ -229,6 +223,24 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  public EAttribute getCell_ContextValue() {
+    return (EAttribute)cellEClass.getEStructuralFeatures().get(5);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getCell_Optional() {
+    return (EAttribute)cellEClass.getEStructuralFeatures().get(6);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public EClass getTree() {
     return treeEClass;
   }
@@ -283,15 +295,6 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
-  public EDataType getObject() {
-    return objectEDataType;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
   public EDataType getTransferFormat() {
     return transferFormatEDataType;
   }
@@ -330,6 +333,8 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
     createEReference(cellEClass, CELL__CONTRIBUTIONS);
     createEReference(cellEClass, CELL__POPUP_MENU);
     createEAttribute(cellEClass, CELL__TRANSFER_FORMATS);
+    createEAttribute(cellEClass, CELL__CONTEXT_VALUE);
+    createEAttribute(cellEClass, CELL__OPTIONAL);
 
     treeEClass = createEClass(TREE);
     createEAttribute(treeEClass, TREE__EDITABLE);
@@ -341,7 +346,6 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
 
     // Create data types
     mediaTypeEDataType = createEDataType(MEDIA_TYPE);
-    objectEDataType = createEDataType(OBJECT);
     transferFormatEDataType = createEDataType(TRANSFER_FORMAT);
   }
 
@@ -371,6 +375,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
     // Obtain other dependent packages
     UiPackageImpl theUiPackage = (UiPackageImpl)EPackage.Registry.INSTANCE.getEPackage(UiPackageImpl.eNS_URI);
     ApplicationPackageImpl theApplicationPackage = (ApplicationPackageImpl)EPackage.Registry.INSTANCE.getEPackage(ApplicationPackageImpl.eNS_URI);
+    CommandsPackageImpl theCommandsPackage = (CommandsPackageImpl)EPackage.Registry.INSTANCE.getEPackage(CommandsPackageImpl.eNS_URI);
     MenuPackageImpl theMenuPackage = (MenuPackageImpl)EPackage.Registry.INSTANCE.getEPackage(MenuPackageImpl.eNS_URI);
 
     // Create type parameters
@@ -389,6 +394,8 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
     EGenericType g2 = createEGenericType(this.getCell());
     g1.getETypeArguments().add(g2);
     cellEClass.getEGenericSuperTypes().add(g1);
+    g1 = createEGenericType(theCommandsPackage.getHandlerContainer());
+    cellEClass.getEGenericSuperTypes().add(g1);
     g1 = createEGenericType(theUiPackage.getContext());
     treeEClass.getEGenericSuperTypes().add(g1);
     g1 = createEGenericType(theApplicationPackage.getContribution());
@@ -396,6 +403,8 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
     g1 = createEGenericType(theUiPackage.getElementContainer());
     g2 = createEGenericType(this.getCell());
     g1.getETypeArguments().add(g2);
+    treeEClass.getEGenericSuperTypes().add(g1);
+    g1 = createEGenericType(theCommandsPackage.getHandlerContainer());
     treeEClass.getEGenericSuperTypes().add(g1);
     cellContributionEClass.getESuperTypes().add(theUiPackage.getContext());
     cellContributionEClass.getESuperTypes().add(theApplicationPackage.getContribution());
@@ -411,9 +420,9 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
     g1 = createEGenericType(this.getTransferFormat());
     g2 = createEGenericType();
     g1.getETypeArguments().add(g2);
-    EGenericType g3 = createEGenericType(this.getObject());
-    g2.setEUpperBound(g3);
     initEAttribute(getCell_TransferFormats(), g1, "transferFormats", null, 0, -1, Cell.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, IS_DERIVED, IS_ORDERED);
+    initEAttribute(getCell_ContextValue(), ecorePackage.getEString(), "contextValue", null, 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getCell_Optional(), ecorePackage.getEBoolean(), "optional", null, 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(treeEClass, Tree.class, "Tree", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getTree_Editable(), ecorePackage.getEBoolean(), "editable", null, 0, 1, Tree.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -425,7 +434,6 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
 
     // Initialize data types
     initEDataType(mediaTypeEDataType, MediaType.class, "MediaType", IS_SERIALIZABLE, !IS_GENERATED_INSTANCE_CLASS);
-    initEDataType(objectEDataType, Object.class, "Object", IS_SERIALIZABLE, !IS_GENERATED_INSTANCE_CLASS);
     initEDataType(transferFormatEDataType, TransferFormat.class, "TransferFormat", !IS_SERIALIZABLE, !IS_GENERATED_INSTANCE_CLASS);
 
     // Create resource

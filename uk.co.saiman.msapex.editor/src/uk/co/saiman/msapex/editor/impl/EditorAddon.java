@@ -52,7 +52,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
@@ -64,8 +63,8 @@ import org.osgi.service.event.Event;
 
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
-import uk.co.saiman.msapex.editor.EditorDescriptor;
 import uk.co.saiman.msapex.editor.Editor;
+import uk.co.saiman.msapex.editor.EditorDescriptor;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
@@ -144,12 +143,13 @@ public class EditorAddon implements EditorService {
   private synchronized void partContextListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
     try {
       Object value = event.getProperty(NEW_VALUE);
-      if (event.getProperty(ELEMENT) instanceof MHandlerContainer
+      Object element = event.getProperty(ELEMENT);
+      if (element instanceof MPart
           && value instanceof IEclipseContext
           && SET.equals(event.getProperty(TYPE))) {
         IEclipseContext context = (IEclipseContext) value;
 
-        MPart part = context.get(MPart.class);
+        MPart part = (MPart) element;
         MPart parentPart = context.getParent().get(MPart.class);
 
         if (isEditor(part)) {

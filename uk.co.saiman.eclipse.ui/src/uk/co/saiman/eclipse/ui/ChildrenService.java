@@ -27,20 +27,49 @@
  */
 package uk.co.saiman.eclipse.ui;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface ListItems {
-  String ITEM_DATA = "uk.co.saiman.eclipse.ui.item.data";
+public interface ChildrenService {
+  default <T> void setItem(String modelElementId, Class<T> contextClass, T child) {
+    setItem(modelElementId, contextClass.getName(), child);
+  }
 
-  <T> void addItem(String id, T child);
+  default <T> void setItem(
+      String modelElementId,
+      Class<T> contextClass,
+      T child,
+      Consumer<? super T> update) {
+    setItem(modelElementId, contextClass.getName(), child, update);
+  }
 
-  <T> void addItem(String id, T child, Consumer<? super T> update);
+  default <T> void setItems(
+      String modelElementId,
+      Class<T> contextClass,
+      Collection<? extends T> children) {
+    setItems(modelElementId, contextClass.getName(), children);
+  }
 
-  <T> void addItems(String id, List<? extends T> children);
+  default <T> void setItems(
+      String modelElementId,
+      Class<T> contextClass,
+      List<? extends T> children,
+      Consumer<? super List<? extends T>> update) {
+    setItems(modelElementId, contextClass.getName(), children, update);
+  }
 
-  <T> void addItems(
-      String id,
+  <T> void setItem(String modelElementId, String contextName, T child);
+
+  <T> void setItem(String modelElementId, String contextName, T child, Consumer<? super T> update);
+
+  <T> void setItems(String modelElementId, String contextName, Collection<? extends T> children);
+
+  <T> void setItems(
+      String modelElementId,
+      String contextName,
       List<? extends T> children,
       Consumer<? super List<? extends T>> update);
+
+  void invalidate();
 }

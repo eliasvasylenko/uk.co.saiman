@@ -40,6 +40,9 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.MContribution;
 
+import org.eclipse.e4.ui.model.application.commands.MHandler;
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
+import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.StringToObjectMapImpl;
 import org.eclipse.e4.ui.model.application.impl.StringToStringMapImpl;
@@ -67,6 +70,7 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
+import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
 import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -106,6 +110,7 @@ import uk.co.saiman.eclipse.model.ui.Tree;
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl#getLocalizedAccessibilityPhrase <em>Localized Accessibility Phrase</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl#getChildren <em>Children</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl#getSelectedElement <em>Selected Element</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl#getHandlers <em>Handlers</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl#isEditable <em>Editable</em>}</li>
  * </ul>
  *
@@ -453,6 +458,16 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @ordered
    */
   protected Cell selectedElement;
+
+  /**
+   * The cached value of the '{@link #getHandlers() <em>Handlers</em>}' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getHandlers()
+   * @generated
+   * @ordered
+   */
+  protected EList<MHandler> handlers;
 
   /**
    * The default value of the '{@link #isEditable() <em>Editable</em>}' attribute.
@@ -968,14 +983,9 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * \@generated
    */
   @Override
   public String getLocalizedAccessibilityPhrase() {
-    // TODO: implement this method to return the 'Localized Accessibility Phrase' attribute
-    // Ensure that you remove @generated or mark it @generated NOT
-    //throw new UnsupportedOperationException();
-
     return getAccessibilityPhrase();
   }
 
@@ -1038,6 +1048,19 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
+  public List<MHandler> getHandlers() {
+    if (handlers == null) {
+      handlers = new EObjectContainmentEList<MHandler>(MHandler.class, this, uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS);
+    }
+    return handlers;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
   public boolean isEditable() {
     return editable;
   }
@@ -1058,13 +1081,9 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * \@generated
    */
   @Override
   public void updateLocalization() {
-    // TODO: implement this method
-    // Ensure that you remove @generated or mark it @generated NOT
-    //throw new UnsupportedOperationException();
   }
 
   /**
@@ -1106,6 +1125,8 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return basicSetVisibleWhen(null, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.TREE__CHILDREN:
         return ((InternalEList<?>)getChildren()).basicRemove(otherEnd, msgs);
+      case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS:
+        return ((InternalEList<?>)getHandlers()).basicRemove(otherEnd, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
   }
@@ -1183,6 +1204,8 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.TREE__SELECTED_ELEMENT:
         if (resolve) return getSelectedElement();
         return basicGetSelectedElement();
+      case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS:
+        return getHandlers();
       case uk.co.saiman.eclipse.model.ui.Package.TREE__EDITABLE:
         return isEditable();
     }
@@ -1267,6 +1290,10 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.TREE__SELECTED_ELEMENT:
         setSelectedElement((Cell)newValue);
         return;
+      case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS:
+        getHandlers().clear();
+        getHandlers().addAll((Collection<? extends MHandler>)newValue);
+        return;
       case uk.co.saiman.eclipse.model.ui.Package.TREE__EDITABLE:
         setEditable((Boolean)newValue);
         return;
@@ -1348,6 +1375,9 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.TREE__SELECTED_ELEMENT:
         setSelectedElement((Cell)null);
         return;
+      case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS:
+        getHandlers().clear();
+        return;
       case uk.co.saiman.eclipse.model.ui.Package.TREE__EDITABLE:
         setEditable(EDITABLE_EDEFAULT);
         return;
@@ -1409,6 +1439,8 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return children != null && !children.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.TREE__SELECTED_ELEMENT:
         return selectedElement != null;
+      case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS:
+        return handlers != null && !handlers.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.TREE__EDITABLE:
         return editable != EDITABLE_EDEFAULT;
     }
@@ -1467,6 +1499,12 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         default: return -1;
       }
     }
+    if (baseClass == MHandlerContainer.class) {
+      switch (derivedFeatureID) {
+        case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS: return CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS;
+        default: return -1;
+      }
+    }
     return super.eBaseStructuralFeatureID(derivedFeatureID, baseClass);
   }
 
@@ -1522,6 +1560,12 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         default: return -1;
       }
     }
+    if (baseClass == MHandlerContainer.class) {
+      switch (baseFeatureID) {
+        case CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS: return uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS;
+        default: return -1;
+      }
+    }
     return super.eDerivedStructuralFeatureID(baseFeatureID, baseClass);
   }
 
@@ -1554,6 +1598,11 @@ public class TreeImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       }
     }
     if (baseClass == MElementContainer.class) {
+      switch (baseOperationID) {
+        default: return -1;
+      }
+    }
+    if (baseClass == MHandlerContainer.class) {
       switch (baseOperationID) {
         default: return -1;
       }

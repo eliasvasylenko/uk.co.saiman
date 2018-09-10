@@ -25,43 +25,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.eclipse.ui.fx.impl;
+package uk.co.saiman.eclipse.ui.fx;
 
-import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.eclipse.ui.TransferDestination.BEFORE_CHILD;
-import static uk.co.saiman.eclipse.ui.TransferDestination.OVER;
+import static java.util.Collections.emptySet;
 
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.Set;
 
-class TransferIn<T> {
-  private final ItemList<T> itemList;
-  private final T object;
-  private final TransfersIn owner;
+import javafx.scene.input.ClipboardContent;
+import uk.co.saiman.eclipse.ui.TransferMode;
 
-  public TransferIn(ItemList<T> itemList, T object, TransfersIn owner) {
-    this.itemList = itemList;
-    this.object = object;
-    this.owner = owner;
-  }
-
-  public void handleDrop() {
-    List<T> items;
-    if (owner.position() == OVER) {
-      items = itemList.getItems().map(Item::getObject).collect(toList());
-    } else {
-      items = itemList.getItems().flatMap(i -> {
-        if (i == owner.adjacentItem()) {
-          if (owner.position() == BEFORE_CHILD) {
-            return Stream.of(object, i.getObject());
-          } else {
-            return Stream.of(i.getObject(), object);
-          }
-        } else {
-          return Stream.of(i.getObject());
-        }
-      }).collect(toList());
+public interface TransferCellOut {
+  TransferCellOut UNSUPPORTED = new TransferCellOut() {
+    @Override
+    public Set<TransferMode> supportedTransferModes() {
+      return emptySet();
     }
-    itemList.getUpdate().get().accept(items);
-  }
+
+    @Override
+    public void handle(TransferMode transferMode) {}
+
+    @Override
+    public ClipboardContent getClipboardContent() {
+      return new ClipboardContent();
+    }
+  };
+
+  Set<TransferMode> supportedTransferModes();
+
+  void handle(TransferMode transferMode);
+
+  ClipboardContent getClipboardContent();
 }

@@ -31,6 +31,7 @@ package uk.co.saiman.eclipse.model.ui;
 
 import org.eclipse.e4.ui.model.application.MContribution;
 
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 
@@ -50,7 +51,7 @@ import org.eclipse.e4.ui.model.application.ui.MElementContainer;
  * @model
  * @generated
  */
-public interface Tree extends MContext, MContribution, MElementContainer<Cell> {
+public interface Tree extends MContext, MContribution, MElementContainer<Cell>, MHandlerContainer {
   /**
    * Returns the value of the '<em><b>Editable</b></em>' attribute.
    * <!-- begin-user-doc -->

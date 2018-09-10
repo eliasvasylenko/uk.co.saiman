@@ -18,7 +18,12 @@ Bundle-Name: SAI :: Eclipse
 	uk.co.saiman.osgi;version=snapshot,\
 	org.eclipse.osgi.compatibility.state,\
 	org.eclipse.emf.common,\
-	org.eclipse.emf.ecore
+	org.eclipse.emf.ecore,\
+	org.eclipse.fx.ui.workbench.renderers.base,\
+	org.eclipse.fx.ui.workbench.renderers.fx,\
+	org.eclipse.fx.ui.workbench.base,\
+	org.eclipse.fx.ui.workbench.fx,\
+	org.eclipse.fx.ui.workbench.services
 
 Bundle-Description: \
 	Classes for working with Eclipse RCP and IDE projects with JavaFX.
@@ -26,6 +31,7 @@ Bundle-Description: \
 Export-Package: \
 	uk.co.saiman.eclipse.service,\
 	uk.co.saiman.eclipse.ui.fx,\
+	uk.co.saiman.eclipse.ui.fx.widget,\
 	uk.co.saiman.eclipse.ui.fx.impl
 
 -includeresource: \

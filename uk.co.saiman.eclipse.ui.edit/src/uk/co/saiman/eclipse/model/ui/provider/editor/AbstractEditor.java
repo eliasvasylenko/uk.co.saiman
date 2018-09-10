@@ -36,10 +36,15 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.emf.ui.common.ImageTooltip;
 import org.eclipse.e4.tools.emf.ui.common.Util;
 import org.eclipse.e4.tools.emf.ui.common.component.AbstractComponentEditor;
+import org.eclipse.e4.tools.emf.ui.internal.ResourceProvider;
 import org.eclipse.e4.tools.emf.ui.internal.common.component.ControlFactory;
+import org.eclipse.e4.tools.emf.ui.internal.common.component.ControlFactory.TextPasteHandler;
+import org.eclipse.e4.tools.emf.ui.internal.common.component.dialogs.PartIconDialogEditor;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
 import org.eclipse.emf.databinding.EMFDataBindingContext;
 import org.eclipse.emf.databinding.FeaturePath;
@@ -51,8 +56,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import uk.co.saiman.eclipse.model.ui.Tree;
 
@@ -171,6 +182,79 @@ public abstract class AbstractEditor extends AbstractComponentEditor {
                 .value(
                     getEditingDomain(),
                     ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__ELEMENT_ID));
+  }
+
+  @SuppressWarnings("unchecked")
+  protected void createLabelControls(
+      Composite parent,
+      EMFDataBindingContext context,
+      IObservableValue<?> master,
+      IWidgetValueProperty textProp) {
+    ControlFactory
+        .createTextField(
+            parent,
+            Messages.PartEditor_LabelLabel,
+            master,
+            context,
+            textProp,
+            EMFEditProperties.value(getEditingDomain(), UiPackageImpl.Literals.UI_LABEL__LABEL));
+    ControlFactory
+        .createTextField(
+            parent,
+            Messages.ModelTooling_UIElement_AccessibilityPhrase,
+            master,
+            context,
+            textProp,
+            EMFEditProperties
+                .value(
+                    getEditingDomain(),
+                    UiPackageImpl.Literals.UI_ELEMENT__ACCESSIBILITY_PHRASE));
+    ControlFactory
+        .createTextField(
+            parent,
+            Messages.PartEditor_Tooltip,
+            master,
+            context,
+            textProp,
+            EMFEditProperties.value(getEditingDomain(), UiPackageImpl.Literals.UI_LABEL__TOOLTIP));
+
+    // ------------------------------------------------------------
+    {
+      final Label l = new Label(parent, SWT.NONE);
+      l.setText(Messages.PartEditor_IconURI);
+      l.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+      l.setToolTipText(Messages.PartEditor_IconURI_Tooltip);
+
+      final Text t = new Text(parent, SWT.BORDER);
+      TextPasteHandler.createFor(t);
+      t.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+      context
+          .bindValue(
+              textProp.observeDelayed(200, t),
+              EMFEditProperties
+                  .value(getEditingDomain(), UiPackageImpl.Literals.UI_LABEL__ICON_URI)
+                  .observeDetail(master));
+
+      new ImageTooltip(t, Messages, this);
+
+      final Button b = new Button(parent, SWT.PUSH | SWT.FLAT);
+      b.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+      b.setImage(createImage(ResourceProvider.IMG_Obj16_zoom));
+      b.setText(Messages.ModelTooling_Common_FindEllipsis);
+      b.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          final PartIconDialogEditor dialog = new PartIconDialogEditor(
+              b.getShell(),
+              eclipseContext,
+              project,
+              getEditingDomain(),
+              (MPart) getMaster().getValue(),
+              Messages);
+          dialog.open();
+        }
+      });
+    }
   }
 
   protected void createContributionControl(Composite parent, EMFDataBindingContext context) {

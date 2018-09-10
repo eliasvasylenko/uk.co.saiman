@@ -27,10 +27,6 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
-
-import javax.inject.Named;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
@@ -40,7 +36,7 @@ public class ProcessorCell {
   public static final String ID = "uk.co.saiman.experiment.processing.cell";
 
   @AboutToShow
-  public void prepare(Cell cell, @Named(ITEM_DATA) Processor<?> entry) {
+  public void prepare(Cell cell, Processor entry) {
     cell.setLabel(entry.getId());
     // TODO cell.setSupplemental("");
   }

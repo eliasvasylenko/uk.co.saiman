@@ -43,7 +43,7 @@ import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.properties.PropertyLoader;
 
 @Component
-public class Convolution implements Processor<Convolution> {
+public class Convolution implements Processor {
   private static final Accessor<double[], ?> VECTOR = doubleAccessor("vector")
       .toStreamAccessor()
       .map(s -> s.mapToDouble(e -> e).toArray(), a -> DoubleStream.of(a).mapToObj(e -> e));
@@ -153,10 +153,5 @@ public class Convolution implements Processor<Convolution> {
       }
     }
     return convoluted;
-  }
-
-  @Override
-  public Class<Convolution> getType() {
-    return Convolution.class;
   }
 }

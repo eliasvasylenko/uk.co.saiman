@@ -199,6 +199,7 @@ public class CellEditor extends AbstractEditor {
       IObservableValue<?> master,
       IWidgetValueProperty textProp) {
     createElementIdControl(parent, context, master, textProp);
+    createLabelControls(parent, context, master, textProp);
     createContributionControl(parent, context);
     createVisibleWhenControl(parent, context);
     createEditableControl(parent, context);

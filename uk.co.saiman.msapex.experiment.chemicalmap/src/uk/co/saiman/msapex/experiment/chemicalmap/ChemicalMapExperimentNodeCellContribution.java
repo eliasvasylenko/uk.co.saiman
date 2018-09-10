@@ -27,14 +27,10 @@
  */
 package uk.co.saiman.msapex.experiment.chemicalmap;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
-
-import javax.inject.Named;
-
-import org.eclipse.e4.ui.di.AboutToShow;
+import javax.inject.Inject;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
@@ -43,12 +39,12 @@ public class ChemicalMapExperimentNodeCellContribution {
   public static final String ID = "uk.co.saiman.experiment.treecontribution.chemicalmap";
 
   public class Contribution {
-    @AboutToShow
+    @Inject
     public void prepare(
         HBox node,
         Cell cell,
-        @Named(ITEM_DATA) ExperimentNode<?, ?> experiment,
-        @AdaptNamed(ITEM_DATA) ChemicalMapConfiguration configuration) {
+        ExperimentNode<?, ?> experiment,
+        @AdaptClass(ExperimentNode.class) ChemicalMapConfiguration configuration) {
       cell.setLabel(experiment.getType().getName());
       // TODO cell.setSupplemental(node, configuration.getChemicalMapName());
     }

@@ -46,22 +46,22 @@ import uk.co.saiman.properties.PropertyLoader;
 
 @Component
 public class ProcessorServiceImpl implements ProcessorService {
-  private final Map<String, Processor<?>> processors = new HashMap<>();
+  private final Map<String, Processor> processors = new HashMap<>();
 
   @Reference
   PropertyLoader propertyLoader;
 
   @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
-  void addProcessingType(Processor<?> type) {
+  void addProcessingType(Processor type) {
     processors.putIfAbsent(type.getId(), type);
   }
 
-  void removeProcessingType(Processor<?> type) {
+  void removeProcessingType(Processor type) {
     processors.remove(type.getId());
   }
 
   @Override
-  public Processor<?> loadProcessor(StateMap persistedState) {
+  public Processor loadProcessor(StateMap persistedState) {
     return processors
         .computeIfAbsent(
             persistedState.get(PROCESSOR_ID_KEY).asProperty().getValue(),

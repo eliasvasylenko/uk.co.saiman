@@ -35,6 +35,8 @@ import java.util.List;
 
 import org.eclipse.e4.ui.model.application.MApplicationFactory;
 
+import org.eclipse.e4.ui.model.application.commands.MCommandsFactory;
+import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 
 import org.eclipse.e4.ui.model.application.ui.MUiFactory;
@@ -130,6 +132,8 @@ public class CellItemProvider
       addContributionsPropertyDescriptor(object);
       addPopupMenuPropertyDescriptor(object);
       addTransferFormatsPropertyDescriptor(object);
+      addContextValuePropertyDescriptor(object);
+      addOptionalPropertyDescriptor(object);
     }
     return itemPropertyDescriptors;
   }
@@ -711,6 +715,50 @@ public class CellItemProvider
   }
 
   /**
+   * This adds a property descriptor for the Context Value feature.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  protected void addContextValuePropertyDescriptor(Object object) {
+    itemPropertyDescriptors.add
+      (createItemPropertyDescriptor
+        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+         getResourceLocator(),
+         getString("_UI_Cell_contextValue_feature"),
+         getString("_UI_PropertyDescriptor_description", "_UI_Cell_contextValue_feature", "_UI_Cell_type"),
+         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__CONTEXT_VALUE,
+         true,
+         false,
+         false,
+         ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+         null,
+         null));
+  }
+
+  /**
+   * This adds a property descriptor for the Optional feature.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  protected void addOptionalPropertyDescriptor(Object object) {
+    itemPropertyDescriptors.add
+      (createItemPropertyDescriptor
+        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+         getResourceLocator(),
+         getString("_UI_Cell_optional_feature"),
+         getString("_UI_PropertyDescriptor_description", "_UI_Cell_optional_feature", "_UI_Cell_type"),
+         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__OPTIONAL,
+         true,
+         false,
+         false,
+         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
+         null,
+         null));
+  }
+
+  /**
    * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
    * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
    * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
@@ -726,6 +774,7 @@ public class CellItemProvider
       childrenFeatures.add(ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__PERSISTED_STATE);
       childrenFeatures.add(UiPackageImpl.Literals.UI_ELEMENT__VISIBLE_WHEN);
       childrenFeatures.add(UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN);
+      childrenFeatures.add(CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS);
       childrenFeatures.add(uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__CONTRIBUTIONS);
     }
     return childrenFeatures;
@@ -806,12 +855,15 @@ public class CellItemProvider
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
         return;
     }
@@ -1008,6 +1060,11 @@ public class CellItemProvider
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
          MAdvancedFactory.INSTANCE.createArea()));
+
+    newChildDescriptors.add
+      (createChildParameter
+        (CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS,
+         MCommandsFactory.INSTANCE.createHandler()));
   }
 
   /**

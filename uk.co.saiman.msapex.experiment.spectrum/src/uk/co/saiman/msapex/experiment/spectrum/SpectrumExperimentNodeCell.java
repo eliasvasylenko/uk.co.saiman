@@ -27,15 +27,11 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
-
-import javax.inject.Named;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.ui.ListItems;
+import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 
@@ -45,9 +41,9 @@ public class SpectrumExperimentNodeCell {
   @AboutToShow
   public void prepare(
       Cell cell,
-      @Named(ITEM_DATA) ExperimentNode<?, ?> data,
-      @AdaptNamed(ITEM_DATA) SpectrumConfiguration state,
-      ListItems children) {
+      ExperimentNode<?, ?> data,
+      @AdaptClass(ExperimentNode.class) SpectrumConfiguration state,
+      ChildrenService children) {
     cell.setLabel(data.getType().getName());
     // TODO cell.setSupplemental(state.getSpectrumName());
   }

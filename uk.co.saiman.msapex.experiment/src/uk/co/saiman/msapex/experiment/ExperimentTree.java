@@ -29,23 +29,33 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.stream.Collectors.toList;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import uk.co.saiman.eclipse.ui.Invalidator;
-import uk.co.saiman.eclipse.ui.ListItems;
+import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentTree {
   public static final String ID = "uk.co.saiman.msapex.experiment.tree";
 
-  @PostConstruct
-  void initialize(Workspace workspace, Invalidator invalidator, ListItems children) {
-    children.addItems(ExperimentNodeCell.ID, workspace.getExperiments().collect(toList()));
+  @Inject
+  void initialize(Workspace workspace, ChildrenService children) {
+    children
+        .setItems(
+            ExperimentNodeCell.ID,
+            ExperimentNode.class,
+            workspace.getExperiments().collect(toList()));
 
     workspace
         .events()
         .weakReference(this)
         .filter(e -> !e.message().getNode().getParent().isPresent())
-        .observe(m -> invalidator.invalidate());
+        .observe(m -> children.invalidate());
+
+    /*
+     * TODO this model of "invalidating" and reinjecting the children parameter
+     * would work ... but it doesn't naturally facilitate reuse of child model
+     * elements.
+     */
   }
 }

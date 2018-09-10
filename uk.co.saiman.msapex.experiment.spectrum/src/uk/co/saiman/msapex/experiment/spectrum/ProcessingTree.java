@@ -27,26 +27,27 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
+import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.inject.Inject;
 
-import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 
-import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.variable.NamedVariable;
+import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.Processor;
-import uk.co.saiman.property.Property;
 
 public class ProcessingTree {
   public static final String ID = "uk.co.saiman.experiment.processing.tree";
 
-  @AboutToShow
-  public void prepare(
-      @NamedVariable(ITEM_DATA) Property<List<Processor<?>>> entry,
-      ListItems children) {
+  @Inject
+  public void prepare(IEclipseContext context, Processing processing, ChildrenService children) {
 
-    children.addItems(ID, entry.get(), r -> entry.set(new ArrayList<>(r)));
+    children
+        .setItems(
+            ID,
+            Processor.class,
+            processing.processors().collect(toList()),
+            r -> context.set(Processing.class, new Processing(r)));
   }
 }

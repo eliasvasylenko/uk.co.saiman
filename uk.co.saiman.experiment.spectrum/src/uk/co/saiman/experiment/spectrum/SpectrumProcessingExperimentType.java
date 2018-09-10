@@ -27,15 +27,12 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 import static uk.co.saiman.experiment.state.Accessor.mapAccessor;
 import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Stream;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -52,6 +49,7 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingType;
+import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.Processor;
 import uk.co.saiman.experiment.processing.ProcessorService;
 import uk.co.saiman.experiment.state.Accessor.ListAccessor;
@@ -71,11 +69,13 @@ public class SpectrumProcessingExperimentType
   private ProcessorService processors;
   private final SpectrumProperties properties;
 
-  private final MapAccessor<Processor<?>> processor = mapAccessor(
+  private final MapAccessor<Processor> processor = mapAccessor(
       "processing",
       s -> processors.loadProcessor(s),
       Processor::getState);
-  private final ListAccessor<List<Processor<?>>> processorList = processor.toListAccessor();
+  private final ListAccessor<Processing> processorList = processor
+      .toListAccessor()
+      .map(Processing::new, p -> p.processors().collect(toList()));
 
   public SpectrumProcessingExperimentType() {
     properties = getDefaultPropertyLoader().getProperties(SpectrumProperties.class);
@@ -127,13 +127,13 @@ public class SpectrumProcessingExperimentType
       }
 
       @Override
-      public Stream<Processor<?>> getProcessing() {
-        return context.state().get(processorList).stream();
+      public Processing getProcessing() {
+        return context.state().get(processorList);
       }
 
       @Override
-      public void setProcessing(Collection<? extends Processor<?>> processors) {
-        context.update(state -> state.with(processorList, new ArrayList<>(processors)));
+      public void setProcessing(Processing processing) {
+        context.update(state -> state.with(processorList, processing));
       }
     };
   }
@@ -142,6 +142,7 @@ public class SpectrumProcessingExperimentType
   public Spectrum process(SpectrumResultConfiguration state, Spectrum input) {
     DataProcessor processor = state
         .getProcessing()
+        .processors()
         .map(Processor::getProcessor)
         .reduce(identity(), DataProcessor::andThen);
 

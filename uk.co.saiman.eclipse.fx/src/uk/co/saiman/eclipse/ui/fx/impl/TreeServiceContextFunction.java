@@ -44,6 +44,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.TreeView;
 import uk.co.saiman.eclipse.model.ui.Tree;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
+import uk.co.saiman.eclipse.ui.fx.widget.WTree;
 
 @Component(
     property = IContextFunction.SERVICE_CONTEXT_KEY
@@ -75,7 +76,7 @@ public class TreeServiceContextFunction implements IContextFunction {
 
       modelService.hostElement(tree, window, owner, context);
 
-      TreeView<?> treeView = (TreeView<?>) tree.getWidget();
+      TreeView<?> treeView = (TreeView<?>) ((WTree<?>) tree.getWidget()).getWidget();
       return treeView;
     }
 

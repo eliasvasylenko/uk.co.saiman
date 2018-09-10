@@ -31,7 +31,7 @@ import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.state.StateMap;
 
-public class MissingProcessorType implements Processor<MissingProcessorType> {
+public class MissingProcessorType implements Processor {
   private final String id;
   private final ProcessingProperties text;
   private final StateMap state;
@@ -69,10 +69,5 @@ public class MissingProcessorType implements Processor<MissingProcessorType> {
   @Override
   public DataProcessor getProcessor() {
     throw new ExperimentException("Cannot find processor " + id);
-  }
-
-  @Override
-  public Class<MissingProcessorType> getType() {
-    return MissingProcessorType.class;
   }
 }

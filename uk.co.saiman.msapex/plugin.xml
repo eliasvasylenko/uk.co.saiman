@@ -20,6 +20,10 @@
 			<property
 				name="cssTheme"
 				value="theme.msapex" />
+
+			<property
+            	name="rendererFactoryUri"
+            	value="bundleclass://uk.co.saiman.eclipse.fx/uk.co.saiman.eclipse.ui.fx.impl.ExtendedRendererFactory" />
 		</product>
 	</extension>
 

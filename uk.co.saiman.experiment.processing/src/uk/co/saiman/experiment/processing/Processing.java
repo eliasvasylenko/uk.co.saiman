@@ -27,21 +27,35 @@
  */
 package uk.co.saiman.experiment.processing;
 
+import static uk.co.saiman.data.function.processing.DataProcessor.identity;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
+
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.state.StateMap;
 
-public interface Processor {
-  String PROCESSOR_ID_KEY = "processorId";
+public class Processing {
+  private List<Processor> processors;
 
-  default String getId() {
-    return getClass().getName();
+  public Processing(Collection<? extends Processor> processors) {
+    // TODO Auto-generated constructor stub
   }
 
-  String getName();
+  public Stream<Processor> processors() {
+    return processors.stream();
+  }
 
-  StateMap getState();
+  public StateMap getState() {
+    return null;
+  }
 
-  Processor withState(StateMap state);
+  public Processing withState(StateMap state) {
+    return null;
+  }
 
-  DataProcessor getProcessor();
+  public DataProcessor getProcessor() {
+    return processors().map(p -> p.getProcessor()).reduce(identity(), DataProcessor::andThen);
+  }
 }

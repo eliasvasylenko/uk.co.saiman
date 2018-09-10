@@ -27,15 +27,12 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.variable.NamedVariable;
+import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.Convolution;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.property.Property;
@@ -44,40 +41,45 @@ public class ConvolutionCell {
   public static final String ID = "uk.co.saiman.experiment.processing.cell.convolution";
 
   @AboutToShow
-  public void prepare(
-      HBox node,
-      @NamedVariable(ITEM_DATA) Property<Convolution> entry,
-      ListItems children) {
+  public void prepare(HBox node, Property<Convolution> entry, ChildrenService children) {
     // TODO setSupplemental(node,
     // Arrays.toString(entry.get().getConvolutionVector()));
 
     children
-        .addItem(
+        .setItem(
             Vector.ID,
+            double[].class,
             entry.get().getConvolutionVector(),
             result -> entry.set(entry.get().withConvolutionVector(result)));
 
     children
-        .addItem(
+        .setItem(
             Centre.ID,
+            int.class,
             entry.get().getConvolutionVectorCentre(),
             result -> entry.set(entry.get().withConvolutionVectorCentre(result)));
   }
 
-  static class Vector {
+  public static class Vector {
     public static final String ID = ConvolutionCell.ID + ".convolution";
 
     @AboutToShow
-    public void prepare(Cell cell, @Localize ProcessingProperties properties) {
+    public void prepare(
+        Cell cell,
+        double[] convolutionVector,
+        @Localize ProcessingProperties properties) {
       cell.setLabel(properties.vectorLabel().get());
     }
   }
 
-  static class Centre {
+  public static class Centre {
     public static final String ID = ConvolutionCell.ID + ".centre";
 
     @AboutToShow
-    public void prepare(Cell cell, @Localize ProcessingProperties properties) {
+    public void prepare(
+        Cell cell,
+        int convolutionVectorCentre,
+        @Localize ProcessingProperties properties) {
       cell.setLabel(properties.centreLabel().get());
     }
   }

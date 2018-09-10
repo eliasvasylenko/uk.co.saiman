@@ -27,15 +27,12 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.variable.NamedVariable;
+import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.BoxFilter;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.property.Property;
@@ -44,24 +41,22 @@ public class BoxFilterCell {
   public static final String ID = "uk.co.saiman.experiment.processing.cell.boxfilter";
 
   @AboutToShow
-  public void prepare(
-      HBox node,
-      @NamedVariable(ITEM_DATA) Property<BoxFilter> entry,
-      ListItems children) {
+  public void prepare(HBox node, Property<BoxFilter> entry, ChildrenService children) {
     // TODO setSupplemental(node, Integer.toString(entry.get().getWidth()));
 
     children
-        .addItem(
+        .setItem(
             Width.ID,
+            int.class,
             entry.get().getWidth(),
             result -> entry.set(entry.get().withWidth(result)));
   }
 
-  static class Width {
+  public static class Width {
     public static final String ID = BoxFilterCell.ID + ".width";
 
     @AboutToShow
-    void prepare(Cell cell, @Localize ProcessingProperties properties) {
+    void prepare(Cell cell, int value, @Localize ProcessingProperties properties) {
       cell.setLabel(properties.widthLabel().get());
     }
   }

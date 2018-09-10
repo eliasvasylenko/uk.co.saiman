@@ -37,6 +37,8 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import org.eclipse.e4.ui.model.application.MApplicationFactory;
 
+import org.eclipse.e4.ui.model.application.commands.MCommandsFactory;
+import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 
 import org.eclipse.e4.ui.model.application.ui.MUiFactory;
@@ -518,6 +520,7 @@ public class TreeItemProvider
       childrenFeatures.add(ApplicationPackageImpl.Literals.APPLICATION_ELEMENT__PERSISTED_STATE);
       childrenFeatures.add(UiPackageImpl.Literals.UI_ELEMENT__VISIBLE_WHEN);
       childrenFeatures.add(UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN);
+      childrenFeatures.add(CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS);
     }
     return childrenFeatures;
   }
@@ -597,6 +600,7 @@ public class TreeItemProvider
       case uk.co.saiman.eclipse.model.ui.Package.TREE__PERSISTED_STATE:
       case uk.co.saiman.eclipse.model.ui.Package.TREE__VISIBLE_WHEN:
       case uk.co.saiman.eclipse.model.ui.Package.TREE__CHILDREN:
+      case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
         return;
     }
@@ -793,6 +797,11 @@ public class TreeItemProvider
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
          MAdvancedFactory.INSTANCE.createArea()));
+
+    newChildDescriptors.add
+      (createChildParameter
+        (CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS,
+         MCommandsFactory.INSTANCE.createHandler()));
   }
 
   /**

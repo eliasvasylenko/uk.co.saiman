@@ -10,7 +10,6 @@
       ecorePackage="UISaiman.ecore#/">
     <genDataTypes documentation="A set of transfer formats is populated automatically to satisfy the&#xA;media types accepted by the cell. It can be modified&#xA;manually to customize serialization behavior.&#xA;&lt;p>&#xA;Transfer formats are used to serialize and deserialize a cell's data in order&#xA;to facilitate, for example, drag-and-drop or copy-and-paste functionality."
         ecoreDataType="UISaiman.ecore#//MediaType"/>
-    <genDataTypes ecoreDataType="UISaiman.ecore#//Object"/>
     <genDataTypes ecoreDataType="UISaiman.ecore#//TransferFormat">
       <genTypeParameters ecoreTypeParameter="UISaiman.ecore#//TransferFormat/T"/>
     </genDataTypes>
@@ -21,6 +20,8 @@
           ecoreFeature="ecore:EReference UISaiman.ecore#//Cell/contributions"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference UISaiman.ecore#//Cell/popupMenu"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/transferFormats"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/contextValue"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/optional"/>
     </genClasses>
     <genClasses ecoreClass="UISaiman.ecore#//Tree">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Tree/editable"/>

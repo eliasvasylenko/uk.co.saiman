@@ -28,33 +28,39 @@
 package uk.co.saiman.eclipse.ui.fx.impl;
 
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static uk.co.saiman.eclipse.ui.TransferDestination.BEFORE_CHILD;
+import static uk.co.saiman.eclipse.ui.TransferDestination.OVER;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javafx.scene.input.Dragboard;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.TransferDestination;
 import uk.co.saiman.eclipse.ui.TransferFormat;
 import uk.co.saiman.eclipse.ui.TransferMode;
 import uk.co.saiman.eclipse.ui.fx.ClipboardCache;
 import uk.co.saiman.eclipse.ui.fx.ClipboardService;
+import uk.co.saiman.eclipse.ui.fx.TransferCellIn;
 import uk.co.saiman.eclipse.ui.fx.TransferModes;
 
-class TransfersIn {
+public class TransferCellInImpl implements TransferCellIn {
   private final TransferDestination position;
-  private final Item<?> adjacentItem;
-  private final Map<TransferMode, Optional<? extends TransferIn<?>>> dropCandidates;
+  private final Cell adjacentItem;
+  private final Map<TransferMode, Optional<? extends TransferInImpl<?>>> dropCandidates;
 
-  public TransfersIn(
+  public TransferCellInImpl(
       List<ItemList<?>> itemLists,
       Dragboard clipboard,
       ClipboardService clipboardService,
       TransferDestination position,
-      Item<?> adjacentItem) {
+      Cell adjacentItem) {
     this.position = position;
     this.adjacentItem = adjacentItem;
 
@@ -71,7 +77,7 @@ class TransfersIn {
                     transferMode)));
   }
 
-  private Optional<? extends TransferIn<?>> forItemLists(
+  private Optional<? extends TransferInImpl<?>> forItemLists(
       List<ItemList<?>> itemLists,
       ClipboardCache clipboard,
       TransferMode transferMode) {
@@ -82,7 +88,7 @@ class TransfersIn {
         .flatMap(t -> t);
   }
 
-  private <T> Optional<TransferIn<T>> forItemList(
+  private <T> Optional<TransferInImpl<T>> forItemList(
       ItemList<T> itemList,
       ClipboardCache clipboard,
       TransferMode transferMode) {
@@ -93,19 +99,12 @@ class TransfersIn {
         .map(clipboard::getData)
         .filter(Optional::isPresent)
         .map(Optional::get)
-        .map(object -> new TransferIn<>(itemList, object, this))
+        .map(object -> new TransferInImpl<>(itemList, object, this))
         .findFirst();
   }
 
-  public TransferDestination position() {
-    return position;
-  }
-
-  public Item<?> adjacentItem() {
-    return adjacentItem;
-  }
-
-  Set<TransferMode> getCandidateTransferModes() {
+  @Override
+  public Set<TransferMode> supportedTransferModes() {
     return dropCandidates
         .keySet()
         .stream()
@@ -113,7 +112,38 @@ class TransfersIn {
         .collect(toSet());
   }
 
-  TransferIn<?> getCandidate(TransferMode transferMode) {
-    return dropCandidates.get(transferMode).get();
+  @Override
+  public void handle(TransferMode transferMode) {
+    dropCandidates.get(transferMode).get().handleDrop();
+  }
+
+  class TransferInImpl<T> {
+    private final ItemList<T> itemList;
+    private final T object;
+
+    public TransferInImpl(ItemList<T> itemList, T object, TransferCellInImpl owner) {
+      this.itemList = itemList;
+      this.object = object;
+    }
+
+    public void handleDrop() {
+      List<T> items;
+      if (position == OVER) {
+        items = itemList.getItems().map(Item::getObject).collect(toList());
+      } else {
+        items = itemList.getItems().flatMap(i -> {
+          if (i.getModel() == adjacentItem) {
+            if (position == BEFORE_CHILD) {
+              return Stream.of(object, i.getObject());
+            } else {
+              return Stream.of(i.getObject(), object);
+            }
+          } else {
+            return Stream.of(i.getObject());
+          }
+        }).collect(toList());
+      }
+      itemList.getUpdate().get().accept(items);
+    }
   }
 }

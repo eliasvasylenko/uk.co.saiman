@@ -30,5 +30,5 @@ package uk.co.saiman.experiment.processing;
 import uk.co.saiman.experiment.state.StateMap;
 
 public interface ProcessorService {
-  Processor<?> loadProcessor(StateMap persistedState);
+  Processor loadProcessor(StateMap persistedState);
 }

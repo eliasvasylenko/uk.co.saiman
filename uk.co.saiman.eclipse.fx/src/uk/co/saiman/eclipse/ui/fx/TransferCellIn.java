@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.experiment.spectrum.
+ * This file is part of uk.co.saiman.eclipse.fx.
  *
- * uk.co.saiman.experiment.spectrum is free software: you can redistribute it and/or modify
+ * uk.co.saiman.eclipse.fx is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.experiment.spectrum is distributed in the hope that it will be useful,
+ * uk.co.saiman.eclipse.fx is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,21 +25,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.spectrum;
+package uk.co.saiman.eclipse.ui.fx;
 
-import uk.co.saiman.experiment.processing.Processing;
+import static java.util.Collections.emptySet;
 
-/**
- * TODO
- * 
- * @author Elias N Vasylenko
- */
-public interface SpectrumResultConfiguration {
-  String getSpectrumName();
+import java.util.Set;
 
-  void setSpectrumName(String name);
+import uk.co.saiman.eclipse.ui.TransferMode;
 
-  Processing getProcessing();
+public interface TransferCellIn {
+  TransferCellIn UNSUPPORTED = new TransferCellIn() {
+    @Override
+    public Set<TransferMode> supportedTransferModes() {
+      return emptySet();
+    }
 
-  void setProcessing(Processing processing);
+    @Override
+    public void handle(TransferMode transferMode) {}
+  };
+
+  Set<TransferMode> supportedTransferModes();
+
+  void handle(TransferMode transferMode);
 }

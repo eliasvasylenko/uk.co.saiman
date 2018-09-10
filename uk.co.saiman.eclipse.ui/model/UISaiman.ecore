@@ -3,7 +3,6 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ui" nsURI="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui"
     nsPrefix="saiman.ui">
   <eClassifiers xsi:type="ecore:EDataType" name="MediaType" instanceClassName="uk.co.saiman.data.format.MediaType"/>
-  <eClassifiers xsi:type="ecore:EDataType" name="Object" instanceClassName="java.lang.Object"/>
   <eClassifiers xsi:type="ecore:EDataType" name="TransferFormat" instanceClassName="uk.co.saiman.eclipse.ui.TransferFormat"
       serializable="false">
     <eTypeParameters name="T"/>
@@ -19,17 +18,18 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transferFormats" upperBound="-1"
         transient="true" derived="true">
       <eGenericType eClassifier="#//TransferFormat">
-        <eTypeArguments>
-          <eUpperBound eClassifier="#//Object"/>
-        </eTypeArguments>
+        <eTypeArguments/>
       </eGenericType>
     </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contextValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="optional" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/UILabel"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/Context"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//Contribution"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/ElementContainer">
       <eTypeArguments eClassifier="#//Cell"/>
     </eGenericSuperTypes>
+    <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//commands/HandlerContainer"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Tree">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="editable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -38,6 +38,7 @@
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/ElementContainer">
       <eTypeArguments eClassifier="#//Cell"/>
     </eGenericSuperTypes>
+    <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//commands/HandlerContainer"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CellContribution" eSuperTypes="../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/Context ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//Contribution">
     <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//Cell"

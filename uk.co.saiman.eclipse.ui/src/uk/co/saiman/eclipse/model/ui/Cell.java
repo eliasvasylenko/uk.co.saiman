@@ -31,6 +31,7 @@ package uk.co.saiman.eclipse.model.ui;
 
 import org.eclipse.e4.ui.model.application.MContribution;
 
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUILabel;
@@ -54,13 +55,15 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getContributions <em>Contributions</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu <em>Popup Menu</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getTransferFormats <em>Transfer Formats</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getContextValue <em>Context Value</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#isOptional <em>Optional</em>}</li>
  * </ul>
  *
  * @see uk.co.saiman.eclipse.model.ui.Package#getCell()
  * @model
  * @generated
  */
-public interface Cell extends MUILabel, MContext, MContribution, MElementContainer<Cell> {
+public interface Cell extends MUILabel, MContext, MContribution, MElementContainer<Cell>, MHandlerContainer {
   /**
    * Returns the value of the '<em><b>Media Types</b></em>' attribute list.
    * The list contents are of type {@link uk.co.saiman.data.format.MediaType}.
@@ -141,7 +144,7 @@ public interface Cell extends MUILabel, MContext, MContribution, MElementContain
 
   /**
    * Returns the value of the '<em><b>Transfer Formats</b></em>' attribute list.
-   * The list contents are of type {@link uk.co.saiman.eclipse.ui.TransferFormat}<code>&lt;? extends java.lang.Object&gt;</code>.
+   * The list contents are of type {@link uk.co.saiman.eclipse.ui.TransferFormat}<code>&lt;?&gt;</code>.
    * <!-- begin-user-doc -->
    * <p>
    * If the meaning of the '<em>Transfer Formats</em>' attribute list isn't clear,
@@ -150,9 +153,61 @@ public interface Cell extends MUILabel, MContext, MContribution, MElementContain
    * <!-- end-user-doc -->
    * @return the value of the '<em>Transfer Formats</em>' attribute list.
    * @see uk.co.saiman.eclipse.model.ui.Package#getCell_TransferFormats()
-   * @model dataType="uk.co.saiman.eclipse.model.ui.TransferFormat&lt;? extends uk.co.saiman.eclipse.model.ui.Object&gt;" transient="true" derived="true"
+   * @model dataType="uk.co.saiman.eclipse.model.ui.TransferFormat&lt;?&gt;" transient="true" derived="true"
    * @generated
    */
-  EList<TransferFormat<? extends Object>> getTransferFormats();
+  EList<TransferFormat<?>> getTransferFormats();
+
+  /**
+   * Returns the value of the '<em><b>Context Value</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>Context Value</em>' attribute isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>Context Value</em>' attribute.
+   * @see #setContextValue(String)
+   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_ContextValue()
+   * @model
+   * @generated
+   */
+  String getContextValue();
+
+  /**
+   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.Cell#getContextValue <em>Context Value</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @param value the new value of the '<em>Context Value</em>' attribute.
+   * @see #getContextValue()
+   * @generated
+   */
+  void setContextValue(String value);
+
+  /**
+   * Returns the value of the '<em><b>Optional</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <p>
+   * If the meaning of the '<em>Optional</em>' attribute isn't clear,
+   * there really should be more of a description here...
+   * </p>
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>Optional</em>' attribute.
+   * @see #setOptional(boolean)
+   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_Optional()
+   * @model
+   * @generated
+   */
+  boolean isOptional();
+
+  /**
+   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.Cell#isOptional <em>Optional</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @param value the new value of the '<em>Optional</em>' attribute.
+   * @see #isOptional()
+   * @generated
+   */
+  void setOptional(boolean value);
 
 } // Cell

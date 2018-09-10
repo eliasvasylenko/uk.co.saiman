@@ -27,15 +27,99 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
+import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_TOBERENDERED;
+
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.osgi.service.event.Event;
 
+import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.ui.fx.ClipboardService;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 
 public class UIAddon {
+  static final String CHILD_CONTEXT_VALUE = "uk.co.saiman.eclipse.model.ui.child.context.value";
+  static final String CHILD_CONTEXT_VALUE_SET = "uk.co.saiman.eclipse.model.ui.child.context.value.set";
+
+  @Inject
+  private Log log;
+
   @PostConstruct
   public void initialize(IEclipseContext context, ClipboardServiceImpl clipboardService) {
     context.set(ClipboardService.class, clipboardService);
+  }
+
+  /**
+   * Watch for cell/tree close events so we can clean up after things
+   */
+  @Inject
+  @Optional
+  private synchronized void cellCloseListener(@UIEventTopic(TOPIC_TOBERENDERED) Event event) {
+    Object element = event.getProperty(UIEvents.EventTags.ELEMENT);
+    boolean toBeRendered = (Boolean) event.getProperty(UIEvents.EventTags.NEW_VALUE);
+    if (!toBeRendered) {
+      if (element instanceof Cell) {
+        // resourceParts.remove(partResources.remove(part));
+      } else if (element instanceof Tree) {
+
+      }
+    }
+  }
+
+  /**
+   * Watch for context creation events so we can inject into the cell contexts
+   * before the UI is created.
+   */
+  @Inject
+  @Optional
+  private synchronized void cellContextListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
+    try {
+      Object value = event.getProperty(NEW_VALUE);
+      Object element = event.getProperty(ELEMENT);
+      if (value instanceof IEclipseContext && SET.equals(event.getProperty(TYPE))) {
+        IEclipseContext context = (IEclipseContext) value;
+
+        if (element instanceof Cell || element instanceof Tree) {
+          try {
+            context
+                .set(
+                    ChildrenService.class,
+                    ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+        if (element instanceof Cell) {
+          Cell cell = (Cell) element;
+
+          if (cell.getPersistedState().containsKey(CHILD_CONTEXT_VALUE)) {
+            cell.setContextValue(cell.getPersistedState().get(CHILD_CONTEXT_VALUE));
+            if (cell.getTransientData().containsKey(CHILD_CONTEXT_VALUE)) {
+              cell
+                  .getContext()
+                  .set(cell.getContextValue(), cell.getTransientData().get(CHILD_CONTEXT_VALUE));
+            } else {
+              cell.setParent(null);
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
+    }
   }
 }

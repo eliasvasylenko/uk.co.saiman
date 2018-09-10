@@ -51,7 +51,7 @@
          id="uk.co.saiman.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808291108"
+         version="0.0.1.201808311546"
          unpack="false"/>
 
    <plugin
@@ -65,7 +65,7 @@
          id="uk.co.saiman.eclipse.ui.edit"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808291109"
+         version="0.0.1.201809040830"
          unpack="false"/>
 
    <plugin

@@ -27,19 +27,18 @@
  */
 package uk.co.saiman.msapex.experiment.sample.treecontributions;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.sample.SampleConfiguration;
 
 public class SampleExperimentNodeCell {
   public static final String ID = "uk.co.saiman.experiment.sample.cell";
 
   @AboutToShow
-  public void prepare(Cell cell, @AdaptNamed(ITEM_DATA) SampleConfiguration data) {
+  public void prepare(Cell cell, @AdaptClass(ExperimentNode.class) SampleConfiguration data) {
     cell.setLabel(data.getName());
     // TODO setSupplemental(data.toString());
   }

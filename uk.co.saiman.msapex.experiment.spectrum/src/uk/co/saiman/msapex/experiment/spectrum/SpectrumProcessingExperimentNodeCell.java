@@ -28,20 +28,17 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
 import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Named;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.eclipse.ui.ListItems;
+import uk.co.saiman.eclipse.adapter.AdaptClass;
+import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.variable.NamedVariable;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.processing.Processor;
@@ -54,13 +51,17 @@ public class SpectrumProcessingExperimentNodeCell {
   @AboutToShow
   public void prepare(
       HBox node,
-      @Named(ITEM_DATA) ExperimentNode<?, ?> data,
-      @AdaptNamed(ITEM_DATA) SpectrumResultConfiguration state,
-      ListItems children) {
+      ExperimentNode<?, ?> data,
+      @AdaptClass(ExperimentNode.class) SpectrumResultConfiguration state,
+      ChildrenService children) {
     setLabel(node, data.getType().getName());
     setSupplemental(node, state.getSpectrumName());
 
-    children.addItems(Processors.ID, state.getProcessing().collect(toList()));
+    children
+        .setItems(
+            Processors.ID,
+            "processors",
+            state.getProcessing().processors().collect(toList()));
   }
 
   static class Processors {
@@ -68,10 +69,10 @@ public class SpectrumProcessingExperimentNodeCell {
 
     @AboutToShow
     public void prepare(
-        @NamedVariable(ITEM_DATA) Property<List<Processor<?>>> entry,
-        ListItems children) {
+        @NamedVariable("processors") Property<List<Processor>> entry,
+        ChildrenService children) {
 
-      children.addItems(ID, entry.get(), r -> entry.set(new ArrayList<>(r)));
+      children.setItems(ID, Processor.class, entry.get(), r -> entry.set(new ArrayList<>(r)));
     }
   }
 }

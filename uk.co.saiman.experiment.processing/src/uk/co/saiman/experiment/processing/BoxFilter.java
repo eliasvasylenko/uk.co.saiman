@@ -40,7 +40,7 @@ import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 import uk.co.saiman.properties.PropertyLoader;
 
 @Component
-public class BoxFilter implements Processor<BoxFilter> {
+public class BoxFilter implements Processor {
   private static final PropertyAccessor<Integer> WIDTH = intAccessor("width");
   protected static final int NO_OP = 1;
 
@@ -123,10 +123,5 @@ public class BoxFilter implements Processor<BoxFilter> {
       applyInPlace(data, width);
       return data;
     }, width / 2);
-  }
-
-  @Override
-  public Class<BoxFilter> getType() {
-    return BoxFilter.class;
   }
 }

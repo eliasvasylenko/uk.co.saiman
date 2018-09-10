@@ -7,6 +7,10 @@ Export-Package:\
 Private-Package:\
 	uk.co.saiman.msapex
 
+Import-Package:\
+	uk.co.saiman.eclipse.,\
+	*
+
 -include:\
 	${build}/include/eclipse.platform.bnd,\
 	${build}/include/eclipse.plugin.bnd,\

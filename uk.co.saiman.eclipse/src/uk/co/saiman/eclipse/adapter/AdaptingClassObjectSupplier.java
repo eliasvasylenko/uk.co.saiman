@@ -1,0 +1,78 @@
+/*
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.eclipse.
+ *
+ * uk.co.saiman.eclipse is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.eclipse is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package uk.co.saiman.eclipse.adapter;
+
+import static uk.co.saiman.reflection.Types.getErasedType;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.suppliers.ExtendedObjectSupplier;
+import org.eclipse.e4.core.di.suppliers.IObjectDescriptor;
+import org.eclipse.e4.core.di.suppliers.IRequestor;
+import org.eclipse.e4.core.services.adapter.Adapter;
+import org.osgi.service.component.annotations.Component;
+
+import uk.co.saiman.eclipse.utilities.TransformingNamedObjectSupplier;
+import uk.co.saiman.properties.PropertyLoader;
+
+/**
+ * Supplier for Eclipse DI contexts, to provide localization implementations of
+ * a requested type via a {@link PropertyLoader}.
+ *
+ * @since 1.2
+ */
+@Component(
+    service = ExtendedObjectSupplier.class,
+    property = "dependency.injection.annotation:String=uk.co.saiman.eclipse.adapter.AdaptClass",
+    immediate = true)
+public class AdaptingClassObjectSupplier extends TransformingNamedObjectSupplier<AdaptClass> {
+  class NamedVariableRequest extends AdaptingClassObjectSupplier.Request {
+    private final Class<?> type;
+    private final Class<?> adapterType;
+
+    public NamedVariableRequest(IObjectDescriptor descriptor, IRequestor requestor) {
+      super(descriptor, requestor);
+
+      this.type = getQualifier().value();
+      this.adapterType = getErasedType(descriptor.getDesiredType());
+    }
+
+    @Override
+    protected Object get(IEclipseContext context) {
+      return context.get(Adapter.class).adapt(context.get(type), adapterType);
+    }
+  }
+
+  public AdaptingClassObjectSupplier() {
+    super(AdaptClass.class);
+  }
+
+  @Override
+  protected NamedVariableRequest getRequest(IObjectDescriptor descriptor, IRequestor requestor) {
+    return new NamedVariableRequest(descriptor, requestor);
+  }
+}

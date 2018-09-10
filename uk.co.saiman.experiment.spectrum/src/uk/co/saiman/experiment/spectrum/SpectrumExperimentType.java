@@ -84,6 +84,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
         .node()
         .getState()
         .getProcessing()
+        .processors()
         .map(Processor::getProcessor)
         .reduce(identity(), DataProcessor::andThen);
 

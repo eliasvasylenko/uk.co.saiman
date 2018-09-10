@@ -42,14 +42,15 @@ import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.eclipse.ui.TransferMode;
 import uk.co.saiman.eclipse.ui.fx.MediaTypes;
+import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 
-class TransferOut<T> {
+public class TransferCellOutImpl<T> implements TransferCellOut {
   private final Item<T> item;
 
   private final Set<TransferMode> transferModes;
   private final ClipboardContent clipboardContent;
 
-  public TransferOut(Item<T> item) {
+  public TransferCellOutImpl(Item<T> item) {
     this.item = item;
 
     // determine available transfer modes
@@ -86,15 +87,13 @@ class TransferOut<T> {
     });
   }
 
-  public T getData() {
-    return item.getObject();
-  }
-
-  public Set<TransferMode> getTransferModes() {
+  @Override
+  public Set<TransferMode> supportedTransferModes() {
     return transferModes;
   }
 
-  public void handleDrag(TransferMode transferMode) {
+  @Override
+  public void handle(TransferMode transferMode) {
     if (!transferModes.contains(transferMode)) {
       throw new IllegalArgumentException("Unsupported transfer mode " + transferMode);
     }
@@ -103,6 +102,7 @@ class TransferOut<T> {
     }
   }
 
+  @Override
   public ClipboardContent getClipboardContent() {
     return clipboardContent;
   }

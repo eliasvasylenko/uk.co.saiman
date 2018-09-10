@@ -376,13 +376,23 @@ public interface Package extends EPackage {
   int CELL__SELECTED_ELEMENT = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 22;
 
   /**
+   * The feature id for the '<em><b>Handlers</b></em>' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @since 1.0
+   * @generated
+   * @ordered
+   */
+  int CELL__HANDLERS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 23;
+
+  /**
    * The feature id for the '<em><b>Media Types</b></em>' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int CELL__MEDIA_TYPES = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 23;
+  int CELL__MEDIA_TYPES = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 24;
 
   /**
    * The feature id for the '<em><b>Editable</b></em>' attribute.
@@ -391,7 +401,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__EDITABLE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 24;
+  int CELL__EDITABLE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 25;
 
   /**
    * The feature id for the '<em><b>Contributions</b></em>' containment reference list.
@@ -400,7 +410,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__CONTRIBUTIONS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 25;
+  int CELL__CONTRIBUTIONS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 26;
 
   /**
    * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
@@ -409,7 +419,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__POPUP_MENU = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 26;
+  int CELL__POPUP_MENU = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 27;
 
   /**
    * The feature id for the '<em><b>Transfer Formats</b></em>' attribute list.
@@ -418,7 +428,25 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__TRANSFER_FORMATS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 27;
+  int CELL__TRANSFER_FORMATS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 28;
+
+  /**
+   * The feature id for the '<em><b>Context Value</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int CELL__CONTEXT_VALUE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 29;
+
+  /**
+   * The feature id for the '<em><b>Optional</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int CELL__OPTIONAL = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 30;
 
   /**
    * The number of structural features of the '<em>Cell</em>' class.
@@ -427,7 +455,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL_FEATURE_COUNT = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 28;
+  int CELL_FEATURE_COUNT = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 31;
 
   /**
    * The operation id for the '<em>Update Localization</em>' operation.
@@ -689,13 +717,23 @@ public interface Package extends EPackage {
   int TREE__SELECTED_ELEMENT = UiPackageImpl.CONTEXT_FEATURE_COUNT + 19;
 
   /**
+   * The feature id for the '<em><b>Handlers</b></em>' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @since 1.0
+   * @generated
+   * @ordered
+   */
+  int TREE__HANDLERS = UiPackageImpl.CONTEXT_FEATURE_COUNT + 20;
+
+  /**
    * The feature id for the '<em><b>Editable</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int TREE__EDITABLE = UiPackageImpl.CONTEXT_FEATURE_COUNT + 20;
+  int TREE__EDITABLE = UiPackageImpl.CONTEXT_FEATURE_COUNT + 21;
 
   /**
    * The number of structural features of the '<em>Tree</em>' class.
@@ -704,7 +742,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int TREE_FEATURE_COUNT = UiPackageImpl.CONTEXT_FEATURE_COUNT + 21;
+  int TREE_FEATURE_COUNT = UiPackageImpl.CONTEXT_FEATURE_COUNT + 22;
 
   /**
    * The operation id for the '<em>Update Localization</em>' operation.
@@ -1153,6 +1191,16 @@ public interface Package extends EPackage {
   int HANDLED_CELL__SELECTED_ELEMENT = CELL__SELECTED_ELEMENT;
 
   /**
+   * The feature id for the '<em><b>Handlers</b></em>' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @since 1.0
+   * @generated
+   * @ordered
+   */
+  int HANDLED_CELL__HANDLERS = CELL__HANDLERS;
+
+  /**
    * The feature id for the '<em><b>Media Types</b></em>' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1196,6 +1244,24 @@ public interface Package extends EPackage {
    * @ordered
    */
   int HANDLED_CELL__TRANSFER_FORMATS = CELL__TRANSFER_FORMATS;
+
+  /**
+   * The feature id for the '<em><b>Context Value</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int HANDLED_CELL__CONTEXT_VALUE = CELL__CONTEXT_VALUE;
+
+  /**
+   * The feature id for the '<em><b>Optional</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int HANDLED_CELL__OPTIONAL = CELL__OPTIONAL;
 
   /**
    * The feature id for the '<em><b>Enabled</b></em>' attribute.
@@ -1297,16 +1363,6 @@ public interface Package extends EPackage {
 
 
   /**
-   * The meta object id for the '<em>Object</em>' data type.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see java.lang.Object
-   * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getObject()
-   * @generated
-   */
-  int OBJECT = 5;
-
-  /**
    * The meta object id for the '<em>Transfer Format</em>' data type.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1314,7 +1370,7 @@ public interface Package extends EPackage {
    * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getTransferFormat()
    * @generated
    */
-  int TRANSFER_FORMAT = 6;
+  int TRANSFER_FORMAT = 5;
 
 
   /**
@@ -1381,6 +1437,28 @@ public interface Package extends EPackage {
    * @generated
    */
   EAttribute getCell_TransferFormats();
+
+  /**
+   * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#getContextValue <em>Context Value</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Context Value</em>'.
+   * @see uk.co.saiman.eclipse.model.ui.Cell#getContextValue()
+   * @see #getCell()
+   * @generated
+   */
+  EAttribute getCell_ContextValue();
+
+  /**
+   * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#isOptional <em>Optional</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Optional</em>'.
+   * @see uk.co.saiman.eclipse.model.ui.Cell#isOptional()
+   * @see #getCell()
+   * @generated
+   */
+  EAttribute getCell_Optional();
 
   /**
    * Returns the meta object for class '{@link uk.co.saiman.eclipse.model.ui.Tree <em>Tree</em>}'.
@@ -1452,17 +1530,6 @@ public interface Package extends EPackage {
    * @generated
    */
   EDataType getMediaType();
-
-  /**
-   * Returns the meta object for data type '{@link java.lang.Object <em>Object</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for data type '<em>Object</em>'.
-   * @see java.lang.Object
-   * @model instanceClass="java.lang.Object"
-   * @generated
-   */
-  EDataType getObject();
 
   /**
    * Returns the meta object for data type '{@link uk.co.saiman.eclipse.ui.TransferFormat <em>Transfer Format</em>}'.
@@ -1549,6 +1616,22 @@ public interface Package extends EPackage {
     EAttribute CELL__TRANSFER_FORMATS = eINSTANCE.getCell_TransferFormats();
 
     /**
+     * The meta object literal for the '<em><b>Context Value</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute CELL__CONTEXT_VALUE = eINSTANCE.getCell_ContextValue();
+
+    /**
+     * The meta object literal for the '<em><b>Optional</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute CELL__OPTIONAL = eINSTANCE.getCell_Optional();
+
+    /**
      * The meta object literal for the '{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl <em>Tree</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -1603,16 +1686,6 @@ public interface Package extends EPackage {
      * @generated
      */
     EDataType MEDIA_TYPE = eINSTANCE.getMediaType();
-
-    /**
-     * The meta object literal for the '<em>Object</em>' data type.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see java.lang.Object
-     * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getObject()
-     * @generated
-     */
-    EDataType OBJECT = eINSTANCE.getObject();
 
     /**
      * The meta object literal for the '<em>Transfer Format</em>' data type.

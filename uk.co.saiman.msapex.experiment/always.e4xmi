@@ -21,7 +21,7 @@
     <elements xsi:type="application:Addon" xmi:id="_apWEa22hn5zDDThfd46eZZ" elementId="uk.co.saiman.msapex.experiment.addon.editor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentEditorAddon"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="saiman.ui:Cell" xmi:id="_gvEOwKuLEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.experiment.node" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNodeCell">
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_gvEOwKuLEeioCuifABHnDQ" label="Test snippet" elementId="uk.co.saiman.msapex.experiment.cell.node" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNodeCell">
       <contributions xmi:id="_tjtUAKuNEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.experiment.cellcontribution" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentCellContribution"/>
       <popupMenu xmi:id="_Y4cl4KuNEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.experiment.popupmenu.node" label="Node">
         <children xsi:type="menu:Menu" xmi:id="_fGt3MN9DEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.menu.addnode" label="Add Node">
@@ -31,7 +31,9 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_3FoR8N9EEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.renameexperiment" label="Rename Experiment" command="_7__6MN9EEee47os9dS7QbA"/>
       </popupMenu>
     </elements>
-    <elements xsi:type="saiman.ui:Tree" xmi:id="_DMvkYKCKEeizj_NEqekErQ" elementId="uk.co.saiman.msapex.experiment.tree" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentTree"/>
+    <elements xsi:type="saiman.ui:Tree" xmi:id="_DMvkYKCKEeizj_NEqekErQ" elementId="uk.co.saiman.msapex.experiment.tree" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentTree">
+      <children xsi:type="saiman.ui:Cell" xmi:id="_PgMt8KxaEeioCuifABHnDQ" label="Test child" elementId="uk.co.saiman.msapex.experiment.cell.0"/>
+    </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_iYArkLsiEeel5-btXoqucA" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
     <elements xsi:type="basic:Part" xmi:id="_kxY9wLsiEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.part" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentPart" label="Experiments" iconURI="${fugue.icon.runtime}/size16/books.png">

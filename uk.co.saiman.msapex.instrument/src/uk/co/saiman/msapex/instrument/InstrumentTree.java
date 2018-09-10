@@ -28,20 +28,18 @@
 package uk.co.saiman.msapex.instrument;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 
-import javax.inject.Named;
+import javax.inject.Inject;
 
-import org.eclipse.e4.ui.di.AboutToShow;
-
-import uk.co.saiman.eclipse.ui.ListItems;
+import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.Instrument;
 
 public class InstrumentTree {
-  public static final String ID = "uk.co.saiman.instrument.tree";
+  public static final String ID = "uk.co.saiman.msapex.instrument.tree";
 
-  @AboutToShow
-  public void prepare(@Named(ITEM_DATA) Instrument data, ListItems children) {
-    children.addItems(DeviceCell.ID, data.getDevices().collect(toList()));
+  @Inject
+  public void prepare(Instrument data, ChildrenService children) {
+    children.setItems(DeviceCell.ID, Device.class, data.getDevices().collect(toList()));
   }
 }

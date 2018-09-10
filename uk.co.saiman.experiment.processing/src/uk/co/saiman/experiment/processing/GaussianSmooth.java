@@ -40,7 +40,7 @@ import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 import uk.co.saiman.properties.PropertyLoader;
 
 @Component
-public class GaussianSmooth implements Processor<GaussianSmooth> {
+public class GaussianSmooth implements Processor {
   private static final PropertyAccessor<Double> STANDARD_DEVIATION = doubleAccessor(
       "standardDeviation");
   private static final int BOX_ITERATIONS = 5;
@@ -110,10 +110,5 @@ public class GaussianSmooth implements Processor<GaussianSmooth> {
 
       return data;
     }, 0);
-  }
-
-  @Override
-  public Class<GaussianSmooth> getType() {
-    return GaussianSmooth.class;
   }
 }

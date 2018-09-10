@@ -29,22 +29,19 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.stream.Collectors.toList;
 import static javafx.css.PseudoClass.getPseudoClass;
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
 import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
 import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.eclipse.ui.ListItems;
+import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.msapex.editor.Editor;
@@ -56,7 +53,7 @@ import uk.co.saiman.msapex.editor.EditorService;
  * @author Elias N Vasylenko
  */
 public class ExperimentNodeCell {
-  public static final String ID = "uk.co.saiman.experiment.cell.node";
+  public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
 
   private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
 
@@ -68,15 +65,12 @@ public class ExperimentNodeCell {
   EditorService editorService;
 
   @Execute
-  public void execute(@Named(ITEM_DATA) ExperimentNode<?, ?> experiment) {
+  public void execute(ExperimentNode<?, ?> experiment) {
     editorService.getApplicableEditors(experiment).findFirst().map(Editor::openPart).isPresent();
   }
 
-  @AboutToShow
-  public void prepare(
-      HBox node,
-      ListItems children,
-      @Named(ITEM_DATA) ExperimentNode<?, ?> experiment) {
+  @Inject
+  public void prepare(HBox node, ChildrenService children, ExperimentNode<?, ?> experiment) {
     /*
      * configure label
      */
@@ -110,6 +104,10 @@ public class ExperimentNodeCell {
     /*
      * add children
      */
-    children.addItems(ExperimentNodeCell.ID, experiment.getChildren().collect(toList()));
+    children
+        .setItems(
+            ExperimentNodeCell.ID,
+            ExperimentNode.class,
+            experiment.getChildren().collect(toList()));
   }
 }

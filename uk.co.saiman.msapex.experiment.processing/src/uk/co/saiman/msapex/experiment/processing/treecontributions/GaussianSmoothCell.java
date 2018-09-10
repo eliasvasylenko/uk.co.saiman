@@ -27,15 +27,12 @@
  */
 package uk.co.saiman.msapex.experiment.processing.treecontributions;
 
-import static uk.co.saiman.eclipse.ui.ListItems.ITEM_DATA;
-
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.ui.ListItems;
-import uk.co.saiman.eclipse.variable.NamedVariable;
+import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.GaussianSmooth;
 import uk.co.saiman.experiment.processing.ProcessingProperties;
 import uk.co.saiman.property.Property;
@@ -44,16 +41,14 @@ public class GaussianSmoothCell {
   public static final String ID = "uk.co.saiman.experiment.processing.cell.gaussiansmooth";
 
   @AboutToShow
-  public void prepare(
-      HBox node,
-      @NamedVariable(ITEM_DATA) Property<GaussianSmooth> entry,
-      ListItems children) {
+  public void prepare(HBox node, Property<GaussianSmooth> entry, ChildrenService children) {
     // TODO setSupplemental(node,
     // Double.toString(entry.get().getStandardDeviation()));
 
     children
-        .addItem(
+        .setItem(
             StandardDeviation.ID,
+            double.class,
             entry.get().getStandardDeviation(),
             result -> entry.set(entry.get().withStandardDeviation(result)));
   }
@@ -62,7 +57,7 @@ public class GaussianSmoothCell {
     public static final String ID = GaussianSmoothCell.ID + ".deviation";
 
     @AboutToShow
-    void prepare(Cell cell, @Localize ProcessingProperties properties) {
+    void prepare(Cell cell, double standardDeviation, @Localize ProcessingProperties properties) {
       cell.setLabel(properties.standardDeviationLabel().get());
     }
   }

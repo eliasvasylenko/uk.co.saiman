@@ -40,6 +40,9 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.MContribution;
 
+import org.eclipse.e4.ui.model.application.commands.MHandler;
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
+import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.StringToObjectMapImpl;
 import org.eclipse.e4.ui.model.application.impl.StringToStringMapImpl;
@@ -68,6 +71,7 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
+import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
 import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -113,11 +117,14 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getLocalizedAccessibilityPhrase <em>Localized Accessibility Phrase</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getChildren <em>Children</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getSelectedElement <em>Selected Element</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getHandlers <em>Handlers</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getMediaTypes <em>Media Types</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isEditable <em>Editable</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getContributions <em>Contributions</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getPopupMenu <em>Popup Menu</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getTransferFormats <em>Transfer Formats</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getContextValue <em>Context Value</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isOptional <em>Optional</em>}</li>
  * </ul>
  *
  * @generated
@@ -552,6 +559,16 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected Cell selectedElement;
 
   /**
+   * The cached value of the '{@link #getHandlers() <em>Handlers</em>}' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getHandlers()
+   * @generated
+   * @ordered
+   */
+  protected EList<MHandler> handlers;
+
+  /**
    * The cached value of the '{@link #getMediaTypes() <em>Media Types</em>}' attribute list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -609,7 +626,47 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    * @ordered
    */
-  protected EList<TransferFormat<? extends Object>> transferFormats;
+  protected EList<TransferFormat<?>> transferFormats;
+
+  /**
+   * The default value of the '{@link #getContextValue() <em>Context Value</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getContextValue()
+   * @generated
+   * @ordered
+   */
+  protected static final String CONTEXT_VALUE_EDEFAULT = null;
+
+  /**
+   * The cached value of the '{@link #getContextValue() <em>Context Value</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getContextValue()
+   * @generated
+   * @ordered
+   */
+  protected String contextValue = CONTEXT_VALUE_EDEFAULT;
+
+  /**
+   * The default value of the '{@link #isOptional() <em>Optional</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #isOptional()
+   * @generated
+   * @ordered
+   */
+  protected static final boolean OPTIONAL_EDEFAULT = false;
+
+  /**
+   * The cached value of the '{@link #isOptional() <em>Optional</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #isOptional()
+   * @generated
+   * @ordered
+   */
+  protected boolean optional = OPTIONAL_EDEFAULT;
 
   /**
    * <!-- begin-user-doc -->
@@ -708,28 +765,18 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * \@generated
    */
   @Override
   public String getLocalizedLabel() {
-    // TODO: implement this method to return the 'Localized Label' attribute
-    // Ensure that you remove @generated or mark it @generated NOT
-    //throw new UnsupportedOperationException();
-
     return getLabel();
   }
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * \@generated
    */
   @Override
   public String getLocalizedTooltip() {
-    // TODO: implement this method to return the 'Localized Tooltip' attribute
-    // Ensure that you remove @generated or mark it @generated NOT
-    //throw new UnsupportedOperationException();
-
     return getTooltip();
   }
 
@@ -1208,14 +1255,9 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * \@generated
    */
   @Override
   public String getLocalizedAccessibilityPhrase() {
-    // TODO: implement this method to return the 'Localized Accessibility Phrase' attribute
-    // Ensure that you remove @generated or mark it @generated NOT
-    //throw new UnsupportedOperationException();
-
     return getAccessibilityPhrase();
   }
 
@@ -1270,6 +1312,19 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     selectedElement = newSelectedElement;
     if (eNotificationRequired())
       eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT, oldSelectedElement, selectedElement));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public List<MHandler> getHandlers() {
+    if (handlers == null) {
+      handlers = new EObjectContainmentEList<MHandler>(MHandler.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS);
+    }
+    return handlers;
   }
 
   /**
@@ -1369,12 +1424,12 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * \@generated
+   * @generated
    */
   @Override
-  public EList<TransferFormat<? extends Object>> getTransferFormats() {
+  public EList<TransferFormat<?>> getTransferFormats() {
     if (transferFormats == null) {
-      transferFormats = new EDataTypeUniqueEList<TransferFormat<? extends Object>>(TransferFormat.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS);
+      transferFormats = new EDataTypeUniqueEList<TransferFormat<?>>(TransferFormat.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS);
     }
     return transferFormats;
   }
@@ -1385,10 +1440,52 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
+  public String getContextValue() {
+    return contextValue;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public void setContextValue(String newContextValue) {
+    String oldContextValue = contextValue;
+    contextValue = newContextValue;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE, oldContextValue, contextValue));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public boolean isOptional() {
+    return optional;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public void setOptional(boolean newOptional) {
+    boolean oldOptional = optional;
+    optional = newOptional;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL, oldOptional, optional));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   */
+  @Override
   public void updateLocalization() {
-    // TODO: implement this method
-    // Ensure that you remove @generated or mark it @generated NOT
-    //throw new UnsupportedOperationException();
   }
 
   /**
@@ -1432,6 +1529,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return basicSetVisibleWhen(null, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
         return ((InternalEList<?>)getChildren()).basicRemove(otherEnd, msgs);
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+        return ((InternalEList<?>)getHandlers()).basicRemove(otherEnd, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         return ((InternalEList<?>)getContributions()).basicRemove(otherEnd, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
@@ -1523,6 +1622,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
         if (resolve) return getSelectedElement();
         return basicGetSelectedElement();
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+        return getHandlers();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         return getMediaTypes();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
@@ -1533,6 +1634,10 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return getPopupMenu();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
         return getTransferFormats();
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
+        return getContextValue();
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
+        return isOptional();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -1624,6 +1729,10 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
         setSelectedElement((Cell)newValue);
         return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+        getHandlers().clear();
+        getHandlers().addAll((Collection<? extends MHandler>)newValue);
+        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         getMediaTypes().clear();
         getMediaTypes().addAll((Collection<? extends MediaType>)newValue);
@@ -1640,7 +1749,13 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
         getTransferFormats().clear();
-        getTransferFormats().addAll((Collection<? extends TransferFormat<? extends Object>>)newValue);
+        getTransferFormats().addAll((Collection<? extends TransferFormat<?>>)newValue);
+        return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
+        setContextValue((String)newValue);
+        return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
+        setOptional((Boolean)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -1729,6 +1844,9 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
         setSelectedElement((Cell)null);
         return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+        getHandlers().clear();
+        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         getMediaTypes().clear();
         return;
@@ -1743,6 +1861,12 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
         getTransferFormats().clear();
+        return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
+        setContextValue(CONTEXT_VALUE_EDEFAULT);
+        return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
+        setOptional(OPTIONAL_EDEFAULT);
         return;
     }
     super.eUnset(featureID);
@@ -1812,6 +1936,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return children != null && !children.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
         return selectedElement != null;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+        return handlers != null && !handlers.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         return mediaTypes != null && !mediaTypes.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
@@ -1822,6 +1948,10 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return popupMenu != null;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
         return transferFormats != null && !transferFormats.isEmpty();
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
+        return CONTEXT_VALUE_EDEFAULT == null ? contextValue != null : !CONTEXT_VALUE_EDEFAULT.equals(contextValue);
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
+        return optional != OPTIONAL_EDEFAULT;
     }
     return super.eIsSet(featureID);
   }
@@ -1881,6 +2011,12 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         default: return -1;
       }
     }
+    if (baseClass == MHandlerContainer.class) {
+      switch (derivedFeatureID) {
+        case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS: return CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS;
+        default: return -1;
+      }
+    }
     return super.eBaseStructuralFeatureID(derivedFeatureID, baseClass);
   }
 
@@ -1936,6 +2072,12 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       switch (baseFeatureID) {
         case UiPackageImpl.ELEMENT_CONTAINER__CHILDREN: return uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN;
         case UiPackageImpl.ELEMENT_CONTAINER__SELECTED_ELEMENT: return uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT;
+        default: return -1;
+      }
+    }
+    if (baseClass == MHandlerContainer.class) {
+      switch (baseFeatureID) {
+        case CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS: return uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS;
         default: return -1;
       }
     }
@@ -2007,6 +2149,10 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     result.append(editable);
     result.append(", transferFormats: ");
     result.append(transferFormats);
+    result.append(", contextValue: ");
+    result.append(contextValue);
+    result.append(", optional: ");
+    result.append(optional);
     result.append(')');
     return result.toString();
   }

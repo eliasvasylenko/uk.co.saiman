@@ -32,6 +32,7 @@ package uk.co.saiman.eclipse.model.ui.util;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.MContribution;
 
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MLocalizable;
@@ -149,6 +150,10 @@ public class AdapterFactory extends AdapterFactoryImpl {
       @Override
       public <T extends MUIElement> Adapter caseElementContainer(MElementContainer<T> object) {
         return createElementContainerAdapter();
+      }
+      @Override
+      public Adapter caseHandlerContainer(MHandlerContainer object) {
+        return createHandlerContainerAdapter();
       }
       @Override
       public Adapter caseItem(MItem object) {
@@ -336,6 +341,21 @@ public class AdapterFactory extends AdapterFactoryImpl {
    * @generated
    */
   public Adapter createElementContainerAdapter() {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link org.eclipse.e4.ui.model.application.commands.MHandlerContainer <em>Handler Container</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see org.eclipse.e4.ui.model.application.commands.MHandlerContainer
+   * @since 1.0
+   * @generated
+   */
+  public Adapter createHandlerContainerAdapter() {
     return null;
   }
 

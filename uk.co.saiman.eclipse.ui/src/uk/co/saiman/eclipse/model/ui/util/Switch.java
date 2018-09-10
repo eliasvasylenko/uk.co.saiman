@@ -32,6 +32,7 @@ package uk.co.saiman.eclipse.model.ui.util;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.MContribution;
 
+import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MLocalizable;
@@ -110,6 +111,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
         if (result == null) result = caseContext(cell);
         if (result == null) result = caseContribution(cell);
         if (result == null) result = caseElementContainer(cell);
+        if (result == null) result = caseHandlerContainer(cell);
         if (result == null) result = caseUIElement(cell);
         if (result == null) result = caseLocalizable(cell);
         if (result == null) result = caseApplicationElement(cell);
@@ -122,6 +124,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
         if (result == null) result = caseContext(tree);
         if (result == null) result = caseContribution(tree);
         if (result == null) result = caseElementContainer(tree);
+        if (result == null) result = caseHandlerContainer(tree);
         if (result == null) result = caseUIElement(tree);
         if (result == null) result = caseApplicationElement(tree);
         if (result == null) result = caseLocalizable(tree);
@@ -145,6 +148,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
         if (result == null) result = caseContext(handledCell);
         if (result == null) result = caseContribution(handledCell);
         if (result == null) result = caseElementContainer(handledCell);
+        if (result == null) result = caseHandlerContainer(handledCell);
         if (result == null) result = caseItem(handledCell);
         if (result == null) result = caseUILabel(handledCell);
         if (result == null) result = caseUIElement(handledCell);
@@ -326,6 +330,22 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * @generated
    */
   public <T extends MUIElement> T1 caseElementContainer(MElementContainer<T> object) {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Handler Container</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Handler Container</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @since 1.0
+   * @generated
+   */
+  public T1 caseHandlerContainer(MHandlerContainer object) {
     return null;
   }
 
