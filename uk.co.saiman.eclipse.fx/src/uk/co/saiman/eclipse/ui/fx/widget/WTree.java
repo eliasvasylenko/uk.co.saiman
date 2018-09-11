@@ -36,4 +36,7 @@ public interface WTree<N> extends WWidget<Tree> {
    *          the widget to remove
    */
   void removeCell(WCell<?> widget);
+
+  @Override
+  N getWidget();
 }

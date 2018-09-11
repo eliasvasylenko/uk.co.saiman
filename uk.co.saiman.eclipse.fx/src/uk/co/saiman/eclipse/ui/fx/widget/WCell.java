@@ -1,5 +1,6 @@
 package uk.co.saiman.eclipse.ui.fx.widget;
 
+import org.eclipse.fx.ui.workbench.renderers.base.widget.WPopupMenu;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WWidget;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
@@ -47,4 +48,6 @@ public interface WCell<N> extends WWidget<Cell> {
 
   @Override
   N getWidget();
+
+  void setPopupMenu(WPopupMenu<?> widget);
 }

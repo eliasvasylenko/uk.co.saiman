@@ -27,10 +27,19 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -60,6 +69,8 @@ public class ChildrenServiceImpl implements ChildrenService {
   @Optional
   private Tree parentTree;
 
+  private final Map<String, List<Cell>> children = new HashMap<>();
+
   @Inject
   public ChildrenServiceImpl() {}
 
@@ -67,43 +78,88 @@ public class ChildrenServiceImpl implements ChildrenService {
     return parentCell != null ? parentCell : parentTree;
   }
 
-  private Cell readyModel(String id) {
-    MUIElement model = (Cell) models.cloneSnippet(application, id, null);
-    if (model == null || !(model instanceof Cell)) {
-      throw new IllegalArgumentException("Child does not exist " + id);
+  @PostConstruct
+  private void findChildren() {
+    for (Cell child : parent().getChildren()) {
+      String contextValue = child.getPersistedState().get(UIAddon.CHILD_CONTEXT_VALUE);
+      if (contextValue != null) {
+        List<Cell> values = getChildren(child.getElementId());
+        values.add(child);
+      }
     }
-    Cell cell = (Cell) model;
+  }
+
+  private List<Cell> getChildren(String id) {
+    return children.computeIfAbsent(id, k -> new ArrayList<>());
+  }
+
+  private Cell readyModel(String id, String contextName, Object value) {
+    Cell cell = null;
+
+    Iterator<Cell> cells = getChildren(id).iterator();
+    while (cells.hasNext()) {
+      Cell child = cells.next();
+
+      if (Objects.equals(child.getTransientData().get(UIAddon.CHILD_CONTEXT_VALUE), value)) {
+        cells.remove();
+        cell = child;
+        break;
+      }
+    }
+
+    if (cell == null) {
+      MUIElement model = (Cell) models.cloneSnippet(application, id, null);
+      if (model == null || !(model instanceof Cell)) {
+        throw new IllegalArgumentException("Child does not exist " + id);
+      }
+      model.getPersistedState().put(UIAddon.CHILD_CONTEXT_VALUE, contextName);
+      model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, value);
+      cell = (Cell) model;
+    }
+
     return cell;
+  }
+
+  private List<Cell> readyModels(
+      String id,
+      String contextName,
+      Collection<? extends Object> values) {
+    return values.stream().map(child -> readyModel(id, contextName, child)).collect(toList());
+  }
+
+  private void setChild(String id, Cell model) {
+    setChildren(id, Collections.singletonList(model));
+  }
+
+  private void setChildren(String id, Collection<Cell> newChildren) {
+    List<Cell> children = getChildren(id);
+    children.forEach(c -> c.setParent(null));
+    children.clear();
+
+    parent().getChildren().addAll(newChildren);
+    children.addAll(newChildren);
   }
 
   @Override
   public <T> void setItem(String id, String contextName, T child) {
-    Cell model = readyModel(id);
-    model.getPersistedState().put(UIAddon.CHILD_CONTEXT_VALUE, contextName);
-    model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, child);
-    parent().getChildren().add(model);
+    Cell model = readyModel(id, contextName, child);
+    setChild(id, model);
   }
 
   @Override
   public <T> void setItem(String id, String contextName, T child, Consumer<? super T> update) {
-    Cell model = readyModel(id);
-    model.getPersistedState().put(UIAddon.CHILD_CONTEXT_VALUE, contextName);
-    model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, child);
+    Cell model = readyModel(id, contextName, child);
     model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super T>) value -> {
       update.accept(value);
       invalidate();
     });
-    parent().getChildren().add(model);
+    setChild(id, model);
   }
 
   @Override
   public <T> void setItems(String id, String contextName, Collection<? extends T> children) {
-    for (Object child : children) {
-      Cell model = readyModel(id);
-      model.getPersistedState().put(UIAddon.CHILD_CONTEXT_VALUE, contextName);
-      model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, child);
-      parent().getChildren().add(model);
-    }
+    List<Cell> models = readyModels(id, contextName, children);
+    setChildren(id, models);
   }
 
   @Override
@@ -112,28 +168,24 @@ public class ChildrenServiceImpl implements ChildrenService {
       String contextName,
       List<? extends T> children,
       Consumer<? super List<? extends T>> update) {
-    for (Object child : children) {
-      Cell model = readyModel(id);
-      model.getPersistedState().put(UIAddon.CHILD_CONTEXT_VALUE, contextName);
-      model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, child);
+    List<Cell> models = readyModels(id, contextName, children);
+    for (Cell model : models) {
       model
           .getTransientData()
           .put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super List<? extends T>>) value -> {
             update.accept(value);
             invalidate();
           });
-      parent().getChildren().add(model);
     }
+    setChildren(id, models);
+
   }
 
   @Override
   public void invalidate() {
-    for (Cell child : parent().getChildren()) {
-      if (child.getPersistedState().containsKey(UIAddon.CHILD_CONTEXT_VALUE)) {
-        child.setParent(null);
-      }
-    }
     context
-        .set(ChildrenService.class, ContextInjectionFactory.make(ChildrenService.class, context));
+        .modify(
+            ChildrenService.class,
+            ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
   }
 }

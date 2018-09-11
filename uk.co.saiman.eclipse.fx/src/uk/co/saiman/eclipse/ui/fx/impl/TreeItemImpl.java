@@ -122,6 +122,14 @@ public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
     container.setCenter(widget);
   }
 
+  public Object getData() {
+    String contextValue = getValue().getContextValue();
+    if (contextValue == null) {
+      return null;
+    }
+    return getValue().getContext().get(contextValue);
+  }
+
   protected void updateValue() {
     fireSyntheticValueChangedEvent();
   }
@@ -200,8 +208,8 @@ public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
       return (U) getValue();
     }
 
-    Object data = getValue().getObject();
-    return data != null ? getValue().getContext().get(Adapter.class).adapt(data, adapter) : null;
+    Object data = getData();
+    return getValue().getContext().get(Adapter.class).adapt(data, adapter);
   }
 
   boolean isEditable() {

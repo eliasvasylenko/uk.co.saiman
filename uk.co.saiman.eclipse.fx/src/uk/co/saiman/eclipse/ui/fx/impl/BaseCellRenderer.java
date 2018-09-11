@@ -2,13 +2,21 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 
 import java.util.Collection;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.services.contributions.IContributionFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.fx.ui.workbench.renderers.base.BaseItemContainerRenderer;
+import org.eclipse.fx.ui.workbench.renderers.base.Util;
+import org.eclipse.fx.ui.workbench.renderers.base.widget.WPopupMenu;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.CellContribution;
+import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 
 /**
@@ -23,6 +31,8 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
    */
   protected IEventBroker eventBroker;
 
+  private CellContributionHandler cellContributionHandler;
+
   @Override
   public void do_init(IEventBroker broker) {
     registerEventListener(broker, UIEvents.UILabel.TOPIC_ICONURI);
@@ -35,6 +45,41 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
 
     registerEventListener(broker, UIEvents.Item.TOPIC_SELECTED);
     registerEventListener(broker, UIEvents.Item.TOPIC_ENABLED);
+
+    registerEventListener(broker, UIEvents.Item.TOPIC_ENABLED);
+
+    broker.subscribe(SaiUiEvents.Cell.TOPIC_POPUP_MENU, new EventHandler() {
+      @Override
+      public void handleEvent(Event event) {
+        Object changedObj = event.getProperty(UIEvents.EventTags.ELEMENT);
+        MUIElement parent = (MUIElement) changedObj;
+
+        if (parent.getRenderer() == this && UIEvents.isSET(event)) {
+          handleSetPopupMenu(
+              (Cell) parent,
+              (MPopupMenu) event.getProperty(UIEvents.EventTags.NEW_VALUE));
+        }
+      }
+    });
+
+    broker.subscribe(SaiUiEvents.Cell.TOPIC_CONTRIBUTIONS, new EventHandler() {
+      @Override
+      public void handleEvent(Event event) {
+        Object changedObj = event.getProperty(UIEvents.EventTags.ELEMENT);
+        MUIElement parent = (MUIElement) changedObj;
+
+        if (parent.getRenderer() == this) {
+          if (UIEvents.isADD(event))
+            handleContributionAddition(
+                (Cell) parent,
+                Util.<CellContribution>asCollection(event, UIEvents.EventTags.NEW_VALUE));
+          else if (UIEvents.isREMOVE(event))
+            handleContributionRemove(
+                (Cell) parent,
+                Util.<CellContribution>asCollection(event, UIEvents.EventTags.OLD_VALUE));
+        }
+      }
+    });
 
     this.eventBroker = broker;
   }
@@ -57,6 +102,14 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
     IContributionFactory contributionFactory = element.getContext().get(IContributionFactory.class);
     Object newCell = contributionFactory.create(element.getContributionURI(), element.getContext());
     element.setObject(newCell);
+
+    cellContributionHandler = ContextInjectionFactory
+        .make(CellContributionHandler.class, element.getContext());
+    handleContributionAddition(element, element.getContributions());
+
+    if (element.getPopupMenu() != null) {
+      handleSetPopupMenu(element, element.getPopupMenu());
+    }
 
     for (Cell child : element.getChildren()) {
       if (child.isToBeRendered()) {
@@ -91,6 +144,26 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
         }
       }
     }
+  }
+
+  public void handleSetPopupMenu(Cell parent, MPopupMenu property) {
+    if (property == null) {
+      return;
+    }
+
+    if (property.getWidget() == null) {
+      engineCreateWidget(property);
+    }
+
+    ((WCell<?>) parent.getWidget()).setPopupMenu((WPopupMenu<?>) property.getWidget());
+  }
+
+  public void handleContributionRemove(Cell parent, Collection<CellContribution> contributions) {
+    cellContributionHandler.handleContributionRemove(parent, contributions);
+  }
+
+  public void handleContributionAddition(Cell parent, Collection<CellContribution> contributions) {
+    cellContributionHandler.handleContributionAddition(parent, contributions);
   }
 
   @Override

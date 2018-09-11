@@ -27,6 +27,14 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import uk.co.saiman.eclipse.adapter.AdaptClass;
+import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.experiment.Experiment;
+import uk.co.saiman.experiment.ExperimentNode;
+
 /**
  * Contribution for root experiment nodes in the experiment tree
  * 
@@ -34,4 +42,13 @@ package uk.co.saiman.msapex.experiment;
  */
 public class ExperimentCellContribution {
   public static final String ID = "uk.co.saiman.experiment.cell";
+
+  @Inject
+  @AdaptClass(ExperimentNode.class)
+  private Experiment experiment;
+
+  @PostConstruct
+  public void prepare(Cell cell) {
+    cell.setLabel("Root Experiment!!!" + experiment.getId());
+  }
 }

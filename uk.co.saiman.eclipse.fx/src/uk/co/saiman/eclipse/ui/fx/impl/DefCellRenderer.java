@@ -12,8 +12,6 @@ import org.eclipse.e4.core.commands.ExpressionContext;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.InjectionException;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
-import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.fx.core.log.Log;
@@ -27,7 +25,6 @@ import org.eclipse.fx.ui.workbench.renderers.fx.widget.WWidgetImpl;
 
 import javafx.event.Event;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.ContextMenuEvent;
@@ -60,16 +57,16 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
     @Inject
     IEclipseContext context;
 
-    private final Cell domElement;
-
     private Label label;
 
     private final TreeItemImpl treeItem;
 
+    private ContextMenu popupMenu;
+
     @Inject
     public CellImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) Cell domElement) {
-      this.domElement = domElement;
       this.treeItem = new TreeItemImpl(domElement);
+      setDomElement(domElement);
     }
 
     public TreeItem<Cell> getTreeItem() {
@@ -137,6 +134,14 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
 
       treeItem.setWidget(node);
 
+      node.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+        showContextMenu(event.getScreenX(), event.getScreenY());
+        event.consume();
+      });
+      node.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+        hideContextMenu();
+      });
+
       return node;
     }
 
@@ -153,18 +158,17 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
 
     @Override
     public void addCell(WCell<?> widget) {
-      System.out.println("addCell " + widget);
-      getWidget();
+      getTreeItem().getChildren().add(((CellImpl) widget).getTreeItem());
     }
 
     @Override
     public void addCell(int idx, WCell<?> widget) {
-      System.out.println("addCell " + idx + " " + widget);
+      getTreeItem().getChildren().add(idx, ((CellImpl) widget).getTreeItem());
     }
 
     @Override
     public void removeCell(WCell<?> widget) {
-      System.out.println("removeCell " + widget);
+      getTreeItem().getChildren().remove(((CellImpl) widget).getTreeItem());
     }
 
     private void contributeCommand(HBox node, Cell model) {
@@ -220,31 +224,22 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       }
     }
 
-    private void contributePopupMenu(HBox node, Cell model) {
-      if (model.getPopupMenu() != null) {
-        Control menuControl = new Control() {};
-        ContextMenu contextMenu = registerMenu(menuControl, model.getPopupMenu());
-        contextMenu.addEventHandler(KeyEvent.ANY, Event::consume);
+    @Override
+    public void setPopupMenu(WPopupMenu<?> widget) {
+      popupMenu = (ContextMenu) widget.getWidget();
+      popupMenu.addEventHandler(KeyEvent.ANY, Event::consume);
+    }
 
-        node.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-          contextMenu.show(node, event.getScreenX(), event.getScreenY());
-          event.consume();
-        });
-        node.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
-          contextMenu.hide();
-        });
+    private void showContextMenu(double screenX, double screenY) {
+      if (popupMenu != null) {
+        popupMenu.show(getWidget(), screenX, screenY);
       }
     }
 
-    @SuppressWarnings("unchecked")
-    private ContextMenu registerMenu(Control widget, MPopupMenu menu) {
-      if (menu.getWidget() != null) {
-        WPopupMenu<ContextMenu> c = (WPopupMenu<ContextMenu>) menu.getWidget();
-        return (ContextMenu) c.getWidget();
+    private void hideContextMenu() {
+      if (popupMenu != null) {
+        popupMenu.hide();
       }
-
-      IPresentationEngine engine = context.get(IPresentationEngine.class);
-      return (ContextMenu) ((WPopupMenu<ContextMenu>) engine.createGui(menu)).getWidget();
     }
   }
 

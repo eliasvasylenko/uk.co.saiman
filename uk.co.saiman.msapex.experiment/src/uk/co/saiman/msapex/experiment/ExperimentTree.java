@@ -39,23 +39,18 @@ public class ExperimentTree {
   public static final String ID = "uk.co.saiman.msapex.experiment.tree";
 
   @Inject
-  void initialize(Workspace workspace, ChildrenService children) {
+  private Workspace workspace;
+
+  @Inject
+  void initialize(ChildrenService children) {
+    workspace.events().filter(e -> !e.getNode().getParent().isPresent()).take(1).observe(m -> {
+      children.invalidate();
+    });
+
     children
         .setItems(
             ExperimentNodeCell.ID,
             ExperimentNode.class,
             workspace.getExperiments().collect(toList()));
-
-    workspace
-        .events()
-        .weakReference(this)
-        .filter(e -> !e.message().getNode().getParent().isPresent())
-        .observe(m -> children.invalidate());
-
-    /*
-     * TODO this model of "invalidating" and reinjecting the children parameter
-     * would work ... but it doesn't naturally facilitate reuse of child model
-     * elements.
-     */
   }
 }

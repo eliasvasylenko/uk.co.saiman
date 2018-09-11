@@ -99,6 +99,7 @@ public class UIAddon {
                 .set(
                     ChildrenService.class,
                     ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
+            context.declareModifiable(ChildrenService.class);
           } catch (Exception e) {
             e.printStackTrace();
           }

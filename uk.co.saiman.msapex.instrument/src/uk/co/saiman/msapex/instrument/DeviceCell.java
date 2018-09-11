@@ -33,7 +33,6 @@ import javax.inject.Inject;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
 
 public class DeviceCell {
@@ -41,11 +40,12 @@ public class DeviceCell {
 
   @Inject
   public void prepare(HBox node, Cell cell, Device item) {
-    ConnectionState state = item.connectionState().get();
-
-    node.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
-
     cell.setLabel(item.getName());
-    // TODO cell.setSupplemental(state.toString());
+
+    item.connectionState().observe(state -> {
+      node.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
+      // cell.setIcon(iconFor(state));
+      // TODO cell.setSupplemental(state.toString());
+    });
   }
 }

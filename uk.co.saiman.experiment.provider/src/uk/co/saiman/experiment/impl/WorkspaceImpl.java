@@ -35,6 +35,7 @@ import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Activate;
@@ -149,11 +150,15 @@ public class WorkspaceImpl implements Workspace {
   public Experiment addExperiment(String id, ResultStorage locationManager) {
     ExperimentImpl experiment = new ExperimentImpl(locationManager, id, StateMap.empty(), this);
 
+    experiments.add(experiment);
+
     Cancellation cancellation = new Cancellation();
     events.next(workspaceEvent(experiment, ADD, cancellation::cancel));
-    cancellation.completeOrThrow();
+    if (!cancellation.complete()) {
+      experiments.remove(experiment);
+      throw new CancellationException();
+    }
 
-    experiments.add(experiment);
     return experiment;
   }
 

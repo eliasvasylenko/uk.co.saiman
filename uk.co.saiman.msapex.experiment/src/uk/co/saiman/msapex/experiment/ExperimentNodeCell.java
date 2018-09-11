@@ -29,9 +29,8 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.stream.Collectors.toList;
 import static javafx.css.PseudoClass.getPseudoClass;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setLabel;
-import static uk.co.saiman.eclipse.ui.fx.TreeService.setSupplemental;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -41,9 +40,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorService;
 
@@ -55,32 +56,34 @@ import uk.co.saiman.msapex.editor.EditorService;
 public class ExperimentNodeCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
 
-  private static final String EXPERIMENT_TREE_POPUP_MENU = "uk.co.saiman.msapex.experiment.popupmenu.node";
+  @Inject
+  private Workspace workspace;
 
   @Inject
   @Localize
-  ExperimentProperties text;
+  private ExperimentProperties text;
 
   @Inject
-  EditorService editorService;
+  private EditorService editorService;
+
+  @Inject
+  private ExperimentNode<?, ?> experiment;
+
+  private Label supplementalText = new Label();
+  private Label lifecycleIndicator = new Label();
 
   @Execute
   public void execute(ExperimentNode<?, ?> experiment) {
     editorService.getApplicableEditors(experiment).findFirst().map(Editor::openPart).isPresent();
   }
 
-  @Inject
-  public void prepare(HBox node, ChildrenService children, ExperimentNode<?, ?> experiment) {
+  @PostConstruct
+  public void prepare(HBox node, Cell cell) {
     /*
      * configure label
      */
-    setLabel(node, experiment.getId());
-    setSupplemental(
-        node,
-        experiment.getType().getName()
-            + " ["
-            + text.lifecycleState(experiment.lifecycleState().get())
-            + "]");
+    cell.setLabel(experiment.getId());
+    node.getChildren().add(supplementalText);
 
     /*
      * add spacer
@@ -93,13 +96,33 @@ public class ExperimentNodeCell {
      * label to show lifecycle state icon
      */
 
-    Label lifecycleIndicator = new Label();
     node.getChildren().add(lifecycleIndicator);
 
-    experiment
-        .lifecycleState()
-        .weakReference(lifecycleIndicator)
-        .observe(m -> m.owner().pseudoClassStateChanged(getPseudoClass(m.toString()), true));
+    /*
+     * Observe lifecycle
+     */
+
+    experiment.lifecycleState().weakReference(this).observe(m -> {
+      m.owner().lifecycleIndicator
+          .pseudoClassStateChanged(getPseudoClass(m.message().toString()), true);
+      m.owner().supplementalText
+          .setText(
+              experiment.getType().getName()
+                  + " ["
+                  + text.lifecycleState(experiment.lifecycleState().get())
+                  + "]");
+    });
+  }
+
+  @Inject
+  public void children(ChildrenService children) {
+    workspace
+        .events()
+        .filter(e -> e.getNode().getParent().filter(experiment::equals).isPresent())
+        .take(1)
+        .observe(m -> {
+          children.invalidate();
+        });
 
     /*
      * add children

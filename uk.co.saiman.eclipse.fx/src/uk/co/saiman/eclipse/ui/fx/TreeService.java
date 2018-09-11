@@ -29,8 +29,6 @@ package uk.co.saiman.eclipse.ui.fx;
 
 import javafx.scene.Parent;
 import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.model.ui.Tree;
 
 public interface TreeService {
@@ -42,12 +40,4 @@ public interface TreeService {
   Control createTree(String treeModelId, Parent owner);
 
   Tree getTree(String treeModelId);
-
-  static void setLabel(HBox node, String text) {
-    ((Label) node.lookup("#" + TEXT_ID)).setText(text);
-  }
-
-  static void setSupplemental(HBox node, String text) {
-    ((Label) node.lookup("#" + SUPPLEMENTAL_TEXT_ID)).setText(text);
-  }
 }

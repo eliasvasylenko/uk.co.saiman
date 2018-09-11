@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.fx.ui.workbench.renderers.base.BaseRenderer;
 import org.eclipse.fx.ui.workbench.renderers.fx.widget.WWidgetImpl;
 
 import javafx.geometry.Bounds;
@@ -34,7 +37,9 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
   public static class TreeImpl extends WWidgetImpl<TreeView<Cell>, Tree>
       implements WTree<TreeView<Cell>> {
     @Inject
-    private ESelectionService selectionService;
+    public TreeImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) Tree domElement) {
+      setDomElement(domElement);
+    }
 
     @Override
     public void addStyleClasses(List<String> classnames) {
@@ -66,12 +71,6 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
       TreeView<Cell> tree = new TreeView<>();
 
       tree.setCellFactory(v -> new TreeCellImpl());
-      tree
-          .getSelectionModel()
-          .selectedItemProperty()
-          .addListener((observable, oldValue, newValue) -> {
-            selectionService.setSelection(newValue);
-          });
       tree.setRoot(new TreeItem<>(null));
       tree.setShowRoot(false);
 
@@ -95,7 +94,7 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
 
     @Override
     public void removeCell(WCell<?> widget) {
-      getWidget().getRoot().getChildren().remove(widget.getWidget());
+      getWidget().getRoot().getChildren().remove(((CellImpl) widget).getTreeItem());
     }
 
     public void onKeyPressed(KeyEvent event) {
@@ -145,9 +144,29 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
         break;
       }
     }
+  }
 
-    public TreeItem<Cell> getSelection() {
-      return getWidget().getSelectionModel().getSelectedItem();
+  @Override
+  protected void initWidget(Tree tree, WTree<TreeView<Cell>> widget) {
+    super.initWidget(tree, widget);
+
+    MPart part = tree.getContext().get(MPart.class);
+
+    if (part != null) {
+      ESelectionService selectionService = part.getContext().get(ESelectionService.class);
+
+      widget
+          .getWidget()
+          .getSelectionModel()
+          .selectedItemProperty()
+          .addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+              newValue.getValue().getContext().activateBranch();
+              selectionService.setSelection(((TreeItemImpl) newValue).getData());
+            } else {
+              selectionService.setSelection(null);
+            }
+          });
     }
   }
 
