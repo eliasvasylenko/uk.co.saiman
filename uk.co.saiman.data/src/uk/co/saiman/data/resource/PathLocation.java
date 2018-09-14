@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.data.resource;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
@@ -42,14 +44,17 @@ public class PathLocation implements Location {
   }
 
   @Override
-  public Stream<Resource> getResources() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException();
+  public Stream<Resource> getResources() throws IOException {
+    return Files.walk(path).map(PathResource::new);
   }
 
+  /**
+   * Path resources can contain path separators, in which case they will be
+   * translated to the resource named at the appropriate sub-path.
+   */
   @Override
-  public Resource getResource(String name, String extension) {
-    return new PathResource(path.resolve(name + "." + extension));
+  public PathResource getResource(String name) {
+    return new PathResource(path.resolve(name));
   }
 
   @Override

@@ -27,12 +27,31 @@
  */
 package uk.co.saiman.data.resource;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 public interface Location {
-  Stream<Resource> getResources();
+  Stream<Resource> getResources() throws IOException;
 
-  Resource getResource(String name, String extension);
+  Resource getResource(String name) throws IOException;
+
+  /**
+   * This is only a convenience method to concatenate the name and extension
+   * around a dot. We cannot reliably extract an extension from a filename, as
+   * sometimes the logical extension itself contains a dot, and sometimes so does
+   * the name, so we cannot determine where to split the string. Because of this
+   * the representation of a resource name is flattened to a single string.
+   * 
+   * @param name
+   *          the name of the file
+   * @param extension
+   *          the extension of the file
+   * @return a resource with the derived name [name].[extension]
+   * @throws IOException
+   */
+  default Resource getResource(String name, String extension) throws IOException {
+    return getResource(name + "." + extension);
+  }
 
   /**
    * @return a string indicating the type of location and specifying it if

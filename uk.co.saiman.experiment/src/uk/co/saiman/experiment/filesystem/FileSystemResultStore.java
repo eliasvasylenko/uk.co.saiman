@@ -35,36 +35,52 @@ import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentRoot;
-import uk.co.saiman.experiment.ResultStorage;
+import uk.co.saiman.experiment.ResultStore;
 
-public class FileSystemResultStorage implements ResultStorage {
+public class FileSystemResultStore implements ResultStore {
+  public class PathStorage implements Storage {
+    private final PathLocation location;
+
+    public PathStorage(Path path) {
+      this.location = new PathLocation(path);
+    }
+
+    @Override
+    public void dispose() throws IOException {
+      Files.deleteIfExists(location.getPath());
+    }
+
+    @Override
+    public Location location() {
+      return location;
+    }
+  }
+
   private final Path rootPath;
 
-  public FileSystemResultStorage(Path rootPath) {
+  public FileSystemResultStore(Path rootPath) {
     this.rootPath = rootPath;
   }
 
   @Override
-  public void removeLocation(ExperimentNode<?, ?> node) throws IOException {
-    Files.delete(getPath(node));
+  public Storage locateStorage(ExperimentNode<?, ?> node) {
+    return new PathStorage(getPath(node));
   }
 
   @Override
-  public void updateLocation(ExperimentNode<?, ?> node, String id) throws IOException {
-    Path newLocation = resolvePath(node, id);
+  public Storage relocateStorage(ExperimentNode<?, ?> node, Storage previousLocation)
+      throws IOException {
+    if (previousLocation.location() instanceof PathLocation) {
+      Path previousPath = ((PathLocation) previousLocation.location()).getPath();
+      Path newPath = getPath(node);
 
-    if (node.getId() != null) {
-      Path oldLocation = getPath(node);
-
-      if (Files.exists(oldLocation)) {
-        Files.move(oldLocation, newLocation);
+      if (Files.exists(previousPath)) {
+        Files.move(previousPath, newPath);
       }
-    }
-  }
 
-  @Override
-  public Location getLocation(ExperimentNode<?, ?> node) {
-    return new PathLocation(getPath(node));
+      return new PathStorage(newPath);
+    }
+    return ResultStore.super.relocateStorage(node, previousLocation);
   }
 
   private Path getPath(ExperimentNode<?, ?> node) {
@@ -72,7 +88,7 @@ public class FileSystemResultStorage implements ResultStorage {
   }
 
   private Path getParentPath(ExperimentNode<?, ?> node) {
-    return node.getParent().map(this::getPath).orElse(rootPath);
+    return node.getParent().map(this::getPath).orElseGet(this::getRootPath);
   }
 
   private Path resolvePath(ExperimentNode<?, ?> node, String id) {

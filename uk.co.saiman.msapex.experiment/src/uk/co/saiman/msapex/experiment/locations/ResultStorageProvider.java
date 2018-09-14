@@ -31,7 +31,7 @@ import java.util.Optional;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
-import uk.co.saiman.experiment.ResultStorage;
+import uk.co.saiman.experiment.ResultStore;
 
 public interface ResultStorageProvider {
   /**
@@ -54,5 +54,5 @@ public interface ResultStorageProvider {
    * @return an optional containing the result locator, or an empty optional if
    *         the operation was cancelled
    */
-  Optional<ResultStorage> requestLocator(IEclipseContext context, String experimentName);
+  Optional<ResultStore> requestLocator(IEclipseContext context, String experimentName);
 }

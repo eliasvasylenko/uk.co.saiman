@@ -37,15 +37,15 @@ import org.eclipse.e4.core.di.annotations.Creatable;
 
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ResultStorage;
+import uk.co.saiman.experiment.ResultStore;
 
 @Creatable
-public class WorkspaceResultLocator implements ResultStorage {
+public class WorkspaceResultLocator implements ResultStore {
   @Named(INSTANCE_LOCATION)
   Location instanceLocation;
 
   @Override
-  public void removeLocation(ExperimentNode<?, ?> node) throws IOException {
+  public void removeStorage(ExperimentNode<?, ?> node) throws IOException {
     // TODO Auto-generated method stub
 
   }
@@ -57,7 +57,7 @@ public class WorkspaceResultLocator implements ResultStorage {
   }
 
   @Override
-  public Location getLocation(ExperimentNode<?, ?> node) throws IOException {
+  public Location locateStorage(ExperimentNode<?, ?> node) throws IOException {
     // TODO Auto-generated method stub
     return null;
   }

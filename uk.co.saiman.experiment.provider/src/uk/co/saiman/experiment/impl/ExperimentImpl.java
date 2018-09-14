@@ -36,13 +36,13 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ResultStorage;
+import uk.co.saiman.experiment.ResultStore;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log.Level;
 
 public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, Void>
     implements Experiment {
-  private final ResultStorage locationManager;
+  private final ResultStore locationManager;
 
   /**
    * Load a root experiment.
@@ -52,7 +52,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
    * @param id
    */
   protected ExperimentImpl(
-      ResultStorage locationManager,
+      ResultStore locationManager,
       String id,
       StateMap persistedState,
       WorkspaceImpl workspace) {
@@ -60,8 +60,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
     this.locationManager = locationManager;
   }
 
-  @Override
-  public ResultStorage getLocationManager() {
+  public ResultStore getLocationManager() {
     return locationManager;
   }
 
@@ -75,7 +74,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
     }
 
     try {
-      getLocationManager().removeLocation(this);
+      getLocationManager().removeStorage(this);
     } catch (IOException e) {
       ExperimentException ee = new ExperimentException(
           format("Cannot remove experiment %s", getId()),

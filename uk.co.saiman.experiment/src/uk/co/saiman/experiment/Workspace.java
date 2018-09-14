@@ -67,10 +67,18 @@ public interface Workspace {
    *          data
    * @return a new root experiment part of the root type
    */
-  Experiment addExperiment(String id, ResultStorage locationManager);
+  Experiment addExperiment(String id, ResultStore locationManager);
 
   /**
-   * @return an observable over workspace events
+   * @return an observable over workspace events in the given state
    */
-  Observable<WorkspaceEvent> events();
+  Observable<WorkspaceEvent> events(WorkspaceEventState state);
+
+  /**
+   * @return an observable over workspace events in the
+   *         {@link WorkspaceEventState#COMPLETED completed} state
+   */
+  default Observable<WorkspaceEvent> events() {
+    return events(WorkspaceEventState.COMPLETED);
+  }
 }

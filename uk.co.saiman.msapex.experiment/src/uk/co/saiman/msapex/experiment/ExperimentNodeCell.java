@@ -29,6 +29,7 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.stream.Collectors.toList;
 import static javafx.css.PseudoClass.getPseudoClass;
+import static uk.co.saiman.experiment.WorkspaceEventState.COMPLETED;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -117,7 +118,7 @@ public class ExperimentNodeCell {
   @Inject
   public void children(ChildrenService children) {
     workspace
-        .events()
+        .events(COMPLETED)
         .filter(e -> e.getNode().getParent().filter(experiment::equals).isPresent())
         .take(1)
         .observe(m -> {

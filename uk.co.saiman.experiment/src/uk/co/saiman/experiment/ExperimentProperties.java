@@ -53,8 +53,8 @@ public interface ExperimentProperties {
       return lifecycleStateCompletion();
     case CONFIGURATION:
       return lifecycleStateConfiguration();
-    case DISPOSED:
-      return lifecycleStateDisposed();
+    case DETACHED:
+      return lifecycleStateDetached();
     case FAILURE:
       return lifecycleStatefailure();
     case PREPARATION:
@@ -71,7 +71,7 @@ public interface ExperimentProperties {
 
   Localized<String> lifecycleStateConfiguration();
 
-  Localized<String> lifecycleStateDisposed();
+  Localized<String> lifecycleStateDetached();
 
   Localized<String> lifecycleStatefailure();
 

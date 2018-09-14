@@ -50,7 +50,7 @@ public class SimpleData<T> implements Data<T> {
     this.format = requireNonNull(format);
   }
 
-  public SimpleData(Location location, String name, DataFormat<T> format) {
+  public SimpleData(Location location, String name, DataFormat<T> format) throws IOException {
     this(location.getResource(name, format.getExtension()), format);
   }
 

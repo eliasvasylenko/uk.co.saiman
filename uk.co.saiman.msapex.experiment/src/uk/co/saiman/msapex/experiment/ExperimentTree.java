@@ -28,6 +28,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.WorkspaceEventState.COMPLETED;
 
 import javax.inject.Inject;
 
@@ -43,9 +44,13 @@ public class ExperimentTree {
 
   @Inject
   void initialize(ChildrenService children) {
-    workspace.events().filter(e -> !e.getNode().getParent().isPresent()).take(1).observe(m -> {
-      children.invalidate();
-    });
+    workspace
+        .events(COMPLETED)
+        .filter(e -> !e.getNode().getParent().isPresent())
+        .take(1)
+        .observe(m -> {
+          children.invalidate();
+        });
 
     children
         .setItems(

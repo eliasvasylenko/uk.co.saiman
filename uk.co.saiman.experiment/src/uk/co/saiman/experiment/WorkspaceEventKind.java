@@ -28,5 +28,39 @@
 package uk.co.saiman.experiment;
 
 public enum WorkspaceEventKind {
-  ADD, MOVE, REMOVE, RENAME, STATE, LIFECYLE, TYPE
+  /**
+   * An experiment node was added to the workspace.
+   */
+  ADD,
+
+  /**
+   * An experiment node was moved within the workspace.
+   */
+  MOVE,
+
+  /**
+   * An experiment node was removed from the workspace.
+   */
+  REMOVE,
+
+  /**
+   * An experiment node's {@link ExperimentNode#getId() id} was updated.
+   */
+  RENAME,
+
+  /**
+   * An experiment node's {@link ExperimentNode#getState() state} was updated.
+   */
+  STATE,
+
+  /**
+   * An experiment node's {@link ExperimentNode#lifecycleState() lifecycle state}
+   * was updated.
+   */
+  LIFECYLE,
+
+  /**
+   * An experiment node's {@link ExperimentNode#getType() type} was updated.
+   */
+  TYPE
 }

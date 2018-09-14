@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.data;
 
+import java.io.IOException;
 import java.lang.ref.SoftReference;
 
 import uk.co.saiman.data.format.DataFormat;
@@ -41,7 +42,7 @@ public class CachingData<T> extends SimpleData<T> {
     this.dataReference = new SoftReference<>(null);
   }
 
-  public CachingData(Location location, String name, DataFormat<T> format) {
+  public CachingData(Location location, String name, DataFormat<T> format) throws IOException {
     this(location.getResource(name, format.getExtension()), format);
   }
 
