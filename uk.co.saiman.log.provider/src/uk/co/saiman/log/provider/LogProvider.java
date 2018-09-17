@@ -53,7 +53,7 @@ public class LogProvider implements Log {
 
   private ServiceReference<LoggerFactory> logServiceReference;
   @Reference(service = LoggerFactory.class)
-  Logger logService;
+  private Logger logService;
 
   @Activate
   public void activate(ComponentContext context) {

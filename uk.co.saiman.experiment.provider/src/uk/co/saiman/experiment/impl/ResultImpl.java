@@ -27,33 +27,25 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
-
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import uk.co.saiman.experiment.Result;
-import uk.co.saiman.observable.Invalidation;
-import uk.co.saiman.observable.MissingValueException;
+import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.ObservableProperty;
-import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.reflection.token.TypeToken;
 
 public class ResultImpl<T> implements Result<T> {
   private final ExperimentNodeImpl<?, T> node;
+  private Supplier<T> valueSupplier;
   private T value;
 
-  private final ObservableProperty<Invalidation<T>> invalidations;
-  private Invalidation<T> invalidation;
+  private boolean dirty;
+  private final HotObservable<Result<T>> updates;
 
   public ResultImpl(ExperimentNodeImpl<?, T> node) {
     this.node = node;
-    this.invalidations = new ObservablePropertyImpl<>(new Invalidation<T>() {
-      @Override
-      public T revalidate() {
-        throw new MissingValueException(new NullPointerException());
-      }
-    });
+    this.updates = new HotObservable<>();
   }
 
   @Override
@@ -66,52 +58,48 @@ public class ResultImpl<T> implements Result<T> {
     return node.getType().getResultType();
   }
 
+  private void update() {
+    if (!dirty) {
+      dirty = true;
+      updates.next(this);
+    }
+  }
+
   void setValue(T value) {
-    this.value = value;
-    invalidation = null;
-    invalidations.set(new Invalidation<T>() {
-      @Override
-      public T revalidate() {
-        return value;
-      }
-    });
+    synchronized (updates) {
+      this.value = value;
+      update();
+    }
   }
 
   void unsetValue() {
-    value = null;
-    invalidation = null;
-    invalidations.set(new Invalidation<T>() {
-      @Override
-      public T revalidate() {
-        throw new MissingValueException(new NullPointerException());
-      }
-    });
+    synchronized (updates) {
+      value = null;
+      update();
+    }
   }
 
-  void setInvalidation(Invalidation<T> invalidation) {
-    this.invalidation = invalidation;
-    invalidations.set(invalidation);
+  void setValueSupplier(Supplier<T> valueSupplier) {
+    synchronized (updates) {
+      this.valueSupplier = valueSupplier;
+      update();
+    }
   }
 
   @Override
   public Optional<T> getValue() {
-    if (invalidation != null) {
-      try {
-        setValue(invalidation.revalidate());
-      } catch (MissingValueException e) {
-        unsetValue();
+    synchronized (updates) {
+      dirty = false;
+      if (valueSupplier != null) {
+        value = valueSupplier.get();
+        valueSupplier = null;
       }
-      invalidation = null;
+      return Optional.ofNullable(value);
     }
-
-    return Optional.ofNullable(value);
   }
 
   @Override
-  public Observable<Invalidation<T>> invalidations() {
-    return invalidations
-        .invalidateLazyRevalidate()
-        .executeOn(newSingleThreadExecutor())
-        .map(i -> (Invalidation<T>) () -> i.revalidate().revalidate());
+  public Observable<Result<T>> updates() {
+    return updates;
   }
 }

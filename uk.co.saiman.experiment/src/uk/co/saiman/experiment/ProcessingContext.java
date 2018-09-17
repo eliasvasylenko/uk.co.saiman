@@ -27,10 +27,11 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.function.Supplier;
+
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.observable.Invalidation;
 
 /**
  * The context of an {@link ExperimentType#process(ProcessingContext) experiment
@@ -56,11 +57,8 @@ public interface ProcessingContext<T, R> {
    * only be invoked once for a given execution. If it is not invoked, then the
    * children will be processed after the execution completes.
    * <p>
-   * If this method is invoked then
-   * <p>
-   * If this method is invoked then the currently executing node will only become
-   * complete once the execution of all the child nodes are complete, and if and
-   * of the child nodes fail then this node will also fail.
+   * This method blocks until all children are executed, and throws an
+   * {@link ExperimentException} if any child fails.
    * 
    * @throws ExperimentException
    *           if invoked multiple times
@@ -105,14 +103,14 @@ public interface ProcessingContext<T, R> {
    * @param value
    *          an invalidation representing the preliminary result
    */
-  void setPartialResult(Invalidation<R> value);
+  void setPartialResult(Supplier<R> value);
 
   /**
-   * Set the result data for this execution. If the value of the given data
-   * matches the return value of {@link ExperimentType#process(ProcessingContext)
-   * execution} once it completes it does not have to be rewritten. This means
-   * that expensive disk IO can be performed during the experiment process rather
-   * than saved until the end.
+   * Set the result data for this execution. If the {@link Data#get() value} of
+   * the given data matches the return value of
+   * {@link ExperimentType#process(ProcessingContext) execution} once it completes
+   * it does not have to be rewritten. This means that expensive disk IO can be
+   * performed during the experiment process rather than saved until the end.
    * <p>
    * This method may be invoked at most once during any given execution, and this
    * precludes invocation of {@link #setResultFormat(String, DataFormat)} or

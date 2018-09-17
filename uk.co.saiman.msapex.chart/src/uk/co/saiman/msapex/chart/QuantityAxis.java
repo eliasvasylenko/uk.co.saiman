@@ -257,7 +257,7 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
   protected List<Number> calculateTickValues(double length, Object rangeObject) {
     @SuppressWarnings("unchecked")
     Range<T> range = (Range<T>) rangeObject;
-    // TODO the length is redundant here and shouldn't have been part of the API.
+    // the length is redundant here and shouldn't have been part of the API.
     return calculateTickValues(range);
   }
 

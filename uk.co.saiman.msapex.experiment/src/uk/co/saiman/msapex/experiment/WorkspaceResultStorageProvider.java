@@ -51,6 +51,6 @@ public class WorkspaceResultStorageProvider implements ResultStorageProvider {
 
   @Override
   public Optional<ResultStore> requestLocator(IEclipseContext context, String experimentName) {
-    return Optional.of(ContextInjectionFactory.make(WorkspaceResultLocator.class, context));
+    return Optional.of(ContextInjectionFactory.make(WorkspaceResultStore.class, context));
   }
 }

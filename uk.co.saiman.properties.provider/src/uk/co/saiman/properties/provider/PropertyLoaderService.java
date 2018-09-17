@@ -39,23 +39,17 @@ import uk.co.saiman.properties.PropertyValueConverter;
 
 @Component
 public class PropertyLoaderService implements PropertyLoader {
-  @Reference
-  private LocaleProvider localeProvider;
+  private final LocaleProvider localeProvider;
+  private final PropertyLoader propertyLoader;
 
-  @Reference
-  private PropertyResourceLoader resourceLoader;
-
-  @Reference
-  private Log log;
-
-  @Reference
-  private PropertyValueConverter valueConverter;
-
-  private PropertyLoader propertyLoader;
-
-  @Activate // TODO constructor injection R7
-  public void initialize() {
-    propertyLoader = PropertyLoader
+  @Activate
+  public PropertyLoaderService(
+      @Reference LocaleProvider localeProvider,
+      @Reference PropertyResourceLoader resourceLoader,
+      @Reference PropertyValueConverter valueConverter,
+      @Reference Log log) {
+    this.localeProvider = localeProvider;
+    this.propertyLoader = PropertyLoader
         .newPropertyLoader(localeProvider, resourceLoader, valueConverter, log);
   }
 

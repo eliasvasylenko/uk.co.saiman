@@ -81,11 +81,16 @@ public class InvalidatingLazyRevalidatingObserver<M>
 
       @Override
       public M revalidate() {
+        boolean validating;
         synchronized (InvalidatingLazyRevalidatingObserver.this) {
-          if (validated == null)
+          validating = validated == null;
+          if (validating) {
             validated = latest;
+          }
         }
-        intermediateObservation.requestNext();
+        if (validating) {
+          intermediateObservation.requestNext();
+        }
         return validated;
       }
     };

@@ -28,8 +28,8 @@
 package uk.co.saiman.experiment.impl;
 
 import static java.lang.String.format;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.CONFIGURATION;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.Experiment;
@@ -58,6 +58,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
       WorkspaceImpl workspace) {
     super(id, workspace.getExperimentRootType(), persistedState, workspace);
     this.locationManager = locationManager;
+    getLifecycleState().set(CONFIGURATION);
   }
 
   public ResultStore getLocationManager() {
@@ -65,7 +66,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
   }
 
   @Override
-  public void removeImpl() {
+  protected void removeImpl() {
     if (!getWorkspace().removeExperiment(getExperiment())) {
       ExperimentException e = new ExperimentException(
           format("Experiment %s does not exist", getId()));
@@ -73,15 +74,7 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
       throw e;
     }
 
-    try {
-      getLocationManager().removeStorage(this);
-    } catch (IOException e) {
-      ExperimentException ee = new ExperimentException(
-          format("Cannot remove experiment %s", getId()),
-          e);
-      getLog().log(Level.ERROR, ee);
-      throw ee;
-    }
+    clearResult();
   }
 
   @Override

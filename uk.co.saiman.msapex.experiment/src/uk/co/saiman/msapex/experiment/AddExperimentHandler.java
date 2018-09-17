@@ -33,7 +33,6 @@ import org.eclipse.e4.core.di.annotations.Execute;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ResultStore;
 import uk.co.saiman.experiment.Workspace;
 
 /**
@@ -43,15 +42,16 @@ import uk.co.saiman.experiment.Workspace;
  */
 public class AddExperimentHandler {
   @Execute
-  void execute(Workspace workspace, @Localize ExperimentProperties text) {
-    ResultStore locationManager = new WorkspaceResultLocator();
-
+  void execute(
+      Workspace workspace,
+      @Localize ExperimentProperties text,
+      WorkspaceResultStore store) {
     requestExperimentNameDialog(workspace, text.newExperiment(), text.newExperimentName())
         .ifPresent(name -> {
           // Path newLocation = workspace.getRootPath().resolve(name);
           // TODO confirmOverwriteIfNecessary(newLocation, text);
 
-          workspace.addExperiment(name, locationManager);
+          workspace.addExperiment(name, store);
         });
   }
 }

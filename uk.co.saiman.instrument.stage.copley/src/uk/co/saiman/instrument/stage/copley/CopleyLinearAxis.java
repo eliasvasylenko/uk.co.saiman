@@ -28,6 +28,7 @@
 package uk.co.saiman.instrument.stage.copley;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.instrument.stage.composed.AxisState.DISCONNECTED;
 import static uk.co.saiman.instrument.stage.composed.AxisState.LOCATION_REQUESTED;
 import static uk.co.saiman.measurement.Units.metre;
@@ -37,6 +38,13 @@ import java.util.function.Consumer;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
+
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyController;
@@ -49,7 +57,30 @@ import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 
+@Designate(ocd = CopleyLinearAxis.CopleyLinearAxisConfiguration.class, factory = true)
+@Component(
+    name = CopleyLinearAxis.CONFIGURATION_PID,
+    configurationPid = CopleyLinearAxis.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
 public class CopleyLinearAxis implements StageAxis<Length> {
+  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.linear";
+
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "Copley Stage Linear Axis Configuration",
+      description = "The configuration for a linear Copley motor axis for a modular stage")
+  public @interface CopleyLinearAxisConfiguration {
+    @AttributeDefinition(
+        name = "Controller comms target",
+        description = "The copley controller instance owning the axis")
+    String comms_target();
+
+    int axis() default 0;
+
+    int node() default 0;
+  }
+
   private final CopleyController comms;
   private final int node;
   private final int axis;
@@ -57,6 +88,13 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   private final ObservableProperty<Quantity<Length>> actualLocation;
 
   private final ObservableProperty<AxisState> axisState;
+
+  @Activate
+  public CopleyLinearAxis(
+      @Reference CopleyController comms,
+      CopleyLinearAxisConfiguration configuration) {
+    this(comms, configuration.node(), configuration.axis());
+  }
 
   public CopleyLinearAxis(CopleyController comms, int node, int axis) {
     this.comms = comms;

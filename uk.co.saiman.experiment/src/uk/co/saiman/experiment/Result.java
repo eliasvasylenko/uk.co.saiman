@@ -30,7 +30,6 @@ package uk.co.saiman.experiment;
 import java.util.Optional;
 
 import uk.co.saiman.data.format.DataFormat;
-import uk.co.saiman.observable.Invalidation;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -60,7 +59,17 @@ public interface Result<T> {
 
   Optional<T> getValue();
 
-  Observable<Invalidation<T>> invalidations();
+  /**
+   * Observe updates to the result value. Update events are sent with
+   * invalidate/lazy-revalidate semantics. This means that once an update has been
+   * sent, further updates are withheld until the previous change has actually
+   * been {@link #getValue() observed}. This means that consumers can deal with
+   * changes in their own time, and publishers may have the option to skip
+   * processing and memory allocation for updates which are not consumed.
+   * 
+   * @return an observable over update events
+   */
+  Observable<Result<T>> updates();
 
   default TypeToken<Result<T>> getThisTypeToken() {
     return new TypeToken<Result<T>>() {}.withTypeArguments(new TypeArgument<T>(getType()) {});

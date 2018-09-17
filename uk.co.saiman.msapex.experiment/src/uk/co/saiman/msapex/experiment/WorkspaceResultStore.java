@@ -29,37 +29,22 @@ package uk.co.saiman.msapex.experiment;
 
 import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
 
-import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Creatable;
+import org.eclipse.osgi.service.datalocation.Location;
 
-import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ResultStore;
+import uk.co.saiman.experiment.filesystem.FileSystemResultStore;
 
 @Creatable
-public class WorkspaceResultLocator implements ResultStore {
-  @Named(INSTANCE_LOCATION)
-  Location instanceLocation;
-
-  @Override
-  public void removeStorage(ExperimentNode<?, ?> node) throws IOException {
-    // TODO Auto-generated method stub
-
+public class WorkspaceResultStore extends FileSystemResultStore {
+  @Inject
+  public WorkspaceResultStore(@Named(INSTANCE_LOCATION) Location instanceLocation)
+      throws URISyntaxException {
+    super(Paths.get(instanceLocation.getURL().toURI()));
   }
-
-  @Override
-  public void updateLocation(ExperimentNode<?, ?> node, String id) throws IOException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public Location locateStorage(ExperimentNode<?, ?> node) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
 }

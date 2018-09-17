@@ -67,7 +67,6 @@ public class SpectrumProcessingEditorPart {
       ExperimentNode<? extends SpectrumResultConfiguration, Spectrum> result) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    // TODO add to context
     context.set(Processing.class, result.getState().getProcessing());
 
     processingTree = treeService.createTree(ProcessingTree.ID, processingTreeScrollPane);

@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.MApplication;
@@ -55,7 +56,6 @@ import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
-import uk.co.saiman.observable.Invalidation;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
@@ -242,8 +242,17 @@ public class ExperimentEditorAddon implements EditorProvider {
     IEclipseContext context = part.getContext();
     context.set(ExperimentNode.class, experiment);
     context.set(Result.class, experiment.getResult());
-    context.declareModifiable(Invalidation.class);
-    experiment.getResult().invalidations().observe(o -> context.modify(Invalidation.class, o));
+    Class<?> resultType = experiment.getResult().getType().getErasedType();
+    context.declareModifiable(resultType);
+
+    experiment
+        .getResult()
+        .updates()
+        .observe(
+            o -> context
+                .modify(
+                    resultType.getName(),
+                    (IContextFunction) (c, k) -> o.getValue().orElse(null)));
   }
 
   @Override

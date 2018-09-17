@@ -111,7 +111,8 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
         .accumulation()
         .observe(
             o -> context
-                .setPartialResult(o.map(s -> new SampledSpectrum(s, calibration, processing))));
+                .setPartialResult(
+                    o.map(s -> new SampledSpectrum(s, calibration, processing))::revalidate));
 
     System.out.println("start acquisition");
     device.startAcquisition();

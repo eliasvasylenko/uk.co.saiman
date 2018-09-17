@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.impl;
 
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
 import static uk.co.saiman.experiment.WorkspaceEventKind.ADD;
@@ -34,6 +35,7 @@ import static uk.co.saiman.experiment.WorkspaceEventKind.REMOVE;
 import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
@@ -69,35 +71,27 @@ public class WorkspaceImpl implements Workspace {
   private final ExperimentRoot experimentRootType;
   private final List<ExperimentImpl> experiments = new ArrayList<>();
 
-  @Reference
-  private PropertyLoader loader;
-  private ExperimentProperties text;
+  private final ExperimentProperties text;
 
-  @Reference
-  private Log log;
+  private final Log log;
 
   private final HotObservable<WorkspaceEvent> pendingEvents = new HotObservable<>();
   private final HotObservable<WorkspaceEvent> completeEvents = new HotObservable<>();
   private final HotObservable<WorkspaceEvent> cancelledEvents = new HotObservable<>();
 
-  /*
-   * TODO Replace with constructor injection with R7
-   */
   public WorkspaceImpl() {
-    this.experimentRootType = new ExperimentRootImpl(
-        getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
+    this(Log.discardingLog());
+  }
+
+  public WorkspaceImpl(Log log) {
+    this(getDefaultPropertyLoader(), log);
   }
 
   @Activate
-  void activate() {
-    text = loader.getProperties(ExperimentProperties.class);
-  }
-
-  /**
-   * Try to create a new experiment workspace
-   */
-  public WorkspaceImpl(Log log) {
-    this(log, getDefaultPropertyLoader().getProperties(ExperimentProperties.class));
+  public WorkspaceImpl(@Reference PropertyLoader loader, @Reference Log log) {
+    this.text = loader.getProperties(ExperimentProperties.class);
+    this.log = log;
+    this.experimentRootType = new ExperimentRootImpl(text);
   }
 
   /**
@@ -145,7 +139,7 @@ public class WorkspaceImpl implements Workspace {
   }
 
   protected boolean removeExperiment(Experiment experiment) {
-    return fireEvents(experiment, () -> experiments.remove(experiment), REMOVE);
+    return fireEvents(REMOVE, experiment, () -> experiments.remove(experiment));
   }
 
   /*
@@ -156,7 +150,7 @@ public class WorkspaceImpl implements Workspace {
   public Experiment addExperiment(String id, ResultStore locationManager) {
     ExperimentImpl experiment = new ExperimentImpl(locationManager, id, StateMap.empty(), this);
 
-    fireEvents(experiment, () -> experiments.add(experiment), ADD);
+    fireEvents(ADD, experiment, () -> experiments.add(experiment));
 
     return experiment;
   }
@@ -171,31 +165,31 @@ public class WorkspaceImpl implements Workspace {
    * needs to also apply to the other.
    */
   protected synchronized <T> T fireEvents(
+      WorkspaceEventKind kind,
       ExperimentNode<?, ?> node,
-      Supplier<T> effect,
-      WorkspaceEventKind... kinds) {
-    return fireEvents(node, effect, kinds, false);
+      Supplier<T> effect) {
+    return fireEvents(singleton(kind), node, effect, false);
   }
 
   /*
    * Fire a forced event. A forced event may not be cancelled.
    */
   protected synchronized <T> T fireForcedEvents(
+      WorkspaceEventKind kind,
       ExperimentNode<?, ?> node,
-      Supplier<T> effect,
-      WorkspaceEventKind... kinds) {
-    return fireEvents(node, effect, kinds, true);
+      Supplier<T> effect) {
+    return fireEvents(singleton(kind), node, effect, true);
   }
 
   protected synchronized <T> T fireEvents(
+      Collection<? extends WorkspaceEventKind> kinds,
       ExperimentNode<?, ?> node,
       Supplier<T> effect,
-      WorkspaceEventKind[] kinds,
       boolean forced) {
     return fireEvents(
         node,
         effect,
-        Stream.of(kinds).map(kind -> new WorkspaceEventImpl(node, kind)).collect(toList()),
+        kinds.stream().map(kind -> new WorkspaceEventImpl(node, kind)).collect(toList()),
         forced);
   }
 

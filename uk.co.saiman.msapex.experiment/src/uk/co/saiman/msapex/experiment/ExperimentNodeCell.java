@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.util.EnumSet.allOf;
 import static java.util.stream.Collectors.toList;
 import static javafx.css.PseudoClass.getPseudoClass;
 import static uk.co.saiman.experiment.WorkspaceEventState.COMPLETED;
@@ -43,6 +44,7 @@ import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Workspace;
@@ -103,16 +105,20 @@ public class ExperimentNodeCell {
      * Observe lifecycle
      */
 
-    experiment.lifecycleState().weakReference(this).observe(m -> {
-      m.owner().lifecycleIndicator
-          .pseudoClassStateChanged(getPseudoClass(m.message().toString()), true);
-      m.owner().supplementalText
-          .setText(
-              experiment.getType().getName()
-                  + " ["
-                  + text.lifecycleState(experiment.lifecycleState().get())
-                  + "]");
-    });
+    experiment
+        .lifecycleState()
+        .weakReference(this)
+        .observe(m -> m.owner().updateStyle(m.message()));
+  }
+
+  public void updateStyle(ExperimentLifecycleState state) {
+    allOf(ExperimentLifecycleState.class)
+        .stream()
+        .forEach(
+            s -> lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(s.toString()), false));
+    lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
+    supplementalText
+        .setText(experiment.getType().getName() + " [" + text.lifecycleState(state) + "]");
   }
 
   @Inject

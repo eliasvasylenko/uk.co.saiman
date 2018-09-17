@@ -88,7 +88,7 @@ public class JSerialPortService implements CommsPort {
   private CommsChannel openChannel;
 
   @Activate
-  JSerialPortService(JSerialPortConfiguration configuration) {
+  public JSerialPortService(JSerialPortConfiguration configuration) {
     this(SerialPort.getCommPort(configuration.name()));
   }
 

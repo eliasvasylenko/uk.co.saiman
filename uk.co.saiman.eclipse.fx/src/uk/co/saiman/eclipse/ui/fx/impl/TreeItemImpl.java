@@ -27,39 +27,23 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.e4.core.services.adapter.Adapter;
-import org.eclipse.e4.ui.workbench.UIEvents.Handler;
-import org.eclipse.e4.ui.workbench.UIEvents.HandlerContainer;
 
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.Dragboard;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.ui.TransferDestination;
 import uk.co.saiman.eclipse.ui.fx.TransferCellHandler;
 import uk.co.saiman.eclipse.ui.fx.TransferCellIn;
 import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 
-/**
- * Users should not need to extend this class. Item specific behavior should be
- * handled by extending {@link Cell} for each type of node which can appear in a
- * tree.
- * 
+/*
  * TODO Cells need a "context value" property to define which their main value
  * coming from the context is. This way we can know which object needs to have
  * the cells {@link Cell#getTransferFormats() transfer formats} applied to it
@@ -98,19 +82,16 @@ import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
  * implement the system?
  * 
  * TODO Cells need to be {@link HandlerContainer handler containers}.
- * 
+ */
+/**
  * @author Elias N Vasylenko
  */
 public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
   // current state
-  private List<ItemList<?>> children;
   private boolean editable;
 
   // ui container
   private final BorderPane container;
-
-  private final Map<Object, TreeItemImpl> childTreeItems = new HashMap<>();
-  private boolean childrenCalculated;
 
   public TreeItemImpl(Cell domElement) {
     container = new BorderPane();
@@ -142,59 +123,8 @@ public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
     Event.fireEvent(this, new TreeModificationEvent<>(valueChangedEvent(), this, getValue()));
   }
 
-  @Override
-  public ObservableList<TreeItem<Cell>> getChildren() {
-    if (!childrenCalculated) {
-      refreshContributions();
-      rebuildChildren();
-    }
-
-    return super.getChildren();
-  }
-
   public Stream<TreeItemImpl> getModularChildren() {
     return getChildren().stream().map(c -> (TreeItemImpl) c);
-  }
-
-  private void rebuildChildren() {
-    List<TreeItem<Cell>> children;
-
-    List<ItemList<?>> listItemGroups = this.children.stream().collect(toList());
-
-    if (!listItemGroups.isEmpty()) {
-      if (isExpanded()) {
-        children = listItemGroups.stream().flatMap(this::rebuildChildrenGroup).collect(toList());
-
-        childrenCalculated = true;
-      } else {
-        // So we get an arrow to expand without having to add the real children:
-        children = Arrays.asList(new TreeItem<>());
-        childrenCalculated = false;
-      }
-    } else {
-      setExpanded(false);
-      childTreeItems.clear();
-
-      children = Collections.emptyList();
-      childrenCalculated = true;
-    }
-
-    super.getChildren().setAll(children);
-  }
-
-  private Stream<TreeItem<Cell>> rebuildChildrenGroup(ItemList<?> group) {
-    /*
-     * TODO Also reuse the same TreeItemImpl for groups containing only a single
-     * object...
-     */
-    childTreeItems.keySet().retainAll(group.getItems().map(Item::getObject).collect(toSet()));
-    return group.getItems().map(this::rebuildChildItem);
-  }
-
-  private TreeItemImpl rebuildChildItem(Item<?> item) {
-    System.out.println(item.getObject());
-
-    return null;
   }
 
   @SuppressWarnings("unchecked")

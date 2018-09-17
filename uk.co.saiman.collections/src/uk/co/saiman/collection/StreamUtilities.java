@@ -278,25 +278,6 @@ public class StreamUtilities {
    * <em>completely and utterly useless</em> because it actually supports
    * termination.
    * 
-   * TODO should hopefully be made redundant by takeWhile in Java 9
-   * 
-   * @param <T>
-   *          the type of the stream elements
-   * @param root
-   *          the root element
-   * @param mapping
-   *          a mapping from an element to the next element
-   * @return a stream over each element in sequence
-   */
-  public static <T> Stream<T> iterate(T root, Function<? super T, ? extends T> mapping) {
-    return iterateOptional(root, t -> Optional.ofNullable(mapping.apply(t)));
-  }
-
-  /**
-   * A bit like {@link Stream#iterate(Object, UnaryOperator)} but not
-   * <em>completely and utterly useless</em> because it actually supports
-   * termination.
-   * 
    * @param <T>
    *          the type of the stream elements
    * @param root

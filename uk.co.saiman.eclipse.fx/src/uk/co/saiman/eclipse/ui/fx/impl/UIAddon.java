@@ -90,6 +90,7 @@ public class UIAddon {
     try {
       Object value = event.getProperty(NEW_VALUE);
       Object element = event.getProperty(ELEMENT);
+
       if (value instanceof IEclipseContext && SET.equals(event.getProperty(TYPE))) {
         IEclipseContext context = (IEclipseContext) value;
 
@@ -110,9 +111,7 @@ public class UIAddon {
           if (cell.getPersistedState().containsKey(CHILD_CONTEXT_VALUE)) {
             cell.setContextValue(cell.getPersistedState().get(CHILD_CONTEXT_VALUE));
             if (cell.getTransientData().containsKey(CHILD_CONTEXT_VALUE)) {
-              cell
-                  .getContext()
-                  .set(cell.getContextValue(), cell.getTransientData().get(CHILD_CONTEXT_VALUE));
+              context.set(cell.getContextValue(), cell.getTransientData().get(CHILD_CONTEXT_VALUE));
             } else {
               cell.setParent(null);
             }

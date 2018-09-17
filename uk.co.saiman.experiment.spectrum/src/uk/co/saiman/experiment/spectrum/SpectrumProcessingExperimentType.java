@@ -38,6 +38,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -65,40 +66,35 @@ import uk.co.saiman.experiment.state.Accessor.MapAccessor;
 @Component(service = ExperimentType.class)
 public class SpectrumProcessingExperimentType
     implements ProcessingType<SpectrumResultConfiguration, Spectrum, Spectrum> {
-  @Reference
-  private ProcessorService processors;
   private final SpectrumProperties properties;
 
-  private final MapAccessor<Processor> processor = mapAccessor(
-      "processing",
-      s -> processors.loadProcessor(s),
-      Processor::getState);
-  private final ListAccessor<Processing> processorList = processor
-      .toListAccessor()
-      .map(Processing::new, p -> p.processors().collect(toList()));
-
-  public SpectrumProcessingExperimentType() {
-    properties = getDefaultPropertyLoader().getProperties(SpectrumProperties.class);
-  }
+  private final MapAccessor<Processor> processor;
+  private final ListAccessor<Processing> processorList;
 
   @Override
   public String getId() {
     return getClass().getName();
   }
 
-  /*-
   public SpectrumProcessingExperimentType(ProcessorService processors) {
-    this(processors, getDefaultProperties(SpectrumProperties.class));
+    this(processors, getDefaultPropertyLoader().getProperties(SpectrumProperties.class));
   }
-  
-  @Activate TODO R7 constructor injection
+
+  @Activate
   public SpectrumProcessingExperimentType(
       @Reference ProcessorService processors,
       @Reference SpectrumProperties properties) {
-    this.processors = processors;
     this.properties = properties;
+
+    this.processor = mapAccessor(
+        "processing",
+        s -> processors.loadProcessor(s),
+        Processor::getState);
+
+    this.processorList = processor
+        .toListAccessor()
+        .map(Processing::new, p -> p.processors().collect(toList()));
   }
-   */
 
   protected SpectrumProperties getProperties() {
     return properties;
