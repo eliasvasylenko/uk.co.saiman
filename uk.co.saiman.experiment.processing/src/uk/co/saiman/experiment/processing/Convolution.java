@@ -35,23 +35,18 @@ import static uk.co.saiman.experiment.state.Accessor.intAccessor;
 import java.util.stream.DoubleStream;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.state.Accessor;
 import uk.co.saiman.experiment.state.StateMap;
-import uk.co.saiman.properties.PropertyLoader;
 
 @Component
-public class Convolution implements Processor {
+public class Convolution implements ProcessorConfiguration {
   private static final Accessor<double[], ?> VECTOR = doubleAccessor("vector")
       .toStreamAccessor()
       .map(s -> s.mapToDouble(e -> e).toArray(), a -> DoubleStream.of(a).mapToObj(e -> e));
   private static final Accessor<Integer, ?> CENTRE = intAccessor("centre");
   private static final Accessor<Boolean, ?> EXTEND = booleanAccessor("extend");
-
-  @Reference
-  PropertyLoader propertyLoader;
 
   private final StateMap state;
 
@@ -64,11 +59,6 @@ public class Convolution implements Processor {
         .withDefault(VECTOR, () -> new double[] { 1 })
         .withDefault(CENTRE, () -> 0)
         .withDefault(EXTEND, () -> true);
-  }
-
-  @Override
-  public String getName() {
-    return propertyLoader.getProperties(ProcessingProperties.class).convolutionProcessor().get();
   }
 
   @Override

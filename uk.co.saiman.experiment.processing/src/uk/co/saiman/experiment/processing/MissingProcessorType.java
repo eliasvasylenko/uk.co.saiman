@@ -31,18 +31,16 @@ import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.state.StateMap;
 
-public class MissingProcessorType implements Processor {
+public class MissingProcessorType implements ProcessorConfiguration {
   private final String id;
-  private final ProcessingProperties text;
   private final StateMap state;
 
-  public MissingProcessorType(String id, ProcessingProperties text) {
-    this(id, text, StateMap.empty());
+  public MissingProcessorType(String id) {
+    this(id, StateMap.empty());
   }
 
-  public MissingProcessorType(String id, ProcessingProperties text, StateMap state) {
+  public MissingProcessorType(String id, StateMap state) {
     this.id = id;
-    this.text = text;
     this.state = state;
   }
 
@@ -52,18 +50,13 @@ public class MissingProcessorType implements Processor {
   }
 
   @Override
-  public String getName() {
-    return text.missingProcessor().get();
-  }
-
-  @Override
   public StateMap getState() {
     return state;
   }
 
   @Override
   public MissingProcessorType withState(StateMap state) {
-    return new MissingProcessorType(id, text, state);
+    return new MissingProcessorType(id, state);
   }
 
   @Override

@@ -45,7 +45,7 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.Processor;
+import uk.co.saiman.experiment.processing.ProcessorConfiguration;
 import uk.co.saiman.experiment.processing.ProcessorService;
 import uk.co.saiman.experiment.sample.XYStageExperimentType;
 import uk.co.saiman.experiment.spectrum.SpectrumExperimentType;
@@ -86,10 +86,10 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
     return dalton().getUnit();
   }
 
-  private final MapAccessor<Processor> processor = mapAccessor(
+  private final MapAccessor<ProcessorConfiguration> processor = mapAccessor(
       "processing",
       s -> processors.loadProcessor(s),
-      Processor::getState);
+      p -> processors.saveProcessor(p));
   private final ListAccessor<Processing> processorList = processor
       .toListAccessor()
       .map(Processing::new, p -> p.processors().collect(toList()));
@@ -97,6 +97,8 @@ public class SaintSpectrumExperimentType extends SpectrumExperimentType<SaintSpe
   @Override
   public SaintSpectrumConfiguration createState(
       ConfigurationContext<SaintSpectrumConfiguration> context) {
+    context.update(s -> s.withDefault(processorList, Processing::new));
+
     return new SaintSpectrumConfiguration() {
       private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
 

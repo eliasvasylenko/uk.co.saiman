@@ -91,8 +91,8 @@ public class HandledCellEditor extends CellEditor {
     createElementIdControl(parent, context, master, textProp);
     createContributionControl(parent, context);
     createVisibleWhenControl(parent, context);
+    createFlagControls(parent, context);
     createCommandControl(parent, context, master, textProp);
-    createEditableControl(parent, context);
     createPopupMenuControl(parent);
     createChildrenControl(parent);
     createMediaTypesControl(parent);

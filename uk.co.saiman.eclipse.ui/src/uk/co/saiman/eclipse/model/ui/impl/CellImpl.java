@@ -119,12 +119,13 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getSelectedElement <em>Selected Element</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getHandlers <em>Handlers</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getMediaTypes <em>Media Types</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isEditable <em>Editable</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getContributions <em>Contributions</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getPopupMenu <em>Popup Menu</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getTransferFormats <em>Transfer Formats</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getContextValue <em>Context Value</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isExpanded <em>Expanded</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isOptional <em>Optional</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isModifiable <em>Modifiable</em>}</li>
  * </ul>
  *
  * @generated
@@ -579,26 +580,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected EList<MediaType> mediaTypes;
 
   /**
-   * The default value of the '{@link #isEditable() <em>Editable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #isEditable()
-   * @generated
-   * @ordered
-   */
-  protected static final boolean EDITABLE_EDEFAULT = false;
-
-  /**
-   * The cached value of the '{@link #isEditable() <em>Editable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #isEditable()
-   * @generated
-   * @ordered
-   */
-  protected boolean editable = EDITABLE_EDEFAULT;
-
-  /**
    * The cached value of the '{@link #getContributions() <em>Contributions</em>}' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -649,6 +630,26 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected String contextValue = CONTEXT_VALUE_EDEFAULT;
 
   /**
+   * The default value of the '{@link #isExpanded() <em>Expanded</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #isExpanded()
+   * @generated
+   * @ordered
+   */
+  protected static final boolean EXPANDED_EDEFAULT = false;
+
+  /**
+   * The cached value of the '{@link #isExpanded() <em>Expanded</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #isExpanded()
+   * @generated
+   * @ordered
+   */
+  protected boolean expanded = EXPANDED_EDEFAULT;
+
+  /**
    * The default value of the '{@link #isOptional() <em>Optional</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -656,7 +657,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    * @ordered
    */
-  protected static final boolean OPTIONAL_EDEFAULT = false;
+  protected static final boolean OPTIONAL_EDEFAULT = true;
 
   /**
    * The cached value of the '{@link #isOptional() <em>Optional</em>}' attribute.
@@ -667,6 +668,26 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @ordered
    */
   protected boolean optional = OPTIONAL_EDEFAULT;
+
+  /**
+   * The default value of the '{@link #isModifiable() <em>Modifiable</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #isModifiable()
+   * @generated
+   * @ordered
+   */
+  protected static final boolean MODIFIABLE_EDEFAULT = false;
+
+  /**
+   * The cached value of the '{@link #isModifiable() <em>Modifiable</em>}' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #isModifiable()
+   * @generated
+   * @ordered
+   */
+  protected boolean modifiable = MODIFIABLE_EDEFAULT;
 
   /**
    * <!-- begin-user-doc -->
@@ -1346,29 +1367,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
-  public boolean isEditable() {
-    return editable;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void setEditable(boolean newEditable) {
-    boolean oldEditable = editable;
-    editable = newEditable;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE, oldEditable, editable));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
   public EList<CellContribution> getContributions() {
     if (contributions == null) {
       contributions = new EObjectContainmentWithInverseEList<CellContribution>(CellContribution.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT);
@@ -1462,7 +1460,27 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  @Override
+  public boolean isExpanded() {
+    return expanded;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public void setExpanded(boolean newExpanded) {
+    boolean oldExpanded = expanded;
+    expanded = newExpanded;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED, oldExpanded, expanded));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public boolean isOptional() {
     return optional;
   }
@@ -1472,12 +1490,32 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  @Override
   public void setOptional(boolean newOptional) {
     boolean oldOptional = optional;
     optional = newOptional;
     if (eNotificationRequired())
       eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL, oldOptional, optional));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public boolean isModifiable() {
+    return modifiable;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public void setModifiable(boolean newModifiable) {
+    boolean oldModifiable = modifiable;
+    modifiable = newModifiable;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE, oldModifiable, modifiable));
   }
 
   /**
@@ -1626,8 +1664,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return getHandlers();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         return getMediaTypes();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
-        return isEditable();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         return getContributions();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
@@ -1636,8 +1672,12 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return getTransferFormats();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
         return getContextValue();
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+        return isExpanded();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
         return isOptional();
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
+        return isModifiable();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -1737,9 +1777,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         getMediaTypes().clear();
         getMediaTypes().addAll((Collection<? extends MediaType>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
-        setEditable((Boolean)newValue);
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         getContributions().clear();
         getContributions().addAll((Collection<? extends CellContribution>)newValue);
@@ -1754,8 +1791,14 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
         setContextValue((String)newValue);
         return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+        setExpanded((Boolean)newValue);
+        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
         setOptional((Boolean)newValue);
+        return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
+        setModifiable((Boolean)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -1850,9 +1893,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         getMediaTypes().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
-        setEditable(EDITABLE_EDEFAULT);
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         getContributions().clear();
         return;
@@ -1865,8 +1905,14 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
         setContextValue(CONTEXT_VALUE_EDEFAULT);
         return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+        setExpanded(EXPANDED_EDEFAULT);
+        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
         setOptional(OPTIONAL_EDEFAULT);
+        return;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
+        setModifiable(MODIFIABLE_EDEFAULT);
         return;
     }
     super.eUnset(featureID);
@@ -1940,8 +1986,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return handlers != null && !handlers.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         return mediaTypes != null && !mediaTypes.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
-        return editable != EDITABLE_EDEFAULT;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
         return contributions != null && !contributions.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
@@ -1950,8 +1994,12 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return transferFormats != null && !transferFormats.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
         return CONTEXT_VALUE_EDEFAULT == null ? contextValue != null : !CONTEXT_VALUE_EDEFAULT.equals(contextValue);
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+        return expanded != EXPANDED_EDEFAULT;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
         return optional != OPTIONAL_EDEFAULT;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
+        return modifiable != MODIFIABLE_EDEFAULT;
     }
     return super.eIsSet(featureID);
   }
@@ -2145,14 +2193,16 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     result.append(accessibilityPhrase);
     result.append(", mediaTypes: ");
     result.append(mediaTypes);
-    result.append(", editable: ");
-    result.append(editable);
     result.append(", transferFormats: ");
     result.append(transferFormats);
     result.append(", contextValue: ");
     result.append(contextValue);
+    result.append(", expanded: ");
+    result.append(expanded);
     result.append(", optional: ");
     result.append(optional);
+    result.append(", modifiable: ");
+    result.append(modifiable);
     result.append(')');
     return result.toString();
   }

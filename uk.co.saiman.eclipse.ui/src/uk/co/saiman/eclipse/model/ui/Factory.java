@@ -85,6 +85,15 @@ public interface Factory extends EFactory {
   HandledCell createHandledCell();
 
   /**
+   * Returns a new object of class '<em>Editable Cell</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Editable Cell</em>'.
+   * @generated
+   */
+  EditableCell createEditableCell();
+
+  /**
    * Returns the package supported by this factory.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->

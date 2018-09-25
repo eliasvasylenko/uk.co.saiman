@@ -41,7 +41,6 @@ import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -65,12 +64,11 @@ public abstract class ExtenderManager implements SynchronousBundleListener {
   private Log log;
   private final Set<Bundle> extendedBundles = new HashSet<>();
 
-  @Activate
-  protected void activate(ComponentContext cc) {
-    this.context = cc.getBundleContext();
-    context.addBundleListener(this);
+  public ExtenderManager(ComponentContext context) {
+    this.context = context.getBundleContext();
+    this.context.addBundleListener(this);
 
-    List<BundleCapability> extenderCapabilities = context
+    List<BundleCapability> extenderCapabilities = this.context
         .getBundle()
         .adapt(BundleWiring.class)
         .getCapabilities(EXTENDER_NAMESPACE);
@@ -86,12 +84,6 @@ public abstract class ExtenderManager implements SynchronousBundleListener {
     }
 
     capability = extenderCapabilities.get(0);
-
-    for (Bundle bundle : context.getBundles()) {
-      if ((bundle.getState() & (Bundle.STARTING | Bundle.ACTIVE)) != 0) {
-        tryRegister(bundle);
-      }
-    }
   }
 
   protected Log getLog() {

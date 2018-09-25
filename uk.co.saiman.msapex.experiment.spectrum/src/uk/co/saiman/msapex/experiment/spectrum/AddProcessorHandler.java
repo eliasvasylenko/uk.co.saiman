@@ -34,45 +34,54 @@ import static uk.co.saiman.fx.FxUtilities.wrap;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 
 import javafx.scene.control.ChoiceDialog;
+import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.Processor;
+import uk.co.saiman.experiment.processing.ProcessorConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
 import uk.co.saiman.properties.Localized;
 
 public class AddProcessorHandler {
+  @CanExecute
+  boolean canExecute(
+      @Optional @AdaptClass(ExperimentNode.class) SpectrumResultConfiguration configuration) {
+    return configuration != null;
+  }
+
   @Execute
   void execute(
-      ExperimentNode<? extends SpectrumResultConfiguration, ?> node,
-      @Service List<Processor> processors,
+      @AdaptClass(ExperimentNode.class) SpectrumResultConfiguration configuration,
+      @Service List<ProcessorConfiguration> processors,
       @Localize ExperimentProperties text) {
 
     requestProcessorType(
         processors,
         text.addSpectrumProcessor(),
         text.addSpectrumProcessorDescription())
-            .ifPresent(processor -> addProcessor(node.getState(), processor));
+            .ifPresent(processor -> addProcessor(configuration, processor));
   }
 
-  private void addProcessor(SpectrumResultConfiguration state, Processor processor) {
-    state
+  private void addProcessor(SpectrumResultConfiguration configuration, ProcessorConfiguration processor) {
+    configuration
         .setProcessing(
             new Processing(
-                concat(state.getProcessing().processors(), Stream.of(processor))
+                concat(configuration.getProcessing().processors(), Stream.of(processor))
                     .collect(toList())));
   }
 
-  static java.util.Optional<Processor> requestProcessorType(
-      @Service List<Processor> processors,
+  static java.util.Optional<ProcessorConfiguration> requestProcessorType(
+      @Service List<ProcessorConfiguration> processors,
       Localized<String> title,
       Localized<String> header) {
-    ChoiceDialog<Processor> nameDialog = processors.isEmpty()
+    ChoiceDialog<ProcessorConfiguration> nameDialog = processors.isEmpty()
         ? new ChoiceDialog<>()
         : new ChoiceDialog<>(processors.get(0), processors);
     nameDialog.titleProperty().bind(wrap(title));

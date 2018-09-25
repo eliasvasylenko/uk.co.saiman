@@ -1,6 +1,7 @@
 Bundle-Name: SAI :: MSApex :: Experiment :: Sample
 
 -include:\
+	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
 	${build}/include/eclipse.fx.bnd,\
 	${build}/include/fugue.icons.bnd
@@ -26,8 +27,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Sample
 \
 	javax.measure.unit-api
 
-Export-Package: \
-	uk.co.saiman.msapex.experiment.sample.treecontributions
+Export-Package: uk.co.saiman.msapex.experiment.sample
 
 -includeresource:\
-	{css=css}
+	{always.e4xmi}

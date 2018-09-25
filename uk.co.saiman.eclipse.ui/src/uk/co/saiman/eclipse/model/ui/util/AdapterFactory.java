@@ -38,9 +38,6 @@ import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MLocalizable;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.MUILabel;
-
-import org.eclipse.e4.ui.model.application.ui.menu.MHandledItem;
-import org.eclipse.e4.ui.model.application.ui.menu.MItem;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notifier;
 
@@ -124,6 +121,10 @@ public class AdapterFactory extends AdapterFactoryImpl {
         return createHandledCellAdapter();
       }
       @Override
+      public Adapter caseEditableCell(EditableCell object) {
+        return createEditableCellAdapter();
+      }
+      @Override
       public Adapter caseLocalizable(MLocalizable object) {
         return createLocalizableAdapter();
       }
@@ -154,14 +155,6 @@ public class AdapterFactory extends AdapterFactoryImpl {
       @Override
       public Adapter caseHandlerContainer(MHandlerContainer object) {
         return createHandlerContainerAdapter();
-      }
-      @Override
-      public Adapter caseItem(MItem object) {
-        return createItemAdapter();
-      }
-      @Override
-      public Adapter caseHandledItem(MHandledItem object) {
-        return createHandledItemAdapter();
       }
       @Override
       public Adapter defaultCase(EObject object) {
@@ -236,6 +229,20 @@ public class AdapterFactory extends AdapterFactoryImpl {
    * @generated
    */
   public Adapter createHandledCellAdapter() {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.EditableCell <em>Editable Cell</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see uk.co.saiman.eclipse.model.ui.EditableCell
+   * @generated
+   */
+  public Adapter createEditableCellAdapter() {
     return null;
   }
 
@@ -356,36 +363,6 @@ public class AdapterFactory extends AdapterFactoryImpl {
    * @generated
    */
   public Adapter createHandlerContainerAdapter() {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link org.eclipse.e4.ui.model.application.ui.menu.MItem <em>Item</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see org.eclipse.e4.ui.model.application.ui.menu.MItem
-   * @since 1.0
-   * @generated
-   */
-  public Adapter createItemAdapter() {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link org.eclipse.e4.ui.model.application.ui.menu.MHandledItem <em>Handled Item</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see org.eclipse.e4.ui.model.application.ui.menu.MHandledItem
-   * @since 1.0
-   * @generated
-   */
-  public Adapter createHandledItemAdapter() {
     return null;
   }
 

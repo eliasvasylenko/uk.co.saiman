@@ -4,12 +4,10 @@
 
 .label-header {
 	-fx-font-size: 17.0pt;
+	font-size: 17.0pt;
 }
 
 .ModularTreeCell #supplementalText {
 	-fx-opacity: 0.65;
-}
-
-.ModularTreeCell #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/node.png");
+	opacity: 0.65;
 }

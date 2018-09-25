@@ -27,10 +27,17 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import javax.annotation.PostConstruct;
+import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_TEXT;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Optional;
+
+import javafx.scene.control.Label;
+import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.Experiment;
+import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
 
 /**
@@ -41,10 +48,23 @@ import uk.co.saiman.experiment.ExperimentNode;
 public class ExperimentCellContribution {
   public static final String ID = "uk.co.saiman.experiment.cell";
 
+  @Optional
   @PostConstruct
-  public void prepare(Cell cell, ExperimentNode<?, ?> node) {
-    if (node instanceof Experiment) {
-      cell.setLabel("Root Experiment!!!" + node.getId());
+  public void prepare(
+      Cell cell,
+      @AdaptClass(ExperimentNode.class) ExperimentConfiguration configuration,
+      @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
+    cell.setLabel(configuration.getName());
+    supplemental.setText(null);
+    cell
+        .setIconURI(
+            "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book.png");
+    /*-
+    if (cell.isExpanded()) {
+      cell
+          .setIconURI(
+              "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/open-book.png");
     }
+    */
   }
 }

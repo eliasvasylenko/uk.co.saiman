@@ -37,6 +37,7 @@ import java.util.Objects;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.contexts.RunAndTrack;
+import org.eclipse.e4.core.di.IInjector;
 import org.eclipse.e4.core.di.suppliers.ExtendedObjectSupplier;
 import org.eclipse.e4.core.di.suppliers.IObjectDescriptor;
 import org.eclipse.e4.core.di.suppliers.IRequestor;
@@ -86,7 +87,8 @@ public abstract class TransformingNamedObjectSupplier<T extends Annotation>
     }
 
     public Object get() {
-      return get(context);
+      Object object = get(context);
+      return object != null ? object : IInjector.NOT_A_VALUE;
     }
 
     protected abstract Object get(IEclipseContext context);
@@ -147,7 +149,7 @@ public abstract class TransformingNamedObjectSupplier<T extends Annotation>
     }
 
     public Object get() {
-      return namedObject;
+      return namedObject != null ? namedObject : IInjector.NOT_A_VALUE;
     }
   }
 
@@ -169,7 +171,7 @@ public abstract class TransformingNamedObjectSupplier<T extends Annotation>
 
     if (!requestor.isValid()) {
       request.disposeTracker();
-      return null;
+      return IInjector.NOT_A_VALUE;
     }
 
     return track ? request.getTracker().get() : request.get();

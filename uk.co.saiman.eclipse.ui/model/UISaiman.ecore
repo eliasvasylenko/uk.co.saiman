@@ -10,7 +10,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="Cell">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="mediaTypes" upperBound="-1"
         eType="#//MediaType"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="editable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="contributions" upperBound="-1"
         eType="#//CellContribution" containment="true" eOpposite="#//CellContribution/parent"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="popupMenu" eType="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/menu/PopupMenu"
@@ -22,7 +21,12 @@
       </eGenericType>
     </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contextValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="optional" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expanded" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="optional" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modifiable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/UILabel"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/Context"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//Contribution"/>
@@ -44,5 +48,28 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//Cell"
         eOpposite="#//Cell/contributions"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="HandledCell" eSuperTypes="#//Cell ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/menu/HandledItem"/>
+  <eClassifiers xsi:type="ecore:EClass" name="HandledCell" eSuperTypes="#//Cell">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="command" eType="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//commands/Command">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="&lt;p>&#xD;&#xA;A reference to the Command associated with this item.&#xD;&#xA;&lt;/p>"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="wbCommand" eType="ecore:EDataType ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//commands/ParameterizedCommand"
+        transient="true">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="&lt;p>&#xD;&#xA;This is used for low level implementation and is not intended to be used by clients&#xD;&#xA;&lt;/p>&#xD;&#xA;@noreference"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parameters" upperBound="-1"
+        eType="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//commands/Parameter"
+        containment="true">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="&lt;p>&#xD;&#xA;Defines the specific parameters to use when executing the command through this item.&#xD;&#xA;&lt;/p>"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EditableCell" eSuperTypes="#//Cell">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="editing" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+  </eClassifiers>
 </ecore:EPackage>

@@ -36,6 +36,7 @@ import static uk.co.saiman.experiment.WorkspaceEventKind.LIFECYLE;
 import static uk.co.saiman.experiment.WorkspaceEventKind.MOVE;
 import static uk.co.saiman.experiment.WorkspaceEventKind.REMOVE;
 import static uk.co.saiman.experiment.WorkspaceEventKind.RENAME;
+import static uk.co.saiman.experiment.WorkspaceEventKind.STATE;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -441,7 +442,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
       @Override
       public void update(StateMap state) {
-        persistedState = state;
+        ExperimentNodeImpl.this.setState(state);
       }
 
       @Override
@@ -464,6 +465,18 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
         return getId();
       }
     };
+  }
+
+  protected void setState(StateMap state) {
+    if (Objects.equals(state, getState())) {
+      return;
+
+    } else if (!Objects.equals(ExperimentNodeImpl.this.state, state)) {
+      workspace.fireEvents(STATE, ExperimentNodeImpl.this, () -> {
+        persistedState = state;
+        return null;
+      });
+    }
   }
 
   protected void setId(String id) {

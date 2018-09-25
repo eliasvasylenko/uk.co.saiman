@@ -51,10 +51,11 @@ import uk.co.saiman.experiment.ConfigurationContext;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingType;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.Processor;
+import uk.co.saiman.experiment.processing.ProcessorConfiguration;
 import uk.co.saiman.experiment.processing.ProcessorService;
 import uk.co.saiman.experiment.state.Accessor.ListAccessor;
 import uk.co.saiman.experiment.state.Accessor.MapAccessor;
+import uk.co.saiman.properties.PropertyLoader;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -68,7 +69,7 @@ public class SpectrumProcessingExperimentType
     implements ProcessingType<SpectrumResultConfiguration, Spectrum, Spectrum> {
   private final SpectrumProperties properties;
 
-  private final MapAccessor<Processor> processor;
+  private final MapAccessor<ProcessorConfiguration> processor;
   private final ListAccessor<Processing> processorList;
 
   @Override
@@ -77,19 +78,19 @@ public class SpectrumProcessingExperimentType
   }
 
   public SpectrumProcessingExperimentType(ProcessorService processors) {
-    this(processors, getDefaultPropertyLoader().getProperties(SpectrumProperties.class));
+    this(processors, getDefaultPropertyLoader());
   }
 
   @Activate
   public SpectrumProcessingExperimentType(
       @Reference ProcessorService processors,
-      @Reference SpectrumProperties properties) {
-    this.properties = properties;
+      @Reference PropertyLoader propertyLoader) {
+    this.properties = propertyLoader.getProperties(SpectrumProperties.class);
 
     this.processor = mapAccessor(
         "processing",
         s -> processors.loadProcessor(s),
-        Processor::getState);
+        p -> processors.saveProcessor(p));
 
     this.processorList = processor
         .toListAccessor()
@@ -108,6 +109,8 @@ public class SpectrumProcessingExperimentType
   @Override
   public SpectrumResultConfiguration createState(
       ConfigurationContext<SpectrumResultConfiguration> context) {
+    context.update(s -> s.withDefault(processorList, Processing::new));
+
     return new SpectrumResultConfiguration() {
       private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
 
@@ -139,7 +142,7 @@ public class SpectrumProcessingExperimentType
     DataProcessor processor = state
         .getProcessing()
         .processors()
-        .map(Processor::getProcessor)
+        .map(ProcessorConfiguration::getProcessor)
         .reduce(identity(), DataProcessor::andThen);
 
     SampledContinuousFunction<Mass, Dimensionless> massData = processor

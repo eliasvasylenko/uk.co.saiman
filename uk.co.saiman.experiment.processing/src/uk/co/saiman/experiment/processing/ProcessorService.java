@@ -30,5 +30,9 @@ package uk.co.saiman.experiment.processing;
 import uk.co.saiman.experiment.state.StateMap;
 
 public interface ProcessorService {
-  Processor loadProcessor(StateMap persistedState);
+  public static final String PROCESSOR_ID_KEY = "uk.co.saiman.experiment.processor.id";
+
+  ProcessorConfiguration loadProcessor(StateMap persistedState);
+
+  StateMap saveProcessor(ProcessorConfiguration processor);
 }

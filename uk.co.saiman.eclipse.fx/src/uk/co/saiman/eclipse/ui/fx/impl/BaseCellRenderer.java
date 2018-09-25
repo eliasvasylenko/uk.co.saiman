@@ -30,6 +30,7 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 import java.util.Collection;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.contributions.IContributionFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
@@ -53,6 +54,8 @@ import uk.co.saiman.eclipse.ui.fx.widget.WCell;
  *          the native widget type
  */
 public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell, Cell, WCell<N>> {
+  private static final String VISIBLE_BEFORE_OPTIONALITY_CHECK = "saiman.visible.before.optionality.check";
+
   /**
    * Eventbroker to use
    */
@@ -73,7 +76,9 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
     registerEventListener(broker, UIEvents.Item.TOPIC_SELECTED);
     registerEventListener(broker, UIEvents.Item.TOPIC_ENABLED);
 
-    registerEventListener(broker, UIEvents.Item.TOPIC_ENABLED);
+    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_EDITING);
+    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_OPTIONAL);
+    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_MODIFIABLE);
 
     broker.subscribe(SaiUiEvents.Cell.TOPIC_POPUP_MENU, new EventHandler() {
       @Override
@@ -120,6 +125,13 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
       return;
     }
 
+    prepareContextValue(element);
+    if (element.getParent() == null) {
+      return;
+    }
+
+    element.getTags().add("NoAutoCollapse");
+
     Class<?> cl = cell.getWidget().getClass();
     do {
       element.getContext().set(cl.getName(), cell.getWidget());
@@ -132,6 +144,7 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
 
     cellContributionHandler = ContextInjectionFactory
         .make(CellContributionHandler.class, element.getContext());
+
     handleContributionAddition(element, element.getContributions());
 
     if (element.getPopupMenu() != null) {
@@ -146,6 +159,76 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
         }
         if (widget != null && isChildRenderedAndVisible(child)) {
           cell.addCell((WCell<?>) widget);
+        }
+      }
+    }
+  }
+
+  protected static void prepareContextValue(Cell element) {
+    IEclipseContext context = element.getContext();
+    String key = element.getContextValue();
+
+    if (key != null && !key.isEmpty()) {
+      // we have a context value specified
+
+      Object value = context.get(key);
+
+      if (element.isModifiable()) {
+        /*-
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         * What to do when context value is set to null?
+         * 
+         * - delete! (when we have an optional and missing value that shouldn't suddenly
+         * get set, e.g. contribution that doesn't apply in a certain context) DEFAULT?
+         * 
+         * - hide! (when we have e.g. a feature which can be switched on and off)
+         * 
+         * - nothing! (when the UI properly supports a null value) DEFAULT?
+         * 
+         * - error! (we don't support null)
+         * 
+         * drag and drop works IF modifiable in context AND the above is NOT set to "error" 
+         * 
+         * 
+         * 
+         * 
+         * Model either with an enum DELETE, HIDE, NOTHING, ERROR
+         * 
+         * - pros: 
+         * 
+         * - cons: maybe a bit confusing? badly named enums
+         * 
+         * Or with a boolean "nullable" and tags to specify delete/hide behavior.
+         * 
+         * - pros: model is simpler for default behavior, just a boolean
+         * 
+         * - cons: more complex behavior is hidden in tags which must be documented.
+         * 
+         * 
+         * 
+         * 
+         */
+
+        if (value == null && element.isOptional()) {
+          if (element.isVisible()) {
+            element.setVisible(false);
+            element.getTags().add(VISIBLE_BEFORE_OPTIONALITY_CHECK);
+          }
+        } else if (element.getTags().remove(VISIBLE_BEFORE_OPTIONALITY_CHECK)) {
+          element.setVisible(true);
+        }
+      } else {
+        context.set(key, value);
+
+        if (value == null && element.isOptional()) {
+          element.setParent(null);
         }
       }
     }
@@ -215,16 +298,18 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
   }
 
   @Override
-  public void do_hideChild(Cell container, MUIElement cell) {
-    WCell<N> tree = getWidget(container);
+  public void do_hideChild(Cell container, MUIElement child) {
+    WCell<N> cell = getWidget(container);
 
-    if (tree == null) {
+    if (cell == null) {
       return;
     }
 
-    WCell<?> widget = (WCell<?>) cell.getWidget();
-    if (widget != null) {
-      tree.removeCell(widget);
+    if (child instanceof Cell) {
+      WCell<?> widget = (WCell<?>) child.getWidget();
+      if (widget != null) {
+        cell.removeCell(widget);
+      }
     }
   }
 }

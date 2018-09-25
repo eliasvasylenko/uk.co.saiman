@@ -41,6 +41,5 @@ Export-Package: \
 	uk.co.saiman.msapex.experiment.spectrum
 
 -includeresource:\
-	{css=css},\
 	res,\
 	{always.e4xmi}

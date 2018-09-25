@@ -34,11 +34,14 @@ import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
 import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_TOBERENDERED;
 
+import java.util.function.Consumer;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -54,6 +57,7 @@ import uk.co.saiman.log.Log.Level;
 public class UIAddon {
   static final String CHILD_CONTEXT_VALUE = "uk.co.saiman.eclipse.model.ui.child.context.value";
   static final String CHILD_CONTEXT_VALUE_SET = "uk.co.saiman.eclipse.model.ui.child.context.value.set";
+  static final String CHILD_CONTEXT_VALUES_SET = "uk.co.saiman.eclipse.model.ui.child.context.values.set";
 
   @Inject
   private Log log;
@@ -95,31 +99,62 @@ public class UIAddon {
         IEclipseContext context = (IEclipseContext) value;
 
         if (element instanceof Cell || element instanceof Tree) {
-          try {
-            context
-                .set(
-                    ChildrenService.class,
-                    ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
-            context.declareModifiable(ChildrenService.class);
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
+          prepareChildContainer(context);
         }
         if (element instanceof Cell) {
-          Cell cell = (Cell) element;
-
-          if (cell.getPersistedState().containsKey(CHILD_CONTEXT_VALUE)) {
-            cell.setContextValue(cell.getPersistedState().get(CHILD_CONTEXT_VALUE));
-            if (cell.getTransientData().containsKey(CHILD_CONTEXT_VALUE)) {
-              context.set(cell.getContextValue(), cell.getTransientData().get(CHILD_CONTEXT_VALUE));
-            } else {
-              cell.setParent(null);
-            }
-          }
+          prepareChild(context, (Cell) element);
         }
       }
     } catch (Exception e) {
       log.log(Level.ERROR, e);
+    }
+  }
+
+  private void prepareChild(IEclipseContext context, Cell cell) {
+    String key = cell.getContextValue();
+    if (key != null) {
+      Object value = cell.getTransientData().remove(CHILD_CONTEXT_VALUE);
+      if (value != null) {
+        context.set(key, value);
+
+        @SuppressWarnings("unchecked")
+        Consumer<Object> valueSet = (Consumer<Object>) cell
+            .getTransientData()
+            .remove(CHILD_CONTEXT_VALUE_SET);
+        if (valueSet != null) {
+          context.declareModifiable(cell.getContextValue());
+          context.runAndTrack(new RunAndTrack() {
+            boolean firstTry = true;
+
+            @Override
+            public boolean changed(IEclipseContext context) {
+              if (firstTry) {
+                firstTry = false;
+                context.get(key);
+              } else if (!firstTry) {
+
+                valueSet.accept(context.get(key));
+                return false;
+              }
+              return true;
+            }
+          });
+        }
+      } else {
+        cell.setParent(null);
+      }
+    }
+  }
+
+  private void prepareChildContainer(IEclipseContext context) {
+    try {
+      context
+          .set(
+              ChildrenService.class,
+              ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
+      context.declareModifiable(ChildrenService.class);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

@@ -28,61 +28,65 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.WorkspaceEventKind.STATE;
+import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_TEXT;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
-import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.core.di.annotations.Optional;
 
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.eclipse.variable.NamedVariable;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.processing.Processor;
+import uk.co.saiman.experiment.processing.Processing;
+import uk.co.saiman.experiment.processing.ProcessorConfiguration;
 import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
-import uk.co.saiman.property.Property;
+import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
 
 public class SpectrumProcessingExperimentNodeCellContribution {
-  public static final String ID = "uk.co.saiman.msapex.experiment.spectrum.cellcontribution.processing";
-
+  @Optional
   @Inject
-  private ExperimentNode<?, ?> data;
-
-  @Inject
-  @AdaptClass(ExperimentNode.class)
-  private SpectrumResultConfiguration state;
-
-  @Inject
-  public void prepare(HBox node, Cell cell) {
-    cell.setLabel(data.getType().getName());
-    Label supplementalText = new Label(state.getSpectrumName());
-    node.getChildren().add(supplementalText);
-
+  public void prepare(
+      ExperimentNode<?, ?> data,
+      Cell cell,
+      @Named(SUPPLEMENTAL_TEXT) Label supplemental,
+      @AdaptClass(ExperimentNode.class) SpectrumResultConfiguration state) {
+    if (state != null) {
+      cell.setLabel(data.getType().getName());
+      supplemental.setText(state.getSpectrumName());
+    }
   }
 
-  public void children(ChildrenService children) {
-    children
-        .setItems(
-            Processors.ID,
-            "processors",
-            state.getProcessing().processors().collect(toList()));
-  }
+  public static class Processors {
 
-  static class Processors {
-    public static final String ID = SpectrumProcessingExperimentNodeCellContribution.ID
-        + ".processors";
-
-    @AboutToShow
+    @Inject
     public void prepare(
-        @NamedVariable("processors") Property<List<Processor>> entry,
-        ChildrenService children) {
+        ExperimentNode<?, ?> data,
+        Cell cell,
+        ChildrenService children,
+        @Optional @AdaptClass(ExperimentNode.class) SpectrumResultConfiguration state) {
+      cell.setVisible(state != null);
+      if (cell.isVisible()) {
+        data
+            .getWorkspace()
+            .events()
+            .filter(e -> e.getNode() == data)
+            .filter(e -> e.getKind() == STATE)
+            .take(1)
+            .observe(o -> children.invalidate());
 
-      children.setItems(ID, Processor.class, entry.get(), r -> entry.set(new ArrayList<>(r)));
+        children
+            .setItems(
+                ProcessorCell.ID,
+                ProcessorConfiguration.class,
+                state.getProcessing().processors().collect(toList()),
+                r -> state.setProcessing(new Processing(new ArrayList<>(r))));
+      }
     }
   }
 }

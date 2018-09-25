@@ -47,7 +47,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
@@ -81,7 +80,7 @@ public class ChildrenServiceImpl implements ChildrenService {
   @PostConstruct
   private void findChildren() {
     for (Cell child : parent().getChildren()) {
-      String contextValue = child.getPersistedState().get(UIAddon.CHILD_CONTEXT_VALUE);
+      String contextValue = child.getContextValue();
       if (contextValue != null) {
         List<Cell> values = getChildren(child.getElementId());
         values.add(child);
@@ -108,13 +107,12 @@ public class ChildrenServiceImpl implements ChildrenService {
     }
 
     if (cell == null) {
-      MUIElement model = (Cell) models.cloneSnippet(application, id, null);
-      if (model == null || !(model instanceof Cell)) {
+      cell = (Cell) models.cloneSnippet(application, id, null);
+      if (cell == null) {
         throw new IllegalArgumentException("Child does not exist " + id);
       }
-      model.getPersistedState().put(UIAddon.CHILD_CONTEXT_VALUE, contextName);
-      model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, value);
-      cell = (Cell) model;
+      cell.setContextValue(contextName);
+      cell.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, value);
     }
 
     return cell;
@@ -169,16 +167,27 @@ public class ChildrenServiceImpl implements ChildrenService {
       List<? extends T> children,
       Consumer<? super List<? extends T>> update) {
     List<Cell> models = readyModels(id, contextName, children);
+    int i = 0;
     for (Cell model : models) {
-      model
-          .getTransientData()
-          .put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super List<? extends T>>) value -> {
-            update.accept(value);
-            invalidate();
-          });
+      int index = i++;
+
+      Map<String, Object> data = model.getTransientData();
+      data.put(UIAddon.CHILD_CONTEXT_VALUES_SET, (Consumer<? super List<? extends T>>) value -> {
+        update.accept(value);
+        invalidate();
+      });
+      data.put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super T>) value -> {
+        List<T> newChildren = new ArrayList<>(children);
+        if (value == null) {
+          newChildren.remove(index);
+        } else {
+          newChildren.set(index, value);
+        }
+        update.accept(newChildren);
+        invalidate();
+      });
     }
     setChildren(id, models);
-
   }
 
   @Override

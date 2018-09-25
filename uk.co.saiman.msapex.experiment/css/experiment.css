@@ -5,31 +5,15 @@
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open-next.png");
 }
 
-.ModularTreeCell :uk-co-saiman-experiment-cell-node #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/document.png");
-}
-
-.ModularTreeCell :uk-co-saiman-experiment-cell #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/book.png");
-}
-.ModularTreeCell:expanded :uk-co-saiman-experiment-cell #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open.png");
-}
-
-.ModularTreeCell :uk-co-saiman-experiment-cell-node :PROCESSING {
+ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node :PROCESSING {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/clock.png");	
 }
-.ModularTreeCell :uk-co-saiman-experiment-cell-node :COMPLETION {
+ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node  {
+	-fx-graphic: url("${fugue.icon.runtime}/size16/clock.png");	
+}
+ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node :COMPLETION {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/tick-circle.png");
 }
-.ModularTreeCell :uk-co-saiman-experiment-cell-node :FAILURE {
+ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node :FAILURE {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/exclamation-red.png");
-}
-
-.ModularTreeCell :ExperimentResultContribution #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/document.png");
-}
-
-.ModularTreeCell :ExperimentResultContributionPresent #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/document-binary.png");
 }

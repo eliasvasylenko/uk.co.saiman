@@ -181,6 +181,7 @@ runplatform: linux64
 	uk.co.saiman.msapex.experiment;version=snapshot,\
 	uk.co.saiman.msapex.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.msapex.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.msapex.experiment.sample;version=snapshot,\
 	uk.co.saiman.msapex.experiment.processing;version=snapshot,\
 	uk.co.saiman.msapex.instrument;version=snapshot,\
 	uk.co.saiman.msapex.instrument.acquisition;version=snapshot,\

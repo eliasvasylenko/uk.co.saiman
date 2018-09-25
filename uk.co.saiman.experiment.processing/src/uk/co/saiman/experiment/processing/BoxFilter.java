@@ -32,20 +32,15 @@ import static uk.co.saiman.data.function.processing.DataProcessor.arrayProcessor
 import static uk.co.saiman.experiment.state.Accessor.intAccessor;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
-import uk.co.saiman.properties.PropertyLoader;
+import uk.co.saiman.experiment.state.StateMap;
 
 @Component
-public class BoxFilter implements Processor {
+public class BoxFilter implements ProcessorConfiguration {
   private static final PropertyAccessor<Integer> WIDTH = intAccessor("width");
   protected static final int NO_OP = 1;
-
-  @Reference
-  PropertyLoader propertyLoader;
 
   private final StateMap state;
 
@@ -55,11 +50,6 @@ public class BoxFilter implements Processor {
 
   public BoxFilter(StateMap state) {
     this.state = state.withDefault(WIDTH, () -> NO_OP);
-  }
-
-  @Override
-  public String getName() {
-    return propertyLoader.getProperties(ProcessingProperties.class).boxFilterProcessor().get();
   }
 
   @Override

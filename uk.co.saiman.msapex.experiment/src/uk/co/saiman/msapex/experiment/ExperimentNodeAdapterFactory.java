@@ -29,6 +29,8 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
+import static uk.co.saiman.collection.StreamUtilities.flatMapRecursive;
+import static uk.co.saiman.collection.StreamUtilities.streamNullable;
 import static uk.co.saiman.collection.StreamUtilities.streamOptional;
 import static uk.co.saiman.collection.StreamUtilities.tryOptional;
 
@@ -66,28 +68,28 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
     ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) adaptableObject;
 
-    if (adapterType == ExperimentType.class) {
+    if (adapterType.isAssignableFrom(ExperimentType.class)) {
       return (T) node.getType();
     }
 
-    if (adapterType == Experiment.class) {
+    if (adapterType.isAssignableFrom(Experiment.class)) {
       return (T) node.getExperiment();
     }
 
-    if (adapterType == Workspace.class) {
+    if (adapterType.isAssignableFrom(Workspace.class)) {
       return (T) node.getWorkspace();
     }
 
-    if (adapterType == node.getType().getStateType().getErasedType()) {
-      return (T) node.getState();
-    }
-
-    if (adapterType == Result.class
+    if (adapterType.isAssignableFrom(Result.class)
         && node.getType().getResultType().getErasedType() != void.class) {
       return (T) node.getResult();
     }
 
-    if (adapterType == node.getResult().getType().getErasedType()) {
+    if (adapterType.isAssignableFrom(node.getType().getStateType().getErasedType())) {
+      return (T) node.getState();
+    }
+
+    if (adapterType.isAssignableFrom(node.getResult().getType().getErasedType())) {
       Optional<?> value = node.getResult().getValue();
       if (value.isPresent())
         return (T) value.get();
@@ -99,20 +101,28 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   @Override
   public Class<?>[] getAdapterList() {
     return concat(
-        of(ExperimentType.class, Experiment.class, Workspace.class),
+        of(ExperimentType.class, Experiment.class, Workspace.class, Result.class),
         experimentTypes
             .get()
             .map(type -> type.getStateType().getErasedType())
             .flatMap(this::getTransitive)).toArray(Class<?>[]::new);
   }
 
-  public Stream<? extends Class<?>> getTransitive(Class<?> adapterType) {
-    return concat(
-        of(adapterType),
-        of(adapterManager.computeAdapterTypes(adapterType))
-            .distinct()
-            .flatMap(
-                typeName -> streamOptional(
-                    tryOptional(() -> getClass().getClassLoader().loadClass(typeName)))));
+  private Stream<? extends Class<?>> getTransitive(Class<?> adapterType) {
+    return concat(getSuperTypes(adapterType), getAdapterTypes(adapterType));
+  }
+
+  private Stream<Class<?>> getAdapterTypes(Class<?> adapterType) {
+    return of(adapterManager.computeAdapterTypes(adapterType))
+        .distinct()
+        .flatMap(
+            typeName -> streamOptional(
+                tryOptional(() -> getClass().getClassLoader().loadClass(typeName))));
+  }
+
+  private Stream<Class<?>> getSuperTypes(Class<?> adapterType) {
+    return flatMapRecursive(
+        adapterType,
+        t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())));
   }
 }

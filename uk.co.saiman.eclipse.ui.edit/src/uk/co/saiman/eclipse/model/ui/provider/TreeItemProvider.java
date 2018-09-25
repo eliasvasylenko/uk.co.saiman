@@ -656,6 +656,11 @@ public class TreeItemProvider
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
+         Factory.eINSTANCE.createEditableCell()));
+
+    newChildDescriptors.add
+      (createChildParameter
+        (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
          MApplicationFactory.INSTANCE.createApplication()));
 
     newChildDescriptors.add

@@ -21,6 +21,7 @@
 	org.eclipse.e4.core.contexts,\
 	org.eclipse.equinox.app,\
 	org.eclipse.equinox.common,\
+	org.eclipse.jdt.annotation,\
 	org.eclipse.jface,\
 	org.eclipse.osgi,\
 	org.eclipse.osgi.services,\

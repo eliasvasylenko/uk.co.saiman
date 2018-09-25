@@ -27,32 +27,29 @@
  */
 package uk.co.saiman.experiment.processing;
 
+import static java.util.Collections.emptyList;
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.state.StateMap;
 
 public class Processing {
-  private List<Processor> processors;
+  private List<ProcessorConfiguration> processors;
 
-  public Processing(Collection<? extends Processor> processors) {
-    // TODO Auto-generated constructor stub
+  public Processing() {
+    this.processors = emptyList();
   }
 
-  public Stream<Processor> processors() {
+  public Processing(Collection<? extends ProcessorConfiguration> processors) {
+    this.processors = new ArrayList<>(processors);
+  }
+
+  public Stream<ProcessorConfiguration> processors() {
     return processors.stream();
-  }
-
-  public StateMap getState() {
-    return null;
-  }
-
-  public Processing withState(StateMap state) {
-    return null;
   }
 
   public DataProcessor getProcessor() {

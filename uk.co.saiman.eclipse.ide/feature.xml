@@ -30,49 +30,49 @@
          id="uk.co.saiman.reflection"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808221517"
+         version="0.0.1.201809170826"
          unpack="false"/>
 
    <plugin
          id="uk.co.saiman.data"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808281027"
+         version="0.0.1.201809170826"
          unpack="false"/>
 
    <plugin
          id="uk.co.saiman.utilities"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808221517"
+         version="0.0.1.201809170805"
          unpack="false"/>
 
    <plugin
          id="uk.co.saiman.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808311546"
+         version="0.0.1.201809211413"
          unpack="false"/>
 
    <plugin
          id="uk.co.saiman.collections"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808221517"
-         unpack="false"/>
-
-   <plugin
-         id="uk.co.saiman.eclipse.ui.edit"
-         download-size="0"
-         install-size="0"
-         version="0.0.1.201809040830"
+         version="0.0.1.201809170826"
          unpack="false"/>
 
    <plugin
          id="uk.co.saiman.reflection.token"
          download-size="0"
          install-size="0"
-         version="0.0.1.201808221517"
+         version="0.0.1.201809170826"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.eclipse.ui.edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201809211451"
          unpack="false"/>
 
 </feature>

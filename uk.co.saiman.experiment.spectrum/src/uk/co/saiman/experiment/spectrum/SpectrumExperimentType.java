@@ -43,7 +43,7 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
-import uk.co.saiman.experiment.processing.Processor;
+import uk.co.saiman.experiment.processing.ProcessorConfiguration;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -85,7 +85,7 @@ public abstract class SpectrumExperimentType<T extends SpectrumConfiguration>
         .getState()
         .getProcessing()
         .processors()
-        .map(Processor::getProcessor)
+        .map(ProcessorConfiguration::getProcessor)
         .reduce(identity(), DataProcessor::andThen);
 
     System.out.println("fetching calibration");

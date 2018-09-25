@@ -88,6 +88,7 @@ public class FactoryImpl extends EFactoryImpl implements Factory {
       case Package.TREE: return (EObject)createTree();
       case Package.CELL_CONTRIBUTION: return (EObject)createCellContribution();
       case Package.HANDLED_CELL: return (EObject)createHandledCell();
+      case Package.EDITABLE_CELL: return (EObject)createEditableCell();
       default:
         throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
     }
@@ -162,6 +163,17 @@ public class FactoryImpl extends EFactoryImpl implements Factory {
   public HandledCell createHandledCell() {
     HandledCellImpl handledCell = new HandledCellImpl();
     return handledCell;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public EditableCell createEditableCell() {
+    EditableCellImpl editableCell = new EditableCellImpl();
+    return editableCell;
   }
 
   /**

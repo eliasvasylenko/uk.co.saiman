@@ -35,6 +35,9 @@
             descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.HandledCellEditorDescriptor">
       </editor>
       <editor
+            descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.EditableCellEditorDescriptor">
+      </editor>
+      <editor
             descriptorClass="uk.co.saiman.eclipse.model.ui.provider.editor.CellContributionEditorDescriptor">
       </editor>
    </extension>

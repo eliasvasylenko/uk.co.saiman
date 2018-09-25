@@ -32,21 +32,16 @@ import static java.lang.Math.sqrt;
 import static uk.co.saiman.experiment.state.Accessor.doubleAccessor;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
-import uk.co.saiman.properties.PropertyLoader;
+import uk.co.saiman.experiment.state.StateMap;
 
 @Component
-public class GaussianSmooth implements Processor {
+public class GaussianSmooth implements ProcessorConfiguration {
   private static final PropertyAccessor<Double> STANDARD_DEVIATION = doubleAccessor(
       "standardDeviation");
   private static final int BOX_ITERATIONS = 5;
-
-  @Reference
-  PropertyLoader propertyLoader;
 
   private final StateMap state;
 
@@ -56,11 +51,6 @@ public class GaussianSmooth implements Processor {
 
   public GaussianSmooth(StateMap state) {
     this.state = state.withDefault(STANDARD_DEVIATION, () -> 10d);
-  }
-
-  @Override
-  public String getName() {
-    return propertyLoader.getProperties(ProcessingProperties.class).gaussianSmoothProcessor().get();
   }
 
   public double getStandardDeviation() {

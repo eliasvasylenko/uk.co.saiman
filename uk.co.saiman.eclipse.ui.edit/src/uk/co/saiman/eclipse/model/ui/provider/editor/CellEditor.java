@@ -28,6 +28,7 @@
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.e4.tools.emf.ui.internal.common.ModelEditor.VIRTUAL_HANDLER;
 import static uk.co.saiman.eclipse.model.ui.Package.eINSTANCE;
 
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import org.eclipse.e4.tools.emf.ui.internal.common.VirtualEntry;
 import org.eclipse.e4.tools.emf.ui.internal.common.component.ControlFactory;
 import org.eclipse.e4.tools.emf.ui.internal.common.component.ControlFactory.TextPasteHandler;
 import org.eclipse.e4.ui.model.application.MContribution;
+import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.MUiFactory;
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
@@ -104,6 +106,10 @@ public class CellEditor extends AbstractEditor {
   private ListComponentManager childrenComponent;
 
   @SuppressWarnings("rawtypes")
+  private final IListProperty HANDLER_CONTAINER__HANDLERS = EMFProperties
+      .list(CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS);
+
+  @SuppressWarnings("rawtypes")
   private final IListProperty CONTRIBUTIONS = EMFProperties
       .list(Package.eINSTANCE.getCell_Contributions());
 
@@ -130,7 +136,11 @@ public class CellEditor extends AbstractEditor {
         new Type(
             getString("_UI_HandledCell_type"),
             ImageDescriptor.createFromFile(VListEditor.class, "/icons/full/obj16/HandledCell.gif"),
-            eINSTANCE.getHandledCell()));
+            eINSTANCE.getHandledCell()),
+        new Type(
+            getString("_UI_EditableCell_type"),
+            ImageDescriptor.createFromFile(VListEditor.class, "/icons/full/obj16/EditableCell.gif"),
+            eINSTANCE.getEditableCell()));
 
     addExpression = new Action(
         Messages.MenuItemEditor_AddCoreExpression,
@@ -202,11 +212,31 @@ public class CellEditor extends AbstractEditor {
     createLabelControls(parent, context, master, textProp);
     createContributionControl(parent, context);
     createVisibleWhenControl(parent, context);
-    createEditableControl(parent, context);
+    createFlagControls(parent, context);
     createPopupMenuControl(parent);
     createChildrenControl(parent);
     createMediaTypesControl(parent);
     createPersistedStateControl(parent);
+  }
+
+  protected void createFlagControls(Composite parent, EMFDataBindingContext context) {
+    ControlFactory
+        .createCheckBox(
+            parent,
+            getString("_UI_Cell_modifiable_feature"),
+            getMaster(),
+            context,
+            WidgetProperties.selection(),
+            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getCell_Modifiable()));
+
+    ControlFactory
+        .createCheckBox(
+            parent,
+            getString("_UI_Cell_optional_feature"),
+            getMaster(),
+            context,
+            WidgetProperties.selection(),
+            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getCell_Optional()));
   }
 
   @SuppressWarnings("unchecked")
@@ -256,17 +286,6 @@ public class CellEditor extends AbstractEditor {
   protected void createChildrenControl(Composite parent) {
     childrenComponent.createForm(parent);
     childrenComponent.getViewer().setInput(CHILDREN.observeDetail(getMaster()));
-  }
-
-  protected void createEditableControl(Composite parent, EMFDataBindingContext context) {
-    ControlFactory
-        .createCheckBox(
-            parent,
-            getString("_UI_Cell_editable_feature"),
-            getMaster(),
-            context,
-            WidgetProperties.selection(),
-            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getCell_Editable()));
   }
 
   protected void createPopupMenuControl(Composite parent) {
@@ -450,6 +469,21 @@ public class CellEditor extends AbstractEditor {
               protected boolean accepted(Object o) {
                 return true;
               }
+            });
+
+    list
+        .add(
+            new VirtualEntry<Object>(
+                VIRTUAL_HANDLER,
+                HANDLER_CONTAINER__HANDLERS,
+                element,
+                Messages.PartEditor_Handlers) {
+
+              @Override
+              protected boolean accepted(Object o) {
+                return true;
+              }
+
             });
 
     list.addAll(CHILDREN.getList(element));

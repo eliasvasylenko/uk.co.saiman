@@ -1,0 +1,4 @@
+Bundle-Name: SAI :: Icons
+
+Export-Package:\
+	uk.co.saiman.icons

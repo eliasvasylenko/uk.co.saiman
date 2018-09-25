@@ -33,7 +33,6 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
 import uk.co.saiman.instrument.raster.RasterDevice;
-import uk.co.saiman.properties.PropertyLoader;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most

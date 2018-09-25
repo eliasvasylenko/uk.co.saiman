@@ -29,18 +29,24 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.EnumSet.allOf;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 import static javafx.css.PseudoClass.getPseudoClass;
+import static uk.co.saiman.collection.StreamUtilities.streamNullable;
 import static uk.co.saiman.experiment.WorkspaceEventState.COMPLETED;
+
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
@@ -58,6 +64,7 @@ import uk.co.saiman.msapex.editor.EditorService;
  */
 public class ExperimentNodeCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
+  public static final String SUPPLEMENTAL_TEXT = ID + ".supplemental";
 
   @Inject
   private Workspace workspace;
@@ -70,13 +77,16 @@ public class ExperimentNodeCell {
   private EditorService editorService;
 
   @Inject
+  private IEclipseContext context;
+
+  @Inject
   private ExperimentNode<?, ?> experiment;
 
   private Label supplementalText = new Label();
   private Label lifecycleIndicator = new Label();
 
   @Execute
-  public void execute(ExperimentNode<?, ?> experiment) {
+  public void execute() {
     editorService.getApplicableEditors(experiment).findFirst().map(Editor::openPart).isPresent();
   }
 
@@ -86,7 +96,11 @@ public class ExperimentNodeCell {
      * configure label
      */
     cell.setLabel(experiment.getId());
+    cell
+        .setIconURI(
+            "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/node.png");
     node.getChildren().add(supplementalText);
+    context.set(SUPPLEMENTAL_TEXT, supplementalText);
 
     /*
      * add spacer
@@ -98,20 +112,27 @@ public class ExperimentNodeCell {
     /*
      * label to show lifecycle state icon
      */
-
     node.getChildren().add(lifecycleIndicator);
 
     /*
      * Observe lifecycle
      */
-
     experiment
         .lifecycleState()
         .weakReference(this)
-        .observe(m -> m.owner().updateStyle(m.message()));
+        .observe(m -> m.owner().updateLifecycle(m.message()));
+
+    /*
+     * Inject configuration
+     */
+    StreamUtilities
+        .<Class<?>>flatMapRecursive(
+            experiment.getState().getClass(),
+            t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())))
+        .forEach(type -> context.set(type.getName(), experiment.getState()));
   }
 
-  public void updateStyle(ExperimentLifecycleState state) {
+  public void updateLifecycle(ExperimentLifecycleState state) {
     allOf(ExperimentLifecycleState.class)
         .stream()
         .forEach(

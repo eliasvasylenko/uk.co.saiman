@@ -128,12 +128,13 @@ public class CellItemProvider
       addLocalizedAccessibilityPhrasePropertyDescriptor(object);
       addSelectedElementPropertyDescriptor(object);
       addMediaTypesPropertyDescriptor(object);
-      addEditablePropertyDescriptor(object);
       addContributionsPropertyDescriptor(object);
       addPopupMenuPropertyDescriptor(object);
       addTransferFormatsPropertyDescriptor(object);
       addContextValuePropertyDescriptor(object);
+      addExpandedPropertyDescriptor(object);
       addOptionalPropertyDescriptor(object);
+      addModifiablePropertyDescriptor(object);
     }
     return itemPropertyDescriptors;
   }
@@ -627,28 +628,6 @@ public class CellItemProvider
   }
 
   /**
-   * This adds a property descriptor for the Editable feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addEditablePropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Cell_editable_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_editable_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__EDITABLE,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
    * This adds a property descriptor for the Contributions feature.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -737,6 +716,28 @@ public class CellItemProvider
   }
 
   /**
+   * This adds a property descriptor for the Expanded feature.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  protected void addExpandedPropertyDescriptor(Object object) {
+    itemPropertyDescriptors.add
+      (createItemPropertyDescriptor
+        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+         getResourceLocator(),
+         getString("_UI_Cell_expanded_feature"),
+         getString("_UI_PropertyDescriptor_description", "_UI_Cell_expanded_feature", "_UI_Cell_type"),
+         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__EXPANDED,
+         true,
+         false,
+         false,
+         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
+         null,
+         null));
+  }
+
+  /**
    * This adds a property descriptor for the Optional feature.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -750,6 +751,28 @@ public class CellItemProvider
          getString("_UI_Cell_optional_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_Cell_optional_feature", "_UI_Cell_type"),
          uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__OPTIONAL,
+         true,
+         false,
+         false,
+         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
+         null,
+         null));
+  }
+
+  /**
+   * This adds a property descriptor for the Modifiable feature.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  protected void addModifiablePropertyDescriptor(Object object) {
+    itemPropertyDescriptors.add
+      (createItemPropertyDescriptor
+        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+         getResourceLocator(),
+         getString("_UI_Cell_modifiable_feature"),
+         getString("_UI_PropertyDescriptor_description", "_UI_Cell_modifiable_feature", "_UI_Cell_type"),
+         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__MODIFIABLE,
          true,
          false,
          false,
@@ -853,10 +876,11 @@ public class CellItemProvider
       case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EDITABLE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
@@ -915,6 +939,11 @@ public class CellItemProvider
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
          Factory.eINSTANCE.createHandledCell()));
+
+    newChildDescriptors.add
+      (createChildParameter
+        (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
+         Factory.eINSTANCE.createEditableCell()));
 
     newChildDescriptors.add
       (createChildParameter

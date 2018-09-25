@@ -65,6 +65,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.HandledCell;
+import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 import uk.co.saiman.function.ThrowingConsumer;
@@ -134,6 +135,13 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       } else {
         this.label.setGraphic(this.graphicsLoader.getGraphicsNode(new EMFUri(URI.createURI(uri))));
       }
+    }
+
+    @Inject
+    public void configureContextValue(
+        @Named(SaiUiEvents.Cell.OPTIONAL) boolean optional,
+        @Named(SaiUiEvents.Cell.MODIFIABLE) boolean modifiable) {
+      BaseCellRenderer.prepareContextValue(getDomElement());
     }
 
     @Override

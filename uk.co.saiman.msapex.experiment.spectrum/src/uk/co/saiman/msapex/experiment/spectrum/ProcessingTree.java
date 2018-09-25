@@ -35,18 +35,17 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.Processor;
+import uk.co.saiman.experiment.processing.ProcessorConfiguration;
 
 public class ProcessingTree {
   public static final String ID = "uk.co.saiman.experiment.processing.tree";
 
   @Inject
   public void prepare(IEclipseContext context, Processing processing, ChildrenService children) {
-
     children
         .setItems(
             ID,
-            Processor.class,
+            ProcessorConfiguration.class,
             processing.processors().collect(toList()),
             r -> context.set(Processing.class, new Processing(r)));
   }

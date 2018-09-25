@@ -1,6 +1,7 @@
 Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 
 -include:\
+	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
 	${build}/include/eclipse.fx.bnd,\
 	${build}/include/fugue.icons.bnd
@@ -30,8 +31,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 \
 	javax.measure.unit-api
 
-Export-Package: \
-	uk.co.saiman.msapex.experiment.processing.treecontributions
+Export-Package: uk.co.saiman.msapex.experiment.processing
 
 -includeresource:\
-	{css=css}
+	{always.e4xmi}

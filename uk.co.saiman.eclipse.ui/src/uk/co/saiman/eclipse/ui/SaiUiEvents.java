@@ -37,6 +37,12 @@ public class SaiUiEvents {
 
     public static final String TOPIC_POPUP_MENU = "org/eclipse/e4/ui/model/ui/Cell/popupMenu/*";
 
-    public static final String POPUP_MENU = "popupMenu";
+    public static final String TOPIC_EDITING = "org/eclipse/e4/ui/model/ui/Cell/editing/*";
+
+    public static final String TOPIC_OPTIONAL = "org/eclipse/e4/ui/model/ui/Cell/optional/*";
+    public static final String OPTIONAL = "optional";
+
+    public static final String TOPIC_MODIFIABLE = "org/eclipse/e4/ui/model/ui/Cell/modifiable/*";
+    public static final String MODIFIABLE = "modifiable";
   }
 }

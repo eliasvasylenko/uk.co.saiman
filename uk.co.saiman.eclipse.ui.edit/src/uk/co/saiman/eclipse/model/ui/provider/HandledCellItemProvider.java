@@ -38,9 +38,6 @@ import org.eclipse.e4.ui.model.application.commands.MCommandsFactory;
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
-
-import org.eclipse.e4.ui.model.application.ui.menu.impl.MenuPackageImpl;
-
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
 
@@ -81,79 +78,10 @@ public class HandledCellItemProvider extends CellItemProvider {
     if (itemPropertyDescriptors == null) {
       super.getPropertyDescriptors(object);
 
-      addEnabledPropertyDescriptor(object);
-      addSelectedPropertyDescriptor(object);
-      addTypePropertyDescriptor(object);
       addCommandPropertyDescriptor(object);
       addWbCommandPropertyDescriptor(object);
     }
     return itemPropertyDescriptors;
-  }
-
-  /**
-   * This adds a property descriptor for the Enabled feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addEnabledPropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Item_enabled_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Item_enabled_feature", "_UI_Item_type"),
-         MenuPackageImpl.Literals.ITEM__ENABLED,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
-   * This adds a property descriptor for the Selected feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addSelectedPropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Item_selected_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Item_selected_feature", "_UI_Item_type"),
-         MenuPackageImpl.Literals.ITEM__SELECTED,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
-   * This adds a property descriptor for the Type feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addTypePropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Item_type_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Item_type_feature", "_UI_Item_type"),
-         MenuPackageImpl.Literals.ITEM__TYPE,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
-         null,
-         null));
   }
 
   /**
@@ -167,9 +95,9 @@ public class HandledCellItemProvider extends CellItemProvider {
       (createItemPropertyDescriptor
         (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
          getResourceLocator(),
-         getString("_UI_HandledItem_command_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_HandledItem_command_feature", "_UI_HandledItem_type"),
-         MenuPackageImpl.Literals.HANDLED_ITEM__COMMAND,
+         getString("_UI_HandledCell_command_feature"),
+         getString("_UI_PropertyDescriptor_description", "_UI_HandledCell_command_feature", "_UI_HandledCell_type"),
+         uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__COMMAND,
          true,
          false,
          true,
@@ -189,9 +117,9 @@ public class HandledCellItemProvider extends CellItemProvider {
       (createItemPropertyDescriptor
         (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
          getResourceLocator(),
-         getString("_UI_HandledItem_wbCommand_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_HandledItem_wbCommand_feature", "_UI_HandledItem_type"),
-         MenuPackageImpl.Literals.HANDLED_ITEM__WB_COMMAND,
+         getString("_UI_HandledCell_wbCommand_feature"),
+         getString("_UI_PropertyDescriptor_description", "_UI_HandledCell_wbCommand_feature", "_UI_HandledCell_type"),
+         uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__WB_COMMAND,
          true,
          false,
          false,
@@ -212,7 +140,7 @@ public class HandledCellItemProvider extends CellItemProvider {
   public Collection<? extends EStructuralFeature> getChildrenFeatures(Object object) {
     if (childrenFeatures == null) {
       super.getChildrenFeatures(object);
-      childrenFeatures.add(MenuPackageImpl.Literals.HANDLED_ITEM__PARAMETERS);
+      childrenFeatures.add(uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__PARAMETERS);
     }
     return childrenFeatures;
   }
@@ -268,9 +196,6 @@ public class HandledCellItemProvider extends CellItemProvider {
     updateChildren(notification);
 
     switch (notification.getFeatureID(HandledCell.class)) {
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__ENABLED:
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__SELECTED:
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__TYPE:
       case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__WB_COMMAND:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
@@ -294,7 +219,7 @@ public class HandledCellItemProvider extends CellItemProvider {
 
     newChildDescriptors.add
       (createChildParameter
-        (MenuPackageImpl.Literals.HANDLED_ITEM__PARAMETERS,
+        (uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__PARAMETERS,
          MCommandsFactory.INSTANCE.createParameter()));
   }
 
