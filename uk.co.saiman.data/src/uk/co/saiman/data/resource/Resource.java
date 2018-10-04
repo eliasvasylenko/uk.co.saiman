@@ -32,6 +32,15 @@ import java.nio.channels.ByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+/**
+ * A resource should typically represent a single logical resource location,
+ * such as a file path or a URL, which should be fully described by the
+ * resources {@link #getName() name} and {@link #getLocation() location}. It
+ * should be immutable in this representation.
+ * 
+ * @author Elias N Vasylenko
+ *
+ */
 public interface Resource {
   Location getLocation();
 
@@ -41,11 +50,31 @@ public interface Resource {
     return getName().endsWith("." + extension);
   }
 
+  Resource transfer(Resource destination) throws IOException;
+
+  default Resource transfer(Location destination) throws IOException {
+    return transfer(destination.getResource(getName()));
+  }
+
   ReadableByteChannel read() throws IOException;
 
   WritableByteChannel write() throws IOException;
 
   ByteChannel open() throws IOException;
 
+  public boolean exists();
+
+  /**
+   * Create the resource if it does not exist.
+   * 
+   * @throws IOException
+   */
+  void create() throws IOException;
+
+  /**
+   * Delete the resource if exists.
+   * 
+   * @throws IOException
+   */
   void delete() throws IOException;
 }

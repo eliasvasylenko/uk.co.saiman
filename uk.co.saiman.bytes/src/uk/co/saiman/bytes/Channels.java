@@ -35,7 +35,7 @@ import java.nio.channels.WritableByteChannel;
 public class Channels {
   private static final int BUFFER_SIZE = 2048;
 
-  public void pipe(ReadableByteChannel from, WritableByteChannel to) throws IOException {
+  public static void pipe(ReadableByteChannel from, WritableByteChannel to) throws IOException {
     final ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
     while (from.read(buffer) != -1) {
       buffer.flip();

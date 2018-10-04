@@ -395,22 +395,13 @@ public interface Package extends EPackage {
   int CELL__MEDIA_TYPES = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 24;
 
   /**
-   * The feature id for the '<em><b>Contributions</b></em>' containment reference list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL__CONTRIBUTIONS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 25;
-
-  /**
    * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int CELL__POPUP_MENU = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 26;
+  int CELL__POPUP_MENU = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 25;
 
   /**
    * The feature id for the '<em><b>Transfer Formats</b></em>' attribute list.
@@ -419,7 +410,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__TRANSFER_FORMATS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 27;
+  int CELL__TRANSFER_FORMATS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 26;
 
   /**
    * The feature id for the '<em><b>Context Value</b></em>' attribute.
@@ -428,7 +419,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__CONTEXT_VALUE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 28;
+  int CELL__CONTEXT_VALUE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 27;
 
   /**
    * The feature id for the '<em><b>Expanded</b></em>' attribute.
@@ -437,25 +428,16 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__EXPANDED = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 29;
+  int CELL__EXPANDED = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 28;
 
   /**
-   * The feature id for the '<em><b>Optional</b></em>' attribute.
+   * The feature id for the '<em><b>Nullable</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int CELL__OPTIONAL = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 30;
-
-  /**
-   * The feature id for the '<em><b>Modifiable</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL__MODIFIABLE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 31;
+  int CELL__NULLABLE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 29;
 
   /**
    * The number of structural features of the '<em>Cell</em>' class.
@@ -464,7 +446,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL_FEATURE_COUNT = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 32;
+  int CELL_FEATURE_COUNT = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 30;
 
   /**
    * The operation id for the '<em>Update Localization</em>' operation.
@@ -773,143 +755,6 @@ public interface Package extends EPackage {
   int TREE_OPERATION_COUNT = UiPackageImpl.CONTEXT_OPERATION_COUNT + 1;
 
   /**
-   * The meta object id for the '{@link uk.co.saiman.eclipse.model.ui.impl.CellContributionImpl <em>Cell Contribution</em>}' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see uk.co.saiman.eclipse.model.ui.impl.CellContributionImpl
-   * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getCellContribution()
-   * @generated
-   */
-  int CELL_CONTRIBUTION = 2;
-
-  /**
-   * The feature id for the '<em><b>Context</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__CONTEXT = UiPackageImpl.CONTEXT__CONTEXT;
-
-  /**
-   * The feature id for the '<em><b>Variables</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__VARIABLES = UiPackageImpl.CONTEXT__VARIABLES;
-
-  /**
-   * The feature id for the '<em><b>Properties</b></em>' map.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__PROPERTIES = UiPackageImpl.CONTEXT__PROPERTIES;
-
-  /**
-   * The feature id for the '<em><b>Element Id</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__ELEMENT_ID = UiPackageImpl.CONTEXT_FEATURE_COUNT + 0;
-
-  /**
-   * The feature id for the '<em><b>Persisted State</b></em>' map.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__PERSISTED_STATE = UiPackageImpl.CONTEXT_FEATURE_COUNT + 1;
-
-  /**
-   * The feature id for the '<em><b>Tags</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__TAGS = UiPackageImpl.CONTEXT_FEATURE_COUNT + 2;
-
-  /**
-   * The feature id for the '<em><b>Contributor URI</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__CONTRIBUTOR_URI = UiPackageImpl.CONTEXT_FEATURE_COUNT + 3;
-
-  /**
-   * The feature id for the '<em><b>Transient Data</b></em>' map.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__TRANSIENT_DATA = UiPackageImpl.CONTEXT_FEATURE_COUNT + 4;
-
-  /**
-   * The feature id for the '<em><b>Contribution URI</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__CONTRIBUTION_URI = UiPackageImpl.CONTEXT_FEATURE_COUNT + 5;
-
-  /**
-   * The feature id for the '<em><b>Object</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @since 1.0
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__OBJECT = UiPackageImpl.CONTEXT_FEATURE_COUNT + 6;
-
-  /**
-   * The feature id for the '<em><b>Parent</b></em>' container reference.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION__PARENT = UiPackageImpl.CONTEXT_FEATURE_COUNT + 7;
-
-  /**
-   * The number of structural features of the '<em>Cell Contribution</em>' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION_FEATURE_COUNT = UiPackageImpl.CONTEXT_FEATURE_COUNT + 8;
-
-  /**
-   * The number of operations of the '<em>Cell Contribution</em>' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL_CONTRIBUTION_OPERATION_COUNT = UiPackageImpl.CONTEXT_OPERATION_COUNT + 0;
-
-  /**
    * The meta object id for the '{@link uk.co.saiman.eclipse.model.ui.impl.HandledCellImpl <em>Handled Cell</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -917,7 +762,7 @@ public interface Package extends EPackage {
    * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getHandledCell()
    * @generated
    */
-  int HANDLED_CELL = 3;
+  int HANDLED_CELL = 2;
 
   /**
    * The feature id for the '<em><b>Label</b></em>' attribute.
@@ -1219,15 +1064,6 @@ public interface Package extends EPackage {
   int HANDLED_CELL__MEDIA_TYPES = CELL__MEDIA_TYPES;
 
   /**
-   * The feature id for the '<em><b>Contributions</b></em>' containment reference list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int HANDLED_CELL__CONTRIBUTIONS = CELL__CONTRIBUTIONS;
-
-  /**
    * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1264,22 +1100,13 @@ public interface Package extends EPackage {
   int HANDLED_CELL__EXPANDED = CELL__EXPANDED;
 
   /**
-   * The feature id for the '<em><b>Optional</b></em>' attribute.
+   * The feature id for the '<em><b>Nullable</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int HANDLED_CELL__OPTIONAL = CELL__OPTIONAL;
-
-  /**
-   * The feature id for the '<em><b>Modifiable</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int HANDLED_CELL__MODIFIABLE = CELL__MODIFIABLE;
+  int HANDLED_CELL__NULLABLE = CELL__NULLABLE;
 
   /**
    * The feature id for the '<em><b>Command</b></em>' reference.
@@ -1344,7 +1171,7 @@ public interface Package extends EPackage {
    * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getEditableCell()
    * @generated
    */
-  int EDITABLE_CELL = 4;
+  int EDITABLE_CELL = 3;
 
   /**
    * The feature id for the '<em><b>Label</b></em>' attribute.
@@ -1646,15 +1473,6 @@ public interface Package extends EPackage {
   int EDITABLE_CELL__MEDIA_TYPES = CELL__MEDIA_TYPES;
 
   /**
-   * The feature id for the '<em><b>Contributions</b></em>' containment reference list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int EDITABLE_CELL__CONTRIBUTIONS = CELL__CONTRIBUTIONS;
-
-  /**
    * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1691,22 +1509,13 @@ public interface Package extends EPackage {
   int EDITABLE_CELL__EXPANDED = CELL__EXPANDED;
 
   /**
-   * The feature id for the '<em><b>Optional</b></em>' attribute.
+   * The feature id for the '<em><b>Nullable</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int EDITABLE_CELL__OPTIONAL = CELL__OPTIONAL;
-
-  /**
-   * The feature id for the '<em><b>Modifiable</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int EDITABLE_CELL__MODIFIABLE = CELL__MODIFIABLE;
+  int EDITABLE_CELL__NULLABLE = CELL__NULLABLE;
 
   /**
    * The feature id for the '<em><b>Editing</b></em>' attribute.
@@ -1753,7 +1562,7 @@ public interface Package extends EPackage {
    * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getMediaType()
    * @generated
    */
-  int MEDIA_TYPE = 5;
+  int MEDIA_TYPE = 4;
 
 
   /**
@@ -1764,7 +1573,7 @@ public interface Package extends EPackage {
    * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getTransferFormat()
    * @generated
    */
-  int TRANSFER_FORMAT = 6;
+  int TRANSFER_FORMAT = 5;
 
 
   /**
@@ -1787,17 +1596,6 @@ public interface Package extends EPackage {
    * @generated
    */
   EAttribute getCell_MediaTypes();
-
-  /**
-   * Returns the meta object for the containment reference list '{@link uk.co.saiman.eclipse.model.ui.Cell#getContributions <em>Contributions</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the containment reference list '<em>Contributions</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.Cell#getContributions()
-   * @see #getCell()
-   * @generated
-   */
-  EReference getCell_Contributions();
 
   /**
    * Returns the meta object for the containment reference '{@link uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu <em>Popup Menu</em>}'.
@@ -1844,26 +1642,15 @@ public interface Package extends EPackage {
   EAttribute getCell_Expanded();
 
   /**
-   * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#isOptional <em>Optional</em>}'.
+   * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#isNullable <em>Nullable</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Optional</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.Cell#isOptional()
+   * @return the meta object for the attribute '<em>Nullable</em>'.
+   * @see uk.co.saiman.eclipse.model.ui.Cell#isNullable()
    * @see #getCell()
    * @generated
    */
-  EAttribute getCell_Optional();
-
-  /**
-   * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#isModifiable <em>Modifiable</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Modifiable</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.Cell#isModifiable()
-   * @see #getCell()
-   * @generated
-   */
-  EAttribute getCell_Modifiable();
+  EAttribute getCell_Nullable();
 
   /**
    * Returns the meta object for class '{@link uk.co.saiman.eclipse.model.ui.Tree <em>Tree</em>}'.
@@ -1885,27 +1672,6 @@ public interface Package extends EPackage {
    * @generated
    */
   EAttribute getTree_Editable();
-
-  /**
-   * Returns the meta object for class '{@link uk.co.saiman.eclipse.model.ui.CellContribution <em>Cell Contribution</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for class '<em>Cell Contribution</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.CellContribution
-   * @generated
-   */
-  EClass getCellContribution();
-
-  /**
-   * Returns the meta object for the container reference '{@link uk.co.saiman.eclipse.model.ui.CellContribution#getParent <em>Parent</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the container reference '<em>Parent</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.CellContribution#getParent()
-   * @see #getCellContribution()
-   * @generated
-   */
-  EReference getCellContribution_Parent();
 
   /**
    * Returns the meta object for class '{@link uk.co.saiman.eclipse.model.ui.HandledCell <em>Handled Cell</em>}'.
@@ -2043,14 +1809,6 @@ public interface Package extends EPackage {
     EAttribute CELL__MEDIA_TYPES = eINSTANCE.getCell_MediaTypes();
 
     /**
-     * The meta object literal for the '<em><b>Contributions</b></em>' containment reference list feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EReference CELL__CONTRIBUTIONS = eINSTANCE.getCell_Contributions();
-
-    /**
      * The meta object literal for the '<em><b>Popup Menu</b></em>' containment reference feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -2083,20 +1841,12 @@ public interface Package extends EPackage {
     EAttribute CELL__EXPANDED = eINSTANCE.getCell_Expanded();
 
     /**
-     * The meta object literal for the '<em><b>Optional</b></em>' attribute feature.
+     * The meta object literal for the '<em><b>Nullable</b></em>' attribute feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute CELL__OPTIONAL = eINSTANCE.getCell_Optional();
-
-    /**
-     * The meta object literal for the '<em><b>Modifiable</b></em>' attribute feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EAttribute CELL__MODIFIABLE = eINSTANCE.getCell_Modifiable();
+    EAttribute CELL__NULLABLE = eINSTANCE.getCell_Nullable();
 
     /**
      * The meta object literal for the '{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl <em>Tree</em>}' class.
@@ -2115,24 +1865,6 @@ public interface Package extends EPackage {
      * @generated
      */
     EAttribute TREE__EDITABLE = eINSTANCE.getTree_Editable();
-
-    /**
-     * The meta object literal for the '{@link uk.co.saiman.eclipse.model.ui.impl.CellContributionImpl <em>Cell Contribution</em>}' class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see uk.co.saiman.eclipse.model.ui.impl.CellContributionImpl
-     * @see uk.co.saiman.eclipse.model.ui.impl.PackageImpl#getCellContribution()
-     * @generated
-     */
-    EClass CELL_CONTRIBUTION = eINSTANCE.getCellContribution();
-
-    /**
-     * The meta object literal for the '<em><b>Parent</b></em>' container reference feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EReference CELL_CONTRIBUTION__PARENT = eINSTANCE.getCellContribution_Parent();
 
     /**
      * The meta object literal for the '{@link uk.co.saiman.eclipse.model.ui.impl.HandledCellImpl <em>Handled Cell</em>}' class.

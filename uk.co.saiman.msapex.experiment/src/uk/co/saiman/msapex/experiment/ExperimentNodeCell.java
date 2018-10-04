@@ -32,16 +32,20 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static javafx.css.PseudoClass.getPseudoClass;
 import static uk.co.saiman.collection.StreamUtilities.streamNullable;
-import static uk.co.saiman.experiment.WorkspaceEventState.COMPLETED;
 
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 
+import javafx.css.PseudoClass;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -53,7 +57,11 @@ import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceEvent.AddExperimentEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.ExperimentLifecycleEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.MoveExperimentEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.RemoveExperimentEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.RenameExperimentEvent;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorService;
 
@@ -65,9 +73,8 @@ import uk.co.saiman.msapex.editor.EditorService;
 public class ExperimentNodeCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
   public static final String SUPPLEMENTAL_TEXT = ID + ".supplemental";
-
-  @Inject
-  private Workspace workspace;
+  public static final PseudoClass SUPPLEMENTAL_PSEUDO_CLASS = getPseudoClass(
+      SUPPLEMENTAL_TEXT.replace('.', '-'));
 
   @Inject
   @Localize
@@ -85,21 +92,30 @@ public class ExperimentNodeCell {
   private Label supplementalText = new Label();
   private Label lifecycleIndicator = new Label();
 
+  @Inject
+  private Cell cell;
+
+  @Inject
+  private ChildrenService children;
+
+  @CanExecute
+  public boolean canExecute() {
+    return editorService.getApplicableEditors(experiment).findFirst().isPresent();
+  }
+
   @Execute
   public void execute() {
-    editorService.getApplicableEditors(experiment).findFirst().map(Editor::openPart).isPresent();
+    editorService.getApplicableEditors(experiment).findFirst().ifPresent(Editor::openPart);
   }
 
   @PostConstruct
-  public void prepare(HBox node, Cell cell) {
+  public void prepare(HBox node) {
     /*
      * configure label
      */
     cell.setLabel(experiment.getId());
-    cell
-        .setIconURI(
-            "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/node.png");
     node.getChildren().add(supplementalText);
+    supplementalText.pseudoClassStateChanged(SUPPLEMENTAL_PSEUDO_CLASS, true);
     context.set(SUPPLEMENTAL_TEXT, supplementalText);
 
     /*
@@ -115,50 +131,84 @@ public class ExperimentNodeCell {
     node.getChildren().add(lifecycleIndicator);
 
     /*
-     * Observe lifecycle
-     */
-    experiment
-        .lifecycleState()
-        .weakReference(this)
-        .observe(m -> m.owner().updateLifecycle(m.message()));
-
-    /*
      * Inject configuration
      */
+    IContextFunction configurationFunction = (c, k) -> c
+        .get(IAdapterManager.class)
+        .getAdapter(c.get(ExperimentNode.class), k);
     StreamUtilities
         .<Class<?>>flatMapRecursive(
             experiment.getState().getClass(),
             t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())))
-        .forEach(type -> context.set(type.getName(), experiment.getState()));
+        .forEach(type -> context.set(type.getName(), configurationFunction));
+
+    /*
+     * Inject events
+     */
+    context.set(ExperimentLifecycleState.class, experiment.getLifecycleState());
+
+    /*
+     * Children
+     */
+    updateChildren();
   }
 
+  @Inject
+  @Optional
+  public void update(RenameExperimentEvent event) {
+    if (event.node() == experiment) {
+      cell.setLabel(event.id());
+    }
+  }
+
+  @Inject
+  @Optional
+  public void update(ExperimentLifecycleEvent event) {
+    if (event.node() == experiment) {
+      context.set(ExperimentLifecycleState.class, event.lifecycleState());
+    }
+  }
+
+  @Inject
+  @Optional
+  public void update(AddExperimentEvent event) {
+    if (event.parent().filter(experiment::equals).isPresent()) {
+      updateChildren();
+    }
+  }
+
+  @Inject
+  @Optional
+  public void update(RemoveExperimentEvent event) {
+    if (event.previousParent().filter(experiment::equals).isPresent()) {
+      updateChildren();
+    }
+  }
+
+  @Inject
+  @Optional
+  public void update(MoveExperimentEvent event) {
+    if (event.previousParent() == experiment || event.parent() == experiment) {
+      updateChildren();
+    }
+  }
+
+  private void updateChildren() {
+    children
+        .setItems(
+            ExperimentNodeCell.ID,
+            ExperimentNode.class,
+            experiment.getChildren().collect(toList()));
+  }
+
+  @Inject
+  @Optional
   public void updateLifecycle(ExperimentLifecycleState state) {
     allOf(ExperimentLifecycleState.class)
         .stream()
         .forEach(
             s -> lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(s.toString()), false));
     lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
-    supplementalText
-        .setText(experiment.getType().getName() + " [" + text.lifecycleState(state) + "]");
-  }
-
-  @Inject
-  public void children(ChildrenService children) {
-    workspace
-        .events(COMPLETED)
-        .filter(e -> e.getNode().getParent().filter(experiment::equals).isPresent())
-        .take(1)
-        .observe(m -> {
-          children.invalidate();
-        });
-
-    /*
-     * add children
-     */
-    children
-        .setItems(
-            ExperimentNodeCell.ID,
-            ExperimentNode.class,
-            experiment.getChildren().collect(toList()));
+    supplementalText.setText("[" + text.lifecycleState(state) + "]");
   }
 }

@@ -128,15 +128,6 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
-      case Package.CELL_CONTRIBUTION: {
-        CellContribution cellContribution = (CellContribution)theEObject;
-        T1 result = caseCellContribution(cellContribution);
-        if (result == null) result = caseContext(cellContribution);
-        if (result == null) result = caseContribution(cellContribution);
-        if (result == null) result = caseApplicationElement(cellContribution);
-        if (result == null) result = defaultCase(theEObject);
-        return result;
-      }
       case Package.HANDLED_CELL: {
         HandledCell handledCell = (HandledCell)theEObject;
         T1 result = caseHandledCell(handledCell);
@@ -198,21 +189,6 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * @generated
    */
   public T1 caseTree(Tree object) {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>Cell Contribution</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Cell Contribution</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @generated
-   */
-  public T1 caseCellContribution(CellContribution object) {
     return null;
   }
 

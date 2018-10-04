@@ -28,9 +28,6 @@
 package uk.co.saiman.experiment;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 
 import uk.co.saiman.data.resource.Location;
 
@@ -63,34 +60,20 @@ public interface ResultStore {
    * the previous location may be destroyed.
    * 
    * @param node
-   * @param previousLocation
+   * @param previousStorage
    * @throws IOException
    *           If the data could not be moved. Wherever possible exceptional
    *           termination should leave the result data intact at the original
    *           location.
    */
-  default Storage relocateStorage(ExperimentNode<?, ?> node, Storage previousLocation)
+  default Storage relocateStorage(ExperimentNode<?, ?> node, Storage previousStorage)
       throws IOException {
-    final int BUFFER_SIZE = 2048;
-
-    Storage location = locateStorage(node);
+    Storage storage = locateStorage(node);
 
     try {
-      previousLocation.location().getResources().forEach(resource -> {
-        try (ReadableByteChannel from = resource.read();
-            WritableByteChannel to = location.location().getResource(resource.getName()).write()) {
-
-          final ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
-
-          while (from.read(buffer) != -1) {
-            buffer.flip();
-            to.write(buffer);
-            buffer.compact();
-          }
-          buffer.flip();
-          while (buffer.hasRemaining()) {
-            to.write(buffer);
-          }
+      previousStorage.location().getResources().forEach(resource -> {
+        try {
+          resource.transfer(storage.location());
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -99,8 +82,8 @@ public interface ResultStore {
       throw (IOException) e.getCause();
     }
 
-    previousLocation.dispose();
-    return location;
+    previousStorage.dispose();
+    return storage;
   }
 
   /**

@@ -27,10 +27,11 @@
  */
 package uk.co.saiman.data.resource;
 
-import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
+import static uk.co.saiman.bytes.Channels.pipe;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
@@ -63,6 +64,21 @@ public class PathResource implements Resource {
   }
 
   @Override
+  public Resource transfer(Resource destination) throws IOException {
+    if (destination instanceof PathResource) {
+      Path destinationPath = ((PathResource) destination).path;
+      if (!path.equals(destinationPath)) {
+        Files.move(path, destinationPath, ATOMIC_MOVE);
+      }
+    } else {
+      destination.create();
+      pipe(read(), destination.write());
+      delete();
+    }
+    return destination;
+  }
+
+  @Override
   public ReadableByteChannel read() throws IOException {
     return Files.newByteChannel(path, READ);
   }
@@ -70,12 +86,12 @@ public class PathResource implements Resource {
   @Override
   public WritableByteChannel write() throws IOException {
     Files.createDirectories(path.getParent());
-    return Files.newByteChannel(path, CREATE, WRITE, TRUNCATE_EXISTING);
+    return Files.newByteChannel(path, WRITE, TRUNCATE_EXISTING);
   }
 
   @Override
   public ByteChannel open() throws IOException {
-    return Files.newByteChannel(path, CREATE, READ, WRITE);
+    return Files.newByteChannel(path, READ, WRITE);
   }
 
   @Override
@@ -84,8 +100,20 @@ public class PathResource implements Resource {
   }
 
   @Override
+  public boolean exists() {
+    return Files.exists(path);
+  }
+
+  @Override
+  public void create() throws IOException {
+    if (!Files.exists(path)) {
+      Files.createDirectories(path.getParent());
+      Files.createFile(path);
+    }
+  }
+
+  @Override
   public void delete() throws IOException {
-    if (Files.exists(path))
-      Files.delete(path);
+    Files.deleteIfExists(path);
   }
 }

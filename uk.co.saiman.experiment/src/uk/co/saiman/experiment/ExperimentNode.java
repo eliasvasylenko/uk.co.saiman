@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.experiment.state.StateMap;
-import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
@@ -75,6 +75,8 @@ public interface ExperimentNode<S, T> {
    */
   S getState();
 
+  StateMap getStateMap();
+
   /**
    * @return the type of the experiment
    */
@@ -109,9 +111,7 @@ public interface ExperimentNode<S, T> {
   /**
    * @return the root part of the experiment tree this part occurs in
    */
-  default Experiment getExperiment() {
-    return (Experiment) findAncestor(getWorkspace().getExperimentRootType()).get();
-  }
+  Experiment getExperiment();
 
   /**
    * @return a list of all ancestors, nearest first, inclusive of the node itself
@@ -216,7 +216,7 @@ public interface ExperimentNode<S, T> {
   /**
    * @return the current processing lifecycle state of the experiment part
    */
-  ObservableValue<ExperimentLifecycleState> lifecycleState();
+  ExperimentLifecycleState getLifecycleState();
 
   default TypeToken<ExperimentNode<S, T>> getThisTypeToken() {
     return new TypeToken<ExperimentNode<S, T>>() {}
@@ -250,4 +250,19 @@ public interface ExperimentNode<S, T> {
    * delete any result data from disk.
    */
   void clearResult();
+
+  /**
+   * @return an observable over workspace events in the given state
+   */
+  default Observable<WorkspaceEvent> events(WorkspaceEventState state) {
+    return getWorkspace().events(state).filter(event -> event.node() == this);
+  }
+
+  /**
+   * @return an observable over workspace events in the
+   *         {@link WorkspaceEventState#COMPLETED completed} state
+   */
+  default Observable<WorkspaceEvent> events() {
+    return events(WorkspaceEventState.COMPLETED);
+  }
 }

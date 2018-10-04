@@ -40,11 +40,6 @@ public enum ExperimentLifecycleState {
   WAITING,
 
   /**
-   * Move stage into position, etc.
-   */
-  PREPARATION,
-
-  /**
    * Optimize laser, acquire from TDC, etc.
    */
   PROCESSING,

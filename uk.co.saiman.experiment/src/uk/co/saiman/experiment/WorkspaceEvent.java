@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.Optional;
+
+import uk.co.saiman.experiment.state.StateMap;
+
 /**
  * An {@link Workspace#events(WorkspaceEventState) event} in an experiment
  * workspace. Workspace events are posted after the associated change to the
@@ -35,11 +39,101 @@ package uk.co.saiman.experiment;
  * @author Elias N Vasylenko
  */
 public interface WorkspaceEvent {
-  ExperimentNode<?, ?> getNode();
+  ExperimentNode<?, ?> node();
 
-  WorkspaceEventKind getKind();
+  WorkspaceEventKind kind();
 
-  WorkspaceEventState getState();
+  WorkspaceEventState state();
 
   void cancel();
+
+  @SuppressWarnings("unchecked")
+  default <T extends WorkspaceEvent> Optional<T> as(Class<T> type) {
+    if (type.isInstance(this)) {
+      return Optional.of((T) this);
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  interface AddExperimentEvent extends WorkspaceEvent {
+    /**
+     * @return an optional containing the parent to add to, or an empty optional if
+     *         it's a root experiment
+     */
+    Optional<ExperimentNode<?, ?>> parent();
+
+    @Override
+    default WorkspaceEventKind kind() {
+      return WorkspaceEventKind.ADD;
+    }
+  }
+
+  interface RemoveExperimentEvent extends WorkspaceEvent {
+    /**
+     * @return an optional containing the parent to remove from, or an empty
+     *         optional if it's a root experiment
+     */
+    Optional<ExperimentNode<?, ?>> previousParent();
+
+    @Override
+    default WorkspaceEventKind kind() {
+      return WorkspaceEventKind.REMOVE;
+    }
+  }
+
+  interface MoveExperimentEvent extends WorkspaceEvent {
+    ExperimentNode<?, ?> parent();
+
+    ExperimentNode<?, ?> previousParent();
+
+    @Override
+    default WorkspaceEventKind kind() {
+      return WorkspaceEventKind.MOVE;
+    }
+  }
+
+  interface RenameExperimentEvent extends WorkspaceEvent {
+    String id();
+
+    String previousId();
+
+    @Override
+    default WorkspaceEventKind kind() {
+      return WorkspaceEventKind.RENAME;
+    }
+  }
+
+  interface ExperimentStateEvent extends WorkspaceEvent {
+    StateMap stateMap();
+
+    StateMap previousStateMap();
+
+    @Override
+    default WorkspaceEventKind kind() {
+      return WorkspaceEventKind.STATE;
+    }
+  }
+
+  interface ExperimentLifecycleEvent extends WorkspaceEvent {
+    ExperimentLifecycleState lifecycleState();
+
+    ExperimentLifecycleState previousLifecycleState();
+
+    @Override
+    default WorkspaceEventKind kind() {
+      return WorkspaceEventKind.LIFECYLE;
+    }
+  }
+
+  interface ExperimentTypeEvent extends WorkspaceEvent {
+    ExperimentType<?, ?> type();
+
+    ExperimentType<?, ?> previousType();
+
+    @Override
+    default WorkspaceEventKind kind() {
+      return WorkspaceEventKind.TYPE;
+    }
+  }
 }

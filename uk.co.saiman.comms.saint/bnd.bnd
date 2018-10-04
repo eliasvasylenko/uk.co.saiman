@@ -2,6 +2,7 @@ Bundle-Name: SAI :: Comms :: SAINT
 
 -buildpath:\
 	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.bytes.conversion;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 \

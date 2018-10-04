@@ -37,6 +37,7 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ResultStore;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.RemoveExperimentEventImpl;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log.Level;
 
@@ -56,13 +57,21 @@ public class ExperimentImpl extends ExperimentNodeImpl<ExperimentConfiguration, 
       String id,
       StateMap persistedState,
       WorkspaceImpl workspace) {
-    super(id, workspace.getExperimentRootType(), persistedState, workspace);
+    super(id, workspace.getExperimentRootType(), persistedState, workspace, CONFIGURATION);
     this.locationManager = locationManager;
-    getLifecycleState().set(CONFIGURATION);
   }
 
   public ResultStore getLocationManager() {
     return locationManager;
+  }
+
+  @Override
+  public void remove() {
+    getWorkspace().fireEvents(() -> {
+      setDisposed();
+      removeImpl();
+      return null;
+    }, new RemoveExperimentEventImpl(this, null));
   }
 
   @Override

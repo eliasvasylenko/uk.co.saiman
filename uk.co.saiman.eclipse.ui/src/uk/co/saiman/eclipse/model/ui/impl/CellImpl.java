@@ -78,7 +78,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.InternalEList;
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.CellContribution;
 import uk.co.saiman.eclipse.ui.TransferFormat;
 
 /**
@@ -119,13 +118,11 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getSelectedElement <em>Selected Element</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getHandlers <em>Handlers</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getMediaTypes <em>Media Types</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getContributions <em>Contributions</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getPopupMenu <em>Popup Menu</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getTransferFormats <em>Transfer Formats</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getContextValue <em>Context Value</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isExpanded <em>Expanded</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isOptional <em>Optional</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isModifiable <em>Modifiable</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isNullable <em>Nullable</em>}</li>
  * </ul>
  *
  * @generated
@@ -580,16 +577,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected EList<MediaType> mediaTypes;
 
   /**
-   * The cached value of the '{@link #getContributions() <em>Contributions</em>}' containment reference list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getContributions()
-   * @generated
-   * @ordered
-   */
-  protected EList<CellContribution> contributions;
-
-  /**
    * The cached value of the '{@link #getPopupMenu() <em>Popup Menu</em>}' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -650,44 +637,24 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected boolean expanded = EXPANDED_EDEFAULT;
 
   /**
-   * The default value of the '{@link #isOptional() <em>Optional</em>}' attribute.
+   * The default value of the '{@link #isNullable() <em>Nullable</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #isOptional()
+   * @see #isNullable()
    * @generated
    * @ordered
    */
-  protected static final boolean OPTIONAL_EDEFAULT = true;
+  protected static final boolean NULLABLE_EDEFAULT = true;
 
   /**
-   * The cached value of the '{@link #isOptional() <em>Optional</em>}' attribute.
+   * The cached value of the '{@link #isNullable() <em>Nullable</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #isOptional()
+   * @see #isNullable()
    * @generated
    * @ordered
    */
-  protected boolean optional = OPTIONAL_EDEFAULT;
-
-  /**
-   * The default value of the '{@link #isModifiable() <em>Modifiable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #isModifiable()
-   * @generated
-   * @ordered
-   */
-  protected static final boolean MODIFIABLE_EDEFAULT = false;
-
-  /**
-   * The cached value of the '{@link #isModifiable() <em>Modifiable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #isModifiable()
-   * @generated
-   * @ordered
-   */
-  protected boolean modifiable = MODIFIABLE_EDEFAULT;
+  protected boolean nullable = NULLABLE_EDEFAULT;
 
   /**
    * <!-- begin-user-doc -->
@@ -1367,19 +1334,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
-  public EList<CellContribution> getContributions() {
-    if (contributions == null) {
-      contributions = new EObjectContainmentWithInverseEList<CellContribution>(CellContribution.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS, uk.co.saiman.eclipse.model.ui.Package.CELL_CONTRIBUTION__PARENT);
-    }
-    return contributions;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
   public MPopupMenu getPopupMenu() {
     return popupMenu;
   }
@@ -1481,8 +1435,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  public boolean isOptional() {
-    return optional;
+  public boolean isNullable() {
+    return nullable;
   }
 
   /**
@@ -1490,32 +1444,11 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  public void setOptional(boolean newOptional) {
-    boolean oldOptional = optional;
-    optional = newOptional;
+  public void setNullable(boolean newNullable) {
+    boolean oldNullable = nullable;
+    nullable = newNullable;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL, oldOptional, optional));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public boolean isModifiable() {
-    return modifiable;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public void setModifiable(boolean newModifiable) {
-    boolean oldModifiable = modifiable;
-    modifiable = newModifiable;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE, oldModifiable, modifiable));
+      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE, oldNullable, nullable));
   }
 
   /**
@@ -1541,8 +1474,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return basicSetParent((MElementContainer<MUIElement>)otherEnd, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
         return ((InternalEList<InternalEObject>)(InternalEList<?>)getChildren()).basicAdd(otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
-        return ((InternalEList<InternalEObject>)(InternalEList<?>)getContributions()).basicAdd(otherEnd, msgs);
     }
     return super.eInverseAdd(otherEnd, featureID, msgs);
   }
@@ -1569,8 +1500,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return ((InternalEList<?>)getChildren()).basicRemove(otherEnd, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
         return ((InternalEList<?>)getHandlers()).basicRemove(otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
-        return ((InternalEList<?>)getContributions()).basicRemove(otherEnd, msgs);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         return basicSetPopupMenu(null, msgs);
     }
@@ -1664,8 +1593,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return getHandlers();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         return getMediaTypes();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
-        return getContributions();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         return getPopupMenu();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
@@ -1674,10 +1601,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return getContextValue();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         return isExpanded();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
-        return isOptional();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
-        return isModifiable();
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
+        return isNullable();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -1777,10 +1702,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         getMediaTypes().clear();
         getMediaTypes().addAll((Collection<? extends MediaType>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
-        getContributions().clear();
-        getContributions().addAll((Collection<? extends CellContribution>)newValue);
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         setPopupMenu((MPopupMenu)newValue);
         return;
@@ -1794,11 +1715,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         setExpanded((Boolean)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
-        setOptional((Boolean)newValue);
-        return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
-        setModifiable((Boolean)newValue);
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
+        setNullable((Boolean)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -1893,9 +1811,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         getMediaTypes().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
-        getContributions().clear();
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         setPopupMenu((MPopupMenu)null);
         return;
@@ -1908,11 +1823,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         setExpanded(EXPANDED_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
-        setOptional(OPTIONAL_EDEFAULT);
-        return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
-        setModifiable(MODIFIABLE_EDEFAULT);
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
+        setNullable(NULLABLE_EDEFAULT);
         return;
     }
     super.eUnset(featureID);
@@ -1986,8 +1898,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return handlers != null && !handlers.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
         return mediaTypes != null && !mediaTypes.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTIONS:
-        return contributions != null && !contributions.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         return popupMenu != null;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
@@ -1996,10 +1906,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return CONTEXT_VALUE_EDEFAULT == null ? contextValue != null : !CONTEXT_VALUE_EDEFAULT.equals(contextValue);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         return expanded != EXPANDED_EDEFAULT;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
-        return optional != OPTIONAL_EDEFAULT;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
-        return modifiable != MODIFIABLE_EDEFAULT;
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
+        return nullable != NULLABLE_EDEFAULT;
     }
     return super.eIsSet(featureID);
   }
@@ -2199,10 +2107,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     result.append(contextValue);
     result.append(", expanded: ");
     result.append(expanded);
-    result.append(", optional: ");
-    result.append(optional);
-    result.append(", modifiable: ");
-    result.append(modifiable);
+    result.append(", nullable: ");
+    result.append(nullable);
     result.append(')');
     return result.toString();
   }

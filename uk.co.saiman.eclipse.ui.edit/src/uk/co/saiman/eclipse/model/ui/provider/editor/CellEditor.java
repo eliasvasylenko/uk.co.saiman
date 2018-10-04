@@ -109,12 +109,6 @@ public class CellEditor extends AbstractEditor {
   private final IListProperty HANDLER_CONTAINER__HANDLERS = EMFProperties
       .list(CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS);
 
-  @SuppressWarnings("rawtypes")
-  private final IListProperty CONTRIBUTIONS = EMFProperties
-      .list(Package.eINSTANCE.getCell_Contributions());
-
-  private static final String VIRTUAL_CELL_CONTRIBUTIONS_MENU = "uk.co.saiman.eclipse.model.ui.cell.contributions.virtual";
-
   @SuppressWarnings("unchecked")
   private static final IValueProperty<Cell, ?> POPUP_MENU = EMFProperties
       .value(Package.eINSTANCE.getCell_PopupMenu());
@@ -211,32 +205,61 @@ public class CellEditor extends AbstractEditor {
     createElementIdControl(parent, context, master, textProp);
     createLabelControls(parent, context, master, textProp);
     createContributionControl(parent, context);
-    createVisibleWhenControl(parent, context);
-    createFlagControls(parent, context);
+    createRenderingControls(parent, context);
+    createContextValueControls(parent, context, master, textProp);
     createPopupMenuControl(parent);
     createChildrenControl(parent);
     createMediaTypesControl(parent);
     createPersistedStateControl(parent);
   }
 
-  protected void createFlagControls(Composite parent, EMFDataBindingContext context) {
+  protected void createContextValueControls(
+      Composite parent,
+      EMFDataBindingContext context,
+      IObservableValue<?> master,
+      IWidgetValueProperty textProp) {
     ControlFactory
         .createCheckBox(
             parent,
-            getString("_UI_Cell_modifiable_feature"),
+            getString("_UI_Cell_nullable_feature"),
             getMaster(),
             context,
             WidgetProperties.selection(),
-            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getCell_Modifiable()));
+            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getCell_Nullable()));
+
+    ControlFactory
+        .createTextField(
+            parent,
+            getString("_UI_Cell_contextValue_feature"),
+            master,
+            context,
+            textProp,
+            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getCell_ContextValue()));
+  }
+
+  protected void createRenderingControls(Composite parent, EMFDataBindingContext context) {
+    createVisibleWhenControl(parent, context);
 
     ControlFactory
         .createCheckBox(
             parent,
-            getString("_UI_Cell_optional_feature"),
+            Messages.ModelTooling_UIElement_Visible,
             getMaster(),
             context,
             WidgetProperties.selection(),
-            EMFEditProperties.value(getEditingDomain(), eINSTANCE.getCell_Optional()));
+            EMFEditProperties
+                .value(getEditingDomain(), UiPackageImpl.Literals.UI_ELEMENT__VISIBLE));
+
+    ControlFactory
+        .createCheckBox(
+            parent,
+            Messages.ModelTooling_UIElement_ToBeRendered,
+            getMaster(),
+            context,
+            WidgetProperties.selection(),
+            EMFEditProperties
+                .value(getEditingDomain(), UiPackageImpl.Literals.UI_ELEMENT__TO_BE_RENDERED));
+
   }
 
   @SuppressWarnings("unchecked")
@@ -457,19 +480,6 @@ public class CellEditor extends AbstractEditor {
     if (getEditor().isModelFragment() && Util.isImport((EObject) element)) {
       return list;
     }
-
-    list
-        .add(
-            new VirtualEntry<Object>(
-                VIRTUAL_CELL_CONTRIBUTIONS_MENU,
-                CONTRIBUTIONS,
-                element,
-                getString("_UI_contributions")) {
-              @Override
-              protected boolean accepted(Object o) {
-                return true;
-              }
-            });
 
     list
         .add(

@@ -128,13 +128,11 @@ public class CellItemProvider
       addLocalizedAccessibilityPhrasePropertyDescriptor(object);
       addSelectedElementPropertyDescriptor(object);
       addMediaTypesPropertyDescriptor(object);
-      addContributionsPropertyDescriptor(object);
       addPopupMenuPropertyDescriptor(object);
       addTransferFormatsPropertyDescriptor(object);
       addContextValuePropertyDescriptor(object);
       addExpandedPropertyDescriptor(object);
-      addOptionalPropertyDescriptor(object);
-      addModifiablePropertyDescriptor(object);
+      addNullablePropertyDescriptor(object);
     }
     return itemPropertyDescriptors;
   }
@@ -628,28 +626,6 @@ public class CellItemProvider
   }
 
   /**
-   * This adds a property descriptor for the Contributions feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addContributionsPropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Cell_contributions_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_contributions_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__CONTRIBUTIONS,
-         true,
-         false,
-         true,
-         null,
-         null,
-         null));
-  }
-
-  /**
    * This adds a property descriptor for the Popup Menu feature.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -738,41 +714,19 @@ public class CellItemProvider
   }
 
   /**
-   * This adds a property descriptor for the Optional feature.
+   * This adds a property descriptor for the Nullable feature.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    */
-  protected void addOptionalPropertyDescriptor(Object object) {
+  protected void addNullablePropertyDescriptor(Object object) {
     itemPropertyDescriptors.add
       (createItemPropertyDescriptor
         (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
          getResourceLocator(),
-         getString("_UI_Cell_optional_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_optional_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__OPTIONAL,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
-   * This adds a property descriptor for the Modifiable feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addModifiablePropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Cell_modifiable_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_modifiable_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__MODIFIABLE,
+         getString("_UI_Cell_nullable_feature"),
+         getString("_UI_PropertyDescriptor_description", "_UI_Cell_nullable_feature", "_UI_Cell_type"),
+         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__NULLABLE,
          true,
          false,
          false,
@@ -798,7 +752,6 @@ public class CellItemProvider
       childrenFeatures.add(UiPackageImpl.Literals.UI_ELEMENT__VISIBLE_WHEN);
       childrenFeatures.add(UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN);
       childrenFeatures.add(CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS);
-      childrenFeatures.add(uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__CONTRIBUTIONS);
     }
     return childrenFeatures;
   }
@@ -879,8 +832,7 @@ public class CellItemProvider
       case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OPTIONAL:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MODIFIABLE:
+      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:

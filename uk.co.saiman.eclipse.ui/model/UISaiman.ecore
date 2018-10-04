@@ -10,8 +10,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="Cell">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="mediaTypes" upperBound="-1"
         eType="#//MediaType"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="contributions" upperBound="-1"
-        eType="#//CellContribution" containment="true" eOpposite="#//CellContribution/parent"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="popupMenu" eType="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/menu/PopupMenu"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transferFormats" upperBound="-1"
@@ -23,10 +21,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contextValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="expanded" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
         defaultValueLiteral="false"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="optional" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nullable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
         defaultValueLiteral="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modifiable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
-        defaultValueLiteral="false"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/UILabel"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/Context"/>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//Contribution"/>
@@ -43,10 +39,6 @@
       <eTypeArguments eClassifier="#//Cell"/>
     </eGenericSuperTypes>
     <eGenericSuperTypes eClassifier="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//commands/HandlerContainer"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="CellContribution" eSuperTypes="../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//ui/Context ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//Contribution">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//Cell"
-        eOpposite="#//Cell/contributions"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="HandledCell" eSuperTypes="#//Cell">
     <eStructuralFeatures xsi:type="ecore:EReference" name="command" eType="ecore:EClass ../../org.eclipse.e4.ui.model.workbench/model/UIElements.ecore#//commands/Command">

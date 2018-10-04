@@ -27,40 +27,62 @@
  */
 package uk.co.saiman.experiment;
 
+import uk.co.saiman.experiment.WorkspaceEvent.AddExperimentEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.ExperimentLifecycleEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.ExperimentStateEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.ExperimentTypeEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.MoveExperimentEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.RemoveExperimentEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.RenameExperimentEvent;
+
 public enum WorkspaceEventKind {
   /**
    * An experiment node was added to the workspace.
    */
-  ADD,
-
-  /**
-   * An experiment node was moved within the workspace.
-   */
-  MOVE,
+  ADD(AddExperimentEvent.class),
 
   /**
    * An experiment node was removed from the workspace.
    */
-  REMOVE,
+  REMOVE(RemoveExperimentEvent.class),
+
+  /**
+   * An experiment node was moved within the workspace.
+   */
+  MOVE(MoveExperimentEvent.class),
 
   /**
    * An experiment node's {@link ExperimentNode#getId() id} was updated.
    */
-  RENAME,
+  RENAME(RenameExperimentEvent.class),
 
   /**
    * An experiment node's {@link ExperimentNode#getState() state} was updated.
    */
-  STATE,
+  STATE(ExperimentStateEvent.class),
 
   /**
-   * An experiment node's {@link ExperimentNode#lifecycleState() lifecycle state}
-   * was updated.
+   * An experiment node's {@link ExperimentNode#getLifecycleState() lifecycle
+   * state} was updated.
    */
-  LIFECYLE,
+  LIFECYLE(ExperimentLifecycleEvent.class),
 
   /**
    * An experiment node's {@link ExperimentNode#getType() type} was updated.
    */
-  TYPE
+  TYPE(ExperimentTypeEvent.class);
+
+  private final Class<? extends WorkspaceEvent> type;
+
+  private WorkspaceEventKind(Class<? extends WorkspaceEvent> type) {
+    this.type = type;
+  }
+
+  public boolean matches(WorkspaceEvent event) {
+    return event.kind() == this;
+  }
+
+  public Class<? extends WorkspaceEvent> type() {
+    return type;
+  }
 }

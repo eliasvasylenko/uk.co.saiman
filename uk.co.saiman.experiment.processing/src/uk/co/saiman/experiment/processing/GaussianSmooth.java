@@ -31,6 +31,8 @@ import static java.lang.Math.floor;
 import static java.lang.Math.sqrt;
 import static uk.co.saiman.experiment.state.Accessor.doubleAccessor;
 
+import java.util.Objects;
+
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
@@ -100,5 +102,22 @@ public class GaussianSmooth implements ProcessorConfiguration {
 
       return data;
     }, 0);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this)
+      return true;
+    if (!(obj instanceof GaussianSmooth))
+      return false;
+
+    GaussianSmooth that = (GaussianSmooth) obj;
+
+    return Objects.equals(this.getStandardDeviation(), that.getStandardDeviation());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getStandardDeviation());
   }
 }

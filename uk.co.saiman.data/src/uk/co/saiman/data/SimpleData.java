@@ -40,7 +40,7 @@ import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.Resource;
 
 public class SimpleData<T> implements Data<T> {
-  private final Resource resource;
+  private Resource resource;
   private final DataFormat<T> format;
   private boolean dirty;
   private T data;
@@ -50,13 +50,36 @@ public class SimpleData<T> implements Data<T> {
     this.format = requireNonNull(format);
   }
 
-  public SimpleData(Location location, String name, DataFormat<T> format) throws IOException {
-    this(location.getResource(name, format.getExtension()), format);
-  }
-
   @Override
   public Resource getResource() {
     return resource;
+  }
+
+  @Override
+  public void relocate(Resource resource) {
+    try {
+      this.resource = this.resource.transfer(resource);
+    } catch (IOException e) {
+      throw new DataException("Failed to relocate data", e);
+    }
+  }
+
+  @Override
+  public void relocate(Location location) throws DataException {
+    try {
+      relocate(location.getResource(getResource().getName()));
+    } catch (IOException e) {
+      throw new DataException("Failed to prepare destination", e);
+    }
+  }
+
+  @Override
+  public void relocate(Location location, String name) throws DataException {
+    try {
+      relocate(location.getResource(name, format.getExtension()));
+    } catch (IOException e) {
+      throw new DataException("Failed to prepare destination", e);
+    }
   }
 
   @Override
@@ -74,13 +97,18 @@ public class SimpleData<T> implements Data<T> {
         try {
           resource.delete();
         } catch (IOException e) {
-          throw new DataException("Unable to clear data", e);
+          throw new DataException("Failed to clear data", e);
         }
       } else {
+        try {
+          resource.create();
+        } catch (IOException e) {
+          throw new DataException("Failed to create data", e);
+        }
         try (WritableByteChannel writeChannel = resource.write()) {
           format.save(writeChannel, new Payload<>(value));
         } catch (IOException e) {
-          throw new DataException("Unable to write data", e);
+          throw new DataException("Failed to write data", e);
         }
       }
 
@@ -97,7 +125,7 @@ public class SimpleData<T> implements Data<T> {
       try (ReadableByteChannel readChannel = resource.read()) {
         setImpl(format.load(readChannel).data);
       } catch (IOException e) {
-        throw new DataException("Unable to read data", e);
+        throw new DataException("Failed to read data", e);
       }
 
       return true;

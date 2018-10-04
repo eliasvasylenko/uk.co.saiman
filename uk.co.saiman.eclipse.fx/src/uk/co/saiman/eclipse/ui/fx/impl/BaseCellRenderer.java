@@ -27,24 +27,26 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static org.eclipse.e4.ui.workbench.IPresentationEngine.NO_AUTO_COLLAPSE;
+
+import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.services.contributions.IContributionFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.fx.ui.workbench.renderers.base.BaseItemContainerRenderer;
-import org.eclipse.fx.ui.workbench.renderers.base.Util;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WPopupMenu;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.CellContribution;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
+import uk.co.saiman.eclipse.ui.SaiUiModel;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 
 /**
@@ -54,14 +56,12 @@ import uk.co.saiman.eclipse.ui.fx.widget.WCell;
  *          the native widget type
  */
 public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell, Cell, WCell<N>> {
-  private static final String VISIBLE_BEFORE_OPTIONALITY_CHECK = "saiman.visible.before.optionality.check";
+  private static final String VISIBILITY_AUTO_HIDDEN = "VisibilityAutoHidden";
 
   /**
    * Eventbroker to use
    */
   protected IEventBroker eventBroker;
-
-  private CellContributionHandler cellContributionHandler;
 
   @Override
   public void do_init(IEventBroker broker) {
@@ -76,9 +76,11 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
     registerEventListener(broker, UIEvents.Item.TOPIC_SELECTED);
     registerEventListener(broker, UIEvents.Item.TOPIC_ENABLED);
 
-    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_EDITING);
-    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_OPTIONAL);
-    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_MODIFIABLE);
+    registerEventListener(broker, SaiUiEvents.EditableCell.TOPIC_EDITING);
+
+    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_NULLABLE);
+    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_EXPANDED);
+    registerEventListener(broker, SaiUiEvents.Cell.TOPIC_CONTEXT_VALUE);
 
     broker.subscribe(SaiUiEvents.Cell.TOPIC_POPUP_MENU, new EventHandler() {
       @Override
@@ -94,21 +96,14 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
       }
     });
 
-    broker.subscribe(SaiUiEvents.Cell.TOPIC_CONTRIBUTIONS, new EventHandler() {
+    broker.subscribe(SaiUiEvents.Cell.TOPIC_NULLABLE, new EventHandler() {
       @Override
       public void handleEvent(Event event) {
         Object changedObj = event.getProperty(UIEvents.EventTags.ELEMENT);
         MUIElement parent = (MUIElement) changedObj;
 
         if (parent.getRenderer() == this) {
-          if (UIEvents.isADD(event))
-            handleContributionAddition(
-                (Cell) parent,
-                Util.<CellContribution>asCollection(event, UIEvents.EventTags.NEW_VALUE));
-          else if (UIEvents.isREMOVE(event))
-            handleContributionRemove(
-                (Cell) parent,
-                Util.<CellContribution>asCollection(event, UIEvents.EventTags.OLD_VALUE));
+          prepareContextValue((Cell) parent);
         }
       }
     });
@@ -125,33 +120,38 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
       return;
     }
 
-    prepareContextValue(element);
-    if (element.getParent() == null) {
+    getRenderingContext(element).runAndTrack(new RunAndTrack() {
+      @Override
+      public boolean changed(IEclipseContext context) {
+        Object contextValue = context.get(SaiUiEvents.Cell.CONTEXT_VALUE);
+        if (contextValue != null && contextValue instanceof String) {
+          context.get((String) contextValue);
+          prepareContextValue(element);
+        }
+        return element.isToBeRendered();
+      }
+    });
+    if (!element.isToBeRendered()) {
       return;
     }
 
-    element.getTags().add("NoAutoCollapse");
+    element.getTags().add(NO_AUTO_COLLAPSE);
 
     Class<?> cl = cell.getWidget().getClass();
     do {
       element.getContext().set(cl.getName(), cell.getWidget());
       cl = cl.getSuperclass();
-    } while (!cl.equals(Object.class)); // $NON-NLS-1$
+    } while (!cl.equals(Object.class));
 
     IContributionFactory contributionFactory = element.getContext().get(IContributionFactory.class);
     Object newCell = contributionFactory.create(element.getContributionURI(), element.getContext());
     element.setObject(newCell);
 
-    cellContributionHandler = ContextInjectionFactory
-        .make(CellContributionHandler.class, element.getContext());
-
-    handleContributionAddition(element, element.getContributions());
-
     if (element.getPopupMenu() != null) {
       handleSetPopupMenu(element, element.getPopupMenu());
     }
 
-    for (Cell child : element.getChildren()) {
+    for (Cell child : new ArrayList<>(element.getChildren())) {
       if (child.isToBeRendered()) {
         Object widget = child.getWidget();
         if (widget == null) {
@@ -168,68 +168,25 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
     IEclipseContext context = element.getContext();
     String key = element.getContextValue();
 
-    if (key != null && !key.isEmpty()) {
+    if (context != null && key != null && !key.isEmpty()) {
       // we have a context value specified
 
       Object value = context.get(key);
 
-      if (element.isModifiable()) {
-        /*-
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * What to do when context value is set to null?
-         * 
-         * - delete! (when we have an optional and missing value that shouldn't suddenly
-         * get set, e.g. contribution that doesn't apply in a certain context) DEFAULT?
-         * 
-         * - hide! (when we have e.g. a feature which can be switched on and off)
-         * 
-         * - nothing! (when the UI properly supports a null value) DEFAULT?
-         * 
-         * - error! (we don't support null)
-         * 
-         * drag and drop works IF modifiable in context AND the above is NOT set to "error" 
-         * 
-         * 
-         * 
-         * 
-         * Model either with an enum DELETE, HIDE, NOTHING, ERROR
-         * 
-         * - pros: 
-         * 
-         * - cons: maybe a bit confusing? badly named enums
-         * 
-         * Or with a boolean "nullable" and tags to specify delete/hide behavior.
-         * 
-         * - pros: model is simpler for default behavior, just a boolean
-         * 
-         * - cons: more complex behavior is hidden in tags which must be documented.
-         * 
-         * 
-         * 
-         * 
-         */
+      if (value == null) {
+        if (!element.isNullable()) {
+          throw new NullPointerException();
 
-        if (value == null && element.isOptional()) {
-          if (element.isVisible()) {
-            element.setVisible(false);
-            element.getTags().add(VISIBLE_BEFORE_OPTIONALITY_CHECK);
-          }
-        } else if (element.getTags().remove(VISIBLE_BEFORE_OPTIONALITY_CHECK)) {
-          element.setVisible(true);
-        }
-      } else {
-        context.set(key, value);
-
-        if (value == null && element.isOptional()) {
+        } else if (!element.getTags().contains(SaiUiModel.NO_AUTO_REMOVE)) {
+          element.setToBeRendered(false);
           element.setParent(null);
+
+        } else if (!element.getTags().contains(SaiUiModel.NO_AUTO_HIDE) && element.isVisible()) {
+          element.setVisible(false);
+          element.getTags().add(VISIBILITY_AUTO_HIDDEN);
         }
+      } else if (element.getTags().remove(VISIBILITY_AUTO_HIDDEN)) {
+        element.setVisible(true);
       }
     }
   }
@@ -268,14 +225,6 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
     ((WCell<?>) parent.getWidget()).setPopupMenu((WPopupMenu<?>) property.getWidget());
   }
 
-  public void handleContributionRemove(Cell parent, Collection<CellContribution> contributions) {
-    cellContributionHandler.handleContributionRemove(parent, contributions);
-  }
-
-  public void handleContributionAddition(Cell parent, Collection<CellContribution> contributions) {
-    cellContributionHandler.handleContributionAddition(parent, contributions);
-  }
-
   @Override
   public void do_childRendered(Cell parentElement, MUIElement element) {
     if (inContentProcessing(parentElement) || !isChildRenderedAndVisible(element)) {
@@ -310,6 +259,21 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
       if (widget != null) {
         cell.removeCell(widget);
       }
+    }
+  }
+
+  static boolean isModifiable(Cell cell) {
+    if (!cell.getContext().containsKey(cell.getContextValue())) {
+      return false;
+    }
+
+    try {
+      cell
+          .getContext()
+          .modify(cell.getContextValue(), cell.getContext().get(cell.getContextValue()));
+      return true;
+    } catch (Exception e) {
+      return false;
     }
   }
 }

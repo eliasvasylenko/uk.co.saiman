@@ -86,7 +86,6 @@ public class FactoryImpl extends EFactoryImpl implements Factory {
     switch (eClass.getClassifierID()) {
       case Package.CELL: return (EObject)createCell();
       case Package.TREE: return (EObject)createTree();
-      case Package.CELL_CONTRIBUTION: return (EObject)createCellContribution();
       case Package.HANDLED_CELL: return (EObject)createHandledCell();
       case Package.EDITABLE_CELL: return (EObject)createEditableCell();
       default:
@@ -141,17 +140,6 @@ public class FactoryImpl extends EFactoryImpl implements Factory {
   public Tree createTree() {
     TreeImpl tree = new TreeImpl();
     return tree;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public CellContribution createCellContribution() {
-    CellContributionImpl cellContribution = new CellContributionImpl();
-    return cellContribution;
   }
 
   /**

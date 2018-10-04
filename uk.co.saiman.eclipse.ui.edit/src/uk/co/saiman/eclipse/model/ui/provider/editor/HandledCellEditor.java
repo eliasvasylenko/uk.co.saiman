@@ -89,9 +89,10 @@ public class HandledCellEditor extends CellEditor {
       IObservableValue<?> master,
       IWidgetValueProperty textProp) {
     createElementIdControl(parent, context, master, textProp);
+    createLabelControls(parent, context, master, textProp);
     createContributionControl(parent, context);
-    createVisibleWhenControl(parent, context);
-    createFlagControls(parent, context);
+    createContextValueControls(parent, context, master, textProp);
+    createRenderingControls(parent, context);
     createCommandControl(parent, context, master, textProp);
     createPopupMenuControl(parent);
     createChildrenControl(parent);

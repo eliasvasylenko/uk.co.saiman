@@ -40,6 +40,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -51,6 +52,7 @@ import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.Tree;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.ui.fx.ClipboardService;
+import uk.co.saiman.eclipse.ui.fx.EditableCellText;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -65,6 +67,10 @@ public class UIAddon {
   @PostConstruct
   public void initialize(IEclipseContext context, ClipboardServiceImpl clipboardService) {
     context.set(ClipboardService.class, clipboardService);
+    context
+        .set(
+            EditableCellText.class.getName(),
+            (IContextFunction) (c, k) -> ContextInjectionFactory.make(EditableCellText.class, c));
   }
 
   /**
@@ -113,14 +119,14 @@ public class UIAddon {
   private void prepareChild(IEclipseContext context, Cell cell) {
     String key = cell.getContextValue();
     if (key != null) {
-      Object value = cell.getTransientData().remove(CHILD_CONTEXT_VALUE);
+      Object value = cell.getTransientData().get(CHILD_CONTEXT_VALUE);
       if (value != null) {
         context.set(key, value);
 
         @SuppressWarnings("unchecked")
         Consumer<Object> valueSet = (Consumer<Object>) cell
             .getTransientData()
-            .remove(CHILD_CONTEXT_VALUE_SET);
+            .get(CHILD_CONTEXT_VALUE_SET);
         if (valueSet != null) {
           context.declareModifiable(cell.getContextValue());
           context.runAndTrack(new RunAndTrack() {
@@ -140,8 +146,6 @@ public class UIAddon {
             }
           });
         }
-      } else {
-        cell.setParent(null);
       }
     }
   }

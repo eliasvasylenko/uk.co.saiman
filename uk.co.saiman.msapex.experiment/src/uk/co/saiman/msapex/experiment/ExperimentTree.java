@@ -28,13 +28,17 @@
 package uk.co.saiman.msapex.experiment;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.experiment.WorkspaceEventState.COMPLETED;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+
+import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceEvent.AddExperimentEvent;
+import uk.co.saiman.experiment.WorkspaceEvent.RemoveExperimentEvent;
 
 public class ExperimentTree {
   public static final String ID = "uk.co.saiman.msapex.experiment.tree";
@@ -43,15 +47,30 @@ public class ExperimentTree {
   private Workspace workspace;
 
   @Inject
-  void initialize(ChildrenService children) {
-    workspace
-        .events(COMPLETED)
-        .filter(e -> !e.getNode().getParent().isPresent())
-        .take(1)
-        .observe(m -> {
-          children.invalidate();
-        });
+  private ChildrenService children;
 
+  @PostConstruct
+  void initialize() {
+    updateChildren();
+  }
+
+  @Inject
+  @Optional
+  public void update(AddExperimentEvent event) {
+    if (!event.parent().isPresent()) {
+      updateChildren();
+    }
+  }
+
+  @Inject
+  @Optional
+  public void update(RemoveExperimentEvent event) {
+    if (!event.previousParent().isPresent()) {
+      updateChildren();
+    }
+  }
+
+  private void updateChildren() {
     children
         .setItems(
             ExperimentNodeCell.ID,

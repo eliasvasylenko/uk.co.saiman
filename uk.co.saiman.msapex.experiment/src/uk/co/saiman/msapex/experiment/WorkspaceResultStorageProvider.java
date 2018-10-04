@@ -34,10 +34,10 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.experiment.ResultStore;
-import uk.co.saiman.msapex.experiment.locations.ResultStorageProvider;
+import uk.co.saiman.msapex.experiment.locations.ResultStoreProvider;
 
 @Component
-public class WorkspaceResultStorageProvider implements ResultStorageProvider {
+public class WorkspaceResultStorageProvider implements ResultStoreProvider {
   @Override
   public String getName() {
     return "Workspace Path";
@@ -50,7 +50,7 @@ public class WorkspaceResultStorageProvider implements ResultStorageProvider {
   }
 
   @Override
-  public Optional<ResultStore> requestLocator(IEclipseContext context, String experimentName) {
+  public Optional<ResultStore> requestStore(IEclipseContext context) {
     return Optional.of(ContextInjectionFactory.make(WorkspaceResultStore.class, context));
   }
 }

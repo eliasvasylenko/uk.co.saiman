@@ -51,13 +51,11 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  * </p>
  * <ul>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getMediaTypes <em>Media Types</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getContributions <em>Contributions</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu <em>Popup Menu</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getTransferFormats <em>Transfer Formats</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getContextValue <em>Context Value</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#isExpanded <em>Expanded</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#isOptional <em>Optional</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#isModifiable <em>Modifiable</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#isNullable <em>Nullable</em>}</li>
  * </ul>
  *
  * @see uk.co.saiman.eclipse.model.ui.Package#getCell()
@@ -76,24 +74,6 @@ public interface Cell extends MUILabel, MContext, MContribution, MElementContain
    * @generated
    */
   EList<MediaType> getMediaTypes();
-
-  /**
-   * Returns the value of the '<em><b>Contributions</b></em>' containment reference list.
-   * The list contents are of type {@link uk.co.saiman.eclipse.model.ui.CellContribution}.
-   * It is bidirectional and its opposite is '{@link uk.co.saiman.eclipse.model.ui.CellContribution#getParent <em>Parent</em>}'.
-   * <!-- begin-user-doc -->
-   * <p>
-   * If the meaning of the '<em>Contributions</em>' reference list isn't clear,
-   * there really should be more of a description here...
-   * </p>
-   * <!-- end-user-doc -->
-   * @return the value of the '<em>Contributions</em>' containment reference list.
-   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_Contributions()
-   * @see uk.co.saiman.eclipse.model.ui.CellContribution#getParent
-   * @model opposite="parent" containment="true"
-   * @generated
-   */
-  EList<CellContribution> getContributions();
 
   /**
    * Returns the value of the '<em><b>Popup Menu</b></em>' containment reference.
@@ -194,59 +174,30 @@ public interface Cell extends MUILabel, MContext, MContribution, MElementContain
   void setExpanded(boolean value);
 
   /**
-   * Returns the value of the '<em><b>Optional</b></em>' attribute.
+   * Returns the value of the '<em><b>Nullable</b></em>' attribute.
    * The default value is <code>"true"</code>.
    * <!-- begin-user-doc -->
    * <p>
-   * If the meaning of the '<em>Optional</em>' attribute isn't clear,
+   * If the meaning of the '<em>Nullable</em>' attribute isn't clear,
    * there really should be more of a description here...
    * </p>
    * <!-- end-user-doc -->
-   * <!-- begin-model-doc -->
-   * Whether the context value of the node is optional. If it is then a missing value will cause the node to be hidden by default, whereas if it is not a value of null will be injected.
-   * <!-- end-model-doc -->
-   * @return the value of the '<em>Optional</em>' attribute.
-   * @see #setOptional(boolean)
-   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_Optional()
+   * @return the value of the '<em>Nullable</em>' attribute.
+   * @see #setNullable(boolean)
+   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_Nullable()
    * @model default="true"
    * @generated
    */
-  boolean isOptional();
+  boolean isNullable();
 
   /**
-   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.Cell#isOptional <em>Optional</em>}' attribute.
+   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.Cell#isNullable <em>Nullable</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @param value the new value of the '<em>Optional</em>' attribute.
-   * @see #isOptional()
+   * @param value the new value of the '<em>Nullable</em>' attribute.
+   * @see #isNullable()
    * @generated
    */
-  void setOptional(boolean value);
-
-  /**
-   * Returns the value of the '<em><b>Modifiable</b></em>' attribute.
-   * The default value is <code>"false"</code>.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * <!-- begin-model-doc -->
-   * Whether the context value of the cell is expected to be modifiable in the parent context.
-   * <!-- end-model-doc -->
-   * @return the value of the '<em>Modifiable</em>' attribute.
-   * @see #setModifiable(boolean)
-   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_Modifiable()
-   * @model default="false"
-   * @generated
-   */
-  boolean isModifiable();
-
-  /**
-   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.Cell#isModifiable <em>Modifiable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @param value the new value of the '<em>Modifiable</em>' attribute.
-   * @see #isModifiable()
-   * @generated
-   */
-  void setModifiable(boolean value);
+  void setNullable(boolean value);
 
 } // Cell

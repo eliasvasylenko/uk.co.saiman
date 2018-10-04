@@ -32,22 +32,22 @@ import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_TEX
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
-import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
-import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 
-public class SpectrumExperimentNodeCellContribution {
-  @Optional
+public class SpectrumExperimentNodeCell {
   @PostConstruct
   public void prepare(
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
       ExperimentNode<?, ?> data,
-      @AdaptClass(ExperimentNode.class) SpectrumConfiguration state) {
+      SpectrumConfiguration state) {
+    cell = (Cell) (MUIElement) cell.getParent();
+
     cell.setLabel(data.getType().getName());
     cell
         .setIconURI(

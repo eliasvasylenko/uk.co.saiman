@@ -10,8 +10,7 @@ package uk.co.saiman.eclipse.model.ui;
  * The following features are supported:
  * </p>
  * <ul>
- * <li>{@link uk.co.saiman.eclipse.model.ui.EditableCell#isEditing
- * <em>Editing</em>}</li>
+ *   <li>{@link uk.co.saiman.eclipse.model.ui.EditableCell#isEditing <em>Editing</em>}</li>
  * </ul>
  *
  * @see uk.co.saiman.eclipse.model.ui.Package#getEditableCell()
@@ -41,12 +40,9 @@ public interface EditableCell extends Cell {
   boolean isEditing();
 
   /**
-   * Sets the value of the
-   * '{@link uk.co.saiman.eclipse.model.ui.EditableCell#isEditing
-   * <em>Editing</em>}' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
-   * 
-   * @param value
-   *          the new value of the '<em>Editing</em>' attribute.
+   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.EditableCell#isEditing <em>Editing</em>}' attribute.
+   * <!-- begin-user-doc --> <!-- end-user-doc -->
+   * @param value the new value of the '<em>Editing</em>' attribute.
    * @see #isEditing()
    * @generated
    */

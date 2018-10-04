@@ -38,8 +38,8 @@ import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.Tree;
 
 public class ExtendedRendererFactory extends DefWorkbenchRendererFactory {
-  private DefCellRenderer cellRenderer;
-  private DefTreeRenderer treeRenderer;
+  private ElementRenderer<?, ?> cellRenderer;
+  private ElementRenderer<?, ?> treeRenderer;
 
   @Inject
   public ExtendedRendererFactory(IEclipseContext context) {

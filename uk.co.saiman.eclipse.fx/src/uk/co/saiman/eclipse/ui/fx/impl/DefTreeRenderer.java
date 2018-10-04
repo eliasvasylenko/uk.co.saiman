@@ -51,6 +51,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.PickResult;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.TransferCellHandler;
 import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 import uk.co.saiman.eclipse.ui.fx.impl.DefCellRenderer.CellImpl;
@@ -66,6 +67,11 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
     @Inject
     public TreeImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) Tree domElement) {
       setDomElement(domElement);
+    }
+
+    @Inject
+    public void setEditable(@Named(SaiUiEvents.Tree.EDITABLE) boolean editable) {
+      getWidget().setEditable(true);
     }
 
     @Override
@@ -100,6 +106,8 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
       tree.setCellFactory(v -> new TreeCellImpl());
       tree.setRoot(new TreeItem<>(null));
       tree.setShowRoot(false);
+      tree.setOnKeyPressed(this::onKeyPressed);
+      tree.setOnKeyReleased(this::onKeyReleased);
 
       return tree;
     }
@@ -143,20 +151,26 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
     }
 
     public void onKeyReleased(KeyEvent event) {
+      CellImpl target = ((CellImpl) getWidget()
+          .getSelectionModel()
+          .getSelectedItem()
+          .getValue()
+          .getWidget());
+      Node widget = target.getWidget();
+
       switch (event.getCode()) {
       case CONTEXT_MENU:
         event.consume();
-        Node selectionBounds = getWidget();
 
-        Bounds sceneBounds = selectionBounds.localToScene(selectionBounds.getLayoutBounds());
-        Bounds screenBounds = selectionBounds.localToScreen(selectionBounds.getLayoutBounds());
+        Bounds sceneBounds = widget.localToScene(widget.getLayoutBounds());
+        Bounds screenBounds = widget.localToScreen(widget.getLayoutBounds());
 
         PickResult pickResult = new PickResult(
-            selectionBounds,
+            widget,
             sceneBounds.getMaxX(),
             sceneBounds.getMaxY());
 
-        getWidget()
+        widget
             .fireEvent(
                 new ContextMenuEvent(
                     ContextMenuEvent.CONTEXT_MENU_REQUESTED,
@@ -166,6 +180,13 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
                     screenBounds.getMaxY(),
                     true,
                     pickResult));
+        break;
+      case ENTER:
+
+        if (target.executeAction()) {
+          event.consume();
+        }
+
         break;
       default:
         break;

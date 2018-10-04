@@ -45,7 +45,7 @@ public class PathLocation implements Location {
 
   @Override
   public Stream<Resource> getResources() throws IOException {
-    return Files.walk(path).map(PathResource::new);
+    return Files.walk(path).filter(Files::isRegularFile).map(PathResource::new);
   }
 
   /**
@@ -59,6 +59,6 @@ public class PathLocation implements Location {
 
   @Override
   public String toString() {
-    return Path.class.getName() + ": " + path;
+    return Path.class.getSimpleName() + "(" + path + ")";
   }
 }

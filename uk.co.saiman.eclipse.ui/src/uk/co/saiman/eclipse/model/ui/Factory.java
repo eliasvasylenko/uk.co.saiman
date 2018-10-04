@@ -67,15 +67,6 @@ public interface Factory extends EFactory {
   Tree createTree();
 
   /**
-   * Returns a new object of class '<em>Cell Contribution</em>'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return a new object of class '<em>Cell Contribution</em>'.
-   * @generated
-   */
-  CellContribution createCellContribution();
-
-  /**
    * Returns a new object of class '<em>Handled Cell</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->

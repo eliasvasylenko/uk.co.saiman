@@ -31,14 +31,16 @@ import static javafx.geometry.Pos.CENTER_LEFT;
 import static org.eclipse.e4.core.contexts.ContextInjectionFactory.invoke;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.commands.ExpressionContext;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.InjectionException;
+import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.fx.core.log.Log;
@@ -56,7 +58,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.InputEvent;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -64,16 +65,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.EditableCell;
 import uk.co.saiman.eclipse.model.ui.HandledCell;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
-import uk.co.saiman.function.ThrowingConsumer;
+import uk.co.saiman.function.ThrowingFunction;
 
 /**
  * default renderer for {@link Cell}
  */
 public class DefCellRenderer extends BaseCellRenderer<Pane> {
+  private static final Object ACTION_UNAVAILABLE = new Object();
+
   public static class CellImpl extends WWidgetImpl<Pane, Cell> implements WCell<Pane> {
     @Inject
     @Log
@@ -90,6 +94,9 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
     private final TreeItemImpl treeItem;
 
     private ContextMenu popupMenu;
+
+    private Consumer<Boolean> editingCallback;
+    private ThrowingFunction<IEclipseContext, Object, Exception> actionCallback;
 
     @Inject
     public CellImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) Cell domElement) {
@@ -122,6 +129,26 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
     }
 
     @Inject
+    public void setExpanded(@Named(SaiUiEvents.Cell.EXPANDED) boolean expanded) {
+      getWidget();
+      this.treeItem.setExpanded(expanded);
+    }
+
+    @Optional
+    @Inject
+    public void setEditing(@Named(SaiUiEvents.EditableCell.EDITING) boolean editing) {
+      getWidget();
+      if (editingCallback != null) {
+        editingCallback.accept(editing);
+      }
+    }
+
+    @Override
+    public void setIsEditingCallback(Consumer<Boolean> editingCallback) {
+      this.editingCallback = editingCallback;
+    }
+
+    @Inject
     public void setLabel(@Named(UIEvents.UILabel.LOCALIZED_LABEL) String label) {
       getWidget();
       this.label.setText(label);
@@ -135,13 +162,6 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       } else {
         this.label.setGraphic(this.graphicsLoader.getGraphicsNode(new EMFUri(URI.createURI(uri))));
       }
-    }
-
-    @Inject
-    public void configureContextValue(
-        @Named(SaiUiEvents.Cell.OPTIONAL) boolean optional,
-        @Named(SaiUiEvents.Cell.MODIFIABLE) boolean modifiable) {
-      BaseCellRenderer.prepareContextValue(getDomElement());
     }
 
     @Override
@@ -168,6 +188,9 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       this.label = label;
 
       treeItem.setWidget(node);
+      treeItem.expandedProperty().addListener((v, o, n) -> {
+        getDomElement().setExpanded(n);
+      });
 
       node.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
         showContextMenu(event.getScreenX(), event.getScreenY());
@@ -177,18 +200,14 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
         hideContextMenu();
       });
 
+      contributeCommand(node, getDomElement());
+
       return node;
     }
 
     @Override
     protected void setUserData(WWidgetImpl<Pane, Cell> widget) {
       getWidget().setUserData(widget);
-    }
-
-    @Override
-    public void setOnActionCallback(Runnable runnable) {
-      // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -206,57 +225,60 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       getTreeItem().getChildren().remove(((CellImpl) widget).getTreeItem());
     }
 
-    private void contributeCommand(HBox node, Cell model) {
-      if (model instanceof HandledCell) {
-        HandledCell handledModel = (HandledCell) model;
-        if (handledModel.getWbCommand() != null) {
-          contributeAction(
-              node,
-              context -> handledModel
-                  .getWbCommand()
-                  .executeWithChecks(
-                      context.get(InputEvent.class),
-                      new ExpressionContext(context)));
-        }
-      } else {
-        contributeAction(node, context -> invoke(model.getObject(), Execute.class, context));
+    @Override
+    public boolean executeAction() {
+      IEclipseContext context = this.context.createChild();
+
+      try {
+        return actionCallback.apply(context) != ACTION_UNAVAILABLE;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     }
 
-    private <E extends Exception> void contributeAction(
-        HBox node,
-        ThrowingConsumer<IEclipseContext, E> action) {
+    private void contributeCommand(Pane node, Cell model) {
+      if (model instanceof EditableCell) {
+        actionCallback = context -> ACTION_UNAVAILABLE;
+
+      } else if (model instanceof HandledCell) {
+        HandledCell handledModel = (HandledCell) model;
+
+        actionCallback = context -> {
+          if (handledModel.getWbCommand() != null) {
+            return handledModel
+                .getWbCommand()
+                .executeWithChecks(context.get(InputEvent.class), new ExpressionContext(context));
+
+          } else {
+            return ACTION_UNAVAILABLE;
+          }
+        };
+
+      } else {
+        actionCallback = context -> {
+          Object canExecute = invoke(
+              model.getObject(),
+              CanExecute.class,
+              context,
+              ACTION_UNAVAILABLE);
+
+          if (canExecute != ACTION_UNAVAILABLE && !(Boolean) canExecute) {
+            return ACTION_UNAVAILABLE;
+          }
+
+          return invoke(model.getObject(), Execute.class, context, ACTION_UNAVAILABLE);
+        };
+      }
+
       node.addEventHandler(MouseEvent.ANY, event -> {
         if (event.getClickCount() == 2
             && event.getButton().equals(MouseButton.PRIMARY)
             && event.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-          executeCommand(event, action);
-        }
-      });
-
-      node.addEventHandler(KeyEvent.ANY, event -> {
-        if (event.getCode() == KeyCode.ENTER) {
-          if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
-            executeCommand(event, action);
+          if (executeAction()) {
+            event.consume();
           }
         }
       });
-    }
-
-    private <E extends Exception> void executeCommand(
-        InputEvent event,
-        ThrowingConsumer<IEclipseContext, E> action) {
-      IEclipseContext context = this.context.createChild();
-
-      context.set(InputEvent.class, event);
-
-      try {
-        action.accept(context);
-      } catch (InjectionException e) {
-        // TODO log or discard?
-      } catch (Exception t) {
-        // TODO log
-      }
     }
 
     @Override

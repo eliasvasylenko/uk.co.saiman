@@ -49,7 +49,6 @@ public class ExperimentResultCell {
     /*
      * configure label
      */
-    cell.setLabel(experiment.getType().getName());
     if (experiment.getResult().getValue().isPresent()) {
       cell
           .setIconURI(

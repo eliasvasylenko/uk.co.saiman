@@ -31,6 +31,13 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 public interface Location {
+  /**
+   * Get all resources at the location.
+   * 
+   * @return a stream of resources which {@link Resource#exists() exist} at the
+   *         location
+   * @throws IOException
+   */
   Stream<Resource> getResources() throws IOException;
 
   Resource getResource(String name) throws IOException;

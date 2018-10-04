@@ -27,23 +27,41 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.util.stream.Stream.concat;
+import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
+
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.service.cm.ConfigurationAdmin;
 
+import uk.co.saiman.data.Data;
+import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.experiment.Experiment;
+import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.WorkspaceEvent;
+import uk.co.saiman.experiment.WorkspaceEventKind;
+import uk.co.saiman.experiment.state.JsonStateMapFormat;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -56,32 +74,41 @@ import uk.co.saiman.log.Log.Level;
  */
 public class WorkspaceAddon {
   @Inject
-  private IEclipseContext context;
+  IEclipseContext context;
 
   @Inject
-  private IAdapterManager adapterManager;
+  IAdapterManager adapterManager;
   private ExperimentNodeAdapterFactory experimentNodeAdapterFactory;
   private ExperimentAdapterFactory experimentAdapterFactory;
 
   @Inject
-  private Log log;
+  Log log;
   @Inject
   @Localize
-  private ExperimentProperties text;
+  ExperimentProperties text;
 
   @Inject
   @Service
-  private ConfigurationAdmin configurationAdmin;
+  ConfigurationAdmin configurationAdmin;
 
   @Inject
   @Service
-  private Workspace workspace;
+  Workspace workspace;
   @Inject
   @Service
-  private List<ExperimentType<?, ?>> experimentTypes;
+  List<ExperimentType<?, ?>> experimentTypes;
+
+  @Inject
+  @Named(INSTANCE_LOCATION)
+  Location instanceLocation;
+  private uk.co.saiman.data.resource.Location workspaceRoot;
+
+  private Map<Experiment, Data<StateMap>> experiments = new HashMap<>();
 
   @PostConstruct
-  void initialize() {
+  void initialize() throws URISyntaxException {
+    workspaceRoot = new PathLocation(Paths.get(instanceLocation.getURL().toURI()));
+
     context.set(Workspace.class, workspace);
 
     try {
@@ -90,13 +117,46 @@ public class WorkspaceAddon {
       log.log(Level.ERROR, e);
       e.printStackTrace();
     }
+
+    /*
+     * Inject events
+     */
+    workspace.events().weakReference(this).observe(o -> {
+      o.owner().context.set(WorkspaceEvent.class, o.message());
+      o.owner().context.remove(WorkspaceEvent.class);
+      o.owner().context.set(o.message().kind().type().getName(), o.message());
+      o.owner().context.remove(o.message().kind().type().getName());
+    });
+  }
+
+//  @Inject
+//  @Optional
+  public void saveExperiment(WorkspaceEvent event) {
+    if (event.node().getLifecycleState() != ExperimentLifecycleState.DETACHED) {
+      try {
+        Experiment experiment = event.node().getExperiment();
+
+        Data<StateMap> data = experiments
+            .computeIfAbsent(
+                experiment,
+                e -> Data.locate(workspaceRoot, experiment.getId(), new JsonStateMapFormat()));
+
+        if (event.kind() == WorkspaceEventKind.RENAME) {
+          data.relocate(workspaceRoot, event.node().getId());
+        }
+
+        data.set(experiment.getStateMap());
+        data.save();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   private Stream<ExperimentType<?, ?>> getExperimentTypes() {
-    return Stream
-        .concat(
-            Stream.of(workspace.getExperimentRootType()),
-            new ArrayList<>(experimentTypes).stream());
+    return concat(
+        Stream.of(workspace.getExperimentRootType()),
+        new ArrayList<>(experimentTypes).stream());
   }
 
   private void initializeAdapters() {

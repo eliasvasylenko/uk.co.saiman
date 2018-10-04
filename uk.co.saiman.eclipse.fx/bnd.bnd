@@ -19,6 +19,7 @@ Bundle-Name: SAI :: Eclipse
 	org.eclipse.osgi.compatibility.state,\
 	org.eclipse.emf.common,\
 	org.eclipse.emf.ecore,\
+	org.eclipse.fx.ui.panes,\
 	org.eclipse.fx.ui.workbench.renderers.base,\
 	org.eclipse.fx.ui.workbench.renderers.fx,\
 	org.eclipse.fx.ui.workbench.base,\

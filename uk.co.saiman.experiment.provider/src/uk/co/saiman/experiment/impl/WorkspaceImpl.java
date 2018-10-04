@@ -27,14 +27,11 @@
  */
 package uk.co.saiman.experiment.impl;
 
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.collection.StreamUtilities.upcastStream;
-import static uk.co.saiman.experiment.WorkspaceEventKind.ADD;
-import static uk.co.saiman.experiment.WorkspaceEventKind.REMOVE;
 import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -47,14 +44,14 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.ExperimentRoot;
 import uk.co.saiman.experiment.ResultStore;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.WorkspaceEvent;
-import uk.co.saiman.experiment.WorkspaceEventKind;
 import uk.co.saiman.experiment.WorkspaceEventState;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.AddExperimentEventImpl;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.RemoveExperimentEventImpl;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.HotObservable;
@@ -139,7 +136,9 @@ public class WorkspaceImpl implements Workspace {
   }
 
   protected boolean removeExperiment(Experiment experiment) {
-    return fireEvents(REMOVE, experiment, () -> experiments.remove(experiment));
+    return fireEvents(
+        () -> experiments.remove(experiment),
+        new RemoveExperimentEventImpl(experiment, null));
   }
 
   /*
@@ -150,7 +149,7 @@ public class WorkspaceImpl implements Workspace {
   public Experiment addExperiment(String id, ResultStore locationManager) {
     ExperimentImpl experiment = new ExperimentImpl(locationManager, id, StateMap.empty(), this);
 
-    fireEvents(ADD, experiment, () -> experiments.add(experiment));
+    fireEvents(() -> experiments.add(experiment), new AddExperimentEventImpl(experiment, null));
 
     return experiment;
   }
@@ -164,39 +163,20 @@ public class WorkspaceImpl implements Workspace {
    * they may represent an atomic action, in which case cancellation of either one
    * needs to also apply to the other.
    */
-  protected synchronized <T> T fireEvents(
-      WorkspaceEventKind kind,
-      ExperimentNode<?, ?> node,
-      Supplier<T> effect) {
-    return fireEvents(singleton(kind), node, effect, false);
+  protected synchronized <T> T fireEvents(Supplier<T> effect, WorkspaceEventImpl... events) {
+    return fireEvents(effect, Arrays.asList(events), false);
   }
 
   /*
    * Fire a forced event. A forced event may not be cancelled.
    */
-  protected synchronized <T> T fireForcedEvents(
-      WorkspaceEventKind kind,
-      ExperimentNode<?, ?> node,
-      Supplier<T> effect) {
-    return fireEvents(singleton(kind), node, effect, true);
+  protected synchronized <T> T fireForcedEvents(Supplier<T> effect, WorkspaceEventImpl... events) {
+    return fireEvents(effect, Arrays.asList(events), true);
   }
 
   protected synchronized <T> T fireEvents(
-      Collection<? extends WorkspaceEventKind> kinds,
-      ExperimentNode<?, ?> node,
       Supplier<T> effect,
-      boolean forced) {
-    return fireEvents(
-        node,
-        effect,
-        kinds.stream().map(kind -> new WorkspaceEventImpl(node, kind)).collect(toList()),
-        forced);
-  }
-
-  protected synchronized <T> T fireEvents(
-      ExperimentNode<?, ?> node,
-      Supplier<T> effect,
-      List<WorkspaceEventImpl> events,
+      Collection<? extends WorkspaceEventImpl> events,
       boolean forced) {
     if (forced) {
       events.forEach(WorkspaceEventImpl::complete);
@@ -226,4 +206,53 @@ public class WorkspaceImpl implements Workspace {
       return Observable.empty();
     }
   }
+
+  /*
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO whole eventing system is too brittle and confusing.
+   * 
+   * Groups of related events should be atomic.
+   * 
+   * Events for a given node should be synchronized on the root experiment.
+   * 
+   * Some events in a group may be optional (e.g. a move event should delete data,
+   * but the lifecycleEvent may be omitted if we're already in the correct state).
+   * 
+   * How to compose related groups of events, and encapsulate the associated
+   * behaviors and conditions?
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO now that we have decoupled the concept of a result store, and any notion
+   * of persistence, is there still a need for the workspace to be an interface?
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
 }

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.eclipse.ui.fx.widget;
 
+import java.util.function.Consumer;
+
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WPopupMenu;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WWidget;
 
@@ -39,13 +41,12 @@ import uk.co.saiman.eclipse.model.ui.Cell;
  *          the native widget
  */
 public interface WCell<N> extends WWidget<Cell> {
+  void setIsEditingCallback(Consumer<Boolean> editingCallback);
+
   /**
-   * Callback to invoke when the item is executed
-   * 
-   * @param runnable
-   *          the runnable to invoke
+   * @return true if the item has an action and it was executed
    */
-  void setOnActionCallback(Runnable runnable);
+  boolean executeAction();
 
   /**
    * Append a widget

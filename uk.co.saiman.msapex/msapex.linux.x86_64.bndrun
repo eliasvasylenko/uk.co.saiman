@@ -138,6 +138,7 @@ runplatform: linux64
 	uk.co.saiman.chemistry;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.bytes.conversion;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.comms.copley;version=snapshot,\
 	uk.co.saiman.comms.copley.provider;version=snapshot,\

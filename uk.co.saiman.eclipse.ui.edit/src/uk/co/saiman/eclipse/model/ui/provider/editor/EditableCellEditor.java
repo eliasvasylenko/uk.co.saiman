@@ -27,12 +27,8 @@
  */
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
-import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.emf.databinding.EMFDataBindingContext;
-import org.eclipse.jface.databinding.swt.IWidgetValueProperty;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
 
 public class EditableCellEditor extends CellEditor {
   @Override
@@ -50,21 +46,5 @@ public class EditableCellEditor extends CellEditor {
   @Override
   public String getDescription(Object element) {
     return getString("_UI_EditableCell_editor_description");
-  }
-
-  @Override
-  protected void createDefaultControls(
-      Composite parent,
-      EMFDataBindingContext context,
-      IObservableValue<?> master,
-      IWidgetValueProperty textProp) {
-    createElementIdControl(parent, context, master, textProp);
-    createContributionControl(parent, context);
-    createVisibleWhenControl(parent, context);
-    createFlagControls(parent, context);
-    createPopupMenuControl(parent);
-    createChildrenControl(parent);
-    createMediaTypesControl(parent);
-    createPersistedStateControl(parent);
   }
 }

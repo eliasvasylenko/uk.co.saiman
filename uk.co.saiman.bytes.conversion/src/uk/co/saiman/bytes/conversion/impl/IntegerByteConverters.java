@@ -25,26 +25,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.bytes.impl;
+package uk.co.saiman.bytes.conversion.impl;
 
+import static uk.co.saiman.bytes.BitArray.fromNumber;
+import static uk.co.saiman.bytes.Endianness.BIG_ENDIAN;
 import static uk.co.saiman.bytes.conversion.ByteConverter.byteConverter;
 import static uk.co.saiman.reflection.Types.getErasedType;
 import static uk.co.saiman.reflection.Types.unwrapPrimitive;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
+import java.util.Optional;
+import java.util.function.Function;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.bytes.BitArray;
+import uk.co.saiman.bytes.Endianness;
 import uk.co.saiman.bytes.conversion.ByteConversionAnnotations;
 import uk.co.saiman.bytes.conversion.ByteConverter;
 import uk.co.saiman.bytes.conversion.ByteConverterProvider;
 import uk.co.saiman.bytes.conversion.ByteConverterService;
+import uk.co.saiman.bytes.conversion.Order;
 import uk.co.saiman.bytes.conversion.Size;
 
 @Component
-public class BooleanByteConverters implements ByteConverterProvider {
+public class IntegerByteConverters implements ByteConverterProvider {
   @Override
   public ByteConverter<?> getConverter(
       AnnotatedType type,
@@ -52,20 +57,55 @@ public class BooleanByteConverters implements ByteConverterProvider {
       ByteConverterService converters) {
     Class<?> erasedType = getErasedType(type.getType());
 
-    int size = annotations.get(Size.class).map(Size::value).orElse(1);
+    Optional<Integer> size = annotations.get(Size.class).map(Size::value);
+    Endianness endianness = annotations.get(Order.class).map(Order::value).orElse(BIG_ENDIAN);
 
-    if (boolean.class == unwrapPrimitive(erasedType)) {
-      return byteConverter(
-          boolean.class,
-          b -> new BitArray(size).with(0, size, b),
-          b -> b.stream().reduce((h, t) -> h || t).orElse(false));
+    int bits;
+    Class<? extends Number> primitive;
+    Function<Number, Number> asNumber;
+
+    if (byte.class == unwrapPrimitive(erasedType)) {
+      bits = size.orElse(Byte.SIZE);
+      primitive = byte.class;
+      asNumber = Number::byteValue;
+
+    } else if (short.class == unwrapPrimitive(erasedType)) {
+      bits = size.orElse(Short.SIZE);
+      primitive = short.class;
+      asNumber = Number::shortValue;
+
+    } else if (int.class == unwrapPrimitive(erasedType)) {
+      bits = size.orElse(Integer.SIZE);
+      primitive = int.class;
+      asNumber = Number::intValue;
+
+    } else if (long.class == unwrapPrimitive(erasedType)) {
+      bits = size.orElse(Long.SIZE);
+      primitive = long.class;
+      asNumber = Number::longValue;
+
+    } else {
+      return null;
+
     }
 
-    return null;
+    return getConverter(primitive, asNumber, bits, endianness);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T extends Number> ByteConverter<T> getConverter(
+      Class<T> primitive,
+      Function<? super Number, ? extends Number> asNumber,
+      int bits,
+      Endianness endianness) {
+    return byteConverter(
+        primitive,
+        b -> fromNumber(b.longValue(), bits, endianness),
+        a -> (T) asNumber.apply(a.toNumber(bits, endianness)));
   }
 
   @Override
   public boolean supportsAnnotation(Class<? extends Annotation> annotationType) {
-    return annotationType == Size.class;
+    return annotationType == Size.class || annotationType == Order.class;
   }
 }

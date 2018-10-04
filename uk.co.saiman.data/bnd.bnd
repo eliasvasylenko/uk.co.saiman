@@ -1,6 +1,7 @@
 -sub: *.bnd
 
 -buildpath: \
+	uk.co.saiman.bytes;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\

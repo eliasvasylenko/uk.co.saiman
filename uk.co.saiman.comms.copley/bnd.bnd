@@ -2,6 +2,7 @@ Bundle-Name: SAI :: Copley
 
 -buildpath: \
 	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.bytes.conversion;version=snapshot,\
 	uk.co.saiman.comms;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\

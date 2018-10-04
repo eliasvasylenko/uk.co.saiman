@@ -70,6 +70,4 @@ public interface ChildrenService {
       String contextName,
       List<? extends T> children,
       Consumer<? super List<? extends T>> update);
-
-  void invalidate();
 }

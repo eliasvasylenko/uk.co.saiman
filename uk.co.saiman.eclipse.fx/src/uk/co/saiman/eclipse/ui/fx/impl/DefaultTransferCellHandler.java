@@ -29,6 +29,7 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 
 import static uk.co.saiman.eclipse.ui.TransferMode.COPY;
 import static uk.co.saiman.eclipse.ui.TransferMode.LINK;
+import static uk.co.saiman.eclipse.ui.fx.impl.BaseCellRenderer.isModifiable;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
 
   @Override
   public TransferCellOut transferOut(Cell cell) {
-    boolean modifiable = isModifiable(cell) && cell.isOptional();
+    boolean nullable = isModifiable(cell) && cell.isNullable();
 
     ClipboardContent content = serialize(cell);
 
@@ -62,13 +63,13 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
     return new TransferCellOut() {
       @Override
       public Set<TransferMode> supportedTransferModes() {
-        return modifiable ? EnumSet.allOf(TransferMode.class) : EnumSet.of(COPY, LINK);
+        return nullable ? EnumSet.allOf(TransferMode.class) : EnumSet.of(COPY, LINK);
       }
 
       @Override
       public void handle(TransferMode transferMode) {
-        System.out.println("handle transfer out " + transferMode + " ? " + modifiable);
-        if (modifiable && transferMode.isDestructive()) {
+        System.out.println("handle transfer out " + transferMode + " ? " + nullable);
+        if (nullable && transferMode.isDestructive()) {
           cell.getContext().modify(cell.getContextValue(), null);
         }
       }
@@ -114,20 +115,5 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
   static Object deserialize(Cell cell, Clipboard content) {
     cell.getTransferFormats();
     return null; // TODO
-  }
-
-  static boolean isModifiable(Cell cell) {
-    if (!cell.getContext().containsKey(cell.getContextValue())) {
-      return false;
-    }
-
-    try {
-      cell
-          .getContext()
-          .modify(cell.getContextValue(), cell.getContext().get(cell.getContextValue()));
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
   }
 }

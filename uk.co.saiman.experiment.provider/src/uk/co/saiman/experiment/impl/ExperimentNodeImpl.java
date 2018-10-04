@@ -28,15 +28,12 @@
 package uk.co.saiman.experiment.impl;
 
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.CONFIGURATION;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.DETACHED;
-import static uk.co.saiman.experiment.WorkspaceEventKind.ADD;
-import static uk.co.saiman.experiment.WorkspaceEventKind.LIFECYLE;
-import static uk.co.saiman.experiment.WorkspaceEventKind.MOVE;
-import static uk.co.saiman.experiment.WorkspaceEventKind.REMOVE;
-import static uk.co.saiman.experiment.WorkspaceEventKind.RENAME;
-import static uk.co.saiman.experiment.WorkspaceEventKind.STATE;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.PROCESSING;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.WAITING;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +45,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
-import uk.co.saiman.data.SimpleData;
+import uk.co.saiman.data.DataException;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.experiment.ConfigurationContext;
@@ -61,11 +58,15 @@ import uk.co.saiman.experiment.ExperimentType;
 import uk.co.saiman.experiment.ProcessingContext;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.ResultStore.Storage;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.AddExperimentEventImpl;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.ExperimentLifecycleEventImpl;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.ExperimentStateEventImpl;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.MoveExperimentEventImpl;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.RemoveExperimentEventImpl;
+import uk.co.saiman.experiment.impl.WorkspaceEventImpl.RenameExperimentEventImpl;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
-import uk.co.saiman.observable.ObservableProperty;
-import uk.co.saiman.observable.ObservableValue;
 
 public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   private String id;
@@ -76,8 +77,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   private ExperimentNodeImpl<?, ?> parent;
   private final List<ExperimentNodeImpl<?, ?>> children = new ArrayList<>();
 
-  private final ObservableProperty<ExperimentLifecycleState> lifecycleState = ObservableProperty
-      .over(DETACHED);
+  private ExperimentLifecycleState lifecycleState;
   private final S state;
   private final ResultImpl<T> result = new ResultImpl<>(this);
   private Data<T> resultData;
@@ -95,10 +95,12 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       String id,
       ExperimentType<S, T> type,
       StateMap persistedState,
-      WorkspaceImpl workspace) {
+      WorkspaceImpl workspace,
+      ExperimentLifecycleState lifecycleState) {
     this.id = id;
     this.type = type;
     this.persistedState = persistedState;
+    this.lifecycleState = lifecycleState;
 
     this.workspace = workspace;
     this.parent = null;
@@ -138,6 +140,11 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     return state;
   }
 
+  @Override
+  public StateMap getStateMap() {
+    return persistedState;
+  }
+
   protected ExperimentProperties getText() {
     return workspace.getText();
   }
@@ -171,11 +178,9 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
 
   @Override
   public ExperimentImpl getExperiment() {
-    return (ExperimentImpl) ExperimentNode.super.getExperiment();
-  }
-
-  protected ExperimentImpl getRootImpl() {
-    return (ExperimentImpl) ExperimentNode.super.getExperiment();
+    return (ExperimentImpl) findAncestor(getWorkspace().getExperimentRootType())
+        .orElseThrow(
+            () -> new ExperimentException(format("Experiment node %s is detached", getId())));
   }
 
   @Override
@@ -187,20 +192,22 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       throw e;
     }
 
-    getWorkspace().fireEvents(REMOVE, this, () -> {
+    getWorkspace().fireEvents(() -> {
       setDisposed();
       removeImpl();
       return null;
-    });
+    },
+        new RemoveExperimentEventImpl(this, parent),
+        new ExperimentLifecycleEventImpl(this, DETACHED, lifecycleState));
   }
 
-  protected ObservableProperty<ExperimentLifecycleState> getLifecycleState() {
+  @Override
+  public ExperimentLifecycleState getLifecycleState() {
     return lifecycleState;
   }
 
   protected void removeImpl() {
-    clearResult();
-
+    clearResultImpl();
     if (parent != null) {
       parent.children.remove(this);
       parent = null;
@@ -208,14 +215,14 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   protected void setDisposed() {
-    lifecycleState.set(DETACHED);
+    lifecycleState = DETACHED;
     for (ExperimentNodeImpl<?, ?> child : children) {
       child.setDisposed();
     }
   }
 
   protected void assertAttached() {
-    if (lifecycleState.equals(DETACHED)) {
+    if (lifecycleState == DETACHED) {
       throw new ExperimentException(format("Experiment %s is detached", getId()));
     }
   }
@@ -241,9 +248,14 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       ExperimentType<U, V> childType,
       StateMap state) {
     assertAttached();
-    ExperimentNodeImpl<U, V> node = new ExperimentNodeImpl<>(null, childType, state, workspace);
+    ExperimentNodeImpl<U, V> node = new ExperimentNodeImpl<>(
+        null,
+        childType,
+        state,
+        workspace,
+        DETACHED);
 
-    workspace.fireEvents(ADD, node, () -> node.moveImpl(this, index));
+    workspace.fireEvents(() -> node.moveImpl(this, index), new AddExperimentEventImpl(node, this));
 
     return node;
   }
@@ -260,27 +272,25 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
           format("Cannot move experiment node %s between workspaces", getId()));
     }
 
-    workspace.fireEvents(MOVE, this, () -> moveImpl(parent, index));
+    synchronized (this) {
+      workspace
+          .fireEvents(
+              () -> moveImpl(parent, index),
+              new MoveExperimentEventImpl(this, parent, this.parent));
+    }
   }
 
-  protected Object moveImpl(ExperimentNode<?, ?> parent, int index) {
+  protected Void moveImpl(ExperimentNode<?, ?> parent, int index) {
     removeImpl();
     ((ExperimentNodeImpl<?, ?>) parent).children.add(index, this);
     this.parent = (ExperimentNodeImpl<?, ?>) parent;
-    if (lifecycleState.isEqual(DETACHED)) {
-      lifecycleState.set(CONFIGURATION);
-    }
+    System.out.println(getId() + " <* " + parent);
     return null;
   }
 
   @Override
-  public ObservableValue<ExperimentLifecycleState> lifecycleState() {
-    return lifecycleState;
-  }
-
-  @Override
   public String toString() {
-    return getId() + " : " + type.getName() + " [" + lifecycleState.get() + "]";
+    return getId() + " : " + type.getName() + " [" + lifecycleState + "]";
   }
 
   @Override
@@ -292,11 +302,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
           .log(
               Level.ERROR,
               new ExperimentException(format("Failed to process experiment %s", getId()), e));
-      workspace
-          .fireForcedEvents(
-              LIFECYLE,
-              this,
-              () -> lifecycleState.set(ExperimentLifecycleState.FAILURE));
+      setLifecycleState(ExperimentLifecycleState.FAILURE, true);
     }
   }
 
@@ -315,15 +321,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   private void processImpl(Runnable processChildren) {
-    try {
-      workspace
-          .fireEvents(
-              LIFECYLE,
-              this,
-              () -> lifecycleState.set(ExperimentLifecycleState.PROCESSING));
-    } catch (CancellationException e) {
-      throw new ExperimentException(format("Experiment processing cancelled %s", this), e);
-    }
+    setLifecycleState(ExperimentLifecycleState.PROCESSING, false);
 
     if (parent != null) {
       if (!type.mayComeAfter(parent.type)) {
@@ -353,18 +351,30 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
     }
 
     try {
-      workspace
-          .fireEvents(
-              LIFECYLE,
-              this,
-              () -> lifecycleState.set(ExperimentLifecycleState.COMPLETION));
+      synchronized (this) {
+        setLifecycleState(ExperimentLifecycleState.COMPLETION, false);
+      }
     } catch (CancellationException e) {
+      setLifecycleState(ExperimentLifecycleState.FAILURE, true);
       this.result.unsetValue();
       throw e;
     }
 
     if (!processedChildrenInline) {
       processChildren.run();
+    }
+  }
+
+  private void setLifecycleState(ExperimentLifecycleState lifecycleState, boolean forced) {
+    synchronized (this) {
+      if (this.lifecycleState != lifecycleState) {
+        workspace
+            .fireEvents(
+                () -> this.lifecycleState = lifecycleState,
+                singleton(
+                    new ExperimentLifecycleEventImpl(this, lifecycleState, this.lifecycleState)),
+                forced);
+      }
     }
   }
 
@@ -414,8 +424,8 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       @Override
       public void setResultFormat(String name, DataFormat<T> format) {
         try {
-          resultData = new SimpleData<>(getLocation(), name, format);
-        } catch (IOException e) {
+          resultData = Data.locate(getLocation(), name, format);
+        } catch (DataException e) {
           new ExperimentException("Cannot persist result at location " + getLocation(), e);
         }
       }
@@ -472,10 +482,10 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       return;
 
     } else if (!Objects.equals(ExperimentNodeImpl.this.state, state)) {
-      workspace.fireEvents(STATE, ExperimentNodeImpl.this, () -> {
+      workspace.fireEvents(() -> {
         persistedState = state;
         return null;
-      });
+      }, new ExperimentStateEventImpl(this, state, persistedState));
     }
   }
 
@@ -490,7 +500,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
       throw new ExperimentException(format("Experiment name already exists %s", id));
 
     } else {
-      workspace.fireEvents(RENAME, this, () -> {
+      workspace.fireEvents(() -> {
         try {
           if (resultStorage != null) {
             resultStorage = getExperiment()
@@ -502,7 +512,7 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
         } catch (IOException e) {
           throw new ExperimentException(format("Failed to set experiment name %s", id));
         }
-      });
+      }, new RenameExperimentEventImpl(this, id, this.id));
     }
   }
 
@@ -512,12 +522,17 @@ public class ExperimentNodeImpl<S, T> implements ExperimentNode<S, T> {
   }
 
   @Override
-  public void clearResult() {
-    workspace.fireEvents(LIFECYLE, this, () -> {
-      clearResultImpl();
-      lifecycleState.set(CONFIGURATION);
-      return null;
-    });
+  public synchronized void clearResult() {
+    if (lifecycleState == PROCESSING || lifecycleState == WAITING) {
+      throw invalidLifecycleStateException();
+    }
+    clearResultImpl();
+    setLifecycleState(CONFIGURATION, false);
+  }
+
+  private ExperimentException invalidLifecycleStateException() {
+    return new ExperimentException(
+        format("Experiment %s is in invalid lifecycle state %s", this, lifecycleState));
   }
 
   protected void clearResultImpl() {

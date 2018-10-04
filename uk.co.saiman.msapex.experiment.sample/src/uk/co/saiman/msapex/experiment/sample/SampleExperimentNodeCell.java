@@ -33,22 +33,21 @@ import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
-import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.sample.SampleConfiguration;
 
-public class SampleExperimentNodeCellContribution {
-  public static final String ID = "uk.co.saiman.experiment.sample.cell";
-
+public class SampleExperimentNodeCell {
   @Optional
   @PostConstruct
   public void prepare(
       Cell cell,
-      @AdaptClass(ExperimentNode.class) SampleConfiguration data,
+      SampleConfiguration data,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
+    cell = (Cell) (MUIElement) cell.getParent();
+
     cell.setLabel(data.getName());
     cell
         .setIconURI(

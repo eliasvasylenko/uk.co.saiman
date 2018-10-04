@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:saiman.ui="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui" xmi:id="_s4RqILsfEeiHnPV1KwXwsQ">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_xQJCQLsfEeiHnPV1KwXwsQ" featurename="contributions" parentElementId="uk.co.saiman.msapex.experiment.cell.node">
-    <elements xsi:type="saiman.ui:CellContribution" xmi:id="_eNSm8LsgEeiHnPV1KwXwsQ" elementId="uk.co.saiman.msapex.experiment.sample.cellcontribution" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.sample/uk.co.saiman.msapex.experiment.sample.SampleExperimentNodeCellContribution"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_JSM3gMGLEei_zvpki5Htzg" featurename="children" parentElementId="uk.co.saiman.msapex.experiment.cell.node">
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_M_5RQMGLEei_zvpki5Htzg" label="Sample" elementId="uk.co.saiman.msapex.experiment.sample.cell" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.sample/uk.co.saiman.msapex.experiment.sample.SampleExperimentNodeCell" visible="false" contextValue="uk.co.saiman.experiment.sample.SampleConfiguration"/>
   </fragments>
 </fragment:ModelFragments>

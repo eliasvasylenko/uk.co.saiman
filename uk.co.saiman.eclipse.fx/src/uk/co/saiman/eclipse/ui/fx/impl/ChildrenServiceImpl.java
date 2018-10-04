@@ -42,8 +42,6 @@ import java.util.function.Consumer;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
@@ -54,8 +52,6 @@ import uk.co.saiman.eclipse.model.ui.Tree;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 
 public class ChildrenServiceImpl implements ChildrenService {
-  @Inject
-  private IEclipseContext context;
   @Inject
   private EModelService models;
   @Inject
@@ -131,7 +127,10 @@ public class ChildrenServiceImpl implements ChildrenService {
 
   private void setChildren(String id, Collection<Cell> newChildren) {
     List<Cell> children = getChildren(id);
-    children.forEach(c -> c.setParent(null));
+    children.forEach(c -> {
+      c.setToBeRendered(false);
+      c.setParent(null);
+    });
     children.clear();
 
     parent().getChildren().addAll(newChildren);
@@ -149,7 +148,6 @@ public class ChildrenServiceImpl implements ChildrenService {
     Cell model = readyModel(id, contextName, child);
     model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super T>) value -> {
       update.accept(value);
-      invalidate();
     });
     setChild(id, model);
   }
@@ -174,7 +172,6 @@ public class ChildrenServiceImpl implements ChildrenService {
       Map<String, Object> data = model.getTransientData();
       data.put(UIAddon.CHILD_CONTEXT_VALUES_SET, (Consumer<? super List<? extends T>>) value -> {
         update.accept(value);
-        invalidate();
       });
       data.put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super T>) value -> {
         List<T> newChildren = new ArrayList<>(children);
@@ -183,18 +180,11 @@ public class ChildrenServiceImpl implements ChildrenService {
         } else {
           newChildren.set(index, value);
         }
+        // the following line is so we know to re-use the model element in #readyModel
+        model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, value);
         update.accept(newChildren);
-        invalidate();
       });
     }
     setChildren(id, models);
-  }
-
-  @Override
-  public void invalidate() {
-    context
-        .modify(
-            ChildrenService.class,
-            ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
   }
 }

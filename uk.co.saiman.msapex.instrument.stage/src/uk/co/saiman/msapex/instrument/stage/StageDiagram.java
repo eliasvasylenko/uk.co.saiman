@@ -52,14 +52,8 @@ import uk.co.saiman.msapex.annotations.XYAnnotation;
  * 
  * @author Elias N Vasylenko
  *
- * @param <X>
- *          the unit of the X axis of the diagram in the UI
- * @param <Y>
- *          the unit of the Y axis of the diagram in the UI
- * @param <A>
- *          the unit of the first axis of the stage
- * @param <B>
- *          the unit of the second axis of the stage
+ * @param <T>
+ *          the coordinate type of the stage
  */
 public abstract class StageDiagram<T> {
   private Image image;

@@ -57,8 +57,6 @@ public interface ExperimentProperties {
       return lifecycleStateDetached();
     case FAILURE:
       return lifecycleStatefailure();
-    case PREPARATION:
-      return lifecycleStatePreparation();
     case PROCESSING:
       return lifecycleStateProcessing();
     case WAITING:
@@ -74,8 +72,6 @@ public interface ExperimentProperties {
   Localized<String> lifecycleStateDetached();
 
   Localized<String> lifecycleStatefailure();
-
-  Localized<String> lifecycleStatePreparation();
 
   Localized<String> lifecycleStateProcessing();
 

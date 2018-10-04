@@ -36,19 +36,23 @@ import static uk.co.saiman.eclipse.ui.fx.TransferModes.fromJavaFXTransferMode;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.beans.InvalidationListener;
 import javafx.css.PseudoClass;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.EditableCell;
+import uk.co.saiman.eclipse.ui.SaiUiModel;
 import uk.co.saiman.eclipse.ui.TransferDestination;
 import uk.co.saiman.eclipse.ui.fx.TransferCellIn;
 import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 import uk.co.saiman.eclipse.ui.fx.TransferModes;
-import uk.co.saiman.fx.FxUtilities;
+import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 
 /**
  * A basic tree cell implementation for use with {@link TreeItem}. This class
@@ -68,10 +72,6 @@ public class TreeCellImpl extends TreeCell<Cell> {
   private TransferCellOut dragCandidate;
   private final Map<TransferDestination, TransferCellIn> dropCandidates = new HashMap<>();
 
-  /**
-   * Load a new instance from the FXML located according to
-   * {@link FxUtilities#getResource(Class)} for this class.
-   */
   public TreeCellImpl() {
     getStyleClass().add(STYLE_CLASS);
     initializeEvents();
@@ -79,13 +79,31 @@ public class TreeCellImpl extends TreeCell<Cell> {
 
   @Override
   protected void updateItem(Cell data, boolean empty) {
+    Cell previousData = getItem();
+    if (previousData != null && previousData.getWidget() != null) {
+      ((WCell<?>) previousData.getWidget()).setIsEditingCallback(null);
+    }
     super.updateItem(data, empty);
+    if (data != null) {
+      ((WCell<?>) data.getWidget()).setIsEditingCallback(this::editingChanged);
+    }
 
     if (empty || data == null) {
       clearItem();
     } else {
-      updateItem();
-      commitEdit(data);
+      updateItem(data);
+    }
+  }
+
+  private void editingChanged(boolean editing) {
+    if (editing) {
+      startEdit();
+    } else {
+      if (getItem().getTags().contains(SaiUiModel.EDIT_CANCELED)) {
+        cancelEdit();
+      } else {
+        commitEdit(getItem());
+      }
     }
   }
 
@@ -94,9 +112,9 @@ public class TreeCellImpl extends TreeCell<Cell> {
     setEditable(false);
   }
 
-  private <T> void updateItem() {
+  private <T> void updateItem(Cell data) {
     setGraphic(getTreeItem().getGraphic());
-    setEditable(getModularTreeItem().isEditable());
+    setEditable(data instanceof EditableCell);
   }
 
   private void initializeEvents() {
@@ -230,29 +248,50 @@ public class TreeCellImpl extends TreeCell<Cell> {
     return (TreeItemImpl) getTreeItem();
   }
 
+  private InvalidationListener defocusListener = i -> {
+    if (!getTreeView().isFocused()) {
+      Node node = getTreeView().getScene().getFocusOwner();
+
+      do {
+        if (node == TreeCellImpl.this) {
+          return;
+        }
+      } while ((node = node.getParent()) != null);
+
+      cancelEdit();
+    }
+  };
+
   @Override
   public void startEdit() {
+    if (isEditing())
+      return;
+
     super.startEdit();
-    if (this.isEditing()) {
-      getModularTreeItem().editingStarted(this::cancelEdit);
+
+    if (isEditing()) {
+      getScene().focusOwnerProperty().addListener(defocusListener);
+      getModularTreeItem().editingStarted();
     }
   }
 
   @Override
   public void commitEdit(Cell newValue) {
-    boolean editing = this.isEditing();
+    if (!isEditing())
+      return;
+
     super.commitEdit(newValue);
-    if (editing) {
-      getModularTreeItem().editingComplete();
-    }
+    getScene().focusOwnerProperty().removeListener(defocusListener);
+    getModularTreeItem().editingComplete();
   }
 
   @Override
   public void cancelEdit() {
-    boolean editing = this.isEditing();
+    if (!isEditing())
+      return;
+
     super.cancelEdit();
-    if (editing) {
-      getModularTreeItem().editingCancelled();
-    }
+    getScene().focusOwnerProperty().removeListener(defocusListener);
+    getModularTreeItem().editingCancelled();
   }
 }
