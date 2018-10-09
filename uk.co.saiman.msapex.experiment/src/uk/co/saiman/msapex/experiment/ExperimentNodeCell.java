@@ -54,16 +54,15 @@ import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.experiment.AttachNodeEvent;
+import uk.co.saiman.experiment.DetachNodeEvent;
+import uk.co.saiman.experiment.ExperimentLifecycleEvent;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.WorkspaceEvent.AddExperimentEvent;
-import uk.co.saiman.experiment.WorkspaceEvent.ExperimentLifecycleEvent;
-import uk.co.saiman.experiment.WorkspaceEvent.MoveExperimentEvent;
-import uk.co.saiman.experiment.WorkspaceEvent.RemoveExperimentEvent;
-import uk.co.saiman.experiment.WorkspaceEvent.RenameExperimentEvent;
+import uk.co.saiman.experiment.RenameNodeEvent;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorService;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -138,7 +137,7 @@ public class ExperimentNodeCell {
         .getAdapter(c.get(ExperimentNode.class), k);
     StreamUtilities
         .<Class<?>>flatMapRecursive(
-            experiment.getState().getClass(),
+            experiment.getVariables().getClass(),
             t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())))
         .forEach(type -> context.set(type.getName(), configurationFunction));
 
@@ -155,7 +154,7 @@ public class ExperimentNodeCell {
 
   @Inject
   @Optional
-  public void update(RenameExperimentEvent event) {
+  public void update(RenameNodeEvent event) {
     if (event.node() == experiment) {
       cell.setLabel(event.id());
     }
@@ -171,7 +170,7 @@ public class ExperimentNodeCell {
 
   @Inject
   @Optional
-  public void update(AddExperimentEvent event) {
+  public void update(AttachNodeEvent event) {
     if (event.parent().filter(experiment::equals).isPresent()) {
       updateChildren();
     }
@@ -179,16 +178,8 @@ public class ExperimentNodeCell {
 
   @Inject
   @Optional
-  public void update(RemoveExperimentEvent event) {
+  public void update(DetachNodeEvent event) {
     if (event.previousParent().filter(experiment::equals).isPresent()) {
-      updateChildren();
-    }
-  }
-
-  @Inject
-  @Optional
-  public void update(MoveExperimentEvent event) {
-    if (event.previousParent() == experiment || event.parent() == experiment) {
       updateChildren();
     }
   }

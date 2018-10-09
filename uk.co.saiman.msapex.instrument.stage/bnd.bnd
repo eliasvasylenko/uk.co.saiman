@@ -16,6 +16,7 @@ Bundle-Name: SAI :: MSApex :: Stage
 	uk.co.saiman.utilities;version=snapshot,\
 \
 	uk.co.saiman.msapex;version=snapshot,\
+	uk.co.saiman.msapex.instrument.sample;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
@@ -27,8 +28,11 @@ Bundle-Name: SAI :: MSApex :: Stage
 \
 	javax.measure.unit-api
 
-Export-Package: uk.co.saiman.msapex.instrument.stage
+Export-Package:\
+	uk.co.saiman.msapex.instrument.stage,\
+	uk.co.saiman.msapex.instrument.stage.i18n
 
 -includeresource: \
 	res,\
+	l10n,\
 	{css=css}

@@ -45,7 +45,6 @@ import javax.inject.Named;
 
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -54,16 +53,16 @@ import uk.co.saiman.data.Data;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.ExperimentProperties;
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentEvent;
+import uk.co.saiman.experiment.ExperimentEventKind;
+import uk.co.saiman.experiment.ExperimentProcedure;
+import uk.co.saiman.experiment.FullProcedure;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.WorkspaceEvent;
-import uk.co.saiman.experiment.WorkspaceEventKind;
 import uk.co.saiman.experiment.state.JsonStateMapFormat;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
 /**
  * Addon for registering an experiment workspace in the root application
@@ -93,17 +92,15 @@ public class WorkspaceAddon {
 
   @Inject
   @Service
-  Workspace workspace;
-  @Inject
-  @Service
-  List<ExperimentType<?, ?>> experimentTypes;
+  volatile List<ExperimentProcedure<?, ?>> experimentTypes;
 
   @Inject
   @Named(INSTANCE_LOCATION)
   Location instanceLocation;
   private uk.co.saiman.data.resource.Location workspaceRoot;
 
-  private Map<Experiment, Data<StateMap>> experiments = new HashMap<>();
+  private final Workspace workspace = new Workspace();
+  private final Map<Experiment, Data<StateMap>> experiments = new HashMap<>();
 
   @PostConstruct
   void initialize() throws URISyntaxException {
@@ -122,47 +119,43 @@ public class WorkspaceAddon {
      * Inject events
      */
     workspace.events().weakReference(this).observe(o -> {
-      o.owner().context.set(WorkspaceEvent.class, o.message());
-      o.owner().context.remove(WorkspaceEvent.class);
+      o.owner().context.set(ExperimentEvent.class, o.message());
+      o.owner().context.remove(ExperimentEvent.class);
       o.owner().context.set(o.message().kind().type().getName(), o.message());
       o.owner().context.remove(o.message().kind().type().getName());
     });
   }
 
-//  @Inject
-//  @Optional
-  public void saveExperiment(WorkspaceEvent event) {
-    if (event.node().getLifecycleState() != ExperimentLifecycleState.DETACHED) {
-      try {
-        Experiment experiment = event.node().getExperiment();
-
+  // @Inject
+  // @Optional
+  public void saveExperiment(ExperimentEvent event) {
+    try {
+      event.node().getExperiment().ifPresent(experiment -> {
         Data<StateMap> data = experiments
             .computeIfAbsent(
                 experiment,
                 e -> Data.locate(workspaceRoot, experiment.getId(), new JsonStateMapFormat()));
 
-        if (event.kind() == WorkspaceEventKind.RENAME) {
+        if (event.kind() == ExperimentEventKind.RENAME) {
           data.relocate(workspaceRoot, event.node().getId());
         }
 
         data.set(experiment.getStateMap());
         data.save();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      });
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
-  private Stream<ExperimentType<?, ?>> getExperimentTypes() {
-    return concat(
-        Stream.of(workspace.getExperimentRootType()),
-        new ArrayList<>(experimentTypes).stream());
+  private Stream<ExperimentProcedure<?, ?>> getExperimentTypes() {
+    return new ArrayList<>(experimentTypes).stream();
   }
 
   private void initializeAdapters() {
     experimentNodeAdapterFactory = new ExperimentNodeAdapterFactory(
         adapterManager,
-        this::getExperimentTypes);
+        () -> concat(Stream.of(FullProcedure.instance()), getExperimentTypes()));
     experimentAdapterFactory = new ExperimentAdapterFactory(
         adapterManager,
         experimentNodeAdapterFactory);

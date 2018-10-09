@@ -56,12 +56,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.acquisition.AcquisitionProperties;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 import uk.co.saiman.msapex.chart.MetricTickUnits;
 import uk.co.saiman.msapex.chart.QuantityAxis;
+import uk.co.saiman.msapex.instrument.acquisition.i18n.AcquisitionProperties;
 
 /**
  * An Eclipse part for management and display of acquisition devices.

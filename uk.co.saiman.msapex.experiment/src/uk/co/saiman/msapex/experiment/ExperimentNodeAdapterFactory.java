@@ -43,17 +43,17 @@ import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentProcedure;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
-  private final Supplier<? extends Stream<? extends ExperimentType<?, ?>>> experimentTypes;
+  private final Supplier<? extends Stream<? extends ExperimentProcedure<?, ?>>> experimentTypes;
 
   public ExperimentNodeAdapterFactory(
       IAdapterManager adapterManager,
-      Supplier<? extends Stream<? extends ExperimentType<?, ?>>> experimentTypes) {
+      Supplier<? extends Stream<? extends ExperimentProcedure<?, ?>>> experimentTypes) {
     this.adapterManager = adapterManager;
     this.experimentTypes = experimentTypes;
     adapterManager.registerAdapters(this, ExperimentNode.class);
@@ -68,8 +68,8 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
     ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) adaptableObject;
 
-    if (adapterType.isAssignableFrom(ExperimentType.class)) {
-      return (T) node.getType();
+    if (adapterType.isAssignableFrom(ExperimentProcedure.class)) {
+      return (T) node.getProcedure();
     }
 
     if (adapterType.isAssignableFrom(Experiment.class)) {
@@ -81,12 +81,12 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
     }
 
     if (adapterType.isAssignableFrom(Result.class)
-        && node.getType().getResultType().getErasedType() != void.class) {
+        && node.getProcedure().getResultType().getErasedType() != void.class) {
       return (T) node.getResult();
     }
 
-    if (adapterType.isAssignableFrom(node.getType().getStateType().getErasedType())) {
-      return (T) node.getState();
+    if (adapterType.isAssignableFrom(node.getProcedure().getVariablesType().getErasedType())) {
+      return (T) node.getVariables();
     }
 
     if (adapterType.isAssignableFrom(node.getResult().getType().getErasedType())) {
@@ -95,16 +95,16 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
         return (T) value.get();
     }
 
-    return (T) adapterManager.loadAdapter(node.getState(), adapterType.getName());
+    return (T) adapterManager.loadAdapter(node.getVariables(), adapterType.getName());
   }
 
   @Override
   public Class<?>[] getAdapterList() {
     return concat(
-        of(ExperimentType.class, Experiment.class, Workspace.class, Result.class),
+        of(ExperimentProcedure.class, Experiment.class, Workspace.class, Result.class),
         experimentTypes
             .get()
-            .map(type -> type.getStateType().getErasedType())
+            .map(type -> type.getVariablesType().getErasedType())
             .flatMap(this::getTransitive)).toArray(Class<?>[]::new);
   }
 

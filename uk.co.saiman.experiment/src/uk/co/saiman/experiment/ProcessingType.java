@@ -32,7 +32,7 @@ import static uk.co.saiman.reflection.token.TypeToken.forType;
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public interface ProcessingType<S, T, U> extends ExperimentType<S, U> {
+public interface ProcessingType<S, T, U> extends ExperimentProcedure<S, U> {
   @Override
   default boolean hasAutomaticExecution() {
     return true;
@@ -44,7 +44,7 @@ public interface ProcessingType<S, T, U> extends ExperimentType<S, U> {
   }
 
   @Override
-  default boolean mayComeAfter(ExperimentType<?, ?> parentType) {
+  default boolean mayComeAfter(ExperimentProcedure<?, ?> parentType) {
     return parentType.getResultType().isAssignableTo(getInputType());
   }
 
@@ -52,7 +52,7 @@ public interface ProcessingType<S, T, U> extends ExperimentType<S, U> {
   default U process(ProcessingContext<S, U> context) {
     @SuppressWarnings("unchecked")
     T input = (T) context.node().getParent().flatMap(p -> p.getResult().getValue()).orElse(null);
-    return process(context.node().getState(), input);
+    return process(context.node().getVariables(), input);
   }
 
   U process(S state, T input);

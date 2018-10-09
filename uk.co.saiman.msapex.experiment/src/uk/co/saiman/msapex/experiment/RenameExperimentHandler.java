@@ -52,8 +52,8 @@ import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.properties.Localized;
 import uk.co.saiman.utility.Named;
 
@@ -68,7 +68,7 @@ public class RenameExperimentHandler {
       Workspace workspace,
       @Localize ExperimentProperties text,
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> node) {
-    Object state = node.getState();
+    Object state = node.getVariables();
     if (state instanceof Named) {
       Named named = (Named) state;
 
@@ -109,7 +109,7 @@ public class RenameExperimentHandler {
 
       boolean exists = workspace
           .getExperiments()
-          .anyMatch(e -> e.getState().getName().equals(newValue));
+          .anyMatch(e -> e.getVariables().getName().equals(newValue));
 
       boolean isValid = ExperimentConfiguration.isNameValid(newValue);
 

@@ -88,7 +88,7 @@ public interface ResultStore {
 
   /**
    * Get the arranged storage location for a node. Subsequent invocations may
-   * return a different location after certain {@link WorkspaceEvent workspace
+   * return a different location after certain {@link ExperimentEvent workspace
    * events}, in which case an invocation of
    * {@link #relocateStorage(ExperimentNode, Storage)} is required in order to
    * move the data to the appropriate location.

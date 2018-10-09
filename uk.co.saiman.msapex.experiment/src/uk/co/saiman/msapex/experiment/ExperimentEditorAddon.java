@@ -50,12 +50,12 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.reflection.token.TypeToken;
 
 /**
@@ -89,8 +89,8 @@ public class ExperimentEditorAddon implements EditorProvider {
     }
 
     public boolean isCompatible(ExperimentNode<?, ?> experiment) {
-      if (!isClassNameCompatible(stateClass, experiment.getType().getStateType())
-          || !isClassNameCompatible(resultClass, experiment.getType().getResultType()))
+      if (!isClassNameCompatible(stateClass, experiment.getProcedure().getVariablesType())
+          || !isClassNameCompatible(resultClass, experiment.getProcedure().getResultType()))
         return false;
 
       return true;

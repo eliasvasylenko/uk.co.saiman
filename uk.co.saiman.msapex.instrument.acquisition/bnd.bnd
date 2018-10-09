@@ -27,10 +27,13 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 \
 	javax.measure.unit-api
 
-Export-Package: uk.co.saiman.msapex.instrument.acquisition
+Export-Package:\
+	uk.co.saiman.msapex.instrument.acquisition,\
+	uk.co.saiman.msapex.instrument.acquisition.i18n
 
 -includeresource: \
 	{always.e4xmi},\
 	{initial.e4xmi},\
 	res,\
+	l10n,\
 	{css=css}

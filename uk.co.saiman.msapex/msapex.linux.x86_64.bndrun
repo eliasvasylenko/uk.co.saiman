@@ -155,7 +155,6 @@ runplatform: linux64
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
-	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\

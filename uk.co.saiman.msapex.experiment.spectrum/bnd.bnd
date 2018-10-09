@@ -38,8 +38,10 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 	javax.measure.unit-api
 
 Export-Package: \
-	uk.co.saiman.msapex.experiment.spectrum
+	uk.co.saiman.msapex.experiment.spectrum,\
+	uk.co.saiman.msapex.experiment.spectrum.i18n
 
 -includeresource:\
 	res,\
+	l10n,\
 	{always.e4xmi}

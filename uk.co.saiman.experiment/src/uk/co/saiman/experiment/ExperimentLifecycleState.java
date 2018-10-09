@@ -55,7 +55,7 @@ public enum ExperimentLifecycleState {
   FAILURE,
 
   /**
-   * The experiment node is not detached from the workspace
+   * The experiment node is not attached to a root experiment
    */
   DETACHED
 }

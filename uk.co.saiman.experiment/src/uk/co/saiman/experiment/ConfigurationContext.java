@@ -36,7 +36,7 @@ import uk.co.saiman.experiment.state.StateMap;
  * The context of an experiment node's initial configuration. When a workspace
  * is requested to create an experiment node of a given type, this context is
  * instantiated and passed to the experiment type implementation via
- * {@link ExperimentType#createState(ConfigurationContext)}.
+ * {@link ExperimentProcedure#configureVariables(ConfigurationContext)}.
  * <p>
  * In other words, each {@link ExperimentNode} has only one
  * {@link ConfigurationContext} associated with it when it is created. The
@@ -65,7 +65,7 @@ public interface ConfigurationContext<T> {
    * to the given default if it is not already set.
    * <p>
    * If the node is newly created an id must be set before the end of
-   * {@link ExperimentType#createState(ConfigurationContext)}. If the node is
+   * {@link ExperimentProcedure#configureVariables(ConfigurationContext)}. If the node is
    * loaded from the persisted workspace, it is strongly recommended that it keep
    * the previously ID, as per the behavior of this method.
    * 
@@ -75,9 +75,9 @@ public interface ConfigurationContext<T> {
 
   /**
    * Set the ID of the node. The ID must be unique amongst all sibling nodes of
-   * the same {@link ExperimentType experiment type}.
+   * the same {@link ExperimentProcedure experiment type}.
    * <p>
-   * Typically the ID may be used to determine the location of {@link #state()
+   * Typically the ID may be used to determine the location of {@link #stateMap()
    * persisted state} of an experiment, and so changing the ID may result in the
    * movement or modification of data.
    * 
@@ -98,11 +98,11 @@ public interface ConfigurationContext<T> {
    * 
    * @return a map containing persisted key/value pairs
    */
-  StateMap state();
+  StateMap stateMap();
 
   void update(StateMap state);
 
   default void update(Function<? super StateMap, ? extends StateMap> function) {
-    update(function.apply(state()));
+    update(function.apply(stateMap()));
   }
 }

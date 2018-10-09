@@ -35,8 +35,6 @@ import static uk.co.saiman.acquisition.adq.RevisionInformation.MIXED;
 import static uk.co.saiman.acquisition.adq.RevisionInformation.SVN_MANAGED;
 import static uk.co.saiman.acquisition.adq.RevisionInformation.SVN_UPDATED;
 
-import java.nio.ByteBuffer;
-
 import org.osgi.service.component.annotations.Component;
 
 import com.sun.jna.Library;

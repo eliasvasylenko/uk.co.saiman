@@ -23,7 +23,6 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
-	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
@@ -33,17 +32,14 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	javax.measure.unit-api,\
 	org.eclipse.emf.common
 
-#Private-Package: \
-#	uk.co.saiman.msapex.experiment,\
-#	uk.co.saiman.msapex.experiment.treecontributions
-
 Export-Package: \
 	uk.co.saiman.msapex.experiment,\
-	uk.co.saiman.msapex.experiment.locations,\
-	uk.co.saiman.msapex.experiment.treecontributions
+	uk.co.saiman.msapex.experiment.i18n,\
+	uk.co.saiman.msapex.experiment.locations
 
 -includeresource:\
 	{css=css},\
 	res,\
+	l10n,\
 	{always.e4xmi},\
 	{initial.e4xmi}

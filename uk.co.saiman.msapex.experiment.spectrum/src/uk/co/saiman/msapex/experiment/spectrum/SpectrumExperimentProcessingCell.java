@@ -43,17 +43,17 @@ import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.WorkspaceEvent;
+import uk.co.saiman.experiment.ExperimentEvent;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessorConfiguration;
-import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
+import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
 import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
 
 public class SpectrumExperimentProcessingCell {
   @Inject
   private ExperimentNode<?, ?> experiment;
   @Inject
-  private SpectrumResultConfiguration state;
+  private SpectrumProcessingConfiguration state;
   @Inject
   private ChildrenService children;
 
@@ -61,7 +61,7 @@ public class SpectrumExperimentProcessingCell {
   public void prepare(Cell cell, @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
     Cell parent = (Cell) (MUIElement) cell.getParent();
 
-    parent.setLabel(experiment.getType().getName());
+    parent.setLabel(experiment.getProcedure().getId());
     supplemental.setText(state.getSpectrumName());
 
     updateChildren();
@@ -69,7 +69,7 @@ public class SpectrumExperimentProcessingCell {
 
   @Inject
   @Optional
-  public void update(WorkspaceEvent event) {
+  public void update(ExperimentEvent event) {
     if (event.node() == experiment) {
       switch (event.kind()) {
       case STATE:

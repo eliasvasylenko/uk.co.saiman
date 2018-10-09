@@ -153,7 +153,11 @@ public class ExperimentPath {
 
   public ExperimentNode<?, ?> resolve(ExperimentNode<?, ?> node) {
     if (isAbsolute())
-      return resolve(node.getWorkspace());
+      return resolve(
+          node
+              .getWorkspace()
+              .orElseThrow(
+                  () -> new ExperimentException("Cannot resolve absolute path for detached node")));
 
     Optional<ExperimentNode<?, ?>> result = Optional.of(node);
 

@@ -47,6 +47,6 @@ public class RemoveNodeHandler {
      * experiment node data would be copied out into an undo history so it could be
      * put back.
      */
-    selectedNode.remove();
+    selectedNode.getParent().ifPresent(parent -> parent.detach(selectedNode));
   }
 }

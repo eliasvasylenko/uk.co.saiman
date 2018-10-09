@@ -27,10 +27,89 @@
  */
 package uk.co.saiman.experiment;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
-public interface Experiment extends ExperimentNode<ExperimentConfiguration, Void> {
-  default int getIndex() {
-    return getWorkspace().getExperiments().collect(toList()).indexOf(this);
+import java.util.Optional;
+
+import uk.co.saiman.experiment.state.StateMap;
+
+public class Experiment extends ExperimentNode<ExperimentConfiguration, Void> {
+  private final ResultStore store;
+
+  private Workspace workspace;
+
+  public Experiment(String id, ResultStore store) {
+    this(id, StateMap.empty(), store);
+  }
+
+  public Experiment(String id, StateMap stateMap, ResultStore store) {
+    this(FullProcedure.instance(), id, stateMap, store);
+  }
+
+  protected Experiment(FullProcedure procedure, String id, StateMap stateMap, ResultStore store) {
+    super(procedure, id, stateMap);
+    this.store = store;
+  }
+
+  @Override
+  void fireEvent(ExperimentEvent event) {
+    super.fireEvent(event);
+    if (workspace != null) {
+      workspace.fireEvent(event);
+    }
+  }
+
+  public ResultStore getResultStore() {
+    return store;
+  }
+
+  @Override
+  public int getIndex() {
+    return getWorkspace().get().getExperiments().collect(toList()).indexOf(this);
+  }
+
+  @Override
+  public Optional<Workspace> getWorkspace() {
+    return Optional.ofNullable(workspace);
+  }
+
+  void addExperimentTo(Workspace workspace) {
+    lockExperiment().run(() -> {
+      workspace.getExperiments().forEach(child -> {
+        if (child.getId().equals(getId())) {
+          throw new ExperimentException(
+              format(
+                  "Experiment node with id %s already attached in workspace %s",
+                  getId(),
+                  workspace));
+        }
+      });
+
+      Workspace previousWorkspace = this.workspace;
+      this.workspace = workspace;
+      workspace.addExperimentImpl(this);
+
+      if (previousWorkspace != null) {
+        previousWorkspace.removeExperimentImpl(this);
+
+        RemoveExperimentEvent removeEvent = new RemoveExperimentEvent(this, previousWorkspace);
+        fireEventLocal(removeEvent);
+        previousWorkspace.fireEvent(removeEvent);
+      }
+      fireEvent(new AddExperimentEvent(this, workspace));
+    });
+  }
+
+  void removeExperimentFrom(Workspace workspace) {
+    lockExperiment().run(() -> {
+      if (this.workspace == workspace) {
+        this.workspace = null;
+      }
+
+      RemoveExperimentEvent removeEvent = new RemoveExperimentEvent(this, workspace);
+      workspace.fireEvent(removeEvent);
+      fireEvent(removeEvent);
+    });
   }
 }

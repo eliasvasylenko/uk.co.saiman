@@ -2,9 +2,6 @@ Bundle-Name: SAI :: Experiment :: Chemical Map
 
 Export-Package: uk.co.saiman.experiment.chemicalmap
 
--includeresource:\
-	l10n
-
 -buildpath:\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

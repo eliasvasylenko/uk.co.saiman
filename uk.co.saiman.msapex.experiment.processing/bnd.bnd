@@ -23,7 +23,6 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
-	uk.co.saiman.experiment.provider;version=snapshot,\
 	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.experiment;version=snapshot,\
@@ -32,7 +31,9 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 \
 	javax.measure.unit-api
 
-Export-Package: uk.co.saiman.msapex.experiment.processing
+Export-Package:\
+	uk.co.saiman.msapex.experiment.processing,\
+	uk.co.saiman.msapex.experiment.processing.i18n
 
 -includeresource:\
 	{always.e4xmi}

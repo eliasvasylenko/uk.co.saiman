@@ -27,9 +27,13 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
 /**
@@ -37,48 +41,74 @@ import uk.co.saiman.observable.Observable;
  * by a hierarchy of nodes. The workspace provides an interface for managing
  * those experiments.
  * <p>
- * A workspace contains a register of {@link ExperimentType experiment types}.
- * Experiment nodes can be created according to these types.
+ * A workspace contains a register of {@link ExperimentProcedure experiment
+ * types}. Experiment nodes can be created according to these types.
  * 
  * @author Elias N Vasylenko
  */
-public interface Workspace {
-  /**
-   * @return the root experiment type
-   */
-  ExperimentRoot getExperimentRootType();
+public class Workspace {
+  private final Set<Experiment> experiments = new HashSet<>();
+
+  private final HotObservable<ExperimentEvent> events = new HotObservable<>();
+
+  void fireEvent(ExperimentEvent event) {
+    events.next(event);
+  }
+
+  public Observable<ExperimentEvent> events() {
+    return events;
+  }
 
   /**
    * Get all experiments of the {@link #getExperiments() root experiment type}.
    * 
    * @return all registered root experiment parts
    */
-  Stream<Experiment> getExperiments();
+  public Stream<Experiment> getExperiments() {
+    synchronized (experiments) {
+      return new ArrayList<>(experiments).stream();
+    }
+  }
 
-  Optional<Experiment> getExperiment(String id);
+  public Optional<Experiment> getExperiment(String id) {
+    synchronized (experiments) {
+      return getExperiments().filter(c -> c.getId().equals(id)).findAny();
+    }
+  }
 
   /**
    * Add a root experiment node to management.
    * 
-   * @param id
-   *          the name of the new experiment
-   * @param locationManager
-   *          the strategy for locating, reading, and writing experiment result
-   *          data
-   * @return a new root experiment part of the root type
+   * @param experiment
+   *          the experiment to add
    */
-  Experiment addExperiment(String id, ResultStore locationManager);
+  public synchronized void addExperiment(Experiment experiment) {
+    synchronized (experiments) {
+      if (experiments.contains(experiment)) {
+        return;
+      }
+    }
+    experiment.lockExperiment().run(() -> experiment.addExperimentTo(this));
+  }
 
-  /**
-   * @return an observable over workspace events in the given state
-   */
-  Observable<WorkspaceEvent> events(WorkspaceEventState state);
+  void addExperimentImpl(Experiment experiment) {
+    synchronized (experiments) {
+      experiments.add(experiment);
+    }
+  }
 
-  /**
-   * @return an observable over workspace events in the
-   *         {@link WorkspaceEventState#COMPLETED completed} state
-   */
-  default Observable<WorkspaceEvent> events() {
-    return events(WorkspaceEventState.COMPLETED);
+  public synchronized void removeExperiment(Experiment experiment) {
+    synchronized (experiments) {
+      if (!experiments.contains(experiment)) {
+        return;
+      }
+    }
+    experiment.lockExperiment().run(() -> experiment.removeExperimentFrom(this));
+  }
+
+  void removeExperimentImpl(Experiment experiment) {
+    synchronized (experiments) {
+      experiments.remove(experiment);
+    }
   }
 }

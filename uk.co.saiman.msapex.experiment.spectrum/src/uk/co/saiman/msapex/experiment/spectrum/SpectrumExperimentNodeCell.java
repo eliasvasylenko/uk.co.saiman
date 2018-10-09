@@ -30,16 +30,23 @@ package uk.co.saiman.msapex.experiment.spectrum;
 import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_TEXT;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
+import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
 
 public class SpectrumExperimentNodeCell {
+  @Inject
+  @Localize
+  SpectrumProperties properties;
+
   @PostConstruct
   public void prepare(
       Cell cell,
@@ -48,7 +55,7 @@ public class SpectrumExperimentNodeCell {
       SpectrumConfiguration state) {
     cell = (Cell) (MUIElement) cell.getParent();
 
-    cell.setLabel(data.getType().getName());
+    cell.setLabel(properties.spectrumExperimentName().get());
     cell
         .setIconURI(
             "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/spectrum.png");

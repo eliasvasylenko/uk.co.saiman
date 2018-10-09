@@ -37,8 +37,6 @@ import java.util.function.Function;
  * revalidated} to calculate the up-to-date state of the data.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T>
  */
 public interface Invalidation<T> {
   T revalidate();

@@ -43,22 +43,22 @@ import javafx.scene.control.ChoiceDialog;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProperties;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessorConfiguration;
-import uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration;
+import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.properties.Localized;
 
 public class AddProcessorHandler {
   @CanExecute
   boolean canExecute(
-      @Optional @AdaptClass(ExperimentNode.class) SpectrumResultConfiguration configuration) {
+      @Optional @AdaptClass(ExperimentNode.class) SpectrumProcessingConfiguration configuration) {
     return configuration != null;
   }
 
   @Execute
   void execute(
-      @AdaptClass(ExperimentNode.class) SpectrumResultConfiguration configuration,
+      @AdaptClass(ExperimentNode.class) SpectrumProcessingConfiguration configuration,
       @Service List<ProcessorConfiguration> processors,
       @Localize ExperimentProperties text) {
 
@@ -69,7 +69,7 @@ public class AddProcessorHandler {
             .ifPresent(processor -> addProcessor(configuration, processor));
   }
 
-  private void addProcessor(SpectrumResultConfiguration configuration, ProcessorConfiguration processor) {
+  private void addProcessor(SpectrumProcessingConfiguration configuration, ProcessorConfiguration processor) {
     configuration
         .setProcessing(
             new Processing(

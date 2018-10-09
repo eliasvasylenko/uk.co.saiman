@@ -43,7 +43,7 @@ import org.eclipse.fx.core.di.Service;
 
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentType;
+import uk.co.saiman.experiment.ExperimentProcedure;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -54,7 +54,7 @@ import uk.co.saiman.experiment.ExperimentType;
 public class AddNodeMenu {
   @Inject
   @Service
-  private List<ExperimentType<?, ?>> experimentTypes;
+  private List<ExperimentProcedure<?, ?>> experimentTypes;
 
   @AboutToShow
   void aboutToShow(
@@ -62,21 +62,21 @@ public class AddNodeMenu {
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode) {
     experimentTypes
         .stream()
-        .filter(t -> t.mayComeAfter(selectedNode.getType()))
+        .filter(t -> t.mayComeAfter(selectedNode.getProcedure()))
         .map(t -> createMenuItem(selectedNode, t))
         .forEach(items::add);
   }
 
   MDirectMenuItem createMenuItem(
       ExperimentNode<?, ?> selectedNode,
-      ExperimentType<?, ?> childType) {
+      ExperimentProcedure<?, ?> subProcedure) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-    moduleItem.setLabel(childType.getName());
+    moduleItem.setLabel(subProcedure.getId());
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute
       public void execute() {
-        selectedNode.addChild(childType);
+        selectedNode.attach(new ExperimentNode<>(subProcedure));
       }
     });
     return moduleItem;

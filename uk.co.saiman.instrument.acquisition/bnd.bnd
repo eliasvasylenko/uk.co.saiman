@@ -2,9 +2,6 @@ Bundle-Name: SAI :: Instrument :: Acquisition
 
 Export-Package: uk.co.saiman.acquisition
 
--includeresource: \
-	l10n
-
 -buildpath: \
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

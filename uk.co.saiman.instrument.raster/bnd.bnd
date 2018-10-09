@@ -2,9 +2,6 @@ Bundle-Name: SAI :: Instrument :: Raster
 
 Export-Package: uk.co.saiman.instrument.raster
 
--includeresource: \
-	l10n
-
 -buildpath: \
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

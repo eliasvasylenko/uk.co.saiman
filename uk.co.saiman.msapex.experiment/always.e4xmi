@@ -21,7 +21,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="saiman.ui:Cell" xmi:id="_gvEOwKuLEeioCuifABHnDQ" label="Experiment Node" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/node.png" elementId="uk.co.saiman.msapex.experiment.cell.node" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNodeCell" nullable="false">
-      <children xsi:type="saiman.ui:EditableCell" xmi:id="_KzXZQMDQEei5uP7Co-v20Q" label="Name" elementId="uk.co.saiman.msapex.experiment.editablecell.0" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNameCell" contextValue="uk.co.saiman.experiment.ExperimentConfiguration"/>
+      <children xsi:type="saiman.ui:EditableCell" xmi:id="_KzXZQMDQEei5uP7Co-v20Q" label="Name" elementId="uk.co.saiman.msapex.experiment.editablecell.name" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNameCell" contextValue="uk.co.saiman.experiment.ExperimentConfiguration"/>
       <children xsi:type="saiman.ui:Cell" xmi:id="_4nO6oLvaEei0KbRa7VpFDA" label="Result" elementId="uk.co.saiman.msapex.experiment.result.cell" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentResultCell">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_8DNSQLvaEei0KbRa7VpFDA" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentResultVisibleExpression"/>
       </children>

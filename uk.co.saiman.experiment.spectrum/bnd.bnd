@@ -2,9 +2,6 @@ Bundle-Name: SAI :: Experiment :: Spectrum
 
 Export-Package: uk.co.saiman.experiment.spectrum
 
--includeresource:\
-	l10n
-
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\

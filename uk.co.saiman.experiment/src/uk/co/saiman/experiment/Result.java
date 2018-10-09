@@ -28,8 +28,10 @@
 package uk.co.saiman.experiment;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -45,19 +47,68 @@ import uk.co.saiman.reflection.token.TypedReference;
  * it's cleaned up by GC?
  * 
  * TODO also consider that the data should still be loadable even if the
- * ExperimentNode type is {@link MissingExperimentType missing}.
+ * ExperimentNode type is {@link UnknownProcedure missing}.
  * 
  * @author Elias N Vasylenko
  *
  * @param <T>
  *          the data type of the result
  */
-public interface Result<T> {
-  ExperimentNode<?, ?> getExperimentNode();
+public class Result<T> {
+  private final ExperimentNode<?, T> node;
+  private Supplier<T> valueSupplier;
+  private T value;
 
-  TypeToken<T> getType();
+  private boolean dirty;
+  private final HotObservable<Result<T>> updates;
 
-  Optional<T> getValue();
+  public Result(ExperimentNode<?, T> node) {
+    this.node = node;
+    this.updates = new HotObservable<>();
+  }
+
+  public ExperimentNode<?, ?> getExperimentNode() {
+    return node;
+  }
+
+  private void update() {
+    if (!dirty) {
+      dirty = true;
+      updates.next(this);
+    }
+  }
+
+  void setValue(T value) {
+    synchronized (updates) {
+      this.value = value;
+      update();
+    }
+  }
+
+  void unsetValue() {
+    synchronized (updates) {
+      value = null;
+      update();
+    }
+  }
+
+  void setValueSupplier(Supplier<T> valueSupplier) {
+    synchronized (updates) {
+      this.valueSupplier = valueSupplier;
+      update();
+    }
+  }
+
+  public Optional<T> getValue() {
+    synchronized (updates) {
+      dirty = false;
+      if (valueSupplier != null) {
+        value = valueSupplier.get();
+        valueSupplier = null;
+      }
+      return Optional.ofNullable(value);
+    }
+  }
 
   /**
    * Observe updates to the result value. Update events are sent with
@@ -69,13 +120,19 @@ public interface Result<T> {
    * 
    * @return an observable over update events
    */
-  Observable<Result<T>> updates();
+  public Observable<Result<T>> updates() {
+    return updates;
+  }
 
-  default TypeToken<Result<T>> getThisTypeToken() {
+  public TypeToken<T> getType() {
+    return node.getProcedure().getResultType();
+  }
+
+  public TypeToken<Result<T>> getThisTypeToken() {
     return new TypeToken<Result<T>>() {}.withTypeArguments(new TypeArgument<T>(getType()) {});
   }
 
-  default TypedReference<Result<T>> asTypedObject() {
+  public TypedReference<Result<T>> asTypedObject() {
     return TypedReference.typedObject(getThisTypeToken(), this);
   }
 }

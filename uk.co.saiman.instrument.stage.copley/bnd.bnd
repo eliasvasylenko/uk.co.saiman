@@ -22,6 +22,3 @@ Bundle-Name: SAI :: Instrument :: Stage :: Copley
 
 Export-Package: \
 	uk.co.saiman.instrument.stage.copley
-
--includeresource: \
-	l10n

@@ -24,10 +24,13 @@ Bundle-Name: SAI :: MSApex :: Sample
 	uk.co.saiman.measurement;version=snapshot,\
 	javax.measure.unit-api
 
-Export-Package: uk.co.saiman.msapex.instrument.sample
+Export-Package: \
+	uk.co.saiman.msapex.instrument.sample,\
+	uk.co.saiman.msapex.instrument.sample.i18n
 
 -includeresource: \
 	{always.e4xmi},\
 	{initial.e4xmi},\
 	res,\
+	l10n,\
 	{css=css}

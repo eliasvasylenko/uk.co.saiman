@@ -32,8 +32,9 @@ import static uk.co.saiman.msapex.experiment.RenameExperimentHandler.requestExpe
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.ExperimentProperties;
+import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
 /**
  * Add an experiment to the workspace
@@ -47,11 +48,6 @@ public class AddExperimentHandler {
       @Localize ExperimentProperties text,
       WorkspaceResultStore store) {
     requestExperimentNameDialog(workspace, text.newExperiment(), text.newExperimentName())
-        .ifPresent(name -> {
-          // Path newLocation = workspace.getRootPath().resolve(name);
-          // TODO confirmOverwriteIfNecessary(newLocation, text);
-
-          workspace.addExperiment(name, store);
-        });
+        .ifPresent(name -> workspace.addExperiment(new Experiment(name, store)));
   }
 }

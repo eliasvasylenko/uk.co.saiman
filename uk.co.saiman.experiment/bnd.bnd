@@ -16,6 +16,3 @@ Export-Package: \
 	uk.co.saiman.experiment.filesystem,\
 	uk.co.saiman.experiment.path,\
 	uk.co.saiman.experiment.state
-
--includeresource: \
-	l10n

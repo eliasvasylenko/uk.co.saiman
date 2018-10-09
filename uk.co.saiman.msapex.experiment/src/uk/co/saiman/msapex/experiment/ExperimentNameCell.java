@@ -47,7 +47,7 @@ import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.WorkspaceEvent.RenameExperimentEvent;
+import uk.co.saiman.experiment.RenameNodeEvent;
 
 /**
  * Contribution for root experiment nodes in the experiment tree
@@ -85,7 +85,7 @@ public class ExperimentNameCell {
 
   @Inject
   @Optional
-  public void updateName(RenameExperimentEvent event) {
+  public void updateName(RenameNodeEvent event) {
     if (event.node() == experiment) {
       nameEditor.setText(event.id());
     }

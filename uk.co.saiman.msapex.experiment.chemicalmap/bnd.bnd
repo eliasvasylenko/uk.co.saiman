@@ -20,6 +20,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Chemical Map
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
@@ -30,9 +31,12 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Chemical Map
 \
 	javax.measure.unit-api
 
-Export-Package: uk.co.saiman.msapex.experiment.chemicalmap
+Export-Package:\
+	uk.co.saiman.msapex.experiment.chemicalmap,\
+	uk.co.saiman.msapex.experiment.chemicalmap.i18n
 
 -includeresource:\
 	{css=css},\
 	res,\
+	l10n,\
 	{always.e4xmi}

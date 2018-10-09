@@ -34,6 +34,7 @@ import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.Convolution;
+import uk.co.saiman.msapex.experiment.processing.i18n.ProcessingProperties;
 import uk.co.saiman.property.Property;
 
 public class ConvolutionCellContribution {
