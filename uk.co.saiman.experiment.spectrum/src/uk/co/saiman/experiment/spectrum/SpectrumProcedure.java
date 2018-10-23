@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.saiman.data.function.processing.DataProcessor.identity;
-
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -41,9 +39,8 @@ import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
-import uk.co.saiman.experiment.ExperimentProcedure;
-import uk.co.saiman.experiment.ProcessingContext;
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
+import uk.co.saiman.experiment.Procedure;
+import uk.co.saiman.experiment.ProcedureContext;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -56,7 +53,7 @@ import uk.co.saiman.experiment.processing.ProcessorConfiguration;
  *          the type of sample configuration for the instrument
  */
 public abstract class SpectrumProcedure<T extends SpectrumConfiguration>
-    implements ExperimentProcedure<T, Spectrum> {
+    implements Procedure<T, Spectrum> {
   private static final String SPECTRUM_DATA_NAME = "spectrum";
 
   protected abstract Unit<Mass> getMassUnit();
@@ -64,7 +61,7 @@ public abstract class SpectrumProcedure<T extends SpectrumConfiguration>
   public abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public Spectrum process(ProcessingContext<T, Spectrum> context) {
+  public Spectrum proceed(ProcedureContext<T, Spectrum> context) {
     System.out.println("create accumulator");
     AcquisitionDevice device = getAcquisitionDevice();
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
@@ -73,13 +70,7 @@ public abstract class SpectrumProcedure<T extends SpectrumConfiguration>
         device.getSampleIntensityUnits());
 
     System.out.println("prepare processing");
-    DataProcessor processing = context
-        .node()
-        .getVariables()
-        .getProcessing()
-        .processors()
-        .map(ProcessorConfiguration::getProcessor)
-        .reduce(identity(), DataProcessor::andThen);
+    DataProcessor processing = context.node().getVariables().getProcessing().getProcessor();
 
     System.out.println("fetching calibration");
     SpectrumCalibration calibration = new SpectrumCalibration() {

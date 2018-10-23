@@ -28,11 +28,11 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 
 import java.util.List;
-import java.util.stream.Stream;
+
+import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -40,16 +40,20 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 
 import javafx.scene.control.ChoiceDialog;
+import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
+import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.properties.Localized;
 
 public class AddProcessorHandler {
+  @Service
+  @Inject
+  private ProcessingService processingService;
+
   @CanExecute
   boolean canExecute(
       @Optional @AdaptClass(ExperimentNode.class) SpectrumProcessingConfiguration configuration) {
@@ -59,31 +63,27 @@ public class AddProcessorHandler {
   @Execute
   void execute(
       @AdaptClass(ExperimentNode.class) SpectrumProcessingConfiguration configuration,
-      @Service List<ProcessorConfiguration> processors,
       @Localize ExperimentProperties text) {
-
-    requestProcessorType(
-        processors,
-        text.addSpectrumProcessor(),
-        text.addSpectrumProcessorDescription())
-            .ifPresent(processor -> addProcessor(configuration, processor));
+    requestProcessorType(text.addSpectrumProcessor(), text.addSpectrumProcessorDescription())
+        .ifPresent(processor -> addProcessor(configuration, processor));
   }
 
-  private void addProcessor(SpectrumProcessingConfiguration configuration, ProcessorConfiguration processor) {
+  private <T extends DataProcessor> void addProcessor(
+      SpectrumProcessingConfiguration configuration,
+      Class<T> processor) {
     configuration
         .setProcessing(
-            new Processing(
-                concat(configuration.getProcessing().processors(), Stream.of(processor))
-                    .collect(toList())));
+            configuration.getProcessing().withStep(processingService.createProcessor(processor)));
   }
 
-  static java.util.Optional<ProcessorConfiguration> requestProcessorType(
-      @Service List<ProcessorConfiguration> processors,
+  private java.util.Optional<Class<? extends DataProcessor>> requestProcessorType(
       Localized<String> title,
       Localized<String> header) {
-    ChoiceDialog<ProcessorConfiguration> nameDialog = processors.isEmpty()
+    List<Class<? extends DataProcessor>> types = processingService.types().collect(toList());
+
+    ChoiceDialog<Class<? extends DataProcessor>> nameDialog = types.isEmpty()
         ? new ChoiceDialog<>()
-        : new ChoiceDialog<>(processors.get(0), processors);
+        : new ChoiceDialog<>(types.get(0), types);
     nameDialog.titleProperty().bind(wrap(title));
     nameDialog.headerTextProperty().bind(wrap(header));
 

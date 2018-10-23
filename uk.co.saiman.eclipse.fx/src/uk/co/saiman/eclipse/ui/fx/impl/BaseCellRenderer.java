@@ -36,6 +36,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.services.contributions.IContributionFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -52,12 +53,9 @@ import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 /**
  * Base renderer of {@link Cell}
  * 
- * @param <N>
- *          the native widget type
+ * @param <N> the native widget type
  */
 public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell, Cell, WCell<N>> {
-  private static final String VISIBILITY_AUTO_HIDDEN = "VisibilityAutoHidden";
-
   /**
    * Eventbroker to use
    */
@@ -96,18 +94,6 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
       }
     });
 
-    broker.subscribe(SaiUiEvents.Cell.TOPIC_NULLABLE, new EventHandler() {
-      @Override
-      public void handleEvent(Event event) {
-        Object changedObj = event.getProperty(UIEvents.EventTags.ELEMENT);
-        MUIElement parent = (MUIElement) changedObj;
-
-        if (parent.getRenderer() == this) {
-          prepareContextValue((Cell) parent);
-        }
-      }
-    });
-
     this.eventBroker = broker;
   }
 
@@ -117,21 +103,6 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
 
     if (cell == null) {
       getLogger().error("No widget found for '" + element + "'");
-      return;
-    }
-
-    getRenderingContext(element).runAndTrack(new RunAndTrack() {
-      @Override
-      public boolean changed(IEclipseContext context) {
-        Object contextValue = context.get(SaiUiEvents.Cell.CONTEXT_VALUE);
-        if (contextValue != null && contextValue instanceof String) {
-          context.get((String) contextValue);
-          prepareContextValue(element);
-        }
-        return element.isToBeRendered();
-      }
-    });
-    if (!element.isToBeRendered()) {
       return;
     }
 
@@ -160,33 +131,6 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
         if (widget != null && isChildRenderedAndVisible(child)) {
           cell.addCell((WCell<?>) widget);
         }
-      }
-    }
-  }
-
-  protected static void prepareContextValue(Cell element) {
-    IEclipseContext context = element.getContext();
-    String key = element.getContextValue();
-
-    if (context != null && key != null && !key.isEmpty()) {
-      // we have a context value specified
-
-      Object value = context.get(key);
-
-      if (value == null) {
-        if (!element.isNullable()) {
-          throw new NullPointerException();
-
-        } else if (!element.getTags().contains(SaiUiModel.NO_AUTO_REMOVE)) {
-          element.setToBeRendered(false);
-          element.setParent(null);
-
-        } else if (!element.getTags().contains(SaiUiModel.NO_AUTO_HIDE) && element.isVisible()) {
-          element.setVisible(false);
-          element.getTags().add(VISIBILITY_AUTO_HIDDEN);
-        }
-      } else if (element.getTags().remove(VISIBILITY_AUTO_HIDDEN)) {
-        element.setVisible(true);
       }
     }
   }
@@ -259,21 +203,6 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
       if (widget != null) {
         cell.removeCell(widget);
       }
-    }
-  }
-
-  static boolean isModifiable(Cell cell) {
-    if (!cell.getContext().containsKey(cell.getContextValue())) {
-      return false;
-    }
-
-    try {
-      cell
-          .getContext()
-          .modify(cell.getContextValue(), cell.getContext().get(cell.getContextValue()));
-      return true;
-    } catch (Exception e) {
-      return false;
     }
   }
 }

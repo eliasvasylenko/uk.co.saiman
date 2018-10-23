@@ -28,8 +28,8 @@
 package uk.co.saiman.experiment.chemicalmap;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.experiment.ExperimentProcedure;
-import uk.co.saiman.experiment.ProcessingContext;
+import uk.co.saiman.experiment.Procedure;
+import uk.co.saiman.experiment.ProcedureContext;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**
@@ -43,7 +43,7 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  *          the type of sample configuration for the instrument
  */
 public abstract class ChemicalMapProcedure<T extends ChemicalMapConfiguration>
-    implements ExperimentProcedure<T, ChemicalMap> {
+    implements Procedure<T, ChemicalMap> {
   private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
 
   protected abstract RasterDevice getRasterDevice();
@@ -51,7 +51,7 @@ public abstract class ChemicalMapProcedure<T extends ChemicalMapConfiguration>
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public ChemicalMap process(ProcessingContext<T, ChemicalMap> context) {
+  public ChemicalMap proceed(ProcedureContext<T, ChemicalMap> context) {
     AcquisitionDevice acquisitionDevice = getAcquisitionDevice();
     RasterDevice rasterDevice = getRasterDevice();
 

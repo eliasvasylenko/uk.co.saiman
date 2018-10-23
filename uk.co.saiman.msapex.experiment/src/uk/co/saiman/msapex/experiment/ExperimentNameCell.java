@@ -47,7 +47,7 @@ import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.RenameNodeEvent;
+import uk.co.saiman.experiment.event.RenameNodeEvent;
 
 /**
  * Contribution for root experiment nodes in the experiment tree

@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.VoidExecutionContext;
+import uk.co.saiman.experiment.VoidProcedureContext;
 import uk.co.saiman.instrument.stage.XYStage;
 
 /**
@@ -43,7 +43,7 @@ public interface XYStageProcedure<T extends XYStageConfiguration> extends Sample
   XYStage device();
 
   @Override
-  default void executeVoid(VoidExecutionContext<T> context) {
+  default void executeVoid(VoidProcedureContext<T> context) {
     device().requestAnalysisLocation(context.node().getVariables().location());
 
     /*

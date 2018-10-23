@@ -163,7 +163,7 @@ public interface Accessor<T, U extends State> {
   }
 
   static PropertyAccessor<String> stringAccessor(String name) {
-    return propertyAccessor(name, StateProperty::getValue, StateProperty::stateProperty);
+    return propertyAccessor(name, StateProperty::getValue, StateProperty::new);
   }
 
   static PropertyAccessor<Integer> intAccessor(String name) {

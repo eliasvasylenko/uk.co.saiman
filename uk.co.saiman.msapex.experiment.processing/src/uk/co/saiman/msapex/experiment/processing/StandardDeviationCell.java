@@ -36,9 +36,9 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 
 import javafx.scene.layout.HBox;
+import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.data.function.processing.GaussianSmooth;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
-import uk.co.saiman.experiment.processing.GaussianSmooth;
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
 
 public class StandardDeviationCell {
   @Inject
@@ -56,12 +56,14 @@ public class StandardDeviationCell {
   @Optional
   @Inject
   void update(GaussianSmooth entry) {
-    editor.setText(Double.toString(entry.getStandardDeviation()));
-    editor
-        .setUpdate(
-            value -> context
-                .modify(
-                    ProcessorConfiguration.class,
-                    entry.withStandardDeviation(Double.parseDouble(value))));
+    if (entry != null) {
+      editor.setText(Double.toString(entry.getStandardDeviation()));
+      editor
+          .setUpdate(
+              value -> context
+                  .modify(
+                      DataProcessor.class,
+                      entry.withStandardDeviation(Double.parseDouble(value))));
+    }
   }
 }

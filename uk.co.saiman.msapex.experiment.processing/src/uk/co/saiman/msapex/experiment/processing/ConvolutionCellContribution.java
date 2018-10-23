@@ -30,10 +30,10 @@ package uk.co.saiman.msapex.experiment.processing;
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
+import uk.co.saiman.data.function.processing.Convolution;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.processing.Convolution;
 import uk.co.saiman.msapex.experiment.processing.i18n.ProcessingProperties;
 import uk.co.saiman.property.Property;
 
@@ -56,8 +56,8 @@ public class ConvolutionCellContribution {
         .setItem(
             Centre.ID,
             int.class,
-            entry.get().getConvolutionVectorCentre(),
-            result -> entry.set(entry.get().withConvolutionVectorCentre(result)));
+            entry.get().getConvolutionVectorOffset(),
+            result -> entry.set(entry.get().withConvolutionVectorOffset(result)));
   }
 
   public static class Vector {

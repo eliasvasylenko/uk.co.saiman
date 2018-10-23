@@ -45,6 +45,7 @@ import javax.inject.Named;
 
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -53,12 +54,12 @@ import uk.co.saiman.data.Data;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentEvent;
-import uk.co.saiman.experiment.ExperimentEventKind;
+import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.ExperimentProcedure;
-import uk.co.saiman.experiment.FullProcedure;
 import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.state.JsonStateMapFormat;
+import uk.co.saiman.experiment.event.ExperimentEvent;
+import uk.co.saiman.experiment.event.ExperimentEventKind;
+import uk.co.saiman.experiment.json.JsonStateMapFormat;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
@@ -92,7 +93,7 @@ public class WorkspaceAddon {
 
   @Inject
   @Service
-  volatile List<ExperimentProcedure<?, ?>> experimentTypes;
+  volatile List<Procedure<?, ?>> experimentTypes;
 
   @Inject
   @Named(INSTANCE_LOCATION)
@@ -126,8 +127,8 @@ public class WorkspaceAddon {
     });
   }
 
-  // @Inject
-  // @Optional
+  @Inject
+  @Optional
   public void saveExperiment(ExperimentEvent event) {
     try {
       event.node().getExperiment().ifPresent(experiment -> {
@@ -141,6 +142,7 @@ public class WorkspaceAddon {
         }
 
         data.set(experiment.getStateMap());
+        data.makeDirty();
         data.save();
       });
     } catch (Exception e) {
@@ -148,14 +150,14 @@ public class WorkspaceAddon {
     }
   }
 
-  private Stream<ExperimentProcedure<?, ?>> getExperimentTypes() {
+  private Stream<Procedure<?, ?>> getExperimentTypes() {
     return new ArrayList<>(experimentTypes).stream();
   }
 
   private void initializeAdapters() {
     experimentNodeAdapterFactory = new ExperimentNodeAdapterFactory(
         adapterManager,
-        () -> concat(Stream.of(FullProcedure.instance()), getExperimentTypes()));
+        () -> concat(Stream.of(ExperimentProcedure.instance()), getExperimentTypes()));
     experimentAdapterFactory = new ExperimentAdapterFactory(
         adapterManager,
         experimentNodeAdapterFactory);

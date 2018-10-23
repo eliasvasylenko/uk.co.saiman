@@ -32,6 +32,8 @@ import static uk.co.saiman.experiment.state.StateKind.MAP;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -54,6 +56,10 @@ public class StateMap implements State {
 
   public State get(String id) {
     return entries.get(id);
+  }
+
+  public Optional<State> getOptional(String id) {
+    return Optional.ofNullable(entries.get(id));
   }
 
   public StateMap with(String id, State value) {
@@ -85,6 +91,11 @@ public class StateMap implements State {
     return accessor.read((U) get(accessor.id()).as(accessor.getKind()));
   }
 
+  @SuppressWarnings("unchecked")
+  public <T, U extends State> Optional<T> getOptional(Accessor<T, U> accessor) {
+    return getOptional(accessor.id()).map(s -> accessor.read((U) s.as(accessor.getKind())));
+  }
+
   public <T> StateMap with(Accessor<T, ?> accessor, T value) {
     return with(accessor.id(), accessor.write(value));
   }
@@ -105,4 +116,21 @@ public class StateMap implements State {
   public static StateMap empty() {
     return EMPTY;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!(obj instanceof StateMap))
+      return false;
+
+    StateMap that = (StateMap) obj;
+
+    return Objects.equals(this.entries, that.entries);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(entries);
+  };
 }

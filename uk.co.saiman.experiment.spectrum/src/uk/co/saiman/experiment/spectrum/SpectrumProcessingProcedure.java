@@ -27,11 +27,6 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.data.function.processing.DataProcessor.identity;
-import static uk.co.saiman.experiment.state.Accessor.mapAccessor;
-import static uk.co.saiman.properties.PropertyLoader.getDefaultPropertyLoader;
-
 import java.util.Random;
 
 import javax.measure.quantity.Dimensionless;
@@ -47,15 +42,12 @@ import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
-import uk.co.saiman.experiment.ConfigurationContext;
-import uk.co.saiman.experiment.ExperimentProcedure;
-import uk.co.saiman.experiment.ProcessingType;
+import uk.co.saiman.experiment.ExperimentContext;
+import uk.co.saiman.experiment.Procedure;
+import uk.co.saiman.experiment.ProcessingProcedure;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
-import uk.co.saiman.experiment.processing.ProcessorService;
-import uk.co.saiman.experiment.state.Accessor.ListAccessor;
-import uk.co.saiman.experiment.state.Accessor.MapAccessor;
-import uk.co.saiman.properties.PropertyLoader;
+import uk.co.saiman.experiment.processing.ProcessingService;
+import uk.co.saiman.experiment.state.Accessor;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -64,38 +56,24 @@ import uk.co.saiman.properties.PropertyLoader;
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = ExperimentProcedure.class)
+@Component(service = Procedure.class)
 public class SpectrumProcessingProcedure
-    implements ProcessingType<SpectrumProcessingConfiguration, Spectrum, Spectrum> {
-  private final MapAccessor<ProcessorConfiguration> processor;
-  private final ListAccessor<Processing> processorList;
+    implements ProcessingProcedure<SpectrumProcessingConfiguration, Spectrum, Spectrum> {
+  private final Accessor<Processing, ?> processorList;
 
   @Override
   public String getId() {
     return getClass().getName();
   }
 
-  public SpectrumProcessingProcedure(ProcessorService processors) {
-    this(processors, getDefaultPropertyLoader());
-  }
-
   @Activate
-  public SpectrumProcessingProcedure(
-      @Reference ProcessorService processors,
-      @Reference PropertyLoader propertyLoader) {
-    this.processor = mapAccessor(
-        "processing",
-        s -> processors.loadProcessor(s),
-        p -> processors.saveProcessor(p));
-
-    this.processorList = processor
-        .toListAccessor()
-        .map(Processing::new, p -> p.processors().collect(toList()));
+  public SpectrumProcessingProcedure(@Reference ProcessingService processors) {
+    this.processorList = processors.getAccessor("processing");
   }
 
   @Override
   public SpectrumProcessingConfiguration configureVariables(
-      ConfigurationContext<SpectrumProcessingConfiguration> context) {
+      ExperimentContext<SpectrumProcessingConfiguration> context) {
     context.update(s -> s.withDefault(processorList, Processing::new));
 
     return new SpectrumProcessingConfiguration() {
@@ -126,11 +104,7 @@ public class SpectrumProcessingProcedure
 
   @Override
   public Spectrum process(SpectrumProcessingConfiguration state, Spectrum input) {
-    DataProcessor processor = state
-        .getProcessing()
-        .processors()
-        .map(ProcessorConfiguration::getProcessor)
-        .reduce(identity(), DataProcessor::andThen);
+    DataProcessor processor = state.getProcessing().getProcessor();
 
     SampledContinuousFunction<Mass, Dimensionless> massData = processor
         .process(input.getMassData());

@@ -151,11 +151,12 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
     }
 
     public void onKeyReleased(KeyEvent event) {
-      CellImpl target = ((CellImpl) getWidget()
-          .getSelectionModel()
-          .getSelectedItem()
-          .getValue()
-          .getWidget());
+      TreeItem<Cell> selectedItem = getWidget().getSelectionModel().getSelectedItem();
+
+      if (selectedItem == null)
+        return;
+
+      CellImpl target = ((CellImpl) selectedItem.getValue().getWidget());
       Node widget = target.getWidget();
 
       switch (event.getCode()) {
@@ -181,13 +182,13 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
                     true,
                     pickResult));
         break;
-      case ENTER:
 
+      case ENTER:
         if (target.executeAction()) {
           event.consume();
         }
-
         break;
+
       default:
         break;
       }

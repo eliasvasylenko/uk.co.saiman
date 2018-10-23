@@ -43,7 +43,7 @@ import org.eclipse.fx.core.di.Service;
 
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProcedure;
+import uk.co.saiman.experiment.Procedure;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -54,7 +54,7 @@ import uk.co.saiman.experiment.ExperimentProcedure;
 public class AddNodeMenu {
   @Inject
   @Service
-  private List<ExperimentProcedure<?, ?>> experimentTypes;
+  private List<Procedure<?, ?>> experimentTypes;
 
   @AboutToShow
   void aboutToShow(
@@ -69,7 +69,7 @@ public class AddNodeMenu {
 
   MDirectMenuItem createMenuItem(
       ExperimentNode<?, ?> selectedNode,
-      ExperimentProcedure<?, ?> subProcedure) {
+      Procedure<?, ?> subProcedure) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
     moduleItem.setLabel(subProcedure.getId());
     moduleItem.setType(ItemType.PUSH);

@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
@@ -54,12 +53,12 @@ import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.AttachNodeEvent;
-import uk.co.saiman.experiment.DetachNodeEvent;
-import uk.co.saiman.experiment.ExperimentLifecycleEvent;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.RenameNodeEvent;
+import uk.co.saiman.experiment.event.AttachNodeEvent;
+import uk.co.saiman.experiment.event.DetachNodeEvent;
+import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
+import uk.co.saiman.experiment.event.RenameNodeEvent;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -132,9 +131,18 @@ public class ExperimentNodeCell {
     /*
      * Inject configuration
      */
-    IContextFunction configurationFunction = (c, k) -> c
-        .get(IAdapterManager.class)
-        .getAdapter(c.get(ExperimentNode.class), k);
+    IContextFunction configurationFunction = (c, k) -> {
+      Object variables = c.get(ExperimentNode.class).getVariables();
+      if (variables != null) {
+        try {
+          Class<?> type = variables.getClass().getClassLoader().loadClass(k);
+          return type.isInstance(variables) ? variables : null;
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+      return null;
+    };
     StreamUtilities
         .<Class<?>>flatMapRecursive(
             experiment.getVariables().getClass(),

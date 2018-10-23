@@ -30,10 +30,10 @@ package uk.co.saiman.msapex.experiment.processing;
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
+import uk.co.saiman.data.function.processing.BoxFilter;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.processing.BoxFilter;
 import uk.co.saiman.msapex.experiment.processing.i18n.ProcessingProperties;
 import uk.co.saiman.property.Property;
 

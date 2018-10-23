@@ -27,87 +27,68 @@
  */
 package uk.co.saiman.experiment;
 
-import static uk.co.saiman.reflection.token.TypeToken.forType;
+import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
 
-import java.lang.reflect.Type;
+import java.util.Optional;
 
-import uk.co.saiman.reflection.token.TypeParameter;
-import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 
-/**
- * An implementation of this interface represents a type of experiment node
- * which can appear in an experiment, for example "Spectrum", "Chemical Map",
- * "Stage Position", etc. Only one instance of such an implementation typically
- * needs to be registered with any given workspace.
- * 
- * <p>
- * The experiment type instance contains methods for managing the state and
- * processing of nodes of its type.
- * 
- * @author Elias N Vasylenko
- *
- * @param <S>
- *          the type of the data describing the experiment state, including
- *          configuration and results
- */
-public interface ExperimentProcedure<S, R> {
-  String getId();
+public class ExperimentProcedure implements VoidProcedure<ExperimentConfiguration> {
+  public static final String FULL_PROCEDURE_PID = "uk.co.saiman.experiment.procedure.full";
 
-  default boolean hasAutomaticExecution() {
+  private static final PropertyAccessor<String> NOTES = stringAccessor("notes");
+  private static final ExperimentProcedure INSTANCE = new ExperimentProcedure();
+
+  @Override
+  public String getId() {
+    return FULL_PROCEDURE_PID;
+  }
+
+  @Override
+  public ExperimentConfiguration configureVariables(
+      ExperimentContext<ExperimentConfiguration> configuration) {
+    configuration.stateMap().withDefault(NOTES, () -> "");
+
+    return new ExperimentConfiguration() {
+      @Override
+      public String getName() {
+        return configuration.node().getId();
+      }
+
+      @Override
+      public void setName(String name) {
+        configuration.setId(name);
+      }
+
+      @Override
+      public Optional<String> getNotes() {
+        String notes = configuration.stateMap().get(NOTES);
+        return notes.isEmpty() ? Optional.empty() : Optional.of(notes);
+      }
+
+      @Override
+      public void setNotes(String notes) {
+        configuration.update(state -> state.with(NOTES, notes));
+      }
+
+      @Override
+      public void clearNotes() {
+        configuration.update(state -> state.remove(NOTES));
+      }
+    };
+  }
+
+  @Override
+  public void executeVoid(VoidProcedureContext<ExperimentConfiguration> context) {
+    context.processChildren();
+  }
+
+  @Override
+  public boolean mayComeAfter(Procedure<?, ?> parentType) {
     return false;
   }
 
-  default boolean isProcessingContextDependent() {
-    return true;
-  }
-
-  /**
-   * @param context
-   *          the node which the configuration is being requested for
-   * @return a new state object suitable for an instance of {@link ExperimentNode}
-   *         over this type.
-   */
-  S configureVariables(ConfigurationContext<S> context);
-
-  /**
-   * Process this experiment type for a given node.
-   * 
-   * @param context
-   *          the processing context
-   */
-  R process(ProcessingContext<S, R> context);
-
-  /**
-   * Test whether a node of this type may directly succeed a node of the given
-   * type.
-   * 
-   * @param parentType
-   *          the candidate parent node type
-   * @return true if a node of this type may be added as a child, false otherwise
-   */
-  boolean mayComeAfter(ExperimentProcedure<?, ?> parentType);
-
-  /**
-   * @return the exact generic type of the configuration interface
-   */
-  default TypeToken<S> getVariablesType() {
-    return forType(getThisType())
-        .resolveSupertype(ExperimentProcedure.class)
-        .resolveTypeArgument(new TypeParameter<S>() {})
-        .getTypeToken();
-  }
-
-  /**
-   * @return the exact generic type of the configuration interface
-   */
-  default TypeToken<R> getResultType() {
-    return forType(getThisType())
-        .resolveSupertype(ExperimentProcedure.class)
-        .resolveTypeArgument(new TypeParameter<R>() {})
-        .getTypeToken();
-  }
-
-  default Type getThisType() {
-    return getClass();
+  public static ExperimentProcedure instance() {
+    return INSTANCE;
   }
 }

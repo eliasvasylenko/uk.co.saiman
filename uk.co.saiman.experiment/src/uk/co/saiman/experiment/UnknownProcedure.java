@@ -33,7 +33,7 @@ import static uk.co.saiman.reflection.token.TypeToken.forType;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public class UnknownProcedure<T> implements ExperimentProcedure<StateMap, T> {
+public class UnknownProcedure<T> implements Procedure<StateMap, T> {
   private final String id;
 
   public UnknownProcedure(String id) {
@@ -57,7 +57,7 @@ public class UnknownProcedure<T> implements ExperimentProcedure<StateMap, T> {
   }
 
   @Override
-  public StateMap configureVariables(ConfigurationContext<StateMap> context) {
+  public StateMap configureVariables(ExperimentContext<StateMap> context) {
     return context.stateMap();
   }
 
@@ -67,12 +67,12 @@ public class UnknownProcedure<T> implements ExperimentProcedure<StateMap, T> {
   }
 
   @Override
-  public boolean mayComeAfter(ExperimentProcedure<?, ?> parentType) {
+  public boolean mayComeAfter(Procedure<?, ?> parentType) {
     return true;
   }
 
   @Override
-  public T process(ProcessingContext<StateMap, T> context) {
+  public T proceed(ProcedureContext<StateMap, T> context) {
     throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
   }
 }

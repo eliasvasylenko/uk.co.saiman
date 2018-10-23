@@ -32,6 +32,9 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Optional;
 
+import uk.co.saiman.experiment.event.AddExperimentEvent;
+import uk.co.saiman.experiment.event.ExperimentEvent;
+import uk.co.saiman.experiment.event.RemoveExperimentEvent;
 import uk.co.saiman.experiment.state.StateMap;
 
 public class Experiment extends ExperimentNode<ExperimentConfiguration, Void> {
@@ -44,10 +47,10 @@ public class Experiment extends ExperimentNode<ExperimentConfiguration, Void> {
   }
 
   public Experiment(String id, StateMap stateMap, ResultStore store) {
-    this(FullProcedure.instance(), id, stateMap, store);
+    this(ExperimentProcedure.instance(), id, stateMap, store);
   }
 
-  protected Experiment(FullProcedure procedure, String id, StateMap stateMap, ResultStore store) {
+  protected Experiment(ExperimentProcedure procedure, String id, StateMap stateMap, ResultStore store) {
     super(procedure, id, stateMap);
     this.store = store;
   }

@@ -35,10 +35,10 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.AddExperimentEvent;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.RemoveExperimentEvent;
 import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.event.AddExperimentEvent;
+import uk.co.saiman.experiment.event.RemoveExperimentEvent;
 
 public class ExperimentTree {
   public static final String ID = "uk.co.saiman.msapex.experiment.tree";

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.eclipse.ui;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
@@ -41,7 +43,11 @@ public interface ChildrenService {
       Class<T> contextClass,
       T child,
       Consumer<? super T> update) {
-    setItem(modelElementId, contextClass.getName(), child, update);
+    setItem(
+        modelElementId,
+        contextClass.getName(),
+        child,
+        object -> update.accept(contextClass.cast(object)));
   }
 
   default <T> void setItems(
@@ -55,19 +61,23 @@ public interface ChildrenService {
       String modelElementId,
       Class<T> contextClass,
       List<? extends T> children,
-      Consumer<? super List<? extends T>> update) {
-    setItems(modelElementId, contextClass.getName(), children, update);
+      Consumer<? super Collection<? extends T>> update) {
+    setItems(
+        modelElementId,
+        contextClass.getName(),
+        children,
+        list -> update.accept(list.stream().map(contextClass::cast).collect(toList())));
   }
 
-  <T> void setItem(String modelElementId, String contextName, T child);
+  void setItem(String modelElementId, String contextName, Object child);
 
-  <T> void setItem(String modelElementId, String contextName, T child, Consumer<? super T> update);
+  void setItem(String modelElementId, String contextName, Object child, Consumer<Object> update);
 
-  <T> void setItems(String modelElementId, String contextName, Collection<? extends T> children);
+  void setItems(String modelElementId, String contextName, Collection<?> children);
 
-  <T> void setItems(
+  void setItems(
       String modelElementId,
       String contextName,
-      List<? extends T> children,
-      Consumer<? super List<? extends T>> update);
+      Collection<?> children,
+      Consumer<? super Collection<?>> update);
 }

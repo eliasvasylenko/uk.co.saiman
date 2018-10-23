@@ -29,15 +29,38 @@ package uk.co.saiman.experiment.state;
 
 import static uk.co.saiman.experiment.state.StateKind.PROPERTY;
 
-public interface StateProperty extends State {
-  String getValue();
+import java.util.Objects;
+
+public class StateProperty implements State {
+  private final String value;
+
+  public StateProperty(String value) {
+    this.value = value;
+  }
+
+  public String getValue() {
+    return value;
+  }
 
   @Override
-  default StateKind getKind() {
+  public StateKind getKind() {
     return PROPERTY;
   }
 
-  static StateProperty stateProperty(String value) {
-    return () -> value;
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!(obj instanceof StateProperty))
+      return false;
+
+    StateProperty that = (StateProperty) obj;
+
+    return Objects.equals(this.value, that.value);
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(value);
+  };
 }

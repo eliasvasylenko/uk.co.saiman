@@ -281,7 +281,7 @@ public class EditorAddon implements EditorService {
 
     @Override
     public Editor getInstance(Object resource) {
-      return new EditorPrototypeImpl(resource, this);
+      return new EditorImpl(resource, this);
     }
 
     @Override
@@ -290,11 +290,11 @@ public class EditorAddon implements EditorService {
     }
   }
 
-  public class EditorPrototypeImpl implements Editor {
+  public class EditorImpl implements Editor {
     private final Object resource;
     private final EditorDescriptor descriptor;
 
-    public EditorPrototypeImpl(Object resource, EditorDescriptor descriptor) {
+    public EditorImpl(Object resource, EditorDescriptor descriptor) {
       this.resource = resource;
       this.descriptor = descriptor;
     }

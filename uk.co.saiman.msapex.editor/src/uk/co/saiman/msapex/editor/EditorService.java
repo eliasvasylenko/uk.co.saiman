@@ -43,12 +43,11 @@ public interface EditorService {
    * generally it may be in order of the editors most recently
    * {@link Editor#openPart() opened}.
    * 
-   * @param resource
-   *          the resource data object to edit
+   * @param resource the resource data object to edit
    * @return The current editors applicable to the given resource in order of
    *         precedence.
    */
-  Stream<Editor> getApplicableEditors(Object resource);
+  Stream<Editor> getApplicableEditors(String contextKey);
 
   Stream<EditorDescriptor> getEditors();
 

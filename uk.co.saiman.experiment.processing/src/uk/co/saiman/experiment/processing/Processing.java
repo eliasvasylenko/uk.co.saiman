@@ -38,21 +38,44 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.function.processing.DataProcessor;
 
 public class Processing {
-  private List<ProcessorConfiguration> processors;
+  private List<DataProcessor> steps;
 
   public Processing() {
-    this.processors = emptyList();
+    this.steps = emptyList();
   }
 
-  public Processing(Collection<? extends ProcessorConfiguration> processors) {
-    this.processors = new ArrayList<>(processors);
+  public Processing(Collection<? extends DataProcessor> processors) {
+    this.steps = new ArrayList<>(processors);
   }
 
-  public Stream<ProcessorConfiguration> processors() {
-    return processors.stream();
+  public Stream<DataProcessor> steps() {
+    return steps.stream();
   }
 
   public DataProcessor getProcessor() {
-    return processors().map(p -> p.getProcessor()).reduce(identity(), DataProcessor::andThen);
+    return steps().reduce(identity(), DataProcessor::andThen);
+  }
+
+  public Processing withStep(DataProcessor step) {
+    List<DataProcessor> steps = new ArrayList<>(this.steps);
+    steps.add(step);
+    return new Processing(steps);
+  }
+
+  public Processing withStep(int index, DataProcessor step) {
+    List<DataProcessor> steps = new ArrayList<>(this.steps);
+    steps.add(index, step);
+    return new Processing(steps);
+  }
+
+  public Processing withStepReplaced(int index, DataProcessor step) {
+    List<DataProcessor> steps = new ArrayList<>(this.steps);
+    steps.set(index, step);
+    return new Processing(steps);
+  }
+
+  public Processing withoutStep(int index) {
+    steps.remove(index);
+    return new Processing(steps);
   }
 }

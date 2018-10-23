@@ -21,8 +21,6 @@ import java.util.function.Supplier;
  * @author Elias N Vasylenko
  */
 class ExperimentLocker {
-  class WorkspaceEventLock {}
-
   private final List<ExperimentNode<?, ?>> experimentNodes;
 
   public ExperimentLocker(ExperimentNode<?, ?>... experimentNodes) {

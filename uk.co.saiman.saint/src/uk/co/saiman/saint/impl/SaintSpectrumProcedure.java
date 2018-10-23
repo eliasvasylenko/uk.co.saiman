@@ -27,9 +27,7 @@
  */
 package uk.co.saiman.saint.impl;
 
-import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static uk.co.saiman.experiment.state.Accessor.mapAccessor;
 import static uk.co.saiman.measurement.Units.dalton;
 
 import java.util.Random;
@@ -42,21 +40,19 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.spectrum.Spectrum;
-import uk.co.saiman.experiment.ConfigurationContext;
-import uk.co.saiman.experiment.ExperimentProcedure;
+import uk.co.saiman.experiment.ExperimentContext;
+import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
-import uk.co.saiman.experiment.processing.ProcessorService;
+import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.sample.XYStageProcedure;
 import uk.co.saiman.experiment.spectrum.SpectrumProcedure;
-import uk.co.saiman.experiment.state.Accessor.ListAccessor;
-import uk.co.saiman.experiment.state.Accessor.MapAccessor;
+import uk.co.saiman.experiment.state.Accessor;
 import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 
 @Component
 public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfiguration>
-    implements ExperimentProcedure<SaintSpectrumConfiguration, Spectrum> {
+    implements Procedure<SaintSpectrumConfiguration, Spectrum> {
   @Reference
   private XYStageProcedure<SaintXYStageConfiguration> stageExperiment;
 
@@ -64,7 +60,7 @@ public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfi
   private AcquisitionDevice acquisitionDevice;
 
   @Reference
-  private ProcessorService processors;
+  private ProcessingService processors;
 
   @Override
   public String getId() {
@@ -76,18 +72,12 @@ public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfi
     return dalton().getUnit();
   }
 
-  private final MapAccessor<ProcessorConfiguration> processor = mapAccessor(
-      "processing",
-      s -> processors.loadProcessor(s),
-      p -> processors.saveProcessor(p));
-  private final ListAccessor<Processing> processorList = processor
-      .toListAccessor()
-      .map(Processing::new, p -> p.processors().collect(toList()));
-
   @Override
   public SaintSpectrumConfiguration configureVariables(
-      ConfigurationContext<SaintSpectrumConfiguration> context) {
-    context.update(s -> s.withDefault(processorList, Processing::new));
+      ExperimentContext<SaintSpectrumConfiguration> context) {
+    Accessor<Processing, ?> accessor = processors.getAccessor("processing");
+
+    context.update(s -> s.withDefault(accessor, Processing::new));
 
     return new SaintSpectrumConfiguration() {
       private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
@@ -110,18 +100,18 @@ public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfi
 
       @Override
       public Processing getProcessing() {
-        return context.stateMap().get(processorList);
+        return context.stateMap().get(accessor);
       }
 
       @Override
       public void setProcessing(Processing processing) {
-        context.update(state -> state.with(processorList, processing));
+        context.update(state -> state.with(accessor, processing));
       }
     };
   }
 
   @Override
-  public boolean mayComeAfter(ExperimentProcedure<?, ?> parentType) {
+  public boolean mayComeAfter(Procedure<?, ?> parentType) {
     return parentType == stageExperiment;
   }
 

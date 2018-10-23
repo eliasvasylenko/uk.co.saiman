@@ -30,6 +30,7 @@ package uk.co.saiman.experiment;
 import java.io.IOException;
 
 import uk.co.saiman.data.resource.Location;
+import uk.co.saiman.experiment.event.ExperimentEvent;
 
 /**
  * A result store defines a strategy for locating, reading, and writing

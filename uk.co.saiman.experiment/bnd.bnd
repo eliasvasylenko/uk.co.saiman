@@ -11,8 +11,14 @@ Bundle-Name: SAI :: Experiment
 	uk.co.saiman.data;version=snapshot,\
 	json;version=latest
 
+Private-Package: \
+	uk.co.saiman.experiment.service.impl
+
 Export-Package: \
 	uk.co.saiman.experiment,\
+	uk.co.saiman.experiment.event,\
 	uk.co.saiman.experiment.filesystem,\
+	uk.co.saiman.experiment.json,\
 	uk.co.saiman.experiment.path,\
+	uk.co.saiman.experiment.service,\
 	uk.co.saiman.experiment.state

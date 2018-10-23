@@ -29,7 +29,7 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 
 import static uk.co.saiman.eclipse.ui.TransferMode.COPY;
 import static uk.co.saiman.eclipse.ui.TransferMode.LINK;
-import static uk.co.saiman.eclipse.ui.fx.impl.BaseCellRenderer.isModifiable;
+import static uk.co.saiman.eclipse.utilities.EclipseUtilities.isModifiable;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -52,7 +52,7 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
 
   @Override
   public TransferCellOut transferOut(Cell cell) {
-    boolean nullable = isModifiable(cell) && cell.isNullable();
+    boolean nullable = isModifiable(cell.getContext(), cell.getContextValue()) && cell.isNullable();
 
     ClipboardContent content = serialize(cell);
 
@@ -87,7 +87,7 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
       return TransferCellIn.UNSUPPORTED;
     }
 
-    boolean modifiable = isModifiable(cell);
+    boolean modifiable = isModifiable(cell.getContext(), cell.getContextValue());
 
     Object value = deserialize(cell, clipboard);
 

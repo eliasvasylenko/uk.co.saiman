@@ -48,6 +48,13 @@ import uk.co.saiman.data.DataException;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.experiment.ResultStore.Storage;
+import uk.co.saiman.experiment.event.AttachNodeEvent;
+import uk.co.saiman.experiment.event.DetachNodeEvent;
+import uk.co.saiman.experiment.event.ExperimentEvent;
+import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
+import uk.co.saiman.experiment.event.ExperimentVariablesEvent;
+import uk.co.saiman.experiment.event.RenameNodeEvent;
+import uk.co.saiman.experiment.event.ReorderExperimentEvent;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -58,10 +65,10 @@ import uk.co.saiman.reflection.token.TypedReference;
 /**
  * This class provides a common interface for manipulating, inspecting, and
  * reflecting over the constituent nodes of an experiment. Each node is
- * associated with an implementation of {@link ExperimentProcedure}.
+ * associated with an implementation of {@link Procedure}.
  * <p>
  * Instances of {@link ExperimentNode} are constructed internally by a
- * {@link Workspace workspace} according to their {@link ExperimentProcedure
+ * {@link Workspace workspace} according to their {@link Procedure
  * type}.
  * 
  * @author Elias N Vasylenko
@@ -72,7 +79,7 @@ import uk.co.saiman.reflection.token.TypedReference;
  */
 public class ExperimentNode<S, T> {
   private String id;
-  private ExperimentProcedure<S, T> procedure;
+  private Procedure<S, T> procedure;
   private StateMap stateMap;
   private ExperimentLifecycleState lifecycleState;
 
@@ -87,11 +94,11 @@ public class ExperimentNode<S, T> {
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
 
-  public ExperimentNode(ExperimentProcedure<S, T> procedure) {
+  public ExperimentNode(Procedure<S, T> procedure) {
     this(procedure, null, StateMap.empty());
   }
 
-  public ExperimentNode(ExperimentProcedure<S, T> procedure, String id, StateMap stateMap) {
+  public ExperimentNode(Procedure<S, T> procedure, String id, StateMap stateMap) {
     this.id = id;
     this.procedure = procedure;
     this.stateMap = stateMap;
@@ -105,7 +112,7 @@ public class ExperimentNode<S, T> {
   }
 
   /**
-   * @return The ID of the node, as configured via {@link ConfigurationContext}.
+   * @return The ID of the node, as configured via {@link ExperimentContext}.
    *         The ID should be unique amongst the children of a node's parent.
    */
   public String getId() {
@@ -148,7 +155,7 @@ public class ExperimentNode<S, T> {
   /**
    * @return the type of the experiment
    */
-  public ExperimentProcedure<S, T> getProcedure() {
+  public Procedure<S, T> getProcedure() {
     return procedure;
   }
 
@@ -177,8 +184,8 @@ public class ExperimentNode<S, T> {
     return state;
   }
 
-  private ConfigurationContext<S> createConfigurationContext() {
-    return new ConfigurationContext<S>() {
+  private ExperimentContext<S> createConfigurationContext() {
+    return new ExperimentContext<S>() {
       @Override
       public ExperimentNode<S, T> node() {
         return ExperimentNode.this;
@@ -442,7 +449,7 @@ public class ExperimentNode<S, T> {
 
   /**
    * Get the nearest available ancestor node of the processing experiment node
-   * which is of the given {@link ExperimentProcedure experiment type}.
+   * which is of the given {@link Procedure experiment type}.
    * 
    * @param procedure
    *          the type of the ancestor we wish to inspect
@@ -450,7 +457,7 @@ public class ExperimentNode<S, T> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  public <U, V> Optional<ExperimentNode<U, V>> findAncestor(ExperimentProcedure<U, V> procedure) {
+  public <U, V> Optional<ExperimentNode<U, V>> findAncestor(Procedure<U, V> procedure) {
     return getAncestors()
         .filter(a -> procedure.equals(a.getProcedure()))
         .findFirst()
@@ -459,7 +466,7 @@ public class ExperimentNode<S, T> {
 
   /**
    * Get the nearest available ancestor node of the processing experiment node
-   * which is of the given {@link ExperimentProcedure experiment type}.
+   * which is of the given {@link Procedure experiment type}.
    * 
    * @param procedure
    *          the type of the ancestor we wish to inspect
@@ -467,7 +474,7 @@ public class ExperimentNode<S, T> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  public <U, V> Stream<ExperimentNode<U, V>> findAncestors(ExperimentProcedure<U, V> procedure) {
+  public <U, V> Stream<ExperimentNode<U, V>> findAncestors(Procedure<U, V> procedure) {
     return getAncestors()
         .filter(a -> procedure.equals(a.getProcedure()))
         .map(a -> (ExperimentNode<U, V>) a);
@@ -545,7 +552,7 @@ public class ExperimentNode<S, T> {
     }
     processedChildrenInline = false;
 
-    T result = getProcedure().process(createProcessingContext(processChildren));
+    T result = getProcedure().proceed(createProcessingContext(processChildren));
 
     if (getProcedure().getResultType().getErasedType() != void.class) {
       this.result.setValue(result);
@@ -569,12 +576,12 @@ public class ExperimentNode<S, T> {
     }
   }
 
-  private ProcessingContext<S, T> createProcessingContext(Runnable processChildren) {
+  private ProcedureContext<S, T> createProcessingContext(Runnable processChildren) {
     /*
      * TODO once processed this must become inoperable, including the proxied Data
      * from setResult. Make sure this is synchronized!
      */
-    return new ProcessingContext<S, T>() {
+    return new ProcedureContext<S, T>() {
       @Override
       public ExperimentNode<S, T> node() {
         return ExperimentNode.this;

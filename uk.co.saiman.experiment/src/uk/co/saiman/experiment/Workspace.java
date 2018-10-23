@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
@@ -41,7 +42,7 @@ import uk.co.saiman.observable.Observable;
  * by a hierarchy of nodes. The workspace provides an interface for managing
  * those experiments.
  * <p>
- * A workspace contains a register of {@link ExperimentProcedure experiment
+ * A workspace contains a register of {@link Procedure experiment
  * types}. Experiment nodes can be created according to these types.
  * 
  * @author Elias N Vasylenko

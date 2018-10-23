@@ -27,25 +27,27 @@
  */
 package uk.co.saiman.msapex.experiment.processing;
 
+import static uk.co.saiman.eclipse.utilities.EclipseUtilities.isModifiable;
+
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
+import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.eclipse.model.ui.Cell;
 
 public class RemoveProcessorHandler {
   @CanExecute
   public boolean canRemove(IEclipseContext context) {
-    try {
-      context.modify(ProcessorConfiguration.class, context.get(ProcessorConfiguration.class));
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
+    return isModifiable(context, DataProcessor.class);
   }
 
   @Execute
-  public void remove(IEclipseContext context) {
-    context.modify(ProcessorConfiguration.class, null);
+  public void remove(IEclipseContext context, Cell cell) {
+    try {
+      context.modify(DataProcessor.class, null);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

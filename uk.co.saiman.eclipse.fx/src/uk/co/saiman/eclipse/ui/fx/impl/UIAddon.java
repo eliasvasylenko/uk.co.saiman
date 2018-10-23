@@ -27,39 +27,40 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static org.eclipse.e4.core.contexts.ContextInjectionFactory.make;
 import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
 import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_TOBERENDERED;
-
-import java.util.function.Consumer;
+import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_WIDGET;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.MContext;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.osgi.service.event.Event;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.Tree;
 import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.ui.SaiUiModel;
 import uk.co.saiman.eclipse.ui.fx.ClipboardService;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
 public class UIAddon {
-  static final String CHILD_CONTEXT_VALUE = "uk.co.saiman.eclipse.model.ui.child.context.value";
-  static final String CHILD_CONTEXT_VALUE_SET = "uk.co.saiman.eclipse.model.ui.child.context.value.set";
-  static final String CHILD_CONTEXT_VALUES_SET = "uk.co.saiman.eclipse.model.ui.child.context.values.set";
+  private static final String VISIBILITY_AUTO_HIDDEN = "VisibilityAutoHidden";
 
   @Inject
   private Log log;
@@ -70,7 +71,11 @@ public class UIAddon {
     context
         .set(
             EditableCellText.class.getName(),
-            (IContextFunction) (c, k) -> ContextInjectionFactory.make(EditableCellText.class, c));
+            (IContextFunction) (c, k) -> make(EditableCellText.class, c));
+    context
+        .set(
+            ChildrenService.class.getName(),
+            (IContextFunction) (c, k) -> make(ChildrenServiceImpl.class, c));
   }
 
   /**
@@ -96,7 +101,7 @@ public class UIAddon {
    */
   @Inject
   @Optional
-  private synchronized void cellContextListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
+  private synchronized void contextCreationListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
     try {
       Object value = event.getProperty(NEW_VALUE);
       Object element = event.getProperty(ELEMENT);
@@ -104,11 +109,14 @@ public class UIAddon {
       if (value instanceof IEclipseContext && SET.equals(event.getProperty(TYPE))) {
         IEclipseContext context = (IEclipseContext) value;
 
-        if (element instanceof Cell || element instanceof Tree) {
-          prepareChildContainer(context);
-        }
-        if (element instanceof Cell) {
-          prepareChild(context, (Cell) element);
+        if (element instanceof Tree) {
+          ChildrenServiceImpl.prepareChildContainer(context);
+
+        } else if (element instanceof Cell) {
+          ChildrenServiceImpl.prepareChildContainer(context);
+          ChildrenServiceImpl.prepareChild(context, (Cell) element);
+
+          System.out.println("Context is set");
         }
       }
     } catch (Exception e) {
@@ -116,49 +124,54 @@ public class UIAddon {
     }
   }
 
-  private void prepareChild(IEclipseContext context, Cell cell) {
-    String key = cell.getContextValue();
-    if (key != null) {
-      Object value = cell.getTransientData().get(CHILD_CONTEXT_VALUE);
-      if (value != null) {
-        context.set(key, value);
+  @Inject
+  @Optional
+  private synchronized void widgetCreationListener(@UIEventTopic(TOPIC_WIDGET) Event event) {
+    try {
+      Object element = event.getProperty(ELEMENT);
 
-        @SuppressWarnings("unchecked")
-        Consumer<Object> valueSet = (Consumer<Object>) cell
-            .getTransientData()
-            .get(CHILD_CONTEXT_VALUE_SET);
-        if (valueSet != null) {
-          context.declareModifiable(cell.getContextValue());
-          context.runAndTrack(new RunAndTrack() {
-            boolean firstTry = true;
-
-            @Override
-            public boolean changed(IEclipseContext context) {
-              if (firstTry) {
-                firstTry = false;
-                context.get(key);
-              } else if (!firstTry) {
-
-                valueSet.accept(context.get(key));
-                return false;
-              }
-              return true;
-            }
-          });
-        }
+      if (SET.equals(event.getProperty(TYPE))
+          && element instanceof MContext
+          && element instanceof MUIElement) {
+        prepareTransferContextValue((MContext) element, (MUIElement) element);
       }
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
     }
   }
 
-  private void prepareChildContainer(IEclipseContext context) {
-    try {
-      context
-          .set(
-              ChildrenService.class,
-              ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
-      context.declareModifiable(ChildrenService.class);
-    } catch (Exception e) {
-      e.printStackTrace();
+  protected static <T extends MContext & MUIElement> void prepareTransferContextValue(
+      MContext context,
+      MUIElement element) {
+    if (context.getContext() == null) {
+      return;
     }
+
+    String key = context.getProperties().get(SaiUiModel.PRIMARY_CONTEXT_KEY);
+    if (key == null || key.isEmpty()) {
+      return;
+    }
+
+    context.getContext().runAndTrack(new RunAndTrack() {
+      @Override
+      public boolean changed(IEclipseContext context) {
+        Object value = context.get(key);
+
+        if (value == null && !element.getTags().contains(SaiUiModel.NO_AUTO_HIDE)) {
+          if (element.getTags().contains(EPartService.REMOVE_ON_HIDE_TAG)) {
+            element.setToBeRendered(false);
+            element.setParent(null);
+
+          } else if (element.isVisible()) {
+            element.setVisible(false);
+            element.getTags().add(VISIBILITY_AUTO_HIDDEN);
+          }
+        } else if (element.getTags().remove(VISIBILITY_AUTO_HIDDEN)) {
+          element.setVisible(true);
+        }
+
+        return true;
+      }
+    });
   }
 }

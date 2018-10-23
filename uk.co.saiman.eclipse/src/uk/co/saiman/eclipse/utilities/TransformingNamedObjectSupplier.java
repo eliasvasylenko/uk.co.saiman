@@ -128,15 +128,17 @@ public abstract class TransformingNamedObjectSupplier<T extends Annotation>
 
           Object namedObject = request.get(context);
 
-          if (!Objects.equals(Tracker.this.namedObject, namedObject)) {
-            Tracker.this.namedObject = namedObject;
+          runExternalCode(() -> {
+            if (!Objects.equals(Tracker.this.namedObject, namedObject)) {
+              Tracker.this.namedObject = namedObject;
 
-            // if this is not the first time ...
-            if (Tracker.this.request != null) {
-              request.requestor.resolveArguments(false);
-              request.requestor.execute();
+              // if this is not the first time ...
+              if (Tracker.this.request != null) {
+                request.requestor.resolveArguments(false);
+                request.requestor.execute();
+              }
             }
-          }
+          });
 
           return true;
         }

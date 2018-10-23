@@ -43,17 +43,17 @@ import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProcedure;
+import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
-  private final Supplier<? extends Stream<? extends ExperimentProcedure<?, ?>>> experimentTypes;
+  private final Supplier<? extends Stream<? extends Procedure<?, ?>>> experimentTypes;
 
   public ExperimentNodeAdapterFactory(
       IAdapterManager adapterManager,
-      Supplier<? extends Stream<? extends ExperimentProcedure<?, ?>>> experimentTypes) {
+      Supplier<? extends Stream<? extends Procedure<?, ?>>> experimentTypes) {
     this.adapterManager = adapterManager;
     this.experimentTypes = experimentTypes;
     adapterManager.registerAdapters(this, ExperimentNode.class);
@@ -68,7 +68,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
     ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) adaptableObject;
 
-    if (adapterType.isAssignableFrom(ExperimentProcedure.class)) {
+    if (adapterType.isAssignableFrom(Procedure.class)) {
       return (T) node.getProcedure();
     }
 
@@ -101,7 +101,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   @Override
   public Class<?>[] getAdapterList() {
     return concat(
-        of(ExperimentProcedure.class, Experiment.class, Workspace.class, Result.class),
+        of(Procedure.class, Experiment.class, Workspace.class, Result.class),
         experimentTypes
             .get()
             .map(type -> type.getVariablesType().getErasedType())

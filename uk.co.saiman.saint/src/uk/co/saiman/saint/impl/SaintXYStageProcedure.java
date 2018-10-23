@@ -38,8 +38,8 @@ import javax.measure.quantity.Length;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.ConfigurationContext;
-import uk.co.saiman.experiment.ExperimentProcedure;
+import uk.co.saiman.experiment.ExperimentContext;
+import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.sample.XYStageProcedure;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 import uk.co.saiman.instrument.stage.XYStage;
@@ -49,7 +49,7 @@ import uk.co.saiman.saint.SaintXYStageConfiguration;
 
 @Component
 public class SaintXYStageProcedure implements XYStageProcedure<SaintXYStageConfiguration>,
-    ExperimentProcedure<SaintXYStageConfiguration, Void> {
+    Procedure<SaintXYStageConfiguration, Void> {
   private static final PropertyAccessor<Quantity<Length>> X = lengthAccessor("xOffset");
   private static final PropertyAccessor<Quantity<Length>> Y = lengthAccessor("yOffset");
 
@@ -63,12 +63,12 @@ public class SaintXYStageProcedure implements XYStageProcedure<SaintXYStageConfi
 
   @Override
   public String getId() {
-    return SaintSpectrumProcedure.class.getName();
+    return SaintXYStageProcedure.class.getName();
   }
 
   @Override
   public SaintXYStageConfiguration configureVariables(
-      ConfigurationContext<SaintXYStageConfiguration> context) {
+      ExperimentContext<SaintXYStageConfiguration> context) {
     String id = context.getId(() -> "A1");
 
     return new SaintXYStageConfiguration() {

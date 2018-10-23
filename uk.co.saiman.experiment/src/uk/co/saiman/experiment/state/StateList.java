@@ -35,6 +35,7 @@ import static uk.co.saiman.experiment.state.StateKind.LIST;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
@@ -113,4 +114,21 @@ public class StateList implements State, Iterable<State> {
   public static Collector<State, ?, StateList> toStateList() {
     return collectingAndThen(toList(), StateList::new);
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!(obj instanceof StateList))
+      return false;
+
+    StateList that = (StateList) obj;
+
+    return Objects.equals(this.elements, that.elements);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(elements);
+  };
 }

@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.ExperimentProcedure;
-import uk.co.saiman.experiment.FullProcedure;
-import uk.co.saiman.experiment.VoidExperimentProcedure;
+import uk.co.saiman.experiment.VoidProcedure;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -41,9 +41,9 @@ import uk.co.saiman.experiment.VoidExperimentProcedure;
  * @param <T>
  *          the type of sample configuration for the instrument
  */
-public interface SampleProcedure<T extends SampleConfiguration> extends VoidExperimentProcedure<T> {
+public interface SampleProcedure<T extends SampleConfiguration> extends VoidProcedure<T> {
   @Override
-  default boolean mayComeAfter(ExperimentProcedure<?, ?> parentType) {
-    return parentType instanceof FullProcedure;
+  default boolean mayComeAfter(Procedure<?, ?> parentType) {
+    return parentType instanceof ExperimentProcedure;
   }
 }

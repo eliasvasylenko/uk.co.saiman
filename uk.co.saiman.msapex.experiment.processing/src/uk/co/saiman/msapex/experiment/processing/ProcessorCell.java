@@ -32,8 +32,9 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
+import uk.co.saiman.eclipse.utilities.EclipseUtilities;
 
 public class ProcessorCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.processing.cell.processor";
@@ -41,9 +42,18 @@ public class ProcessorCell {
   @Inject
   private IEclipseContext context;
 
+  @Inject
+  private Cell cell;
+
   @PostConstruct
-  public void prepare(Cell cell, ProcessorConfiguration entry) {
-    cell.setLabel(entry.getId());
-    context.set(entry.getClass().getName(), entry);
+  public void prepare() {
+    EclipseUtilities.injectSupertypes(context, DataProcessor.class);
+  }
+
+  @Inject
+  public void inject(DataProcessor entry) {
+    if (entry != null) {
+      cell.setLabel(entry.getClass().getName());
+    }
   }
 }

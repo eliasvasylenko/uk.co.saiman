@@ -47,6 +47,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
@@ -72,7 +73,6 @@ public class ExperimentEditorAddon implements EditorProvider {
   private static final String BUNDLE_CLASS = "bundleclass://";
   private static final String BUNDLE_CLASS_SEPARATOR = "/";
 
-  private static final String REMOVE_ON_HIDE = "removeOnHide";
   private static final String SEGREGATED_DND = "segregatedDnD";
   private static final String TABS_LOCATION = "fx.stack.tabslocation";
   private static final String TABS_LOCATION_BOTTOM = "BOTTOM";
@@ -198,7 +198,7 @@ public class ExperimentEditorAddon implements EditorProvider {
   @Override
   public MPart createEditorPart(String id, Object resource) {
     MCompositePart part = modelService.createModelElement(MCompositePart.class);
-    part.getTags().add(REMOVE_ON_HIDE);
+    part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
     part.getTags().add(SEGREGATED_DND);
     part.setDirty(true);
 

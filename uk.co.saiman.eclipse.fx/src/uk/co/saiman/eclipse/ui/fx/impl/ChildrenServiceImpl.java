@@ -27,31 +27,173 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.Tree;
 import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.ui.SaiUiModel;
 
 public class ChildrenServiceImpl implements ChildrenService {
+  private class Children {
+    private class Child {
+      private final Cell cell;
+      private Object item;
+
+      public Child(Object item) {
+        this.cell = (Cell) models.cloneSnippet(application, modelElementId, null);
+        if (this.cell == null) {
+          throw new IllegalArgumentException("Child does not exist " + modelElementId);
+        }
+        this.cell.setContextValue(contextName);
+        this.cell.setNullable(true);
+        this.cell.getTags().add(SaiUiModel.NO_AUTO_REMOVE);
+        this.cell.getTags().add(SaiUiModel.NO_AUTO_HIDE);
+        this.item = item;
+      }
+
+      public Cell cell() {
+        return cell;
+      }
+
+      public Object item() {
+        return item;
+      }
+
+      public Child setItem(Object item) {
+        this.item = item;
+        return this;
+      }
+    }
+
+    private final String modelElementId;
+
+    private String contextName;
+
+    private List<Child> children = new ArrayList<>();
+
+    private Consumer<? super List<?>> updatePlural;
+    private Consumer<Object> updateSingle;
+
+    public Children(String modelElementId) {
+      this.modelElementId = modelElementId;
+    }
+
+    public boolean isModifiable() {
+      return updateSingle != null || updatePlural != null;
+    }
+
+    public java.util.Optional<Child> getChild(Cell cell) {
+      return children.stream().filter(c -> c.cell() == cell).findAny();
+    }
+
+    public Object getValue(Cell cell) {
+      return getChild(cell).map(Child::item).orElse(null);
+    }
+
+    public void addChildren() {
+      /*
+       * 
+       * 
+       * TODO only remove and re-add the items we need to to get the correct order.
+       * 
+       * 
+       */
+      for (Iterator<Cell> i = parent().getChildren().iterator(); i.hasNext();) {
+        Cell cell = i.next();
+        if (cell.getElementId().equals(modelElementId)) {
+          i.remove();
+        }
+      }
+      parent().getChildren().addAll(children.stream().map(Child::cell).collect(toList()));
+    }
+
+    public void updateChildren() {
+      if (updateSingle != null) {
+        updateSingle.accept(children.get(0).item());
+      } else if (updatePlural != null) {
+        updatePlural
+            .accept(children.stream().map(Child::item).filter(Objects::nonNull).collect(toList()));
+      }
+    }
+
+    public boolean updateChild(Cell cell, Object value) {
+      if (!parent().getChildren().contains(cell)) {
+        cell.setToBeRendered(false);
+        return false;
+      }
+      Child child = getChild(cell).orElse(null);
+      if (child == null) {
+        cell.setToBeRendered(false);
+        return false;
+      }
+      child.setItem(value);
+      return true;
+    }
+
+    public synchronized void setItem(String contextName, Object item, Consumer<Object> update) {
+      if (Objects.equals(this.contextName, contextName)
+          && !(update == null && isModifiable())
+          && children.size() == 1) {
+        children.get(0).setItem(item);
+      } else {
+        this.contextName = contextName;
+        children = singletonList(new Child(item));
+      }
+      updateSingle = update;
+      updatePlural = null;
+      addChildren();
+    }
+
+    public synchronized void setItems(
+        String contextName,
+        Collection<?> items,
+        Consumer<? super Collection<?>> update) {
+      if (Objects.equals(this.contextName, contextName) && !(update == null && isModifiable())) {
+        Map<Object, Child> previousChildren = new LinkedHashMap<>();
+        children.stream().forEach(child -> previousChildren.putIfAbsent(child.item(), child));
+        children = items.stream().map(item -> {
+          Child child = previousChildren.remove(item);
+          if (child != null) {
+            child.setItem(item);
+            return child;
+          } else {
+            return new Child(item);
+          }
+        }).collect(toList());
+      } else {
+        this.contextName = contextName;
+        children.stream().map(Child::cell).forEach(parent().getChildren()::remove);
+        children = items.stream().map(Child::new).collect(toList());
+      }
+      updateSingle = null;
+      updatePlural = update;
+      addChildren();
+    }
+  }
+
   @Inject
   private EModelService models;
   @Inject
@@ -64,7 +206,7 @@ public class ChildrenServiceImpl implements ChildrenService {
   @Optional
   private Tree parentTree;
 
-  private final Map<String, List<Cell>> children = new HashMap<>();
+  private final Map<String, Children> children = new HashMap<>();
 
   @Inject
   public ChildrenServiceImpl() {}
@@ -73,118 +215,90 @@ public class ChildrenServiceImpl implements ChildrenService {
     return parentCell != null ? parentCell : parentTree;
   }
 
-  @PostConstruct
-  private void findChildren() {
-    for (Cell child : parent().getChildren()) {
-      String contextValue = child.getContextValue();
-      if (contextValue != null) {
-        List<Cell> values = getChildren(child.getElementId());
-        values.add(child);
-      }
-    }
+  private Children getChildren(String modelElementId) {
+    return children.computeIfAbsent(modelElementId, k -> new Children(modelElementId));
   }
 
-  private List<Cell> getChildren(String id) {
-    return children.computeIfAbsent(id, k -> new ArrayList<>());
+  @Override
+  public void setItem(String modelElementId, String contextName, Object child) {
+    getChildren(modelElementId).setItem(contextName, child, null);
   }
 
-  private Cell readyModel(String id, String contextName, Object value) {
-    Cell cell = null;
-
-    Iterator<Cell> cells = getChildren(id).iterator();
-    while (cells.hasNext()) {
-      Cell child = cells.next();
-
-      if (Objects.equals(child.getTransientData().get(UIAddon.CHILD_CONTEXT_VALUE), value)) {
-        cells.remove();
-        cell = child;
-        break;
-      }
-    }
-
-    if (cell == null) {
-      cell = (Cell) models.cloneSnippet(application, id, null);
-      if (cell == null) {
-        throw new IllegalArgumentException("Child does not exist " + id);
-      }
-      cell.setContextValue(contextName);
-      cell.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, value);
-    }
-
-    return cell;
-  }
-
-  private List<Cell> readyModels(
-      String id,
+  @Override
+  public void setItem(
+      String modelElementId,
       String contextName,
-      Collection<? extends Object> values) {
-    return values.stream().map(child -> readyModel(id, contextName, child)).collect(toList());
-  }
-
-  private void setChild(String id, Cell model) {
-    setChildren(id, Collections.singletonList(model));
-  }
-
-  private void setChildren(String id, Collection<Cell> newChildren) {
-    List<Cell> children = getChildren(id);
-    children.forEach(c -> {
-      c.setToBeRendered(false);
-      c.setParent(null);
-    });
-    children.clear();
-
-    parent().getChildren().addAll(newChildren);
-    children.addAll(newChildren);
+      Object child,
+      Consumer<Object> update) {
+    getChildren(modelElementId).setItem(contextName, child, update);
   }
 
   @Override
-  public <T> void setItem(String id, String contextName, T child) {
-    Cell model = readyModel(id, contextName, child);
-    setChild(id, model);
+  public void setItems(String modelElementId, String contextName, Collection<?> children) {
+    getChildren(modelElementId).setItems(contextName, children, null);
   }
 
   @Override
-  public <T> void setItem(String id, String contextName, T child, Consumer<? super T> update) {
-    Cell model = readyModel(id, contextName, child);
-    model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super T>) value -> {
-      update.accept(value);
-    });
-    setChild(id, model);
-  }
-
-  @Override
-  public <T> void setItems(String id, String contextName, Collection<? extends T> children) {
-    List<Cell> models = readyModels(id, contextName, children);
-    setChildren(id, models);
-  }
-
-  @Override
-  public <T> void setItems(
-      String id,
+  public void setItems(
+      String modelElementId,
       String contextName,
-      List<? extends T> children,
-      Consumer<? super List<? extends T>> update) {
-    List<Cell> models = readyModels(id, contextName, children);
-    int i = 0;
-    for (Cell model : models) {
-      int index = i++;
+      Collection<?> children,
+      Consumer<? super Collection<?>> update) {
+    getChildren(modelElementId).setItems(contextName, children, update);
+  }
 
-      Map<String, Object> data = model.getTransientData();
-      data.put(UIAddon.CHILD_CONTEXT_VALUES_SET, (Consumer<? super List<? extends T>>) value -> {
-        update.accept(value);
-      });
-      data.put(UIAddon.CHILD_CONTEXT_VALUE_SET, (Consumer<? super T>) value -> {
-        List<T> newChildren = new ArrayList<>(children);
-        if (value == null) {
-          newChildren.remove(index);
-        } else {
-          newChildren.set(index, value);
+  static void prepareChildContainer(IEclipseContext context) {
+    try {
+      context
+          .set(
+              ChildrenService.class,
+              ContextInjectionFactory.make(ChildrenServiceImpl.class, context));
+      context.declareModifiable(ChildrenService.class);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  static void prepareChild(IEclipseContext context, Cell cell) {
+    IEclipseContext parentContext = ((MContext) cell.getParent()).getContext();
+    ChildrenServiceImpl parentService = (ChildrenServiceImpl) parentContext
+        .get(ChildrenService.class);
+
+    parentService.prepareChildImpl(context, cell);
+  }
+
+  private void prepareChildImpl(IEclipseContext context, Cell cell) {
+    String key = cell.getContextValue();
+    if (key == null)
+      return;
+
+    Children children = getChildren(cell.getElementId());
+    Object value = children.getValue(cell);
+    if (value == null)
+      return;
+
+    context.set(key, value);
+
+    if (!children.isModifiable())
+      return;
+
+    context.declareModifiable(key);
+
+    RunAndTrack runAndTrack = new RunAndTrack() {
+      private boolean firstTry = true;
+
+      @Override
+      public boolean changed(IEclipseContext c) {
+        Object value = c.get(key);
+        if (firstTry) {
+          firstTry = false;
+          return true;
         }
-        // the following line is so we know to re-use the model element in #readyModel
-        model.getTransientData().put(UIAddon.CHILD_CONTEXT_VALUE, value);
-        update.accept(newChildren);
-      });
-    }
-    setChildren(id, models);
+        boolean updated = children.updateChild(cell, value);
+        runExternalCode(children::updateChildren);
+        return updated;
+      }
+    };
+    context.runAndTrack(runAndTrack);
   }
 }

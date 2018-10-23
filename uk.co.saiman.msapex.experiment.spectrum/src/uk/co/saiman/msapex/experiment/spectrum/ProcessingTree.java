@@ -33,9 +33,10 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.processing.ProcessorConfiguration;
+import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
 
 public class ProcessingTree {
   public static final String ID = "uk.co.saiman.experiment.processing.tree";
@@ -44,9 +45,9 @@ public class ProcessingTree {
   public void prepare(IEclipseContext context, Processing processing, ChildrenService children) {
     children
         .setItems(
-            ID,
-            ProcessorConfiguration.class,
-            processing.processors().collect(toList()),
-            r -> context.set(Processing.class, new Processing(r)));
+            ProcessorCell.ID,
+            DataProcessor.class,
+            processing.steps().collect(toList()),
+            r -> context.modify(Processing.class, new Processing(r)));
   }
 }
