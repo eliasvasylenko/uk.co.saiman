@@ -27,305 +27,85 @@
  */
 package uk.co.saiman.msapex.editor.impl;
 
-import static java.util.Objects.requireNonNull;
-import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
-import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
-import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
-import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
-import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
-import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_TOBERENDERED;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.di.UIEventTopic;
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.MDirtyable;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
-import org.eclipse.e4.ui.workbench.UIEvents;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
-import org.osgi.service.event.Event;
 
-import uk.co.saiman.log.Log;
-import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.editor.Editor;
-import uk.co.saiman.msapex.editor.EditorDescriptor;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
 public class EditorAddon implements EditorService {
-  private static final String PART_STACK_ID = "uk.co.saiman.msapex.partstack.editor";
-  public static final String PROVIDER_ID = "uk.co.saiman.msapex.editor.provider";
-
-  @Inject
-  private MApplication application;
-  @Inject
-  private EModelService modelService;
-  @Inject
-  private EPartService partService;
-  @Inject
-  private Log log;
-
-  private final Set<EditorDescriptor> editorPrecedence = new LinkedHashSet<>();
-
-  private final Map<String, List<MPart>> orphanedEditors = new HashMap<>();
-  private final Map<String, EditorProvider> editorProviders = new LinkedHashMap<>();
-
-  private final Map<MPart, Object> partResources = new HashMap<>();
-  private final Map<Object, MPart> resourceParts = new HashMap<>();
+  private final Set<EditorProvider> editorProviders = new HashSet<>();
 
   @PostConstruct
   void initialize(IEclipseContext context) {
-    List<MPart> persistedParts = modelService
-        .findElements(
-            application,
-            MPart.class,
-            EModelService.ANYWHERE,
-            part -> isEditor((MPart) part));
-
-    persistedParts.forEach(part -> {
-      String provider = part.getPersistedState().get(PROVIDER_ID);
-      orphanedEditors.computeIfAbsent(provider, k -> new ArrayList<>()).add(part);
-    });
-
     context.set(EditorService.class, this);
   }
 
-  protected <T> MPart createEditor(EditorDescriptor descriptor, Object data) {
-    MPart editorPart = descriptor.getProvider().createEditorPart(descriptor.getPartId(), data);
-
-    editorPart.setCloseable(true);
-    editorPart.getPersistedState().put(PROVIDER_ID, descriptor.getProvider().getId());
-
-    partResources.put(editorPart, data);
-
-    ((MPartStack) modelService.find(PART_STACK_ID, application)).getChildren().add(editorPart);
-
-    partService.showPart(editorPart, PartState.CREATE);
-
-    return editorPart;
+  @Override
+  public void registerProvider(EditorProvider editorProvider) {
+    editorProviders.add(editorProvider);
   }
 
-  /**
-   * Watch for part close events so we can clean up after the editors.
-   */
-  @Inject
-  @Optional
-  private synchronized void partCloseListener(@UIEventTopic(TOPIC_TOBERENDERED) Event event) {
-    Object part = event.getProperty(UIEvents.EventTags.ELEMENT);
-    boolean toBeRendered = (Boolean) event.getProperty(UIEvents.EventTags.NEW_VALUE);
-    if (part instanceof MPart && !toBeRendered && isEditor((MPart) part)) {
-      resourceParts.remove(partResources.remove(part));
-    }
+  @Override
+  public void unregisterProvider(EditorProvider editorProvider) {
+    editorProviders.remove(editorProvider);
   }
 
-  /**
-   * Watch for context creation events so we can inject into the part contexts
-   * before the UI is created.
-   */
-  @Inject
-  @Optional
-  private synchronized void partContextListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
-    try {
-      Object value = event.getProperty(NEW_VALUE);
-      Object element = event.getProperty(ELEMENT);
-      if (element instanceof MPart
-          && value instanceof IEclipseContext
-          && SET.equals(event.getProperty(TYPE))) {
-        IEclipseContext context = (IEclipseContext) value;
+  @Override
+  public Stream<EditorProvider> getEditorProviders() {
+    return editorProviders.stream().map(this::mock);
+  }
 
-        MPart part = (MPart) element;
-        MPart parentPart = context.getParent().get(MPart.class);
-
-        if (isEditor(part)) {
-          prepareEditorPartContext(part);
-        } else if (isEditor(parentPart)) {
-          prepareEditorChildPartContext(context);
-        }
+  private EditorProvider mock(EditorProvider editorProvider) {
+    return new EditorProvider() {
+      @Override
+      public boolean isApplicable(Object contextValue) {
+        return editorProvider.isApplicable(contextValue);
       }
-    } catch (Exception e) {
-      log.log(Level.ERROR, e);
-    }
-  }
 
-  private void prepareEditorPartContext(MPart part) {
-    EditorProvider provider = editorProviders.get(part.getPersistedState().get(PROVIDER_ID));
-
-    Object resource = partResources.get(part);
-    if (resource != null) {
-      provider.initializeEditorPart(part, resource);
-    } else {
-      provider.initializeMissingResourceEditorPart(part);
-    }
-  }
-
-  private void prepareEditorChildPartContext(IEclipseContext context) {
-    /*
-     * We don't want the child part to dirty itself, we want it to dirty the
-     * container.
-     */
-    context.set(MDirtyable.class, context.getParent().get(MDirtyable.class));
-  }
-
-  @Override
-  public Stream<Editor> getApplicableEditors(Object resource) {
-    List<EditorDescriptor> existingPrecedence = new ArrayList<>(editorPrecedence);
-
-    /*
-     * TODO deal with precedence
-     */
-    return getEditors().filter(e -> e.isApplicable(resource)).map(e -> e.getInstance(resource));
-  }
-
-  @Override
-  public Stream<EditorDescriptor> getEditors() {
-    return editorProviders
-        .values()
-        .stream()
-        .flatMap(e -> e.getEditorPartIds().map(p -> new EditorDescriptorImpl(e, p)));
-  }
-
-  @Override
-  public void registerProvider(EditorProvider provider) {
-    editorProviders.put(provider.getId(), provider);
-    List<MPart> orphans = orphanedEditors.remove(provider.getId());
-    if (orphans != null)
-      for (MPart part : orphans) {
-        try {
-          Object resource = provider.loadEditorResource(part);
-
-          partResources.put(part, resource);
-          resourceParts.put(resource, part);
-        } catch (Exception e) {
-          log.log(Level.ERROR, e);
-        }
+      @Override
+      public Editor getEditorPart(Object contextValue) {
+        return mock(editorProvider.getEditorPart(contextValue));
       }
+
+      @Override
+      public String getContextKey() {
+        return editorProvider.getContextKey();
+      }
+    };
   }
 
-  @Override
-  public void unregisterProvider(EditorProvider provider) {
-    editorProviders.remove(provider.getId());
-  }
+  private Editor mock(Editor editor) {
+    return new Editor() {
+      @Override
+      public MPart openPart() {
+        /*
+         * TODO adjust precedence
+         */
+        return editor.openPart();
+      }
 
-  @Override
-  public boolean isEditor(MPart part) {
-    return part != null && part.getPersistedState().containsKey(PROVIDER_ID);
-  }
+      @Override
+      public String getLabel() {
+        return editor.getLabel();
+      }
 
-  @Override
-  public Object getResource(MPart part) {
-    return partResources.get(part);
-  }
+      @Override
+      public String getDescription() {
+        return editor.getDescription();
+      }
 
-  public class EditorDescriptorImpl implements EditorDescriptor {
-    private final EditorProvider provider;
-    private final String partId;
-
-    public EditorDescriptorImpl(EditorProvider provider, String partId) {
-      this.provider = requireNonNull(provider);
-      this.partId = requireNonNull(partId);
-    }
-
-    @Override
-    public EditorProvider getProvider() {
-      return provider;
-    }
-
-    @Override
-    public String getIconUri() {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public String getPartId() {
-      return partId;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-      if (other == this)
-        return true;
-      if (!(other instanceof EditorDescriptorImpl))
-        return false;
-
-      EditorDescriptorImpl that = (EditorDescriptorImpl) other;
-
-      return this.provider == that.provider && Objects.equals(this.partId, that.partId);
-    }
-
-    @Override
-    public int hashCode() {
-      return provider.hashCode() ^ partId.hashCode();
-    }
-
-    @Override
-    public boolean isApplicable(Object resource) {
-      return provider.isEditorApplicable(partId, resource);
-    }
-
-    @Override
-    public Editor getInstance(Object resource) {
-      return new EditorImpl(resource, this);
-    }
-
-    @Override
-    public String toString() {
-      return getProvider().getId() + "/" + getPartId();
-    }
-  }
-
-  public class EditorImpl implements Editor {
-    private final Object resource;
-    private final EditorDescriptor descriptor;
-
-    public EditorImpl(Object resource, EditorDescriptor descriptor) {
-      this.resource = resource;
-      this.descriptor = descriptor;
-    }
-
-    @Override
-    public EditorDescriptor getDescriptor() {
-      return descriptor;
-    }
-
-    @Override
-    public Object getResource() {
-      return resource;
-    }
-
-    @Override
-    public MPart openPart() {
-      /*
-       * TODO this should only move the editor preference before other editors which
-       * were actually applicable to the resource!!!
-       * 
-       * editorPrecedence.remove(getDescriptor());
-       * editorPrecedence.add(getDescriptor());
-       */
-
-      MPart editorPart = getEditor();
-      partService.activate(editorPart);
-      return editorPart;
-    }
-
-    MPart getEditor() {
-      return resourceParts.computeIfAbsent(resource, r -> createEditor(getDescriptor(), resource));
-    }
+      @Override
+      public String getIconURI() {
+        return editor.getIconURI();
+      }
+    };
   }
 }

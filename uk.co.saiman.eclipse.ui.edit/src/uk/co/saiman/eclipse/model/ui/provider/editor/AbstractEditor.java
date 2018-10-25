@@ -282,6 +282,17 @@ public abstract class AbstractEditor extends AbstractComponentEditor {
             VERTICAL_LIST_WIDGET_INDENT);
   }
 
+  protected void createContextPropertiesControl(Composite parent) {
+    ControlFactory
+        .createMapProperties(
+            parent,
+            Messages,
+            this,
+            Messages.ModelTooling_Context_Properties,
+            UiPackageImpl.Literals.CONTEXT__PROPERTIES,
+            VERTICAL_LIST_WIDGET_INDENT);
+  }
+
   protected void createContextVariablesControl(Composite parent) {
     ControlFactory
         .createStringListWidget(

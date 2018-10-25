@@ -27,28 +27,35 @@
  */
 package uk.co.saiman.msapex.editor.impl;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
+
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.services.adapter.Adapter;
-import org.eclipse.e4.ui.model.application.MAddon;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.osgi.service.event.Event;
 
-import uk.co.saiman.msapex.editor.EditorProvider;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.editor.EditorService;
 
-public class FileEditorAddon implements EditorProvider {
+public class FileEditorAddon {
   /**
    * The persisted file name of a resource for an active editor.
    */
@@ -59,82 +66,72 @@ public class FileEditorAddon implements EditorProvider {
    */
   public static final String EDITOR_FILE_PATH_PATTERN = "uk.co.saiman.msapex.editor.file.path.pattern";
 
-  private final Map<String, MPart> editorParts = new LinkedHashMap<>();
-
-  @Inject
-  private EditorService editorService;
   @Inject
   private EModelService modelService;
   @Inject
+  private EditorService editorService;
+  @Inject
   private MApplication application;
   @Inject
-  private Adapter adapter;
-  @Inject
-  private MAddon addon;
+  private Log log;
+
+  private Map<String, FileEditorProvider> providers;
 
   @PostConstruct
-  void create() {
-    for (MUIElement snippet : application.getSnippets()) {
-      if (snippet instanceof MPart) {
-        MPart part = (MPart) snippet;
-        if (part.getPersistedState().containsKey(EDITOR_FILE_PATH_PATTERN)) {
-          editorParts.put(part.getElementId(), part);
-        }
-      }
-    }
+  synchronized void create() {
+    providers = application
+        .getSnippets()
+        .stream()
+        .filter(this::isFileEditor)
+        .map(snippet -> new FileEditorProvider(application, (MPart) snippet))
+        .collect(toMap(FileEditorProvider::getId, identity()));
 
-    editorService.registerProvider(this);
+    modelService
+        .findElements(application, MPart.class, EModelService.ANYWHERE, part -> isFileEditor(part))
+        .forEach(this::addEditor);
+
+    providers.values().forEach(editorService::registerProvider);
   }
 
   @PreDestroy
   void destroy() {
-    editorService.unregisterProvider(this);
+    providers.values().forEach(editorService::unregisterProvider);
   }
 
-  @Override
-  public String getId() {
-    return addon.getElementId();
-  }
-
-  @Override
-  public Stream<String> getEditorPartIds() {
-    return editorParts.values().stream().map(MPart::getElementId);
-  }
-
-  @Override
-  public boolean isEditorApplicable(String editorId, Object resource) {
-    MPart part = editorParts.get(editorId);
-    if (part != null && resource instanceof Path) {
-      Path path = (Path) resource;
-      String pattern = part.getPersistedState().get(EDITOR_FILE_PATH_PATTERN);
-
-      PathMatcher matcher = path.getFileSystem().getPathMatcher("glob:" + pattern);
-
-      return matcher.matches(path);
+  private void addEditor(MPart part) {
+    FileEditorProvider provider = providers.get(part.getElementId());
+    if (provider != null) {
+      provider.addEditor(part);
     }
-    return false;
   }
 
-  @Override
-  public MPart createEditorPart(String id, Object resource) {
-    MPart part = (MPart) modelService.cloneSnippet(application, id, null);
-    part.getPersistedState().remove(EDITOR_FILE_PATH_PATTERN);
-    return part;
+  private boolean isFileEditor(MApplicationElement model) {
+    return model.getPersistedState().containsKey(EDITOR_FILE_PATH_PATTERN);
   }
 
-  @Override
-  public Object loadEditorResource(MPart part) {
-    return Paths.get(part.getPersistedState().get(EDITOR_FILE_NAME));
-  }
+  /*
+   * Part lifecycle in the application model
+   */
 
-  @Override
-  public void initializeEditorPart(MPart part, Object resource) {
-    Path path = adapter.adapt(resource, Path.class);
-    part.getPersistedState().put(EDITOR_FILE_NAME, path.toString());
-  }
+  @Inject
+  @Optional
+  private void partOpenListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
+    try {
+      Object value = event.getProperty(NEW_VALUE);
+      Object element = event.getProperty(ELEMENT);
 
-  @Override
-  public void initializeMissingResourceEditorPart(MPart part) {
-    String missingResource = part.getPersistedState().get(EDITOR_FILE_NAME);
+      if (element instanceof MPart
+          && value instanceof IEclipseContext
+          && SET.equals(event.getProperty(TYPE))) {
+        IEclipseContext context = (IEclipseContext) value;
+        MPart part = (MPart) element;
+
+        if (isFileEditor(part)) {
+          context.set(Path.class, (Path) part.getTransientData().get(EDITOR_FILE_NAME));
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
+    }
   }
 }

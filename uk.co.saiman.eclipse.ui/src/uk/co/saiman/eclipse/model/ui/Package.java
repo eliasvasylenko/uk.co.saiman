@@ -386,40 +386,13 @@ public interface Package extends EPackage {
   int CELL__HANDLERS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 23;
 
   /**
-   * The feature id for the '<em><b>Media Types</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL__MEDIA_TYPES = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 24;
-
-  /**
    * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int CELL__POPUP_MENU = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 25;
-
-  /**
-   * The feature id for the '<em><b>Transfer Formats</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL__TRANSFER_FORMATS = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 26;
-
-  /**
-   * The feature id for the '<em><b>Context Value</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL__CONTEXT_VALUE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 27;
+  int CELL__POPUP_MENU = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 24;
 
   /**
    * The feature id for the '<em><b>Expanded</b></em>' attribute.
@@ -428,16 +401,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL__EXPANDED = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 28;
-
-  /**
-   * The feature id for the '<em><b>Nullable</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CELL__NULLABLE = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 29;
+  int CELL__EXPANDED = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 25;
 
   /**
    * The number of structural features of the '<em>Cell</em>' class.
@@ -446,7 +410,7 @@ public interface Package extends EPackage {
    * @generated
    * @ordered
    */
-  int CELL_FEATURE_COUNT = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 30;
+  int CELL_FEATURE_COUNT = UiPackageImpl.UI_LABEL_FEATURE_COUNT + 26;
 
   /**
    * The operation id for the '<em>Update Localization</em>' operation.
@@ -1055,15 +1019,6 @@ public interface Package extends EPackage {
   int HANDLED_CELL__HANDLERS = CELL__HANDLERS;
 
   /**
-   * The feature id for the '<em><b>Media Types</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int HANDLED_CELL__MEDIA_TYPES = CELL__MEDIA_TYPES;
-
-  /**
    * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1073,24 +1028,6 @@ public interface Package extends EPackage {
   int HANDLED_CELL__POPUP_MENU = CELL__POPUP_MENU;
 
   /**
-   * The feature id for the '<em><b>Transfer Formats</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int HANDLED_CELL__TRANSFER_FORMATS = CELL__TRANSFER_FORMATS;
-
-  /**
-   * The feature id for the '<em><b>Context Value</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int HANDLED_CELL__CONTEXT_VALUE = CELL__CONTEXT_VALUE;
-
-  /**
    * The feature id for the '<em><b>Expanded</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1098,15 +1035,6 @@ public interface Package extends EPackage {
    * @ordered
    */
   int HANDLED_CELL__EXPANDED = CELL__EXPANDED;
-
-  /**
-   * The feature id for the '<em><b>Nullable</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int HANDLED_CELL__NULLABLE = CELL__NULLABLE;
 
   /**
    * The feature id for the '<em><b>Command</b></em>' reference.
@@ -1464,15 +1392,6 @@ public interface Package extends EPackage {
   int EDITABLE_CELL__HANDLERS = CELL__HANDLERS;
 
   /**
-   * The feature id for the '<em><b>Media Types</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int EDITABLE_CELL__MEDIA_TYPES = CELL__MEDIA_TYPES;
-
-  /**
    * The feature id for the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1482,24 +1401,6 @@ public interface Package extends EPackage {
   int EDITABLE_CELL__POPUP_MENU = CELL__POPUP_MENU;
 
   /**
-   * The feature id for the '<em><b>Transfer Formats</b></em>' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int EDITABLE_CELL__TRANSFER_FORMATS = CELL__TRANSFER_FORMATS;
-
-  /**
-   * The feature id for the '<em><b>Context Value</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int EDITABLE_CELL__CONTEXT_VALUE = CELL__CONTEXT_VALUE;
-
-  /**
    * The feature id for the '<em><b>Expanded</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1507,15 +1408,6 @@ public interface Package extends EPackage {
    * @ordered
    */
   int EDITABLE_CELL__EXPANDED = CELL__EXPANDED;
-
-  /**
-   * The feature id for the '<em><b>Nullable</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int EDITABLE_CELL__NULLABLE = CELL__NULLABLE;
 
   /**
    * The feature id for the '<em><b>Editing</b></em>' attribute.
@@ -1587,17 +1479,6 @@ public interface Package extends EPackage {
   EClass getCell();
 
   /**
-   * Returns the meta object for the attribute list '{@link uk.co.saiman.eclipse.model.ui.Cell#getMediaTypes <em>Media Types</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the attribute list '<em>Media Types</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.Cell#getMediaTypes()
-   * @see #getCell()
-   * @generated
-   */
-  EAttribute getCell_MediaTypes();
-
-  /**
    * Returns the meta object for the containment reference '{@link uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu <em>Popup Menu</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1609,28 +1490,6 @@ public interface Package extends EPackage {
   EReference getCell_PopupMenu();
 
   /**
-   * Returns the meta object for the attribute list '{@link uk.co.saiman.eclipse.model.ui.Cell#getTransferFormats <em>Transfer Formats</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the attribute list '<em>Transfer Formats</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.Cell#getTransferFormats()
-   * @see #getCell()
-   * @generated
-   */
-  EAttribute getCell_TransferFormats();
-
-  /**
-   * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#getContextValue <em>Context Value</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Context Value</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.Cell#getContextValue()
-   * @see #getCell()
-   * @generated
-   */
-  EAttribute getCell_ContextValue();
-
-  /**
    * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#isExpanded <em>Expanded</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -1640,17 +1499,6 @@ public interface Package extends EPackage {
    * @generated
    */
   EAttribute getCell_Expanded();
-
-  /**
-   * Returns the meta object for the attribute '{@link uk.co.saiman.eclipse.model.ui.Cell#isNullable <em>Nullable</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Nullable</em>'.
-   * @see uk.co.saiman.eclipse.model.ui.Cell#isNullable()
-   * @see #getCell()
-   * @generated
-   */
-  EAttribute getCell_Nullable();
 
   /**
    * Returns the meta object for class '{@link uk.co.saiman.eclipse.model.ui.Tree <em>Tree</em>}'.
@@ -1801,14 +1649,6 @@ public interface Package extends EPackage {
     EClass CELL = eINSTANCE.getCell();
 
     /**
-     * The meta object literal for the '<em><b>Media Types</b></em>' attribute list feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EAttribute CELL__MEDIA_TYPES = eINSTANCE.getCell_MediaTypes();
-
-    /**
      * The meta object literal for the '<em><b>Popup Menu</b></em>' containment reference feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -1817,36 +1657,12 @@ public interface Package extends EPackage {
     EReference CELL__POPUP_MENU = eINSTANCE.getCell_PopupMenu();
 
     /**
-     * The meta object literal for the '<em><b>Transfer Formats</b></em>' attribute list feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EAttribute CELL__TRANSFER_FORMATS = eINSTANCE.getCell_TransferFormats();
-
-    /**
-     * The meta object literal for the '<em><b>Context Value</b></em>' attribute feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EAttribute CELL__CONTEXT_VALUE = eINSTANCE.getCell_ContextValue();
-
-    /**
      * The meta object literal for the '<em><b>Expanded</b></em>' attribute feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
     EAttribute CELL__EXPANDED = eINSTANCE.getCell_Expanded();
-
-    /**
-     * The meta object literal for the '<em><b>Nullable</b></em>' attribute feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EAttribute CELL__NULLABLE = eINSTANCE.getCell_Nullable();
 
     /**
      * The meta object literal for the '{@link uk.co.saiman.eclipse.model.ui.impl.TreeImpl <em>Tree</em>}' class.

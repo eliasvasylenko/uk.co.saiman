@@ -25,41 +25,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.editor.impl;
+package uk.co.saiman.msapex.editor;
 
-import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
+public interface ClassEditorProvider<T> extends EditorProvider {
+  Class<T> getContextType();
 
-import javax.inject.Inject;
+  boolean isApplicableTyped(T contextValue);
 
-import org.eclipse.e4.core.di.annotations.CanExecute;
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+  Editor getEditorPartTyped(T contextValue);
 
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.msapex.editor.EditorProperties;
-import uk.co.saiman.msapex.editor.Editor;
-import uk.co.saiman.msapex.editor.EditorService;
-
-public class OpenSelectionHandler {
-  @Inject
-  EPartService partService;
-
-  @CanExecute
-  boolean canExecute(
-      EditorService editorService,
-      @Localize EditorProperties text,
-      @Optional @AdaptNamed(ACTIVE_SELECTION) Object selection) {
-    return selection != null && editorService.getApplicableEditors(selection).findAny().isPresent();
+  @SuppressWarnings("unchecked")
+  @Override
+  default boolean isApplicable(Object contextValue) {
+    return getContextType().isInstance(contextValue) && isApplicableTyped((T) contextValue);
   }
 
-  @Execute
-  void execute(
-      EditorService editorService,
-      @Localize EditorProperties text,
-      @AdaptNamed(ACTIVE_SELECTION) Object selection) {
-    editorService.getApplicableEditors(selection).findFirst().ifPresent(
-        Editor::openPart);
+  @SuppressWarnings("unchecked")
+  @Override
+  default Editor getEditorPart(Object contextValue) {
+    return getEditorPartTyped((T) contextValue);
+  }
+
+  @Override
+  default String getContextKey() {
+    return getContextType().getName();
   }
 }

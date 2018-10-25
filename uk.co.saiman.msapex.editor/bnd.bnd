@@ -19,4 +19,5 @@ Export-Package: uk.co.saiman.msapex.editor
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
-	uk.co.saiman.eclipse;version=snapshot
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot

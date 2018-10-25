@@ -76,9 +76,7 @@ import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
 import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.InternalEList;
-import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.ui.TransferFormat;
 
 /**
  * <!-- begin-user-doc -->
@@ -117,12 +115,8 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getChildren <em>Children</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getSelectedElement <em>Selected Element</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getHandlers <em>Handlers</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getMediaTypes <em>Media Types</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getPopupMenu <em>Popup Menu</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getTransferFormats <em>Transfer Formats</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#getContextValue <em>Context Value</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isExpanded <em>Expanded</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.impl.CellImpl#isNullable <em>Nullable</em>}</li>
  * </ul>
  *
  * @generated
@@ -567,16 +561,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   protected EList<MHandler> handlers;
 
   /**
-   * The cached value of the '{@link #getMediaTypes() <em>Media Types</em>}' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getMediaTypes()
-   * @generated
-   * @ordered
-   */
-  protected EList<MediaType> mediaTypes;
-
-  /**
    * The cached value of the '{@link #getPopupMenu() <em>Popup Menu</em>}' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -585,36 +569,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @ordered
    */
   protected MPopupMenu popupMenu;
-
-  /**
-   * The cached value of the '{@link #getTransferFormats() <em>Transfer Formats</em>}' attribute list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getTransferFormats()
-   * @generated
-   * @ordered
-   */
-  protected EList<TransferFormat<?>> transferFormats;
-
-  /**
-   * The default value of the '{@link #getContextValue() <em>Context Value</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getContextValue()
-   * @generated
-   * @ordered
-   */
-  protected static final String CONTEXT_VALUE_EDEFAULT = null;
-
-  /**
-   * The cached value of the '{@link #getContextValue() <em>Context Value</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getContextValue()
-   * @generated
-   * @ordered
-   */
-  protected String contextValue = CONTEXT_VALUE_EDEFAULT;
 
   /**
    * The default value of the '{@link #isExpanded() <em>Expanded</em>}' attribute.
@@ -635,26 +589,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @ordered
    */
   protected boolean expanded = EXPANDED_EDEFAULT;
-
-  /**
-   * The default value of the '{@link #isNullable() <em>Nullable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #isNullable()
-   * @generated
-   * @ordered
-   */
-  protected static final boolean NULLABLE_EDEFAULT = true;
-
-  /**
-   * The cached value of the '{@link #isNullable() <em>Nullable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #isNullable()
-   * @generated
-   * @ordered
-   */
-  protected boolean nullable = NULLABLE_EDEFAULT;
 
   /**
    * <!-- begin-user-doc -->
@@ -1321,19 +1255,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
-  public EList<MediaType> getMediaTypes() {
-    if (mediaTypes == null) {
-      mediaTypes = new EDataTypeUniqueEList<MediaType>(MediaType.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES);
-    }
-    return mediaTypes;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
   public MPopupMenu getPopupMenu() {
     return popupMenu;
   }
@@ -1378,42 +1299,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  @Override
-  public EList<TransferFormat<?>> getTransferFormats() {
-    if (transferFormats == null) {
-      transferFormats = new EDataTypeUniqueEList<TransferFormat<?>>(TransferFormat.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS);
-    }
-    return transferFormats;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public String getContextValue() {
-    return contextValue;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void setContextValue(String newContextValue) {
-    String oldContextValue = contextValue;
-    contextValue = newContextValue;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE, oldContextValue, contextValue));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
   public boolean isExpanded() {
     return expanded;
   }
@@ -1428,27 +1313,6 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     expanded = newExpanded;
     if (eNotificationRequired())
       eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED, oldExpanded, expanded));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public boolean isNullable() {
-    return nullable;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public void setNullable(boolean newNullable) {
-    boolean oldNullable = nullable;
-    nullable = newNullable;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE, oldNullable, nullable));
   }
 
   /**
@@ -1591,18 +1455,10 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return basicGetSelectedElement();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
         return getHandlers();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
-        return getMediaTypes();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         return getPopupMenu();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
-        return getTransferFormats();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
-        return getContextValue();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         return isExpanded();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
-        return isNullable();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -1698,25 +1554,11 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         getHandlers().clear();
         getHandlers().addAll((Collection<? extends MHandler>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
-        getMediaTypes().clear();
-        getMediaTypes().addAll((Collection<? extends MediaType>)newValue);
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         setPopupMenu((MPopupMenu)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
-        getTransferFormats().clear();
-        getTransferFormats().addAll((Collection<? extends TransferFormat<?>>)newValue);
-        return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
-        setContextValue((String)newValue);
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         setExpanded((Boolean)newValue);
-        return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
-        setNullable((Boolean)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -1808,23 +1650,11 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
         getHandlers().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
-        getMediaTypes().clear();
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         setPopupMenu((MPopupMenu)null);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
-        getTransferFormats().clear();
-        return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
-        setContextValue(CONTEXT_VALUE_EDEFAULT);
-        return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         setExpanded(EXPANDED_EDEFAULT);
-        return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
-        setNullable(NULLABLE_EDEFAULT);
         return;
     }
     super.eUnset(featureID);
@@ -1896,18 +1726,10 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
         return selectedElement != null;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
         return handlers != null && !handlers.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
-        return mediaTypes != null && !mediaTypes.isEmpty();
       case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
         return popupMenu != null;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
-        return transferFormats != null && !transferFormats.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
-        return CONTEXT_VALUE_EDEFAULT == null ? contextValue != null : !CONTEXT_VALUE_EDEFAULT.equals(contextValue);
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
         return expanded != EXPANDED_EDEFAULT;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
-        return nullable != NULLABLE_EDEFAULT;
     }
     return super.eIsSet(featureID);
   }
@@ -2099,16 +1921,8 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     result.append(containerData);
     result.append(", accessibilityPhrase: ");
     result.append(accessibilityPhrase);
-    result.append(", mediaTypes: ");
-    result.append(mediaTypes);
-    result.append(", transferFormats: ");
-    result.append(transferFormats);
-    result.append(", contextValue: ");
-    result.append(contextValue);
     result.append(", expanded: ");
     result.append(expanded);
-    result.append(", nullable: ");
-    result.append(nullable);
     result.append(')');
     return result.toString();
   }

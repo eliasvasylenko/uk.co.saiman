@@ -127,12 +127,8 @@ public class CellItemProvider
       addAccessibilityPhrasePropertyDescriptor(object);
       addLocalizedAccessibilityPhrasePropertyDescriptor(object);
       addSelectedElementPropertyDescriptor(object);
-      addMediaTypesPropertyDescriptor(object);
       addPopupMenuPropertyDescriptor(object);
-      addTransferFormatsPropertyDescriptor(object);
-      addContextValuePropertyDescriptor(object);
       addExpandedPropertyDescriptor(object);
-      addNullablePropertyDescriptor(object);
     }
     return itemPropertyDescriptors;
   }
@@ -604,28 +600,6 @@ public class CellItemProvider
   }
 
   /**
-   * This adds a property descriptor for the Media Types feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addMediaTypesPropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Cell_mediaTypes_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_mediaTypes_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__MEDIA_TYPES,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
    * This adds a property descriptor for the Popup Menu feature.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -648,50 +622,6 @@ public class CellItemProvider
   }
 
   /**
-   * This adds a property descriptor for the Transfer Formats feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addTransferFormatsPropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Cell_transferFormats_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_transferFormats_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__TRANSFER_FORMATS,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
-   * This adds a property descriptor for the Context Value feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addContextValuePropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Cell_contextValue_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_contextValue_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__CONTEXT_VALUE,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
    * This adds a property descriptor for the Expanded feature.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -705,28 +635,6 @@ public class CellItemProvider
          getString("_UI_Cell_expanded_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_Cell_expanded_feature", "_UI_Cell_type"),
          uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__EXPANDED,
-         true,
-         false,
-         false,
-         ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
-         null,
-         null));
-  }
-
-  /**
-   * This adds a property descriptor for the Nullable feature.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected void addNullablePropertyDescriptor(Object object) {
-    itemPropertyDescriptors.add
-      (createItemPropertyDescriptor
-        (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-         getResourceLocator(),
-         getString("_UI_Cell_nullable_feature"),
-         getString("_UI_PropertyDescriptor_description", "_UI_Cell_nullable_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__NULLABLE,
          true,
          false,
          false,
@@ -828,11 +736,7 @@ public class CellItemProvider
       case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__MEDIA_TYPES:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSFER_FORMATS:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT_VALUE:
       case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__NULLABLE:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
       case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:

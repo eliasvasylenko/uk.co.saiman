@@ -14,13 +14,9 @@
       <genTypeParameters ecoreTypeParameter="UISaiman.ecore#//TransferFormat/T"/>
     </genDataTypes>
     <genClasses ecoreClass="UISaiman.ecore#//Cell">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/mediaTypes"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference UISaiman.ecore#//Cell/popupMenu"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/transferFormats"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/contextValue"/>
       <genFeatures documentation="True if the tree node is expanded in the UI presentation"
           createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/expanded"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Cell/nullable"/>
     </genClasses>
     <genClasses ecoreClass="UISaiman.ecore#//Tree">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute UISaiman.ecore#//Tree/editable"/>

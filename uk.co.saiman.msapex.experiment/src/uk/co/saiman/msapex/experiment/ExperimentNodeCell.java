@@ -98,12 +98,18 @@ public class ExperimentNodeCell {
 
   @CanExecute
   public boolean canExecute() {
-    return editorService.getApplicableEditors(experiment).findFirst().isPresent();
+    return editorService
+        .getApplicableEditors(ExperimentNode.class, experiment)
+        .findFirst()
+        .isPresent();
   }
 
   @Execute
   public void execute() {
-    editorService.getApplicableEditors(experiment).findFirst().ifPresent(Editor::openPart);
+    editorService
+        .getApplicableEditors(ExperimentNode.class, experiment)
+        .findFirst()
+        .ifPresent(Editor::openPart);
   }
 
   @PostConstruct

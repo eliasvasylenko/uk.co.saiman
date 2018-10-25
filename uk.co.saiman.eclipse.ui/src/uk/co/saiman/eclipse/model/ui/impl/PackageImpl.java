@@ -178,35 +178,8 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getCell_MediaTypes() {
-    return (EAttribute)cellEClass.getEStructuralFeatures().get(0);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
   public EReference getCell_PopupMenu() {
-    return (EReference)cellEClass.getEStructuralFeatures().get(1);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getCell_TransferFormats() {
-    return (EAttribute)cellEClass.getEStructuralFeatures().get(2);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getCell_ContextValue() {
-    return (EAttribute)cellEClass.getEStructuralFeatures().get(3);
+    return (EReference)cellEClass.getEStructuralFeatures().get(0);
   }
 
   /**
@@ -215,16 +188,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * @generated
    */
   public EAttribute getCell_Expanded() {
-    return (EAttribute)cellEClass.getEStructuralFeatures().get(4);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getCell_Nullable() {
-    return (EAttribute)cellEClass.getEStructuralFeatures().get(5);
+    return (EAttribute)cellEClass.getEStructuralFeatures().get(1);
   }
 
   /**
@@ -346,12 +310,8 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
 
     // Create classes and their features
     cellEClass = createEClass(CELL);
-    createEAttribute(cellEClass, CELL__MEDIA_TYPES);
     createEReference(cellEClass, CELL__POPUP_MENU);
-    createEAttribute(cellEClass, CELL__TRANSFER_FORMATS);
-    createEAttribute(cellEClass, CELL__CONTEXT_VALUE);
     createEAttribute(cellEClass, CELL__EXPANDED);
-    createEAttribute(cellEClass, CELL__NULLABLE);
 
     treeEClass = createEClass(TREE);
     createEAttribute(treeEClass, TREE__EDITABLE);
@@ -431,15 +391,8 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
 
     // Initialize classes, features, and operations; add parameters
     initEClass(cellEClass, Cell.class, "Cell", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getCell_MediaTypes(), this.getMediaType(), "mediaTypes", null, 0, -1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getCell_PopupMenu(), theMenuPackage.getPopupMenu(), null, "popupMenu", null, 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    g1 = createEGenericType(this.getTransferFormat());
-    g2 = createEGenericType();
-    g1.getETypeArguments().add(g2);
-    initEAttribute(getCell_TransferFormats(), g1, "transferFormats", null, 0, -1, Cell.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, IS_DERIVED, IS_ORDERED);
-    initEAttribute(getCell_ContextValue(), ecorePackage.getEString(), "contextValue", null, 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getCell_Expanded(), ecorePackage.getEBoolean(), "expanded", "false", 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getCell_Nullable(), ecorePackage.getEBoolean(), "nullable", "true", 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(treeEClass, Tree.class, "Tree", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getTree_Editable(), ecorePackage.getEBoolean(), "editable", null, 0, 1, Tree.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

@@ -27,96 +27,62 @@
  */
 package uk.co.saiman.msapex.editor;
 
-import java.util.stream.Stream;
+import static java.util.Arrays.asList;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.model.application.MContribution;
+import org.eclipse.e4.ui.model.application.MApplicationElement;
+import org.eclipse.e4.ui.model.application.ui.MSnippetContainer;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
-/**
- * An editor provider for certain types of resource. Implementations may manage
- * abstract resource descriptors or operate directly on business objects.
- * <p>
- * The provider can provide a number of different editors for different types of
- * resource. Each provided editor has to a unique {@link #getEditorPartIds ID},
- * where each ID corresponds to the {@link MPart#getElementId element id} of the
- * editor part which can be added to the application model.
- * 
- * @author Elias N Vasylenko
- */
 public interface EditorProvider {
-  String getId();
+  public static final String DEFAULT_EDITOR_CONTEXT_KEY = "DefaultEditorContextKey";
+  public static final String DEFAULT_EDITOR_PROVIDER = "DefaultEditorProvider";
+
+  String getContextKey();
 
   /**
-   * Get a list of the available editor part IDs.
+   * Determine whether a given context value can be {@link #getEditorPart(Object)
+   * opened} by this editor provider. If this returns true, implementors should
+   * try to guarantee that the value will be compatible, though this may not
+   * always be possible. In some cases this method may only give a heuristic, e.g.
+   * determining compatibility by checking a file extension, in which case it may
+   * be possible to open an editor for a value for which this method returns
+   * false.
    * 
-   * @return a list of ID strings corresponding to the {@link MPart#getElementId
-   *         element IDs} of the MPart instances we can instantiate
+   * @param contextValue
+   * @return true if the value is expected to be compatible, false otherwise
    */
-  Stream<String> getEditorPartIds();
+  boolean isApplicable(Object contextValue);
 
   /**
-   * Test whether an editor is applicable to a resource.
-   * 
-   * @param editorId
-   *          the ID of the editor
-   * @param resource
-   *          the object to edit
-   * @return true if the editor with the given part ID is applicable to the given
-   *         resource
-   */
-  boolean isEditorApplicable(String editorId, Object resource);
-
-  /**
-   * Create a {@link MPart part} instance of the given element ID.
+   * Create an editor part which is applicable to the given context key and value,
+   * or get an existing part if one is already created for the given value.
    * <p>
-   * This method is invoked the first time a part is to be added to the model, and
-   * <em>not</em> when a persisted part is reloaded into the model.
-   * 
-   * @param id
-   *          the ID of the editor part to create
-   * @param resource
-   *          the object to edit
-   * @return a new editor part, not yet added to the application model
-   */
-  MPart createEditorPart(String id, Object resource);
-
-  /**
-   * Load the resource for a persisted editor.
-   * 
-   * @param part
-   *          the editor part which has been persisted and loaded into the
-   *          application model
-   * @return a reference to the editing resource loaded from the persisted state
-   */
-  Object loadEditorResource(MPart part);
-
-  /**
-   * Initialize an editor part for the given resource.
+   * The returned part should not be activated, and if it is newly created as a
+   * result of invocation, it should not be added to the application model.
    * <p>
-   * This method will be invoked both when a
-   * {@link #createEditorPart(String, Object) new part instance is created} and
-   * when an {@link #loadEditorResource(MPart) existing part} is loaded from the
-   * persisted application model.
-   * <p>
-   * The management system is guaranteed to only invoke this method for a part
-   * which has been {@link #createEditorPart(String, Object) created via an id}
-   * which has been {@link #isEditorApplicable(String, Object) verified to be
-   * compatible} with the given resource.
-   * <p>
-   * It is also guaranteed that this method will be invoked after the part's
-   * {@link IEclipseContext context} has been initialized, but before the part's
-   * {@link MContribution#getContributionURI() contribution} has been created.
+   * If the given value was previously signaled to be {@link #isApplicable(Object)
+   * applicable} then implementations should try to guarantee that invocation will
+   * succeed and return a valid editor instance. They may also give a best-effort
+   * in the case that {@link #isApplicable(Object)} returned false.
    * 
-   * @param part
-   *          the editor part which is being entered into the application model
-   * @param resource
-   *          the object to edit
+   * @param contextKey
+   * @param contextValue
+   * @return an optional containing an editor part which is applicable for the
+   *         given context value, or an empty optional if no such part can be
+   *         created or found
    */
-  void initializeEditorPart(MPart part, Object resource);
+  Editor getEditorPart(Object contextValue);
 
-  /**
-   * Initialize an editor part for a missing resource.
-   */
-  void initializeMissingResourceEditorPart(MPart part);
+  static MPart cloneSnippet(MPart snippet, MSnippetContainer container) {
+    String id = snippet.getElementId();
+    EModelService modelService = snippet.getContext().get(EModelService.class);
+
+    MPart part = (MPart) modelService.cloneSnippet(container, id, null);
+    modelService
+        .findElements(part, null, MApplicationElement.class, asList("renameOnClone"))
+        .stream()
+        .forEach(e -> e.setElementId(e.getElementId() + ".clone"));
+    return part;
+  }
 }

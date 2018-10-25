@@ -30,8 +30,10 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.eclipse.ui.SaiUiModel.TRANSFER_FORMAT;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -94,8 +96,7 @@ public class ItemList<T> {
 
   @SuppressWarnings("unchecked")
   public Stream<TransferFormat<T>> getTransferFormats() {
-    return getModelSnippet()
-        .getTransferFormats()
+    return ((Collection<?>) getModelSnippet().getTransientData().get(TRANSFER_FORMAT))
         .stream()
         .map(format -> (TransferFormat<T>) format);
   }

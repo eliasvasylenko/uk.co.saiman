@@ -29,6 +29,7 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.eclipse.ui.SaiUiModel.PRIMARY_CONTEXT_KEY;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,9 +68,7 @@ public class ChildrenServiceImpl implements ChildrenService {
         if (this.cell == null) {
           throw new IllegalArgumentException("Child does not exist " + modelElementId);
         }
-        this.cell.setContextValue(contextName);
-        this.cell.setNullable(true);
-        this.cell.getTags().add(SaiUiModel.NO_AUTO_REMOVE);
+        this.cell.getProperties().put(PRIMARY_CONTEXT_KEY, contextName);
         this.cell.getTags().add(SaiUiModel.NO_AUTO_HIDE);
         this.item = item;
       }
@@ -268,7 +267,7 @@ public class ChildrenServiceImpl implements ChildrenService {
   }
 
   private void prepareChildImpl(IEclipseContext context, Cell cell) {
-    String key = cell.getContextValue();
+    String key = cell.getProperties().get(PRIMARY_CONTEXT_KEY);
     if (key == null)
       return;
 

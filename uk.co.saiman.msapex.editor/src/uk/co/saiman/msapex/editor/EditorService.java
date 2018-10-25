@@ -29,12 +29,20 @@ package uk.co.saiman.msapex.editor;
 
 import java.util.stream.Stream;
 
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-
 public interface EditorService {
-  void registerProvider(EditorProvider provider);
+  void registerProvider(EditorProvider editorProvider);
 
-  void unregisterProvider(EditorProvider provider);
+  void unregisterProvider(EditorProvider editorProvider);
+
+  Stream<EditorProvider> getEditorProviders();
+
+  default Stream<EditorProvider> getEditorProviders(String contextKey) {
+    return getEditorProviders().filter(p -> p.getContextKey().equals(contextKey));
+  }
+
+  default Stream<EditorProvider> getEditorProviders(Class<?> contextKey) {
+    return getEditorProviders(contextKey.getName());
+  }
 
   /**
    * Get the available editors for a resource in order of precedence.
@@ -47,11 +55,13 @@ public interface EditorService {
    * @return The current editors applicable to the given resource in order of
    *         precedence.
    */
-  Stream<Editor> getApplicableEditors(String contextKey);
+  default Stream<Editor> getApplicableEditors(String contextKey, Object contextValue) {
+    return getEditorProviders(contextKey)
+        .filter(p -> p.isApplicable(contextValue))
+        .map(p -> p.getEditorPart(contextValue));
+  }
 
-  Stream<EditorDescriptor> getEditors();
-
-  boolean isEditor(MPart part);
-
-  Object getResource(MPart part);
+  default <T> Stream<Editor> getApplicableEditors(Class<T> contextKey, T contextValue) {
+    return getApplicableEditors(contextKey.getName(), contextValue);
+  }
 }

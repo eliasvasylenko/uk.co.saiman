@@ -37,9 +37,6 @@ import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUILabel;
 
 import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
-import org.eclipse.emf.common.util.EList;
-import uk.co.saiman.data.format.MediaType;
-import uk.co.saiman.eclipse.ui.TransferFormat;
 
 /**
  * <!-- begin-user-doc -->
@@ -50,12 +47,8 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getMediaTypes <em>Media Types</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getPopupMenu <em>Popup Menu</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getTransferFormats <em>Transfer Formats</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#getContextValue <em>Context Value</em>}</li>
  *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#isExpanded <em>Expanded</em>}</li>
- *   <li>{@link uk.co.saiman.eclipse.model.ui.Cell#isNullable <em>Nullable</em>}</li>
  * </ul>
  *
  * @see uk.co.saiman.eclipse.model.ui.Package#getCell()
@@ -63,18 +56,6 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  * @generated
  */
 public interface Cell extends MUILabel, MContext, MContribution, MElementContainer<Cell>, MHandlerContainer {
-  /**
-   * Returns the value of the '<em><b>Media Types</b></em>' attribute list.
-   * The list contents are of type {@link uk.co.saiman.data.format.MediaType}.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the value of the '<em>Media Types</em>' attribute list.
-   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_MediaTypes()
-   * @model dataType="uk.co.saiman.eclipse.model.ui.MediaType"
-   * @generated
-   */
-  EList<MediaType> getMediaTypes();
-
   /**
    * Returns the value of the '<em><b>Popup Menu</b></em>' containment reference.
    * <!-- begin-user-doc -->
@@ -100,48 +81,6 @@ public interface Cell extends MUILabel, MContext, MContribution, MElementContain
    * @generated
    */
   void setPopupMenu(MPopupMenu value);
-
-  /**
-   * Returns the value of the '<em><b>Transfer Formats</b></em>' attribute list.
-   * The list contents are of type {@link uk.co.saiman.eclipse.ui.TransferFormat}<code>&lt;?&gt;</code>.
-   * <!-- begin-user-doc -->
-   * <p>
-   * If the meaning of the '<em>Transfer Formats</em>' attribute list isn't clear,
-   * there really should be more of a description here...
-   * </p>
-   * <!-- end-user-doc -->
-   * @return the value of the '<em>Transfer Formats</em>' attribute list.
-   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_TransferFormats()
-   * @model dataType="uk.co.saiman.eclipse.model.ui.TransferFormat&lt;?&gt;" transient="true" derived="true"
-   * @generated
-   */
-  EList<TransferFormat<?>> getTransferFormats();
-
-  /**
-   * Returns the value of the '<em><b>Context Value</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <p>
-   * If the meaning of the '<em>Context Value</em>' attribute isn't clear,
-   * there really should be more of a description here...
-   * </p>
-   * <!-- end-user-doc -->
-   * @return the value of the '<em>Context Value</em>' attribute.
-   * @see #setContextValue(String)
-   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_ContextValue()
-   * @model
-   * @generated
-   */
-  String getContextValue();
-
-  /**
-   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.Cell#getContextValue <em>Context Value</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @param value the new value of the '<em>Context Value</em>' attribute.
-   * @see #getContextValue()
-   * @generated
-   */
-  void setContextValue(String value);
 
   /**
    * Returns the value of the '<em><b>Expanded</b></em>' attribute.
@@ -172,32 +111,5 @@ public interface Cell extends MUILabel, MContext, MContribution, MElementContain
    * @generated
    */
   void setExpanded(boolean value);
-
-  /**
-   * Returns the value of the '<em><b>Nullable</b></em>' attribute.
-   * The default value is <code>"true"</code>.
-   * <!-- begin-user-doc -->
-   * <p>
-   * If the meaning of the '<em>Nullable</em>' attribute isn't clear,
-   * there really should be more of a description here...
-   * </p>
-   * <!-- end-user-doc -->
-   * @return the value of the '<em>Nullable</em>' attribute.
-   * @see #setNullable(boolean)
-   * @see uk.co.saiman.eclipse.model.ui.Package#getCell_Nullable()
-   * @model default="true"
-   * @generated
-   */
-  boolean isNullable();
-
-  /**
-   * Sets the value of the '{@link uk.co.saiman.eclipse.model.ui.Cell#isNullable <em>Nullable</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @param value the new value of the '<em>Nullable</em>' attribute.
-   * @see #isNullable()
-   * @generated
-   */
-  void setNullable(boolean value);
 
 } // Cell

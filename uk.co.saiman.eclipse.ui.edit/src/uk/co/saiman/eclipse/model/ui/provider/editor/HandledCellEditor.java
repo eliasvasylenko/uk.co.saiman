@@ -91,13 +91,12 @@ public class HandledCellEditor extends CellEditor {
     createElementIdControl(parent, context, master, textProp);
     createLabelControls(parent, context, master, textProp);
     createContributionControl(parent, context);
-    createContextValueControls(parent, context, master, textProp);
     createRenderingControls(parent, context);
     createCommandControl(parent, context, master, textProp);
     createPopupMenuControl(parent);
     createChildrenControl(parent);
-    createMediaTypesControl(parent);
     createPersistedStateControl(parent);
+    createContextPropertiesControl(parent);
   }
 
   @SuppressWarnings("unchecked")

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static uk.co.saiman.eclipse.ui.SaiUiModel.PRIMARY_CONTEXT_KEY;
+
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -100,7 +102,7 @@ public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
   }
 
   public Object getData() {
-    String contextValue = getValue().getContextValue();
+    String contextValue = getValue().getProperties().get(PRIMARY_CONTEXT_KEY);
     if (contextValue == null) {
       return null;
     }

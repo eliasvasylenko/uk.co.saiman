@@ -32,11 +32,8 @@ import static org.eclipse.e4.ui.workbench.IPresentationEngine.NO_AUTO_COLLAPSE;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.contexts.RunAndTrack;
 import org.eclipse.e4.core.services.contributions.IContributionFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -47,7 +44,6 @@ import org.osgi.service.event.EventHandler;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
-import uk.co.saiman.eclipse.ui.SaiUiModel;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 
 /**

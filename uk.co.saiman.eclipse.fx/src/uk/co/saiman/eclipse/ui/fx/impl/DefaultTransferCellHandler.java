@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static uk.co.saiman.eclipse.ui.SaiUiModel.NULLABLE;
+import static uk.co.saiman.eclipse.ui.SaiUiModel.PRIMARY_CONTEXT_KEY;
 import static uk.co.saiman.eclipse.ui.TransferMode.COPY;
 import static uk.co.saiman.eclipse.ui.TransferMode.LINK;
 import static uk.co.saiman.eclipse.utilities.EclipseUtilities.isModifiable;
@@ -52,7 +54,9 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
 
   @Override
   public TransferCellOut transferOut(Cell cell) {
-    boolean nullable = isModifiable(cell.getContext(), cell.getContextValue()) && cell.isNullable();
+    boolean nullable = isModifiable(
+        cell.getContext(),
+        cell.getProperties().get(PRIMARY_CONTEXT_KEY)) && cell.getTags().contains(NULLABLE);
 
     ClipboardContent content = serialize(cell);
 
@@ -70,7 +74,7 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
       public void handle(TransferMode transferMode) {
         System.out.println("handle transfer out " + transferMode + " ? " + nullable);
         if (nullable && transferMode.isDestructive()) {
-          cell.getContext().modify(cell.getContextValue(), null);
+          cell.getContext().modify(cell.getProperties().get(PRIMARY_CONTEXT_KEY), null);
         }
       }
 
@@ -87,7 +91,9 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
       return TransferCellIn.UNSUPPORTED;
     }
 
-    boolean modifiable = isModifiable(cell.getContext(), cell.getContextValue());
+    boolean modifiable = isModifiable(
+        cell.getContext(),
+        cell.getProperties().get(PRIMARY_CONTEXT_KEY));
 
     Object value = deserialize(cell, clipboard);
 
@@ -101,19 +107,17 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
       public void handle(TransferMode transferMode) {
         System.out.println("handle transfer in " + transferMode + " ? " + modifiable);
         if (transferMode.isDestructive()) {
-          cell.getContext().modify(cell.getContextValue(), null);
+          cell.getContext().modify(cell.getProperties().get(PRIMARY_CONTEXT_KEY), null);
         }
       }
     };
   }
 
   static ClipboardContent serialize(Cell cell) {
-    cell.getTransferFormats();
     return new ClipboardContent(); // TODO
   }
 
   static Object deserialize(Cell cell, Clipboard content) {
-    cell.getTransferFormats();
     return null; // TODO
   }
 }
