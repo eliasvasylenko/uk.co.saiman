@@ -161,7 +161,6 @@ public class ExperimentEditorAddon implements EditorProvider {
   private Editor loadNewEditor(ExperimentNode<?, ?> node) {
     MPart editor = cloneSnippet(ExperimentEditorPart.ID, modelService, application);
     editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
-    System.out.println(" LNE " + node);
     editor.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
     return Editor.overPart(editor);
   }

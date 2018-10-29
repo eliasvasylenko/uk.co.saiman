@@ -1,0 +1,7 @@
+# This is just a quick little hack to get the javafx packages on the build path
+
+-buildpath.javafx=\
+	${repo;org.openjfx:javafx-graphics};version=file,\
+	${repo;org.openjfx:javafx-base};version=file,\
+	${repo;org.openjfx:javafx-controls};version=file,\
+	${repo;org.openjfx:javafx-fxml};version=file

@@ -100,27 +100,27 @@
 		<dependency>
 			<groupId>si.uom</groupId>
 			<artifactId>si-units-java8</artifactId>
-			<version>0.6.2</version>
+			<version>0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>si.uom</groupId>
 			<artifactId>si-quantity</artifactId>
-			<version>0.6.2</version>
+			<version>0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>tec.uom</groupId>
 			<artifactId>uom-se</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>tec.uom.lib</groupId>
 			<artifactId>uom-lib-common</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>tec.units</groupId>
 			<artifactId>unit-ri</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.3</version>
 		</dependency>
 
 		<!-- Webcams -->
@@ -162,7 +162,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20171018</version>
+			<version>20180813</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.json.bind</groupId>
@@ -172,7 +172,7 @@
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
-			<version>1.1.2</version>
+			<version>1.1.3</version>
 		</dependency>
 
 		<!-- Logging -->
@@ -196,7 +196,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-
 		<!-- Console -->
 
 		<dependency>
@@ -204,6 +203,15 @@
 			<artifactId>jline</artifactId>
 			<version>3.8.0</version>
 		</dependency>
+
+		<!-- REST -->
+
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+
 	</dependencies>
 
 </project>

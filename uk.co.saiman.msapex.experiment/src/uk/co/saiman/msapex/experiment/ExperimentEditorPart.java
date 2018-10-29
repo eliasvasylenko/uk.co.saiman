@@ -60,8 +60,6 @@ public class ExperimentEditorPart {
   void initialize() {
     node = (ExperimentNode<?, ?>) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
 
-    System.out.println("init");
-
     context.set(ExperimentNode.class, node);
     context.declareModifiable(node.getProcedure().getResultType().getErasedType());
     context.declareModifiable(node.getProcedure().getVariablesType().getErasedType());

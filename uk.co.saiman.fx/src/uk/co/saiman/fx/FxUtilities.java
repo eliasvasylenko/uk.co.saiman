@@ -73,8 +73,7 @@ public class FxUtilities {
    * returning upon completion. This method is safe whether or not the invoking
    * thread is the event thread.
    * 
-   * @param runnable
-   *          The action to execute
+   * @param runnable The action to execute
    */
   public static void runNow(Runnable runnable) {
     runNow(() -> {
@@ -88,10 +87,8 @@ public class FxUtilities {
    * returning the result upon completion. This method is safe whether or not the
    * invoking thread is the event thread.
    * 
-   * @param <T>
-   *          The type of value to result from the action
-   * @param runnable
-   *          The action to execute
+   * @param          <T> The type of value to result from the action
+   * @param runnable The action to execute
    * @return The result of invoking the given supplier
    */
   public static <T> T runNow(Supplier<T> runnable) {
@@ -120,15 +117,11 @@ public class FxUtilities {
    * Create a new observable list as a transformation of a component observable
    * list.
    * 
-   * @param <T>
-   *          the type of the elements of the new list
-   * @param <U>
-   *          the type of the elements of the component list
-   * @param component
-   *          the component list
-   * @param mapper
-   *          a mapping from the type of the elements of the component list to the
-   *          type of the elements of the new list
+   * @param           <T> the type of the elements of the new list
+   * @param           <U> the type of the elements of the component list
+   * @param component the component list
+   * @param mapper    a mapping from the type of the elements of the component
+   *                  list to the type of the elements of the new list
    * @return a new observable list, backed by the given list, with each element in
    *         that list transformed according to the given function
    */
@@ -182,6 +175,11 @@ public class FxUtilities {
 
       @Override
       public int getSourceIndex(int index) {
+        return index;
+      }
+
+      @Override
+      public int getViewIndex(int index) {
         return index;
       }
 
@@ -260,15 +258,11 @@ public class FxUtilities {
    * Create a new observable set as a transformation of a component observable
    * set.
    * 
-   * @param <T>
-   *          the type of the elements of the new set
-   * @param <U>
-   *          the type of the elements of the component set
-   * @param component
-   *          the component set
-   * @param mapper
-   *          a mapping from the type of the elements of the component set to the
-   *          type of the elements of the new set
+   * @param           <T> the type of the elements of the new set
+   * @param           <U> the type of the elements of the component set
+   * @param component the component set
+   * @param mapper    a mapping from the type of the elements of the component set
+   *                  to the type of the elements of the new set
    * @return a new observable set, backed by the given set, with each element in
    *         that set transformed according to the given function
    */
@@ -297,10 +291,8 @@ public class FxUtilities {
   /**
    * Create an observable list view of an observable set.
    * 
-   * @param <T>
-   *          the type of the elements of the set
-   * @param component
-   *          the set to wrap as a list
+   * @param           <T> the type of the elements of the set
+   * @param component the set to wrap as a list
    * @return a list whose contents are backed by the given set
    */
   public static <T> ObservableList<T> asList(ObservableSet<T> component) {
@@ -324,10 +316,8 @@ public class FxUtilities {
   /**
    * Create an observable set view of an observable list.
    * 
-   * @param <T>
-   *          the type of the elements of the list
-   * @param component
-   *          the list to wrap as a set
+   * @param           <T> the type of the elements of the list
+   * @param component the list to wrap as a set
    * @return a set whose contents are backed by the given list
    */
   public static <T> ObservableSet<T> asSet(ObservableList<T> component) {
@@ -363,12 +353,9 @@ public class FxUtilities {
    * Wrap an {@link uk.co.saiman.observable.Observable} with a JavaFX equivalent
    * {@link ObservableValue}.
    * 
-   * @param <T>
-   *          the type of the value
-   * @param observable
-   *          the observable value to wrap
-   * @param initial
-   *          the initial value of the wrapping observable value
+   * @param            <T> the type of the value
+   * @param observable the observable value to wrap
+   * @param initial    the initial value of the wrapping observable value
    * @return a JavaFX observable value backed by the given observable
    */
   public static <T> ObservableValue<T> wrap(Observable<T> observable, T initial) {
@@ -383,10 +370,8 @@ public class FxUtilities {
    * Wrap an {@link uk.co.saiman.observable.ObservableValue} with a JavaFX
    * equivalent {@link ObservableValue}.
    * 
-   * @param <T>
-   *          the type of the value
-   * @param observable
-   *          the observable value to wrap
+   * @param            <T> the type of the value
+   * @param observable the observable value to wrap
    * @return a JavaFX observable value backed by the given observable value
    */
   public static <T> ObservableValue<T> wrap(uk.co.saiman.observable.ObservableValue<T> observable) {
@@ -399,8 +384,7 @@ public class FxUtilities {
    * the same package as the controller class. The name of the file is determined
    * according to the convention described by {@link #getResourceName(Class)}.
    * 
-   * @param controllerClass
-   *          The controller class whose resource we wish to locate
+   * @param controllerClass The controller class whose resource we wish to locate
    * @return The URL for the resource associated with the given controller class.
    */
   public static URL getResource(Class<?> controllerClass) {
@@ -414,8 +398,7 @@ public class FxUtilities {
    * {@code [classnameprefix]Controller}, the name of the file is assumed to be
    * {@code [classnameprefix].fxml}.
    * 
-   * @param controllerClass
-   *          The controller class whose resource we wish to locate
+   * @param controllerClass The controller class whose resource we wish to locate
    * @return The URL for the resource associated with the given controller class.
    */
   public static String getResourceName(Class<?> controllerClass) {
@@ -464,10 +447,8 @@ public class FxUtilities {
    * conventions. The location of the file is assumed to be the same package as
    * the controller class.
    * 
-   * @param controllerClass
-   *          The controller class whose resource we wish to locate
-   * @param resourceName
-   *          The name of the resource file
+   * @param controllerClass The controller class whose resource we wish to locate
+   * @param resourceName    The name of the resource file
    * @return The URL for the resource associated with the given controller class.
    */
   public static URL getResource(Class<?> controllerClass, String resourceName) {

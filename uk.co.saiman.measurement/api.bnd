@@ -5,7 +5,7 @@ Bundle-SymbolicName: uk.co.saiman.measurement
 	@${repo;tec.uom.se},\
 	@${repo;si.uom:si-units-java8},\
 	@${repo;si.uom.si-quantity},\
-	@${repo;tec.uom.lib:uom-lib-common}
+	@${repo;tec.uom.lib.uom-lib-common}
 
 Private-Package:\
 	si.uom.*,\

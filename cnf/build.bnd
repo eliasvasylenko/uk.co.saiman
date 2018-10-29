@@ -3,9 +3,9 @@
 ########################
 
 ## Java Compiler Options
-javac.source:		1.8
-javac.target:		1.8
-javac.compliance:	1.8
+javac.source:		11
+javac.target:		11
+javac.compliance:	11
 javac.debug:		on
 
 Git-Descriptor:		${system-allow-fail;git describe --dirty --always}
@@ -58,19 +58,19 @@ Bundle-Developers:\
 -buildrepo: Maven Local
 -releaserepo: JFrog OSS
 
--plugin.Central:  \
+-plugin.Central:\
 	aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
 		name=Central;\
 		releaseUrls=https://repo1.maven.org/maven2/;\
 		pom=${build}/central.xml;\
 		location=${build}/cache/central.xml
 
--plugin.Bnd: \
+-plugin.Bnd:\
 \
-		aQute.bnd.repository.p2.provider.P2Repository;\
-			name				=		"Bnd";\
-			url					=       "https://bndtools.ci.cloudbees.com/job/bndtools.master/lastSuccessfulBuild/artifact/build/generated/p2";\
-			location			=		${build}/cache/bnd
+	aQute.bnd.repository.p2.provider.P2Repository;\
+		name				=	"Bnd";\
+		url					=	"https://bndtools.ci.cloudbees.com/job/bndtools.master/lastSuccessfulBuild/artifact/build/generated/p2";\
+		location			=	${build}/cache/bnd
 
 -plugin.Local:\
 \
@@ -100,43 +100,43 @@ Bundle-Developers:\
 		initialDependencies	=	${build}/npm.json;\
 		optionalAttributes	=	"main, description"
 
--plugin.Apache:  \
+-plugin.Apache:\
 	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
-		name=Apache; \
-		snapshotUrls=https://repository.apache.org/content/groups/snapshots; \
-		releaseUrls=https://repository.apache.org/content/groups/public; \
-		pom=${build}/apache.xml; \
-		location=${build}/cache/apache.xml
-
--plugin.JavaFX:  \
-	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
-		name="Java FX"; \
-		snapshotUrls=https://oss.sonatype.org/content/repositories/snapshots; \
-		releaseUrls=https://oss.sonatype.org/content/repositories/public; \
-		pom=${build}/javafx.xml; \
-		location=${build}/cache/javafx.xml
+		name				=	Apache; \
+		snapshotUrls		=	https://repository.apache.org/content/groups/snapshots; \
+		releaseUrls			=	https://repository.apache.org/content/groups/public; \
+		pom					=	${build}/apache.xml; \
+		location			=	${build}/cache/apache.xml
 
 -plugin.eclipse.platform.photon:\
-\
-		aQute.bnd.repository.p2.provider.P2Repository;\
-			name				=		"Eclipse Photon Simultaneous Release";\
-			url					=		http://download.eclipse.org/releases/photon;\
-			location			=		${build}/cache/eclipse-platform
-#			url					=		${fileuri;${build}/eclipse.platform.target};\
-#			targetPlatform		=		true
+	aQute.bnd.repository.p2.provider.P2Repository;\
+		name				=	"Eclipse Photon Simultaneous Release";\
+		url					=	http://download.eclipse.org/releases/photon;\
+		location			=	${build}/cache/eclipse-platform
+#		url					=	${fileuri;${build}/eclipse.platform.target};\
+#		targetPlatform		=	true
 
--plugin.eclipse.fx.nightly: \
-\
-		aQute.bnd.repository.p2.provider.P2Repository;\
-			name				=		"E(fx)clipse Runtime Nightly (3.3.0+)";\
-			url					=       http://download.eclipse.org/efxclipse/runtime-nightly/site/;\
-			location			=		${build}/cache/eclipse-fx
+-plugin.eclipse.fx.nightly:\
+	aQute.bnd.repository.p2.provider.P2Repository;\
+		name				=	"E(fx)clipse Runtime Nightly (3.3.0+)";\
+		url					=	http://download.eclipse.org/efxclipse/runtime-nightly/site/;\
+		location			=	${build}/cache/eclipse-fx
+
+javafx.platform: linux
+javafx.version: 11
+-plugin.JavaFX:\
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
+		name				=	"Java FX";\
+		transitive			=	false;\
+		releaseUrls			=	https://repo1.maven.org/maven2/;\
+		location			=	${build}/cache/javafx.xml;\
+		pom					=	${build}/javafx.xml
 
 ## Run requirement groups:
 -runrequires.base:\
 	bnd.identity; id=org.apache.felix.log
 
--runee:					JavaSE-1.8
+-runee:					JavaSE-11
 
 # Build path groups:
 -buildpath.base=\

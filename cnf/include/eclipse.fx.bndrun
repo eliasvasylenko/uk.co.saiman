@@ -22,13 +22,15 @@
 -runrequires.eclipse.fx.p2:\
 	bnd.identity; id=org.eclipse.fx.core.p2
 
-## Run properties groups:
--runproperties.eclipse.fx:\
-	osgi.framework.extensions=\
-		org.eclipse.fx.osgi
+-runpath.javafx:\
+	org.openjfx:javafx-graphics,\
+	org.openjfx:javafx-base,\
+	org.openjfx:javafx-controls,\
+	org.openjfx:javafx-fxml,\
+	org.openjfx:javafx-swing
 
 ## Run system packages groups:
--runsystempackages.eclipse.fx:\
+javafx.packages:\
 	com.sun.glass.ui,\
 	javafx.animation,\
 	javafx.application,\
@@ -65,3 +67,11 @@
 	javafx.util,\
 	javafx.util.converter,\
 	netscape.javascript
+
+-runproperties.javafx:\
+	org.osgi.framework.bootdelegation=javafx.*,\
+	osgi.frameworkParentClassloader=app,\
+	osgi.parentClassloader=app
+
+-runsystempackages.javafx:\
+	${javafx.packages}

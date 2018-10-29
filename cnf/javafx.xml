@@ -13,44 +13,51 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx.base</artifactId>
-			<version>11.0.0-SNAPSHOT</version>
+			<artifactId>javafx-base</artifactId>
+			<classifier>linux</classifier>
+			<version>11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx.controls</artifactId>
-			<version>11.0.0-SNAPSHOT</version>
+			<artifactId>javafx-controls</artifactId>
+			<classifier>linux</classifier>
+			<version>11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx.fxml</artifactId>
-			<version>11.0.0-SNAPSHOT</version>
+			<artifactId>javafx-fxml</artifactId>
+			<classifier>linux</classifier>
+			<version>11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx.graphics</artifactId>
-			<version>11.0.0-SNAPSHOT</version>
+			<artifactId>javafx-graphics</artifactId>
+			<classifier>linux</classifier>
+			<version>11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx.media</artifactId>
-			<version>11.0.0-SNAPSHOT</version>
+			<artifactId>javafx-media</artifactId>
+			<classifier>linux</classifier>
+			<version>11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx.swing</artifactId>
-			<version>11.0.0-SNAPSHOT</version>
+			<artifactId>javafx-swing</artifactId>
+			<classifier>linux</classifier>
+			<version>11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx.web</artifactId>
-			<version>11.0.0-SNAPSHOT</version>
+			<artifactId>javafx-web</artifactId>
+			<classifier>linux</classifier>
+			<version>11</version>
 		</dependency>
 	</dependencies>
 
