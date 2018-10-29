@@ -27,21 +27,38 @@
  */
 package uk.co.saiman.msapex.editor.impl;
 
+import static java.util.Collections.emptyList;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
 public class EditorAddon implements EditorService {
+  private static final String EDITOR_STACK_ID = "uk.co.saiman.msapex.partstack.editor";
+
   private final Set<EditorProvider> editorProviders = new HashSet<>();
+
+  @Inject
+  private MApplication application;
+  @Inject
+  private EPartService partService;
+  @Inject
+  private EModelService modelService;
 
   @PostConstruct
   void initialize(IEclipseContext context) {
@@ -56,6 +73,16 @@ public class EditorAddon implements EditorService {
   @Override
   public void unregisterProvider(EditorProvider editorProvider) {
     editorProviders.remove(editorProvider);
+  }
+
+  @Override
+  public void open(Editor editor) {
+    List<MPartStack> editorStacks = modelService
+        .findElements(application, EDITOR_STACK_ID, MPartStack.class, emptyList());
+    if (!editorStacks.isEmpty()) {
+      editorStacks.get(0).getChildren().add(editor.getPart());
+      partService.activate(editor.getPart());
+    }
   }
 
   @Override
@@ -85,11 +112,11 @@ public class EditorAddon implements EditorService {
   private Editor mock(Editor editor) {
     return new Editor() {
       @Override
-      public MPart openPart() {
+      public MPart getPart() {
         /*
          * TODO adjust precedence
          */
-        return editor.openPart();
+        return editor.getPart();
       }
 
       @Override

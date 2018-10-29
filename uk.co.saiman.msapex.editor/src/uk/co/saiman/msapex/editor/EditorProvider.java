@@ -27,13 +27,6 @@
  */
 package uk.co.saiman.msapex.editor;
 
-import static java.util.Arrays.asList;
-
-import org.eclipse.e4.ui.model.application.MApplicationElement;
-import org.eclipse.e4.ui.model.application.ui.MSnippetContainer;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-
 public interface EditorProvider {
   public static final String DEFAULT_EDITOR_CONTEXT_KEY = "DefaultEditorContextKey";
   public static final String DEFAULT_EDITOR_PROVIDER = "DefaultEditorProvider";
@@ -73,16 +66,4 @@ public interface EditorProvider {
    *         created or found
    */
   Editor getEditorPart(Object contextValue);
-
-  static MPart cloneSnippet(MPart snippet, MSnippetContainer container) {
-    String id = snippet.getElementId();
-    EModelService modelService = snippet.getContext().get(EModelService.class);
-
-    MPart part = (MPart) modelService.cloneSnippet(container, id, null);
-    modelService
-        .findElements(part, null, MApplicationElement.class, asList("renameOnClone"))
-        .stream()
-        .forEach(e -> e.setElementId(e.getElementId() + ".clone"));
-    return part;
-  }
 }

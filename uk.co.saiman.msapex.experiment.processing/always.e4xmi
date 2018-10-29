@@ -4,8 +4,9 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jmBBQLvzEei0KbRa7VpFDA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="saiman.ui:Cell" xmi:id="_o5Y_YLvzEei0KbRa7VpFDA" label="Processor" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/gear-small.png" elementId="uk.co.saiman.msapex.experiment.processing.cell.processor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.processing/uk.co.saiman.msapex.experiment.processing.ProcessorCell">
       <children xsi:type="saiman.ui:EditableCell" xmi:id="_I5vEUMCzEei5uP7Co-v20Q" label="Standard Deviation" elementId="uk.co.saiman.msapex.experiment.processing.editablecell.gaussiansmooth.standarddeviation" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.processing/uk.co.saiman.msapex.experiment.processing.StandardDeviationCell">
-        <properties key="PrimaryContextKey" value="uk.co.saiman.data.function.processing.GaussianSmooth"/>
+        <properties key="primaryContextKey" value="uk.co.saiman.data.function.processing.GaussianSmooth"/>
         <tags>removeOnHide</tags>
+        <tags>hideOnNull</tags>
       </children>
       <handlers xmi:id="_D5AZ8LwUEeiIO74NhBcGww" elementId="uk.co.saiman.msapex.experiment.processing.handler.0" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.processing/uk.co.saiman.msapex.experiment.processing.RemoveProcessorHandler" command="_UvzlgLv0Eei0KbRa7VpFDA"/>
       <popupMenu xmi:id="_SPou0Lv0Eei0KbRa7VpFDA" elementId="uk.co.saiman.msapex.experiment.processing.popupmenu.0">

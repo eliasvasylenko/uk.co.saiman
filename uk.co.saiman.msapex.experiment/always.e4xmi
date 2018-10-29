@@ -22,8 +22,9 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="saiman.ui:Cell" xmi:id="_gvEOwKuLEeioCuifABHnDQ" label="Experiment Node" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/node.png" elementId="uk.co.saiman.msapex.experiment.cell.node" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNodeCell">
       <children xsi:type="saiman.ui:EditableCell" xmi:id="_KzXZQMDQEei5uP7Co-v20Q" label="Name" elementId="uk.co.saiman.msapex.experiment.editablecell.name" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNameCell">
-        <properties key="PrimaryContextKey" value="uk.co.saiman.experiment.ExperimentConfiguration"/>
+        <properties key="primaryContextKey" value="uk.co.saiman.experiment.ExperimentConfiguration"/>
         <tags>removeOnHide</tags>
+        <tags>hideOnNull</tags>
       </children>
       <children xsi:type="saiman.ui:Cell" xmi:id="_4nO6oLvaEei0KbRa7VpFDA" label="Result" elementId="uk.co.saiman.msapex.experiment.result.cell" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentResultCell">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_8DNSQLvaEei0KbRa7VpFDA" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentResultVisibleExpression"/>
@@ -37,7 +38,15 @@
       </popupMenu>
     </elements>
     <elements xsi:type="saiman.ui:Tree" xmi:id="_DMvkYKCKEeizj_NEqekErQ" elementId="uk.co.saiman.msapex.experiment.tree" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentTree" editable="true"/>
-    <elements xsi:type="basic:CompositePart" xmi:id="_oPdkMNgkEeiOZN9m2H2j1w" elementId="uk.co.saiman.msapex.experiment.compositepart.editor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentEditorPart" label="Experiment" iconURI="${fugue.icon.runtime}/size16/book.png"/>
+    <elements xsi:type="basic:CompositePart" xmi:id="_oPdkMNgkEeiOZN9m2H2j1w" elementId="uk.co.saiman.msapex.experiment.compositepart.editor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentEditorPart" label="Experiment" iconURI="${fugue.icon.runtime}/size16/book.png" closeable="true" selectedElement="_NwK4kNg9EeiDZrJmfrSjFA" horizontal="true">
+      <persistedState key="fx.stack.tabslocation" value="BOTTOM"/>
+      <tags>segregatedDnD</tags>
+      <tags>removeOnHide</tags>
+      <children xsi:type="basic:PartStack" xmi:id="_NwK4kNg9EeiDZrJmfrSjFA" elementId="uk.co.saiman.msapex.experiment.partstack.editor">
+        <persistedState key="fx.stack.tabslocation" value="BOTTOM"/>
+        <tags>segregatedDnD</tags>
+      </children>
+    </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_iYArkLsiEeel5-btXoqucA" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
     <elements xsi:type="basic:Part" xmi:id="_kxY9wLsiEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.part" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentPart" label="Experiments" iconURI="${fugue.icon.runtime}/size16/books.png">

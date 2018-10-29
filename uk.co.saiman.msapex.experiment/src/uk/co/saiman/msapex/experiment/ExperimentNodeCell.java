@@ -59,7 +59,6 @@ import uk.co.saiman.experiment.event.AttachNodeEvent;
 import uk.co.saiman.experiment.event.DetachNodeEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
 import uk.co.saiman.experiment.event.RenameNodeEvent;
-import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
@@ -77,13 +76,10 @@ public class ExperimentNodeCell {
   @Inject
   @Localize
   private ExperimentProperties text;
-
   @Inject
   private EditorService editorService;
-
   @Inject
   private IEclipseContext context;
-
   @Inject
   private ExperimentNode<?, ?> experiment;
 
@@ -106,10 +102,14 @@ public class ExperimentNodeCell {
 
   @Execute
   public void execute() {
-    editorService
-        .getApplicableEditors(ExperimentNode.class, experiment)
-        .findFirst()
-        .ifPresent(Editor::openPart);
+    try {
+      editorService
+          .getApplicableEditors(ExperimentNode.class, experiment)
+          .findFirst()
+          .ifPresent(editorService::open);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @PostConstruct

@@ -55,7 +55,6 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.model.ui.Tree;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.eclipse.ui.SaiUiModel;
 
 public class ChildrenServiceImpl implements ChildrenService {
   private class Children {
@@ -69,7 +68,6 @@ public class ChildrenServiceImpl implements ChildrenService {
           throw new IllegalArgumentException("Child does not exist " + modelElementId);
         }
         this.cell.getProperties().put(PRIMARY_CONTEXT_KEY, contextName);
-        this.cell.getTags().add(SaiUiModel.NO_AUTO_HIDE);
         this.item = item;
       }
 

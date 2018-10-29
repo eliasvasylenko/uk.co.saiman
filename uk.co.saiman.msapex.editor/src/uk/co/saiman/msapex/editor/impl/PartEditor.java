@@ -27,7 +27,7 @@ public class PartEditor implements Editor {
   }
 
   @Override
-  public MPart openPart() {
+  public MPart getPart() {
     return editor;
   }
 }

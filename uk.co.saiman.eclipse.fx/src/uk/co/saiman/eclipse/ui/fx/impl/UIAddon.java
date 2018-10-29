@@ -35,6 +35,7 @@ import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
 import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_TOBERENDERED;
 import static org.eclipse.e4.ui.workbench.UIEvents.UIElement.TOPIC_WIDGET;
+import static uk.co.saiman.eclipse.ui.SaiUiModel.NULLABLE;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -155,9 +156,11 @@ public class UIAddon {
     context.getContext().runAndTrack(new RunAndTrack() {
       @Override
       public boolean changed(IEclipseContext context) {
-        Object value = context.get(key);
+        boolean isPresent = element.getTags().contains(NULLABLE)
+            ? context.containsKey(key)
+            : context.get(key) == null;
 
-        if (value == null && !element.getTags().contains(SaiUiModel.NO_AUTO_HIDE)) {
+        if (isPresent && element.getTags().contains(SaiUiModel.HIDE_ON_NULL)) {
           if (element.getTags().contains(EPartService.REMOVE_ON_HIDE_TAG)) {
             element.setToBeRendered(false);
             element.setParent(null);

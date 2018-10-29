@@ -14,7 +14,6 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
 import uk.co.saiman.msapex.editor.ClassEditorProvider;
 import uk.co.saiman.msapex.editor.Editor;
-import uk.co.saiman.msapex.editor.EditorProvider;
 
 public class FileEditorProvider implements ClassEditorProvider<Path> {
   private final MApplication application;
@@ -46,7 +45,7 @@ public class FileEditorProvider implements ClassEditorProvider<Path> {
   @Override
   public synchronized Editor getEditorPartTyped(Path path) {
     Editor editor = editors.get(path);
-    if (editor == null || !editor.openPart().isToBeRendered()) {
+    if (editor == null || !editor.getPart().isToBeRendered()) {
       editor = loadNewEditor(path);
       editors.put(path, editor);
     }
@@ -54,7 +53,7 @@ public class FileEditorProvider implements ClassEditorProvider<Path> {
   }
 
   private Editor loadNewEditor(Path path) {
-    MPart editor = EditorProvider.cloneSnippet(snippet, application);
+    MPart editor = Editor.cloneSnippet(snippet, application);
     editor.getPersistedState().put(EDITOR_FILE_NAME, path.toString());
     editor.getTransientData().put(EDITOR_FILE_NAME, path);
     return new PartEditor(editor);

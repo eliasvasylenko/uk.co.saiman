@@ -87,7 +87,7 @@ public class FileEditorAddon {
         .collect(toMap(FileEditorProvider::getId, identity()));
 
     modelService
-        .findElements(application, MPart.class, EModelService.ANYWHERE, part -> isFileEditor(part))
+        .findElements(application, MPart.class, EModelService.ANYWHERE, this::isFileEditor)
         .forEach(this::addEditor);
 
     providers.values().forEach(editorService::registerProvider);

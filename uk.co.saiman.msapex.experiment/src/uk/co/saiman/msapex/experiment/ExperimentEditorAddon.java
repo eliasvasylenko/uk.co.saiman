@@ -27,32 +27,32 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static java.util.Arrays.asList;
+import static java.lang.String.format;
+import static uk.co.saiman.log.Log.Level.ERROR;
+import static uk.co.saiman.msapex.editor.Editor.cloneSnippet;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.IContextFunction;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
-import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Result;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.log.Log;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
+import uk.co.saiman.observable.OwnedMessage;
 
 /**
  * An editor addon which only provides a single type of composite editor for
@@ -61,14 +61,11 @@ import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
  * @author Elias N Vasylenko
  */
 public class ExperimentEditorAddon implements EditorProvider {
-  public static final String EDITOR_RESULT_CLASS = "uk.co.saiman.msapex.editor.result.class";
-  public static final String EDITOR_STATE_CLASS = "uk.co.saiman.msapex.editor.state.class";
   public static final String EDITOR_EXPERIMENT_PATH = "uk.co.saiman.msapex.editor.experiment.path";
+  public static final String EDITOR_EXPERIMENT_NODE = "uk.co.saiman.msapex.editor.experiment.node";
 
-  private static final String SEGREGATED_DND = "segregatedDnD";
-  private static final String TABS_LOCATION = "fx.stack.tabslocation";
-  private static final String TABS_LOCATION_BOTTOM = "BOTTOM";
-
+  @Inject
+  private Workspace workspace;
   @Inject
   private EditorService editorService;
   @Inject
@@ -76,95 +73,96 @@ public class ExperimentEditorAddon implements EditorProvider {
   @Inject
   private MApplication application;
   @Inject
-  private Workspace workspace;
-  @Inject
   @Localize
   private ExperimentProperties text;
+  @Inject
+  private Log log;
+
+  private final Map<ExperimentNode<?, ?>, Editor> editors = new HashMap<>();
 
   @PostConstruct
-  void create() {
-    for (MUIElement snippet : application.getSnippets()) {
-      if (snippet instanceof MPart) {
-        MPart part = (MPart) snippet;
-
-      }
-    }
+  synchronized void create() {
+    modelService
+        .findElements(application, MPart.class, EModelService.ANYWHERE, this::isExperimentEditor)
+        .forEach(this::addEditor);
 
     editorService.registerProvider(this);
+
+    workspace
+        .events()
+        .weakReference(this)
+        .map(OwnedMessage::owner)
+        .observe(ExperimentEditorAddon::updatePaths);
+  }
+
+  private synchronized void updatePaths() {
+    editors.values().stream().map(Editor::getPart).forEach(this::updatePath);
+  }
+
+  private synchronized void updatePath(MPart editor) {
+    ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) editor
+        .getTransientData()
+        .get(EDITOR_EXPERIMENT_NODE);
+
+    if (node.getWorkspace().filter(workspace::equals).isPresent()) {
+      editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
+    } else {
+      editor.getPersistedState().remove(EDITOR_EXPERIMENT_PATH);
+    }
+  }
+
+  private synchronized void addEditor(MPart part) {
+    ExperimentPath path = ExperimentPath
+        .fromString(part.getPersistedState().get(EDITOR_EXPERIMENT_PATH));
+
+    ExperimentNode<?, ?> node;
+    try {
+      node = path.resolve(workspace);
+    } catch (Exception e) {
+      log.log(ERROR, format("Cannot load persisted editor at path %s", path), e);
+      return;
+    }
+
+    part.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
+    editors.put(node, Editor.overPart(part));
+  }
+
+  private boolean isExperimentEditor(MApplicationElement element) {
+    return element instanceof MPart
+        && ((MPart) element).getPersistedState().containsKey(EDITOR_EXPERIMENT_PATH);
   }
 
   @PreDestroy
-  void destroy() {
+  synchronized void destroy() {
     editorService.unregisterProvider(this);
-  }
-
-  public MPart getEditorPart(String id, Object resource) {
-    MCompositePart part = modelService.createModelElement(MCompositePart.class);
-    part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
-    part.getTags().add(SEGREGATED_DND);
-    part.setDirty(true);
-
-    MPartStack partStack = modelService.createModelElement(MPartStack.class);
-    partStack.getPersistedState().put(TABS_LOCATION, TABS_LOCATION_BOTTOM);
-    part.getChildren().add(partStack);
-
-    ExperimentNode<?, ?> experiment = (ExperimentNode<?, ?>) resource;
-
-    return part;
-  }
-
-  private MPart loadSnippet(String id, Object resource) {
-    MPart part = (MPart) modelService.cloneSnippet(application, id, null);
-    modelService
-        .findElements(part, null, MApplicationElement.class, asList("renameOnClone"))
-        .stream()
-        .forEach(e -> e.setElementId(e.getElementId() + ".clone"));
-    return part;
-  }
-
-  public Object loadEditorResource(MPart part) {
-    String pathString = part.getPersistedState().get(EDITOR_EXPERIMENT_PATH);
-    return ExperimentPath.fromString(pathString).resolve(workspace);
-  }
-
-  public void initializeEditorPart(MPart part, Object resource) {
-    ExperimentNode<?, ?> experiment = (ExperimentNode<?, ?>) resource;
-    part.setLabel(experiment.getId());
-
-    part.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(experiment).toString());
-
-    // inject result and result data changes into context
-    IEclipseContext context = part.getContext();
-    context.set(ExperimentNode.class, experiment);
-    context.set(Result.class, experiment.getResult());
-    Class<?> resultType = experiment.getResult().getType().getErasedType();
-    context.declareModifiable(resultType);
-
-    experiment
-        .getResult()
-        .updates()
-        .observe(
-            o -> context
-                .modify(
-                    resultType.getName(),
-                    (IContextFunction) (c, k) -> o.getValue().orElse(null)));
   }
 
   @Override
   public String getContextKey() {
-    // TODO Auto-generated method stub
-    return null;
+    return ExperimentNode.class.getName();
   }
 
   @Override
   public boolean isApplicable(Object contextValue) {
-    // TODO Auto-generated method stub
-    return false;
+    return contextValue instanceof ExperimentNode<?, ?>;
   }
 
   @Override
-  public Editor getEditorPart(Object contextValue) {
-    // TODO Auto-generated method stub
-    return null;
+  public synchronized Editor getEditorPart(Object contextValue) {
+    ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) contextValue;
+    Editor editor = editors.get(node);
+    if (editor == null || !editor.getPart().isToBeRendered()) {
+      editor = loadNewEditor(node);
+      editors.put(node, editor);
+    }
+    return editor;
+  }
+
+  private Editor loadNewEditor(ExperimentNode<?, ?> node) {
+    MPart editor = cloneSnippet(ExperimentEditorPart.ID, modelService, application);
+    editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
+    System.out.println(" LNE " + node);
+    editor.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
+    return Editor.overPart(editor);
   }
 }

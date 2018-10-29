@@ -27,7 +27,16 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static uk.co.saiman.msapex.experiment.ExperimentEditorAddon.EDITOR_EXPERIMENT_NODE;
+
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
+
+import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.Workspace;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -36,6 +45,25 @@ import javax.annotation.PostConstruct;
  * @author Elias N Vasylenko
  */
 public class ExperimentEditorPart {
+  public static final String ID = "uk.co.saiman.msapex.experiment.compositepart.editor";
+
+  @Inject
+  private IEclipseContext context;
+  @Inject
+  private Workspace workspace;
+  @Inject
+  private MCompositePart part;
+
+  private ExperimentNode<?, ?> node;
+
   @PostConstruct
-  void initialize() {}
+  void initialize() {
+    node = (ExperimentNode<?, ?>) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
+
+    System.out.println("init");
+
+    context.set(ExperimentNode.class, node);
+    context.declareModifiable(node.getProcedure().getResultType().getErasedType());
+    context.declareModifiable(node.getProcedure().getVariablesType().getErasedType());
+  }
 }

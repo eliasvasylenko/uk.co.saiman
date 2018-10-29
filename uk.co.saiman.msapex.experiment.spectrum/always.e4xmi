@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:saiman.ui="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui" xmi:id="_lrkSELAhEee3CYPXi8ELmw">
   <imports xsi:type="commands:Command" xmi:id="_ZXfj8M7DEeePVOUOTm0QwA" elementId="uk.co.saiman.msapex.experiment.processing.command.addprocessor"/>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_oGF0ULpUEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_oGF0ULpUEeel5-btXoqucA" featurename="children" parentElementId="uk.co.saiman.msapex.experiment.partstack.editor">
     <elements xsi:type="basic:Part" xmi:id="_heFAMQdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.part.masses" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SpectrumGraphEditorPart" label="Masses">
-      <persistedState key="uk.co.saiman.msapex.editor.result.class" value="bundleclass://uk.co.saiman.experiment/uk.co.saiman.data.spectrum.Spectrum"/>
       <tags>Part-Toolbar-FullSpan</tags>
+      <tags>nullable</tags>
+      <properties key="primaryContextKey" value="uk.co.saiman.data.spectrum.Spectrum"/>
       <toolbar xmi:id="_heFAMgdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.toolbar.0">
         <children xsi:type="menu:DirectToolItem" xmi:id="_heFAMwdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.directtoolitem.dirty" label="Dirty?" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SetDirty"/>
       </toolbar>
     </elements>
     <elements xsi:type="basic:Part" xmi:id="_heFANAdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.part.times" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SpectrumRawGraphEditorPart" label="Times">
-      <persistedState key="uk.co.saiman.msapex.editor.result.class" value="bundleclass://uk.co.saiman.experiment/uk.co.saiman.data.spectrum.Spectrum"/>
       <tags>Part-Toolbar-FullSpan</tags>
+      <tags>nullable</tags>
+      <properties key="primaryContextKey" value="uk.co.saiman.data.spectrum.Spectrum"/>
       <toolbar xmi:id="_heFANQdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.toolbar.1"/>
     </elements>
     <elements xsi:type="basic:Part" xmi:id="_kv9nsQdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.part.processing" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SpectrumProcessingEditorPart" label="Processing">
-      <persistedState key="uk.co.saiman.msapex.editor.state.class" value="bundleclass://uk.co.saiman.experiment/uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration"/>
       <tags>Part-Toolbar-FullSpan</tags>
+      <properties key="primaryContextKey" value="uk.co.saiman.experiment.spectrum.SpectrumResultConfiguration"/>
       <handlers xmi:id="_kv9nsgdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.handler.addprocessor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.AddProcessorHandler" command="_ZXfj8M7DEeePVOUOTm0QwA"/>
       <toolbar xmi:id="_kv9nswdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.toolbar.2">
         <children xsi:type="menu:HandledToolItem" xmi:id="_kv9ntAdQEeiHXagQarUQbA" elementId="uk.co.saiman.msapex.experiment.spectrum.handledtoolitem.addprocessor" label="Add" command="_ZXfj8M7DEeePVOUOTm0QwA"/>
@@ -25,15 +27,17 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_gNrtILvrEei0KbRa7VpFDA" featurename="children" parentElementId="uk.co.saiman.msapex.experiment.cell.node">
     <elements xsi:type="saiman.ui:Cell" xmi:id="_ugeA0LvsEei0KbRa7VpFDA" label="Processing" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/gear.png" elementId="uk.co.saiman.msapex.experiment.spectrum.processing.cell" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SpectrumExperimentProcessingCell">
-      <properties key="PrimaryContextKey" value="uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration"/>
+      <properties key="primaryContextKey" value="uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration"/>
       <tags>removeOnHide</tags>
+      <tags>hideOnNull</tags>
       <popupMenu xmi:id="_wt-aMLvsEei0KbRa7VpFDA" elementId="uk.co.saiman.msapex.experiment.spectrum.popupmenu.0">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_yAfK8LvsEei0KbRa7VpFDA" elementId="uk.co.saiman.msapex.experiment.spectrum.handledmenuitem.addprocessing" label="Add Processor" command="_ZXfj8M7DEeePVOUOTm0QwA"/>
       </popupMenu>
     </elements>
     <elements xsi:type="saiman.ui:Cell" xmi:id="_RHKeEMGKEei_zvpki5Htzg" elementId="uk.co.saiman.msapex.experiment.spectrum.cell" contributionURI="bundleclass://uk.co.saiman.msapex.experiment.spectrum/uk.co.saiman.msapex.experiment.spectrum.SpectrumExperimentNodeCell" visible="false">
-      <properties key="PrimaryContextKey" value="uk.co.saiman.experiment.spectrum.SpectrumConfiguration"/>
+      <properties key="primaryContextKey" value="uk.co.saiman.experiment.spectrum.SpectrumConfiguration"/>
       <tags>removeOnHide</tags>
+      <tags>hideOnNull</tags>
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_7md2oLwAEeiIO74NhBcGww" featurename="handlers" parentElementId="uk.co.saiman.msapex.experiment.cell.node">
