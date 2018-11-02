@@ -28,6 +28,7 @@
 package uk.co.saiman.observable;
 
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
@@ -47,7 +48,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(MultiplePassthroughObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(MultiplePassthroughObserver.class));
       }
     };
   }
@@ -58,7 +61,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(MultiplePassthroughObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(MultiplePassthroughObserver.class));
       }
     };
   }
@@ -69,7 +74,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(RetryingObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(RetryingObserver.class));
       }
     };
   }
@@ -80,7 +87,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(ReferenceOwnedObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(ReferenceOwnedObserver.class));
       }
     };
   }
@@ -91,7 +100,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(ReferenceOwnedObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(ReferenceOwnedObserver.class));
       }
     };
   }
@@ -102,7 +113,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(ReferenceOwnedObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(ReferenceOwnedObserver.class));
       }
     };
   }
@@ -113,7 +126,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(ReferenceOwnedObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(ReferenceOwnedObserver.class));
       }
     };
   }
@@ -124,7 +139,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(ExecutorObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(ExecutorObserver.class));
       }
     };
   }
@@ -135,7 +152,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(MappingObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(MappingObserver.class));
       }
     };
   }
@@ -146,7 +165,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(FilteringObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(FilteringObserver.class));
       }
     };
   }
@@ -157,7 +178,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(TakeWhileObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(TakeWhileObserver.class));
       }
     };
   }
@@ -168,7 +191,9 @@ public class ObservableTest {
 
     new Verifications() {
       {
-        upstreamObservable.observe(withArgThat(instanceOf(DropWhileObserver.class)));
+        Observer<String> observer;
+        upstreamObservable.observe(observer = withCapture());
+        assertThat(observer, instanceOf(DropWhileObserver.class));
       }
     };
   }

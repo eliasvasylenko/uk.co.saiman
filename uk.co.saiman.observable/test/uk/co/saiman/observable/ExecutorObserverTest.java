@@ -32,7 +32,7 @@ import java.util.concurrent.Executor;
 import org.junit.Test;
 
 import mockit.Expectations;
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
 import mockit.Mocked;
 import mockit.VerificationsInOrder;
@@ -72,9 +72,7 @@ public class ExecutorObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
-      {}
-    };
+    new FullVerifications() {};
   }
 
   @Test
@@ -84,12 +82,13 @@ public class ExecutorObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         executor.execute((Runnable) any);
         executor.execute((Runnable) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test

@@ -29,8 +29,9 @@ package uk.co.saiman.observable;
 
 import org.junit.Test;
 
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
+import mockit.VerificationsInOrder;
 
 @SuppressWarnings("javadoc")
 public class InvalidatingLazyRevalidatingObserverTest {
@@ -48,12 +49,13 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext((Invalidation<String>) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @SuppressWarnings("unchecked")
@@ -65,12 +67,13 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext((Invalidation<String>) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @SuppressWarnings("unchecked")
@@ -84,12 +87,13 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext((Invalidation<String>) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @SuppressWarnings("unchecked")
@@ -104,13 +108,14 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext((Invalidation<String>) any);
         downstreamObserver.onNext((Invalidation<String>) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @SuppressWarnings("unchecked")
@@ -121,13 +126,14 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     test.onFail(new Throwable());
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext((Invalidation<String>) any);
         downstreamObserver.onFail((Throwable) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test(expected = MissingValueException.class)
@@ -140,11 +146,12 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     test.onFail(new Throwable());
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onFail((Throwable) any);
       }
     };
+    new FullVerifications() {};
   }
 }

@@ -33,8 +33,9 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
+import mockit.VerificationsInOrder;
 import uk.co.saiman.observable.ObservableValue.Change;
 
 @SuppressWarnings("javadoc")
@@ -65,12 +66,13 @@ public class ObservablePropertyImplTest {
 
     property.observe(downstreamObserver);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("initial");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -80,7 +82,7 @@ public class ObservablePropertyImplTest {
     property.observe(downstreamObserver).cancel();
     property.observe(downstreamObserver);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("initial");
@@ -88,6 +90,7 @@ public class ObservablePropertyImplTest {
         downstreamObserver.onNext("initial");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -97,13 +100,14 @@ public class ObservablePropertyImplTest {
     property.observe(downstreamObserver);
     property.set("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("initial");
         downstreamObserver.onNext("message");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -113,12 +117,13 @@ public class ObservablePropertyImplTest {
     property.set("message");
     property.observe(downstreamObserver);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("message");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -129,13 +134,14 @@ public class ObservablePropertyImplTest {
     property.observe(downstreamObserver);
     property.setProblem(problem);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("initial");
         downstreamObserver.onFail(problem);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -146,12 +152,13 @@ public class ObservablePropertyImplTest {
     property.setProblem(problem);
     property.observe(downstreamObserver);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onFail(problem);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test(expected = MissingValueException.class)
@@ -192,11 +199,12 @@ public class ObservablePropertyImplTest {
     ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
     observable.changes().observe(changeObserver);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         changeObserver.onObserve((Observation) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -205,7 +213,7 @@ public class ObservablePropertyImplTest {
     observable.changes().observe(changeObserver);
     observable.set("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         changeObserver.onObserve((Observation) any);
         Change<String> change;
@@ -214,6 +222,7 @@ public class ObservablePropertyImplTest {
         assertThat(change.newValue().get(), equalTo("message"));
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -222,7 +231,7 @@ public class ObservablePropertyImplTest {
     observable.changes().observe(changeObserver);
     observable.setProblem(new Throwable());
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         changeObserver.onObserve((Observation) any);
         Change<String> change;
@@ -231,6 +240,7 @@ public class ObservablePropertyImplTest {
         assertFalse(change.newValue().isValid());
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -239,11 +249,12 @@ public class ObservablePropertyImplTest {
     observable.changes().observe(changeObserver);
     observable.set("initial");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         changeObserver.onObserve((Observation) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -253,7 +264,7 @@ public class ObservablePropertyImplTest {
     observable.setProblem(new Throwable());
     observable.set("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         Change<String> change;
         changeObserver.onObserve((Observation) any);
@@ -267,6 +278,7 @@ public class ObservablePropertyImplTest {
         assertThat(change.newValue().get(), equalTo("message"));
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -276,7 +288,7 @@ public class ObservablePropertyImplTest {
     observable.setProblem(new Throwable());
     observable.setProblem(new Throwable());
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         Change<String> change;
         changeObserver.onObserve((Observation) any);
@@ -290,6 +302,7 @@ public class ObservablePropertyImplTest {
         assertFalse(change.newValue().isValid());
       }
     };
+    new FullVerifications() {};
   }
 
   @SuppressWarnings("unchecked")
@@ -300,7 +313,7 @@ public class ObservablePropertyImplTest {
     observable.set("message");
     observable.set("more");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         changeObserver.onObserve((Observation) any);
         Change<String> change;
@@ -313,5 +326,6 @@ public class ObservablePropertyImplTest {
         assertThat(change.newValue().get(), equalTo("message"));
       }
     };
+    new FullVerifications() {};
   }
 }

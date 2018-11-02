@@ -29,8 +29,9 @@ package uk.co.saiman.observable;
 
 import org.junit.Test;
 
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
+import mockit.VerificationsInOrder;
 
 @SuppressWarnings("javadoc")
 public class TakeWhileObserverTest {
@@ -47,13 +48,14 @@ public class TakeWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onComplete();
         upstreamObservation.cancel();
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -63,12 +65,13 @@ public class TakeWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("message");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -79,7 +82,7 @@ public class TakeWhileObserverTest {
     test.onNext("pass");
     test.onNext("fail");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("pass");
@@ -87,6 +90,7 @@ public class TakeWhileObserverTest {
         upstreamObservation.cancel();
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -97,13 +101,14 @@ public class TakeWhileObserverTest {
     test.onNext("fail");
     test.onNext("pass");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onComplete();
         upstreamObservation.cancel();
       }
     };
+    new FullVerifications() {};
   }
 
   @Test(expected = NullPointerException.class)

@@ -29,8 +29,9 @@ package uk.co.saiman.observable;
 
 import org.junit.Test;
 
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
+import mockit.VerificationsInOrder;
 
 @SuppressWarnings("javadoc")
 public class DropWhileObserverTest {
@@ -47,12 +48,13 @@ public class DropWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("message");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -62,12 +64,13 @@ public class DropWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         upstreamObservation.requestNext();
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -78,13 +81,14 @@ public class DropWhileObserverTest {
     test.onNext("pass");
     test.onNext("fail");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         upstreamObservation.requestNext();
         downstreamObserver.onNext("fail");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -95,13 +99,14 @@ public class DropWhileObserverTest {
     test.onNext("fail");
     test.onNext("pass");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("fail");
         downstreamObserver.onNext("pass");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test(expected = NullPointerException.class)

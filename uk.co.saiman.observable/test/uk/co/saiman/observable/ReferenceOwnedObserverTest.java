@@ -33,8 +33,9 @@ import java.lang.ref.WeakReference;
 
 import org.junit.Test;
 
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
+import mockit.VerificationsInOrder;
 
 @SuppressWarnings("javadoc")
 public class ReferenceOwnedObserverTest {
@@ -104,12 +105,13 @@ public class ReferenceOwnedObserverTest {
     weakReferenceTest();
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve(upstreamObservation);
         downstreamObserver.onNext((OwnedMessage<Object, String>) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @SuppressWarnings("unchecked")
@@ -126,12 +128,13 @@ public class ReferenceOwnedObserverTest {
     weakReferenceTest();
     test.onNext("message2");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve(upstreamObservation);
         downstreamObserver.onNext((OwnedMessage<Object, String>) any);
         upstreamObservation.cancel();
       }
     };
+    new FullVerifications() {};
   }
 }

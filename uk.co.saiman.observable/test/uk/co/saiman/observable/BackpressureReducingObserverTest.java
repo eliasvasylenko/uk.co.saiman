@@ -36,8 +36,9 @@ import java.util.function.Supplier;
 import org.junit.Test;
 
 import mockit.Expectations;
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
+import mockit.VerificationsInOrder;
 
 @SuppressWarnings("javadoc")
 public class BackpressureReducingObserverTest {
@@ -70,13 +71,14 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         identity.get();
         accumulator.apply("identity", "message");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -94,7 +96,7 @@ public class BackpressureReducingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         identity.get();
@@ -102,6 +104,7 @@ public class BackpressureReducingObserverTest {
         accumulator.apply("identity", "message2");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -121,13 +124,14 @@ public class BackpressureReducingObserverTest {
     test.onNext("message");
     test.onComplete();
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         identity.get();
         accumulator.apply("identity", "message");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -147,13 +151,14 @@ public class BackpressureReducingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         initial.apply("message1");
         accumulator.apply("initial", "message2");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -163,12 +168,13 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.onComplete();
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onComplete();
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -181,11 +187,12 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.getObservation().requestNext();
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -198,11 +205,12 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.getObservation().requestNext();
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -223,13 +231,14 @@ public class BackpressureReducingObserverTest {
     test.onNext("message");
     test.getObservation().requestNext();
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         initial.apply("message");
         downstreamObserver.onNext("initial");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test(expected = NullPointerException.class)

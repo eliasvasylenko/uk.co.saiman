@@ -37,7 +37,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import mockit.Expectations;
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
 import mockit.Verifications;
 import mockit.VerificationsInOrder;
@@ -93,9 +93,7 @@ public class SafeObserverTest {
     Observer<String> test = new SafeObserver<>(downstreamObserver);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
-      {}
-    };
+    new FullVerifications() {};
   }
 
   @Test
@@ -169,7 +167,9 @@ public class SafeObserverTest {
     new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onFail(withArgThat(instanceOf(UnexpectedMessageException.class)));
+        Throwable capture;
+        downstreamObserver.onFail(capture = withCapture());
+        assertThat(capture, instanceOf(UnexpectedMessageException.class));
       }
     };
   }

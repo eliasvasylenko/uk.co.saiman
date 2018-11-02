@@ -64,7 +64,6 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
   private static final double MOVE_STEP_PERCENTAGE = 10;
 
   private final Set<ContinuousFunctionSeries<X, Y>> series;
-  private final AnimationTimer refreshTimer;
 
   private Interval<Double> zoom;
   private Interval<Double> domain;
@@ -94,7 +93,7 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
     setOnScroll(this::onScroll);
     setOnKeyPressed(this::onKeyPressed);
 
-    refreshTimer = createTimer();
+    createTimer();
 
     series = new HashSet<>();
 
@@ -121,12 +120,6 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
     };
     refreshTimer.start();
     return refreshTimer;
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    refreshTimer.stop();
-    super.finalize();
   }
 
   /**
@@ -308,9 +301,8 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
   /**
    * Zoom in the view in the domain by the given factor.
    * 
-   * @param zoomAmount
-   *          The amount to zoom in, as a multiplier of the size of a chart
-   *          beneath a fixed viewport
+   * @param zoomAmount The amount to zoom in, as a multiplier of the size of a
+   *                   chart beneath a fixed viewport
    */
   public void zoom(double zoomAmount) {
     zoom(zoomAmount, (effectiveZoom.getRightEndpoint() - effectiveZoom.getLeftEndpoint()) / 2);
@@ -319,11 +311,9 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
   /**
    * Zoom in the view in the domain by the given factor, about the given centre.
    * 
-   * @param zoomAmount
-   *          The amount to zoom in, as a multiplier of the size of a chart
-   *          beneath a fixed viewport
-   * @param centre
-   *          The focus of the zoom in the domain
+   * @param zoomAmount The amount to zoom in, as a multiplier of the size of a
+   *                   chart beneath a fixed viewport
+   * @param centre     The focus of the zoom in the domain
    */
   public void zoom(double zoomAmount, double centre) {
     double zoomLeft = centre - effectiveZoom.getLeftEndpoint();
@@ -367,9 +357,8 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
    * Move the view over the underlying charts through the domain by a given
    * percentage.
    * 
-   * @param percentage
-   *          A percentage of the full width of the view area by which to move the
-   *          chart
+   * @param percentage A percentage of the full width of the view area by which to
+   *                   move the chart
    */
   public void moveZoom(double percentage) {
     if (!zoom.isUnbounded()) {
@@ -385,10 +374,8 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
    * Move the view of the domain to contain exactly the interval between the given
    * values.
    * 
-   * @param from
-   *          The leftmost value in the domain to show in the view
-   * @param to
-   *          The rightmost value in the domain to show in the view
+   * @param from The leftmost value in the domain to show in the view
+   * @param to   The rightmost value in the domain to show in the view
    */
   public void setZoom(double from, double to) {
     if ((to - from) > (domain.getRightEndpoint() - domain.getLeftEndpoint())) {

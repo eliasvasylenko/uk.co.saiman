@@ -29,8 +29,9 @@ package uk.co.saiman.observable;
 
 import org.junit.Test;
 
-import mockit.FullVerificationsInOrder;
+import mockit.FullVerifications;
 import mockit.Injectable;
+import mockit.VerificationsInOrder;
 
 @SuppressWarnings("javadoc")
 public class PassthroughObserverTest {
@@ -56,11 +57,12 @@ public class PassthroughObserverTest {
 
     test.onObserve(upstreamObservation);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve(upstreamObservation);
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -70,12 +72,13 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("message");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -87,7 +90,7 @@ public class PassthroughObserverTest {
     test.onNext("message2");
     test.onNext("message3");
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onNext("message1");
@@ -95,6 +98,7 @@ public class PassthroughObserverTest {
         downstreamObserver.onNext("message3");
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -104,12 +108,13 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onComplete();
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onComplete();
       }
     };
+    new FullVerifications() {};
   }
 
   @Test
@@ -121,11 +126,12 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onFail(t);
 
-    new FullVerificationsInOrder() {
+    new VerificationsInOrder() {
       {
         downstreamObserver.onObserve((Observation) any);
         downstreamObserver.onFail(t);
       }
     };
+    new FullVerifications() {};
   }
 }
