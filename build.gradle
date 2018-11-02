@@ -28,7 +28,7 @@ buildscript {
 
 task wrapper(type: Wrapper) {
   jarFile = rootProject.file('.gradle-wrapper/gradle-wrapper.jar')
-  gradleVersion = '4.5'
+  gradleVersion = '4.10'
 }
 
 /* Initialize the bnd workspace */
@@ -52,6 +52,10 @@ configure(bndProjects()) {
 /* Test Configuration */
 configure(bndProjects()) {
   apply plugin: 'jacoco'
+
+  jacoco {
+    toolVersion = "0.8.2"
+  }
 
   repositories {
     mavenCentral()
