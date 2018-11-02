@@ -1,5 +1,6 @@
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
-	uk.co.saiman.utilities;version=snapshot
+	uk.co.saiman.utilities;version=snapshot,\
+	org.apache.felix.webconsole.plugins.ds;version=latest
 
 -sub: *.bnd

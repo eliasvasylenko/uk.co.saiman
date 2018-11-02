@@ -29,7 +29,9 @@ package uk.co.saiman.experiment.processing.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
+import static uk.co.saiman.experiment.processing.Processing.toProcessing;
 import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
+import static uk.co.saiman.experiment.state.StateList.toStateList;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,9 +42,12 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.processing.MissingProcessor;
+import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.state.State;
+import uk.co.saiman.experiment.state.StateList;
 import uk.co.saiman.experiment.state.StateMap;
 
 @Component
@@ -62,6 +67,11 @@ public class ProcessingServiceImpl implements ProcessingService {
   void removeProcessingType(ProcessingStrategy<?> type) {
     processors.remove(type.getType(), type);
     namedProcessors.remove(type.getType().getName(), type);
+  }
+
+  @Override
+  public Stream<ProcessingStrategy<?>> strategies() {
+    return processors.values().stream();
   }
 
   @Override
@@ -86,13 +96,16 @@ public class ProcessingServiceImpl implements ProcessingService {
   }
 
   @Override
-  public Stream<Class<? extends DataProcessor>> types() {
-    return processors.keySet().stream();
+  public Processing loadProcessing(StateList persistedState) {
+    return persistedState
+        .stream()
+        .map(State::asMap)
+        .map(this::loadProcessor)
+        .collect(toProcessing());
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public <T extends DataProcessor> T createProcessor(Class<T> type) {
-    return (T) processors.get(type).createProcessor();
+  public StateList saveProcessing(Processing processing) {
+    return processing.steps().map(this::saveProcessor).collect(toStateList());
   }
 }

@@ -40,11 +40,6 @@ public class ExperimentProcedure implements VoidProcedure<ExperimentConfiguratio
   private static final ExperimentProcedure INSTANCE = new ExperimentProcedure();
 
   @Override
-  public String getId() {
-    return FULL_PROCEDURE_PID;
-  }
-
-  @Override
   public ExperimentConfiguration configureVariables(
       ExperimentContext<ExperimentConfiguration> configuration) {
     configuration.stateMap().withDefault(NOTES, () -> "");

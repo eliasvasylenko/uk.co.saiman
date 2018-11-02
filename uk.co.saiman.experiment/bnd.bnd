@@ -6,6 +6,7 @@ Bundle-Name: SAI :: Experiment
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\

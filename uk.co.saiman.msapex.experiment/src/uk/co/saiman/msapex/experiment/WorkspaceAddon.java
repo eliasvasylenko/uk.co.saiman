@@ -48,22 +48,21 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 import org.eclipse.osgi.service.datalocation.Location;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 import uk.co.saiman.data.Data;
+import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.PathLocation;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.ExperimentProcedure;
+import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.ExperimentEventKind;
-import uk.co.saiman.experiment.json.JsonStateMapFormat;
-import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.experiment.json.JsonExperimentFormat;
+import uk.co.saiman.experiment.service.ProcedureService;
+import uk.co.saiman.experiment.service.ResultStorageService;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
-import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
 /**
  * Addon for registering an experiment workspace in the root application
@@ -83,13 +82,14 @@ public class WorkspaceAddon {
 
   @Inject
   Log log;
-  @Inject
-  @Localize
-  ExperimentProperties text;
 
   @Inject
   @Service
-  ConfigurationAdmin configurationAdmin;
+  ProcedureService procedureService;
+  @Inject
+  @Service
+  ResultStorageService resultStorageService;
+  DataFormat<Experiment> experimentFormat;
 
   @Inject
   @Service
@@ -101,13 +101,15 @@ public class WorkspaceAddon {
   private uk.co.saiman.data.resource.Location workspaceRoot;
 
   private final Workspace workspace = new Workspace();
-  private final Map<Experiment, Data<StateMap>> experiments = new HashMap<>();
+  private final Map<Experiment, Data<Experiment>> experiments = new HashMap<>();
 
   @PostConstruct
   void initialize() throws URISyntaxException {
     workspaceRoot = new PathLocation(Paths.get(instanceLocation.getURL().toURI()));
 
     context.set(Workspace.class, workspace);
+
+    experimentFormat = new JsonExperimentFormat(procedureService, resultStorageService);
 
     try {
       initializeAdapters();
@@ -132,16 +134,16 @@ public class WorkspaceAddon {
   public void saveExperiment(ExperimentEvent event) {
     try {
       event.node().getExperiment().ifPresent(experiment -> {
-        Data<StateMap> data = experiments
+        Data<Experiment> data = experiments
             .computeIfAbsent(
                 experiment,
-                e -> Data.locate(workspaceRoot, experiment.getId(), new JsonStateMapFormat()));
+                e -> Data.locate(workspaceRoot, experiment.getId(), experimentFormat));
 
         if (event.kind() == ExperimentEventKind.RENAME) {
           data.relocate(workspaceRoot, event.node().getId());
         }
 
-        data.set(experiment.getStateMap());
+        data.set(experiment);
         data.makeDirty();
         data.save();
       });

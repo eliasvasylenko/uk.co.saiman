@@ -27,10 +27,14 @@
  */
 package uk.co.saiman.experiment.service;
 
+import java.util.stream.Stream;
+
 import uk.co.saiman.experiment.Procedure;
 
 public interface ProcedureService {
   Procedure<?, ?> getProcedure(String id);
 
   String getId(Procedure<?, ?> procedure);
+
+  Stream<Procedure<?, ?>> procedures();
 }

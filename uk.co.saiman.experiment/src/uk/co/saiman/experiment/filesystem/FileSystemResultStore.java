@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.ExperimentProcedure;
 import uk.co.saiman.experiment.ResultStore;
 
 public class FileSystemResultStore implements ResultStore {
@@ -92,11 +91,7 @@ public class FileSystemResultStore implements ResultStore {
   }
 
   private Path resolvePath(ExperimentNode<?, ?> node, String id) {
-    Path parentPath = getParentPath(node);
-
-    if (!(node.getProcedure() instanceof ExperimentProcedure))
-      parentPath = parentPath.resolve(node.getProcedure().getId());
-    return parentPath.resolve(id);
+    return getParentPath(node).resolve(id);
   }
 
   public Path getRootPath() {

@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.observable;
 
-import java.util.Observable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -36,15 +35,13 @@ import java.util.function.Function;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of message to observe
+ * @param <T> the type of message to observe
  */
 public interface Observer<T> {
   /**
    * The method which will receive notification from an {@link Observable}.
    * 
-   * @param message
-   *          the message object instance
+   * @param message the message object instance
    */
   void onNext(T message);
 

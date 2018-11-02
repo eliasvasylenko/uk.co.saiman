@@ -94,10 +94,11 @@ public class ExperimentNodeCell {
 
   @CanExecute
   public boolean canExecute() {
-    return editorService
-        .getApplicableEditors(ExperimentNode.class, experiment)
-        .findFirst()
-        .isPresent();
+    return experiment.getProcedure().hasResult()
+        && editorService
+            .getApplicableEditors(ExperimentNode.class, experiment)
+            .findFirst()
+            .isPresent();
   }
 
   @Execute
@@ -144,7 +145,7 @@ public class ExperimentNodeCell {
           Class<?> type = variables.getClass().getClassLoader().loadClass(k);
           return type.isInstance(variables) ? variables : null;
         } catch (Exception e) {
-          e.printStackTrace();
+          // this just means it's not an instance, discard
         }
       }
       return null;

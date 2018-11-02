@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static uk.co.saiman.experiment.state.Accessor.listAccessor;
+
 import java.util.Random;
 
 import javax.measure.quantity.Dimensionless;
@@ -61,14 +63,12 @@ public class SpectrumProcessingProcedure
     implements ProcessingProcedure<SpectrumProcessingConfiguration, Spectrum, Spectrum> {
   private final Accessor<Processing, ?> processorList;
 
-  @Override
-  public String getId() {
-    return getClass().getName();
-  }
-
   @Activate
   public SpectrumProcessingProcedure(@Reference ProcessingService processors) {
-    this.processorList = processors.getAccessor("processing");
+    this.processorList = listAccessor(
+        "processing",
+        processors::loadProcessing,
+        processors::saveProcessing);
   }
 
   @Override

@@ -40,11 +40,11 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 
 import javafx.scene.control.ChoiceDialog;
-import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.processing.ProcessingService;
+import uk.co.saiman.experiment.processing.ProcessingStrategy;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.properties.Localized;
@@ -65,25 +65,20 @@ public class AddProcessorHandler {
       @AdaptClass(ExperimentNode.class) SpectrumProcessingConfiguration configuration,
       @Localize ExperimentProperties text) {
     requestProcessorType(text.addSpectrumProcessor(), text.addSpectrumProcessorDescription())
-        .ifPresent(processor -> addProcessor(configuration, processor));
+        .ifPresent(
+            processor -> configuration
+                .setProcessing(
+                    configuration.getProcessing().withStep(processor.createProcessor())));
   }
 
-  private <T extends DataProcessor> void addProcessor(
-      SpectrumProcessingConfiguration configuration,
-      Class<T> processor) {
-    configuration
-        .setProcessing(
-            configuration.getProcessing().withStep(processingService.createProcessor(processor)));
-  }
-
-  private java.util.Optional<Class<? extends DataProcessor>> requestProcessorType(
+  private java.util.Optional<ProcessingStrategy<?>> requestProcessorType(
       Localized<String> title,
       Localized<String> header) {
-    List<Class<? extends DataProcessor>> types = processingService.types().collect(toList());
+    List<ProcessingStrategy<?>> strategies = processingService.strategies().collect(toList());
 
-    ChoiceDialog<Class<? extends DataProcessor>> nameDialog = types.isEmpty()
+    ChoiceDialog<ProcessingStrategy<?>> nameDialog = strategies.isEmpty()
         ? new ChoiceDialog<>()
-        : new ChoiceDialog<>(types.get(0), types);
+        : new ChoiceDialog<>(strategies.get(0), strategies);
     nameDialog.titleProperty().bind(wrap(title));
     nameDialog.headerTextProperty().bind(wrap(header));
 

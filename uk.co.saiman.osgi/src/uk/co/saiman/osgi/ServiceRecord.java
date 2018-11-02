@@ -27,23 +27,26 @@
  */
 package uk.co.saiman.osgi;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
+
 /**
  * A very simple wrapper around an OSGi service which exposes the service
  * ranking. The ranking is not guaranteed to remain consistent.
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of the service
+ * @param <T> the type of the service
  */
-public interface RankedService<T> {
-	/**
-	 * @return the wrapped service object
-	 */
-	T getServiceObject();
+public interface ServiceRecord<T, U> {
+  ServiceReference<T> serviceReference();
 
-	/**
-	 * @return the current ranking of the object
-	 */
-	int getRanking();
+  /**
+   * @return the wrapped service object
+   */
+  T serviceObject();
+
+  U id();
+
+  Bundle bundle();
 }

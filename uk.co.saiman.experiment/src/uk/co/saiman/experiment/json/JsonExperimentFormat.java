@@ -30,16 +30,25 @@ package uk.co.saiman.experiment.json;
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
 import static uk.co.saiman.data.format.RegistrationTree.VENDOR;
 import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
+import static uk.co.saiman.experiment.state.StateList.toStateList;
 
 import java.util.stream.Stream;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
+import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.Procedure;
+import uk.co.saiman.experiment.ResultStore;
+import uk.co.saiman.experiment.service.ProcedureService;
+import uk.co.saiman.experiment.service.ResultStorageService;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.state.State;
 import uk.co.saiman.experiment.state.StateMap;
 
 @Component
@@ -52,8 +61,27 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
       VENDOR).withSuffix("json");
 
   private static final PropertyAccessor<String> ID = stringAccessor("id");
+  private static final String CONFIGURATION = "configuration";
+  private static final String CHILDREN = "children";
 
   private final JsonStateMapFormat stateMapFormat = new JsonStateMapFormat();
+
+  private final PropertyAccessor<Procedure<?, ?>> procedure;
+
+  private final PropertyAccessor<ResultStore> resultStorage;
+
+  @Activate
+  public JsonExperimentFormat(
+      @Reference ProcedureService procedureService,
+      @Reference ResultStorageService resultStorageService) {
+    this.procedure = stringAccessor("procedure")
+        .map(s -> procedureService.getProcedure(s), p -> procedureService.getId(p));
+
+    this.resultStorage = stringAccessor("resultStorage")
+        .map(
+            s -> resultStorageService.getResultStorageStrategy(s).configureStore(StateMap.empty()),
+            r -> "unknown");
+  }
 
   @Override
   public String getExtension() {
@@ -71,7 +99,25 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   private Experiment loadExperiment(StateMap data) {
-    return new Experiment(data.get(ID), /* TODO */null);
+    return loadExperimentNode(new Experiment(data.get(ID), data.get(resultStorage)), data);
+  }
+
+  private <T extends ExperimentNode<?, ?>> T loadExperimentNode(T experimentNode, StateMap data) {
+    data
+        .get(CHILDREN)
+        .asList()
+        .stream()
+        .map(State::asMap)
+        .forEach(
+            child -> experimentNode
+                .attach(
+                    loadExperimentNode(
+                        new ExperimentNode<>(
+                            child.get(procedure),
+                            child.get(ID),
+                            child.get(CONFIGURATION).asMap()),
+                        child)));
+    return experimentNode;
   }
 
   @Override
@@ -80,7 +126,20 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   private Payload<? extends StateMap> saveExperiment(Experiment data) {
-    // TODO Auto-generated method stub
-    return null;
+    StateMap stateMap = saveExperimentNode(data);
+    return new Payload<>(stateMap);
+  }
+
+  private StateMap saveExperimentNode(ExperimentNode<?, ?> node) {
+    return StateMap
+        .empty()
+        .with(ID, node.getId())
+        .with(CONFIGURATION, node.getStateMap())
+        .with(
+            CHILDREN,
+            node
+                .getChildren()
+                .map(child -> saveExperimentNode(child).with(procedure, child.getProcedure()))
+                .collect(toStateList()));
   }
 }

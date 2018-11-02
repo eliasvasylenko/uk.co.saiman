@@ -35,6 +35,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
@@ -44,10 +45,14 @@ import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.event.ExperimentVariablesEvent;
 import uk.co.saiman.experiment.processing.Processing;
+import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
 import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
 
 public class SpectrumExperimentProcessingCell {
+  @Inject
+  @Service
+  private ProcedureService procedures;
   @Inject
   private ExperimentNode<?, ?> experiment;
   @Inject
@@ -59,7 +64,7 @@ public class SpectrumExperimentProcessingCell {
   public void prepare(Cell cell, @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
     Cell parent = (Cell) (MUIElement) cell.getParent();
 
-    parent.setLabel(experiment.getProcedure().getId());
+    parent.setLabel(procedures.getId(experiment.getProcedure()));
     supplemental.setText(state.getSpectrumName());
 
     updateChildren();

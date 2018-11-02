@@ -27,69 +27,60 @@
  */
 package uk.co.saiman.comms.copley.impl;
 
-import static org.osgi.framework.Constants.SERVICE_PID;
-import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
-import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Deactivate;
 
 import uk.co.saiman.comms.copley.CopleyController;
+import uk.co.saiman.osgi.ServiceIndex;
+import uk.co.saiman.osgi.ServiceRecord;
 
 @Component(service = CopleyService.class)
 public class CopleyService {
-  private final Map<String, CopleyController> controllers = new HashMap<>();
-  private final Map<CopleyController, String> ids = new HashMap<>();
-  private final Map<CopleyController, Bundle> bundles = new HashMap<>();
+  private final ServiceIndex<CopleyController, String> controllers;
 
-  public CopleyService() {}
-
-  @Reference(cardinality = MULTIPLE, policy = DYNAMIC, unbind = "removeController")
-  synchronized void addController(
-      CopleyController controller,
-      ServiceReference<CopleyController> serviceReference) {
-    String servicePid = (String) serviceReference.getProperty(SERVICE_PID);
-    if (servicePid != null) {
-      controllers.put(servicePid, controller);
-      ids.put(controller, servicePid);
-      bundles.put(controller, serviceReference.getBundle());
-    }
+  @Activate
+  public CopleyService(BundleContext context) {
+    controllers = ServiceIndex.open(context, CopleyController.class);
   }
 
-  synchronized void removeController(CopleyController controller) {
-    controllers.remove(ids.remove(controller));
-    bundles.remove(controller);
+  @Deactivate
+  public void deactivate() {
+    controllers.close();
   }
 
   public String getId(CopleyController controller) {
-    return Optional
-        .ofNullable(ids.get(controller))
+    return controllers
+        .findRecord(controller)
         .orElseThrow(
-            () -> new IllegalArgumentException("Cannot find if for controller " + controller));
+            () -> new IllegalArgumentException("Cannot find id for controller " + controller))
+        .id();
   }
 
   public CopleyController getController(String id) {
-    return Optional
-        .ofNullable(controllers.get(id))
-        .orElseThrow(() -> new IllegalArgumentException("Cannot find controller for id " + id));
+    return controllers
+        .get(id)
+        .orElseThrow(() -> new IllegalArgumentException("Cannot find controller for id " + id))
+        .serviceObject();
   }
 
   public Stream<String> getIds() {
-    return controllers.keySet().stream();
+    return controllers.ids();
   }
 
   public Stream<CopleyController> getControllers() {
-    return controllers.values().stream();
+    return controllers.records().map(ServiceRecord::serviceObject);
   }
 
   public Bundle getBundle(CopleyController controller) {
-    return bundles.get(controller);
+    return controllers
+        .findRecord(controller)
+        .orElseThrow(
+            () -> new IllegalArgumentException("Cannot find bundle for controller " + controller))
+        .bundle();
   }
 }

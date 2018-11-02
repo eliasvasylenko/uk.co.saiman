@@ -27,31 +27,20 @@
  */
 package uk.co.saiman.experiment.processing;
 
-import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.experiment.state.Accessor.mapAccessor;
-
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.state.Accessor;
+import uk.co.saiman.experiment.state.StateList;
 import uk.co.saiman.experiment.state.StateMap;
 
 public interface ProcessingService {
-  Stream<Class<? extends DataProcessor>> types();
-
-  <T extends DataProcessor> T createProcessor(Class<T> type);
+  Stream<ProcessingStrategy<?>> strategies();
 
   DataProcessor loadProcessor(StateMap persistedState);
 
   StateMap saveProcessor(DataProcessor processor);
 
-  default Accessor<DataProcessor, ?> getStepAccessor(String id) {
-    return mapAccessor(id, this::loadProcessor, this::saveProcessor);
-  }
+  Processing loadProcessing(StateList persistedState);
 
-  default Accessor<Processing, ?> getAccessor(String id) {
-    return getStepAccessor(id)
-        .toListAccessor()
-        .map(Processing::new, p -> p.steps().collect(toList()));
-  }
+  StateList saveProcessing(Processing processing);
 }

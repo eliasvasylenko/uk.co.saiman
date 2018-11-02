@@ -46,13 +46,10 @@ import uk.co.saiman.reflection.token.TypeToken;
  * 
  * @author Elias N Vasylenko
  *
- * @param <S>
- *          the type of the data describing the experiment state, including
- *          configuration and results
+ * @param <S> the type of the data describing the experiment state, including
+ *        configuration and results
  */
 public interface Procedure<S, R> {
-  String getId();
-
   default boolean hasAutomaticExecution() {
     return false;
   }
@@ -62,8 +59,7 @@ public interface Procedure<S, R> {
   }
 
   /**
-   * @param context
-   *          the node which the configuration is being requested for
+   * @param context the node which the configuration is being requested for
    * @return a new state object suitable for an instance of {@link ExperimentNode}
    *         over this type.
    */
@@ -72,8 +68,7 @@ public interface Procedure<S, R> {
   /**
    * Process this experiment type for a given node.
    * 
-   * @param context
-   *          the processing context
+   * @param context the processing context
    */
   R proceed(ProcedureContext<S, R> context);
 
@@ -81,8 +76,7 @@ public interface Procedure<S, R> {
    * Test whether a node of this type may directly succeed a node of the given
    * type.
    * 
-   * @param parentType
-   *          the candidate parent node type
+   * @param parentType the candidate parent node type
    * @return true if a node of this type may be added as a child, false otherwise
    */
   boolean mayComeAfter(Procedure<?, ?> parentType);
@@ -109,5 +103,10 @@ public interface Procedure<S, R> {
 
   default Type getThisType() {
     return getClass();
+  }
+
+  default boolean hasResult() {
+    Class<?> erasedType = getResultType().getErasedType();
+    return erasedType != void.class && erasedType != Void.class;
   }
 }

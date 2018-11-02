@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.util.stream.Collectors.joining;
 import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
 import java.util.List;
@@ -44,6 +45,7 @@ import org.eclipse.fx.core.di.Service;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.Procedure;
+import uk.co.saiman.experiment.service.ProcedureService;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -54,24 +56,34 @@ import uk.co.saiman.experiment.Procedure;
 public class AddNodeMenu {
   @Inject
   @Service
-  private List<Procedure<?, ?>> experimentTypes;
+  private ProcedureService procedures;
 
   @AboutToShow
   void aboutToShow(
       List<MMenuElement> items,
       @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode) {
-    experimentTypes
-        .stream()
+    try {
+      System.out
+          .println(
+              "filt "
+                  + procedures
+                      .procedures()
+                      .filter(t -> t.mayComeAfter(selectedNode.getProcedure()))
+                      .map(t -> procedures.getId(t))
+                      .collect(joining(", ")));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    procedures
+        .procedures()
         .filter(t -> t.mayComeAfter(selectedNode.getProcedure()))
         .map(t -> createMenuItem(selectedNode, t))
         .forEach(items::add);
   }
 
-  MDirectMenuItem createMenuItem(
-      ExperimentNode<?, ?> selectedNode,
-      Procedure<?, ?> subProcedure) {
+  MDirectMenuItem createMenuItem(ExperimentNode<?, ?> selectedNode, Procedure<?, ?> subProcedure) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-    moduleItem.setLabel(subProcedure.getId());
+    moduleItem.setLabel(procedures.getId(subProcedure));
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute

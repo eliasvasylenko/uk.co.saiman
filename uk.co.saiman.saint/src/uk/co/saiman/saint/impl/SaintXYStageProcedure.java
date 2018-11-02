@@ -62,11 +62,6 @@ public class SaintXYStageProcedure implements XYStageProcedure<SaintXYStageConfi
   private XYStage stageDevice;
 
   @Override
-  public String getId() {
-    return SaintXYStageProcedure.class.getName();
-  }
-
-  @Override
   public SaintXYStageConfiguration configureVariables(
       ExperimentContext<SaintXYStageConfiguration> context) {
     String id = context.getId(() -> "A1");

@@ -28,11 +28,14 @@
 package uk.co.saiman.experiment.processing;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
@@ -50,6 +53,10 @@ public class Processing {
 
   public Stream<DataProcessor> steps() {
     return steps.stream();
+  }
+
+  public static Collector<DataProcessor, ?, Processing> toProcessing() {
+    return collectingAndThen(toList(), Processing::new);
   }
 
   public DataProcessor getProcessor() {

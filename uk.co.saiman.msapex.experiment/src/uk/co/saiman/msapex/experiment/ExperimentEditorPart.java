@@ -50,8 +50,6 @@ public class ExperimentEditorPart {
   @Inject
   private IEclipseContext context;
   @Inject
-  private Workspace workspace;
-  @Inject
   private MCompositePart part;
 
   private ExperimentNode<?, ?> node;

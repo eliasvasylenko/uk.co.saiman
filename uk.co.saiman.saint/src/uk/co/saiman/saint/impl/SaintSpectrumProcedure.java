@@ -28,6 +28,7 @@
 package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static uk.co.saiman.experiment.state.Accessor.listAccessor;
 import static uk.co.saiman.measurement.Units.dalton;
 
 import java.util.Random;
@@ -63,11 +64,6 @@ public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfi
   private ProcessingService processors;
 
   @Override
-  public String getId() {
-    return SaintSpectrumProcedure.class.getName();
-  }
-
-  @Override
   protected Unit<Mass> getMassUnit() {
     return dalton().getUnit();
   }
@@ -75,7 +71,10 @@ public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfi
   @Override
   public SaintSpectrumConfiguration configureVariables(
       ExperimentContext<SaintSpectrumConfiguration> context) {
-    Accessor<Processing, ?> accessor = processors.getAccessor("processing");
+    Accessor<Processing, ?> accessor = listAccessor(
+        "processing",
+        processors::loadProcessing,
+        processors::saveProcessing);
 
     context.update(s -> s.withDefault(accessor, Processing::new));
 

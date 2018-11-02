@@ -55,8 +55,6 @@ public class ParameterizedTypes {
   static final class ParameterizedTypeImpl implements ParameterizedType, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static final Integer PROCESSING = new Integer(0);
-
     private final Type ownerType;
     private final List<Type> typeArguments;
     private final Class<?> rawType;
@@ -102,24 +100,13 @@ public class ParameterizedTypes {
 
     @Override
     public int hashCode() {
-      if (hashCode == null || hashCode == PROCESSING) {
-        synchronized (this) {
-          /*
-           * This way the hash code will return 0 if we encounter it again in the
-           * parameters, rather than recurring infinitely:
-           * 
-           * (this is not a problem for other threads as hashCode is synchronized until
-           * given a proper result)
-           */
-          hashCode = PROCESSING;
-
-          /*
-           * Calculate the hash code properly, now we're guarded against recursion:
-           */
-          this.hashCode = Objects.hashCode(ownerType)
-              ^ Objects.hashCode(rawType)
-              ^ Objects.hashCode(typeArguments);
-        }
+      if (hashCode == null) {
+        /*
+         * Calculate the hash code properly, now we're guarded against recursion:
+         */
+        this.hashCode = Objects.hashCode(ownerType)
+            ^ Objects.hashCode(rawType)
+            ^ Objects.hashCode(typeArguments);
       }
 
       return hashCode;
@@ -147,8 +134,7 @@ public class ParameterizedTypes {
    * type, as well as all type variables on any enclosing types recursively, in
    * the order encountered.
    *
-   * @param rawType
-   *          The class whose generic type parameters we wish to determine.
+   * @param rawType The class whose generic type parameters we wish to determine.
    * @return A list of all relevant type variables.
    */
   public static Stream<TypeVariable<?>> getAllTypeParameters(Class<?> rawType) {
@@ -166,8 +152,7 @@ public class ParameterizedTypes {
    * on its raw type, as given by {@link #getAllTypeParameters(Class)}, to their
    * arguments within the context of this type.
    *
-   * @param type
-   *          The type whose generic type arguments we wish to determine.
+   * @param type The type whose generic type arguments we wish to determine.
    * @return A mapping of all type variables to their arguments in the context of
    *         the given type.
    */
@@ -216,13 +201,10 @@ public class ParameterizedTypes {
    * no provided argument will be parameterized with the type variables
    * themselves.
    * 
-   * @param ownerType
-   *          the owner type for the resulting parameterized type
-   * @param rawType
-   *          A raw {@link Class} from which we wish to determine a
-   *          {@link ParameterizedType}.
-   * @param typeArguments
-   *          A mapping of generic type variables to arguments.
+   * @param ownerType     the owner type for the resulting parameterized type
+   * @param rawType       A raw {@link Class} from which we wish to determine a
+   *                      {@link ParameterizedType}.
+   * @param typeArguments A mapping of generic type variables to arguments.
    * @return A {@link ParameterizedType} instance over the given class,
    *         parameterized with the given type arguments.
    */
@@ -311,9 +293,8 @@ public class ParameterizedTypes {
    * substituting the type parameters of that class as their own argument
    * instantiations.
    * 
-   * @param rawType
-   *          A raw {@link Class} from which we wish to determine a
-   *          {@link ParameterizedType}.
+   * @param rawType A raw {@link Class} from which we wish to determine a
+   *                {@link ParameterizedType}.
    * @return A {@link ParameterizedType} instance over the given class.
    */
   public static ParameterizedType parameterize(Class<?> rawType) {
