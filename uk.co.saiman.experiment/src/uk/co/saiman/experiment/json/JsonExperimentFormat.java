@@ -75,7 +75,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
       @Reference ProcedureService procedureService,
       @Reference ResultStorageService resultStorageService) {
     this.procedure = stringAccessor("procedure")
-        .map(s -> procedureService.getProcedure(s), p -> procedureService.getId(p));
+        .map(procedureService::getProcedure, procedureService::getId);
 
     this.resultStorage = stringAccessor("resultStorage")
         .map(

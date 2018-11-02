@@ -69,7 +69,7 @@ Bundle-Developers:\
 \
 	aQute.bnd.repository.p2.provider.P2Repository;\
 		name				=	"Bnd";\
-		url					=	"https://bndtools.ci.cloudbees.com/job/bndtools.master/lastSuccessfulBuild/artifact/build/generated/p2";\
+		url					=	"https://dl.bintray.com/bndtools/bndtools/4.1.0";\
 		location			=	${build}/cache/bnd
 
 -plugin.Local:\
