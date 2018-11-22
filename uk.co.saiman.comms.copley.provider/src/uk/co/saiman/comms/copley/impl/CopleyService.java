@@ -41,7 +41,7 @@ import uk.co.saiman.osgi.ServiceRecord;
 
 @Component(service = CopleyService.class)
 public class CopleyService {
-  private final ServiceIndex<CopleyController, String> controllers;
+  private final ServiceIndex<?, String, CopleyController> controllers;
 
   @Activate
   public CopleyService(BundleContext context) {

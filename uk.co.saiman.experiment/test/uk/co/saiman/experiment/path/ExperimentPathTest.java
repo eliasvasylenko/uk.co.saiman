@@ -41,16 +41,10 @@ import org.junit.Test;
 import mockit.Mocked;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.path.ExperimentMatcher;
-import uk.co.saiman.experiment.path.ExperimentPath;
 
 public class ExperimentPathTest {
   @Mocked
-  Workspace workspace;
-
-  @Mocked
-  ExperimentNode<?, ?> node;
+  ExperimentNode<?> node;
 
   @Test
   public void testEmptyAbsolutePath() {

@@ -42,7 +42,7 @@ public class ExperimentResultCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
 
   @Inject
-  private ExperimentNode<?, ?> experiment;
+  private ExperimentNode<?> experiment;
 
   @PostConstruct
   public void prepare(Cell cell) {

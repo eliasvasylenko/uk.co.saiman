@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
+import static org.eclipse.e4.ui.workbench.IPresentationEngine.NO_AUTO_COLLAPSE;
+
 import java.util.Collection;
 
 import org.eclipse.e4.core.services.contributions.IContributionFactory;
@@ -43,8 +45,7 @@ import uk.co.saiman.eclipse.ui.fx.widget.WTree;
 /**
  * Base renderer of {@link Tree}
  * 
- * @param <N>
- *          the native widget type
+ * @param <N> the native widget type
  */
 public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree, Cell, WTree<N>> {
   @Override
@@ -66,6 +67,8 @@ public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree
       getLogger().error("No widget found for '" + element + "'");
       return;
     }
+
+    element.getTags().add(NO_AUTO_COLLAPSE);
 
     Class<?> cl = tree.getWidget().getClass();
     do {

@@ -35,7 +35,7 @@ public class ReorderExperimentEvent extends ExperimentEvent {
   private final int index;
   private final int previousIndex;
 
-  public ReorderExperimentEvent(ExperimentNode<?, ?> experiment, int previousIndex) {
+  public ReorderExperimentEvent(ExperimentNode<?> experiment, int previousIndex) {
     super(experiment);
     this.index = experiment.getIndex();
     this.previousIndex = previousIndex;

@@ -28,16 +28,18 @@
 package uk.co.saiman.msapex.instrument;
 
 import static org.eclipse.e4.ui.workbench.UIEvents.ALL_ELEMENT_ID;
+import static org.eclipse.e4.ui.workbench.UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.internal.events.EventBroker;
-import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.fx.core.di.Service;
 
 import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.InstrumentLifecycleState;
 import uk.co.saiman.log.Log;
 
 /**
@@ -59,11 +61,18 @@ public class InstrumentAddon {
   private Log log;
 
   @PostConstruct
-  void initialize(EventBroker eventBroker) {
+  void initialize() {
     context.set(Instrument.class, instrument);
 
-    instrument.lifecycleState().observe(s -> {
-      eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, ALL_ELEMENT_ID);
+    instrument.lifecycleState().weakReference(this).observe(o -> {
+      var event = o.message();
+      o.owner().context.set(InstrumentLifecycleState.class, event);
     });
+    context.set(InstrumentLifecycleState.class, instrument.lifecycleState().get());
+  }
+
+  @Inject
+  public void stateChange(EventBroker eventBroker, @Optional InstrumentLifecycleState state) {
+    eventBroker.send(REQUEST_ENABLEMENT_UPDATE_TOPIC, ALL_ELEMENT_ID);
   }
 }

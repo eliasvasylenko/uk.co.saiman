@@ -44,14 +44,13 @@ import uk.co.saiman.experiment.state.StateMap;
  * the workspace, and references may be held to it.
  * 
  * @author Elias N Vasylenko
- * @param <T>
- *          the type of the executing node
+ * @param <T> the type of the executing node
  */
 public interface ExperimentContext<T> {
   /**
    * @return the currently executing experiment node
    */
-  ExperimentNode<T, ?> node();
+  ExperimentNode<T> node();
 
   /**
    * Get the ID of the node.
@@ -81,8 +80,7 @@ public interface ExperimentContext<T> {
    * persisted state} of an experiment, and so changing the ID may result in the
    * movement or modification of data.
    * 
-   * @param id
-   *          the ID for the node
+   * @param id the ID for the node
    */
   void setId(String id);
 

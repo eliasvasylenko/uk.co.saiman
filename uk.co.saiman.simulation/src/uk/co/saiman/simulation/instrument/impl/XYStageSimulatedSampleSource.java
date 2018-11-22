@@ -53,16 +53,15 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.camera.CameraConnection;
 import uk.co.saiman.camera.CameraDevice;
 import uk.co.saiman.camera.CameraImage;
-import uk.co.saiman.camera.CameraProperties;
 import uk.co.saiman.camera.CameraResolution;
 import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import uk.co.saiman.msapex.camera.i18n.CameraProperties;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.PassthroughObserver;
 import uk.co.saiman.properties.PropertyLoader;
-import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.ImageSimulatedSampleSource;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
@@ -80,38 +79,24 @@ import uk.co.saiman.simulation.instrument.impl.XYStageSimulatedSampleSource.XYSt
  * @author Elias N Vasylenko
  */
 @Designate(ocd = XYStageSimulatedSampleSourceConfiguration.class, factory = true)
-@Component(
-    name = XYStageSimulatedSampleSource.CONFIGURATION_PID,
-    configurationPid = XYStageSimulatedSampleSource.CONFIGURATION_PID,
-    configurationPolicy = REQUIRE)
+@Component(name = XYStageSimulatedSampleSource.CONFIGURATION_PID, configurationPid = XYStageSimulatedSampleSource.CONFIGURATION_PID, configurationPolicy = REQUIRE)
 public class XYStageSimulatedSampleSource
     implements ImageSimulatedSampleSource, SimulatedSampleSource, CameraDevice {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.samplesource.xystage";
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      id = CONFIGURATION_PID,
-      name = "XY Stage Simulated Sample Source Configuration",
-      description = "The configuration for a sample simulation over an two dimensional, linear stage")
+  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "XY Stage Simulated Sample Source Configuration", description = "The configuration for a sample simulation over an two dimensional, linear stage")
   public @interface XYStageSimulatedSampleSourceConfiguration {
-    @AttributeDefinition(
-        name = "Stage Device",
-        description = "The OSGi reference filter for the stage")
+    @AttributeDefinition(name = "Stage Device", description = "The OSGi reference filter for the stage")
     String stageDevice_target() default "(objectClass=uk.co.saiman.instrument.stage.XYStage)";
 
-    @AttributeDefinition(
-        name = "Horizontal camera resolution",
-        description = "The horizontal resolution of the simulated camera feed of the sample stage in pixels")
+    @AttributeDefinition(name = "Horizontal camera resolution", description = "The horizontal resolution of the simulated camera feed of the sample stage in pixels")
     int cameraResolutionWidth() default 320;
 
-    @AttributeDefinition(
-        name = "Vertical camera resolution",
-        description = "The vertical resolution of the simulated camera feed of the sample stage in pixels")
+    @AttributeDefinition(name = "Vertical camera resolution", description = "The vertical resolution of the simulated camera feed of the sample stage in pixels")
     int cameraResolutionHeight() default 240;
 
-    @AttributeDefinition(
-        name = "View area width",
-        description = "The width of the visible area of the plate")
+    @AttributeDefinition(name = "View area width", description = "The width of the visible area of the plate")
     String viewAreaWidth() default "10mm";
   }
 
@@ -154,33 +139,32 @@ public class XYStageSimulatedSampleSource
     }
   };
 
-  @Reference
-  private XYStage stageDevice;
+  private final XYStage stageDevice;
+
+  private final CameraProperties cameraProperties;
+
+  private final Set<CameraConnection> cameraConnections;
+  private final HotObservable<CameraImage> imageStream;
+
+  private CameraResolution cameraResolution;
+  private double cameraImageZoomX;
+  private double cameraImageZoomY;
 
   private ChemicalComposition redChemical;
   private ChemicalComposition greenChemical;
   private ChemicalComposition blueChemical;
   private SimulatedSampleImage sampleImage;
 
-  @Reference
-  private PropertyLoader propertyLoader;
-  private SimulationProperties simulationProperties;
-  private CameraProperties cameraProperties;
-
-  private Set<CameraConnection> cameraConnections;
-  private HotObservable<CameraImage> imageStream;
-
-  private CameraResolution cameraResolution;
-  private double cameraImageZoomX;
-  private double cameraImageZoomY;
-
   @Activate
-  synchronized void activate(XYStageSimulatedSampleSourceConfiguration configuration) {
-    simulationProperties = propertyLoader.getProperties(SimulationProperties.class);
-    cameraProperties = propertyLoader.getProperties(CameraProperties.class);
+  public XYStageSimulatedSampleSource(
+      @Reference XYStage stageDevice,
+      XYStageSimulatedSampleSourceConfiguration configuration,
+      @Reference PropertyLoader propertyLoader) {
+    this.stageDevice = stageDevice;
+    this.cameraProperties = propertyLoader.getProperties(CameraProperties.class);
+    this.cameraConnections = new HashSet<>();
 
-    cameraConnections = new HashSet<>();
-    imageStream = new HotObservable<>();
+    this.imageStream = new HotObservable<>();
     imageStream
         .executeOn(newSingleThreadExecutor())
         .filter(m -> !cameraConnections.isEmpty())

@@ -37,7 +37,7 @@ public class ExperimentLifecycleEvent extends ExperimentEvent {
   private final ExperimentLifecycleState previousLifecycleState;
 
   public ExperimentLifecycleEvent(
-      ExperimentNode<?, ?> node,
+      ExperimentNode<?> node,
       ExperimentLifecycleState lifecycleState,
       ExperimentLifecycleState previousLifecycleState) {
     super(node);

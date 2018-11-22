@@ -47,7 +47,6 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Workspace;
 
 public class ExperimentPath {
   private static final String SEPARATOR = "/";
@@ -74,7 +73,7 @@ public class ExperimentPath {
     return new ExperimentPath(-1, emptyList());
   }
 
-  public static ExperimentPath of(ExperimentNode<?, ?> node) {
+  public static ExperimentPath of(ExperimentNode<?> node) {
     return new ExperimentPath(
         -1,
         reverse(node.getAncestors()).map(ExperimentMatcher::matching).collect(toList()));
@@ -151,15 +150,20 @@ public class ExperimentPath {
     }
   }
 
-  public ExperimentNode<?, ?> resolve(ExperimentNode<?, ?> node) {
-    if (isAbsolute())
-      return resolve(
-          node
-              .getWorkspace()
-              .orElseThrow(
-                  () -> new ExperimentException("Cannot resolve absolute path for detached node")));
+  public ExperimentNode<?> resolve(ExperimentIndex index, ExperimentNode<?> node) {
+    if (isAbsolute()) {
+      return resolve(index);
+    } else {
+      return resolve(node);
+    }
+  }
 
-    Optional<ExperimentNode<?, ?>> result = Optional.of(node);
+  public ExperimentNode<?> resolve(ExperimentNode<?> node) {
+    if (isAbsolute()) {
+      throw new ExperimentException("Cannot resolve absolute path for detached node");
+    }
+
+    Optional<ExperimentNode<?>> result = Optional.of(node);
 
     for (int i = 0; i < ancestors; i++) {
       result = result.flatMap(ExperimentNode::getParent);
@@ -175,16 +179,13 @@ public class ExperimentPath {
     return result.orElseThrow(() -> new ExperimentException(CANNOT_RESOLVE + " " + this));
   }
 
-  public ExperimentNode<?, ?> resolve(Workspace workspace) {
+  public ExperimentNode<?> resolve(ExperimentIndex index) {
     if (ancestors > 0)
       throw new ExperimentException(PARENT_OF_ROOT);
     if (matchers.isEmpty())
       throw new ExperimentException(ROOT_NOT_EXPERIMENT);
 
-    Optional<? extends ExperimentNode<?, ?>> result = workspace
-        .getExperiments()
-        .filter(matchers.get(0)::match)
-        .findFirst();
+    Optional<? extends ExperimentNode<?>> result = matchers.get(0).findMatch(index);
 
     for (int i = 1; i < matchers.size(); i++) {
       ExperimentMatcher matcher = matchers.get(i);

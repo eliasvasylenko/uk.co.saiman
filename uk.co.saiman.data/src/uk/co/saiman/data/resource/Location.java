@@ -38,7 +38,7 @@ public interface Location {
    *         location
    * @throws IOException
    */
-  Stream<Resource> getResources() throws IOException;
+  Stream<Resource> resources() throws IOException;
 
   Resource getResource(String name) throws IOException;
 
@@ -49,10 +49,8 @@ public interface Location {
    * the name, so we cannot determine where to split the string. Because of this
    * the representation of a resource name is flattened to a single string.
    * 
-   * @param name
-   *          the name of the file
-   * @param extension
-   *          the extension of the file
+   * @param name      the name of the file
+   * @param extension the extension of the file
    * @return a resource with the derived name [name].[extension]
    * @throws IOException
    */

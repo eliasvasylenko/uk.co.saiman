@@ -31,7 +31,7 @@ public enum ExperimentLifecycleState {
   /**
    * Experiment if configurable and unprocessed.
    */
-  CONFIGURATION,
+  PREPARATION,
 
   /**
    * Experiment part is locked out of configuration and waiting in part of a

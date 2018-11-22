@@ -1,0 +1,73 @@
+/*
+ * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.experiment.
+ *
+ * uk.co.saiman.experiment is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.experiment is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package uk.co.saiman.experiment.service.impl;
+
+import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
+
+import java.util.stream.Stream;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+
+import uk.co.saiman.experiment.StorageConfiguration;
+import uk.co.saiman.experiment.Store;
+import uk.co.saiman.experiment.service.StorageService;
+import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.osgi.ServiceIndex;
+
+@Component
+public class StorageServiceImpl implements StorageService {
+  private static final String STORE_ID_KEY = "uk.co.saiman.experiment.store.id";
+  private static final PropertyAccessor<String> STORE_ID = stringAccessor(STORE_ID_KEY);
+
+  private final ServiceIndex<Store<?>, String, Store<?>> storeIndex;
+
+  @Activate
+  public StorageServiceImpl(BundleContext context) {
+    storeIndex = ServiceIndex.open(context, Store.class.getName());
+  }
+
+  @Override
+  public Stream<Store<?>> stores() {
+    return storeIndex.objects();
+  }
+
+  @Override
+  public StorageConfiguration<?> configureStorage(StateMap persistedState) {
+    Store<?> store = storeIndex.get(persistedState.get(STORE_ID)).get().serviceObject();
+    return new StorageConfiguration<>(store, persistedState);
+  }
+
+  @Override
+  public <T> StateMap deconfigureStorage(StorageConfiguration<T> processor) {
+    String id = storeIndex.findRecord(processor.store()).get().id();
+    return processor.deconfigure().with(STORE_ID, id);
+  }
+}

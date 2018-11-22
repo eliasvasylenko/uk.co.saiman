@@ -7,6 +7,11 @@ javac.source:		11
 javac.target:		11
 javac.compliance:	11
 javac.debug:		on
+-runee:					JavaSE-11
+
+# The following lines are a hack to force IDE plugin publishing to P2 to work
+#Bundle-RequiredExecutionEnvironment: JavaSE-9
+#-noee: true
 
 Git-Descriptor:		${system-allow-fail;git describe --dirty --always}
 Git-SHA:			${system-allow-fail;git rev-list -1 HEAD}
@@ -108,15 +113,15 @@ Bundle-Developers:\
 		pom					=	${build}/apache.xml; \
 		location			=	${build}/cache/apache.xml
 
--plugin.eclipse.platform.photon:\
+-plugin.Eclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"Eclipse Photon Simultaneous Release";\
-		url					=	http://download.eclipse.org/releases/photon;\
+		name				=	"Eclipse 2018‑12";\
+		url					=	http://download.eclipse.org/releases/2018-12;\
 		location			=	${build}/cache/eclipse-platform
 #		url					=	${fileuri;${build}/eclipse.platform.target};\
 #		targetPlatform		=	true
 
--plugin.eclipse.fx.nightly:\
+-plugin.efxclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
 		name				=	"E(fx)clipse Runtime Nightly (3.3.0+)";\
 		url					=	http://download.eclipse.org/efxclipse/runtime-nightly/site/;\
@@ -135,8 +140,6 @@ javafx.version: 11
 ## Run requirement groups:
 -runrequires.base:\
 	bnd.identity; id=org.apache.felix.log
-
--runee:					JavaSE-11
 
 # Build path groups:
 -buildpath.base=\
@@ -158,7 +161,7 @@ test-cases: 			${classes;NAMED;*Test}
 -fixupmessages.sub: "Eclipse: The Bundle Symbolic * is a sub-bundle *.bnd but uses the project name"
 
 # TODO Once a baseline release has been made this should point to it, and the local repo copy removed
--pluginpath.babel.transpiler: ${build}/local/uk.co.saiman.babel.transpiler.plugin/uk.co.saiman.babel.transpiler.plugin-0.0.1.jar
+-pluginpath: ${build}/local/uk.co.saiman.babel.transpiler.plugin/uk.co.saiman.babel.transpiler.plugin-0.0.1.jar
 -plugin: uk.co.saiman.babel.transpiler.plugin.MakeTranspiled
 -make:\
 	(*).js;\
@@ -166,3 +169,4 @@ test-cases: 			${classes;NAMED;*Test}
 		source="$1.jsx";\
 		presets="react";\
 		plugins="transform-object-rest-spread"
+

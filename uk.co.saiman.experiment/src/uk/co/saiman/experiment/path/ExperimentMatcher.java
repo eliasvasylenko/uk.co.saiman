@@ -27,6 +27,9 @@
  */
 package uk.co.saiman.experiment.path;
 
+import java.util.Optional;
+
+import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentNode;
 
 /**
@@ -41,12 +44,16 @@ public class ExperimentMatcher {
     this.id = id;
   }
 
-  public static ExperimentMatcher matching(ExperimentNode<?, ?> node) {
+  public static ExperimentMatcher matching(ExperimentNode<?> node) {
     return new ExperimentMatcher(node.getId());
   }
 
-  public boolean match(ExperimentNode<?, ?> node) {
+  public boolean match(ExperimentNode<?> node) {
     return id.equals(node.getId());
+  }
+
+  public Optional<Experiment> findMatch(ExperimentIndex index) {
+    return index.getExperiment(id);
   }
 
   @Override

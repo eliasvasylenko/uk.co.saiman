@@ -39,14 +39,13 @@ import uk.co.saiman.data.resource.Location;
  * modification of that state.
  * 
  * @author Elias N Vasylenko
- * @param <T>
- *          the type of the executing node
+ * @param <T> the type of the executing node
  */
 public interface ProcedureContext<T, R> {
   /**
    * @return the currently executing experiment node
    */
-  ExperimentNode<T, R> node();
+  ExperimentNode<T> node();
 
   /**
    * Invocation of this method is optional, and it may only be invoked at most
@@ -60,8 +59,7 @@ public interface ProcedureContext<T, R> {
    * This method blocks until all children are executed, and throws an
    * {@link ExperimentException} if any child fails.
    * 
-   * @throws ExperimentException
-   *           if invoked multiple times
+   * @throws ExperimentException if invoked multiple times
    */
   void processChildren();
 
@@ -86,8 +84,7 @@ public interface ProcedureContext<T, R> {
    * {@link Procedure#proceed(ProcedureContext) execution} once processing
    * completes.
    * 
-   * @param value
-   *          the preliminary result
+   * @param value the preliminary result
    */
   void setPartialResult(R value);
 
@@ -100,8 +97,7 @@ public interface ProcedureContext<T, R> {
    * {@link Procedure#proceed(ProcedureContext) execution} once processing
    * completes.
    * 
-   * @param value
-   *          an invalidation representing the preliminary result
+   * @param value an invalidation representing the preliminary result
    */
   void setPartialResult(Supplier<R> value);
 
@@ -127,10 +123,8 @@ public interface ProcedureContext<T, R> {
    * precludes invocation of {@link #setResultData(Data)} or
    * {@link #setResultFormat(String, String)} during the same execution.
    * 
-   * @param name
-   *          the name of the result data file
-   * @param format
-   *          the format of the result data file
+   * @param name   the name of the result data file
+   * @param format the format of the result data file
    */
   void setResultFormat(String name, DataFormat<R> format);
 
@@ -144,10 +138,8 @@ public interface ProcedureContext<T, R> {
    * precludes invocation of {@link #setResultData(Data)} or
    * {@link #setResultFormat(String, DataFormat)} during the same execution.
    * 
-   * @param name
-   *          the name of the result data file
-   * @param extension
-   *          the extension of the format of the result data file
+   * @param name      the name of the result data file
+   * @param extension the extension of the format of the result data file
    */
   void setResultFormat(String name, String extension);
 }

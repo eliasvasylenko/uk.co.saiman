@@ -28,7 +28,6 @@
 package uk.co.saiman.msapex.instrument.sample.i18n;
 
 import uk.co.saiman.properties.Localized;
-import uk.co.saiman.properties.SaiProperties;
 
 /**
  * Localized text resource accessor for acquisition engine items.
@@ -37,8 +36,6 @@ import uk.co.saiman.properties.SaiProperties;
  */
 @SuppressWarnings("javadoc")
 public interface SampleDeviceProperties {
-  SaiProperties sai();
-
   Localized<String> noSampleDevices();
 
   Localized<String> noSampleSources();

@@ -29,7 +29,6 @@ package uk.co.saiman.webmodule.server;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM_FORMAT;
@@ -72,17 +71,11 @@ import uk.co.saiman.webmodule.WebModule;
 
 @RequireHttpWhiteboard
 @Designate(ocd = WebModuleServlet.ModuleServerConfiguration.class, factory = true)
-@Component(
-    service = Servlet.class,
-    immediate = true,
-    configurationPid = WebModuleServlet.CONFIGURATION_PID,
-    configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(service = Servlet.class, immediate = true, configurationPid = WebModuleServlet.CONFIGURATION_PID, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class WebModuleServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
 
-  @ObjectClassDefinition(
-      name = "Module Server Configuration",
-      description = "The module server provides OSGi powered dependency management for javascript modules")
+  @ObjectClassDefinition(name = "Module Server Configuration", description = "The module server provides OSGi powered dependency management for javascript modules")
   public @interface ModuleServerConfiguration {
     @AttributeDefinition(name = "Servlet pattern")
     String osgi_http_whiteboard_servlet_pattern() default "/"
@@ -95,7 +88,7 @@ public class WebModuleServlet extends HttpServlet {
   private static final String TRANSPILATION_FAILED = "Failed to transpile ES6 resource %s";
 
   private final Transpiler transpiler = new Transpiler();
-  private ModuleServerConfiguration config;
+  // private ModuleServerConfiguration config;
   private BundleContext context;
 
   @Reference
@@ -105,7 +98,7 @@ public class WebModuleServlet extends HttpServlet {
 
   @Activate
   void activate(ModuleServerConfiguration config, BundleContext context) throws Exception {
-    this.config = config;
+    // this.config = config;
     this.context = context;
   }
 
@@ -168,7 +161,8 @@ public class WebModuleServlet extends HttpServlet {
       HttpServletRequest request,
       HttpServletResponse response,
       String bundleName,
-      String bundleVersion) throws IOException {
+      String bundleVersion)
+      throws IOException {
     Bundle bundle = getBundle(bundleName, bundleVersion);
 
     if (bundle == null) {
@@ -177,8 +171,6 @@ public class WebModuleServlet extends HttpServlet {
     }
 
     BundleConfiguration configuration = new BundleConfiguration(bundle, request.getServletPath());
-
-    System.out.println(configuration);
 
     response.setContentType("application/javascript");
     writeResource(response, "dist/system.js");
@@ -220,14 +212,12 @@ public class WebModuleServlet extends HttpServlet {
       HttpServletResponse response,
       String moduleName,
       String moduleVersion,
-      String resource) throws IOException {
+      String resource)
+      throws IOException {
     moduleName = URLDecoder.decode(moduleName, "UTF-8");
 
     WebModule module;
     synchronized (modules) {
-      System.out.println(PackageId.parseId(moduleName));
-      System.out.println(Version.parseVersion(moduleVersion));
-      System.out.println(modules);
       try {
         ServiceReference<WebModule> registration = modules
             .get(PackageId.parseId(moduleName))
@@ -240,13 +230,6 @@ public class WebModuleServlet extends HttpServlet {
         return;
       }
     }
-
-    System.out.println("££££££££££");
-    System.out.println(module);
-    System.out.println(module.id());
-    System.out.println(module.dependencies().collect(toList()));
-    System.out.println(module.format());
-    System.out.println(resource);
 
     String source = module.openResource(resource);
     if (module.format().equals(ESM_FORMAT) && resource.endsWith(JS_EXTENSION)) {

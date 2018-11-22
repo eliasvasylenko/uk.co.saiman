@@ -48,9 +48,9 @@ import java.util.function.Supplier;
  * @author Elias N Vasylenko
  */
 class ExperimentLocker {
-  private final List<ExperimentNode<?, ?>> experimentNodes;
+  private final List<ExperimentNode<?>> experimentNodes;
 
-  public ExperimentLocker(ExperimentNode<?, ?>... experimentNodes) {
+  public ExperimentLocker(ExperimentNode<?>... experimentNodes) {
     this.experimentNodes = asList(experimentNodes);
   }
 

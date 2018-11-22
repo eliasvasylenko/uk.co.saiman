@@ -123,7 +123,7 @@ public class HandledCellEditor extends CellEditor {
             new UpdateValueStrategy().setConverter(new CommandToStringConverter(Messages)));
 
     Button b = new Button(parent, SWT.PUSH | SWT.FLAT);
-    b.setText(Messages.ModelTooling_Common_FindEllipsis);
+    b.setText(getString("_UI_FindEllipsis"));
     b.setImage(createImage(ResourceProvider.IMG_Obj16_zoom));
     b.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
     b.addSelectionListener(new SelectionAdapter() {

@@ -44,7 +44,7 @@ public class PathLocation implements Location {
   }
 
   @Override
-  public Stream<Resource> getResources() throws IOException {
+  public Stream<Resource> resources() throws IOException {
     return Files.walk(path).filter(Files::isRegularFile).map(PathResource::new);
   }
 

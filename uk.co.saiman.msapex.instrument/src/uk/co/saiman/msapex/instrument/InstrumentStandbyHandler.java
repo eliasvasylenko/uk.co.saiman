@@ -30,22 +30,21 @@ package uk.co.saiman.msapex.instrument;
 import static uk.co.saiman.instrument.InstrumentLifecycleState.BEGIN_OPERATION;
 import static uk.co.saiman.instrument.InstrumentLifecycleState.OPERATING;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.services.internal.events.EventBroker;
+import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.InstrumentLifecycleState;
 
 public class InstrumentStandbyHandler {
   @Execute
-  void execute(IEclipseContext context, Instrument instrument, EventBroker eventBroker) {
+  void execute(Instrument instrument) {
     instrument.requestStandby();
   }
 
   @CanExecute
-  boolean canExecute(Instrument instrument) {
-    return instrument.lifecycleState().isEqual(BEGIN_OPERATION)
-        || instrument.lifecycleState().isEqual(OPERATING);
+  boolean canExecute(@Optional InstrumentLifecycleState state) {
+    return state == BEGIN_OPERATION || state == OPERATING;
   }
 }

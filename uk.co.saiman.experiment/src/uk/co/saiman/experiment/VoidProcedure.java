@@ -36,7 +36,7 @@ public interface VoidProcedure<T> extends Procedure<T, Void> {
   default Void proceed(ProcedureContext<T, Void> context) {
     executeVoid(new VoidProcedureContext<T>() {
       @Override
-      public ExperimentNode<T, Void> node() {
+      public ExperimentNode<T> node() {
         return context.node();
       }
 

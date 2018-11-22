@@ -54,7 +54,7 @@ public class SpectrumExperimentProcessingCell {
   @Service
   private ProcedureService procedures;
   @Inject
-  private ExperimentNode<?, ?> experiment;
+  private ExperimentNode<?> experiment;
   @Inject
   private SpectrumProcessingConfiguration state;
   @Inject

@@ -48,6 +48,7 @@ public class SimpleData<T> implements Data<T> {
   public SimpleData(Resource resource, DataFormat<T> format) {
     this.resource = requireNonNull(resource);
     this.format = requireNonNull(format);
+    this.dirty = true;
   }
 
   @Override
@@ -90,8 +91,6 @@ public class SimpleData<T> implements Data<T> {
   @Override
   public boolean save() {
     if (isDirty()) {
-      this.dirty = false;
-
       T value = getImpl();
       if (value == null) {
         try {
@@ -112,6 +111,7 @@ public class SimpleData<T> implements Data<T> {
         }
       }
 
+      this.dirty = false;
       return true;
     }
     return false;
@@ -120,14 +120,13 @@ public class SimpleData<T> implements Data<T> {
   @Override
   public boolean load() {
     if (isDirty()) {
-      this.dirty = false;
-
       try (ReadableByteChannel readChannel = resource.read()) {
         setImpl(format.load(readChannel).data);
       } catch (IOException e) {
         throw new DataException("Failed to read data", e);
       }
 
+      this.dirty = false;
       return true;
     }
     return false;

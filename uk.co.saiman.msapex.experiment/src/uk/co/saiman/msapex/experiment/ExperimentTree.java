@@ -35,10 +35,10 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Workspace;
-import uk.co.saiman.experiment.event.AddExperimentEvent;
-import uk.co.saiman.experiment.event.RemoveExperimentEvent;
+import uk.co.saiman.msapex.experiment.workspace.Workspace;
+import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
+import uk.co.saiman.msapex.experiment.workspace.event.AddExperimentEvent;
+import uk.co.saiman.msapex.experiment.workspace.event.RemoveExperimentEvent;
 
 public class ExperimentTree {
   public static final String ID = "uk.co.saiman.msapex.experiment.tree";
@@ -69,8 +69,8 @@ public class ExperimentTree {
   private void updateChildren() {
     children
         .setItems(
-            ExperimentNodeCell.ID,
-            ExperimentNode.class,
-            workspace.getExperiments().collect(toList()));
+            ExperimentCell.ID,
+            WorkspaceExperiment.class,
+            workspace.getWorkspaceExperiments().collect(toList()));
   }
 }

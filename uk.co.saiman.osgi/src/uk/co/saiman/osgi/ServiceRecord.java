@@ -38,8 +38,8 @@ import org.osgi.framework.ServiceReference;
  *
  * @param <T> the type of the service
  */
-public interface ServiceRecord<T, U> {
-  ServiceReference<T> serviceReference();
+public interface ServiceRecord<S, U, T> {
+  ServiceReference<S> serviceReference();
 
   /**
    * @return the wrapped service object

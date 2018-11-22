@@ -116,8 +116,6 @@ public class UIAddon {
         } else if (element instanceof Cell) {
           ChildrenServiceImpl.prepareChildContainer(context);
           ChildrenServiceImpl.prepareChild(context, (Cell) element);
-
-          System.out.println("Context is set");
         }
       }
     } catch (Exception e) {

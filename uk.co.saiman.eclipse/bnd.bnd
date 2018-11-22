@@ -24,6 +24,7 @@ Export-Package: \
 	uk.co.saiman.eclipse,\
 	uk.co.saiman.eclipse.utilities,\
 	uk.co.saiman.eclipse.adapter,\
+	uk.co.saiman.eclipse.dialog,\
 	uk.co.saiman.eclipse.variable,\
 	uk.co.saiman.eclipse.localization
 

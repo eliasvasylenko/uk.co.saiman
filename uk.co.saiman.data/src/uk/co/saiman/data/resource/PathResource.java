@@ -52,10 +52,13 @@ public class PathResource implements Resource {
   }
 
   @Override
+  public String toString() {
+    return PathResource.class.getSimpleName() + "(" + path + ")";
+  }
+
+  @Override
   public String getName() {
-    String name = path.getFileName().toString();
-    int lastDot = name.lastIndexOf('.');
-    return lastDot > 0 ? name.substring(0, lastDot - 1) : name;
+    return path.getFileName().toString();
   }
 
   @Override

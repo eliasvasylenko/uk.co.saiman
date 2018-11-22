@@ -30,6 +30,7 @@ package uk.co.saiman.experiment;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -51,24 +52,24 @@ import uk.co.saiman.reflection.token.TypedReference;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the data type of the result
+ * @param <T> the data type of the result
  */
 public class Result<T> {
-  private final ExperimentNode<?, T> node;
+  private final Procedure<?, T> procedure;
   private Supplier<T> valueSupplier;
   private T value;
+  private Data<T> resultData;
 
   private boolean dirty;
   private final HotObservable<Result<T>> updates;
 
-  public Result(ExperimentNode<?, T> node) {
-    this.node = node;
+  public Result(Procedure<?, T> procedure) {
+    this.procedure = procedure;
     this.updates = new HotObservable<>();
   }
 
-  public ExperimentNode<?, ?> getExperimentNode() {
-    return node;
+  public Procedure<?, T> getProcedure() {
+    return procedure;
   }
 
   private void update() {
@@ -78,9 +79,22 @@ public class Result<T> {
     }
   }
 
+  void setData(Data<T> data) {
+    T value = data.get();
+
+    synchronized (updates) {
+      this.value = value;
+      this.resultData = data;
+      update();
+    }
+  }
+
   void setValue(T value) {
     synchronized (updates) {
       this.value = value;
+      if (resultData != null) {
+        resultData.set(value);
+      }
       update();
     }
   }
@@ -88,6 +102,11 @@ public class Result<T> {
   void unsetValue() {
     synchronized (updates) {
       value = null;
+      if (resultData != null) {
+        resultData.unset();
+        resultData.save();
+        resultData = null;
+      }
       update();
     }
   }
@@ -125,7 +144,7 @@ public class Result<T> {
   }
 
   public TypeToken<T> getType() {
-    return node.getProcedure().getResultType();
+    return procedure.getResultType();
   }
 
   public TypeToken<Result<T>> getThisTypeToken() {

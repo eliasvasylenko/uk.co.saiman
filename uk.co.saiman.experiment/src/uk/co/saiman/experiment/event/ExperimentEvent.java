@@ -34,13 +34,13 @@ import java.util.Optional;
 import uk.co.saiman.experiment.ExperimentNode;
 
 public abstract class ExperimentEvent {
-  private final ExperimentNode<?, ?> node;
+  private final ExperimentNode<?> node;
 
-  public ExperimentEvent(ExperimentNode<?, ?> node) {
+  public ExperimentEvent(ExperimentNode<?> node) {
     this.node = requireNonNull(node);
   }
 
-  public ExperimentNode<?, ?> node() {
+  public ExperimentNode<?> node() {
     return node;
   }
 
@@ -48,7 +48,7 @@ public abstract class ExperimentEvent {
 
   @Override
   public String toString() {
-    return kind() + "(" + node().getId() + ")";
+    return ExperimentEvent.class.getSimpleName() + "<" + kind() + ">(" + node().getId() + ")";
   }
 
   @SuppressWarnings("unchecked")

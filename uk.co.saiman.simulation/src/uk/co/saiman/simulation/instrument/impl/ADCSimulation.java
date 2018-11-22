@@ -59,9 +59,7 @@ import uk.co.saiman.simulation.instrument.impl.ADCSimulation.ADCSimulationConfig
 @Component(configurationPid = ADCSimulation.CONFIGURATION_PID, configurationPolicy = REQUIRE)
 public class ADCSimulation implements DetectorSimulationService {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      name = "ADC Simulation Configuration",
-      description = "The ADC simulation provides an implementation of a detector interface simulating an analogue-to-digital converter")
+  @ObjectClassDefinition(name = "ADC Simulation Configuration", description = "The ADC simulation provides an implementation of a detector interface simulating an analogue-to-digital converter")
   public @interface ADCSimulationConfiguration {
     @AttributeDefinition(name = "SNR", description = "Set the simulated signal-to-noise-ratio")
     double signalToNoiseRatio() default 0.95;
@@ -72,14 +70,14 @@ public class ADCSimulation implements DetectorSimulationService {
   @Reference
   private SimulatedSampleSource sampleSource;
 
-  private double signalToNoise;
+  // private double signalToNoise;
 
   private final Random random = new Random();
 
   @Activate
   @Modified
   void configure(ADCSimulationConfiguration configuration) {
-    signalToNoise = configuration.signalToNoiseRatio();
+    // signalToNoise = configuration.signalToNoiseRatio();
   }
 
   @Override

@@ -28,34 +28,21 @@
 package uk.co.saiman.msapex.experiment;
 
 import static java.lang.String.format;
-import static java.util.Comparator.reverseOrder;
-import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
-import static uk.co.saiman.fx.FxUtilities.wrap;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
+import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.GridPane;
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
-import uk.co.saiman.properties.Localized;
-import uk.co.saiman.utility.Named;
+import uk.co.saiman.msapex.experiment.workspace.Workspace;
+import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 
 /**
  * Add an experiment to the workspace
@@ -63,81 +50,39 @@ import uk.co.saiman.utility.Named;
  * @author Elias N Vasylenko
  */
 public class RenameExperimentHandler {
+  @Inject
+  Log log;
+  @Inject
+  @Localize
+  ExperimentProperties text;
+  @Inject
+  Workspace workspace;
+
   @Execute
-  void execute(
-      Workspace workspace,
-      @Localize ExperimentProperties text,
-      @AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> node) {
-    Object state = node.getVariables();
-    if (state instanceof Named) {
-      Named named = (Named) state;
+  void execute(WorkspaceExperiment experiment) {
+    new RenameExperimentDialog(workspace, text, experiment.name())
+        .showAndWait()
+        .ifPresent(name -> renameExperiment(experiment, name));
+  }
 
-      requestExperimentNameDialog(
-          workspace,
-          text.renameExperiment(),
-          text.renameExperimentName(named.getName())).ifPresent(name -> {
-            if (workspace.getExperiment(name).isPresent()) {
-              // this should have been detected in the requestExperimentNameDialog logic.
-              throw new ExperimentException(format("Experiment already exists with id %s", name));
-            }
-
-            /*
-             * TODO we can no longer check if data already exists at the location.
-             * RenameExperiment.confirmOverwriteIfNecessary(newLocation, text);
-             */
-
-            named.setName(name);
-          });
+  private void renameExperiment(WorkspaceExperiment experiment, String name) {
+    if (workspace.getWorkspaceExperiment(name).isPresent()) {
+      // this should have been detected in the requestExperimentNameDialog logic.
+      throw new ExperimentException(format("Experiment already exists with id %s", name));
     }
-  }
 
-  static Optional<String> requestExperimentNameDialog(
-      Workspace workspace,
-      Localized<String> title,
-      Localized<String> header) {
-    TextInputDialog nameDialog = new TextInputDialog();
-    nameDialog.titleProperty().bind(wrap(title));
-    nameDialog.headerTextProperty().bind(wrap(header));
-    GridPane content = (GridPane) nameDialog.getDialogPane().getContent();
-    content.add(new Label("This is where we need to put format error messages..."), 0, 0);
-    content.getChildren().remove(nameDialog.getEditor());
-    content.add(nameDialog.getEditor(), 0, 1);
+    try {
+      experiment.rename(name);
 
-    Button okButton = (Button) nameDialog.getDialogPane().lookupButton(ButtonType.OK);
-    okButton.setDisable(true);
-    nameDialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
 
-      boolean exists = workspace
-          .getExperiments()
-          .anyMatch(e -> e.getVariables().getName().equals(newValue));
-
-      boolean isValid = ExperimentConfiguration.isNameValid(newValue);
-
-      okButton.setDisable(!isValid || exists);
-    });
-
-    return nameDialog.showAndWait();
-  }
-
-  static void confirmOverwriteIfNecessary(Path newLocation, ExperimentProperties text) {
-    if (Files.exists(newLocation)) {
-      Alert alert = new Alert(AlertType.CONFIRMATION);
-      alert.titleProperty().bind(wrap(text.overwriteData()));
-      alert.headerTextProperty().bind(wrap(text.overwriteDataConfirmation(newLocation)));
-
-      boolean success = alert.showAndWait().map(ButtonType.OK::equals).orElse(false);
-
-      if (success) {
-        try {
-          Files.walk(newLocation).sorted(reverseOrder()).map(Path::toFile).forEach(File::delete);
-        } catch (IOException e) {
-          throw new ExperimentException(
-              format("Unable to delete existing data at %s", newLocation),
-              e);
-        }
-      } else {
-        throw new ExperimentException("Cancelled choose experiment name");
-      }
+      Alert alert = new Alert(AlertType.ERROR);
+      DialogUtilities.addStackTrace(alert, e);
+      alert.setTitle(text.renameExperimentFailedDialog().toString());
+      alert.setHeaderText(text.renameExperimentFailedText(experiment).toString());
+      alert.setContentText(text.renameExperimentFailedDescription().toString());
+      alert.showAndWait();
     }
   }
 }

@@ -27,12 +27,9 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
-
 import org.eclipse.e4.core.di.annotations.Execute;
 
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 
 /**
  * Add an experiment to the workspace.
@@ -41,8 +38,7 @@ import uk.co.saiman.experiment.ExperimentNode;
  */
 public class RunExperimentHandler {
   @Execute
-  void execute(@AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> experimentNode) {
-    if (experimentNode != null)
-      new Thread(experimentNode::process).start();
+  void execute(WorkspaceExperiment experiment) {
+    new Thread(experiment.experiment()::process).start();
   }
 }

@@ -36,7 +36,7 @@ public class ExperimentVariablesEvent extends ExperimentEvent {
   private final StateMap stateMap;
   private final StateMap previousStateMap;
 
-  public ExperimentVariablesEvent(ExperimentNode<?, ?> node, StateMap previousStateMap) {
+  public ExperimentVariablesEvent(ExperimentNode<?> node, StateMap previousStateMap) {
     super(node);
     this.stateMap = node.getStateMap();
     this.previousStateMap = previousStateMap;

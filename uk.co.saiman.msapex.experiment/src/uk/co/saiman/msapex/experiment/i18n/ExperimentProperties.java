@@ -30,7 +30,8 @@ package uk.co.saiman.msapex.experiment.i18n;
 import java.nio.file.Path;
 
 import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.Workspace;
+import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;
 
 /**
@@ -45,15 +46,14 @@ public interface ExperimentProperties {
   Localized<String> newExperimentName();
 
   /**
-   * @param state
-   *          the state to localize
+   * @param state the state to localize
    * @return localized name of the state
    */
   default Localized<String> lifecycleState(ExperimentLifecycleState state) {
     switch (state) {
     case COMPLETION:
       return lifecycleStateCompletion();
-    case CONFIGURATION:
+    case PREPARATION:
       return lifecycleStateConfiguration();
     case DETACHED:
       return lifecycleStateDetached();
@@ -95,9 +95,52 @@ public interface ExperimentProperties {
 
   Localized<String> renameExperimentName(String name);
 
-  Localized<String> cannotCreateWorkspace(Workspace experimentWorkspace);
-
   Localized<String> addSpectrumProcessor();
 
   Localized<String> addSpectrumProcessorDescription();
+
+  Localized<String> removeExperimentDialog();
+
+  Localized<String> removeExperimentText(WorkspaceExperiment experiment);
+
+  Localized<String> removeExperimentConfirmation();
+
+  Localized<String> removeExperimentFailedDialog();
+
+  Localized<String> removeExperimentFailedText(WorkspaceExperiment experiment);
+
+  Localized<String> removeExperimentFailedDescription();
+
+  Localized<String> removeNodeFailedDialog();
+
+  Localized<String> removeNodeFailedText(ExperimentNode<?> node);
+
+  Localized<String> removeNodeFailedDescription();
+
+  Localized<String> renameExperimentFailedDialog();
+
+  Localized<String> renameExperimentFailedText(WorkspaceExperiment experiment);
+
+  Localized<String> renameExperimentFailedDescription();
+
+  Localized<String> newExperimentFailedDi();
+
+  Localized<String> newExperimentFailedText(String name);
+
+  Localized<String> newExperimentFailedDescription();
+
+  Localized<String> openExperimentFailedDialog();
+
+  Localized<String> openExperimentFailedText(WorkspaceExperiment experiment);
+
+  Localized<String> openExperimentFailedDescription();
+
+  Localized<String> addNodeFailedDialog();
+
+  Localized<String> addNodeFailedText(WorkspaceExperiment experiment);
+
+  Localized<String> addNodeFailedText(ExperimentNode<?> node);
+
+  Localized<String> addNodeFailedDescription();
+
 }

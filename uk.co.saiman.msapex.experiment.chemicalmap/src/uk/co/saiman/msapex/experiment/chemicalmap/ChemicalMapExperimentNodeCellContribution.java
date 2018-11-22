@@ -54,7 +54,7 @@ public class ChemicalMapExperimentNodeCellContribution {
   public void prepare(
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
-      ExperimentNode<?, ?> experiment,
+      ExperimentNode<?> experiment,
       @Optional @AdaptClass(ExperimentNode.class) ChemicalMapConfiguration configuration) {
     if (configuration != null) {
       cell.setLabel(properties.chemicalMapExperimentName().get());

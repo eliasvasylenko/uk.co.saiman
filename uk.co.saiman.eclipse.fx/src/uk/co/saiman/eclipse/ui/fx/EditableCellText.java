@@ -28,6 +28,7 @@
 package uk.co.saiman.eclipse.ui.fx;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -49,7 +50,7 @@ import uk.co.saiman.eclipse.ui.SaiUiModel;
 public class EditableCellText extends StackPane {
   private final Label label = new Label();
   private final TextField field = new TextField();
-  private Consumer<String> update;
+  private Predicate<String> update;
 
   @Inject
   EditableCell cell;
@@ -81,9 +82,19 @@ public class EditableCellText extends StackPane {
         field.setText(label.getText());
 
       } else {
+        String previous = label.getText();
         label.setText(field.getText());
         if (update != null) {
-          update.accept(field.getText());
+          try {
+            if (!update.test(field.getText())) {
+              label.setText(previous);
+              field.setText(previous);
+            }
+          } catch (Exception e) {
+            label.setText(previous);
+            field.setText(previous);
+            throw e;
+          }
         }
       }
     }
@@ -95,6 +106,13 @@ public class EditableCellText extends StackPane {
   }
 
   public void setUpdate(Consumer<String> update) {
+    this.update = name -> {
+      update.accept(name);
+      return true;
+    };
+  }
+
+  public void setTryUpdate(Predicate<String> update) {
     this.update = update;
   }
 

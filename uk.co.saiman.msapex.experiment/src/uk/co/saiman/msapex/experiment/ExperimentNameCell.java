@@ -31,23 +31,24 @@ import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_PSE
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.di.UIEventTopic;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
-import org.eclipse.e4.ui.workbench.UIEvents;
-import org.osgi.service.event.Event;
 
-import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import uk.co.saiman.eclipse.dialog.DialogUtilities;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
-import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.event.RenameNodeEvent;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
+import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
+import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment.Status;
 
 /**
  * Contribution for root experiment nodes in the experiment tree
@@ -56,54 +57,56 @@ import uk.co.saiman.experiment.event.RenameNodeEvent;
  */
 public class ExperimentNameCell {
   @Inject
-  Cell cell;
-  Cell parent;
+  IEclipseContext context;
+  @Inject
+  Log log;
+  @Inject
+  @Localize
+  ExperimentProperties text;
 
   @Inject
-  ExperimentConfiguration configuration;
+  Cell cell;
 
   @Inject
   EditableCellText nameEditor;
 
   @Inject
-  ExperimentNode<?, ?> experiment;
+  WorkspaceExperiment experiment;
 
   @PostConstruct
-  public void prepare(HBox node, @Named(ExperimentNodeCell.SUPPLEMENTAL_TEXT) Label supplemental) {
-    parent = (Cell) (MUIElement) cell.getParent();
-
-    parent.setLabel(configuration.getName());
-    setIcon();
-
+  public void prepare(HBox node) {
     node.getChildren().add(nameEditor);
     HBox.setHgrow(nameEditor, Priority.SOMETIMES);
 
-    nameEditor.setText(configuration.getName());
-    nameEditor.setUpdate(name -> configuration.setName(name));
+    nameEditor.setText(experiment.name());
+    nameEditor.setTryUpdate(name -> renameExperiment(experiment, name));
     nameEditor.getLabel().pseudoClassStateChanged(SUPPLEMENTAL_PSEUDO_CLASS, true);
+  }
+
+  private boolean renameExperiment(WorkspaceExperiment experiment, String name) {
+    try {
+      experiment.rename(name);
+      return true;
+
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
+
+      Alert alert = new Alert(AlertType.ERROR);
+      DialogUtilities.addStackTrace(alert, e);
+      alert.setTitle(text.renameExperimentFailedDialog().toString());
+      alert.setHeaderText(text.renameExperimentFailedText(experiment).toString());
+      alert.setContentText(text.renameExperimentFailedDescription().toString());
+      alert.showAndWait();
+
+      return false;
+    }
   }
 
   @Inject
   @Optional
   public void updateName(RenameNodeEvent event) {
-    if (event.node() == experiment) {
+    if (experiment.status() == Status.OPEN && event.node() == experiment.experiment()) {
       nameEditor.setText(event.id());
     }
-  }
-
-  @Optional
-  @Inject
-  public void expanded(@UIEventTopic(SaiUiEvents.Cell.TOPIC_EXPANDED) Event expanded) {
-    if (expanded.getProperty(UIEvents.EventTags.ELEMENT) == parent) {
-      setIcon();
-    }
-  }
-
-  private void setIcon() {
-    parent
-        .setIconURI(
-            parent.isExpanded()
-                ? "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-open.png"
-                : "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book.png");
   }
 }

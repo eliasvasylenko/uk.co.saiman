@@ -223,6 +223,9 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
     @Override
     public void removeCell(WCell<?> widget) {
       getTreeItem().getChildren().remove(((CellImpl) widget).getTreeItem());
+      if (getTreeItem().getChildren().isEmpty()) {
+        getDomElement().setExpanded(false);
+      }
     }
 
     @Override

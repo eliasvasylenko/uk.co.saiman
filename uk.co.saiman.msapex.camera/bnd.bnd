@@ -22,6 +22,10 @@ Bundle-Name: SAI :: MSApex :: Camera
 	{always.e4xmi},\
 	{initial.e4xmi},\
 	res,\
+	l10n,\
 	{css=css}
 
-Private-Package: uk.co.saiman.msapex.camera
+Export-Package:\
+	uk.co.saiman.msapex.camera,\
+	uk.co.saiman.msapex.camera.i18n
+	

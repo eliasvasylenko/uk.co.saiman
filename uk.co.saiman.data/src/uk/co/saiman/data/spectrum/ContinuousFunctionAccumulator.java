@@ -55,10 +55,8 @@ import uk.co.saiman.observable.Observation;
  * 
  * @author Elias N Vasylenko
  *
- * @param <UD>
- *          the type of the units of measurement of values in the domain
- * @param <UR>
- *          the type of the units of measurement of values in the range
+ * @param <UD> the type of the units of measurement of values in the domain
+ * @param <UR> the type of the units of measurement of values in the range
  */
 public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Quantity<UR>> {
   private Throwable failure;
@@ -70,10 +68,8 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
   private final Observable<Invalidation<SampledContinuousFunction<UD, UR>>> accumulation;
 
   /**
-   * @param domain
-   *          the domain of the accumulated function
-   * @param unitRange
-   *          the unit of the accumulation dimension
+   * @param domain    the domain of the accumulated function
+   * @param unitRange the unit of the accumulation dimension
    */
   public ContinuousFunctionAccumulator(
       Observable<SampledContinuousFunction<UD, UR>> source,
@@ -137,9 +133,7 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
 
   public SampledContinuousFunction<UD, UR> getAccumulation() {
     try {
-      System.out.println("waiting...");
       complete.await();
-      System.out.println("waited");
     } catch (InterruptedException e) {
       new LockException(e);
     }

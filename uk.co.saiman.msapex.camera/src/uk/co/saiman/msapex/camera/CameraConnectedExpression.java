@@ -29,6 +29,7 @@ package uk.co.saiman.msapex.camera;
 
 import org.eclipse.e4.core.di.annotations.Evaluate;
 import org.eclipse.e4.core.di.annotations.Optional;
+
 import uk.co.saiman.camera.CameraConnection;
 
 /**

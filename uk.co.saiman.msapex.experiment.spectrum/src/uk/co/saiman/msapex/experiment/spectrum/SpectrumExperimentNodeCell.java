@@ -51,7 +51,7 @@ public class SpectrumExperimentNodeCell {
   public void prepare(
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
-      ExperimentNode<?, ?> data,
+      ExperimentNode<?> data,
       SpectrumConfiguration state) {
     cell = (Cell) (MUIElement) cell.getParent();
 

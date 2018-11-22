@@ -33,16 +33,6 @@ public enum ExperimentEventKind {
   /**
    * An experiment node was added to the workspace.
    */
-  ADD(AddExperimentEvent.class),
-
-  /**
-   * An experiment node was removed from the workspace.
-   */
-  REMOVE(RemoveExperimentEvent.class),
-
-  /**
-   * An experiment node was added to the workspace.
-   */
   ATTACH(AttachNodeEvent.class),
 
   /**

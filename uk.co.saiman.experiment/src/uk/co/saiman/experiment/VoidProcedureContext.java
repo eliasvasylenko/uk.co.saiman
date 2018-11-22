@@ -32,14 +32,13 @@ package uk.co.saiman.experiment;
  * current state, and enabling modification of that state.
  * 
  * @author Elias N Vasylenko
- * @param <T>
- *          the type of the executing node
+ * @param <T> the type of the executing node
  */
 public interface VoidProcedureContext<T> {
   /**
    * @see ProcedureContext#node()
    */
-  ExperimentNode<T, Void> node();
+  ExperimentNode<T> node();
 
   /**
    * @see ProcedureContext#processChildren()

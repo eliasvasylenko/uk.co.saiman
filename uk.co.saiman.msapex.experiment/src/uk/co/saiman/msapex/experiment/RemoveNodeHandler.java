@@ -27,12 +27,18 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
+import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 
-import uk.co.saiman.eclipse.adapter.AdaptNamed;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import uk.co.saiman.eclipse.dialog.DialogUtilities;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
 /**
  * Remove a node from an experiment in the workspace
@@ -40,13 +46,26 @@ import uk.co.saiman.experiment.ExperimentNode;
  * @author Elias N Vasylenko
  */
 public class RemoveNodeHandler {
+  @Inject
+  Log log;
+  @Inject
+  @Localize
+  ExperimentProperties text;
+
   @Execute
-  void execute(@AdaptNamed(ACTIVE_SELECTION) ExperimentNode<?, ?> selectedNode) {
-    /*
-     * TODO an "are you sure?" dialog. This is currently permanent! Ideally the
-     * experiment node data would be copied out into an undo history so it could be
-     * put back.
-     */
-    selectedNode.getParent().ifPresent(parent -> parent.detach(selectedNode));
+  void execute(ExperimentNode<?> node) {
+    try {
+      node.getParent().ifPresent(parent -> parent.detach(node));
+
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
+
+      Alert alert = new Alert(AlertType.ERROR);
+      DialogUtilities.addStackTrace(alert, e);
+      alert.setTitle(text.removeNodeFailedDialog().toString());
+      alert.setHeaderText(text.removeNodeFailedText(node).toString());
+      alert.setContentText(text.removeNodeFailedDescription().toString());
+      alert.showAndWait();
+    }
   }
 }

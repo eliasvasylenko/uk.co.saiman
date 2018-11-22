@@ -45,13 +45,13 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentNode;
-import uk.co.saiman.experiment.Workspace;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
+import uk.co.saiman.msapex.experiment.workspace.Workspace;
 import uk.co.saiman.observable.OwnedMessage;
 
 /**
@@ -78,7 +78,7 @@ public class ExperimentEditorAddon implements EditorProvider {
   @Inject
   private Log log;
 
-  private final Map<ExperimentNode<?, ?>, Editor> editors = new HashMap<>();
+  private final Map<ExperimentNode<?>, Editor> editors = new HashMap<>();
 
   @PostConstruct
   synchronized void create() {
@@ -100,11 +100,11 @@ public class ExperimentEditorAddon implements EditorProvider {
   }
 
   private synchronized void updatePath(MPart editor) {
-    ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) editor
+    ExperimentNode<?> node = (ExperimentNode<?>) editor
         .getTransientData()
         .get(EDITOR_EXPERIMENT_NODE);
 
-    if (node.getWorkspace().filter(workspace::equals).isPresent()) {
+    if (node.getExperiment().filter(workspace::containsExperiment).isPresent()) {
       editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
     } else {
       editor.getPersistedState().remove(EDITOR_EXPERIMENT_PATH);
@@ -115,7 +115,7 @@ public class ExperimentEditorAddon implements EditorProvider {
     ExperimentPath path = ExperimentPath
         .fromString(part.getPersistedState().get(EDITOR_EXPERIMENT_PATH));
 
-    ExperimentNode<?, ?> node;
+    ExperimentNode<?> node;
     try {
       node = path.resolve(workspace);
     } catch (Exception e) {
@@ -144,12 +144,12 @@ public class ExperimentEditorAddon implements EditorProvider {
 
   @Override
   public boolean isApplicable(Object contextValue) {
-    return contextValue instanceof ExperimentNode<?, ?>;
+    return contextValue instanceof ExperimentNode<?>;
   }
 
   @Override
   public synchronized Editor getEditorPart(Object contextValue) {
-    ExperimentNode<?, ?> node = (ExperimentNode<?, ?>) contextValue;
+    ExperimentNode<?> node = (ExperimentNode<?>) contextValue;
     Editor editor = editors.get(node);
     if (editor == null || !editor.getPart().isToBeRendered()) {
       editor = loadNewEditor(node);
@@ -158,7 +158,7 @@ public class ExperimentEditorAddon implements EditorProvider {
     return editor;
   }
 
-  private Editor loadNewEditor(ExperimentNode<?, ?> node) {
+  private Editor loadNewEditor(ExperimentNode<?> node) {
     MPart editor = cloneSnippet(ExperimentEditorPart.ID, modelService, application);
     editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
     editor.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);

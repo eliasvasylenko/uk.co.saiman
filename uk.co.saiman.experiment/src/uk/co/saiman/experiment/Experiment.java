@@ -27,92 +27,40 @@
  */
 package uk.co.saiman.experiment;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
 
-import java.util.Optional;
-
-import uk.co.saiman.experiment.event.AddExperimentEvent;
-import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.event.RemoveExperimentEvent;
 import uk.co.saiman.experiment.state.StateMap;
 
-public class Experiment extends ExperimentNode<ExperimentConfiguration, Void> {
-  private final ResultStore store;
+public class Experiment extends ExperimentNode<ExperimentConfiguration> {
+  private final StorageConfiguration<?> storageConfiguration;
 
-  private Workspace workspace;
-
-  public Experiment(String id, ResultStore store) {
+  public Experiment(String id, StorageConfiguration<?> store) {
     this(id, StateMap.empty(), store);
   }
 
-  public Experiment(String id, StateMap stateMap, ResultStore store) {
+  public Experiment(String id, StateMap stateMap, StorageConfiguration<?> store) {
     this(ExperimentProcedure.instance(), id, stateMap, store);
   }
 
-  protected Experiment(ExperimentProcedure procedure, String id, StateMap stateMap, ResultStore store) {
-    super(procedure, id, stateMap);
-    this.store = store;
+  protected Experiment(
+      ExperimentProcedure procedure,
+      String id,
+      StateMap stateMap,
+      StorageConfiguration<?> store) {
+    super(procedure, id, stateMap, PREPARATION);
+    this.storageConfiguration = store;
   }
 
-  @Override
-  void fireEvent(ExperimentEvent event) {
-    super.fireEvent(event);
-    if (workspace != null) {
-      workspace.fireEvent(event);
-    }
-  }
-
-  public ResultStore getResultStore() {
-    return store;
+  public StorageConfiguration<?> getStorageConfiguration() {
+    return storageConfiguration;
   }
 
   @Override
   public int getIndex() {
-    return getWorkspace().get().getExperiments().collect(toList()).indexOf(this);
+    return -1;
   }
 
-  @Override
-  public Optional<Workspace> getWorkspace() {
-    return Optional.ofNullable(workspace);
-  }
-
-  void addExperimentTo(Workspace workspace) {
-    lockExperiment().run(() -> {
-      workspace.getExperiments().forEach(child -> {
-        if (child.getId().equals(getId())) {
-          throw new ExperimentException(
-              format(
-                  "Experiment node with id %s already attached in workspace %s",
-                  getId(),
-                  workspace));
-        }
-      });
-
-      Workspace previousWorkspace = this.workspace;
-      this.workspace = workspace;
-      workspace.addExperimentImpl(this);
-
-      if (previousWorkspace != null) {
-        previousWorkspace.removeExperimentImpl(this);
-
-        RemoveExperimentEvent removeEvent = new RemoveExperimentEvent(this, previousWorkspace);
-        fireEventLocal(removeEvent);
-        previousWorkspace.fireEvent(removeEvent);
-      }
-      fireEvent(new AddExperimentEvent(this, workspace));
-    });
-  }
-
-  void removeExperimentFrom(Workspace workspace) {
-    lockExperiment().run(() -> {
-      if (this.workspace == workspace) {
-        this.workspace = null;
-      }
-
-      RemoveExperimentEvent removeEvent = new RemoveExperimentEvent(this, workspace);
-      workspace.fireEvent(removeEvent);
-      fireEvent(removeEvent);
-    });
+  public void dispose() {
+    setDetached();
   }
 }

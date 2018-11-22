@@ -29,16 +29,11 @@ package uk.co.saiman.msapex.experiment;
 
 import static java.util.EnumSet.allOf;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
 import static javafx.css.PseudoClass.getPseudoClass;
-import static uk.co.saiman.collection.StreamUtilities.streamNullable;
-
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -49,10 +44,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.utilities.EclipseUtilities;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentNode;
 import uk.co.saiman.experiment.event.AttachNodeEvent;
@@ -81,7 +76,7 @@ public class ExperimentNodeCell {
   @Inject
   private IEclipseContext context;
   @Inject
-  private ExperimentNode<?, ?> experiment;
+  private ExperimentNode<?> experiment;
 
   private Label supplementalText = new Label();
   private Label lifecycleIndicator = new Label();
@@ -138,6 +133,8 @@ public class ExperimentNodeCell {
     /*
      * Inject configuration
      */
+    EclipseUtilities.injectSupertypes(context, ExperimentNode.class, ExperimentNode::getVariables);
+    /*- TODO
     IContextFunction configurationFunction = (c, k) -> {
       Object variables = c.get(ExperimentNode.class).getVariables();
       if (variables != null) {
@@ -155,6 +152,7 @@ public class ExperimentNodeCell {
             experiment.getVariables().getClass(),
             t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())))
         .forEach(type -> context.set(type.getName(), configurationFunction));
+        */
 
     /*
      * Inject events
@@ -186,7 +184,7 @@ public class ExperimentNodeCell {
   @Inject
   @Optional
   public void update(AttachNodeEvent event) {
-    if (event.parent().filter(experiment::equals).isPresent()) {
+    if (event.parent() == experiment) {
       updateChildren();
     }
   }
@@ -194,7 +192,7 @@ public class ExperimentNodeCell {
   @Inject
   @Optional
   public void update(DetachNodeEvent event) {
-    if (event.previousParent().filter(experiment::equals).isPresent()) {
+    if (event.previousParent() == experiment) {
       updateChildren();
     }
   }
