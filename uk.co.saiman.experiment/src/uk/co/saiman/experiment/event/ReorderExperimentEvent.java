@@ -29,13 +29,13 @@ package uk.co.saiman.experiment.event;
 
 import static uk.co.saiman.experiment.event.ExperimentEventKind.REORDER;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public class ReorderExperimentEvent extends ExperimentEvent {
   private final int index;
   private final int previousIndex;
 
-  public ReorderExperimentEvent(ExperimentNode<?> experiment, int previousIndex) {
+  public ReorderExperimentEvent(ExperimentStep<?> experiment, int previousIndex) {
     super(experiment);
     this.index = experiment.getIndex();
     this.previousIndex = previousIndex;

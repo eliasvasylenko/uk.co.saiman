@@ -39,11 +39,10 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of sample configuration for the instrument
+ * @param <T> the type of sample configuration for the instrument
  */
 public abstract class ChemicalMapProcedure<T extends ChemicalMapConfiguration>
-    implements Procedure<T, ChemicalMap> {
+    implements Procedure<T> {
   private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
 
   protected abstract RasterDevice getRasterDevice();
@@ -51,7 +50,7 @@ public abstract class ChemicalMapProcedure<T extends ChemicalMapConfiguration>
   protected abstract AcquisitionDevice getAcquisitionDevice();
 
   @Override
-  public ChemicalMap proceed(ProcedureContext<T, ChemicalMap> context) {
+  public void proceed(ProcedureContext<T> context) {
     AcquisitionDevice acquisitionDevice = getAcquisitionDevice();
     RasterDevice rasterDevice = getRasterDevice();
 

@@ -30,17 +30,17 @@ package uk.co.saiman.experiment.event;
 import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.experiment.event.ExperimentEventKind.ATTACH;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public class AttachNodeEvent extends ExperimentEvent {
-  private final ExperimentNode<?> parent;
+  private final ExperimentStep<?> parent;
 
-  public AttachNodeEvent(ExperimentNode<?> node, ExperimentNode<?> parent) {
+  public AttachNodeEvent(ExperimentStep<?> node, ExperimentStep<?> parent) {
     super(node);
     this.parent = requireNonNull(parent);
   }
 
-  public ExperimentNode<?> parent() {
+  public ExperimentStep<?> parent() {
     return parent;
   }
 

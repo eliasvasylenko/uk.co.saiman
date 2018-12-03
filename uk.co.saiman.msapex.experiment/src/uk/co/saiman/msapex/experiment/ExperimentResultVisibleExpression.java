@@ -31,7 +31,7 @@ import org.eclipse.e4.core.di.annotations.Evaluate;
 import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.adapter.AdaptClass;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Result;
 
 /**
@@ -41,7 +41,7 @@ import uk.co.saiman.experiment.Result;
  */
 public class ExperimentResultVisibleExpression {
   @Evaluate
-  public boolean isVisible(@Optional @AdaptClass(ExperimentNode.class) Result<?> result) {
+  public boolean isVisible(@Optional @AdaptClass(ExperimentStep.class) Result<?> result) {
     return result != null;
   }
 }

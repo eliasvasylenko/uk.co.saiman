@@ -44,9 +44,11 @@ import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
+import uk.co.saiman.experiment.AnalysisProcedure;
 import uk.co.saiman.experiment.ExperimentContext;
+import uk.co.saiman.experiment.Dependency;
+import uk.co.saiman.experiment.Observation;
 import uk.co.saiman.experiment.Procedure;
-import uk.co.saiman.experiment.ProcessingProcedure;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.state.Accessor;
@@ -60,8 +62,13 @@ import uk.co.saiman.experiment.state.Accessor;
  */
 @Component(service = Procedure.class)
 public class SpectrumProcessingProcedure
-    implements ProcessingProcedure<SpectrumProcessingConfiguration, Spectrum, Spectrum> {
+    implements AnalysisProcedure<SpectrumProcessingConfiguration, Spectrum, Spectrum> {
+  public static final String PROCESSED_SPECTRUM = "uk.co.saiman.experiment.spectrum.processed.result";
+
   private final Accessor<Processing, ?> processorList;
+
+  private final Dependency<Spectrum> inputSpectrum;
+  private final Observation<Spectrum> processedSpectrum;
 
   @Activate
   public SpectrumProcessingProcedure(@Reference ProcessingService processors) {
@@ -69,6 +76,8 @@ public class SpectrumProcessingProcedure
         "processing",
         processors::loadProcessing,
         processors::saveProcessing);
+    this.inputSpectrum = new Dependency<Spectrum>() {};
+    this.processedSpectrum = new Observation<Spectrum>(PROCESSED_SPECTRUM) {};
   }
 
   @Override
@@ -130,5 +139,15 @@ public class SpectrumProcessingProcedure
         return input.getCalibration();
       }
     };
+  }
+
+  @Override
+  public Dependency<Spectrum> input() {
+    return inputSpectrum;
+  }
+
+  @Override
+  public Observation<Spectrum> output() {
+    return processedSpectrum;
   }
 }

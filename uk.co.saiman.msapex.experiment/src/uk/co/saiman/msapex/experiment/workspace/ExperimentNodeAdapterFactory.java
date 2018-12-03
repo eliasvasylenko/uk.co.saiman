@@ -34,7 +34,6 @@ import static uk.co.saiman.collection.StreamUtilities.streamNullable;
 import static uk.co.saiman.collection.StreamUtilities.streamOptional;
 import static uk.co.saiman.collection.StreamUtilities.tryOptional;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -42,20 +41,20 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.Result;
 
 public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
-  private final Supplier<? extends Stream<? extends Procedure<?, ?>>> experimentTypes;
+  private final Supplier<? extends Stream<? extends Procedure<?>>> experimentTypes;
 
   public ExperimentNodeAdapterFactory(
       IAdapterManager adapterManager,
-      Supplier<? extends Stream<? extends Procedure<?, ?>>> experimentTypes) {
+      Supplier<? extends Stream<? extends Procedure<?>>> experimentTypes) {
     this.adapterManager = adapterManager;
     this.experimentTypes = experimentTypes;
-    adapterManager.registerAdapters(this, ExperimentNode.class);
+    adapterManager.registerAdapters(this, ExperimentStep.class);
   }
 
   public void unregister() {
@@ -65,7 +64,7 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-    ExperimentNode<?> node = (ExperimentNode<?>) adaptableObject;
+    ExperimentStep<?> node = (ExperimentStep<?>) adaptableObject;
 
     if (adapterType.isAssignableFrom(Procedure.class)) {
       return (T) node.getProcedure();
@@ -75,19 +74,8 @@ public class ExperimentNodeAdapterFactory implements IAdapterFactory {
       return (T) node.getExperiment();
     }
 
-    if (adapterType.isAssignableFrom(Result.class)
-        && node.getProcedure().getResultType().getErasedType() != void.class) {
-      return (T) node.getResult();
-    }
-
     if (adapterType.isAssignableFrom(node.getProcedure().getVariablesType().getErasedType())) {
       return (T) node.getVariables();
-    }
-
-    if (adapterType.isAssignableFrom(node.getResult().getType().getErasedType())) {
-      Optional<?> value = node.getResult().getValue();
-      if (value.isPresent())
-        return (T) value.get();
     }
 
     return (T) adapterManager.loadAdapter(node.getVariables(), adapterType.getName());

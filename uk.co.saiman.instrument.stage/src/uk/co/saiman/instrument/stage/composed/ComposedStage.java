@@ -46,8 +46,8 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 
 import uk.co.saiman.instrument.ConnectionState;
-import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.InstrumentRegistration;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.Stage;
@@ -61,7 +61,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   private final String name;
-  private final InstrumentRegistration registration;
+  private final DeviceRegistration registration;
   private final Set<StageAxis<?>> axes;
 
   private final T analysisLocation;
@@ -108,12 +108,12 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   @Override
-  public DeviceRegistration getRegistration() {
-    return registration.getDeviceRegistration();
+  public InstrumentRegistration getInstrumentRegistration() {
+    return registration.getInstrumentRegistration();
   }
 
   protected void dispose() {
-    registration.unregister();
+    registration.deregister();
     axisObservations.forEach(Disposable::cancel);
   }
 
@@ -212,7 +212,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   public synchronized void setRequestedLocation(Mode mode, T location) {
-    if (getRegistration().isRegistered()) {
+    if (getInstrumentRegistration().isRegistered()) {
       this.mode = mode;
       setRequestedLocationImpl(location);
     }

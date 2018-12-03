@@ -44,7 +44,7 @@ public interface Store<T> {
   StateMap deconfigure(T store);
 
   /**
-   * Given a node whose {@link #locateStorage(Object, ExperimentNode) arranged
+   * Given a node whose {@link #locateStorage(Object, ExperimentStep) arranged
    * storage location} may have changed, move stored result data from the previous
    * location to the arranged one.
    * <p>
@@ -66,7 +66,7 @@ public interface Store<T> {
    */
   default Storage relocateStorage(
       T configuration,
-      ExperimentNode<?> node,
+      ExperimentStep<?> node,
       Storage previousStorage)
       throws IOException {
     Storage storage = locateStorage(configuration, node);
@@ -91,12 +91,12 @@ public interface Store<T> {
    * Get the arranged storage location for a node. Subsequent invocations may
    * return a different location after certain {@link ExperimentEvent workspace
    * events}, in which case an invocation of
-   * {@link #relocateStorage(Object, ExperimentNode, Storage)} is required
+   * {@link #relocateStorage(Object, ExperimentStep, Storage)} is required
    * in order to move the data to the appropriate location.
    * 
    * @param node the node whose data storage we wish to locate
    * @return the location at which to store experiment results
    * @throws IOException if the storage is not accessible
    */
-  Storage locateStorage(T configuration, ExperimentNode<?> node) throws IOException;
+  Storage locateStorage(T configuration, ExperimentStep<?> node) throws IOException;
 }

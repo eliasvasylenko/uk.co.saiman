@@ -29,7 +29,7 @@ package uk.co.saiman.msapex.experiment;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 /**
  * Add an experiment to the workspace.
@@ -38,7 +38,7 @@ import uk.co.saiman.experiment.ExperimentNode;
  */
 public class RunNodeHandler {
   @Execute
-  void execute(ExperimentNode<?> experimentNode) {
+  void execute(ExperimentStep<?> experimentNode) {
     new Thread(experimentNode::process).start();
   }
 }

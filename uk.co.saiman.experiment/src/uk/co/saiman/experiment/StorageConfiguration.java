@@ -59,12 +59,12 @@ public class StorageConfiguration<T> {
     this.configuration = configuration;
   }
 
-  public Storage relocateStorage(ExperimentNode<?> node, Storage previousStorage)
+  public Storage relocateStorage(ExperimentStep<?> node, Storage previousStorage)
       throws IOException {
     return store.relocateStorage(configuration, node, previousStorage);
   }
 
-  public Storage locateStorage(ExperimentNode<?> node) throws IOException {
+  public Storage locateStorage(ExperimentStep<?> node) throws IOException {
     return store.locateStorage(configuration, node);
   }
 

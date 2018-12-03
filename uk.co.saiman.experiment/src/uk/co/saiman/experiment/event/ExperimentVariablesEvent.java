@@ -29,14 +29,14 @@ package uk.co.saiman.experiment.event;
 
 import static uk.co.saiman.experiment.event.ExperimentEventKind.STATE;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.state.StateMap;
 
 public class ExperimentVariablesEvent extends ExperimentEvent {
   private final StateMap stateMap;
   private final StateMap previousStateMap;
 
-  public ExperimentVariablesEvent(ExperimentNode<?> node, StateMap previousStateMap) {
+  public ExperimentVariablesEvent(ExperimentStep<?> node, StateMap previousStateMap) {
     super(node);
     this.stateMap = node.getStateMap();
     this.previousStateMap = previousStateMap;

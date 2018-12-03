@@ -35,7 +35,9 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.experiment.Observation;
+import uk.co.saiman.reflection.token.TypeToken;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -51,14 +53,19 @@ public class ExperimentEditorPart {
   @Inject
   private MCompositePart part;
 
-  private ExperimentNode<?> node;
+  private ExperimentStep<?> node;
 
   @PostConstruct
   void initialize() {
-    node = (ExperimentNode<?>) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
+    node = (ExperimentStep<?>) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
 
-    context.set(ExperimentNode.class, node);
-    context.declareModifiable(node.getProcedure().getResultType().getErasedType());
+    context.set(ExperimentStep.class, node);
+    node
+        .getProcedure()
+        .observations()
+        .map(Observation::getResultType)
+        .map(TypeToken::getErasedType)
+        .forEach(context::declareModifiable);
     context.declareModifiable(node.getProcedure().getVariablesType().getErasedType());
   }
 }

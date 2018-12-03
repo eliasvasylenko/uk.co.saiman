@@ -39,7 +39,7 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.StorageConfiguration;
 import uk.co.saiman.experiment.service.ProcedureService;
@@ -65,7 +65,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   private static final String CONFIGURATION = "configuration";
   private static final String CHILDREN = "children";
 
-  private final PropertyAccessor<Procedure<?, ?>> procedure;
+  private final PropertyAccessor<Procedure<?>> procedure;
   private final MapAccessor<StorageConfiguration<?>> storage;
 
   private final JsonStateMapFormat stateMapFormat = new JsonStateMapFormat();
@@ -98,7 +98,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
     return loadExperimentNode(new Experiment(data.get(ID), data.get(storage)), data);
   }
 
-  protected <T extends ExperimentNode<?>> T loadExperimentNode(T experimentNode, StateMap data) {
+  protected <T extends ExperimentStep<?>> T loadExperimentNode(T experimentNode, StateMap data) {
     data
         .get(CHILDREN)
         .asList()
@@ -108,8 +108,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
             child -> experimentNode
                 .attach(
                     loadExperimentNode(
-                        new ExperimentNode<>(
-                            (Procedure<?, ?>) child.get(procedure),
+                        new ExperimentStep<>(
+                            (Procedure<?>) child.get(procedure),
                             child.get(ID),
                             child.get(CONFIGURATION).asMap()),
                         child)));
@@ -125,7 +125,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
     return saveExperimentNode(data).with(storage, data.getStorageConfiguration());
   }
 
-  protected StateMap saveExperimentNode(ExperimentNode<?> node) {
+  protected StateMap saveExperimentNode(ExperimentStep<?> node) {
     return StateMap
         .empty()
         .with(ID, node.getId())

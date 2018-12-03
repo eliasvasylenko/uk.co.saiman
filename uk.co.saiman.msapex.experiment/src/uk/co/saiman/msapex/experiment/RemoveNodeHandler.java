@@ -35,7 +35,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -53,7 +53,7 @@ public class RemoveNodeHandler {
   ExperimentProperties text;
 
   @Execute
-  void execute(ExperimentNode<?> node) {
+  void execute(ExperimentStep<?> node) {
     try {
       node.getParent().ifPresent(parent -> parent.detach(node));
 

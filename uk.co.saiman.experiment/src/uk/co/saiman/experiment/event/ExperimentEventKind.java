@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.event;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public enum ExperimentEventKind {
   /**

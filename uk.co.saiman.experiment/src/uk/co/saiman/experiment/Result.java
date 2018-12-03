@@ -31,45 +31,41 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import uk.co.saiman.data.Data;
-import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.reflection.token.TypeArgument;
-import uk.co.saiman.reflection.token.TypeToken;
-import uk.co.saiman.reflection.token.TypedReference;
 
 /**
- * TODO this should probably be weak-referenced to the actual data object, with
- * a way to load (and save?) according to whatever {@link DataFormat format} it
- * was originally saved as or is appropriate. Otherwise there will certainly be
- * memory usage issues. So how can this work alongside the observable value
- * aspect? Presumably if any observers are attached this will count as a
- * reference to the data object? Or will they just be sent a fail event after
- * it's cleaned up by GC?
- * 
- * TODO also consider that the data should still be loadable even if the
- * ExperimentNode type is {@link UnknownProcedure missing}.
+ * A result which may be produced during the processing of an
+ * {@link ExperimentStep experiment step}.
  * 
  * @author Elias N Vasylenko
  *
  * @param <T> the data type of the result
  */
 public class Result<T> {
-  private final Procedure<?, T> procedure;
-  private Supplier<T> valueSupplier;
+  private final ExperimentStep<?> step;
+  private final Observation<T> observation;
+
+  private Supplier<? extends T> valueSupplier;
   private T value;
   private Data<T> resultData;
 
+  private boolean complete;
   private boolean dirty;
   private final HotObservable<Result<T>> updates;
 
-  public Result(Procedure<?, T> procedure) {
-    this.procedure = procedure;
+  Result(ExperimentStep<?> step, Observation<T> observation) {
+    this.step = step;
+    this.observation = observation;
     this.updates = new HotObservable<>();
   }
 
-  public Procedure<?, T> getProcedure() {
-    return procedure;
+  public ExperimentStep<?> getExperimentStep() {
+    return step;
+  }
+
+  public Observation<T> getObservation() {
+    return observation;
   }
 
   private void update() {
@@ -83,6 +79,7 @@ public class Result<T> {
     T value = data.get();
 
     synchronized (updates) {
+      complete = false;
       this.value = value;
       this.resultData = data;
       update();
@@ -91,6 +88,7 @@ public class Result<T> {
 
   void setValue(T value) {
     synchronized (updates) {
+      complete = true;
       this.value = value;
       if (resultData != null) {
         resultData.set(value);
@@ -99,8 +97,16 @@ public class Result<T> {
     }
   }
 
+  public void complete() {
+    synchronized (updates) {
+      complete = true;
+      update();
+    }
+  }
+
   void unsetValue() {
     synchronized (updates) {
+      complete = false;
       value = null;
       if (resultData != null) {
         resultData.unset();
@@ -111,10 +117,23 @@ public class Result<T> {
     }
   }
 
-  void setValueSupplier(Supplier<T> valueSupplier) {
+  void setPartialValue(Supplier<? extends T> valueSupplier) {
     synchronized (updates) {
+      complete = false;
       this.valueSupplier = valueSupplier;
       update();
+    }
+  }
+
+  public boolean isComplete() {
+    synchronized (updates) {
+      return complete;
+    }
+  }
+
+  public boolean isPartiallyComplete() {
+    synchronized (updates) {
+      return !isComplete() && value == null && valueSupplier == null;
     }
   }
 
@@ -141,17 +160,5 @@ public class Result<T> {
    */
   public Observable<Result<T>> updates() {
     return updates;
-  }
-
-  public TypeToken<T> getType() {
-    return procedure.getResultType();
-  }
-
-  public TypeToken<Result<T>> getThisTypeToken() {
-    return new TypeToken<Result<T>>() {}.withTypeArguments(new TypeArgument<T>(getType()) {});
-  }
-
-  public TypedReference<Result<T>> asTypedObject() {
-    return TypedReference.typedObject(getThisTypeToken(), this);
   }
 }

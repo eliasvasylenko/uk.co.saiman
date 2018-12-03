@@ -39,10 +39,10 @@ import java.util.stream.Stream;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.DeviceRegistration;
+import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentLifecycleState;
-import uk.co.saiman.instrument.InstrumentRegistration;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
@@ -58,7 +58,7 @@ import uk.co.saiman.observable.ObservableValue;
  */
 @Component
 public class InstrumentImpl implements Instrument {
-  private final Set<DeviceRegistration> devices;
+  private final Set<InstrumentRegistration> devices;
   private final ObservableProperty<InstrumentLifecycleState> state;
 
   /**
@@ -70,13 +70,13 @@ public class InstrumentImpl implements Instrument {
   }
 
   @Override
-  public Stream<? extends DeviceRegistration> getRegistrations() {
+  public Stream<? extends InstrumentRegistration> getRegistrations() {
     return devices.stream();
   }
 
   @Override
-  public synchronized InstrumentRegistration registerDevice(Device device) {
-    DeviceRegistration deviceRegistration = new DeviceRegistration() {
+  public synchronized DeviceRegistration registerDevice(Device device) {
+    InstrumentRegistration deviceRegistration = new InstrumentRegistration() {
       @Override
       public boolean isRegistered() {
         return devices.contains(this);
@@ -93,14 +93,14 @@ public class InstrumentImpl implements Instrument {
       }
     };
 
-    InstrumentRegistration instrumentRegistration = new InstrumentRegistration() {
+    DeviceRegistration instrumentRegistration = new DeviceRegistration() {
       @Override
-      public void unregister() {
+      public void deregister() {
         devices.remove(deviceRegistration);
       }
 
       @Override
-      public DeviceRegistration getDeviceRegistration() {
+      public InstrumentRegistration getInstrumentRegistration() {
         return deviceRegistration;
       }
     };

@@ -27,10 +27,9 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import javax.measure.quantity.Length;
-
+import uk.co.saiman.experiment.ProcedureContext;
 import uk.co.saiman.instrument.stage.PolarStage;
-import uk.co.saiman.measurement.coordinate.PolarCoordinate;
+import uk.co.saiman.instrument.stage.Stage;
 
 /**
  * An {@link SampleProcedure experiment type} for {@link PolarStage radial stage
@@ -40,8 +39,15 @@ import uk.co.saiman.measurement.coordinate.PolarCoordinate;
  *
  * @param <T> the type of sample configuration for the instrument
  */
-public interface PolarStageProcedure<T extends PolarStageConfiguration>
-    extends StageProcedure<PolarCoordinate<Length>, T> {
+public interface StageProcedure<T, U extends StageConfiguration<T>> extends SampleProcedure<U> {
   @Override
-  PolarStage sampleDevice();
+  Stage<T> sampleDevice();
+
+  @Override
+  default void proceed(ProcedureContext<U> context) {
+    T location = context.node().getVariables().location();
+
+    sampleDevice().requestAnalysisLocation(location);
+    context.holdCondition(getSampleReadyCondition());
+  }
 }

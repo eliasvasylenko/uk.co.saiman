@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.VoidProcedureContext;
+import javax.measure.quantity.Length;
+
 import uk.co.saiman.instrument.stage.XYStage;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
 /**
  * An {@link SampleProcedure experiment type} for {@link XYStage XY stage
@@ -36,21 +38,10 @@ import uk.co.saiman.instrument.stage.XYStage;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of sample configuration for the instrument
+ * @param <T> the type of sample configuration for the instrument
  */
-public interface XYStageProcedure<T extends XYStageConfiguration> extends SampleProcedure<T> {
-  XYStage device();
-
+public interface XYStageProcedure<T extends XYStageConfiguration>
+    extends StageProcedure<XYCoordinate<Length>, T> {
   @Override
-  default void executeVoid(VoidProcedureContext<T> context) {
-    device().requestAnalysisLocation(context.node().getVariables().location());
-
-    /*
-     * TODO listen for interruption of the stage position and cancel/fail/warn if it
-     * is disturbed. Possibly acquire some sort of lock?
-     */
-
-    context.processChildren();
-  }
+  XYStage sampleDevice();
 }

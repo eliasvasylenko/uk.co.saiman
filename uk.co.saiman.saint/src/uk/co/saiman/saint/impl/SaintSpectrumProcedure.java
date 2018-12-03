@@ -42,9 +42,11 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.experiment.ExperimentContext;
+import uk.co.saiman.experiment.Observation;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
+import uk.co.saiman.experiment.sample.SampleProcedure;
 import uk.co.saiman.experiment.sample.XYStageProcedure;
 import uk.co.saiman.experiment.spectrum.SpectrumProcedure;
 import uk.co.saiman.experiment.state.Accessor;
@@ -52,8 +54,10 @@ import uk.co.saiman.saint.SaintSpectrumConfiguration;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 
 @Component
-public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfiguration>
-    implements Procedure<SaintSpectrumConfiguration, Spectrum> {
+public class SaintSpectrumProcedure implements SpectrumProcedure<SaintSpectrumConfiguration>,
+    Procedure<SaintSpectrumConfiguration> {
+  public static final String SAINT_SPECTRUM = "uk.co.saiman.saint.spectrum.result";
+
   @Reference
   private XYStageProcedure<SaintXYStageConfiguration> stageExperiment;
 
@@ -63,8 +67,14 @@ public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfi
   @Reference
   private ProcessingService processors;
 
+  private final Observation<Spectrum> spectrumObservation;
+
+  public SaintSpectrumProcedure() {
+    spectrumObservation = new Observation<Spectrum>(SAINT_SPECTRUM) {};
+  }
+
   @Override
-  protected Unit<Mass> getMassUnit() {
+  public Unit<Mass> getMassUnit() {
     return dalton().getUnit();
   }
 
@@ -110,12 +120,17 @@ public class SaintSpectrumProcedure extends SpectrumProcedure<SaintSpectrumConfi
   }
 
   @Override
-  public boolean mayComeAfter(Procedure<?, ?> parentType) {
-    return parentType == stageExperiment;
+  public AcquisitionDevice getAcquisitionDevice() {
+    return acquisitionDevice;
   }
 
   @Override
-  public AcquisitionDevice getAcquisitionDevice() {
-    return acquisitionDevice;
+  public SampleProcedure<?> getSampleProcedure() {
+    return stageExperiment;
+  }
+
+  @Override
+  public Observation<Spectrum> spectrumObservation() {
+    return spectrumObservation;
   }
 }

@@ -39,7 +39,7 @@ import uk.co.saiman.osgi.ServiceIndex;
 
 @Component
 public class ProcedureServiceImpl implements ProcedureService {
-  private final ServiceIndex<?, String, Procedure<?, ?>> procedures;
+  private final ServiceIndex<?, String, Procedure<?>> procedures;
 
   @Activate
   public ProcedureServiceImpl(BundleContext context) {
@@ -47,17 +47,17 @@ public class ProcedureServiceImpl implements ProcedureService {
   }
 
   @Override
-  public Stream<Procedure<?, ?>> procedures() {
+  public Stream<Procedure<?>> procedures() {
     return procedures.objects();
   }
 
   @Override
-  public Procedure<?, ?> getProcedure(String id) {
+  public Procedure<?> getProcedure(String id) {
     return procedures.get(id).get().serviceObject();
   }
 
   @Override
-  public String getId(Procedure<?, ?> procedure) {
+  public String getId(Procedure<?> procedure) {
     return procedures.findRecord(procedure).get().id();
   }
 }

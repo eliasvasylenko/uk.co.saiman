@@ -25,23 +25,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment;
+package uk.co.saiman.experiment.path;
+
+import uk.co.saiman.experiment.Observation;
+import uk.co.saiman.experiment.Result;
 
 /**
- * The context of an experiment execution, providing information about the
- * current state, and enabling modification of that state.
- * 
- * @author Elias N Vasylenko
- * @param <T> the type of the executing node
+ * Currently the {@link ResultMatcher path} only matches each child by ID. This
+ * could be expanded to e.g. XPath-like behavior with different matching
+ * strategies.
  */
-public interface VoidProcedureContext<T> {
-  /**
-   * @see ProcedureContext#node()
-   */
-  ExperimentNode<T> node();
+public class ResultMatcher<T> {
+  private final String id;
 
-  /**
-   * @see ProcedureContext#processChildren()
-   */
-  void processChildren();
+  ResultMatcher(String id) {
+    this.id = id;
+  }
+
+  public static <T> ResultMatcher<T> matching(Observation<T> observation) {
+    return new ResultMatcher<>(observation.id());
+  }
+
+  public boolean match(Result<?> result) {
+    return id.equals(result.getObservation().id());
+  }
+
+  @Override
+  public String toString() {
+    return id;
+  }
+
+  public static ResultMatcher<?> fromString(String string) {
+    return new ResultMatcher<>(string);
+  }
 }

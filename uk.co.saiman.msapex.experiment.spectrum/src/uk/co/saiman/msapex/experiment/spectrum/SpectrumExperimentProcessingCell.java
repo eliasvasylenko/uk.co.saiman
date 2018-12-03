@@ -42,7 +42,7 @@ import javafx.scene.control.Label;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.event.ExperimentVariablesEvent;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.service.ProcedureService;
@@ -54,7 +54,7 @@ public class SpectrumExperimentProcessingCell {
   @Service
   private ProcedureService procedures;
   @Inject
-  private ExperimentNode<?> experiment;
+  private ExperimentStep<?> experiment;
   @Inject
   private SpectrumProcessingConfiguration state;
   @Inject

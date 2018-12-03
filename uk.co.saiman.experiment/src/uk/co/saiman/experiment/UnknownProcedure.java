@@ -28,12 +28,13 @@
 package uk.co.saiman.experiment;
 
 import static java.lang.String.format;
-import static uk.co.saiman.reflection.token.TypeToken.forType;
+
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public class UnknownProcedure<T> implements Procedure<StateMap, T> {
+public class UnknownProcedure implements Procedure<StateMap> {
   private final String id;
 
   public UnknownProcedure(String id) {
@@ -42,17 +43,6 @@ public class UnknownProcedure<T> implements Procedure<StateMap, T> {
 
   public String getId() {
     return id;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public TypeToken<T> getResultType() {
-    /*
-     * TODO best effort at result type by loading any persisted result data and
-     * using the type of that. This way we can still load the results and use
-     * child-nodes for e.g. analysis.
-     */
-    return (TypeToken<T>) forType(void.class);
   }
 
   @Override
@@ -66,12 +56,27 @@ public class UnknownProcedure<T> implements Procedure<StateMap, T> {
   }
 
   @Override
-  public boolean mayComeAfter(Procedure<?, ?> parentType) {
-    return true;
+  public void proceed(ProcedureContext<StateMap> context) {
+    throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
   }
 
   @Override
-  public T proceed(ProcedureContext<StateMap, T> context) {
-    throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
+  public Stream<Condition> requiredConditions() {
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<Condition> preparedConditions() {
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<Dependency<?>> dependencies() {
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<Observation<?>> observations() {
+    return Stream.empty(); // TODO load existing results;
   }
 }

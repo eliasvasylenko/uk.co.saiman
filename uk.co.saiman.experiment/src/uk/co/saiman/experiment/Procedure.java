@@ -30,6 +30,7 @@ package uk.co.saiman.experiment;
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
 import java.lang.reflect.Type;
+import java.util.stream.Stream;
 
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
@@ -49,18 +50,51 @@ import uk.co.saiman.reflection.token.TypeToken;
  * @param <S> the type of the data describing the experiment state, including
  *        configuration and results
  */
-public interface Procedure<S, R> {
+public interface Procedure<S> {
+  /**
+   * @return a stream of the conditions which are prepared by the procedure
+   */
+  Stream<Condition> preparedConditions();
+
+  /**
+   * @return a stream of the requirements of the procedure
+   */
+  Stream<Condition> requiredConditions();
+
+  /**
+   * The observations made by the procedure. An experiment step which observes a
+   * procedure will {@link ExperimentStep#getResult(Observation) provide a result}
+   * for each observation made by the procedure.
+   * 
+   * @return a stream of the observations which are made by the procedure
+   */
+  Stream<Dependency<?>> dependencies();
+
+  /**
+   * The observations made by the procedure. An experiment step which observes a
+   * procedure will {@link ExperimentStep#getResult(Observation) provide a result}
+   * for each observation made by the procedure.
+   * 
+   * @return a stream of the observations which are made by the procedure
+   */
+  Stream<Observation<?>> observations();
+
+  default boolean satisfiesRequirementsOf(Procedure<?> procedure) {
+    return procedure
+        .requiredConditions()
+        .allMatch(requirement -> preparedConditions().anyMatch(requirement::equals));
+  }
+
+  /*
+   * Execution is cheap enough that
+   */
   default boolean hasAutomaticExecution() {
     return false;
   }
 
-  default boolean isProcessingContextDependent() {
-    return true;
-  }
-
   /**
    * @param context the node which the configuration is being requested for
-   * @return a new state object suitable for an instance of {@link ExperimentNode}
+   * @return a new state object suitable for an instance of {@link ExperimentStep}
    *         over this type.
    */
   S configureVariables(ExperimentContext<S> context);
@@ -70,16 +104,7 @@ public interface Procedure<S, R> {
    * 
    * @param context the processing context
    */
-  R proceed(ProcedureContext<S, R> context);
-
-  /**
-   * Test whether a node of this type may directly succeed a node of the given
-   * type.
-   * 
-   * @param parentType the candidate parent node type
-   * @return true if a node of this type may be added as a child, false otherwise
-   */
-  boolean mayComeAfter(Procedure<?, ?> parentType);
+  void proceed(ProcedureContext<S> context);
 
   /**
    * @return the exact generic type of the configuration interface
@@ -91,22 +116,7 @@ public interface Procedure<S, R> {
         .getTypeToken();
   }
 
-  /**
-   * @return the exact generic type of the configuration interface
-   */
-  default TypeToken<R> getResultType() {
-    return forType(getThisType())
-        .resolveSupertype(Procedure.class)
-        .resolveTypeArgument(new TypeParameter<R>() {})
-        .getTypeToken();
-  }
-
   default Type getThisType() {
     return getClass();
-  }
-
-  default boolean hasResult() {
-    Class<?> erasedType = getResultType().getErasedType();
-    return erasedType != void.class && erasedType != Void.class;
   }
 }

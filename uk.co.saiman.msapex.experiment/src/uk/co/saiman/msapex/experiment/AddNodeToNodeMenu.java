@@ -43,7 +43,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.log.Log;
@@ -67,15 +67,15 @@ public class AddNodeToNodeMenu {
   ExperimentProperties text;
 
   @AboutToShow
-  void aboutToShow(List<MMenuElement> items, ExperimentNode<?> selectedNode) {
+  void aboutToShow(List<MMenuElement> items, ExperimentStep<?> selectedNode) {
     procedures
         .procedures()
-        .filter(t -> t.mayComeAfter(selectedNode.getProcedure()))
+        .filter(selectedNode.getProcedure()::satisfiesRequirementsOf)
         .map(t -> createMenuItem(selectedNode, t))
         .forEach(items::add);
   }
 
-  private MDirectMenuItem createMenuItem(ExperimentNode<?> node, Procedure<?, ?> subProcedure) {
+  private MDirectMenuItem createMenuItem(ExperimentStep<?> node, Procedure<?> subProcedure) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
     moduleItem.setLabel(procedures.getId(subProcedure));
     moduleItem.setType(ItemType.PUSH);
@@ -88,9 +88,9 @@ public class AddNodeToNodeMenu {
     return moduleItem;
   }
 
-  private void addNode(ExperimentNode<?> node, Procedure<?, ?> subProcedure) {
+  private void addNode(ExperimentStep<?> node, Procedure<?> subProcedure) {
     try {
-      node.attach(new ExperimentNode<>(subProcedure));
+      node.attach(new ExperimentStep<>(subProcedure));
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);

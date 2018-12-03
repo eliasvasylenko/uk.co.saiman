@@ -28,7 +28,9 @@
 package uk.co.saiman.experiment;
 
 import static java.lang.String.format;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.DETACHED;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.PROCESSING;
 import static uk.co.saiman.reflection.token.TypedReference.typedObject;
@@ -36,6 +38,7 @@ import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
@@ -69,32 +72,32 @@ import uk.co.saiman.reflection.token.TypedReference;
  * @author Elias N Vasylenko
  * @param <S> the type of the data describing the experiment configuration
  */
-public class ExperimentNode<S> {
+public class ExperimentStep<S> {
   private String id;
-  private Procedure<S, ?> procedure;
+  private Procedure<S> procedure;
   private StateMap stateMap;
   private ExperimentLifecycleState lifecycleState;
 
-  private ExperimentNode<?> parent;
-  private final List<ExperimentNode<?>> children;
+  private ExperimentStep<?> parent;
+  private final List<ExperimentStep<?>> children;
 
   private final S variables;
-  private final Result<?> result;
-  private boolean processedChildrenInline;
+  private final Map<Dependency<?>, Input<?>> inputs;
+  private final Map<Observation<?>, Result<?>> results;
   private Storage resultStorage;
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
 
-  public ExperimentNode(Procedure<S, ?> procedure) {
+  public ExperimentStep(Procedure<S> procedure) {
     this(procedure, null, StateMap.empty());
   }
 
-  public ExperimentNode(Procedure<S, ?> procedure, String id, StateMap stateMap) {
+  public ExperimentStep(Procedure<S> procedure, String id, StateMap stateMap) {
     this(procedure, id, stateMap, DETACHED);
   }
 
-  protected ExperimentNode(
-      Procedure<S, ?> procedure,
+  protected ExperimentStep(
+      Procedure<S> procedure,
       String id,
       StateMap stateMap,
       ExperimentLifecycleState lifecycleState) {
@@ -106,7 +109,16 @@ public class ExperimentNode<S> {
     this.parent = null;
     this.children = new ArrayList<>();
 
-    this.result = new Result<>(procedure);
+    this.inputs = procedure
+        .dependencies()
+        .map(condition -> new Input<>(this, condition))
+        .collect(toMap(Input::getDependency, identity()));
+
+    this.results = procedure
+        .observations()
+        .map(observation -> new Result<>(this, observation))
+        .collect(toMap(Result::getObservation, identity()));
+
     this.variables = createVariables(id);
   }
 
@@ -154,7 +166,7 @@ public class ExperimentNode<S> {
   /**
    * @return the type of the experiment
    */
-  public Procedure<S, ?> getProcedure() {
+  public Procedure<S> getProcedure() {
     return procedure;
   }
 
@@ -186,8 +198,8 @@ public class ExperimentNode<S> {
   private ExperimentContext<S> createConfigurationContext() {
     return new ExperimentContext<S>() {
       @Override
-      public ExperimentNode<S> node() {
-        return ExperimentNode.this;
+      public ExperimentStep<S> node() {
+        return ExperimentStep.this;
       }
 
       @Override
@@ -197,12 +209,12 @@ public class ExperimentNode<S> {
 
       @Override
       public void update(StateMap stateMap) {
-        ExperimentNode.this.setStateMap(stateMap);
+        ExperimentStep.this.setStateMap(stateMap);
       }
 
       @Override
       public void setId(String id) {
-        ExperimentNode.this.setId(id);
+        ExperimentStep.this.setId(id);
       }
 
       @Override
@@ -239,12 +251,12 @@ public class ExperimentNode<S> {
     });
   }
 
-  public TypeToken<ExperimentNode<S>> getThisTypeToken() {
-    return new TypeToken<ExperimentNode<S>>() {}
+  public TypeToken<ExperimentStep<S>> getThisTypeToken() {
+    return new TypeToken<ExperimentStep<S>>() {}
         .withTypeArguments(new TypeArgument<S>(getProcedure().getVariablesType()) {});
   }
 
-  public TypedReference<ExperimentNode<S>> asTypedObject() {
+  public TypedReference<ExperimentStep<S>> asTypedObject() {
     return typedObject(getThisTypeToken(), this);
   }
 
@@ -278,7 +290,7 @@ public class ExperimentNode<S> {
     return new ExperimentLocker(this);
   }
 
-  private static ExperimentLocker lockExperiments(ExperimentNode<?>... experimentNodes) {
+  private static ExperimentLocker lockExperiments(ExperimentStep<?>... experimentNodes) {
     return new ExperimentLocker(experimentNodes);
   }
 
@@ -290,7 +302,7 @@ public class ExperimentNode<S> {
    * @return the parent part of this experiment, if present, otherwise an empty
    *         optional
    */
-  public Optional<ExperimentNode<?>> getParent() {
+  public Optional<ExperimentStep<?>> getParent() {
     return Optional.ofNullable(parent);
   }
 
@@ -308,23 +320,23 @@ public class ExperimentNode<S> {
    * 
    * @return An ordered list of all sequential child experiment parts
    */
-  public Stream<ExperimentNode<?>> getChildren() {
+  public Stream<ExperimentStep<?>> getChildren() {
     return lockExperiment().run(() -> new ArrayList<>(children)).stream();
   }
 
-  public Optional<ExperimentNode<?>> getChild(String id) {
+  public Optional<ExperimentStep<?>> getChild(String id) {
     return lockExperiment().run(() -> getChildren().filter(c -> c.getId().equals(id)).findAny());
   }
 
-  public void attach(ExperimentNode<?> node) {
+  public void attach(ExperimentStep<?> node) {
     lockExperiments(this, node).run(() -> attachImpl(node, (int) getChildren().count()));
   }
 
-  public void attach(ExperimentNode<?> node, int index) {
+  public void attach(ExperimentStep<?> node, int index) {
     lockExperiments(this, node).run(() -> attachImpl(node, index));
   }
 
-  private void attachImpl(ExperimentNode<?> node, int index) {
+  private void attachImpl(ExperimentStep<?> node, int index) {
     if (index > children.size()) {
       throw new ExperimentException(
           format("Experiment node index %s is out of range at node %s", index, this));
@@ -360,7 +372,7 @@ public class ExperimentNode<S> {
         }
       });
 
-      ExperimentNode<?> previousParent = node.parent;
+      ExperimentStep<?> previousParent = node.parent;
       node.parent = this;
       children.add(node);
 
@@ -377,11 +389,11 @@ public class ExperimentNode<S> {
     }
   }
 
-  public void detach(ExperimentNode<?> node) {
+  public void detach(ExperimentStep<?> node) {
     lockExperiment().run(() -> detachImpl(node));
   }
 
-  private void detachImpl(ExperimentNode<?> node) {
+  private void detachImpl(ExperimentStep<?> node) {
     if (lifecycleState == PROCESSING) {
       throw new ExperimentException(
           format("Cannot detach experiment %s while in the %s state", getId(), PROCESSING));
@@ -397,7 +409,7 @@ public class ExperimentNode<S> {
   }
 
   void setDetached() {
-    result.unsetValue();
+    clearResults();
     ExperimentLifecycleState previousLifecycleState = lifecycleState;
     if (previousLifecycleState != DETACHED) {
       lifecycleState = DETACHED;
@@ -413,8 +425,8 @@ public class ExperimentNode<S> {
   }
 
   public Optional<Experiment> getExperimentImpl() {
-    List<ExperimentNode<?>> ancestors = getAncestorsImpl();
-    ExperimentNode<?> root = ancestors.get(ancestors.size() - 1);
+    List<ExperimentStep<?>> ancestors = getAncestorsImpl();
+    ExperimentStep<?> root = ancestors.get(ancestors.size() - 1);
     if (root instanceof Experiment) {
       return Optional.of((Experiment) root);
     } else {
@@ -425,14 +437,14 @@ public class ExperimentNode<S> {
   /**
    * @return a list of all ancestors, nearest first, inclusive of the node itself
    */
-  public Stream<ExperimentNode<?>> getAncestors() {
+  public Stream<ExperimentStep<?>> getAncestors() {
     return lockExperiment().run(() -> getAncestorsImpl()).stream();
   }
 
-  private List<ExperimentNode<?>> getAncestorsImpl() {
+  private List<ExperimentStep<?>> getAncestorsImpl() {
     // collect and re-stream, as we need to collect the list whilst locked.
     return StreamUtilities
-        .<ExperimentNode<?>>iterateOptional(this, ExperimentNode::getParent)
+        .<ExperimentStep<?>>iterateOptional(this, ExperimentStep::getParent)
         .collect(toList());
   }
 
@@ -445,11 +457,11 @@ public class ExperimentNode<S> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  public <U> Optional<ExperimentNode<U>> findAncestor(Procedure<U, ?> procedure) {
+  public <U> Optional<ExperimentStep<U>> findAncestor(Procedure<U> procedure) {
     return getAncestors()
         .filter(a -> procedure.equals(a.getProcedure()))
         .findFirst()
-        .map(a -> (ExperimentNode<U>) a);
+        .map(a -> (ExperimentStep<U>) a);
   }
 
   /**
@@ -461,10 +473,10 @@ public class ExperimentNode<S> {
    *         such ancestor exists
    */
   @SuppressWarnings("unchecked")
-  public <U> Stream<ExperimentNode<U>> findAncestors(Procedure<U, ?> procedure) {
+  public <U> Stream<ExperimentStep<U>> findAncestors(Procedure<U> procedure) {
     return getAncestors()
         .filter(a -> procedure.equals(a.getProcedure()))
-        .map(a -> (ExperimentNode<U>) a);
+        .map(a -> (ExperimentStep<U>) a);
   }
 
   /*
@@ -478,69 +490,103 @@ public class ExperimentNode<S> {
    * this method should fail.
    */
   public void process() {
+    /*-
+       lock {
+         Set root experiment to processing state, and all other ancestors
+         and all descendents to waiting state. If the root or any ancestors
+         are already processing or waiting then leave them alone.
+         
+         TODO consider procedure types which don't need ancestors to be re-run...
+         
+         TODO pass in Executor to manage parallelism
+       }
+     */
     try {
       processAncestors(getAncestors().collect(toList()));
     } catch (Exception e) {
+      e.printStackTrace();
       // TODO setLifecycleState(ExperimentLifecycleState.FAILURE, true);
       throw new ExperimentException(format("Failed to process experiment %s", getId()), e);
     }
   }
 
   /**
-   * Get the result associated with this node.
+   * Get the result produced by an {@link Observation} which is made by this node.
    * 
-   * @return an optional containing the result, or an empty optional if the
-   *         experiment type has no result type
+   * @return the result produced by the given condition
    */
-  public Result<?> getResult() {
-    return result;
+  @SuppressWarnings("unchecked")
+  public <R> Result<R> getResult(Observation<R> observation) {
+    Result<?> result = results.get(observation);
+    if (result == null) {
+      throw new ExperimentException(
+          format("Experiment step %s does not make observation of %s", this, observation));
+    }
+    return (Result<R>) result;
+  }
+
+  public Stream<Result<?>> getResults() {
+    return results.values().stream();
+  }
+
+  /**
+   * Get the input which satisfies a {@link Dependency} which is required by this
+   * node.
+   * 
+   * @return the input which satisfies the given dependency
+   */
+  @SuppressWarnings("unchecked")
+  public <I> Input<I> getInput(Dependency<I> dependency) {
+    Input<?> input = this.inputs.get(dependency);
+    if (input == null) {
+      throw new ExperimentException(
+          format("Experiment step %s does not have dependency on %s", this, dependency));
+    }
+    return (Input<I>) input;
+  }
+
+  public Stream<Input<?>> getInputs() {
+    return inputs.values().stream();
   }
 
   /**
    * Clear all the results associated with this node. Take care, as this will also
    * delete any result data from disk.
    */
-  public void clearResult() {
-    result.unsetValue();
+  public void clearResults() {
+    results.values().forEach(Result::unsetValue);
   }
 
-  private void processAncestors(List<ExperimentNode<?>> ancestors) {
-    ExperimentNode<?> node = ancestors.remove(ancestors.size() - 1);
+  private void processAncestors(List<ExperimentStep<?>> ancestors) {
+    ExperimentStep<?> node = ancestors.remove(ancestors.size() - 1);
 
     if (!ancestors.isEmpty()) {
-      node.processImpl(() -> node.processAncestors(ancestors), result);
+      node.processImpl(() -> node.processAncestors(ancestors));
     } else {
-      node.processImpl(node::processChildren, result);
+      node.processImpl(node::processChildren);
     }
   }
 
   private void processChildren() {
-    getChildren().forEach(n -> n.processImpl(n::processChildren, result));
+    getChildren().forEach(n -> n.processImpl(n::processChildren));
   }
 
-  private <T> void processImpl(Runnable processChildren, Result<T> result) {
+  private void processImpl(Runnable processChildren) {
     // TODO setLifecycleState(ExperimentLifecycleState.PROCESSING, false);
 
     if (parent != null) {
-      if (!procedure.mayComeAfter(parent.procedure)) {
+      if (!parent.procedure.satisfiesRequirementsOf(procedure)) {
         throw new ExperimentException(
             format(
-                "Experiment procedure %s does not fulfil constraint on containing procedure %s",
+                "Experiment procedure %s does not satisfy requirements of containing procedure %s",
                 procedure,
                 parent));
       }
     }
 
-    result.unsetValue();
-    processedChildrenInline = false;
+    clearResults();
 
-    @SuppressWarnings("unchecked")
-    Procedure<S, T> procedure = (Procedure<S, T>) getProcedure();
-    T value = procedure.proceed(createProcessingContext(processChildren, result));
-
-    if (result.getType().getErasedType() != void.class) {
-      result.setValue(value);
-    }
+    procedure.proceed(createProcessingContext(processChildren));
 
     try {
       synchronized (this) {
@@ -548,32 +594,20 @@ public class ExperimentNode<S> {
       }
     } catch (CancellationException e) {
       // TODO setLifecycleState(ExperimentLifecycleState.FAILURE, true);
-      result.unsetValue();
+      clearResults();
       throw e;
-    }
-
-    if (!processedChildrenInline) {
-      processChildren.run();
     }
   }
 
-  private <T> ProcedureContext<S, T> createProcessingContext(
-      Runnable processChildren,
-      Result<T> result) {
+  private ProcedureContext<S> createProcessingContext(Runnable processChildren) {
     /*
      * TODO once processed this must become inoperable, including the proxied Data
      * from setResult. Make sure this is synchronized!
      */
-    return new ProcedureContext<S, T>() {
+    return new ProcedureContext<S>() {
       @Override
-      public ExperimentNode<S> node() {
-        return ExperimentNode.this;
-      }
-
-      @Override
-      public void processChildren() {
-        processedChildrenInline = true;
-        processChildren.run();
+      public ExperimentStep<S> node() {
+        return ExperimentStep.this;
       }
 
       @Override
@@ -582,33 +616,77 @@ public class ExperimentNode<S> {
       }
 
       @Override
-      public void setPartialResult(T value) {
-        setPartialResult(() -> value);
+      public <T> void setPartialResult(Observation<T> observation, T value) {
+        setPartialResult(observation, (Supplier<? extends T>) () -> value);
       }
 
       @Override
-      public void setPartialResult(Supplier<T> value) {
-        result.setValueSupplier(value);
+      public <T> void setPartialResult(Observation<T> observation, Supplier<? extends T> value) {
+        getResult(observation).setPartialValue(value);
       }
 
       @Override
-      public void setResultData(Data<T> data) {
-        result.setData(data);
+      public <T> void setResultData(Observation<T> observation, Data<T> data) {
+        getResult(observation).setData(data);
       }
 
       @Override
-      public void setResultFormat(String name, DataFormat<T> format) {
+      public <T> void setResultFormat(
+          Observation<T> observation,
+          String name,
+          DataFormat<T> format) {
         try {
-          result.setData(Data.locate(getLocation(), name, format));
+          getResult(observation).setData(Data.locate(getLocation(), name, format));
         } catch (DataException e) {
           new ExperimentException("Cannot persist result at location " + getLocation(), e);
         }
       }
 
       @Override
-      public void setResultFormat(String name, String extension) {
+      public <T> void setResultFormat(Observation<T> observation, String name, String extension) {
         DataFormat<T> format = null; // TODO find based on extension (& type)
-        setResultFormat(name, format);
+        setResultFormat(observation, name, format);
+      }
+
+      @Override
+      public void completeObservation(Observation<?> observation) {
+        getResult(observation).complete();
+      }
+
+      @Override
+      public void enterCondition(Condition condition) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void awaitCondition(Condition condition) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void exitCondition(Condition condition) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void holdCondition(Condition condition) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public <U> Result<U> resolveInput(Dependency<U> requirement) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public void releaseCondition(Condition condition) {
+        // TODO Auto-generated method stub
+
       }
     };
   }

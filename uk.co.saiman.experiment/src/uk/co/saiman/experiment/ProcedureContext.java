@@ -41,39 +41,42 @@ import uk.co.saiman.data.resource.Location;
  * @author Elias N Vasylenko
  * @param <T> the type of the executing node
  */
-public interface ProcedureContext<T, R> {
+public interface ProcedureContext<T> {
   /**
    * @return the currently executing experiment node
    */
-  ExperimentNode<T> node();
-
-  /**
-   * Invocation of this method is optional, and it may only be invoked at most
-   * once during an execution.
-   * <p>
-   * This method causes the execution of all child nodes of the currently
-   * executing node, returning once they have stopped processing. This method may
-   * only be invoked once for a given execution. If it is not invoked, then the
-   * children will be processed after the execution completes.
-   * <p>
-   * This method blocks until all children are executed, and throws an
-   * {@link ExperimentException} if any child fails.
-   * 
-   * @throws ExperimentException if invoked multiple times
-   */
-  void processChildren();
+  ExperimentStep<T> node();
 
   /**
    * Get a location which can be used to persist resource artifacts of this
    * execution. Typically a resource in this location is used to construct one or
    * more related {@link Data data} instances, one of which will be set as the
-   * {@link #setResultData(Data) result} of the execution.
+   * {@link #setResultData(Observation, Data) result} of the execution.
    * <p>
    * The location will be empty before execution begins.
    * 
    * @return an interface over the execution location
    */
   Location getLocation();
+
+  void enterCondition(Condition condition);
+
+  void exitCondition(Condition condition);
+
+  void holdCondition(Condition condition);
+
+  void awaitCondition(Condition condition);
+
+  void releaseCondition(Condition condition);
+
+  /**
+   * Wait for the given requirement to be satisfied.
+   * 
+   * @param requirement
+   * @throws ExperimentException if the requirement can not be fulfilled
+   * @return the item which satisfies the requirement
+   */
+  <U> Result<U> resolveInput(Dependency<U> requirement);
 
   /**
    * Set a preliminary partial result value for this execution.
@@ -86,7 +89,7 @@ public interface ProcedureContext<T, R> {
    * 
    * @param value the preliminary result
    */
-  void setPartialResult(R value);
+  <R> void setPartialResult(Observation<R> observation, R value);
 
   /**
    * Set a preliminary partial result value for this execution.
@@ -99,7 +102,7 @@ public interface ProcedureContext<T, R> {
    * 
    * @param value an invalidation representing the preliminary result
    */
-  void setPartialResult(Supplier<R> value);
+  <R> void setPartialResult(Observation<R> observation, Supplier<? extends R> value);
 
   /**
    * Set the result data for this execution. If the {@link Data#get() value} of
@@ -109,10 +112,12 @@ public interface ProcedureContext<T, R> {
    * performed during the experiment process rather than saved until the end.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultFormat(String, DataFormat)} or
-   * {@link #setResultFormat(String, String)} during the same execution.
+   * precludes invocation of
+   * {@link #setResultFormat(Observation, String, DataFormat)} or
+   * {@link #setResultFormat(Observation, String, String)} during the same
+   * execution.
    */
-  void setResultData(Data<R> data);
+  <R> void setResultData(Observation<R> observation, Data<R> data);
 
   /**
    * Set the result format for this execution. If invoked, then once the
@@ -120,13 +125,14 @@ public interface ProcedureContext<T, R> {
    * returned value will be persisted according to the given file name and format.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultData(Data)} or
-   * {@link #setResultFormat(String, String)} during the same execution.
+   * precludes invocation of {@link #setResultData(Observation, Data)} or
+   * {@link #setResultFormat(Observation, String, String)} during the same
+   * execution.
    * 
    * @param name   the name of the result data file
    * @param format the format of the result data file
    */
-  void setResultFormat(String name, DataFormat<R> format);
+  <R> void setResultFormat(Observation<R> observation, String name, DataFormat<R> format);
 
   /**
    * Set the result format extensions for this execution. If invoked, then once
@@ -135,11 +141,19 @@ public interface ProcedureContext<T, R> {
    * format matching the given extension.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultData(Data)} or
-   * {@link #setResultFormat(String, DataFormat)} during the same execution.
+   * precludes invocation of {@link #setResultData(Observation, Data)} or
+   * {@link #setResultFormat(Observation, String, DataFormat)} during the same
+   * execution.
    * 
    * @param name      the name of the result data file
    * @param extension the extension of the format of the result data file
    */
-  void setResultFormat(String name, String extension);
+  <R> void setResultFormat(Observation<R> observation, String name, String extension);
+
+  default <R> void setResult(Observation<R> observation, R value) {
+    setPartialResult(observation, value);
+    completeObservation(observation);
+  }
+
+  void completeObservation(Observation<?> observation);
 }

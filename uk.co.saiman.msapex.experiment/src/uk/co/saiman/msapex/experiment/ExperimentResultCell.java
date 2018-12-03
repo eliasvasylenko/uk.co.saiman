@@ -27,11 +27,13 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static uk.co.saiman.experiment.ExperimentLifecycleState.COMPLETION;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -42,14 +44,14 @@ public class ExperimentResultCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
 
   @Inject
-  private ExperimentNode<?> experiment;
+  private ExperimentStep<?> experiment;
 
   @PostConstruct
   public void prepare(Cell cell) {
     /*
      * configure label
      */
-    if (experiment.getResult().getValue().isPresent()) {
+    if (experiment.getLifecycleState() == COMPLETION) {
       cell
           .setIconURI(
               "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document-binary.png");

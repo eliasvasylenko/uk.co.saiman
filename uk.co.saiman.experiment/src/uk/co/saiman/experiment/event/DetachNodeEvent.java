@@ -30,17 +30,17 @@ package uk.co.saiman.experiment.event;
 import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.experiment.event.ExperimentEventKind.DETACH;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public class DetachNodeEvent extends ExperimentEvent {
-  private final ExperimentNode<?> previousParent;
+  private final ExperimentStep<?> previousParent;
 
-  public DetachNodeEvent(ExperimentNode<?> node, ExperimentNode<?> previousParent) {
+  public DetachNodeEvent(ExperimentStep<?> node, ExperimentStep<?> previousParent) {
     super(node);
     this.previousParent = requireNonNull(previousParent);
   }
 
-  public ExperimentNode<?> previousParent() {
+  public ExperimentStep<?> previousParent() {
     return previousParent;
   }
 

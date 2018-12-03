@@ -39,7 +39,7 @@ import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
 import uk.co.saiman.msapex.experiment.chemicalmap.i18n.ChemicalMapProperties;
 
@@ -54,8 +54,8 @@ public class ChemicalMapExperimentNodeCellContribution {
   public void prepare(
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
-      ExperimentNode<?> experiment,
-      @Optional @AdaptClass(ExperimentNode.class) ChemicalMapConfiguration configuration) {
+      ExperimentStep<?> experiment,
+      @Optional @AdaptClass(ExperimentStep.class) ChemicalMapConfiguration configuration) {
     if (configuration != null) {
       cell.setLabel(properties.chemicalMapExperimentName().get());
       supplemental.setText(configuration.getChemicalMapName());

@@ -46,11 +46,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public class ExperimentPath {
-  private static final String SEPARATOR = "/";
-  private static final String PARENT = "..";
+  public static final String SEPARATOR = "/";
+  public static final String SELF = ".";
+  public static final String PARENT = "..";
 
   private static final String PARENT_OF_ROOT = "Cannot resolve parent of root path";
   private static final String CANNOT_RESOLVE = "Cannot resolve path";
@@ -73,7 +74,7 @@ public class ExperimentPath {
     return new ExperimentPath(-1, emptyList());
   }
 
-  public static ExperimentPath of(ExperimentNode<?> node) {
+  public static ExperimentPath of(ExperimentStep<?> node) {
     return new ExperimentPath(
         -1,
         reverse(node.getAncestors()).map(ExperimentMatcher::matching).collect(toList()));
@@ -150,7 +151,7 @@ public class ExperimentPath {
     }
   }
 
-  public ExperimentNode<?> resolve(ExperimentIndex index, ExperimentNode<?> node) {
+  public ExperimentStep<?> resolve(ExperimentIndex index, ExperimentStep<?> node) {
     if (isAbsolute()) {
       return resolve(index);
     } else {
@@ -158,15 +159,15 @@ public class ExperimentPath {
     }
   }
 
-  public ExperimentNode<?> resolve(ExperimentNode<?> node) {
+  public ExperimentStep<?> resolve(ExperimentStep<?> node) {
     if (isAbsolute()) {
       throw new ExperimentException("Cannot resolve absolute path for detached node");
     }
 
-    Optional<ExperimentNode<?>> result = Optional.of(node);
+    Optional<ExperimentStep<?>> result = Optional.of(node);
 
     for (int i = 0; i < ancestors; i++) {
-      result = result.flatMap(ExperimentNode::getParent);
+      result = result.flatMap(ExperimentStep::getParent);
     }
     if (!result.isPresent()) {
       throw new ExperimentException(PARENT_OF_EXPERIMENT);
@@ -179,13 +180,13 @@ public class ExperimentPath {
     return result.orElseThrow(() -> new ExperimentException(CANNOT_RESOLVE + " " + this));
   }
 
-  public ExperimentNode<?> resolve(ExperimentIndex index) {
+  public ExperimentStep<?> resolve(ExperimentIndex index) {
     if (ancestors > 0)
       throw new ExperimentException(PARENT_OF_ROOT);
     if (matchers.isEmpty())
       throw new ExperimentException(ROOT_NOT_EXPERIMENT);
 
-    Optional<? extends ExperimentNode<?>> result = matchers.get(0).findMatch(index);
+    Optional<? extends ExperimentStep<?>> result = matchers.get(0).findMatch(index);
 
     for (int i = 1; i < matchers.size(); i++) {
       ExperimentMatcher matcher = matchers.get(i);

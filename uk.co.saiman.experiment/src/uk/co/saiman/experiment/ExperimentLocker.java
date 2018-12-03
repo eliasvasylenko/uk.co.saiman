@@ -48,9 +48,9 @@ import java.util.function.Supplier;
  * @author Elias N Vasylenko
  */
 class ExperimentLocker {
-  private final List<ExperimentNode<?>> experimentNodes;
+  private final List<ExperimentStep<?>> experimentNodes;
 
-  public ExperimentLocker(ExperimentNode<?>... experimentNodes) {
+  public ExperimentLocker(ExperimentStep<?>... experimentNodes) {
     this.experimentNodes = asList(experimentNodes);
   }
 
@@ -83,7 +83,7 @@ class ExperimentLocker {
   public <T> T run(Supplier<T> action) {
     // TODO safely lock on all experiment nodes and their parents
 
-    synchronized (ExperimentNode.class) {
+    synchronized (ExperimentStep.class) {
       return action.get();
     }
   }

@@ -34,8 +34,12 @@ public enum ExperimentLifecycleState {
   PREPARATION,
 
   /**
-   * Experiment part is locked out of configuration and waiting in part of a
-   * processing queue.
+   * Experiment step is gathering the resources necessary to begin
+   */
+  // PRE_PROCESSING,
+
+  /**
+   * Experiment step is waiting for resources to become available for processing
    */
   WAITING,
 
@@ -43,6 +47,11 @@ public enum ExperimentLifecycleState {
    * Optimize laser, acquire from TDC, etc.
    */
   PROCESSING,
+
+  /**
+   * Experiment step is cleaning up the resources used
+   */
+  // POST_PROCESSING,
 
   /**
    * Once transitioned to this state, data is acquired

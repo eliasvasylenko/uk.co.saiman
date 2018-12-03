@@ -31,16 +31,16 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
 
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public abstract class ExperimentEvent {
-  private final ExperimentNode<?> node;
+  private final ExperimentStep<?> node;
 
-  public ExperimentEvent(ExperimentNode<?> node) {
+  public ExperimentEvent(ExperimentStep<?> node) {
     this.node = requireNonNull(node);
   }
 
-  public ExperimentNode<?> node() {
+  public ExperimentStep<?> node() {
     return node;
   }
 

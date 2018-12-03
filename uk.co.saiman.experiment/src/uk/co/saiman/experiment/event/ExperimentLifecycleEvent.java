@@ -30,14 +30,14 @@ package uk.co.saiman.experiment.event;
 import static uk.co.saiman.experiment.event.ExperimentEventKind.LIFECYLE;
 
 import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public class ExperimentLifecycleEvent extends ExperimentEvent {
   private final ExperimentLifecycleState lifecycleState;
   private final ExperimentLifecycleState previousLifecycleState;
 
   public ExperimentLifecycleEvent(
-      ExperimentNode<?> node,
+      ExperimentStep<?> node,
       ExperimentLifecycleState lifecycleState,
       ExperimentLifecycleState previousLifecycleState) {
     super(node);

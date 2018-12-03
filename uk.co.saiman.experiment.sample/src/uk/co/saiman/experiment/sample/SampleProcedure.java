@@ -27,9 +27,13 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import java.util.stream.Stream;
+
+import uk.co.saiman.experiment.Condition;
+import uk.co.saiman.experiment.Dependency;
+import uk.co.saiman.experiment.Observation;
 import uk.co.saiman.experiment.Procedure;
-import uk.co.saiman.experiment.ExperimentProcedure;
-import uk.co.saiman.experiment.VoidProcedure;
+import uk.co.saiman.instrument.sample.SampleDevice;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -38,12 +42,30 @@ import uk.co.saiman.experiment.VoidProcedure;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of sample configuration for the instrument
+ * @param <T> the type of sample configuration for the instrument
  */
-public interface SampleProcedure<T extends SampleConfiguration> extends VoidProcedure<T> {
+public interface SampleProcedure<T extends SampleConfiguration> extends Procedure<T> {
+  Condition getSampleReadyCondition();
+
+  SampleDevice<?> sampleDevice();
+
   @Override
-  default boolean mayComeAfter(Procedure<?, ?> parentType) {
-    return parentType instanceof ExperimentProcedure;
+  default Stream<Condition> requiredConditions() {
+    return Stream.empty();
+  }
+
+  @Override
+  default Stream<Condition> preparedConditions() {
+    return Stream.of(getSampleReadyCondition());
+  }
+
+  @Override
+  default Stream<Dependency<?>> dependencies() {
+    return Stream.empty();
+  }
+
+  @Override
+  default Stream<Observation<?>> observations() {
+    return Stream.empty();
   }
 }

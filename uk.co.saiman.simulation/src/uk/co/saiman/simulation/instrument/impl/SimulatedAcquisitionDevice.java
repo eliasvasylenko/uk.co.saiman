@@ -62,9 +62,9 @@ import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.DeviceRegistration;
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentRegistration;
+import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.HotObservable;
@@ -162,7 +162,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   private SimulationProperties simulationProperties;
   @Reference
   private Instrument instrument;
-  private InstrumentRegistration instrumentRegistration;
+  private DeviceRegistration instrumentRegistration;
 
   /*
    * Instrument Configuration
@@ -235,12 +235,12 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
 
   @Deactivate
   public void dispose() {
-    instrumentRegistration.unregister();
+    instrumentRegistration.deregister();
   }
 
   @Override
-  public DeviceRegistration getRegistration() {
-    return instrumentRegistration.getDeviceRegistration();
+  public InstrumentRegistration getInstrumentRegistration() {
+    return instrumentRegistration.getInstrumentRegistration();
   }
 
   @Override
@@ -304,7 +304,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   private void acquire() {
     currentThread().setPriority(MAX_PRIORITY);
 
-    while (getRegistration().isRegistered()) {
+    while (getInstrumentRegistration().isRegistered()) {
       DetectorSimulation detector;
       int counter;
 

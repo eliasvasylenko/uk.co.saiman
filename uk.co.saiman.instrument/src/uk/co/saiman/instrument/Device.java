@@ -45,11 +45,13 @@ public interface Device {
   /**
    * Devices should only ever be registered to a single instrument, and must
    * always be registered when created. This method should therefore always return
-   * the same registration.
+   * the same registration, even if the registration subsequently becomes
+   * {@link InstrumentRegistration#isRegistered() invalid} due to
+   * {@link DeviceRegistration#deregister() deregistration}.
    * 
    * @return the instrument registration for the device
    */
-  DeviceRegistration getRegistration();
+  InstrumentRegistration getInstrumentRegistration();
 
   /**
    * Get an observable value over the state of the connection to the hardware

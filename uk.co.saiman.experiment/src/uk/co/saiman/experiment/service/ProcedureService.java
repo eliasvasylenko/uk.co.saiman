@@ -32,9 +32,9 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.Procedure;
 
 public interface ProcedureService {
-  Stream<Procedure<?, ?>> procedures();
+  Stream<Procedure<?>> procedures();
 
-  Procedure<?, ?> getProcedure(String id);
+  Procedure<?> getProcedure(String id);
 
-  String getId(Procedure<?, ?> procedure);
+  String getId(Procedure<?> procedure);
 }

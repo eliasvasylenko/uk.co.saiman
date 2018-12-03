@@ -38,7 +38,7 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
 
@@ -51,7 +51,7 @@ public class SpectrumExperimentNodeCell {
   public void prepare(
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
-      ExperimentNode<?> data,
+      ExperimentStep<?> data,
       SpectrumConfiguration state) {
     cell = (Cell) (MUIElement) cell.getParent();
 

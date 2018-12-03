@@ -28,22 +28,27 @@
 package uk.co.saiman.instrument;
 
 /**
- * A registration with an instrument. An instrument registration is obtained
- * when a device {@link Instrument#registerDevice(Device) registers} itself to
- * an instrument. It should be owned by the registered device, and typically
- * should not be exposed outside the implementation of the device.
+ * A registration of a device with an instrument. An instrument registration is
+ * created when a device is {@link Instrument#registerDevice(Device) registered}
+ * to an instrument. It should be owned by the instrument, and may be obtained
+ * via {@link Instrument#getRegistrations()} or
+ * {@link Device#getInstrumentRegistration()}.
  * <p>
  * Each instance is mirrored by a corresponding {@link DeviceRegistration},
- * which is owned by the instrument.
+ * which is owned by the device.
+ * <p>
+ * An instance of {@link DeviceRegistration} cannot be obtained from an
+ * instrument of {@link InstrumentRegistration}. This is to ensure that device
+ * registrations can be passed safely around by users of the instrument API,
+ * while the power to unregister a device can remain properly encapsulated by
+ * the caller and implementor of {@link Instrument#registerDevice(Device)}.
  * 
  * @author Elias N Vasylenko
- *
  */
 public interface InstrumentRegistration {
-  void unregister();
+  boolean isRegistered();
 
-  /**
-   * @return the corresponding device registration
-   */
-  DeviceRegistration getDeviceRegistration();
+  Instrument getInstrument();
+
+  Device getDevice();
 }

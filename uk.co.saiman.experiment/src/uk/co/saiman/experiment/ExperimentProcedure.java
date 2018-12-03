@@ -30,10 +30,11 @@ package uk.co.saiman.experiment;
 import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 
-public class ExperimentProcedure implements VoidProcedure<ExperimentConfiguration> {
+public class ExperimentProcedure implements Procedure<ExperimentConfiguration> {
   public static final String FULL_PROCEDURE_PID = "uk.co.saiman.experiment.procedure.full";
 
   private static final PropertyAccessor<String> NOTES = stringAccessor("notes");
@@ -74,16 +75,29 @@ public class ExperimentProcedure implements VoidProcedure<ExperimentConfiguratio
   }
 
   @Override
-  public void executeVoid(VoidProcedureContext<ExperimentConfiguration> context) {
-    context.processChildren();
-  }
-
-  @Override
-  public boolean mayComeAfter(Procedure<?, ?> parentType) {
-    return false;
-  }
+  public void proceed(ProcedureContext<ExperimentConfiguration> context) {}
 
   public static ExperimentProcedure instance() {
     return INSTANCE;
+  }
+
+  @Override
+  public Stream<Condition> requiredConditions() {
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<Condition> preparedConditions() {
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<Dependency<?>> dependencies() {
+    return Stream.empty();
+  }
+
+  @Override
+  public Stream<Observation<?>> observations() {
+    return Stream.empty();
   }
 }

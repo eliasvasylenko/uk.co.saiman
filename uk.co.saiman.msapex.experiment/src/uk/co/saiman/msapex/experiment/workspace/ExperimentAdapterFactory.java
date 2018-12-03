@@ -34,7 +34,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 public class ExperimentAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
@@ -57,7 +57,7 @@ public class ExperimentAdapterFactory implements IAdapterFactory {
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
     Experiment experiment = (Experiment) adaptableObject;
 
-    if (adapterType == ExperimentNode.class) {
+    if (adapterType == ExperimentStep.class) {
       return (T) experiment;
     }
 
@@ -66,7 +66,7 @@ public class ExperimentAdapterFactory implements IAdapterFactory {
 
   @Override
   public Class<?>[] getAdapterList() {
-    return concat(of(ExperimentNode.class), of(experimentNodeAdapterFactory.getAdapterList()))
+    return concat(of(ExperimentStep.class), of(experimentNodeAdapterFactory.getAdapterList()))
         .toArray(Class[]::new);
   }
 }

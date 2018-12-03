@@ -31,7 +31,7 @@ import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
 
 import uk.co.saiman.experiment.state.StateMap;
 
-public class Experiment extends ExperimentNode<ExperimentConfiguration> {
+public class Experiment extends ExperimentStep<ExperimentConfiguration> {
   private final StorageConfiguration<?> storageConfiguration;
 
   public Experiment(String id, StorageConfiguration<?> store) {

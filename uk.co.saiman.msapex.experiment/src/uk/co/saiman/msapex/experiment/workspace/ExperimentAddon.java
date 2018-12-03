@@ -107,7 +107,7 @@ public class ExperimentAddon {
   private StorageService storageService;
   @Inject
   @Service
-  private volatile List<Procedure<?, ?>> experimentTypes;
+  private volatile List<Procedure<?>> experimentTypes;
 
   private Workspace workspace;
   private FileSystemStore workspaceStore;
@@ -191,7 +191,7 @@ public class ExperimentAddon {
     }
   }
 
-  private Stream<Procedure<?, ?>> getExperimentTypes() {
+  private Stream<Procedure<?>> getExperimentTypes() {
     return new ArrayList<>(experimentTypes).stream();
   }
 

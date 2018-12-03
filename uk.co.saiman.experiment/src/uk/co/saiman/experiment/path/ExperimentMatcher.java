@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.path;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 
 /**
  * Currently the {@link ExperimentMatcher path} only matches each child by ID.
@@ -44,11 +44,11 @@ public class ExperimentMatcher {
     this.id = id;
   }
 
-  public static ExperimentMatcher matching(ExperimentNode<?> node) {
+  public static ExperimentMatcher matching(ExperimentStep<?> node) {
     return new ExperimentMatcher(node.getId());
   }
 
-  public boolean match(ExperimentNode<?> node) {
+  public boolean match(ExperimentStep<?> node) {
     return id.equals(node.getId());
   }
 

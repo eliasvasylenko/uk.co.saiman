@@ -38,6 +38,7 @@ import javax.measure.quantity.Length;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.experiment.Condition;
 import uk.co.saiman.experiment.ExperimentContext;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.sample.XYStageProcedure;
@@ -48,8 +49,10 @@ import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.saint.SaintXYStageConfiguration;
 
 @Component
-public class SaintXYStageProcedure implements XYStageProcedure<SaintXYStageConfiguration>,
-    Procedure<SaintXYStageConfiguration, Void> {
+public class SaintXYStageProcedure
+    implements XYStageProcedure<SaintXYStageConfiguration>, Procedure<SaintXYStageConfiguration> {
+  public static final String SAMPLE_HOLDING_CONDITION = "uk.co.saiman.saint.sampleholding";
+
   private static final PropertyAccessor<Quantity<Length>> X = lengthAccessor("xOffset");
   private static final PropertyAccessor<Quantity<Length>> Y = lengthAccessor("yOffset");
 
@@ -60,6 +63,8 @@ public class SaintXYStageProcedure implements XYStageProcedure<SaintXYStageConfi
 
   @Reference(cardinality = OPTIONAL)
   private XYStage stageDevice;
+
+  private Condition sampleHolding = new Condition(SAMPLE_HOLDING_CONDITION);
 
   @Override
   public SaintXYStageConfiguration configureVariables(
@@ -107,7 +112,12 @@ public class SaintXYStageProcedure implements XYStageProcedure<SaintXYStageConfi
   }
 
   @Override
-  public XYStage device() {
+  public XYStage sampleDevice() {
     return stageDevice;
+  }
+
+  @Override
+  public Condition getSampleReadyCondition() {
+    return sampleHolding;
   }
 }

@@ -29,29 +29,61 @@ package uk.co.saiman.experiment;
 
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
+import java.util.stream.Stream;
+
+import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public interface VoidProcedure<T> extends Procedure<T, Void> {
-  @Override
-  default Void proceed(ProcedureContext<T, Void> context) {
-    executeVoid(new VoidProcedureContext<T>() {
-      @Override
-      public ExperimentNode<T> node() {
-        return context.node();
-      }
+public interface AnalysisProcedure<S, T, U> extends Procedure<S> {
+  Dependency<T> input();
 
-      @Override
-      public void processChildren() {
-        context.processChildren();
-      }
-    });
-    return null;
+  Observation<U> output();
+
+  @Override
+  default Stream<Condition> preparedConditions() {
+    return Stream.empty();
   }
 
-  void executeVoid(VoidProcedureContext<T> context);
+  @Override
+  default Stream<Condition> requiredConditions() {
+    return Stream.empty();
+  }
 
   @Override
-  default TypeToken<Void> getResultType() {
-    return forType(void.class);
+  default Stream<Dependency<?>> dependencies() {
+    return Stream.of(input());
+  }
+
+  @Override
+  default Stream<Observation<?>> observations() {
+    return Stream.of(output());
+  }
+
+  @Override
+  default boolean hasAutomaticExecution() {
+    return true;
+  }
+
+  default boolean hasPartialExecution() {
+    return false;
+  }
+
+  @Override
+  default void proceed(ProcedureContext<S> context) {
+    T input = (T) context.resolveInput(input()).getValue().orElse(null);
+    U output = process(context.node().getVariables(), input);
+    context.setResult(output(), output);
+  }
+
+  U process(S state, T input);
+
+  /**
+   * @return the exact generic type of the input of this processing step
+   */
+  default TypeToken<T> getInputType() {
+    return forType(getThisType())
+        .resolveSupertype(AnalysisProcedure.class)
+        .resolveTypeArgument(new TypeParameter<T>() {})
+        .getTypeToken();
   }
 }

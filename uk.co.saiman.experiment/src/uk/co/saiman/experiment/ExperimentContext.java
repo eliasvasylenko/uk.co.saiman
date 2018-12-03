@@ -38,7 +38,7 @@ import uk.co.saiman.experiment.state.StateMap;
  * instantiated and passed to the experiment type implementation via
  * {@link Procedure#configureVariables(ExperimentContext)}.
  * <p>
- * In other words, each {@link ExperimentNode} has only one
+ * In other words, each {@link ExperimentStep} has only one
  * {@link ExperimentContext} associated with it when it is created. The
  * configuration context remains valid so long as the experiment node remains in
  * the workspace, and references may be held to it.
@@ -50,7 +50,7 @@ public interface ExperimentContext<T> {
   /**
    * @return the currently executing experiment node
    */
-  ExperimentNode<T> node();
+  ExperimentStep<T> node();
 
   /**
    * Get the ID of the node.

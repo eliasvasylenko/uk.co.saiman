@@ -49,7 +49,7 @@ import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.utilities.EclipseUtilities;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.event.AttachNodeEvent;
 import uk.co.saiman.experiment.event.DetachNodeEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
@@ -76,7 +76,7 @@ public class ExperimentNodeCell {
   @Inject
   private IEclipseContext context;
   @Inject
-  private ExperimentNode<?> experiment;
+  private ExperimentStep<?> experiment;
 
   private Label supplementalText = new Label();
   private Label lifecycleIndicator = new Label();
@@ -89,9 +89,9 @@ public class ExperimentNodeCell {
 
   @CanExecute
   public boolean canExecute() {
-    return experiment.getProcedure().hasResult()
+    return experiment.getProcedure().observations().count() > 0
         && editorService
-            .getApplicableEditors(ExperimentNode.class, experiment)
+            .getApplicableEditors(ExperimentStep.class, experiment)
             .findFirst()
             .isPresent();
   }
@@ -100,7 +100,7 @@ public class ExperimentNodeCell {
   public void execute() {
     try {
       editorService
-          .getApplicableEditors(ExperimentNode.class, experiment)
+          .getApplicableEditors(ExperimentStep.class, experiment)
           .findFirst()
           .ifPresent(editorService::open);
     } catch (Exception e) {
@@ -133,7 +133,7 @@ public class ExperimentNodeCell {
     /*
      * Inject configuration
      */
-    EclipseUtilities.injectSupertypes(context, ExperimentNode.class, ExperimentNode::getVariables);
+    EclipseUtilities.injectSupertypes(context, ExperimentStep.class, ExperimentStep::getVariables);
     /*- TODO
     IContextFunction configurationFunction = (c, k) -> {
       Object variables = c.get(ExperimentNode.class).getVariables();
@@ -201,7 +201,7 @@ public class ExperimentNodeCell {
     children
         .setItems(
             ExperimentNodeCell.ID,
-            ExperimentNode.class,
+            ExperimentStep.class,
             experiment.getChildren().collect(toList()));
   }
 

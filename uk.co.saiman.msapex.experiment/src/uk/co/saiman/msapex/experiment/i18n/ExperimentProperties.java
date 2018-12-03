@@ -30,7 +30,7 @@ package uk.co.saiman.msapex.experiment.i18n;
 import java.nio.file.Path;
 
 import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;
 
@@ -113,7 +113,7 @@ public interface ExperimentProperties {
 
   Localized<String> removeNodeFailedDialog();
 
-  Localized<String> removeNodeFailedText(ExperimentNode<?> node);
+  Localized<String> removeNodeFailedText(ExperimentStep<?> node);
 
   Localized<String> removeNodeFailedDescription();
 
@@ -139,7 +139,7 @@ public interface ExperimentProperties {
 
   Localized<String> addNodeFailedText(WorkspaceExperiment experiment);
 
-  Localized<String> addNodeFailedText(ExperimentNode<?> node);
+  Localized<String> addNodeFailedText(ExperimentStep<?> node);
 
   Localized<String> addNodeFailedDescription();
 

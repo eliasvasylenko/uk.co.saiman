@@ -41,7 +41,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
@@ -63,7 +63,7 @@ public class SpectrumProcessingEditorPart {
       BorderPane container,
       TreeService treeService,
       @LocalInstance FXMLLoader loader,
-      ExperimentNode<? extends SpectrumProcessingConfiguration> result) {
+      ExperimentStep<? extends SpectrumProcessingConfiguration> result) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
     context.set(Processing.class, result.getVariables().getProcessing());

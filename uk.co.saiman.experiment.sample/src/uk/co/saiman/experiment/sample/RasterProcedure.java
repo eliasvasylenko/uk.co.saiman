@@ -27,18 +27,17 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.VoidProcedure;
+import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**
- * An {@link SampleProcedure experiment type} for {@link RasterDevice
- * raster devices}.
+ * An {@link SampleProcedure experiment type} for {@link RasterDevice raster
+ * devices}.
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of sample configuration for the instrument
+ * @param <T> the type of sample configuration for the instrument
  */
-public interface RasterProcedure<T extends RasterConfiguration> extends VoidProcedure<T> {
+public interface RasterProcedure<T extends RasterConfiguration> extends Procedure<T> {
   RasterDevice device();
 }

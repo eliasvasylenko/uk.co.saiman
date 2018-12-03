@@ -44,7 +44,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Storage;
 import uk.co.saiman.experiment.Store;
 import uk.co.saiman.experiment.filesystem.FileSystemStore.FileSystemStoreConfiguration;
@@ -112,14 +112,14 @@ public class FileSystemStore implements Store<Path> {
   }
 
   @Override
-  public Storage locateStorage(Path configuration, ExperimentNode<?> node) {
+  public Storage locateStorage(Path configuration, ExperimentStep<?> node) {
     return new PathStorage(getPath(node, configuration));
   }
 
   @Override
   public Storage relocateStorage(
       Path configuration,
-      ExperimentNode<?> node,
+      ExperimentStep<?> node,
       Storage previousLocation)
       throws IOException {
     if (previousLocation.location() instanceof PathLocation) {
@@ -135,15 +135,15 @@ public class FileSystemStore implements Store<Path> {
     return Store.super.relocateStorage(configuration, node, previousLocation);
   }
 
-  private Path getPath(ExperimentNode<?> node, Path path) {
+  private Path getPath(ExperimentStep<?> node, Path path) {
     return resolvePath(node, path, node.getId());
   }
 
-  private Path getParentPath(ExperimentNode<?> node, Path path) {
+  private Path getParentPath(ExperimentStep<?> node, Path path) {
     return node.getParent().map(p -> getPath(p, path)).orElseGet(() -> rootPath.resolve(path));
   }
 
-  private Path resolvePath(ExperimentNode<?> node, Path path, String id) {
+  private Path resolvePath(ExperimentStep<?> node, Path path, String id) {
     return getParentPath(node, path).resolve(id);
   }
 }

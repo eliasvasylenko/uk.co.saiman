@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import java.util.stream.Stream;
+
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -39,8 +41,12 @@ import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
+import uk.co.saiman.experiment.Condition;
+import uk.co.saiman.experiment.Dependency;
+import uk.co.saiman.experiment.Observation;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.ProcedureContext;
+import uk.co.saiman.experiment.sample.SampleProcedure;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -49,19 +55,21 @@ import uk.co.saiman.experiment.ProcedureContext;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of sample configuration for the instrument
+ * @param <T> the type of sample configuration for the instrument
  */
-public abstract class SpectrumProcedure<T extends SpectrumConfiguration>
-    implements Procedure<T, Spectrum> {
-  private static final String SPECTRUM_DATA_NAME = "spectrum";
+public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Procedure<T> {
+  static final String SPECTRUM_DATA_NAME = "spectrum";
 
-  protected abstract Unit<Mass> getMassUnit();
+  Unit<Mass> getMassUnit();
 
-  public abstract AcquisitionDevice getAcquisitionDevice();
+  AcquisitionDevice getAcquisitionDevice();
+
+  SampleProcedure<?> getSampleProcedure();
+
+  Observation<Spectrum> spectrumObservation();
 
   @Override
-  public Spectrum proceed(ProcedureContext<T, Spectrum> context) {
+  default void proceed(ProcedureContext<T> context) {
     System.out.println("create accumulator");
     AcquisitionDevice device = getAcquisitionDevice();
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
@@ -96,9 +104,11 @@ public abstract class SpectrumProcedure<T extends SpectrumConfiguration>
         .observe(
             o -> context
                 .setPartialResult(
+                    spectrumObservation(),
                     o.map(s -> new SampledSpectrum(s, calibration, processing))::revalidate));
 
     System.out.println("start acquisition");
+    context.awaitCondition(getSampleProcedure().getSampleReadyCondition());
     device.startAcquisition();
 
     /*
@@ -118,7 +128,35 @@ public abstract class SpectrumProcedure<T extends SpectrumConfiguration>
      */
 
     System.out.println("get result");
-    context.setResultFormat(SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
-    return new SampledSpectrum(accumulator.getAccumulation(), calibration, processing);
+    context
+        .setResultFormat(
+            spectrumObservation(),
+            SPECTRUM_DATA_NAME,
+            new RegularSampledSpectrumFormat(null));
+    context
+        .setResult(
+            spectrumObservation(),
+            new SampledSpectrum(accumulator.getAccumulation(), calibration, processing));
   }
+
+  @Override
+  default Stream<Condition> requiredConditions() {
+    return Stream.of(getSampleProcedure().getSampleReadyCondition());
+  }
+
+  @Override
+  default Stream<Condition> preparedConditions() {
+    return Stream.empty();
+  }
+
+  @Override
+  default Stream<Dependency<?>> dependencies() {
+    return Stream.empty();
+  }
+
+  @Override
+  default Stream<Observation<?>> observations() {
+    return Stream.of(spectrumObservation());
+  }
+
 }

@@ -36,8 +36,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.CanExecute;
-import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -57,7 +55,7 @@ import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.ExperimentNode;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.event.AttachNodeEvent;
 import uk.co.saiman.experiment.event.DetachNodeEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
@@ -95,26 +93,23 @@ public class ExperimentCell {
   @Inject
   ChildrenService children;
 
-  @CanExecute
-  public boolean canExecute() {
-    return experiment.status() == Status.CLOSED;
-  }
+  @Optional
+  @Inject
+  public void execute(@UIEventTopic(SaiUiEvents.Cell.TOPIC_EXPANDED) @Optional Event expanded) {
+    if (cell.isExpanded()) {
+      try {
+        experiment.open();
 
-  @Execute
-  public void execute() {
-    try {
-      experiment.open();
-      cell.setExpanded(true);
+      } catch (Exception e) {
+        log.log(Level.ERROR, e);
 
-    } catch (Exception e) {
-      log.log(Level.ERROR, e);
-
-      Alert alert = new Alert(AlertType.ERROR);
-      DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.openExperimentFailedDialog().toString());
-      alert.setHeaderText(text.openExperimentFailedText(experiment).toString());
-      alert.setContentText(text.openExperimentFailedDescription().toString());
-      alert.showAndWait();
+        Alert alert = new Alert(AlertType.ERROR);
+        DialogUtilities.addStackTrace(alert, e);
+        alert.setTitle(text.openExperimentFailedDialog().toString());
+        alert.setHeaderText(text.openExperimentFailedText(experiment).toString());
+        alert.setContentText(text.openExperimentFailedDescription().toString());
+        alert.showAndWait();
+      }
     }
   }
 
@@ -162,7 +157,7 @@ public class ExperimentCell {
 
   private void open() {
     context.set(Experiment.class, experiment.experiment());
-    context.set(ExperimentNode.class, experiment.experiment());
+    context.set(ExperimentStep.class, experiment.experiment());
     context.set(ExperimentConfiguration.class, experiment.experiment().getVariables());
     context.set(ExperimentLifecycleState.class, experiment.experiment().getLifecycleState());
     updateIcon();
@@ -173,7 +168,7 @@ public class ExperimentCell {
     try {
       removeChildren();
       context.remove(Experiment.class);
-      context.remove(ExperimentNode.class);
+      context.remove(ExperimentStep.class);
       context.remove(ExperimentConfiguration.class);
       context.remove(ExperimentLifecycleState.class);
       updateIcon();
@@ -215,14 +210,14 @@ public class ExperimentCell {
   }
 
   private void removeChildren() {
-    children.setItems(ExperimentNodeCell.ID, ExperimentNode.class, emptyList());
+    children.setItems(ExperimentNodeCell.ID, ExperimentStep.class, emptyList());
   }
 
   private void updateChildren() {
     children
         .setItems(
             ExperimentNodeCell.ID,
-            ExperimentNode.class,
+            ExperimentStep.class,
             experiment.experiment().getChildren().collect(toList()));
   }
 
