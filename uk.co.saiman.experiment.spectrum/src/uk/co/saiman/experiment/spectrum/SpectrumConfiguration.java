@@ -35,5 +35,5 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
  * @author Elias N Vasylenko
  */
 public interface SpectrumConfiguration extends SpectrumProcessingConfiguration {
-  AcquisitionDevice getAcquisitionDevice();
+  AcquisitionDevice<?> getAcquisitionDevice();
 }

@@ -80,8 +80,8 @@ public class AcquisitionPart {
   @FXML
   private Label noSelectionLabel;
 
-  private Set<AcquisitionDevice> currentSelection;
-  private Map<AcquisitionDevice, ContinuousFunctionChart<Time, Dimensionless>> controllers = new HashMap<>();
+  private Set<AcquisitionDevice<?>> currentSelection;
+  private Map<AcquisitionDevice<?>, ContinuousFunctionChart<Time, Dimensionless>> controllers = new HashMap<>();
 
   @Inject
   @LocalInstance
@@ -92,17 +92,17 @@ public class AcquisitionPart {
     if (chartPane == null)
       return;
 
-    Set<AcquisitionDevice> newSelection = devices == null
+    Set<AcquisitionDevice<?>> newSelection = devices == null
         ? emptySet()
         : devices.getSelectedDevices().collect(toCollection(LinkedHashSet::new));
 
-    for (AcquisitionDevice oldDevice : currentSelection) {
+    for (AcquisitionDevice<?> oldDevice : currentSelection) {
       if (!newSelection.remove(oldDevice)) {
         deselectAcquisitionDevice(oldDevice);
         currentSelection.remove(oldDevice);
       }
     }
-    for (AcquisitionDevice newDevice : newSelection) {
+    for (AcquisitionDevice<?> newDevice : newSelection) {
       selectAcquisitionDevice(newDevice);
       currentSelection.add(newDevice);
     }
@@ -121,7 +121,7 @@ public class AcquisitionPart {
     noSelectionLabel.textProperty().bind(wrap(text.noDevicesSelected()));
   }
 
-  private void selectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {
+  private void selectAcquisitionDevice(AcquisitionDevice<?> acquisitionDevice) {
     noSelectionLabel.setVisible(false);
 
     /*
@@ -144,7 +144,7 @@ public class AcquisitionPart {
     acquisitionDevice.dataEvents().observe(series::setContinuousFunction);
   }
 
-  private void deselectAcquisitionDevice(AcquisitionDevice acquisitionDevice) {
+  private void deselectAcquisitionDevice(AcquisitionDevice<?> acquisitionDevice) {
     ContinuousFunctionChart<Time, Dimensionless> controller = controllers.remove(acquisitionDevice);
 
     chartPane.getChildren().remove(controller);

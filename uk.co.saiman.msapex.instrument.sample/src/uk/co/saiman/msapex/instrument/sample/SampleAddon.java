@@ -64,7 +64,7 @@ public class SampleAddon {
 
   @Inject
   @ObservableService
-  private ObservableList<SampleDevice<?>> availableDevices;
+  private ObservableList<SampleDevice<?, ?>> availableDevices;
 
   @Inject
   private IEclipseContext context;
@@ -89,7 +89,7 @@ public class SampleAddon {
     context.runAndTrack(new RunAndTrack() {
       @Override
       public boolean changed(IEclipseContext context) {
-        SampleDevice<?> device = context.get(SampleDevice.class);
+        SampleDevice<?, ?> device = context.get(SampleDevice.class);
 
         // Set the default camera device to the last one which was selected
         defaultDeviceSelection = ofNullable(device).map(Device::getName).orElse(null);
@@ -110,9 +110,9 @@ public class SampleAddon {
   }
 
   private synchronized void updateSelectedDevices() {
-    Set<SampleDevice<?>> availableDevices = new HashSet<>(this.availableDevices);
+    Set<SampleDevice<?, ?>> availableDevices = new HashSet<>(this.availableDevices);
 
-    SampleDevice<?> selectedDevice = context.get(SampleDevice.class);
+    SampleDevice<?, ?> selectedDevice = context.get(SampleDevice.class);
     if (selectedDevice == null) {
       availableDevices
           .stream()
@@ -127,9 +127,9 @@ public class SampleAddon {
 
   @Inject
   synchronized void setSelection(
-      @Optional @AdaptNamed(ACTIVE_SELECTION) SampleDevice<?> device,
+      @Optional @AdaptNamed(ACTIVE_SELECTION) SampleDevice<?, ?> device,
       EPartService partService,
-      @Optional SampleDevice<?> selection) {
+      @Optional SampleDevice<?, ?> selection) {
     if (device != null) {
       if (selection != device) {
         context.modify(SampleDevice.class, device);

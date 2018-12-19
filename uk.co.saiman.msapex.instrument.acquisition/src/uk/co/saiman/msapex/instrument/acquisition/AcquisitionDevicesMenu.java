@@ -55,15 +55,16 @@ public class AcquisitionDevicesMenu {
   @AboutToShow
   void aboutToShow(
       List<MMenuElement> items,
-      @Service List<AcquisitionDevice> available,
+      @Service List<AcquisitionDevice<?>> available,
       @Optional AcquisitionDeviceSelection selection) {
     if (selection == null)
       selection = new AcquisitionDeviceSelection();
 
-    Set<AcquisitionDevice> selectedDevices = selection.getSelectedDevices().collect(
-        toCollection(LinkedHashSet::new));
+    Set<AcquisitionDevice<?>> selectedDevices = selection
+        .getSelectedDevices()
+        .collect(toCollection(LinkedHashSet::new));
 
-    for (AcquisitionDevice module : available) {
+    for (AcquisitionDevice<?> module : available) {
       MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
       moduleItem.setLabel(module.getName());
       moduleItem.setType(ItemType.CHECK);
@@ -76,9 +77,10 @@ public class AcquisitionDevicesMenu {
           } else {
             selectedDevices.remove(module);
           }
-          context.modify(
-              AcquisitionDeviceSelection.class,
-              new AcquisitionDeviceSelection(selectedDevices));
+          context
+              .modify(
+                  AcquisitionDeviceSelection.class,
+                  new AcquisitionDeviceSelection(selectedDevices));
         }
       });
 

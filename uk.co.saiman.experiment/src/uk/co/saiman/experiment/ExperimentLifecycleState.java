@@ -34,11 +34,6 @@ public enum ExperimentLifecycleState {
   PREPARATION,
 
   /**
-   * Experiment step is gathering the resources necessary to begin
-   */
-  // PRE_PROCESSING,
-
-  /**
    * Experiment step is waiting for resources to become available for processing
    */
   WAITING,
@@ -46,22 +41,17 @@ public enum ExperimentLifecycleState {
   /**
    * Optimize laser, acquire from TDC, etc.
    */
-  PROCESSING,
-
-  /**
-   * Experiment step is cleaning up the resources used
-   */
-  // POST_PROCESSING,
+  PROCEEDING,
 
   /**
    * Once transitioned to this state, data is acquired
    */
-  COMPLETION,
+  COMPLETE,
 
   /**
    * Something went wrong...
    */
-  FAILURE,
+  FAILED,
 
   /**
    * The experiment node is not attached to a root experiment

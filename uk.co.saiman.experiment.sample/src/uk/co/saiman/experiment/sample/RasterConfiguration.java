@@ -38,29 +38,29 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @author Elias N Vasylenko
  */
 public interface RasterConfiguration {
-	Quantity<Length> getMaximumWidth();
+  Quantity<Length> getMaximumWidth();
 
-	Quantity<Length> getMaximumHeight();
+  Quantity<Length> getMaximumHeight();
 
-	Quantity<Length> getWidth();
+  Quantity<Length> getWidth();
 
-	void setWidth(Quantity<Length> distance);
+  void setWidth(Quantity<Length> distance);
 
-	Quantity<Length> getHeight();
+  Quantity<Length> getHeight();
 
-	void setHeight(Quantity<Length> distance);
+  void setHeight(Quantity<Length> distance);
 
-	int getXSteps();
+  int getXSteps();
 
-	void setXSteps(int steps);
+  void setXSteps(int steps);
 
-	int getYSteps();
+  int getYSteps();
 
-	void setYSteps(int steps);
+  void setYSteps(int steps);
 
-	Quantity<Length> getXResolution();
+  Quantity<Length> getXResolution();
 
-	Quantity<Length> getYResolution();
+  Quantity<Length> getYResolution();
 
-	RasterDevice rasterDevice();
+  RasterDevice<?> rasterDevice();
 }

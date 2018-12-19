@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.event;
 
-import static uk.co.saiman.experiment.event.ExperimentEventKind.STATE;
+import static uk.co.saiman.experiment.event.ExperimentEventKind.VARIABLES;
 
 import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.state.StateMap;
@@ -52,6 +52,6 @@ public class ExperimentVariablesEvent extends ExperimentEvent {
 
   @Override
   public ExperimentEventKind kind() {
-    return STATE;
+    return VARIABLES;
   }
 }

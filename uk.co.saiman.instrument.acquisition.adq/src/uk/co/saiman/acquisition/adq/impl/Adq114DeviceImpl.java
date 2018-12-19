@@ -27,12 +27,15 @@
  */
 package uk.co.saiman.acquisition.adq.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
+import uk.co.saiman.acquisition.adq.Adq114Control;
 import uk.co.saiman.acquisition.adq.Adq114Device;
 import uk.co.saiman.acquisition.adq.AdqHardwareInterface;
 import uk.co.saiman.data.function.SampledContinuousFunction;
@@ -41,7 +44,7 @@ import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
 
-public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
+public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Adq114Device {
   public Adq114DeviceImpl(AdqDeviceManager manager) {
     super(manager);
   }
@@ -50,12 +53,6 @@ public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
   public AdqHardwareInterface getHardwareInterface() {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  @Override
-  public void startAcquisition() {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -95,12 +92,6 @@ public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
   }
 
   @Override
-  public void setAcquisitionCount(int count) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public int getAcquisitionCount() {
     // TODO Auto-generated method stub
     return 0;
@@ -119,21 +110,9 @@ public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
   }
 
   @Override
-  public void setAcquisitionTime(Quantity<Time> time) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public Quantity<Time> getAcquisitionTime() {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  @Override
-  public void setSampleDepth(int depth) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -156,6 +135,12 @@ public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
 
   @Override
   public ObservableValue<ConnectionState> connectionState() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Adq114Control acquireControl(long timeout, TimeUnit unit) {
     // TODO Auto-generated method stub
     return null;
   }

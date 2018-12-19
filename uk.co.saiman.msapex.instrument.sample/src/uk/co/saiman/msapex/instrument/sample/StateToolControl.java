@@ -38,7 +38,7 @@ import uk.co.saiman.observable.Disposable;
 
 public class StateToolControl {
   private final Label label;
-  private SampleDevice<?> device;
+  private SampleDevice<?, ?> device;
   private Disposable requestedLocation;
   private Disposable actualLocation;
   private Disposable sampleState;
@@ -50,7 +50,7 @@ public class StateToolControl {
   }
 
   @Inject
-  public void setDevice(@Optional SampleDevice<?> device) {
+  public void setDevice(@Optional SampleDevice<?, ?> device) {
     if (this.device != null) {
       requestedLocation.cancel();
       actualLocation.cancel();

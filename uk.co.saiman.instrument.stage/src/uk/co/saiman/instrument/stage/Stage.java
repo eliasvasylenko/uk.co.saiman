@@ -34,9 +34,8 @@ import uk.co.saiman.instrument.sample.SampleDevice;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          The type of a coordinate.
+ * @param <T> The type of a coordinate.
  */
-public interface Stage<T> extends SampleDevice<T> {
+public interface Stage<T, U extends StageControl<T>> extends SampleDevice<T, U> {
   void abortRequest();
 }

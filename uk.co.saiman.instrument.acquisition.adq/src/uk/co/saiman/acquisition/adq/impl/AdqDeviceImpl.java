@@ -27,9 +27,10 @@
  */
 package uk.co.saiman.acquisition.adq.impl;
 
+import uk.co.saiman.acquisition.adq.AdqControl;
 import uk.co.saiman.acquisition.adq.AdqDevice;
 
-public abstract class AdqDeviceImpl implements AdqDevice {
+public abstract class AdqDeviceImpl<T extends AdqControl> implements AdqDevice<T> {
   private final AdqDeviceManager manager;
 
   public AdqDeviceImpl(AdqDeviceManager manager) {

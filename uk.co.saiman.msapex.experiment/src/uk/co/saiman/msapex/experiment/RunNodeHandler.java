@@ -27,9 +27,14 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import javax.inject.Inject;
+
 import org.eclipse.e4.core.di.annotations.Execute;
 
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
 /**
  * Add an experiment to the workspace.
@@ -37,8 +42,14 @@ import uk.co.saiman.experiment.ExperimentStep;
  * @author Elias N Vasylenko
  */
 public class RunNodeHandler {
+  @Inject
+  Log log;
+  @Inject
+  @Localize
+  ExperimentProperties text;
+
   @Execute
-  void execute(ExperimentStep<?> experimentNode) {
-    new Thread(experimentNode::process).start();
+  void execute(ExperimentStep<?> step) {
+    step.schedule();
   }
 }

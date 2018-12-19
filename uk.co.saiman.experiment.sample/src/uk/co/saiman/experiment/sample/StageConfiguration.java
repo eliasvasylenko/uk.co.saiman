@@ -35,7 +35,7 @@ import uk.co.saiman.instrument.stage.Stage;
  * @author Elias N Vasylenko
  */
 public interface StageConfiguration<T> extends SampleConfiguration {
-  Stage<T> stageDevice();
+  Stage<T, ?> stageDevice();
 
   T location();
 

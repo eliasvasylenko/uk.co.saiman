@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.filesystem;
+package uk.co.saiman.experiment.storage.filesystem;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.experiment.state.Accessor.stringAccessor;
@@ -45,10 +45,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.Storage;
-import uk.co.saiman.experiment.Store;
-import uk.co.saiman.experiment.filesystem.FileSystemStore.FileSystemStoreConfiguration;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.storage.Storage;
+import uk.co.saiman.experiment.storage.Store;
+import uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FileSystemStoreConfiguration;
 import uk.co.saiman.experiment.state.StateMap;
 
 @Designate(ocd = FileSystemStoreConfiguration.class, factory = true)
@@ -73,7 +73,7 @@ public class FileSystemStore implements Store<Path> {
     }
 
     @Override
-    public void dispose() throws IOException {
+    public void deallocate() throws IOException {
       Files.deleteIfExists(location.getPath());
     }
 
@@ -112,7 +112,7 @@ public class FileSystemStore implements Store<Path> {
   }
 
   @Override
-  public Storage locateStorage(Path configuration, ExperimentStep<?> node) {
+  public Storage allocateStorage(Path configuration, ExperimentStep<?> node) {
     return new PathStorage(getPath(node, configuration));
   }
 
@@ -120,10 +120,10 @@ public class FileSystemStore implements Store<Path> {
   public Storage relocateStorage(
       Path configuration,
       ExperimentStep<?> node,
-      Storage previousLocation)
+      Storage previousStorage)
       throws IOException {
-    if (previousLocation.location() instanceof PathLocation) {
-      Path previousPath = ((PathLocation) previousLocation.location()).getPath();
+    if (previousStorage.location() instanceof PathLocation) {
+      Path previousPath = ((PathLocation) previousStorage.location()).getPath();
       Path newPath = getPath(node, configuration);
 
       if (Files.exists(previousPath)) {
@@ -132,7 +132,7 @@ public class FileSystemStore implements Store<Path> {
 
       return new PathStorage(newPath);
     }
-    return Store.super.relocateStorage(configuration, node, previousLocation);
+    return Store.super.relocateStorage(configuration, node, previousStorage);
   }
 
   private Path getPath(ExperimentStep<?> node, Path path) {

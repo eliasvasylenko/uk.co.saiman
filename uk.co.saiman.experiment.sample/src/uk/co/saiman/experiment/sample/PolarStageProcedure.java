@@ -43,5 +43,5 @@ import uk.co.saiman.measurement.coordinate.PolarCoordinate;
 public interface PolarStageProcedure<T extends PolarStageConfiguration>
     extends StageProcedure<PolarCoordinate<Length>, T> {
   @Override
-  PolarStage sampleDevice();
+  PolarStage<?> sampleDevice();
 }

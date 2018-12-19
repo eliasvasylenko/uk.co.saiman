@@ -62,7 +62,7 @@ public class SaintXYStageProcedure
   }
 
   @Reference(cardinality = OPTIONAL)
-  private XYStage stageDevice;
+  private XYStage<?> stageDevice;
 
   private Condition sampleHolding = new Condition(SAMPLE_HOLDING_CONDITION);
 
@@ -86,7 +86,7 @@ public class SaintXYStageProcedure
       }
 
       @Override
-      public XYStage stageDevice() {
+      public XYStage<?> stageDevice() {
         return stageDevice;
       }
 
@@ -112,7 +112,7 @@ public class SaintXYStageProcedure
   }
 
   @Override
-  public XYStage sampleDevice() {
+  public XYStage<?> sampleDevice() {
     return stageDevice;
   }
 

@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.filesystem;
+package uk.co.saiman.experiment.storage.filesystem;
 
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
 import static uk.co.saiman.data.format.RegistrationTree.VENDOR;
@@ -41,7 +41,7 @@ import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Procedure;
-import uk.co.saiman.experiment.StorageConfiguration;
+import uk.co.saiman.experiment.scheduling.SchedulingStrategy;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.service.StorageService;
 import uk.co.saiman.experiment.state.Accessor.MapAccessor;
@@ -49,6 +49,7 @@ import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
 import uk.co.saiman.experiment.state.State;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.experiment.state.json.JsonStateMapFormat;
+import uk.co.saiman.experiment.storage.StorageConfiguration;
 
 public class JsonExperimentFormat implements TextFormat<Experiment> {
   public static final int VERSION = 1;
@@ -67,16 +68,21 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
   private final PropertyAccessor<Procedure<?>> procedure;
   private final MapAccessor<StorageConfiguration<?>> storage;
+  private final SchedulingStrategy schedulingStrategy;
 
   private final JsonStateMapFormat stateMapFormat = new JsonStateMapFormat();
 
-  public JsonExperimentFormat(ProcedureService procedureService, StorageService storageService) {
+  public JsonExperimentFormat(
+      ProcedureService procedureService,
+      StorageService storageService,
+      SchedulingStrategy schedulingStrategy) {
     this.procedure = stringAccessor(PROCEDURE)
         .map(procedureService::getProcedure, procedureService::getId);
     this.storage = mapAccessor(
         STORAGE,
         s -> storageService.configureStorage(s),
         r -> storageService.deconfigureStorage(r));
+    this.schedulingStrategy = schedulingStrategy;
   }
 
   @Override
@@ -95,7 +101,9 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
-    return loadExperimentNode(new Experiment(data.get(ID), data.get(storage)), data);
+    return loadExperimentNode(
+        new Experiment(data.get(ID), data.get(storage), schedulingStrategy),
+        data);
   }
 
   protected <T extends ExperimentStep<?>> T loadExperimentNode(T experimentNode, StateMap data) {

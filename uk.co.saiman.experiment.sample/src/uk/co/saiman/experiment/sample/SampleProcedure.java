@@ -47,15 +47,15 @@ import uk.co.saiman.instrument.sample.SampleDevice;
 public interface SampleProcedure<T extends SampleConfiguration> extends Procedure<T> {
   Condition getSampleReadyCondition();
 
-  SampleDevice<?> sampleDevice();
+  SampleDevice<?, ?> sampleDevice();
 
   @Override
-  default Stream<Condition> requiredConditions() {
+  default Stream<Condition> expectations() {
     return Stream.empty();
   }
 
   @Override
-  default Stream<Condition> preparedConditions() {
+  default Stream<Condition> conditions() {
     return Stream.of(getSampleReadyCondition());
   }
 

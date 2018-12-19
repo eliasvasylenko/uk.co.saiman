@@ -28,20 +28,21 @@
 package uk.co.saiman.experiment;
 
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.DETACHED;
-import static uk.co.saiman.experiment.ExperimentLifecycleState.PROCESSING;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.PROCEEDING;
 import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CancellationException;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -50,16 +51,16 @@ import uk.co.saiman.data.Data;
 import uk.co.saiman.data.DataException;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.event.AttachNodeEvent;
-import uk.co.saiman.experiment.event.DetachNodeEvent;
+import uk.co.saiman.experiment.event.AttachStepEvent;
+import uk.co.saiman.experiment.event.DetachStepEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
 import uk.co.saiman.experiment.event.ExperimentVariablesEvent;
-import uk.co.saiman.experiment.event.RenameNodeEvent;
-import uk.co.saiman.experiment.event.ReorderExperimentEvent;
+import uk.co.saiman.experiment.event.RenameStepEvent;
+import uk.co.saiman.experiment.event.ReorderStepsEvent;
+import uk.co.saiman.experiment.scheduling.Schedule;
 import uk.co.saiman.experiment.state.StateMap;
-import uk.co.saiman.observable.HotObservable;
-import uk.co.saiman.observable.Observable;
+import uk.co.saiman.experiment.storage.Storage;
 import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeToken;
 import uk.co.saiman.reflection.token.TypedReference;
@@ -82,11 +83,10 @@ public class ExperimentStep<S> {
   private final List<ExperimentStep<?>> children;
 
   private final S variables;
+  private final Map<Condition, State> states;
   private final Map<Dependency<?>, Input<?>> inputs;
   private final Map<Observation<?>, Result<?>> results;
-  private Storage resultStorage;
-
-  private final HotObservable<ExperimentEvent> events = new HotObservable<>();
+  private Storage resultStore;
 
   public ExperimentStep(Procedure<S> procedure) {
     this(procedure, null, StateMap.empty());
@@ -109,9 +109,14 @@ public class ExperimentStep<S> {
     this.parent = null;
     this.children = new ArrayList<>();
 
+    this.states = procedure
+        .conditions()
+        .map(condition -> new State(this, condition))
+        .collect(toMap(State::getCondition, identity()));
+
     this.inputs = procedure
         .dependencies()
-        .map(condition -> new Input<>(this, condition))
+        .map(dependency -> new Input<>(this, dependency))
         .collect(toMap(Input::getDependency, identity()));
 
     this.results = procedure
@@ -135,31 +140,34 @@ public class ExperimentStep<S> {
       throw new ExperimentException(format("Invalid experiment name %s", id));
     }
 
-    lockExperiment().run(() -> {
-      if (Objects.equals(id, getId())) {
-        return;
-      }
+    lockExperiment().update(lock -> {
+      if (!Objects.equals(id, getId())) {
+        String previousId;
 
-      if (getParent().map(p -> p.getChildren().anyMatch(s -> id.equals(s.getId()))).orElse(false)) {
-        throw new ExperimentException(
-            format("Experiment node with id %s already attached at node %s", id, parent));
+        if (getParent()
+            .map(p -> p.getChildren().anyMatch(s -> id.equals(s.getId())))
+            .orElse(false)) {
+          throw new ExperimentException(
+              format("Experiment node with id %s already attached at node %s", id, parent));
 
-      } else {
-        try {
-          if (resultStorage != null) {
-            resultStorage = getExperiment()
-                .get()
-                .getStorageConfiguration()
-                .relocateStorage(this, resultStorage);
+        } else {
+          try {
+            if (resultStore != null) {
+              resultStore = getExperiment()
+                  .get()
+                  .getStorageConfiguration()
+                  .relocateStorage(this, resultStore);
+            }
+          } catch (IOException e) {
+            throw new ExperimentException(format("Failed to set experiment name %s", id));
           }
-        } catch (IOException e) {
-          throw new ExperimentException(format("Failed to set experiment name %s", id));
+
+          previousId = this.id;
+          this.id = id;
         }
 
-        this.id = id;
+        queueEvents(new RenameStepEvent(this, previousId));
       }
-
-      fireEvent(new RenameNodeEvent(this, id));
     });
   }
 
@@ -239,15 +247,13 @@ public class ExperimentStep<S> {
       return;
     }
 
-    lockExperiment().run(() -> {
-      if (Objects.equals(stateMap, this.stateMap)) {
-        return;
+    lockExperiment().update(lock -> {
+      if (!Objects.equals(stateMap, this.stateMap)) {
+        StateMap previous = this.stateMap;
+        this.stateMap = stateMap;
+
+        queueEvents(new ExperimentVariablesEvent(this, previous));
       }
-
-      StateMap previous = this.stateMap;
-      this.stateMap = stateMap;
-
-      fireEvent(new ExperimentVariablesEvent(this, previous));
     });
   }
 
@@ -271,26 +277,31 @@ public class ExperimentStep<S> {
     return lifecycleState;
   }
 
-  public Observable<ExperimentEvent> events() {
-    return events;
-  }
-
-  void fireEventLocal(ExperimentEvent event) {
-    events.next(event);
-  }
-
-  void fireEvent(ExperimentEvent event) {
-    fireEventLocal(event);
-    if (parent != null) {
-      parent.fireEvent(event);
+  void setLifecycleState(ExperimentLifecycleState lifecycleState) {
+    ExperimentLifecycleState previousLifecycleState = getLifecycleState();
+    if (previousLifecycleState != lifecycleState) {
+      this.lifecycleState = lifecycleState;
+      queueEvents(new ExperimentLifecycleEvent(this, previousLifecycleState));
     }
   }
 
-  ExperimentLocker lockExperiment() {
-    return new ExperimentLocker(this);
+  void queueEvents(ExperimentEvent... events) {
+    queueEvents(List.of(events));
   }
 
-  private static ExperimentLocker lockExperiments(ExperimentStep<?>... experimentNodes) {
+  void queueEvents(Collection<? extends ExperimentEvent> events) {
+    getExperiment().ifPresent(e -> e.queueEvents(events));
+  }
+
+  ExperimentLocker lockExperiment() {
+    return new ExperimentLocker(singleton(this));
+  }
+
+  static ExperimentLocker lockExperiments(ExperimentStep<?>... experimentNodes) {
+    return lockExperiments(List.of(experimentNodes));
+  }
+
+  static ExperimentLocker lockExperiments(Collection<? extends ExperimentStep<?>> experimentNodes) {
     return new ExperimentLocker(experimentNodes);
   }
 
@@ -311,7 +322,7 @@ public class ExperimentStep<S> {
    */
   public int getIndex() {
     return lockExperiment()
-        .run(() -> getParent().get().getChildren().collect(toList()).indexOf(this));
+        .get(lock -> getParent().get().getChildren().collect(toList()).indexOf(this));
   }
 
   /**
@@ -321,19 +332,19 @@ public class ExperimentStep<S> {
    * @return An ordered list of all sequential child experiment parts
    */
   public Stream<ExperimentStep<?>> getChildren() {
-    return lockExperiment().run(() -> new ArrayList<>(children)).stream();
+    return lockExperiment().get(lock -> new ArrayList<>(children)).stream();
   }
 
   public Optional<ExperimentStep<?>> getChild(String id) {
-    return lockExperiment().run(() -> getChildren().filter(c -> c.getId().equals(id)).findAny());
+    return lockExperiment().get(lock -> getChildren().filter(c -> c.getId().equals(id)).findAny());
   }
 
   public void attach(ExperimentStep<?> node) {
-    lockExperiments(this, node).run(() -> attachImpl(node, (int) getChildren().count()));
+    lockExperiments(this, node).update(lock -> attachImpl(node, (int) getChildren().count()));
   }
 
   public void attach(ExperimentStep<?> node, int index) {
-    lockExperiments(this, node).run(() -> attachImpl(node, index));
+    lockExperiments(this, node).update(lock -> attachImpl(node, index));
   }
 
   private void attachImpl(ExperimentStep<?> node, int index) {
@@ -348,21 +359,11 @@ public class ExperimentStep<S> {
       children.remove(node);
       children.add(index, node);
 
-      if (previousIndex > index) {
-        fireEvent(new ReorderExperimentEvent(this, previousIndex));
-        for (int i = index; i < previousIndex; i++) {
-          fireEvent(new ReorderExperimentEvent(children.get(i + 1), i));
-        }
-      } else if (previousIndex < index) {
-        for (int i = previousIndex; i < index; i++) {
-          fireEvent(new ReorderExperimentEvent(children.get(i), i + 1));
-        }
-        fireEvent(new ReorderExperimentEvent(this, previousIndex));
-      }
+      queueEvents(new ReorderStepsEvent(this, index, previousIndex));
     } else {
-      if (lifecycleState == PROCESSING) {
+      if (getLifecycleState() == PROCEEDING) {
         throw new ExperimentException(
-            format("Cannot detach experiment %s while in the %s state", getId(), PROCESSING));
+            format("Cannot detach experiment %s while in the %s state", getId(), PROCEEDING));
       }
 
       children.forEach(child -> {
@@ -381,22 +382,20 @@ public class ExperimentStep<S> {
 
         setDetached();
 
-        DetachNodeEvent detachEvent = new DetachNodeEvent(node, previousParent);
-        fireEventLocal(detachEvent);
-        previousParent.fireEvent(detachEvent);
+        previousParent.queueEvents(new DetachStepEvent(node, previousParent));
       }
-      fireEvent(new AttachNodeEvent(node, this));
+      queueEvents(new AttachStepEvent(node, this));
     }
   }
 
   public void detach(ExperimentStep<?> node) {
-    lockExperiment().run(() -> detachImpl(node));
+    lockExperiment().update(lock -> detachImpl(node));
   }
 
   private void detachImpl(ExperimentStep<?> node) {
-    if (lifecycleState == PROCESSING) {
+    if (getLifecycleState() == PROCEEDING) {
       throw new ExperimentException(
-          format("Cannot detach experiment %s while in the %s state", getId(), PROCESSING));
+          format("Cannot detach experiment %s while in the %s state", getId(), PROCEEDING));
     }
 
     if (node.parent == this) {
@@ -404,24 +403,20 @@ public class ExperimentStep<S> {
       node.parent = null;
       node.setDetached();
 
-      fireEvent(new DetachNodeEvent(node, this));
+      queueEvents(new DetachStepEvent(node, this));
     }
   }
 
   void setDetached() {
     clearResults();
-    ExperimentLifecycleState previousLifecycleState = lifecycleState;
-    if (previousLifecycleState != DETACHED) {
-      lifecycleState = DETACHED;
-      fireEvent(new ExperimentLifecycleEvent(this, lifecycleState, previousLifecycleState));
-    }
+    setLifecycleState(DETACHED);
   }
 
   /**
    * @return the root part of the experiment tree this part occurs in
    */
   public Optional<Experiment> getExperiment() {
-    return lockExperiment().run(() -> getExperimentImpl());
+    return lockExperiment().get(lock -> getExperimentImpl());
   }
 
   public Optional<Experiment> getExperimentImpl() {
@@ -438,7 +433,7 @@ public class ExperimentStep<S> {
    * @return a list of all ancestors, nearest first, inclusive of the node itself
    */
   public Stream<ExperimentStep<?>> getAncestors() {
-    return lockExperiment().run(() -> getAncestorsImpl()).stream();
+    return lockExperiment().get(lock -> getAncestorsImpl()).stream();
   }
 
   private List<ExperimentStep<?>> getAncestorsImpl() {
@@ -483,37 +478,36 @@ public class ExperimentStep<S> {
    * Experiment Processing
    */
 
-  /**
-   * Process this experiment node. The request will be passed down to the root
-   * experiment node and processing will proceed back down the ancestor hierarchy
-   * to this node. If the experiment is already in progress then invocation of
-   * this method should fail.
-   */
-  public void process() {
-    /*-
-       lock {
-         Set root experiment to processing state, and all other ancestors
-         and all descendents to waiting state. If the root or any ancestors
-         are already processing or waiting then leave them alone.
-         
-         TODO consider procedure types which don't need ancestors to be re-run...
-         
-         TODO pass in Executor to manage parallelism
-       }
-     */
-    try {
-      processAncestors(getAncestors().collect(toList()));
-    } catch (Exception e) {
-      e.printStackTrace();
-      // TODO setLifecycleState(ExperimentLifecycleState.FAILURE, true);
-      throw new ExperimentException(format("Failed to process experiment %s", getId()), e);
-    }
+  public void schedule() {
+    lockExperiments().update(lock -> {
+      // TODO
+    });
+  }
+
+  public static void schedule(ExperimentStep<?>... steps) {
+    schedule(List.of(steps));
+  }
+
+  public static void schedule(Collection<? extends ExperimentStep<?>> steps) {
+    lockExperiments(steps).update(lock -> {
+      if (lock.getExperiments().count() != 1) {
+        // TODO
+        throw new UnsupportedOperationException("Not yet implemented");
+      } else {
+        throw new ExperimentException(
+            "Schedule must contain steps belonging to a single root experiment");
+      }
+    });
+  }
+
+  public void takeStep(Schedule schedule) {
+    procedure.proceed(createProcedureContext(schedule));
   }
 
   /**
    * Get the result produced by an {@link Observation} which is made by this node.
    * 
-   * @return the result produced by the given condition
+   * @return the result produced by the given observation
    */
   @SuppressWarnings("unchecked")
   public <R> Result<R> getResult(Observation<R> observation) {
@@ -550,6 +544,25 @@ public class ExperimentStep<S> {
   }
 
   /**
+   * Get the input which satisfies a {@link Dependency} which is required by this
+   * node.
+   * 
+   * @return the input which satisfies the given dependency
+   */
+  public State getState(Condition condition) {
+    State state = this.states.get(condition);
+    if (state == null) {
+      throw new ExperimentException(
+          format("Experiment step %s does not provide condition %s", this, condition));
+    }
+    return state;
+  }
+
+  public Stream<State> getStates() {
+    return states.values().stream();
+  }
+
+  /**
    * Clear all the results associated with this node. Take care, as this will also
    * delete any result data from disk.
    */
@@ -557,49 +570,8 @@ public class ExperimentStep<S> {
     results.values().forEach(Result::unsetValue);
   }
 
-  private void processAncestors(List<ExperimentStep<?>> ancestors) {
-    ExperimentStep<?> node = ancestors.remove(ancestors.size() - 1);
+  private ProcedureContext<S> createProcedureContext(Schedule schedule) {
 
-    if (!ancestors.isEmpty()) {
-      node.processImpl(() -> node.processAncestors(ancestors));
-    } else {
-      node.processImpl(node::processChildren);
-    }
-  }
-
-  private void processChildren() {
-    getChildren().forEach(n -> n.processImpl(n::processChildren));
-  }
-
-  private void processImpl(Runnable processChildren) {
-    // TODO setLifecycleState(ExperimentLifecycleState.PROCESSING, false);
-
-    if (parent != null) {
-      if (!parent.procedure.satisfiesRequirementsOf(procedure)) {
-        throw new ExperimentException(
-            format(
-                "Experiment procedure %s does not satisfy requirements of containing procedure %s",
-                procedure,
-                parent));
-      }
-    }
-
-    clearResults();
-
-    procedure.proceed(createProcessingContext(processChildren));
-
-    try {
-      synchronized (this) {
-        // TODO setLifecycleState(ExperimentLifecycleState.COMPLETION, false);
-      }
-    } catch (CancellationException e) {
-      // TODO setLifecycleState(ExperimentLifecycleState.FAILURE, true);
-      clearResults();
-      throw e;
-    }
-  }
-
-  private ProcedureContext<S> createProcessingContext(Runnable processChildren) {
     /*
      * TODO once processed this must become inoperable, including the proxied Data
      * from setResult. Make sure this is synchronized!
@@ -612,7 +584,7 @@ public class ExperimentStep<S> {
 
       @Override
       public Location getLocation() {
-        return resultStorage.location();
+        return resultStore.location();
       }
 
       @Override
@@ -643,50 +615,40 @@ public class ExperimentStep<S> {
       }
 
       @Override
-      public <T> void setResultFormat(Observation<T> observation, String name, String extension) {
-        DataFormat<T> format = null; // TODO find based on extension (& type)
-        setResultFormat(observation, name, format);
-      }
-
-      @Override
       public void completeObservation(Observation<?> observation) {
         getResult(observation).complete();
       }
 
       @Override
       public void enterCondition(Condition condition) {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public void awaitCondition(Condition condition) {
-        // TODO Auto-generated method stub
-
+        getState(condition).enter();
       }
 
       @Override
       public void exitCondition(Condition condition) {
-        // TODO Auto-generated method stub
-
+        schedule.awaitConditionDependents(ExperimentStep.this, condition);
+        getState(condition).exit();
       }
 
       @Override
-      public void holdCondition(Condition condition) {
-        // TODO Auto-generated method stub
-
+      public <U> Result<? extends U> acquireResult(Dependency<U> requirement) {
+        var result = getInput(requirement)
+            .getResult()
+            .orElseThrow(
+                () -> new ExperimentException(format("Dependency %s is unfulfilled", requirement)));
+        schedule.awaitResult(ExperimentStep.this, result);
+        return result;
       }
 
       @Override
-      public <U> Result<U> resolveInput(Dependency<U> requirement) {
-        // TODO Auto-generated method stub
-        return null;
+      public <U extends AutoCloseable> U acquireResource(Resource<U> resource) {
+        return schedule.awaitResource(ExperimentStep.this, resource);
       }
 
       @Override
-      public void releaseCondition(Condition condition) {
-        // TODO Auto-generated method stub
-
+      public Hold acquireHold(Condition condition) {
+        schedule.awaitConditionDependency(ExperimentStep.this, condition);
+        return getParent().get().getState(condition).takeHold();
       }
     };
   }

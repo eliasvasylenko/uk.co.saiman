@@ -29,6 +29,8 @@ package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Activate;
@@ -42,6 +44,7 @@ import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.instrument.stage.Stage;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.instrument.stage.composed.ComposedXYStage;
+import uk.co.saiman.instrument.stage.composed.ComposedXYStageControl;
 import uk.co.saiman.instrument.stage.composed.StageAxis;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
@@ -49,19 +52,15 @@ import uk.co.saiman.measurement.coordinate.XYCoordinate;
  * @author Elias N Vasylenko
  */
 @Designate(ocd = SaintStage.SaintStageConfiguration.class, factory = true)
-@Component(
-    name = SaintStage.CONFIGURATION_PID,
-    configurationPid = SaintStage.CONFIGURATION_PID,
-    configurationPolicy = REQUIRE)
-public class SaintStage extends ComposedXYStage
-    implements SampleDevice<XYCoordinate<Length>>, Stage<XYCoordinate<Length>>, XYStage {
+@Component(name = SaintStage.CONFIGURATION_PID, configurationPid = SaintStage.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+    SampleDevice.class,
+    Stage.class,
+    XYStage.class })
+public class SaintStage extends ComposedXYStage<ComposedXYStageControl> {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.saint";
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      id = CONFIGURATION_PID,
-      name = "SAINT Stage Configuration",
-      description = "The configuration for a modular stage composed of an x axis and a y axis")
+  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "SAINT Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
   public @interface SaintStageConfiguration {
     String name();
 
@@ -89,5 +88,10 @@ public class SaintStage extends ComposedXYStage
         XYCoordinate.fromString(configuration.upperBound()).asType(Length.class),
         XYCoordinate.fromString(configuration.analysisLocation()).asType(Length.class),
         XYCoordinate.fromString(configuration.exchangeLocation()).asType(Length.class));
+  }
+
+  @Override
+  public ComposedXYStageControl acquireControl(long timeout, TimeUnit unit) {
+    return new ComposedXYStageControl(this, timeout, unit);
   }
 }

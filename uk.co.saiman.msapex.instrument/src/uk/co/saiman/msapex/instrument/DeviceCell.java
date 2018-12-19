@@ -39,7 +39,7 @@ public class DeviceCell {
   public static final String ID = "uk.co.saiman.msapex.instrument.cell.device";
 
   @Inject
-  public void prepare(HBox node, Cell cell, Device item) {
+  public void prepare(HBox node, Cell cell, Device<?> item) {
     cell.setLabel(item.getName());
 
     item.connectionState().observe(state -> {

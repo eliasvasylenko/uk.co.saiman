@@ -52,12 +52,12 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 public class SelectNextAcquisitionDeviceHandler {
   @Inject
   @Service
-  List<AcquisitionDevice> availableDevices;
+  List<AcquisitionDevice<?>> availableDevices;
 
   @Execute
   void execute(IEclipseContext context, @Optional AcquisitionDeviceSelection selectedDevices) {
-    List<AcquisitionDevice> availableDevices = new ArrayList<>(this.availableDevices);
-    List<AcquisitionDevice> selection = selectedDevices != null
+    List<AcquisitionDevice<?>> availableDevices = new ArrayList<>(this.availableDevices);
+    List<AcquisitionDevice<?>> selection = selectedDevices != null
         ? selectedDevices.getSelectedDevices().collect(toList())
         : emptyList();
 

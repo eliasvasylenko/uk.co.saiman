@@ -28,7 +28,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.experiment.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
+import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 
 import java.nio.file.Path;
 
@@ -41,8 +41,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.StorageConfiguration;
-import uk.co.saiman.experiment.Store;
+import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;

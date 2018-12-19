@@ -29,9 +29,9 @@ package uk.co.saiman.experiment.service;
 
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.StorageConfiguration;
-import uk.co.saiman.experiment.Store;
 import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.experiment.storage.Store;
 
 public interface StorageService {
   Stream<Store<?>> stores();

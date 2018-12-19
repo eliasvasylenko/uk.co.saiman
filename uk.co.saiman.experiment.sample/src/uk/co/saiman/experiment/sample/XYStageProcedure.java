@@ -43,5 +43,5 @@ import uk.co.saiman.measurement.coordinate.XYCoordinate;
 public interface XYStageProcedure<T extends XYStageConfiguration>
     extends StageProcedure<XYCoordinate<Length>, T> {
   @Override
-  XYStage sampleDevice();
+  XYStage<?> sampleDevice();
 }

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.path;
 
+import java.util.Optional;
+
 import uk.co.saiman.experiment.Observation;
 import uk.co.saiman.experiment.Result;
 
@@ -48,6 +50,11 @@ public class ResultMatcher<T> {
 
   public boolean match(Result<?> result) {
     return id.equals(result.getObservation().id());
+  }
+
+  @SuppressWarnings("unchecked")
+  public Optional<Result<? extends T>> asMatch(Result<?> node) {
+    return match(node) ? Optional.of((Result<? extends T>) node) : Optional.empty();
   }
 
   @Override

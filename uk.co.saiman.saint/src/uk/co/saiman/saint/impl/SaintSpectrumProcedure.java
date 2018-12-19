@@ -62,7 +62,7 @@ public class SaintSpectrumProcedure implements SpectrumProcedure<SaintSpectrumCo
   private XYStageProcedure<SaintXYStageConfiguration> stageExperiment;
 
   @Reference(cardinality = OPTIONAL)
-  private AcquisitionDevice acquisitionDevice;
+  private AcquisitionDevice<?> acquisitionDevice;
 
   @Reference
   private ProcessingService processors;
@@ -103,7 +103,7 @@ public class SaintSpectrumProcedure implements SpectrumProcedure<SaintSpectrumCo
       }
 
       @Override
-      public AcquisitionDevice getAcquisitionDevice() {
+      public AcquisitionDevice<?> getAcquisitionDevice() {
         return acquisitionDevice;
       }
 
@@ -120,7 +120,7 @@ public class SaintSpectrumProcedure implements SpectrumProcedure<SaintSpectrumCo
   }
 
   @Override
-  public AcquisitionDevice getAcquisitionDevice() {
+  public AcquisitionDevice<?> getAcquisitionDevice() {
     return acquisitionDevice;
   }
 

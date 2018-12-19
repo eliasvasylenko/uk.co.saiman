@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.saiman.experiment.ExperimentLifecycleState.COMPLETION;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.COMPLETE;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -51,7 +51,7 @@ public class ExperimentResultCell {
     /*
      * configure label
      */
-    if (experiment.getLifecycleState() == COMPLETION) {
+    if (experiment.getLifecycleState() == COMPLETE) {
       cell
           .setIconURI(
               "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document-binary.png");

@@ -25,32 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.event;
-
-import static uk.co.saiman.experiment.event.ExperimentEventKind.REORDER;
-
-import uk.co.saiman.experiment.ExperimentStep;
-
-public class ReorderExperimentEvent extends ExperimentEvent {
-  private final int index;
-  private final int previousIndex;
-
-  public ReorderExperimentEvent(ExperimentStep<?> experiment, int previousIndex) {
-    super(experiment);
-    this.index = experiment.getIndex();
-    this.previousIndex = previousIndex;
-  }
-
-  public int index() {
-    return index;
-  }
-
-  public int previousIndex() {
-    return previousIndex;
-  }
-
-  @Override
-  public ExperimentEventKind kind() {
-    return REORDER;
-  }
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.experiment.scheduling;

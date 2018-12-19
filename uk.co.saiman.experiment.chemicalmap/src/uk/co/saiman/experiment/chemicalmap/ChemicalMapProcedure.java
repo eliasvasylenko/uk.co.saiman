@@ -45,14 +45,14 @@ public abstract class ChemicalMapProcedure<T extends ChemicalMapConfiguration>
     implements Procedure<T> {
   private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
 
-  protected abstract RasterDevice getRasterDevice();
+  protected abstract RasterDevice<?> getRasterDevice();
 
-  protected abstract AcquisitionDevice getAcquisitionDevice();
+  protected abstract AcquisitionDevice<?> getAcquisitionDevice();
 
   @Override
   public void proceed(ProcedureContext<T> context) {
-    AcquisitionDevice acquisitionDevice = getAcquisitionDevice();
-    RasterDevice rasterDevice = getRasterDevice();
+    AcquisitionDevice<?> acquisitionDevice = getAcquisitionDevice();
+    RasterDevice<?> rasterDevice = getRasterDevice();
 
     /*- TODO
     Consumer<Spectrum> writer = new CumulativeChemicalMapFormat()

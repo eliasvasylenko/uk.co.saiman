@@ -15,9 +15,12 @@ Bundle-Name: SAI :: Experiment
 Export-Package: \
 	uk.co.saiman.experiment,\
 	uk.co.saiman.experiment.event,\
-	uk.co.saiman.experiment.filesystem,\
 	uk.co.saiman.experiment.path,\
+	uk.co.saiman.experiment.scheduling,\
+	uk.co.saiman.experiment.scheduling.concurrent,\
 	uk.co.saiman.experiment.service,\
 	uk.co.saiman.experiment.service.impl,\
 	uk.co.saiman.experiment.state,\
-	uk.co.saiman.experiment.state.json
+	uk.co.saiman.experiment.state.json,\
+	uk.co.saiman.experiment.storage,\
+	uk.co.saiman.experiment.storage.filesystem

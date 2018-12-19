@@ -1,5 +1,7 @@
 package uk.co.saiman.experiment;
 
+import java.util.Optional;
+
 import uk.co.saiman.experiment.path.ResultPath;
 
 /**
@@ -14,7 +16,6 @@ public class Input<T> {
   private final ExperimentStep<?> step;
   private final Dependency<T> dependency;
   private ResultPath<T> resultPath;
-  private Result<? extends T> result;
 
   public Input(ExperimentStep<?> step, Dependency<T> dependency) {
     this.step = step;
@@ -30,7 +31,6 @@ public class Input<T> {
   }
 
   public void setResultPath(ResultPath<T> resultPath) {
-    this.result = resultPath.resolve(step);
     this.resultPath = resultPath;
   }
 
@@ -38,7 +38,7 @@ public class Input<T> {
     return resultPath;
   }
 
-  public Result<? extends T> getResult() {
-    return result;
+  public Optional<Result<? extends T>> getResult() {
+    return resultPath.resolve(step);
   }
 }

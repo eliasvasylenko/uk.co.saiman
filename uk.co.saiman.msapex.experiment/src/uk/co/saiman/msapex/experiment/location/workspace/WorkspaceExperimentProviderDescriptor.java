@@ -1,6 +1,6 @@
 package uk.co.saiman.msapex.experiment.location.workspace;
 
-import static uk.co.saiman.experiment.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
+import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 
 import org.osgi.service.component.annotations.Component;
 

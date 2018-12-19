@@ -42,6 +42,7 @@ import static uk.co.saiman.observable.Observer.forObservation;
 import static uk.co.saiman.observable.Observer.onObservation;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -57,14 +58,16 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.acquisition.AcquisitionControl;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.InstrumentRegistration;
-import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.DeviceRegistration;
+import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.HotObservable;
@@ -83,18 +86,15 @@ import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.Acquis
  * @author Elias N Vasylenko
  */
 @Designate(ocd = AcquisitionSimulationConfiguration.class, factory = true)
-@Component(
-    configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID,
-    configurationPolicy = REQUIRE)
-public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
+@Component(configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+    Device.class,
+    AcquisitionDevice.class })
+public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
+    implements AcquisitionDevice<AcquisitionControl> {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      name = "Simulated Acquisition Device Configuration",
-      description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
+  @ObjectClassDefinition(name = "Simulated Acquisition Device Configuration", description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
   public @interface AcquisitionSimulationConfiguration {
-    @AttributeDefinition(
-        name = "Acquisition Resolution",
-        description = "The minimum resolvable units of time for samples")
+    @AttributeDefinition(name = "Acquisition Resolution", description = "The minimum resolvable units of time for samples")
     String acquisitionResolution() default DEFAULT_ACQUISITION_RESOLUTION_SECONDS + "s";
   }
 
@@ -254,8 +254,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     return detector;
   }
 
-  @Override
-  public void startAcquisition() {
+  void startAcquisition() {
     synchronized (acquiringLock) {
       try {
         synchronized (startingLock) {
@@ -393,8 +392,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     return getSampleResolution().inverse().asType(Frequency.class);
   }
 
-  @Override
-  public void setAcquisitionTime(Quantity<Time> time) {
+  void setAcquisitionTime(Quantity<Time> time) {
     synchronized (startingLock) {
       acquisitionDepth = time.divide(getSampleResolution()).getValue().intValue();
       initializeDetector();
@@ -406,8 +404,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     return getSampleResolution().multiply(getSampleDepth());
   }
 
-  @Override
-  public void setSampleDepth(int depth) {
+  void setSampleDepth(int depth) {
     synchronized (startingLock) {
       acquisitionDepth = depth;
       initializeDetector();
@@ -419,8 +416,7 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
     return acquisitionDepth;
   }
 
-  @Override
-  public void setAcquisitionCount(int count) {
+  void setAcquisitionCount(int count) {
     if (count <= 0) {
       throw new AcquisitionException(simulationProperties.invalidAcquisitionCount(count));
     }
@@ -450,5 +446,10 @@ public class SimulatedAcquisitionDevice implements AcquisitionDevice, Device {
   @Override
   public ObservableValue<ConnectionState> connectionState() {
     return Observable.value(CONNECTED);
+  }
+
+  @Override
+  public AcquisitionControl acquireControl(long timeout, TimeUnit unit) {
+    return new SimulatedAcquisitionControl(this, timeout, unit);
   }
 }

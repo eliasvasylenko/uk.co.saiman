@@ -28,7 +28,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.experiment.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
+import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 
 import java.nio.file.Path;
 
@@ -36,7 +36,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.extensions.Service;
 
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.Store;
+import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
 

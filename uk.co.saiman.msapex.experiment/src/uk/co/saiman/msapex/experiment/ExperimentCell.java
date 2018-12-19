@@ -56,10 +56,10 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.event.AttachNodeEvent;
-import uk.co.saiman.experiment.event.DetachNodeEvent;
+import uk.co.saiman.experiment.event.AttachStepEvent;
+import uk.co.saiman.experiment.event.DetachStepEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
-import uk.co.saiman.experiment.event.RenameNodeEvent;
+import uk.co.saiman.experiment.event.RenameStepEvent;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -179,7 +179,7 @@ public class ExperimentCell {
 
   @Inject
   @Optional
-  public void update(RenameNodeEvent event) {
+  public void update(RenameStepEvent event) {
     if (experiment.status() == Status.OPEN && event.node() == experiment.experiment()) {
       cell.setLabel(event.id());
     }
@@ -195,7 +195,7 @@ public class ExperimentCell {
 
   @Inject
   @Optional
-  public void update(AttachNodeEvent event) {
+  public void update(AttachStepEvent event) {
     if (experiment.status() == Status.OPEN && event.parent() == experiment.experiment()) {
       updateChildren();
     }
@@ -203,7 +203,7 @@ public class ExperimentCell {
 
   @Inject
   @Optional
-  public void update(DetachNodeEvent event) {
+  public void update(DetachStepEvent event) {
     if (experiment.status() == Status.OPEN && event.previousParent() == experiment.experiment()) {
       updateChildren();
     }

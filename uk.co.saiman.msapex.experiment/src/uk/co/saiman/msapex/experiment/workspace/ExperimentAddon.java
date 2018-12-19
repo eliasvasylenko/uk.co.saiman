@@ -32,7 +32,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
 import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.experiment.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
+import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 import static uk.co.saiman.log.Log.Level.INFO;
 
 import java.net.URISyntaxException;
@@ -61,11 +61,12 @@ import org.osgi.framework.ServiceRegistration;
 
 import uk.co.saiman.experiment.ExperimentProcedure;
 import uk.co.saiman.experiment.Procedure;
-import uk.co.saiman.experiment.Store;
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.filesystem.FileSystemStore;
+import uk.co.saiman.experiment.scheduling.SchedulingStrategy;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.service.StorageService;
+import uk.co.saiman.experiment.storage.Store;
+import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.workspace.event.AddExperimentEvent;
@@ -108,6 +109,9 @@ public class ExperimentAddon {
   @Inject
   @Service
   private volatile List<Procedure<?>> experimentTypes;
+  @Inject
+  @Service
+  private SchedulingStrategy schedulingStrategy;
 
   private Workspace workspace;
   private FileSystemStore workspaceStore;
@@ -142,7 +146,7 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspace(Path rootPath) {
-    workspace = new Workspace(rootPath, procedureService, storageService);
+    workspace = new Workspace(rootPath, procedureService, storageService, schedulingStrategy);
     context.set(Workspace.class, workspace);
     loadWorkspace();
   }

@@ -139,7 +139,7 @@ public class XYStageSimulatedSampleSource
     }
   };
 
-  private final XYStage stageDevice;
+  private final XYStage<?> stageDevice;
 
   private final CameraProperties cameraProperties;
 
@@ -157,7 +157,7 @@ public class XYStageSimulatedSampleSource
 
   @Activate
   public XYStageSimulatedSampleSource(
-      @Reference XYStage stageDevice,
+      @Reference XYStage<?> stageDevice,
       XYStageSimulatedSampleSourceConfiguration configuration,
       @Reference PropertyLoader propertyLoader) {
     this.stageDevice = stageDevice;

@@ -29,6 +29,8 @@ package uk.co.saiman.experiment.path;
 
 import static uk.co.saiman.experiment.path.ExperimentPath.SEPARATOR;
 
+import java.util.Optional;
+
 import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Result;
 
@@ -61,23 +63,22 @@ public class ResultPath<T> {
     return experimentPath.toString() + SEPARATOR + matcher.toString();
   }
 
-  @SuppressWarnings("unchecked")
-  private static <T> Result<? extends T> resolve(
+  private <U> Optional<Result<? extends U>> resolve(
       ExperimentStep<?> experimentStep,
-      ResultMatcher<T> matcher) {
-    return (Result<T>) experimentStep.getResults().filter(matcher::match).findFirst().get();
+      ResultMatcher<U> matcher) {
+    return experimentStep.getResults().map(matcher::asMatch).flatMap(Optional::stream).findFirst();
   }
 
-  public Result<? extends T> resolve(ExperimentIndex index, ExperimentStep<?> node) {
-    return resolve(experimentPath.resolve(index, node), matcher);
+  public Optional<Result<? extends T>> resolve(ExperimentIndex index, ExperimentStep<?> node) {
+    return experimentPath.resolve(index, node).flatMap(step -> resolve(step, matcher));
   }
 
-  public Result<? extends T> resolve(ExperimentStep<?> node) {
-    return resolve(experimentPath.resolve(node), matcher);
+  public Optional<Result<? extends T>> resolve(ExperimentStep<?> node) {
+    return experimentPath.resolve(node).flatMap(step -> resolve(step, matcher));
   }
 
-  public Result<? extends T> resolve(ExperimentIndex index) {
-    return resolve(experimentPath.resolve(index), matcher);
+  public Optional<Result<? extends T>> resolve(ExperimentIndex index) {
+    return experimentPath.resolve(index).flatMap(step -> resolve(step, matcher));
   }
 
   public ExperimentPath getExperimentPath() {

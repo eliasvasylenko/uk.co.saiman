@@ -61,12 +61,12 @@ public class UnknownProcedure implements Procedure<StateMap> {
   }
 
   @Override
-  public Stream<Condition> requiredConditions() {
+  public Stream<Condition> expectations() {
     return Stream.empty();
   }
 
   @Override
-  public Stream<Condition> preparedConditions() {
+  public Stream<Condition> conditions() {
     return Stream.empty();
   }
 

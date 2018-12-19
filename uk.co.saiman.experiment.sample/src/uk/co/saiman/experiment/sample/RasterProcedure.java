@@ -39,5 +39,5 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @param <T> the type of sample configuration for the instrument
  */
 public interface RasterProcedure<T extends RasterConfiguration> extends Procedure<T> {
-  RasterDevice device();
+  RasterDevice<?> device();
 }

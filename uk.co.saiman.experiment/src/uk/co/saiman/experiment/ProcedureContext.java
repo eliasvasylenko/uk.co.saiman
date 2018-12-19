@@ -47,6 +47,19 @@ public interface ProcedureContext<T> {
    */
   ExperimentStep<T> node();
 
+  Hold acquireHold(Condition condition);
+
+  <U extends AutoCloseable> U acquireResource(Resource<U> resource);
+
+  /**
+   * Wait for the given requirement to be satisfied.
+   * 
+   * @param requirement
+   * @throws ExperimentException if the requirement can not be fulfilled
+   * @return the item which satisfies the requirement
+   */
+  <U> Result<? extends U> acquireResult(Dependency<U> requirement);
+
   /**
    * Get a location which can be used to persist resource artifacts of this
    * execution. Typically a resource in this location is used to construct one or
@@ -63,20 +76,10 @@ public interface ProcedureContext<T> {
 
   void exitCondition(Condition condition);
 
-  void holdCondition(Condition condition);
-
-  void awaitCondition(Condition condition);
-
-  void releaseCondition(Condition condition);
-
-  /**
-   * Wait for the given requirement to be satisfied.
-   * 
-   * @param requirement
-   * @throws ExperimentException if the requirement can not be fulfilled
-   * @return the item which satisfies the requirement
-   */
-  <U> Result<U> resolveInput(Dependency<U> requirement);
+  default void holdCondition(Condition condition) {
+    enterCondition(condition);
+    exitCondition(condition);
+  }
 
   /**
    * Set a preliminary partial result value for this execution.
@@ -113,8 +116,7 @@ public interface ProcedureContext<T> {
    * <p>
    * This method may be invoked at most once during any given execution, and this
    * precludes invocation of
-   * {@link #setResultFormat(Observation, String, DataFormat)} or
-   * {@link #setResultFormat(Observation, String, String)} during the same
+   * {@link #setResultFormat(Observation, String, DataFormat)} during the same
    * execution.
    */
   <R> void setResultData(Observation<R> observation, Data<R> data);
@@ -125,30 +127,15 @@ public interface ProcedureContext<T> {
    * returned value will be persisted according to the given file name and format.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultData(Observation, Data)} or
-   * {@link #setResultFormat(Observation, String, String)} during the same
-   * execution.
+   * precludes invocation of {@link #setResultData(Observation, Data)} during the
+   * same execution.
    * 
    * @param name   the name of the result data file
    * @param format the format of the result data file
    */
-  <R> void setResultFormat(Observation<R> observation, String name, DataFormat<R> format);
-
-  /**
-   * Set the result format extensions for this execution. If invoked, then once
-   * the {@link Procedure#proceed(ProcedureContext) execution} is complete the
-   * returned value will be persisted according to the given file name and a
-   * format matching the given extension.
-   * <p>
-   * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultData(Observation, Data)} or
-   * {@link #setResultFormat(Observation, String, DataFormat)} during the same
-   * execution.
-   * 
-   * @param name      the name of the result data file
-   * @param extension the extension of the format of the result data file
-   */
-  <R> void setResultFormat(Observation<R> observation, String name, String extension);
+  default <R> void setResultFormat(Observation<R> observation, String name, DataFormat<R> format) {
+    setResultData(observation, Data.locate(getLocation(), name, format));
+  }
 
   default <R> void setResult(Observation<R> observation, R value) {
     setPartialResult(observation, value);

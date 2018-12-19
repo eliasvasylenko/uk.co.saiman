@@ -47,11 +47,11 @@ public interface Instrument {
 
   ObservableValue<InstrumentLifecycleState> lifecycleState();
 
-  default Stream<? extends Device> getDevices() {
+  default Stream<? extends Device<?>> getDevices() {
     return getRegistrations().map(InstrumentRegistration::getDevice);
   }
 
   Stream<? extends InstrumentRegistration> getRegistrations();
 
-  DeviceRegistration registerDevice(Device device);
+  DeviceRegistration registerDevice(Device<?> device);
 }

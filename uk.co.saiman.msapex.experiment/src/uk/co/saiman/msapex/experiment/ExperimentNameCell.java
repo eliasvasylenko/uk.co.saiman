@@ -43,7 +43,7 @@ import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
-import uk.co.saiman.experiment.event.RenameNodeEvent;
+import uk.co.saiman.experiment.event.RenameStepEvent;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -104,7 +104,7 @@ public class ExperimentNameCell {
 
   @Inject
   @Optional
-  public void updateName(RenameNodeEvent event) {
+  public void updateName(RenameStepEvent event) {
     if (experiment.status() == Status.OPEN && event.node() == experiment.experiment()) {
       nameEditor.setText(event.id());
     }

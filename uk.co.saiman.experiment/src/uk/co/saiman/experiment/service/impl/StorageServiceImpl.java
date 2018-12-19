@@ -35,10 +35,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.experiment.StorageConfiguration;
-import uk.co.saiman.experiment.Store;
 import uk.co.saiman.experiment.service.StorageService;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.osgi.ServiceIndex;
 

@@ -40,12 +40,12 @@ public interface AnalysisProcedure<S, T, U> extends Procedure<S> {
   Observation<U> output();
 
   @Override
-  default Stream<Condition> preparedConditions() {
+  default Stream<Condition> conditions() {
     return Stream.empty();
   }
 
   @Override
-  default Stream<Condition> requiredConditions() {
+  default Stream<Condition> expectations() {
     return Stream.empty();
   }
 
@@ -64,13 +64,9 @@ public interface AnalysisProcedure<S, T, U> extends Procedure<S> {
     return true;
   }
 
-  default boolean hasPartialExecution() {
-    return false;
-  }
-
   @Override
   default void proceed(ProcedureContext<S> context) {
-    T input = (T) context.resolveInput(input()).getValue().orElse(null);
+    T input = (T) context.acquireResult(input()).getValue().orElse(null);
     U output = process(context.node().getVariables(), input);
     context.setResult(output(), output);
   }

@@ -25,27 +25,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.event;
+package uk.co.saiman.experiment.storage;
 
-import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.event.ExperimentEventKind.DETACH;
+import java.io.IOException;
 
 import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.experiment.state.StateMap;
 
-public class DetachNodeEvent extends ExperimentEvent {
-  private final ExperimentStep<?> previousParent;
+/**
+ * A store defines a strategy for arranging locations to read, and write
+ * experiment result data, typically for persistent storage.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class StorageConfiguration<T> {
+  private final Store<T> store;
+  private final T configuration;
 
-  public DetachNodeEvent(ExperimentStep<?> node, ExperimentStep<?> previousParent) {
-    super(node);
-    this.previousParent = requireNonNull(previousParent);
+  public Store<T> store() {
+    return store;
   }
 
-  public ExperimentStep<?> previousParent() {
-    return previousParent;
+  public T configuration() {
+    return configuration;
   }
 
-  @Override
-  public ExperimentEventKind kind() {
-    return DETACH;
+  public StorageConfiguration(Store<T> store, StateMap persistedState) {
+    this.store = store;
+    this.configuration = store.configure(persistedState);
+  }
+
+  public StorageConfiguration(Store<T> storage, T configuration) {
+    this.store = storage;
+    this.configuration = configuration;
+  }
+
+  public Storage relocateStorage(ExperimentStep<?> node, Storage previousStore) throws IOException {
+    return store.relocateStorage(configuration, node, previousStore);
+  }
+
+  public Storage locateStorage(ExperimentStep<?> node) throws IOException {
+    return store.allocateStorage(configuration, node);
+  }
+
+  public StateMap deconfigure() {
+    return store.deconfigure(configuration);
   }
 }

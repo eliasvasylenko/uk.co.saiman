@@ -39,5 +39,5 @@ import uk.co.saiman.measurement.coordinate.XYCoordinate;
  */
 public interface XYStageConfiguration extends StageConfiguration<XYCoordinate<Length>> {
   @Override
-  XYStage stageDevice();
+  XYStage<?> stageDevice();
 }

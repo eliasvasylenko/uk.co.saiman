@@ -29,7 +29,7 @@ package uk.co.saiman.acquisition.adq;
 
 import static uk.co.saiman.acquisition.adq.AdqProductId.ADQ114;
 
-public interface Adq114Device extends AdqDevice {
+public interface Adq114Device extends AdqDevice<Adq114Control> {
   @Override
   default AdqProductId getProductId() {
     return ADQ114;

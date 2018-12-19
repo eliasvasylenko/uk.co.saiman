@@ -41,13 +41,15 @@ import uk.co.saiman.instrument.stage.Stage;
  */
 public interface StageProcedure<T, U extends StageConfiguration<T>> extends SampleProcedure<U> {
   @Override
-  Stage<T> sampleDevice();
+  Stage<T, ?> sampleDevice();
 
   @Override
   default void proceed(ProcedureContext<U> context) {
     T location = context.node().getVariables().location();
 
-    sampleDevice().requestAnalysisLocation(location);
-    context.holdCondition(getSampleReadyCondition());
+    try (var control = sampleDevice().acquireControl()) {
+      control.requestAnalysisLocation(location);
+      context.holdCondition(getSampleReadyCondition());
+    }
   }
 }

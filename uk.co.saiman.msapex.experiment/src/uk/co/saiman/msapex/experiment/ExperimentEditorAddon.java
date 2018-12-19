@@ -115,16 +115,10 @@ public class ExperimentEditorAddon implements EditorProvider {
     ExperimentPath path = ExperimentPath
         .fromString(part.getPersistedState().get(EDITOR_EXPERIMENT_PATH));
 
-    ExperimentStep<?> node;
-    try {
-      node = path.resolve(workspace);
-    } catch (Exception e) {
-      log.log(ERROR, format("Cannot load persisted editor at path %s", path), e);
-      return;
-    }
-
-    part.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
-    editors.put(node, Editor.overPart(part));
+    path.resolve(workspace).ifPresentOrElse(node -> {
+      part.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
+      editors.put(node, Editor.overPart(part));
+    }, () -> log.log(ERROR, format("Cannot load persisted editor at path %s", path)));
   }
 
   private boolean isExperimentEditor(MApplicationElement element) {

@@ -39,7 +39,7 @@ import org.eclipse.osgi.service.datalocation.Location;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.Store;
+import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.msapex.experiment.RenameExperimentDialog;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.location.ExperimentProvider;

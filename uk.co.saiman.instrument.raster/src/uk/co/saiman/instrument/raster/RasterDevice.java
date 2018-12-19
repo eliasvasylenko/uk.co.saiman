@@ -30,7 +30,7 @@ package uk.co.saiman.instrument.raster;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.observable.Observable;
 
-public interface RasterDevice extends Device {
+public interface RasterDevice<T extends RasterControl> extends Device<T> {
   int getRasterWidth();
 
   int getRasterHeight();

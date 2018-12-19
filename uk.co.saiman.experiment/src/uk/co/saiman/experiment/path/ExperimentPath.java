@@ -54,9 +54,6 @@ public class ExperimentPath {
   public static final String PARENT = "..";
 
   private static final String PARENT_OF_ROOT = "Cannot resolve parent of root path";
-  private static final String CANNOT_RESOLVE = "Cannot resolve path";
-  private static final String ROOT_NOT_EXPERIMENT = "Root path does not resolve an experiment";
-  private static final String PARENT_OF_EXPERIMENT = "Cannot resolve parent of experiment";
 
   private final int ancestors;
   private final List<ExperimentMatcher> matchers;
@@ -151,7 +148,7 @@ public class ExperimentPath {
     }
   }
 
-  public ExperimentStep<?> resolve(ExperimentIndex index, ExperimentStep<?> node) {
+  public Optional<ExperimentStep<?>> resolve(ExperimentIndex index, ExperimentStep<?> node) {
     if (isAbsolute()) {
       return resolve(index);
     } else {
@@ -159,9 +156,9 @@ public class ExperimentPath {
     }
   }
 
-  public ExperimentStep<?> resolve(ExperimentStep<?> node) {
+  public Optional<ExperimentStep<?>> resolve(ExperimentStep<?> node) {
     if (isAbsolute()) {
-      throw new ExperimentException("Cannot resolve absolute path for detached node");
+      Optional.empty();
     }
 
     Optional<ExperimentStep<?>> result = Optional.of(node);
@@ -170,21 +167,24 @@ public class ExperimentPath {
       result = result.flatMap(ExperimentStep::getParent);
     }
     if (!result.isPresent()) {
-      throw new ExperimentException(PARENT_OF_EXPERIMENT);
+      return Optional.empty();
     }
 
     for (ExperimentMatcher matcher : matchers) {
       result = result.flatMap(r -> r.getChildren().filter(matcher::match).findFirst());
     }
 
-    return result.orElseThrow(() -> new ExperimentException(CANNOT_RESOLVE + " " + this));
+    return result;
   }
 
-  public ExperimentStep<?> resolve(ExperimentIndex index) {
-    if (ancestors > 0)
-      throw new ExperimentException(PARENT_OF_ROOT);
-    if (matchers.isEmpty())
-      throw new ExperimentException(ROOT_NOT_EXPERIMENT);
+  @SuppressWarnings("unchecked")
+  public Optional<ExperimentStep<?>> resolve(ExperimentIndex index) {
+    if (ancestors > 0) {
+      Optional.empty();
+    }
+    if (matchers.isEmpty()) {
+      Optional.empty();
+    }
 
     Optional<? extends ExperimentStep<?>> result = matchers.get(0).findMatch(index);
 
@@ -193,7 +193,7 @@ public class ExperimentPath {
       result = result.flatMap(r -> r.getChildren().filter(matcher::match).findFirst());
     }
 
-    return result.orElseThrow(() -> new ExperimentException(CANNOT_RESOLVE + " " + this));
+    return (Optional<ExperimentStep<?>>) result;
   }
 
   public boolean isAbsolute() {

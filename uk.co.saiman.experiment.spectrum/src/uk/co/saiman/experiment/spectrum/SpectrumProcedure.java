@@ -62,7 +62,7 @@ public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Proc
 
   Unit<Mass> getMassUnit();
 
-  AcquisitionDevice getAcquisitionDevice();
+  AcquisitionDevice<?> getAcquisitionDevice();
 
   SampleProcedure<?> getSampleProcedure();
 
@@ -71,7 +71,7 @@ public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Proc
   @Override
   default void proceed(ProcedureContext<T> context) {
     System.out.println("create accumulator");
-    AcquisitionDevice device = getAcquisitionDevice();
+    AcquisitionDevice<?> device = getAcquisitionDevice();
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
         device.acquisitionDataEvents(),
         device.getSampleDomain(),
@@ -108,44 +108,51 @@ public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Proc
                     o.map(s -> new SampledSpectrum(s, calibration, processing))::revalidate));
 
     System.out.println("start acquisition");
-    context.awaitCondition(getSampleProcedure().getSampleReadyCondition());
-    device.startAcquisition();
 
-    /*
-     * TODO some sort of invalidate/lazy-revalidate message passer
-     * 
-     * ContinuousFunctionAccumulator already has this, it provides an observable
-     * with backpressure which gives the latest spectrum every time it is requested
-     * and otherwise does no work (i.e. no array copying etc.). The limitation is
-     * that it can't notify a listener when a new item is actually available without
-     * actually doing the work and sending an item, the listener has to just request
-     * and see.
-     * 
-     * The problem is how to pass this through the Result API to users without
-     * losing the laziness so we can request at e.g. the monitor refresh rate.
-     * 
-     * Perhaps the observable type should be `Result<T>` rather than `T`?
-     */
+    try (var condition = context.acquireHold(getSampleProcedure().getSampleReadyCondition());
+        var control = device.acquireControl()) {
+      control.startAcquisition();
 
-    System.out.println("get result");
-    context
-        .setResultFormat(
-            spectrumObservation(),
-            SPECTRUM_DATA_NAME,
-            new RegularSampledSpectrumFormat(null));
-    context
-        .setResult(
-            spectrumObservation(),
-            new SampledSpectrum(accumulator.getAccumulation(), calibration, processing));
+      /*
+       * TODO some sort of invalidate/lazy-revalidate message passer
+       * 
+       * ContinuousFunctionAccumulator already has this, it provides an observable
+       * with backpressure which gives the latest spectrum every time it is requested
+       * and otherwise does no work (i.e. no array copying etc.). The limitation is
+       * that it can't notify a listener when a new item is actually available without
+       * actually doing the work and sending an item, the listener has to just request
+       * and see.
+       * 
+       * The problem is how to pass this through the Result API to users without
+       * losing the laziness so we can request at e.g. the monitor refresh rate.
+       * 
+       * Perhaps the observable type should be `Result<T>` rather than `T`?
+       */
+
+      System.out.println("get result");
+      var accumulation = accumulator.getAccumulation();
+
+      condition.close();
+
+      context
+          .setResultFormat(
+              spectrumObservation(),
+              SPECTRUM_DATA_NAME,
+              new RegularSampledSpectrumFormat(null));
+      context
+          .setResult(
+              spectrumObservation(),
+              new SampledSpectrum(accumulation, calibration, processing));
+    }
   }
 
   @Override
-  default Stream<Condition> requiredConditions() {
+  default Stream<Condition> expectations() {
     return Stream.of(getSampleProcedure().getSampleReadyCondition());
   }
 
   @Override
-  default Stream<Condition> preparedConditions() {
+  default Stream<Condition> conditions() {
     return Stream.empty();
   }
 

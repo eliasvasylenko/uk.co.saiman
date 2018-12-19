@@ -51,15 +51,15 @@ public interface ExperimentProperties {
    */
   default Localized<String> lifecycleState(ExperimentLifecycleState state) {
     switch (state) {
-    case COMPLETION:
+    case COMPLETE:
       return lifecycleStateCompletion();
     case PREPARATION:
       return lifecycleStateConfiguration();
     case DETACHED:
       return lifecycleStateDetached();
-    case FAILURE:
+    case FAILED:
       return lifecycleStatefailure();
-    case PROCESSING:
+    case PROCEEDING:
       return lifecycleStateProcessing();
     case WAITING:
       return lifecycleStateWaiting();

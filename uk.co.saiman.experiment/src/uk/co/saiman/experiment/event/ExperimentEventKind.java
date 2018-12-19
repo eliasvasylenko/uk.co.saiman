@@ -33,31 +33,31 @@ public enum ExperimentEventKind {
   /**
    * An experiment node was added to the workspace.
    */
-  ATTACH(AttachNodeEvent.class),
+  ATTACH(AttachStepEvent.class),
 
   /**
    * An experiment node was removed from the workspace.
    */
-  DETACH(DetachNodeEvent.class),
+  DETACH(DetachStepEvent.class),
 
   /**
-   * An experiment node's {@link ExperimentNode#getIndex() index} was updated.
+   * An experiment node's {@link ExperimentStep#getIndex() index} was updated.
    */
-  REORDER(ReorderExperimentEvent.class),
+  REORDER(ReorderStepsEvent.class),
 
   /**
-   * An experiment node's {@link ExperimentNode#getId() id} was updated.
+   * An experiment node's {@link ExperimentStep#getId() id} was updated.
    */
-  RENAME(RenameNodeEvent.class),
+  RENAME(RenameStepEvent.class),
 
   /**
-   * An experiment node's {@link ExperimentNode#getVariables() variables} were
+   * An experiment node's {@link ExperimentStep#getVariables() variables} were
    * updated.
    */
-  STATE(ExperimentVariablesEvent.class),
+  VARIABLES(ExperimentVariablesEvent.class),
 
   /**
-   * An experiment node's {@link ExperimentNode#getLifecycleState() lifecycle
+   * An experiment node's {@link ExperimentStep#getLifecycleState() lifecycle
    * state} was updated.
    */
   LIFECYLE(ExperimentLifecycleEvent.class);

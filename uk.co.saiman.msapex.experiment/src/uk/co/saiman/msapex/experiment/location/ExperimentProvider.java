@@ -30,7 +30,7 @@ package uk.co.saiman.msapex.experiment.location;
 import java.util.function.Function;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.Store;
+import uk.co.saiman.experiment.storage.Store;
 
 public interface ExperimentProvider<T> {
   Store<T> store();

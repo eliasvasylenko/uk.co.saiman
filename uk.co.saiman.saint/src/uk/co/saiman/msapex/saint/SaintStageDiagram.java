@@ -40,7 +40,7 @@ import uk.co.saiman.msapex.instrument.stage.XYStageDiagram;
 @Component
 public class SaintStageDiagram extends XYStageDiagram {
   @Reference
-  private XYStage stageDevice;
+  private XYStage<?> stageDevice;
 
   @Activate
   void activate() {
@@ -48,7 +48,7 @@ public class SaintStageDiagram extends XYStageDiagram {
   }
 
   @Override
-  public XYStage getStageDevice() {
+  public XYStage<?> getStageDevice() {
     return stageDevice;
   }
 

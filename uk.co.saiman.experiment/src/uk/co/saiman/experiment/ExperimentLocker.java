@@ -27,10 +27,12 @@
  */
 package uk.co.saiman.experiment;
 
-import static java.util.Arrays.asList;
-
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Utility to lock on all event sources participating in an event dispatch.
@@ -50,8 +52,8 @@ import java.util.function.Supplier;
 class ExperimentLocker {
   private final List<ExperimentStep<?>> experimentNodes;
 
-  public ExperimentLocker(ExperimentStep<?>... experimentNodes) {
-    this.experimentNodes = asList(experimentNodes);
+  public ExperimentLocker(Collection<? extends ExperimentStep<?>> experimentNodes) {
+    this.experimentNodes = new ArrayList<>(experimentNodes);
   }
 
   /*
@@ -73,18 +75,25 @@ class ExperimentLocker {
    * 
    */
 
-  public void run(Runnable action) {
-    run(() -> {
-      action.run();
+  public void update(Consumer<ExperimentLock> action) {
+    get(lock -> {
+      action.accept(lock);
       return null;
     });
+    experimentNodes
+        .stream()
+        .map(ExperimentStep::getExperiment)
+        .flatMap(Optional::stream)
+        .distinct()
+        .forEach(Experiment::fireEvents);
   }
 
-  public <T> T run(Supplier<T> action) {
+  public <T> T get(Function<ExperimentLock, T> action) {
     // TODO safely lock on all experiment nodes and their parents
 
     synchronized (ExperimentStep.class) {
-      return action.get();
+      var lock = new ExperimentLock(experimentNodes);
+      return action.apply(lock);
     }
   }
 }

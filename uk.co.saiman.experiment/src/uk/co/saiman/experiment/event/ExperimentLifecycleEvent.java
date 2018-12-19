@@ -38,10 +38,9 @@ public class ExperimentLifecycleEvent extends ExperimentEvent {
 
   public ExperimentLifecycleEvent(
       ExperimentStep<?> node,
-      ExperimentLifecycleState lifecycleState,
       ExperimentLifecycleState previousLifecycleState) {
     super(node);
-    this.lifecycleState = lifecycleState;
+    this.lifecycleState = node.getLifecycleState();
     this.previousLifecycleState = previousLifecycleState;
   }
 

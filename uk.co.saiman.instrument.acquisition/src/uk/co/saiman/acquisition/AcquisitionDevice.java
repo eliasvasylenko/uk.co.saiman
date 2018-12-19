@@ -45,17 +45,11 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface AcquisitionDevice extends Device {
+public interface AcquisitionDevice<T extends AcquisitionControl> extends Device<T> {
   /**
-   * Begin an acquisition experiment with the current configuration.
-   * 
-   * @throws IllegalStateException
-   *           if acquisition is already in progress
-   */
-  void startAcquisition();
-
-  /**
-   * Stop any acquisition experiment that may be in progress.
+   * Stop any acquisition experiment that may be in progress. This method revokes
+   * control of any currently acquired {@link #acquireControl() control
+   * interface}.
    */
   void stopAcquisition();
 
@@ -76,19 +70,18 @@ public interface AcquisitionDevice extends Device {
 
   /**
    * @return The last acquired acquisition data. This leaves the format of the
-   *         acquired data to the discretion of the implementing hardware
-   *         module.
+   *         acquired data to the discretion of the implementing hardware module.
    */
   SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData();
 
   /**
    * Add or remove data event observers.
    * <p>
-   * The observers may be triggered with data events that happen outside the
-   * scope of an actual acquisition experiment, in the case of an "always on"
-   * instrument setup. In this case, the {@link #isAcquiring()} method will
-   * indicate whether the event is related to an experiment if invoked by a
-   * listener to a data event.
+   * The observers may be triggered with data events that happen outside the scope
+   * of an actual acquisition experiment, in the case of an "always on" instrument
+   * setup. In this case, the {@link #isAcquiring()} method will indicate whether
+   * the event is related to an experiment if invoked by a listener to a data
+   * event.
    * 
    * @return an observable interface for registering data event listeners
    */
@@ -108,14 +101,6 @@ public interface AcquisitionDevice extends Device {
   }
 
   /**
-   * Set the total acquisition count for a single experiment.
-   * 
-   * @param count
-   *          the number of continua to acquire for a single experiment
-   */
-  void setAcquisitionCount(int count);
-
-  /**
    * Get the total acquisition count for a single experiment.
    * 
    * @return the number of continua to acquire for a single experiment
@@ -132,23 +117,12 @@ public interface AcquisitionDevice extends Device {
   Quantity<Time> getSampleResolution();
 
   /**
-   * Get the sample frequency in the acquired sampled continuous function.
-   * Unless otherwise specified by a subclass this may be considered to be a
-   * constant.
+   * Get the sample frequency in the acquired sampled continuous function. Unless
+   * otherwise specified by a subclass this may be considered to be a constant.
    * 
    * @return the sample frequency
    */
   Quantity<Frequency> getSampleFrequency();
-
-  /**
-   * Set the active sampling duration for a single data acquisition event. This
-   * may adjust the acquisition depth to fit according to the current
-   * acquisition resolution.
-   * 
-   * @param time
-   *          the time an acquisition will last in milliseconds
-   */
-  void setAcquisitionTime(Quantity<Time> time);
 
   /**
    * Get the active sampling duration for a single data acquisition event.
@@ -156,16 +130,6 @@ public interface AcquisitionDevice extends Device {
    * @return the time an acquisition will last in milliseconds
    */
   Quantity<Time> getAcquisitionTime();
-
-  /**
-   * Set the number of samples in an acquired sampled continuous function. This
-   * may adjust the acquisition time to fit according to the current acquisition
-   * resolution.
-   * 
-   * @param depth
-   *          the sample depth for an acquired data array
-   */
-  void setSampleDepth(int depth);
 
   /**
    * Get the number of samples in an acquired sampled continuous function.

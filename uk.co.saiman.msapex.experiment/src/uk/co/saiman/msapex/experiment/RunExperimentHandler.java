@@ -35,7 +35,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -55,12 +54,9 @@ public class RunExperimentHandler {
 
   @Execute
   void execute(WorkspaceExperiment experiment) {
-    Experiment node;
-
     try {
-      node = experiment.experiment();
+      experiment.experiment().schedule();
 
-      new Thread(node::process).start();
     } catch (Exception e) {
       log.log(Level.ERROR, e);
 

@@ -75,7 +75,7 @@ public class InstrumentImpl implements Instrument {
   }
 
   @Override
-  public synchronized DeviceRegistration registerDevice(Device device) {
+  public synchronized DeviceRegistration registerDevice(Device<?> device) {
     InstrumentRegistration deviceRegistration = new InstrumentRegistration() {
       @Override
       public boolean isRegistered() {
@@ -88,7 +88,7 @@ public class InstrumentImpl implements Instrument {
       }
 
       @Override
-      public Device getDevice() {
+      public Device<?> getDevice() {
         return device;
       }
     };

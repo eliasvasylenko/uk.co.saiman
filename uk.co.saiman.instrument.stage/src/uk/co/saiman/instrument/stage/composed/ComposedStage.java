@@ -46,16 +46,18 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 
 import uk.co.saiman.instrument.ConnectionState;
-import uk.co.saiman.instrument.InstrumentRegistration;
+import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.Stage;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
-public abstract class ComposedStage<T> implements Stage<T> {
+public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extends DeviceImpl<U>
+    implements Stage<T, U> {
   enum Mode {
     ANALYSING, EXCHANGING
   }
@@ -169,17 +171,16 @@ public abstract class ComposedStage<T> implements Stage<T> {
   }
 
   @SafeVarargs
-  private final <U> BinaryOperator<U> precedence(U... precedence) {
+  private final <V> BinaryOperator<V> precedence(V... precedence) {
     return (a, b) -> {
-      for (U option : precedence)
+      for (V option : precedence)
         if (a == option || b == option)
           return option;
       return precedence[0];
     };
   }
 
-  @Override
-  public synchronized SampleState requestExchange() {
+  synchronized SampleState requestExchange() {
     if (mode != Mode.EXCHANGING) {
       setRequestedLocation(Mode.EXCHANGING, exchangeLocation);
 
@@ -189,8 +190,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
     }
   }
 
-  @Override
-  public synchronized SampleState requestAnalysis() {
+  synchronized SampleState requestAnalysis() {
     if (mode != Mode.ANALYSING) {
       setRequestedLocation(Mode.ANALYSING, analysisLocation);
 
@@ -200,8 +200,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
     }
   }
 
-  @Override
-  public synchronized SampleState requestAnalysisLocation(T location) {
+  synchronized SampleState requestAnalysisLocation(T location) {
     if (!isLocationReachable(location)) {
       throw new IllegalArgumentException("Location unreachable " + location);
     }
@@ -211,7 +210,7 @@ public abstract class ComposedStage<T> implements Stage<T> {
     return sampleState().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
   }
 
-  public synchronized void setRequestedLocation(Mode mode, T location) {
+  synchronized void setRequestedLocation(Mode mode, T location) {
     if (getInstrumentRegistration().isRegistered()) {
       this.mode = mode;
       setRequestedLocationImpl(location);

@@ -41,12 +41,14 @@ import uk.co.saiman.instrument.sample.SampleDevice;
 
 public class RequestAnalysisHandler {
   @Execute
-  void execute(IEclipseContext context, SampleDevice<?> device, EventBroker eventBroker) {
-    device.requestAnalysis();
+  void execute(IEclipseContext context, SampleDevice<?, ?> device, EventBroker eventBroker) {
+    try (var control = device.acquireControl()) {
+      control.requestAnalysis();
+    }
   }
 
   @CanExecute
-  boolean canExecute(@Optional SampleDevice<?> device) {
+  boolean canExecute(@Optional SampleDevice<?, ?> device) {
     return device != null
         && device
             .sampleState()

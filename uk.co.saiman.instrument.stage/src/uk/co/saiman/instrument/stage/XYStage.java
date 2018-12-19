@@ -31,11 +31,11 @@ import javax.measure.quantity.Length;
 
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
-public interface XYStage extends Stage<XYCoordinate<Length>> {
+public interface XYStage<T extends XYStageControl> extends Stage<XYCoordinate<Length>, T> {
   /**
    * 
    * @return The minimally containing lower bound of all
-   *         {@link #isLocationReachable(XYCoordinate) reachable} positions of the
+   *         {@link #isLocationReachable(Object) reachable} positions of the
    *         stage. The location of the bound itself may not be reachable.
    *         Implementations of this method should be idempotent and free of
    *         side-effects.
@@ -44,7 +44,7 @@ public interface XYStage extends Stage<XYCoordinate<Length>> {
 
   /**
    * @return The minimally containing upper bound of all
-   *         {@link #isLocationReachable(XYCoordinate) reachable} positions of the
+   *         {@link #isLocationReachable(Object) reachable} positions of the
    *         stage. The location of the bound itself may not be reachable.
    *         Implementations of this method should be idempotent and free of
    *         side-effects.

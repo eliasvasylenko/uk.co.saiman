@@ -36,11 +36,11 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @author Elias N Vasylenko
  */
 public interface ChemicalMapConfiguration {
-	String getChemicalMapName();
+  String getChemicalMapName();
 
-	void setChemicalMapName(String name);
+  void setChemicalMapName(String name);
 
-	RasterDevice getRasterDevice();
+  RasterDevice<?> getRasterDevice();
 
-	AcquisitionDevice getAcquisitionDevice();
+  AcquisitionDevice<?> getAcquisitionDevice();
 }

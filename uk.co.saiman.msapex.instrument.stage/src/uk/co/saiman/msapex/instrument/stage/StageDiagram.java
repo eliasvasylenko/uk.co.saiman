@@ -52,8 +52,7 @@ import uk.co.saiman.msapex.annotations.XYAnnotation;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the coordinate type of the stage
+ * @param <T> the coordinate type of the stage
  */
 public abstract class StageDiagram<T> {
   private Image image;
@@ -64,7 +63,7 @@ public abstract class StageDiagram<T> {
 
   protected void initialize(Unit<Length> unit) {
     this.annotationLayer = new AnnotationLayer<>(unit, unit);
-    Stage<T> stageDevice = getStageDevice();
+    Stage<T, ?> stageDevice = getStageDevice();
 
     requestedCoordinates = stageLocationToCoordinates(wrap(stageDevice.requestedLocation()));
     actualCoordinates = stageLocationToCoordinates(wrap(stageDevice.actualLocation()));
@@ -94,7 +93,7 @@ public abstract class StageDiagram<T> {
         createObjectBinding(() -> getCoordinatesAtStageLocation(location.getValue()), location));
   }
 
-  public abstract Stage<T> getStageDevice();
+  public abstract Stage<T, ?> getStageDevice();
 
   public Image getImage() {
     return image;

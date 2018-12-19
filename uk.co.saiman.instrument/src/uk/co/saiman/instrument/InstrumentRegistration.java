@@ -50,5 +50,5 @@ public interface InstrumentRegistration {
 
   Instrument getInstrument();
 
-  Device getDevice();
+  Device<?> getDevice();
 }

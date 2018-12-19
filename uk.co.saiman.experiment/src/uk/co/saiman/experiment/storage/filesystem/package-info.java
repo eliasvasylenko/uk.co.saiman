@@ -25,27 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.event;
-
-import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.event.ExperimentEventKind.ATTACH;
-
-import uk.co.saiman.experiment.ExperimentStep;
-
-public class AttachNodeEvent extends ExperimentEvent {
-  private final ExperimentStep<?> parent;
-
-  public AttachNodeEvent(ExperimentStep<?> node, ExperimentStep<?> parent) {
-    super(node);
-    this.parent = requireNonNull(parent);
-  }
-
-  public ExperimentStep<?> parent() {
-    return parent;
-  }
-
-  @Override
-  public ExperimentEventKind kind() {
-    return ATTACH;
-  }
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.experiment.storage.filesystem;

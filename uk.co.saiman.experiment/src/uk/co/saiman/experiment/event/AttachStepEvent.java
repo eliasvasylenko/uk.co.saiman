@@ -27,28 +27,25 @@
  */
 package uk.co.saiman.experiment.event;
 
+import static java.util.Objects.requireNonNull;
+import static uk.co.saiman.experiment.event.ExperimentEventKind.ATTACH;
+
 import uk.co.saiman.experiment.ExperimentStep;
 
-public class RenameNodeEvent extends ExperimentEvent {
-  private final String id;
-  private final String previousId;
+public class AttachStepEvent extends ExperimentEvent {
+  private final ExperimentStep<?> parent;
 
-  public RenameNodeEvent(ExperimentStep<?> node, String id) {
+  public AttachStepEvent(ExperimentStep<?> node, ExperimentStep<?> parent) {
     super(node);
-    this.id = id;
-    this.previousId = node.getId();
+    this.parent = requireNonNull(parent);
   }
 
-  public String id() {
-    return id;
-  }
-
-  public String previousId() {
-    return previousId;
+  public ExperimentStep<?> parent() {
+    return parent;
   }
 
   @Override
   public ExperimentEventKind kind() {
-    return ExperimentEventKind.RENAME;
+    return ATTACH;
   }
 }

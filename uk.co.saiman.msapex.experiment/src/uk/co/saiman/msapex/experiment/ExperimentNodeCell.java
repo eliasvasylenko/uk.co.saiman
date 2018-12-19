@@ -50,10 +50,10 @@ import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.utilities.EclipseUtilities;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.event.AttachNodeEvent;
-import uk.co.saiman.experiment.event.DetachNodeEvent;
+import uk.co.saiman.experiment.event.AttachStepEvent;
+import uk.co.saiman.experiment.event.DetachStepEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
-import uk.co.saiman.experiment.event.RenameNodeEvent;
+import uk.co.saiman.experiment.event.RenameStepEvent;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
@@ -167,7 +167,7 @@ public class ExperimentNodeCell {
 
   @Inject
   @Optional
-  public void update(RenameNodeEvent event) {
+  public void update(RenameStepEvent event) {
     if (event.node() == experiment) {
       cell.setLabel(event.id());
     }
@@ -183,7 +183,7 @@ public class ExperimentNodeCell {
 
   @Inject
   @Optional
-  public void update(AttachNodeEvent event) {
+  public void update(AttachStepEvent event) {
     if (event.parent() == experiment) {
       updateChildren();
     }
@@ -191,7 +191,7 @@ public class ExperimentNodeCell {
 
   @Inject
   @Optional
-  public void update(DetachNodeEvent event) {
+  public void update(DetachStepEvent event) {
     if (event.previousParent() == experiment) {
       updateChildren();
     }

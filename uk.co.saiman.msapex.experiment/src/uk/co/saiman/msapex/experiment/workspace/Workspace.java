@@ -13,11 +13,12 @@ import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.StorageConfiguration;
-import uk.co.saiman.experiment.filesystem.JsonExperimentFormat;
 import uk.co.saiman.experiment.path.ExperimentIndex;
+import uk.co.saiman.experiment.scheduling.SchedulingStrategy;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.service.StorageService;
+import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.experiment.storage.filesystem.JsonExperimentFormat;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment.Status;
 import uk.co.saiman.msapex.experiment.workspace.event.AddExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.event.WorkspaceEvent;
@@ -32,17 +33,23 @@ public class Workspace implements ExperimentIndex {
 
   private final PathLocation rootLocation;
   private final DataFormat<Experiment> experimentFormat;
+  private final SchedulingStrategy schedulingStrategy;
 
   private final HotObservable<WorkspaceEvent> events;
 
   public Workspace(
       Path rootPath,
       ProcedureService procedureService,
-      StorageService storageService) {
+      StorageService storageService,
+      SchedulingStrategy schedulingStrategy) {
     this.experiments = new HashSet<>();
 
     this.rootLocation = new PathLocation(rootPath);
-    this.experimentFormat = new JsonExperimentFormat(procedureService, storageService);
+    this.experimentFormat = new JsonExperimentFormat(
+        procedureService,
+        storageService,
+        schedulingStrategy);
+    this.schedulingStrategy = schedulingStrategy;
 
     this.events = new HotObservable<>();
   }
@@ -53,6 +60,10 @@ public class Workspace implements ExperimentIndex {
 
   public DataFormat<Experiment> getExperimentFormat() {
     return experimentFormat;
+  }
+
+  public SchedulingStrategy getSchedulingStrategy() {
+    return schedulingStrategy;
   }
 
   public Stream<WorkspaceExperiment> getWorkspaceExperiments() {

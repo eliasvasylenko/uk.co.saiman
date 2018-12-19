@@ -54,21 +54,12 @@ public interface Procedure<S> {
   /**
    * @return a stream of the conditions which are prepared by the procedure
    */
-  Stream<Condition> preparedConditions();
+  Stream<Condition> conditions();
 
   /**
    * @return a stream of the requirements of the procedure
    */
-  Stream<Condition> requiredConditions();
-
-  /**
-   * The observations made by the procedure. An experiment step which observes a
-   * procedure will {@link ExperimentStep#getResult(Observation) provide a result}
-   * for each observation made by the procedure.
-   * 
-   * @return a stream of the observations which are made by the procedure
-   */
-  Stream<Dependency<?>> dependencies();
+  Stream<Condition> expectations();
 
   /**
    * The observations made by the procedure. An experiment step which observes a
@@ -79,10 +70,19 @@ public interface Procedure<S> {
    */
   Stream<Observation<?>> observations();
 
+  /**
+   * The observations made by the procedure. An experiment step which observes a
+   * procedure will {@link ExperimentStep#getResult(Observation) provide a result}
+   * for each observation made by the procedure.
+   * 
+   * @return a stream of the observations which are made by the procedure
+   */
+  Stream<Dependency<?>> dependencies();
+
   default boolean satisfiesRequirementsOf(Procedure<?> procedure) {
     return procedure
-        .requiredConditions()
-        .allMatch(requirement -> preparedConditions().anyMatch(requirement::equals));
+        .expectations()
+        .allMatch(requirement -> conditions().anyMatch(requirement::equals));
   }
 
   /*

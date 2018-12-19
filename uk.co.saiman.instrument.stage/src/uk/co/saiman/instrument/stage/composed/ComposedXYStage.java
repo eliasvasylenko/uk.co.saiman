@@ -33,7 +33,8 @@ import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
-public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>> implements XYStage {
+public abstract class ComposedXYStage<T extends ComposedXYStageControl>
+    extends ComposedStage<XYCoordinate<Length>, T> implements XYStage<T> {
   private final StageAxis<Length> xAxis;
   private final StageAxis<Length> yAxis;
 

@@ -27,20 +27,54 @@
  */
 package uk.co.saiman.instrument;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import java.util.concurrent.TimeUnit;
+
 import uk.co.saiman.observable.ObservableValue;
 
 /**
  * Typically this interface should be extended to provide interfaces over
  * general classes of hardware such that alternative hardware can be
  * substituted.
+ * <p>
+ * A physical hardware device, generally speaking, is inherently a singleton
+ * service with shared state. Because of this it is important to regulate access
+ * when control is contested between multiple consumers. Exclusive control of a
+ * device is therefore provided via a {@link #acquireControl() control
+ * interface}, which can only be acquired by one consumer at a time, acting as a
+ * write-lock over the functions of the device.
+ * <p>
+ * Reading from the device needs no such regulation and should be provided via
+ * methods directly on the implementing class of the device. Sometimes it may be
+ * useful or necessary to issue certain commands without owning control of the
+ * device, such as to override and shutdown operation. Such methods may also be
+ * provided on the implementing class of the device, but they should carefully
+ * document that they usurp control from any currently acquired control
+ * interface and explain the consequences of this.
  * 
  * @author Elias N Vasylenko
+ * 
+ * @param <T> the control interface for the device
  */
-public interface Device {
+public interface Device<T extends AutoCloseable> {
   /**
    * @return the human-readable and localized name of the device
    */
   String getName();
+
+  /**
+   * Acquire a mutually exclusive lock on control of the device. The returned
+   * interface should provide access to all control and write-functionality of the
+   * device, but should not be required for reading from the device.
+   * 
+   * @return an interface for interaction with the device
+   */
+  default T acquireControl() {
+    return acquireControl(0, MILLISECONDS);
+  }
+
+  T acquireControl(long timeout, TimeUnit unit);
 
   /**
    * Devices should only ever be registered to a single instrument, and must

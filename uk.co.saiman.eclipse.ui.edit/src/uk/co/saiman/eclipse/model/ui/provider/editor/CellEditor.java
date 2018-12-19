@@ -263,8 +263,8 @@ public class CellEditor extends AbstractEditor {
             EMFEditProperties
                 .value(getEditingDomain(), UiPackageImpl.Literals.UI_ELEMENT__VISIBLE_WHEN)
                 .observeDetail(getMaster()),
-            new UpdateValueStrategy().setConverter(new EClass2EObject()),
-            new UpdateValueStrategy().setConverter(new EObject2EClass()));
+            new UpdateValueStrategy<>().setConverter(new EClass2EObject()),
+            new UpdateValueStrategy<>().setConverter(new EObject2EClass()));
   }
 
   @SuppressWarnings("unchecked")
@@ -399,7 +399,7 @@ public class CellEditor extends AbstractEditor {
     return list;
   }
 
-  class EObject2EClass extends Converter {
+  class EObject2EClass extends Converter<Object, Object> {
     public EObject2EClass() {
       super(EObject.class, EClass.class);
     }
@@ -413,7 +413,7 @@ public class CellEditor extends AbstractEditor {
     }
   }
 
-  class EClass2EObject extends Converter {
+  class EClass2EObject extends Converter<Object, Object> {
     public EClass2EObject() {
       super(EClass.class, EObject.class);
     }

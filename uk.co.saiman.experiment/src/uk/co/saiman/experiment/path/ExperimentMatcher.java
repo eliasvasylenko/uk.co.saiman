@@ -52,6 +52,10 @@ public class ExperimentMatcher {
     return id.equals(node.getId());
   }
 
+  public Optional<ExperimentStep<?>> asMatch(ExperimentStep<?> node) {
+    return match(node) ? Optional.of(node) : Optional.empty();
+  }
+
   public Optional<Experiment> findMatch(ExperimentIndex index) {
     return index.getExperiment(id);
   }

@@ -37,17 +37,17 @@ import java.util.stream.Stream;
 import uk.co.saiman.acquisition.AcquisitionDevice;
 
 public class AcquisitionDeviceSelection {
-  private List<AcquisitionDevice> devices;
+  private List<AcquisitionDevice<?>> devices;
 
   public AcquisitionDeviceSelection() {
     this.devices = emptyList();
   }
 
-  public AcquisitionDeviceSelection(Collection<? extends AcquisitionDevice> devices) {
+  public AcquisitionDeviceSelection(Collection<? extends AcquisitionDevice<?>> devices) {
     this.devices = new ArrayList<>(devices);
   }
 
-  public Stream<AcquisitionDevice> getSelectedDevices() {
+  public Stream<AcquisitionDevice<?>> getSelectedDevices() {
     return devices.stream();
   }
 }

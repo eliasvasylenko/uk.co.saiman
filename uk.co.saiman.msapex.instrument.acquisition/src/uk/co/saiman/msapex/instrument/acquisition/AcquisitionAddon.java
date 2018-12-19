@@ -69,7 +69,7 @@ public class AcquisitionAddon {
 
   @Inject
   @ObservableService
-  private ObservableList<AcquisitionDevice> availableDevices;
+  private ObservableList<AcquisitionDevice<?>> availableDevices;
 
   @Inject
   private IEclipseContext context;
@@ -126,15 +126,15 @@ public class AcquisitionAddon {
   }
 
   private synchronized void updateSelectedDevices() {
-    Set<AcquisitionDevice> availableDevices = new HashSet<>(this.availableDevices);
+    Set<AcquisitionDevice<?>> availableDevices = new HashSet<>(this.availableDevices);
 
     AcquisitionDeviceSelection selection = context.get(AcquisitionDeviceSelection.class);
-    Set<AcquisitionDevice> selectedDevices = selection == null
+    Set<AcquisitionDevice<?>> selectedDevices = selection == null
         ? new HashSet<>()
         : selection.getSelectedDevices().collect(toCollection(HashSet::new));
 
     boolean added = false;
-    for (AcquisitionDevice device : availableDevices) {
+    for (AcquisitionDevice<?> device : availableDevices) {
       if (defaultDeviceSelection.contains(device.getName())) {
         if (selectedDevices.add(device))
           added = true;
@@ -152,7 +152,7 @@ public class AcquisitionAddon {
 
   @Inject
   synchronized void setSelection(
-      @Optional @AdaptNamed(ACTIVE_SELECTION) AcquisitionDevice device,
+      @Optional @AdaptNamed(ACTIVE_SELECTION) AcquisitionDevice<?> device,
       EPartService partService,
       @Optional AcquisitionDeviceSelection selection) {
     if (device != null) {
