@@ -90,19 +90,6 @@ public interface ProcedureContext<T> {
    * {@link Procedure#proceed(ProcedureContext) execution} once processing
    * completes.
    * 
-   * @param value the preliminary result
-   */
-  <R> void setPartialResult(Observation<R> observation, R value);
-
-  /**
-   * Set a preliminary partial result value for this execution.
-   * <p>
-   * This method may be invoked multiple times during processing. The purpose is
-   * to support live-updating of result data, and any values passed to this method
-   * will be overridden by the return value of
-   * {@link Procedure#proceed(ProcedureContext) execution} once processing
-   * completes.
-   * 
    * @param value an invalidation representing the preliminary result
    */
   <R> void setPartialResult(Observation<R> observation, Supplier<? extends R> value);
@@ -138,7 +125,7 @@ public interface ProcedureContext<T> {
   }
 
   default <R> void setResult(Observation<R> observation, R value) {
-    setPartialResult(observation, value);
+    setPartialResult(observation, () -> value);
     completeObservation(observation);
   }
 

@@ -27,9 +27,11 @@
  */
 package uk.co.saiman.observable;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.concurrent.Executor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.Expectations;
 import mockit.FullVerifications;
@@ -139,8 +141,10 @@ public class ExecutorObserverTest {
     };
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void nullExecutorTest() {
-    new ExecutorObserver<>(downstreamObserver, null);
+    assertThrows(
+        NullPointerException.class,
+        () -> new ExecutorObserver<>(downstreamObserver, null));
   }
 }

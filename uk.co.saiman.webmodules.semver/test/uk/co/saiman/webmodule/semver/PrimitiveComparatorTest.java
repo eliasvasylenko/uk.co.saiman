@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.webmodule.semver;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 import mockit.Expectations;
 import mockit.Injectable;
@@ -45,8 +47,8 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertTrue(new PrimitiveComparator(Operator.EQUAL, first).matches(second));
-    Assert.assertTrue(new PrimitiveComparator(Operator.EQUAL, second).matches(first));
+    assertTrue(new PrimitiveComparator(Operator.EQUAL, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.EQUAL, second).matches(first));
   }
 
   @Test
@@ -60,8 +62,8 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertFalse(new PrimitiveComparator(Operator.EQUAL, first).matches(second));
-    Assert.assertFalse(new PrimitiveComparator(Operator.EQUAL, second).matches(first));
+    assertFalse(new PrimitiveComparator(Operator.EQUAL, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.EQUAL, second).matches(first));
   }
 
   @Test
@@ -77,7 +79,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertTrue(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
   }
 
   @Test
@@ -93,7 +95,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
   }
 
   @Test
@@ -109,7 +111,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
   }
 
   @Test
@@ -125,8 +127,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert
-        .assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
   }
 
   @Test
@@ -142,9 +143,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert
-        .assertFalse(
-            new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
   }
 
   @Test
@@ -160,8 +159,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert
-        .assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
   }
 
   @Test
@@ -177,7 +175,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertFalse(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
   }
 
   @Test
@@ -193,7 +191,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertTrue(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
   }
 
   @Test
@@ -209,7 +207,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertFalse(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
   }
 
   @Test
@@ -225,7 +223,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertFalse(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
   }
 
   @Test
@@ -241,7 +239,7 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
   }
 
   @Test
@@ -257,6 +255,6 @@ public class PrimitiveComparatorTest {
       }
     };
 
-    Assert.assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
   }
 }

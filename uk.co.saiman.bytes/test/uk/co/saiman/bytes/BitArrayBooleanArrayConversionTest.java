@@ -27,248 +27,247 @@
  */
 package uk.co.saiman.bytes;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.co.saiman.bytes.BitArray.fromBooleanArray;
 import static uk.co.saiman.bytes.Endianness.BIG_ENDIAN;
 import static uk.co.saiman.bytes.Endianness.LITTLE_ENDIAN;
 
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class BitArrayBooleanArrayConversionTest {
-  @Parameters
-  public static Collection<Object[]> booleanArrays() {
-    return asList(
-        new Object[] {
-            new boolean[] { true },
-            new long[] { 0x8000000000000000L },
-            new long[] { 1L } },
+  static class Conversions {
+    private final boolean[] booleans;
+    private final long[] bigEndianLongs;
+    private final long[] littleEndianLongs;
 
-        new Object[] { new boolean[] { false }, new long[] { 0L }, new long[] { 0L } },
-
-        new Object[] {
-            new boolean[] { true, false },
-            new long[] { 0x8000000000000000L },
-            new long[] { 1L } },
-
-        new Object[] {
-            new boolean[] { false, true },
-            new long[] { 0x4000000000000000L },
-            new long[] { 2L } },
-
-        new Object[] {
-            new boolean[] {
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                true },
-            new long[] { -1L, 0xFF00000000000000L },
-            new long[] { -1L, 0xFFL } },
-
-        new Object[] {
-            new boolean[] {
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false },
-            new long[] { 0L, 0L },
-            new long[] { 0L, 0L } });
+    public Conversions(boolean[] booleans, long[] bigEndianLongs, long[] littleEndianLongs) {
+      this.booleans = booleans;
+      this.bigEndianLongs = bigEndianLongs;
+      this.littleEndianLongs = littleEndianLongs;
+    }
   }
 
-  private final boolean[] values;
-  private final long[] bigEndian;
-  private final long[] littleEndian;
+  public static Stream<Conversions> conversions() {
+    return Stream
+        .of(
+            new Conversions(
+                new boolean[] { true },
+                new long[] { 0x8000000000000000L },
+                new long[] { 1L }),
 
-  public BitArrayBooleanArrayConversionTest(
-      boolean[] values,
-      long[] bigEndian,
-      long[] littleEndian) {
-    this.values = values;
-    this.bigEndian = bigEndian;
-    this.littleEndian = littleEndian;
+            new Conversions(new boolean[] { false }, new long[] { 0L }, new long[] { 0L }),
+
+            new Conversions(
+                new boolean[] { true, false },
+                new long[] { 0x8000000000000000L },
+                new long[] { 1L }),
+
+            new Conversions(
+                new boolean[] { false, true },
+                new long[] { 0x4000000000000000L },
+                new long[] { 2L }),
+
+            new Conversions(
+                new boolean[] {
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true },
+                new long[] { -1L, 0xFF00000000000000L },
+                new long[] { -1L, 0xFFL }),
+
+            new Conversions(
+                new boolean[] {
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false },
+                new long[] { 0L, 0L },
+                new long[] { 0L, 0L }));
   }
 
-  @Test
-  public void booleanArrayRoundTripTest() {
-    BitArray bits = fromBooleanArray(values);
+  @ParameterizedTest
+  @MethodSource("conversions")
+  public void booleanArrayRoundTripTest(Conversions conversions) {
+    BitArray bits = fromBooleanArray(conversions.booleans);
     boolean[] result = bits.toBooleanArray();
 
-    assertArrayEquals(values, result);
+    assertArrayEquals(conversions.booleans, result);
   }
 
-  @Test
-  public void booleanArrayToBigEndianInternalRepresentationTest() {
-    BitArray bits = fromBooleanArray(values);
+  @ParameterizedTest
+  @MethodSource("conversions")
+  public void booleanArrayToBigEndianInternalRepresentationTest(Conversions conversions) {
+    BitArray bits = fromBooleanArray(conversions.booleans);
 
-    assertArrayEquals(bigEndian, bits.getBits());
+    assertArrayEquals(conversions.bigEndianLongs, bits.getBits());
   }
 
-  @Test
-  public void booleanArrayToBigEndianLongTest() {
-    BitArray bits = fromBooleanArray(values);
+  @ParameterizedTest
+  @MethodSource("conversions")
+  public void booleanArrayToBigEndianLongTest(Conversions conversions) {
+    BitArray bits = fromBooleanArray(conversions.booleans);
 
-    for (int i = 0; i < littleEndian.length; i++) {
+    for (int i = 0; i < conversions.littleEndianLongs.length; i++) {
       long bigEndianResult = bits
           .slice(Long.SIZE * i, bits.length())
           .toNumber(Long.SIZE, BIG_ENDIAN);
 
-      assertEquals(bigEndian[i], bigEndianResult);
+      assertEquals(conversions.bigEndianLongs[i], bigEndianResult);
     }
   }
 
-  @Test
-  public void booleanArrayToLittleEndianLongTest() {
-    BitArray bits = fromBooleanArray(values);
+  @ParameterizedTest
+  @MethodSource("conversions")
+  public void booleanArrayToLittleEndianLongTest(Conversions conversions) {
+    BitArray bits = fromBooleanArray(conversions.booleans);
 
-    for (int i = 0; i < littleEndian.length; i++) {
+    for (int i = 0; i < conversions.littleEndianLongs.length; i++) {
       long littleEndianResult = bits
           .slice(Long.SIZE * i, bits.length())
           .toNumber(Long.SIZE, LITTLE_ENDIAN);
 
-      assertEquals(littleEndian[i], littleEndianResult);
+      assertEquals(conversions.littleEndianLongs[i], littleEndianResult);
     }
   }
 }

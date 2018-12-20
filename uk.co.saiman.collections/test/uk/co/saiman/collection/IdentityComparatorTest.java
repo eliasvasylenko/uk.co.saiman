@@ -28,12 +28,10 @@
 package uk.co.saiman.collection;
 
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
-import org.junit.Assert;
-import org.junit.Test;
-
-import uk.co.saiman.collection.EquivalenceComparator;
+import org.junit.jupiter.api.Test;
 
 /**
  * It is very difficult or impossible to test this class properly, as the
@@ -45,28 +43,30 @@ import uk.co.saiman.collection.EquivalenceComparator;
  *
  */
 public class IdentityComparatorTest {
-	/**
-	 * This test compares identity equal references.
-	 */
-	@Test
-	public void compareIdenticalReferences() {
-		Object reference = new Object();
-		Assert.assertThat("Identical objects should pass identity equality test",
-				reference, comparator().comparesEqualTo(reference));
-	}
+  /**
+   * This test compares identity equal references.
+   */
+  @Test
+  public void compareIdenticalReferences() {
+    Object reference = new Object();
+    assertThat(
+        "Identical objects should pass identity equality test",
+        reference,
+        comparator().comparesEqualTo(reference));
+  }
 
-	/**
-	 * This test compares identity unequal references.
-	 */
-	@Test
-	public void compareDifferentReferences() {
-		Assert.assertThat(
-				"Equal but distinct objects should fail identity equality test",
-				new Object(), not(comparator().comparesEqualTo(new Object())));
-	}
+  /**
+   * This test compares identity unequal references.
+   */
+  @Test
+  public void compareDifferentReferences() {
+    assertThat(
+        "Equal but distinct objects should fail identity equality test",
+        new Object(),
+        not(comparator().comparesEqualTo(new Object())));
+  }
 
-	private ComparatorMatcherBuilder<Object> comparator() {
-		return ComparatorMatcherBuilder.comparedBy(EquivalenceComparator
-				.identityComparator());
-	}
+  private ComparatorMatcherBuilder<Object> comparator() {
+    return ComparatorMatcherBuilder.comparedBy(EquivalenceComparator.identityComparator());
+  }
 }

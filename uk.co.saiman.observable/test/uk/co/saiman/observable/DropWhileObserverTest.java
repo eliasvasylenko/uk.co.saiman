@@ -27,7 +27,9 @@
  */
 package uk.co.saiman.observable;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -109,8 +111,10 @@ public class DropWhileObserverTest {
     new FullVerifications() {};
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void nullSkipFilterTest() {
-    new DropWhileObserver<>(downstreamObserver, null);
+    assertThrows(
+        NullPointerException.class,
+        () -> new DropWhileObserver<>(downstreamObserver, null));
   }
 }

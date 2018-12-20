@@ -27,11 +27,12 @@
  */
 package uk.co.saiman.observable;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -161,13 +162,13 @@ public class ObservablePropertyImplTest {
     new FullVerifications() {};
   }
 
-  @Test(expected = MissingValueException.class)
+  @Test
   public void setProblemEventThenGetTest() {
     ObservableProperty<String> property = new ObservablePropertyImpl<>("initial");
     Throwable problem = new Throwable();
 
     property.setProblem(problem);
-    property.get();
+    assertThrows(MissingValueException.class, () -> property.get());
   }
 
   @Test
@@ -180,18 +181,18 @@ public class ObservablePropertyImplTest {
     assertThat(property.get(), equalTo("message"));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void failWithNullThrowableTest() {
     ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
     observable.observe();
-    observable.setProblem(null);
+    assertThrows(NullPointerException.class, () -> observable.setProblem(null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void failWithNullMessageTest() {
     ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
     observable.observe();
-    observable.set(null);
+    assertThrows(NullPointerException.class, () -> observable.set(null));
   }
 
   @Test

@@ -588,11 +588,6 @@ public class ExperimentStep<S> {
       }
 
       @Override
-      public <T> void setPartialResult(Observation<T> observation, T value) {
-        setPartialResult(observation, (Supplier<? extends T>) () -> value);
-      }
-
-      @Override
       public <T> void setPartialResult(Observation<T> observation, Supplier<? extends T> value) {
         getResult(observation).setPartialValue(value);
       }

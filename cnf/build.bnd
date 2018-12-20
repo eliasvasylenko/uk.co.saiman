@@ -149,11 +149,16 @@ javafx.version: 11
 
 -testpath.base=\
 	org.jmockit:jmockit,\
-	org.apache.servicemix.bundles.junit,\
+	org.junit.jupiter:junit-jupiter-api,\
+	org.junit.jupiter:junit-jupiter-engine,\
+	org.junit.jupiter:junit-jupiter-params,\
+	org.junit.platform:junit-platform-commons,\
+	org.junit.platform:junit-platform-engine,\
+	org.junit.platform:junit-platform-launcher,\
+	org.opentest4j,\
 	org.hamcrest:hamcrest-core,\
 	org.hamcrest:java-hamcrest
 
-test-cases: 			${classes;NAMED;*Test}
 -resolve.effective:		resolve, active
 
 ## Fix warnings

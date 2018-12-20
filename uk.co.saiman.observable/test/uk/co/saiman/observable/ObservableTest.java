@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.observable;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.Assert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.Injectable;
 import mockit.Verifications;

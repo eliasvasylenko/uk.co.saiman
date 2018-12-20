@@ -27,12 +27,10 @@
  */
 package uk.co.saiman.observable;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.Injectable;
 
-@Ignore
 @SuppressWarnings("javadoc")
 public class MaterializingObserverTest {
   @Injectable

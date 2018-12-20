@@ -27,8 +27,9 @@
  */
 package uk.co.saiman.collection;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 
 import uk.co.saiman.property.IdentityProperty;
 
@@ -42,40 +43,40 @@ import uk.co.saiman.property.IdentityProperty;
  *
  */
 public class IdentityPropertyTest {
-	/**
-	 * Confirm default constructor initializes with null value
-	 */
-	@Test
-	public void testNullInitialisation() {
-		Assert.assertEquals(null, new IdentityProperty<>().get());
-	}
+  /**
+   * Confirm default constructor initializes with null value
+   */
+  @Test
+  public void testNullInitialisation() {
+    assertEquals(null, new IdentityProperty<>().get());
+  }
 
-	/**
-	 * Confirm value constructor initializes properly
-	 */
-	@Test
-	public void testValueInitialisation() {
-		Assert.assertEquals("value", new IdentityProperty<>("value").get());
-	}
+  /**
+   * Confirm value constructor initializes properly
+   */
+  @Test
+  public void testValueInitialisation() {
+    assertEquals("value", new IdentityProperty<>("value").get());
+  }
 
-	/**
-	 * Confirm property setting works
-	 */
-	@Test
-	public void testSet() {
-		IdentityProperty<String> property = new IdentityProperty<>();
-		property.set("set");
-		Assert.assertEquals("set", property.get());
-	}
+  /**
+   * Confirm property setting works
+   */
+  @Test
+  public void testSet() {
+    IdentityProperty<String> property = new IdentityProperty<>();
+    property.set("set");
+    assertEquals("set", property.get());
+  }
 
-	/**
-	 * Confirm property setting works multiple times
-	 */
-	@Test
-	public void testMultipleSet() {
-		IdentityProperty<String> property = new IdentityProperty<>();
-		property.set("set");
-		property.set("again");
-		Assert.assertEquals("again", property.get());
-	}
+  /**
+   * Confirm property setting works multiple times
+   */
+  @Test
+  public void testMultipleSet() {
+    IdentityProperty<String> property = new IdentityProperty<>();
+    property.set("set");
+    property.set("again");
+    assertEquals("again", property.get());
+  }
 }

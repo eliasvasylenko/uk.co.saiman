@@ -27,23 +27,25 @@
  */
 package uk.co.saiman.webmodule.semver;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 public class PreReleaseVersionStringTest {
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseWithInnerSpace() {
-    new PreReleaseVersion("0 0");
+    assertThrows(IllegalArgumentException.class, () -> new PreReleaseVersion("0 0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseWithLeadingSpace() {
-    new PreReleaseVersion(" 0");
+    assertThrows(IllegalArgumentException.class, () -> new PreReleaseVersion(" 0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMinorWithTrailingSpace() {
-    new PreReleaseVersion("0 ");
+    assertThrows(IllegalArgumentException.class, () -> new PreReleaseVersion("0 "));
   }
 
   @Test
@@ -51,26 +53,14 @@ public class PreReleaseVersionStringTest {
     String string = "0.0.0.0";
     PreReleaseVersion version = new PreReleaseVersion(string);
 
-    Assert
-        .assertEquals(
-            0,
-            (int) version.getIdentifiers().skip(0).findFirst().get().getInteger().get());
-    Assert
-        .assertEquals(
-            0,
-            (int) version.getIdentifiers().skip(1).findFirst().get().getInteger().get());
-    Assert
-        .assertEquals(
-            0,
-            (int) version.getIdentifiers().skip(2).findFirst().get().getInteger().get());
-    Assert
-        .assertEquals(
-            0,
-            (int) version.getIdentifiers().skip(3).findFirst().get().getInteger().get());
+    assertEquals(0, (int) version.getIdentifiers().skip(0).findFirst().get().getInteger().get());
+    assertEquals(0, (int) version.getIdentifiers().skip(1).findFirst().get().getInteger().get());
+    assertEquals(0, (int) version.getIdentifiers().skip(2).findFirst().get().getInteger().get());
+    assertEquals(0, (int) version.getIdentifiers().skip(3).findFirst().get().getInteger().get());
 
-    Assert.assertEquals(4, version.getIdentifiers().count());
+    assertEquals(4, version.getIdentifiers().count());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -78,13 +68,13 @@ public class PreReleaseVersionStringTest {
     String string = "a.b.c.d";
     PreReleaseVersion version = new PreReleaseVersion(string);
 
-    Assert.assertEquals("a", version.getIdentifiers().skip(0).findFirst().get().getString().get());
-    Assert.assertEquals("b", version.getIdentifiers().skip(1).findFirst().get().getString().get());
-    Assert.assertEquals("c", version.getIdentifiers().skip(2).findFirst().get().getString().get());
-    Assert.assertEquals("d", version.getIdentifiers().skip(3).findFirst().get().getString().get());
+    assertEquals("a", version.getIdentifiers().skip(0).findFirst().get().getString().get());
+    assertEquals("b", version.getIdentifiers().skip(1).findFirst().get().getString().get());
+    assertEquals("c", version.getIdentifiers().skip(2).findFirst().get().getString().get());
+    assertEquals("d", version.getIdentifiers().skip(3).findFirst().get().getString().get());
 
-    Assert.assertEquals(4, version.getIdentifiers().count());
+    assertEquals(4, version.getIdentifiers().count());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 }

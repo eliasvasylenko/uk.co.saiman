@@ -27,53 +27,56 @@
  */
 package uk.co.saiman.webmodule.semver;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 public class VersionStringTest {
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseEmptyString() {
-    Version.parse("");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse(""));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMajorWithTrailingSpace() {
-    Version.parse("0 .0.0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0 .0.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMinorWithLeadingSpace() {
-    Version.parse("0. 0.0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0. 0.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMinorWithTrailingSpace() {
-    Version.parse("0.0 .0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0.0 .0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMicroWithLeadingSpace() {
-    Version.parse("0.0. 0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0.0. 0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMicroWithTrailingSpace() {
-    Version.parse("0.0.0 -0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0.0.0 -0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMajorWithLetters() {
-    Version.parse("0a.0.0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0a.0.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMinorWithLetters() {
-    Version.parse("0.0a.0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0.0a.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMicroWithLetters() {
-    Version.parse("0.0.0a");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0.0.0a"));
   }
 
   @Test
@@ -81,13 +84,13 @@ public class VersionStringTest {
     String string = "0.0.0";
     Version version = Version.parse(string);
 
-    Assert.assertEquals(0, version.getMajor());
-    Assert.assertEquals(0, version.getMinor());
-    Assert.assertEquals(0, version.getMicro());
-    Assert.assertFalse(version.getPreRelease().isPresent());
-    Assert.assertFalse(version.getBuildInformation().isPresent());
+    assertEquals(0, version.getMajor());
+    assertEquals(0, version.getMinor());
+    assertEquals(0, version.getMicro());
+    assertFalse(version.getPreRelease().isPresent());
+    assertFalse(version.getBuildInformation().isPresent());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -95,13 +98,13 @@ public class VersionStringTest {
     String string = "0.0.0-0";
     Version version = Version.parse(string);
 
-    Assert.assertEquals(0, version.getMajor());
-    Assert.assertEquals(0, version.getMinor());
-    Assert.assertEquals(0, version.getMicro());
-    Assert.assertEquals(version.getPreRelease().get().toString(), "0");
-    Assert.assertFalse(version.getBuildInformation().isPresent());
+    assertEquals(0, version.getMajor());
+    assertEquals(0, version.getMinor());
+    assertEquals(0, version.getMicro());
+    assertEquals(version.getPreRelease().get().toString(), "0");
+    assertFalse(version.getBuildInformation().isPresent());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -109,13 +112,13 @@ public class VersionStringTest {
     String string = "0.0.0+0";
     Version version = Version.parse(string);
 
-    Assert.assertEquals(0, version.getMajor());
-    Assert.assertEquals(0, version.getMinor());
-    Assert.assertEquals(0, version.getMicro());
-    Assert.assertFalse(version.getPreRelease().isPresent());
-    Assert.assertEquals(version.getBuildInformation().get(), "0");
+    assertEquals(0, version.getMajor());
+    assertEquals(0, version.getMinor());
+    assertEquals(0, version.getMicro());
+    assertFalse(version.getPreRelease().isPresent());
+    assertEquals(version.getBuildInformation().get(), "0");
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -123,23 +126,23 @@ public class VersionStringTest {
     String string = "0.0.0-0+0";
     Version version = Version.parse(string);
 
-    Assert.assertEquals(0, version.getMajor());
-    Assert.assertEquals(0, version.getMinor());
-    Assert.assertEquals(0, version.getMicro());
-    Assert.assertEquals(version.getPreRelease().get().toString(), "0");
-    Assert.assertEquals(version.getBuildInformation().get(), "0");
+    assertEquals(0, version.getMajor());
+    assertEquals(0, version.getMinor());
+    assertEquals(0, version.getMicro());
+    assertEquals(version.getPreRelease().get().toString(), "0");
+    assertEquals(version.getBuildInformation().get(), "0");
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseTooManyComponents() {
-    Version.parse("0.0.0.0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0.0.0.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseTooFewComponents() {
-    Version.parse("0.0");
+    assertThrows(IllegalArgumentException.class, () -> Version.parse("0.0"));
   }
 
   @Test
@@ -147,11 +150,11 @@ public class VersionStringTest {
     String string = "123.456.789";
     Version version = Version.parse(string);
 
-    Assert.assertEquals(123, version.getMajor());
-    Assert.assertEquals(456, version.getMinor());
-    Assert.assertEquals(789, version.getMicro());
+    assertEquals(123, version.getMajor());
+    assertEquals(456, version.getMinor());
+    assertEquals(789, version.getMicro());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -159,10 +162,10 @@ public class VersionStringTest {
     String string = "0.0.0-a-b-c";
     Version version = Version.parse(string);
 
-    Assert.assertEquals(version.getPreRelease().get().toString(), "a-b-c");
-    Assert.assertFalse(version.getBuildInformation().isPresent());
+    assertEquals(version.getPreRelease().get().toString(), "a-b-c");
+    assertFalse(version.getBuildInformation().isPresent());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -170,9 +173,9 @@ public class VersionStringTest {
     String string = "0.0.0+a-b-c";
     Version version = Version.parse(string);
 
-    Assert.assertFalse(version.getPreRelease().isPresent());
-    Assert.assertEquals(version.getBuildInformation().get(), "a-b-c");
+    assertFalse(version.getPreRelease().isPresent());
+    assertEquals(version.getBuildInformation().get(), "a-b-c");
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 }

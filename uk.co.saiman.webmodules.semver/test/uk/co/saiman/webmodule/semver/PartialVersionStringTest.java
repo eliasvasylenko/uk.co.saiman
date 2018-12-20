@@ -27,59 +27,62 @@
  */
 package uk.co.saiman.webmodule.semver;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 public class PartialVersionStringTest {
   public void parseEmptyString() {
     String string = "";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertFalse(version.getMajor().isPresent());
-    Assert.assertFalse(version.getMinor().isPresent());
-    Assert.assertFalse(version.getMicro().isPresent());
+    assertFalse(version.getMajor().isPresent());
+    assertFalse(version.getMinor().isPresent());
+    assertFalse(version.getMicro().isPresent());
 
-    Assert.assertEquals("*", version.toString());
+    assertEquals("*", version.toString());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMajorWithTrailingSpace() {
-    new PartialVersion("0 .0.0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0 .0.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMinorWithLeadingSpace() {
-    new PartialVersion("0. 0.0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0. 0.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMinorWithTrailingSpace() {
-    new PartialVersion("0.0 .0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0.0 .0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMicroWithLeadingSpace() {
-    new PartialVersion("0.0. 0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0.0. 0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMicroWithTrailingSpace() {
-    new PartialVersion("0.0.0 -0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0.0.0 -0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMajorWithLetters() {
-    new PartialVersion("0a.0.0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0a.0.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMinorWithLetters() {
-    new PartialVersion("0.0a.0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0.0a.0"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseMicroWithLetters() {
-    new PartialVersion("0.0.0a");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0.0.0a"));
   }
 
   @Test
@@ -87,12 +90,12 @@ public class PartialVersionStringTest {
     String string = "0.0.0";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertEquals(0, (int) version.getMajor().get());
-    Assert.assertEquals(0, (int) version.getMinor().get());
-    Assert.assertEquals(0, (int) version.getMicro().get());
-    Assert.assertFalse(version.getPreRelease().isPresent());
+    assertEquals(0, (int) version.getMajor().get());
+    assertEquals(0, (int) version.getMinor().get());
+    assertEquals(0, (int) version.getMicro().get());
+    assertFalse(version.getPreRelease().isPresent());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -100,17 +103,17 @@ public class PartialVersionStringTest {
     String string = "0.0.0-0";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertEquals(0, (int) version.getMajor().get());
-    Assert.assertEquals(0, (int) version.getMinor().get());
-    Assert.assertEquals(0, (int) version.getMicro().get());
-    Assert.assertEquals(version.getPreRelease().get().toString(), "0");
+    assertEquals(0, (int) version.getMajor().get());
+    assertEquals(0, (int) version.getMinor().get());
+    assertEquals(0, (int) version.getMicro().get());
+    assertEquals(version.getPreRelease().get().toString(), "0");
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void parseTooManyComponents() {
-    new PartialVersion("0.0.0.0");
+    assertThrows(IllegalArgumentException.class, () -> new PartialVersion("0.0.0.0"));
   }
 
   @Test
@@ -118,11 +121,11 @@ public class PartialVersionStringTest {
     String string = "0.0";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertEquals(0, (int) version.getMajor().get());
-    Assert.assertEquals(0, (int) version.getMinor().get());
-    Assert.assertFalse(version.getMicro().isPresent());
+    assertEquals(0, (int) version.getMajor().get());
+    assertEquals(0, (int) version.getMinor().get());
+    assertFalse(version.getMicro().isPresent());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -130,11 +133,11 @@ public class PartialVersionStringTest {
     String string = "0";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertEquals(0, (int) version.getMajor().get());
-    Assert.assertFalse(version.getMinor().isPresent());
-    Assert.assertFalse(version.getMicro().isPresent());
+    assertEquals(0, (int) version.getMajor().get());
+    assertFalse(version.getMinor().isPresent());
+    assertFalse(version.getMicro().isPresent());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -142,11 +145,11 @@ public class PartialVersionStringTest {
     String string = "*";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertFalse(version.getMajor().isPresent());
-    Assert.assertFalse(version.getMinor().isPresent());
-    Assert.assertFalse(version.getMicro().isPresent());
+    assertFalse(version.getMajor().isPresent());
+    assertFalse(version.getMinor().isPresent());
+    assertFalse(version.getMicro().isPresent());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -154,11 +157,11 @@ public class PartialVersionStringTest {
     String string = "X";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertFalse(version.getMajor().isPresent());
-    Assert.assertFalse(version.getMinor().isPresent());
-    Assert.assertFalse(version.getMicro().isPresent());
+    assertFalse(version.getMajor().isPresent());
+    assertFalse(version.getMinor().isPresent());
+    assertFalse(version.getMicro().isPresent());
 
-    Assert.assertEquals("*", version.toString());
+    assertEquals("*", version.toString());
   }
 
   @Test
@@ -166,11 +169,11 @@ public class PartialVersionStringTest {
     String string = "x";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertFalse(version.getMajor().isPresent());
-    Assert.assertFalse(version.getMinor().isPresent());
-    Assert.assertFalse(version.getMicro().isPresent());
+    assertFalse(version.getMajor().isPresent());
+    assertFalse(version.getMinor().isPresent());
+    assertFalse(version.getMicro().isPresent());
 
-    Assert.assertEquals("*", version.toString());
+    assertEquals("*", version.toString());
   }
 
   @Test
@@ -178,11 +181,11 @@ public class PartialVersionStringTest {
     String string = "123.456.789";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertEquals(123, (int) version.getMajor().get());
-    Assert.assertEquals(456, (int) version.getMinor().get());
-    Assert.assertEquals(789, (int) version.getMicro().get());
+    assertEquals(123, (int) version.getMajor().get());
+    assertEquals(456, (int) version.getMinor().get());
+    assertEquals(789, (int) version.getMicro().get());
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 
   @Test
@@ -190,8 +193,8 @@ public class PartialVersionStringTest {
     String string = "0.0.0-a-b-c";
     PartialVersion version = new PartialVersion(string);
 
-    Assert.assertEquals(version.getPreRelease().get().toString(), "a-b-c");
+    assertEquals(version.getPreRelease().get().toString(), "a-b-c");
 
-    Assert.assertEquals(string, version.toString());
+    assertEquals(string, version.toString());
   }
 }

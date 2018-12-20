@@ -28,15 +28,16 @@
 package uk.co.saiman.experiment.path;
 
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
 import static uk.co.saiman.experiment.path.ExperimentPath.absolute;
 import static uk.co.saiman.experiment.path.ExperimentPath.relative;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import mockit.Mocked;
 import uk.co.saiman.experiment.ExperimentException;
@@ -64,9 +65,9 @@ public class ExperimentPathTest {
     assertThat(path.isAbsolute(), is(false));
   }
 
-  @Test(expected = ExperimentException.class)
+  @Test
   public void testParentOfEmptyAbsolutePath() {
-    absolute().parent();
+    Assertions.assertThrows(ExperimentException.class, absolute()::parent);
   }
 
   @Test

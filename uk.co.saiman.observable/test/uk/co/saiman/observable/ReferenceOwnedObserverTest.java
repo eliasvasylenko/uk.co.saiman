@@ -27,11 +27,13 @@
  */
 package uk.co.saiman.observable;
 
-import static org.junit.Assert.assertNull;
+import static java.time.Duration.ofSeconds;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 import java.lang.ref.WeakReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -45,17 +47,19 @@ public class ReferenceOwnedObserverTest {
   @Injectable
   Observer<OwnedMessage<Object, String>> downstreamObserver;
 
-  @Test(timeout = 5000)
+  @Test
   public void weakReferenceTest() {
-    WeakReference<?> reference = new WeakReference<>(new Object());
+    assertTimeout(ofSeconds(5), () -> {
+      WeakReference<?> reference = new WeakReference<>(new Object());
 
-    while (reference.get() != null) {
-      new Object();
-      System.gc();
-      System.runFinalization();
-    }
+      while (reference.get() != null) {
+        new Object();
+        System.gc();
+        System.runFinalization();
+      }
 
-    assertNull(reference.get());
+      assertNull(reference.get());
+    });
   }
 
   private Observer<OwnedMessage<Object, String>> wrapDownstreamObserver() {
@@ -94,7 +98,7 @@ public class ReferenceOwnedObserverTest {
   }
 
   @SuppressWarnings("unchecked")
-  @Test(timeout = 5000)
+  @Test
   public void holdWeakOwnedObserverThenMessageTest() {
     Object owner = new Object();
 
@@ -115,7 +119,7 @@ public class ReferenceOwnedObserverTest {
   }
 
   @SuppressWarnings("unchecked")
-  @Test(timeout = 5000)
+  @Test
   public void dropWeakOwnedObserverThenMessageTest() {
     Object owner = new Object();
 

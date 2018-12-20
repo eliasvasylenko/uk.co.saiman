@@ -27,10 +27,11 @@
  */
 package uk.co.saiman.observable;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -61,11 +62,11 @@ public class HotObservableTest {
     observable.assertLive();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void startWhenLiveTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
-    observable.start();
+    assertThrows(IllegalStateException.class, () -> observable.start());
   }
 
   @Test
@@ -105,28 +106,28 @@ public class HotObservableTest {
     observable.assertDead();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void messageWhenDeadTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
     observable.complete();
-    observable.next("fail");
+    assertThrows(IllegalStateException.class, () -> observable.next("fail"));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void completeWhenDeadTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
     observable.complete();
-    observable.complete();
+    assertThrows(IllegalStateException.class, () -> observable.complete());
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void failWhenDeadTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
     observable.complete();
-    observable.fail(new Exception());
+    assertThrows(IllegalStateException.class, () -> observable.fail(new Exception()));
   }
 
   @Test
@@ -204,17 +205,17 @@ public class HotObservableTest {
     assertThat(observable.hasObservers(), equalTo(true));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void failWithNullThrowableTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe();
-    observable.fail(null);
+    assertThrows(NullPointerException.class, () -> observable.fail(null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void failWithNullMessageTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe();
-    observable.next(null);
+    assertThrows(NullPointerException.class, () -> observable.next(null));
   }
 }

@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.data.function.processing;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import uk.co.saiman.data.function.processing.Convolution;
+import org.junit.jupiter.api.Test;
 
 public class ConvolutionTest {
   private static final double[] EMPTY = new double[] {};
@@ -39,15 +39,14 @@ public class ConvolutionTest {
   private static final double[] TWO = new double[] { 5, 13 };
   private static final double[] THREE = new double[] { 3, 11, 17 };
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void emptyConvolutionVectorTest() {
-    Convolution.process(UNIT, EMPTY);
+    assertThrows(IllegalArgumentException.class, () -> Convolution.process(UNIT, EMPTY));
   }
 
-  @Test(expected = NegativeArraySizeException.class)
+  @Test
   public void emptyDataTest() {
-    double[] result = Convolution.process(EMPTY, THREE);
-    Assert.assertArrayEquals(EMPTY, result, 0);
+    assertThrows(NegativeArraySizeException.class, () -> Convolution.process(EMPTY, THREE));
   }
 
   @Test
@@ -57,9 +56,9 @@ public class ConvolutionTest {
     double[] resultOffset1 = Convolution.process(TWO, THREE, 1);
     double[] resultOffset2 = Convolution.process(TWO, THREE, 2);
 
-    Assert.assertArrayEquals(EMPTY, result, 0);
-    Assert.assertArrayEquals(new double[] { 379, 403 }, resultOffset0, 0);
-    Assert.assertArrayEquals(new double[] { 291, 379 }, resultOffset1, 0);
-    Assert.assertArrayEquals(new double[] { 155, 291 }, resultOffset2, 0);
+    assertArrayEquals(EMPTY, result);
+    assertArrayEquals(new double[] { 379, 403 }, resultOffset0);
+    assertArrayEquals(new double[] { 291, 379 }, resultOffset1);
+    assertArrayEquals(new double[] { 155, 291 }, resultOffset2);
   }
 }

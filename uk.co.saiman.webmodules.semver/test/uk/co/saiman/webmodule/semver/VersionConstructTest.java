@@ -27,76 +27,78 @@
  */
 package uk.co.saiman.webmodule.semver;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.junit.jupiter.api.Test;
 
 public class VersionConstructTest {
   @Test
   public void constructAllZeroRelease() {
     Version version = new Version(0, 0, 0);
 
-    Assert.assertEquals(version.getMajor(), 0);
-    Assert.assertEquals(version.getMinor(), 0);
-    Assert.assertEquals(version.getMicro(), 0);
-    Assert.assertFalse(version.getPreRelease().isPresent());
-    Assert.assertFalse(version.getBuildInformation().isPresent());
+    assertEquals(version.getMajor(), 0);
+    assertEquals(version.getMinor(), 0);
+    assertEquals(version.getMicro(), 0);
+    assertFalse(version.getPreRelease().isPresent());
+    assertFalse(version.getBuildInformation().isPresent());
   }
 
   @Test
   public void constructAllZeroPreRelease() {
     Version version = new Version(0, 0, 0).withPreRelease("0");
 
-    Assert.assertEquals(version.getMajor(), 0);
-    Assert.assertEquals(version.getMinor(), 0);
-    Assert.assertEquals(version.getMicro(), 0);
-    Assert.assertEquals(version.getPreRelease().get().toString(), "0");
-    Assert.assertFalse(version.getBuildInformation().isPresent());
+    assertEquals(version.getMajor(), 0);
+    assertEquals(version.getMinor(), 0);
+    assertEquals(version.getMicro(), 0);
+    assertEquals(version.getPreRelease().get().toString(), "0");
+    assertFalse(version.getBuildInformation().isPresent());
   }
 
   @Test
   public void constructAllZeroReleaseWithBuildInfo() {
     Version version = new Version(0, 0, 0).withBuildInformation("0");
 
-    Assert.assertEquals(version.getMajor(), 0);
-    Assert.assertEquals(version.getMinor(), 0);
-    Assert.assertEquals(version.getMicro(), 0);
-    Assert.assertFalse(version.getPreRelease().isPresent());
-    Assert.assertEquals(version.getBuildInformation().get(), "0");
+    assertEquals(version.getMajor(), 0);
+    assertEquals(version.getMinor(), 0);
+    assertEquals(version.getMicro(), 0);
+    assertFalse(version.getPreRelease().isPresent());
+    assertEquals(version.getBuildInformation().get(), "0");
   }
 
   @Test
   public void constructAllZeroPreReleaseWithBuildInfo() {
     Version version = new Version(0, 0, 0).withPreRelease("0").withBuildInformation("0");
 
-    Assert.assertEquals(version.getMajor(), 0);
-    Assert.assertEquals(version.getMinor(), 0);
-    Assert.assertEquals(version.getMicro(), 0);
-    Assert.assertEquals(version.getPreRelease().get().toString(), "0");
-    Assert.assertEquals(version.getBuildInformation().get(), "0");
+    assertEquals(version.getMajor(), 0);
+    assertEquals(version.getMinor(), 0);
+    assertEquals(version.getMicro(), 0);
+    assertEquals(version.getPreRelease().get().toString(), "0");
+    assertEquals(version.getBuildInformation().get(), "0");
   }
 
   @Test
   public void constructLargeNumbers() {
     Version version = new Version(123, 456, 789);
 
-    Assert.assertEquals(version.getMajor(), 123);
-    Assert.assertEquals(version.getMinor(), 456);
-    Assert.assertEquals(version.getMicro(), 789);
+    assertEquals(version.getMajor(), 123);
+    assertEquals(version.getMinor(), 456);
+    assertEquals(version.getMicro(), 789);
   }
 
   @Test
   public void constructPreReleaseWithExtraDashes() {
     Version version = new Version(0, 0, 0).withPreRelease("a-b-c");
 
-    Assert.assertEquals(version.getPreRelease().get().toString(), "a-b-c");
-    Assert.assertFalse(version.getBuildInformation().isPresent());
+    assertEquals(version.getPreRelease().get().toString(), "a-b-c");
+    assertFalse(version.getBuildInformation().isPresent());
   }
 
   @Test
   public void constructBuildInformationWithExtraDashes() {
     Version version = new Version(0, 0, 0).withBuildInformation("a-b-c");
 
-    Assert.assertFalse(version.getPreRelease().isPresent());
-    Assert.assertEquals(version.getBuildInformation().get(), "a-b-c");
+    assertFalse(version.getPreRelease().isPresent());
+    assertEquals(version.getBuildInformation().get(), "a-b-c");
   }
 }

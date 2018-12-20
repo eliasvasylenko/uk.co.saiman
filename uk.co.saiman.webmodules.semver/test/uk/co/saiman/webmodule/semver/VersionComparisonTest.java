@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.webmodule.semver;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.junit.jupiter.api.Test;
 
 public class VersionComparisonTest {
   @Test
@@ -38,18 +40,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0);
     second = new Version(0, 0, 0);
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
 
     first = new Version(1, 2, 3);
     second = new Version(1, 2, 3);
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
 
     first = new Version(123, 456, 789);
     second = new Version(123, 456, 789);
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
   }
 
   @Test
@@ -59,18 +61,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0).withPreRelease(new String("0"));
     second = new Version(0, 0, 0).withPreRelease(new String("0"));
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
 
     first = new Version(1, 2, 3).withPreRelease(new String("4"));
     second = new Version(1, 2, 3).withPreRelease(new String("4"));
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
 
     first = new Version(123, 456, 789).withPreRelease(new String("abc"));
     second = new Version(123, 456, 789).withPreRelease(new String("abc"));
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
   }
 
   @Test
@@ -80,18 +82,18 @@ public class VersionComparisonTest {
 
     first = new Version(1, 1, 1);
     second = new Version(0, 0, 0);
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(1, 1, 1).withPreRelease(new String("b"));
     second = new Version(0, 0, 0).withPreRelease(new String("a"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(1, 1, 1).withBuildInformation(new String("b"));
     second = new Version(0, 0, 0).withBuildInformation(new String("a"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -101,18 +103,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0);
     second = new Version(1, 1, 1);
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 0).withPreRelease(new String("a"));
     second = new Version(1, 1, 1).withPreRelease(new String("b"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 0).withBuildInformation(new String("a"));
     second = new Version(1, 1, 1).withBuildInformation(new String("b"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -122,18 +124,18 @@ public class VersionComparisonTest {
 
     first = new Version(1, 0, 0);
     second = new Version(0, 1, 1);
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(1, 0, 0).withPreRelease(new String("a"));
     second = new Version(0, 1, 1).withPreRelease(new String("b"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(1, 0, 0).withBuildInformation(new String("a"));
     second = new Version(0, 1, 1).withBuildInformation(new String("b"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -143,18 +145,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 1, 1);
     second = new Version(1, 0, 0);
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 1, 1).withPreRelease(new String("b"));
     second = new Version(1, 0, 0).withPreRelease(new String("a"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 1, 1).withBuildInformation(new String("b"));
     second = new Version(1, 0, 0).withBuildInformation(new String("a"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -164,18 +166,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 1, 0);
     second = new Version(0, 0, 1);
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 1, 0).withPreRelease(new String("a"));
     second = new Version(0, 0, 1).withPreRelease(new String("b"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 1, 0).withBuildInformation(new String("a"));
     second = new Version(0, 0, 1).withBuildInformation(new String("b"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -185,18 +187,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 1);
     second = new Version(0, 1, 0);
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 1).withPreRelease(new String("b"));
     second = new Version(0, 1, 0).withPreRelease(new String("a"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 1).withBuildInformation(new String("b"));
     second = new Version(0, 1, 0).withBuildInformation(new String("a"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -206,18 +208,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 1);
     second = new Version(0, 0, 0);
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 1).withPreRelease(new String("a"));
     second = new Version(0, 0, 0).withPreRelease(new String("b"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 1).withBuildInformation(new String("a"));
     second = new Version(0, 0, 0).withBuildInformation(new String("b"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -227,18 +229,18 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0);
     second = new Version(0, 0, 1);
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 0).withPreRelease(new String("b"));
     second = new Version(0, 0, 1).withPreRelease(new String("a"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
 
     first = new Version(0, 0, 0).withBuildInformation(new String("b"));
     second = new Version(0, 0, 1).withBuildInformation(new String("a"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -248,8 +250,8 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0).withPreRelease(new String("b"));
     second = new Version(0, 0, 0).withPreRelease(new String("a"));
-    Assert.assertEquals(1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -259,8 +261,8 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0).withPreRelease(new String("a"));
     second = new Version(0, 0, 0).withPreRelease(new String("b"));
-    Assert.assertEquals(-1, first.compareTo(second));
-    Assert.assertNotEquals(first, second);
+    assertEquals(-1, first.compareTo(second));
+    assertNotEquals(first, second);
   }
 
   @Test
@@ -270,8 +272,8 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0).withBuildInformation(new String("b"));
     second = new Version(0, 0, 0).withBuildInformation(new String("a"));
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
   }
 
   @Test
@@ -281,7 +283,7 @@ public class VersionComparisonTest {
 
     first = new Version(0, 0, 0).withBuildInformation(new String("a"));
     second = new Version(0, 0, 0).withBuildInformation(new String("b"));
-    Assert.assertEquals(0, first.compareTo(second));
-    Assert.assertEquals(first, second);
+    assertEquals(0, first.compareTo(second));
+    assertEquals(first, second);
   }
 }

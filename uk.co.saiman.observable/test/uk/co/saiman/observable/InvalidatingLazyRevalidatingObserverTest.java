@@ -27,7 +27,9 @@
  */
 package uk.co.saiman.observable;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -136,7 +138,7 @@ public class InvalidatingLazyRevalidatingObserverTest {
     new FullVerifications() {};
   }
 
-  @Test(expected = MissingValueException.class)
+  @Test
   public void invalidateAndRevalidateSingleFailure() {
     Observer<String> test = new InvalidatingLazyRevalidatingObserver<>(
         new MultiplePassthroughObserver<Invalidation<String>>(
@@ -144,7 +146,7 @@ public class InvalidatingLazyRevalidatingObserverTest {
             Invalidation::revalidate));
 
     test.onObserve(upstreamObservation);
-    test.onFail(new Throwable());
+    assertThrows(MissingValueException.class, () -> test.onFail(new Throwable()));
 
     new VerificationsInOrder() {
       {

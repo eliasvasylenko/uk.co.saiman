@@ -27,30 +27,31 @@
  */
 package uk.co.saiman.reflection;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.Assert.assertThat;
 import static uk.co.saiman.reflection.ParameterizedTypes.parameterize;
 
 import java.lang.reflect.ParameterizedType;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.co.saiman.reflection.ParameterizedTypeTest.Outer.Inner;
 
 @SuppressWarnings("javadoc")
 public class ParameterizedTypeTest {
-	static class Outer<T> {
-		class Inner<U> {}
-	}
+  static class Outer<T> {
+    class Inner<U> {}
+  }
 
-	@Test
-	public void parameterizedEnclosingTypeTest() {
-		ParameterizedType parameterizedType = parameterize(Inner.class, String.class, Number.class);
+  @Test
+  public void parameterizedEnclosingTypeTest() {
+    ParameterizedType parameterizedType = parameterize(Inner.class, String.class, Number.class);
 
-		assertThat(parameterizedType.getOwnerType(), instanceOf(ParameterizedType.class));
+    assertThat(parameterizedType.getOwnerType(), instanceOf(ParameterizedType.class));
 
-		assertThat(((ParameterizedType) parameterizedType.getOwnerType()).getActualTypeArguments(),
-				arrayContaining(String.class));
-	}
+    assertThat(
+        ((ParameterizedType) parameterizedType.getOwnerType()).getActualTypeArguments(),
+        arrayContaining(String.class));
+  }
 }

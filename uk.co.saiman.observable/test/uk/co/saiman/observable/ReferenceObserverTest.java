@@ -27,11 +27,13 @@
  */
 package uk.co.saiman.observable;
 
-import static org.junit.Assert.assertNull;
+import static java.time.Duration.ofMillis;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.lang.ref.WeakReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -45,17 +47,19 @@ public class ReferenceObserverTest {
   @Injectable
   Observer<String> downstreamObserver;
 
-  @Test(timeout = 5000)
+  @Test
   public void weakReferenceTest() {
-    WeakReference<?> reference = new WeakReference<>(new Object());
+    Assertions.assertTimeout(ofMillis(5000), () -> {
+      WeakReference<?> reference = new WeakReference<>(new Object());
 
-    while (reference.get() != null) {
-      new Object();
-      System.gc();
-      System.runFinalization();
-    }
+      while (reference.get() != null) {
+        new Object();
+        System.gc();
+        System.runFinalization();
+      }
 
-    assertNull(reference.get());
+      assertNull(reference.get());
+    });
   }
 
   private Observer<String> wrapDownstreamObserver() {
@@ -82,7 +86,7 @@ public class ReferenceObserverTest {
     };
   }
 
-  @Test(timeout = 5000)
+  @Test
   public void holdWeakObserverThenMessageTest() {
     Observer<String> downstreamObserverWrapper = wrapDownstreamObserver();
     Observer<String> test = ReferenceObserver.weak(downstreamObserverWrapper);
@@ -100,7 +104,7 @@ public class ReferenceObserverTest {
     new FullVerifications() {};
   }
 
-  @Test(timeout = 5000)
+  @Test
   public void dropWeakObserverThenMessageTest() {
     Observer<String> downstreamObserverWrapper = wrapDownstreamObserver();
     Observer<String> test = ReferenceObserver.weak(downstreamObserverWrapper);

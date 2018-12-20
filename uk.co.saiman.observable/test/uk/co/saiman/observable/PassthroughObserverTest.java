@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.observable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.FullVerifications;
 import mockit.Injectable;

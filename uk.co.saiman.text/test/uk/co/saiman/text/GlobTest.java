@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.text;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("javadoc")
 public class GlobTest {

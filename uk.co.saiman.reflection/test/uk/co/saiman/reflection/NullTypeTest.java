@@ -27,22 +27,21 @@
  */
 package uk.co.saiman.reflection;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.Type;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import uk.co.saiman.reflection.Types;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("javadoc")
 public class NullTypeTest {
-	@Test
-	public void assignabilityFromNullTest() {
-		Assert.assertTrue(Types.isAssignable((Type) null, String.class));
-	}
+  @Test
+  public void assignabilityFromNullTest() {
+    assertTrue(Types.isAssignable((Type) null, String.class));
+  }
 
-	@Test
-	public void assignabilityToNullTest() {
-		Assert.assertTrue(Types.isAssignable(String.class, (Type) null));
-	}
+  @Test
+  public void assignabilityToNullTest() {
+    assertTrue(Types.isAssignable(String.class, (Type) null));
+  }
 }

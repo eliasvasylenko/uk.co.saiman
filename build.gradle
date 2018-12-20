@@ -5,19 +5,14 @@
  * and bnd_* values from gradle.properties.
  */
 
-import aQute.bnd.build.Workspace
-import aQute.bnd.osgi.Constants
-
 /* Add bnd gradle plugin as a script dependency */
 buildscript {
   repositories {
-    jcenter()
     maven {
       url "https://plugins.gradle.org/m2/"
     }
   }
   dependencies {
-    classpath bndPlugin
     classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.13.1'
     classpath ('org.ajoberstar:gradle-git:1.5.1') {
       /* Resolve dependency conflict with bndtools: */
@@ -26,27 +21,16 @@ buildscript {
   }
 }
 
-task wrapper(type: Wrapper) {
+wrapper {
   jarFile = rootProject.file('.gradle-wrapper/gradle-wrapper.jar')
-  gradleVersion = '4.10'
+  gradleVersion = '5.0'
 }
-
-/* Initialize the bnd workspace */
-Workspace.setDriver(Constants.BNDDRIVER_GRADLE)
-Workspace.addGestalt(Constants.GESTALT_BATCH, null)
-ext.bndWorkspace = new Workspace(rootDir, bnd_cnf).setOffline(gradle.startParameter.offline)
-
-ext.cnf = rootProject.project(bnd_cnf)
 
 /* Configure the subprojects */
 def bndProjects() {
   return subprojects.findAll {
-    bndWorkspace.getProject(it.name) != null && new File(it.projectDir, "src").exists()
+    it.plugins.hasPlugin('biz.aQute.bnd')
   }
-}
-
-configure(bndProjects()) {
-  plugins.apply 'biz.aQute.bnd'
 }
 
 /* Test Configuration */

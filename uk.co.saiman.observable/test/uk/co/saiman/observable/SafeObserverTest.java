@@ -27,14 +27,15 @@
  */
 package uk.co.saiman.observable;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.Expectations;
 import mockit.FullVerifications;
@@ -230,11 +231,11 @@ public class SafeObserverTest {
     assertFalse(test.getObservation().isRequestUnbounded());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void useNullObserverTest() {
     SafeObserver<String> test = new SafeObserver<>(downstreamObserver);
 
-    test.onObserve(null);
+    assertThrows(NullPointerException.class, () -> test.onObserve(null));
   }
 
   @Test

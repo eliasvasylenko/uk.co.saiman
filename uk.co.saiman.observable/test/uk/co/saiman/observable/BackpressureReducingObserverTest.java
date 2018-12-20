@@ -27,13 +27,14 @@
  */
 package uk.co.saiman.observable;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.co.saiman.observable.BackpressureReducingObserver.backpressureReducingObserver;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import mockit.Expectations;
 import mockit.FullVerifications;
@@ -241,26 +242,37 @@ public class BackpressureReducingObserverTest {
     new FullVerifications() {};
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void nullAccumulaterWithIdentityTest() {
-    backpressureReducingObserver(downstreamObserver, () -> null, null);
+    assertThrows(
+        NullPointerException.class,
+        () -> backpressureReducingObserver(downstreamObserver, () -> null, null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void nullAccumulaterWithInitialTest() {
-    backpressureReducingObserver(downstreamObserver, a -> null, null);
+    assertThrows(
+        NullPointerException.class,
+        () -> backpressureReducingObserver(downstreamObserver, a -> null, null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void nullIdentityTest() {
-    backpressureReducingObserver(downstreamObserver, (Supplier<String>) null, (a, b) -> null);
+    assertThrows(
+        NullPointerException.class,
+        () -> backpressureReducingObserver(
+            downstreamObserver,
+            (Supplier<String>) null,
+            (a, b) -> null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void nullInitialTest() {
-    backpressureReducingObserver(
-        downstreamObserver,
-        (Function<String, String>) null,
-        (a, b) -> null);
+    assertThrows(
+        NullPointerException.class,
+        () -> backpressureReducingObserver(
+            downstreamObserver,
+            (Function<String, String>) null,
+            (a, b) -> null));
   }
 }
