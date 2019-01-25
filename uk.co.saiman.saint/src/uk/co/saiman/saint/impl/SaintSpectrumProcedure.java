@@ -41,12 +41,12 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.spectrum.Spectrum;
+import uk.co.saiman.experiment.ConditionRequirement;
 import uk.co.saiman.experiment.ExperimentContext;
 import uk.co.saiman.experiment.Observation;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
-import uk.co.saiman.experiment.sample.SampleProcedure;
 import uk.co.saiman.experiment.sample.XYStageProcedure;
 import uk.co.saiman.experiment.spectrum.SpectrumProcedure;
 import uk.co.saiman.experiment.state.Accessor;
@@ -67,9 +67,12 @@ public class SaintSpectrumProcedure implements SpectrumProcedure<SaintSpectrumCo
   @Reference
   private ProcessingService processors;
 
+  private final ConditionRequirement<Void> sampleResource;
   private final Observation<Spectrum> spectrumObservation;
 
   public SaintSpectrumProcedure() {
+    sampleResource = ConditionRequirement
+        .conditionRequirement(stageExperiment.getSamplePreparation());
     spectrumObservation = new Observation<Spectrum>(SAINT_SPECTRUM) {};
   }
 
@@ -125,8 +128,8 @@ public class SaintSpectrumProcedure implements SpectrumProcedure<SaintSpectrumCo
   }
 
   @Override
-  public SampleProcedure<?> getSampleProcedure() {
-    return stageExperiment;
+  public ConditionRequirement<Void> sampleResource() {
+    return sampleResource;
   }
 
   @Override

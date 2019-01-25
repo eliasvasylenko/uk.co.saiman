@@ -29,9 +29,7 @@ package uk.co.saiman.experiment.sample;
 
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.Condition;
-import uk.co.saiman.experiment.Dependency;
-import uk.co.saiman.experiment.Observation;
+import uk.co.saiman.experiment.Preparation;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.instrument.sample.SampleDevice;
 
@@ -45,27 +43,12 @@ import uk.co.saiman.instrument.sample.SampleDevice;
  * @param <T> the type of sample configuration for the instrument
  */
 public interface SampleProcedure<T extends SampleConfiguration> extends Procedure<T> {
-  Condition getSampleReadyCondition();
+  Preparation<Void> getSamplePreparation();
 
   SampleDevice<?, ?> sampleDevice();
 
   @Override
-  default Stream<Condition> expectations() {
-    return Stream.empty();
-  }
-
-  @Override
-  default Stream<Condition> conditions() {
-    return Stream.of(getSampleReadyCondition());
-  }
-
-  @Override
-  default Stream<Dependency<?>> dependencies() {
-    return Stream.empty();
-  }
-
-  @Override
-  default Stream<Observation<?>> observations() {
-    return Stream.empty();
+  default Stream<Preparation<?>> preparations() {
+    return Stream.of(getSamplePreparation());
   }
 }

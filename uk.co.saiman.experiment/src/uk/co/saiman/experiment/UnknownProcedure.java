@@ -29,8 +29,6 @@ package uk.co.saiman.experiment;
 
 import static java.lang.String.format;
 
-import java.util.stream.Stream;
-
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.reflection.token.TypeToken;
 
@@ -58,25 +56,5 @@ public class UnknownProcedure implements Procedure<StateMap> {
   @Override
   public void proceed(ProcedureContext<StateMap> context) {
     throw new ExperimentException(format("Cannot execute missing experiment type %s", id));
-  }
-
-  @Override
-  public Stream<Condition> expectations() {
-    return Stream.empty();
-  }
-
-  @Override
-  public Stream<Condition> conditions() {
-    return Stream.empty();
-  }
-
-  @Override
-  public Stream<Dependency<?>> dependencies() {
-    return Stream.empty();
-  }
-
-  @Override
-  public Stream<Observation<?>> observations() {
-    return Stream.empty(); // TODO load existing results;
   }
 }

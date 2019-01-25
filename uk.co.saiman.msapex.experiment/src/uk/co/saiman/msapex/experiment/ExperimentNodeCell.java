@@ -51,7 +51,7 @@ import uk.co.saiman.eclipse.utilities.EclipseUtilities;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.event.AttachStepEvent;
-import uk.co.saiman.experiment.event.DetachStepEvent;
+import uk.co.saiman.experiment.event.DisposeStepEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
 import uk.co.saiman.experiment.event.RenameStepEvent;
 import uk.co.saiman.msapex.editor.EditorService;
@@ -168,7 +168,7 @@ public class ExperimentNodeCell {
   @Inject
   @Optional
   public void update(RenameStepEvent event) {
-    if (event.node() == experiment) {
+    if (event.step() == experiment) {
       cell.setLabel(event.id());
     }
   }
@@ -176,7 +176,7 @@ public class ExperimentNodeCell {
   @Inject
   @Optional
   public void update(ExperimentLifecycleEvent event) {
-    if (event.node() == experiment) {
+    if (event.step() == experiment) {
       context.set(ExperimentLifecycleState.class, event.lifecycleState());
     }
   }
@@ -191,7 +191,7 @@ public class ExperimentNodeCell {
 
   @Inject
   @Optional
-  public void update(DetachStepEvent event) {
+  public void update(DisposeStepEvent event) {
     if (event.previousParent() == experiment) {
       updateChildren();
     }
@@ -202,7 +202,7 @@ public class ExperimentNodeCell {
         .setItems(
             ExperimentNodeCell.ID,
             ExperimentStep.class,
-            experiment.getChildren().collect(toList()));
+            experiment.getComponentSteps().collect(toList()));
   }
 
   @Inject

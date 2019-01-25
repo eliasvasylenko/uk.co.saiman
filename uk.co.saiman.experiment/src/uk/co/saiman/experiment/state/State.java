@@ -31,6 +31,12 @@ import static uk.co.saiman.experiment.state.StateKind.LIST;
 import static uk.co.saiman.experiment.state.StateKind.MAP;
 import static uk.co.saiman.experiment.state.StateKind.PROPERTY;
 
+/**
+ * An immutable piece of data which can easily be transformed according to
+ * {@link Accessor type-safe accessors}.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface State {
   StateKind getKind();
 

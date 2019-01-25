@@ -27,7 +27,10 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -43,8 +46,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Procedure;
+import uk.co.saiman.experiment.Resource;
+import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
@@ -70,36 +74,54 @@ public class AddNodeToNodeMenu {
   void aboutToShow(List<MMenuElement> items, ExperimentStep<?> selectedNode) {
     procedures
         .procedures()
-        .filter(selectedNode.getProcedure()::satisfiesRequirementsOf)
-        .map(t -> createMenuItem(selectedNode, t))
+        .flatMap(p -> createMenuItem(selectedNode, p).stream())
         .forEach(items::add);
   }
 
-  private MDirectMenuItem createMenuItem(ExperimentStep<?> node, Procedure<?> subProcedure) {
+  private Optional<MDirectMenuItem> createMenuItem(ExperimentStep<?> step, Procedure<?> subProcedure) {
+    var resources = subProcedure.requirement().resolveResources(step).collect(toList());
+    return !resources.isEmpty()
+        ? Optional.of(createMenuItem(resources, subProcedure))
+        : Optional.empty();
+  }
+
+  private MDirectMenuItem createMenuItem(
+      List<? extends Resource> resources,
+      Procedure<?> subProcedure) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
     moduleItem.setLabel(procedures.getId(subProcedure));
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute
       public void execute() {
-        addNode(node, subProcedure);
+        addNode(resources, subProcedure);
       }
     });
     return moduleItem;
   }
 
-  private void addNode(ExperimentStep<?> node, Procedure<?> subProcedure) {
-    try {
-      node.attach(new ExperimentStep<>(subProcedure));
+  private void addNode(List<? extends Resource> resources, Procedure<?> subProcedure) {
+    Resource resource;
 
+    if (resources.size() == 1) {
+      resource = resources.get(0);
+    } else {
+      // TODO open a dialog box to select which resource to attach to.
+      throw new UnsupportedOperationException();
+    }
+
+    try {
+      resource.attach(new ExperimentStep<>(subProcedure));
     } catch (Exception e) {
       log.log(Level.ERROR, e);
 
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.addNodeFailedDialog().toString());
-      alert.setHeaderText(text.addNodeFailedText(node).toString());
-      alert.setContentText(text.addNodeFailedDescription().toString());
+      alert.setTitle(text.attachNodeFailedDialog().toString());
+      alert
+          .setHeaderText(
+              text.attachNodeFailedText(resource.getNode(), resource, subProcedure).toString());
+      alert.setContentText(text.attachNodeFailedDescription().toString());
       alert.showAndWait();
     }
   }

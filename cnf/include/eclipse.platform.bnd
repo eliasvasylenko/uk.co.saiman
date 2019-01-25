@@ -26,7 +26,7 @@
 	org.eclipse.osgi,\
 	org.eclipse.osgi.services,\
 	org.eclipse.ui.workbench,\
-	javax.annotation-api
+	javax.annotation
 
 Import-Package:\
 	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!

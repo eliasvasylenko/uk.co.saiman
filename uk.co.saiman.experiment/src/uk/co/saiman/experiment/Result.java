@@ -42,8 +42,7 @@ import uk.co.saiman.observable.Observable;
  *
  * @param <T> the data type of the result
  */
-public class Result<T> {
-  private final ExperimentStep<?> step;
+public class Result<T> extends Resource {
   private final Observation<T> observation;
 
   private Supplier<? extends T> valueSupplier;
@@ -55,13 +54,9 @@ public class Result<T> {
   private final HotObservable<Result<T>> updates;
 
   Result(ExperimentStep<?> step, Observation<T> observation) {
-    this.step = step;
+    super(step);
     this.observation = observation;
     this.updates = new HotObservable<>();
-  }
-
-  public ExperimentStep<?> getExperimentStep() {
-    return step;
   }
 
   public Observation<T> getObservation() {

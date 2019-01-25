@@ -38,7 +38,7 @@ import javax.measure.quantity.Length;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.Condition;
+import uk.co.saiman.experiment.Preparation;
 import uk.co.saiman.experiment.ExperimentContext;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.sample.XYStageProcedure;
@@ -64,7 +64,7 @@ public class SaintXYStageProcedure
   @Reference(cardinality = OPTIONAL)
   private XYStage<?> stageDevice;
 
-  private Condition sampleHolding = new Condition(SAMPLE_HOLDING_CONDITION);
+  private Preparation<Void> sampleHolding = new Preparation<>(SAMPLE_HOLDING_CONDITION) {};
 
   @Override
   public SaintXYStageConfiguration configureVariables(
@@ -117,7 +117,7 @@ public class SaintXYStageProcedure
   }
 
   @Override
-  public Condition getSampleReadyCondition() {
+  public Preparation<Void> getSamplePreparation() {
     return sampleHolding;
   }
 }

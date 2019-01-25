@@ -62,7 +62,6 @@ import org.osgi.framework.ServiceRegistration;
 import uk.co.saiman.experiment.ExperimentProcedure;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.scheduling.SchedulingStrategy;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.service.StorageService;
 import uk.co.saiman.experiment.storage.Store;
@@ -109,9 +108,6 @@ public class ExperimentAddon {
   @Inject
   @Service
   private volatile List<Procedure<?>> experimentTypes;
-  @Inject
-  @Service
-  private SchedulingStrategy schedulingStrategy;
 
   private Workspace workspace;
   private FileSystemStore workspaceStore;
@@ -146,7 +142,7 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspace(Path rootPath) {
-    workspace = new Workspace(rootPath, procedureService, storageService, schedulingStrategy);
+    workspace = new Workspace(rootPath, procedureService, storageService);
     context.set(Workspace.class, workspace);
     loadWorkspace();
   }

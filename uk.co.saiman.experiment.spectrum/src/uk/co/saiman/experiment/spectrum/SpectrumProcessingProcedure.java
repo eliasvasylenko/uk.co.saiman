@@ -46,7 +46,7 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.AnalysisProcedure;
 import uk.co.saiman.experiment.ExperimentContext;
-import uk.co.saiman.experiment.Dependency;
+import uk.co.saiman.experiment.ResultRequirement;
 import uk.co.saiman.experiment.Observation;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.processing.Processing;
@@ -67,7 +67,7 @@ public class SpectrumProcessingProcedure
 
   private final Accessor<Processing, ?> processorList;
 
-  private final Dependency<Spectrum> inputSpectrum;
+  private final ResultRequirement<Spectrum> inputSpectrum;
   private final Observation<Spectrum> processedSpectrum;
 
   @Activate
@@ -76,7 +76,7 @@ public class SpectrumProcessingProcedure
         "processing",
         processors::loadProcessing,
         processors::saveProcessing);
-    this.inputSpectrum = new Dependency<Spectrum>() {};
+    this.inputSpectrum = new ResultRequirement<Spectrum>() {};
     this.processedSpectrum = new Observation<Spectrum>(PROCESSED_SPECTRUM) {};
   }
 
@@ -142,7 +142,7 @@ public class SpectrumProcessingProcedure
   }
 
   @Override
-  public Dependency<Spectrum> input() {
+  public ResultRequirement<Spectrum> input() {
     return inputSpectrum;
   }
 

@@ -27,32 +27,23 @@
  */
 package uk.co.saiman.experiment;
 
-import java.util.Optional;
+import uk.co.saiman.experiment.state.StateMap;
 
-import uk.co.saiman.utility.Named;
+public class ExperimentConfiguration<S> {
+  private final Procedure<S, ?> procedure;
 
-public interface ExperimentConfiguration extends Named {
-  /**
-   * @return the notes of the experiment
-   */
-  Optional<String> getNotes();
+  private String id;
+  private StateMap state;
+  private S variables;
 
-  /**
-   * @param notes
-   *          the new notes for the experiment
-   */
-  void setNotes(String notes);
+  public ExperimentConfiguration(String id, Procedure<S, ?> procedure) {
+    this(id, procedure, StateMap.empty());
+  }
 
-  /**
-   * Remove the notes for the experiment
-   */
-  void clearNotes();
-
-  public static boolean isNameValid(String name) {
-    final String ALPHANUMERIC = "[a-zA-Z0-9]+";
-    final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
-
-    return name != null
-        && name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
+  public ExperimentConfiguration(String id, Procedure<S, ?> procedure, StateMap state) {
+    this.id = id;
+    this.procedure = procedure;
+    this.state = state;
+    
   }
 }

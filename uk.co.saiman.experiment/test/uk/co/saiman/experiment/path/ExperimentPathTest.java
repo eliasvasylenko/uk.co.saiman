@@ -38,13 +38,13 @@ import static uk.co.saiman.experiment.path.ExperimentPath.relative;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
-import mockit.Mocked;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentStep;
 
 public class ExperimentPathTest {
-  @Mocked
+  @Mock
   ExperimentStep<?> node;
 
   @Test
@@ -80,7 +80,7 @@ public class ExperimentPathTest {
   }
 
   @Test
-  public void testParentOfAbsolutePath(@Mocked ExperimentMatcher matcher) {
+  public void testParentOfAbsolutePath(@Mock ExperimentMatcher matcher) {
     ExperimentPath path = absolute().resolve(matcher).parent();
 
     assertThat(path.getAncestorDepth(), equalTo(0));
@@ -89,7 +89,7 @@ public class ExperimentPathTest {
   }
 
   @Test
-  public void testParentOfRelativePath(@Mocked ExperimentMatcher matcher) {
+  public void testParentOfRelativePath(@Mock ExperimentMatcher matcher) {
     ExperimentPath path = relative().resolve(matcher).parent();
 
     assertThat(path.getAncestorDepth(), equalTo(0));
@@ -98,7 +98,7 @@ public class ExperimentPathTest {
   }
 
   @Test
-  public void testResolveChildOfPath(@Mocked ExperimentMatcher matcher) {
+  public void testResolveChildOfPath(@Mock ExperimentMatcher matcher) {
     ExperimentPath path = relative().resolve(matcher);
 
     assertThat(path.getAncestorDepth(), equalTo(0));

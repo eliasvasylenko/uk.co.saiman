@@ -29,9 +29,6 @@ package uk.co.saiman.experiment;
 
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
-import java.lang.reflect.Type;
-import java.util.stream.Stream;
-
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
 
@@ -48,70 +45,36 @@ import uk.co.saiman.reflection.token.TypeToken;
  * @author Elias N Vasylenko
  *
  * @param <S> the type of the data describing the experiment state, including
- *            configuration and results
+ *        configuration and results
  */
-public interface Procedure<S, T extends Resource> {
-  /**
-   * The observations which are made by experiment steps which follow this
-   * procedure.
-   * 
-   * As a matter of convention, if possible, observations should be given in the
-   * order in which they are made. This is not required or enforced however.
-   * 
-   * @return a stream of the observations which are prepared by the procedure
-   */
-  default Stream<Observation<?>> observations() {
-    return Stream.empty();
+public interface ContingentProcedure<S, T> extends Procedure<S> {
+  @Override
+  default ConditionRequirement<T> requirement() {
+    return conditionRequirement();
   }
 
-  /**
-   * The preparations which are made by experiment steps which follow this
-   * procedure.
-   * 
-   * As a matter of convention, if possible, preparations should be given in the
-   * order in which they are made. This is not required or enforced however.
-   * 
-   * @return a stream of the preparations which are prepared by the procedure
-   */
-  default Stream<Preparation<?>> preparations() {
-    return Stream.empty();
-  }
-
-  Requirement<T> requirement();
-
-  /*
-   * Execution is cheap and resources are unlimited, so we may proceed
-   * automatically when necessary
-   */
-  default boolean isAutomatic() {
-    return false;
-  }
-
-  /**
-   * @param context the node which the configuration is being requested for
-   * @return a new state object suitable for an instance of {@link ExperimentStep}
-   *         over this type.
-   */
-  S configureVariables(ExperimentContext<S> context);
+  ConditionRequirement<T> conditionRequirement();
 
   /**
    * Process this experiment type for a given node.
    * 
    * @param context the processing context
    */
-  void proceed(ProcedureContext<S> context, T requirement);
+  @Override
+  default void proceed(ProcedureContext<S> context) {
+    T resource = context.acquireCondition(conditionRequirement());
+    proceed(context, resource);
+  }
+
+  void proceed(ProcedureContext<S> context, T condition);
 
   /**
    * @return the exact generic type of the configuration interface
    */
-  default TypeToken<S> getVariablesType() {
+  default TypeToken<T> getConditionType() {
     return forType(getThisType())
-        .resolveSupertype(Procedure.class)
-        .resolveTypeArgument(new TypeParameter<S>() {})
+        .resolveSupertype(ContingentProcedure.class)
+        .resolveTypeArgument(new TypeParameter<T>() {})
         .getTypeToken();
-  }
-
-  default Type getThisType() {
-    return getClass();
   }
 }

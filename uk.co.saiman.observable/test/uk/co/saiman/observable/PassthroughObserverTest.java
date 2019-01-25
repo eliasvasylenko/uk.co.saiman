@@ -27,18 +27,21 @@
  */
 package uk.co.saiman.observable;
 
-import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class PassthroughObserverTest {
-  @Injectable
+  @Mock
   Observation upstreamObservation;
 
-  @Injectable
+  @Mock
   Observer<String> downstreamObserver;
 
   protected PassthroughObserver<String, String> createDefaultObserver(
@@ -57,12 +60,9 @@ public class PassthroughObserverTest {
 
     test.onObserve(upstreamObservation);
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve(upstreamObservation);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -72,13 +72,10 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext("message");
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext("message");
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -90,15 +87,12 @@ public class PassthroughObserverTest {
     test.onNext("message2");
     test.onNext("message3");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext("message1");
-        downstreamObserver.onNext("message2");
-        downstreamObserver.onNext("message3");
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext("message1");
+    inOrder.verify(downstreamObserver).onNext("message2");
+    inOrder.verify(downstreamObserver).onNext("message3");
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -108,13 +102,10 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onComplete();
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onComplete();
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onComplete();
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -126,12 +117,9 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onFail(t);
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onFail(t);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onFail(t);
+    inOrder.verifyNoMoreInteractions();
   }
 }

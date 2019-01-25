@@ -49,7 +49,7 @@ public interface StageProcedure<T, U extends StageConfiguration<T>> extends Samp
 
     try (var control = sampleDevice().acquireControl()) {
       control.requestAnalysisLocation(location);
-      context.holdCondition(getSampleReadyCondition());
+      context.prepareCondition(getSamplePreparation(), null);
     }
   }
 }

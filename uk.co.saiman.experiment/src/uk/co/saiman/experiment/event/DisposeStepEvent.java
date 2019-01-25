@@ -28,14 +28,14 @@
 package uk.co.saiman.experiment.event;
 
 import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.event.ExperimentEventKind.DETACH;
+import static uk.co.saiman.experiment.event.ExperimentEventKind.DISPOSE;
 
 import uk.co.saiman.experiment.ExperimentStep;
 
-public class DetachStepEvent extends ExperimentEvent {
+public class DisposeStepEvent extends ExperimentEvent {
   private final ExperimentStep<?> previousParent;
 
-  public DetachStepEvent(ExperimentStep<?> node, ExperimentStep<?> previousParent) {
+  public DisposeStepEvent(ExperimentStep<?> node, ExperimentStep<?> previousParent) {
     super(node);
     this.previousParent = requireNonNull(previousParent);
   }
@@ -46,6 +46,6 @@ public class DetachStepEvent extends ExperimentEvent {
 
   @Override
   public ExperimentEventKind kind() {
-    return DETACH;
+    return DISPOSE;
   }
 }

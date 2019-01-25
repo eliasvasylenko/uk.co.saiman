@@ -105,7 +105,7 @@ public class ExperimentNameCell {
   @Inject
   @Optional
   public void updateName(RenameStepEvent event) {
-    if (experiment.status() == Status.OPEN && event.node() == experiment.experiment()) {
+    if (experiment.status() == Status.OPEN && event.step() == experiment.experiment()) {
       nameEditor.setText(event.id());
     }
   }

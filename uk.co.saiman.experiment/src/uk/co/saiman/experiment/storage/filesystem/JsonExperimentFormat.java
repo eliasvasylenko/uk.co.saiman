@@ -41,7 +41,6 @@ import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.Procedure;
-import uk.co.saiman.experiment.scheduling.SchedulingStrategy;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.service.StorageService;
 import uk.co.saiman.experiment.state.Accessor.MapAccessor;
@@ -68,21 +67,16 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
   private final PropertyAccessor<Procedure<?>> procedure;
   private final MapAccessor<StorageConfiguration<?>> storage;
-  private final SchedulingStrategy schedulingStrategy;
 
   private final JsonStateMapFormat stateMapFormat = new JsonStateMapFormat();
 
-  public JsonExperimentFormat(
-      ProcedureService procedureService,
-      StorageService storageService,
-      SchedulingStrategy schedulingStrategy) {
+  public JsonExperimentFormat(ProcedureService procedureService, StorageService storageService) {
     this.procedure = stringAccessor(PROCEDURE)
         .map(procedureService::getProcedure, procedureService::getId);
     this.storage = mapAccessor(
         STORAGE,
         s -> storageService.configureStorage(s),
         r -> storageService.deconfigureStorage(r));
-    this.schedulingStrategy = schedulingStrategy;
   }
 
   @Override
@@ -101,9 +95,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
-    return loadExperimentNode(
-        new Experiment(data.get(ID), data.get(storage), schedulingStrategy),
-        data);
+    return loadExperimentNode(new Experiment(data.get(ID), data.get(storage)), data);
   }
 
   protected <T extends ExperimentStep<?>> T loadExperimentNode(T experimentNode, StateMap data) {
@@ -114,6 +106,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
         .map(State::asMap)
         .forEach(
             child -> experimentNode
+                .getResult(child.get(accessor))
                 .attach(
                     loadExperimentNode(
                         new ExperimentStep<>(
@@ -141,7 +134,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
         .with(
             CHILDREN,
             node
-                .getChildren()
+                .getComponentSteps()
                 .map(child -> saveExperimentNode(child).with(procedure, child.getProcedure()))
                 .collect(toStateList()));
   }

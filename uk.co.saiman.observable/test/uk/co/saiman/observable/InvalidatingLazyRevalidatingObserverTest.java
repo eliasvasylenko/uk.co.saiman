@@ -28,22 +28,29 @@
 package uk.co.saiman.observable;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
 
 import org.junit.jupiter.api.Test;
-
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class InvalidatingLazyRevalidatingObserverTest {
-  @Injectable
+  @Mock
   Observation upstreamObservation;
 
-  @Injectable
+  @Mock
   Observer<Invalidation<String>> downstreamObserver;
 
-  @SuppressWarnings("unchecked")
+  @Captor
+  ArgumentCaptor<Invalidation<String>> invalidation;
+
   @Test
   public void invalidateWithSingleMessage() {
     Observer<String> test = new InvalidatingLazyRevalidatingObserver<>(downstreamObserver);
@@ -51,16 +58,12 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext((Invalidation<String>) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void invalidateWithMultipleMessages() {
     Observer<String> test = new InvalidatingLazyRevalidatingObserver<>(downstreamObserver);
@@ -69,16 +72,12 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext((Invalidation<String>) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void invalidateAndRevalidateSingleMessage() {
     Observer<String> test = new InvalidatingLazyRevalidatingObserver<>(
@@ -89,16 +88,12 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext((Invalidation<String>) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void invalidateAndRevalidateMultipleMessages() {
     Observer<String> test = new InvalidatingLazyRevalidatingObserver<>(
@@ -110,17 +105,12 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext((Invalidation<String>) any);
-        downstreamObserver.onNext((Invalidation<String>) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver, times(2)).onNext(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void invalidateWithSingleFailure() {
     Observer<String> test = new InvalidatingLazyRevalidatingObserver<>(downstreamObserver);
@@ -128,14 +118,11 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     test.onFail(new Throwable());
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext((Invalidation<String>) any);
-        downstreamObserver.onFail((Throwable) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext(any());
+    inOrder.verify(downstreamObserver).onFail(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -148,12 +135,10 @@ public class InvalidatingLazyRevalidatingObserverTest {
     test.onObserve(upstreamObservation);
     assertThrows(MissingValueException.class, () -> test.onFail(new Throwable()));
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onFail((Throwable) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext(invalidation.capture());
+    assertThrows(MissingValueException.class, invalidation.getValue()::revalidate);
+    inOrder.verifyNoMoreInteractions();
   }
 }

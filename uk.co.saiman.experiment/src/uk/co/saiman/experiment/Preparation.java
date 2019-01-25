@@ -25,5 +25,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-@org.osgi.annotation.versioning.Version("1.0.0")
-package uk.co.saiman.experiment.scheduling;
+package uk.co.saiman.experiment;
+
+import static uk.co.saiman.reflection.token.TypeToken.forType;
+
+import java.util.Optional;
+
+import uk.co.saiman.reflection.token.TypeParameter;
+import uk.co.saiman.reflection.token.TypeToken;
+
+/**
+ * A condition which is provided by an experiment procedure.
+ * 
+ * @author Elias N Vasylenko
+ */
+public abstract class Preparation<T> extends Capability<Condition<T>> {
+  private final String id;
+
+  public Preparation(String id) {
+    this.id = id;
+  }
+
+  public String id() {
+    return id;
+  }
+
+  public TypeToken<T> getConditionType() {
+    return forType(getClass())
+        .resolveSupertype(Procedure.class)
+        .resolveTypeArgument(new TypeParameter<T>() {})
+        .getTypeToken();
+  }
+
+  @Override
+  public Optional<Condition<T>> resolveResource(ExperimentStep<?> step) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+}

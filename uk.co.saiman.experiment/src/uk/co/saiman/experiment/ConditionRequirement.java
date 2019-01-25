@@ -29,43 +29,58 @@ package uk.co.saiman.experiment;
 
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
-import java.lang.reflect.Type;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
-import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
-import uk.co.saiman.reflection.token.TypedReference;
 
-/**
- * An input to an experiment procedure should be wired up to an observation made
- * by a preceding procedure.
- * 
- * @author Elias N Vasylenko
- *
- * @param <T> the type of the result we wish to find
- */
-public abstract class Dependency<T> {
-  public Type getThisType() {
-    return getClass();
+public abstract class ConditionRequirement<T> extends Requirement<Condition<T>> {
+  public static <T> ConditionRequirement<T> conditionRequirement(Preparation<T> condition) {
+    throw new UnsupportedOperationException();
   }
 
-  public TypeToken<T> getResultType() {
-    return forType(getThisType())
+  private final String id;
+
+  protected ConditionRequirement(String id) {
+    this.id = id;
+  }
+
+  protected ConditionRequirement(Preparation<T> preparation) {
+    this.id = preparation.id();
+  }
+
+  public String id() {
+    return id;
+  }
+
+  public CompletableFuture<? extends T> request() {
+    throw new UnsupportedOperationException();
+  }
+
+  public T acquire() {
+    return request().join();
+  }
+
+  public TypeToken<T> getConditionType() {
+    return forType(getClass())
         .resolveSupertype(Procedure.class)
         .resolveTypeArgument(new TypeParameter<T>() {})
         .getTypeToken();
   }
 
-  public TypeToken<Dependency<T>> getThisTypeToken() {
-    return new TypeToken<Dependency<T>>() {}
-        .withTypeArguments(new TypeArgument<T>(getResultType()) {});
+  @SuppressWarnings("unchecked")
+  @Override
+  public Optional<Preparation<T>> resolveCapability(Capability<?> capability) {
+    return capability instanceof Preparation<?>
+        && ((Preparation<?>) capability).getConditionType().isAssignableTo(getConditionType())
+            ? Optional.of((Preparation<T>) capability)
+            : Optional.empty();
   }
 
-  public TypedReference<Dependency<T>> asTypedObject() {
-    return TypedReference.typedObject(getThisTypeToken(), this);
-  }
-
-  public boolean isSatisfiedBy(Observation<?> observation) {
-    return observation.getResultType().isAssignableTo(getResultType());
+  @Override
+  public Stream<Preparation<T>> resolveCapabilities(Procedure<?> procedure) {
+    return procedure.preparations().map(this::resolveCapability).flatMap(Optional::stream);
   }
 }

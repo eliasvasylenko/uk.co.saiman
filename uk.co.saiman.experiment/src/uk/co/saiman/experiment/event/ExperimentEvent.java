@@ -34,21 +34,21 @@ import java.util.Optional;
 import uk.co.saiman.experiment.ExperimentStep;
 
 public abstract class ExperimentEvent {
-  private final ExperimentStep<?> node;
+  private final ExperimentStep<?> step;
 
-  public ExperimentEvent(ExperimentStep<?> node) {
-    this.node = requireNonNull(node);
+  public ExperimentEvent(ExperimentStep<?> step) {
+    this.step = requireNonNull(step);
   }
 
-  public ExperimentStep<?> node() {
-    return node;
+  public ExperimentStep<?> step() {
+    return step;
   }
 
   public abstract ExperimentEventKind kind();
 
   @Override
   public String toString() {
-    return ExperimentEvent.class.getSimpleName() + "<" + kind() + ">(" + node().getId() + ")";
+    return ExperimentEvent.class.getSimpleName() + "<" + kind() + ">(" + step().getId() + ")";
   }
 
   @SuppressWarnings("unchecked")

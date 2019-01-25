@@ -29,6 +29,7 @@ package uk.co.saiman.experiment;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.state.StateMap;
 
@@ -103,4 +104,12 @@ public interface ExperimentContext<T> {
   default void update(Function<? super StateMap, ? extends StateMap> function) {
     update(function.apply(stateMap()));
   }
+
+  <U> boolean setRequiredResult(ResultRequirement<U> requirement, Result<? extends U> result);
+
+  <U> boolean addRequiredResult(ResultRequirement<U> requirement, Result<? extends U> result);
+
+  <U> boolean removeRequiredResult(ResultRequirement<U> requirement, Result<?> result);
+
+  <U> Stream<Result<? extends U>> clearRequiredResults(ResultRequirement<U> requirement);
 }

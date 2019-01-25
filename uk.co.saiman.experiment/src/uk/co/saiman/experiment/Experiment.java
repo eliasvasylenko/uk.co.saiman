@@ -32,79 +32,78 @@ import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.PROCEEDING;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.WAITING;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.scheduling.Schedule;
-import uk.co.saiman.experiment.scheduling.Scheduler;
-import uk.co.saiman.experiment.scheduling.SchedulingContext;
-import uk.co.saiman.experiment.scheduling.SchedulingStrategy;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
-public class Experiment extends ExperimentStep<ExperimentConfiguration> {
+public class Experiment extends ExperimentStep<Void> {
+  private static class ExperimentProcedure implements Procedure<Void> {
+    @Override
+    public Void configureVariables(ExperimentContext<Void> configuration) {
+      return null;
+    }
+
+    @Override
+    public void proceed(ProcedureContext<Void> context) {
+      context.prepareCondition(Experiment.SCHEDULED_CONDITION, null);
+    }
+
+    @Override
+    public Stream<Preparation<?>> preparations() {
+      return Stream.of(SCHEDULED_CONDITION);
+    }
+  }
+
+  private static final ExperimentProcedure PROCEDURE = new ExperimentProcedure();
+
+  private static final String SCHEDULED_CONDITION_ID = Experiment.class.getPackageName()
+      + ".submitted";
+  private static final Preparation<Void> SCHEDULED_CONDITION = new Preparation<Void>(
+      SCHEDULED_CONDITION_ID) {};
+  private static final ConditionRequirement<Void> SCHEDULED_REQUIREMENT = new ConditionRequirement<Void>(
+      SCHEDULED_CONDITION) {};
+
+  private final Condition<Void> submitted;
+
   private final StorageConfiguration<?> storageConfiguration;
-  private final Scheduler scheduler;
+  private final Deque<ExperimentStep<?>> schedulingQueue = new ArrayDeque<>();
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
   private final List<ExperimentEvent> eventQueue = new ArrayList<>();
 
-  public Experiment(
-      String id,
-      StorageConfiguration<?> storageConfiguration,
-      SchedulingStrategy schedulingStrategy) {
-    this(id, StateMap.empty(), storageConfiguration, schedulingStrategy);
-  }
-
-  public Experiment(
-      String id,
-      StateMap stateMap,
-      StorageConfiguration<?> storageConfiguration,
-      SchedulingStrategy schedulingStrategy) {
-    this(ExperimentProcedure.instance(), id, stateMap, storageConfiguration, schedulingStrategy);
-  }
-
-  protected Experiment(
-      ExperimentProcedure procedure,
-      String id,
-      StateMap stateMap,
-      StorageConfiguration<?> storageConfiguration,
-      SchedulingStrategy schedulingStrategy) {
-    super(procedure, id, stateMap, PREPARATION);
+  public Experiment(String id, StorageConfiguration<?> storageConfiguration) {
+    super(procedure(), id, StateMap.empty(), PREPARATION);
     this.storageConfiguration = storageConfiguration;
-    this.scheduler = schedulingStrategy.provideScheduler(getSchedulingContext());
+    this.submitted = new Condition<>(this, SCHEDULED_CONDITION);
   }
 
-  private SchedulingContext getSchedulingContext() {
-    return new SchedulingContext() {
-      @Override
-      public Experiment experiment() {
-        return Experiment.this;
-      }
+  @Override
+  public void setId(String id) {
+    super.setId(id);
+  }
 
-      @Override
-      public void commence(ExperimentStep<?> step, Schedule schedule) {
-        step.takeStep(schedule);
-      }
-    };
+  @Override
+  public Optional<Experiment> getExperiment() {
+    return Optional.of(this);
+  }
+
+  @Override
+  public Optional<ExperimentStep<?>> getContainer() {
+    return Optional.empty();
   }
 
   public StorageConfiguration<?> getStorageConfiguration() {
     return storageConfiguration;
-  }
-
-  public Scheduler getScheduler() {
-    return scheduler;
-  }
-
-  @Override
-  public int getIndex() {
-    return -1;
   }
 
   public void dispose() {
@@ -135,7 +134,9 @@ public class Experiment extends ExperimentStep<ExperimentConfiguration> {
 
   public synchronized void addSteps(Collection<? extends ExperimentStep<?>> steps) {
     lockExperiment().update(lock -> {
-      var allSteps = addTransitiveClosure(steps);
+      for (var step : addTransitiveClosure(steps)) {
+        new Thread(step::takeStep).run();
+      }
     });
   }
 
@@ -150,18 +151,15 @@ public class Experiment extends ExperimentStep<ExperimentConfiguration> {
     for (int i = 0; i < transitiveSteps.size(); i++) {
       var step = transitiveSteps.get(i);
 
-      if (step.getProcedure().expectations().findAny().isPresent()) {
-        step
-            .getParent()
-            .filter(s -> s.getLifecycleState() != WAITING && s.getLifecycleState() != PROCEEDING)
-            .ifPresent(transitiveSteps::add);
-      }
+      step
+          .getRequiredConditions()
+          .map(Condition::getNode)
+          .filter(s -> s.getLifecycleState() != WAITING && s.getLifecycleState() != PROCEEDING)
+          .forEach(transitiveSteps::add);
 
       step
-          .getInputs()
-          .map(Input::getResult)
-          .flatMap(Optional::stream)
-          .map(Result::getExperimentStep)
+          .getRequiredResults()
+          .map(Result::getNode)
           .filter(
               s -> s.getLifecycleState() != COMPLETE
                   && s.getLifecycleState() != WAITING
@@ -177,22 +175,51 @@ public class Experiment extends ExperimentStep<ExperimentConfiguration> {
      * conditions/expectations. This is our set of requirements.
      * 
      * TODO collect transitive closure of ALL experiments whose dependencies are
-     * wired to results via inputs, and ALL descendents which are linked by way of
-     * conditions/expectations. This is our set of dependents.
+     * wired to results via inputs, and ALL INCOMPLETE descendents which are linked
+     * by way of conditions/expectations. This is our set of dependents.
+     * 
+     * Consider that dependencies may have their own dependents, and dependents may
+     * have other dependencies.
+     * 
+     * TODO taking the transitive closure of the experiments whose dependencies are
+     * wired to results via inputs, if any are already complete or processing, FAIL!
+     * They need to be explicitly cancelled/cleared before we can proceed!
      */
-
-  }
-
-  private void prepareSteps(Collection<? extends ExperimentStep<?>> steps) {
-    steps.forEach(this::prepareStep);
-    steps.stream().forEach(step -> step.setLifecycleState(WAITING));
-  }
-
-  private void takeStep(ExperimentStep<?> step) {
 
   }
 
   private void prepareStep(ExperimentStep<?> step) {
     step.clearResults();
+    step.setLifecycleState(WAITING);
+  }
+
+  public static boolean isNameValid(String name) {
+    final String ALPHANUMERIC = "[a-zA-Z0-9]+";
+    final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
+
+    return name != null
+        && name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
+  }
+
+  @Override
+  public void schedule() {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void attach(ExperimentStep<?> step) {
+    submitted.attach(step);
+  }
+
+  public static Procedure<Void> procedure() {
+    return PROCEDURE;
+  }
+
+  public static ConditionRequirement<Void> scheduledRequirement() {
+    return SCHEDULED_REQUIREMENT;
+  }
+
+  public static Preparation<Void> scheduledCondition() {
+    return SCHEDULED_CONDITION;
   }
 }

@@ -73,7 +73,7 @@ public class SpectrumExperimentProcessingCell {
   @Inject
   @Optional
   public void updateVariables(ExperimentVariablesEvent event) {
-    if (event.node() == experiment) {
+    if (event.step() == experiment) {
       updateChildren();
     }
   }

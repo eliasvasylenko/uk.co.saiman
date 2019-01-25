@@ -38,7 +38,7 @@ public enum ExperimentEventKind {
   /**
    * An experiment node was removed from the workspace.
    */
-  DETACH(DetachStepEvent.class),
+  DISPOSE(DisposeStepEvent.class),
 
   /**
    * An experiment node's {@link ExperimentStep#getIndex() index} was updated.

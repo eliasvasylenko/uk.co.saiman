@@ -29,12 +29,10 @@ package uk.co.saiman.experiment;
 
 import static uk.co.saiman.reflection.token.TypeToken.forType;
 
-import java.lang.reflect.Type;
+import java.util.Optional;
 
-import uk.co.saiman.reflection.token.TypeArgument;
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
-import uk.co.saiman.reflection.token.TypedReference;
 
 /**
  * An observation can be made during an {@link ExperimentStep experiment step}
@@ -44,7 +42,7 @@ import uk.co.saiman.reflection.token.TypedReference;
  *
  * @param <T> the type of the result we wish to find
  */
-public abstract class Observation<T> {
+public abstract class Observation<T> extends Capability<Result<T>> {
   private final String id;
 
   public Observation(String id) {
@@ -55,23 +53,16 @@ public abstract class Observation<T> {
     return id;
   }
 
-  public Type getThisType() {
-    return getClass();
-  }
-
   public TypeToken<T> getResultType() {
-    return forType(getThisType())
+    return forType(getClass())
         .resolveSupertype(Procedure.class)
         .resolveTypeArgument(new TypeParameter<T>() {})
         .getTypeToken();
   }
 
-  public TypeToken<Observation<T>> getThisTypeToken() {
-    return new TypeToken<Observation<T>>() {}
-        .withTypeArguments(new TypeArgument<T>(getResultType()) {});
-  }
-
-  public TypedReference<Observation<T>> asTypedObject() {
-    return TypedReference.typedObject(getThisTypeToken(), this);
+  @Override
+  public Optional<Result<T>> resolveResource(ExperimentStep<?> step) {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

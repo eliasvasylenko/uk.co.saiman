@@ -34,25 +34,10 @@ import java.util.stream.Stream;
 import uk.co.saiman.reflection.token.TypeParameter;
 import uk.co.saiman.reflection.token.TypeToken;
 
-public interface AnalysisProcedure<S, T, U> extends Procedure<S> {
-  Dependency<T> input();
+public interface AnalysisProcedure<S, T, U> extends Procedure<S, Result<T>> {
+  ResultRequirement<T> input();
 
   Observation<U> output();
-
-  @Override
-  default Stream<Condition> conditions() {
-    return Stream.empty();
-  }
-
-  @Override
-  default Stream<Condition> expectations() {
-    return Stream.empty();
-  }
-
-  @Override
-  default Stream<Dependency<?>> dependencies() {
-    return Stream.of(input());
-  }
 
   @Override
   default Stream<Observation<?>> observations() {
@@ -60,13 +45,18 @@ public interface AnalysisProcedure<S, T, U> extends Procedure<S> {
   }
 
   @Override
-  default boolean hasAutomaticExecution() {
+  default ResultRequirement<T> requirement() {
+    return input();
+  }
+
+  @Override
+  default boolean isAutomatic() {
     return true;
   }
 
   @Override
-  default void proceed(ProcedureContext<S> context) {
-    T input = (T) context.acquireResult(input()).getValue().orElse(null);
+  default void proceed(ProcedureContext<S> context, Result<T> requirement) {
+    T input = (T) requirement.getValue().orElse(null);
     U output = process(context.node().getVariables(), input);
     context.setResult(output(), output);
   }

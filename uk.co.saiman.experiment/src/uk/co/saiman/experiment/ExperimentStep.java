@@ -30,35 +30,36 @@ package uk.co.saiman.experiment;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.COMPLETE;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.DETACHED;
 import static uk.co.saiman.experiment.ExperimentLifecycleState.PROCEEDING;
+import static uk.co.saiman.experiment.ExperimentLifecycleState.WAITING;
 import static uk.co.saiman.reflection.token.TypedReference.typedObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.DataException;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.experiment.event.AttachStepEvent;
-import uk.co.saiman.experiment.event.DetachStepEvent;
+import uk.co.saiman.experiment.event.DisposeStepEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
 import uk.co.saiman.experiment.event.ExperimentVariablesEvent;
 import uk.co.saiman.experiment.event.RenameStepEvent;
 import uk.co.saiman.experiment.event.ReorderStepsEvent;
-import uk.co.saiman.experiment.scheduling.Schedule;
 import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.experiment.storage.Storage;
 import uk.co.saiman.reflection.token.TypeArgument;
@@ -79,20 +80,23 @@ public class ExperimentStep<S> {
   private StateMap stateMap;
   private ExperimentLifecycleState lifecycleState;
 
-  private ExperimentStep<?> parent;
-  private final List<ExperimentStep<?>> children;
+  private Experiment experiment;
 
   private final S variables;
-  private final Map<Condition, State> states;
-  private final Map<Dependency<?>, Input<?>> inputs;
-  private final Map<Observation<?>, Result<?>> results;
+
+  private Condition<?> requiredCondition;
+  private final Map<Preparation<?>, Condition<?>> preparedConditions;
+
+  private final Map<ResultRequirement<?>, Result<?>> requiredResults;
+  private final Map<Observation<?>, Result<?>> observedResults;
+
   private Storage resultStore;
 
-  public ExperimentStep(Procedure<S> procedure) {
+  public ExperimentStep(Procedure<S, ?> procedure) {
     this(procedure, null, StateMap.empty());
   }
 
-  public ExperimentStep(Procedure<S> procedure, String id, StateMap stateMap) {
+  public ExperimentStep(Procedure<S, ?> procedure, String id, StateMap stateMap) {
     this(procedure, id, stateMap, DETACHED);
   }
 
@@ -106,20 +110,27 @@ public class ExperimentStep<S> {
     this.stateMap = stateMap;
     this.lifecycleState = lifecycleState;
 
-    this.parent = null;
-    this.children = new ArrayList<>();
+    /*
+     * TODO
+     * 
+     * Cut this nonsense out.
+     * 
+     * We don't need the requirement thing for external resources, it's just an
+     * over-complication. We may not even need the condition resources to be this
+     * complicated.
+     */
 
-    this.states = procedure
-        .conditions()
-        .map(condition -> new State(this, condition))
-        .collect(toMap(State::getCondition, identity()));
+    this.requiredCondition = null;
+    this.requiredResults = new HashMap<>();
+    if (procedure.requirement() instanceof ResultRequirement<?>) {
+      requiredResults.put((ResultRequirement<?>) procedure.requirement(), null);
+    }
 
-    this.inputs = procedure
-        .dependencies()
-        .map(dependency -> new Input<>(this, dependency))
-        .collect(toMap(Input::getDependency, identity()));
-
-    this.results = procedure
+    this.preparedConditions = procedure
+        .preparations()
+        .map(condition -> new Condition<>(this, condition))
+        .collect(toMap(Condition::getPreparation, identity()));
+    this.observedResults = procedure
         .observations()
         .map(observation -> new Result<>(this, observation))
         .collect(toMap(Result::getObservation, identity()));
@@ -136,7 +147,7 @@ public class ExperimentStep<S> {
   }
 
   void setId(String id) {
-    if (!ExperimentConfiguration.isNameValid(id)) {
+    if (!Experiment.isNameValid(id)) {
       throw new ExperimentException(format("Invalid experiment name %s", id));
     }
 
@@ -144,11 +155,14 @@ public class ExperimentStep<S> {
       if (!Objects.equals(id, getId())) {
         String previousId;
 
-        if (getParent()
-            .map(p -> p.getChildren().anyMatch(s -> id.equals(s.getId())))
+        if (getContainer()
+            .map(p -> p.getComponentSteps().anyMatch(s -> id.equals(s.getId())))
             .orElse(false)) {
           throw new ExperimentException(
-              format("Experiment node with id %s already attached at node %s", id, parent));
+              format(
+                  "Experiment node with id %s already attached at node %s",
+                  id,
+                  getContainer().get()));
 
         } else {
           try {
@@ -239,6 +253,31 @@ public class ExperimentStep<S> {
         }
         return getId();
       }
+
+      @Override
+      public <U> boolean setRequiredResult(
+          ResultRequirement<U> requirement,
+          Result<? extends U> result) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public <U> boolean addRequiredResult(
+          ResultRequirement<U> requirement,
+          Result<? extends U> result) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public <U> boolean removeRequiredResult(ResultRequirement<U> requirement, Result<?> result) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public <U> Stream<Result<? extends U>> clearRequiredResults(
+          ResultRequirement<U> requirement) {
+        throw new UnsupportedOperationException();
+      }
     };
   }
 
@@ -313,16 +352,16 @@ public class ExperimentStep<S> {
    * @return the parent part of this experiment, if present, otherwise an empty
    *         optional
    */
-  public Optional<ExperimentStep<?>> getParent() {
-    return Optional.ofNullable(parent);
+  public Optional<Resource> getDependency() {
+    return getProcedure().requirement().resolveResources(this).findAny().map(Function.identity());
   }
 
-  /**
-   * @return the node's index in its parent's list of children
-   */
-  public int getIndex() {
-    return lockExperiment()
-        .get(lock -> getParent().get().getChildren().collect(toList()).indexOf(this));
+  public Optional<ExperimentStep<?>> getContainer() {
+    return getDependency().map(d -> d.getNode());
+  }
+
+  public Optional<Experiment> getExperiment() {
+    return lockExperiment().get(lock -> Optional.ofNullable(experiment));
   }
 
   /**
@@ -331,20 +370,13 @@ public class ExperimentStep<S> {
    * 
    * @return An ordered list of all sequential child experiment parts
    */
-  public Stream<ExperimentStep<?>> getChildren() {
+  public Stream<ExperimentStep<?>> getComponentSteps() {
     return lockExperiment().get(lock -> new ArrayList<>(children)).stream();
   }
 
-  public Optional<ExperimentStep<?>> getChild(String id) {
-    return lockExperiment().get(lock -> getChildren().filter(c -> c.getId().equals(id)).findAny());
-  }
-
-  public void attach(ExperimentStep<?> node) {
-    lockExperiments(this, node).update(lock -> attachImpl(node, (int) getChildren().count()));
-  }
-
-  public void attach(ExperimentStep<?> node, int index) {
-    lockExperiments(this, node).update(lock -> attachImpl(node, index));
+  public Optional<ExperimentStep<?>> getComponentStep(String id) {
+    return lockExperiment()
+        .get(lock -> getComponentSteps().filter(c -> c.getId().equals(id)).findAny());
   }
 
   private void attachImpl(ExperimentStep<?> node, int index) {
@@ -361,9 +393,18 @@ public class ExperimentStep<S> {
 
       queueEvents(new ReorderStepsEvent(this, index, previousIndex));
     } else {
-      if (getLifecycleState() == PROCEEDING) {
+      /*
+       * TODO perform this check for transitive closure of experiment steps which are
+       * RESULT-DEPENDENT on this step.
+       */
+      if (getLifecycleState() == PROCEEDING
+          || getLifecycleState() == COMPLETE
+          || getLifecycleState() == WAITING) {
         throw new ExperimentException(
-            format("Cannot detach experiment %s while in the %s state", getId(), PROCEEDING));
+            format(
+                "Cannot detach experiment %s while in the %s state",
+                getId(),
+                getLifecycleState()));
       }
 
       children.forEach(child -> {
@@ -382,20 +423,29 @@ public class ExperimentStep<S> {
 
         setDetached();
 
-        previousParent.queueEvents(new DetachStepEvent(node, previousParent));
+        previousParent.queueEvents(new DisposeStepEvent(node, previousParent));
       }
       queueEvents(new AttachStepEvent(node, this));
     }
   }
 
-  public void detach(ExperimentStep<?> node) {
-    lockExperiment().update(lock -> detachImpl(node));
+  public void dispose() {
+    lockExperiment().update(lock -> detachImpl());
   }
 
-  private void detachImpl(ExperimentStep<?> node) {
-    if (getLifecycleState() == PROCEEDING) {
+  private void detachImpl() {
+    /*
+     * TODO perform this check for transitive closure of experiment steps which are
+     * RESULT-DEPENDENT on this step.
+     */
+    if (getLifecycleState() == PROCEEDING
+        || getLifecycleState() == COMPLETE
+        || getLifecycleState() == WAITING) {
       throw new ExperimentException(
-          format("Cannot detach experiment %s while in the %s state", getId(), PROCEEDING));
+          format(
+              "Cannot detach experiment %s while in the %s state",
+              getId(),
+              getLifecycleState()));
     }
 
     if (node.parent == this) {
@@ -403,75 +453,12 @@ public class ExperimentStep<S> {
       node.parent = null;
       node.setDetached();
 
-      queueEvents(new DetachStepEvent(node, this));
+      queueEvents(new DisposeStepEvent(node, this));
     }
   }
 
   void setDetached() {
-    clearResults();
     setLifecycleState(DETACHED);
-  }
-
-  /**
-   * @return the root part of the experiment tree this part occurs in
-   */
-  public Optional<Experiment> getExperiment() {
-    return lockExperiment().get(lock -> getExperimentImpl());
-  }
-
-  public Optional<Experiment> getExperimentImpl() {
-    List<ExperimentStep<?>> ancestors = getAncestorsImpl();
-    ExperimentStep<?> root = ancestors.get(ancestors.size() - 1);
-    if (root instanceof Experiment) {
-      return Optional.of((Experiment) root);
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  /**
-   * @return a list of all ancestors, nearest first, inclusive of the node itself
-   */
-  public Stream<ExperimentStep<?>> getAncestors() {
-    return lockExperiment().get(lock -> getAncestorsImpl()).stream();
-  }
-
-  private List<ExperimentStep<?>> getAncestorsImpl() {
-    // collect and re-stream, as we need to collect the list whilst locked.
-    return StreamUtilities
-        .<ExperimentStep<?>>iterateOptional(this, ExperimentStep::getParent)
-        .collect(toList());
-  }
-
-  /**
-   * Get the nearest available ancestor node of the processing experiment node
-   * which is of the given {@link Procedure experiment type}.
-   * 
-   * @param procedure the type of the ancestor we wish to inspect
-   * @return the nearest ancestor of the given type, or an empty optional if no
-   *         such ancestor exists
-   */
-  @SuppressWarnings("unchecked")
-  public <U> Optional<ExperimentStep<U>> findAncestor(Procedure<U> procedure) {
-    return getAncestors()
-        .filter(a -> procedure.equals(a.getProcedure()))
-        .findFirst()
-        .map(a -> (ExperimentStep<U>) a);
-  }
-
-  /**
-   * Get the nearest available ancestor node of the processing experiment node
-   * which is of the given {@link Procedure experiment type}.
-   * 
-   * @param procedure the type of the ancestor we wish to inspect
-   * @return the nearest ancestor of the given type, or an empty optional if no
-   *         such ancestor exists
-   */
-  @SuppressWarnings("unchecked")
-  public <U> Stream<ExperimentStep<U>> findAncestors(Procedure<U> procedure) {
-    return getAncestors()
-        .filter(a -> procedure.equals(a.getProcedure()))
-        .map(a -> (ExperimentStep<U>) a);
   }
 
   /*
@@ -500,8 +487,8 @@ public class ExperimentStep<S> {
     });
   }
 
-  public void takeStep(Schedule schedule) {
-    procedure.proceed(createProcedureContext(schedule));
+  void takeStep() {
+    procedure.proceed(createProcedureContext());
   }
 
   /**
@@ -509,9 +496,10 @@ public class ExperimentStep<S> {
    * 
    * @return the result produced by the given observation
    */
+  @Override
   @SuppressWarnings("unchecked")
   public <R> Result<R> getResult(Observation<R> observation) {
-    Result<?> result = results.get(observation);
+    Result<?> result = observedResults.get(observation);
     if (result == null) {
       throw new ExperimentException(
           format("Experiment step %s does not make observation of %s", this, observation));
@@ -519,47 +507,71 @@ public class ExperimentStep<S> {
     return (Result<R>) result;
   }
 
+  @Override
   public Stream<Result<?>> getResults() {
-    return results.values().stream();
+    return observedResults.values().stream();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <R> Condition<R> getCondition(Preparation<R> preparation) {
+    Condition<?> condition = preparedConditions.get(preparation);
+    if (condition == null) {
+      throw new ExperimentException(
+          format("Experiment step %s does not make preparation of %s", this, condition));
+    }
+    return (Condition<R>) condition;
+  }
+
+  @Override
+  public Stream<Condition<?>> getConditions() {
+    return preparedConditions.values().stream();
   }
 
   /**
-   * Get the input which satisfies a {@link Dependency} which is required by this
-   * node.
+   * Get the input which satisfies a {@link ResultRequirement} which is required
+   * by this node.
    * 
    * @return the input which satisfies the given dependency
    */
   @SuppressWarnings("unchecked")
-  public <I> Input<I> getInput(Dependency<I> dependency) {
-    Input<?> input = this.inputs.get(dependency);
+  public <I> Result<I> getRequiredResult(ResultRequirement<I> requirement) {
+    Result<?> input = this.requiredResults.get(requirement);
     if (input == null) {
       throw new ExperimentException(
-          format("Experiment step %s does not have dependency on %s", this, dependency));
+          format("Experiment step %s does not have dependency on %s", this, requirement));
     }
-    return (Input<I>) input;
+    return (Result<I>) input;
   }
 
-  public Stream<Input<?>> getInputs() {
-    return inputs.values().stream();
+  public Stream<Result<?>> getRequiredResults() {
+    return requiredResults.values().stream();
   }
 
   /**
-   * Get the input which satisfies a {@link Dependency} which is required by this
-   * node.
+   * Get the input which satisfies a {@link ResultRequirement} which is required
+   * by this node.
    * 
    * @return the input which satisfies the given dependency
    */
-  public State getState(Condition condition) {
-    State state = this.states.get(condition);
-    if (state == null) {
+  @SuppressWarnings("unchecked")
+  public <I> Condition<I> getRequiredCondition(ConditionRequirement<I> requirement) {
+    Condition<?> input = this.requiredCondition;
+    if (input == null) {
       throw new ExperimentException(
-          format("Experiment step %s does not provide condition %s", this, condition));
+          format("Experiment step %s does not have dependency on %s", this, requirement));
     }
-    return state;
+    return (Condition<I>) input;
   }
 
-  public Stream<State> getStates() {
-    return states.values().stream();
+  /**
+   * Get the input which satisfies a {@link ResultRequirement} which is required
+   * by this node.
+   * 
+   * @return the input which satisfies the given dependency
+   */
+  public Stream<Condition<?>> getRequiredConditions() {
+    return Stream.ofNullable(requiredCondition);
   }
 
   /**
@@ -567,10 +579,10 @@ public class ExperimentStep<S> {
    * delete any result data from disk.
    */
   public void clearResults() {
-    results.values().forEach(Result::unsetValue);
+    observedResults.values().forEach(Result::unsetValue);
   }
 
-  private ProcedureContext<S> createProcedureContext(Schedule schedule) {
+  private ProcedureContext<S> createProcedureContext() {
 
     /*
      * TODO once processed this must become inoperable, including the proxied Data
@@ -615,18 +627,14 @@ public class ExperimentStep<S> {
       }
 
       @Override
-      public void enterCondition(Condition condition) {
-        getState(condition).enter();
-      }
-
-      @Override
-      public void exitCondition(Condition condition) {
+      public <T> void prepareCondition(Preparation<T> preparation, T condition) {
+        getCondition(preparation).enter();
         schedule.awaitConditionDependents(ExperimentStep.this, condition);
-        getState(condition).exit();
+        getCondition(preparation).exit();
       }
 
       @Override
-      public <U> Result<? extends U> acquireResult(Dependency<U> requirement) {
+      public <U> Result<? extends U> acquireResult(ResultRequirement<U> requirement) {
         var result = getInput(requirement)
             .getResult()
             .orElseThrow(
@@ -636,14 +644,20 @@ public class ExperimentStep<S> {
       }
 
       @Override
-      public <U extends AutoCloseable> U acquireResource(Resource<U> resource) {
+      public Hold acquireHold(Preparation condition) {
+        schedule.awaitConditionDependency(ExperimentStep.this, condition);
+        return getContainer().get().getState(condition).takeHold();
+      }
+
+      @Override
+      public <U> U acquireCondition(ConditionRequirement<U> resource) {
         return schedule.awaitResource(ExperimentStep.this, resource);
       }
 
       @Override
-      public Hold acquireHold(Condition condition) {
-        schedule.awaitConditionDependency(ExperimentStep.this, condition);
-        return getParent().get().getState(condition).takeHold();
+      public <U> Stream<Result<? extends U>> acquireResults(ResultRequirement<U> requirement) {
+        // TODO Auto-generated method stub
+        return null;
       }
     };
   }

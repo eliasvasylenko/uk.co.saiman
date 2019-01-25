@@ -68,6 +68,6 @@ public class WorkspaceExperimentProvider implements ExperimentProvider<Void> {
   public void createExperiments(Function<Void, Experiment> createExperiment) {
     Experiment experiment = createExperiment.apply(null);
     new RenameExperimentDialog(workspace, text, null);
-    experiment.getVariables().setName("name");
+    experiment.setId("name");
   }
 }

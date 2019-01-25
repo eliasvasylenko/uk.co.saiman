@@ -33,9 +33,7 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.nCopies;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
-import static uk.co.saiman.collection.StreamUtilities.reverse;
 import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 
 import java.util.ArrayList;
@@ -45,6 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.ExperimentStep;
 
@@ -72,9 +71,11 @@ public class ExperimentPath {
   }
 
   public static ExperimentPath of(ExperimentStep<?> node) {
-    return new ExperimentPath(
-        -1,
-        reverse(node.getAncestors()).map(ExperimentMatcher::matching).collect(toList()));
+    return node
+        .getContainer()
+        .map(ExperimentPath::of)
+        .orElseGet(() -> node instanceof Experiment ? absolute() : relative())
+        .resolve(ExperimentMatcher.matching(node));
   }
 
   public static ExperimentPath fromString(String string) {
@@ -164,14 +165,14 @@ public class ExperimentPath {
     Optional<ExperimentStep<?>> result = Optional.of(node);
 
     for (int i = 0; i < ancestors; i++) {
-      result = result.flatMap(ExperimentStep::getParent);
+      result = result.flatMap(ExperimentStep::getContainer);
     }
     if (!result.isPresent()) {
       return Optional.empty();
     }
 
     for (ExperimentMatcher matcher : matchers) {
-      result = result.flatMap(r -> r.getChildren().filter(matcher::match).findFirst());
+      result = result.flatMap(r -> r.getComponentSteps().filter(matcher::match).findFirst());
     }
 
     return result;
@@ -190,7 +191,7 @@ public class ExperimentPath {
 
     for (int i = 1; i < matchers.size(); i++) {
       ExperimentMatcher matcher = matchers.get(i);
-      result = result.flatMap(r -> r.getChildren().filter(matcher::match).findFirst());
+      result = result.flatMap(r -> r.getComponentSteps().filter(matcher::match).findFirst());
     }
 
     return (Optional<ExperimentStep<?>>) result;

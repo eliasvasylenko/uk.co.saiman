@@ -45,7 +45,7 @@ public class ResultPath<T> {
 
   public static <T> ResultPath<T> of(Result<T> result) {
     return new ResultPath<T>(
-        ExperimentPath.of(result.getExperimentStep()),
+        ExperimentPath.of(result.getNode()),
         ResultMatcher.matching(result.getObservation()));
   }
 

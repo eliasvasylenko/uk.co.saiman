@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static uk.co.saiman.experiment.Experiment.scheduledCondition;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,7 +46,6 @@ import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.ExperimentProcedure;
 import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.log.Log;
@@ -72,7 +73,7 @@ public class AddNodeToExperimentMenu {
   void aboutToShow(List<MMenuElement> items, WorkspaceExperiment experiment) {
     procedures
         .procedures()
-        .filter(ExperimentProcedure.instance()::satisfiesRequirementsOf)
+        .filter(p -> p.requirement().resolveCapability(scheduledCondition()).isPresent())
         .map(t -> createMenuItem(experiment, t))
         .forEach(items::add);
   }
@@ -101,9 +102,9 @@ public class AddNodeToExperimentMenu {
 
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.addNodeFailedDialog().toString());
-      alert.setHeaderText(text.addNodeFailedText(experiment).toString());
-      alert.setContentText(text.addNodeFailedDescription().toString());
+      alert.setTitle(text.attachNodeFailedDialog().toString());
+      alert.setHeaderText(text.attachNodeFailedText(experiment, subProcedure).toString());
+      alert.setContentText(text.attachNodeFailedDescription().toString());
       alert.showAndWait();
     }
   }

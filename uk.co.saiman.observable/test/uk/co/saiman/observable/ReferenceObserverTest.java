@@ -29,22 +29,23 @@ package uk.co.saiman.observable;
 
 import static java.time.Duration.ofMillis;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.inOrder;
 
 import java.lang.ref.WeakReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class ReferenceObserverTest {
-  @Injectable
+  @Mock
   Observation upstreamObservation;
 
-  @Injectable
+  @Mock
   Observer<String> downstreamObserver;
 
   @Test
@@ -95,13 +96,10 @@ public class ReferenceObserverTest {
     weakReferenceTest();
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve(upstreamObservation);
-        downstreamObserver.onNext("message");
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
+    inOrder.verify(downstreamObserver).onNext("message");
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -115,13 +113,10 @@ public class ReferenceObserverTest {
     weakReferenceTest();
     test.onNext("message2");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve(upstreamObservation);
-        downstreamObserver.onNext("message1");
-        upstreamObservation.cancel();
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
+    inOrder.verify(downstreamObserver).onNext("message1");
+    inOrder.verify(upstreamObservation).cancel();
+    inOrder.verifyNoMoreInteractions();
   }
 }

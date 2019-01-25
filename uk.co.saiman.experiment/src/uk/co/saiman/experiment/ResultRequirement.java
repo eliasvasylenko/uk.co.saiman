@@ -25,32 +25,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.scheduling.concurrent;
+package uk.co.saiman.experiment;
 
-import java.util.Collection;
+import static uk.co.saiman.reflection.token.TypeToken.forType;
 
-import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.scheduling.Scheduler;
-import uk.co.saiman.experiment.scheduling.SchedulingContext;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-public class ConcurrentScheduler implements Scheduler {
-  private final SchedulingContext schedulingContext;
-  private final int maximumConcurrency;
+import uk.co.saiman.reflection.token.TypeParameter;
+import uk.co.saiman.reflection.token.TypeToken;
 
-  public ConcurrentScheduler(SchedulingContext schedulingContext, int maximumConcurrency) {
-    this.schedulingContext = schedulingContext;
-    this.maximumConcurrency = maximumConcurrency;
+/**
+ * An input to an experiment procedure should be wired up to an observation made
+ * by a preceding procedure.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T> the type of the result we wish to find
+ */
+public abstract class ResultRequirement<T> extends Requirement<Result<T>> {
+  public TypeToken<T> getResultType() {
+    return forType(getClass())
+        .resolveSupertype(Procedure.class)
+        .resolveTypeArgument(new TypeParameter<T>() {})
+        .getTypeToken();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Optional<Observation<T>> resolveCapability(Capability<?> capability) {
+    return capability instanceof Observation<?>
+        && ((Observation<?>) capability).getResultType().isAssignableTo(getResultType())
+            ? Optional.of((Observation<T>) capability)
+            : Optional.empty();
   }
 
   @Override
-  public void scheduleSteps(Collection<? extends ExperimentStep<?>> steps) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void unscheduleSteps(Collection<? extends ExperimentStep<?>> steps) {
-    // TODO Auto-generated method stub
-
+  public Stream<Observation<T>> resolveCapabilities(Procedure<?> procedure) {
+    return procedure.observations().map(this::resolveCapability).flatMap(Optional::stream);
   }
 }

@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment;
 
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
@@ -47,9 +48,7 @@ public interface ProcedureContext<T> {
    */
   ExperimentStep<T> node();
 
-  Hold acquireHold(Condition condition);
-
-  <U extends AutoCloseable> U acquireResource(Resource<U> resource);
+  <U> U acquireCondition(ConditionRequirement<U> resource);
 
   /**
    * Wait for the given requirement to be satisfied.
@@ -58,7 +57,9 @@ public interface ProcedureContext<T> {
    * @throws ExperimentException if the requirement can not be fulfilled
    * @return the item which satisfies the requirement
    */
-  <U> Result<? extends U> acquireResult(Dependency<U> requirement);
+  <U> Result<? extends U> acquireResult(ResultRequirement<U> requirement);
+
+  <U> Stream<Result<? extends U>> acquireResults(ResultRequirement<U> requirement);
 
   /**
    * Get a location which can be used to persist resource artifacts of this
@@ -72,14 +73,7 @@ public interface ProcedureContext<T> {
    */
   Location getLocation();
 
-  void enterCondition(Condition condition);
-
-  void exitCondition(Condition condition);
-
-  default void holdCondition(Condition condition) {
-    enterCondition(condition);
-    exitCondition(condition);
-  }
+  <U> void prepareCondition(Preparation<U> condition, U resource);
 
   /**
    * Set a preliminary partial result value for this execution.

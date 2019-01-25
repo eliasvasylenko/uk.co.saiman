@@ -28,27 +28,29 @@
 package uk.co.saiman.observable;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
 
 import java.util.concurrent.Executor;
 
 import org.junit.jupiter.api.Test;
-
-import mockit.Expectations;
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class ExecutorObserverTest {
   interface MockObserver<T> extends Observer<T> {}
 
   interface MockObservation extends Observation {}
 
-  @Injectable
+  @Mock
   MockObservation upstreamObservation;
 
-  @Injectable
+  @Mock
   MockObserver<String> downstreamObserver;
 
   @Test
@@ -59,12 +61,9 @@ public class ExecutorObserverTest {
     test.getObservation().requestNext();
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext("message");
-      }
-    };
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext("message");
   }
 
   @Test
@@ -74,57 +73,41 @@ public class ExecutorObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
-  public void messageEventOnMockedExecutorTest(@Mocked Executor executor) {
+  public void messageEventOnMockedExecutorTest(@Mock Executor executor) {
     Observer<String> test = new ExecutorObserver<>(downstreamObserver, executor);
 
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        executor.execute((Runnable) any);
-        executor.execute((Runnable) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(executor, upstreamObservation, downstreamObserver);
+    inOrder.verify(executor, times(2)).execute(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
   public void throwFromOnObserveTest() {
-    Throwable throwable = new Exception();
+    Throwable throwable = new RuntimeException();
 
-    new Expectations() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        result = throwable;
-      }
-    };
+    doThrow(throwable).when(downstreamObserver).onObserve(any());
 
     Observer<String> test = new ExecutorObserver<>(downstreamObserver, r -> r.run());
     test.onObserve(upstreamObservation);
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onFail(throwable);
-      }
-    };
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onFail(throwable);
   }
 
   @Test
   public void throwFromOnNextTest() {
-    Throwable throwable = new Exception();
+    Throwable throwable = new RuntimeException();
 
-    new Expectations() {
-      {
-        downstreamObserver.onNext(anyString);
-        result = throwable;
-      }
-    };
+    doThrow(throwable).when(downstreamObserver).onNext(any());
 
     SafeObserver<String> test = new ExecutorObserver<>(downstreamObserver, r -> r.run());
 
@@ -132,13 +115,10 @@ public class ExecutorObserverTest {
     test.getObservation().requestNext();
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext("message");
-        downstreamObserver.onFail(throwable);
-      }
-    };
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext("message");
+    inOrder.verify(downstreamObserver).onFail(throwable);
   }
 
   @Test

@@ -41,12 +41,10 @@ import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
-import uk.co.saiman.experiment.Condition;
-import uk.co.saiman.experiment.Dependency;
+import uk.co.saiman.experiment.ConditionRequirement;
+import uk.co.saiman.experiment.ContingentProcedure;
 import uk.co.saiman.experiment.Observation;
-import uk.co.saiman.experiment.Procedure;
 import uk.co.saiman.experiment.ProcedureContext;
-import uk.co.saiman.experiment.sample.SampleProcedure;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -57,19 +55,20 @@ import uk.co.saiman.experiment.sample.SampleProcedure;
  *
  * @param <T> the type of sample configuration for the instrument
  */
-public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Procedure<T> {
+public interface SpectrumProcedure<T extends SpectrumConfiguration>
+    extends ContingentProcedure<T, Void> {
   static final String SPECTRUM_DATA_NAME = "spectrum";
 
   Unit<Mass> getMassUnit();
 
   AcquisitionDevice<?> getAcquisitionDevice();
 
-  SampleProcedure<?> getSampleProcedure();
-
   Observation<Spectrum> spectrumObservation();
 
+  ConditionRequirement<Void> sampleResource();
+
   @Override
-  default void proceed(ProcedureContext<T> context) {
+  default void proceed(ProcedureContext<T> context, Void condition) {
     System.out.println("create accumulator");
     AcquisitionDevice<?> device = getAcquisitionDevice();
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
@@ -109,8 +108,7 @@ public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Proc
 
     System.out.println("start acquisition");
 
-    try (var condition = context.acquireHold(getSampleProcedure().getSampleReadyCondition());
-        var control = device.acquireControl()) {
+    try (var control = device.acquireControl()) {
       control.startAcquisition();
 
       /*
@@ -132,8 +130,6 @@ public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Proc
       System.out.println("get result");
       var accumulation = accumulator.getAccumulation();
 
-      condition.close();
-
       context
           .setResultFormat(
               spectrumObservation(),
@@ -147,23 +143,12 @@ public interface SpectrumProcedure<T extends SpectrumConfiguration> extends Proc
   }
 
   @Override
-  default Stream<Condition> expectations() {
-    return Stream.of(getSampleProcedure().getSampleReadyCondition());
-  }
-
-  @Override
-  default Stream<Condition> conditions() {
-    return Stream.empty();
-  }
-
-  @Override
-  default Stream<Dependency<?>> dependencies() {
-    return Stream.empty();
+  default ConditionRequirement<Void> conditionRequirement() {
+    return sampleResource();
   }
 
   @Override
   default Stream<Observation<?>> observations() {
     return Stream.of(spectrumObservation());
   }
-
 }

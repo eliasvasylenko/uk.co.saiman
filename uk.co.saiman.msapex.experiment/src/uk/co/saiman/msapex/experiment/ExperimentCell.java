@@ -57,7 +57,7 @@ import uk.co.saiman.experiment.ExperimentConfiguration;
 import uk.co.saiman.experiment.ExperimentLifecycleState;
 import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.event.AttachStepEvent;
-import uk.co.saiman.experiment.event.DetachStepEvent;
+import uk.co.saiman.experiment.event.DisposeStepEvent;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
 import uk.co.saiman.experiment.event.RenameStepEvent;
 import uk.co.saiman.log.Log;
@@ -158,7 +158,6 @@ public class ExperimentCell {
   private void open() {
     context.set(Experiment.class, experiment.experiment());
     context.set(ExperimentStep.class, experiment.experiment());
-    context.set(ExperimentConfiguration.class, experiment.experiment().getVariables());
     context.set(ExperimentLifecycleState.class, experiment.experiment().getLifecycleState());
     updateIcon();
     updateChildren();
@@ -180,7 +179,7 @@ public class ExperimentCell {
   @Inject
   @Optional
   public void update(RenameStepEvent event) {
-    if (experiment.status() == Status.OPEN && event.node() == experiment.experiment()) {
+    if (experiment.status() == Status.OPEN && event.step() == experiment.experiment()) {
       cell.setLabel(event.id());
     }
   }
@@ -188,7 +187,7 @@ public class ExperimentCell {
   @Inject
   @Optional
   public void update(ExperimentLifecycleEvent event) {
-    if (experiment.status() == Status.OPEN && event.node() == experiment.experiment()) {
+    if (experiment.status() == Status.OPEN && event.step() == experiment.experiment()) {
       context.set(ExperimentLifecycleState.class, event.lifecycleState());
     }
   }
@@ -203,7 +202,7 @@ public class ExperimentCell {
 
   @Inject
   @Optional
-  public void update(DetachStepEvent event) {
+  public void update(DisposeStepEvent event) {
     if (experiment.status() == Status.OPEN && event.previousParent() == experiment.experiment()) {
       updateChildren();
     }
@@ -218,7 +217,7 @@ public class ExperimentCell {
         .setItems(
             ExperimentNodeCell.ID,
             ExperimentStep.class,
-            experiment.experiment().getChildren().collect(toList()));
+            experiment.experiment().getComponentSteps().collect(toList()));
   }
 
   @Inject

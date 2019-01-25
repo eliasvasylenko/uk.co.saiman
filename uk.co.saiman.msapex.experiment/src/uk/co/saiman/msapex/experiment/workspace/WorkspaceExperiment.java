@@ -67,7 +67,7 @@ public class WorkspaceExperiment {
           "Experiment file already exists at location " + data.getResource());
     }
 
-    this.experiment = new Experiment(name, storageConfiguration, workspace.getSchedulingStrategy());
+    this.experiment = new Experiment(name, storageConfiguration);
     this.eventsObservation = observe();
     this.status = Status.OPEN;
 
@@ -176,7 +176,7 @@ public class WorkspaceExperiment {
 
   public void rename(String name) {
     open();
-    experiment.getVariables().setName(name);
+    experiment.setId(name);
   }
 
   public Status status() {

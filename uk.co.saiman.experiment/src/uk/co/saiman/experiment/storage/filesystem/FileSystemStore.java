@@ -46,10 +46,10 @@ import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.ExperimentStep;
 import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
+import uk.co.saiman.experiment.state.StateMap;
 import uk.co.saiman.experiment.storage.Storage;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FileSystemStoreConfiguration;
-import uk.co.saiman.experiment.state.StateMap;
 
 @Designate(ocd = FileSystemStoreConfiguration.class, factory = true)
 @Component(name = FileSystemStore.FILE_SYSTEM_STORE_ID, configurationPolicy = REQUIRE, service = {
@@ -136,14 +136,10 @@ public class FileSystemStore implements Store<Path> {
   }
 
   private Path getPath(ExperimentStep<?> node, Path path) {
-    return resolvePath(node, path, node.getId());
+    return getParentPath(node, path).resolve(node.getId());
   }
 
   private Path getParentPath(ExperimentStep<?> node, Path path) {
-    return node.getParent().map(p -> getPath(p, path)).orElseGet(() -> rootPath.resolve(path));
-  }
-
-  private Path resolvePath(ExperimentStep<?> node, Path path, String id) {
-    return getParentPath(node, path).resolve(id);
+    return node.getContainer().map(p -> getPath(p, path)).orElseGet(() -> rootPath.resolve(path));
   }
 }

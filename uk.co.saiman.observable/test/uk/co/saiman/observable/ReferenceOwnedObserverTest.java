@@ -30,21 +30,23 @@ package uk.co.saiman.observable;
 import static java.time.Duration.ofSeconds;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 
 import java.lang.ref.WeakReference;
 
 import org.junit.jupiter.api.Test;
-
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class ReferenceOwnedObserverTest {
-  @Injectable
+  @Mock
   Observation upstreamObservation;
 
-  @Injectable
+  @Mock
   Observer<OwnedMessage<Object, String>> downstreamObserver;
 
   @Test
@@ -97,7 +99,6 @@ public class ReferenceOwnedObserverTest {
     };
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void holdWeakOwnedObserverThenMessageTest() {
     Object owner = new Object();
@@ -109,16 +110,12 @@ public class ReferenceOwnedObserverTest {
     weakReferenceTest();
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve(upstreamObservation);
-        downstreamObserver.onNext((OwnedMessage<Object, String>) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
+    inOrder.verify(downstreamObserver).onNext(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void dropWeakOwnedObserverThenMessageTest() {
     Object owner = new Object();
@@ -132,13 +129,10 @@ public class ReferenceOwnedObserverTest {
     weakReferenceTest();
     test.onNext("message2");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve(upstreamObservation);
-        downstreamObserver.onNext((OwnedMessage<Object, String>) any);
-        upstreamObservation.cancel();
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
+    inOrder.verify(downstreamObserver).onNext(any());
+    inOrder.verify(upstreamObservation).cancel();
+    inOrder.verifyNoMoreInteractions();
   }
 }

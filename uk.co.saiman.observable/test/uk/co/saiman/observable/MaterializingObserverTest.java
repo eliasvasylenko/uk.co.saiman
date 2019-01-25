@@ -28,15 +28,14 @@
 package uk.co.saiman.observable;
 
 import org.junit.jupiter.api.Test;
-
-import mockit.Injectable;
+import org.mockito.Mock;
 
 @SuppressWarnings("javadoc")
 public class MaterializingObserverTest {
-  @Injectable
+  @Mock
   Observation upstreamObservation;
 
-  @Injectable
+  @Mock
   Observer<String> downstreamObserver;
 
   @Test

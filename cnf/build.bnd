@@ -148,7 +148,11 @@ javafx.version: 11
 	osgi.core;version=latest
 
 -testpath.base=\
-	org.jmockit:jmockit,\
+	org.mockito.mockito-core,\
+	org.mockito:mockito-junit-jupiter,\
+	net.bytebuddy.byte-buddy,\
+	net.bytebuddy.byte-buddy-agent,\
+	org.objenesis,\
 	org.junit.jupiter:junit-jupiter-api,\
 	org.junit.jupiter:junit-jupiter-engine,\
 	org.junit.jupiter:junit-jupiter-params,\

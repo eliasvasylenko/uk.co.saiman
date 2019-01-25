@@ -28,19 +28,21 @@
 package uk.co.saiman.observable;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
-
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class TakeWhileObserverTest {
-  @Injectable
+  @Mock
   Observation upstreamObservation;
 
-  @Injectable
+  @Mock
   Observer<String> downstreamObserver;
 
   @Test
@@ -50,14 +52,11 @@ public class TakeWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onComplete();
-        upstreamObservation.cancel();
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onComplete();
+    inOrder.verify(upstreamObservation).cancel();
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -67,13 +66,10 @@ public class TakeWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext("message");
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext("message");
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -84,15 +80,12 @@ public class TakeWhileObserverTest {
     test.onNext("pass");
     test.onNext("fail");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext("pass");
-        downstreamObserver.onComplete();
-        upstreamObservation.cancel();
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext("pass");
+    inOrder.verify(downstreamObserver).onComplete();
+    inOrder.verify(upstreamObservation).cancel();
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -103,14 +96,11 @@ public class TakeWhileObserverTest {
     test.onNext("fail");
     test.onNext("pass");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onComplete();
-        upstreamObservation.cancel();
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onComplete();
+    inOrder.verify(upstreamObservation).cancel();
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test

@@ -55,7 +55,7 @@ public class RemoveNodeHandler {
   @Execute
   void execute(ExperimentStep<?> node) {
     try {
-      node.getParent().ifPresent(parent -> parent.detach(node));
+      node.dispose();
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);

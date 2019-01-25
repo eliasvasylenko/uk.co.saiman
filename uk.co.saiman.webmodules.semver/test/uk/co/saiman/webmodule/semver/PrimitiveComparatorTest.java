@@ -29,232 +29,62 @@ package uk.co.saiman.webmodule.semver;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import mockit.Expectations;
-import mockit.Injectable;
-
+@ExtendWith(MockitoExtension.class)
 public class PrimitiveComparatorTest {
   @Test
-  public void equalityPositiveTest(@Injectable Version first, @Injectable Version second) {
-    new Expectations() {
-      {
-        first.equals(second);
-        result = true;
-        second.equals(first);
-        result = true;
-      }
-    };
-
-    assertTrue(new PrimitiveComparator(Operator.EQUAL, first).matches(second));
-    assertTrue(new PrimitiveComparator(Operator.EQUAL, second).matches(first));
-  }
-
-  @Test
-  public void equalityNegativeTest(@Injectable Version first, @Injectable Version second) {
-    new Expectations() {
-      {
-        first.equals(second);
-        result = false;
-        second.equals(first);
-        result = false;
-      }
-    };
-
-    assertFalse(new PrimitiveComparator(Operator.EQUAL, first).matches(second));
-    assertFalse(new PrimitiveComparator(Operator.EQUAL, second).matches(first));
-  }
-
-  @Test
-  public void greaterThanComparatorForVersionWhichIsHigher(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = -1;
-        second.compareTo(first);
-        result = 1;
-      }
-    };
+  public void comparatorsForVersionWhichIsHigher(@Mock Version first, @Mock Version second) {
+    when(first.compareTo(second)).thenReturn(-1);
+    when(second.compareTo(first)).thenReturn(1);
 
     assertTrue(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
+
+    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, second).matches(first));
+    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, second).matches(first));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN, second).matches(first));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, second).matches(first));
   }
 
   @Test
-  public void greaterThanComparatorForVersionWhichIsLower(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 1;
-        second.compareTo(first);
-        result = -1;
-      }
-    };
+  public void comparatorsForVersionWhichIsLower(@Mock Version first, @Mock Version second) {
+    when(first.compareTo(second)).thenReturn(1);
+    when(second.compareTo(first)).thenReturn(-1);
 
     assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
+
+    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN, second).matches(first));
+    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, second).matches(first));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN, second).matches(first));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, second).matches(first));
   }
 
   @Test
   public void greaterThanComparatorForVersionWhichIsEqual(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 0;
-        second.compareTo(first);
-        result = 0;
-      }
-    };
+      @Mock Version first,
+      @Mock Version second) {
+    when(first.compareTo(second)).thenReturn(0);
+    when(second.compareTo(first)).thenReturn(0);
 
     assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, first).matches(second));
-  }
-
-  @Test
-  public void greaterThanOrEqualComparatorForVersionWhichIsHigher(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = -1;
-        second.compareTo(first);
-        result = 1;
-      }
-    };
-
     assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
-  }
-
-  @Test
-  public void greaterThanOrEqualComparatorForVersionWhichIsLower(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 1;
-        second.compareTo(first);
-        result = -1;
-      }
-    };
-
-    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
-  }
-
-  @Test
-  public void greaterThanOrEqualComparatorForVersionWhichIsEqual(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 0;
-        second.compareTo(first);
-        result = 0;
-      }
-    };
-
-    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, first).matches(second));
-  }
-
-  @Test
-  public void lessThanComparatorForVersionWhichIsHigher(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = -1;
-        second.compareTo(first);
-        result = 1;
-      }
-    };
-
     assertFalse(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
-  }
-
-  @Test
-  public void lessThanComparatorForVersionWhichIsLower(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 1;
-        second.compareTo(first);
-        result = -1;
-      }
-    };
-
-    assertTrue(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
-  }
-
-  @Test
-  public void lessThanComparatorForVersionWhichIsEqual(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 0;
-        second.compareTo(first);
-        result = 0;
-      }
-    };
-
-    assertFalse(new PrimitiveComparator(Operator.LESS_THAN, first).matches(second));
-  }
-
-  @Test
-  public void lessThanOrEqualComparatorForVersionWhichIsHigher(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = -1;
-        second.compareTo(first);
-        result = 1;
-      }
-    };
-
-    assertFalse(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
-  }
-
-  @Test
-  public void lessThanOrEqualComparatorForVersionWhichIsLower(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 1;
-        second.compareTo(first);
-        result = -1;
-      }
-    };
-
     assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
-  }
 
-  @Test
-  public void lessThanOrEqualComparatorForVersionWhichIsEqual(
-      @Injectable Version first,
-      @Injectable Version second) {
-    new Expectations() {
-      {
-        first.compareTo(second);
-        result = 0;
-        second.compareTo(first);
-        result = 0;
-      }
-    };
-
-    assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, first).matches(second));
+    assertFalse(new PrimitiveComparator(Operator.GREATER_THAN, second).matches(first));
+    assertTrue(new PrimitiveComparator(Operator.GREATER_THAN_OR_EQUAL, second).matches(first));
+    assertFalse(new PrimitiveComparator(Operator.LESS_THAN, second).matches(first));
+    assertTrue(new PrimitiveComparator(Operator.LESS_THAN_OR_EQUAL, second).matches(first));
   }
 }

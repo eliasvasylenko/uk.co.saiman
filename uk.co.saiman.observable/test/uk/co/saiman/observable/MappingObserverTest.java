@@ -28,19 +28,20 @@
 package uk.co.saiman.observable;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
-
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class MappingObserverTest {
-  @Injectable
+  @Mock
   Observation upstreamObservation;
 
-  @Injectable
+  @Mock
   Observer<String> downstreamObserver;
 
   @Test
@@ -53,16 +54,13 @@ public class MappingObserverTest {
     test.onNext("three");
     test.onNext("four");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve(upstreamObservation);
-        downstreamObserver.onNext("one!");
-        downstreamObserver.onNext("two!");
-        downstreamObserver.onNext("three!");
-        downstreamObserver.onNext("four!");
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
+    inOrder.verify(downstreamObserver).onNext("one!");
+    inOrder.verify(downstreamObserver).onNext("two!");
+    inOrder.verify(downstreamObserver).onNext("three!");
+    inOrder.verify(downstreamObserver).onNext("four!");
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test

@@ -30,16 +30,18 @@ package uk.co.saiman.observable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
-
-import mockit.FullVerifications;
-import mockit.Injectable;
-import mockit.VerificationsInOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("javadoc")
+@ExtendWith(MockitoExtension.class)
 public class HotObservableTest {
-  @Injectable
+  @Mock
   Observer<String> downstreamObserver;
 
   @Test
@@ -47,12 +49,9 @@ public class HotObservableTest {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -136,13 +135,10 @@ public class HotObservableTest {
     observable.observe(downstreamObserver);
     observable.next("message");
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onNext("message");
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onNext("message");
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -151,13 +147,10 @@ public class HotObservableTest {
     observable.observe(downstreamObserver);
     observable.complete();
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onComplete();
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onComplete();
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -168,13 +161,10 @@ public class HotObservableTest {
     observable.observe(downstreamObserver);
     observable.fail(t);
 
-    new VerificationsInOrder() {
-      {
-        downstreamObserver.onObserve((Observation) any);
-        downstreamObserver.onFail(t);
-      }
-    };
-    new FullVerifications() {};
+    var inOrder = inOrder(downstreamObserver);
+    inOrder.verify(downstreamObserver).onObserve(any());
+    inOrder.verify(downstreamObserver).onFail(t);
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
