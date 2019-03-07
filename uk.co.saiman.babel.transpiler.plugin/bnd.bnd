@@ -12,7 +12,8 @@ Export-Package: \
 	jdk.nashorn.api.scripting
 
 Private-Package: \
-	uk.co.saiman.babel.transpiler.plugin
+	uk.co.saiman.babel.transpiler.plugin,\
+	uk.co.saiman.babel.transpiler
 
 Require-Capability: \
 	osgi.compile.time.only;\

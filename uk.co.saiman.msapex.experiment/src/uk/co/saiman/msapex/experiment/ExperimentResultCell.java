@@ -27,13 +27,13 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.saiman.experiment.ExperimentLifecycleState.COMPLETE;
+import static uk.co.saiman.experiment.schedule.ExperimentLifecycleState.COMPLETE;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.experiment.Step;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -44,7 +44,7 @@ public class ExperimentResultCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
 
   @Inject
-  private ExperimentStep<?> experiment;
+  private Step<?, ?> experiment;
 
   @PostConstruct
   public void prepare(Cell cell) {

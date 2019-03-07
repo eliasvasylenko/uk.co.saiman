@@ -28,7 +28,7 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_TEXT;
+import static uk.co.saiman.msapex.experiment.ExperimentStepCell.SUPPLEMENTAL_TEXT;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -42,8 +42,8 @@ import javafx.scene.control.Label;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.event.ExperimentVariablesEvent;
+import uk.co.saiman.experiment.model.ExperimentStep;
+import uk.co.saiman.experiment.model.event.ExperimentVariablesEvent;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;

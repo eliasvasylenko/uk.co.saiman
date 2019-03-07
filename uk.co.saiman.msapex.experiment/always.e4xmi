@@ -3,7 +3,7 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_xM00IHzvEeeLpZ9wHq5Ynw" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Command" xmi:id="_zfCuYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.newfilesystemexperiment" commandName="New File System Experiment" description="Add a new file system store experiment to the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_RiIukHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.runexperiment" commandName="Run Experiment" description="Run the selected experiment" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
-    <elements xsi:type="commands:Command" xmi:id="_VMhVoHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.removenode" commandName="Remove Node" description="Remove an experiment node from the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
+    <elements xsi:type="commands:Command" xmi:id="_VMhVoHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.command.removestep" commandName="Remove Step" description="Remove an experiment step from the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_7__6MN9EEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.command.renameexperiment" commandName="Rename Experiment" description="Rename the selected experiment" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_YdoxAOjJEeiBK4Dg0V9ijA" elementId="uk.co.saiman.msapex.experiment.command.addexperiments" commandName="Add Experiments" description="Add new experiments to the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_6cC-0Oy8Eei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.command.openexperiment" commandName="Open Experiment" description="Open an experiment file in the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
@@ -26,8 +26,8 @@
       <handlers xmi:id="_AzISAN9FEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handler.renameexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RenameExperimentHandler" command="_7__6MN9EEee47os9dS7QbA"/>
       <handlers xmi:id="_WOsOAO17Eeit7PIHEtez9Q" elementId="uk.co.saiman.msapex.experiment.handler.0" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RemoveExperimentHandler" command="_RZeykO17Eeit7PIHEtez9Q"/>
       <popupMenu xmi:id="_x9FOcOy8Eei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.popupmenu.experiment" label="Experiment">
-        <children xsi:type="menu:Menu" xmi:id="_TpjcAOywEei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.menu.addnode" label="Add Node">
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_Ux8AYOywEei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddNodeToExperimentMenu"/>
+        <children xsi:type="menu:Menu" xmi:id="_TpjcAOywEei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.menu.addstep" label="Add Step">
+          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_Ux8AYOywEei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addstep" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddStepToExperimentMenu"/>
         </children>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_wGPI4O19Eeit7PIHEtez9Q" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.run" label="Run" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_3FoR8N9EEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.renameexperiment" label="Rename Experiment" command="_7__6MN9EEee47os9dS7QbA"/>
@@ -40,18 +40,18 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_tKB2cO19Eeit7PIHEtez9Q" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.remove" label="Remove" command="_RZeykO17Eeit7PIHEtez9Q"/>
       </popupMenu>
     </elements>
-    <elements xsi:type="saiman.ui:Cell" xmi:id="_gvEOwKuLEeioCuifABHnDQ" label="Experiment Node" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/node.png" elementId="uk.co.saiman.msapex.experiment.cell.node" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentNodeCell">
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_gvEOwKuLEeioCuifABHnDQ" label="Experiment Step" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/node.png" elementId="uk.co.saiman.msapex.experiment.cell.step" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentStepCell">
       <children xsi:type="saiman.ui:Cell" xmi:id="_4nO6oLvaEei0KbRa7VpFDA" label="Result" elementId="uk.co.saiman.msapex.experiment.result.cell" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentResultCell">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_8DNSQLvaEei0KbRa7VpFDA" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentResultVisibleExpression"/>
       </children>
-      <handlers xmi:id="_ebj4EHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.removenode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RemoveNodeHandler" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
-      <handlers xmi:id="_CxrH0OzPEei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.handler.run" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RunNodeHandler" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
-      <popupMenu xmi:id="_Y4cl4KuNEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.experiment.popupmenu.node" label="Node">
+      <handlers xmi:id="_ebj4EHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.handler.removestep" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.RemoveStepHandler" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
+      <handlers xmi:id="_CxrH0OzPEei7pqb_YKjS4g" elementId="uk.co.saiman.msapex.experiment.handler.schedule" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ScheduleStepHandler" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
+      <popupMenu xmi:id="_Y4cl4KuNEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.experiment.popupmenu.step" label="Step">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_brmvYO2LEeit7PIHEtez9Q" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.run" label="Run" command="_RiIukHzwEeeLpZ9wHq5Ynw"/>
-        <children xsi:type="menu:Menu" xmi:id="_fGt3MN9DEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.menu.addnode" label="Add Node">
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_Rj2nULshEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addnode" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddNodeToNodeMenu"/>
+        <children xsi:type="menu:Menu" xmi:id="_fGt3MN9DEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.menu.addstep" label="Add Step">
+          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_Rj2nULshEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.dynamicmenucontribution.addstep" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddStepToStepMenu"/>
         </children>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_aKoXsN9DEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.removenode" label="Remove" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_aKoXsN9DEee47os9dS7QbA" elementId="uk.co.saiman.msapex.experiment.handledmenuitem.removestep" label="Remove" command="_VMhVoHzwEeeLpZ9wHq5Ynw"/>
       </popupMenu>
     </elements>
     <elements xsi:type="saiman.ui:Tree" xmi:id="_DMvkYKCKEeizj_NEqekErQ" elementId="uk.co.saiman.msapex.experiment.tree" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentTree" editable="true"/>

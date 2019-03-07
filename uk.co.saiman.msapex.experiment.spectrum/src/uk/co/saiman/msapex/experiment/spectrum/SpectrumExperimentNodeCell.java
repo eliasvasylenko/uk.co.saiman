@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment.spectrum;
 
-import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_TEXT;
+import static uk.co.saiman.msapex.experiment.ExperimentStepCell.SUPPLEMENTAL_TEXT;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -38,7 +38,7 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.experiment.model.ExperimentStep;
 import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
 

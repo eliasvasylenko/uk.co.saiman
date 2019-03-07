@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment.processing;
 
-import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_PSEUDO_CLASS;
+import static uk.co.saiman.msapex.experiment.ExperimentStepCell.SUPPLEMENTAL_PSEUDO_CLASS;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;

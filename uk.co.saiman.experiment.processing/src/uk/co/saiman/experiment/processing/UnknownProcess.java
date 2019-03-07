@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.processing;
 
-import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.state.StateMap;
 
 public class UnknownProcess implements ProcessingStrategy<MissingProcessor> {
   private final String id;

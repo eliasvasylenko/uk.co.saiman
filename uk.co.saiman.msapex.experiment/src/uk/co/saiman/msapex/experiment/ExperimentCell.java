@@ -54,12 +54,13 @@ import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentLifecycleState;
-import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.event.AttachStepEvent;
-import uk.co.saiman.experiment.event.DisposeStepEvent;
+import uk.co.saiman.experiment.ExperimentEvent;
+import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
-import uk.co.saiman.experiment.event.RenameStepEvent;
+import uk.co.saiman.experiment.model.event.AttachStepEvent;
+import uk.co.saiman.experiment.model.event.DisposeStepEvent;
+import uk.co.saiman.experiment.model.event.RenameStepEvent;
+import uk.co.saiman.experiment.schedule.ExperimentLifecycleState;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -157,7 +158,6 @@ public class ExperimentCell {
 
   private void open() {
     context.set(Experiment.class, experiment.experiment());
-    context.set(ExperimentStep.class, experiment.experiment());
     context.set(ExperimentLifecycleState.class, experiment.experiment().getLifecycleState());
     updateIcon();
     updateChildren();
@@ -167,7 +167,7 @@ public class ExperimentCell {
     try {
       removeChildren();
       context.remove(Experiment.class);
-      context.remove(ExperimentStep.class);
+      context.remove(Step.class);
       context.remove(ExperimentConfiguration.class);
       context.remove(ExperimentLifecycleState.class);
       updateIcon();
@@ -178,46 +178,24 @@ public class ExperimentCell {
 
   @Inject
   @Optional
-  public void update(RenameStepEvent event) {
+  public void update(ExperimentEvent event) {
     if (experiment.status() == Status.OPEN && event.step() == experiment.experiment()) {
-      cell.setLabel(event.id());
-    }
-  }
-
-  @Inject
-  @Optional
-  public void update(ExperimentLifecycleEvent event) {
-    if (experiment.status() == Status.OPEN && event.step() == experiment.experiment()) {
+      cell.setLabel(event.newProcedure().id());
       context.set(ExperimentLifecycleState.class, event.lifecycleState());
-    }
-  }
-
-  @Inject
-  @Optional
-  public void update(AttachStepEvent event) {
-    if (experiment.status() == Status.OPEN && event.parent() == experiment.experiment()) {
-      updateChildren();
-    }
-  }
-
-  @Inject
-  @Optional
-  public void update(DisposeStepEvent event) {
-    if (experiment.status() == Status.OPEN && event.previousParent() == experiment.experiment()) {
       updateChildren();
     }
   }
 
   private void removeChildren() {
-    children.setItems(ExperimentNodeCell.ID, ExperimentStep.class, emptyList());
+    children.setItems(ExperimentStepCell.ID, Step.class, emptyList());
   }
 
   private void updateChildren() {
     children
         .setItems(
-            ExperimentNodeCell.ID,
-            ExperimentStep.class,
-            experiment.experiment().getComponentSteps().collect(toList()));
+            ExperimentStepCell.ID,
+            Step.class,
+            experiment.experiment().getDependentSteps().collect(toList()));
   }
 
   @Inject

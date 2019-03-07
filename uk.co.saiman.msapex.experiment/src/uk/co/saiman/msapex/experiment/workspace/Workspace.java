@@ -40,18 +40,22 @@ import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.path.ExperimentIndex;
+import uk.co.saiman.experiment.format.JsonExperimentFormat;
+import uk.co.saiman.experiment.json.JsonProcedureFormat;
+import uk.co.saiman.experiment.path.ProductIndex;
+import uk.co.saiman.experiment.path.ResourceIndex;
+import uk.co.saiman.experiment.procedure.ConductorService;
+import uk.co.saiman.experiment.procedure.ProcedureIndex;
 import uk.co.saiman.experiment.service.ProcedureService;
-import uk.co.saiman.experiment.service.StorageService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
-import uk.co.saiman.experiment.storage.filesystem.JsonExperimentFormat;
+import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment.Status;
 import uk.co.saiman.msapex.experiment.workspace.event.AddExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.event.WorkspaceEvent;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
-public class Workspace implements ExperimentIndex {
+public class Workspace implements ProcedureIndex {
   static final String WORKSPACE = "workspace";
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.filesystem.workspace";
 
@@ -64,12 +68,12 @@ public class Workspace implements ExperimentIndex {
 
   public Workspace(
       Path rootPath,
-      ProcedureService procedureService,
+      ConductorService conductorService,
       StorageService storageService) {
     this.experiments = new HashSet<>();
 
     this.rootLocation = new PathLocation(rootPath);
-    this.experimentFormat = new JsonExperimentFormat(procedureService, storageService);
+    this.experimentFormat = new JsonExperimentFormat(conductorService, storageService);
 
     this.events = new HotObservable<>();
   }

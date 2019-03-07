@@ -30,8 +30,8 @@ package uk.co.saiman.experiment.processing;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.state.StateList;
-import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.state.StateList;
+import uk.co.saiman.state.StateMap;
 
 public interface ProcessingService {
   Stream<ProcessingStrategy<?>> strategies();

@@ -170,7 +170,7 @@ javafx.version: 11
 -fixupmessages.sub: "Eclipse: The Bundle Symbolic * is a sub-bundle *.bnd but uses the project name"
 
 # TODO Once a baseline release has been made this should point to it, and the local repo copy removed
--pluginpath: ${build}/local/uk.co.saiman.babel.transpiler.plugin/uk.co.saiman.babel.transpiler.plugin-0.0.1.jar
+-pluginpath.babel.transpiler: ${build}/local/uk.co.saiman.babel.transpiler.plugin/uk.co.saiman.babel.transpiler.plugin-0.0.1.jar
 -plugin: uk.co.saiman.babel.transpiler.plugin.MakeTranspiled
 -make:\
 	(*).js;\
@@ -178,4 +178,3 @@ javafx.version: 11
 		source="$1.jsx";\
 		presets="react";\
 		plugins="transform-object-rest-spread"
-

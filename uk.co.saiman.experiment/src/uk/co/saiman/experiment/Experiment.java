@@ -27,199 +27,100 @@
  */
 package uk.co.saiman.experiment;
 
-import static uk.co.saiman.experiment.ExperimentLifecycleState.COMPLETE;
-import static uk.co.saiman.experiment.ExperimentLifecycleState.PREPARATION;
-import static uk.co.saiman.experiment.ExperimentLifecycleState.PROCEEDING;
-import static uk.co.saiman.experiment.ExperimentLifecycleState.WAITING;
+import java.lang.ref.Reference;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.TreeSet;
+import java.util.function.Function;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.procedure.Instruction;
+import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.procedure.Template;
+import uk.co.saiman.experiment.product.Nothing;
+import uk.co.saiman.experiment.schedule.Products;
+import uk.co.saiman.experiment.schedule.Schedule;
+import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
-public class Experiment extends ExperimentStep<Void> {
-  private static class ExperimentProcedure implements Procedure<Void> {
-    @Override
-    public Void configureVariables(ExperimentContext<Void> configuration) {
-      return null;
-    }
+public class Experiment {
+  private Procedure procedure;
+  private NavigableSet<ExperimentPath> enabled = new TreeSet<>();
 
-    @Override
-    public void proceed(ProcedureContext<Void> context) {
-      context.prepareCondition(Experiment.SCHEDULED_CONDITION, null);
-    }
+  private final Scheduler scheduler;
 
-    @Override
-    public Stream<Preparation<?>> preparations() {
-      return Stream.of(SCHEDULED_CONDITION);
-    }
-  }
-
-  private static final ExperimentProcedure PROCEDURE = new ExperimentProcedure();
-
-  private static final String SCHEDULED_CONDITION_ID = Experiment.class.getPackageName()
-      + ".submitted";
-  private static final Preparation<Void> SCHEDULED_CONDITION = new Preparation<Void>(
-      SCHEDULED_CONDITION_ID) {};
-  private static final ConditionRequirement<Void> SCHEDULED_REQUIREMENT = new ConditionRequirement<Void>(
-      SCHEDULED_CONDITION) {};
-
-  private final Condition<Void> submitted;
-
-  private final StorageConfiguration<?> storageConfiguration;
-  private final Deque<ExperimentStep<?>> schedulingQueue = new ArrayDeque<>();
+  private Map<ExperimentPath, Reference<Step<?, ?>>> steps = new HashMap<>();
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
-  private final List<ExperimentEvent> eventQueue = new ArrayList<>();
 
-  public Experiment(String id, StorageConfiguration<?> storageConfiguration) {
-    super(procedure(), id, StateMap.empty(), PREPARATION);
-    this.storageConfiguration = storageConfiguration;
-    this.submitted = new Condition<>(this, SCHEDULED_CONDITION);
+  public Experiment(Procedure procedure, StorageConfiguration<?> storageConfiguration) {
+    this.scheduler = new Scheduler(storageConfiguration);
+
+    var schedule = this.scheduler.schedule(Procedure.define(procedure.id()));
   }
 
-  @Override
+  public Procedure getProcedure() {
+    return procedure;
+  }
+
+  public Schedule getSchedule() {
+    return scheduler.getSchedule().get();
+  }
+
+  public Products getProducts() {
+    return scheduler.getProducts().get();
+  }
+
+  public String getId() {
+    return getSchedule().getProcedure().id();
+  }
+
   public void setId(String id) {
-    super.setId(id);
+    updateProcedure(p -> p.withId(id));
   }
 
-  @Override
-  public Optional<Experiment> getExperiment() {
-    return Optional.of(this);
+  private synchronized void updateProcedure(Function<Procedure, Procedure> modifier) {
+    updateProcedure(modifier.apply(this.procedure));
   }
 
-  @Override
-  public Optional<ExperimentStep<?>> getContainer() {
-    return Optional.empty();
+  private synchronized boolean updateProcedure(Procedure newProcedure) {
+    boolean changed = !procedure.equals(newProcedure);
+    if (changed) {
+      procedure = newProcedure;
+      scheduler.schedule(procedure);
+    }
+    return changed;
   }
 
   public StorageConfiguration<?> getStorageConfiguration() {
-    return storageConfiguration;
-  }
-
-  public void dispose() {
-    setDetached();
+    return scheduler.getStorageConfiguration();
   }
 
   public Observable<ExperimentEvent> events() {
     return events;
   }
 
-  @Override
-  void queueEvents(Collection<? extends ExperimentEvent> events) {
-    synchronized (eventQueue) {
-      eventQueue.addAll(events);
-    }
+  public synchronized <T> Step<T, Nothing> attach(Template<T, Nothing> step) {
+
+    // TODO
+
+    return null;
   }
 
-  void fireEvents() {
-    Collection<ExperimentEvent> events = new ArrayList<>();
-
-    synchronized (eventQueue) {
-      events.addAll(eventQueue);
-      eventQueue.clear();
-    }
-
-    events.forEach(this.events::next);
-  }
-
-  public synchronized void addSteps(Collection<? extends ExperimentStep<?>> steps) {
-    lockExperiment().update(lock -> {
-      for (var step : addTransitiveClosure(steps)) {
-        new Thread(step::takeStep).run();
-      }
-    });
-  }
-
-  private Collection<ExperimentStep<?>> addTransitiveClosure(
-      Collection<? extends ExperimentStep<?>> steps) {
-    List<ExperimentStep<?>> transitiveSteps = new ArrayList<>(steps);
-    for (var step : steps) {
-      if (step.getLifecycleState() != WAITING && step.getLifecycleState() != PROCEEDING) {
-        transitiveSteps.add(step);
-      }
-    }
-    for (int i = 0; i < transitiveSteps.size(); i++) {
-      var step = transitiveSteps.get(i);
-
-      step
-          .getRequiredConditions()
-          .map(Condition::getNode)
-          .filter(s -> s.getLifecycleState() != WAITING && s.getLifecycleState() != PROCEEDING)
-          .forEach(transitiveSteps::add);
-
-      step
-          .getRequiredResults()
-          .map(Result::getNode)
-          .filter(
-              s -> s.getLifecycleState() != COMPLETE
-                  && s.getLifecycleState() != WAITING
-                  && s.getLifecycleState() != PROCEEDING)
-          .forEach(transitiveSteps::add);
-    }
-
-    return transitiveSteps;
-
-    /*
-     * TODO collect transitive closure of ALL INCOMPLETE experiments which are wired
-     * to dependencies as inputs, and ALL ancestors which are linked by way of
-     * conditions/expectations. This is our set of requirements.
-     * 
-     * TODO collect transitive closure of ALL experiments whose dependencies are
-     * wired to results via inputs, and ALL INCOMPLETE descendents which are linked
-     * by way of conditions/expectations. This is our set of dependents.
-     * 
-     * Consider that dependencies may have their own dependents, and dependents may
-     * have other dependencies.
-     * 
-     * TODO taking the transitive closure of the experiments whose dependencies are
-     * wired to results via inputs, if any are already complete or processing, FAIL!
-     * They need to be explicitly cancelled/cleared before we can proceed!
-     */
+  public synchronized void close() {
 
   }
 
-  private void prepareStep(ExperimentStep<?> step) {
-    step.clearResults();
-    step.setLifecycleState(WAITING);
+  Instruction getInstruction(ExperimentPath path) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
-  public static boolean isNameValid(String name) {
-    final String ALPHANUMERIC = "[a-zA-Z0-9]+";
-    final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
-
-    return name != null
-        && name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
-  }
-
-  @Override
-  public void schedule() {
+  void updateInstruction(ExperimentPath path, Instruction instruction) {
     // TODO Auto-generated method stub
 
-  }
-
-  public void attach(ExperimentStep<?> step) {
-    submitted.attach(step);
-  }
-
-  public static Procedure<Void> procedure() {
-    return PROCEDURE;
-  }
-
-  public static ConditionRequirement<Void> scheduledRequirement() {
-    return SCHEDULED_REQUIREMENT;
-  }
-
-  public static Preparation<Void> scheduledCondition() {
-    return SCHEDULED_CONDITION;
   }
 }

@@ -1,11 +1,23 @@
 Bundle-Name: SAI :: Babel :: Transpiler
 
+-buildpathNO: \
+	org.graalvm.js:js;version=latest,\
+	org.graalvm.js:js-scriptengine;version=latest,\
+	org.graalvm.regex:regex;version=latest,\
+	org.graalvm.sdk:graal-sdk;version=latest,\
+	org.graalvm.truffle:truffle-api;version=latest
+
 standalone.version = 6.24.0
 -includeresource: \
 	@${repo;uk.co.saiman.webmodule.babel-standalone.cjs;${standalone.version}}!/static/*
-
+	
 Import-Package: \
 	*
 
 Export-Package: \
 	uk.co.saiman.babel.transpiler
+
+Private-PackageNO: \
+	com.oracle.truffle.*,\
+	com.oracle.js.*,\
+	org.graalvm.*

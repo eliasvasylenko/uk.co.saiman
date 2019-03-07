@@ -42,7 +42,7 @@ import org.eclipse.fx.core.di.Service;
 import javafx.scene.control.ChoiceDialog;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.experiment.model.ExperimentStep;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;

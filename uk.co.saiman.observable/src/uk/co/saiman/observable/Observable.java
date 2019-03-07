@@ -34,6 +34,7 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.observable.BackpressureReducingObserver.backpressureReducingObserver;
+import static uk.co.saiman.observable.Observer.forObservation;
 import static uk.co.saiman.observable.Observer.onCompletion;
 import static uk.co.saiman.observable.Observer.onFailure;
 import static uk.co.saiman.observable.Observer.onObservation;
@@ -67,16 +68,14 @@ import uk.co.saiman.property.Property;
  * observers expecting the applicable type of message.
  * 
  * @author Elias N Vasylenko
- * @param <M>
- *          The message type. This may be {@link Void} if no message need be
- *          sent.
+ * @param <M> The message type. This may be {@link Void} if no message need be
+ *            sent.
  */
 public interface Observable<M> {
   /**
    * Observers added will receive messages from this Observable.
    * 
-   * @param observer
-   *          an observer to add
+   * @param observer an observer to add
    * @return a disposable over the observation
    */
   Disposable observe(Observer<? super M> observer);
@@ -96,11 +95,11 @@ public interface Observable<M> {
    * throw a {@link MissingValueException}.
    * 
    * @return the next value
-   * @throws MissingValueException
-   *           If a failure or completion event is received before the next
-   *           message event. In the former case the cause will be the failure
-   *           throwable, in the latter case an instance of
-   *           {@link AlreadyCompletedException}.
+   * @throws MissingValueException If a failure or completion event is received
+   *                               before the next message event. In the former
+   *                               case the cause will be the failure throwable,
+   *                               in the latter case an instance of
+   *                               {@link AlreadyCompletedException}.
    */
   default CompletableFuture<M> getNext() {
     return tryGetNext().thenApplyAsync(o -> o.orElseThrow(() -> new AlreadyCompletedException()));
@@ -112,11 +111,11 @@ public interface Observable<M> {
    * throw a {@link MissingValueException}.
    * 
    * @return the next value
-   * @throws MissingValueException
-   *           If a failure or completion event is received before the next
-   *           message event. In the former case the cause will be the failure
-   *           throwable, in the latter case an instance of
-   *           {@link AlreadyCompletedException}.
+   * @throws MissingValueException If a failure or completion event is received
+   *                               before the next message event. In the former
+   *                               case the cause will be the failure throwable,
+   *                               in the latter case an instance of
+   *                               {@link AlreadyCompletedException}.
    */
   default CompletableFuture<Optional<M>> tryGetNext() {
     CompletableFuture<Optional<M>> result = new CompletableFuture<>();
@@ -157,11 +156,11 @@ public interface Observable<M> {
    * throw a {@link MissingValueException}.
    * 
    * @return the next value
-   * @throws MissingValueException
-   *           If a failure or completion event is received before the next
-   *           message event. In the former case the cause will be the failure
-   *           throwable, in the latter case an instance of
-   *           {@link AlreadyCompletedException}.
+   * @throws MissingValueException If a failure or completion event is received
+   *                               before the next message event. In the former
+   *                               case the cause will be the failure throwable,
+   *                               in the latter case an instance of
+   *                               {@link AlreadyCompletedException}.
    */
   default M get() {
     CompletableFuture<M> result = getNext();
@@ -189,10 +188,8 @@ public interface Observable<M> {
    * exists only to create a more natural fit into the fluent API by making the
    * order of operations clearer in method chains.
    * 
-   * @param <T>
-   *          the type of the resulting observable
-   * @param transformation
-   *          the transformation function to apply to the observable
+   * @param <T>            the type of the resulting observable
+   * @param transformation the transformation function to apply to the observable
    * @return the derived observable
    */
   default <T> Observable<T> compose(Function<Observable<M>, Observable<T>> transformation) {
@@ -203,8 +200,7 @@ public interface Observable<M> {
    * A collector which can be applied to a {@link Stream} to derive a cold
    * observable.
    * 
-   * @param <M>
-   *          the type of the observable
+   * @param <M> the type of the observable
    * @return an observable over the given stream
    */
   static <M> Collector<M, ?, Observable<M>> toObservable() {
@@ -215,8 +211,7 @@ public interface Observable<M> {
    * Derive an observable which passes events to the given observer directly
    * before passing them downstream.
    * 
-   * @param action
-   *          an observer representing the action to take
+   * @param action an observer representing the action to take
    * @return an observable which performs the injected behavior
    */
   default Observable<M> then(Observer<M> action) {
@@ -227,8 +222,7 @@ public interface Observable<M> {
    * Derive an observable which passes events to the given observer directly after
    * passing them downstream.
    * 
-   * @param action
-   *          an observer representing the action to take
+   * @param action an observer representing the action to take
    * @return an observable which performs the injected behavior
    */
   default Observable<M> thenAfter(Observer<M> action) {
@@ -253,20 +247,11 @@ public interface Observable<M> {
   }
 
   default Observable<M> requestNext() {
-    // return then(onObservation(o -> o.requestUnbounded()));
+    return then(onObservation(o -> o.requestNext()));
+  }
 
-    return then(new Observer<M>() {
-      @Override
-      public void onNext(M message) {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public void onObserve(Observation observation) {
-        observation.requestNext();
-      }
-    });
+  default Observable<M> thenRequestNext() {
+    return then(forObservation(o -> s -> o.requestNext()));
   }
 
   default Observable<M> retrying() {
@@ -345,10 +330,8 @@ public interface Observable<M> {
    * an {@link OwnedMessage}, which may create references to the owner on demand
    * within observer logic without retainment.
    * 
-   * @param <O>
-   *          the type of the owning object
-   * @param owner
-   *          the owning referent object
+   * @param <O>   the type of the owning object
+   * @param owner the owning referent object
    * @return the derived observable
    */
   default <O> Observable<OwnedMessage<O, M>> weakReference(O owner) {
@@ -375,10 +358,8 @@ public interface Observable<M> {
    * an {@link OwnedMessage}, which may create references to the owner on demand
    * within observer logic without retainment.
    * 
-   * @param <O>
-   *          the type of the owning object
-   * @param owner
-   *          the owning referent object
+   * @param <O>   the type of the owning object
+   * @param owner the owning referent object
    * @return the derived observable
    */
   default <O> Observable<OwnedMessage<O, M>> softReference(O owner) {
@@ -388,8 +369,7 @@ public interface Observable<M> {
   /**
    * Derive an observable which re-emits messages on the given executor.
    * 
-   * @param executor
-   *          the target executor
+   * @param executor the target executor
    * @return the derived observable
    */
   default Observable<M> executeOn(Executor executor) {
@@ -400,10 +380,8 @@ public interface Observable<M> {
    * Derive an observable which transforms messages according to the given
    * mapping.
    * 
-   * @param <T>
-   *          the type of the derived observable
-   * @param mapping
-   *          the mapping function
+   * @param <T>     the type of the derived observable
+   * @param mapping the mapping function
    * @return an observable over the mapped messages
    */
   default <T> Observable<T> map(Function<? super M, ? extends T> mapping) {
@@ -414,8 +392,7 @@ public interface Observable<M> {
    * Derive an observable which passes along only those messages which match the
    * given condition.
    * 
-   * @param condition
-   *          the terminating condition
+   * @param condition the terminating condition
    * @return the derived observable
    */
   default Observable<M> filter(Predicate<? super M> condition) {
@@ -426,8 +403,7 @@ public interface Observable<M> {
    * Derive an observable which passes along only those messages which match the
    * given type.
    * 
-   * @param type
-   *          the message type
+   * @param type the message type
    * @return the derived observable
    */
   default <T> Observable<T> filterTo(Class<T> type) {
@@ -439,11 +415,10 @@ public interface Observable<M> {
    * optional mapping, and passes along only those messages which produce an
    * optional containing a result.
    * 
-   * @param mapping
-   *          the optional mapping function
+   * @param mapping the optional mapping function
    * @return the derived observable
    */
-  default <T> Observable<T> optionalMap(Function<? super M, ? extends Optional<T>> mapping) {
+  default <T> Observable<T> partialMap(Function<? super M, ? extends Optional<T>> mapping) {
     return map(mapping).filter(Optional::isPresent).map(Optional::get);
   }
 
@@ -451,8 +426,7 @@ public interface Observable<M> {
    * Derive an observable which completes and disposes itself after receiving a
    * message which matches the given condition.
    * 
-   * @param condition
-   *          the terminating condition
+   * @param condition the terminating condition
    * @return the derived observable
    */
   default Observable<M> takeWhile(Predicate<? super M> condition) {
@@ -468,8 +442,7 @@ public interface Observable<M> {
    * Derive an observable which completes and disposes itself after receiving a
    * message which matches the given condition.
    * 
-   * @param condition
-   *          the terminating condition
+   * @param condition the terminating condition
    * @return the derived observable
    */
   default Observable<M> dropWhile(Predicate<? super M> condition) {
@@ -501,11 +474,9 @@ public interface Observable<M> {
    * forward every message as soon as it is available. Because of this, The
    * downstream observable does not support backpressure.
    * 
-   * @param <T>
-   *          the resulting observable message type
+   * @param <T>     the resulting observable message type
    * 
-   * @param mapping
-   *          the terminating condition
+   * @param mapping the terminating condition
    * @return the derived observable
    */
   default <T> Observable<T> mergeMap(
@@ -517,11 +488,9 @@ public interface Observable<M> {
    * As {@link #flatMap(Function, RequestAllocator)} using
    * {@link RequestAllocator#sequential() sequential request allocation}.
    * 
-   * @param <T>
-   *          the resulting observable message type
+   * @param <T>     the resulting observable message type
    * 
-   * @param mapping
-   *          the terminating condition
+   * @param mapping the terminating condition
    * @return the derived observable
    */
   default <T> Observable<T> concatMap(
@@ -544,14 +513,11 @@ public interface Observable<M> {
    * The resulting observable supports backpressure if and only if the
    * intermediate observables support backpressure.
    * 
-   * @param <T>
-   *          the resulting observable message type
+   * @param <T>              the resulting observable message type
    * 
-   * @param mapping
-   *          the terminating condition
-   * @param requestAllocator
-   *          the strategy for allocating downstream requests to upstream
-   *          observations
+   * @param mapping          the terminating condition
+   * @param requestAllocator the strategy for allocating downstream requests to
+   *                         upstream observations
    * @return the derived observable
    */
   default <T> Observable<T> flatMap(
@@ -586,11 +552,9 @@ public interface Observable<M> {
    * invoking {@link Invalidation#revalidate()}, which will return the most recent
    * message from upstream.
    * 
-   * @param identity
-   *          the identity value for the accumulating function
-   * @param accumulator
-   *          an associative, non-interfering, stateless function for combining
-   *          two values
+   * @param identity    the identity value for the accumulating function
+   * @param accumulator an associative, non-interfering, stateless function for
+   *                    combining two values
    * @return an observable over the reduced values
    */
   default Observable<Invalidation<M>> invalidateLazyRevalidate() {
@@ -601,14 +565,11 @@ public interface Observable<M> {
    * Introduce backpressure by reducing messages until a request is made
    * downstream, then forwarding the reduction.
    * 
-   * @param <R>
-   *          the resulting reduction type
+   * @param <R>         the resulting reduction type
    * 
-   * @param identity
-   *          the identity value for the accumulating function
-   * @param accumulator
-   *          an associative, non-interfering, stateless function for combining
-   *          two values
+   * @param identity    the identity value for the accumulating function
+   * @param accumulator an associative, non-interfering, stateless function for
+   *                    combining two values
    * @return an observable over the reduced values
    */
   default <R> Observable<R> reduceBackpressure(
@@ -621,14 +582,11 @@ public interface Observable<M> {
    * Introduce backpressure by reducing messages until a request is made
    * downstream, then forwarding the reduction.
    * 
-   * @param <R>
-   *          the resulting reduction type
+   * @param <R>         the resulting reduction type
    * 
-   * @param initial
-   *          the initial value for the accumulating function
-   * @param accumulator
-   *          an associative, non-interfering, stateless function for combining
-   *          two values
+   * @param initial     the initial value for the accumulating function
+   * @param accumulator an associative, non-interfering, stateless function for
+   *                    combining two values
    * @return an observable over the reduced values
    */
   default <R> Observable<R> reduceBackpressure(
@@ -641,9 +599,8 @@ public interface Observable<M> {
    * Introduce backpressure by reducing messages until a request is made
    * downstream, then forwarding the reduction.
    * 
-   * @param accumulator
-   *          an associative, non-interfering, stateless function for combining
-   *          two values
+   * @param accumulator an associative, non-interfering, stateless function for
+   *                    combining two values
    * @return an observable over the reduced values
    */
   default Observable<M> reduceBackpressure(BinaryOperator<M> accumulator) {
@@ -661,13 +618,10 @@ public interface Observable<M> {
    * Introduce backpressure by collecting messages until a request is made
    * downstream, then forwarding the collection.
    * 
-   * @param <R>
-   *          the resulting collection type
-   * @param <A>
-   *          the intermediate collection type
+   * @param <R>       the resulting collection type
+   * @param <A>       the intermediate collection type
    * 
-   * @param collector
-   *          the collector to apply to incoming messages
+   * @param collector the collector to apply to incoming messages
    * @return an observable over the collected values
    */
   default <R, A> Observable<R> collectBackpressure(Collector<? super M, A, ? extends R> collector) {

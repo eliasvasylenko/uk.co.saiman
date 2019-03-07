@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.saiman.msapex.experiment.ExperimentNodeCell.SUPPLEMENTAL_PSEUDO_CLASS;
+import static uk.co.saiman.msapex.experiment.ExperimentStepCell.SUPPLEMENTAL_PSEUDO_CLASS;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -43,7 +43,7 @@ import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
-import uk.co.saiman.experiment.event.RenameStepEvent;
+import uk.co.saiman.experiment.model.event.RenameStepEvent;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;

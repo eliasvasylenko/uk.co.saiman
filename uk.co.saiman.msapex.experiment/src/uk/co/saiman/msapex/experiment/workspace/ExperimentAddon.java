@@ -29,7 +29,6 @@ package uk.co.saiman.msapex.experiment.workspace;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.concat;
 import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
 import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
 import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
@@ -59,11 +58,10 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import uk.co.saiman.experiment.ExperimentProcedure;
-import uk.co.saiman.experiment.Procedure;
-import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.service.ProcedureService;
-import uk.co.saiman.experiment.service.StorageService;
+import uk.co.saiman.experiment.ExperimentEvent;
+import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.procedure.ConductorService;
+import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
 import uk.co.saiman.log.Log;
@@ -96,18 +94,18 @@ public class ExperimentAddon {
 
   @Inject
   private IAdapterManager adapterManager;
-  private ExperimentNodeAdapterFactory experimentNodeAdapterFactory;
+  private ExperimentStepAdapterFactory experimentNodeAdapterFactory;
   private ExperimentAdapterFactory experimentAdapterFactory;
 
   @Inject
   @Service
-  private ProcedureService procedureService;
+  private ConductorService conductorService;
   @Inject
   @Service
   private StorageService storageService;
   @Inject
   @Service
-  private volatile List<Procedure<?>> experimentTypes;
+  private volatile List<Conductor<?, ?>> experimentTypes;
 
   private Workspace workspace;
   private FileSystemStore workspaceStore;
@@ -142,7 +140,7 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspace(Path rootPath) {
-    workspace = new Workspace(rootPath, procedureService, storageService);
+    workspace = new Workspace(rootPath, conductorService, storageService);
     context.set(Workspace.class, workspace);
     loadWorkspace();
   }
@@ -191,14 +189,14 @@ public class ExperimentAddon {
     }
   }
 
-  private Stream<Procedure<?>> getExperimentTypes() {
+  private Stream<Conductor<?, ?>> getExperimentTypes() {
     return new ArrayList<>(experimentTypes).stream();
   }
 
   private void initializeAdapters() {
-    experimentNodeAdapterFactory = new ExperimentNodeAdapterFactory(
+    experimentNodeAdapterFactory = new ExperimentStepAdapterFactory(
         adapterManager,
-        () -> concat(Stream.of(ExperimentProcedure.instance()), getExperimentTypes()));
+        () -> Stream.concat(Stream.of(ExperimentProcedure.instance()), getExperimentTypes()));
     experimentAdapterFactory = new ExperimentAdapterFactory(
         adapterManager,
         experimentNodeAdapterFactory);

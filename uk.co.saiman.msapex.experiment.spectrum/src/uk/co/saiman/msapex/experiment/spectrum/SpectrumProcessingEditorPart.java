@@ -41,7 +41,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
-import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.experiment.model.ExperimentStep;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;

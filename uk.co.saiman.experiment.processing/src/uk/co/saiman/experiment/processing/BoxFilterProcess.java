@@ -27,13 +27,13 @@
  */
 package uk.co.saiman.experiment.processing;
 
-import static uk.co.saiman.experiment.state.Accessor.intAccessor;
+import static uk.co.saiman.state.Accessor.intAccessor;
 
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.function.processing.BoxFilter;
-import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
-import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.state.Accessor.PropertyAccessor;
+import uk.co.saiman.state.StateMap;
 
 @Component
 public class BoxFilterProcess implements ProcessingStrategy<BoxFilter> {

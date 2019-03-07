@@ -1,26 +1,21 @@
-Bundle-Name: SAI :: Experiment
+Bundle-Name: SAI :: Experiment :: Model
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.experiment.scheduling;version=snapshot,\
+	uk.co.saiman.experiment.storage;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-	uk.co.saiman.reflection;version=snapshot,\
-	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	json;version=latest
 
 Export-Package: \
 	uk.co.saiman.experiment,\
-	uk.co.saiman.experiment.event,\
-	uk.co.saiman.experiment.path,\
-	uk.co.saiman.experiment.scheduling,\
-	uk.co.saiman.experiment.scheduling.concurrent,\
-	uk.co.saiman.experiment.service,\
-	uk.co.saiman.experiment.service.impl,\
-	uk.co.saiman.experiment.state,\
-	uk.co.saiman.experiment.state.json,\
-	uk.co.saiman.experiment.storage,\
-	uk.co.saiman.experiment.storage.filesystem
+	uk.co.saiman.experiment.format,\
+	uk.co.saiman.experiment.service

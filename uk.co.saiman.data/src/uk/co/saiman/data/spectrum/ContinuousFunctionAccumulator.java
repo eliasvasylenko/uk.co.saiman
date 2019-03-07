@@ -28,10 +28,10 @@
 package uk.co.saiman.data.spectrum;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static uk.co.saiman.observable.Observer.forObservation;
 import static uk.co.saiman.observable.Observer.onCompletion;
 import static uk.co.saiman.observable.Observer.onFailure;
 import static uk.co.saiman.observable.Observer.onObservation;
-import static uk.co.saiman.observable.Observer.forObservation;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;

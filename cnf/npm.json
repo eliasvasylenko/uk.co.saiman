@@ -36,7 +36,6 @@
 		},
 		"requirejs": "^2.3.5",
 		"systemjs": "^0.21.3",
-		"babel-standalone": "^6.24.0",
-		"hello": 123
+		"babel-standalone": "^6.24.0"
 	}
 }

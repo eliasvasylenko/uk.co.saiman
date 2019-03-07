@@ -46,8 +46,7 @@ import java.util.function.BiPredicate;
  *
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          The type of object to compare.
+ * @param <T> The type of object to compare.
  */
 public class EquivalenceComparator<T> implements Comparator<T> {
   private final BiPredicate<? super T, ? super T> equality;
@@ -59,9 +58,8 @@ public class EquivalenceComparator<T> implements Comparator<T> {
   /**
    * Create a fresh identity comparator.
    * 
-   * @param equality
-   *          The equality predicate with respect to which we wish to create a
-   *          consistent ordering.
+   * @param equality The equality predicate with respect to which we wish to
+   *                 create a consistent ordering.
    */
   public EquivalenceComparator(BiPredicate<? super T, ? super T> equality) {
     this.equality = equality;
@@ -74,8 +72,7 @@ public class EquivalenceComparator<T> implements Comparator<T> {
   /**
    * Create a new {@link EquivalenceComparator} over the identity operation.
    * 
-   * @param <T>
-   *          The type of the items to compare
+   * @param <T> The type of the items to compare
    * @return The new equality comparator instance.
    */
   public static <T> EquivalenceComparator<T> identityComparator() {
@@ -86,8 +83,7 @@ public class EquivalenceComparator<T> implements Comparator<T> {
    * Create a new {@link EquivalenceComparator} over the {@link Object#equals}
    * equality operation.
    * 
-   * @param <T>
-   *          The type of the items to compare
+   * @param <T> The type of the items to compare
    * @return The new equality comparator instance.
    */
   public static <T> EquivalenceComparator<T> naturalComparator() {
@@ -96,8 +92,6 @@ public class EquivalenceComparator<T> implements Comparator<T> {
 
   @Override
   public int compare(EquivalenceComparator<T> this, T first, T second) {
-    clean();
-
     if (equality.test(first, second)) {
       return 0;
     }
@@ -109,34 +103,38 @@ public class EquivalenceComparator<T> implements Comparator<T> {
       return secondHash - firstHash;
     }
 
-    IDReference firstReference = new IDReference(first, firstHash);
-    IDReference secondReference = new IDReference(second, secondHash);
+    synchronized (this) {
+      clean();
 
-    List<IDReference> collisions = collisionMap.get(firstHash);
-    if (collisions == null) {
-      collisions = new ArrayList<>();
+      IDReference firstReference = new IDReference(first, firstHash);
+      IDReference secondReference = new IDReference(second, secondHash);
 
-      collisions.add(firstReference);
-      collisions.add(secondReference);
+      List<IDReference> collisions = collisionMap.get(firstHash);
+      if (collisions == null) {
+        collisions = new ArrayList<>();
 
-      collisionMap.put(firstHash, collisions);
+        collisions.add(firstReference);
+        collisions.add(secondReference);
 
-      return 1;
-    } else {
-      int firstIndex = collisions.indexOf(firstReference);
-      if (firstIndex < 0) {
-        collisions.add(0, firstReference);
-        firstIndex = 0;
+        collisionMap.put(firstHash, collisions);
+
+        return 1;
+      } else {
+        int firstIndex = collisions.indexOf(firstReference);
+        if (firstIndex < 0) {
+          collisions.add(0, firstReference);
+          firstIndex = 0;
+        }
+
+        int secondIndex = collisions.indexOf(secondReference);
+        if (secondIndex < 0) {
+          collisions.add(0, secondReference);
+          secondIndex = 0;
+          firstIndex++;
+        }
+
+        return secondIndex - firstIndex;
       }
-
-      int secondIndex = collisions.indexOf(secondReference);
-      if (secondIndex < 0) {
-        collisions.add(0, secondReference);
-        secondIndex = 0;
-        firstIndex++;
-      }
-
-      return secondIndex - firstIndex;
     }
   }
 

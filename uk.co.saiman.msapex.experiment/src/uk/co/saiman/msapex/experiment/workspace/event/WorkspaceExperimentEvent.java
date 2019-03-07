@@ -29,7 +29,7 @@ package uk.co.saiman.msapex.experiment.workspace.event;
 
 import static uk.co.saiman.msapex.experiment.workspace.event.WorkspaceEventKind.EXPERIMENT;
 
-import uk.co.saiman.experiment.event.ExperimentEvent;
+import uk.co.saiman.experiment.ExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 

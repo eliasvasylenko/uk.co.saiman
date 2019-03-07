@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.util.stream.Stream.concat;
 import static uk.co.saiman.msapex.experiment.ExperimentEditorAddon.EDITOR_EXPERIMENT_NODE;
 
 import javax.annotation.PostConstruct;
@@ -35,9 +36,9 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 
-import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.Observation;
-import uk.co.saiman.reflection.token.TypeToken;
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.product.Observation;
+import uk.co.saiman.experiment.product.Preparation;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -53,19 +54,18 @@ public class ExperimentEditorPart {
   @Inject
   private MCompositePart part;
 
-  private ExperimentStep<?> node;
+  private Step<?, ?> node;
 
   @PostConstruct
   void initialize() {
-    node = (ExperimentStep<?>) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
+    node = (Step<?, ?>) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
 
-    context.set(ExperimentStep.class, node);
-    node
-        .getProcedure()
-        .observations()
-        .map(Observation::getResultType)
-        .map(TypeToken::getErasedType)
-        .forEach(context::declareModifiable);
-    context.declareModifiable(node.getProcedure().getVariablesType().getErasedType());
+    context.set(Step.class, node);
+
+    concat(
+        node.getConductor().preparations().map(Preparation::type),
+        node.getConductor().observations().map(Observation::type))
+            .forEach(context::declareModifiable);
+    context.declareModifiable(node.getConductor().getVariablesType());
   }
 }

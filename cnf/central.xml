@@ -9,6 +9,10 @@
 	<version>0.0.0</version>
 
 	<packaging>pom</packaging>
+	
+	<properties>
+		<graalvm.version>1.0.0-rc10</graalvm.version>
+	</properties>
 
 	<dependencies>
 		<!-- Native Interop -->
@@ -242,6 +246,33 @@
 			<version>2.1.1</version>
 		</dependency>
 
+		<!-- Javascript -->
+
+		<dependency>
+			<groupId>org.graalvm.sdk</groupId>
+			<artifactId>graal-sdk</artifactId>
+			<version>${graalvm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<version>${graalvm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js-scriptengine</artifactId>
+			<version>${graalvm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.tools</groupId>
+			<artifactId>profiler</artifactId>
+			<version>${graalvm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.tools</groupId>
+			<artifactId>chromeinspector</artifactId>
+			<version>${graalvm.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>

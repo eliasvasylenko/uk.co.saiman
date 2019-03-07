@@ -28,13 +28,13 @@
 package uk.co.saiman.experiment.processing;
 
 import static uk.co.saiman.data.function.processing.GaussianSmooth.DEFAULT_STANDARD_DEVIATION;
-import static uk.co.saiman.experiment.state.Accessor.doubleAccessor;
+import static uk.co.saiman.state.Accessor.doubleAccessor;
 
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.function.processing.GaussianSmooth;
-import uk.co.saiman.experiment.state.Accessor.PropertyAccessor;
-import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.state.Accessor.PropertyAccessor;
+import uk.co.saiman.state.StateMap;
 
 @Component
 public class GaussianSmoothProcess implements ProcessingStrategy<GaussianSmooth> {

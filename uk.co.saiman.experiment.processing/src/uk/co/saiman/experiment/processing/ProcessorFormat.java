@@ -39,7 +39,7 @@ import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.state.StateMap;
+import uk.co.saiman.state.StateMap;
 
 public class ProcessorFormat implements DataFormat<DataProcessor> {
   public static final int VERSION = 1;

@@ -38,16 +38,14 @@ import java.util.function.Supplier;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          The type of the property.
+ * @param <T> The type of the property.
  */
 /* @I */
 public interface Property<T> {
   /**
    * Set the value of this property to the given value.
    * 
-   * @param to
-   *          The new value to set for this property.
+   * @param to The new value to set for this property.
    * @return The previous value of this property.
    */
   T set(T to);
@@ -61,6 +59,10 @@ public interface Property<T> {
    */
   default T unset() {
     return set(null);
+  }
+
+  default boolean isSet() {
+    return get() == null;
   }
 
   /**
@@ -105,10 +107,8 @@ public interface Property<T> {
   /**
    * Create a property which defers its implementation to the given callbacks.
    * 
-   * @param get
-   *          the property retrieval callback
-   * @param set
-   *          the property assignment callback
+   * @param get the property retrieval callback
+   * @param set the property assignment callback
    * @return a property over the given callbacks
    */
   static <T> Property<T> over(Supplier<T> get, Consumer<T> set) {

@@ -20,10 +20,14 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.eclipse.ui;version=snapshot,\
 	uk.co.saiman.eclipse.ui.edit;version=snapshot,\
 	uk.co.saiman.eclipse.fx;version=snapshot,\
+	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.experiment.scheduling;version=snapshot,\
+	uk.co.saiman.experiment.storage;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\

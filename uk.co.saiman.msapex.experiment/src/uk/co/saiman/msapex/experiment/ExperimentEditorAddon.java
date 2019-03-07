@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static java.lang.String.format;
-import static uk.co.saiman.log.Log.Level.ERROR;
 import static uk.co.saiman.msapex.editor.Editor.cloneSnippet;
 
 import java.util.HashMap;
@@ -44,7 +42,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.ExperimentStep;
+import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.msapex.editor.Editor;
@@ -78,7 +76,7 @@ public class ExperimentEditorAddon implements EditorProvider {
   @Inject
   private Log log;
 
-  private final Map<ExperimentStep<?>, Editor> editors = new HashMap<>();
+  private final Map<Step<?, ?>, Editor> editors = new HashMap<>();
 
   @PostConstruct
   synchronized void create() {
@@ -100,11 +98,9 @@ public class ExperimentEditorAddon implements EditorProvider {
   }
 
   private synchronized void updatePath(MPart editor) {
-    ExperimentStep<?> node = (ExperimentStep<?>) editor
-        .getTransientData()
-        .get(EDITOR_EXPERIMENT_NODE);
+    Step<?, ?> node = (Step<?, ?>) editor.getTransientData().get(EDITOR_EXPERIMENT_NODE);
 
-    if (node.getExperiment().filter(workspace::containsExperiment).isPresent()) {
+    if (node.getExperiment().filter(workspace::containsExperiment).isDependent()) {
       editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
     } else {
       editor.getPersistedState().remove(EDITOR_EXPERIMENT_PATH);
@@ -115,7 +111,7 @@ public class ExperimentEditorAddon implements EditorProvider {
     ExperimentPath path = ExperimentPath
         .fromString(part.getPersistedState().get(EDITOR_EXPERIMENT_PATH));
 
-    path.resolve(workspace).ifPresentOrElse(node -> {
+    workspace.resolve(path).ifPresentOrElse(node -> {
       part.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
       editors.put(node, Editor.overPart(part));
     }, () -> log.log(ERROR, format("Cannot load persisted editor at path %s", path)));
@@ -133,17 +129,17 @@ public class ExperimentEditorAddon implements EditorProvider {
 
   @Override
   public String getContextKey() {
-    return ExperimentStep.class.getName();
+    return Step.class.getName();
   }
 
   @Override
   public boolean isApplicable(Object contextValue) {
-    return contextValue instanceof ExperimentStep<?>;
+    return contextValue instanceof Step<?, ?>;
   }
 
   @Override
   public synchronized Editor getEditorPart(Object contextValue) {
-    ExperimentStep<?> node = (ExperimentStep<?>) contextValue;
+    Step<?, ?> node = (Step<?, ?>) contextValue;
     Editor editor = editors.get(node);
     if (editor == null || !editor.getPart().isToBeRendered()) {
       editor = loadNewEditor(node);
@@ -152,7 +148,7 @@ public class ExperimentEditorAddon implements EditorProvider {
     return editor;
   }
 
-  private Editor loadNewEditor(ExperimentStep<?> node) {
+  private Editor loadNewEditor(Step<?, ?> node) {
     MPart editor = cloneSnippet(ExperimentEditorPart.ID, modelService, application);
     editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
     editor.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
