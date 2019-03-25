@@ -38,6 +38,7 @@ import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Template;
+import uk.co.saiman.experiment.procedure.Variable;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
 
@@ -97,6 +98,15 @@ public class Step {
 
   public Conductor<?> getConductor() {
     return conductor;
+  }
+
+  public <T> T getVariable(Variable<T> variable) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public <T> void setVariable(Variable<T> variable, Function<? super T, ? extends T> value) {
+    // TODO Auto-generated method stub
   }
 
   void withLock(Runnable action) {
@@ -178,5 +188,10 @@ public class Step {
   public Stream<? extends Step> getDependentSteps() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  public boolean isDetached() {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

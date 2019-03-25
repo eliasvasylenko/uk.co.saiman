@@ -35,55 +35,56 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
 import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.experiment.model.ExperimentStep;
-import uk.co.saiman.experiment.model.event.ExperimentVariablesEvent;
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.processing.Processing;
-import uk.co.saiman.experiment.service.ProcedureService;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
+import uk.co.saiman.experiment.spectrum.SpectrumProcessingConductor;
 import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
+import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
 
 public class SpectrumExperimentProcessingCell {
   @Inject
-  @Service
-  private ProcedureService procedures;
+  @Localize
+  private SpectrumProperties properties;
   @Inject
-  private ExperimentStep<?> experiment;
-  @Inject
-  private SpectrumProcessingConfiguration state;
+  private Step step;
   @Inject
   private ChildrenService children;
 
   @PostConstruct
-  public void prepare(Cell cell, @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
+  public void prepare(
+      Cell cell,
+      @Named(SUPPLEMENTAL_TEXT) Label supplemental,
+      SpectrumProcessingConductor conductor) {
     Cell parent = (Cell) (MUIElement) cell.getParent();
 
-    parent.setLabel(procedures.getId(experiment.getProcedure()));
-    supplemental.setText(state.getSpectrumName());
+    parent.setLabel(properties.spectrumProcessingExperimentName().get());
+    supplemental.setText(step.getInstruction().id());
 
-    updateChildren();
+    updateChildren(conductor);
   }
 
   @Inject
   @Optional
-  public void updateVariables(ExperimentVariablesEvent event) {
-    if (event.step() == experiment) {
-      updateChildren();
+  public void updateVariables(ChangeVariableEvent event, SpectrumProcessingConductor conductor) {
+    if (event.step() == step) {
+      updateChildren(conductor);
     }
   }
 
-  public void updateChildren() {
+  public void updateChildren(SpectrumProcessingConductor conductor) {
     children
         .setItems(
             ProcessorCell.ID,
             DataProcessor.class,
-            state.getProcessing().steps().collect(toList()),
-            r -> state.setProcessing(new Processing(r)));
+            step.getVariable(conductor.processing()).steps().collect(toList()),
+            r -> step.setVariable(conductor.processing(), v -> new Processing(r)));
   }
 }

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment;
 
+import static java.lang.String.format;
+import static uk.co.saiman.log.Log.Level.ERROR;
 import static uk.co.saiman.msapex.editor.Editor.cloneSnippet;
 
 import java.util.HashMap;
@@ -43,13 +45,13 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
+import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.observable.OwnedMessage;
 
 /**
@@ -98,22 +100,22 @@ public class ExperimentEditorAddon implements EditorProvider {
   }
 
   private synchronized void updatePath(MPart editor) {
-    Step node = (Step) editor.getTransientData().get(EDITOR_EXPERIMENT_NODE);
+    Step step = (Step) editor.getTransientData().get(EDITOR_EXPERIMENT_NODE);
 
-    if (node.getExperiment().filter(workspace::containsExperiment).isDependent()) {
-      editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
-    } else {
-      editor.getPersistedState().remove(EDITOR_EXPERIMENT_PATH);
-    }
+    workspace
+        .getPath(step)
+        .ifPresentOrElse(
+            path -> editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, path.toString()),
+            () -> editor.getPersistedState().remove(EDITOR_EXPERIMENT_PATH));
   }
 
   private synchronized void addEditor(MPart part) {
-    ExperimentPath path = ExperimentPath
+    WorkspaceExperimentPath path = WorkspaceExperimentPath
         .fromString(part.getPersistedState().get(EDITOR_EXPERIMENT_PATH));
 
-    workspace.resolve(path).ifPresentOrElse(node -> {
-      part.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
-      editors.put(node, Editor.overPart(part));
+    workspace.resolveStep(path).ifPresentOrElse(step -> {
+      part.getTransientData().put(EDITOR_EXPERIMENT_NODE, step);
+      editors.put(step, Editor.overPart(part));
     }, () -> log.log(ERROR, format("Cannot load persisted editor at path %s", path)));
   }
 

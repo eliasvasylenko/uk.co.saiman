@@ -119,6 +119,10 @@ public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> 
     };
   }
 
+  public Variable<Processing> processing() {
+    return processing;
+  }
+
   @Override
   public ResultRequirement<Spectrum> directRequirement() {
     return inputSpectrum;

@@ -49,12 +49,13 @@ public class ExperimentResultCell {
 
   @Inject
   @Optional
-  public void prepare(Cell cell, ExperimentPath path, Products products) {
+  public void prepare(Cell cell, ExperimentPath<?> path, Products products) {
     /*
      * configure label
      */
     products
         .resolveResult(path.resolve(observation))
+        .value()
         .ifPresentOrElse(
             result -> cell
                 .setIconURI(

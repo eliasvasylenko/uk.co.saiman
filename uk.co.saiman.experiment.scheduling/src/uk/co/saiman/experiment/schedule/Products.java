@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.path.Dependency;
 import uk.co.saiman.experiment.path.ProductPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Result;

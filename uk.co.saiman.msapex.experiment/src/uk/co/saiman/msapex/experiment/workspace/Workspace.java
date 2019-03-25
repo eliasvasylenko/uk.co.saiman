@@ -40,6 +40,7 @@ import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
 import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
@@ -89,6 +90,11 @@ public class Workspace {
     return experiments.stream().filter(experiment -> experiment.name().equals(id)).findAny();
   }
 
+  public Optional<Step> resolveStep(WorkspaceExperimentPath path) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   public Stream<Experiment> getExperiments() {
     return getWorkspaceExperiments().map(WorkspaceExperiment::experiment);
   }
@@ -99,6 +105,19 @@ public class Workspace {
 
   public boolean containsExperiment(Experiment experiment) {
     return getWorkspaceExperiment(experiment).isPresent();
+  }
+
+  public boolean containsStep(Step step) {
+    return containsExperiment(step.getExperiment()) && !step.isDetached();
+  }
+
+  public Optional<WorkspaceExperimentPath> getPath(Step step) {
+    return containsStep(step)
+        ? Optional
+            .of(
+                WorkspaceExperimentPath
+                    .define(ExperimentIndex.define(step.getExperiment().getId()), step.getPath()))
+        : Optional.empty();
   }
 
   public Optional<WorkspaceExperiment> getWorkspaceExperiment(Experiment experiment) {
