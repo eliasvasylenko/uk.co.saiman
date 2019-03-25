@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.procedure;
 
+import static java.lang.String.format;
+
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -39,12 +41,12 @@ import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Result;
 
 /**
- * The context of an {@link Conductor#conduct(ConductorContext) experiment
+ * The context of an {@link Conductor#conduct(ConductionContext) experiment
  * execution}, providing information about the current state, and enabling
  * modification of that state.
  * 
  * @author Elias N Vasylenko
- * @param <T> the type of the executing node
+ * @param <S> the type of the direct requirement of the executing node
  */
 public interface ConductionContext<S extends Product> {
   /**
@@ -52,7 +54,13 @@ public interface ConductionContext<S extends Product> {
    */
   Instruction instruction();
 
-  <T> T getVariable(Variable<T> variable);
+  default <T> T getVariable(Variable<T> variable) {
+    return instruction()
+        .variable(variable)
+        .orElseThrow(
+            () -> new ProcedureException(
+                format("Variable %s is not available on instruction %s", variable, instruction())));
+  }
 
   S dependency();
 
@@ -82,7 +90,7 @@ public interface ConductionContext<S extends Product> {
    * This method may be invoked multiple times during processing. The purpose is
    * to support live-updating of result data, and any values passed to this method
    * will be overridden by the return value of
-   * {@link Conductor#conduct(ConductorContext) execution} once processing
+   * {@link Conductor#conduct(ConductionContext) execution} once processing
    * completes.
    * 
    * @param value an invalidation representing the preliminary result
@@ -92,7 +100,7 @@ public interface ConductionContext<S extends Product> {
   /**
    * Set the result data for this execution. If the {@link Data#get() value} of
    * the given data matches the return value of
-   * {@link Conductor#conduct(ConductorContext) execution} once it completes it
+   * {@link Conductor#conduct(ConductionContext) execution} once it completes it
    * does not have to be rewritten. This means that expensive disk IO can be
    * performed during the experiment process rather than saved until the end.
    * <p>
@@ -105,7 +113,7 @@ public interface ConductionContext<S extends Product> {
 
   /**
    * Set the result format for this execution. If invoked, then once the
-   * {@link Conductor#conduct(ConductorContext) execution} is complete the
+   * {@link Conductor#conduct(ConductionContext) execution} is complete the
    * returned value will be persisted according to the given file name and format.
    * <p>
    * This method may be invoked at most once during any given execution, and this

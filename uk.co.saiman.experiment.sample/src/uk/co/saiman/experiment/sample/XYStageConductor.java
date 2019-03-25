@@ -27,21 +27,47 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import static uk.co.saiman.measurement.Quantities.quantityFormat;
+import static uk.co.saiman.state.Accessor.mapAccessor;
+import static uk.co.saiman.state.Accessor.stringAccessor;
+
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
+import uk.co.saiman.experiment.procedure.Variable;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import uk.co.saiman.state.MapIndex;
+import uk.co.saiman.state.StateMap;
 
 /**
  * An {@link SampleConductor experiment type} for {@link XYStage XY stage
  * devices}.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T> the type of sample configuration for the instrument
  */
-public interface XYStageConductor<T extends XYStageConfiguration>
-    extends StageConductor<XYCoordinate<Length>, T> {
+public interface XYStageConductor extends StageConductor<XYCoordinate<Length>> {
+  public static final MapIndex<Quantity<Length>> X = lengthAccessor("xOffset");
+  public static final MapIndex<Quantity<Length>> Y = lengthAccessor("yOffset");
+  public static final Variable<XYCoordinate<Length>> LOCATION = new Variable<>(
+      "sampleLocation",
+      XYCoordinate.class,
+      mapAccessor(
+          s -> new XYCoordinate<>(s.get(X), s.get(Y)),
+          l -> StateMap.empty().with(X, l.getX()).with(Y, l.getY())));
+
+  private static MapIndex<Quantity<Length>> lengthAccessor(String value) {
+    return new MapIndex<>(
+        value,
+        stringAccessor()
+            .map(l -> quantityFormat().parse(l).asType(Length.class), quantityFormat()::format));
+  }
+
   @Override
   XYStage<?> sampleDevice();
+
+  @Override
+  default Variable<XYCoordinate<Length>> sampleLocation() {
+    return LOCATION;
+  }
 }

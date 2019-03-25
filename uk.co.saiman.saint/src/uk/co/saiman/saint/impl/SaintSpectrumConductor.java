@@ -31,11 +31,10 @@ import static org.osgi.service.component.annotations.ReferenceCardinality.OPTION
 import static uk.co.saiman.measurement.Units.dalton;
 import static uk.co.saiman.state.Accessor.listAccessor;
 
-import java.util.Random;
-
 import javax.measure.Unit;
 import javax.measure.quantity.Mass;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -43,82 +42,49 @@ import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.experiment.procedure.ConditionRequirement;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.ConfigurationContext;
+import uk.co.saiman.experiment.procedure.Variable;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.sample.XYStageConductor;
 import uk.co.saiman.experiment.spectrum.SpectrumConductor;
-import uk.co.saiman.saint.SaintSpectrumConfiguration;
-import uk.co.saiman.saint.SaintXYStageConfiguration;
-import uk.co.saiman.state.Accessor;
 
 @Component
-public class SaintSpectrumConductor implements SpectrumConductor<SaintSpectrumConfiguration>,
-    Conductor<SaintSpectrumConfiguration, Condition<Void>> {
+public class SaintSpectrumConductor implements SpectrumConductor, Conductor<Condition<Void>> {
   public static final String SAINT_SPECTRUM = "uk.co.saiman.saint.spectrum.result";
 
-  @Reference
-  private XYStageConductor<SaintXYStageConfiguration> stageExperiment;
+  private final AcquisitionDevice<?> acquisitionDevice;
 
-  @Reference(cardinality = OPTIONAL)
-  private AcquisitionDevice<?> acquisitionDevice;
-
-  @Reference
-  private ProcessingService processors;
+  private final Variable<Processing> processing;
 
   private final ConditionRequirement<Void> sampleResource;
   private final Observation<Spectrum> spectrumObservation;
 
-  public SaintSpectrumConductor() {
-    sampleResource = new ConditionRequirement<>(stageExperiment.getSamplePreparation());
-    spectrumObservation = new Observation<>(SAINT_SPECTRUM, Spectrum.class);
+  @Activate
+  public SaintSpectrumConductor(
+      @Reference XYStageConductor stageExperiment,
+      @Reference(cardinality = OPTIONAL) AcquisitionDevice<?> acquisitionDevice,
+      @Reference ProcessingService processors) {
+    this.acquisitionDevice = acquisitionDevice;
+
+    this.processing = new Variable<>(
+        "processing",
+        Processing.class,
+        listAccessor(processors::loadProcessing, processors::saveProcessing));
+
+    this.sampleResource = new ConditionRequirement<>(stageExperiment.samplePreparation());
+    this.spectrumObservation = new Observation<>(SAINT_SPECTRUM, Spectrum.class);
+  }
+
+  @Override
+  public Variable<Processing> processing() {
+    return processing;
   }
 
   @Override
   public Unit<Mass> getMassUnit() {
     return dalton().getUnit();
-  }
-
-  @Override
-  public SaintSpectrumConfiguration configureExperiment(ConfigurationContext context) {
-    Accessor<Processing, ?> accessor = listAccessor(
-        "processing",
-        processors::loadProcessing,
-        processors::saveProcessing);
-
-    context.update(s -> s.withDefault(accessor, Processing::new));
-
-    return new SaintSpectrumConfiguration() {
-      private String name = context.getId(() -> "test-" + new Random().nextInt(Integer.MAX_VALUE));
-
-      @Override
-      public void setSpectrumName(String name) {
-        this.name = name;
-        context.setId(name);
-      }
-
-      @Override
-      public String getSpectrumName() {
-        return name;
-      }
-
-      @Override
-      public AcquisitionDevice<?> getAcquisitionDevice() {
-        return acquisitionDevice;
-      }
-
-      @Override
-      public Processing getProcessing() {
-        return context.getState().get(accessor);
-      }
-
-      @Override
-      public void setProcessing(Processing processing) {
-        context.update(state -> state.with(accessor, processing));
-      }
-    };
   }
 
   @Override
@@ -134,10 +100,5 @@ public class SaintSpectrumConductor implements SpectrumConductor<SaintSpectrumCo
   @Override
   public Observation<Spectrum> spectrumObservation() {
     return spectrumObservation;
-  }
-
-  @Override
-  public Class<SaintSpectrumConfiguration> getVariablesType() {
-    return SaintSpectrumConfiguration.class;
   }
 }

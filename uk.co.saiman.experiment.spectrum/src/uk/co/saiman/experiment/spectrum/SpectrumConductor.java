@@ -42,10 +42,14 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.procedure.ConditionRequirement;
-import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.ConductionContext;
+import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.procedure.IndirectRequirement;
+import uk.co.saiman.experiment.procedure.Variable;
+import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.product.Observation;
+import uk.co.saiman.experiment.product.Production;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -53,11 +57,8 @@ import uk.co.saiman.experiment.product.Observation;
  * that they operate on the configured sample.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T> the type of sample configuration for the instrument
  */
-public interface SpectrumConductor<T extends SpectrumConfiguration>
-    extends Conductor<T, Condition<Void>> {
+public interface SpectrumConductor extends Conductor<Condition<Void>> {
   static final String SPECTRUM_DATA_NAME = "spectrum";
 
   Unit<Mass> getMassUnit();
@@ -68,8 +69,10 @@ public interface SpectrumConductor<T extends SpectrumConfiguration>
 
   ConditionRequirement<Void> sampleResource();
 
+  Variable<Processing> processing();
+
   @Override
-  default void conduct(ConductionContext<T, Condition<Void>> context) {
+  default void conduct(ConductionContext<Condition<Void>> context) {
     System.out.println("create accumulator");
     AcquisitionDevice<?> device = getAcquisitionDevice();
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
@@ -78,7 +81,7 @@ public interface SpectrumConductor<T extends SpectrumConfiguration>
         device.getSampleIntensityUnits());
 
     System.out.println("prepare processing");
-    DataProcessor processing = context.variables().getProcessing().getProcessor();
+    DataProcessor processing = context.getVariable(processing()).getProcessor();
 
     System.out.println("fetching calibration");
     SpectrumCalibration calibration = new SpectrumCalibration() {
@@ -144,12 +147,22 @@ public interface SpectrumConductor<T extends SpectrumConfiguration>
   }
 
   @Override
-  default ConditionRequirement<Void> requirement() {
+  default ConditionRequirement<Void> directRequirement() {
     return sampleResource();
   }
 
   @Override
-  default Stream<Observation<?>> observations() {
+  default Stream<Production<?>> products() {
     return Stream.of(spectrumObservation());
+  }
+
+  @Override
+  default Stream<Variable<?>> variables() {
+    return Stream.of(processing());
+  }
+
+  @Override
+  default Stream<IndirectRequirement<?>> indirectRequirements() {
+    return Stream.empty();
   }
 }

@@ -27,9 +27,10 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static java.util.EnumSet.allOf;
 import static java.util.stream.Collectors.toList;
 import static javafx.css.PseudoClass.getPseudoClass;
+
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -47,13 +48,15 @@ import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
-import uk.co.saiman.eclipse.utilities.EclipseUtilities;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
-import uk.co.saiman.experiment.model.event.AttachStepEvent;
-import uk.co.saiman.experiment.model.event.DisposeStepEvent;
-import uk.co.saiman.experiment.model.event.RenameStepEvent;
-import uk.co.saiman.experiment.schedule.ExperimentLifecycleState;
+import uk.co.saiman.experiment.event.AddStepEvent;
+import uk.co.saiman.experiment.event.ChangeVariableEvent;
+import uk.co.saiman.experiment.event.MoveStepEvent;
+import uk.co.saiman.experiment.event.RemoveStepEvent;
+import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.procedure.Instruction;
+import uk.co.saiman.experiment.procedure.Productions;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
@@ -76,7 +79,7 @@ public class ExperimentStepCell {
   @Inject
   private IEclipseContext context;
   @Inject
-  private Step<?, ?> experiment;
+  private Step experiment;
 
   private Label supplementalText = new Label();
   private Label lifecycleIndicator = new Label();
@@ -89,11 +92,8 @@ public class ExperimentStepCell {
 
   @CanExecute
   public boolean canExecute() {
-    return experiment.getConductor().observations().count() > 0
-        && editorService
-            .getApplicableEditors(Step.class, experiment)
-            .findFirst()
-            .isDependent();
+    return Productions.observations(experiment.getConductor()).count() > 0
+        && editorService.getApplicableEditors(Step.class, experiment).findFirst().isPresent();
   }
 
   @Execute
@@ -113,7 +113,6 @@ public class ExperimentStepCell {
     /*
      * configure label
      */
-    cell.setLabel(experiment.getId());
     node.getChildren().add(supplementalText);
     supplementalText.pseudoClassStateChanged(SUPPLEMENTAL_PSEUDO_CLASS, true);
     context.set(SUPPLEMENTAL_TEXT, supplementalText);
@@ -133,7 +132,8 @@ public class ExperimentStepCell {
     /*
      * Inject configuration
      */
-    EclipseUtilities.injectSupertypes(context, Step.class, Step::getVariables);
+    context.set(Conductor.class, experiment.getConductor());
+    context.set(Instruction.class, experiment.getInstruction());
     /*- TODO
     IContextFunction configurationFunction = (c, k) -> {
       Object variables = c.get(ExperimentNode.class).getVariables();
@@ -157,44 +157,51 @@ public class ExperimentStepCell {
     /*
      * Inject events
      */
-    context.set(ExperimentLifecycleState.class, experiment.getLifecycleState());
 
     /*
      * Children
      */
+    updatePath();
     updateChildren();
   }
 
   @Inject
   @Optional
-  public void update(RenameStepEvent event) {
-    if (event.step() == experiment) {
-      cell.setLabel(event.id());
+  public void update(MoveStepEvent event) {
+    if (Objects.equals(event.step(), experiment)) {
+      updatePath();
     }
   }
 
   @Inject
   @Optional
-  public void update(ExperimentLifecycleEvent event) {
-    if (event.step() == experiment) {
-      context.set(ExperimentLifecycleState.class, event.lifecycleState());
-    }
-  }
-
-  @Inject
-  @Optional
-  public void update(AttachStepEvent event) {
-    if (event.parent() == experiment) {
+  public void update(AddStepEvent event) {
+    if (Objects.equals(event.dependencyStep(), experiment)) {
       updateChildren();
     }
   }
 
   @Inject
   @Optional
-  public void update(DisposeStepEvent event) {
-    if (event.previousParent() == experiment) {
+  public void update(RemoveStepEvent event) {
+    if (Objects.equals(event.previousDependencyStep(), experiment)) {
       updateChildren();
     }
+  }
+
+  @Inject
+  @Optional
+  public void update(ChangeVariableEvent event) {
+    if (Objects.equals(event.step(), experiment)) {
+      // TODO update context?
+    }
+  }
+
+  @Inject
+  @Optional
+  public void updatePath() {
+    cell.setLabel(experiment.getId());
+    context.set(ExperimentPath.class, experiment.getPath());
   }
 
   private void updateChildren() {
@@ -203,16 +210,5 @@ public class ExperimentStepCell {
             ExperimentStepCell.ID,
             Step.class,
             experiment.getDependentSteps().collect(toList()));
-  }
-
-  @Inject
-  @Optional
-  public void updateLifecycle(ExperimentLifecycleState state) {
-    allOf(ExperimentLifecycleState.class)
-        .stream()
-        .forEach(
-            s -> lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(s.toString()), false));
-    lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
-    supplementalText.setText("[" + text.lifecycleState(state) + "]");
   }
 }

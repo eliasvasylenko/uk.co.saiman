@@ -28,6 +28,8 @@
 package uk.co.saiman.experiment.product;
 
 import uk.co.saiman.experiment.path.Dependency;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.path.ProductPath;
 
 /**
  * A condition which may be produced by a preparation during the conducting of
@@ -40,7 +42,10 @@ import uk.co.saiman.experiment.path.Dependency;
 public interface Condition<T> extends Product {
   Preparation<T> preparation();
 
-  default Dependency<Condition<T>> dependency() {
-    return Dependency.define(path().getExperimentPath(), preparation());
+  Dependency<Condition<T>, Absolute> dependency();
+
+  @Override
+  default ProductPath<Absolute> path() {
+    return dependency().getProductPath();
   }
 }

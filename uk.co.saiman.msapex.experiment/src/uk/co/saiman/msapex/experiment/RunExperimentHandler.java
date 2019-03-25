@@ -55,7 +55,7 @@ public class RunExperimentHandler {
   @Execute
   void execute(WorkspaceExperiment experiment) {
     try {
-      experiment.experiment().run();
+      experiment.experiment().getSchedule().proceed();
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);

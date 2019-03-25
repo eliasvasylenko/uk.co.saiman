@@ -45,7 +45,7 @@ import uk.co.saiman.experiment.processing.MissingProcessor;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
-import uk.co.saiman.state.Accessor.PropertyAccessor;
+import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
 import uk.co.saiman.state.StateList;
 import uk.co.saiman.state.StateMap;
@@ -53,7 +53,9 @@ import uk.co.saiman.state.StateMap;
 @Component
 public class ProcessingServiceImpl implements ProcessingService {
   private static final String PROCESSOR_ID_KEY = "uk.co.saiman.experiment.processor.id";
-  private static final PropertyAccessor<String> PROCESSOR_ID = stringAccessor(PROCESSOR_ID_KEY);
+  private static final MapIndex<String> PROCESSOR_ID = new MapIndex<>(
+      PROCESSOR_ID_KEY,
+      stringAccessor());
 
   private final Map<Class<? extends DataProcessor>, ProcessingStrategy<?>> processors = new HashMap<>();
   private final Map<String, ProcessingStrategy<?>> namedProcessors = new HashMap<>();

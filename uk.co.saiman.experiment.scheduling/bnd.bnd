@@ -16,3 +16,5 @@ Bundle-Name: SAI :: Experiment :: Model
 
 Export-Package: \
 	uk.co.saiman.experiment.schedule,\
+	uk.co.saiman.experiment.schedule.conflicts,\
+	uk.co.saiman.experiment.schedule.event

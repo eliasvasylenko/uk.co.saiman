@@ -37,11 +37,8 @@ import uk.co.saiman.measurement.coordinate.PolarCoordinate;
  * devices}.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T> the type of sample configuration for the instrument
  */
-public interface PolarStageConductor<T extends PolarStageConfiguration>
-    extends StageConductor<PolarCoordinate<Length>, T> {
+public interface PolarStageConductor extends StageConductor<PolarCoordinate<Length>> {
   @Override
   PolarStage<?> sampleDevice();
 }

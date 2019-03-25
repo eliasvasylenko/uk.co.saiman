@@ -76,7 +76,7 @@ public class ExperimentEditorAddon implements EditorProvider {
   @Inject
   private Log log;
 
-  private final Map<Step<?, ?>, Editor> editors = new HashMap<>();
+  private final Map<Step, Editor> editors = new HashMap<>();
 
   @PostConstruct
   synchronized void create() {
@@ -98,7 +98,7 @@ public class ExperimentEditorAddon implements EditorProvider {
   }
 
   private synchronized void updatePath(MPart editor) {
-    Step<?, ?> node = (Step<?, ?>) editor.getTransientData().get(EDITOR_EXPERIMENT_NODE);
+    Step node = (Step) editor.getTransientData().get(EDITOR_EXPERIMENT_NODE);
 
     if (node.getExperiment().filter(workspace::containsExperiment).isDependent()) {
       editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
@@ -134,12 +134,12 @@ public class ExperimentEditorAddon implements EditorProvider {
 
   @Override
   public boolean isApplicable(Object contextValue) {
-    return contextValue instanceof Step<?, ?>;
+    return contextValue instanceof Step;
   }
 
   @Override
   public synchronized Editor getEditorPart(Object contextValue) {
-    Step<?, ?> node = (Step<?, ?>) contextValue;
+    Step node = (Step) contextValue;
     Editor editor = editors.get(node);
     if (editor == null || !editor.getPart().isToBeRendered()) {
       editor = loadNewEditor(node);
@@ -148,9 +148,9 @@ public class ExperimentEditorAddon implements EditorProvider {
     return editor;
   }
 
-  private Editor loadNewEditor(Step<?, ?> node) {
+  private Editor loadNewEditor(Step node) {
     MPart editor = cloneSnippet(ExperimentEditorPart.ID, modelService, application);
-    editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, ExperimentPath.of(node).toString());
+    editor.getPersistedState().put(EDITOR_EXPERIMENT_PATH, node.getPath().toString());
     editor.getTransientData().put(EDITOR_EXPERIMENT_NODE, node);
     return Editor.overPart(editor);
   }

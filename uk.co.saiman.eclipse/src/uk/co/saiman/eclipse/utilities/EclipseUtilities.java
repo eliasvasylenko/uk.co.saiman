@@ -28,9 +28,13 @@
 package uk.co.saiman.eclipse.utilities;
 
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 import static uk.co.saiman.collection.StreamUtilities.streamNullable;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -44,55 +48,76 @@ import uk.co.saiman.collection.StreamUtilities;
 public final class EclipseUtilities {
   private EclipseUtilities() {}
 
-  public static void injectSupertypes(IEclipseContext context, Class<?> key) {
-    injectSupertypes(context, key.getName());
+  public static void injectSupertypes(IEclipseContext providerContext, Class<?> key) {
+    injectSupertypes(providerContext, key.getName());
   }
 
   @SuppressWarnings("unchecked")
   public static <T> void injectSupertypes(
-      IEclipseContext context,
+      IEclipseContext providerContext,
       Class<T> key,
-      Function<T, Object> mapping) {
-    injectSupertypes(context, key.getName(), value -> mapping.apply((T) value));
+      Function<T, Object> derivationFunction) {
+    injectSupertypes(providerContext, key.getName(), value -> derivationFunction.apply((T) value));
   }
 
-  public static void injectSupertypes(IEclipseContext context, String key) {
-    injectSupertypes(context, key, identity());
+  public static void injectSupertypes(IEclipseContext providerContext, String key) {
+    injectSupertypes(providerContext, key, identity());
   }
 
   public static void injectSupertypes(
-      IEclipseContext context,
+      IEclipseContext providerContext,
       String key,
-      Function<Object, Object> mapping) {
-    IContextFunction configurationFunction = (c, k) -> {
-      Object object = c.get(key);
-      if (object != null) {
-        Object mappedObject = mapping.apply(object);
+      Function<Object, Object> derivationFunction) {
+    injectDerived(
+        providerContext,
+        key,
+        derivationFunction
+            .andThen(
+                object -> StreamUtilities
+                    .<Class<?>>flatMapRecursive(
+                        object.getClass(),
+                        t -> concat(
+                            streamNullable(t.getSuperclass()),
+                            Stream.of(t.getInterfaces())))
+                    .collect(toMap(Class::getName, k -> object))));
+  }
 
-        try {
-          Class<?> type = mappedObject.getClass().getClassLoader().loadClass(k);
-          return type.isInstance(mappedObject) ? mappedObject : IInjector.NOT_A_VALUE;
-        } catch (ClassNotFoundException e) {
-          return IInjector.NOT_A_VALUE;
-        }
-      } else {
-        return IInjector.NOT_A_VALUE;
-      }
-    };
-    context.runAndTrack(new RunAndTrack() {
+  /**
+   * Inject derived objects based on a single source object of the given key.
+   * Derived objects are only available to child contexts if the source object is
+   * still visible to them, i.e. is not overridden in a more specific context.
+   * 
+   * @param providerContext    the root context in which to inject the derivations
+   * @param key                the key of the source object
+   * @param derivationFunction a mapping from the value of a source object to a
+   *                           map of keys to objects to be injected
+   */
+  public static void injectDerived(
+      IEclipseContext providerContext,
+      String key,
+      Function<Object, Map<String, Object>> derivationFunction) {
+
+    providerContext.runAndTrack(new RunAndTrack() {
       @Override
       public synchronized boolean changed(IEclipseContext context) {
-        Object object = context.get(key);
-        if (object != null) {
-          Object mappedObject = mapping.apply(object);
+        Object providerObject = context.get(key);
+        if (providerObject != null) {
+          var derivations = derivationFunction.apply(providerObject);
+
+          IContextFunction configurationFunction = (requesterContext, k) -> {
+            return Optional
+                .ofNullable(requesterContext.get(key))
+                .filter(requesterObject -> Objects.equals(requesterObject, providerObject))
+                .flatMap(o -> Optional.ofNullable(derivations.get(k)))
+                .orElse(IInjector.NOT_A_VALUE);
+          };
 
           runExternalCode(() -> {
-            StreamUtilities
-                .<Class<?>>flatMapRecursive(
-                    mappedObject.getClass(),
-                    t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())))
-                .filter(c -> !c.getName().equals(key))
-                .forEach(type -> context.set(type.getName(), configurationFunction));
+            derivations
+                .keySet()
+                .stream()
+                .filter(c -> !c.equals(key))
+                .forEach(c -> context.set(c, configurationFunction));
           });
         }
 

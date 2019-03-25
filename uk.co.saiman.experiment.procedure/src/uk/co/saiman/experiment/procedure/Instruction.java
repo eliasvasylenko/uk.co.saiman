@@ -3,21 +3,119 @@ package uk.co.saiman.experiment.procedure;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 
 import uk.co.saiman.state.StateMap;
 
 public class Instruction {
   private final String id;
   private final StateMap state;
-  private final Conductor<?, ?> conductor;
+  private final Conductor<?> conductor;
 
-  private Instruction(String id, StateMap state, Conductor<?, ?> conductor) {
+  private Instruction(String id, StateMap state, Conductor<?> conductor) {
     this.id = id;
     this.state = state;
     this.conductor = conductor;
   }
 
-  public static Instruction define(String id, StateMap state, Conductor<?, ?> conductor) {
+  /*
+   * 
+   * 
+   * 
+   * 
+   * TODO most ordering problems are solved by disallowing a condition dependency
+   * to have indirect result dependencies. Items with only result dependencies can
+   * be processed at any time, they don't have awkward timing/ordering issues.
+   * 
+   * 
+   * 
+   * TODO maybe simplify this so we only have an experiment path not a product
+   * path, then the conductor/requirement mediates what product we attach to
+   * (optionally based on our state). That way:
+   * 
+   * - If we have conductors/requirements that can only wire to one specific
+   * product id, we don't need to redundantly specify that id anywhere.
+   * 
+   * - If we can connect to different products we also have the option of
+   * specifying one.
+   * 
+   * 
+   * What about the age old problem of ordering? Of responding to moving/renaming
+   * of dependencies that we're wired to?
+   * 
+   * 
+   * Maybe a product can provide multiple product paths when multiple requirements
+   * try to wire against it? e.g. one for each index needed for ordering? Or maybe
+   * it just tracks which requirements attempt to wire against it and maintains
+   * ordering internally? Where and when is this ordering stored?
+   * 
+   * - How do we surface the ordering through e.g. drag and drop?
+   * 
+   * - How do we retain the ordering through template expansion?
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * Have instructions declare their dependency:
+   * 
+   * - Pleasing parallel with indirect dependencies.
+   * 
+   * - All information is self contained, only references parent
+   * 
+   * - Unusual place to specify ordering:
+   * 
+   * -- Specify an index: what if we overlap with another instruction at same
+   * index?
+   * 
+   * -- Specify linked list: what if we're batch-copied out of order and link to
+   * instructions which aren't there?
+   * 
+   * Have instructions declare their dependents
+   * 
+   * - No worry of instructions declaring conflicting dependencies e.g. at the
+   * same position
+   * 
+   * - Central model of ordered list dependencies
+   * 
+   * - What do we do when adding instructions? Who is responsible for inserting
+   * into metadata?
+   * 
+   * - What do we do when removing instructions?
+   * 
+   * 
+   * 
+   * What cases do we actually care about ordering? Generating reports? This is a
+   * bit of an edge case. Does it matter if it's a little clunky? Maybe ordering
+   * *should* be maintained by the container.
+   * 
+   * 
+   * 
+   * 
+   * Maybe a conductor adds a number of products to an instruction based on
+   * configuration, e.g. pulls a SIZE variable to determine how many numbered
+   * products to add, of takes a CHAPTER_NAMES variable to get a list of strings
+   * to determine the names of the products to add.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO problem with having paths which specify their index is insertion and
+   * removal, all instructions at paths with higher indices must be moved. How do
+   * we keep track of movement? Do we need to? Experiment path is still the same
+   * so we have a persistent id.
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
+
+  public static Instruction define(String id, StateMap state, Conductor<?> conductor) {
     return new Instruction(
         Procedure.validateName(id),
         requireNonNull(state),
@@ -32,7 +130,19 @@ public class Instruction {
     return new Instruction(Procedure.validateName(id), state, conductor);
   }
 
-  public Conductor<?, ?> conductor() {
+  public <T> Optional<T> variable(Variable<T> variable) {
+    return state().getOptional(variable.index());
+  }
+
+  public <T> Instruction withVariable(Variable<T> variable, T value) {
+    return withState(state().with(variable.index(), value));
+  }
+
+  public <T> Instruction withVariable(Variable<T> variable, Function<Optional<T>, T> value) {
+    return withVariable(variable, value.apply(variable(variable)));
+  }
+
+  public Conductor<?> conductor() {
     return conductor;
   }
 

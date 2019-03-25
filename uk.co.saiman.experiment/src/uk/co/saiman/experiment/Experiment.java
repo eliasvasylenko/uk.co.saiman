@@ -33,8 +33,11 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Template;
@@ -48,11 +51,11 @@ import uk.co.saiman.observable.Observable;
 
 public class Experiment {
   private Procedure procedure;
-  private NavigableSet<ExperimentPath> enabled = new TreeSet<>();
+  private NavigableSet<ExperimentPath<Absolute>> enabled = new TreeSet<>();
 
   private final Scheduler scheduler;
 
-  private Map<ExperimentPath, Reference<Step<?, ?>>> steps = new HashMap<>();
+  private Map<ExperimentPath<Absolute>, Reference<Step>> steps = new HashMap<>();
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
 
@@ -103,7 +106,7 @@ public class Experiment {
     return events;
   }
 
-  public synchronized <T> Step<T, Nothing> attach(Template<T, Nothing> step) {
+  public synchronized Step attach(Template<Nothing> step) {
 
     // TODO
 
@@ -114,13 +117,18 @@ public class Experiment {
 
   }
 
-  Instruction getInstruction(ExperimentPath path) {
+  Instruction getInstruction(ExperimentPath<?> path) {
     // TODO Auto-generated method stub
     return null;
   }
 
-  void updateInstruction(ExperimentPath path, Instruction instruction) {
+  void updateInstruction(ExperimentPath<?> path, Instruction instruction) {
     // TODO Auto-generated method stub
 
+  }
+
+  public Stream<Step> getSteps() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

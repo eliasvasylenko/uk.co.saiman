@@ -27,16 +27,13 @@
  */
 package uk.co.saiman.experiment.path;
 
-import static java.lang.Math.max;
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.nCopies;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.concat;
 import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -46,35 +43,41 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
 
-public class ExperimentPath implements Comparable<ExperimentPath> {
+/**
+ * A path within an experiment. The root path represents the complete procedure,
+ * and descendant paths point to instructions.
+ * 
+ * @author Elias N Vasylenko
+ *
+ */
+public abstract class ExperimentPath<T extends ExperimentPath<T>>
+    implements Comparable<ExperimentPath<?>> {
   public static final String SEPARATOR = "/";
   public static final String SELF = ".";
   public static final String PARENT = "..";
 
-  private final int ancestors;
   private final List<String> ids;
 
-  protected ExperimentPath(int parents, List<String> ids) {
-    this.ancestors = parents;
+  protected ExperimentPath(List<String> ids) {
     this.ids = ids;
   }
 
-  public static ExperimentPath defineRelative() {
+  public static ExperimentPath<Relative> defineRelative() {
     return defineRelative(0);
   }
 
-  public static ExperimentPath defineRelative(int ancestor) {
-    return new ExperimentPath(ancestor, emptyList());
+  public static ExperimentPath<Relative> defineRelative(int ancestor) {
+    return new Relative(ancestor, emptyList());
   }
 
-  public static ExperimentPath defineAbsolute() {
-    return new ExperimentPath(-1, emptyList());
+  public static ExperimentPath<Absolute> defineAbsolute() {
+    return new Absolute(emptyList());
   }
 
-  public static ExperimentPath fromString(String string) {
+  public static ExperimentPath<?> fromString(String string) {
     string = string.strip();
 
-    ExperimentPath path;
+    ExperimentPath<?> path;
 
     if (string.startsWith(SEPARATOR)) {
       string = string.substring(SEPARATOR.length());
@@ -100,80 +103,49 @@ public class ExperimentPath implements Comparable<ExperimentPath> {
     return path;
   }
 
+  public static ExperimentPath<Relative> relativeFromString(String string) {
+    var path = ExperimentPath.fromString(string);
+    if (path instanceof Relative) {
+      return (Relative) path;
+    } else {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  public static ExperimentPath<Absolute> absoluteFromString(String string) {
+    var path = fromString(string);
+    if (path instanceof Absolute) {
+      return (Absolute) path;
+    } else {
+      throw new IllegalArgumentException();
+    }
+  }
+
   @Override
   public String toString() {
-    return (ancestors == -1 ? SEPARATOR : "")
-        + concat(nCopies(max(0, ancestors), PARENT).stream(), getIds())
-            .collect(joining(SEPARATOR, "", SEPARATOR));
+    return ids().map(id -> id + SEPARATOR).collect(joining());
   }
 
-  public Optional<ExperimentPath> parent() {
-    if (ids.isEmpty()) {
-      if (isAbsolute())
-        return Optional.empty();
-      return Optional.of(new ExperimentPath(ancestors + 1, ids));
-    } else {
-      return Optional.of(new ExperimentPath(ancestors, ids.subList(0, ids.size() - 1)));
-    }
+  public abstract Optional<ExperimentPath<T>> parent();
+
+  public abstract boolean isAbsolute();
+
+  public abstract int ancestorDepth();
+
+  List<String> getIds() {
+    return ids;
   }
 
-  public ExperimentPath resolve(String id) {
-    List<String> matchers = new ArrayList<>(this.ids.size() + 1);
-    matchers.add(id);
-    return new ExperimentPath(ancestors, matchers);
-  }
-
-  public ExperimentPath resolve(Collection<? extends String> matchers) {
-    List<String> concat = new ArrayList<>(this.ids.size() + matchers.size());
-    concat.addAll(this.ids);
-    concat.addAll(matchers);
-    return new ExperimentPath(ancestors, concat);
-  }
-
-  public ExperimentPath resolve(String... matcher) {
-    return resolve(asList(matcher));
-  }
-
-  public Optional<ExperimentPath> resolve(ExperimentPath path) {
-    if (path.isAbsolute()) {
-      return Optional.of(path);
-
-    } else if (path.ancestors >= ids.size()) {
-      if (isAbsolute()) {
-        return Optional.empty();
-
-      } else {
-        return Optional
-            .of(new ExperimentPath(ancestors + path.ancestors - ids.size(), emptyList()));
-      }
-
-    } else {
-      List<String> matchers = new ArrayList<>(this.ids.size() - path.ancestors + path.ids.size());
-      matchers.addAll(this.ids.subList(0, this.ids.size() - path.ancestors));
-      matchers.addAll(path.ids);
-      return Optional.of(new ExperimentPath(ancestors, matchers));
-    }
-  }
-
-  public <T extends Product> Optional<ProductPath> resolve(ProductPath path) {
-    return resolve(path.getExperimentPath())
-        .map(experimentPath -> ProductPath.define(experimentPath, path.getProductId()));
-  }
-
-  public ProductPath resolve(Production<?> production) {
-    return ProductPath.define(this, production.id());
-  }
-
-  public boolean isAbsolute() {
-    return ancestors == -1;
-  }
-
-  public int getAncestorDepth() {
-    return isAbsolute() ? 0 : ancestors;
-  }
-
-  public Stream<String> getIds() {
+  public Stream<String> ids() {
     return ids.stream();
+  }
+
+  public int depth() {
+    return ids.size() - ancestorDepth();
+  }
+
+  public boolean isEmpty() {
+    return ids.isEmpty() && ancestorDepth() == 0;
   }
 
   @Override
@@ -183,19 +155,23 @@ public class ExperimentPath implements Comparable<ExperimentPath> {
     if (obj == null || obj.getClass() != getClass())
       return false;
 
-    var that = (ExperimentPath) obj;
+    var that = (ExperimentPath<?>) obj;
 
-    return this.ancestors == that.ancestors && Objects.equals(this.ids, that.ids);
+    return this.ancestorDepth() == that.ancestorDepth() && Objects.equals(this.ids, that.ids);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ancestors, ids);
+    return Objects.hash(ancestorDepth(), ids);
   }
 
   @Override
-  public int compareTo(ExperimentPath that) {
-    int compareAncestors = that.ancestors - this.ancestors;
+  public int compareTo(ExperimentPath<?> that) {
+    if (this.isAbsolute() != that.isAbsolute()) {
+      return this.isAbsolute() ? 1 : -1;
+    }
+
+    int compareAncestors = that.ancestorDepth() - this.ancestorDepth();
     if (compareAncestors != 0) {
       return compareAncestors;
     }
@@ -211,12 +187,47 @@ public class ExperimentPath implements Comparable<ExperimentPath> {
     return this.ids.size() - that.ids.size();
   }
 
-  public ExperimentPath relativeTo(ExperimentPath path) {
-    return path.getIds().reduce(this, ExperimentPath::relativeTo, throwingMerger());
+  abstract ExperimentPath<T> withIds(List<String> ids);
+
+  public ExperimentPath<T> resolve(Collection<? extends String> ids) {
+    List<String> concat = new ArrayList<>(this.ids.size() + ids.size());
+    concat.addAll(this.ids);
+    concat.addAll(ids);
+    return withIds(concat);
   }
 
-  ExperimentPath relativeTo(String id) {
-    int ancestors = this.ancestors;
+  public ExperimentPath<T> resolve(String... ids) {
+    return resolve(Arrays.asList(ids));
+  }
+
+  public abstract Optional<ExperimentPath<T>> resolve(ExperimentPath<Relative> path);
+
+  public ProductPath<T> resolve(ProductIndex productIndex) {
+    return new ProductPath<>(this, productIndex);
+  }
+
+  public Optional<ProductPath<T>> resolve(ProductPath<Relative> path) {
+    return resolve(path.getExperimentPath()).map(p -> new ProductPath<>(p, path.getProductIndex()));
+  }
+
+  public <U extends Product> Dependency<U, T> resolve(Production<U> production) {
+    return new Dependency<>(this, production);
+  }
+
+  public abstract Optional<ExperimentPath<Absolute>> resolveAgainst(ExperimentPath<Absolute> path);
+
+  public ExperimentPath<Absolute> toAbsolute() {
+    return resolveAgainst(defineAbsolute()).get();
+  }
+
+  public ExperimentPath<Relative> relativeTo(ExperimentPath<?> path) {
+    return path
+        .ids()
+        .reduce(defineRelative(0).resolve(ids), ExperimentPath::relativeTo, throwingMerger());
+  }
+
+  ExperimentPath<Relative> relativeTo(String id) {
+    int ancestors = ancestorDepth();
     List<String> ids = this.ids;
 
     if (ids.size() > 0 && ids.get(0).equals(id)) {
@@ -225,6 +236,140 @@ public class ExperimentPath implements Comparable<ExperimentPath> {
       ancestors++;
     }
 
-    return new ExperimentPath(ancestors, ids);
+    return new Relative(ancestors, ids);
+  }
+
+  /**
+   * An absolute path.
+   * 
+   * @author Elias N Vasylenko
+   */
+  public static class Absolute extends ExperimentPath<Absolute> {
+    Absolute(List<String> ids) {
+      super(ids);
+    }
+
+    @Override
+    public String toString() {
+      return SEPARATOR + super.toString();
+    }
+
+    @Override
+    public Optional<ExperimentPath<Absolute>> parent() {
+      if (isEmpty()) {
+        return Optional.empty();
+      } else {
+        return Optional.of(new Absolute(getIds().subList(0, getIds().size() - 1)));
+      }
+    }
+
+    @Override
+    public boolean isAbsolute() {
+      return true;
+    }
+
+    @Override
+    public int ancestorDepth() {
+      return 0;
+    }
+
+    @Override
+    public ExperimentPath<Absolute> withIds(List<String> ids) {
+      return new Absolute(ids);
+    }
+
+    @Override
+    public Optional<ExperimentPath<Absolute>> resolve(ExperimentPath<Relative> path) {
+      if (path.ancestorDepth() == getIds().size()) {
+        return Optional.of(withIds(path.getIds()));
+
+      } else if (path.ancestorDepth() > getIds().size()) {
+        return Optional.empty();
+
+      } else {
+        return Optional
+            .of(
+                new Absolute(getIds().subList(0, getIds().size() - path.ancestorDepth()))
+                    .resolve(path.getIds()));
+      }
+    }
+
+    @Override
+    public Optional<ExperimentPath<Absolute>> resolveAgainst(ExperimentPath<Absolute> path) {
+      return Optional.of(this);
+    }
+  }
+
+  /**
+   * A relative path.
+   * 
+   * @author Elias N Vasylenko
+   */
+  public static class Relative extends ExperimentPath<Relative> {
+    private final int ancestors;
+
+    Relative(int ancestors, List<String> ids) {
+      super(ids);
+      this.ancestors = ancestors;
+    }
+
+    @Override
+    public String toString() {
+      return isEmpty()
+          ? SELF + SEPARATOR
+          : Stream.generate(() -> PARENT + SEPARATOR).limit(ancestors).collect(joining())
+              + super.toString();
+    }
+
+    @Override
+    public Optional<ExperimentPath<Relative>> parent() {
+      if (depth() == 0) {
+        return Optional.of(new Relative(ancestors + 1, getIds()));
+      } else {
+        return Optional.of(new Relative(ancestors, getIds().subList(0, getIds().size() - 1)));
+      }
+    }
+
+    @Override
+    public boolean isAbsolute() {
+      return false;
+    }
+
+    @Override
+    public int ancestorDepth() {
+      return ancestors;
+    }
+
+    @Override
+    public ExperimentPath<Relative> withIds(List<String> ids) {
+      return new Relative(ancestors, ids);
+    }
+
+    @Override
+    public Optional<ExperimentPath<Relative>> resolve(ExperimentPath<Relative> path) {
+      if (path.ancestorDepth() == getIds().size()) {
+        return Optional.of(withIds(path.getIds()));
+
+      } else if (path.ancestorDepth() > getIds().size()) {
+        return Optional
+            .of(
+                new Relative(
+                    path.ancestorDepth() + ancestorDepth() - getIds().size(),
+                    emptyList()));
+
+      } else {
+        return Optional
+            .of(
+                new Relative(
+                    ancestorDepth(),
+                    getIds().subList(0, getIds().size() - path.ancestorDepth()))
+                        .resolve(path.getIds()));
+      }
+    }
+
+    @Override
+    public Optional<ExperimentPath<Absolute>> resolveAgainst(ExperimentPath<Absolute> path) {
+      return path.resolve(this);
+    }
   }
 }

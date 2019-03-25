@@ -58,7 +58,7 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import uk.co.saiman.experiment.ExperimentEvent;
+import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.storage.StorageService;
@@ -105,7 +105,7 @@ public class ExperimentAddon {
   private StorageService storageService;
   @Inject
   @Service
-  private volatile List<Conductor<?, ?>> experimentTypes;
+  private volatile List<Conductor<?>> experimentTypes;
 
   private Workspace workspace;
   private FileSystemStore workspaceStore;
@@ -189,14 +189,14 @@ public class ExperimentAddon {
     }
   }
 
-  private Stream<Conductor<?, ?>> getExperimentTypes() {
+  private Stream<Conductor<?>> getExperimentTypes() {
     return new ArrayList<>(experimentTypes).stream();
   }
 
   private void initializeAdapters() {
     experimentNodeAdapterFactory = new ExperimentStepAdapterFactory(
         adapterManager,
-        () -> Stream.concat(Stream.of(ExperimentProcedure.instance()), getExperimentTypes()));
+        this::getExperimentTypes);
     experimentAdapterFactory = new ExperimentAdapterFactory(
         adapterManager,
         experimentNodeAdapterFactory);

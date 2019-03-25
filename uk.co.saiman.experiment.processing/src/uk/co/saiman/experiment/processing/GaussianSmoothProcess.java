@@ -33,13 +33,14 @@ import static uk.co.saiman.state.Accessor.doubleAccessor;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.data.function.processing.GaussianSmooth;
-import uk.co.saiman.state.Accessor.PropertyAccessor;
+import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 
 @Component
 public class GaussianSmoothProcess implements ProcessingStrategy<GaussianSmooth> {
-  private static final PropertyAccessor<Double> STANDARD_DEVIATION = doubleAccessor(
-      "standardDeviation");
+  private static final MapIndex<Double> STANDARD_DEVIATION = new MapIndex<>(
+      "standardDeviation",
+      doubleAccessor());
 
   @Override
   public GaussianSmooth createProcessor() {

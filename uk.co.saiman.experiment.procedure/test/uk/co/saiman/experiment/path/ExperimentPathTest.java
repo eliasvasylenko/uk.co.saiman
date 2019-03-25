@@ -36,81 +36,100 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.co.saiman.experiment.path.ExperimentPath.defineAbsolute;
-import static uk.co.saiman.experiment.path.ExperimentPath.defineRelative;
 
 import java.util.Optional;
 
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
 import org.junit.jupiter.api.Test;
 
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.path.ExperimentPath.Relative;
+
 public class ExperimentPathTest {
   @Test
   public void testEmptyAbsolutePath() {
-    ExperimentPath path = defineAbsolute();
+    ExperimentPath<Absolute> path = ExperimentPath.defineAbsolute();
 
-    assertThat(path.getAncestorDepth(), equalTo(0));
-    assertThat(path.getIds().collect(toList()), empty());
+    assertThat(path.ancestorDepth(), equalTo(0));
+    assertThat(path.ids().collect(toList()), empty());
     assertThat(path.isAbsolute(), is(true));
   }
 
   @Test
   public void testEmptyRelativePath() {
-    ExperimentPath path = defineRelative();
+    ExperimentPath<Relative> path = ExperimentPath.defineRelative();
 
-    assertThat(path.getAncestorDepth(), equalTo(0));
-    assertThat(path.getIds().collect(toList()), empty());
+    assertThat(path.ancestorDepth(), equalTo(0));
+    assertThat(path.ids().collect(toList()), empty());
     assertThat(path.isAbsolute(), is(false));
   }
 
   @Test
   public void testParentOfEmptyAbsolutePath() {
-    Optional<ExperimentPath> path = defineAbsolute().parent();
+    Optional<ExperimentPath<Absolute>> path = ExperimentPath.defineAbsolute().parent();
 
     assertTrue(path.isEmpty());
   }
 
   @Test
   public void testParentOfEmptyRelativePath() {
-    ExperimentPath path = defineRelative().parent().get();
+    ExperimentPath<Relative> path = ExperimentPath.defineRelative().parent().get();
 
-    assertThat(path.getAncestorDepth(), equalTo(1));
-    assertThat(path.getIds().collect(toList()), empty());
+    assertThat(path.ancestorDepth(), equalTo(1));
+    assertThat(path.ids().collect(toList()), empty());
     assertThat(path.isAbsolute(), is(false));
   }
 
   @Test
   public void testParentOfAbsolutePath() {
-    ExperimentPath path = defineAbsolute().resolve("id").parent().get();
+    ExperimentPath<Absolute> path = ExperimentPath.defineAbsolute().resolve("id").parent().get();
 
-    assertThat(path.getAncestorDepth(), equalTo(0));
-    assertThat(path.getIds().collect(toList()), empty());
+    assertThat(path.ancestorDepth(), equalTo(0));
+    assertThat(path.ids().collect(toList()), empty());
     assertThat(path.isAbsolute(), is(true));
   }
 
   @Test
   public void testParentOfRelativePath() {
-    ExperimentPath path = defineRelative().resolve("id").parent().get();
+    ExperimentPath<Relative> path = ExperimentPath.defineRelative().resolve("id").parent().get();
 
-    assertThat(path.getAncestorDepth(), equalTo(0));
-    assertThat(path.getIds().collect(toList()), empty());
+    assertThat(path.ancestorDepth(), equalTo(0));
+    assertThat(path.ids().collect(toList()), empty());
     assertThat(path.isAbsolute(), is(false));
   }
 
   @Test
   public void testResolveChildOfPath() {
-    ExperimentPath path = defineRelative().resolve("id");
+    ExperimentPath<Relative> path = ExperimentPath.defineRelative().resolve("id");
 
-    assertThat(path.getAncestorDepth(), equalTo(0));
-    assertThat(path.getIds().collect(toList()), contains("id"));
+    assertThat(path.ancestorDepth(), equalTo(0));
+    assertThat(path.ids().collect(toList()), contains("id"));
   }
 
   @Test
   public void testWithAncestorEquality() {
-    ExperimentPath path1 = defineRelative().parent().get().parent().get().resolve("true");
-    ExperimentPath path2 = defineRelative().parent().get().parent().get().resolve("true");
-    ExperimentPath path3 = defineRelative().parent().get().parent().get().resolve("false");
-    ExperimentPath path4 = defineRelative().parent().get().resolve("true");
+    ExperimentPath<Relative> path1 = ExperimentPath
+        .defineRelative()
+        .parent()
+        .get()
+        .parent()
+        .get()
+        .resolve("true");
+    ExperimentPath<Relative> path2 = ExperimentPath
+        .defineRelative()
+        .parent()
+        .get()
+        .parent()
+        .get()
+        .resolve("true");
+    ExperimentPath<Relative> path3 = ExperimentPath
+        .defineRelative()
+        .parent()
+        .get()
+        .parent()
+        .get()
+        .resolve("false");
+    ExperimentPath<Relative> path4 = ExperimentPath.defineRelative().parent().get().resolve("true");
 
     assertEquals(path1, path2);
     assertNotEquals(path1, path3);
@@ -121,9 +140,13 @@ public class ExperimentPathTest {
 
   @Test
   public void testWithDepthEquality() {
-    ExperimentPath path1 = defineRelative().resolve("a").resolve("b");
-    ExperimentPath path2 = defineRelative().resolve("a").resolve("b");
-    ExperimentPath path3 = defineRelative().resolve("a").resolve("b").resolve("c");
+    ExperimentPath<Relative> path1 = ExperimentPath.defineRelative().resolve("a").resolve("b");
+    ExperimentPath<Relative> path2 = ExperimentPath.defineRelative().resolve("a").resolve("b");
+    ExperimentPath<Relative> path3 = ExperimentPath
+        .defineRelative()
+        .resolve("a")
+        .resolve("b")
+        .resolve("c");
 
     assertEquals(path1, path2);
     assertNotEquals(path1, path3);
@@ -132,48 +155,60 @@ public class ExperimentPathTest {
 
   @Test
   public void testWithAncerstorOrdering() {
-    ExperimentPath path1 = defineRelative().parent().get().parent().get().resolve("true");
-    ExperimentPath path2 = defineRelative().parent().get().parent().get().resolve("true");
-    ExperimentPath path3 = defineRelative().parent().get().resolve("true");
+    ExperimentPath<Relative> path1 = ExperimentPath
+        .defineRelative()
+        .parent()
+        .get()
+        .parent()
+        .get()
+        .resolve("true");
+    ExperimentPath<Relative> path2 = ExperimentPath
+        .defineRelative()
+        .parent()
+        .get()
+        .parent()
+        .get()
+        .resolve("true");
+    ExperimentPath<Relative> path3 = ExperimentPath.defineRelative().parent().get().resolve("true");
 
-    assertThat(
-        path1,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().comparesEqualTo(path2));
-    assertThat(
-        path1,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().lessThan(path3));
-    assertThat(
-        path3,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().greaterThan(path1));
+    assertThat(path1, comparatorMatcher().comparesEqualTo(path2));
+    assertThat(path1, comparatorMatcher().lessThan(path3));
+    assertThat(path3, comparatorMatcher().greaterThan(path1));
   }
 
   @Test
   public void testWithDepthOrdering() {
-    ExperimentPath path1 = defineRelative().resolve("a").resolve("b");
-    ExperimentPath path2 = defineRelative().resolve("a").resolve("b");
-    ExperimentPath path3 = defineRelative().resolve("a").resolve("b").resolve("c");
+    ExperimentPath<Relative> path1 = ExperimentPath.defineRelative().resolve("a").resolve("b");
+    ExperimentPath<Relative> path2 = ExperimentPath.defineRelative().resolve("a").resolve("b");
+    ExperimentPath<Relative> path3 = ExperimentPath
+        .defineRelative()
+        .resolve("a")
+        .resolve("b")
+        .resolve("c");
 
-    assertThat(
-        path1,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().comparesEqualTo(path2));
-    assertThat(
-        path1,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().lessThan(path3));
-    assertThat(
-        path3,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().greaterThan(path1));
+    assertThat(path1, comparatorMatcher().comparesEqualTo(path2));
+    assertThat(path1, comparatorMatcher().lessThan(path3));
+    assertThat(path3, comparatorMatcher().greaterThan(path1));
   }
 
   @Test
   public void testAtDepthOrdering() {
-    ExperimentPath path1 = defineRelative().resolve("a").resolve("b").resolve("c");
-    ExperimentPath path2 = defineRelative().resolve("a").resolve("b").resolve("d");
+    ExperimentPath<Relative> path1 = ExperimentPath
+        .defineRelative()
+        .resolve("a")
+        .resolve("b")
+        .resolve("c");
+    ExperimentPath<Relative> path2 = ExperimentPath
+        .defineRelative()
+        .resolve("a")
+        .resolve("b")
+        .resolve("d");
 
-    assertThat(
-        path1,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().lessThan(path2));
-    assertThat(
-        path2,
-        ComparatorMatcherBuilder.<ExperimentPath>usingNaturalOrdering().greaterThan(path1));
+    assertThat(path1, comparatorMatcher().lessThan(path2));
+    assertThat(path2, comparatorMatcher().greaterThan(path1));
+  }
+
+  public static ComparatorMatcherBuilder<ExperimentPath<?>> comparatorMatcher() {
+    return ComparatorMatcherBuilder.<ExperimentPath<?>>usingNaturalOrdering();
   }
 }

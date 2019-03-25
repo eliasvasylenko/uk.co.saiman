@@ -27,13 +27,14 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static uk.co.saiman.experiment.schedule.ExperimentLifecycleState.COMPLETE;
-
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.di.annotations.Optional;
+
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.product.Observation;
+import uk.co.saiman.experiment.schedule.Products;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -44,21 +45,22 @@ public class ExperimentResultCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
 
   @Inject
-  private Step<?, ?> experiment;
+  private Observation<?> observation;
 
-  @PostConstruct
-  public void prepare(Cell cell) {
+  @Inject
+  @Optional
+  public void prepare(Cell cell, ExperimentPath path, Products products) {
     /*
      * configure label
      */
-    if (experiment.getLifecycleState() == COMPLETE) {
-      cell
-          .setIconURI(
-              "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document-binary.png");
-    } else {
-      cell
-          .setIconURI(
-              "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document.png");
-    }
+    products
+        .resolveResult(path.resolve(observation))
+        .ifPresentOrElse(
+            result -> cell
+                .setIconURI(
+                    "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document-binary.png"),
+            () -> cell
+                .setIconURI(
+                    "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document.png"));
   }
 }

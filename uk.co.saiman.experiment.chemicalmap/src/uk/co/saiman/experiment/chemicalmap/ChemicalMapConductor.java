@@ -28,8 +28,8 @@
 package uk.co.saiman.experiment.chemicalmap;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.ConductionContext;
+import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
@@ -42,8 +42,7 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  *
  * @param <T> the type of sample configuration for the instrument
  */
-public abstract class ChemicalMapConductor<T extends ChemicalMapConfiguration>
-    implements Conductor<T, Condition<Void>> {
+public abstract class ChemicalMapConductor implements Conductor<Condition<Void>> {
   private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
 
   protected abstract RasterDevice<?> getRasterDevice();
@@ -51,7 +50,7 @@ public abstract class ChemicalMapConductor<T extends ChemicalMapConfiguration>
   protected abstract AcquisitionDevice<?> getAcquisitionDevice();
 
   @Override
-  public void conduct(ConductionContext<T, Condition<Void>> context) {
+  public void conduct(ConductionContext<Condition<Void>> context) {
     AcquisitionDevice<?> acquisitionDevice = getAcquisitionDevice();
     RasterDevice<?> rasterDevice = getRasterDevice();
 

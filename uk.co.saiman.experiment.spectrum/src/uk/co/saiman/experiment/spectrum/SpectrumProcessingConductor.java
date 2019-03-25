@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.saiman.state.Accessor.listAccessor;
-
 import java.util.stream.Stream;
 
 import javax.measure.quantity.Dimensionless;
@@ -46,15 +44,14 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.procedure.ConductionContext;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.ConfigurationContext;
-import uk.co.saiman.experiment.procedure.ExperimentConfiguration;
+import uk.co.saiman.experiment.procedure.IndirectRequirement;
 import uk.co.saiman.experiment.procedure.ResultRequirement;
+import uk.co.saiman.experiment.procedure.Variable;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.product.Result;
-import uk.co.saiman.state.Accessor;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -64,58 +61,25 @@ import uk.co.saiman.state.Accessor;
  * @author Elias N Vasylenko
  */
 @Component(service = Conductor.class)
-public class SpectrumProcessingConductor
-    implements Conductor<SpectrumProcessingConfiguration, Result<Spectrum>> {
+public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> {
   public static final String INPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.input";
   public static final String OUTPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.output";
 
-  private final Accessor<Processing, ?> processorList;
+  private final Variable<Processing> processing;
 
   private final ResultRequirement<Spectrum> inputSpectrum;
   private final Observation<Spectrum> processedSpectrum;
 
   @Activate
   public SpectrumProcessingConductor(@Reference ProcessingService processors) {
-    this.processorList = listAccessor(
-        "processing",
-        processors::loadProcessing,
-        processors::saveProcessing);
+    this.processing = new Variable<>("spectrumProcessing", Processing.class, processors.accessor());
     this.inputSpectrum = new ResultRequirement<>(INPUT_SPECTRUM, Spectrum.class) {};
     this.processedSpectrum = new Observation<>(OUTPUT_SPECTRUM, Spectrum.class) {};
   }
 
   @Override
-  public ExperimentConfiguration<SpectrumProcessingConfiguration> configureExperiment(
-      ConfigurationContext context) {
-    context.update(s -> s.withDefault(processorList, Processing::new));
-
-    return new ExperimentConfiguration<>(new SpectrumProcessingConfiguration() {
-      @Override
-      public void setSpectrumName(String name) {
-        context.setId(name);
-      }
-
-      @Override
-      public String getSpectrumName() {
-        return context.getId();
-      }
-
-      @Override
-      public Processing getProcessing() {
-        return context.getState().get(processorList);
-      }
-
-      @Override
-      public void setProcessing(Processing processing) {
-        context.update(state -> state.with(processorList, processing));
-      }
-    });
-  }
-
-  @Override
-  public void conduct(
-      ConductionContext<SpectrumProcessingConfiguration, Result<Spectrum>> context) {
-    DataProcessor processor = context.variables().getProcessing().getProcessor();
+  public void conduct(ConductionContext<Result<Spectrum>> context) {
+    DataProcessor processor = context.getVariable(processing).getProcessor();
 
     context
         .dependency()
@@ -156,17 +120,22 @@ public class SpectrumProcessingConductor
   }
 
   @Override
-  public ResultRequirement<Spectrum> requirement() {
+  public ResultRequirement<Spectrum> directRequirement() {
     return inputSpectrum;
   }
 
   @Override
-  public Stream<? extends Production<?>> productions() {
+  public Stream<Production<?>> products() {
     return Stream.of(processedSpectrum);
   }
 
   @Override
-  public Class<SpectrumProcessingConfiguration> getVariablesType() {
-    return SpectrumProcessingConfiguration.class;
+  public Stream<Variable<?>> variables() {
+    return Stream.of(processing);
+  }
+
+  @Override
+  public Stream<IndirectRequirement<?>> indirectRequirements() {
+    return Stream.empty();
   }
 }

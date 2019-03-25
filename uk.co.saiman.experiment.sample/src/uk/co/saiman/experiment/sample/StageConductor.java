@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.procedure.ConductionContext;
-import uk.co.saiman.experiment.product.Nothing;
 import uk.co.saiman.instrument.stage.PolarStage;
 import uk.co.saiman.instrument.stage.Stage;
 
@@ -40,17 +38,7 @@ import uk.co.saiman.instrument.stage.Stage;
  *
  * @param <T> the type of sample configuration for the instrument
  */
-public interface StageConductor<T, U extends StageConfiguration<T>> extends SampleConductor<U> {
+public interface StageConductor<T> extends SampleConductor<T> {
   @Override
   Stage<T, ?> sampleDevice();
-
-  @Override
-  default void conduct(ConductionContext<U, Nothing> context) {
-    T location = context.variables().location();
-
-    try (var control = sampleDevice().acquireControl()) {
-      control.requestAnalysisLocation(location);
-      context.prepareCondition(getSamplePreparation(), null);
-    }
-  }
 }

@@ -27,11 +27,8 @@
  */
 package uk.co.saiman.experiment.procedure;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.product.Observation;
-import uk.co.saiman.experiment.product.Preparation;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
 
@@ -47,7 +44,7 @@ import uk.co.saiman.experiment.product.Production;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of the {@link #requirement() requirement}
+ * @param <T> the type of the {@link #directRequirement() direct requirement}
  */
 public interface Conductor<T extends Product> {
   /**
@@ -57,11 +54,17 @@ public interface Conductor<T extends Product> {
    * 
    * @return the productions made by this conductor
    */
-  Stream<? extends Production<?>> productions();
+  Stream<Production<?>> products();
 
-  Stream<? extends Variable<?>> variables();
+  /**
+   * @return the set of required variables for experiments conducted by this
+   *         conductor
+   */
+  Stream<Variable<?>> variables();
 
-  Requirement<T> requirement();
+  Requirement<T> directRequirement();
+
+  Stream<IndirectRequirement<?>> indirectRequirements();
 
   /*
    * Execution is cheap and resources are unlimited, so we may proceed
@@ -71,53 +74,10 @@ public interface Conductor<T extends Product> {
     return false;
   }
 
-  ExperimentConfiguration<S> configureExperiment(ConfigurationContext context);
-
   /**
    * Process this experiment type for a given node.
    * 
    * @param context the processing context
    */
   void conduct(ConductionContext<T> context);
-
-  /*
-   * TODO instead of having the S type parameter and a single variables object,
-   * how about we attach any number of ExperimentVariable objects to a conductor
-   * (or experiment step) each specifying their own `Class<T> variableType() and
-   * `Accessor<S, ?> accessor()`?
-   */
-
-  public static boolean produces(Conductor<?, ?> conductor, Production<?> production) {
-    return conductor.productions().anyMatch(production::equals);
-  }
-
-  /**
-   * The observations which are made by experiment steps which follow this
-   * procedure.
-   * 
-   * @return a stream of the observations which are prepared by the procedure
-   */
-  public static Stream<? extends Observation<?>> observations(Conductor<?, ?> conductor) {
-    return conductor
-        .productions()
-        .filter(Observation.class::isInstance)
-        .map(p -> (Observation<?>) p);
-  }
-
-  /**
-   * The preparations which are made by experiment steps which follow this
-   * procedure.
-   * 
-   * @return a stream of the preparations which are prepared by the procedure
-   */
-  public static Stream<Preparation<?>> preparations(Conductor<?, ?> conductor) {
-    return conductor
-        .productions()
-        .filter(Preparation.class::isInstance)
-        .map(p -> (Preparation<?>) p);
-  }
-
-  public static Optional<? extends Production<?>> production(Conductor<?, ?> conductor, String id) {
-    return conductor.productions().filter(c -> c.id().equals(id)).findAny();
-  }
 }

@@ -39,8 +39,7 @@ import uk.co.saiman.data.resource.Resource;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of the data object
+ * @param <T> the type of the data object
  */
 public interface Data<T> {
   static <T> Data<T> locate(Resource resource, DataFormat<T> format) {

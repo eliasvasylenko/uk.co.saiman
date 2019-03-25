@@ -40,13 +40,15 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.path.ProductIndex;
 import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.product.Product;
-import uk.co.saiman.state.Accessor.PropertyAccessor;
+import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
 import uk.co.saiman.state.StateList;
 import uk.co.saiman.state.StateMap;
@@ -69,12 +71,12 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
       "saiman.procedure.v" + VERSION,
       VENDOR).withSuffix("json");
 
-  private static final PropertyAccessor<String> ID = stringAccessor("id");
+  private static final MapIndex<String> ID = new MapIndex<>("id", stringAccessor());
   private static final String CONDUCTOR = "conductor";
   private static final String CONFIGURATION = "configuration";
   private static final String CHILDREN = "children";
 
-  private final PropertyAccessor<Conductor<?, ?>> conductor;
+  private final MapIndex<Conductor<?>> conductor;
 
   private final JsonStateMapFormat stateMapFormat;
 
@@ -85,8 +87,9 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
   public JsonProcedureFormat(ConductorService conductorService, JsonStateMapFormat stateMapFormat) {
     this.stateMapFormat = stateMapFormat;
 
-    this.conductor = stringAccessor(CONDUCTOR)
-        .map(conductorService::getConductor, conductorService::getId);
+    this.conductor = new MapIndex<>(
+        CONDUCTOR,
+        stringAccessor().map(conductorService::getConductor, conductorService::getId));
   }
 
   @Override
@@ -115,19 +118,19 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
   private <T extends Product> Procedure loadInstructions(
       Procedure procedure,
       StateList data,
-      ProductPath path) {
+      ProductPath<Absolute> path) {
     return data
         .stream()
         .map(State::asMap)
         .reduce(procedure, (p, s) -> loadInstruction(p, s, path), throwingMerger());
   }
 
-  private Procedure loadInstruction(Procedure procedure, StateMap data, ProductPath path) {
+  private Procedure loadInstruction(
+      Procedure procedure,
+      StateMap data,
+      ProductPath<Absolute> path) {
     var instruction = Instruction
-        .define(
-            data.get(ID),
-            data.get(CONFIGURATION).asMap(),
-            (Conductor<?, ?>) data.get(conductor));
+        .define(data.get(ID), data.get(CONFIGURATION).asMap(), (Conductor<?>) data.get(conductor));
     procedure = procedure.withInstruction(instruction);
 
     var children = data.get(CHILDREN).asMap();
@@ -140,7 +143,7 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
             (p, k) -> loadInstructions(
                 p,
                 children.get(k).asList(),
-                ProductPath.define(experimentPath, k)),
+                experimentPath.resolve(ProductIndex.fromString(k))),
             throwingMerger());
   }
 
@@ -160,7 +163,7 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
                 procedure.independentInstructions().collect(toList())));
   }
 
-  protected StateList saveInstructions(Procedure procedure, List<ExperimentPath> paths) {
+  protected StateList saveInstructions(Procedure procedure, List<ExperimentPath<Absolute>> paths) {
     return paths
         .stream()
         .reduce(
@@ -169,7 +172,7 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
             throwingMerger());
   }
 
-  protected StateMap saveInstruction(Procedure procedure, ExperimentPath path) {
+  protected StateMap saveInstruction(Procedure procedure, ExperimentPath<Absolute> path) {
     var instruction = procedure.instruction(path).get();
 
     return StateMap
@@ -179,12 +182,12 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
         .with(
             CHILDREN,
             procedure
-                .dependents(path)
+                .products(path)
                 .reduce(
                     StateMap.empty(),
                     (m, s) -> m
                         .with(
-                            s.getProductId(),
+                            s.getProductIndex().toString(),
                             saveInstructions(
                                 procedure,
                                 procedure.dependentInstructions(s).collect(toList()))),

@@ -42,8 +42,6 @@ import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
 public interface Accessor<T, U extends State> {
-  String id();
-
   T read(U data);
 
   U write(T value);
@@ -64,7 +62,7 @@ public interface Accessor<T, U extends State> {
     default <V> PropertyAccessor<V> map(
         Function<? super T, ? extends V> read,
         Function<? super V, ? extends T> write) {
-      return propertyAccessor(id(), s -> read.apply(read(s)), s -> write(write.apply(s)));
+      return propertyAccessor(s -> read.apply(read(s)), s -> write(write.apply(s)));
     }
   }
 
@@ -78,7 +76,7 @@ public interface Accessor<T, U extends State> {
     default <V> MapAccessor<V> map(
         Function<? super T, ? extends V> read,
         Function<? super V, ? extends T> write) {
-      return mapAccessor(id(), s -> read.apply(read(s)), s -> write(write.apply(s)));
+      return mapAccessor(s -> read.apply(read(s)), s -> write(write.apply(s)));
     }
   }
 
@@ -92,20 +90,14 @@ public interface Accessor<T, U extends State> {
     default <V> ListAccessor<V> map(
         Function<? super T, ? extends V> read,
         Function<? super V, ? extends T> write) {
-      return listAccessor(id(), s -> read.apply(read(s)), s -> write(write.apply(s)));
+      return listAccessor(s -> read.apply(read(s)), s -> write(write.apply(s)));
     }
   }
 
   static <T> PropertyAccessor<T> propertyAccessor(
-      String name,
       Function<? super StateProperty, ? extends T> read,
       Function<? super T, ? extends StateProperty> write) {
     return new PropertyAccessor<T>() {
-      @Override
-      public String id() {
-        return name;
-      }
-
       @Override
       public T read(StateProperty data) {
         return read.apply(data);
@@ -119,15 +111,9 @@ public interface Accessor<T, U extends State> {
   }
 
   static <T> MapAccessor<T> mapAccessor(
-      String name,
       Function<? super StateMap, ? extends T> read,
       Function<? super T, ? extends StateMap> write) {
     return new MapAccessor<T>() {
-      @Override
-      public String id() {
-        return name;
-      }
-
       @Override
       public T read(StateMap data) {
         return read.apply(data);
@@ -141,15 +127,9 @@ public interface Accessor<T, U extends State> {
   }
 
   static <T> ListAccessor<T> listAccessor(
-      String name,
       Function<? super StateList, ? extends T> read,
       Function<? super T, ? extends StateList> write) {
     return new ListAccessor<T>() {
-      @Override
-      public String id() {
-        return name;
-      }
-
       @Override
       public T read(StateList data) {
         return read.apply(data);
@@ -162,34 +142,33 @@ public interface Accessor<T, U extends State> {
     };
   }
 
-  static PropertyAccessor<String> stringAccessor(String name) {
-    return propertyAccessor(name, StateProperty::getValue, StateProperty::new);
+  static PropertyAccessor<String> stringAccessor() {
+    return propertyAccessor(StateProperty::getValue, StateProperty::new);
   }
 
-  static PropertyAccessor<Integer> intAccessor(String name) {
-    return stringAccessor(name).map(Integer::parseInt, Objects::toString);
+  static PropertyAccessor<Integer> intAccessor() {
+    return stringAccessor().map(Integer::parseInt, Objects::toString);
   }
 
-  static PropertyAccessor<Long> longAccessor(String name) {
-    return stringAccessor(name).map(Long::parseLong, Objects::toString);
+  static PropertyAccessor<Long> longAccessor() {
+    return stringAccessor().map(Long::parseLong, Objects::toString);
   }
 
-  static PropertyAccessor<Float> floatAccessor(String name) {
-    return stringAccessor(name).map(Float::parseFloat, Objects::toString);
+  static PropertyAccessor<Float> floatAccessor() {
+    return stringAccessor().map(Float::parseFloat, Objects::toString);
   }
 
-  static PropertyAccessor<Double> doubleAccessor(String name) {
-    return stringAccessor(name).map(Double::parseDouble, Objects::toString);
+  static PropertyAccessor<Double> doubleAccessor() {
+    return stringAccessor().map(Double::parseDouble, Objects::toString);
   }
 
-  static PropertyAccessor<Boolean> booleanAccessor(String name) {
-    return stringAccessor(name).map(Boolean::parseBoolean, Objects::toString);
+  static PropertyAccessor<Boolean> booleanAccessor() {
+    return stringAccessor().map(Boolean::parseBoolean, Objects::toString);
   }
 
   @SuppressWarnings("unchecked")
   default ListAccessor<Stream<T>> toStreamAccessor() {
     return listAccessor(
-        id(),
         s -> s.stream().map(e -> read((U) e)),
         a -> a.map(e -> write(e)).collect(toStateList()));
   }

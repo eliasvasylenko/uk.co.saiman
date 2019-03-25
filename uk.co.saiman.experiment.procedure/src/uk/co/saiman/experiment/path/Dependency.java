@@ -28,26 +28,22 @@
 package uk.co.saiman.experiment.path;
 
 import java.util.Objects;
+import java.util.Optional;
 
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
 
-public class Dependency<T extends Product> {
-  private final ExperimentPath experimentPath;
+public class Dependency<T extends Product, U extends ExperimentPath<U>> {
+  private final ExperimentPath<U> experimentPath;
   private final Production<T> production;
 
-  Dependency(ExperimentPath experimentPath, Production<T> production) {
+  Dependency(ExperimentPath<U> experimentPath, Production<T> production) {
     this.experimentPath = experimentPath;
     this.production = production;
   }
 
-  public static <T extends Product> Dependency<T> define(
-      ExperimentPath experimentPath,
-      Production<T> production) {
-    return new Dependency<>(experimentPath, production);
-  }
-
-  public ExperimentPath getExperimentPath() {
+  public ExperimentPath<U> getExperimentPath() {
     return experimentPath;
   }
 
@@ -55,8 +51,8 @@ public class Dependency<T extends Product> {
     return production;
   }
 
-  public ProductPath getProductPath() {
-    return experimentPath.resolve(production);
+  public ProductPath<U> getProductPath() {
+    return experimentPath.resolve(ProductIndex.forProduction(production));
   }
 
   @Override
@@ -66,7 +62,7 @@ public class Dependency<T extends Product> {
     if (obj == null || obj.getClass() != getClass())
       return false;
 
-    var that = (Dependency<?>) obj;
+    var that = (Dependency<?, ?>) obj;
 
     return Objects.equals(this.experimentPath, that.experimentPath)
         && Objects.equals(this.production, that.production);
@@ -75,5 +71,13 @@ public class Dependency<T extends Product> {
   @Override
   public int hashCode() {
     return Objects.hash(experimentPath, production);
+  }
+
+  public Optional<Dependency<T, Absolute>> resolveAgainst(ExperimentPath<Absolute> path) {
+    return experimentPath.resolveAgainst(path).map(p -> p.resolve(production));
+  }
+
+  public Dependency<T, Absolute> toAbsolute() {
+    return resolveAgainst(ExperimentPath.defineAbsolute()).get();
   }
 }

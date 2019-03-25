@@ -38,8 +38,8 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.model.ExperimentStep;
-import uk.co.saiman.experiment.spectrum.SpectrumConfiguration;
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
 
 public class SpectrumExperimentNodeCell {
@@ -51,14 +51,14 @@ public class SpectrumExperimentNodeCell {
   public void prepare(
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
-      ExperimentStep<?> data,
-      SpectrumConfiguration state) {
+      Step data,
+      Instruction instruction) {
     cell = (Cell) (MUIElement) cell.getParent();
 
     cell.setLabel(properties.spectrumExperimentName().get());
     cell
         .setIconURI(
             "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/spectrum.png");
-    supplemental.setText(state.getSpectrumName());
+    supplemental.setText(instruction.id());
   }
 }

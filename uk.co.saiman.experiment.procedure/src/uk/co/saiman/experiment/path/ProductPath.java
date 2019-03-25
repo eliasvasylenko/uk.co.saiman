@@ -28,41 +28,48 @@
 package uk.co.saiman.experiment.path;
 
 import java.util.Objects;
+import java.util.Optional;
 
-public class ProductPath implements Comparable<ProductPath> {
-  private final ExperimentPath experimentPath;
-  private final String productId;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 
-  ProductPath(ExperimentPath experimentPath, String productId) {
+public class ProductPath<T extends ExperimentPath<T>> implements Comparable<ProductPath<?>> {
+  private final ExperimentPath<T> experimentPath;
+  private final ProductIndex productIndex;
+
+  ProductPath(ExperimentPath<T> experimentPath, ProductIndex productIndex) {
     this.experimentPath = experimentPath;
-    this.productId = productId;
+    this.productIndex = productIndex;
   }
 
-  public static ProductPath define(ExperimentPath experimentPath, String productId) {
-    return new ProductPath(experimentPath, productId);
-  }
-
-  public ExperimentPath getExperimentPath() {
+  public ExperimentPath<T> getExperimentPath() {
     return experimentPath;
   }
 
-  public String getProductId() {
-    return productId;
+  public ProductIndex getProductIndex() {
+    return productIndex;
   }
 
-  public static ProductPath fromString(String string) {
+  public static ProductPath<?> fromString(String string) {
     string = string.strip();
 
     int lastSlash = string.lastIndexOf('/');
 
-    return define(
-        ExperimentPath.fromString(string.substring(0, lastSlash)),
-        string.substring(lastSlash + 1));
+    return ExperimentPath
+        .fromString(string.substring(0, lastSlash))
+        .resolve(ProductIndex.define(string.substring(lastSlash + 1)));
+  }
+
+  public Optional<ProductPath<Absolute>> resolveAgainst(ExperimentPath<Absolute> path) {
+    return experimentPath.resolveAgainst(path).map(p -> p.resolve(productIndex));
+  }
+
+  public ProductPath<Absolute> toAbsolute() {
+    return resolveAgainst(ExperimentPath.defineAbsolute()).get();
   }
 
   @Override
   public String toString() {
-    return experimentPath + productId;
+    return experimentPath.toString() + productIndex.toString();
   }
 
   @Override
@@ -72,20 +79,20 @@ public class ProductPath implements Comparable<ProductPath> {
     if (obj == null || obj.getClass() != getClass())
       return false;
 
-    var that = (ProductPath) obj;
+    var that = (ProductPath<?>) obj;
 
     return Objects.equals(this.experimentPath, that.experimentPath)
-        && Objects.equals(this.productId, that.productId);
+        && Objects.equals(this.productIndex, that.productIndex);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(experimentPath, productId);
+    return Objects.hash(experimentPath, productIndex);
   }
 
   @Override
-  public int compareTo(ProductPath that) {
+  public int compareTo(ProductPath<?> that) {
     int comparePath = this.experimentPath.compareTo(that.experimentPath);
-    return comparePath != 0 ? comparePath : this.productId.compareTo(that.productId);
+    return comparePath != 0 ? comparePath : this.productIndex.compareTo(that.productIndex);
   }
 }

@@ -3,10 +3,10 @@ package uk.co.saiman.experiment.schedule.event;
 import uk.co.saiman.experiment.schedule.Products;
 import uk.co.saiman.experiment.schedule.Scheduler;
 
-public class ProceedEvent extends SchedulingEvent {
+public class BeginProcedureEvent extends SchedulingEvent {
   private final Products products;
 
-  public ProceedEvent(Scheduler scheduler, Products products) {
+  public BeginProcedureEvent(Scheduler scheduler, Products products) {
     super(scheduler);
     this.products = products;
   }
@@ -17,6 +17,6 @@ public class ProceedEvent extends SchedulingEvent {
 
   @Override
   public SchedulingEventKind kind() {
-    return SchedulingEventKind.PROCEED;
+    return SchedulingEventKind.BEGIN_PROCEDURE;
   }
 }

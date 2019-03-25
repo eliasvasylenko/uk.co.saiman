@@ -28,39 +28,19 @@
 package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static uk.co.saiman.measurement.Quantities.quantityFormat;
-import static uk.co.saiman.measurement.Units.metre;
-import static uk.co.saiman.state.Accessor.stringAccessor;
-
-import javax.measure.Quantity;
-import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.ConfigurationContext;
 import uk.co.saiman.experiment.product.Nothing;
 import uk.co.saiman.experiment.product.Preparation;
 import uk.co.saiman.experiment.sample.XYStageConductor;
 import uk.co.saiman.instrument.stage.XYStage;
-import uk.co.saiman.measurement.coordinate.XYCoordinate;
-import uk.co.saiman.measurement.scalar.Scalar;
-import uk.co.saiman.saint.SaintXYStageConfiguration;
-import uk.co.saiman.state.Accessor.PropertyAccessor;
 
 @Component
-public class SaintXYStageConductor implements XYStageConductor<SaintXYStageConfiguration>,
-    Conductor<SaintXYStageConfiguration, Nothing> {
+public class SaintXYStageConductor implements XYStageConductor, Conductor<Nothing> {
   public static final String SAMPLE_HOLDING_CONDITION = "uk.co.saiman.saint.sampleholding";
-
-  private static final PropertyAccessor<Quantity<Length>> X = lengthAccessor("xOffset");
-  private static final PropertyAccessor<Quantity<Length>> Y = lengthAccessor("yOffset");
-
-  private static PropertyAccessor<Quantity<Length>> lengthAccessor(String value) {
-    return stringAccessor(value)
-        .map(l -> quantityFormat().parse(l).asType(Length.class), quantityFormat()::format);
-  }
 
   @Reference(cardinality = OPTIONAL)
   private XYStage<?> stageDevice;
@@ -68,61 +48,12 @@ public class SaintXYStageConductor implements XYStageConductor<SaintXYStageConfi
   private Preparation<Void> sampleHolding = new Preparation<>(SAMPLE_HOLDING_CONDITION, Void.class);
 
   @Override
-  public SaintXYStageConfiguration configureExperiment(ConfigurationContext context) {
-    String id = context.getId(() -> "A1");
-
-    return new SaintXYStageConfiguration() {
-      {
-        context
-            .update(
-                state -> state
-                    .withDefault(X, () -> new Scalar<>(metre().micro(), 0))
-                    .withDefault(Y, () -> new Scalar<>(metre().micro(), 0)));
-      }
-
-      @Override
-      public String getName() {
-        return id;
-      }
-
-      @Override
-      public XYStage<?> stageDevice() {
-        return stageDevice;
-      }
-
-      @Override
-      public XYCoordinate<Length> location() {
-        return new XYCoordinate<>(context.getState().get(X), context.getState().get(Y));
-      }
-
-      @Override
-      public void setLocation(XYCoordinate<Length> location) {
-        context.update(state -> state.with(X, location.getX()).with(Y, location.getY()));
-      }
-
-      @Override
-      public String toString() {
-        return "("
-            + quantityFormat().format(location().getX())
-            + ", "
-            + quantityFormat().format(location().getY())
-            + ")";
-      }
-    };
-  }
-
-  @Override
   public XYStage<?> sampleDevice() {
     return stageDevice;
   }
 
   @Override
-  public Preparation<Void> getSamplePreparation() {
+  public Preparation<Void> samplePreparation() {
     return sampleHolding;
-  }
-
-  @Override
-  public Class<SaintXYStageConfiguration> getVariablesType() {
-    return SaintXYStageConfiguration.class;
   }
 }

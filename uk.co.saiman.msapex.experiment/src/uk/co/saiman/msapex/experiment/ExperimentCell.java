@@ -28,9 +28,7 @@
 package uk.co.saiman.msapex.experiment;
 
 import static java.util.Collections.emptyList;
-import static java.util.EnumSet.allOf;
 import static java.util.stream.Collectors.toList;
-import static javafx.css.PseudoClass.getPseudoClass;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -53,14 +51,9 @@ import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.ExperimentConfiguration;
-import uk.co.saiman.experiment.ExperimentEvent;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.event.ExperimentLifecycleEvent;
-import uk.co.saiman.experiment.model.event.AttachStepEvent;
-import uk.co.saiman.experiment.model.event.DisposeStepEvent;
-import uk.co.saiman.experiment.model.event.RenameStepEvent;
-import uk.co.saiman.experiment.schedule.ExperimentLifecycleState;
+import uk.co.saiman.experiment.event.ExperimentEvent;
+import uk.co.saiman.experiment.procedure.ExperimentConfiguration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -158,7 +151,6 @@ public class ExperimentCell {
 
   private void open() {
     context.set(Experiment.class, experiment.experiment());
-    context.set(ExperimentLifecycleState.class, experiment.experiment().getLifecycleState());
     updateIcon();
     updateChildren();
   }
@@ -169,7 +161,6 @@ public class ExperimentCell {
       context.remove(Experiment.class);
       context.remove(Step.class);
       context.remove(ExperimentConfiguration.class);
-      context.remove(ExperimentLifecycleState.class);
       updateIcon();
     } catch (Exception e) {
       e.printStackTrace();
@@ -179,9 +170,8 @@ public class ExperimentCell {
   @Inject
   @Optional
   public void update(ExperimentEvent event) {
-    if (experiment.status() == Status.OPEN && event.step() == experiment.experiment()) {
-      cell.setLabel(event.newProcedure().id());
-      context.set(ExperimentLifecycleState.class, event.lifecycleState());
+    if (experiment.status() == Status.OPEN && event.experiment() == experiment.experiment()) {
+      cell.setLabel(event.procedure().id());
       updateChildren();
     }
   }
@@ -195,21 +185,7 @@ public class ExperimentCell {
         .setItems(
             ExperimentStepCell.ID,
             Step.class,
-            experiment.experiment().getDependentSteps().collect(toList()));
-  }
-
-  @Inject
-  public void updateLifecycle(@Optional ExperimentLifecycleState state) {
-    allOf(ExperimentLifecycleState.class)
-        .stream()
-        .forEach(
-            s -> lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(s.toString()), false));
-    if (state == null || state == ExperimentLifecycleState.DETACHED) {
-      supplementalText.setText(null);
-    } else {
-      lifecycleIndicator.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
-      supplementalText.setText("[" + text.lifecycleState(state) + "]");
-    }
+            experiment.experiment().getSteps().collect(toList()));
   }
 
   @Optional

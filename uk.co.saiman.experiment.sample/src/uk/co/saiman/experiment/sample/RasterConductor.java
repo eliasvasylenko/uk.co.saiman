@@ -40,6 +40,6 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @param <T> the type of sample configuration for the instrument
  */
 public interface RasterConductor<T extends RasterConfiguration, U extends Product>
-    extends Conductor<T, U> {
+    extends Conductor<U> {
   RasterDevice<?> device();
 }

@@ -63,6 +63,10 @@ public class StateMap implements State {
     return Optional.ofNullable(entries.get(id));
   }
 
+  public <T> T get(Accessor<T, StateMap> accessor) {
+    return accessor.read(this);
+  }
+
   public StateMap with(String id, State value) {
     Map<String, State> entries = new HashMap<>(this.entries);
     entries.put(id, value);
@@ -92,29 +96,32 @@ public class StateMap implements State {
   }
 
   @SuppressWarnings("unchecked")
-  public <T, U extends State> T get(Accessor<T, U> accessor) {
-    return accessor.read((U) get(accessor.id()).as(accessor.getKind()));
+  private <T, U extends State> T readAs(Accessor<T, U> accessor, State state) {
+    return accessor.read((U) state.as(accessor.getKind()));
   }
 
-  @SuppressWarnings("unchecked")
-  public <T, U extends State> Optional<T> getOptional(Accessor<T, U> accessor) {
-    return getOptional(accessor.id()).map(s -> accessor.read((U) s.as(accessor.getKind())));
+  public <T, U extends State> T get(MapIndex<T> index) {
+    return readAs(index.accessor(), get(index.id()));
   }
 
-  public <T> StateMap with(Accessor<T, ?> accessor, T value) {
-    return with(accessor.id(), accessor.write(value));
+  public <T> Optional<T> getOptional(MapIndex<T> index) {
+    return getOptional(index.id()).map(s -> readAs(index.accessor(), s));
   }
 
-  public <T> StateMap withDefault(Accessor<T, ?> accessor, Supplier<? extends T> value) {
-    return withDefault(accessor.id(), () -> accessor.write(value.get()));
+  public <T> StateMap with(MapIndex<T> index, T value) {
+    return with(index.id(), index.accessor().write(value));
   }
 
-  public <T> StateMap with(Accessor<T, ?> accessor, Function<T, T> value) {
-    return with(accessor.id(), accessor.write(value.apply(get(accessor))));
+  public <T> StateMap withDefault(MapIndex<T> index, Supplier<? extends T> value) {
+    return withDefault(index.id(), () -> index.accessor().write(value.get()));
   }
 
-  public StateMap remove(Accessor<?, ?> accessor) {
-    return remove(accessor.id());
+  public <T> StateMap with(MapIndex<T> index, Function<T, T> value) {
+    return with(index.id(), index.accessor().write(value.apply(get(index))));
+  }
+
+  public StateMap remove(MapIndex<?> index) {
+    return remove(index.id());
   }
 
   @Override

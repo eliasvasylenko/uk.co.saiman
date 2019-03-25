@@ -1,24 +1,31 @@
 package uk.co.saiman.experiment.procedure;
 
 import uk.co.saiman.state.Accessor;
+import uk.co.saiman.state.MapIndex;
 
 public class Variable<T> {
-  private final Class<T> variableType;
+  private final String name;
+  private final Class<? super T> type;
   private final Accessor<T, ?> accessor;
 
-  public Variable(Class<T> variableType, Accessor<T, ?> accessor) {
-    this.variableType = variableType;
+  public Variable(String name, Class<? super T> type, Accessor<T, ?> accessor) {
+    this.name = name;
+    this.type = type;
     this.accessor = accessor;
+  }
+
+  public String name() {
+    return name;
   }
 
   /**
    * @return the type of the variable
    */
-  public Class<T> variableType() {
-    return variableType;
+  public Class<? super T> type() {
+    return type;
   }
 
-  public Accessor<T, ?> accessor() {
-    return accessor;
+  public MapIndex<T> index() {
+    return new MapIndex<>(name, accessor);
   }
 }

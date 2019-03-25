@@ -41,7 +41,7 @@ import uk.co.saiman.experiment.json.JsonProcedureFormat;
 import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
-import uk.co.saiman.state.Accessor.MapAccessor;
+import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
 
@@ -56,7 +56,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
   private static final String STORAGE = "storage";
 
-  private final MapAccessor<StorageConfiguration<?>> storage;
+  private final MapIndex<StorageConfiguration<?>> storage;
 
   private final JsonStateMapFormat stateMapFormat;
   private final JsonProcedureFormat procedureFormat;
@@ -84,10 +84,11 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
     this.stateMapFormat = stateMapFormat;
     this.procedureFormat = experimentDefinitionFormat;
 
-    this.storage = mapAccessor(
+    this.storage = new MapIndex<>(
         STORAGE,
-        s -> storageService.configureStorage(s),
-        r -> storageService.deconfigureStorage(r));
+        mapAccessor(
+            s -> storageService.configureStorage(s),
+            r -> storageService.deconfigureStorage(r)));
   }
 
   @Override

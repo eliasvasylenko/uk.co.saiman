@@ -27,8 +27,9 @@
  */
 package uk.co.saiman.experiment.schedule;
 
+import uk.co.saiman.experiment.path.Dependency;
 import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ProductPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.product.Preparation;
@@ -36,9 +37,12 @@ import uk.co.saiman.experiment.product.Preparation;
 public class ConditionImpl<T> implements Condition<T> {
   private final Preparation<T> preparation;
   private final Instruction procedure;
-  private final ExperimentPath path;
+  private final ExperimentPath<Absolute> path;
 
-  public ConditionImpl(Preparation<T> preparation, Instruction procedure, ExperimentPath path) {
+  public ConditionImpl(
+      Preparation<T> preparation,
+      Instruction procedure,
+      ExperimentPath<Absolute> path) {
     this.preparation = preparation;
     this.procedure = procedure;
     this.path = path;
@@ -50,7 +54,7 @@ public class ConditionImpl<T> implements Condition<T> {
   }
 
   @Override
-  public ProductPath path() {
+  public Dependency<Condition<T>, Absolute> dependency() {
     return path.resolve(preparation());
   }
 }

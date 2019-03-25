@@ -49,7 +49,7 @@ public class ScheduleStepHandler {
   ExperimentProperties text;
 
   @Execute
-  void execute(Step<?, ?> step) {
+  void execute(Step step) {
     step.schedule();
   }
 }

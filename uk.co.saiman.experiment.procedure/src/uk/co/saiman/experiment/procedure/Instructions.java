@@ -18,79 +18,88 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.path.Dependency;
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.path.ProductIndex;
 import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.product.Nothing;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
 
-public abstract class Instructions<T extends Instructions<T>> {
+public abstract class Instructions<T extends Instructions<T, U>, U extends ExperimentPath<U>> {
   /*
    * We store the experiment hierarchy as flat map. Because experiment paths are
    * comparable, the ordering is equivalent to an alphabetical, depth-first
    * traversal of the path hierarchy.
    */
-  private final NavigableMap<ExperimentPath, ExperimentLocation> instructions;
-  private final Map<ProductPath, ProductLocation> dependencies;
+  private final NavigableMap<ExperimentPath<U>, ExperimentLocation> instructions;
+  private final Map<ProductPath<U>, ProductLocation> dependencies;
 
   Instructions() {
     this(emptyNavigableMap(), emptyMap());
   }
 
   Instructions(
-      NavigableMap<ExperimentPath, ExperimentLocation> instructions,
-      Map<ProductPath, ProductLocation> dependencies) {
+      NavigableMap<ExperimentPath<U>, ExperimentLocation> instructions,
+      Map<ProductPath<U>, ProductLocation> dependencies) {
     this.instructions = instructions;
     this.dependencies = dependencies;
   }
 
-  NavigableMap<ExperimentPath, ExperimentLocation> getInstructions() {
+  abstract ExperimentPath<U> getExperimentPath();
+
+  NavigableMap<ExperimentPath<U>, ExperimentLocation> getInstructions() {
     return instructions;
   }
 
-  Map<ProductPath, ProductLocation> getDependencies() {
+  Map<ProductPath<U>, ProductLocation> getDependencies() {
     return dependencies;
   }
 
-  public Stream<ExperimentPath> instructions() {
+  public Stream<ExperimentPath<U>> instructions() {
     return instructions.keySet().stream();
   }
 
-  public Stream<ProductPath> dependents(ExperimentPath path) {
+  public Stream<ProductPath<U>> products(ExperimentPath<U> path) {
     return Optional
         .ofNullable(instructions.get(path))
         .map(l -> dependencyPaths(path, l))
         .orElseGet(Stream::empty);
   }
 
-  private Stream<ProductPath> dependencyPaths(ExperimentPath path, ExperimentLocation location) {
+  private Stream<ProductPath<U>> dependencyPaths(
+      ExperimentPath<U> path,
+      ExperimentLocation location) {
     return Stream
         .concat(
-            location.instruction().conductor().productions().map(Production::id),
+            location.instruction().conductor().products().map(Production::id),
             location.unknownProducts())
-        .map(s -> ProductPath.define(path, s))
+        .map(s -> path.resolve(ProductIndex.define(s)))
         .filter(dependencies::containsKey);
   }
 
-  public Optional<Instruction> instruction(ExperimentPath path) {
+  public Optional<Instruction> instruction(ExperimentPath<?> path) {
     return Optional.ofNullable(instructions.get(path)).map(e -> e.instruction());
   }
 
-  public Stream<ExperimentPath> independentInstructions() {
-    return dependencies.get(null).dependencies();
+  public Stream<ExperimentPath<U>> independentInstructions() {
+    return dependencies.get(null).dependents().map(getExperimentPath()::resolve);
   }
 
-  public Stream<ExperimentPath> dependentInstructions(ProductPath path) {
+  public Stream<ExperimentPath<U>> dependentInstructions(ProductPath<U> path) {
     return Optional
         .ofNullable(dependencies.get(path))
-        .map(d -> d.dependencies())
+        .map(d -> d.dependents().map(path.getExperimentPath()::resolve))
         .orElseGet(Stream::empty);
   }
 
-  public T withInstruction(ProductPath path, Instruction instruction) {
+  public Stream<ExperimentPath<U>> dependentInstructions(ExperimentPath<U> path) {
+    return products(path).flatMap(this::dependentInstructions);
+  }
+
+  public T withInstruction(ProductPath<U> path, Instruction instruction) {
     return withInstruction(path, -1, instruction);
   }
 
-  public T withInstruction(ProductPath path, long index, Instruction instruction) {
+  public T withInstruction(ProductPath<U> path, long index, Instruction instruction) {
     return withInstruction(Optional.of(path), index, instruction);
   }
 
@@ -99,7 +108,7 @@ public abstract class Instructions<T extends Instructions<T>> {
   }
 
   private T withInstruction(
-      Optional<ProductPath> productPath,
+      Optional<ProductPath<U>> productPath,
       long index,
       Instruction instruction) {
     var instructions = new TreeMap<>(this.instructions);
@@ -110,33 +119,33 @@ public abstract class Instructions<T extends Instructions<T>> {
     return withInstructions(instructions, dependencies);
   }
 
-  public <U extends Product> T withTemplate(
-      Dependency<? extends U> dependency,
-      Template<?, U> template) {
+  public <W extends Product> T withTemplate(
+      Dependency<? extends W, U> dependency,
+      Template<W> template) {
     return withTemplate(dependency, -1, template);
   }
 
-  public <U extends Product> T withTemplate(
-      Dependency<? extends U> dependency,
+  public <W extends Product> T withTemplate(
+      Dependency<? extends W, U> dependency,
       long index,
-      Template<?, U> template) {
+      Template<W> template) {
     return withTemplate(
         Optional.of(validateProductPath(dependency)),
         index,
         requireNonNull(template));
   }
 
-  T withTemplate(long index, Template<?, Nothing> template) {
+  T withTemplate(long index, Template<Nothing> template) {
     return withTemplate(Optional.empty(), index, template);
   }
 
-  private T withTemplate(Optional<ProductPath> productPath, long index, Template<?, ?> template) {
+  private T withTemplate(Optional<ProductPath<U>> productPath, long index, Template<?> template) {
     var instructions = new TreeMap<>(this.instructions);
     var dependencies = new HashMap<>(this.dependencies);
 
-    var experimentPath = productPath
-        .map(p -> p.getExperimentPath())
-        .orElseGet(ExperimentPath::defineAbsolute)
+    ExperimentPath<U> experimentPath = productPath
+        .map(ProductPath::getExperimentPath)
+        .orElseGet(this::getExperimentPath)
         .resolve(template.id());
 
     if (instructions.containsKey(experimentPath)) {
@@ -160,18 +169,18 @@ public abstract class Instructions<T extends Instructions<T>> {
         .entrySet()
         .stream()
         .map(e -> Map.entry(e.getKey(), e.getValue()))
-        .forEach(e -> instructions.put(e.getKey(), e.getValue()));
+        .forEach(e -> instructions.put(experimentPath.resolve(e.getKey()).get(), e.getValue()));
     template
         .getDependencies()
         .entrySet()
         .stream()
         .map(e -> e)
-        .forEach(e -> dependencies.put(e.getKey(), e.getValue()));
+        .forEach(e -> dependencies.put(experimentPath.resolve(e.getKey()).get(), e.getValue()));
 
     return withInstructions(instructions, dependencies);
   }
 
-  public T withoutInstruction(ExperimentPath experimentPath) {
+  public T withoutInstruction(U experimentPath) {
     var instructions = new TreeMap<>(this.instructions);
     var dependencies = new HashMap<>(this.dependencies);
 
@@ -180,21 +189,19 @@ public abstract class Instructions<T extends Instructions<T>> {
     return withInstructions(instructions, dependencies);
   }
 
-  protected abstract T withInstructions(
-      NavigableMap<ExperimentPath, ExperimentLocation> instructions,
-      Map<ProductPath, ProductLocation> dependencies);
+  abstract T withInstructions(
+      NavigableMap<ExperimentPath<U>, ExperimentLocation> instructions,
+      Map<ProductPath<U>, ProductLocation> dependencies);
 
-  private ProductPath validateProductPath(Dependency<?> dependency) {
+  private ProductPath<U> validateProductPath(Dependency<?, U> dependency) {
     requireNonNull(dependency);
     var experiment = instructions.get(dependency.getExperimentPath());
     if (experiment == null) {
       throw new ProcedureException(
           format("Cannot resolve dependency %s amongst instructions %s", dependency, this));
     }
-    experiment
-        .instruction()
-        .conductor()
-        .production(dependency.getProduction().id())
+    Productions
+        .production(experiment.instruction().conductor(), dependency.getProduction().id())
         .filter(p -> p.equals(dependency.getProduction()))
         .orElseThrow(
             () -> new ProcedureException(
@@ -205,37 +212,36 @@ public abstract class Instructions<T extends Instructions<T>> {
     return dependency.getProductPath();
   }
 
-  private static void addInstruction(
-      TreeMap<ExperimentPath, ExperimentLocation> instructionMap,
-      HashMap<ProductPath, ProductLocation> dependencyMap,
-      Optional<ProductPath> productPath,
+  private void addInstruction(
+      TreeMap<ExperimentPath<U>, ExperimentLocation> instructionMap,
+      HashMap<ProductPath<U>, ProductLocation> dependencyMap,
+      Optional<ProductPath<U>> productPath,
       long index,
       Instruction instruction) {
-    var experimentPath = productPath
+    ExperimentPath<U> experimentPath = productPath
         .map(ProductPath::getExperimentPath)
-        .orElseGet(ExperimentPath::defineAbsolute);
+        .orElseGet(this::getExperimentPath)
+        .resolve(instruction.id());
 
     instructionMap.computeIfPresent(experimentPath, (e, l) -> l.withInstruction(instruction));
 
-    productPath.ifPresent(path -> {
-      dependencyMap
-          .compute(
-              path,
-              (p, l) -> Optional
-                  .ofNullable(l)
-                  .orElseGet(ProductLocation::new)
-                  .withDependency(experimentPath));
-    });
+    dependencyMap
+        .compute(
+            productPath.orElse(null),
+            (p, l) -> Optional
+                .ofNullable(l)
+                .orElseGet(ProductLocation::new)
+                .withDependent(instruction.id()));
   }
 
-  private static void removeInstruction(
-      TreeMap<ExperimentPath, ExperimentLocation> instructionMap,
-      HashMap<ProductPath, ProductLocation> dependencyMap,
-      ExperimentPath path) {
+  private void removeInstruction(
+      TreeMap<ExperimentPath<U>, ExperimentLocation> instructionMap,
+      HashMap<ProductPath<U>, ProductLocation> dependencyMap,
+      U path) {
     var higherPaths = instructionMap.navigableKeySet().tailSet(path).iterator();
     while (higherPaths.hasNext()) {
       var higherPath = higherPaths.next();
-      if (higherPath.relativeTo(path).getAncestorDepth() > 0) {
+      if (higherPath.relativeTo(path).ancestorDepth() > 0) {
         break;
       }
       higherPaths.remove();
@@ -284,25 +290,25 @@ public abstract class Instructions<T extends Instructions<T>> {
   }
 
   static class ProductLocation {
-    private final List<ExperimentPath> dependencies;
+    private final List<String> dependents;
 
-    public ProductLocation() {
-      dependencies = emptyList();
+    private ProductLocation() {
+      dependents = emptyList();
     }
 
-    public ProductLocation(List<ExperimentPath> dependencies) {
-      this.dependencies = dependencies;
+    private ProductLocation(List<String> dependents) {
+      this.dependents = dependents;
     }
 
-    public Stream<ExperimentPath> dependencies() {
-      return dependencies.stream();
+    public Stream<String> dependents() {
+      return dependents.stream();
     }
 
-    public ProductLocation withDependency(ExperimentPath path) {
-      List<ExperimentPath> dependencies = new ArrayList<>(this.dependencies.size() + 1);
-      dependencies.addAll(this.dependencies);
-      dependencies.add(path);
-      return new ProductLocation(dependencies);
+    public ProductLocation withDependent(String path) {
+      List<String> dependents = new ArrayList<>(this.dependents.size() + 1);
+      dependents.addAll(this.dependents);
+      dependents.add(path);
+      return new ProductLocation(dependents);
     }
   }
 }

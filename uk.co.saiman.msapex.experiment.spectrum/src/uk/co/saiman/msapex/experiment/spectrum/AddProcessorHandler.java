@@ -34,6 +34,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -42,10 +43,10 @@ import org.eclipse.fx.core.di.Service;
 import javafx.scene.control.ChoiceDialog;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.model.ExperimentStep;
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessingConfiguration;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.properties.Localized;
 
@@ -54,21 +55,22 @@ public class AddProcessorHandler {
   @Inject
   private ProcessingService processingService;
 
+  @Inject
+  private IEclipseContext context;
+
   @CanExecute
-  boolean canExecute(
-      @Optional @AdaptClass(ExperimentStep.class) SpectrumProcessingConfiguration configuration) {
+  boolean canExecute(@Optional @AdaptClass(Step.class) Processing configuration) {
     return configuration != null;
   }
 
   @Execute
   void execute(
-      @AdaptClass(ExperimentStep.class) SpectrumProcessingConfiguration configuration,
+      @AdaptClass(Step.class) Processing configuration,
       @Localize ExperimentProperties text) {
     requestProcessorType(text.addSpectrumProcessor(), text.addSpectrumProcessorDescription())
         .ifPresent(
-            processor -> configuration
-                .setProcessing(
-                    configuration.getProcessing().withStep(processor.createProcessor())));
+            processor -> context
+                .set(Processing.class, configuration.withStep(processor.createProcessor())));
   }
 
   private java.util.Optional<ProcessingStrategy<?>> requestProcessorType(

@@ -45,10 +45,11 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.storage.Storage;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FileSystemStoreConfiguration;
-import uk.co.saiman.state.Accessor.PropertyAccessor;
+import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 
 @Designate(ocd = FileSystemStoreConfiguration.class, factory = true)
@@ -83,8 +84,9 @@ public class FileSystemStore implements Store<Path> {
     }
   }
 
-  private static final PropertyAccessor<Path> PATH = stringAccessor("path")
-      .map(p -> Paths.get(p), p -> p.toString());
+  private static final MapIndex<Path> PATH = new MapIndex<>(
+      "path",
+      stringAccessor().map(p -> Paths.get(p), p -> p.toString()));
 
   private final Path rootPath;
 
@@ -112,16 +114,19 @@ public class FileSystemStore implements Store<Path> {
   }
 
   @Override
-  public Storage allocateStorage(Path root, ExperimentPath path) {
-    return new PathStorage(getPath(root, path));
+  public Storage allocateStorage(Path experimentRoot, ExperimentPath<Absolute> path) {
+    return new PathStorage(getPath(experimentRoot, path));
   }
 
   @Override
-  public Storage relocateStorage(Path root, ExperimentPath path, Storage previousStorage)
+  public Storage relocateStorage(
+      Path experimentRoot,
+      ExperimentPath<Absolute> path,
+      Storage previousStorage)
       throws IOException {
     if (previousStorage.location() instanceof PathLocation) {
       Path previousPath = ((PathLocation) previousStorage.location()).getPath();
-      Path newPath = getPath(root, path);
+      Path newPath = getPath(experimentRoot, path);
 
       if (Files.exists(previousPath)) {
         Files.move(previousPath, newPath);
@@ -129,10 +134,10 @@ public class FileSystemStore implements Store<Path> {
 
       return new PathStorage(newPath);
     }
-    return Store.super.relocateStorage(root, path, previousStorage);
+    return Store.super.relocateStorage(experimentRoot, path, previousStorage);
   }
 
-  private Path getPath(Path root, ExperimentPath path) {
-    return path.getIds().reduce(root, (p, i) -> p.resolve(i), null);
+  private Path getPath(Path experimentRoot, ExperimentPath<Absolute> path) {
+    return path.ids().reduce(rootPath.resolve(experimentRoot), (p, i) -> p.resolve(i), null);
   }
 }

@@ -31,8 +31,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import uk.co.saiman.data.Data;
+import uk.co.saiman.experiment.path.Dependency;
 import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ProductPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Result;
@@ -49,7 +50,7 @@ import uk.co.saiman.observable.Observable;
 public class ResultImpl<T> implements Result<T> {
   private final Observation<T> observation;
   private final Instruction procedure;
-  private final ExperimentPath path;
+  private final ExperimentPath<Absolute> path;
 
   private Supplier<? extends T> valueSupplier;
   private T value;
@@ -59,7 +60,7 @@ public class ResultImpl<T> implements Result<T> {
   private boolean dirty;
   private final HotObservable<Result<T>> updates;
 
-  ResultImpl(Observation<T> observation, Instruction procedure, ExperimentPath path) {
+  ResultImpl(Observation<T> observation, Instruction procedure, ExperimentPath<Absolute> path) {
     this.observation = observation;
     this.procedure = procedure;
     this.path = path;
@@ -180,8 +181,7 @@ public class ResultImpl<T> implements Result<T> {
   }
 
   @Override
-  public ProductPath path() {
-    // TODO Auto-generated method stub
-    return null;
+  public Dependency<Result<T>, Absolute> dependency() {
+    return path.resolve(observation);
   }
 }

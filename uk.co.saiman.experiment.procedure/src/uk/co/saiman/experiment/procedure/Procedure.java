@@ -5,11 +5,12 @@ import static java.lang.String.format;
 import java.util.Map;
 import java.util.NavigableMap;
 
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.product.Nothing;
 
-public class Procedure extends Instructions<Procedure> {
+public class Procedure extends Instructions<Procedure, Absolute> {
   private final String id;
 
   private Procedure(String id) {
@@ -18,8 +19,8 @@ public class Procedure extends Instructions<Procedure> {
 
   private Procedure(
       String id,
-      NavigableMap<ExperimentPath, ExperimentLocation> instructions,
-      Map<ProductPath, ProductLocation> dependencies) {
+      NavigableMap<ExperimentPath<Absolute>, ExperimentLocation> instructions,
+      Map<ProductPath<Absolute>, ProductLocation> dependencies) {
     super(instructions, dependencies);
     this.id = validateName(id);
   }
@@ -53,8 +54,8 @@ public class Procedure extends Instructions<Procedure> {
 
   @Override
   protected Procedure withInstructions(
-      NavigableMap<ExperimentPath, ExperimentLocation> instructions,
-      Map<ProductPath, ProductLocation> dependencies) {
+      NavigableMap<ExperimentPath<Absolute>, ExperimentLocation> instructions,
+      Map<ProductPath<Absolute>, ProductLocation> dependencies) {
     return new Procedure(id, instructions, dependencies);
   }
 
@@ -67,11 +68,17 @@ public class Procedure extends Instructions<Procedure> {
     return super.withInstruction(index, instruction);
   }
 
-  public Procedure withTemplate(Template<?, Nothing> template) {
+  public Procedure withTemplate(Template<Nothing> template) {
     return withTemplate(-1, template);
   }
 
-  public Procedure withTemplate(long index, Template<?, Nothing> template) {
+  @Override
+  public Procedure withTemplate(long index, Template<Nothing> template) {
     return super.withTemplate(index, template);
+  }
+
+  @Override
+  ExperimentPath<Absolute> getExperimentPath() {
+    return ExperimentPath.defineAbsolute();
   }
 }

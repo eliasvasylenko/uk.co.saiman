@@ -53,7 +53,7 @@ public class RemoveStepHandler {
   ExperimentProperties text;
 
   @Execute
-  void execute(Step<?, ?> node) {
+  void execute(Step node) {
     try {
       node.detach();
 
@@ -62,9 +62,9 @@ public class RemoveStepHandler {
 
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.removeNodeFailedDialog().toString());
-      alert.setHeaderText(text.removeNodeFailedText(node).toString());
-      alert.setContentText(text.removeNodeFailedDescription().toString());
+      alert.setTitle(text.removeStepFailedDialog().toString());
+      alert.setHeaderText(text.removeStepFailedText(node).toString());
+      alert.setContentText(text.removeStepFailedDescription().toString());
       alert.showAndWait();
     }
   }

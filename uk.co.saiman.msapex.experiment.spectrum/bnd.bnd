@@ -22,6 +22,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 	uk.co.saiman.data.function;version=snapshot,\
 	uk.co.saiman.data.spectrum;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\

@@ -32,9 +32,9 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.procedure.Conductor;
 
 public interface ConductorService {
-  Stream<Conductor<?, ?>> conductors();
+  Stream<Conductor<?>> conductors();
 
-  Conductor<?, ?> getConductor(String id);
+  Conductor<?> getConductor(String id);
 
-  String getId(Conductor<?, ?> procedure);
+  String getId(Conductor<?> procedure);
 }

@@ -25,50 +25,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment;
+package uk.co.saiman.experiment.service;
 
-import static java.util.Objects.requireNonNull;
+import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.procedure.Procedure;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 
-public class ExperimentEvent {
-  private final Step<?, ?> step;
-  private final ExperimentPath previousPath;
-  private final ExperimentPath newPath;
-  private final Procedure previousProcedure;
-  private final Procedure newProcedure;
+import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.procedure.ConductorService;
+import uk.co.saiman.osgi.ServiceIndex;
 
-  public ExperimentEvent(Step<?, ?> step, ExperimentPath path, Procedure procedure) {
-    this.step = requireNonNull(step);
-    this.previousPath = step.getPath();
-    this.newPath = requireNonNull(path);
-    this.previousProcedure = step.getExperiment().getProcedure();
-    this.newProcedure = requireNonNull(procedure);
-  }
+@Component
+public class ConductorServiceImpl implements ConductorService {
+  private final ServiceIndex<?, String, Conductor<?>> procedures;
 
-  public Step<?, ?> step() {
-    return step;
-  }
-
-  public ExperimentPath previousPath() {
-    return previousPath;
-  }
-
-  public ExperimentPath newPath() {
-    return newPath;
-  }
-
-  public Procedure previousProcedure() {
-    return previousProcedure;
-  }
-
-  public Procedure newProcedure() {
-    return newProcedure;
+  @Activate
+  public ConductorServiceImpl(BundleContext context) {
+    procedures = ServiceIndex.open(context, Conductor.class.getName());
   }
 
   @Override
-  public String toString() {
-    return ExperimentEvent.class.getSimpleName() + "(" + step().getId() + ")";
+  public Stream<Conductor<?>> conductors() {
+    return procedures.objects();
+  }
+
+  @Override
+  public Conductor<?> getConductor(String id) {
+    return procedures.get(id).get().serviceObject();
+  }
+
+  @Override
+  public String getId(Conductor<?> procedure) {
+    return procedures.findRecord(procedure).get().id();
   }
 }

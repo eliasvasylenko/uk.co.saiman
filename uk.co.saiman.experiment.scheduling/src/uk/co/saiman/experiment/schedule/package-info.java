@@ -25,21 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.spectrum;
-
-import uk.co.saiman.experiment.processing.Processing;
-
-/**
- * TODO
- * 
- * @author Elias N Vasylenko
- */
-public interface SpectrumProcessingConfiguration {
-  String getSpectrumName();
-
-  void setSpectrumName(String name);
-
-  Processing getProcessing();
-
-  void setProcessing(Processing processing);
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.experiment.schedule;

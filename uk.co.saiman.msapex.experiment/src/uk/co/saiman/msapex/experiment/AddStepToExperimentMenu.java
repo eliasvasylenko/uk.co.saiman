@@ -44,14 +44,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.ConductorService;
-import uk.co.saiman.experiment.procedure.Instruction;
-import uk.co.saiman.experiment.procedure.Requirement;
 import uk.co.saiman.experiment.product.Nothing;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
+import uk.co.saiman.msapex.experiment.step.provider.ExperimentStepProvider;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 
 /**
@@ -63,7 +60,7 @@ import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 public class AddStepToExperimentMenu {
   @Inject
   @Service
-  ConductorService conductors;
+  List<ExperimentStepProvider<?>> stepProviders;
   @Inject
   Log log;
   @Inject
@@ -72,9 +69,9 @@ public class AddStepToExperimentMenu {
 
   @AboutToShow
   void aboutToShow(List<MMenuElement> items, WorkspaceExperiment experiment) {
-    conductors
-        .conductors()
-        .map(c -> Requirement.asIndependent(c))
+    stepProviders
+        .stream()
+        .map(provider -> provider.asIndependent())
         .flatMap(Optional::stream)
         .map(t -> createMenuItem(experiment, t))
         .forEach(items::add);
@@ -82,31 +79,33 @@ public class AddStepToExperimentMenu {
 
   private MDirectMenuItem createMenuItem(
       WorkspaceExperiment experiment,
-      Conductor<?, Nothing> subProcedure) {
+      ExperimentStepProvider<Nothing> stepProvider) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-    moduleItem.setLabel(conductors.getId(subProcedure));
+    moduleItem.setLabel(stepProvider.name().get());
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute
       public void execute() {
-        addNode(experiment, subProcedure);
+        addNode(experiment, stepProvider);
       }
     });
     return moduleItem;
   }
 
-  private void addNode(WorkspaceExperiment experiment, Conductor<?, Nothing> subProcedure) {
+  private void addNode(
+      WorkspaceExperiment experiment,
+      ExperimentStepProvider<Nothing> stepProvider) {
     try {
-      experiment.experiment().attach(Instruction.define(subProcedure));
+      stepProvider.createStep().ifPresent(experiment.experiment()::attach);
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);
 
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.attachNodeFailedDialog().toString());
-      alert.setHeaderText(text.attachNodeFailedText(experiment, subProcedure).toString());
-      alert.setContentText(text.attachNodeFailedDescription().toString());
+      alert.setTitle(text.attachStepFailedDialog().toString());
+      alert.setHeaderText(text.attachStepFailedText(experiment, stepProvider.name()).toString());
+      alert.setContentText(text.attachStepFailedDescription().toString());
       alert.showAndWait();
     }
   }

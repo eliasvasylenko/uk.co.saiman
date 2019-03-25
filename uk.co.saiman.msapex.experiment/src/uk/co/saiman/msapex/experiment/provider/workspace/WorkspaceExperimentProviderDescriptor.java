@@ -25,14 +25,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.location.workspace;
+package uk.co.saiman.msapex.experiment.provider.workspace;
 
 import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.msapex.experiment.location.ExperimentProvider;
-import uk.co.saiman.msapex.experiment.location.AddExperimentWizard;
+import uk.co.saiman.msapex.experiment.provider.AddExperimentWizard;
+import uk.co.saiman.msapex.experiment.provider.ExperimentProvider;
 
 @Component
 public class WorkspaceExperimentProviderDescriptor implements AddExperimentWizard {
@@ -48,7 +48,7 @@ public class WorkspaceExperimentProviderDescriptor implements AddExperimentWizar
   }
 
   @Override
-  public Class<? extends ExperimentProvider<?>> getFirstPage() {
+  public Class<? extends ExperimentProvider> getFirstPage() {
     return WorkspaceExperimentProvider.class;
   }
 

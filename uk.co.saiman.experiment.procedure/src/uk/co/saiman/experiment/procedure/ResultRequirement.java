@@ -30,8 +30,8 @@ package uk.co.saiman.experiment.procedure;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.product.Observation;
+import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.product.Result;
 
 /**
@@ -42,17 +42,16 @@ import uk.co.saiman.experiment.product.Result;
  *
  * @param <T> the type of the result we wish to find
  */
-public class ResultRequirement<T> extends Requirement<Result<T>> {
+public class ResultRequirement<T> extends ProductRequirement<Result<T>> {
   public enum Cardinality {
     SINGULAR, PLURAL
   }
 
-  private final String id;
   private final Class<T> type;
   private final Cardinality cardinality;
 
   public ResultRequirement(String id, Class<T> type, Cardinality cardinality) {
-    this.id = id;
+    super(id);
     this.type = type;
     this.cardinality = cardinality;
   }
@@ -63,10 +62,6 @@ public class ResultRequirement<T> extends Requirement<Result<T>> {
 
   public ResultRequirement(Observation<T> observation) {
     this(observation.id(), observation.type());
-  }
-
-  public String id() {
-    return id;
   }
 
   public Class<T> type() {
@@ -87,7 +82,10 @@ public class ResultRequirement<T> extends Requirement<Result<T>> {
   }
 
   @Override
-  public Stream<Observation<T>> resolveDependencies(Conductor<?, ?> procedure) {
-    return procedure.observations().map(this::resolveDependency).flatMap(Optional::stream);
+  public Stream<Observation<T>> resolveDependencies(Conductor<?> procedure) {
+    return Productions
+        .observations(procedure)
+        .map(this::resolveDependency)
+        .flatMap(Optional::stream);
   }
 }

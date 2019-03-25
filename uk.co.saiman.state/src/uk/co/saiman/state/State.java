@@ -31,6 +31,8 @@ import static uk.co.saiman.state.StateKind.LIST;
 import static uk.co.saiman.state.StateKind.MAP;
 import static uk.co.saiman.state.StateKind.PROPERTY;
 
+import java.util.Optional;
+
 /**
  * An immutable piece of data which can easily be transformed according to
  * {@link Accessor type-safe accessors}.
@@ -39,6 +41,13 @@ import static uk.co.saiman.state.StateKind.PROPERTY;
  */
 public interface State {
   StateKind getKind();
+
+  @SuppressWarnings("unchecked")
+  default <T, U extends State> Optional<T> tryGet(Accessor<T, U> accessor) {
+    return getKind() == accessor.getKind()
+        ? Optional.of(accessor.read((U) this))
+        : Optional.empty();
+  }
 
   /*
    * TODO with amber generic enums, refactor to only need #as method.

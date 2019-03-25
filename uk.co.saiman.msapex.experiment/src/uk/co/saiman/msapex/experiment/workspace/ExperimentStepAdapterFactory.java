@@ -31,8 +31,6 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static uk.co.saiman.collection.StreamUtilities.flatMapRecursive;
 import static uk.co.saiman.collection.StreamUtilities.streamNullable;
-import static uk.co.saiman.collection.StreamUtilities.streamOptional;
-import static uk.co.saiman.collection.StreamUtilities.tryOptional;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -43,15 +41,15 @@ import org.eclipse.core.runtime.IAdapterManager;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.product.Result;
+import uk.co.saiman.experiment.procedure.Variable;
 
 public class ExperimentStepAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
-  private final Supplier<? extends Stream<? extends Conductor<?, ?>>> experimentTypes;
+  private final Supplier<? extends Stream<? extends Conductor<?>>> experimentTypes;
 
   public ExperimentStepAdapterFactory(
       IAdapterManager adapterManager,
-      Supplier<? extends Stream<? extends Conductor<?, ?>>> experimentTypes) {
+      Supplier<? extends Stream<? extends Conductor<?>>> experimentTypes) {
     this.adapterManager = adapterManager;
     this.experimentTypes = experimentTypes;
     adapterManager.registerAdapters(this, Step.class);
@@ -64,41 +62,39 @@ public class ExperimentStepAdapterFactory implements IAdapterFactory {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-    Step<?, ?> node = (Step<?, ?>) adaptableObject;
+    Step node = (Step) adaptableObject;
 
     if (adapterType.isAssignableFrom(Conductor.class)) {
       return (T) node.getConductor();
     }
 
     if (adapterType.isAssignableFrom(Experiment.class)) {
-      return (T) node.getContainingExperiment();
+      return (T) node.getExperiment();
     }
 
-    if (adapterType.isAssignableFrom(node.getConductor().getVariablesType())) {
-      return (T) node.getVariables();
-    }
+    var variable = node
+        .getConductor()
+        .variables()
+        .filter(v -> adapterType.isAssignableFrom(v.type()))
+        .findAny()
+        .flatMap(node.getInstruction()::variable);
 
-    return (T) adapterManager.loadAdapter(node.getVariables(), adapterType.getName());
+    return (T) variable.orElse(null);
   }
 
   @Override
   public Class<?>[] getAdapterList() {
     return concat(
-        of(Conductor.class, Experiment.class, Workspace.class, Result.class),
-        experimentTypes.get().map(type -> type.getVariablesType()).flatMap(this::getTransitive))
-            .toArray(Class<?>[]::new);
+        of(Conductor.class, Experiment.class),
+        experimentTypes
+            .get()
+            .flatMap(Conductor::variables)
+            .map(Variable::type)
+            .flatMap(this::getTransitive)).toArray(Class<?>[]::new);
   }
 
   private Stream<? extends Class<?>> getTransitive(Class<?> adapterType) {
-    return concat(getSuperTypes(adapterType), getAdapterTypes(adapterType));
-  }
-
-  private Stream<Class<?>> getAdapterTypes(Class<?> adapterType) {
-    return of(adapterManager.computeAdapterTypes(adapterType))
-        .distinct()
-        .flatMap(
-            typeName -> streamOptional(
-                tryOptional(() -> getClass().getClassLoader().loadClass(typeName))));
+    return getSuperTypes(adapterType);
   }
 
   private Stream<Class<?>> getSuperTypes(Class<?> adapterType) {

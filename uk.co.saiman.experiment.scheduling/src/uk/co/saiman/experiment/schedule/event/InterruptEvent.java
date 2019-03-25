@@ -17,6 +17,6 @@ public class InterruptEvent extends SchedulingEvent {
 
   @Override
   public SchedulingEventKind kind() {
-    return SchedulingEventKind.INTERRUPT;
+    return SchedulingEventKind.COMPLETE_PROCEDURE;
   }
 }

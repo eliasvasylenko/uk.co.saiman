@@ -1,6 +1,7 @@
 package uk.co.saiman.experiment.product;
 
 import uk.co.saiman.experiment.path.ProductPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 
 /**
  * Represents a void product. There is no type of {@link Production production}
@@ -15,7 +16,7 @@ public final class Nothing implements Product {
   private Nothing() {}
 
   @Override
-  public ProductPath path() {
+  public ProductPath<Absolute> path() {
     throw new AssertionError();
   }
 }

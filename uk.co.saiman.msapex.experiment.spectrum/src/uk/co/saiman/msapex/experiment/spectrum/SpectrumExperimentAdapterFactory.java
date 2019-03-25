@@ -55,7 +55,7 @@ public class SpectrumExperimentAdapterFactory implements IAdapterFactory {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-    SpectrumConductor<?> configuration = (SpectrumConductor<?>) adaptableObject;
+    SpectrumConductor configuration = (SpectrumConductor) adaptableObject;
 
     if (adapterType == AcquisitionDevice.class) {
       return (T) configuration.getAcquisitionDevice();

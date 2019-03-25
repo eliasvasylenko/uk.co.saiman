@@ -30,6 +30,8 @@ package uk.co.saiman.experiment.product;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.path.Dependency;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.observable.Observable;
 
 /**
@@ -45,8 +47,11 @@ public interface Result<T> extends Product {
 
   Observation<T> observation();
 
-  default Dependency<Result<T>> dependency() {
-    return Dependency.define(path().getExperimentPath(), observation());
+  Dependency<Result<T>, Absolute> dependency();
+
+  @Override
+  default ProductPath<Absolute> path() {
+    return dependency().getProductPath();
   }
 
   boolean isComplete();

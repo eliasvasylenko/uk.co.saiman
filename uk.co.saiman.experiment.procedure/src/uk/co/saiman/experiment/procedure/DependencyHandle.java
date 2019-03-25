@@ -6,7 +6,7 @@ import uk.co.saiman.experiment.product.Product;
 public interface DependencyHandle<T extends Product> {
   Requirement<T> requirement();
 
-  Dependency<? extends T> dependency();
+  Dependency<? extends T, ?> dependency();
 
   boolean isValid();
 }

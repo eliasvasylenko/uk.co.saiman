@@ -27,13 +27,19 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import static uk.co.saiman.state.Accessor.stringAccessor;
+
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.procedure.ConductionContext;
 import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.procedure.IndirectRequirement;
 import uk.co.saiman.experiment.procedure.NoRequirement;
 import uk.co.saiman.experiment.procedure.Requirement;
+import uk.co.saiman.experiment.procedure.Variable;
 import uk.co.saiman.experiment.product.Nothing;
 import uk.co.saiman.experiment.product.Preparation;
+import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.instrument.sample.SampleDevice;
 
 /**
@@ -42,21 +48,47 @@ import uk.co.saiman.instrument.sample.SampleDevice;
  * that they operate on the configured sample.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T> the type of sample configuration for the instrument
  */
-public interface SampleConductor<T extends SampleConfiguration> extends Conductor<T, Nothing> {
-  Preparation<Void> getSamplePreparation();
+public interface SampleConductor<T> extends Conductor<Nothing> {
+  Variable<String> SAMPLE_NAME = new Variable<>("sampleName", String.class, stringAccessor());
 
-  SampleDevice<?, ?> sampleDevice();
+  default Variable<String> sampleName() {
+    return SAMPLE_NAME;
+  }
+
+  Variable<T> sampleLocation();
+
+  Preparation<Void> samplePreparation();
+
+  SampleDevice<T, ?> sampleDevice();
 
   @Override
-  default Stream<Preparation<?>> preparations() {
-    return Stream.of(getSamplePreparation());
+  default void conduct(ConductionContext<Nothing> context) {
+    T location = context.getVariable(sampleLocation());
+
+    try (var control = sampleDevice().acquireControl()) {
+      control.requestAnalysisLocation(location);
+      context.prepareCondition(samplePreparation(), null);
+    }
   }
 
   @Override
-  default NoRequirement requirement() {
+  default Stream<Production<?>> products() {
+    return Stream.of(samplePreparation());
+  }
+
+  @Override
+  default Stream<Variable<?>> variables() {
+    return Stream.of(sampleName(), sampleLocation());
+  }
+
+  @Override
+  default NoRequirement directRequirement() {
     return Requirement.none();
+  }
+
+  @Override
+  default Stream<IndirectRequirement<?>> indirectRequirements() {
+    return Stream.empty();
   }
 }

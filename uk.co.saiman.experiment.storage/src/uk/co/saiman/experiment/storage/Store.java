@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.storage;
 import java.io.IOException;
 
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.state.StateMap;
 
 /**
@@ -50,10 +51,10 @@ public interface Store<T> {
    * @return the location at which to store experiment results
    * @throws IOException if the storage is not accessible
    */
-  Storage allocateStorage(T configuration, ExperimentPath path) throws IOException;
+  Storage allocateStorage(T configuration, ExperimentPath<Absolute> path) throws IOException;
 
   /**
-   * Given a node whose {@link #allocateStorage(Object, ExperimentPath ) arranged
+   * Given a node whose {@link #allocateStorage(Object, ExperimentPath) arranged
    * store location} may have changed, move stored result data from the previous
    * location to the arranged one.
    * <p>
@@ -73,7 +74,10 @@ public interface Store<T> {
    *                     exceptional termination should leave the result data
    *                     intact at the original location.
    */
-  default Storage relocateStorage(T configuration, ExperimentPath path, Storage previousStorage)
+  default Storage relocateStorage(
+      T configuration,
+      ExperimentPath<Absolute> path,
+      Storage previousStorage)
       throws IOException {
     Storage storage = allocateStorage(configuration, path);
 

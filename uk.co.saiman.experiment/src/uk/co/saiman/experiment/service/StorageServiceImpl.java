@@ -39,13 +39,13 @@ import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.osgi.ServiceIndex;
-import uk.co.saiman.state.Accessor.PropertyAccessor;
+import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 
 @Component
 public class StorageServiceImpl implements StorageService {
   private static final String STORE_ID_KEY = "uk.co.saiman.experiment.store.id";
-  private static final PropertyAccessor<String> STORE_ID = stringAccessor(STORE_ID_KEY);
+  private static final MapIndex<String> STORE_ID = new MapIndex<>(STORE_ID_KEY, stringAccessor());
 
   private final ServiceIndex<Store<?>, String, Store<?>> storeIndex;
 

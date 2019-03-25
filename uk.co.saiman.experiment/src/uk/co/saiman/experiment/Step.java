@@ -30,21 +30,16 @@ package uk.co.saiman.experiment;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.path.Dependency;
 import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ProductPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.DependencyHandle;
 import uk.co.saiman.experiment.procedure.Instruction;
-import uk.co.saiman.experiment.procedure.ConfigurationContext;
-import uk.co.saiman.experiment.procedure.Requirement;
-import uk.co.saiman.experiment.procedure.ResultRequirement;
 import uk.co.saiman.experiment.procedure.Template;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
-import uk.co.saiman.experiment.product.Result;
-import uk.co.saiman.state.StateMap;
 
 /**
  * This class provides a common interface for manipulating, inspecting, and
@@ -52,24 +47,21 @@ import uk.co.saiman.state.StateMap;
  * associated with an implementation of {@link Conductor}.
  * 
  * @author Elias N Vasylenko
- * @param <S> the type of the data describing the experiment configuration
  */
-public class Step<S, U extends Product> {
+public class Step {
   private final Experiment experiment;
-  private final Conductor<S, U> conductor;
-  private ExperimentPath path;
+  private final Conductor<?> conductor;
+  private ExperimentPath<Absolute> path;
 
-  private final S variables;
   private boolean scheduled;
 
   private Production<?> production;
   private int index;
 
-  private Step(Experiment experiment, Conductor<S, U> conductor, ExperimentPath path) {
+  private Step(Experiment experiment, Conductor<?> conductor, ExperimentPath<Absolute> path) {
     this.experiment = experiment;
     this.conductor = conductor;
     this.path = path;
-    this.variables = createVariables();
   }
 
   /**
@@ -95,30 +87,16 @@ public class Step<S, U extends Product> {
     return scheduled;
   }
 
-  @SuppressWarnings("unchecked")
   public Instruction getProcedure() {
     return (Instruction) experiment.getInstruction(path);
   }
 
-  /**
-   * @return The ID of the node, as configured via {@link ConfigurationContext}. The
-   *         ID should be unique amongst the children of a node's parent.
-   */
   public String getId() {
     return getProcedure().id();
   }
 
-  @SuppressWarnings("unchecked")
-  public Conductor<S, U> getConductor() {
+  public Conductor<?> getConductor() {
     return conductor;
-  }
-
-  public S getVariables() {
-    return variables;
-  }
-
-  private S createVariables() {
-    return getConductor().configureExperiment(new StepProcedureContext());
   }
 
   void withLock(Runnable action) {
@@ -150,7 +128,7 @@ public class Step<S, U extends Product> {
    * @return the parent part of this experiment, if present, otherwise an empty
    *         optional
    */
-  public Optional<Dependency<U>> getDependency() {
+  public Optional<Dependency<?, Absolute>> getDependency() {
     return Optional.empty();// withLock(() ->
                             // Optional.of(parentDependent).map(Dependent::capability));
   }
@@ -159,19 +137,16 @@ public class Step<S, U extends Product> {
     return experiment;
   }
 
-  public <V, T extends Product> Step<V, T> attach(
-      Production<? extends T> production,
-      Template<V, T> template) {
+  public <T extends Product> Step attach(Production<? extends T> production, Template<T> template) {
     return attach(production, -1, template);
   }
 
-  public <V, T extends Product> Step<V, T> attach(
+  public <V, T extends Product> Step attach(
       Production<? extends T> production,
       int index,
-      Template<V, T> template) {
-    withLock(() -> {
-      updateProcedure(
-          getProcedure().with(production, steps -> steps.withInstruction(index, instruction)));
+      Template<T> template) {
+    return withLock(() -> {
+      return null;
     });
   }
 
@@ -183,67 +158,25 @@ public class Step<S, U extends Product> {
     });
   }
 
-  public ExperimentPath getPath() {
+  public ExperimentPath<Absolute> getPath() {
     throw new UnsupportedOperationException();
   }
 
-  public <T extends Product> ProductPath<T> getPath(Production<T> capability) {
+  public <T extends Product> Dependency<T, Absolute> getPath(Production<T> capability) {
     throw new UnsupportedOperationException();
   }
 
-  public Step<?, ?> resolve(ExperimentPath path) {
+  public Step resolve(ExperimentPath<Absolute> path) {
     throw new UnsupportedOperationException();
   }
 
-  public class StepProcedureContext implements ConfigurationContext {
-    @Override
-    public String getId() {
-      return withLock(() -> getProcedure().id());
-    }
+  public Instruction getInstruction() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-    @Override
-    public void setId(String id) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public StateMap getState() {
-      return withLock(() -> getProcedure().state());
-    }
-
-    @Override
-    public void update(StateMap state) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public <T> DependencyHandle<Result<T>> setRequiredResult(
-        Requirement<Result<T>> requirement,
-        Dependency<? extends Result<? extends T>> dependency) {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public <T> DependencyHandle<Result<T>> addRequiredResult(
-        Requirement<Result<T>> requirement,
-        Dependency<? extends Result<? extends T>> dependency) {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public boolean removeRequiredResult(ResultRequirement<?> requirement, ProductPath dependency) {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override
-    public boolean clearRequiredResults(ResultRequirement<?> requirement) {
-      // TODO Auto-generated method stub
-      return false;
-    }
+  public Stream<? extends Step> getDependentSteps() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

@@ -25,15 +25,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.location;
-
-import java.util.function.Function;
-
-import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.storage.Store;
-
-public interface ExperimentProvider<T> {
-  Store<T> store();
-
-  void createExperiments(Function<T, Experiment> createExperiment);
-}
+/**
+ * 
+ */
+/**
+ * @author Elias N Vasylenko
+ *
+ */
+package uk.co.saiman.msapex.experiment.provider;

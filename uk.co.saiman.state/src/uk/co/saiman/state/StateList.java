@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
@@ -55,6 +57,16 @@ public class StateList implements State, Iterable<State> {
 
   public State get(int index) {
     return elements.get(index);
+  }
+
+  public Optional<State> getOptional(int index) {
+    return index >= 0 && index < elements.size()
+        ? Optional.of(elements.get(index))
+        : Optional.empty();
+  }
+
+  public <T> T get(Accessor<T, StateList> accessor) {
+    return accessor.read(this);
   }
 
   public StateList withAdded(State element) {
@@ -88,6 +100,39 @@ public class StateList implements State, Iterable<State> {
     List<State> elements = new ArrayList<>(this.elements);
     elements.remove(index);
     return new StateList(elements);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T, U extends State> T readAs(Accessor<T, U> accessor, State state) {
+    return accessor.read((U) state.as(accessor.getKind()));
+  }
+
+  public <T, U extends State> T get(ListIndex<T> index) {
+    return readAs(index.accessor(), get(index.position()));
+  }
+
+  public <T> Optional<T> getOptional(ListIndex<T> index) {
+    return getOptional(index.position()).map(s -> readAs(index.accessor(), s));
+  }
+
+  public <T> StateList withSet(ListIndex<T> index, T value) {
+    return withSet(index.position(), index.accessor().write(value));
+  }
+
+  public <T> StateList withSet(ListIndex<T> index, Function<T, T> value) {
+    return withSet(index.position(), index.accessor().write(value.apply(get(index))));
+  }
+
+  public <T> StateList withAdded(ListIndex<T> index, T value) {
+    return withSet(index.position(), index.accessor().write(value));
+  }
+
+  public <T> StateList withAdded(Accessor<T, ?> accessor, T value) {
+    return withAdded(accessor.write(value));
+  }
+
+  public StateList remove(ListIndex<?> index) {
+    return remove(index.position());
   }
 
   public boolean isEmpty() {

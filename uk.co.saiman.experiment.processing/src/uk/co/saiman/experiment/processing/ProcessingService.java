@@ -27,9 +27,12 @@
  */
 package uk.co.saiman.experiment.processing;
 
+import static uk.co.saiman.state.Accessor.listAccessor;
+
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.state.Accessor;
 import uk.co.saiman.state.StateList;
 import uk.co.saiman.state.StateMap;
 
@@ -43,4 +46,8 @@ public interface ProcessingService {
   Processing loadProcessing(StateList persistedState);
 
   StateList saveProcessing(Processing processing);
+
+  default Accessor<Processing, ?> accessor() {
+    return listAccessor(this::loadProcessing, this::saveProcessing);
+  }
 }

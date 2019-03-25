@@ -37,7 +37,6 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.sample.SampleConfiguration;
 
 public class SampleExperimentNodeCell {
   @Optional

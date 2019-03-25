@@ -35,22 +35,17 @@ import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.product.Preparation;
 import uk.co.saiman.experiment.product.Production;
 
-public class ConditionRequirement<T> extends Requirement<Condition<T>> {
-  private final String id;
+public class ConditionRequirement<T> extends ProductRequirement<Condition<T>> {
   private final Class<T> type;
 
   public ConditionRequirement(String id, Class<T> type) {
-    this.id = id;
+    super(id);
     this.type = type;
   }
 
   public ConditionRequirement(Preparation<T> preparation) {
-    this.id = preparation.id();
+    super(preparation.id());
     this.type = preparation.type();
-  }
-
-  public String id() {
-    return id;
   }
 
   public Class<T> type() {
@@ -75,7 +70,10 @@ public class ConditionRequirement<T> extends Requirement<Condition<T>> {
   }
 
   @Override
-  public Stream<Preparation<T>> resolveDependencies(Conductor<?, ?> procedure) {
-    return procedure.preparations().map(this::resolveDependency).flatMap(Optional::stream);
+  public Stream<Preparation<T>> resolveDependencies(Conductor<?> procedure) {
+    return Productions
+        .preparations(procedure)
+        .map(this::resolveDependency)
+        .flatMap(Optional::stream);
   }
 }

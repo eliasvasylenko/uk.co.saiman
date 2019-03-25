@@ -2,17 +2,13 @@ package uk.co.saiman.experiment.schedule;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.schedule.event.InterruptEvent;
-import uk.co.saiman.experiment.schedule.event.ProceedEvent;
-import uk.co.saiman.experiment.schedule.event.SchedulingEvent;
-import uk.co.saiman.experiment.schedule.event.SchedulingEvent;
-import uk.co.saiman.experiment.schedule.event.UnscheduleEvent;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
-import uk.co.saiman.observable.HotObservable;
-import uk.co.saiman.observable.Observable;
 
 /**
  * A scheduler
@@ -26,13 +22,17 @@ import uk.co.saiman.observable.Observable;
  */
 public class Scheduler {
   private final StorageConfiguration<?> storageConfiguration;
+
   private Schedule schedule;
   private Products products;
+
+  private final SortedMap<ExperimentPath<Absolute>, InstructionProgress> progress;
 
   public Scheduler(StorageConfiguration<?> storageConfiguration) {
     this.storageConfiguration = storageConfiguration;
     this.schedule = null;
     this.products = null;
+    this.progress = new TreeMap<>();
   }
 
   public StorageConfiguration<?> getStorageConfiguration() {
@@ -49,8 +49,11 @@ public class Scheduler {
 
   public synchronized Schedule schedule(Procedure procedure) {
     schedule = new Schedule(this, procedure);
-    events.next(new SchedulingEvent(this, schedule));
     return schedule;
+  }
+
+  public synchronized Optional<Schedule> scheduleReset() {
+    return getProducts().map(Products::getProcedure).map(this::schedule);
   }
 
   private void assertFresh(Schedule schedule) {
@@ -63,19 +66,32 @@ public class Scheduler {
     assertFresh(schedule);
 
     this.schedule = null;
-    events.next(new UnscheduleEvent(this, schedule));
   }
 
   synchronized Products proceed(Schedule schedule) {
     assertFresh(schedule);
 
-    /*
-     * TODO if we are already proceeding, we may be able to "join" any changes into
-     * the existing process if all conflicting interdependencies are downstream.
-     */
-    products = new Products(this);
-    events.next(new ProceedEvent(this, products));
-    return products;
+    var procedure = schedule.getProcedure();
+
+    var progressIterator = progress.entrySet().iterator();
+    while (progressIterator.hasNext()) {
+      var progress = progressIterator.next();
+
+      procedure
+          .instruction(progress.getKey())
+          .ifPresentOrElse(progress.getValue()::updateInstruction, () -> {
+            progress.getValue().interrupt();
+            progressIterator.remove();
+          });
+    }
+    procedure
+        .instructions()
+        .filter(progress::containsKey)
+        .forEach(
+            path -> progress
+                .put(path, new InstructionProgress(this, path, procedure.instruction(path).get())));
+
+    return products = new Products(this);
   }
 
   private void assertFresh(Products products) {
@@ -88,20 +104,16 @@ public class Scheduler {
     assertFresh(products);
 
     // TODO cancel if we're processing
-    events.next(new InterruptEvent(this, products));
   }
 
   synchronized void clear(Products products) throws IOException {
     assertFresh(products);
 
-    try {
-      interrupt(products);
-      this.products = null;
-      storageConfiguration
-          .locateStorage(ExperimentPath.defineAbsolute().resolve(procedure.id()))
-          .deallocate();
-    } finally {
-      events.next(new ClearProductsEvent());
-    }
+    interrupt(products);
+    this.products = null;
+    storageConfiguration
+        .locateStorage(
+            ExperimentPath.defineAbsolute().resolve(products.getSchedule().getProcedure().id()))
+        .deallocate();
   }
 }

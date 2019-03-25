@@ -41,12 +41,7 @@ import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
-import uk.co.saiman.experiment.json.JsonProcedureFormat;
-import uk.co.saiman.experiment.path.ProductIndex;
-import uk.co.saiman.experiment.path.ResourceIndex;
 import uk.co.saiman.experiment.procedure.ConductorService;
-import uk.co.saiman.experiment.procedure.ProcedureIndex;
-import uk.co.saiman.experiment.service.ProcedureService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment.Status;
@@ -55,7 +50,7 @@ import uk.co.saiman.msapex.experiment.workspace.event.WorkspaceEvent;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
-public class Workspace implements ProcedureIndex {
+public class Workspace {
   static final String WORKSPACE = "workspace";
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.filesystem.workspace";
 
@@ -94,17 +89,14 @@ public class Workspace implements ProcedureIndex {
     return experiments.stream().filter(experiment -> experiment.name().equals(id)).findAny();
   }
 
-  @Override
   public Stream<Experiment> getExperiments() {
     return getWorkspaceExperiments().map(WorkspaceExperiment::experiment);
   }
 
-  @Override
   public Optional<Experiment> getExperiment(String id) {
     return getWorkspaceExperiment(id).map(WorkspaceExperiment::experiment);
   }
 
-  @Override
   public boolean containsExperiment(Experiment experiment) {
     return getWorkspaceExperiment(experiment).isPresent();
   }

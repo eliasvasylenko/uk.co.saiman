@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.product.Production;
-import uk.co.saiman.experiment.schedule.ExperimentLifecycleState;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;
 
@@ -46,40 +45,6 @@ public interface ExperimentProperties {
   Localized<String> newExperiment();
 
   Localized<String> newExperimentName();
-
-  /**
-   * @param state the state to localize
-   * @return localized name of the state
-   */
-  default Localized<String> lifecycleState(ExperimentLifecycleState state) {
-    switch (state) {
-    case COMPLETE:
-      return lifecycleStateCompletion();
-    case PREPARATION:
-      return lifecycleStateConfiguration();
-    case DETACHED:
-      return lifecycleStateDetached();
-    case FAILED:
-      return lifecycleStatefailure();
-    case PROCEEDING:
-      return lifecycleStateProcessing();
-    case WAITING:
-      return lifecycleStateWaiting();
-    }
-    throw new AssertionError();
-  }
-
-  Localized<String> lifecycleStateCompletion();
-
-  Localized<String> lifecycleStateConfiguration();
-
-  Localized<String> lifecycleStateDetached();
-
-  Localized<String> lifecycleStatefailure();
-
-  Localized<String> lifecycleStateProcessing();
-
-  Localized<String> lifecycleStateWaiting();
 
   Localized<String> configuration();
 
@@ -113,11 +78,11 @@ public interface ExperimentProperties {
 
   Localized<String> removeExperimentFailedDescription();
 
-  Localized<String> removeNodeFailedDialog();
+  Localized<String> removeStepFailedDialog();
 
-  Localized<String> removeNodeFailedText(Step<?, ?> node);
+  Localized<String> removeStepFailedText(Step step);
 
-  Localized<String> removeNodeFailedDescription();
+  Localized<String> removeStepFailedDescription();
 
   Localized<String> renameExperimentFailedDialog();
 
@@ -137,15 +102,15 @@ public interface ExperimentProperties {
 
   Localized<String> openExperimentFailedDescription();
 
-  Localized<String> attachNodeFailedDialog();
+  Localized<String> attachStepFailedDialog();
 
-  Localized<String> attachNodeFailedText(WorkspaceExperiment experiment, Conductor<?, ?> procedure);
+  Localized<String> attachStepFailedText(WorkspaceExperiment experiment, Localized<String> name);
 
-  Localized<String> attachNodeFailedText(
-      Step<?, ?> node,
+  Localized<String> attachStepFailedText(
+      Step step,
       Production<?> production,
-      Conductor<?, ?> procedure);
+      Conductor<?> procedure);
 
-  Localized<String> attachNodeFailedDescription();
+  Localized<String> attachStepFailedDescription();
 
 }

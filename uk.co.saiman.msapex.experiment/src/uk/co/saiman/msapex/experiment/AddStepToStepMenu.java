@@ -47,14 +47,12 @@ import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.ConductorService;
-import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
+import uk.co.saiman.msapex.experiment.step.provider.ExperimentStepProvider;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -65,7 +63,7 @@ import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 public class AddStepToStepMenu {
   @Inject
   @Service
-  ConductorService conductors;
+  List<ExperimentStepProvider<?>> providers;
   @Inject
   Log log;
   @Inject
@@ -73,45 +71,43 @@ public class AddStepToStepMenu {
   ExperimentProperties text;
 
   @AboutToShow
-  void aboutToShow(List<MMenuElement> items, Step<?, ?> selectedNode) {
-    conductors
-        .conductors()
-        .flatMap(p -> createMenuItem(selectedNode, p).stream())
-        .forEach(items::add);
+  void aboutToShow(List<MMenuElement> items, Step selectedNode) {
+    providers.stream().flatMap(p -> createMenuItem(selectedNode, p).stream()).forEach(items::add);
   }
 
   private <T extends Product> Optional<MDirectMenuItem> createMenuItem(
-      Step<?, ?> step,
-      Conductor<?, T> subProcedure) {
-    var resources = subProcedure
-        .requirement()
+      Step step,
+      ExperimentStepProvider<T> stepProvider) {
+    var resources = stepProvider
+        .conductor()
+        .directRequirement()
         .resolveDependencies(step.getConductor())
         .collect(toList());
     return !resources.isEmpty()
-        ? Optional.of(createMenuItem(step, resources, subProcedure))
+        ? Optional.of(createMenuItem(step, resources, stepProvider))
         : Optional.empty();
   }
 
   private <T extends Product> MDirectMenuItem createMenuItem(
-      Step<?, ?> step,
+      Step step,
       List<? extends Production<? extends T>> resources,
-      Conductor<?, T> subProcedure) {
+      ExperimentStepProvider<T> stepProvider) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-    moduleItem.setLabel(conductors.getId(subProcedure));
+    moduleItem.setLabel(stepProvider.name().get());
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute
       public void execute() {
-        addNode(step, resources, subProcedure);
+        addNode(step, resources, stepProvider);
       }
     });
     return moduleItem;
   }
 
   private <T extends Product> void addNode(
-      Step<?, ?> step,
+      Step step,
       List<? extends Production<? extends T>> resources,
-      Conductor<?, T> subProcedure) {
+      ExperimentStepProvider<T> stepProvider) {
     Production<? extends T> resource;
 
     if (resources.size() == 1) {
@@ -122,15 +118,17 @@ public class AddStepToStepMenu {
     }
 
     try {
-      step.attach(resource, Instruction.define(subProcedure));
+      stepProvider.createStep().ifPresent(template -> step.attach(resource, template));
     } catch (Exception e) {
       log.log(Level.ERROR, e);
 
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.attachNodeFailedDialog().toString());
-      alert.setHeaderText(text.attachNodeFailedText(step, resource, subProcedure).toString());
-      alert.setContentText(text.attachNodeFailedDescription().toString());
+      alert.setTitle(text.attachStepFailedDialog().toString());
+      alert
+          .setHeaderText(
+              text.attachStepFailedText(step, resource, stepProvider.conductor()).toString());
+      alert.setContentText(text.attachStepFailedDescription().toString());
       alert.showAndWait();
     }
   }

@@ -25,49 +25,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.location.workspace;
-
-import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
+package uk.co.saiman.msapex.experiment.provider.workspace;
 
 import java.net.URISyntaxException;
-import java.util.function.Function;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.eclipse.osgi.service.datalocation.Location;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
+import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
+import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
 import uk.co.saiman.msapex.experiment.RenameExperimentDialog;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
-import uk.co.saiman.msapex.experiment.location.ExperimentProvider;
+import uk.co.saiman.msapex.experiment.provider.ExperimentProvider;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
 
-public class WorkspaceExperimentProvider implements ExperimentProvider<Void> {
+public class WorkspaceExperimentProvider implements ExperimentProvider {
   private final Workspace workspace;
   private final ExperimentProperties text;
+  private final Store<Path> store;
 
   @Inject
-  public WorkspaceExperimentProvider(
-      @Named(INSTANCE_LOCATION) Location instanceLocation,
-      Workspace workspace,
-      @Localize ExperimentProperties text)
+  public WorkspaceExperimentProvider(Workspace workspace, @Localize ExperimentProperties text)
       throws URISyntaxException {
     this.workspace = workspace;
     this.text = text;
+    this.store = new FileSystemStore(workspace.getWorkspaceLocation().getPath());
   }
 
   @Override
-  public Store<Void> store() {
-    return null;
-  }
-
-  @Override
-  public void createExperiments(Function<Void, Experiment> createExperiment) {
-    Experiment experiment = createExperiment.apply(null);
-    new RenameExperimentDialog(workspace, text, null);
-    experiment.setId("name");
+  public Stream<Experiment> createExperiments() {
+    return new RenameExperimentDialog(workspace, text, null)
+        .showAndWait()
+        .map(
+            id -> new Experiment(
+                Procedure.define(id),
+                new StorageConfiguration<>(store, Path.of("."))))
+        .stream();
   }
 }

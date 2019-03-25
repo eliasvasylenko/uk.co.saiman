@@ -42,6 +42,10 @@ public class StateProperty implements State {
     return value;
   }
 
+  public <T> T get(Accessor<T, StateProperty> accessor) {
+    return accessor.read(this);
+  }
+
   @Override
   public StateKind getKind() {
     return PROPERTY;

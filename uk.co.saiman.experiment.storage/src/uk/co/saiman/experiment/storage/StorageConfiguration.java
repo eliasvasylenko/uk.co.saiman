@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.storage;
 import java.io.IOException;
 
 import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.state.StateMap;
 
 /**
@@ -60,11 +61,12 @@ public class StorageConfiguration<T> {
     this.configuration = configuration;
   }
 
-  public Storage relocateStorage(ExperimentPath path, Storage previousStore) throws IOException {
+  public Storage relocateStorage(ExperimentPath<Absolute> path, Storage previousStore)
+      throws IOException {
     return store.relocateStorage(configuration, path, previousStore);
   }
 
-  public Storage locateStorage(ExperimentPath path) throws IOException {
+  public Storage locateStorage(ExperimentPath<Absolute> path) throws IOException {
     return store.allocateStorage(configuration, path);
   }
 
