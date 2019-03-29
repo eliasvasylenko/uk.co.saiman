@@ -29,8 +29,6 @@ package uk.co.saiman.msapex.chart;
 
 import static java.lang.Math.floor;
 import static java.lang.Math.max;
-import static javafx.geometry.Orientation.HORIZONTAL;
-import static javafx.geometry.Orientation.VERTICAL;
 
 import java.util.List;
 
@@ -44,7 +42,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
-import javafx.geometry.Orientation;
+import javafx.geometry.Side;
 import javafx.scene.chart.ValueAxis;
 
 public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
@@ -158,21 +156,12 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
   /**
    * Get the string label name for a tick mark with the given value
    *
-   * @param value
-   *          The value to format into a tick label string
+   * @param value The value to format into a tick label string
    * @return A formatted string for the given value
    */
   @Override
   protected String getTickMarkLabel(Number value) {
     return getTickLabelFormatter().toString(value);
-  }
-
-  /*
-   * getEffectiveSide() is package private for some idiotic reason so we have to
-   * resort to this trick
-   */
-  public Orientation getEffectiveOrientation() {
-    return (calculateNewScale(1, 0, 1) < 0) ? VERTICAL : HORIZONTAL;
   }
 
   /**
@@ -197,15 +186,14 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
    * Called to set the current axis range to the given range. If isAnimating() is
    * true then this method should animate the range to the new range.
    *
-   * @param range
-   *          A range object returned from autoRange()
-   * @param animate
-   *          If true animate the change in range
+   * @param range   A range object returned from autoRange()
+   * @param animate If true animate the change in range
    */
   @Override
   protected void setRange(Object rangeObject, boolean animate) {
     @SuppressWarnings("unchecked")
     Range<T> range = (Range<T>) rangeObject;
+
     setLowerBound(range.lowerBound());
     setUpperBound(range.upperBound());
 
@@ -221,10 +209,8 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
    * Measure the size of the label for given tick mark value. This uses the font
    * that is set for the tick marks
    *
-   * @param value
-   *          tick mark value
-   * @param range
-   *          range to use during calculations
+   * @param value tick mark value
+   * @param range range to use during calculations
    * @return size of tick mark label for given value
    */
   @Override
@@ -240,16 +226,14 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
 
   public double measureTickMarkLabelSide(String label) {
     Dimension2D size = measureTickMarkLabelSize(label);
-    return getEffectiveOrientation() == VERTICAL ? size.getHeight() : size.getWidth();
+    return getSide() == Side.LEFT || getSide() == Side.RIGHT ? size.getHeight() : size.getWidth();
   }
 
   /**
    * Calculate a list of all the data values for each tick mark in range
    *
-   * @param length
-   *          The length of the axis in display units
-   * @param range
-   *          A range object returned from autoRange()
+   * @param length The length of the axis in display units
+   * @param range  A range object returned from autoRange()
    * @return A list of tick marks that fit along the axis if it was the given
    *         length
    */
@@ -279,14 +263,10 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
    * Called to set the upper and lower bound and anything else that needs to be
    * auto-ranged
    *
-   * @param minValue
-   *          The min data value that needs to be plotted on this axis
-   * @param maxValue
-   *          The max data value that needs to be plotted on this axis
-   * @param length
-   *          The length of the axis in display coordinates
-   * @param labelSize
-   *          The approximate average size a label takes along the axis
+   * @param minValue  The min data value that needs to be plotted on this axis
+   * @param maxValue  The max data value that needs to be plotted on this axis
+   * @param length    The length of the axis in display coordinates
+   * @param labelSize The approximate average size a label takes along the axis
    * @return The calculated range
    */
   @Override

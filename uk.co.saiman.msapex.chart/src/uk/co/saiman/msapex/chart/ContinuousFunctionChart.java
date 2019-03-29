@@ -58,10 +58,10 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
   private static final int REPEAT_RATE = 8;
   private static final String CONTINUOUS_FUNCTION_CHART_PSEUDO_CLASS = "continuousFunctionChart";
 
-  private static final double ZOOM_STEP_PERCENTAGE = 20;
-  private static final double MAX_ZOOM_STEP = 0.5;
-  private static final double PIXEL_ZOOM_DAMP = 50;
-  private static final double MOVE_STEP_PERCENTAGE = 10;
+  public static final double ZOOM_STEP_PERCENTAGE = 20;
+  public static final double MAX_ZOOM_STEP = 0.5;
+  public static final double PIXEL_ZOOM_DAMP = 50;
+  public static final double MOVE_STEP_PERCENTAGE = 10;
 
   private final Set<ContinuousFunctionSeries<X, Y>> series;
 
@@ -201,6 +201,8 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
       final QuantityAxis<X> xAxis = getXAxis();
 
       if (xAxis.isAutoRanging()) {
+        System.out.println();
+        System.out.println(" RANGE X");
         xAxis
             .invalidateRange(
                 asList(effectiveZoom.getLeftEndpoint(), effectiveZoom.getRightEndpoint()));
@@ -212,6 +214,8 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
 
       if (yAxis.isAutoRanging()) {
         getZoomedRange().ifPresent(rangeInterval -> {
+          System.out.println();
+          System.out.println(" RANGE Y");
           yAxis
               .invalidateRange(
                   asList(rangeInterval.getLeftEndpoint(), rangeInterval.getRightEndpoint()));
@@ -454,6 +458,13 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
 
     x = getXAxis().localToParent(x, 0).getX();
     y = getYAxis().localToParent(y, 0).getY();
+
+    // TODO
+    System.out
+        .println(
+            getClass().getSimpleName()
+                + ".getPlotArea() = "
+                + new BoundingBox(x, y, width, height));
 
     return new BoundingBox(x, y, width, height);
   }

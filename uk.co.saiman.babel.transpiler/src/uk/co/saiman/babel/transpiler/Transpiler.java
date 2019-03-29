@@ -76,7 +76,8 @@ public class Transpiler {
   public synchronized String transpile(
       String source,
       Collection<? extends String> plugins,
-      Collection<? extends String> presets) throws ScriptException {
+      Collection<? extends String> presets)
+      throws ScriptException {
     context.getBindings(ENGINE_SCOPE).put(INPUT_KEY, source);
 
     return engine.eval(getTransformScriptString(plugins, presets), context).toString();
