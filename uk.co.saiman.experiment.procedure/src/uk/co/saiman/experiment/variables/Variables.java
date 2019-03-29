@@ -2,6 +2,7 @@ package uk.co.saiman.experiment.variables;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import uk.co.saiman.state.StateMap;
 
@@ -15,4 +16,6 @@ public interface Variables {
   default <U> Variables withVariable(Variable<U> variable, Function<Optional<U>, U> value) {
     return withVariable(variable, value.apply(variable(variable)));
   }
+
+  Stream<Variable<?>> stream();
 }

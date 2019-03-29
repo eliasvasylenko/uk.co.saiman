@@ -27,31 +27,18 @@
  */
 package uk.co.saiman.msapex.experiment.workspace;
 
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
-import static uk.co.saiman.collection.StreamUtilities.flatMapRecursive;
-import static uk.co.saiman.collection.StreamUtilities.streamNullable;
-
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.variables.Variable;
 
 public class ExperimentStepAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
-  private final Supplier<? extends Stream<? extends Conductor<?>>> experimentTypes;
 
-  public ExperimentStepAdapterFactory(
-      IAdapterManager adapterManager,
-      Supplier<? extends Stream<? extends Conductor<?>>> experimentTypes) {
+  public ExperimentStepAdapterFactory(IAdapterManager adapterManager) {
     this.adapterManager = adapterManager;
-    this.experimentTypes = experimentTypes;
     adapterManager.registerAdapters(this, Step.class);
   }
 
@@ -72,34 +59,11 @@ public class ExperimentStepAdapterFactory implements IAdapterFactory {
       return (T) node.getExperiment();
     }
 
-    var variable = node
-        .getConductor()
-        .variables()
-        .filter(v -> adapterType.isAssignableFrom(v.type()))
-        .findAny()
-        .flatMap(node.getInstruction()::variable);
-
-    return (T) variable.orElse(null);
+    return null;
   }
 
   @Override
   public Class<?>[] getAdapterList() {
-    return concat(
-        of(Conductor.class, Experiment.class),
-        experimentTypes
-            .get()
-            .flatMap(Conductor::variables)
-            .map(Variable::type)
-            .flatMap(this::getTransitive)).toArray(Class<?>[]::new);
-  }
-
-  private Stream<? extends Class<?>> getTransitive(Class<?> adapterType) {
-    return getSuperTypes(adapterType);
-  }
-
-  private Stream<Class<?>> getSuperTypes(Class<?> adapterType) {
-    return flatMapRecursive(
-        adapterType,
-        t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())));
+    return new Class<?>[] { Conductor.class, Experiment.class };
   }
 }

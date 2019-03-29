@@ -20,6 +20,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Chemical Map
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\

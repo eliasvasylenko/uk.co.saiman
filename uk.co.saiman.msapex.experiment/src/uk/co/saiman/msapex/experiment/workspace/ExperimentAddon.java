@@ -37,10 +37,8 @@ import static uk.co.saiman.log.Log.Level.INFO;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -59,7 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
@@ -107,9 +104,6 @@ public class ExperimentAddon {
   @Inject
   @Service
   private StorageService storageService;
-  @Inject
-  @Service
-  private volatile List<Conductor<?>> experimentTypes;
 
   private Workspace workspace;
   private FileSystemStore workspaceStore;
@@ -193,14 +187,8 @@ public class ExperimentAddon {
     }
   }
 
-  private Stream<Conductor<?>> getExperimentTypes() {
-    return new ArrayList<>(experimentTypes).stream();
-  }
-
   private void initializeAdapters() {
-    experimentNodeAdapterFactory = new ExperimentStepAdapterFactory(
-        adapterManager,
-        this::getExperimentTypes);
+    experimentNodeAdapterFactory = new ExperimentStepAdapterFactory(adapterManager);
     experimentAdapterFactory = new ExperimentAdapterFactory(
         adapterManager,
         experimentNodeAdapterFactory);

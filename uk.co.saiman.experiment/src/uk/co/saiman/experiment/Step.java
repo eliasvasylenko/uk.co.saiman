@@ -41,6 +41,7 @@ import uk.co.saiman.experiment.procedure.Template;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.Variables;
 
 /**
  * This class provides a common interface for manipulating, inspecting, and
@@ -193,5 +194,10 @@ public class Step {
   public boolean isDetached() {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  public Variables getVariables() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

@@ -37,20 +37,22 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.experiment.sample.SampleConductor;
+import uk.co.saiman.experiment.variables.Variables;
 
 public class SampleExperimentNodeCell {
   @Optional
   @PostConstruct
   public void prepare(
       Cell cell,
-      SampleConfiguration data,
+      SampleConductor<?> sampleConductor,
+      Variables variables,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
     cell = (Cell) (MUIElement) cell.getParent();
 
-    cell.setLabel(data.getName());
     cell
         .setIconURI(
             "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/flask.png");
-    supplemental.setText(data.toString());
+    supplemental.setText(variables.variable(sampleConductor.sampleLocation()).toString());
   }
 }

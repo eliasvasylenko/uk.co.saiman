@@ -38,9 +38,9 @@ import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.procedure.Variable;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Preparation;
+import uk.co.saiman.experiment.variables.Variable;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -65,10 +65,10 @@ public class ExperimentEditorPart {
     context.set(Step.class, node);
 
     concat(
-        node.getConductor().variables().map(Variable::type),
+        node.getVariables().stream().map(Variable::id),
         concat(
-            Productions.preparations(node.getConductor()).map(Preparation::type),
-            Productions.observations(node.getConductor()).map(Observation::type)))
+            Productions.preparations(node.getConductor()).map(Preparation::id),
+            Productions.observations(node.getConductor()).map(Observation::id)))
                 .forEach(context::declareModifiable);
   }
 }

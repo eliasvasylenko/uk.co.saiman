@@ -27,20 +27,10 @@
  */
 package uk.co.saiman.msapex.experiment.chemicalmap;
 
-import static uk.co.saiman.msapex.experiment.ExperimentStepCell.SUPPLEMENTAL_TEXT;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 
-import org.eclipse.e4.core.di.annotations.Optional;
-
-import javafx.scene.control.Label;
-import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.ExperimentStep;
-import uk.co.saiman.experiment.chemicalmap.ChemicalMapConfiguration;
 import uk.co.saiman.msapex.experiment.chemicalmap.i18n.ChemicalMapProperties;
 
 public class ChemicalMapExperimentNodeCellContribution {
@@ -51,14 +41,5 @@ public class ChemicalMapExperimentNodeCellContribution {
   ChemicalMapProperties properties;
 
   @PostConstruct
-  public void prepare(
-      Cell cell,
-      @Named(SUPPLEMENTAL_TEXT) Label supplemental,
-      ExperimentStep<?> experiment,
-      @Optional @AdaptClass(ExperimentStep.class) ChemicalMapConfiguration configuration) {
-    if (configuration != null) {
-      cell.setLabel(properties.chemicalMapExperimentName().get());
-      supplemental.setText(configuration.getChemicalMapName());
-    }
-  }
+  public void prepare() {}
 }

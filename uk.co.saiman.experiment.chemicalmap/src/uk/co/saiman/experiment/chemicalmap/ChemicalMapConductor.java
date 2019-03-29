@@ -39,12 +39,8 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * that they operate on the configured sample.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T> the type of sample configuration for the instrument
  */
 public abstract class ChemicalMapConductor implements Conductor<Condition<Void>> {
-  private static final String CHEMICAL_MAP_DATA_NAME = "chemicalmap";
-
   protected abstract RasterDevice<?> getRasterDevice();
 
   protected abstract AcquisitionDevice<?> getAcquisitionDevice();
