@@ -29,6 +29,7 @@ package uk.co.saiman.experiment.procedure;
 
 import static java.lang.String.format;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -39,6 +40,7 @@ import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Preparation;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Result;
+import uk.co.saiman.experiment.variables.Variable;
 
 /**
  * The context of an {@link Conductor#conduct(ConductionContext) experiment
@@ -55,12 +57,13 @@ public interface ConductionContext<S extends Product> {
   Instruction instruction();
 
   default <T> T getVariable(Variable<T> variable) {
-    return instruction()
-        .variable(variable)
+    return getOptionalVariable(variable)
         .orElseThrow(
             () -> new ProcedureException(
                 format("Variable %s is not available on instruction %s", variable, instruction())));
   }
+
+  <T> Optional<T> getOptionalVariable(Variable<T> variable);
 
   S dependency();
 

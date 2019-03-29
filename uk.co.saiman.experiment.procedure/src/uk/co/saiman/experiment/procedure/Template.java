@@ -9,36 +9,37 @@ import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.path.ExperimentPath.Relative;
 import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.product.Product;
-import uk.co.saiman.state.StateMap;
+import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.Variables;
 
 public class Template<T extends Product> extends Instructions<Template<T>, Relative> {
   private final String id;
-  private final StateMap state;
+  private final Variables variables;
   private final Conductor<T> conductor;
 
-  private Template(String id, StateMap state, Conductor<T> conductor) {
+  private Template(String id, Variables variables, Conductor<T> conductor) {
     this.id = id;
-    this.state = state;
+    this.variables = variables;
     this.conductor = conductor;
   }
 
   private Template(
       String id,
-      StateMap state,
+      Variables variables,
       Conductor<T> conductor,
       NavigableMap<ExperimentPath<Relative>, ExperimentLocation> instructions,
       Map<ProductPath<Relative>, ProductLocation> dependencies) {
     super(instructions, dependencies);
     this.id = id;
-    this.state = state;
+    this.variables = variables;
     this.conductor = conductor;
   }
 
   public static <S, T extends Product> Template<T> define(
       String id,
-      StateMap state,
+      Variables variables,
       Conductor<T> conductor) {
-    return new Template<>(Procedure.validateName(id), state, conductor);
+    return new Template<>(Procedure.validateName(id), variables, conductor);
   }
 
   public String id() {
@@ -46,42 +47,42 @@ public class Template<T extends Product> extends Instructions<Template<T>, Relat
   }
 
   public Template<T> withId(String id) {
-    return new Template<>(id, state, conductor, getInstructions(), getDependencies());
+    return new Template<>(id, variables, conductor, getInstructions(), getDependencies());
+  }
+
+  public Variables variables() {
+    return variables;
+  }
+
+  public Template<T> withVariables(Variables variables) {
+    return new Template<>(id, variables, conductor);
   }
 
   public <U> Optional<U> variable(Variable<U> variable) {
-    return state().getOptional(variable.index());
+    return variables.variable(variable);
   }
 
   public <U> Template<T> withVariable(Variable<U> variable, U value) {
-    return withState(state().with(variable.index(), value));
+    return withVariables(variables.withVariable(variable, value));
   }
 
   public <U> Template<T> withVariable(Variable<U> variable, Function<Optional<U>, U> value) {
-    return withVariable(variable, value.apply(variable(variable)));
+    return withVariables(variables.withVariable(variable, value));
   }
 
   public Conductor<T> conductor() {
     return conductor;
   }
 
-  public StateMap state() {
-    return state;
-  }
-
-  public Template<T> withState(StateMap state) {
-    return new Template<>(id, state, conductor, getInstructions(), getDependencies());
-  }
-
   public Instruction instruction() {
-    return Instruction.define(id, state, conductor);
+    return Instruction.define(id, variables, conductor);
   }
 
   @Override
   protected Template<T> withInstructions(
       NavigableMap<ExperimentPath<Relative>, ExperimentLocation> instructions,
       Map<ProductPath<Relative>, ProductLocation> dependencies) {
-    return new Template<>(id, state, conductor, instructions, dependencies);
+    return new Template<>(id, variables, conductor, instructions, dependencies);
   }
 
   @Override

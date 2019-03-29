@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.variables.VariableDeclaration;
 
 /**
  * An implementation of this interface represents a type of experiment node
@@ -56,15 +57,15 @@ public interface Conductor<T extends Product> {
    */
   Stream<Production<?>> products();
 
+  Requirement<T> directRequirement();
+
+  Stream<Requirements> indirectRequirements();
+
   /**
    * @return the set of required variables for experiments conducted by this
    *         conductor
    */
-  Stream<Variable<?>> variables();
-
-  Requirement<T> directRequirement();
-
-  Stream<IndirectRequirement<?>> indirectRequirements();
+  Stream<VariableDeclaration> variables();
 
   /*
    * Execution is cheap and resources are unlimited, so we may proceed

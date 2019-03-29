@@ -31,6 +31,7 @@ import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
 import static uk.co.saiman.data.format.RegistrationTree.VENDOR;
+import static uk.co.saiman.state.Accessor.mapAccessor;
 import static uk.co.saiman.state.Accessor.stringAccessor;
 
 import java.util.List;
@@ -48,6 +49,8 @@ import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.product.Product;
+import uk.co.saiman.experiment.variables.VariableService;
+import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
 import uk.co.saiman.state.StateList;
@@ -73,23 +76,31 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
 
   private static final MapIndex<String> ID = new MapIndex<>("id", stringAccessor());
   private static final String CONDUCTOR = "conductor";
-  private static final String CONFIGURATION = "configuration";
+  private static final String VARIABLES = "variables";
   private static final String CHILDREN = "children";
 
   private final MapIndex<Conductor<?>> conductor;
+  private final MapIndex<Variables> variables;
 
   private final JsonStateMapFormat stateMapFormat;
 
-  public JsonProcedureFormat(ConductorService conductorService) {
-    this(conductorService, new JsonStateMapFormat());
+  public JsonProcedureFormat(ConductorService conductorService, VariableService variableService) {
+    this(conductorService, variableService, new JsonStateMapFormat());
   }
 
-  public JsonProcedureFormat(ConductorService conductorService, JsonStateMapFormat stateMapFormat) {
+  public JsonProcedureFormat(
+      ConductorService conductorService,
+      VariableService variableService,
+      JsonStateMapFormat stateMapFormat) {
     this.stateMapFormat = stateMapFormat;
 
     this.conductor = new MapIndex<>(
         CONDUCTOR,
         stringAccessor().map(conductorService::getConductor, conductorService::getId));
+
+    this.variables = new MapIndex<>(
+        VARIABLES,
+        mapAccessor(variableService::createVariables, Variables::state));
   }
 
   @Override
@@ -130,7 +141,7 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
       StateMap data,
       ProductPath<Absolute> path) {
     var instruction = Instruction
-        .define(data.get(ID), data.get(CONFIGURATION).asMap(), (Conductor<?>) data.get(conductor));
+        .define(data.get(ID), data.get(variables), (Conductor<?>) data.get(conductor));
     procedure = procedure.withInstruction(instruction);
 
     var children = data.get(CHILDREN).asMap();
@@ -178,7 +189,7 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
     return StateMap
         .empty()
         .with(ID, instruction.id())
-        .with(CONFIGURATION, instruction.state())
+        .with(variables, instruction.variables())
         .with(
             CHILDREN,
             procedure

@@ -44,14 +44,13 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.procedure.ConductionContext;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.IndirectRequirement;
+import uk.co.saiman.experiment.procedure.Requirement;
+import uk.co.saiman.experiment.procedure.Requirements;
 import uk.co.saiman.experiment.procedure.ResultRequirement;
-import uk.co.saiman.experiment.procedure.Variable;
-import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
-import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.product.Result;
+import uk.co.saiman.experiment.variables.VariableDeclaration;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -62,24 +61,18 @@ import uk.co.saiman.experiment.product.Result;
  */
 @Component(service = Conductor.class)
 public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> {
-  public static final String INPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.input";
   public static final String OUTPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.output";
 
-  private final Variable<Processing> processing;
-
   private final ResultRequirement<Spectrum> inputSpectrum;
-  private final Observation<Spectrum> processedSpectrum;
 
   @Activate
   public SpectrumProcessingConductor(@Reference ProcessingService processors) {
-    this.processing = new Variable<>("spectrumProcessing", Processing.class, processors.accessor());
-    this.inputSpectrum = new ResultRequirement<>(INPUT_SPECTRUM, Spectrum.class) {};
-    this.processedSpectrum = new Observation<>(OUTPUT_SPECTRUM, Spectrum.class) {};
+    this.inputSpectrum = Requirement.on(SpectrumConductor.SPECTRUM);
   }
 
   @Override
   public void conduct(ConductionContext<Result<Spectrum>> context) {
-    DataProcessor processor = context.getVariable(processing).getProcessor();
+    DataProcessor processor = context.getVariable(SpectrumConductor.PROCESSING).getProcessor();
 
     context
         .dependency()
@@ -89,7 +82,7 @@ public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> 
         .partialMap(i -> i.value())
         .map(s -> processSpectrum(processor, s))
         .thenRequestNext()
-        .then(r -> context.setPartialResult(processedSpectrum, () -> r))
+        .then(r -> context.setPartialResult(SpectrumConductor.SPECTRUM, () -> r))
         .join();
   }
 
@@ -119,10 +112,6 @@ public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> 
     };
   }
 
-  public Variable<Processing> processing() {
-    return processing;
-  }
-
   @Override
   public ResultRequirement<Spectrum> directRequirement() {
     return inputSpectrum;
@@ -130,16 +119,16 @@ public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> 
 
   @Override
   public Stream<Production<?>> products() {
-    return Stream.of(processedSpectrum);
+    return Stream.of(SpectrumConductor.SPECTRUM);
   }
 
   @Override
-  public Stream<Variable<?>> variables() {
-    return Stream.of(processing);
+  public Stream<VariableDeclaration> variables() {
+    return Stream.of(SpectrumConductor.PROCESSING.declareOptional());
   }
 
   @Override
-  public Stream<IndirectRequirement<?>> indirectRequirements() {
+  public Stream<Requirements> indirectRequirements() {
     return Stream.empty();
   }
 }

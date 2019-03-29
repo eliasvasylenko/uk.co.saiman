@@ -27,53 +27,11 @@
  */
 package uk.co.saiman.experiment.procedure;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
 import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.product.Preparation;
-import uk.co.saiman.experiment.product.Production;
 
 public class ConditionRequirement<T> extends ProductRequirement<Condition<T>> {
-  private final Class<T> type;
-
-  public ConditionRequirement(String id, Class<T> type) {
-    super(id);
-    this.type = type;
-  }
-
-  public ConditionRequirement(Preparation<T> preparation) {
-    super(preparation.id());
-    this.type = preparation.type();
-  }
-
-  public Class<T> type() {
-    return type;
-  }
-
-  public CompletableFuture<? extends T> request() {
-    throw new UnsupportedOperationException();
-  }
-
-  public T acquire() {
-    return request().join();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Optional<Preparation<T>> resolveDependency(Production<?> capability) {
-    return capability instanceof Preparation<?>
-        && type().isAssignableFrom(((Preparation<?>) capability).type())
-            ? Optional.of((Preparation<T>) capability)
-            : Optional.empty();
-  }
-
-  @Override
-  public Stream<Preparation<T>> resolveDependencies(Conductor<?> procedure) {
-    return Productions
-        .preparations(procedure)
-        .map(this::resolveDependency)
-        .flatMap(Optional::stream);
+  ConditionRequirement(Preparation<T> preparation) {
+    super(preparation);
   }
 }

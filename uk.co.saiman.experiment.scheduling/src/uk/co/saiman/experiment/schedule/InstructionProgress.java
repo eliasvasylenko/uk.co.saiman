@@ -3,6 +3,7 @@ package uk.co.saiman.experiment.schedule;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -19,6 +20,7 @@ import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Preparation;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Result;
+import uk.co.saiman.experiment.variables.Variable;
 
 public class InstructionProgress {
   private final Scheduler scheduler;
@@ -103,6 +105,12 @@ public class InstructionProgress {
       public void completeObservation(Observation<?> observation) {
         // TODO Auto-generated method stub
 
+      }
+
+      @Override
+      public <U> Optional<U> getOptionalVariable(Variable<U> variable) {
+        // TODO Auto-generated method stub
+        return null;
       }
     });
   }

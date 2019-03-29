@@ -27,19 +27,18 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import static uk.co.saiman.state.Accessor.stringAccessor;
-
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.procedure.ConductionContext;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.IndirectRequirement;
 import uk.co.saiman.experiment.procedure.NoRequirement;
 import uk.co.saiman.experiment.procedure.Requirement;
-import uk.co.saiman.experiment.procedure.Variable;
+import uk.co.saiman.experiment.procedure.Requirements;
 import uk.co.saiman.experiment.product.Nothing;
 import uk.co.saiman.experiment.product.Preparation;
 import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.instrument.sample.SampleDevice;
 
 /**
@@ -50,12 +49,6 @@ import uk.co.saiman.instrument.sample.SampleDevice;
  * @author Elias N Vasylenko
  */
 public interface SampleConductor<T> extends Conductor<Nothing> {
-  Variable<String> SAMPLE_NAME = new Variable<>("sampleName", String.class, stringAccessor());
-
-  default Variable<String> sampleName() {
-    return SAMPLE_NAME;
-  }
-
   Variable<T> sampleLocation();
 
   Preparation<Void> samplePreparation();
@@ -78,8 +71,8 @@ public interface SampleConductor<T> extends Conductor<Nothing> {
   }
 
   @Override
-  default Stream<Variable<?>> variables() {
-    return Stream.of(sampleName(), sampleLocation());
+  default Stream<VariableDeclaration> variables() {
+    return Stream.of(sampleLocation().declareRequired());
   }
 
   @Override
@@ -88,7 +81,7 @@ public interface SampleConductor<T> extends Conductor<Nothing> {
   }
 
   @Override
-  default Stream<IndirectRequirement<?>> indirectRequirements() {
+  default Stream<Requirements> indirectRequirements() {
     return Stream.empty();
   }
 }

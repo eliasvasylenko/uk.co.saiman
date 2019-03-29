@@ -29,7 +29,6 @@ package uk.co.saiman.saint.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static uk.co.saiman.measurement.Units.dalton;
-import static uk.co.saiman.state.Accessor.listAccessor;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Mass;
@@ -39,14 +38,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.experiment.procedure.ConditionRequirement;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.Variable;
-import uk.co.saiman.experiment.processing.Processing;
+import uk.co.saiman.experiment.procedure.Requirement;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.product.Condition;
-import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.sample.XYStageConductor;
 import uk.co.saiman.experiment.spectrum.SpectrumConductor;
 
@@ -56,10 +52,7 @@ public class SaintSpectrumConductor implements SpectrumConductor, Conductor<Cond
 
   private final AcquisitionDevice<?> acquisitionDevice;
 
-  private final Variable<Processing> processing;
-
   private final ConditionRequirement<Void> sampleResource;
-  private final Observation<Spectrum> spectrumObservation;
 
   @Activate
   public SaintSpectrumConductor(
@@ -68,18 +61,7 @@ public class SaintSpectrumConductor implements SpectrumConductor, Conductor<Cond
       @Reference ProcessingService processors) {
     this.acquisitionDevice = acquisitionDevice;
 
-    this.processing = new Variable<>(
-        "processing",
-        Processing.class,
-        listAccessor(processors::loadProcessing, processors::saveProcessing));
-
-    this.sampleResource = new ConditionRequirement<>(stageExperiment.samplePreparation());
-    this.spectrumObservation = new Observation<>(SAINT_SPECTRUM, Spectrum.class);
-  }
-
-  @Override
-  public Variable<Processing> processing() {
-    return processing;
+    this.sampleResource = Requirement.on(stageExperiment.samplePreparation());
   }
 
   @Override
@@ -95,10 +77,5 @@ public class SaintSpectrumConductor implements SpectrumConductor, Conductor<Cond
   @Override
   public ConditionRequirement<Void> sampleResource() {
     return sampleResource;
-  }
-
-  @Override
-  public Observation<Spectrum> spectrumObservation() {
-    return spectrumObservation;
   }
 }

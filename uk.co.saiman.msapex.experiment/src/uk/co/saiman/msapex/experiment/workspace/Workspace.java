@@ -45,6 +45,7 @@ import uk.co.saiman.experiment.format.JsonExperimentFormat;
 import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
+import uk.co.saiman.experiment.variables.VariableService;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment.Status;
 import uk.co.saiman.msapex.experiment.workspace.event.AddExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.event.WorkspaceEvent;
@@ -65,11 +66,15 @@ public class Workspace {
   public Workspace(
       Path rootPath,
       ConductorService conductorService,
+      VariableService variableService,
       StorageService storageService) {
     this.experiments = new HashSet<>();
 
     this.rootLocation = new PathLocation(rootPath);
-    this.experimentFormat = new JsonExperimentFormat(conductorService, storageService);
+    this.experimentFormat = new JsonExperimentFormat(
+        conductorService,
+        variableService,
+        storageService);
 
     this.events = new HotObservable<>();
   }

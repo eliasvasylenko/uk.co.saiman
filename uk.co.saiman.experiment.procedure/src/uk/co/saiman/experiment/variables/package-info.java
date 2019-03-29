@@ -25,36 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.procedure;
-
-import uk.co.saiman.experiment.product.Observation;
-import uk.co.saiman.experiment.product.Result;
-
-/**
- * An input to an experiment procedure should be wired up to an observation made
- * by a preceding procedure.
- * 
- * @author Elias N Vasylenko
- *
- * @param <T> the type of the result we wish to find
- */
-public class ResultRequirement<T> extends ProductRequirement<Result<T>> {
-  public enum Cardinality {
-    SINGULAR, PLURAL
-  }
-
-  private final Cardinality cardinality;
-
-  ResultRequirement(Observation<T> observation) {
-    this(observation, Cardinality.SINGULAR);
-  }
-
-  ResultRequirement(Observation<T> observation, Cardinality cardinality) {
-    super(observation);
-    this.cardinality = cardinality;
-  }
-
-  public Cardinality cardinality() {
-    return cardinality;
-  }
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.experiment.variables;

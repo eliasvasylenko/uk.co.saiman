@@ -34,7 +34,7 @@ import static uk.co.saiman.state.Accessor.stringAccessor;
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.experiment.procedure.Variable;
+import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.state.MapIndex;
@@ -47,11 +47,10 @@ import uk.co.saiman.state.StateMap;
  * @author Elias N Vasylenko
  */
 public interface XYStageConductor extends StageConductor<XYCoordinate<Length>> {
-  public static final MapIndex<Quantity<Length>> X = lengthAccessor("xOffset");
-  public static final MapIndex<Quantity<Length>> Y = lengthAccessor("yOffset");
-  public static final Variable<XYCoordinate<Length>> LOCATION = new Variable<>(
-      "sampleLocation",
-      XYCoordinate.class,
+  MapIndex<Quantity<Length>> X = lengthAccessor("xOffset");
+  MapIndex<Quantity<Length>> Y = lengthAccessor("yOffset");
+  Variable<XYCoordinate<Length>> LOCATION = new Variable<>(
+      "xySampleLocation",
       mapAccessor(
           s -> new XYCoordinate<>(s.get(X), s.get(Y)),
           l -> StateMap.empty().with(X, l.getX()).with(Y, l.getY())));

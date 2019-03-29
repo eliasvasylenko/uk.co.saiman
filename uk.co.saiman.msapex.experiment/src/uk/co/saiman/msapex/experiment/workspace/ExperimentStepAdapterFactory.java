@@ -41,7 +41,7 @@ import org.eclipse.core.runtime.IAdapterManager;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.Variable;
+import uk.co.saiman.experiment.variables.Variable;
 
 public class ExperimentStepAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;

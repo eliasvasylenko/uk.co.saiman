@@ -6,16 +6,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import uk.co.saiman.state.StateMap;
+import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.Variables;
 
 public class Instruction {
   private final String id;
-  private final StateMap state;
+  private final Variables variables;
   private final Conductor<?> conductor;
 
-  private Instruction(String id, StateMap state, Conductor<?> conductor) {
+  private Instruction(String id, Variables variables, Conductor<?> conductor) {
     this.id = id;
-    this.state = state;
+    this.variables = variables;
     this.conductor = conductor;
   }
 
@@ -115,10 +116,10 @@ public class Instruction {
    * 
    */
 
-  public static Instruction define(String id, StateMap state, Conductor<?> conductor) {
+  public static Instruction define(String id, Variables variables, Conductor<?> conductor) {
     return new Instruction(
         Procedure.validateName(id),
-        requireNonNull(state),
+        requireNonNull(variables),
         requireNonNull(conductor));
   }
 
@@ -127,31 +128,31 @@ public class Instruction {
   }
 
   public Instruction withId(String id) {
-    return new Instruction(Procedure.validateName(id), state, conductor);
+    return new Instruction(Procedure.validateName(id), variables, conductor);
+  }
+
+  public Variables variables() {
+    return variables;
+  }
+
+  public Instruction withVariables(Variables variables) {
+    return new Instruction(id, variables, conductor);
   }
 
   public <T> Optional<T> variable(Variable<T> variable) {
-    return state().getOptional(variable.index());
+    return variables.variable(variable);
   }
 
-  public <T> Instruction withVariable(Variable<T> variable, T value) {
-    return withState(state().with(variable.index(), value));
+  public <U> Instruction withVariable(Variable<U> variable, U value) {
+    return withVariables(variables.withVariable(variable, value));
   }
 
-  public <T> Instruction withVariable(Variable<T> variable, Function<Optional<T>, T> value) {
-    return withVariable(variable, value.apply(variable(variable)));
+  public <U> Instruction withVariable(Variable<U> variable, Function<Optional<U>, U> value) {
+    return withVariables(variables.withVariable(variable, value));
   }
 
   public Conductor<?> conductor() {
     return conductor;
-  }
-
-  public StateMap state() {
-    return state;
-  }
-
-  public Instruction withState(StateMap state) {
-    return new Instruction(id, requireNonNull(state), conductor);
   }
 
   @Override
@@ -166,12 +167,12 @@ public class Instruction {
     Instruction that = (Instruction) obj;
 
     return Objects.equals(this.id, that.id)
-        && Objects.equals(this.state, that.state)
+        && Objects.equals(this.variables, that.variables)
         && Objects.equals(this.conductor, that.conductor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, state, conductor);
+    return Objects.hash(id, variables, conductor);
   }
 }

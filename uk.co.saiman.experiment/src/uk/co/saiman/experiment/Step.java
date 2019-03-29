@@ -38,9 +38,9 @@ import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Template;
-import uk.co.saiman.experiment.procedure.Variable;
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.variables.Variable;
 
 /**
  * This class provides a common interface for manipulating, inspecting, and

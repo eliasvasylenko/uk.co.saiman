@@ -8,8 +8,7 @@ import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.Instruction;
-import uk.co.saiman.experiment.procedure.Variable;
-import uk.co.saiman.state.StateMap;
+import uk.co.saiman.experiment.variables.Variables;
 
 public class ScheduledInstruction {
   private final Schedule schedule;
@@ -48,12 +47,8 @@ public class ScheduledInstruction {
     return instruction.conductor();
   }
 
-  public StateMap state() {
-    return instruction.state();
-  }
-
-  public <T> Optional<T> variable(Variable<T> variable) {
-    return state().getOptional(variable.index());
+  public Variables variables() {
+    return instruction.variables();
   }
 
   public Optional<ScheduledInstruction> parent() {

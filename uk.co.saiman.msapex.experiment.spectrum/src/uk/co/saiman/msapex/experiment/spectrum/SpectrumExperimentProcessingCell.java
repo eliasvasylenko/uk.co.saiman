@@ -28,6 +28,7 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.spectrum.SpectrumConductor.PROCESSING;
 import static uk.co.saiman.msapex.experiment.ExperimentStepCell.SUPPLEMENTAL_TEXT;
 
 import javax.annotation.PostConstruct;
@@ -84,7 +85,7 @@ public class SpectrumExperimentProcessingCell {
         .setItems(
             ProcessorCell.ID,
             DataProcessor.class,
-            step.getVariable(conductor.processing()).steps().collect(toList()),
-            r -> step.setVariable(conductor.processing(), v -> new Processing(r)));
+            step.getVariable(PROCESSING).steps().collect(toList()),
+            r -> step.setVariable(PROCESSING, v -> new Processing(r)));
   }
 }

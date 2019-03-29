@@ -11,15 +11,14 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.Resource;
-import uk.co.saiman.experiment.path.Dependency;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.IndirectRequirement;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.RequirementResolutionContext;
-import uk.co.saiman.experiment.product.Product;
+import uk.co.saiman.experiment.procedure.Requirements;
+import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.schedule.Products;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.ScheduledInstruction;
@@ -129,27 +128,26 @@ public class Conflicts {
           .stream()
           .flatMap(Conductor::indirectRequirements)
           .flatMap(this::resolveDependencies)
-          .map(this::conflictingDependency)
-          .flatMap(Optional::stream)
           .collect(toMap(Change::path, identity(), (a, b) -> a))
           .values()
           .stream();
     }
 
-    private <T extends Product> Stream<Dependency<? extends T, Absolute>> resolveDependencies(
-        IndirectRequirement<T> requirement) {
+    private Stream<Change> resolveDependencies(Requirements requirement) {
       return requirement
           .dependencies(new RequirementResolutionContext() {})
-          .flatMap(dependency -> dependency.resolveAgainst(path).stream());
+          .flatMap(dependency -> dependency.resolveAgainst(path).stream())
+          .flatMap(
+              path -> conflictingDependency(path, requirement.requirement().production()).stream());
     }
 
-    private Optional<Change> conflictingDependency(Dependency<?, Absolute> dependency) {
-      return change(dependency.getExperimentPath())
+    private Optional<Change> conflictingDependency(
+        ExperimentPath<Absolute> dependency,
+        Production<?> production) {
+      return change(dependency)
           .filter(
               c -> c.isConflicting()
-                  || dependency
-                      .getProduction()
-                      .isPresent(c.scheduledInstruction().get().conductor()));
+                  || production.isPresent(c.scheduledInstruction().get().conductor()));
     }
   }
 }

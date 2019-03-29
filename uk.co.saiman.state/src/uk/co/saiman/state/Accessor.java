@@ -41,6 +41,20 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
+/**
+ * A bijection between a Java type and a serialization state. Can be used to
+ * {@link MapIndex index into a map} or {@link ListIndex a list} to read data
+ * from that location, or derive a new state with data set at that location.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T> the type of the Java object
+ * @param <U> the type of the state object
+ */
+/*
+ * TODO add API for creating accessors over multiple types of state, e.g. can
+ * format as a property or a map depending on type.
+ */
 public interface Accessor<T, U extends State> {
   T read(U data);
 
