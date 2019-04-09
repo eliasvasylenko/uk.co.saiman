@@ -37,7 +37,7 @@ import javax.measure.Quantity;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
+ * @param <T> the quantity type of the tick unit
  */
 public interface TickUnits<T extends Quantity<T>> {
   TickUnit<T> getUnitBelow(double valueAbove);

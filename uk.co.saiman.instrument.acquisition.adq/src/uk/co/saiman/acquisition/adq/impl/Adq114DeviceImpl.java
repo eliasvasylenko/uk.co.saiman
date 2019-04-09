@@ -68,13 +68,13 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
   }
 
   @Override
-  public Unit<Dimensionless> getSampleIntensityUnits() {
+  public Unit<Dimensionless> getSampleIntensityUnit() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public Unit<Time> getSampleTimeUnits() {
+  public Unit<Time> getSampleTimeUnit() {
     // TODO Auto-generated method stub
     return null;
   }

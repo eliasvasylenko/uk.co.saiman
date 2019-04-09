@@ -49,7 +49,6 @@ import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.product.Product;
-import uk.co.saiman.experiment.variables.VariableService;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
@@ -84,23 +83,18 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
 
   private final JsonStateMapFormat stateMapFormat;
 
-  public JsonProcedureFormat(ConductorService conductorService, VariableService variableService) {
-    this(conductorService, variableService, new JsonStateMapFormat());
+  public JsonProcedureFormat(ConductorService conductorService) {
+    this(conductorService, new JsonStateMapFormat());
   }
 
-  public JsonProcedureFormat(
-      ConductorService conductorService,
-      VariableService variableService,
-      JsonStateMapFormat stateMapFormat) {
+  public JsonProcedureFormat(ConductorService conductorService, JsonStateMapFormat stateMapFormat) {
     this.stateMapFormat = stateMapFormat;
 
     this.conductor = new MapIndex<>(
         CONDUCTOR,
         stringAccessor().map(conductorService::getConductor, conductorService::getId));
 
-    this.variables = new MapIndex<>(
-        VARIABLES,
-        mapAccessor(variableService::createVariables, Variables::state));
+    this.variables = new MapIndex<>(VARIABLES, mapAccessor(Variables::new, Variables::state));
   }
 
   @Override
@@ -169,9 +163,7 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
         .with(ID, procedure.id())
         .with(
             CHILDREN,
-            c -> saveInstructions(
-                procedure,
-                procedure.independentInstructions().collect(toList())));
+            saveInstructions(procedure, procedure.independentInstructions().collect(toList())));
   }
 
   protected StateList saveInstructions(Procedure procedure, List<ExperimentPath<Absolute>> paths) {

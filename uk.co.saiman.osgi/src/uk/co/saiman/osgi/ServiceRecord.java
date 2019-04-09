@@ -38,7 +38,7 @@ import org.osgi.framework.ServiceReference;
  *
  * @param <T> the type of the service
  */
-public interface ServiceRecord<S, U, T> {
+public interface ServiceRecord<S, U, T> extends Comparable<ServiceRecord<?, ?, ?>> {
   ServiceReference<S> serviceReference();
 
   /**
@@ -48,5 +48,12 @@ public interface ServiceRecord<S, U, T> {
 
   U id();
 
+  int rank();
+
   Bundle bundle();
+
+  @Override
+  default int compareTo(ServiceRecord<?, ?, ?> that) {
+    return -Integer.compare(this.rank(), that.rank());
+  }
 }

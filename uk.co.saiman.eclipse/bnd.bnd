@@ -8,6 +8,7 @@ Bundle-Name: SAI :: Eclipse
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
@@ -25,6 +26,7 @@ Export-Package: \
 	uk.co.saiman.eclipse.utilities,\
 	uk.co.saiman.eclipse.adapter,\
 	uk.co.saiman.eclipse.dialog,\
+	uk.co.saiman.eclipse.model,\
 	uk.co.saiman.eclipse.variable,\
 	uk.co.saiman.eclipse.localization
 

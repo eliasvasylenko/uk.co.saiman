@@ -27,27 +27,25 @@
  */
 package uk.co.saiman.experiment.processing;
 
-import static uk.co.saiman.state.Accessor.listAccessor;
+import static uk.co.saiman.experiment.processing.Processing.toProcessing;
+import static uk.co.saiman.experiment.processing.ProcessingDeclaration.toProcessingDeclaration;
 
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.state.Accessor;
-import uk.co.saiman.state.StateList;
-import uk.co.saiman.state.StateMap;
 
 public interface ProcessingService {
   Stream<ProcessingStrategy<?>> strategies();
 
-  DataProcessor loadProcessor(StateMap persistedState);
+  DataProcessor loadDeclaration(ProcessorDeclaration declaration);
 
-  StateMap saveProcessor(DataProcessor processor);
+  ProcessorDeclaration saveDeclaration(DataProcessor processor);
 
-  Processing loadProcessing(StateList persistedState);
+  default Processing loadDeclaration(ProcessingDeclaration declaration) {
+    return declaration.processors().map(this::loadDeclaration).collect(toProcessing());
+  }
 
-  StateList saveProcessing(Processing processing);
-
-  default Accessor<Processing, ?> accessor() {
-    return listAccessor(this::loadProcessing, this::saveProcessing);
+  default ProcessingDeclaration saveDeclaration(Processing processing) {
+    return processing.steps().map(this::saveDeclaration).collect(toProcessingDeclaration());
   }
 }

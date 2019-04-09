@@ -140,15 +140,15 @@ public class Instruction {
   }
 
   public <T> Optional<T> variable(Variable<T> variable) {
-    return variables.variable(variable);
+    return variables.get(variable);
   }
 
   public <U> Instruction withVariable(Variable<U> variable, U value) {
-    return withVariables(variables.withVariable(variable, value));
+    return withVariables(variables.with(variable, value));
   }
 
   public <U> Instruction withVariable(Variable<U> variable, Function<Optional<U>, U> value) {
-    return withVariables(variables.withVariable(variable, value));
+    return withVariables(variables.with(variable, value));
   }
 
   public Conductor<?> conductor() {

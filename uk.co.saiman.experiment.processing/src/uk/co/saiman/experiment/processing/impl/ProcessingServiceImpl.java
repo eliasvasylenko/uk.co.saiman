@@ -29,9 +29,6 @@ package uk.co.saiman.experiment.processing.impl;
 
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static uk.co.saiman.experiment.processing.Processing.toProcessing;
-import static uk.co.saiman.state.Accessor.stringAccessor;
-import static uk.co.saiman.state.StateList.toStateList;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,21 +39,12 @@ import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.processing.MissingProcessor;
-import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
-import uk.co.saiman.state.MapIndex;
-import uk.co.saiman.state.State;
-import uk.co.saiman.state.StateList;
-import uk.co.saiman.state.StateMap;
+import uk.co.saiman.experiment.processing.ProcessorDeclaration;
 
 @Component
 public class ProcessingServiceImpl implements ProcessingService {
-  private static final String PROCESSOR_ID_KEY = "uk.co.saiman.experiment.processor.id";
-  private static final MapIndex<String> PROCESSOR_ID = new MapIndex<>(
-      PROCESSOR_ID_KEY,
-      stringAccessor());
-
   private final Map<Class<? extends DataProcessor>, ProcessingStrategy<?>> processors = new HashMap<>();
   private final Map<String, ProcessingStrategy<?>> namedProcessors = new HashMap<>();
 
@@ -77,37 +65,22 @@ public class ProcessingServiceImpl implements ProcessingService {
   }
 
   @Override
-  public DataProcessor loadProcessor(StateMap persistedState) {
-    String id = persistedState.get(PROCESSOR_ID);
-    ProcessingStrategy<?> process = namedProcessors.get(id);
+  public DataProcessor loadDeclaration(ProcessorDeclaration declaration) {
+    ProcessingStrategy<?> process = namedProcessors.get(declaration.id());
 
     if (process != null) {
-      return process.configureProcessor(persistedState);
+      return process.configureProcessor(declaration.state());
     } else {
-      return new MissingProcessor(id);
+      return new MissingProcessor(declaration.id());
     }
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public StateMap saveProcessor(DataProcessor processor) {
+  public ProcessorDeclaration saveDeclaration(DataProcessor processor) {
     ProcessingStrategy<?> process = processors.get(processor.getClass());
-    return ((ProcessingStrategy<DataProcessor>) process)
-        .deconfigureProcessor(processor)
-        .with(PROCESSOR_ID, processor.getClass().getName());
-  }
-
-  @Override
-  public Processing loadProcessing(StateList persistedState) {
-    return persistedState
-        .stream()
-        .map(State::asMap)
-        .map(this::loadProcessor)
-        .collect(toProcessing());
-  }
-
-  @Override
-  public StateList saveProcessing(Processing processing) {
-    return processing.steps().map(this::saveProcessor).collect(toStateList());
+    return new ProcessorDeclaration(
+        processor.getClass().getName(),
+        ((ProcessingStrategy<DataProcessor>) process).deconfigureProcessor(processor));
   }
 }

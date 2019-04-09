@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
+
 import java.util.stream.Stream;
 
 import javax.measure.quantity.Dimensionless;
@@ -64,15 +66,19 @@ public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> 
   public static final String OUTPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.output";
 
   private final ResultRequirement<Spectrum> inputSpectrum;
+  private final ProcessingService processingService;
 
   @Activate
-  public SpectrumProcessingConductor(@Reference ProcessingService processors) {
+  public SpectrumProcessingConductor(@Reference ProcessingService processingService) {
     this.inputSpectrum = Requirement.on(SpectrumConductor.SPECTRUM);
+    this.processingService = processingService;
   }
 
   @Override
   public void conduct(ConductionContext<Result<Spectrum>> context) {
-    DataProcessor processor = context.getVariable(SpectrumConductor.PROCESSING).getProcessor();
+    DataProcessor processor = processingService
+        .loadDeclaration(context.getVariable(PROCESSING_VARIABLE))
+        .getProcessor();
 
     context
         .dependency()
@@ -124,7 +130,7 @@ public class SpectrumProcessingConductor implements Conductor<Result<Spectrum>> 
 
   @Override
   public Stream<VariableDeclaration> variables() {
-    return Stream.of(SpectrumConductor.PROCESSING.declareOptional());
+    return Stream.of(PROCESSING_VARIABLE.declareOptional());
   }
 
   @Override

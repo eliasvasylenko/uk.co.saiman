@@ -54,6 +54,8 @@ public interface Result<T> extends Product {
     return dependency().getProductPath();
   }
 
+  boolean isEmpty();
+
   boolean isComplete();
 
   boolean isPartial();

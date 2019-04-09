@@ -61,7 +61,6 @@ import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
-import uk.co.saiman.experiment.variables.VariableService;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.workspace.event.AddExperimentEvent;
@@ -100,9 +99,6 @@ public class ExperimentAddon {
   private ConductorService conductorService;
   @Inject
   @Service
-  private VariableService variableService;
-  @Inject
-  @Service
   private StorageService storageService;
 
   private Workspace workspace;
@@ -138,7 +134,7 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspace(Path rootPath) {
-    workspace = new Workspace(rootPath, conductorService, variableService, storageService);
+    workspace = new Workspace(rootPath, conductorService, storageService);
     context.set(Workspace.class, workspace);
     loadWorkspace();
   }

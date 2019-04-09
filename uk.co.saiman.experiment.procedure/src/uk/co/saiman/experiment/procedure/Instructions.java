@@ -81,7 +81,10 @@ public abstract class Instructions<T extends Instructions<T, U>, U extends Exper
   }
 
   public Stream<ExperimentPath<U>> independentInstructions() {
-    return dependencies.get(null).dependents().map(getExperimentPath()::resolve);
+    return Optional
+        .ofNullable(dependencies.get(null))
+        .map(d -> d.dependents().map(getExperimentPath()::resolve))
+        .orElseGet(Stream::empty);
   }
 
   public Stream<ExperimentPath<U>> dependentInstructions(ProductPath<U> path) {

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment;
 
+import static java.util.Objects.requireNonNull;
+
 import java.lang.ref.Reference;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,9 +62,8 @@ public class Experiment {
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
 
   public Experiment(Procedure procedure, StorageConfiguration<?> storageConfiguration) {
+    this.procedure = requireNonNull(procedure);
     this.scheduler = new Scheduler(storageConfiguration);
-
-    var schedule = this.scheduler.schedule(Procedure.define(procedure.id()));
   }
 
   public Procedure getProcedure() {

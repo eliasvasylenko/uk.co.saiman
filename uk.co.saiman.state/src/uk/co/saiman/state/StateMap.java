@@ -56,7 +56,7 @@ public class StateMap implements State {
   }
 
   public State get(String id) {
-    return entries.get(id);
+    return getOptional(id).orElseThrow(() -> new MissingStateException(id));
   }
 
   public Optional<State> getOptional(String id) {

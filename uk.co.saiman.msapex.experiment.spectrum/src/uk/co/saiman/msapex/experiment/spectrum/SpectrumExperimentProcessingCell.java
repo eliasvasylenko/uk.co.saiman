@@ -28,7 +28,7 @@
 package uk.co.saiman.msapex.experiment.spectrum;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.experiment.spectrum.SpectrumConductor.PROCESSING;
+import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
 import static uk.co.saiman.msapex.experiment.ExperimentStepCell.SUPPLEMENTAL_TEXT;
 
 import javax.annotation.PostConstruct;
@@ -46,6 +46,7 @@ import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.processing.Processing;
+import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingConductor;
 import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
@@ -58,6 +59,8 @@ public class SpectrumExperimentProcessingCell {
   private Step step;
   @Inject
   private ChildrenService children;
+  @Inject
+  private ProcessingService processing;
 
   @PostConstruct
   public void prepare(
@@ -85,7 +88,13 @@ public class SpectrumExperimentProcessingCell {
         .setItems(
             ProcessorCell.ID,
             DataProcessor.class,
-            step.getVariable(PROCESSING).steps().collect(toList()),
-            r -> step.setVariable(PROCESSING, v -> new Processing(r)));
+            processing
+                .loadDeclaration(step.getVariable(PROCESSING_VARIABLE))
+                .steps()
+                .collect(toList()),
+            r -> step
+                .setVariable(
+                    PROCESSING_VARIABLE,
+                    v -> processing.saveDeclaration(new Processing(r))));
   }
 }

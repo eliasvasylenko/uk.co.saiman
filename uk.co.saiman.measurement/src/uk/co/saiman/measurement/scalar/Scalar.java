@@ -32,6 +32,15 @@ import javax.measure.Unit;
 
 import uk.co.saiman.measurement.UnitBuilder;
 
+/*
+ * TODO this needs to be revisited when Valhalla brings value types and
+ * specialization. It's possible that it can be hugely overhauled to be both a
+ * value and specializable over unit (or perhaps just unit type). So we can use
+ * the scalar API and get the same performance and memory layout as if we were
+ * using pure primitives. This in turn may make it useful to revisit continuous
+ * function API etc. to more directly deal with quantities, since we can have
+ * e.g. flattened arrays of them.
+ */
 public class Scalar<T extends Quantity<T>> implements Quantity<T>, Comparable<Quantity<T>> {
   private final Unit<T> unit;
   private final double amount;

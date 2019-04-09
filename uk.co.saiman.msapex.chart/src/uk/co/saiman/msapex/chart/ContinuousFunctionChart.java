@@ -201,8 +201,6 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
       final QuantityAxis<X> xAxis = getXAxis();
 
       if (xAxis.isAutoRanging()) {
-        System.out.println();
-        System.out.println(" RANGE X");
         xAxis
             .invalidateRange(
                 asList(effectiveZoom.getLeftEndpoint(), effectiveZoom.getRightEndpoint()));
@@ -214,8 +212,6 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
 
       if (yAxis.isAutoRanging()) {
         getZoomedRange().ifPresent(rangeInterval -> {
-          System.out.println();
-          System.out.println(" RANGE Y");
           yAxis
               .invalidateRange(
                   asList(rangeInterval.getLeftEndpoint(), rangeInterval.getRightEndpoint()));
@@ -458,13 +454,6 @@ public class ContinuousFunctionChart<X extends Quantity<X>, Y extends Quantity<Y
 
     x = getXAxis().localToParent(x, 0).getX();
     y = getYAxis().localToParent(y, 0).getY();
-
-    // TODO
-    System.out
-        .println(
-            getClass().getSimpleName()
-                + ".getPlotArea() = "
-                + new BoundingBox(x, y, width, height));
 
     return new BoundingBox(x, y, width, height);
   }

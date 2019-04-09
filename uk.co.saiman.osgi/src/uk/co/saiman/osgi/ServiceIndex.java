@@ -28,7 +28,6 @@
 package uk.co.saiman.osgi;
 
 import static java.util.Collections.sort;
-import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
 
 import java.util.ArrayList;
@@ -46,6 +45,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.util.tracker.ServiceTracker;
+
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
 
 /**
  * @author Elias N Vasylenko
@@ -87,6 +89,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
       return id;
     }
 
+    @Override
     public int rank() {
       return rank;
     }
@@ -99,35 +102,35 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
 
   private final BiFunction<T, ServiceReference<S>, U> indexer;
   private final Function<S, T> extractor;
-  private final Map<ServiceReference<S>, ServiceRecord<S, U, T>> records = new HashMap<>();
   private final Map<U, List<ServiceRecord<S, U, T>>> recordsById = new HashMap<>();
+  private final HotObservable<ServiveEvent> events = new HotObservable<>();
 
-  protected ServiceIndex(
+  public ServiceIndex(
       BundleContext context,
       Class<S> clazz,
-      BiFunction<T, ServiceReference<S>, U> indexer,
-      Function<S, T> extractor) {
+      Function<S, T> extractor,
+      BiFunction<T, ServiceReference<S>, U> indexer) {
     super(context, clazz, null);
-    this.indexer = indexer;
     this.extractor = extractor;
+    this.indexer = indexer;
   }
 
-  protected ServiceIndex(
+  public ServiceIndex(
       BundleContext context,
       String reference,
-      BiFunction<T, ServiceReference<S>, U> indexer,
-      Function<S, T> extractor) {
+      Function<S, T> extractor,
+      BiFunction<T, ServiceReference<S>, U> indexer) {
     super(context, reference, null);
-    this.indexer = indexer;
     this.extractor = extractor;
+    this.indexer = indexer;
   }
 
   public static <T> ServiceIndex<T, String, T> open(BundleContext context, Class<T> clazz) {
     var serviceIndex = new ServiceIndex<>(
         context,
         clazz,
-        (s, reference) -> (String) reference.getProperty(ComponentConstants.COMPONENT_NAME),
-        identity());
+        identity(),
+        (s, reference) -> (String) reference.getProperty(ComponentConstants.COMPONENT_NAME));
     serviceIndex.open();
     return serviceIndex;
   }
@@ -136,8 +139,8 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     ServiceIndex<T, String, T> serviceIndex = new ServiceIndex<>(
         context,
         reference,
-        (s, r) -> (String) r.getProperty(ComponentConstants.COMPONENT_NAME),
-        identity());
+        identity(),
+        (s, r) -> (String) r.getProperty(ComponentConstants.COMPONENT_NAME));
     serviceIndex.open();
     return serviceIndex;
   }
@@ -149,8 +152,8 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     var serviceIndex = new ServiceIndex<>(
         context,
         clazz,
-        (s, reference) -> (String) reference.getProperty(ComponentConstants.COMPONENT_NAME),
-        extractor);
+        extractor,
+        (s, reference) -> (String) reference.getProperty(ComponentConstants.COMPONENT_NAME));
     serviceIndex.open();
     return serviceIndex;
   }
@@ -162,8 +165,8 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     ServiceIndex<S, String, T> serviceIndex = new ServiceIndex<>(
         context,
         reference,
-        (s, r) -> (String) r.getProperty(ComponentConstants.COMPONENT_NAME),
-        extractor);
+        extractor,
+        (s, r) -> (String) r.getProperty(ComponentConstants.COMPONENT_NAME));
     serviceIndex.open();
     return serviceIndex;
   }
@@ -171,9 +174,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   private void addRecordById(ServiceRecord<S, U, T> record) {
     if (record.id() != null) {
       recordsById.computeIfAbsent(record.id(), i -> new ArrayList<>()).add(record);
-      sort(
-          recordsById.get(record.id()),
-          comparing(r -> ((ServiceIndex<?, ?, ?>.ServiceRecordImpl) r).rank()).reversed());
+      sort(recordsById.get(record.id()));
     }
   }
 
@@ -192,8 +193,8 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     var record = new ServiceRecordImpl(
         reference,
         extractor.apply((S) context.getService(reference)));
-    records.put(reference, record);
     addRecordById(record);
+    events.next(new ServiceAddedEvent(record));
     return record;
   }
 
@@ -205,15 +206,16 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     removeRecordById(record);
     record.refresh();
     addRecordById(record);
+    events.next(new ServiceModifiedEvent(service));
   }
 
   @Override
   public synchronized void removedService(
       ServiceReference<S> reference,
       ServiceRecord<S, U, T> service) {
-    records.remove(reference);
     removeRecordById(service);
     context.ungetService(reference);
+    events.next(new ServiceRemovedEvent(reference));
   }
 
   public Stream<U> ids() {
@@ -221,7 +223,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   }
 
   public Stream<ServiceRecord<S, U, T>> records() {
-    return records.values().stream().filter(record -> record.id() != null);
+    return recordsById.values().stream().flatMap(List::stream).sorted();
   }
 
   public Stream<T> objects() {
@@ -229,14 +231,16 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   }
 
   public Optional<ServiceRecord<S, U, T>> findRecord(T serviceObject) {
-    return records
-        .values()
-        .stream()
-        .filter(record -> record.serviceObject() == serviceObject)
-        .findFirst();
+    return records().filter(record -> record.serviceObject() == serviceObject).findFirst();
   }
 
   public Optional<ServiceRecord<S, U, T>> get(U id) {
-    return recordsById.get(id).stream().findFirst();
+    return Optional
+        .ofNullable(recordsById.get(id))
+        .flatMap(records -> records.stream().findFirst());
+  }
+
+  public Observable<ServiveEvent> events() {
+    return events;
   }
 }

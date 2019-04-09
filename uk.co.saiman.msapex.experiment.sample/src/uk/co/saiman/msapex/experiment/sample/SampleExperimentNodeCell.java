@@ -53,6 +53,9 @@ public class SampleExperimentNodeCell {
     cell
         .setIconURI(
             "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/flask.png");
-    supplemental.setText(variables.variable(sampleConductor.sampleLocation()).toString());
+    variables
+        .get(sampleConductor.sampleLocation())
+        .map(Object::toString)
+        .ifPresent(supplemental::setText);
   }
 }

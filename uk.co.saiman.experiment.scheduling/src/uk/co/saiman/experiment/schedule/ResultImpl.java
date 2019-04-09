@@ -184,4 +184,10 @@ public class ResultImpl<T> implements Result<T> {
   public Dependency<Result<T>, Absolute> dependency() {
     return path.resolve(observation);
   }
+
+  @Override
+  public boolean isEmpty() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

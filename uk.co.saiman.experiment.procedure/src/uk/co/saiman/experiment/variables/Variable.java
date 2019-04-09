@@ -2,8 +2,6 @@ package uk.co.saiman.experiment.variables;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Optional;
-
 import uk.co.saiman.state.Accessor;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
@@ -13,18 +11,11 @@ import uk.co.saiman.state.State;
  * represents a type of {@link State state} which may be associated with an
  * instruction, and the Java type which the state may be materialized as.
  * <p>
- * Variable instances are intended to be static, and do not prescribe the method
- * of converting between state and object, though they may suggest a default
- * strategy.
+ * Variable instances are intended to be static.
  */
 public class Variable<T> {
   private final String id;
   private final Accessor<T, ?> accessor;
-
-  public Variable(String id) {
-    this.id = requireNonNull(id);
-    this.accessor = null;
-  }
 
   public Variable(String id, Accessor<T, ?> accessor) {
     this.id = requireNonNull(id);
@@ -35,8 +26,8 @@ public class Variable<T> {
     return id;
   }
 
-  public Optional<MapIndex<T>> defaultMapIndex() {
-    return Optional.ofNullable(accessor).map(a -> new MapIndex<>(id, a));
+  public MapIndex<T> mapIndex() {
+    return new MapIndex<>(id, accessor);
   }
 
   public VariableDeclaration declareRequired() {

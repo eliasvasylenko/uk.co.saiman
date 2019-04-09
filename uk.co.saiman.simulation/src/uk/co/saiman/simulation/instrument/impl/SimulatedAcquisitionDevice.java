@@ -230,7 +230,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
   private void initializeDetector() {
     detector = detectorService == null
         ? null
-        : detectorService.getDetectorSimulation(getSampleDomain(), getSampleIntensityUnits());
+        : detectorService.getDetectorSimulation(getSampleDomain(), getSampleIntensityUnit());
   }
 
   @Deactivate
@@ -429,12 +429,12 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
   }
 
   @Override
-  public Unit<Time> getSampleTimeUnits() {
+  public Unit<Time> getSampleTimeUnit() {
     return timeUnits;
   }
 
   @Override
-  public Unit<Dimensionless> getSampleIntensityUnits() {
+  public Unit<Dimensionless> getSampleIntensityUnit() {
     return intensityUnits;
   }
 

@@ -23,6 +23,7 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 \
 	javax.measure.unit-api

@@ -59,13 +59,6 @@ public class ObservableTest {
   }
 
   @Test
-  public void retryingTest() {
-    downstreamObservable.retrying().observe(downstreamObserver);
-
-    verify(upstreamObservable).observe(isA(RetryingObserver.class));
-  }
-
-  @Test
   public void softReferenceOwnedTest() {
     downstreamObservable.softReference(new Object()).observe(downstreamObserver);
 

@@ -107,7 +107,13 @@ public class SimpleData<T> implements Data<T> {
         try (WritableByteChannel writeChannel = resource.write()) {
           format.save(writeChannel, new Payload<>(value));
         } catch (IOException e) {
-          throw new DataException("Failed to write data", e);
+          var failed = new DataException("Failed to write data", e);
+          try {
+            resource.delete();
+          } catch (IOException e1) {
+            failed.addSuppressed(e1);
+          }
+          throw failed;
         }
       }
 

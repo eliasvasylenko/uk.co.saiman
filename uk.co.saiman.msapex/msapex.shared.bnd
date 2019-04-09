@@ -28,6 +28,7 @@
 	bnd.identity; id=uk.co.saiman.msapex.experiment.spectrum,\
 	bnd.identity; id=uk.co.saiman.msapex.instrument,\
 	bnd.identity; id=uk.co.saiman.msapex.instrument.acquisition,\
+	bnd.identity; id=uk.co.saiman.msapex.instrument.vacuum,\
 	bnd.identity; id=uk.co.saiman.msapex.instrument.sample,\
 	bnd.identity; id=uk.co.saiman.msapex.instrument.stage,\
 	bnd.identity; id=uk.co.saiman.msapex.simulation,\

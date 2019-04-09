@@ -61,12 +61,12 @@ public interface AcquisitionDevice<T extends AcquisitionControl> extends Device<
   /**
    * @return the units of measurement of sample intensities
    */
-  Unit<Dimensionless> getSampleIntensityUnits();
+  Unit<Dimensionless> getSampleIntensityUnit();
 
   /**
    * @return the units of measurement of sample times
    */
-  Unit<Time> getSampleTimeUnits();
+  Unit<Time> getSampleTimeUnit();
 
   /**
    * @return The last acquired acquisition data. This leaves the format of the
@@ -146,10 +146,10 @@ public interface AcquisitionDevice<T extends AcquisitionControl> extends Device<
    */
   default RegularSampledDomain<Time> getSampleDomain() {
     return new RegularSampledDomain<>(
-        getSampleTimeUnits(),
+        getSampleTimeUnit(),
         getSampleDepth(),
         getSampleFrequency()
-            .to(getSampleTimeUnits().inverse().asType(Frequency.class))
+            .to(getSampleTimeUnit().inverse().asType(Frequency.class))
             .getValue()
             .doubleValue(),
         0);

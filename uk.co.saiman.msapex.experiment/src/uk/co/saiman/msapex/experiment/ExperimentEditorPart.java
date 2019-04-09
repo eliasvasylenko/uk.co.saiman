@@ -41,6 +41,7 @@ import uk.co.saiman.experiment.procedure.Productions;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Preparation;
 import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.VariableDeclaration;
 
 /**
  * Experiment management view part. Manage experiments and their results in the
@@ -65,7 +66,7 @@ public class ExperimentEditorPart {
     context.set(Step.class, node);
 
     concat(
-        node.getVariables().stream().map(Variable::id),
+        node.getConductor().variables().map(VariableDeclaration::variable).map(Variable::id),
         concat(
             Productions.preparations(node.getConductor()).map(Preparation::id),
             Productions.observations(node.getConductor()).map(Observation::id)))

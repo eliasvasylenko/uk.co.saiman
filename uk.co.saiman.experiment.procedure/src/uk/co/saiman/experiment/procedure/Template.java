@@ -59,15 +59,15 @@ public class Template<T extends Product> extends Instructions<Template<T>, Relat
   }
 
   public <U> Optional<U> variable(Variable<U> variable) {
-    return variables.variable(variable);
+    return variables.get(variable);
   }
 
   public <U> Template<T> withVariable(Variable<U> variable, U value) {
-    return withVariables(variables.withVariable(variable, value));
+    return withVariables(variables.with(variable, value));
   }
 
   public <U> Template<T> withVariable(Variable<U> variable, Function<Optional<U>, U> value) {
-    return withVariables(variables.withVariable(variable, value));
+    return withVariables(variables.with(variable, value));
   }
 
   public Conductor<T> conductor() {

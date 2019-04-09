@@ -28,10 +28,6 @@
 package uk.co.saiman.data.spectrum;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static uk.co.saiman.observable.Observer.forObservation;
-import static uk.co.saiman.observable.Observer.onCompletion;
-import static uk.co.saiman.observable.Observer.onFailure;
-import static uk.co.saiman.observable.Observer.onObservation;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -43,7 +39,8 @@ import javax.measure.UnitConverter;
 import uk.co.saiman.data.function.ArraySampledContinuousFunction;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.SampledDomain;
-import uk.co.saiman.observable.Invalidation;
+import uk.co.saiman.observable.ExclusiveObserver;
+import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.LockException;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.Observation;
@@ -59,13 +56,14 @@ import uk.co.saiman.observable.Observation;
  * @param <UR> the type of the units of measurement of values in the range
  */
 public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Quantity<UR>> {
-  private Throwable failure;
-  private final CountDownLatch complete;
-
   private final SampledDomain<UD> domain;
   private final Unit<UR> unitRange;
   private double[] intensities;
-  private final Observable<Invalidation<SampledContinuousFunction<UD, UR>>> accumulation;
+
+  private Throwable failure;
+  private final CountDownLatch complete = new CountDownLatch(1);
+  private SampledContinuousFunction<UD, UR> lastFunction;
+  private final HotObservable<ContinuousFunctionAccumulator<UD, UR>> accumulation = new HotObservable<>();
 
   /**
    * @param domain    the domain of the accumulated function
@@ -79,22 +77,33 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
     this.unitRange = unitRange;
     this.intensities = new double[domain.getDepth()];
 
-    complete = new CountDownLatch(1);
-    accumulation = source
-        .aggregateBackpressure()
+    getLatestAccumulation();
+
+    source
         .executeOn(newSingleThreadExecutor())
-        .map(this::aggregateArray)
-        .then(onObservation(Observation::requestNext))
-        .then(forObservation(o -> m -> o.requestNext()))
-        .then(onCompletion(this::complete))
-        .then(onFailure(this::fail))
-        .invalidateLazyRevalidate()
-        .reemit()
-        .map(m -> m.map(i -> {
-          synchronized (i) {
-            return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
+        .aggregateBackpressure()
+        .observe(new ExclusiveObserver<>() {
+          @Override
+          public void onNext(List<SampledContinuousFunction<UD, UR>> message) {
+            aggregateArray(message);
+            getObservation().requestNext();
           }
-        }));
+
+          public void onObserve(Observation observation) {
+            super.onObserve(observation);
+            observation.requestNext();
+          }
+
+          @Override
+          public void onComplete() {
+            complete();
+          }
+
+          @Override
+          public void onFail(Throwable t) {
+            fail(t);
+          }
+        });
   }
 
   private void complete() {
@@ -106,17 +115,21 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
     complete.countDown();
   }
 
-  private double[] aggregateArray(List<SampledContinuousFunction<UD, UR>> next) {
+  private void aggregateArray(List<SampledContinuousFunction<UD, UR>> message) {
     synchronized (intensities) {
-      for (SampledContinuousFunction<?, UR> c : next) {
+      for (SampledContinuousFunction<?, UR> c : message) {
         UnitConverter converter = c.range().getUnit().getConverterTo(unitRange);
 
         for (int i = 0; i < domain.getDepth(); i++) {
           intensities[i] += converter.convert(c.range().getSample(i));
         }
       }
+
+      if (lastFunction != null) {
+        lastFunction = null;
+        accumulation.next(this);
+      }
     }
-    return intensities;
   }
 
   public SampledDomain<UD> getDomain() {
@@ -127,11 +140,20 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
     return unitRange;
   }
 
-  public Observable<Invalidation<SampledContinuousFunction<UD, UR>>> accumulation() {
+  public Observable<ContinuousFunctionAccumulator<UD, UR>> accumulation() {
     return accumulation;
   }
 
-  public SampledContinuousFunction<UD, UR> getAccumulation() {
+  public SampledContinuousFunction<UD, UR> getLatestAccumulation() {
+    synchronized (intensities) {
+      if (lastFunction == null) {
+        lastFunction = new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
+      }
+      return lastFunction;
+    }
+  }
+
+  public SampledContinuousFunction<UD, UR> getCompleteAccumulation() {
     try {
       complete.await();
     } catch (InterruptedException e) {
@@ -139,6 +161,6 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
     }
     if (failure != null)
       throw new IllegalStateException("Failed to accumulate", failure);
-    return new ArraySampledContinuousFunction<>(domain, unitRange, intensities);
+    return getLatestAccumulation();
   }
 }

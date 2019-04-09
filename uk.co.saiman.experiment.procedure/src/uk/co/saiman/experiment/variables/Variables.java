@@ -2,20 +2,38 @@ package uk.co.saiman.experiment.variables;
 
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import uk.co.saiman.state.StateMap;
 
-public interface Variables {
-  StateMap state();
+/**
+ * An immutable container for experiment procedure variables.
+ * 
+ * @author Elias N Vasylenko
+ */
+public class Variables {
+  private final StateMap state;
 
-  <T> Optional<T> variable(Variable<T> variable);
-
-  <U> Variables withVariable(Variable<U> variable, U value);
-
-  default <U> Variables withVariable(Variable<U> variable, Function<Optional<U>, U> value) {
-    return withVariable(variable, value.apply(variable(variable)));
+  public Variables() {
+    this.state = StateMap.empty();
   }
 
-  Stream<Variable<?>> stream();
+  public Variables(StateMap state) {
+    this.state = state;
+  }
+
+  public StateMap state() {
+    return state;
+  }
+
+  public <T> Optional<T> get(Variable<T> variable) {
+    return state.getOptional(variable.mapIndex());
+  }
+
+  public <U> Variables with(Variable<U> variable, U value) {
+    return new Variables(state.with(variable.mapIndex(), value));
+  }
+
+  public <U> Variables with(Variable<U> variable, Function<Optional<U>, U> value) {
+    return new Variables(state.with(variable.mapIndex(), value.apply(get(variable))));
+  }
 }

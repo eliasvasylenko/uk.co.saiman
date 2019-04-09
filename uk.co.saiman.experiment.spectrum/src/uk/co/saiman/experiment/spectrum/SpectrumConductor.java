@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
+
 import java.util.stream.Stream;
 
 import javax.measure.Unit;
@@ -45,11 +47,10 @@ import uk.co.saiman.experiment.procedure.ConditionRequirement;
 import uk.co.saiman.experiment.procedure.ConductionContext;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.Requirements;
-import uk.co.saiman.experiment.processing.Processing;
+import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Production;
-import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 
 /**
@@ -61,7 +62,6 @@ import uk.co.saiman.experiment.variables.VariableDeclaration;
  */
 public interface SpectrumConductor extends Conductor<Condition<Void>> {
   String SPECTRUM_DATA_NAME = "spectrum";
-  Variable<Processing> PROCESSING = new Variable<>("uk.co.saiman.experiment.processing");
   Observation<Spectrum> SPECTRUM = new Observation<>("uk.co.saiman.data.spectrum", Spectrum.class);
 
   Unit<Mass> getMassUnit();
@@ -70,6 +70,8 @@ public interface SpectrumConductor extends Conductor<Condition<Void>> {
 
   ConditionRequirement<Void> sampleResource();
 
+  ProcessingService processingService();
+
   @Override
   default void conduct(ConductionContext<Condition<Void>> context) {
     System.out.println("create accumulator");
@@ -77,16 +79,18 @@ public interface SpectrumConductor extends Conductor<Condition<Void>> {
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
         device.acquisitionDataEvents(),
         device.getSampleDomain(),
-        device.getSampleIntensityUnits());
+        device.getSampleIntensityUnit());
 
     System.out.println("prepare processing");
-    DataProcessor processing = context.getVariable(PROCESSING).getProcessor();
+    DataProcessor processing = processingService()
+        .loadDeclaration(context.getVariable(PROCESSING_VARIABLE))
+        .getProcessor();
 
     System.out.println("fetching calibration");
     SpectrumCalibration calibration = new SpectrumCalibration() {
       @Override
       public Unit<Time> getTimeUnit() {
-        return device.getSampleTimeUnits();
+        return device.getSampleTimeUnit();
       }
 
       @Override
@@ -107,7 +111,7 @@ public interface SpectrumConductor extends Conductor<Condition<Void>> {
             o -> context
                 .setPartialResult(
                     SPECTRUM,
-                    o.map(s -> new SampledSpectrum(s, calibration, processing))::revalidate));
+                    () -> new SampledSpectrum(o.getLatestAccumulation(), calibration, processing)));
 
     System.out.println("start acquisition");
 
@@ -131,7 +135,7 @@ public interface SpectrumConductor extends Conductor<Condition<Void>> {
        */
 
       System.out.println("get result");
-      var accumulation = accumulator.getAccumulation();
+      var accumulation = accumulator.getCompleteAccumulation();
 
       context.setResultFormat(SPECTRUM, SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
       context.setResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
@@ -150,7 +154,7 @@ public interface SpectrumConductor extends Conductor<Condition<Void>> {
 
   @Override
   default Stream<VariableDeclaration> variables() {
-    return Stream.of(PROCESSING.declareRequired());
+    return Stream.of(PROCESSING_VARIABLE.declareRequired());
   }
 
   @Override

@@ -46,23 +46,15 @@ import java.util.function.Supplier;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          The message type of the upstream observable
- * @param <U>
- *          The message type of the downstream observer
+ * @param <T> The message type of the upstream observable
+ * @param <U> The message type of the downstream observer
  */
-public abstract class PassthroughObserver<T, U> implements Observer<T> {
-  private Observation observation;
+public abstract class PassthroughObserver<T, U> extends ExclusiveObserver<T> {
   private final Supplier<Observer<? super U>> downstreamObserver;
 
   public PassthroughObserver(Observer<? super U> downstreamObserver) {
-    this(getSupplier(downstreamObserver));
-  }
-
-  private static <U> Supplier<Observer<? super U>> getSupplier(
-      Observer<? super U> downstreamObserver) {
     requireNonNull(downstreamObserver);
-    return () -> downstreamObserver;
+    this.downstreamObserver = () -> downstreamObserver;
   }
 
   public PassthroughObserver(Supplier<Observer<? super U>> downstreamObserver) {
@@ -73,20 +65,12 @@ public abstract class PassthroughObserver<T, U> implements Observer<T> {
     return downstreamObserver.get();
   }
 
-  public Observation getObservation() {
-    return observation;
-  }
-
   @Override
   public abstract void onNext(T message);
 
-  protected void initializeObservation(Observation observation) {
-    this.observation = observation;
-  }
-
   @Override
   public void onObserve(Observation observation) {
-    initializeObservation(observation);
+    super.onObserve(observation);
     getDownstreamObserver().onObserve(observation);
   }
 

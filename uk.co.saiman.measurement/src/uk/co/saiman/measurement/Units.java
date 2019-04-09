@@ -33,6 +33,7 @@ import javax.measure.quantity.AmountOfSubstance;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Mass;
+import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Time;
 
 import si.uom.SI;
@@ -75,6 +76,10 @@ public final class Units {
 
   public static MetricUnitBuilder<Mass> gram() {
     return withMetricUnit(SI.GRAM);
+  }
+
+  public static MetricUnitBuilder<Pressure> pascal() {
+    return withMetricUnit(SI.PASCAL);
   }
 
   public static UnitFormat unitFormat() {

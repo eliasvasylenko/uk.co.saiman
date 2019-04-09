@@ -35,6 +35,7 @@ import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
@@ -75,9 +76,9 @@ public class Processing {
     return new Processing(steps);
   }
 
-  public Processing withStepReplaced(int index, DataProcessor step) {
+  public Processing withStep(int index, Function<DataProcessor, DataProcessor> step) {
     List<DataProcessor> steps = new ArrayList<>(this.steps);
-    steps.set(index, step);
+    steps.set(index, step.apply(steps.get(index)));
     return new Processing(steps);
   }
 

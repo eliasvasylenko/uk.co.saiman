@@ -29,25 +29,23 @@ package uk.co.saiman.msapex.camera;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
-
-import java.util.ArrayList;
-import java.util.List;
+import static uk.co.saiman.log.Log.Level.ERROR;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.contexts.RunAndTrack;
+import org.eclipse.e4.core.di.extensions.OSGiBundle;
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.fx.core.di.Service;
+import org.osgi.framework.BundleContext;
 
-import javafx.beans.InvalidationListener;
-import javafx.collections.ObservableList;
 import uk.co.saiman.camera.CameraConnection;
 import uk.co.saiman.camera.CameraDevice;
-import uk.co.saiman.eclipse.service.ObservableService;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.osgi.ServiceIndex;
 
 /**
  * Register a camera device in the application context and persist the selection
@@ -58,10 +56,6 @@ import uk.co.saiman.log.Log.Level;
 public class CameraAddon {
   private static final String SELECTED_DEVICE_KEY = "selected.device";
   private static final String CONNECTION_OPEN_KEY = "connection.open";
-
-  @Inject
-  @ObservableService
-  private ObservableList<CameraDevice> availableDevices;
 
   @Inject
   private IEclipseContext context;
@@ -75,13 +69,20 @@ public class CameraAddon {
   private String defaultCamera;
   private boolean defaultConnect;
 
+  private ServiceIndex<CameraDevice, String, CameraDevice> deviceIndex;
+
   @PostConstruct
-  void initialize() {
+  void initialize(@OSGiBundle BundleContext bundleContext) {
+    deviceIndex = ServiceIndex.open(bundleContext, CameraDevice.class);
+
     defaultCamera = addon.getPersistedState().get(SELECTED_DEVICE_KEY);
     defaultConnect = parseBoolean(addon.getPersistedState().get(CONNECTION_OPEN_KEY));
 
     context.declareModifiable(CameraDevice.class);
     context.declareModifiable(CameraConnection.class);
+
+    deviceIndex.events().observe(i -> updateCameraDevice());
+    updateCameraDevice();
 
     // Track updates to camera and connection...
     context.runAndTrack(new RunAndTrack() {
@@ -91,18 +92,18 @@ public class CameraAddon {
         CameraConnection connection = context.get(CameraConnection.class);
 
         // Set the default camera device to the last one which was selected
-        if (device != null) {
-          defaultCamera = device.getName();
-          defaultConnect = connection != null;
+        deviceIndex.findRecord(device).ifPresent(service -> {
+          defaultCamera = service.id();
           addon.getPersistedState().put(SELECTED_DEVICE_KEY, defaultCamera);
-          addon.getPersistedState().put(CONNECTION_OPEN_KEY, Boolean.toString(defaultConnect));
-        }
+        });
+        defaultConnect = connection != null;
+        addon.getPersistedState().put(CONNECTION_OPEN_KEY, Boolean.toString(defaultConnect));
 
         // Make sure any open connection always belongs to the selected camera!
         if (connection != null && (device == null || connection.getDevice() != device)) {
           log
               .log(
-                  Level.ERROR,
+                  ERROR,
                   format(
                       "Camera connection %s inconsistent with device %s in Eclipse context",
                       connection,
@@ -112,28 +113,26 @@ public class CameraAddon {
         return true;
       }
     });
+  }
 
-    availableDevices.addListener((InvalidationListener) i -> updateCameraDevice());
-    updateCameraDevice();
+  @PreDestroy
+  void close() {
+    deviceIndex.close();
   }
 
   private synchronized void updateCameraDevice() {
-    List<CameraDevice> devices = new ArrayList<>(availableDevices);
-
     CameraDevice currentDevice = context.get(CameraDevice.class);
 
     if (currentDevice == null) {
-      for (CameraDevice device : devices) {
-        if (device.getName().equals(defaultCamera)) {
-          boolean connect = defaultConnect;
-          CameraSelectionHelper.selectCamera(context, device);
-          if (connect)
-            context.modify(CameraConnection.class, device.openConnection());
-          break;
+      deviceIndex.get(defaultCamera).ifPresent(device -> {
+        boolean connect = defaultConnect;
+        CameraSelectionHelper.selectCamera(context, device.serviceObject());
+        if (connect) {
+          context.modify(CameraConnection.class, device.serviceObject().openConnection());
         }
-      }
+      });
 
-    } else if (!devices.contains(currentDevice)) {
+    } else if (deviceIndex.findRecord(currentDevice).isEmpty()) {
       CameraSelectionHelper.selectCamera(context, null);
     }
   }

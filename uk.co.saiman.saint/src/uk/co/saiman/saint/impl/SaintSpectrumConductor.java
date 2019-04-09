@@ -51,17 +51,17 @@ public class SaintSpectrumConductor implements SpectrumConductor, Conductor<Cond
   public static final String SAINT_SPECTRUM = "uk.co.saiman.saint.spectrum.result";
 
   private final AcquisitionDevice<?> acquisitionDevice;
-
   private final ConditionRequirement<Void> sampleResource;
+  private final ProcessingService processingService;
 
   @Activate
   public SaintSpectrumConductor(
       @Reference XYStageConductor stageExperiment,
       @Reference(cardinality = OPTIONAL) AcquisitionDevice<?> acquisitionDevice,
-      @Reference ProcessingService processors) {
+      @Reference ProcessingService processingService) {
     this.acquisitionDevice = acquisitionDevice;
-
     this.sampleResource = Requirement.on(stageExperiment.samplePreparation());
+    this.processingService = processingService;
   }
 
   @Override
@@ -77,5 +77,10 @@ public class SaintSpectrumConductor implements SpectrumConductor, Conductor<Cond
   @Override
   public ConditionRequirement<Void> sampleResource() {
     return sampleResource;
+  }
+
+  @Override
+  public ProcessingService processingService() {
+    return processingService;
   }
 }

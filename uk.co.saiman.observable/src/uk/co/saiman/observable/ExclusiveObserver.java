@@ -27,30 +27,44 @@
  */
 package uk.co.saiman.observable;
 
-import java.util.function.Function;
+import static java.util.Objects.requireNonNull;
 
 /**
- * A message interface for designing
- * {@link Observable#invalidateLazyRevalidate() invalidate/lazy-revalidate}
- * reactive systems. Instances represent an invalidation of the data represented
- * by an upstream {@link Observable}. The instance can be {@link #revalidate()
- * revalidated} to calculate the up-to-date state of the data.
+ * This is a helper class for implementing {@link Observable passive
+ * observables}.
+ * <p>
+ * A passive observable is one which does not maintain a set of observations or
+ * manage its own events, instead deferring to one or more upstream observables.
+ * When an observer subscribes to a passive observable, typically the observer
+ * is decorated, and the decorator is then subscribed to the parents. This way
+ * the decorator can modify, inspect, or filter events as appropriate before
+ * passing them back through to the original observer.
+ * <p>
+ * This class is a partial implementation of such a decorator.
  * 
  * @author Elias N Vasylenko
+ *
+ * @param <T> The message type of the upstream observable
  */
-public interface Invalidation<T> {
-  T revalidate();
+public abstract class ExclusiveObserver<T> implements Observer<T> {
+  private Observation observation;
 
-  /**
-   * Perform a mapping of the data to be revalidated. The mapping computation is
-   * only applied upon revalidation.
-   * 
-   * @param mapping
-   *          the mapping function
-   * @return a new invalidation object which applies the given mapping upon
-   *         revalidation
-   */
-  default <U> Invalidation<U> map(Function<T, U> mapping) {
-    return () -> mapping.apply(revalidate());
+  public Observation getObservation() {
+    return observation;
+  }
+
+  @Override
+  public abstract void onNext(T message);
+
+  protected void initializeObservation(Observation observation) {
+    if (this.observation != null) {
+      throw new AlreadyObservedException();
+    }
+    this.observation = requireNonNull(observation);
+  }
+
+  @Override
+  public void onObserve(Observation observation) {
+    initializeObservation(observation);
   }
 }

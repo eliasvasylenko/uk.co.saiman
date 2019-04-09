@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_zMk4oHzfEeeLpZ9wHq5Ynw">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_uqCYUFeDEemLB55c6x5QLw" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Category" xmi:id="_0Uq_4FeDEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.category" name="Vacuum" description="Vacuum devices"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_3-LdMFeDEemLB55c6x5QLw" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Command" xmi:id="_6xLJQFeDEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.command.nextdevice" commandName="Next Device" description="Select the next vacuum device in the available list" category="_0Uq_4FeDEemLB55c6x5QLw"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_9nlVsFeDEemLB55c6x5QLw" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
+    <elements xsi:type="commands:Handler" xmi:id="__Lq-oFeDEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.handler.nextdevice" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.vacuum/uk.co.saiman.msapex.instrument.vacuum.SelectNextVacuumDeviceHandler" command="_6xLJQFeDEemLB55c6x5QLw"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_Dh8bUFeEEemLB55c6x5QLw" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
+    <elements xsi:type="basic:Part" xmi:id="_LKI7wFeEEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.part" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.vacuum/uk.co.saiman.msapex.instrument.vacuum.VacuumPart" label="Vacuum" iconURI="${fugue.icon.runtime}/size16/weather-wind.png">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_OOOX0FeEEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.toolbar">
+        <children xsi:type="menu:HandledToolItem" xmi:id="_TuVKYFeEEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.handledtoolitem.devices" label="Devices" command="_6xLJQFeDEemLB55c6x5QLw">
+          <menu xmi:id="_W4bH0FeEEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.menu.devices">
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_ZR3rcFeEEemLB55c6x5QLw" elementId="uk.co.saiman.msapex.instrument.vacuum.dynamicmenucontribution.devices" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.vacuum/uk.co.saiman.msapex.instrument.vacuum.VacuumDevicesMenu"/>
+          </menu>
+        </children>
+      </toolbar>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

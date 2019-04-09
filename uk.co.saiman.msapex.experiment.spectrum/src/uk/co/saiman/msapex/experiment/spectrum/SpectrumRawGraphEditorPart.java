@@ -42,11 +42,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.data.spectrum.Spectrum;
+import uk.co.saiman.experiment.product.Result;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 import uk.co.saiman.msapex.chart.MetricTickUnits;
 import uk.co.saiman.msapex.chart.QuantityAxis;
-import uk.co.saiman.observable.Invalidation;
 
 public class SpectrumRawGraphEditorPart {
   @FXML
@@ -68,9 +68,9 @@ public class SpectrumRawGraphEditorPart {
 
   @Inject
   @Optional
-  void value(Invalidation<Spectrum> value) {
+  void value(Result<Spectrum> value) {
     if (value != null) {
-      series.setContinuousFunction(value.map(Spectrum::getTimeData));
+      series.setContinuousFunction(() -> value.value().map(Spectrum::getTimeData).orElse(null));
     }
   }
 }

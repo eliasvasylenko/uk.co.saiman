@@ -254,10 +254,6 @@ public interface Observable<M> {
     return then(forObservation(o -> s -> o.requestNext()));
   }
 
-  default Observable<M> retrying() {
-    return observer -> observe(new RetryingObserver<>(observer, this));
-  }
-
   default Observable<M> repeating() {
     return observer -> observe(new RepeatingObserver<>(observer, this));
   }
@@ -539,26 +535,6 @@ public interface Observable<M> {
         .observe(future::complete);
 
     return future;
-  }
-
-  /**
-   * Create an invalidate/lazy-revalidate reactive observable.
-   * <p>
-   * The created downstream observable does not support backpressure in the
-   * traditional sense, however it does provide similar control and guarantees
-   * about message delivery to the downstream observer. Downstream observers
-   * should not signal interest in further messages via the usual
-   * {@link Observation#request(long) request method and similar}, but instead by
-   * invoking {@link Invalidation#revalidate()}, which will return the most recent
-   * message from upstream.
-   * 
-   * @param identity    the identity value for the accumulating function
-   * @param accumulator an associative, non-interfering, stateless function for
-   *                    combining two values
-   * @return an observable over the reduced values
-   */
-  default Observable<Invalidation<M>> invalidateLazyRevalidate() {
-    return observer -> observe(new InvalidatingLazyRevalidatingObserver<>(observer));
   }
 
   /**

@@ -31,7 +31,7 @@ import javax.measure.Quantity;
 
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.procedure.ProcedureException;
 
 public class MissingProcessor implements DataProcessor {
   private final String id;
@@ -47,6 +47,6 @@ public class MissingProcessor implements DataProcessor {
   @Override
   public <UD extends Quantity<UD>, UR extends Quantity<UR>> SampledContinuousFunction<UD, UR> process(
       SampledContinuousFunction<UD, UR> data) {
-    throw new ExperimentException("Cannot find processor " + id);
+    throw new ProcedureException("Cannot find processor " + id);
   }
 }
