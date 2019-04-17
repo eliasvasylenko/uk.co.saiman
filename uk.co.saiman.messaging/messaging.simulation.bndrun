@@ -14,12 +14,7 @@
 	eclipse.consoleLog=true,\
 	configurator.initial='{\
 		"uk.co.saiman.messaging.pipe~test": {\
-			"test.value": 123\
-		},\
-		"uk.co.saiman.messaging.pipe~test2": {\
-			"test.value": 123\
-		},\
-		"uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse": {}\
+		}\
 	}'
 
 -runbundles:\
