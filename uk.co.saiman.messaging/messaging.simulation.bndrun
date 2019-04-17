@@ -5,21 +5,24 @@
 	org.eclipse.osgi
 
 -runproperties:\
-	configurator.initial='{\
-		"uk.co.saiman.messaging.pipe~test": {\
-		}\
-	}',\
 	osgi.ws=gtk,\
 	osgi.os=linux,\
 	osgi.arch=x86_64,\
 	osgi.console=,\
 	eclipse.log.enabled=true,\
 	equinox.log.history.max=25,\
-	eclipse.consoleLog=true
+	eclipse.consoleLog=true,\
+	configurator.initial='{\
+		"uk.co.saiman.messaging.pipe~test": {\
+			"test.value": 123\
+		},\
+		"uk.co.saiman.messaging.pipe~test2": {\
+			"test.value": 123\
+		},\
+		"uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse": {}\
+	}'
 
 -runbundles:\
-	org.apache.felix.configadmin;version=latest,\
-	org.apache.felix.configurator;version=latest,\
 	ch.qos.logback.classic;version=latest,\
 	ch.qos.logback.core;version=latest,\
 	slf4j.api;version=latest,\
@@ -52,4 +55,6 @@
 	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-	org.eclipse.equinox.coordinator;version=latest
+	org.eclipse.equinox.coordinator;version=latest,\
+	org.apache.felix.configadmin;version=latest,\
+	org.apache.felix.configurator;version=latest

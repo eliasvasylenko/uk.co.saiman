@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ * Copyright (C) 2019 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
  *          ______         ___      ___________
  *       ,'========\     ,'===\    /========== \
  *      /== \___/== \  ,'==.== \   \__/== \___\/
@@ -87,7 +87,7 @@ public class WebModuleServlet extends HttpServlet {
   private static final String JS_EXTENSION = ".js";
   private static final String TRANSPILATION_FAILED = "Failed to transpile ES6 resource %s";
 
-  private final Transpiler transpiler = new Transpiler();
+  private Transpiler transpiler;
   // private ModuleServerConfiguration config;
   private BundleContext context;
 
@@ -208,6 +208,13 @@ public class WebModuleServlet extends HttpServlet {
     return null;
   }
 
+  private synchronized Transpiler getTranspiler() {
+    if (transpiler == null) {
+      transpiler = new Transpiler();
+    }
+    return transpiler;
+  }
+
   protected void loadModuleResource(
       HttpServletResponse response,
       String moduleName,
@@ -234,7 +241,7 @@ public class WebModuleServlet extends HttpServlet {
     String source = module.openResource(resource);
     if (module.format().equals(ESM_FORMAT) && resource.endsWith(JS_EXTENSION)) {
       try {
-        source = transpiler
+        source = getTranspiler()
             .transpile(source, asList("transform-es2015-modules-amd"), asList("es2015"));
       } catch (ScriptException e) {
         throw new IOException(format(TRANSPILATION_FAILED, module.id()), e);

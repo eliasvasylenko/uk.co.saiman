@@ -34,6 +34,7 @@ import static uk.co.saiman.messaging.commands.MessagingCommands.COMMAND_SCOPE_KE
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -80,8 +81,8 @@ public class MessagingCommands {
   private final ServiceIndex<?, String, MessageReceiver> messageReceiverIndex;
   private final ServiceIndex<?, String, MessageSender> messageSenderIndex;
 
-  private Map<ServiceRecord<?, String, ?>, DataBuffer> dataBuffers;
-  private Map<ServiceRecord<?, String, ?>, MessageBuffer> messageBuffers;
+  private Map<ServiceRecord<?, String, ?>, DataBuffer> dataBuffers = new HashMap<>();
+  private Map<ServiceRecord<?, String, ?>, MessageBuffer> messageBuffers = new HashMap<>();
 
   @Activate
   public MessagingCommands(BundleContext context) {

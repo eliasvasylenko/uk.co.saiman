@@ -40,7 +40,7 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
 @Designate(ocd = MessagePipeConfiguration.class, factory = true)
-@Component(configurationPid = MessagePipe.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+@Component(configurationPid = MessagePipe.CONFIGURATION_PID, immediate = true, configurationPolicy = REQUIRE, service = {
     MessageChannel.class,
     MessageSender.class,
     MessageReceiver.class,
