@@ -100,9 +100,9 @@ public class CopleyHardwareSimulation {
   private ByteConverterService converters;
 
   @Reference
-  private DataSender dataSender;
+  private DataSender response;
   @Reference
-  private DataReceiver dataReceiver;
+  private DataReceiver command;
   private Disposable observation;
 
   private final ByteBuffer header = ByteBuffer.allocate(HEADER_SIZE);
@@ -169,7 +169,7 @@ public class CopleyHardwareSimulation {
   private synchronized void openObservation() {
     if (observation == null) {
       try {
-        observation = dataReceiver
+        observation = command
             .receiveData()
             .then(onFailure(f -> closeObservation()))
             .observe(buffer -> {
@@ -297,7 +297,7 @@ public class CopleyHardwareSimulation {
         response.put(result);
         response.flip();
 
-        dataSender.sendData(response);
+        this.response.sendData(response);
       } catch (Exception e) {
         log.log(ERROR, "Unable to send simulated hardware response: " + e.getMessage(), e);
       }

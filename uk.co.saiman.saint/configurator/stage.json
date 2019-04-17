@@ -18,14 +18,14 @@
 		"comms.target": "(service.pid=uk.co.saiman.comms.copley~saintsimulation)"
 	},
 	"uk.co.saiman.comms.copley~saintsimulation": {
-		"port.target": "(name=/saiman/copley)"
+		"command.target": "(service.pid=uk.co.saiman.messaging.pipe~saintsimulation.copleycommand)",
+		"response.target": "(service.pid=uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse)"
 	},
 	"uk.co.saiman.comms.copley.simulation~saintsimulation": {
 		"axes": 2,
-		"port.target": "(name=/saiman/copley.simulation)"
+		"command.target": "(service.pid=uk.co.saiman.messaging.pipe~saintsimulation.copleycommand)",
+		"response.target": "(service.pid=uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse)"
 	},
-	"uk.co.saiman.comms.simulation.paired~saintsimulation.copley": {
-		"name": "/saiman/copley",
-		"partnerName": "/saiman/copley.simulation"
-	}
+	"uk.co.saiman.messaging.pipe~saintsimulation.copleycommand": {},
+	"uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse": {}
 }

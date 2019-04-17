@@ -176,6 +176,7 @@ runplatform: linux64
 	uk.co.saiman.instrument.stage.composed;version=snapshot,\
 	uk.co.saiman.instrument.stage.copley;version=snapshot,\
 	uk.co.saiman.instrument.vacuum;version=snapshot,\
+	uk.co.saiman.instrument.vacuum.maldi;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
 	uk.co.saiman.measurement.fx;version=snapshot,\

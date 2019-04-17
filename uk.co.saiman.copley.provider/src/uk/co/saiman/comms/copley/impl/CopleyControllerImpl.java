@@ -80,8 +80,8 @@ public class CopleyControllerImpl implements CopleyController {
   public CopleyControllerImpl(
       BundleContext context,
       @Reference ByteConverterService converters,
-      @Reference DataSender sender,
-      @Reference DataReceiver receiver)
+      @Reference(name = "command") DataSender sender,
+      @Reference(name = "response") DataReceiver receiver)
       throws IOException {
     this.context = context;
     this.converters = converters;

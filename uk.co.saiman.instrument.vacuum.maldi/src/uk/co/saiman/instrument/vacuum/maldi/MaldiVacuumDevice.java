@@ -56,6 +56,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.instrument.ConnectionState;
+import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
@@ -73,11 +74,13 @@ import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
 @Designate(ocd = MaldiVacuumConfiguration.class, factory = true)
-@Component(configurationPid = MaldiVacuumDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+@Component(configurationPid = MaldiVacuumDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+    Device.class,
+    VacuumDevice.class })
 public class MaldiVacuumDevice extends DeviceImpl<VacuumControl>
     implements VacuumDevice<VacuumControl> {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Maldi Vacuum Device", description = "A servive for interfacing with a Rabbit MQ message broker")
+  @ObjectClassDefinition(name = "Maldi Vacuum Device", description = "A vaccum device implementation for MALDI")
   public @interface MaldiVacuumConfiguration {
     @AttributeDefinition(name = "Sample Resolution", description = "The minimum resolvable units of time for samples")
     String sampleResolution() default DEFAULT_SAMPLE_RESOLUTION_SECONDS + "s";

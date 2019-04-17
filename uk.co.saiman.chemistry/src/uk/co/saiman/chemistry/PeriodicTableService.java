@@ -78,15 +78,19 @@ public class PeriodicTableService {
   /**
    * Activation registers the periodic table service.
    * 
-   * @param context
-   *          The bundle context in which to register our service
+   * @param context The bundle context in which to register our service
    */
   @SuppressWarnings("javadoc")
   @Activate
   public void activate(BundleContext context)
-      throws SAXException, IOException, ParserConfigurationException, XPathExpressionException {
-    Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
-        getClass().getResourceAsStream("PeriodicTable.xml"));
+      throws SAXException,
+      IOException,
+      ParserConfigurationException,
+      XPathExpressionException {
+    Document document = DocumentBuilderFactory
+        .newInstance()
+        .newDocumentBuilder()
+        .parse(getClass().getResourceAsStream("PeriodicTable.xml"));
     XPath xPath = XPathFactory.newInstance().newXPath();
 
     List<Element> elements = new ArrayList<>();
@@ -108,10 +112,11 @@ public class PeriodicTableService {
 
       for (int j = 0; j < isotopeNodes.getLength(); j++) {
         Node isotopeNode = isotopeNodes.item(j);
-        element = element.withIsotope(
-            getInt(isotopeNode, MASS_NUMBER),
-            getDouble(isotopeNode, MASS),
-            getDouble(isotopeNode, ABUNDANCE));
+        element = element
+            .withIsotope(
+                getInt(isotopeNode, MASS_NUMBER),
+                getDouble(isotopeNode, MASS),
+                getDouble(isotopeNode, ABUNDANCE));
       }
 
       elements.add(element);

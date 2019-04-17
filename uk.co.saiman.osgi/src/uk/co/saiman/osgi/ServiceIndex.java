@@ -43,7 +43,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 import uk.co.saiman.observable.HotObservable;
@@ -69,6 +68,8 @@ import uk.co.saiman.observable.Observable;
  * @param <T> the type of the service to track
  */
 public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U, T>> {
+  private static final String DEFAULT_KEY = Constants.SERVICE_PID;
+
   class ServiceRecordImpl implements ServiceRecord<S, U, T> {
     private final ServiceReference<S> reference;
 
@@ -144,7 +145,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
         context,
         clazz,
         identity(),
-        (s, reference) -> (String) reference.getProperty(ComponentConstants.COMPONENT_NAME));
+        (s, reference) -> (String) reference.getProperty(DEFAULT_KEY));
     serviceIndex.open();
     return serviceIndex;
   }
@@ -154,7 +155,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
         context,
         reference,
         identity(),
-        (s, r) -> (String) r.getProperty(ComponentConstants.COMPONENT_NAME));
+        (s, r) -> (String) r.getProperty(DEFAULT_KEY));
     serviceIndex.open();
     return serviceIndex;
   }
@@ -167,7 +168,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
         context,
         clazz,
         extractor,
-        (s, reference) -> (String) reference.getProperty(ComponentConstants.COMPONENT_NAME));
+        (s, reference) -> (String) reference.getProperty(DEFAULT_KEY));
     serviceIndex.open();
     return serviceIndex;
   }
@@ -180,7 +181,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
         context,
         reference,
         extractor,
-        (s, r) -> (String) r.getProperty(ComponentConstants.COMPONENT_NAME));
+        (s, r) -> (String) r.getProperty(DEFAULT_KEY));
     serviceIndex.open();
     return serviceIndex;
   }

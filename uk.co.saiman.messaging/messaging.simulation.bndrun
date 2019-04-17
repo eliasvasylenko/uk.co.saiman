@@ -6,7 +6,8 @@
 
 -runproperties:\
 	configurator.initial='{\
-		"uk.co.saiman.messaging.pipe~test": {}\
+		"uk.co.saiman.messaging.pipe~test": {\
+		}\
 	}',\
 	osgi.ws=gtk,\
 	osgi.os=linux,\
