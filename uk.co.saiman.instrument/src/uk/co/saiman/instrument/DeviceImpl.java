@@ -31,6 +31,16 @@ import java.util.concurrent.Semaphore;
 
 public abstract class DeviceImpl<T extends AutoCloseable> implements Device<T> {
   private final Semaphore semaphore = new Semaphore(1);
+  private final String name;
+
+  public DeviceImpl(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
 
   Semaphore getSemaphore() {
     return semaphore;

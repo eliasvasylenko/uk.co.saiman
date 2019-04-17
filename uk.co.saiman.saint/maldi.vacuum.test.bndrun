@@ -1,0 +1,74 @@
+Subsystem-SymbolicName: uk.co.saiman.comms.copley
+Subsystem-Type: osgi.subsystem.application
+
+-runvm:\
+	-Xmx1024m
+
+-runfw:\
+	org.eclipse.osgi
+
+-runee:\
+	JavaSE-1.8
+
+-runproperties:\
+	uk.co.saiman.configadmin.persistence=~/.saiman/test-config,\
+	osgi.ws=gtk,\
+	osgi.os=linux,\
+	osgi.arch=x86_64
+
+-include:\
+	${build}/include/felix.bndrun,\
+	${build}/include/utilities.bnd
+
+-runrequires:\
+	bnd.identity; id=uk.co.saiman.comms.copley,\
+	bnd.identity; id=uk.co.saiman.utilities,\
+	bnd.identity; id=uk.co.saiman.configadmin.persistence,\
+
+-runbundles: \
+	org.apache.felix.log;version='[1.0.1,1.0.2)',\
+	org.apache.felix.scr;version='[2.0.10,2.0.11)',\
+	org.apache.felix.configadmin;version='[1.8.16,1.8.17)',\
+	uk.co.saiman.configadmin.persistence;version=snapshot,\
+	org.eclipse.osgi.services;version='[3.6.0,3.6.1)',\
+	org.eclipse.equinox.metatype;version='[1.4.300,1.4.301)',\
+	osgi.enroute.logger.simple.provider;version='[2.1.0,2.1.1)',\
+	uk.co.saiman.jetty.logger;version=snapshot,\
+	biz.aQute.bndlib;version='[3.3.0,3.3.1)',\
+	org.apache.commons.fileupload;version='[1.3.2,1.3.3)',\
+	org.apache.commons.io;version='[2.5.0,2.5.1)',\
+	org.apache.felix.gogo.command;version='[0.16.0,0.16.1)',\
+	org.apache.felix.gogo.runtime;version='[0.16.2,0.16.3)',\
+	org.apache.felix.gogo.shell;version='[0.10.0,0.10.1)',\
+	org.apache.felix.http.jetty;version='[3.2.0,3.2.1)',\
+	org.apache.felix.http.servlet-api;version='[1.1.2,1.1.3)',\
+	org.apache.felix.inventory;version='[1.0.4,1.0.5)',\
+	org.apache.felix.webconsole;version='[4.3.0,4.3.1)',\
+	org.apache.felix.webconsole.plugins.ds;version='[2.0.8,2.0.9)',\
+	org.eclipse.equinox.event;version='[1.4.0,1.4.1)',\
+	osgi.enroute.bostock.d3.webresource;version='[3.5.6,3.5.7)',\
+	osgi.enroute.dtos.bndlib.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.executor.simple.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.rest.simple.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.web.simple.provider;version='[2.1.0,2.1.1)',\
+	osgi.enroute.webconsole.xray.provider;version='[2.1.0,2.1.1)',\
+	uk.co.saiman.axios.webresource;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.comms;version=snapshot,\
+	uk.co.saiman.comms.copley;version=snapshot,\
+	uk.co.saiman.comms.provider;version=snapshot,\
+	uk.co.saiman.comms.rest;version=snapshot,\
+	uk.co.saiman.comms.serial;version=snapshot,\
+	uk.co.saiman.facebook.react.dom.webresource;version=snapshot,\
+	uk.co.saiman.facebook.react.proptypes.webresource;version=snapshot,\
+	uk.co.saiman.facebook.react.redux.webresource;version=snapshot,\
+	uk.co.saiman.facebook.react.webresource;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.redux.thunk.webresource;version=snapshot,\
+	uk.co.saiman.redux.webresource;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.requirejs.webresource;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.webconsole.webresource;version=snapshot

@@ -75,9 +75,9 @@ public class SaintStage extends ComposedXYStage<ComposedXYStageControl> {
 
   @Activate
   public SaintStage(
-      @Reference Instrument instrument,
-      @Reference StageAxis<Length> xAxis,
-      @Reference StageAxis<Length> yAxis,
+      @Reference(name = "instrument") Instrument instrument,
+      @Reference(name = "xAxis") StageAxis<Length> xAxis,
+      @Reference(name = "yAxis") StageAxis<Length> yAxis,
       SaintStageConfiguration configuration) {
     super(
         configuration.name(),

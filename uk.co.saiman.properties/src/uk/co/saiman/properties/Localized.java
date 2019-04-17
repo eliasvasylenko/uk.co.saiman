@@ -28,12 +28,10 @@
 package uk.co.saiman.properties;
 
 import java.util.Locale;
+import java.util.Optional;
 
-import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
-import uk.co.saiman.observable.Observation;
-import uk.co.saiman.observable.Observer;
 
 /**
  * A localized property interface which is observable over the value changes due
@@ -51,8 +49,7 @@ public interface Localized<T> extends ObservableValue<T> {
   T get();
 
   /**
-   * @param locale
-   *          the locale to translate to
+   * @param locale the locale to translate to
    * @return the localized string value according to the given locale
    */
   T get(Locale locale);
@@ -60,10 +57,8 @@ public interface Localized<T> extends ObservableValue<T> {
   /**
    * Create a localized view of a value with a static locale.
    * 
-   * @param value
-   *          the localized value
-   * @param locale
-   *          the locale of the given text
+   * @param value  the localized value
+   * @param locale the locale of the given text
    * @return a localized string over the given text and locale
    */
   static <T> Localized<T> forStaticLocale(T value, Locale locale) {
@@ -84,31 +79,23 @@ public interface Localized<T> extends ObservableValue<T> {
       }
 
       @Override
-      public Disposable observe(Observer<? super T> observer) {
-        Observation observation = new Observation() {
-          @Override
-          public void cancel() {}
-
-          @Override
-          public void request(long count) {}
-
-          @Override
-          public long getPendingRequestCount() {
-            return Long.MAX_VALUE;
-          }
-        };
-        observer.onObserve(observation);
-        return observation;
-      }
-
-      @Override
       public ObservableValue<Locale> locale() {
-        return Observable.value(locale);
+        return ObservableValue.of(locale);
       }
 
       @Override
       public Observable<Change<T>> changes() {
         return Observable.empty();
+      }
+
+      @Override
+      public Optional<T> tryGet() {
+        return Optional.of(value);
+      }
+
+      @Override
+      public Observable<T> value() {
+        return Observable.of(value);
       }
     };
   }

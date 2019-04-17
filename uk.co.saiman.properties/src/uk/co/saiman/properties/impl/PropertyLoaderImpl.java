@@ -32,7 +32,6 @@ import static java.util.Objects.requireNonNull;
 import uk.co.saiman.collection.computingmap.CacheComputingMap;
 import uk.co.saiman.collection.computingmap.ComputingMap;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.properties.LocaleProvider;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.properties.PropertyResourceLoader;
@@ -49,10 +48,8 @@ public class PropertyLoaderImpl implements PropertyLoader {
   /**
    * Create a new {@link PropertyLoader} instance for the given initial locale.
    * 
-   * @param locale
-   *          the initial locale
-   * @param log
-   *          the log for localization
+   * @param locale the initial locale
+   * @param log    the log for localization
    */
   public PropertyLoaderImpl(
       LocaleProvider locale,
@@ -67,12 +64,6 @@ public class PropertyLoaderImpl implements PropertyLoader {
     this.resourceLoader = resourceLoader;
     this.valueConverter = valueConverter;
     this.log = requireNonNull(log);
-
-    if (log != null) {
-      getLocaleProvider().observe(l -> {
-        log.log(Level.INFO, String.format("Locale changed %s", l));
-      });
-    }
   }
 
   @Override

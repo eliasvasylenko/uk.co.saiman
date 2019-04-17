@@ -4,6 +4,7 @@
 		"sampleSource.target": "(service.pid=uk.co.saiman.simulation.samplesource.xystage~saintsimulation)"
 	},
 	"uk.co.saiman.simulation.instrument.acquisition~saintsimulation": {
+		"instrument.target": "(service.pid=uk.co.saiman.instrument~saint)",
 		"acquisitionResolution": "2.5E-7s",
 		"detector.target": "(service.pid=uk.co.saiman.simulation.adc~saintsimulation)"
 	},

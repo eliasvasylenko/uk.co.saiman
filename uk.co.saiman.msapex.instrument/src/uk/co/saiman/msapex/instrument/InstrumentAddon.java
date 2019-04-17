@@ -64,7 +64,7 @@ public class InstrumentAddon {
   void initialize() {
     context.set(Instrument.class, instrument);
 
-    instrument.lifecycleState().weakReference(this).observe(o -> {
+    instrument.lifecycleState().value().weakReference(this).observe(o -> {
       var event = o.message();
       o.owner().context.set(InstrumentLifecycleState.class, event);
     });

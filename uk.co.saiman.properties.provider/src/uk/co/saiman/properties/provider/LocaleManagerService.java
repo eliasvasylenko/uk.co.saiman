@@ -30,6 +30,7 @@ package uk.co.saiman.properties.provider;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -41,9 +42,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.Observer;
 import uk.co.saiman.properties.LocaleManager;
 import uk.co.saiman.properties.LocaleProvider;
 import uk.co.saiman.properties.provider.LocaleManagerService.LocaleManagerConfiguration;
@@ -54,15 +53,10 @@ import uk.co.saiman.properties.provider.LocaleManagerService.LocaleManagerConfig
  * @author Elias N Vasylenko
  */
 @Designate(ocd = LocaleManagerConfiguration.class)
-@Component(
-    name = LocaleManagerService.CONFIGURATION_PID,
-    configurationPid = LocaleManagerService.CONFIGURATION_PID)
+@Component(name = LocaleManagerService.CONFIGURATION_PID, configurationPid = LocaleManagerService.CONFIGURATION_PID)
 public class LocaleManagerService implements LocaleManager, LocaleProvider {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      id = CONFIGURATION_PID,
-      name = "Locale Configuration",
-      description = "The configuration for the user locale for the application")
+  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "Locale Configuration", description = "The configuration for the user locale for the application")
   public @interface LocaleManagerConfiguration {
     @AttributeDefinition(name = "Locale", description = "The user locale for the application")
     String locale() default "";
@@ -136,11 +130,6 @@ public class LocaleManagerService implements LocaleManager, LocaleProvider {
   }
 
   @Override
-  public Disposable observe(Observer<? super Locale> observer) {
-    return component.observe();
-  }
-
-  @Override
   public Observable<Change<Locale>> changes() {
     return component.changes();
   }
@@ -148,5 +137,15 @@ public class LocaleManagerService implements LocaleManager, LocaleProvider {
   @Override
   public void setProblem(Throwable t) {
     component.setProblem(t);
+  }
+
+  @Override
+  public Optional<Locale> tryGet() {
+    return component.tryGet();
+  }
+
+  @Override
+  public Observable<Locale> value() {
+    return component.value();
   }
 }

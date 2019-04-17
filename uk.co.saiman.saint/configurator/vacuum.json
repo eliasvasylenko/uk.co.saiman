@@ -1,0 +1,28 @@
+{
+	"uk.co.saiman.messaging.rabbitmq.host~saintvacuum": {
+		"url": "amqp://SAI@192.168.192.196/lt2",
+		"password": "LT2"
+	},
+	"uk.co.saiman.messaging.rabbitmq.exchange~saintvacuum.status": {
+		"host.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.host~saintvacuum)",
+		"exchangeName": "LaserToF",
+		"exchangeType": "fanout"
+	},
+	"uk.co.saiman.messaging.rabbitmq.queue~saintvacuum.status": {
+		"exchange.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.exchange~saintvacuum.status)"
+	},
+	"uk.co.saiman.messaging.rabbitmq.exchange~saintvacuum.command": {
+		"host.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.host~saintvacuum)",
+		"exchangeName": "LaserToFCommand",
+		"exchangeType": "fanout"
+	},
+	"uk.co.saiman.messaging.rabbitmq.publisher~saintvacuum.command": {
+		"exchange.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.exchange~saintvacuum.command)"
+	},
+	"uk.co.saiman.instrument.vacuum.maldi~saintvacuum": {
+		"instrument.target": "(service.pid=uk.co.saiman.instrument~saint)",
+		"status.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.queue~saintvacuum.status)",
+		"command.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.publisher~saintvacuum.command)",
+		"sampleResolution": "1s"
+	}
+}

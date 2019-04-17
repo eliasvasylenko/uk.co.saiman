@@ -58,22 +58,14 @@ import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 
 @Designate(ocd = CopleyLinearAxis.CopleyLinearAxisConfiguration.class, factory = true)
-@Component(
-    name = CopleyLinearAxis.CONFIGURATION_PID,
-    configurationPid = CopleyLinearAxis.CONFIGURATION_PID,
-    configurationPolicy = REQUIRE)
+@Component(name = CopleyLinearAxis.CONFIGURATION_PID, configurationPid = CopleyLinearAxis.CONFIGURATION_PID, configurationPolicy = REQUIRE)
 public class CopleyLinearAxis implements StageAxis<Length> {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.linear";
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      id = CONFIGURATION_PID,
-      name = "Copley Stage Linear Axis Configuration",
-      description = "The configuration for a linear Copley motor axis for a modular stage")
+  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "Copley Stage Linear Axis Configuration", description = "The configuration for a linear Copley motor axis for a modular stage")
   public @interface CopleyLinearAxisConfiguration {
-    @AttributeDefinition(
-        name = "Controller comms target",
-        description = "The copley controller instance owning the axis")
+    @AttributeDefinition(name = "Controller comms target", description = "The copley controller instance owning the axis")
     String comms_target();
 
     int axis() default 0;
@@ -91,7 +83,7 @@ public class CopleyLinearAxis implements StageAxis<Length> {
 
   @Activate
   public CopleyLinearAxis(
-      @Reference CopleyController comms,
+      @Reference(name = "comms") CopleyController comms,
       CopleyLinearAxisConfiguration configuration) {
     this(comms, configuration.node(), configuration.axis());
   }
@@ -106,22 +98,7 @@ public class CopleyLinearAxis implements StageAxis<Length> {
     fixedRate(0, 50, MILLISECONDS).observe(o -> updateActualLocation());
 
     this.axisState = new ObservablePropertyImpl<>(DISCONNECTED);
-    axisState.observe(s -> System.out.println(s));
-  }
-
-  protected void withAxis(Consumer<CopleyAxis> action, Runnable failure) {
-    CopleyAxis axis = comms
-        .getNodes()
-        .filter(n -> n.getId() == node)
-        .findFirst()
-        .flatMap(n -> n.getAxes().filter(a -> a.getAxisNumber() == this.axis).findFirst())
-        .orElse(null);
-
-    if (axis != null) {
-      action.accept(axis);
-    } else {
-      failure.run();
-    }
+    axisState.value().observe(s -> System.out.println(s));
   }
 
   @Override
@@ -131,9 +108,9 @@ public class CopleyLinearAxis implements StageAxis<Length> {
 
     axisState.set(LOCATION_REQUESTED);
 
-    withAxis(
-        axis -> axis.requestedPosition().set(new Int32(getStepsFromLength(location))),
-        () -> {});
+    comms
+        .getAxis(this.node, this.axis)
+        .ifPresent(axis -> axis.requestedPosition().set(new Int32(getStepsFromLength(location))));
   }
 
   @Override
@@ -143,9 +120,11 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   }
 
   void updateActualLocation() {
-    withAxis(
-        axis -> actualLocation.set(getLengthFromSteps(axis.actualPosition().get().value)),
-        () -> actualLocation.setProblem(new SampleLocationUnknown()));
+    comms
+        .getAxis(this.node, this.axis)
+        .ifPresentOrElse(
+            axis -> actualLocation.set(getLengthFromSteps(axis.actualPosition().get().value)),
+            () -> actualLocation.setProblem(new SampleLocationUnknown()));
   }
 
   public int getStepsFromLength(Quantity<Length> length) {

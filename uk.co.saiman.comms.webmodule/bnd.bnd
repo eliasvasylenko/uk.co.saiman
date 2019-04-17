@@ -16,11 +16,7 @@ webmodule.root: OSGI-INF/uk.co.saiman.webmodule
 
 -includeresource: \
 	{static=res},\
-	${webmodule.root}/index.js=webmodule/index.js,\
-	${webmodule.root}/actions.js=webmodule/actions.js,\
-	${webmodule.root}/reducers.js=webmodule/reducers.js,\
-	${webmodule.root}/comms-table.js=webmodule/comms-table.js,\
-	${webmodule.root}/comms-info.js=webmodule/comms-info.js
+	${webmodule.root}=webmodule
 
 Export-Package: \
 	uk.co.saiman.comms.webmodule

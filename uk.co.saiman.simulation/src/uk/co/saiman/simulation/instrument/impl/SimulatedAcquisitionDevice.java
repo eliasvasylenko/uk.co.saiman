@@ -58,9 +58,6 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.acquisition.AcquisitionControl;
-import uk.co.saiman.acquisition.AcquisitionDevice;
-import uk.co.saiman.acquisition.AcquisitionException;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
@@ -68,6 +65,9 @@ import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.InstrumentRegistration;
+import uk.co.saiman.instrument.acquisition.AcquisitionControl;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
+import uk.co.saiman.instrument.acquisition.AcquisitionException;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.HotObservable;
@@ -153,25 +153,21 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
    */
   public static final int DEFAULT_ACQUISITION_COUNT = 1000;
 
-  @Reference
-  private Log log;
-  private Unit<Dimensionless> intensityUnits;
-  private Unit<Time> timeUnits;
-  @Reference
-  private PropertyLoader loader;
-  private SimulationProperties simulationProperties;
-  @Reference
-  private Instrument instrument;
-  private DeviceRegistration instrumentRegistration;
+  private final Unit<Dimensionless> intensityUnit;
+  private final Unit<Time> timeUnit;
+
+  private final SimulationProperties simulationProperties;
+  private final DeviceRegistration instrumentRegistration;
+  private final Log log;
 
   /*
    * Instrument Configuration
    */
+  private final Quantity<Time> acquisitionResolution;
   private int acquisitionDepth;
   private int acquisitionCount;
-  private Quantity<Time> resolution;
 
-  @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
+  @Reference(name = "detector", cardinality = OPTIONAL, policy = DYNAMIC)
   private volatile DetectorSimulationService detectorService;
   private volatile DetectorSimulation detector;
 
@@ -192,23 +188,40 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
   private final Object acquiringLock = new Object();
   private Optional<ExperimentConfiguration> experiment;
 
-  public SimulatedAcquisitionDevice() {
+  @Activate
+  public SimulatedAcquisitionDevice(
+      AcquisitionSimulationConfiguration configuration,
+      @Reference PropertyLoader loader,
+      @Reference Log log,
+      @Reference(name = "instrument") Instrument instrument) {
+    this(
+        quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class),
+        loader.getProperties(SimulationProperties.class),
+        log,
+        instrument);
+  }
+
+  public SimulatedAcquisitionDevice(
+      Quantity<Time> acquisitionResolution,
+      SimulationProperties simulationProperties,
+      Log log,
+      Instrument instrument) {
+    super(simulationProperties.acquisitionSimulationDeviceName().toString());
+
+    this.acquisitionResolution = acquisitionResolution;
+    this.simulationProperties = simulationProperties;
+    this.log = log;
+
     acquisitionBuffer = new HotObservable<>();
     dataListeners = new HotObservable<>();
     acquisitionListeners = new HotObservable<>();
     acquisitionListeners.complete();
     acquiring = false;
     experiment = Optional.empty();
-  }
 
-  @Activate
-  synchronized void activate(AcquisitionSimulationConfiguration configuration) {
-    simulationProperties = loader.getProperties(SimulationProperties.class);
+    intensityUnit = count().getUnit();
+    timeUnit = second().getUnit();
 
-    intensityUnits = count().getUnit();
-    timeUnits = second().getUnit();
-
-    resolution = quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class);
     setAcquisitionTime(new Scalar<>(second(), DEFAULT_ACQUISITION_TIME_SECONDS));
     setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
@@ -241,11 +254,6 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
   @Override
   public InstrumentRegistration getInstrumentRegistration() {
     return instrumentRegistration.getInstrumentRegistration();
-  }
-
-  @Override
-  public String getName() {
-    return simulationProperties.acquisitionSimulationDeviceName().toString();
   }
 
   protected DetectorSimulation getDetector() {
@@ -384,7 +392,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
 
   @Override
   public Quantity<Time> getSampleResolution() {
-    return resolution;
+    return acquisitionResolution;
   }
 
   @Override
@@ -430,12 +438,12 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
 
   @Override
   public Unit<Time> getSampleTimeUnit() {
-    return timeUnits;
+    return timeUnit;
   }
 
   @Override
   public Unit<Dimensionless> getSampleIntensityUnit() {
-    return intensityUnits;
+    return intensityUnit;
   }
 
   @Override
@@ -445,7 +453,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
 
   @Override
   public ObservableValue<ConnectionState> connectionState() {
-    return Observable.value(CONNECTED);
+    return ObservableValue.of(CONNECTED);
   }
 
   @Override

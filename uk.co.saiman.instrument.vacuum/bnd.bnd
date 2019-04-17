@@ -1,6 +1,6 @@
 Bundle-Name: SAI :: Instrument :: Vacuum
 
-Export-Package: uk.co.saiman.vacuum
+Export-Package: uk.co.saiman.instrument.vacuum
 
 -buildpath: \
 	uk.co.saiman.observable;version=snapshot,\

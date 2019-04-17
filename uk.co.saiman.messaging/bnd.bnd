@@ -1,14 +1,14 @@
 Bundle-Name: SAI :: Messaging
 
 -buildpath: \
-	com.rabbitmq.client;version=latest,\
-	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
-	uk.co.saiman.reflection;version=snapshot,\
-	uk.co.saiman.text;version=snapshot,\
-	uk.co.saiman.utilities;version=snapshot
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
+	org.apache.felix.gogo.command,\
+	org.apache.felix.gogo.runtime,\
+	org.apache.felix.gogo.shell
 
 Export-Package: \
 	uk.co.saiman.messaging,\
-	uk.co.saiman.messaging.rabbitmq,\
-	uk.co.saiman.messaging.rest
+	uk.co.saiman.messaging.commands

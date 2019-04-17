@@ -27,40 +27,37 @@
  */
 package uk.co.saiman.observable;
 
-import static uk.co.saiman.observable.Observable.empty;
-import static uk.co.saiman.observable.Observable.failingValue;
-import static uk.co.saiman.observable.Observable.value;
+import static uk.co.saiman.observable.ObservableValue.empty;
+import static uk.co.saiman.observable.ObservableValue.of;
 
-public class MaterializingObserver<T> extends PassthroughObserver<T, Observable<T>> {
-  public MaterializingObserver(Observer<? super Observable<T>> downstreamObserver) {
+public class MaterializingObserver<T> extends PassthroughObserver<T, ObservableValue<T>> {
+  public MaterializingObserver(Observer<? super ObservableValue<T>> downstreamObserver) {
     super(downstreamObserver);
   }
 
   @Override
   public void onObserve(Observation observation) {
     /*
-     * TODO deal with backpressure properly! Consider that the extra "onNext"
-     * from "onFail" may not be requested.
+     * TODO deal with backpressure properly! Consider that the extra "onNext" from
+     * "onFail" may not be requested.
      */
     super.onObserve(observation);
   }
 
   @Override
   public void onNext(T message) {
-    getDownstreamObserver().onNext(value(message));
+    getDownstreamObserver().onNext(of(message));
   }
 
   @Override
   public void onFail(Throwable t) {
-    getDownstreamObserver().onNext(failingValue(t));
+    getDownstreamObserver().onNext(empty(t));
 
     super.onComplete();
   }
 
   @Override
   public void onComplete() {
-    getDownstreamObserver().onNext(empty());
-
     super.onComplete();
   }
 }

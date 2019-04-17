@@ -53,20 +53,19 @@ import java.util.function.Consumer;
  * operation.
  * 
  * @author Elias N Vasylenko
- * @param <M>
- *          The type of event message to produce
+ * @param <M> The type of event message to produce
  */
 public class HotObservable<M> implements Observable<M> {
   private boolean live = true;
   private Set<ObservationImpl<M>> observations;
   private final Executor executor;
 
-  public HotObservable(Executor executor) {
-    this.executor = requireNonNull(executor);
-  }
-
   public HotObservable() {
     this.executor = null;
+  }
+
+  public HotObservable(Executor executor) {
+    this.executor = requireNonNull(executor);
   }
 
   @Override
@@ -91,17 +90,34 @@ public class HotObservable<M> implements Observable<M> {
     };
 
     synchronized (this) {
-      if (observations == null)
+      boolean opened = observations == null;
+
+      if (opened) {
         observations = new LinkedHashSet<>();
+      }
       observations.add(observation);
 
       if (isLive()) {
         forObservers(singletonList(observation), ObservationImpl::onObserve);
+
+        if (opened) {
+          try {
+            open();
+          } catch (Throwable e) {
+            this.observations = null;
+            observation.onFail(e);
+            return observation;
+          }
+        }
       }
     }
 
     return observation;
   }
+
+  protected void open() throws Exception {}
+
+  protected void close() throws Exception {}
 
   public boolean hasObservers() {
     return observations != null;
@@ -110,6 +126,11 @@ public class HotObservable<M> implements Observable<M> {
   synchronized void cancelObservation(Observation observer) {
     if (observations != null && observations.remove(observer) && observations.isEmpty()) {
       observations = null;
+      try {
+        close();
+      } catch (Exception e) {
+        ((ObservationImpl<?>) observer).onFail(e);
+      }
     }
   }
 
@@ -152,16 +173,12 @@ public class HotObservable<M> implements Observable<M> {
       throw new IllegalStateException();
   }
 
-  void assertDead() {
-    if (live)
-      throw new IllegalStateException();
-  }
-
   public synchronized HotObservable<M> start() {
-    assertDead();
-    live = true;
+    if (!live) {
+      live = true;
 
-    forObservers(copyObservations(), o -> o.onObserve());
+      forObservers(copyObservations(), o -> o.onObserve());
+    }
 
     return this;
   }
@@ -169,8 +186,7 @@ public class HotObservable<M> implements Observable<M> {
   /**
    * Fire the given message to all observers.
    * 
-   * @param item
-   *          the message event to send
+   * @param item the message event to send
    * @return the receiver for method chaining
    */
   public synchronized HotObservable<M> next(M item) {

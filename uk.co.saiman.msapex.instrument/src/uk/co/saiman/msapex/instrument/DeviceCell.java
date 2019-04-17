@@ -42,7 +42,7 @@ public class DeviceCell {
   public void prepare(HBox node, Cell cell, Device<?> item) {
     cell.setLabel(item.getName());
 
-    item.connectionState().observe(state -> {
+    item.connectionState().value().observe(state -> {
       node.pseudoClassStateChanged(getPseudoClass(state.toString()), true);
       // cell.setIcon(iconFor(state));
       // TODO cell.setSupplemental(state.toString());

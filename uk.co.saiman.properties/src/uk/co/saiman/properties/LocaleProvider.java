@@ -28,11 +28,10 @@
 package uk.co.saiman.properties;
 
 import java.util.Locale;
+import java.util.Optional;
 
-import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
-import uk.co.saiman.observable.Observer;
 
 /**
  * Management interface over and associate {@link PropertyLoader localiser
@@ -68,8 +67,8 @@ public interface LocaleProvider extends ObservableValue<Locale> {
   static LocaleProvider getStaticProvider(Locale locale) {
     return new LocaleProvider() {
       @Override
-      public Disposable observe(Observer<? super Locale> observer) {
-        return Observable.of(locale).observe(observer);
+      public Observable<Locale> value() {
+        return Observable.of(locale);
       }
 
       @Override
@@ -80,6 +79,11 @@ public interface LocaleProvider extends ObservableValue<Locale> {
       @Override
       public Observable<Change<Locale>> changes() {
         return Observable.<Change<Locale>>empty();
+      }
+
+      @Override
+      public Optional<Locale> tryGet() {
+        return Optional.of(locale);
       }
     };
   }
@@ -103,7 +107,12 @@ class DefaultLocaleProvider implements LocaleProvider {
   }
 
   @Override
-  public Disposable observe(Observer<? super Locale> observer) {
-    return Observable.empty().observe();
+  public Optional<Locale> tryGet() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Observable<Locale> value() {
+    return Observable.empty();
   }
 }

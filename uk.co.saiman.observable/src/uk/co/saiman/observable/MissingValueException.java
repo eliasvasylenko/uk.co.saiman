@@ -30,11 +30,11 @@ package uk.co.saiman.observable;
 public class MissingValueException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
-  public MissingValueException(Observable<?> observable) {
+  public MissingValueException(Object observable) {
     this(observable, null);
   }
 
-  public MissingValueException(Observable<?> observable, Throwable t) {
+  public MissingValueException(Object observable, Throwable t) {
     super("Unable to obtain value from source " + observable, t);
   }
 

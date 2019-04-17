@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import uk.co.saiman.vacuum.VacuumDevice;
+import uk.co.saiman.instrument.vacuum.VacuumDevice;
 
 public class VacuumDeviceSelection {
   private List<VacuumDevice<?>> devices;

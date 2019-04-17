@@ -1,0 +1,54 @@
+-runvm:\
+	-Xmx1024m
+
+-runfw:\
+	org.eclipse.osgi
+
+-runproperties:\
+	configurator.initial='{\
+		"uk.co.saiman.messaging.pipe~test": {}\
+	}',\
+	osgi.ws=gtk,\
+	osgi.os=linux,\
+	osgi.arch=x86_64,\
+	osgi.console=,\
+	eclipse.log.enabled=true,\
+	equinox.log.history.max=25,\
+	eclipse.consoleLog=true
+
+-runbundles:\
+	org.apache.felix.configadmin;version=latest,\
+	org.apache.felix.configurator;version=latest,\
+	ch.qos.logback.classic;version=latest,\
+	ch.qos.logback.core;version=latest,\
+	slf4j.api;version=latest,\
+	org.apache.log4j;version=latest,\
+	org.apache.felix.logback;version=latest,\
+	org.apache.commons.logging;version=latest,\
+	org.apache.commons.io;version=latest,\
+	org.apache.commons.fileupload;version=latest,\
+	org.apache.felix.gogo.command;version=latest,\
+	org.apache.felix.gogo.runtime;version=latest,\
+	org.apache.felix.gogo.shell;version=latest,\
+	org.apache.felix.gogo.jline;version=latest,\
+	org.jline;version=latest,\
+	org.apache.felix.http.jetty;version=latest,\
+	org.apache.felix.http.servlet-api;version=latest,\
+	org.apache.felix.inventory;version=latest,\
+	org.apache.felix.scr;version=latest,\
+	org.apache.felix.webconsole;version=latest,\
+	org.apache.felix.webconsole.plugins.ds;version=latest,\
+	org.eclipse.equinox.event;version=latest,\
+	org.eclipse.equinox.metatype;version=latest,\
+	org.eclipse.osgi.services;version=latest,\
+	org.eclipse.osgi.util;version=latest,\
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.messaging;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	org.eclipse.equinox.coordinator;version=latest

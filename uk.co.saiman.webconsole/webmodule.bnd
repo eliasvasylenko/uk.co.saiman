@@ -5,7 +5,7 @@ Bundle-Description: \
 	Provides web console console utilities for SAI system administration.
 
 -includeresource: \
-	/OSGI-INF/uk.co.saiman.webmodule/index.js=webmodule/index.js
+	/OSGI-INF/uk.co.saiman.webmodule=webmodule
 
 Import-Package: \
 	org.apache.felix.webconsole

@@ -83,7 +83,7 @@ public class LocalizedConversion implements PropertyValueConversion<Localized<?>
 
       this.arguments = arguments;
 
-      locale().weakReference().observe(this);
+      locale().value().weakReference().observe(this);
       updateText(locale().get());
     }
 

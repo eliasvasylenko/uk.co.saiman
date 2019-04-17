@@ -37,18 +37,16 @@ import uk.co.saiman.property.Property;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of the value
+ * @param <T> the type of the value
  */
 public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
   /**
    * Instantiate an observable property with identity assignment and identity
    * equality.
    * 
-   * @param <T>
-   *          the type of event message to produce and which we may assign from
-   * @param initialValue
-   *          the initial value
+   * @param <T>          the type of event message to produce and which we may
+   *                     assign from
+   * @param initialValue the initial value
    * @return an observable property with the given default value
    */
   static <T> ObservableProperty<T> over(T initialValue) {
@@ -59,10 +57,9 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
    * Instantiate an observable property with identity assignment and identity
    * equality.
    * 
-   * @param <T>
-   *          the type of event message to produce and which we may assign from
-   * @param initialProblem
-   *          the initial problem
+   * @param <T>            the type of event message to produce and which we may
+   *                       assign from
+   * @param initialProblem the initial problem
    * @return an observable property with the given default value
    */
   static <T> ObservableProperty<T> over(Throwable initialProblem) {
@@ -79,7 +76,5 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
   }
 
   @Override
-  default Optional<T> tryGet() {
-    return ObservableValue.super.tryGet();
-  }
+  Optional<T> tryGet();
 }

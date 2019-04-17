@@ -34,10 +34,6 @@ import java.util.function.Predicate;
  * A value which can be {@link #get() fetched} and observed for updates and
  * {@link #changes() changes}.
  * <p>
- * Observable value adheres to the contract of {@link Observable}, with a few
- * extra restrictions on its behavior to conform to the semantics of a mutable
- * value.
- * <p>
  * An instance may send a {@link Observer#onComplete() completion} event to
  * indicate that it will not mutate beyond that point, but it should only send
  * this to an observer if it has already sent them a message event containing
@@ -50,39 +46,18 @@ import java.util.function.Predicate;
  * <p>
  * A common example of an error state may be {@link NullPointerException} when
  * there is no value available.
- * <p>
- * The observable should always be primed with either a message event or a
- * failure event immediately upon instantiation, and observers which subscribe
- * to the observable should always receive the last such event immediately upon
- * the first request made. Typically implementations may not support
- * backpressure, meaning a signal will always be propagated immediately upon
- * observation.
- * <p>
- * This means that the {@link #get()} method inherited from observable should
- * never block.
- * <p>
- * Invocation of {@link #get()} should be idempotent and always reflect the
- * current up-to-date state of the value. Invocation of
- * {@link #observe(Observer)} should also be idempotent.
- * <p>
- * This does <em>not</em> mean that implementations of {@link ObservableValue}
- * can never support backpressure, but it does mean that at any given moment the
- * implementation should only be prepared to fulfill a single request with the
- * latest value, and previous signals are discarded.
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of the value
+ * @param <T> the type of the value
  */
-public interface ObservableValue<T> extends Observable<T> {
+public interface ObservableValue<T> {
   /**
    * A value change event.
    * 
    * @author Elias N Vasylenko
    *
-   * @param <T>
-   *          the type of the value
+   * @param <T> the type of the value
    */
   interface Change<T> {
     ObservableValue<T> previousValue();
@@ -97,23 +72,7 @@ public interface ObservableValue<T> extends Observable<T> {
    * 
    * @return the current value
    */
-  @Override
   T get();
-
-  @Override
-  default ObservableValue<T> toValue() {
-    return this;
-  }
-
-  @Override
-  default ObservableValue<T> toValue(T initial) {
-    return this;
-  }
-
-  @Override
-  default ObservableValue<T> toValue(Throwable initialProblem) {
-    return this;
-  }
 
   /**
    * Immediately resolve the current value, if one exists.
@@ -121,12 +80,9 @@ public interface ObservableValue<T> extends Observable<T> {
    * @return an optional containing the current value, or an empty option if no
    *         value is available
    */
-  @Override
-  default Optional<T> tryGet() {
-    return Observable.super.tryGet();
-  }
+  Optional<T> tryGet();
 
-  default boolean isValid() {
+  default boolean isPresent() {
     return tryGet().isPresent();
   }
 
@@ -157,4 +113,18 @@ public interface ObservableValue<T> extends Observable<T> {
    * @return an observable over changes to the value
    */
   Observable<Change<T>> changes();
+
+  Observable<T> value();
+
+  static <M> ObservableValue<M> empty(Throwable failure) {
+    return new EmptyObservableValue<>(failure);
+  }
+
+  static <M> ObservableValue<M> empty() {
+    return empty(new NullPointerException());
+  }
+
+  static <M> ObservableValue<M> of(M value) {
+    return new ImmutableObservableValue<>(value);
+  }
 }

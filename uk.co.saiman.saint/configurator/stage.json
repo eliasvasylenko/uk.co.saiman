@@ -1,6 +1,7 @@
 {
 	"uk.co.saiman.instrument.stage.saint~saintsimulation": {
 		"name": "SAINT Stage",
+		"instrument.target": "(service.pid=uk.co.saiman.instrument~saint)",
 		"exchangeLocation": "0mm, -100mm",
 		"analysisLocation": "0mm, 0mm",
 		"lowerBound": "-27.5mm, -20mm",

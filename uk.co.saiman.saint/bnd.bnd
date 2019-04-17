@@ -7,6 +7,8 @@
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.bytes.conversion;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.resource;version=snapshot,\
@@ -15,9 +17,8 @@
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.camera;version=snapshot,\
 	uk.co.saiman.chemistry;version=snapshot,\
-	uk.co.saiman.comms;version=snapshot,\
-	uk.co.saiman.comms.copley;version=snapshot,\
-	uk.co.saiman.comms.saint;version=snapshot,\
+	uk.co.saiman.messaging.comms;version=snapshot,\
+	uk.co.saiman.copley;version=snapshot,\
 	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.data.function;version=snapshot,\
@@ -34,8 +35,10 @@
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
+	uk.co.saiman.instrument.vacuum;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.instrument.stage.composed;version=snapshot,\
+	uk.co.saiman.messaging;version=snapshot,\
 	uk.co.saiman.msapex.annotations;version=snapshot,\
 	uk.co.saiman.msapex.camera;version=snapshot,\
 	uk.co.saiman.msapex.chemistry;version=snapshot,\

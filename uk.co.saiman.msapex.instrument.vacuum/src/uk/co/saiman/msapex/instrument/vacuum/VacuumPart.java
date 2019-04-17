@@ -35,6 +35,7 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,6 +45,7 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.LocalInstance;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
@@ -52,8 +54,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.instrument.vacuum.VacuumDevice;
 import uk.co.saiman.msapex.instrument.vacuum.i18n.VacuumProperties;
-import uk.co.saiman.vacuum.VacuumDevice;
 
 /**
  * An Eclipse part for management and display of vacuum devices.
@@ -88,12 +90,13 @@ public class VacuumPart {
         ? emptySet()
         : devices.getSelectedDevices().collect(toCollection(LinkedHashSet::new));
 
-    for (VacuumDevice<?> oldDevice : currentSelection) {
+    for (VacuumDevice<?> oldDevice : List.copyOf(currentSelection)) {
       if (!newSelection.remove(oldDevice)) {
         deselectVacuumDevice(oldDevice);
         currentSelection.remove(oldDevice);
       }
     }
+
     for (VacuumDevice<?> newDevice : newSelection) {
       selectVacuumDevice(newDevice);
       currentSelection.add(newDevice);
@@ -114,23 +117,27 @@ public class VacuumPart {
   }
 
   private void selectVacuumDevice(VacuumDevice<?> vacuumDevice) {
-    noSelectionLabel.setVisible(false);
+    Platform.runLater(() -> {
+      noSelectionLabel.setVisible(false);
 
-    /*
-     * New chart controller for device
-     */
+      /*
+       * New chart controller for device
+       */
 
-    PressureChart chartController = new PressureChart(vacuumDevice);
-    controllers.put(vacuumDevice, chartController);
-    chartPane.getChildren().add(chartController.getNode());
-    HBox.setHgrow(chartController.getNode(), Priority.ALWAYS);
+      PressureChart chartController = new PressureChart(vacuumDevice);
+      controllers.put(vacuumDevice, chartController);
+      chartPane.getChildren().add(chartController.getNode());
+      HBox.setHgrow(chartController.getNode(), Priority.ALWAYS);
+    });
   }
 
   private void deselectVacuumDevice(VacuumDevice<?> vacuumDevice) {
-    PressureChart controller = controllers.remove(vacuumDevice);
+    Platform.runLater(() -> {
+      PressureChart controller = controllers.remove(vacuumDevice);
 
-    chartPane.getChildren().remove(controller.getNode());
+      chartPane.getChildren().remove(controller.getNode());
 
-    noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
+      noSelectionLabel.setVisible(chartPane.getChildren().isEmpty());
+    });
   }
 }

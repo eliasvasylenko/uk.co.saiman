@@ -37,7 +37,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.procedure.ConditionRequirement;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.Requirement;
@@ -45,6 +44,7 @@ import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.sample.XYStageConductor;
 import uk.co.saiman.experiment.spectrum.SpectrumConductor;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
 @Component
 public class SaintSpectrumConductor implements SpectrumConductor, Conductor<Condition<Void>> {

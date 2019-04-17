@@ -7,7 +7,7 @@ javac.source:		11
 javac.target:		11
 javac.compliance:	11
 javac.debug:		on
--runee:					JavaSE-11
+-runee:				JavaSE-11
 
 # The following lines are a hack to force IDE plugin publishing to P2 to work
 #Bundle-RequiredExecutionEnvironment: JavaSE-9
@@ -116,15 +116,15 @@ Bundle-Developers:\
 -plugin.Eclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
 		name				=	"Eclipse 2018‑12";\
-		url					=	http://download.eclipse.org/releases/2018-12;\
+		url					=	https://download.eclipse.org/releases/2018-12/
 		location			=	${build}/cache/eclipse-platform
 #		url					=	${fileuri;${build}/eclipse.platform.target};\
 #		targetPlatform		=	true
 
 -plugin.efxclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"E(fx)clipse Runtime Nightly (3.3.0+)";\
-		url					=	http://download.eclipse.org/efxclipse/runtime-nightly/site/;\
+		name				=	"E(fx)clipse Runtime (3.5.0)";\
+		url					=	https://download.eclipse.org/efxclipse/runtime-released/3.5.0/site/;\
 		location			=	${build}/cache/eclipse-fx
 
 javafx.platform: linux
@@ -168,13 +168,3 @@ javafx.version: 11
 ## Fix warnings
 -fixupmessages.res: "Bndtools: Found source folder 'res' that is not on bnd's source path 'src'"
 -fixupmessages.sub: "Eclipse: The Bundle Symbolic * is a sub-bundle *.bnd but uses the project name"
-
-# TODO Once a baseline release has been made this should point to it, and the local repo copy removed
--pluginpath.babel.transpiler: ${build}/local/uk.co.saiman.babel.transpiler.plugin/uk.co.saiman.babel.transpiler.plugin-0.0.1.jar
--plugin: uk.co.saiman.babel.transpiler.plugin.MakeTranspiled
--make:\
-	(*).js;\
-		type=transpile;\
-		source="$1.jsx";\
-		presets="react";\
-		plugins="transform-object-rest-spread"

@@ -1,10 +1,8 @@
 Bundle-Name: SAI :: SP Devices :: ADQ
 
-Private-Package: \
-	uk.co.saiman.acquisition.adq.impl
+Private-Package: uk.co.saiman.instrument.acquisition.adq.impl
 
-Export-Package: \
-	uk.co.saiman.acquisition.adq
+Export-Package: uk.co.saiman.instrument.acquisition.adq
 
 -buildpath: \
 	uk.co.saiman.instrument.acquisition;version=snapshot,\

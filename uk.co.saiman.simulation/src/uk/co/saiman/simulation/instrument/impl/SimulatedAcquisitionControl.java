@@ -32,8 +32,8 @@ import java.util.concurrent.TimeUnit;
 import javax.measure.Quantity;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.acquisition.AcquisitionControl;
 import uk.co.saiman.instrument.DeviceControlImpl;
+import uk.co.saiman.instrument.acquisition.AcquisitionControl;
 
 public class SimulatedAcquisitionControl extends DeviceControlImpl<SimulatedAcquisitionDevice>
     implements AcquisitionControl {

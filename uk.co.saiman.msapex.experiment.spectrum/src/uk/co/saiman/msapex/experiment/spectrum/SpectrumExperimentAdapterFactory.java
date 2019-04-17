@@ -34,8 +34,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.spectrum.SpectrumConductor;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
 @Component(immediate = true)
 public class SpectrumExperimentAdapterFactory implements IAdapterFactory {

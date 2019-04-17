@@ -45,9 +45,9 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.fx.core.di.Service;
 import org.osgi.framework.BundleContext;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.model.IndexedSelectionService;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.osgi.ServiceIndex;
 

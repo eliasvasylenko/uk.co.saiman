@@ -1,6 +1,6 @@
 Bundle-Name: SAI :: Instrument :: Acquisition
 
-Export-Package: uk.co.saiman.acquisition
+Export-Package: uk.co.saiman.instrument.acquisition
 
 -buildpath: \
 	uk.co.saiman.observable;version=snapshot,\

@@ -29,6 +29,7 @@ package uk.co.saiman.observable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
@@ -95,14 +96,14 @@ public class HotObservableTest {
   public void isDeadAfterCompleteTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.complete();
-    observable.assertDead();
+    assertFalse(observable.isLive());
   }
 
   @Test
   public void isDeadAfterFailTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.fail(new Throwable());
-    observable.assertDead();
+    assertFalse(observable.isLive());
   }
 
   @Test

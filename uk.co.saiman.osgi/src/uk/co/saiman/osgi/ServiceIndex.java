@@ -50,6 +50,20 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
 /**
+ * A service index is an OSGi service tracker which dynamically registers
+ * tracked services into an index. As services come and go, it extracts a key
+ * from the respective service reference and enters the reference into the index
+ * by that key.
+ * <p>
+ * By default the key extracted is the component name of the service. When
+ * multiple services are found with the same key, only the highest ranking is
+ * indexed.
+ * <p>
+ * The component name of a service can be used as a persistent id, so the
+ * default behavior of indexing by component name allows consumers to choose an
+ * indexed service, persist their choice, and then recall their choice as
+ * services come and go or at the next framework restart.
+ * 
  * @author Elias N Vasylenko
  *
  * @param <T> the type of the service to track
@@ -105,7 +119,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   private final Map<U, List<ServiceRecord<S, U, T>>> recordsById = new HashMap<>();
   private final HotObservable<ServiveEvent> events = new HotObservable<>();
 
-  public ServiceIndex(
+  private ServiceIndex(
       BundleContext context,
       Class<S> clazz,
       Function<S, T> extractor,
@@ -115,7 +129,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     this.indexer = indexer;
   }
 
-  public ServiceIndex(
+  private ServiceIndex(
       BundleContext context,
       String reference,
       Function<S, T> extractor,

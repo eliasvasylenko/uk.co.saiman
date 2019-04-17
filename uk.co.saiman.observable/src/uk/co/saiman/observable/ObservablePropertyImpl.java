@@ -30,6 +30,7 @@ package uk.co.saiman.observable;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A simple implementation of {@link ObservableProperty} which maintains a list
@@ -39,8 +40,7 @@ import java.util.Objects;
  * synchronized on the implementation object.
  * 
  * @author Elias N Vasylenko
- * @param <T>
- *          the type of event message to produce
+ * @param <T> the type of event message to produce
  */
 public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
   private final HotObservable<T> backingObservable;
@@ -63,7 +63,7 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
     return observer -> backingObservable
         .materialize()
         .repeating()
-        .observe(new PassthroughObserver<Observable<T>, Change<T>>(observer) {
+        .observe(new PassthroughObserver<ObservableValue<T>, Change<T>>(observer) {
           private ObservableValue<T> previousValue;
 
           @Override
@@ -73,9 +73,9 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
           }
 
           @Override
-          public void onNext(Observable<T> message) {
+          public void onNext(ObservableValue<T> message) {
             ObservableValue<T> previousValue = this.previousValue;
-            ObservableValue<T> newValue = message.toValue();
+            ObservableValue<T> newValue = message;
             this.previousValue = newValue;
 
             getDownstreamObserver().onNext(new Change<T>() {
@@ -95,23 +95,15 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
 
   public ObservableValue<T> currentState() {
     if (value != null) {
-      return Observable.value(value);
+      return ObservableValue.of(value);
     } else {
-      return Observable.failingValue(failure);
+      return ObservableValue.empty(failure);
     }
   }
 
   @Override
-  public synchronized Disposable observe(Observer<? super T> observer) {
-    ObservationImpl<T> disposable = backingObservable.observeImpl(observer);
-
-    if (value != null) {
-      disposable.onNext(value);
-    } else {
-      disposable.onFail(failure);
-    }
-
-    return disposable;
+  public Observable<T> value() {
+    return backingObservable.prefixing(this::get);
   }
 
   @Override
@@ -143,5 +135,10 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
     if (value == null)
       throw new MissingValueException(this, failure);
     return value;
+  }
+
+  @Override
+  public Optional<T> tryGet() {
+    return Optional.ofNullable(value);
   }
 }

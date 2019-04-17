@@ -15,8 +15,8 @@ Bundle-Name: SAI :: Instrument :: Stage :: Copley
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
-	uk.co.saiman.comms.copley;version=snapshot,\
-	uk.co.saiman.comms;version=snapshot,\
+	uk.co.saiman.copley;version=snapshot,\
+	uk.co.saiman.messaging.comms;version=snapshot,\
 \
 	javax.measure.unit-api
 

@@ -37,11 +37,6 @@ import static uk.co.saiman.properties.Key.UNQUALIFIED_DOTTED;
  */
 @Key(UNQUALIFIED_DOTTED)
 public interface SaiProperties {
-  /**
-   * Namespace for GoGo commands.
-   */
-  public static String SAI_COMMAND_SCOPE = "sai";
-
   String copyrightHolderName();
 
   String copyrightHolderEmail();

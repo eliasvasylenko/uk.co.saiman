@@ -258,22 +258,20 @@ public interface Observable<M> {
     return observer -> observe(new RepeatingObserver<>(observer, this));
   }
 
-  default Observable<Observable<M>> materialize() {
+  default Observable<M> prefixing(Supplier<M> value) {
+    return observer -> observe(new PrefixingObserver<>(value, observer));
+  }
+
+  default Observable<ObservableValue<M>> materialize() {
     return observer -> observe(new MaterializingObserver<>(observer));
   }
 
   default ObservableValue<M> toValue() {
-    return toValue(new MissingValueException(this));
-  }
+    ObservableProperty<M> value = tryGet()
+        .map(ObservablePropertyImpl::new)
+        .orElse(new ObservablePropertyImpl<>(new NullPointerException()));
 
-  default ObservableValue<M> toValue(M initial) {
-    ObservableProperty<M> value = new ObservablePropertyImpl<>(tryGet().orElse(initial));
-    observe(new Observer<M>() {
-      @Override
-      public void onObserve(Observation observation) {
-        observation.requestUnbounded();
-      }
-
+    requestUnbounded().observe(new Observer<M>() {
       @Override
       public void onNext(M message) {
         value.set(message);
@@ -287,12 +285,14 @@ public interface Observable<M> {
     return value;
   }
 
-  default ObservableValue<M> toValue(Throwable initialProblem) {
-    ObservableProperty<M> value = tryGet()
-        .map(ObservablePropertyImpl::new)
-        .orElse(new ObservablePropertyImpl<>(initialProblem));
+  default ObservableValue<M> toValue(M initial) {
+    ObservableProperty<M> value = new ObservablePropertyImpl<>(tryGet().orElse(initial));
+    observe(new Observer<M>() {
+      @Override
+      public void onObserve(Observation observation) {
+        observation.requestUnbounded();
+      }
 
-    requestUnbounded().observe(new Observer<M>() {
       @Override
       public void onNext(M message) {
         value.set(message);
@@ -658,12 +658,8 @@ public interface Observable<M> {
     return of(observables).concatMap(identity());
   }
 
-  static <M> ObservableValue<M> failingValue(Throwable failure) {
-    return new FailingObservableValue<>(failure);
-  }
-
-  static <M> ObservableValue<M> value(M value) {
-    return new ImmutableObservableValue<>(value);
+  static <M> Observable<M> failing(Throwable failure) {
+    return new FailingObservable<>(failure);
   }
 
   static Observable<Long> fixedRate(long delay, long period, TimeUnit time) {

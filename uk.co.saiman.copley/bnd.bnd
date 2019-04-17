@@ -1,0 +1,21 @@
+Bundle-Name: SAI :: Copley
+
+-buildpath: \
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.bytes.conversion;version=snapshot,\
+	uk.co.saiman.messaging.comms;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+	org.apache.aries.javax.jax.rs-api,\
+	javax.measure.unit-api,\
+	uk.co.saiman.reflection.token,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.text;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+	org.apache.aries.javax.jax.rs-api,\
+	javax.measure.unit-api

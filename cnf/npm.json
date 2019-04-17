@@ -36,6 +36,7 @@
 		},
 		"requirejs": "^2.3.5",
 		"systemjs": "^0.21.3",
-		"babel-standalone": "^6.24.0"
+		"babel-standalone": "^6.24.0",
+		"lighterhtml": "0.9.3"
 	}
 }

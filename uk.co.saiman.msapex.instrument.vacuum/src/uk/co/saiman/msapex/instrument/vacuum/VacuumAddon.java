@@ -47,9 +47,9 @@ import org.osgi.framework.BundleContext;
 
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
 import uk.co.saiman.eclipse.model.IndexedSelectionService;
+import uk.co.saiman.instrument.vacuum.VacuumDevice;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.osgi.ServiceIndex;
-import uk.co.saiman.vacuum.VacuumDevice;
 
 /**
  * Register a vacuum device selection in the application context and persist the

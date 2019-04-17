@@ -1,0 +1,39 @@
+Bundle-Name: SAI :: Comms :: Provider
+
+-buildpath: \
+	uk.co.saiman.bytes;version=snapshot,\
+	uk.co.saiman.messaging;version=snapshot,\
+	uk.co.saiman.messaging.comms;version=snapshot,\
+\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
+	uk.co.saiman.webconsole;version=snapshot,\
+	uk.co.saiman.webmodules;version=snapshot,\
+\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+\
+	com.fazecast:jSerialComm,\
+	org.apache.felix.gogo.command,\
+	org.apache.felix.gogo.runtime,\
+	org.apache.felix.gogo.shell
+
+-includeresource: \
+	@${repo;com.fazecast:jSerialComm}!/Android/*,\
+	@${repo;com.fazecast:jSerialComm}!/Linux/*,\
+	@${repo;com.fazecast:jSerialComm}!/OSX/*,\
+	@${repo;com.fazecast:jSerialComm}!/Windows/*,\
+	l10n
+
+Import-Package: \
+	*
+
+Private-Package: \
+	uk.co.saiman.comms.impl,\
+\
+	com.fazecast.jSerialComm

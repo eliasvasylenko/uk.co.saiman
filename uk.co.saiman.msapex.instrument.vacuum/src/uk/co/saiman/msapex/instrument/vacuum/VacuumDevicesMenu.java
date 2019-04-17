@@ -43,7 +43,7 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 import org.eclipse.fx.core.di.Service;
 
-import uk.co.saiman.vacuum.VacuumDevice;
+import uk.co.saiman.instrument.vacuum.VacuumDevice;
 
 /**
  * Track vacuum devices available through OSGi services and select which device

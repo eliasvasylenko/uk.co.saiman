@@ -87,7 +87,7 @@ public class FxUtilities {
    * returning the result upon completion. This method is safe whether or not the
    * invoking thread is the event thread.
    * 
-   * @param          <T> The type of value to result from the action
+   * @param <T>      The type of value to result from the action
    * @param runnable The action to execute
    * @return The result of invoking the given supplier
    */
@@ -117,8 +117,8 @@ public class FxUtilities {
    * Create a new observable list as a transformation of a component observable
    * list.
    * 
-   * @param           <T> the type of the elements of the new list
-   * @param           <U> the type of the elements of the component list
+   * @param <T>       the type of the elements of the new list
+   * @param <U>       the type of the elements of the component list
    * @param component the component list
    * @param mapper    a mapping from the type of the elements of the component
    *                  list to the type of the elements of the new list
@@ -258,8 +258,8 @@ public class FxUtilities {
    * Create a new observable set as a transformation of a component observable
    * set.
    * 
-   * @param           <T> the type of the elements of the new set
-   * @param           <U> the type of the elements of the component set
+   * @param <T>       the type of the elements of the new set
+   * @param <U>       the type of the elements of the component set
    * @param component the component set
    * @param mapper    a mapping from the type of the elements of the component set
    *                  to the type of the elements of the new set
@@ -291,7 +291,7 @@ public class FxUtilities {
   /**
    * Create an observable list view of an observable set.
    * 
-   * @param           <T> the type of the elements of the set
+   * @param <T>       the type of the elements of the set
    * @param component the set to wrap as a list
    * @return a list whose contents are backed by the given set
    */
@@ -316,7 +316,7 @@ public class FxUtilities {
   /**
    * Create an observable set view of an observable list.
    * 
-   * @param           <T> the type of the elements of the list
+   * @param <T>       the type of the elements of the list
    * @param component the list to wrap as a set
    * @return a set whose contents are backed by the given list
    */
@@ -353,7 +353,7 @@ public class FxUtilities {
    * Wrap an {@link uk.co.saiman.observable.Observable} with a JavaFX equivalent
    * {@link ObservableValue}.
    * 
-   * @param            <T> the type of the value
+   * @param <T>        the type of the value
    * @param observable the observable value to wrap
    * @param initial    the initial value of the wrapping observable value
    * @return a JavaFX observable value backed by the given observable
@@ -370,12 +370,12 @@ public class FxUtilities {
    * Wrap an {@link uk.co.saiman.observable.ObservableValue} with a JavaFX
    * equivalent {@link ObservableValue}.
    * 
-   * @param            <T> the type of the value
+   * @param <T>        the type of the value
    * @param observable the observable value to wrap
    * @return a JavaFX observable value backed by the given observable value
    */
   public static <T> ObservableValue<T> wrap(uk.co.saiman.observable.ObservableValue<T> observable) {
-    return wrap(observable, observable.get());
+    return wrap(observable.value(), observable.get());
   }
 
   /**

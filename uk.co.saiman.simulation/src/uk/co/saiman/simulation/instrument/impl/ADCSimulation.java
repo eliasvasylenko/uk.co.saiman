@@ -43,8 +43,8 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.acquisition.AcquisitionBufferPool;
 import uk.co.saiman.data.function.SampledDomain;
+import uk.co.saiman.instrument.acquisition.AcquisitionBufferPool;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.SimulatedSampleSource;

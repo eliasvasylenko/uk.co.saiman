@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
 public class AcquisitionDeviceSelection {
   private List<AcquisitionDevice<?>> devices;

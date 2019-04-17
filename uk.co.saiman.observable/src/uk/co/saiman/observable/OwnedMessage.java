@@ -27,8 +27,14 @@
  */
 package uk.co.saiman.observable;
 
+import java.util.function.BiConsumer;
+
 public interface OwnedMessage<O, M> {
   O owner();
 
   M message();
+
+  default void apply(BiConsumer<? super O, ? super M> action) {
+    action.accept(owner(), message());
+  }
 }

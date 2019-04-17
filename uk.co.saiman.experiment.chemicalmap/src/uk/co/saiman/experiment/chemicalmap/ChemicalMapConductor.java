@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.experiment.procedure.ConductionContext;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.product.Condition;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**

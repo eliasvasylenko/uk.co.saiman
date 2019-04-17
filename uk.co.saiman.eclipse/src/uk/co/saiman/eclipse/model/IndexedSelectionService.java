@@ -150,11 +150,11 @@ public abstract class IndexedSelectionService<T, U> {
       if (selectedRecord != null) {
         var selectedObject = selectedRecord.serviceObject();
         indexedSelection.put(selectedIndex, selectedObject);
-        modified = selection.add(selectedObject) | modified;
+        modified = selection.add(selectedObject) || modified;
 
       } else {
         var selectedObject = indexedSelection.put(selectedIndex, null);
-        modified = selection.remove(selectedObject) | modified;
+        modified = selection.remove(selectedObject) || modified;
       }
     }
 

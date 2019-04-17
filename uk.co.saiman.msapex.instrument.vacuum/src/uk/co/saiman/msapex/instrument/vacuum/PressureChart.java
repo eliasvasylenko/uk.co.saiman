@@ -13,12 +13,12 @@ import javax.measure.quantity.Time;
 import javafx.scene.Node;
 import uk.co.saiman.data.function.ArraySampledContinuousFunction;
 import uk.co.saiman.data.function.IrregularSampledDomain;
+import uk.co.saiman.instrument.vacuum.VacuumDevice;
+import uk.co.saiman.instrument.vacuum.VacuumSample;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 import uk.co.saiman.msapex.chart.MetricTickUnits;
 import uk.co.saiman.msapex.chart.QuantityAxis;
-import uk.co.saiman.vacuum.VacuumDevice;
-import uk.co.saiman.vacuum.VacuumSample;
 
 public class PressureChart {
   private final ContinuousFunctionChart<Time, Pressure> chart;

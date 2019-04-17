@@ -36,7 +36,6 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.acquisition.AcquisitionDevice;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.spectrum.ContinuousFunctionAccumulator;
 import uk.co.saiman.data.spectrum.SampledSpectrum;
@@ -52,6 +51,7 @@ import uk.co.saiman.experiment.product.Condition;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
+import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most

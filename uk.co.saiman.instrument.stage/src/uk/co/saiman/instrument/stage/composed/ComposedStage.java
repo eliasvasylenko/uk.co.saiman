@@ -62,7 +62,6 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     ANALYSING, EXCHANGING
   }
 
-  private final String name;
   private final DeviceRegistration registration;
   private final Set<StageAxis<?>> axes;
 
@@ -84,7 +83,7 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
       T analysisLocation,
       T exchangeLocation,
       StageAxis<?>... axes) {
-    this.name = name;
+    super(name);
     this.axes = new HashSet<>(asList(axes));
     this.analysisLocation = analysisLocation;
     this.exchangeLocation = exchangeLocation;
@@ -93,20 +92,17 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     this.connectionState = over(DISCONNECTED);
     this.sampleState = over(ANALYSIS_LOCATION_FAILED);
     this.requestedLocation = ObservableProperty.over(exchangeLocation);
-    this.requestedLocation.observe(l -> setRequestedLocation(ANALYSING, l));
+    this.requestedLocation.value().observe(l -> setRequestedLocation(ANALYSING, l));
     this.actualLocation = ObservableProperty.over(exchangeLocation);
 
     this.axisObservations = concat(
-        this.axes.stream().map(a -> a.axisState().observe(s -> updateState())),
-        this.axes.stream().map(a -> a.actualLocation().observe(p -> updateActualLocation())))
-            .collect(toList());
+        this.axes.stream().map(a -> a.axisState().value().observe(s -> updateState())),
+        this.axes
+            .stream()
+            .map(a -> a.actualLocation().value().observe(p -> updateActualLocation())))
+                .collect(toList());
 
     this.registration = instrument.registerDevice(this);
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override
@@ -184,7 +180,7 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     if (mode != Mode.EXCHANGING) {
       setRequestedLocation(Mode.EXCHANGING, exchangeLocation);
 
-      return sampleState().filter(s -> EXCHANGE_REQUESTED != s).get();
+      return sampleState().value().filter(s -> EXCHANGE_REQUESTED != s).get();
     } else {
       return sampleState().get();
     }
@@ -194,7 +190,7 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     if (mode != Mode.ANALYSING) {
       setRequestedLocation(Mode.ANALYSING, analysisLocation);
 
-      return sampleState().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
+      return sampleState().value().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
     } else {
       return sampleState().get();
     }
@@ -207,7 +203,7 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
 
     setRequestedLocation(Mode.ANALYSING, location);
 
-    return sampleState().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
+    return sampleState().value().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
   }
 
   synchronized void setRequestedLocation(Mode mode, T location) {

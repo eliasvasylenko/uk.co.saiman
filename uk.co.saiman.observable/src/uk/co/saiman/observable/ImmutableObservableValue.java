@@ -27,31 +27,13 @@
  */
 package uk.co.saiman.observable;
 
+import java.util.Optional;
+
 public class ImmutableObservableValue<T> implements ObservableValue<T> {
   private final T value;
 
   public ImmutableObservableValue(T value) {
     this.value = value;
-  }
-
-  @Override
-  public Disposable observe(Observer<? super T> observer) {
-    ObservationImpl<T> observation = new ObservationImpl<T>(observer) {
-      @Override
-      public synchronized void request(long count) {}
-
-      @Override
-      public synchronized long getPendingRequestCount() {
-        return Long.MAX_VALUE;
-      }
-
-      @Override
-      protected void cancelImpl() {}
-    };
-    observation.onObserve();
-    observation.onNext(value);
-    observation.onComplete();
-    return observation;
   }
 
   @Override
@@ -62,5 +44,15 @@ public class ImmutableObservableValue<T> implements ObservableValue<T> {
   @Override
   public Observable<Change<T>> changes() {
     return new EmptyObservable<>();
+  }
+
+  @Override
+  public Optional<T> tryGet() {
+    return Optional.of(value);
+  }
+
+  @Override
+  public Observable<T> value() {
+    return Observable.of(value);
   }
 }
