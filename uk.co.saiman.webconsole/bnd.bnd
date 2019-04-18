@@ -6,10 +6,6 @@
 	org.apache.felix.webconsole,\
 \
 	uk.co.saiman.webmodule.axios.amd;version=latest,\
-	uk.co.saiman.webmodule.react.amd;version=latest,\
-	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
-	uk.co.saiman.webmodule.prop-types.cjs;version=latest,\
-	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
-	uk.co.saiman.webmodule.redux-thunk.amd;version=latest
+	uk.co.saiman.webmodule.lighterhtml.esm;version=latest
 
 -sub: *.bnd

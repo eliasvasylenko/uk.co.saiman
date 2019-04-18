@@ -1,42 +1,18 @@
 {
+	"format": "esm",
 	"dependencies": {
-		"axios": {
-			"version": "0",
-			"format": "amd",
-			"entry.point": "dist/axios.js"
+		"requirejs": {
+			"version": "^2.3.5",
+			"format": "cjs"
 		},
-		"react": {
-			"version": "^16.3.0",
-			"format": "amd",
-			"entry.point": "umd/react.development.js",
-			"dependencies": {
-				
-			}
+		"systemjs": {
+			"version": "^0.21.3",
+			"format": "cjs"
 		},
-		"react-redux": {
-			"version": "^5.0.0",
-			"format": "amd",
-			"entry.point": "dist/react-redux.js"
+		"babel-standalone":  {
+			"version": "^6.24.0",
+			"format": "cjs"
 		},
-		"redux-thunk": {
-			"version": "^2.1.0",
-			"format": "amd",
-			"entry.point": "dist/redux-thunk.js"
-		},
-		"redux": {
-			"version": "^4.0.0",
-			"format": "amd",
-			"entry.point": "dist/redux.js"
-		},
-		"prop-types": "^15.0.0",
-		"react-dom": {
-			"version": "^16.3.0",
-			"format": "amd",
-			"entry.point": "umd/react-dom.development.js"
-		},
-		"requirejs": "^2.3.5",
-		"systemjs": "^0.21.3",
-		"babel-standalone": "^6.24.0",
 		"lighterhtml": "0.9.3"
 	}
 }

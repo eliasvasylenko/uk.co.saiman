@@ -242,7 +242,10 @@ public class WebModuleServlet extends HttpServlet {
     if (module.format().equals(ESM_FORMAT) && resource.endsWith(JS_EXTENSION)) {
       try {
         source = getTranspiler()
-            .transpile(source, asList("transform-es2015-modules-amd"), asList("es2015"));
+            .transpile(
+                source,
+                asList("transform-es2015-modules-amd", "transform-object-rest-spread"),
+                asList("es2015"));
       } catch (ScriptException e) {
         throw new IOException(format(TRANSPILATION_FAILED, module.id()), e);
       }

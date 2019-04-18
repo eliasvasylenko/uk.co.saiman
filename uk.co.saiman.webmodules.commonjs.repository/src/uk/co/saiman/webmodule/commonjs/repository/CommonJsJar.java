@@ -54,6 +54,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Stream;
@@ -303,6 +304,63 @@ public class CommonJsJar {
       parts.add(builder.toString());
     }
 
-    return parts.stream();
+    return parts.stream().map(part -> sanitizeJavaNamePart(part, separated));
+  }
+
+  static String sanitizeJavaNamePart(String name, boolean separated) {
+    return (separated
+        && Set
+            .of(
+                "abstract",
+                "continue",
+                "for",
+                "new",
+                "switch",
+                "assert",
+                "default",
+                "goto",
+                "package",
+                "synchronized",
+                "boolean",
+                "do",
+                "if",
+                "private",
+                "this",
+                "break",
+                "double",
+                "implements",
+                "protected",
+                "throw",
+                "byte",
+                "else",
+                "import",
+                "public",
+                "throws",
+                "case",
+                "enum",
+                "instanceof",
+                "return",
+                "transient",
+                "catch",
+                "extends",
+                "int",
+                "short",
+                "try",
+                "char",
+                "final",
+                "interface",
+                "static",
+                "void",
+                "class",
+                "finally",
+                "long",
+                "strictfp",
+                "volatile",
+                "const",
+                "float",
+                "native",
+                "super",
+                "while")
+            .contains(name)) ? "_" + name : name;
   }
 }

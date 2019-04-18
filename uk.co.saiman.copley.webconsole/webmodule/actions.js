@@ -47,7 +47,7 @@ export const POLLING_STATES = {
  * utilities
  */
 
-const handleError = (dispatch, type, extra) => (error) => {
+const handleError = (present, type, extra) => (error) => {
   if (error.response) {
     error = {
       message: error.response.statusText + " (" + error.response.status + ")",
@@ -72,7 +72,7 @@ const handleError = (dispatch, type, extra) => (error) => {
 
   error = { ...extra, ...error }
   
-  dispatch({
+  present({
     type: type,
     error
   })
@@ -115,31 +115,31 @@ const api = {
 	variable : (controller, node, axis, variable) => api.variables(controller, node, axis) + "/" + variable
 }
 
-export const translate = (key, ...args) => (dispatch, getState) => {
-  getState().locale
+export const translate = (locale, key, ...args) => (present) => {
+  locale
 }
 
-export const setLocale = (locale) => (dispatch) => {
-  dispatch({ type: SET_LOCALE, payload: locale })
+export const setLocale = (locale) => (present) => {
+  present({ type: SET_LOCALE, payload: locale })
 }
 
-export const requestInfo = () => (dispatch) => {
-  dispatch({ type: REQUEST_SYSTEM_INFO })
+export const requestInfo = () => (present) => {
+  present({ type: REQUEST_SYSTEM_INFO })
 
   axios.get(api.system())
     .then(data => {
-      dispatch({
+      present({
         type: RECEIVE_SYSTEM_INFO,
         payload: {
           ...data.data
         }
       })
     })
-    .catch(handleError(dispatch, RECEIVE_SYSTEM_INFO))
+    .catch(handleError(present, RECEIVE_SYSTEM_INFO))
 }
 
-export const requestControllerInfo = () => (dispatch) => {
-  dispatch({ type: REQUEST_CONTROLLER_INFO })
+export const requestControllerInfo = () => (present) => {
+  present({ type: REQUEST_CONTROLLER_INFO })
 
   Promise.all([
     axios.get(controllerInfoAPI + commsRestID),
@@ -147,7 +147,7 @@ export const requestControllerInfo = () => (dispatch) => {
     axios.get(actionsInfoAPI + commsRestID)
   ])
     .then(data => {
-      dispatch({
+      present({
         type: RECEIVE_CONTROLLER_INFO,
         payload: {
           ...data[0].data,
@@ -156,11 +156,11 @@ export const requestControllerInfo = () => (dispatch) => {
         }
       })
     })
-    .catch(handleError(dispatch, RECEIVE_CONTROLLER_INFO))
+    .catch(handleError(present, RECEIVE_CONTROLLER_INFO))
 }
 
-export const openConnection = () => (dispatch, getState) => {
-  dispatch({ type: REQUEST_OPEN_CONNECTION_STATE })
+export const openConnection = () => (present) => {
+  present({ type: REQUEST_OPEN_CONNECTION_STATE })
 
   const request = {
     url : openCommsAPI,
@@ -172,20 +172,20 @@ export const openConnection = () => (dispatch, getState) => {
     .then(data => {
       if (typeof data.data.error !== typeof undefined)
         throw data.data
-      dispatch({
+      present({
         type: CONNECTION_STATE_CHANGED,
         payload: data.data
       })
 
-      dispatch(requestControllerInfo())
+      present(requestControllerInfo())
     })
-    .catch(handleError(dispatch, CONNECTION_STATE_CHANGED))
+    .catch(handleError(present, CONNECTION_STATE_CHANGED))
 }
 
-export const closeConnection = () => (dispatch, getState) => {
-  dispatch({ type: REQUEST_CLOSED_CONNECTION_STATE })
+export const closeConnection = () => (present) => {
+  present({ type: REQUEST_CLOSED_CONNECTION_STATE })
 
-  setPollingEnabled(false)(dispatch, getState)
+  setPollingEnabled(false)(present)
 
   const request = {
     url : closeCommsAPI,
@@ -197,29 +197,26 @@ export const closeConnection = () => (dispatch, getState) => {
     .then(data => {
       if (typeof data.data.error !== typeof undefined)
         throw data.data
-      dispatch({
+      present({
         type: CONNECTION_STATE_CHANGED,
         payload: data.data
       })
 
-      dispatch({ type: CLEAR_REQUESTED_VALUES })
+      present({ type: CLEAR_REQUESTED_VALUES })
     })
-    .catch(handleError(dispatch, CONNECTION_STATE_CHANGED))
+    .catch(handleError(present, CONNECTION_STATE_CHANGED))
 }
 
-const pollAction = (action) => (dispatch, getState) => {
-  const { entries, entriesByID } = getState()
-
-  const applicableEntries = entries
-    .map(entry => entriesByID[entry])
+const pollAction = (entries, action) => (present) => {
+  const entries = entries
     .filter(entry => entry.actions.includes(action.id))
   
-  const actionRequests = applicableEntries
-    .map(entry => createExecutionRequest(entry, action, dispatch))
+  const actionRequests = entries
+    .map(entry => createExecutionRequest(entry, action, present))
 
-  dispatch({
+  present({
     type: SEND_POLL_REQUEST,
-    entries: applicableEntries.map(entry => entry.id),
+    entries: entries.map(entry => entry.id),
     action: action.id
   })
 
@@ -228,7 +225,7 @@ const pollAction = (action) => (dispatch, getState) => {
       const result = {}
 
       for (let i in data) {
-        const entry = applicableEntries[i]
+        const entry = entries[i]
         const entryData = data[i].data
 
         if (typeof entryData.error !== typeof undefined)
@@ -237,7 +234,7 @@ const pollAction = (action) => (dispatch, getState) => {
         result[entry.id] = entryData
       }
 
-      dispatch({
+      present({
         type: RECEIVE_POLL_RESPONSE,
         action: action.id,
         payload: result
@@ -245,61 +242,42 @@ const pollAction = (action) => (dispatch, getState) => {
     })
 }
 
-const poll = (dispatch, getState) => {
-  const { pollingStatus, actions, actionsByID } = getState()
-
-  dispatch({ type: POLL_TICK })
-
-  if (pollingStatus !== POLLING_STATES.ENABLED)
-    return
-
-  const pollableActions = actions
-    .map(action => actionsByID[action])
-    .filter(action => action.pollable)
+const poll = (entries, actions) => (present) => {
+  present({ type: POLL_TICK })
 
   let requests = Promise.resolve([])
-  for (let action of pollableActions) {
-    requests = requests.then(responses => [ ...responses, dispatch(pollAction(action)) ])
+  for (let action of actions) {
+    requests = requests.then(responses => [ ...responses, present(pollAction(entries, action)) ])
   }
-  requests.then(responses => {
-    setTimeout(() => poll(dispatch, getState), 350)
-  })
-  .catch(handleError(dispatch, RECEIVE_POLL_RESPONSE))
+  requests.catch(handleError(present, RECEIVE_POLL_RESPONSE))
 }
 
-export const setPollingEnabled = (enablePolling) => (dispatch, getState) => {
-  const { pollingStatus } = getState()
-
-  dispatch({
+export const setPollingEnabled = (enablePolling) => (present) => {
+  present({
     type: SET_POLLING_ENABLED,
     payload: enablePolling
   })
-
-  if (enablePolling && pollingStatus === POLLING_STATES.DISABLED)
-    poll(dispatch, getState)
 }
 
-export const sendExecutionRequest = (entry, action) => (dispatch, getState) => {
-  const { entriesByID, actionsByID } = getState()
+export const sendExecutionRequest = (entry, action) => (present) => {
+  const request = createExecutionRequest(entry, action, present)
 
-  const request = createExecutionRequest(entriesByID[entry], actionsByID[action], dispatch)
-
-  dispatch({
+  present({
     type: SEND_EXECUTION_REQUEST,
-    entry: entry,
-    action: action
+    entry: entry.id,
+    action: action.id
   })
 
   return axios(request)
     .then(data => {
       if (typeof data.data.error !== typeof undefined)
         throw data.data
-      dispatch({
+      present({
         type: RECEIVE_EXECUTION_RESPONSE,
-        entry,
-        action,
+        entry: entry.id,
+        action: action.id,
         payload: data.data
       })
     })
-    .catch(handleError(dispatch, RECEIVE_EXECUTION_RESPONSE))
+    .catch(handleError(present, RECEIVE_EXECUTION_RESPONSE))
 }

@@ -44,6 +44,7 @@ import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.FORMAT_
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.RESOURCE_ROOT_ATTRIBUTE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.json.JSONObject;
@@ -54,13 +55,17 @@ import org.osgi.resource.Resource;
 
 import aQute.bnd.osgi.resource.CapReqBuilder;
 import aQute.bnd.osgi.resource.CapabilityBuilder;
+import aQute.bnd.osgi.resource.FilterBuilder;
 import aQute.bnd.osgi.resource.RequirementBuilder;
 import aQute.bnd.version.VersionRange;
 import uk.co.saiman.webmodule.ModuleFormat;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.WebModule;
 import uk.co.saiman.webmodule.WebModuleConstants;
+import uk.co.saiman.webmodule.commonjs.Dependency;
+import uk.co.saiman.webmodule.commonjs.DependencyKind;
 import uk.co.saiman.webmodule.commonjs.RegistryResolutionException;
+import uk.co.saiman.webmodule.semver.Range;
 
 public class CommonJsResource implements Resource {
   private final PackageId name;
@@ -71,15 +76,11 @@ public class CommonJsResource implements Resource {
   private final List<CapReqBuilder> requirements;
   private final List<CapReqBuilder> capabilities;
 
-  CommonJsResource(
-      PackageId name,
-      Version version,
-      BundleVersionConfiguration configuration,
-      JSONObject json) {
-    this.name = name;
-    this.version = version;
+  CommonJsResource(CommonJsBundleVersion bundleVersion, BundleVersionConfiguration configuration) {
+    this.name = bundleVersion.getBundle().getModuleName();
+    this.version = bundleVersion.getVersion();
     this.format = configuration.format();
-    this.entryPoint = getEntryPoint(json, configuration);
+    this.entryPoint = getEntryPoint(bundleVersion.getPackageJson(), configuration);
 
     /*
      * 
@@ -91,8 +92,8 @@ public class CommonJsResource implements Resource {
 
     this.requirements = concat(
         Stream.of(createExtenderRequirement()),
-        createDependencyRequirements(json)).collect(toList());
-    this.capabilities = Stream.of(createModuleServiceCapability(json)).collect(toList());
+        createDependencyRequirements(bundleVersion)).collect(toList());
+    this.capabilities = Stream.of(createModuleServiceCapability()).collect(toList());
   }
 
   private String getEntryPoint(JSONObject json, BundleVersionConfiguration configuration) {
@@ -119,7 +120,7 @@ public class CommonJsResource implements Resource {
     return null;
   }
 
-  private CapReqBuilder createModuleServiceCapability(JSONObject packageJson) {
+  private CapReqBuilder createModuleServiceCapability() {
     try {
       CapReqBuilder builder = new CapabilityBuilder(this, SERVICE_NAMESPACE)
           .setResource(this)
@@ -153,12 +154,46 @@ public class CommonJsResource implements Resource {
     }
   }
 
-  private Stream<CapReqBuilder> createDependencyRequirements(JSONObject packageJson) {
+  private Stream<CapReqBuilder> createDependencyRequirements(CommonJsBundleVersion bundleVersion) {
     try {
-      // TODO Auto-generated method stub
-      return Stream.empty();
+      return bundleVersion
+          .getDependencies()
+          .map(bundleVersion::getDependencyVersion)
+          .map(this::createDependencyRequirement)
+          .flatMap(Optional::stream);
+    } catch (RegistryResolutionException e) {
+      throw e;
     } catch (Exception e) {
       throw new RegistryResolutionException("Failed to generate dependency requirements", e);
+    }
+  }
+
+  private Optional<CapReqBuilder> createDependencyRequirement(Dependency dependency) {
+    try {
+      if (dependency.getKind() == DependencyKind.VERSION_RANGE) {
+        return Optional
+            .of(
+                new RequirementBuilder(SERVICE_NAMESPACE)
+                    .setResource(this)
+                    .addAttribute(EXTENDER_VERSION_ATTRIBUTE, EXTENDER_VERSION)
+                    .addDirective(
+                        REQUIREMENT_FILTER_DIRECTIVE,
+                        new FilterBuilder()
+                            .and()
+                            .eq(CAPABILITY_OBJECTCLASS_ATTRIBUTE, WebModule.class.getName())
+                            .eq(ID_ATTRIBUTE, dependency.getPackageId().toString())
+                            .literal(
+                                dependency
+                                    .getVersion(DependencyKind.VERSION_RANGE)
+                                    .map(Range::toOsgiFilterString)
+                                    .get())
+                            .end()
+                            .toString()));
+      } else {
+        return Optional.empty();
+      }
+    } catch (Exception e) {
+      throw new RegistryResolutionException("Failed to generate dependency requirement", e);
     }
   }
 

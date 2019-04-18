@@ -105,6 +105,10 @@ public class CommonJsBundleVersion {
       if (!formatConfigurations.containsKey(format))
         formatConfigurations.put(format, configuration);
     }
+
+    getDependencies()
+        .map(this::getDependencyVersion)
+        .forEach(bundle.getRepository()::configureBundle);
   }
 
   public CommonJsBundle getBundle() {
@@ -122,13 +126,7 @@ public class CommonJsBundleVersion {
         return Optional.empty();
       } else {
         CommonJsResource resource = resources
-            .computeIfAbsent(
-                format,
-                r -> new CommonJsResource(
-                    getBundle().getModuleName(),
-                    getVersion(),
-                    configuration,
-                    getPackageJson()));
+            .computeIfAbsent(format, r -> new CommonJsResource(this, configuration));
         return Optional.ofNullable(resource);
       }
     }

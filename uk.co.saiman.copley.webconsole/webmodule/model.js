@@ -1,4 +1,3 @@
-import Thunk from "redux-thunk"
 import {
   REQUEST_INFO,
   RECEIVE_INFO,
@@ -25,7 +24,8 @@ import {
 import { translate } from "@saiman/copley-i18n/../fr.js"
 
 const UNKNOWN_TEXT = "..."
-const initialState = {
+
+var model = {
   /*
    * Info
    */
@@ -182,82 +182,82 @@ function executionResponse(entriesByID, { entry, payload }) {
   return entriesByID
 }
 
-function copleyApp(state = initialState, action) {
+function present(action) {
   if (typeof action.error !== typeof undefined) {
-    return handleError(state, action)
+    return handleError(model, action)
   }
 
-  if (typeof state.connection.fault !== typeof undefined) {
-    state = { ...state, connection: { ...state.connection } }
-    delete state.connection.fault
+  if (typeof model.connection.fault !== typeof undefined) {
+    model = { ...model, connection: { ...state.connection } }
+    delete model.connection.fault
   }
 
-  if (typeof state.fault !== typeof undefined) {
-    state = { ...state }
-    delete state.fault
+  if (typeof model.fault !== typeof undefined) {
+    model = { ...model }
+    delete model.fault
   }
 
   console.log(action.type)
 
   switch (action.type) {
   case SET_LOCALE:
-  	state = { ...state, locale: action.payload }
+  	model = { ...model, locale: action.payload }
   	break
   case REQUEST_INFO:
-    state = { ...state, waiting: true }
+    model = { ...model, waiting: true }
     break
   case RECEIVE_INFO:
-    state = { ...state, ...action.payload }
+    model = { ...model, ...action.payload }
     break
 
   case REQUEST_CONTROLLER_INFO:
-    state = { ...state, waiting: true }
+    model = { ...model, waiting: true }
     break
   case RECEIVE_CONTROLLER_INFO:
-    state = { ...state, ...action.payload }
+    model = { ...model, ...action.payload }
     break
 
   case CLEAR_REQUESTED_VALUES:
-    state = { ...state, entriesByID: clearData(state.entriesByID) }
+    model = { ...model, entriesByID: clearData(model.entriesByID) }
     break
   case CHANGE_REQUESTED_VALUE:
-    state = { ...state, entriesByID: requestValue(state.entriesByID, action) }
+    model = { ...model, entriesByID: requestValue(model.entriesByID, action) }
     break
 
   case REQUEST_CONNECTION_STATE:
-    state = { ...state, connection: setConnection(state.connection, action.payload) }
+    model = { ...model, connection: setConnection(model.connection, action.payload) }
     break
   case CONNECTION_STATE_CHANGED:
-    state = { ...state, connection: changeConnection(state.connection, action.payload) }
+    model = { ...model, connection: changeConnection(model.connection, action.payload) }
     break
 
   case SET_COMMAND_FILTER:
-    state = { ...state, entriesFilter: action.payload }
+    model = { ...model, entriesFilter: action.payload }
     break
 
   case SET_POLLING_ENABLED:
-    state = { ...state, pollingStatus: enablePolling(state.pollingStatus, action.payload) }
+    model = { ...model, pollingStatus: enablePolling(model.pollingStatus, action.payload) }
     break
   case POLL_TICK:
-    state = { ...state, pollingStatus: pollTick(state.pollingStatus) }
+    model = { ...model, pollingStatus: pollTick(model.pollingStatus) }
     break
   case SEND_POLL_REQUEST:
-    state = { ...state, entriesByID: pollingRequest(state.entriesByID, action) }
+    model = { ...model, entriesByID: pollingRequest(model.entriesByID, action) }
     break
   case RECEIVE_POLL_RESPONSE:
-    state = { ...state, entriesByID: pollingResponse(state.entriesByID, action) }
+    model = { ...model, entriesByID: pollingResponse(model.entriesByID, action) }
     break
   case SEND_EXECUTION_REQUEST:
-    state = { ...state, entriesByID: executionRequest(state.entriesByID, action) }
+    model = { ...model, entriesByID: executionRequest(model.entriesByID, action) }
     break
   case RECEIVE_EXECUTION_RESPONSE:
-    state = { ...state, entriesByID: executionResponse(state.entriesByID, action) }
+    model = { ...model, entriesByID: executionResponse(model.entriesByID, action) }
     break
 
   default:
   }
 
-  return state
+  state.render(model)
 }
 
 function handleError(state, action) {
@@ -287,4 +287,8 @@ function handleError(state, action) {
   return state
 }
 
-export default copleyApp
+export const dispatch = (action) => {
+	action(present)
+}
+
+export default dispatch

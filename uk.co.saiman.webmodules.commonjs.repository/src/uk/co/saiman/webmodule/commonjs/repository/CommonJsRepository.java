@@ -42,8 +42,10 @@ import java.util.stream.Stream;
 
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -86,28 +88,17 @@ import uk.co.saiman.webmodule.commonjs.registry.Registry;
  * @author Elias N Vasylenko
  */
 @Designate(ocd = CommonJsRepository.CommonJsRepositoryConfiguration.class, factory = true)
-@Component(
-    immediate = true,
-    configurationPid = CommonJsRepository.CONFIGURATION_PID,
-    configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, configurationPid = CommonJsRepository.CONFIGURATION_PID, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class CommonJsRepository extends BaseRepository implements Repository {
-  @ObjectClassDefinition(
-      name = "CommonJS Repository",
-      description = "The CommonJS repository service provides OSGi bundles containing javascript module resources, and the capabilities to resolve them")
+  @ObjectClassDefinition(name = "CommonJS Repository", description = "The CommonJS repository service provides OSGi bundles containing javascript module resources, and the capabilities to resolve them")
   public @interface CommonJsRepositoryConfiguration {
-    @AttributeDefinition(
-        name = "Initial Dependencies",
-        description = "A path to a JSON file in the format of the value of a \"dependencies\" attribute as specified by CommonJS/NPM")
+    @AttributeDefinition(name = "Initial Dependencies", description = "A path to a JSON file in the format of the value of a \"dependencies\" attribute as specified by CommonJS/NPM")
     String initialDependencies();
 
-    @AttributeDefinition(
-        name = "Local Cache",
-        description = "A local cache directory for CommonJS artifacts and generated bundles")
+    @AttributeDefinition(name = "Local Cache", description = "A local cache directory for CommonJS artifacts and generated bundles")
     String localCache();
 
-    @AttributeDefinition(
-        name = "BSN Prefix",
-        description = "The prefix for the BSNs and packages of generated bundles")
+    @AttributeDefinition(name = "BSN Prefix", description = "The prefix for the BSNs and packages of generated bundles")
     String bsnPrefix();
   }
 
@@ -122,28 +113,18 @@ public class CommonJsRepository extends BaseRepository implements Repository {
   private boolean initialized;
   private final Map<PackageId, CommonJsBundle> resources = new HashMap<>();
 
-  /*- TODO
   @Activate
-  CommonJsRepository(
+  public CommonJsRepository(
       @Reference Registry registry,
       @Reference Log log,
       CommonJsRepositoryConfiguration configuration) {
-    this.registry = registry;
-    this.log = log;
-    this.primaryModules = new HashSet<>(asList(configuration.moduleNames()));
-    // TODO load initial dependencies
-    configuration.initialDependencies();?
-    this.cache = Paths.get(configuration.localCache());
-    this.bsnPrefix = configuration.bsnPrefix();
-  
-    try {
-      createDirectories(cache);
-    } catch (Exception e) {
-      log.log(Level.ERROR, e);
-      throw new RegistryResolutionException("Unable to create cache directory " + cache, e);
-    }
+    this(
+        registry,
+        log,
+        Path.of(configuration.initialDependencies()),
+        Path.of(configuration.localCache()),
+        configuration.bsnPrefix());
   }
-  */
 
   public CommonJsRepository(
       Registry registry,

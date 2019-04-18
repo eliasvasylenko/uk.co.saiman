@@ -39,12 +39,9 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.osgi.annotation.bundle.Requirement;
 
-import uk.co.saiman.webmodule.react.RequireReactWebModule;
-
 /**
  * A Web Resource that provides RequireJS javascript files.
  */
-@RequireReactWebModule
 @Requirement(
     namespace = SERVICE_NAMESPACE,
     filter = "(" + ID_ATTRIBUTE + "=" + SAI_WEB_CONSOLE_WEB_MODULE_NAME + ")",

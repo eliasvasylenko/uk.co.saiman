@@ -32,6 +32,11 @@ import java.net.URL;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.commonjs.Resolver;
 
+/**
+ * A CommonJS format registry of packages.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface Registry extends Resolver {
   PackageRoot getPackageRoot(PackageId name);
 

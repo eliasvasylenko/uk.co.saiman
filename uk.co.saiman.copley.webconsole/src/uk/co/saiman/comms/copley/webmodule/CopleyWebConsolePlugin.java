@@ -81,31 +81,15 @@ import org.osgi.service.component.annotations.Deactivate;
 import uk.co.saiman.comms.webmodule.RequireSaiCommsWebModule;
 import uk.co.saiman.webconsole.RequireSaiWebConsoleWebModule;
 import uk.co.saiman.webmodule.ProvideWebModule;
-import uk.co.saiman.webmodule.axios.RequireAxiosWebModule;
-import uk.co.saiman.webmodule.react.RequireReactWebModule;
-import uk.co.saiman.webmodule.react.dom.RequireReactDomWebModule;
-import uk.co.saiman.webmodule.react.redux.RequireReactReduxWebModule;
-import uk.co.saiman.webmodule.redux.RequireReduxWebModule;
-import uk.co.saiman.webmodule.redux.thunk.RequireReduxThunkWebModule;
+import uk.co.saiman.webmodule.lighterhtml.RequireLighterhtmlWebModule;
 
-@RequireReactWebModule
-@RequireReactDomWebModule
-@RequireReactReduxWebModule
-@RequireReduxThunkWebModule
-@RequireReduxWebModule
-@RequireAxiosWebModule
+@RequireLighterhtmlWebModule
 @RequireSaiWebConsoleWebModule
 @RequireSaiCommsWebModule
-@ProvideWebModule(
-    id = COPLEY_WEB_MODULE_NAME,
-    version = COPLEY_WEB_MODULE_VERSION,
-    entryPoint = DEFAULT_ENTRY_POINT,
-    resourceRoot = DEFAULT_RESOURCE_ROOT,
-    format = ESM)
-@Component(
-    immediate = true,
-    service = Servlet.class,
-    property = PLUGIN_LABEL + "=" + COPLEY_PLUGIN_ID)
+@ProvideWebModule(id = COPLEY_WEB_MODULE_NAME, version = COPLEY_WEB_MODULE_VERSION, entryPoint = DEFAULT_ENTRY_POINT, resourceRoot = DEFAULT_RESOURCE_ROOT, format = ESM)
+@Component(immediate = true, service = Servlet.class, property = PLUGIN_LABEL
+    + "="
+    + COPLEY_PLUGIN_ID)
 public class CopleyWebConsolePlugin extends SimpleWebConsolePlugin {
   public static final String COPLEY_PLUGIN_ID = "uk.co.saiman.copley";
 
@@ -140,7 +124,8 @@ public class CopleyWebConsolePlugin extends SimpleWebConsolePlugin {
   @SuppressWarnings("unchecked")
   @Override
   protected void renderContent(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
+      throws ServletException,
+      IOException {
 
     DefaultVariableResolver component = (DefaultVariableResolver) getVariableResolver(request);
     component.put(REST_ID, getLabel());

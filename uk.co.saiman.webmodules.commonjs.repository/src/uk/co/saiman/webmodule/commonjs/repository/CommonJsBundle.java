@@ -70,6 +70,9 @@ public class CommonJsBundle {
     this.resources = new HashMap<>();
   }
 
+  /*
+   * Someone has a dependency on us
+   */
   void configureDependency(Dependency dependency) {
     if (dependency.getKind() == VERSION_RANGE) {
       configureVersions(dependency.getVersion(VERSION_RANGE).get());
@@ -108,12 +111,6 @@ public class CommonJsBundle {
         getLog().log(WARN, "Cannot initialize version " + version, e);
         return;
       }
-
-      CommonJsBundleVersion bundleVersionFinal = bundleVersion;
-      bundleVersionFinal
-          .getDependencies()
-          .map(bundleVersionFinal::getDependencyVersion)
-          .forEach(repository::configureBundle);
     }
   }
 

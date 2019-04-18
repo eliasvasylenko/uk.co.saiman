@@ -20,12 +20,7 @@ Bundle-Name: SAI :: Copley :: Web Console
 	uk.co.saiman.webmodules;version=snapshot,\
 	uk.co.saiman.webmodules.i18n;version=snapshot,\
 	uk.co.saiman.webmodule.axios.amd;version=latest,\
-	uk.co.saiman.webmodule.react.amd;version=latest,\
-	uk.co.saiman.webmodule.react-dom.amd;version=latest,\
-	uk.co.saiman.webmodule.prop-types.cjs;version=latest,\
-	uk.co.saiman.webmodule.react-redux.amd;version=latest,\
-	uk.co.saiman.webmodule.redux-thunk.amd;version=latest,\
-	uk.co.saiman.webmodule.redux.amd;version=latest
+	uk.co.saiman.webmodule.lighterhtml.esm;version=latest
 
 Private-Package: \
 	uk.co.saiman.comms.copley.webmodule

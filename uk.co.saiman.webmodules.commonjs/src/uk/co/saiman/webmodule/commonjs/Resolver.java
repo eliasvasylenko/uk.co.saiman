@@ -29,6 +29,13 @@ package uk.co.saiman.webmodule.commonjs;
 
 import java.util.stream.Stream;
 
+/**
+ * A generic interface to resolve CommonJS dependencies from, abstracted over
+ * any particular mechanism of resolution or supported {@link DependencyKind
+ * kind} of dependency.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface Resolver {
   Stream<PackageVersion> resolve(Dependency dependency);
 }

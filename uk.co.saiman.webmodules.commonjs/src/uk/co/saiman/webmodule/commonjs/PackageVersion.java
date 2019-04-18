@@ -32,6 +32,14 @@ import java.util.stream.Stream;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.semver.Version;
 
+/**
+ * A CommonJS registry package version. Provides at least one {@link Resource
+ * resource} containing the module, but may contain multiple resources of
+ * different {@link ResourceType types}. Also provides the dependencies of the
+ * package version.
+ * 
+ * @author Elias N Vasylenko
+ */
 public interface PackageVersion {
   PackageId getName();
 

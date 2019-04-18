@@ -1,6 +1,3 @@
-import * as React from 'react'
-import { connect } from 'react-redux'
-
 import {
   ConsoleComponent,
   FilterBox,
@@ -18,9 +15,9 @@ import {
   POLLING_STATES
 } from './actions.js'
 
-const CommsData = (enums, items = {}, changeValue) =>
+const CommsData = (enums, items = {}, changeValue) => html`
   <div className="commsData">
-    {
+    ${
       Object.keys(items).map(item => CommsDataItem(
         enums,
         item,
@@ -31,12 +28,13 @@ const CommsData = (enums, items = {}, changeValue) =>
       ))
     }
   </div>
+`
 
-const CommsDataItem = (enums, item, value, changeValue) => {
-  return <div key={item} className="commsDataItem">
-    <label>{item}</label>
+const CommsDataItem = (enums, item, value, changeValue) => html`
+  <div key=${item} className="commsDataItem">
+    <label>${item}</label>
     <span>
-      {
+      ${
         (typeof value === typeof [])
           ? value.map((value, index) => CommsDataValue(
               enums,
@@ -50,7 +48,7 @@ const CommsDataItem = (enums, item, value, changeValue) => {
       }
     </span>
   </div>
-}
+`
 
 const CommsDataValue = (enums, index, value, change) => {
   const type = typeof value
@@ -70,32 +68,26 @@ const CommsDataValue = (enums, index, value, change) => {
     for (let enumType in enums) {
       if (enums[enumType].includes(value)) {
         if (change) {
-          return (
-            <select key={index} value={value} onChange={event => change(event.target.value)}>
-              {
-                enums[enumType].map(e => (
-                  <option key={e} value={e}>
-                    {e}
-                  </option>
-                ))
-              }
+          return html`
+            <select key=${index} value=${value} onChange=${event => change(event.target.value)}>
+              ${ enums[enumType].map(e => html`<option key=${e} value=${e}>${e}</option>`) }
             </select>
-          )
+          `
         }
       }
     }
   }
 
   if (type === typeof "")
-    return <input key={index} type="text" value={value} onChange={event => change(event.target.value)} />
+    return html`<input key=${index} type="text" value=${value} onChange=${event => change(event.target.value)} />`
 
   if (type === typeof 0)
-    return <input key={index} type="number" value={value} onChange={event => change(Number(event.target.value))} />
+    return html`<input key=${index} type="number" value=${value} onChange=${event => change(Number(event.target.value))} />`
 
   if (type === typeof true)
-    return <input key={index} type="checkbox" checked={value} onChange={event => change(event.target.checked)} />
+    return html`<input key=${index} type="checkbox" checked=${value} onChange=${event => change(event.target.checked)} />`
 
-  return <span>Unknown</span>
+  return html`<span>Unknown</span>`
 }
 
 class CommsTable extends ConsoleComponent {
@@ -106,26 +98,24 @@ class CommsTable extends ConsoleComponent {
   render() { return this.renderImpl(this.props) }
 
   renderImpl({ enums, fault, entries, filter, setFilter, clearFilter, pollingStatus, setPollingEnabled, execute, changeOutputValue }) {
-    return (
+    return html`
       <div id="commsTableContainer">
-        <StatLine status={fault ? fault.message : "Status OK"} />
-        <TableControls
-          left={
-            <FilterBox filter={filter} setFilter={setFilter} clearFilter={clearFilter} />
-          }
-          right={
+        ${StatLine({ status: (fault ? fault.message : "Status OK") })}
+        ${TableControls({
+          left: FilterBox({ filter: filter, setFilter: setFilter, clearFilter: clearFilter }),
+          right: 
             pollingStatus === POLLING_STATES.ENABLED
-              ? <button onClick={e => setPollingEnabled(false)}>{i18n.pollStop}</button>
-              : <button onClick={e => setPollingEnabled(true)}>{i18n.pollStart}</button>
-          } />
-        <ArrayTable
-          columns={[
+              ? html`<button onClick=${e => setPollingEnabled(false)}> ${i18n.pollStop} </button>`
+              : html`<button onClick=${e => setPollingEnabled(true)}> ${i18n.pollStart} </button>`
+        })}
+        ${ArrayTable({
+          columns: [
             "entryID",
             "entryOutput",
             "entryInput",
             "entryActions"
-          ]}
-          rows={
+          ],
+          rows: 
             entries
               .filter(entry => entry.id.toLowerCase().includes(filter.toLowerCase()))
               .map(entry => ({
@@ -133,27 +123,23 @@ class CommsTable extends ConsoleComponent {
                 entryOutput: CommsData(enums, entry.output, (item, index, value) => changeOutputValue(entry.id, item, index, value)),
                 entryInput: CommsData(enums, entry.input),
                 entryActions: this.renderActions(entry, execute)
-              }))
-          }
-          keyColumn="entryID" />
+              })),
+          keyColumn: "entryID"
+        })}
       </div>
-    )
+    `
   }
 
   renderActions({ id, actions, output }, execute) {
-    return (
-      <div>
-        {
-          actions.map(action => (
-            <button
-                key={action.id}
-                onClick={e => execute(id, action.id, action.sendsOutput ? output : {})}>
-              {action.id}
-            </button>
-          ))
-        }
-      </div>
-    )
+    return html`<div>${
+      actions.map(action => html`
+        <button
+            key=${action.id}
+            onClick=${e => execute(id, action.id, action.sendsOutput ? output : {})}>
+          ${action.id}
+        </button>
+      `)
+    }</div>`
   }
 }
 
