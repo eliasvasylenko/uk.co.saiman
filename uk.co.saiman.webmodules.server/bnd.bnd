@@ -16,7 +16,6 @@ Bundle-Description: \
 
 Private-Package: uk.co.saiman.webmodule.server
 
-systemjs.version = 0.21.3.REL
+es-module-shims.version = 0.2.3.REL
 -includeresource: \
-	static=static,\
-	@${repo;uk.co.saiman.webmodule.systemjs.cjs;${systemjs.version}}!/static/dist/system.js
+	@${repo;uk.co.saiman.webmodule.es-module-shims.esm;${es-module-shims.version}}!/static/dist/es-module-shims.js

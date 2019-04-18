@@ -1,6 +1,6 @@
 import {
-  REQUEST_INFO,
-  RECEIVE_INFO,
+  REQUEST_SYSTEM_INFO,
+  RECEIVE_SYSTEM_INFO,
   REQUEST_CONTROLLER_INFO,
   RECEIVE_CONTROLLER_INFO,
   CLEAR_REQUESTED_VALUES,
@@ -20,8 +20,6 @@ import {
   SEND_EXECUTION_REQUEST,
   RECEIVE_EXECUTION_RESPONSE
 } from "./actions.js"
-
-import { translate } from "@saiman/copley-i18n/../fr.js"
 
 const UNKNOWN_TEXT = "..."
 
@@ -236,7 +234,6 @@ function present(action) {
     break
 
   case SET_POLLING_ENABLED:
-    model = { ...model, pollingStatus: enablePolling(model.pollingStatus, action.payload) }
     break
   case POLL_TICK:
     model = { ...model, pollingStatus: pollTick(model.pollingStatus) }

@@ -1,6 +1,9 @@
-<script src="/webmodules/${bsn}/${Bundle-Version}"></script>
+<script defer src="/webmodules/importmap-shim.js"></script>
+<script type="importmap-shim" src="/webmodules/importmap.json?bundle=${bsn}&version=${Bundle-Version}"></script>
 <script>
-	const appRoot = "\${appRoot}";
-	const pluginRoot = "\${pluginRoot}";
-	importModule("@saiman/copley");
+	const appRoot = "\${appRoot}"
+	const pluginRoot = "\${pluginRoot}"
+</script>
+<script type="module-shim">
+	import copley from "@saiman/copley"
 </script>

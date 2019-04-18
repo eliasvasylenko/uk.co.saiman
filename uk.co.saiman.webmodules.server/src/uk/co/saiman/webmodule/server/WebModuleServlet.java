@@ -27,15 +27,10 @@
  */
 package uk.co.saiman.webmodule.server;
 
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static uk.co.saiman.webmodule.WebModuleConstants.ESM_FORMAT;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URLDecoder;
 import java.util.HashMap;
@@ -44,7 +39,6 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.script.ScriptException;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +58,6 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.babel.transpiler.Transpiler;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.webmodule.PackageId;
 import uk.co.saiman.webmodule.WebModule;
@@ -84,11 +77,7 @@ public class WebModuleServlet extends HttpServlet {
   }
 
   static final String CONFIGURATION_PID = "uk.co.saiman.webmodules.server";
-  private static final String JS_EXTENSION = ".js";
-  private static final String TRANSPILATION_FAILED = "Failed to transpile ES6 resource %s";
 
-  private Transpiler transpiler;
-  // private ModuleServerConfiguration config;
   private BundleContext context;
 
   @Reference
@@ -135,29 +124,41 @@ public class WebModuleServlet extends HttpServlet {
       throws IOException {
     String servletPath = request.getServletPath();
     String requestPath = request.getRequestURI();
-    String path = requestPath.substring(servletPath.length(), requestPath.length());
+    String path = requestPath.substring(servletPath.length() + 1, requestPath.length());
 
     if (path == null) {
       response.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
 
-    String[] pathComponents = path.split("/", 4);
+    String[] pathComponents = path.split("/", 3);
 
-    if (pathComponents.length < 3) {
+    if (pathComponents.length == 1) {
+      switch (path) {
+      case "importmap-shim.js":
+        response.setContentType("application/javascript");
+        writeResource(response, "dist/es-module-shims.js");
+        break;
+
+      case "importmap.json":
+        String bundleId = request.getParameterMap().get("bundle")[0];
+        String bundleVersion = request.getParameterMap().get("version")[0];
+        loadImportMap(request, response, bundleId, bundleVersion);
+        break;
+
+      default:
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+      }
+
+    } else if (pathComponents.length < 3) {
       response.sendError(HttpServletResponse.SC_NOT_FOUND);
-      return;
-    }
-
-    if (pathComponents.length < 4) {
-      loadModuleProvisioner(request, response, pathComponents[1], pathComponents[2]);
 
     } else {
-      loadModuleResource(response, pathComponents[1], pathComponents[2], pathComponents[3]);
+      loadModuleResource(response, pathComponents[0], pathComponents[1], pathComponents[2]);
     }
   }
 
-  protected void loadModuleProvisioner(
+  protected void loadImportMap(
       HttpServletRequest request,
       HttpServletResponse response,
       String bundleName,
@@ -170,31 +171,24 @@ public class WebModuleServlet extends HttpServlet {
       return;
     }
 
-    BundleConfiguration configuration = new BundleConfiguration(bundle, request.getServletPath());
+    BundleImportMap configuration = new BundleImportMap(bundle, request.getServletPath());
 
-    response.setContentType("application/javascript");
-    writeResource(response, "dist/system.js");
-    writeResource(response, "static-config.js");
-
-    configuration.writeConfig(response.getOutputStream());
+    configuration.writeImportMap(response.getOutputStream());
   }
 
   private void writeResource(HttpServletResponse response, String resource) throws IOException {
-    try (InputStream in = getClass().getResourceAsStream("/static/" + resource)) {
+    try (var in = getClass().getResourceAsStream("/static/" + resource);
+        var out = response.getOutputStream()) {
       if (in == null) {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
-
-      OutputStream out = response.getOutputStream();
 
       byte[] buffer = new byte[4096];
       int length;
       while ((length = in.read(buffer)) > 0) {
         out.write(buffer, 0, length);
       }
-
-      out.flush();
     }
   }
 
@@ -206,13 +200,6 @@ public class WebModuleServlet extends HttpServlet {
       }
     }
     return null;
-  }
-
-  private synchronized Transpiler getTranspiler() {
-    if (transpiler == null) {
-      transpiler = new Transpiler();
-    }
-    return transpiler;
   }
 
   protected void loadModuleResource(
@@ -239,21 +226,10 @@ public class WebModuleServlet extends HttpServlet {
     }
 
     String source = module.openResource(resource);
-    if (module.format().equals(ESM_FORMAT) && resource.endsWith(JS_EXTENSION)) {
-      try {
-        source = getTranspiler()
-            .transpile(
-                source,
-                asList("transform-es2015-modules-amd", "transform-object-rest-spread"),
-                asList("es2015"));
-      } catch (ScriptException e) {
-        throw new IOException(format(TRANSPILATION_FAILED, module.id()), e);
-      }
-    }
-
     response.setContentType("application/javascript");
-    OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream());
-    writer.write(source);
-    writer.flush();
+
+    try (var writer = new OutputStreamWriter(response.getOutputStream())) {
+      writer.write(source);
+    }
   }
 }

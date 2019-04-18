@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 /*
  * action types
  */
@@ -13,8 +11,7 @@ export const RECEIVE_CONTROLLER_INFO = 'RECEIVE_CONTROLLER_INFO'
 export const CLEAR_REQUESTED_VALUES = 'CLEAR_REQUESTED_VALUES'
 export const CHANGE_REQUESTED_VALUE = 'CHANGE_REQUESTED_VALUE'
 
-export const REQUEST_OPEN_CONNECTION_STATE = 'REQUEST_OPEN_CONNECTION_STATE'
-export const REQUEST_CLOSED_CONNECTION_STATE = 'REQUEST_CLOSED_CONNECTION_STATE'
+export const REQUEST_CONNECTION_STATE = 'REQUEST_CONNECTION_STATE'
 export const CONNECTION_STATE_CHANGED = 'CONNECTION_STATE_CHANGED'
 
 export const SET_COMMAND_FILTER = 'SET_COMMAND_FILTER'
@@ -103,6 +100,18 @@ export const changeOutputValue = (entry, item, index, value) => ({
  * Thunk action creators
  */
 
+const fetchJson = (query) => {
+	((typeof query === typeof "")
+		? fetch(query)
+		: fetch(query.url, query)
+	).then((response) => {
+		if(response.ok) {
+			return response.json();
+		}
+		throw new Error('Network response error ' + response.status + " " + response.statusText);
+	})
+}
+
 const api = {
 	system : () => "/api/copley",
 	controllers : () => "/api/copley/controllers",
@@ -126,7 +135,7 @@ export const setLocale = (locale) => (present) => {
 export const requestInfo = () => (present) => {
   present({ type: REQUEST_SYSTEM_INFO })
 
-  axios.get(api.system())
+  fetchJson(api.system())
     .then(data => {
       present({
         type: RECEIVE_SYSTEM_INFO,
@@ -142,9 +151,9 @@ export const requestControllerInfo = () => (present) => {
   present({ type: REQUEST_CONTROLLER_INFO })
 
   Promise.all([
-    axios.get(controllerInfoAPI + commsRestID),
-    axios.get(entriesInfoAPI + commsRestID),
-    axios.get(actionsInfoAPI + commsRestID)
+    fetchJson(controllerInfoAPI + commsRestID),
+    fetchJson(entriesInfoAPI + commsRestID),
+    fetchJson(actionsInfoAPI + commsRestID)
   ])
     .then(data => {
       present({
@@ -160,15 +169,18 @@ export const requestControllerInfo = () => (present) => {
 }
 
 export const openConnection = () => (present) => {
-  present({ type: REQUEST_OPEN_CONNECTION_STATE })
+  present({
+    type: REQUEST_CONNECTION_STATE,
+    payload: CONNECTION_STATES.OPEN
+  })
 
   const request = {
-    url : openCommsAPI,
+	url: openCommsAPI,
     method: "POST",
     data: JSON.stringify(commsRestID)
   }
 
-  axios(request)
+  fetchJson(request)
     .then(data => {
       if (typeof data.data.error !== typeof undefined)
         throw data.data
@@ -183,7 +195,11 @@ export const openConnection = () => (present) => {
 }
 
 export const closeConnection = () => (present) => {
-  present({ type: REQUEST_CLOSED_CONNECTION_STATE })
+  present({
+    type: REQUEST_CONNECTION_STATE,
+    payload: CONNECTION_STATES.CLOSED
+  })
+
 
   setPollingEnabled(false)(present)
 
@@ -193,7 +209,7 @@ export const closeConnection = () => (present) => {
     data: JSON.stringify(commsRestID)
   }
 
-  axios(request)
+  fetchJson(request)
     .then(data => {
       if (typeof data.data.error !== typeof undefined)
         throw data.data
@@ -220,7 +236,7 @@ const pollAction = (entries, action) => (present) => {
     action: action.id
   })
 
-  Promise.all(actionRequests.map(axios))
+  Promise.all(actionRequests.map(fetchJson))
     .then(data => {
       const result = {}
 
@@ -268,7 +284,7 @@ export const sendExecutionRequest = (entry, action) => (present) => {
     action: action.id
   })
 
-  return axios(request)
+  return fetchJson(request)
     .then(data => {
       if (typeof data.data.error !== typeof undefined)
         throw data.data

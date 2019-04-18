@@ -94,6 +94,6 @@ public class RabbitHost {
   }
 
   public Connection newConnection() throws IOException, TimeoutException {
-    return factory.newConnection();
+    return factory.clone().newConnection();
   }
 }

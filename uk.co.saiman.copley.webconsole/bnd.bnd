@@ -19,7 +19,6 @@ Bundle-Name: SAI :: Copley :: Web Console
 	uk.co.saiman.webconsole;version=snapshot,\
 	uk.co.saiman.webmodules;version=snapshot,\
 	uk.co.saiman.webmodules.i18n;version=snapshot,\
-	uk.co.saiman.webmodule.axios.amd;version=latest,\
 	uk.co.saiman.webmodule.lighterhtml.esm;version=latest
 
 Private-Package: \

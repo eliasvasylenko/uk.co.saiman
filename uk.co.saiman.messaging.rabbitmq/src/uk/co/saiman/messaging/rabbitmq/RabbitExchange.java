@@ -105,23 +105,26 @@ public class RabbitExchange {
   }
 
   protected synchronized Channel openChannel() throws IOException {
-    if (channel == null) {
-      try {
-        connection = host.newConnection();
-        channel = connection.createChannel();
-        channel.exchangeDeclare(exchangeName, exchangeType);
-      } catch (TimeoutException e) {
-        channel = null;
-        log.log(Level.ERROR, e);
-        throw new IOException(e);
-      } catch (IOException e) {
-        channel = null;
-        log.log(Level.ERROR, e);
-        throw e;
-      }
+    if (channel != null) {
+      return channel;
     }
 
-    return channel;
+    try {
+      connection = host.newConnection();
+      channel = connection.createChannel();
+      channel.exchangeDeclare(exchangeName, exchangeType);
+      return channel;
+
+    } catch (TimeoutException e) {
+      channel = null;
+      log.log(Level.ERROR, e);
+      throw new IOException(e);
+
+    } catch (IOException e) {
+      channel = null;
+      log.log(Level.ERROR, e);
+      throw e;
+    }
   }
 
   protected synchronized void closeChannel() throws IOException {

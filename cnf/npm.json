@@ -1,18 +1,14 @@
 {
 	"format": "esm",
 	"dependencies": {
-		"requirejs": {
-			"version": "^2.3.5",
-			"format": "cjs"
+		"es-module-shims": {
+			"version": "^0.2.3",
+			"entry.point": "dist/es-module-shims.js"
 		},
-		"systemjs": {
-			"version": "^0.21.3",
-			"format": "cjs"
-		},
-		"babel-standalone":  {
+		"babel-standalone": {
 			"version": "^6.24.0",
 			"format": "cjs"
 		},
-		"lighterhtml": "0.9.3"
+		"lighterhtml": "^0.9.3"
 	}
 }

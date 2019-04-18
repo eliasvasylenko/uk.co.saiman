@@ -4,7 +4,6 @@ Bundle-Name: SAI :: Comms :: Web Module
 	uk.co.saiman.webconsole;version=snapshot,\
 	uk.co.saiman.webmodules;version=snapshot,\
 \
-	uk.co.saiman.webmodule.axios.amd;version=latest,\
 	uk.co.saiman.webmodule.lighterhtml.esm;version=latest
 
 webmodule.root: OSGI-INF/uk.co.saiman.webmodule

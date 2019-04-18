@@ -1,5 +1,4 @@
 import {
-  ConsoleComponent,
   FilterBox,
   TableControls,
   ArrayTable,
@@ -166,4 +165,3 @@ const CommsTableController = connect(
   mapDispatchToProps
 )(CommsTable)
 
-export default CommsTableController
