@@ -34,7 +34,6 @@ import static java.util.Collections.emptyNavigableMap;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,17 +57,13 @@ public abstract class Instructions<T extends Instructions<T, U>, U extends Exper
    * traversal of the path hierarchy.
    */
   private final NavigableMap<ExperimentPath<U>, ExperimentLocation> instructions;
-  private final Map<ProductPath<U>, ProductLocation> dependencies;
 
   Instructions() {
-    this(emptyNavigableMap(), emptyMap());
+    this(emptyNavigableMap());
   }
 
-  Instructions(
-      NavigableMap<ExperimentPath<U>, ExperimentLocation> instructions,
-      Map<ProductPath<U>, ProductLocation> dependencies) {
+  Instructions(NavigableMap<ExperimentPath<U>, ExperimentLocation> instructions) {
     this.instructions = instructions;
-    this.dependencies = dependencies;
   }
 
   abstract ExperimentPath<U> getExperimentPath();
@@ -95,10 +90,11 @@ public abstract class Instructions<T extends Instructions<T, U>, U extends Exper
   private Stream<ProductPath<U>> dependencyPaths(
       ExperimentPath<U> path,
       ExperimentLocation location) {
-    return Stream
-        .concat(
-            location.instruction().conductor().products().map(Production::id),
-            location.unknownProducts())
+    return location
+        .instruction()
+        .conductor()
+        .products()
+        .map(Production::id)
         .map(s -> path.resolve(ProductIndex.define(s)))
         .filter(dependencies::containsKey);
   }
@@ -286,15 +282,15 @@ public abstract class Instructions<T extends Instructions<T, U>, U extends Exper
    */
   static class ExperimentLocation {
     private final Instruction instruction;
-    private final List<String> unknownProducts;
+    private final List<String> dependents;
 
     private ExperimentLocation(Instruction instruction) {
       this(instruction, List.of());
     }
 
-    private ExperimentLocation(Instruction instruction, List<String> unknownProducts) {
+    private ExperimentLocation(Instruction instruction, List<String> dependents) {
       this.instruction = instruction;
-      this.unknownProducts = unknownProducts;
+      this.dependents = dependents;
     }
 
     public Instruction instruction() {
@@ -310,35 +306,15 @@ public abstract class Instructions<T extends Instructions<T, U>, U extends Exper
       throw new UnsupportedOperationException();
     }
 
-    public Stream<String> unknownProducts() {
-      return unknownProducts.stream();
-    }
-
-    public ExperimentLocation withUnknownProducts(Collection<? extends String> products) {
-      return new ExperimentLocation(instruction, List.copyOf(products));
-    }
-  }
-
-  static class ProductLocation {
-    private final List<String> dependents;
-
-    private ProductLocation() {
-      dependents = emptyList();
-    }
-
-    private ProductLocation(List<String> dependents) {
-      this.dependents = dependents;
-    }
-
     public Stream<String> dependents() {
       return dependents.stream();
     }
 
-    public ProductLocation withDependent(String path) {
+    public ExperimentLocation withDependent(String path) {
       List<String> dependents = new ArrayList<>(this.dependents.size() + 1);
       dependents.addAll(this.dependents);
       dependents.add(path);
-      return new ProductLocation(dependents);
+      return new ExperimentLocation(instruction, dependents);
     }
   }
 }

@@ -30,13 +30,16 @@ package uk.co.saiman.experiment;
 import static java.util.Objects.requireNonNull;
 
 import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
@@ -86,11 +89,8 @@ public class Experiment {
     updateProcedure(p -> p.withId(id));
   }
 
-  private synchronized void updateProcedure(Function<Procedure, Procedure> modifier) {
-    updateProcedure(modifier.apply(this.procedure));
-  }
-
-  private synchronized boolean updateProcedure(Procedure newProcedure) {
+  private synchronized boolean updateProcedure(Function<Procedure, Procedure> modifier) {
+    var newProcedure = modifier.apply(procedure);
     boolean changed = !procedure.equals(newProcedure);
     if (changed) {
       procedure = newProcedure;
@@ -108,14 +108,24 @@ public class Experiment {
   }
 
   public synchronized Step attach(Template<Nothing> step) {
+    List.of();
+    updateProcedure(p -> p.withTemplate(step), () -> List.of(new AddStepEvent()));
 
-    // TODO
-
-    return null;
+    return getStep(ExperimentPath.defineAbsolute().resolve(step.id()));
   }
 
   public synchronized void close() {
 
+  }
+
+  private Step getStep(ExperimentPath<Absolute> path) {
+    var reference = steps.get(path);
+    var step = reference == null ? null : reference.get();
+    if (step == null) {
+      step = new Step(this, procedure.instruction(path).get().conductor(), path.toAbsolute());
+      steps.put(path, new SoftReference<>(step));
+    }
+    return step;
   }
 
   Instruction getInstruction(ExperimentPath<?> path) {
@@ -128,8 +138,7 @@ public class Experiment {
 
   }
 
-  public Stream<Step> getSteps() {
-    // TODO Auto-generated method stub
-    return null;
+  public Stream<Step> getIndependentSteps() {
+    return procedure.independentInstructions().map(this::getStep);
   }
 }

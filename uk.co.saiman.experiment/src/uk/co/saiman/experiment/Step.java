@@ -60,7 +60,7 @@ public class Step {
   private Production<?> production;
   private int index;
 
-  private Step(Experiment experiment, Conductor<?> conductor, ExperimentPath<Absolute> path) {
+  Step(Experiment experiment, Conductor<?> conductor, ExperimentPath<Absolute> path) {
     this.experiment = experiment;
     this.conductor = conductor;
     this.path = path;
@@ -110,21 +110,10 @@ public class Step {
     // TODO Auto-generated method stub
   }
 
-  void withLock(Runnable action) {
-    withLock(() -> {
-      action.run();
-      return null;
-    });
-  }
-
-  <T> T withLock(Supplier<T> action) {
-    synchronized (experiment) {
-      return action.get();
-    }
-  }
-
   private void updateProcedure(Function<Instruction, Instruction> modifier) {
-    withLock(() -> updateProcedure(modifier.apply(getProcedure())));
+    synchronized (experiment) {
+      updateProcedure(modifier.apply(getProcedure()));
+    }
   }
 
   private void updateProcedure(Instruction procedure) {
@@ -156,17 +145,17 @@ public class Step {
       Production<? extends T> production,
       int index,
       Template<T> template) {
-    return withLock(() -> {
+    synchronized (experiment) {
       return null;
-    });
+    }
   }
 
   public void detach() {
-    withLock(() -> {
+    synchronized (experiment) {
 
       // TODO
 
-    });
+    }
   }
 
   public ExperimentPath<Absolute> getPath() {
