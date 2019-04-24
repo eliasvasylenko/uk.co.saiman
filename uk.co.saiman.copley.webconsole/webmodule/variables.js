@@ -89,58 +89,50 @@ const CommsDataValue = (enums, index, value, change) => {
   return html`<span>Unknown</span>`
 }
 
-class CommsTable extends ConsoleComponent {
-  constructor(props) {
-    super(props)
-  }
+const Actions = ({ id, actions, output }, execute) => html`
+	<div>
+	${
+	  actions.map(action => html`
+	    <button
+	        key=${action.id}
+	        onClick=${e => execute(id, action.id, action.sendsOutput ? output : {})}>
+	      ${action.id}
+	    </button>
+	  `)
+	}
+	</div>
+`
 
-  render() { return this.renderImpl(this.props) }
-
-  renderImpl({ enums, fault, entries, filter, setFilter, clearFilter, pollingStatus, setPollingEnabled, execute, changeOutputValue }) {
-    return html`
-      <div id="commsTableContainer">
-        ${StatLine({ status: (fault ? fault.message : "Status OK") })}
-        ${TableControls({
-          left: FilterBox({ filter: filter, setFilter: setFilter, clearFilter: clearFilter }),
-          right: 
-            pollingStatus === POLLING_STATES.ENABLED
-              ? html`<button onClick=${e => setPollingEnabled(false)}> ${i18n.pollStop} </button>`
-              : html`<button onClick=${e => setPollingEnabled(true)}> ${i18n.pollStart} </button>`
-        })}
-        ${ArrayTable({
-          columns: [
-            "entryID",
-            "entryOutput",
-            "entryInput",
-            "entryActions"
-          ],
-          rows: 
-            entries
-              .filter(entry => entry.id.toLowerCase().includes(filter.toLowerCase()))
-              .map(entry => ({
-                entryID: entry.id,
-                entryOutput: CommsData(enums, entry.output, (item, index, value) => changeOutputValue(entry.id, item, index, value)),
-                entryInput: CommsData(enums, entry.input),
-                entryActions: this.renderActions(entry, execute)
-              })),
-          keyColumn: "entryID"
-        })}
-      </div>
-    `
-  }
-
-  renderActions({ id, actions, output }, execute) {
-    return html`<div>${
-      actions.map(action => html`
-        <button
-            key=${action.id}
-            onClick=${e => execute(id, action.id, action.sendsOutput ? output : {})}>
-          ${action.id}
-        </button>
-      `)
-    }</div>`
-  }
-}
+export const CopleyTable = ({ enums, fault, entries, filtering, polling, execute, changeOutputValue }) => html`
+  <div id="commsTableContainer">
+    ${StatLine({ status: (fault ? fault.message : "Status OK") })}
+    ${TableControls({
+      left: FilterBox(filtering),
+      right: 
+        polling.pollingStatus === POLLING_STATES.ENABLED
+          ? html`<button onClick=${e => polling.setPollingEnabled(false)}> ${i18n.pollStop} </button>`
+          : html`<button onClick=${e => polling.setPollingEnabled(true)}> ${i18n.pollStart} </button>`
+    })}
+    ${ArrayTable({
+      columns: [
+        "entryID",
+        "entryOutput",
+        "entryInput",
+        "entryActions"
+      ],
+      rows: 
+        entries
+          .filter(entry => entry.id.toLowerCase().includes(filtering.filter.toLowerCase()))
+          .map(entry => ({
+            entryID: entry.id,
+            entryOutput: CommsData(enums, entry.output, (item, index, value) => changeOutputValue(entry.id, item, index, value)),
+            entryInput: CommsData(enums, entry.input),
+            entryActions: Actions(entry, execute)
+          })),
+      keyColumn: "entryID"
+    })}
+  </div>
+`
 
 const mapStateToProps = state => ({
   entries: state.entries.map(entry => ({

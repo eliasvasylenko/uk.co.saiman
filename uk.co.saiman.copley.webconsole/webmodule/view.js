@@ -1,8 +1,8 @@
-import { html } from 'lighterhtml'
+import { html, render } from 'lighterhtml'
 
 import { MapTable, StatLine } from '@saiman/webconsole'
 
-import { openConnection, closeConnection, CONNECTION_STATES } from './actions.js'
+import CopleyTable from './variables.js'
 
 const CopleyInformation = ({ name, connection, bundle, setConnectionOpen }) => {
   const entries = {
@@ -40,4 +40,23 @@ const CopleyInformation = ({ name, connection, bundle, setConnectionOpen }) => {
   `
 }
 
-export default CopleyInformation
+const view = {
+	
+}
+
+render(
+  html`
+    <div id="copleyApp">
+      ${CopleyInformation({
+		name: model.name,
+        connection: model.connection,
+        bundle: model.bundle,
+        locale:model.locale
+      })}
+      ${CopleyTable({})}
+    </div>
+  `,
+  document.getElementById( 'content' )
+)
+
+export default view
