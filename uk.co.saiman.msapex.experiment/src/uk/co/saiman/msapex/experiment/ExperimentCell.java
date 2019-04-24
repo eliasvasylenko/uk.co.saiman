@@ -185,7 +185,7 @@ public class ExperimentCell {
         .setItems(
             ExperimentStepCell.ID,
             Step.class,
-            experiment.experiment().getSteps().collect(toList()));
+            experiment.experiment().getIndependentSteps().collect(toList()));
   }
 
   @Optional

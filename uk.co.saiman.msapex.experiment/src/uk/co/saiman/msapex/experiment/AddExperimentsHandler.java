@@ -27,16 +27,14 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
-
-import java.nio.file.Path;
+import static org.osgi.framework.Constants.SERVICE_PID;
+import static uk.co.saiman.msapex.experiment.workspace.ExperimentAddon.WORKSPACE_STORE_ID;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.extensions.Service;
 
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.storage.Store;
+import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
 
@@ -47,16 +45,20 @@ import uk.co.saiman.msapex.experiment.workspace.Workspace;
  */
 public class AddExperimentsHandler {
   private static final String FILE_SYSTEM_STORE_FILTER = "("
-      + COMPONENT_NAME
+      + SERVICE_PID
       + "="
-      + FILE_SYSTEM_STORE_ID
+      + WORKSPACE_STORE_ID
       + ")";
 
   @Execute
   void execute(
       Workspace workspace,
       @Localize ExperimentProperties text,
-      @Service(filterExpression = FILE_SYSTEM_STORE_FILTER) Store<Path> fileSystemStore) {
-    new RenameExperimentDialog(workspace, text, "").showAndWait().ifPresent(name -> {});
+      @Service(filterExpression = FILE_SYSTEM_STORE_FILTER) FileSystemStore fileSystemStore) {
+    try {
+      new RenameExperimentDialog(workspace, text, "").showAndWait().ifPresent(name -> {});
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

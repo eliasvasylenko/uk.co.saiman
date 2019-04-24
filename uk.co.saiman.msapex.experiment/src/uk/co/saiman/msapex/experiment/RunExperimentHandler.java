@@ -67,6 +67,5 @@ public class RunExperimentHandler {
       alert.setContentText(text.openExperimentFailedDescription().toString());
       alert.showAndWait();
     }
-
   }
 }

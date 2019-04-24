@@ -30,7 +30,7 @@ package uk.co.saiman.msapex.experiment.workspace;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
+import static org.osgi.framework.Constants.SERVICE_PID;
 import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 import static uk.co.saiman.log.Log.Level.INFO;
 
@@ -79,6 +79,8 @@ import uk.co.saiman.msapex.experiment.workspace.event.WorkspaceExperimentEvent;
 public class ExperimentAddon {
   private static final String EXPERIMENTS = "experiments";
 
+  public static final String WORKSPACE_STORE_ID = FILE_SYSTEM_STORE_ID + "~" + "ExperimentAddon";
+
   @Inject
   private IEclipseContext context;
   @Inject
@@ -124,7 +126,7 @@ public class ExperimentAddon {
     workspaceStore = new FileSystemStore(rootPath);
 
     Dictionary<String, String> configuration = new Hashtable<>();
-    configuration.put(COMPONENT_NAME, FILE_SYSTEM_STORE_ID);
+    configuration.put(SERVICE_PID, WORKSPACE_STORE_ID);
 
     workspaceStoreRegsitration = bundleContext
         .registerService(

@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static org.osgi.service.component.ComponentConstants.COMPONENT_NAME;
-import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
+import static org.osgi.framework.Constants.SERVICE_PID;
+import static uk.co.saiman.msapex.experiment.workspace.ExperimentAddon.WORKSPACE_STORE_ID;
 
 import java.nio.file.Path;
 
@@ -55,9 +55,9 @@ import uk.co.saiman.msapex.experiment.workspace.Workspace;
  */
 public class NewFileSystemExperimentHandler {
   private static final String FILE_SYSTEM_STORE_FILTER = "("
-      + COMPONENT_NAME
+      + SERVICE_PID
       + "="
-      + FILE_SYSTEM_STORE_ID
+      + WORKSPACE_STORE_ID
       + ")";
 
   @Inject
