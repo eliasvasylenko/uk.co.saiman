@@ -29,7 +29,7 @@ package uk.co.saiman.experiment.procedure;
 
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.product.Product;
+import uk.co.saiman.experiment.product.Dependency;
 import uk.co.saiman.experiment.product.Production;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 
@@ -47,7 +47,7 @@ import uk.co.saiman.experiment.variables.VariableDeclaration;
  *
  * @param <T> the type of the {@link #directRequirement() direct requirement}
  */
-public interface Conductor<T extends Product> {
+public interface Conductor<T extends Dependency> {
   /**
    * It is required that productions be returned in the order in which they are
    * fulfilled, as this ordering is used to validate that experiment step

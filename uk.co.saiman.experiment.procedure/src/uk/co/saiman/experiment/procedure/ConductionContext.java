@@ -36,9 +36,9 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
+import uk.co.saiman.experiment.product.Dependency;
 import uk.co.saiman.experiment.product.Observation;
 import uk.co.saiman.experiment.product.Preparation;
-import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Result;
 import uk.co.saiman.experiment.variables.Variable;
 
@@ -50,11 +50,11 @@ import uk.co.saiman.experiment.variables.Variable;
  * @author Elias N Vasylenko
  * @param <S> the type of the direct requirement of the executing node
  */
-public interface ConductionContext<S extends Product> {
+public interface ConductionContext<S extends Dependency> {
   /**
    * @return the currently executing experiment node
    */
-  Instruction instruction();
+  Instruction<S> instruction();
 
   default <T> T getVariable(Variable<T> variable) {
     return getOptionalVariable(variable)

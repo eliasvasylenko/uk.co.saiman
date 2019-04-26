@@ -27,8 +27,7 @@
  */
 package uk.co.saiman.experiment.procedure;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.product.Production;
@@ -45,14 +44,21 @@ public abstract class ProductRequirement<T extends Product> extends Requirement<
   }
 
   @Override
-  public Optional<? extends Production<? extends T>> resolveDependency(Production<?> capability) {
-    // TODO Auto-generated method stub
-    return null;
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    }
+    if (!(obj instanceof ProductRequirement<?>)) {
+      return false;
+    }
+
+    var that = (ProductRequirement<?>) obj;
+
+    return Objects.equals(this.production, that.production);
   }
 
   @Override
-  public Stream<? extends Production<? extends T>> resolveDependencies(Conductor<?> procedure) {
-    // TODO Auto-generated method stub
-    return null;
+  public int hashCode() {
+    return production.hashCode();
   }
 }

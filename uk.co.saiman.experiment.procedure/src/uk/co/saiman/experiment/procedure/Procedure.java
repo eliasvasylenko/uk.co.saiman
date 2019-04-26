@@ -29,31 +29,30 @@ package uk.co.saiman.experiment.procedure;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
+import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.product.Nothing;
 
-public class Procedure extends Instructions<Procedure, Absolute> {
+public class Procedure extends InstructionContainer<Procedure> {
   private final String id;
 
-  private Procedure(String id) {
+  private Procedure(String id, List<Instruction<?>> instructions) {
+    super(instructions);
     this.id = validateName(id);
   }
 
   private Procedure(
       String id,
-      NavigableMap<ExperimentPath<Absolute>, ExperimentLocation> instructions,
-      Map<ProductPath<Absolute>, ProductLocation> dependencies) {
-    super(instructions, dependencies);
+      List<Instruction<?>> instructions,
+      Map<String, Instruction<?>> dependents) {
+    super(instructions, dependents);
     this.id = validateName(id);
   }
 
   public static Procedure define(String id) {
-    return new Procedure(id);
+    return new Procedure(id, List.of(), Map.of());
   }
 
   public String id() {
@@ -61,7 +60,7 @@ public class Procedure extends Instructions<Procedure, Absolute> {
   }
 
   public Procedure withId(String id) {
-    return new Procedure(id, getInstructions(), getDependencies());
+    return new Procedure(id, getInstructions(), getDependents());
   }
 
   static String validateName(String name) {
@@ -80,32 +79,19 @@ public class Procedure extends Instructions<Procedure, Absolute> {
   }
 
   @Override
-  protected Procedure withInstructions(
-      NavigableMap<ExperimentPath<Absolute>, ExperimentLocation> instructions,
-      Map<ProductPath<Absolute>, ProductLocation> dependencies) {
-    return new Procedure(id, instructions, dependencies);
-  }
-
-  public Procedure withInstruction(Instruction instruction) {
-    return withInstruction(-1, instruction);
+  Procedure with(List<Instruction<?>> instructions, Map<String, Instruction<?>> dependents) {
+    return new Procedure(id, instructions, dependents);
   }
 
   @Override
-  Procedure withInstruction(long index, Instruction instruction) {
-    return super.withInstruction(index, instruction);
+  Procedure with(List<Instruction<?>> instructions) {
+    return new Procedure(id, instructions);
   }
 
-  public Procedure withTemplate(Template<Nothing> template) {
-    return withTemplate(-1, template);
-  }
-
-  @Override
-  public Procedure withTemplate(long index, Template<Nothing> template) {
-    return super.withTemplate(index, template);
-  }
-
-  @Override
-  ExperimentPath<Absolute> getExperimentPath() {
-    return ExperimentPath.defineAbsolute();
+  @SuppressWarnings("unchecked")
+  public Stream<Instruction<Nothing>> independentInstructions() {
+    return instructions()
+        .filter(i -> i.conductor().directRequirement().equals(Requirement.none()))
+        .map(i -> (Instruction<Nothing>) i);
   }
 }

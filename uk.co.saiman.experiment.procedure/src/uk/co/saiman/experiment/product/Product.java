@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.product;
 import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 
-public interface Product {
+// TODO sealed type
+public interface Product extends Dependency {
   ProductPath<Absolute> path();
 }

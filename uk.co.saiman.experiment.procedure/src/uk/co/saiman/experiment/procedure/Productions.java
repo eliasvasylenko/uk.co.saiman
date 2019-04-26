@@ -50,10 +50,7 @@ public class Productions {
    * @return a stream of the observations which are prepared by the procedure
    */
   public static Stream<? extends Observation<?>> observations(Conductor<?> conductor) {
-    return conductor
-        .products()
-        .filter(Observation.class::isInstance)
-        .map(p -> (Observation<?>) p);
+    return conductor.products().filter(Observation.class::isInstance).map(p -> (Observation<?>) p);
   }
 
   /**
@@ -63,10 +60,7 @@ public class Productions {
    * @return a stream of the preparations which are prepared by the procedure
    */
   public static Stream<Preparation<?>> preparations(Conductor<?> conductor) {
-    return conductor
-        .products()
-        .filter(Preparation.class::isInstance)
-        .map(p -> (Preparation<?>) p);
+    return conductor.products().filter(Preparation.class::isInstance).map(p -> (Preparation<?>) p);
   }
 
   public static Optional<? extends Production<?>> production(Conductor<?> conductor, String id) {
@@ -77,9 +71,10 @@ public class Productions {
   public static <T extends Product> Optional<Conductor<? super T>> asDependent(
       Conductor<?> conductor,
       Production<T> production) {
-    return conductor.directRequirement().resolveDependency(production).isPresent()
-        ? Optional.of((Conductor<? super T>) conductor)
-        : Optional.empty();
+    return conductor.directRequirement() instanceof ProductRequirement<?>
+        && ((ProductRequirement<?>) conductor.directRequirement()).production().equals(production)
+            ? Optional.of((Conductor<? super T>) conductor)
+            : Optional.empty();
   }
 
   @SuppressWarnings("unchecked")

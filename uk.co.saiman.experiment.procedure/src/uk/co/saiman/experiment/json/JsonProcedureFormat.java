@@ -40,15 +40,11 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.path.ProductIndex;
-import uk.co.saiman.experiment.path.ProductPath;
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.ConductorService;
 import uk.co.saiman.experiment.procedure.Instruction;
+import uk.co.saiman.experiment.procedure.InstructionContainer;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.product.Product;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
@@ -116,40 +112,20 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
     return loadInstructions(Procedure.define(data.get(ID)), data.get(CHILDREN).asList());
   }
 
-  private <T extends Product> Procedure loadInstructions(Procedure procedure, StateList data) {
-    return loadInstructions(procedure, data, null);
-  }
-
-  private <T extends Product> Procedure loadInstructions(
-      Procedure procedure,
-      StateList data,
-      ProductPath<Absolute> path) {
+  private <T extends InstructionContainer<T>> T loadInstructions(T container, StateList data) {
     return data
         .stream()
         .map(State::asMap)
-        .reduce(procedure, (p, s) -> loadInstruction(p, s, path), throwingMerger());
+        .reduce(container, (p, s) -> loadInstruction(p, s), throwingMerger());
   }
 
-  private Procedure loadInstruction(
-      Procedure procedure,
-      StateMap data,
-      ProductPath<Absolute> path) {
+  private <T extends InstructionContainer<T>> T loadInstruction(T container, StateMap data) {
     var instruction = Instruction
         .define(data.get(ID), data.get(variables), (Conductor<?>) data.get(conductor));
-    procedure = procedure.withInstruction(instruction);
 
-    var children = data.get(CHILDREN).asMap();
-    var experimentPath = path.getExperimentPath();
+    instruction = loadInstructions(instruction, data.get(CHILDREN).asList());
 
-    return children
-        .getKeys()
-        .reduce(
-            procedure,
-            (p, k) -> loadInstructions(
-                p,
-                children.get(k).asList(),
-                experimentPath.resolve(ProductIndex.fromString(k))),
-            throwingMerger());
+    return container.withInstruction(instruction);
   }
 
   @Override
@@ -161,39 +137,20 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
     return StateMap
         .empty()
         .with(ID, procedure.id())
-        .with(
-            CHILDREN,
-            saveInstructions(procedure, procedure.independentInstructions().collect(toList())));
+        .with(CHILDREN, saveInstructions(procedure.independentInstructions().collect(toList())));
   }
 
-  protected StateList saveInstructions(Procedure procedure, List<ExperimentPath<Absolute>> paths) {
-    return paths
+  protected StateList saveInstructions(List<Instruction<?>> instructions) {
+    return instructions
         .stream()
-        .reduce(
-            StateList.empty(),
-            (l, s) -> l.withAdded(saveInstruction(procedure, s)),
-            throwingMerger());
+        .reduce(StateList.empty(), (l, s) -> l.withAdded(saveInstruction(s)), throwingMerger());
   }
 
-  protected StateMap saveInstruction(Procedure procedure, ExperimentPath<Absolute> path) {
-    var instruction = procedure.instruction(path).get();
-
+  protected StateMap saveInstruction(Instruction<?> instruction) {
     return StateMap
         .empty()
         .with(ID, instruction.id())
         .with(variables, instruction.variables())
-        .with(
-            CHILDREN,
-            procedure
-                .products(path)
-                .reduce(
-                    StateMap.empty(),
-                    (m, s) -> m
-                        .with(
-                            s.getProductIndex().toString(),
-                            saveInstructions(
-                                procedure,
-                                procedure.dependentInstructions(s).collect(toList()))),
-                    throwingMerger()));
+        .with(CHILDREN, saveInstructions(instruction.instructions().collect(toList())));
   }
 }
