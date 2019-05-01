@@ -27,10 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -47,8 +44,7 @@ import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.product.Product;
-import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -63,7 +59,7 @@ import uk.co.saiman.msapex.experiment.step.provider.ExperimentStepProvider;
 public class AddStepToStepMenu {
   @Inject
   @Service
-  List<ExperimentStepProvider<?>> providers;
+  List<ExperimentStepProvider<?>> stepProviders;
   @Inject
   Log log;
   @Inject
@@ -71,26 +67,16 @@ public class AddStepToStepMenu {
   ExperimentProperties text;
 
   @AboutToShow
-  void aboutToShow(List<MMenuElement> items, Step selectedNode) {
-    providers.stream().flatMap(p -> createMenuItem(selectedNode, p).stream()).forEach(items::add);
-  }
-
-  private <T extends Product> Optional<MDirectMenuItem> createMenuItem(
-      Step step,
-      ExperimentStepProvider<T> stepProvider) {
-    var resources = stepProvider
-        .conductor()
-        .directRequirement()
-        .resolveDependencies(step.getConductor())
-        .collect(toList());
-    return !resources.isEmpty()
-        ? Optional.of(createMenuItem(step, resources, stepProvider))
-        : Optional.empty();
+  void aboutToShow(List<MMenuElement> items, Step step) {
+    stepProviders
+        .stream()
+        .flatMap(provider -> provider.asDependent(step.getExecutor()).stream())
+        .map(provider -> createMenuItem(step, provider))
+        .forEach(items::add);
   }
 
   private <T extends Product> MDirectMenuItem createMenuItem(
       Step step,
-      List<? extends Production<? extends T>> resources,
       ExperimentStepProvider<T> stepProvider) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
     moduleItem.setLabel(stepProvider.name().get());
@@ -98,36 +84,23 @@ public class AddStepToStepMenu {
     moduleItem.setObject(new Object() {
       @Execute
       public void execute() {
-        addNode(step, resources, stepProvider);
+        addNode(step, stepProvider);
       }
     });
     return moduleItem;
   }
 
-  private <T extends Product> void addNode(
-      Step step,
-      List<? extends Production<? extends T>> resources,
-      ExperimentStepProvider<T> stepProvider) {
-    Production<? extends T> resource;
-
-    if (resources.size() == 1) {
-      resource = resources.get(0);
-    } else {
-      // TODO open a dialog box to select which resource to attach to.
-      throw new UnsupportedOperationException();
-    }
-
+  private <T extends Product> void addNode(Step step, ExperimentStepProvider<T> stepProvider) {
     try {
-      stepProvider.createStep().ifPresent(template -> step.attach(resource, template));
+      stepProvider.createStep().ifPresent(step::attach);
+
     } catch (Exception e) {
       log.log(Level.ERROR, e);
 
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
       alert.setTitle(text.attachStepFailedDialog().toString());
-      alert
-          .setHeaderText(
-              text.attachStepFailedText(step, resource, stepProvider.conductor()).toString());
+      alert.setHeaderText(text.attachStepFailedText(step, stepProvider.executor()).toString());
       alert.setContentText(text.attachStepFailedDescription().toString());
       alert.showAndWait();
     }

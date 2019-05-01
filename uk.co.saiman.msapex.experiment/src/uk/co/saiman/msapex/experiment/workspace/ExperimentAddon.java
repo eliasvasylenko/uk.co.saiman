@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.procedure.ConductorService;
+import uk.co.saiman.experiment.instruction.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
@@ -98,7 +98,7 @@ public class ExperimentAddon {
 
   @Inject
   @Service
-  private ConductorService conductorService;
+  private ExecutorService conductorService;
   @Inject
   @Service
   private StorageService storageService;

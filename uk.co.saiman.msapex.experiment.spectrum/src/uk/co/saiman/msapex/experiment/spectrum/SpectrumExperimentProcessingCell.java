@@ -47,7 +47,7 @@ import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
-import uk.co.saiman.experiment.spectrum.SpectrumProcessingConductor;
+import uk.co.saiman.experiment.spectrum.SpectrumProcessingExecutor;
 import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
 
@@ -66,7 +66,7 @@ public class SpectrumExperimentProcessingCell {
   public void prepare(
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
-      SpectrumProcessingConductor conductor) {
+      SpectrumProcessingExecutor conductor) {
     Cell parent = (Cell) (MUIElement) cell.getParent();
 
     parent.setLabel(properties.spectrumProcessingExperimentName().get());
@@ -77,13 +77,13 @@ public class SpectrumExperimentProcessingCell {
 
   @Inject
   @Optional
-  public void updateVariables(ChangeVariableEvent event, SpectrumProcessingConductor conductor) {
+  public void updateVariables(ChangeVariableEvent event, SpectrumProcessingExecutor conductor) {
     if (event.step() == step) {
       updateChildren(conductor);
     }
   }
 
-  public void updateChildren(SpectrumProcessingConductor conductor) {
+  public void updateChildren(SpectrumProcessingExecutor conductor) {
     children
         .setItems(
             ProcessorCell.ID,

@@ -30,8 +30,8 @@ package uk.co.saiman.msapex.experiment.i18n;
 import java.nio.file.Path;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;
 
@@ -106,10 +106,7 @@ public interface ExperimentProperties {
 
   Localized<String> attachStepFailedText(WorkspaceExperiment experiment, Localized<String> name);
 
-  Localized<String> attachStepFailedText(
-      Step step,
-      Production<?> production,
-      Conductor<?> procedure);
+  Localized<String> attachStepFailedText(Step step, Executor<?> procedure);
 
   Localized<String> attachStepFailedDescription();
 

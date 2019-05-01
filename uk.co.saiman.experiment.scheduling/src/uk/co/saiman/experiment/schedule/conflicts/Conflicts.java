@@ -38,17 +38,15 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.Resource;
+import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.instruction.IndirectRequirements;
+import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.procedure.RequirementResolutionContext;
-import uk.co.saiman.experiment.procedure.Requirements;
-import uk.co.saiman.experiment.product.Production;
-import uk.co.saiman.experiment.schedule.Products;
+import uk.co.saiman.experiment.procedure.Productions;
+import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.experiment.schedule.Schedule;
-import uk.co.saiman.experiment.schedule.ScheduledInstruction;
 
 public class Conflicts {
   private final Schedule schedule;
@@ -58,13 +56,11 @@ public class Conflicts {
     this.schedule = schedule;
 
     this.differences = new HashMap<>();
-    schedule.getProcedure().instructions().forEach(this::checkDifference);
+    schedule.getScheduledProcedure().paths().forEach(this::checkDifference);
     schedule
-        .currentProducts()
-        .map(Products::getProcedure)
+        .getPreviouslyConductedProcedure()
         .stream()
-        .flatMap(Procedure::instructions)
-        .filter(path -> schedule.getProcedure().instruction(path).isEmpty())
+        .flatMap(Procedure::paths)
         .forEach(this::checkDifference);
   }
 
@@ -81,23 +77,24 @@ public class Conflicts {
   }
 
   private void checkDifference(ExperimentPath<Absolute> experimentPath) {
-    differences.put(experimentPath, new ChangeImpl(experimentPath));
+    if (!differences.containsKey(experimentPath)) {
+      differences.put(experimentPath, new ChangeImpl(experimentPath));
+    }
   }
 
   public class ChangeImpl implements Change {
     private final ExperimentPath<Absolute> path;
 
-    private final Optional<Instruction> previousInstruction;
-    private final Optional<ScheduledInstruction> scheduledInstruction;
+    private final Optional<Instruction<?>> previousInstruction;
+    private final Optional<Instruction<?>> scheduledInstruction;
 
     public ChangeImpl(ExperimentPath<Absolute> path) {
       this.path = path;
 
       this.previousInstruction = schedule
-          .currentProducts()
-          .map(Products::getProcedure)
+          .getPreviouslyConductedProcedure()
           .flatMap(p -> p.instruction(path));
-      this.scheduledInstruction = schedule.scheduledInstruction(path);
+      this.scheduledInstruction = schedule.getScheduledProcedure().instruction(path);
     }
 
     @Override
@@ -106,13 +103,13 @@ public class Conflicts {
     }
 
     @Override
-    public Optional<Instruction> currentInstruction() {
+    public Optional<Instruction<?>> currentInstruction() {
       return previousInstruction;
     }
 
     @Override
-    public Optional<Instruction> scheduledInstruction() {
-      return scheduledInstruction.map(ScheduledInstruction::instruction);
+    public Optional<Instruction<?>> scheduledInstruction() {
+      return scheduledInstruction;
     }
 
     @Override
@@ -139,33 +136,31 @@ public class Conflicts {
     }
 
     @Override
-    public Optional<Instruction> conflictingInstruction() {
+    public Optional<Instruction<?>> conflictingInstruction() {
       return previousInstruction
-          .filter(
-              state -> scheduledInstruction
-                  .map(ScheduledInstruction::instruction)
-                  .filter(state::equals)
-                  .isEmpty());
+          .filter(state -> scheduledInstruction.filter(state::equals).isEmpty());
     }
 
     @Override
     public Stream<Change> conflictingDependencies() {
       return scheduledInstruction
-          .map(ScheduledInstruction::conductor)
+          .map(Instruction::executor)
           .stream()
-          .flatMap(Conductor::indirectRequirements)
+          .flatMap(Executor::indirectRequirements)
           .flatMap(this::resolveDependencies)
           .collect(toMap(Change::path, identity(), (a, b) -> a))
           .values()
           .stream();
     }
 
-    private Stream<Change> resolveDependencies(Requirements requirement) {
-      return requirement
-          .dependencies(new RequirementResolutionContext() {})
+    private Stream<Change> resolveDependencies(IndirectRequirements requirements) {
+      return scheduledInstruction
+          .stream()
+          .flatMap(requirements::dependencies)
           .flatMap(dependency -> dependency.resolveAgainst(path).stream())
           .flatMap(
-              path -> conflictingDependency(path, requirement.requirement().production()).stream());
+              path -> conflictingDependency(path, requirements.requirement().production())
+                  .stream());
     }
 
     private Optional<Change> conflictingDependency(
@@ -174,7 +169,7 @@ public class Conflicts {
       return change(dependency)
           .filter(
               c -> c.isConflicting()
-                  || production.isPresent(c.scheduledInstruction().get().conductor()));
+                  || Productions.produces(c.scheduledInstruction().get().executor(), production));
     }
   }
 }

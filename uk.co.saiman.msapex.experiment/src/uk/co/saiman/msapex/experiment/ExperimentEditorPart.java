@@ -38,8 +38,8 @@ import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.product.Observation;
-import uk.co.saiman.experiment.product.Preparation;
+import uk.co.saiman.experiment.production.Observation;
+import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 
@@ -66,10 +66,10 @@ public class ExperimentEditorPart {
     context.set(Step.class, node);
 
     concat(
-        node.getConductor().variables().map(VariableDeclaration::variable).map(Variable::id),
+        node.getExecutor().variables().map(VariableDeclaration::variable).map(Variable::id),
         concat(
-            Productions.preparations(node.getConductor()).map(Preparation::id),
-            Productions.observations(node.getConductor()).map(Observation::id)))
+            Productions.preparations(node.getExecutor()).map(Preparation::id),
+            Productions.observations(node.getExecutor()).map(Observation::id)))
                 .forEach(context::declareModifiable);
   }
 }

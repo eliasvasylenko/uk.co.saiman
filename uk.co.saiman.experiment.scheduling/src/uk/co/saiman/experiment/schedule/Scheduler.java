@@ -29,49 +29,53 @@ package uk.co.saiman.experiment.schedule;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.production.Results;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 
 /**
- * A scheduler
+ * A scheduler provides management and feedback facilities around a target
+ * conductor. It allows users to schedule a procedure to be conducted, then
+ * inspect what changes this would incur against the previously conducted
+ * experiment, if any, before proceeding.
  * <p>
  * A scheduler should not be shared between multiple clients. While updates are
  * atomic and thread safe, clients who wish to make sure there are no
  * invalidations before proceeding
+ * <p>
+ * TODO "automatic" executors should be processed as soon as they are scheduled,
+ * regardless of what data would be overwritten as a result. This requires the
+ * "diff" calculation to be a little more thorough, such that we can extract a
+ * subset of changes for partial application.
  * 
  * @author Elias N Vasylenko
  *
  */
 public class Scheduler {
-  private final StorageConfiguration<?> storageConfiguration;
-
   private Schedule schedule;
-  private Products products;
-
-  private final SortedMap<ExperimentPath<Absolute>, InstructionProgress> progress;
+  private Conductor conductor;
 
   public Scheduler(StorageConfiguration<?> storageConfiguration) {
-    this.storageConfiguration = storageConfiguration;
     this.schedule = null;
-    this.products = null;
-    this.progress = new TreeMap<>();
-  }
-
-  public StorageConfiguration<?> getStorageConfiguration() {
-    return storageConfiguration;
+    this.conductor = new Conductor(storageConfiguration);
   }
 
   public Optional<Schedule> getSchedule() {
     return Optional.ofNullable(schedule);
   }
 
-  public Optional<Products> getProducts() {
-    return Optional.ofNullable(products);
+  Conductor getConductor() {
+    return conductor;
+  }
+
+  public Results getResults() {
+    return conductor;
+  }
+
+  public StorageConfiguration<?> getStorageConfiguration() {
+    return conductor.storageConfiguration();
   }
 
   public synchronized Schedule schedule(Procedure procedure) {
@@ -80,7 +84,7 @@ public class Scheduler {
   }
 
   public synchronized Optional<Schedule> scheduleReset() {
-    return getProducts().map(Products::getProcedure).map(this::schedule);
+    return getConductor().procedure().map(this::schedule);
   }
 
   private void assertFresh(Schedule schedule) {
@@ -95,52 +99,11 @@ public class Scheduler {
     this.schedule = null;
   }
 
-  synchronized Products proceed(Schedule schedule) {
-    assertFresh(schedule);
-
-    var procedure = schedule.getProcedure();
-
-    var progressIterator = progress.entrySet().iterator();
-    while (progressIterator.hasNext()) {
-      var progress = progressIterator.next();
-
-      procedure
-          .instruction(progress.getKey())
-          .ifPresentOrElse(progress.getValue()::updateInstruction, () -> {
-            progress.getValue().interrupt();
-            progressIterator.remove();
-          });
-    }
-    procedure
-        .instructions()
-        .filter(progress::containsKey)
-        .forEach(
-            path -> progress
-                .put(path, new InstructionProgress(this, path, procedure.instruction(path).get())));
-
-    return products = new Products(this);
-  }
-
-  private void assertFresh(Products products) {
-    if (this.products != products) {
-      throw new SchedulingException("Scheduler products are stale");
-    }
-  }
-
-  synchronized void interrupt(Products products) {
-    assertFresh(products);
-
+  synchronized void interrupt() {
     // TODO cancel if we're processing
   }
 
-  synchronized void clear(Products products) throws IOException {
-    assertFresh(products);
-
-    interrupt(products);
-    this.products = null;
-    storageConfiguration
-        .locateStorage(
-            ExperimentPath.defineAbsolute().resolve(products.getSchedule().getProcedure().id()))
-        .deallocate();
+  synchronized void clear() throws IOException {
+    conductor.clear();
   }
 }

@@ -42,7 +42,7 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
-import uk.co.saiman.experiment.procedure.ConductorService;
+import uk.co.saiman.experiment.instruction.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment.Status;
@@ -64,7 +64,7 @@ public class Workspace {
 
   public Workspace(
       Path rootPath,
-      ConductorService conductorService,
+      ExecutorService conductorService,
       StorageService storageService) {
     this.experiments = new HashSet<>();
 

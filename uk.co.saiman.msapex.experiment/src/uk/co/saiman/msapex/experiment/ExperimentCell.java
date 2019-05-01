@@ -53,7 +53,6 @@ import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.procedure.ExperimentConfiguration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -160,7 +159,6 @@ public class ExperimentCell {
       removeChildren();
       context.remove(Experiment.class);
       context.remove(Step.class);
-      context.remove(ExperimentConfiguration.class);
       updateIcon();
     } catch (Exception e) {
       e.printStackTrace();
@@ -171,7 +169,7 @@ public class ExperimentCell {
   @Optional
   public void update(ExperimentEvent event) {
     if (experiment.status() == Status.OPEN && event.experiment() == experiment.experiment()) {
-      cell.setLabel(event.procedure().id());
+      cell.setLabel(event.definition().id());
       updateChildren();
     }
   }

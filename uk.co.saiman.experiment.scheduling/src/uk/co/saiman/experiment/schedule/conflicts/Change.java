@@ -32,19 +32,20 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.Resource;
+import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.procedure.Instruction;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 
 public interface Change {
-  ExperimentPath path();
+  ExperimentPath<Absolute> path();
 
-  Optional<Instruction> currentInstruction();
+  Optional<Instruction<?>> currentInstruction();
 
-  Optional<Instruction> scheduledInstruction();
+  Optional<Instruction<?>> scheduledInstruction();
 
   boolean isConflicting();
 
-  Optional<Instruction> conflictingInstruction();
+  Optional<Instruction<?>> conflictingInstruction();
 
   Stream<Resource> conflictingResources() throws IOException;
 

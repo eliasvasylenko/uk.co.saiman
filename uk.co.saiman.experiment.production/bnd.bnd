@@ -1,0 +1,17 @@
+Bundle-Name: SAI :: Experiment :: Products
+
+-buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.state;version=snapshot,\
+	uk.co.saiman.data;version=snapshot
+
+Export-Package: \
+	uk.co.saiman.experiment.path,\
+	uk.co.saiman.experiment.production,\
+	uk.co.saiman.experiment.requirement

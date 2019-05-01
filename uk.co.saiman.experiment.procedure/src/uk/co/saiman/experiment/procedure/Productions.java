@@ -30,17 +30,19 @@ package uk.co.saiman.experiment.procedure;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.product.Nothing;
-import uk.co.saiman.experiment.product.Observation;
-import uk.co.saiman.experiment.product.Preparation;
-import uk.co.saiman.experiment.product.Product;
-import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.production.Nothing;
+import uk.co.saiman.experiment.production.Observation;
+import uk.co.saiman.experiment.production.Preparation;
+import uk.co.saiman.experiment.production.Product;
+import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.requirement.ProductRequirement;
 
 public class Productions {
   private Productions() {}
 
-  public static boolean produces(Conductor<?> conductor, Production<?> production) {
-    return conductor.products().anyMatch(production::equals);
+  public static boolean produces(Executor<?> executor, Production<?> production) {
+    return executor.products().anyMatch(production::equals);
   }
 
   /**
@@ -49,8 +51,8 @@ public class Productions {
    * 
    * @return a stream of the observations which are prepared by the procedure
    */
-  public static Stream<? extends Observation<?>> observations(Conductor<?> conductor) {
-    return conductor.products().filter(Observation.class::isInstance).map(p -> (Observation<?>) p);
+  public static Stream<? extends Observation<?>> observations(Executor<?> executor) {
+    return executor.products().filter(Observation.class::isInstance).map(p -> (Observation<?>) p);
   }
 
   /**
@@ -59,28 +61,41 @@ public class Productions {
    * 
    * @return a stream of the preparations which are prepared by the procedure
    */
-  public static Stream<Preparation<?>> preparations(Conductor<?> conductor) {
-    return conductor.products().filter(Preparation.class::isInstance).map(p -> (Preparation<?>) p);
+  public static Stream<Preparation<?>> preparations(Executor<?> executor) {
+    return executor.products().filter(Preparation.class::isInstance).map(p -> (Preparation<?>) p);
   }
 
-  public static Optional<? extends Production<?>> production(Conductor<?> conductor, String id) {
-    return conductor.products().filter(c -> c.id().equals(id)).findAny();
+  public static Optional<? extends Production<?>> production(Executor<?> executor, String id) {
+    return executor.products().filter(c -> c.id().equals(id)).findAny();
   }
 
   @SuppressWarnings("unchecked")
-  public static <T extends Product> Optional<Conductor<? super T>> asDependent(
-      Conductor<?> conductor,
+  public static Optional<Executor<? extends Product>> asDependent(
+      Executor<?> executor,
+      Executor<?> parentExecutor) {
+    return executor.directRequirement() instanceof ProductRequirement<?>
+        && Productions
+            .produces(
+                parentExecutor,
+                ((ProductRequirement<?>) executor.directRequirement()).production())
+                    ? Optional.of((Executor<? extends Product>) executor)
+                    : Optional.empty();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends Product> Optional<Executor<? super T>> asDependent(
+      Executor<?> executor,
       Production<T> production) {
-    return conductor.directRequirement() instanceof ProductRequirement<?>
-        && ((ProductRequirement<?>) conductor.directRequirement()).production().equals(production)
-            ? Optional.of((Conductor<? super T>) conductor)
+    return executor.directRequirement() instanceof ProductRequirement<?>
+        && ((ProductRequirement<?>) executor.directRequirement()).production().equals(production)
+            ? Optional.of((Executor<? super T>) executor)
             : Optional.empty();
   }
 
   @SuppressWarnings("unchecked")
-  public static <S> Optional<Conductor<Nothing>> asIndependent(Conductor<?> conductor) {
-    return conductor.directRequirement().isIndependent()
-        ? Optional.of((Conductor<Nothing>) conductor)
+  public static <S> Optional<Executor<Nothing>> asIndependent(Executor<?> executor) {
+    return executor.directRequirement().isIndependent()
+        ? Optional.of((Executor<Nothing>) executor)
         : Optional.empty();
   }
 }

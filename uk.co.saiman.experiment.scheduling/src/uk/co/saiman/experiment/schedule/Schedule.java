@@ -27,74 +27,54 @@
  */
 package uk.co.saiman.experiment.schedule;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.path.ProductPath;
+import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.schedule.event.SchedulingEvent;
+import uk.co.saiman.experiment.procedure.event.ConductorEvent;
+import uk.co.saiman.experiment.production.Results;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
 public class Schedule {
   private final Scheduler scheduler;
-  private final Procedure procedure;
-  private final Optional<Products> currentProducts;
+  private final Procedure scheduledProcedure;
+  private final Optional<Procedure> previouslyConductedProcedure;
 
-  private final Map<ExperimentPath<Absolute>, ScheduledInstruction> scheduledInstructions;
-
-  private final HotObservable<SchedulingEvent> events = new HotObservable<>();
+  private final HotObservable<ConductorEvent> events = new HotObservable<>();
 
   public Schedule(Scheduler scheduler, Procedure procedure) {
     this.scheduler = scheduler;
-    this.procedure = procedure;
-    this.currentProducts = scheduler.getProducts();
-
-    this.scheduledInstructions = new HashMap<>();
+    this.scheduledProcedure = procedure;
+    this.previouslyConductedProcedure = scheduler.getConductor().procedure();
   }
 
   public Scheduler getScheduler() {
     return scheduler;
   }
 
-  public Optional<Products> currentProducts() {
-    return currentProducts;
+  public Optional<Procedure> getPreviouslyConductedProcedure() {
+    return previouslyConductedProcedure;
   }
 
-  public Procedure getProcedure() {
-    return procedure;
-  }
-
-  public Optional<ScheduledInstruction> scheduledInstruction(ExperimentPath<Absolute> path) {
-    return Optional.ofNullable(scheduledInstructions.get(path));
+  public Procedure getScheduledProcedure() {
+    return scheduledProcedure;
   }
 
   public void unschedule() {
     scheduler.unschedule(this);
   }
 
-  public Products proceed() {
-    return scheduler.proceed(this);
+  public Results conduct() {
+    scheduler.getConductor().conduct(scheduledProcedure);
+    return scheduler.getConductor();
   }
 
-  public Observable<SchedulingEvent> events() {
+  public Observable<ConductorEvent> events() {
     return events;
   }
 
-  Optional<ScheduledInstruction> getParent(ScheduledInstruction scheduledInstruction) {
-    return scheduledInstruction
-        .productPath()
-        .map(ProductPath::getExperimentPath)
-        .map(scheduledInstructions::get);
-  }
-
-  Stream<ScheduledInstruction> getChildren(ScheduledInstruction scheduledInstruction) {
-    return procedure
-        .dependentInstructions(scheduledInstruction.experimentPath())
-        .map(scheduledInstructions::get);
+  Optional<Instruction<?>> getParent(Instruction<?> instruction) {
+    return instruction.path().parent().flatMap(scheduledProcedure::instruction);
   }
 }

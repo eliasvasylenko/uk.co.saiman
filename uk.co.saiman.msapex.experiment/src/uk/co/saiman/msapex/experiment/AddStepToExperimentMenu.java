@@ -28,7 +28,6 @@
 package uk.co.saiman.msapex.experiment;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -44,7 +43,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.product.Nothing;
+import uk.co.saiman.experiment.production.Nothing;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -71,9 +70,8 @@ public class AddStepToExperimentMenu {
   void aboutToShow(List<MMenuElement> items, WorkspaceExperiment experiment) {
     stepProviders
         .stream()
-        .map(provider -> provider.asIndependent())
-        .flatMap(Optional::stream)
-        .map(t -> createMenuItem(experiment, t))
+        .flatMap(provider -> provider.asIndependent().stream())
+        .map(provider -> createMenuItem(experiment, provider))
         .forEach(items::add);
   }
 

@@ -34,7 +34,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.spectrum.SpectrumConductor;
+import uk.co.saiman.experiment.spectrum.SpectrumExecutor;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
 @Component(immediate = true)
@@ -44,7 +44,7 @@ public class SpectrumExperimentAdapterFactory implements IAdapterFactory {
 
   @Activate
   public void register() {
-    adapterManager.registerAdapters(this, SpectrumConductor.class);
+    adapterManager.registerAdapters(this, SpectrumExecutor.class);
   }
 
   @Deactivate
@@ -55,7 +55,7 @@ public class SpectrumExperimentAdapterFactory implements IAdapterFactory {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-    SpectrumConductor configuration = (SpectrumConductor) adaptableObject;
+    SpectrumExecutor configuration = (SpectrumExecutor) adaptableObject;
 
     if (adapterType == AcquisitionDevice.class) {
       return (T) configuration.getAcquisitionDevice();

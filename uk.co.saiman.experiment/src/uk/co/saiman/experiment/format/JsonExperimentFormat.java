@@ -37,8 +37,8 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.json.JsonProcedureFormat;
-import uk.co.saiman.experiment.procedure.ConductorService;
+import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
+import uk.co.saiman.experiment.instruction.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.state.MapIndex;
@@ -59,30 +59,30 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   private final MapIndex<StorageConfiguration<?>> storage;
 
   private final JsonStateMapFormat stateMapFormat;
-  private final JsonProcedureFormat procedureFormat;
+  private final JsonExperimentDefinitionFormat definitionFormat;
 
-  public JsonExperimentFormat(ConductorService procedureService, StorageService storageService) {
+  public JsonExperimentFormat(ExecutorService procedureService, StorageService storageService) {
     this(procedureService, storageService, new JsonStateMapFormat());
   }
 
   public JsonExperimentFormat(
-      ConductorService procedureService,
+      ExecutorService procedureService,
       StorageService storageService,
       JsonStateMapFormat stateMapFormat) {
     this(
         procedureService,
         storageService,
         stateMapFormat,
-        new JsonProcedureFormat(procedureService, stateMapFormat));
+        new JsonExperimentDefinitionFormat(procedureService, stateMapFormat));
   }
 
   public JsonExperimentFormat(
-      ConductorService procedureService,
+      ExecutorService procedureService,
       StorageService storageService,
       JsonStateMapFormat stateMapFormat,
-      JsonProcedureFormat experimentDefinitionFormat) {
+      JsonExperimentDefinitionFormat definitionFormat) {
     this.stateMapFormat = stateMapFormat;
-    this.procedureFormat = experimentDefinitionFormat;
+    this.definitionFormat = definitionFormat;
 
     this.storage = new MapIndex<>(
         STORAGE,
@@ -107,7 +107,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
-    return new Experiment(procedureFormat.loadProcedure(data), data.get(storage));
+    return new Experiment(definitionFormat.loadProcedure(data), data.get(storage));
   }
 
   @Override
@@ -116,8 +116,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected StateMap saveExperiment(Experiment data) {
-    return procedureFormat
-        .saveProcedure(data.getProcedure())
+    return definitionFormat
+        .saveProcedure(data.getDefinition())
         .with(storage, data.getStorageConfiguration());
   }
 }

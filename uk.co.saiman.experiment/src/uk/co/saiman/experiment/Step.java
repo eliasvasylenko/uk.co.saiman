@@ -29,40 +29,36 @@ package uk.co.saiman.experiment;
 
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.path.Dependency;
+import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.Instruction;
-import uk.co.saiman.experiment.procedure.Template;
-import uk.co.saiman.experiment.product.Product;
-import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.production.Product;
+import uk.co.saiman.experiment.production.ProductPath;
+import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.Variables;
 
 /**
  * This class provides a common interface for manipulating, inspecting, and
  * reflecting over the constituent nodes of an experiment. Each node is
- * associated with an implementation of {@link Conductor}.
+ * associated with an implementation of {@link Executor}.
  * 
  * @author Elias N Vasylenko
  */
 public class Step {
   private final Experiment experiment;
-  private final Conductor<?> conductor;
+  private final Executor<?> executor;
   private ExperimentPath<Absolute> path;
 
   private boolean scheduled;
 
-  private Production<?> production;
-  private int index;
-
-  Step(Experiment experiment, Conductor<?> conductor, ExperimentPath<Absolute> path) {
+  Step(Experiment experiment, Executor<?> conductor, ExperimentPath<Absolute> path) {
     this.experiment = experiment;
-    this.conductor = conductor;
+    this.executor = conductor;
     this.path = path;
   }
 
@@ -89,16 +85,16 @@ public class Step {
     return scheduled;
   }
 
-  public Instruction getProcedure() {
-    return (Instruction) experiment.getInstruction(path);
+  public StepDefinition<?> getDefinition() {
+    return (StepDefinition<?>) experiment.getDefinition().findStep(path).get();
   }
 
   public String getId() {
-    return getProcedure().id();
+    return getDefinition().id();
   }
 
-  public Conductor<?> getConductor() {
-    return conductor;
+  public Executor<?> getExecutor() {
+    return executor;
   }
 
   public <T> T getVariable(Variable<T> variable) {
@@ -110,14 +106,14 @@ public class Step {
     // TODO Auto-generated method stub
   }
 
-  private void updateProcedure(Function<Instruction, Instruction> modifier) {
+  private void updateProcedure(Function<StepDefinition<?>, StepDefinition<?>> modifier) {
     synchronized (experiment) {
-      updateProcedure(modifier.apply(getProcedure()));
+      updateProcedure(modifier.apply(getDefinition()));
     }
   }
 
-  private void updateProcedure(Instruction procedure) {
-    getExperiment().updateInstruction(path, procedure);
+  private void updateProcedure(StepDefinition<?> definition) {
+    getExperiment().updateInstruction(path, definition);
   }
 
   /*
@@ -128,7 +124,7 @@ public class Step {
    * @return the parent part of this experiment, if present, otherwise an empty
    *         optional
    */
-  public Optional<Dependency<?, Absolute>> getDependency() {
+  public Optional<ProductPath<Absolute, ?>> getDependency() {
     return Optional.empty();// withLock(() ->
                             // Optional.of(parentDependent).map(Dependent::capability));
   }
@@ -137,14 +133,15 @@ public class Step {
     return experiment;
   }
 
-  public <T extends Product> Step attach(Production<? extends T> production, Template<T> template) {
-    return attach(production, -1, template);
+  public <T extends Product> Step attach(StepDefinition<T> template) {
+    throw new UnsupportedOperationException();
+    // TODO return attach(production, -1, template);
   }
 
   public <V, T extends Product> Step attach(
       Production<? extends T> production,
       int index,
-      Template<T> template) {
+      StepDefinition<T> step) {
     synchronized (experiment) {
       return null;
     }
@@ -162,7 +159,7 @@ public class Step {
     throw new UnsupportedOperationException();
   }
 
-  public <T extends Product> Dependency<T, Absolute> getPath(Production<T> capability) {
+  public <T extends Product> ProductPath<Absolute, T> getPath(Production<T> capability) {
     throw new UnsupportedOperationException();
   }
 
@@ -170,7 +167,7 @@ public class Step {
     throw new UnsupportedOperationException();
   }
 
-  public Instruction getInstruction() {
+  public Instruction<?> getInstruction() {
     // TODO Auto-generated method stub
     return null;
   }

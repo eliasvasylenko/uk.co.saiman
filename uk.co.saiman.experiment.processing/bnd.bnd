@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: Experiment :: Spectrum
+Bundle-Name: SAI :: Experiment :: Processing
 
 Export-Package: uk.co.saiman.experiment.processing
 Private-Package: uk.co.saiman.experiment.processing.impl

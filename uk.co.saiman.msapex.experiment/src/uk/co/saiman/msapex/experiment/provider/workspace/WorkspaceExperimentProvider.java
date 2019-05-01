@@ -35,7 +35,7 @@ import javax.inject.Inject;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
@@ -63,7 +63,7 @@ public class WorkspaceExperimentProvider implements ExperimentProvider {
         .showAndWait()
         .map(
             id -> new Experiment(
-                Procedure.define(id),
+                ExperimentDefinition.define(id),
                 new StorageConfiguration<>(store, Path.of("."))))
         .stream();
   }

@@ -34,7 +34,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
-import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
 
@@ -59,7 +59,7 @@ public class RenameExperimentDialog extends TextInputDialog {
 
       boolean exists = workspace.getWorkspaceExperiment(newValue).isPresent();
 
-      boolean isValid = Procedure.isNameValid(newValue);
+      boolean isValid = ExperimentDefinition.isNameValid(newValue);
 
       okButton.setDisable(!isValid || exists);
     });

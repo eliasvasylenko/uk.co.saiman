@@ -33,8 +33,9 @@ import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.product.Observation;
-import uk.co.saiman.experiment.schedule.Products;
+import uk.co.saiman.experiment.production.Observation;
+import uk.co.saiman.experiment.production.ProductPath;
+import uk.co.saiman.experiment.production.Results;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -49,12 +50,12 @@ public class ExperimentResultCell {
 
   @Inject
   @Optional
-  public void prepare(Cell cell, ExperimentPath<?> path, Products products) {
+  public void prepare(Cell cell, ExperimentPath<?> path, Results results) {
     /*
      * configure label
      */
-    products
-        .resolveResult(path.resolve(observation))
+    results
+        .resolveResult(ProductPath.define(path, observation))
         .value()
         .ifPresentOrElse(
             result -> cell

@@ -29,31 +29,30 @@ package uk.co.saiman.msapex.experiment.step.provider;
 
 import java.util.Optional;
 
-import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.procedure.Template;
-import uk.co.saiman.experiment.product.Nothing;
-import uk.co.saiman.experiment.product.Product;
-import uk.co.saiman.experiment.product.Production;
+import uk.co.saiman.experiment.production.Dependency;
+import uk.co.saiman.experiment.production.Nothing;
+import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.properties.Localized;
 
-public interface ExperimentStepProvider<T extends Product> {
+public interface ExperimentStepProvider<T extends Dependency> {
   Localized<String> name();
 
-  Conductor<T> conductor();
+  Executor<T> executor();
 
-  Optional<Template<T>> createStep();
+  Optional<StepDefinition<T>> createStep();
 
   @SuppressWarnings("unchecked")
-  default <U extends Product> Optional<ExperimentStepProvider<? super U>> asDependent(
-      Production<U> production) {
+  default Optional<ExperimentStepProvider<? extends Product>> asDependent(Executor<?> executor) {
     return Productions
-        .asDependent(conductor(), production)
-        .map(c -> (ExperimentStepProvider<? super U>) this);
+        .asDependent(executor(), executor)
+        .map(c -> (ExperimentStepProvider<? extends Product>) this);
   }
 
   @SuppressWarnings("unchecked")
   default <S> Optional<ExperimentStepProvider<Nothing>> asIndependent() {
-    return Productions.asIndependent(conductor()).map(c -> (ExperimentStepProvider<Nothing>) this);
+    return Productions.asIndependent(executor()).map(c -> (ExperimentStepProvider<Nothing>) this);
   }
 }

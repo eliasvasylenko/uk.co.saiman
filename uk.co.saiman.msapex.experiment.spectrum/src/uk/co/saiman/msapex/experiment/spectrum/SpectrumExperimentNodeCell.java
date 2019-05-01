@@ -39,7 +39,7 @@ import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.procedure.Instruction;
+import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.msapex.experiment.spectrum.i18n.SpectrumProperties;
 
 public class SpectrumExperimentNodeCell {
@@ -52,7 +52,7 @@ public class SpectrumExperimentNodeCell {
       Cell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
       Step data,
-      Instruction instruction) {
+      Instruction<?> instruction) {
     cell = (Cell) (MUIElement) cell.getParent();
 
     cell.setLabel(properties.spectrumExperimentName().get());

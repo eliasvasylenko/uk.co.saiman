@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.instruction.Executor;
 
 public class ExperimentStepAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;
@@ -51,8 +51,8 @@ public class ExperimentStepAdapterFactory implements IAdapterFactory {
   public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
     Step node = (Step) adaptableObject;
 
-    if (adapterType.isAssignableFrom(Conductor.class)) {
-      return (T) node.getConductor();
+    if (adapterType.isAssignableFrom(Executor.class)) {
+      return (T) node.getExecutor();
     }
 
     if (adapterType.isAssignableFrom(Experiment.class)) {
@@ -64,6 +64,6 @@ public class ExperimentStepAdapterFactory implements IAdapterFactory {
 
   @Override
   public Class<?>[] getAdapterList() {
-    return new Class<?>[] { Conductor.class, Experiment.class };
+    return new Class<?>[] { Executor.class, Experiment.class };
   }
 }

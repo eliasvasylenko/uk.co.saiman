@@ -30,7 +30,8 @@ package uk.co.saiman.experiment.event;
 import static uk.co.saiman.experiment.event.ExperimentEventKind.ADD_STEP;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.path.Dependency;
+import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.production.ProductPath;
 
 public class AddStepEvent extends ExperimentStepEvent {
   @Override
@@ -38,7 +39,7 @@ public class AddStepEvent extends ExperimentStepEvent {
     return ADD_STEP;
   }
 
-  public Dependency<?, ?> dependency() {
+  public ProductPath<Absolute, ?> dependency() {
     // TODO Auto-generated method stub
     return null;
   }

@@ -27,6 +27,7 @@
 	uk.co.saiman.measurement.fx;version=snapshot,\
 	uk.co.saiman.measurement.coordinates;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.experiment.production;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\

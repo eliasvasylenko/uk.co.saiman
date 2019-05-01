@@ -28,12 +28,12 @@
 package uk.co.saiman.experiment.event;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 
 public abstract class ExperimentEvent {
   public abstract ExperimentEventKind kind();
 
-  public Procedure procedure() {
+  public ExperimentDefinition definition() {
     // TODO Auto-generated method stub
     return null;
   }

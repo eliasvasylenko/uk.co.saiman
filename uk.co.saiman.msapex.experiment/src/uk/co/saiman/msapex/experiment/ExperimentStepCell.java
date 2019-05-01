@@ -49,13 +49,14 @@ import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
 import uk.co.saiman.experiment.event.RemoveStepEvent;
+import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.procedure.Conductor;
-import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Productions;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -79,7 +80,7 @@ public class ExperimentStepCell {
   @Inject
   private IEclipseContext context;
   @Inject
-  private Step experiment;
+  private Step step;
 
   private Label supplementalText = new Label();
   private Label lifecycleIndicator = new Label();
@@ -92,15 +93,15 @@ public class ExperimentStepCell {
 
   @CanExecute
   public boolean canExecute() {
-    return Productions.observations(experiment.getConductor()).count() > 0
-        && editorService.getApplicableEditors(Step.class, experiment).findFirst().isPresent();
+    return Productions.observations(step.getExecutor()).count() > 0
+        && editorService.getApplicableEditors(Step.class, step).findFirst().isPresent();
   }
 
   @Execute
   public void execute() {
     try {
       editorService
-          .getApplicableEditors(Step.class, experiment)
+          .getApplicableEditors(Step.class, step)
           .findFirst()
           .ifPresent(editorService::open);
     } catch (Exception e) {
@@ -132,8 +133,9 @@ public class ExperimentStepCell {
     /*
      * Inject configuration
      */
-    context.set(Conductor.class, experiment.getConductor());
-    context.set(Instruction.class, experiment.getInstruction());
+    context.set(Executor.class, step.getExecutor());
+    context.set(StepDefinition.class, step.getDefinition());
+    context.set(Instruction.class, step.getInstruction());
     /*- TODO
     IContextFunction configurationFunction = (c, k) -> {
       Object variables = c.get(ExperimentNode.class).getVariables();
@@ -168,7 +170,7 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void update(MoveStepEvent event) {
-    if (Objects.equals(event.step(), experiment)) {
+    if (Objects.equals(event.step(), step)) {
       updatePath();
     }
   }
@@ -176,7 +178,7 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void update(AddStepEvent event) {
-    if (Objects.equals(event.dependencyStep(), experiment)) {
+    if (Objects.equals(event.dependencyStep(), step)) {
       updateChildren();
     }
   }
@@ -184,7 +186,7 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void update(RemoveStepEvent event) {
-    if (Objects.equals(event.previousDependencyStep(), experiment)) {
+    if (Objects.equals(event.previousDependencyStep(), step)) {
       updateChildren();
     }
   }
@@ -192,7 +194,7 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void update(ChangeVariableEvent event) {
-    if (Objects.equals(event.step(), experiment)) {
+    if (Objects.equals(event.step(), step)) {
       // TODO update context?
     }
   }
@@ -200,15 +202,12 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void updatePath() {
-    cell.setLabel(experiment.getId());
-    context.set(ExperimentPath.class, experiment.getPath());
+    cell.setLabel(step.getId());
+    context.set(ExperimentPath.class, step.getPath());
   }
 
   private void updateChildren() {
     children
-        .setItems(
-            ExperimentStepCell.ID,
-            Step.class,
-            experiment.getDependentSteps().collect(toList()));
+        .setItems(ExperimentStepCell.ID, Step.class, step.getDependentSteps().collect(toList()));
   }
 }

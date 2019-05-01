@@ -12,6 +12,7 @@ Export-Package: uk.co.saiman.experiment.spectrum
 	uk.co.saiman.reflection.token;version=snapshot,\
 \
 	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.experiment.production;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
