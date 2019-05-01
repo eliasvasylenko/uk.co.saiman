@@ -118,22 +118,22 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
     return loadSteps(ExperimentDefinition.define(data.get(ID)), data.get(CHILDREN).asList());
   }
 
-  private <T extends StepContainer<T>> T loadSteps(T container, StateList data) {
+  private <T extends StepContainer<? extends T>> T loadSteps(T container, StateList data) {
     return data
         .stream()
         .map(State::asMap)
         .reduce(container, (p, s) -> loadStep(p, s), throwingMerger());
   }
 
-  private <T extends StepContainer<T>> T loadStep(T container, StateMap data) {
-    var step = StepDefinition
+  private <T extends StepContainer<? extends T>> T loadStep(T container, StateMap data) {
+    StepDefinition<?> step = StepDefinition
         .define(
             data.get(ID),
             data.get(variables),
             (Executor<?>) data.get(conductor),
             data.get(PLAN));
 
-    step = loadSteps(step, data.get(CHILDREN).asList());
+    step = this.<StepDefinition<?>>loadSteps(step, data.get(CHILDREN).asList());
 
     return container.withStep(step);
   }
