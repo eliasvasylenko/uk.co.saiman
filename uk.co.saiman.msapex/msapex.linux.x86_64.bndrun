@@ -158,8 +158,10 @@ runplatform: linux64
 	uk.co.saiman.eclipse.ui;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
+	uk.co.saiman.experiment.definition;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
+	uk.co.saiman.experiment.production;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.scheduling;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
