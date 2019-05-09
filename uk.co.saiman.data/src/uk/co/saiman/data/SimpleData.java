@@ -129,7 +129,7 @@ public class SimpleData<T> implements Data<T> {
       try (ReadableByteChannel readChannel = resource.read()) {
         setImpl(format.load(readChannel).data);
       } catch (IOException e) {
-        throw new DataException("Failed to read data", e);
+        throw new DataException("Failed to read data: " + e.getMessage(), e);
       }
 
       this.dirty = false;

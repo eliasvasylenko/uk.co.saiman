@@ -32,7 +32,7 @@ import java.util.Optional;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
-import uk.co.saiman.experiment.production.Results;
+import uk.co.saiman.experiment.production.Output;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
@@ -65,7 +65,7 @@ public class Schedule {
     scheduler.unschedule(this);
   }
 
-  public Results conduct() {
+  public Output conduct() {
     scheduler.getConductor().conduct(scheduledProcedure);
     return scheduler.getConductor();
   }

@@ -6,6 +6,9 @@ runplatform: linux64
 	osgi.os=linux,\
 	osgi.arch=x86_64
 
+-runvm.linux: \
+	-Djdk.gtk.version=2
+
 #-runvm.debug:\
 #	-Dglass.disableGrab=true
 
@@ -161,7 +164,7 @@ runplatform: linux64
 	uk.co.saiman.experiment.definition;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
-	uk.co.saiman.experiment.production;version=snapshot,\
+	uk.co.saiman.experiment.graph;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.scheduling;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
@@ -207,7 +210,6 @@ runplatform: linux64
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.saint;version=snapshot,\
 	uk.co.saiman.saint.msapex;version=snapshot,\
-	uk.co.saiman.saint.provider;version=snapshot,\
 	uk.co.saiman.saint.simulation;version=snapshot,\
 	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.simulation;version=snapshot,\

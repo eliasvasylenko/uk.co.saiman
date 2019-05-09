@@ -27,5 +27,6 @@
 		"response.target": "(service.pid=uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse)"
 	},
 	"uk.co.saiman.messaging.pipe~saintsimulation.copleycommand": {},
-	"uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse": {}
+	"uk.co.saiman.messaging.pipe~saintsimulation.copleyresponse": {},
+	"uk.co.saiman.saint.xystageexecutor~saintsimulation": {}
 }

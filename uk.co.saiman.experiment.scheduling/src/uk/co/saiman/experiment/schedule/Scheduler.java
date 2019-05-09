@@ -32,8 +32,10 @@ import java.util.Optional;
 
 import uk.co.saiman.experiment.procedure.Conductor;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.production.Results;
+import uk.co.saiman.experiment.procedure.event.ConductorEvent;
+import uk.co.saiman.experiment.production.Output;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.observable.Observable;
 
 /**
  * A scheduler provides management and feedback facilities around a target
@@ -70,7 +72,7 @@ public class Scheduler {
     return conductor;
   }
 
-  public Results getResults() {
+  public Output getResults() {
     return conductor;
   }
 
@@ -105,5 +107,9 @@ public class Scheduler {
 
   synchronized void clear() throws IOException {
     conductor.clear();
+  }
+
+  public Observable<ConductorEvent> conductorEvents() {
+    return conductor.events();
   }
 }

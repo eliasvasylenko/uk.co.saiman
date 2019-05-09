@@ -36,9 +36,7 @@ public enum ExperimentEventKind {
 
   MOVE_STEP(MoveStepEvent.class),
 
-  CHANGE_VARIABLE(ChangeVariableEvent.class),
-
-  EXPERIMENT_SCHEDULE(ExperimentSchedulingEvent.class);
+  CHANGE_VARIABLE(ChangeVariableEvent.class);
 
   private final Class<? extends ExperimentEvent> type;
 

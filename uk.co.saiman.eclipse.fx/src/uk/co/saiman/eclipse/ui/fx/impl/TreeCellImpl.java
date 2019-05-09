@@ -252,11 +252,12 @@ public class TreeCellImpl extends TreeCell<Cell> {
     if (!getTreeView().isFocused()) {
       Node node = getTreeView().getScene().getFocusOwner();
 
-      do {
+      while (node != null) {
         if (node == TreeCellImpl.this) {
           return;
         }
-      } while ((node = node.getParent()) != null);
+        node = node.getParent();
+      }
 
       cancelEdit();
     }

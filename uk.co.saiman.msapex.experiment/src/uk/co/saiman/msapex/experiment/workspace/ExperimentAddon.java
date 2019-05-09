@@ -57,6 +57,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import uk.co.saiman.experiment.event.ExperimentEvent;
+import uk.co.saiman.experiment.event.RenameExperimentEvent;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.instruction.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
@@ -117,8 +119,8 @@ public class ExperimentAddon {
       initializeAdapters();
       initializeEvents();
     } catch (Exception e) {
-      e.printStackTrace();
       log.log(Level.ERROR, e);
+      throw e;
     }
   }
 
@@ -136,9 +138,15 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspace(Path rootPath) {
-    workspace = new Workspace(rootPath, conductorService, storageService);
+    workspace = new Workspace(rootPath, conductorService, storageService, log);
     context.set(Workspace.class, workspace);
     loadWorkspace();
+  }
+
+  @Inject
+  @Optional
+  public void update(RenameExperimentEvent event) {
+    saveWorkspace();
   }
 
   @Inject
@@ -154,22 +162,34 @@ public class ExperimentAddon {
   }
 
   private void loadWorkspace() {
-    String experiments = addon.getPersistedState().get(EXPERIMENTS);
-    if (experiments != null) {
-      Stream
-          .of(experiments.split(","))
-          .map(String::strip)
-          .filter(not(String::isBlank))
-          .forEach(workspace::loadExperiment);
+    try {
+      String experiments = addon.getPersistedState().get(EXPERIMENTS);
+      if (experiments != null) {
+        Stream
+            .of(experiments.split(","))
+            .map(String::strip)
+            .filter(not(String::isBlank))
+            .map(ExperimentId::fromName)
+            .forEach(workspace::loadExperiment);
+      }
+    } catch (Exception e) {
+      log.log(Level.ERROR, "Problem loading workspace", e);
+      throw e;
     }
   }
 
   private void saveWorkspace() {
-    String experiments = workspace
-        .getWorkspaceExperiments()
-        .map(WorkspaceExperiment::name)
-        .collect(joining(","));
-    addon.getPersistedState().put(EXPERIMENTS, experiments);
+    try {
+      String experiments = workspace
+          .getWorkspaceExperiments()
+          .map(WorkspaceExperiment::id)
+          .map(ExperimentId::name)
+          .collect(joining(","));
+      addon.getPersistedState().put(EXPERIMENTS, experiments);
+    } catch (Exception e) {
+      log.log(Level.ERROR, "Problem saving workspace", e);
+      throw e;
+    }
   }
 
   @PreDestroy

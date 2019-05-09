@@ -29,23 +29,32 @@ package uk.co.saiman.experiment.event;
 
 import static uk.co.saiman.experiment.event.ExperimentEventKind.ADD_STEP;
 
+import java.util.Optional;
+
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.production.ProductPath;
 
 public class AddStepEvent extends ExperimentStepEvent {
+  private final Optional<ProductPath<Absolute, ?>> dependencyPath;
+  private final Optional<Step> dependencyStep;
+
+  public AddStepEvent(Step step) {
+    super(step);
+    this.dependencyPath = step.getDependencyPath();
+    this.dependencyStep = step.getDependencyStep();
+  }
+
   @Override
   public ExperimentEventKind kind() {
     return ADD_STEP;
   }
 
-  public ProductPath<Absolute, ?> dependency() {
-    // TODO Auto-generated method stub
-    return null;
+  public Optional<ProductPath<Absolute, ?>> dependencyPath() {
+    return dependencyPath;
   }
 
-  public Step dependencyStep() {
-    // TODO Auto-generated method stub
-    return null;
+  public Optional<Step> dependencyStep() {
+    return dependencyStep;
   }
 }

@@ -111,7 +111,7 @@ public class ExperimentCell {
     /*
      * configure label
      */
-    cell.setLabel(experiment.name());
+    cell.setLabel(experiment.id().name());
     node.getChildren().add(supplementalText);
 
     /*
@@ -155,35 +155,39 @@ public class ExperimentCell {
   }
 
   private void close() {
-    try {
-      removeChildren();
-      context.remove(Experiment.class);
-      context.remove(Step.class);
-      updateIcon();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    removeChildren();
+    context.remove(Experiment.class);
+    context.remove(Step.class);
+    updateIcon();
   }
 
   @Inject
   @Optional
   public void update(ExperimentEvent event) {
     if (experiment.status() == Status.OPEN && event.experiment() == experiment.experiment()) {
-      cell.setLabel(event.definition().id());
+      cell.setLabel(event.experimentDefinition().id().name());
       updateChildren();
     }
   }
 
   private void removeChildren() {
-    children.setItems(ExperimentStepCell.ID, Step.class, emptyList());
+    try {
+      children.setItems(ExperimentStepCell.ID, Step.class, emptyList());
+    } catch (Exception e) {
+      log.log(Level.ERROR, "Problem removing children", e);
+    }
   }
 
   private void updateChildren() {
-    children
-        .setItems(
-            ExperimentStepCell.ID,
-            Step.class,
-            experiment.experiment().getIndependentSteps().collect(toList()));
+    try {
+      children
+          .setItems(
+              ExperimentStepCell.ID,
+              Step.class,
+              experiment.experiment().getIndependentSteps().collect(toList()));
+    } catch (Exception e) {
+      log.log(Level.ERROR, "Problem updating children", e);
+    }
   }
 
   @Optional
@@ -195,12 +199,16 @@ public class ExperimentCell {
   }
 
   private void updateIcon() {
-    cell
-        .setIconURI(
-            (experiment.status() == Status.CLOSED)
-                ? "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-small.png"
-                : cell.isExpanded()
-                    ? "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-open.png"
-                    : "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book.png");
+    try {
+      cell
+          .setIconURI(
+              (experiment.status() == Status.CLOSED)
+                  ? "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-small.png"
+                  : cell.isExpanded()
+                      ? "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-open.png"
+                      : "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book.png");
+    } catch (Exception e) {
+      log.log(Level.ERROR, "Problem updating icon", e);
+    }
   }
 }

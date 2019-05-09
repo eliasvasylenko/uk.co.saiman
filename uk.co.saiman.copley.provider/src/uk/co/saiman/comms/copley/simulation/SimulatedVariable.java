@@ -28,11 +28,12 @@
 package uk.co.saiman.comms.copley.simulation;
 
 import uk.co.saiman.comms.copley.VariableBank;
+import uk.co.saiman.comms.copley.impl.CopleyErrorException;
 
 interface SimulatedVariable {
-  public byte[] get(int axis, VariableBank bank);
+  public byte[] get(int axis, VariableBank bank) throws CopleyErrorException;
 
-  public void set(int axis, VariableBank bank, byte[] value);
+  public void set(int axis, VariableBank bank, byte[] value) throws CopleyErrorException;
 
-  public void copy(byte axis, VariableBank bank);
+  public void copy(byte axis, VariableBank bank) throws CopleyErrorException;
 }

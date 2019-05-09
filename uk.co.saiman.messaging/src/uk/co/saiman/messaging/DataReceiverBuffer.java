@@ -74,6 +74,7 @@ class DataReceiverBuffer implements DataBuffer {
       }
     }
     this.buffer.put(buffer);
+    notifyAll();
   }
 
   private synchronized void fail(Throwable cause) {
@@ -89,8 +90,8 @@ class DataReceiverBuffer implements DataBuffer {
   @Override
   public synchronized void close() {
     if (observation != null) {
-      observation = null;
       observation.cancel();
+      observation = null;
     }
   }
 
@@ -132,7 +133,7 @@ class DataReceiverBuffer implements DataBuffer {
       long startTime = System.currentTimeMillis();
       do {
         assertOpen();
-        long delay = timeout + startTime - System.currentTimeMillis();
+        long delay = timeout - System.currentTimeMillis() + startTime;
         if (delay <= 0) {
           throw new InterruptedByTimeoutException();
         }
@@ -147,7 +148,9 @@ class DataReceiverBuffer implements DataBuffer {
     }
 
     this.buffer.flip();
-    buffer.put(this.buffer);
+    byte[] bytes = new byte[buffer.remaining()];
+    this.buffer.get(bytes, 0, bytes.length);
+    buffer.put(bytes);
     this.buffer.compact();
   }
 

@@ -25,7 +25,7 @@
     <elements xsi:type="application:Addon" xmi:id="_QybzMKgiEeep8ofnuPrwwg" elementId="uk.co.saiman.msapex.instrument.addon" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentAddon"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_0JgGkKwtEeioCuifABHnDQ" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="saiman.ui:Cell" xmi:id="_2zdLYKwtEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.instrument.cell.device" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.DeviceCell">
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_2zdLYKwtEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.instrument.device.cell" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.DeviceCell">
       <popupMenu xmi:id="_LE5EQKwuEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.instrument.popupmenu.device" label="Device"/>
     </elements>
     <elements xsi:type="saiman.ui:Tree" xmi:id="_3J8YwKwtEeioCuifABHnDQ" elementId="uk.co.saiman.msapex.instrument.tree" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentTree"/>

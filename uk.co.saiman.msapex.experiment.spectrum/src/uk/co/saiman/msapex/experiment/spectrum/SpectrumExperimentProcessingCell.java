@@ -70,7 +70,7 @@ public class SpectrumExperimentProcessingCell {
     Cell parent = (Cell) (MUIElement) cell.getParent();
 
     parent.setLabel(properties.spectrumProcessingExperimentName().get());
-    supplemental.setText(step.getInstruction().id());
+    supplemental.setText(step.getInstruction().id().name());
 
     updateChildren(conductor);
   }
@@ -89,7 +89,7 @@ public class SpectrumExperimentProcessingCell {
             ProcessorCell.ID,
             DataProcessor.class,
             processing
-                .loadDeclaration(step.getVariable(PROCESSING_VARIABLE))
+                .loadDeclaration(step.getVariables().get(PROCESSING_VARIABLE).orElseThrow())
                 .steps()
                 .collect(toList()),
             r -> step

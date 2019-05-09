@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.msapex.experiment.processing;
 
-import static uk.co.saiman.eclipse.utilities.EclipseUtilities.isModifiable;
+import static uk.co.saiman.eclipse.utilities.EclipseContextUtilities.isModifiable;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;

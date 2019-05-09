@@ -94,7 +94,12 @@ public class AddStepToExperimentMenu {
       WorkspaceExperiment experiment,
       ExperimentStepProvider<Nothing> stepProvider) {
     try {
-      stepProvider.createStep().ifPresent(experiment.experiment()::attach);
+      stepProvider
+          .createSteps(
+              new DefineStepImpl<>(
+                  experiment.experiment().getDefinition(),
+                  stepProvider.executor()))
+          .forEach(experiment.experiment()::attach);
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);

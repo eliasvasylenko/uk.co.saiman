@@ -1,4 +1,4 @@
-:uk-co-saiman-msapex-experiment-cell-node-supplemental {
+:uk-co-saiman-msapex-experiment-step-cell-supplemental {
 	-fx-opacity: 0.65;
 	opacity: 0.65;
 }
@@ -10,15 +10,15 @@
 	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open-next.png");
 }
 
-ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node :PROCESSING {
+ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell :PROCESSING {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/clock.png");	
 }
-ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node  {
+ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell  {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/clock.png");	
 }
-ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node :COMPLETION {
+ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell :COMPLETION {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/tick-circle.png");
 }
-ModularTreeCell :uk-co-saiman-msapex-experiment-cell-node :FAILURE {
+ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell :FAILURE {
 	-fx-graphic: url("${fugue.icon.runtime}/size16/exclamation-red.png");
 }

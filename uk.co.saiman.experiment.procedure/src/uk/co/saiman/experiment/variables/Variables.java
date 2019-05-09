@@ -60,7 +60,9 @@ public class Variables {
     return new Variables(state.with(variable.mapIndex(), value));
   }
 
-  public <U> Variables with(Variable<U> variable, Function<Optional<U>, U> value) {
+  public <U> Variables with(
+      Variable<U> variable,
+      Function<? super Optional<U>, ? extends U> value) {
     return new Variables(state.with(variable.mapIndex(), value.apply(get(variable))));
   }
 }

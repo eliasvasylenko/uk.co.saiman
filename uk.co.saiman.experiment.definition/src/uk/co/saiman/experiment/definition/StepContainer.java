@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.definition;
 
+import static java.lang.String.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -44,9 +45,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class StepContainer<T extends StepContainer<T>> {
+import uk.co.saiman.experiment.graph.ExperimentGraphEdge;
+import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+
+public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepContainer<U, T>> {
   private final List<StepDefinition<?>> steps;
-  private final Map<String, StepDefinition<?>> dependents;
+  private final Map<ExperimentId, StepDefinition<?>> dependents;
 
   StepContainer(List<StepDefinition<?>> steps) {
     this(
@@ -56,7 +61,7 @@ public abstract class StepContainer<T extends StepContainer<T>> {
             .collect(toMap(StepDefinition::id, identity(), throwingMerger(), TreeMap::new)));
   }
 
-  StepContainer(List<StepDefinition<?>> steps, Map<String, StepDefinition<?>> dependents) {
+  StepContainer(List<StepDefinition<?>> steps, Map<ExperimentId, StepDefinition<?>> dependents) {
     this.steps = steps;
     this.dependents = dependents;
   }
@@ -65,7 +70,7 @@ public abstract class StepContainer<T extends StepContainer<T>> {
     return steps;
   }
 
-  Map<String, StepDefinition<?>> getDependents() {
+  Map<ExperimentId, StepDefinition<?>> getDependents() {
     return dependents;
   }
 
@@ -76,9 +81,9 @@ public abstract class StepContainer<T extends StepContainer<T>> {
     if (obj == null || obj.getClass() != getClass())
       return false;
 
-    StepContainer<?> that = (StepContainer<?>) obj;
+    StepContainer<?, ?> that = (StepContainer<?, ?>) obj;
 
-    return Objects.equals(this.dependents, that.dependents);
+    return Objects.equals(this.steps, that.steps);
   }
 
   @Override
@@ -86,15 +91,15 @@ public abstract class StepContainer<T extends StepContainer<T>> {
     return Objects.hash(steps);
   }
 
-  public Optional<StepDefinition<?>> findStep(String id) {
+  public Optional<StepDefinition<?>> findSubstep(ExperimentId id) {
     return Optional.ofNullable(dependents.get(id));
   }
 
-  public Stream<StepDefinition<?>> steps() {
+  public Stream<StepDefinition<?>> substeps() {
     return steps.stream();
   }
 
-  abstract T with(List<StepDefinition<?>> steps, Map<String, StepDefinition<?>> dependents);
+  abstract T with(List<StepDefinition<?>> steps, Map<ExperimentId, StepDefinition<?>> dependents);
 
   abstract T with(List<StepDefinition<?>> steps);
 
@@ -106,7 +111,7 @@ public abstract class StepContainer<T extends StepContainer<T>> {
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withoutStep(String id) {
+  public T withoutSubstep(ExperimentId id) {
     var dependents = new HashMap<>(this.dependents);
     var steps = new ArrayList<>(this.steps);
 
@@ -121,7 +126,7 @@ public abstract class StepContainer<T extends StepContainer<T>> {
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withoutSteps() {
+  public T withoutSubsteps() {
     return with(List.of(), Map.of());
   }
 
@@ -133,7 +138,7 @@ public abstract class StepContainer<T extends StepContainer<T>> {
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withStep(StepDefinition<?> step) {
+  public T withSubstep(StepDefinition<?> step) {
     var dependents = new HashMap<>(this.dependents);
     var steps = new ArrayList<>(this.steps);
 
@@ -152,7 +157,7 @@ public abstract class StepContainer<T extends StepContainer<T>> {
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withSteps(Collection<? extends StepDefinition<?>> steps) {
+  public T withSubsteps(Collection<? extends StepDefinition<?>> steps) {
     var dependents = new HashMap<>(this.dependents);
     var newSteps = new ArrayList<>(this.steps);
 
@@ -179,12 +184,12 @@ public abstract class StepContainer<T extends StepContainer<T>> {
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withStep(
-      String id,
-      Function<Optional<StepDefinition<?>>, Optional<StepDefinition<?>>> replacement) {
-    var without = withoutStep(id);
+  public T withSubstep(
+      ExperimentId id,
+      Function<? super Optional<? extends StepDefinition<?>>, ? extends Optional<? extends StepDefinition<?>>> replacement) {
+    var without = withoutSubstep(id);
 
-    return replacement.apply(findStep(id)).map(without::withStep).orElse(without);
+    return replacement.apply(findSubstep(id)).map(without::withSubstep).orElse(without);
   }
 
   /**
@@ -196,9 +201,57 @@ public abstract class StepContainer<T extends StepContainer<T>> {
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withSteps(
-      Function<Stream<StepDefinition<?>>, Stream<StepDefinition<?>>> transformation) {
-    var steps = steps().collect(Collectors.toList());
-    return withoutSteps().withSteps(transformation.apply(steps.stream()).collect(toList()));
+  public T withSubsteps(
+      Function<? super Stream<? extends StepDefinition<?>>, ? extends Stream<? extends StepDefinition<?>>> transformation) {
+    var steps = substeps().collect(Collectors.toList());
+    return withoutSubsteps().withSubsteps(transformation.apply(steps.stream()).collect(toList()));
+  }
+
+  public Optional<StepDefinition<?>> findSubstep(ExperimentPath<U> path) {
+    if (path.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var ids = path.iterator();
+    var id = ids.next();
+
+    if (!(id instanceof ExperimentGraphEdge.Dependent)) {
+      throw new ExperimentDefinitionException(
+          format("Cannot resolve step definition which is not direct descendent at %s", path));
+    }
+
+    var step = findSubstep(((ExperimentGraphEdge.Dependent) id).id());
+    while (ids.hasNext() && step.isPresent()) {
+      step = step.flatMap(s -> s.findSubstep(((ExperimentGraphEdge.Dependent) ids.next()).id()));
+    }
+    return step;
+  }
+
+  /**
+   * Derive a new container, performing an optional replacement of the step at the
+   * given path.
+   * 
+   * @param path        the path of the step to replace
+   * @param replacement a function accepting the existing step and returning its
+   *                    optional replacement, or an empty optional to indicate
+   *                    that the step should be removed from the derived container
+   * @return An optional containing the derived container, or an empty optional if
+   *         a step could not be found at the given path.
+   */
+  public Optional<T> withSubstep(
+      ExperimentPath<U> path,
+      Function<? super StepDefinition<?>, ? extends Optional<? extends StepDefinition<?>>> replacement) {
+    if (path.isEmpty()) {
+      throw new ExperimentDefinitionException(format("Cannot resolve step definition at %s", path));
+    }
+
+    var id = path.id(0);
+    var subPath = path.relativeTo(id);
+    var subStep = findSubstep(id);
+
+    return (subPath.isEmpty()
+        ? subStep.map(replacement::apply)
+        : subStep.map(step -> step.withSubstep(subPath, replacement)))
+            .map(step -> withSubstep(id, s -> step));
   }
 }

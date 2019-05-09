@@ -37,6 +37,8 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.sample.SampleExecutor;
 import uk.co.saiman.experiment.variables.Variables;
 
@@ -45,16 +47,19 @@ public class SampleExperimentNodeCell {
   @PostConstruct
   public void prepare(
       Cell cell,
-      SampleExecutor<?> sampleConductor,
+      Executor<?> exec,
+      SampleExecutor<?> sampleExecutor,
       Variables variables,
+      StepDefinition<?> step,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
     cell = (Cell) (MUIElement) cell.getParent();
 
     cell
         .setIconURI(
             "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/flask.png");
+
     variables
-        .get(sampleConductor.sampleLocation())
+        .get(sampleExecutor.sampleLocation())
         .map(Object::toString)
         .ifPresent(supplemental::setText);
   }

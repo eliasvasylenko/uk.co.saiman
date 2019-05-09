@@ -32,13 +32,17 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.event.AddStepEvent;
+import uk.co.saiman.experiment.event.ChangeVariableEvent;
+import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.experiment.production.ProductPath;
 import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.requirement.ProductRequirement;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.Variables;
 
@@ -53,7 +57,6 @@ public class Step {
   private final Experiment experiment;
   private final Executor<?> executor;
   private ExperimentPath<Absolute> path;
-
   private boolean scheduled;
 
   Step(Experiment experiment, Executor<?> conductor, ExperimentPath<Absolute> path) {
@@ -86,10 +89,12 @@ public class Step {
   }
 
   public StepDefinition<?> getDefinition() {
-    return (StepDefinition<?>) experiment.getDefinition().findStep(path).get();
+    synchronized (experiment) {
+      return experiment.getStepDefinition(path).get();
+    }
   }
 
-  public String getId() {
+  public ExperimentId getId() {
     return getDefinition().id();
   }
 
@@ -97,23 +102,21 @@ public class Step {
     return executor;
   }
 
-  public <T> T getVariable(Variable<T> variable) {
-    // TODO Auto-generated method stub
-    return null;
+  public <T> Optional<T> getVariable(Variable<T> variable) {
+    return getDefinition().variables().get(variable);
   }
 
-  public <T> void setVariable(Variable<T> variable, Function<? super T, ? extends T> value) {
-    // TODO Auto-generated method stub
-  }
-
-  private void updateProcedure(Function<StepDefinition<?>, StepDefinition<?>> modifier) {
+  public <T> void setVariable(
+      Variable<T> variable,
+      Function<? super Optional<T>, ? extends T> value) {
     synchronized (experiment) {
-      updateProcedure(modifier.apply(getDefinition()));
+      if (experiment
+          .updateStepDefinition(
+              path,
+              getDefinition().withVariables(variables -> variables.with(variable, value)))) {
+        experiment.fireEvent(new ChangeVariableEvent(this, variable));
+      }
     }
-  }
-
-  private void updateProcedure(StepDefinition<?> definition) {
-    getExperiment().updateInstruction(path, definition);
   }
 
   /*
@@ -124,9 +127,33 @@ public class Step {
    * @return the parent part of this experiment, if present, otherwise an empty
    *         optional
    */
-  public Optional<ProductPath<Absolute, ?>> getDependency() {
-    return Optional.empty();// withLock(() ->
-                            // Optional.of(parentDependent).map(Dependent::capability));
+  public Optional<ProductPath<Absolute, ?>> getDependencyPath() {
+    synchronized (experiment) {
+      return getExecutor().directRequirement() instanceof ProductRequirement<?>
+          ? path
+              .parent()
+              .map(
+                  p -> ProductPath
+                      .define(
+                          p,
+                          ((ProductRequirement<?>) getExecutor().directRequirement()).production()))
+          : Optional.empty();
+    }
+  }
+
+  public Optional<Step> getDependencyStep() {
+    synchronized (experiment) {
+      return path
+          .parent()
+          .filter(path -> !path.isEmpty())
+          .map(parentPath -> getExperiment().getStep(parentPath));
+    }
+  }
+
+  public synchronized Step getDependentStep(ExperimentId id) {
+    synchronized (experiment) {
+      return experiment.getStep(path.resolve(id));
+    }
   }
 
   public Experiment getExperiment() {
@@ -134,16 +161,25 @@ public class Step {
   }
 
   public <T extends Product> Step attach(StepDefinition<T> template) {
-    throw new UnsupportedOperationException();
-    // TODO return attach(production, -1, template);
+    return attach(
+        ((ProductRequirement<T>) template.executor().directRequirement()).production(),
+        -1,
+        template);
   }
 
   public <V, T extends Product> Step attach(
       Production<? extends T> production,
       int index,
-      StepDefinition<T> step) {
+      StepDefinition<T> stepDefinition) {
     synchronized (experiment) {
-      return null;
+      boolean changed = experiment
+          .updateStepDefinition(path, getDefinition().withSubstep(stepDefinition));
+
+      Step newStep = getDependentStep(stepDefinition.id());
+      if (changed) {
+        experiment.fireEvent(new AddStepEvent(newStep));
+      }
+      return newStep;
     }
   }
 
@@ -156,34 +192,37 @@ public class Step {
   }
 
   public ExperimentPath<Absolute> getPath() {
-    throw new UnsupportedOperationException();
+    return path;
   }
 
   public <T extends Product> ProductPath<Absolute, T> getPath(Production<T> capability) {
-    throw new UnsupportedOperationException();
+    return ProductPath.define(path, capability);
   }
 
   public Step resolve(ExperimentPath<Absolute> path) {
     throw new UnsupportedOperationException();
   }
 
-  public Instruction<?> getInstruction() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   public Stream<? extends Step> getDependentSteps() {
-    // TODO Auto-generated method stub
-    return null;
+    synchronized (experiment) {
+      return getDefinition()
+          .substeps()
+          .map(step -> path.resolve(step.id()))
+          .map(experiment::getStep);
+    }
   }
 
   public boolean isDetached() {
-    // TODO Auto-generated method stub
     return false;
   }
 
   public Variables getVariables() {
-    // TODO Auto-generated method stub
-    return null;
+    synchronized (experiment) {
+      return getDefinition().variables();
+    }
+  }
+
+  public Instruction<?> getInstruction() {
+    return new Instruction<>(path, getVariables(), getExecutor());
   }
 }

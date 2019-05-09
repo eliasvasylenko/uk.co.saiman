@@ -55,6 +55,8 @@ import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyController;
 import uk.co.saiman.comms.copley.CopleyNode;
 import uk.co.saiman.comms.copley.impl.CopleyControllerImpl.CopleyControllerConfiguration;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.messaging.DataReceiver;
 import uk.co.saiman.messaging.DataSender;
 
@@ -67,27 +69,32 @@ public class CopleyControllerImpl implements CopleyController {
   @ObjectClassDefinition(name = "Copley Comms Configuration", description = "The configuration for the underlying serial comms for a Copley motor control")
   public @interface CopleyControllerConfiguration {}
 
+  private final Log log;
+
   private final BundleContext context;
   private final ByteConverterService converters;
 
   private final DataSender sender;
   private final DataReceiver receiver;
 
-  private final Map<CopleyNodeImpl, ServiceRegistration<CopleyNode>> nodes = new LinkedHashMap<>();
-  private final Map<CopleyAxis, ServiceRegistration<CopleyAxis>> axes = new LinkedHashMap<>();
+  private Map<CopleyNodeImpl, ServiceRegistration<CopleyNode>> nodes = new LinkedHashMap<>();
+  private Map<CopleyAxis, ServiceRegistration<CopleyAxis>> axes = new LinkedHashMap<>();
 
   @Activate
   public CopleyControllerImpl(
       BundleContext context,
       @Reference ByteConverterService converters,
       @Reference(name = "command") DataSender sender,
-      @Reference(name = "response") DataReceiver receiver)
+      @Reference(name = "response") DataReceiver receiver,
+      @Reference Log log)
       throws IOException {
     this.context = context;
     this.converters = converters;
 
     this.sender = sender;
     this.receiver = receiver;
+
+    this.log = log;
   }
 
   DataSender getSender() {
@@ -98,16 +105,30 @@ public class CopleyControllerImpl implements CopleyController {
     return receiver;
   }
 
-  protected void open() throws IOException {
-    List<CopleyNodeImpl> nodes = listNodes();
+  Log getLog() {
+    return log;
+  }
 
-    nodes.forEach(node -> {
-      this.nodes.put(node, context.registerService(CopleyNode.class, node, getProperties(node)));
+  protected void open() {
+    if (nodes.isEmpty() || axes.isEmpty()) {
+      try {
+        log.log(Level.INFO, "Open copley controller");
 
-      node.getAxes().forEach(axis -> {
-        this.axes.put(axis, context.registerService(CopleyAxis.class, axis, getProperties(axis)));
-      });
-    });
+        List<CopleyNodeImpl> nodes = listNodes();
+
+        nodes.forEach(node -> {
+          this.nodes
+              .put(node, context.registerService(CopleyNode.class, node, getProperties(node)));
+
+          node.getAxes().forEach(axis -> {
+            this.axes
+                .put(axis, context.registerService(CopleyAxis.class, axis, getProperties(axis)));
+          });
+        });
+      } catch (Exception e) {
+        log.log(Level.ERROR, "Failed to open copley controller", e);
+      }
+    }
   }
 
   private Dictionary<String, String> getProperties(CopleyNode node) {
@@ -121,6 +142,8 @@ public class CopleyControllerImpl implements CopleyController {
   }
 
   protected void close() {
+    log.log(Level.INFO, "Close copley controller");
+
     nodes.values().forEach(n -> n.unregister());
     nodes.clear();
     axes.values().forEach(n -> n.unregister());
@@ -128,6 +151,7 @@ public class CopleyControllerImpl implements CopleyController {
   }
 
   protected void checkChannel() throws IOException {
+    open();
     for (var node : nodes.keySet()) {
       node.ping();
     }
@@ -163,12 +187,13 @@ public class CopleyControllerImpl implements CopleyController {
 
   @Override
   public Stream<CopleyNode> getNodes() {
+    open();
     return upcastStream(nodes.keySet().stream());
   }
 
   @Override
   public void reset() {
-    // TODO Auto-generated method stub
-
+    close();
+    open();
   }
 }

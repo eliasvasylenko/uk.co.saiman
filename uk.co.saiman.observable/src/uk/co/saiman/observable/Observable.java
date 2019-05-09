@@ -43,13 +43,13 @@ import static uk.co.saiman.observable.RequestAllocator.sequential;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
@@ -615,6 +615,10 @@ public interface Observable<M> {
     return collectBackpressure(toCollection(() -> new MaximumCapacityList<>(toCapacity)));
   }
 
+  default Observable<M> requestFixedRate(long delay, long period, TimeUnit time) {
+    return observer -> observe(new FixedRateObserver<>(observer, delay, period, time));
+  }
+
   /*
    * Static factories
    */
@@ -663,12 +667,24 @@ public interface Observable<M> {
   }
 
   static Observable<Long> fixedRate(long delay, long period, TimeUnit time) {
-    HotObservable<Long> hot = new HotObservable<>();
-    AtomicLong count = new AtomicLong(0);
-    Executors
-        .newSingleThreadScheduledExecutor()
-        .scheduleAtFixedRate(() -> hot.next(count.getAndIncrement()), delay, period, time);
-    return hot;
+    return new ColdObservable<>(new Iterable<Long>() {
+      @Override
+      public Iterator<Long> iterator() {
+        return new Iterator<Long>() {
+          private AtomicLong counter = new AtomicLong();
+
+          @Override
+          public boolean hasNext() {
+            return true;
+          }
+
+          @Override
+          public Long next() {
+            return counter.getAndIncrement();
+          }
+        };
+      }
+    }).requestFixedRate(delay, period, time);
   }
 
   default void join() {

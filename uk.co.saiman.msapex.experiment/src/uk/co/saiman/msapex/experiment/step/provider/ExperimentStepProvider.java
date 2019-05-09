@@ -28,6 +28,7 @@
 package uk.co.saiman.msapex.experiment.step.provider;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.instruction.Executor;
@@ -42,7 +43,7 @@ public interface ExperimentStepProvider<T extends Dependency> {
 
   Executor<T> executor();
 
-  Optional<StepDefinition<T>> createStep();
+  Stream<StepDefinition<T>> createSteps(DefineStep<T> defineStep);
 
   @SuppressWarnings("unchecked")
   default Optional<ExperimentStepProvider<? extends Product>> asDependent(Executor<?> executor) {

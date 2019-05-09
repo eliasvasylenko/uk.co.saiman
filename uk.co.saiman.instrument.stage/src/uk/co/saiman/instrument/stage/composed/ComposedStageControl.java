@@ -40,17 +40,22 @@ public class ComposedStageControl<T> extends DeviceControlImpl<ComposedStage<T, 
   }
 
   @Override
-  public SampleState requestExchange() {
-    return getDevice().requestExchange();
+  public void requestExchange() {
+    getDevice().requestExchange();
   }
 
   @Override
-  public SampleState requestAnalysis() {
-    return getDevice().requestAnalysis();
+  public void requestAnalysis() {
+    getDevice().requestAnalysis();
   }
 
   @Override
-  public SampleState requestAnalysisLocation(T location) {
-    return getDevice().requestAnalysisLocation(location);
+  public void requestAnalysisLocation(T location) {
+    getDevice().requestAnalysisLocation(location);
+  }
+
+  @Override
+  public SampleState awaitRequest() {
+    return getDevice().awaitRequest();
   }
 }

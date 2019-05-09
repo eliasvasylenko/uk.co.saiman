@@ -28,7 +28,9 @@
 package uk.co.saiman.comms.copley.simulation;
 
 import uk.co.saiman.bytes.conversion.ByteConverter;
+import uk.co.saiman.comms.copley.ErrorCode;
 import uk.co.saiman.comms.copley.VariableBank;
+import uk.co.saiman.comms.copley.impl.CopleyErrorException;
 
 abstract class ComputedVariable<T> implements SimulatedVariable {
   private final ByteConverter<T> converter;
@@ -38,24 +40,24 @@ abstract class ComputedVariable<T> implements SimulatedVariable {
   }
 
   @Override
-  public byte[] get(int axis, VariableBank bank) {
+  public byte[] get(int axis, VariableBank bank) throws CopleyErrorException {
     switch (bank) {
     case ACTIVE:
       return converter.toBytes(compute(axis));
     default:
-      throw new UnsupportedOperationException();
+      throw new CopleyErrorException(ErrorCode.VARIABLE_NOT_IN_PAGE);
     }
   }
 
   public abstract T compute(int axis);
 
   @Override
-  public void set(int axis, VariableBank bank, byte[] value) {
-    throw new UnsupportedOperationException();
+  public void set(int axis, VariableBank bank, byte[] value) throws CopleyErrorException {
+    throw new CopleyErrorException(ErrorCode.ILLEGAL_WRITE);
   }
 
   @Override
-  public void copy(byte axis, VariableBank bank) {
-    throw new UnsupportedOperationException();
+  public void copy(byte axis, VariableBank bank) throws CopleyErrorException {
+    throw new CopleyErrorException(ErrorCode.ILLEGAL_WRITE);
   }
 }

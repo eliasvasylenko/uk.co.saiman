@@ -48,16 +48,19 @@ import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
 import uk.co.saiman.experiment.event.RemoveStepEvent;
+import uk.co.saiman.experiment.graph.ExperimentPath;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.procedure.Productions;
+import uk.co.saiman.experiment.production.ProductPath;
+import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.msapex.editor.EditorService;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 
@@ -67,7 +70,7 @@ import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
  * @author Elias N Vasylenko
  */
 public class ExperimentStepCell {
-  public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
+  public static final String ID = "uk.co.saiman.msapex.experiment.step.cell";
   public static final String SUPPLEMENTAL_TEXT = ID + ".supplemental";
   public static final PseudoClass SUPPLEMENTAL_PSEUDO_CLASS = getPseudoClass(
       SUPPLEMENTAL_TEXT.replace('.', '-'));
@@ -133,28 +136,27 @@ public class ExperimentStepCell {
     /*
      * Inject configuration
      */
-    context.set(Executor.class, step.getExecutor());
     context.set(StepDefinition.class, step.getDefinition());
     context.set(Instruction.class, step.getInstruction());
-    /*- TODO
-    IContextFunction configurationFunction = (c, k) -> {
-      Object variables = c.get(ExperimentNode.class).getVariables();
-      if (variables != null) {
-        try {
-          Class<?> type = variables.getClass().getClassLoader().loadClass(k);
-          return type.isInstance(variables) ? variables : null;
-        } catch (Exception e) {
-          // this just means it's not an instance, discard
-        }
-      }
-      return null;
-    };
-    StreamUtilities
-        .<Class<?>>flatMapRecursive(
-            experiment.getVariables().getClass(),
-            t -> concat(streamNullable(t.getSuperclass()), Stream.of(t.getInterfaces())))
-        .forEach(type -> context.set(type.getName(), configurationFunction));
-        */
+    context.set(Variables.class, step.getVariables());
+    context.set(ExperimentPath.class, step.getPath());
+    context.set(Executor.class, step.getExecutor());
+
+    EclipseContextUtilities.injectSubtypes(context, Executor.class);
+
+    EclipseContextUtilities.injectDerived(context, Step.class, (step, buffer) -> {
+      step
+          .getDependencyPath()
+          .ifPresent(productPath -> buffer.set(ProductPath.class.getName(), productPath));
+
+      step.getExecutor().products().forEach(production -> {
+        buffer.set(production.id(), production);
+      });
+
+      step.getExecutor().variables().forEach(variableDeclaration -> {
+        buffer.set(variableDeclaration.variable().id(), variableDeclaration.variable());
+      });
+    });
 
     /*
      * Inject events
@@ -202,7 +204,7 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void updatePath() {
-    cell.setLabel(step.getId());
+    cell.setLabel(step.getId().name());
     context.set(ExperimentPath.class, step.getPath());
   }
 

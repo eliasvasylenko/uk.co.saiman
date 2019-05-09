@@ -39,25 +39,25 @@ import uk.co.saiman.osgi.ServiceIndex;
 
 @Component
 public class ExecutorServiceImpl implements ExecutorService {
-  private final ServiceIndex<?, String, Executor<?>> procedures;
+  private final ServiceIndex<?, String, Executor<?>> executors;
 
   @Activate
   public ExecutorServiceImpl(BundleContext context) {
-    procedures = ServiceIndex.open(context, Executor.class.getName());
+    executors = ServiceIndex.open(context, Executor.class.getName());
   }
 
   @Override
   public Stream<Executor<?>> executors() {
-    return procedures.objects();
+    return executors.objects();
   }
 
   @Override
   public Executor<?> getExecutor(String id) {
-    return procedures.get(id).get().serviceObject();
+    return executors.get(id).get().serviceObject();
   }
 
   @Override
-  public String getId(Executor<?> procedure) {
-    return procedures.findRecord(procedure).get().id();
+  public String getId(Executor<?> executor) {
+    return executors.findRecord(executor).get().id();
   }
 }

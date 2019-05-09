@@ -55,6 +55,7 @@ public class CompositeByteConverter<T> implements ByteConverter<T> {
     this.type = type;
     this.components = new HashMap<>();
     this.annotations = findAnnotations();
+    getConverter();
   }
 
   @Override
@@ -76,12 +77,14 @@ public class CompositeByteConverter<T> implements ByteConverter<T> {
 
     components.keySet().retainAll(providers);
 
-    return providers
+    var converter = providers
         .stream()
         .map(this::getConverter)
         .filter(Objects::nonNull)
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Cannot find converter for type " + type));
+
+    return converter;
   }
 
   private ByteConverter<T> getConverter(ByteConverterProvider provider) {

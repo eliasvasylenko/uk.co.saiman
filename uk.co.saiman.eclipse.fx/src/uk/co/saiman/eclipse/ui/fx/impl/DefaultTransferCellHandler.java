@@ -31,7 +31,7 @@ import static uk.co.saiman.eclipse.ui.SaiUiModel.NULLABLE;
 import static uk.co.saiman.eclipse.ui.SaiUiModel.PRIMARY_CONTEXT_KEY;
 import static uk.co.saiman.eclipse.ui.TransferMode.COPY;
 import static uk.co.saiman.eclipse.ui.TransferMode.LINK;
-import static uk.co.saiman.eclipse.utilities.EclipseUtilities.isModifiable;
+import static uk.co.saiman.eclipse.utilities.EclipseContextUtilities.isModifiable;
 
 import java.util.EnumSet;
 import java.util.Set;

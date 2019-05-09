@@ -29,7 +29,21 @@ package uk.co.saiman.experiment.event;
 
 import static uk.co.saiman.experiment.event.ExperimentEventKind.CHANGE_VARIABLE;
 
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.variables.Variable;
+
 public class ChangeVariableEvent extends ExperimentStepEvent {
+  private final Variable<?> variable;
+
+  public ChangeVariableEvent(Step step, Variable<?> variable) {
+    super(step);
+    this.variable = variable;
+  }
+
+  public Variable<?> variable() {
+    return variable;
+  }
+
   @Override
   public ExperimentEventKind kind() {
     return CHANGE_VARIABLE;

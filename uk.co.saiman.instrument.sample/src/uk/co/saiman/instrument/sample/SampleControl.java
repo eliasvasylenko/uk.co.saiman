@@ -31,41 +31,48 @@ public interface SampleControl<T> extends AutoCloseable {
   /**
    * Request that the sample be prepared for exchange.
    * <p>
-   * Invocation blocks until the sample is prepared or a stable failure state is
-   * reached.
-   * 
    * Typically the exchange position for a given piece of hardware means that e.g.
    * the sample are is at atmosphere and/or any inlet valves are shut.
-   * 
-   * @return the resulting state, either {@link SampleState#EXCHANGE_FAILED} or
-   *         {@link SampleState#EXCHANGE}
+   * <p>
+   * The device will initially be put into the
+   * {@link SampleState#EXCHANGE_REQUESTED} state. The possible states to follow
+   * from this request are either {@link SampleState#EXCHANGE_FAILED} or
+   * {@link SampleState#EXCHANGE}.
    */
-  SampleState requestExchange();
+  void requestExchange();
 
   /**
    * Request that the sample be prepared for analysis.
    * <p>
-   * Invocation blocks until the sample is prepared or a stable failure state is
-   * reached.
-   * 
-   * @return the resulting state, either
-   *         {@link SampleState#ANALYSIS_LOCATION_FAILED} or
-   *         {@link SampleState#ANALYSIS}
+   * The device will initially be put into the
+   * {@link SampleState#ANALYSIS_LOCATION_REQUESTED} state. The possible states to
+   * follow from this request are either
+   * {@link SampleState#ANALYSIS_LOCATION_FAILED} or {@link SampleState#ANALYSIS}.
    */
-  SampleState requestAnalysis();
+  void requestAnalysis();
 
   /**
    * Request analysis at the given sample location.
    * <p>
-   * Invocation blocks until the sample is prepared or a stable failure state is
-   * reached.
+   * The device will initially be put into the
+   * {@link SampleState#ANALYSIS_LOCATION_REQUESTED} state. The possible states to
+   * follow from this request are either
+   * {@link SampleState#ANALYSIS_LOCATION_FAILED} or {@link SampleState#ANALYSIS}.
    * 
    * @param location the location to analyze
-   * @return the resulting state, either
-   *         {@link SampleState#ANALYSIS_LOCATION_FAILED} or
+   */
+  void requestAnalysisLocation(T location);
+
+  /**
+   * Invocation blocks until the previous request is fulfilled, or until a failure
+   * state is reached.
+   * 
+   * @return the state resulting from the previous request, one of
+   *         {@link SampleState#EXCHANGE_FAILED}, {@link SampleState#EXCHANGE},
+   *         {@link SampleState#ANALYSIS_LOCATION_FAILED}, or
    *         {@link SampleState#ANALYSIS}
    */
-  SampleState requestAnalysisLocation(T location);
+  SampleState awaitRequest();
 
   @Override
   void close();

@@ -29,4 +29,12 @@ package uk.co.saiman.instrument.sample;
 
 public class SampleLocationUnknown extends RuntimeException {
   private static final long serialVersionUID = 1L;
+
+  public SampleLocationUnknown() {
+    this(null);
+  }
+
+  public SampleLocationUnknown(Exception e) {
+    super("Sample location cannot be determined", e);
+  }
 }

@@ -36,7 +36,7 @@ import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.instrument.Device;
 
 public class DeviceCell {
-  public static final String ID = "uk.co.saiman.msapex.instrument.cell.device";
+  public static final String ID = "uk.co.saiman.msapex.instrument.device.cell";
 
   @Inject
   public void prepare(HBox node, Cell cell, Device<?> item) {

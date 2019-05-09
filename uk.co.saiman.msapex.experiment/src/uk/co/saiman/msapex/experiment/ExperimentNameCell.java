@@ -45,7 +45,8 @@ import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.Cell;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
-import uk.co.saiman.experiment.event.MoveStepEvent;
+import uk.co.saiman.experiment.event.RenameExperimentEvent;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -80,14 +81,14 @@ public class ExperimentNameCell {
     node.getChildren().add(nameEditor);
     HBox.setHgrow(nameEditor, Priority.SOMETIMES);
 
-    nameEditor.setText(experiment.name());
+    nameEditor.setText(experiment.id().name());
     nameEditor.setTryUpdate(name -> renameExperiment(experiment, name));
     nameEditor.getLabel().pseudoClassStateChanged(SUPPLEMENTAL_PSEUDO_CLASS, true);
   }
 
   private boolean renameExperiment(WorkspaceExperiment experiment, String name) {
     try {
-      experiment.rename(name);
+      experiment.rename(ExperimentId.fromName(name));
       return true;
 
     } catch (Exception e) {
@@ -106,10 +107,10 @@ public class ExperimentNameCell {
 
   @Inject
   @Optional
-  public void updateName(MoveStepEvent event) {
+  public void updateName(RenameExperimentEvent event) {
     if (experiment.status() == Status.OPEN
-        && Objects.equals(event.step(), experiment.experiment())) {
-      nameEditor.setText(event.id());
+        && Objects.equals(event.experiment(), experiment.experiment())) {
+      nameEditor.setText(event.id().name());
     }
   }
 }

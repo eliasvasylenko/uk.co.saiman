@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.bytes.conversion;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
@@ -59,8 +60,7 @@ public interface ByteConversionAnnotations {
    * If both the receiving and given set contains annotations for the same class,
    * exclusive preference will be given to the receiver.
    * 
-   * @param more
-   *          a set of annotations to take in combination with the receiver
+   * @param more a set of annotations to take in combination with the receiver
    * @return a set of annotations containing those from the receiver and given
    *         sets
    */
@@ -97,12 +97,8 @@ class ByteConversionAnnotationsImpl implements ByteConversionAnnotations {
           }
         }
       }
-    } catch (
-        NoSuchMethodException
-        | SecurityException
-        | IllegalAccessException
-        | IllegalArgumentException
-        | InvocationTargetException e) {}
+    } catch (NoSuchMethodException | SecurityException | IllegalAccessException
+        | IllegalArgumentException | InvocationTargetException e) {}
     return Stream.of(annotation);
   }
 
@@ -138,5 +134,10 @@ class ByteConversionAnnotationsImpl implements ByteConversionAnnotations {
   @Override
   public ByteConversionAnnotations and(ByteConversionAnnotations more) {
     return new AggregatedByteConversionAnnotations(this, more);
+  }
+
+  @Override
+  public String toString() {
+    return getAll().distinct().map(Annotation::toString).collect(joining(", ", "(", ")"));
   }
 }

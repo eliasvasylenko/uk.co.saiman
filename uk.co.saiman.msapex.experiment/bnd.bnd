@@ -27,7 +27,7 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.definition;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.production;version=snapshot,\
+	uk.co.saiman.experiment.graph;version=snapshot,\
 	uk.co.saiman.experiment.scheduling;version=snapshot,\
 	uk.co.saiman.experiment.storage;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\

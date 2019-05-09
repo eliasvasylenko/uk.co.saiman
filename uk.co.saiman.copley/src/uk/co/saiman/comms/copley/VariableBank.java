@@ -28,9 +28,13 @@
 package uk.co.saiman.comms.copley;
 
 public enum VariableBank {
-	ACTIVE, STORED;
+  ACTIVE, STORED;
 
-	public boolean getBit() {
-		return this == STORED;
-	}
+  public boolean getBit() {
+    return this == STORED;
+  }
+
+  public static VariableBank fromBit(boolean bit) {
+    return bit ? STORED : ACTIVE;
+  }
 }

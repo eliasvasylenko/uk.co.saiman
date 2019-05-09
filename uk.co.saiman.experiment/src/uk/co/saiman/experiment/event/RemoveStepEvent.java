@@ -29,23 +29,32 @@ package uk.co.saiman.experiment.event;
 
 import static uk.co.saiman.experiment.event.ExperimentEventKind.REMOVE_STEP;
 
+import java.util.Optional;
+
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.production.ProductPath;
 
 public class RemoveStepEvent extends ExperimentStepEvent {
+  private final  Optional<ProductPath<Absolute, ?>> previousDependencyPath;
+  private final Optional<Step> previousDependencyStep;
+
+  public RemoveStepEvent(Step step, Optional<Step> previousParent) {
+    super(step);
+    this.previousDependencyPath = step.getDependencyPath();
+    this.previousDependencyStep = previousParent;
+  }
+
   @Override
   public ExperimentEventKind kind() {
     return REMOVE_STEP;
   }
 
-  public ProductPath<Absolute, ?> previousDependency() {
-    // TODO Auto-generated method stub
-    return null;
+  public Optional<ProductPath<Absolute, ?>> previousDependencyPath() {
+    return previousDependencyPath;
   }
 
-  public Step previousDependencyStep() {
-    // TODO Auto-generated method stub
-    return null;
+  public Optional<Step> previousDependencyStep() {
+    return previousDependencyStep;
   }
 }

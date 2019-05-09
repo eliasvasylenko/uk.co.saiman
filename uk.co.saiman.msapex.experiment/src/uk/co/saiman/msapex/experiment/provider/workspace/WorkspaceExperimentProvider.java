@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
@@ -61,6 +62,7 @@ public class WorkspaceExperimentProvider implements ExperimentProvider {
   public Stream<Experiment> createExperiments() {
     return new RenameExperimentDialog(workspace, text, null)
         .showAndWait()
+        .map(ExperimentId::fromName)
         .map(
             id -> new Experiment(
                 ExperimentDefinition.define(id),

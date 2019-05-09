@@ -68,7 +68,6 @@ public class DTOByteConverter<T> implements ByteConverter<T> {
 
     public void put(Object object, BitArray bits) {
       Object value = byteConverter.toObject(bits.slice(offset, bits.length()));
-
       try {
         field.set(object, value);
       } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -128,10 +127,7 @@ public class DTOByteConverter<T> implements ByteConverter<T> {
     T object;
     try {
       object = (T) constructor.newInstance();
-    } catch (
-        InstantiationException
-        | IllegalAccessException
-        | IllegalArgumentException
+    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException e) {
       throw new ByteConversionException("Cannot instantiate DTO", e);
     }

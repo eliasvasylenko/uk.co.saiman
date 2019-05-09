@@ -33,7 +33,9 @@ import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.workspace.event.CloseExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.event.OpenExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.event.RemoveExperimentEvent;
@@ -48,7 +50,7 @@ public class WorkspaceExperiment {
 
   private final Workspace workspace;
   private final Data<Experiment> data;
-  private String name;
+  private ExperimentId id;
 
   private Experiment experiment;
   private Disposable eventsObservation;
@@ -56,10 +58,10 @@ public class WorkspaceExperiment {
 
   public WorkspaceExperiment(
       Workspace workspace,
-      String name,
+      ExperimentId id,
       StorageConfiguration<?> storageConfiguration) {
     this.workspace = workspace;
-    this.name = name;
+    this.id = id;
     this.data = locateExperiment();
 
     if (data.getResource().exists()) {
@@ -67,7 +69,7 @@ public class WorkspaceExperiment {
           "Experiment file already exists at location " + data.getResource());
     }
 
-    this.experiment = new Experiment(ExperimentDefinition.define(name), storageConfiguration);
+    this.experiment = new Experiment(ExperimentDefinition.define(id), storageConfiguration);
     this.eventsObservation = observe();
     this.status = Status.OPEN;
 
@@ -75,21 +77,22 @@ public class WorkspaceExperiment {
     this.data.save();
   }
 
-  public WorkspaceExperiment(Workspace workspace, String name) {
+  public WorkspaceExperiment(Workspace workspace, ExperimentId name) {
     this.workspace = workspace;
-    this.name = name;
+    this.id = name;
     this.data = locateExperiment();
 
     this.status = Status.CLOSED;
   }
 
   private Data<Experiment> locateExperiment() {
-    return Data.locate(workspace.getWorkspaceLocation(), name, workspace.getExperimentFormat());
+    return Data
+        .locate(workspace.getWorkspaceLocation(), id.name(), workspace.getExperimentFormat());
   }
 
   @Override
   public String toString() {
-    return name;
+    return id.name();
   }
 
   public void open() {
@@ -105,7 +108,7 @@ public class WorkspaceExperiment {
 
       break;
     case REMOVED:
-      throw new ExperimentException("Cannot load removed experiment %s" + name);
+      throw new ExperimentException("Cannot load removed experiment %s" + id);
     default:
     }
   }
@@ -125,7 +128,7 @@ public class WorkspaceExperiment {
 
       break;
     case REMOVED:
-      throw new ExperimentException("Cannot unload removed experiment %s" + name);
+      throw new ExperimentException("Cannot unload removed experiment %s" + id);
     default:
     }
   }
@@ -133,13 +136,13 @@ public class WorkspaceExperiment {
   public void save() {
     switch (status) {
     case OPEN:
-      data.relocate(workspace.getWorkspaceLocation(), name);
+      data.relocate(workspace.getWorkspaceLocation(), id.name());
       data.set(experiment);
       data.makeDirty();
       data.save();
       break;
     case REMOVED:
-      throw new ExperimentException("Cannot save removed experiment %s" + name);
+      throw new ExperimentException("Cannot save removed experiment %s" + id);
     default:
     }
   }
@@ -154,9 +157,14 @@ public class WorkspaceExperiment {
   private void nextEvent(WorkspaceEvent event) {
     if (event.kind() == EXPERIMENT) {
       if (status == Status.OPEN) {
-        name = experiment.getId();
+        id = experiment.getId();
 
-        save();
+        try {
+          save();
+        } catch (Exception e) {
+          workspace.log().log(Level.ERROR, "Problem saving experiment", e);
+          throw e;
+        }
         workspace.nextEvent(event);
       }
     } else {
@@ -171,7 +179,7 @@ public class WorkspaceExperiment {
     nextEvent(new RemoveExperimentEvent(workspace, this));
   }
 
-  public void rename(String name) {
+  public void rename(ExperimentId name) {
     open();
     experiment.setId(name);
   }
@@ -180,8 +188,8 @@ public class WorkspaceExperiment {
     return status;
   }
 
-  public String name() {
-    return name;
+  public ExperimentId id() {
+    return id;
   }
 
   public synchronized Experiment experiment() {

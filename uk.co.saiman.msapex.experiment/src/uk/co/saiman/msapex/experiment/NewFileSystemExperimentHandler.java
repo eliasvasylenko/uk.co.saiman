@@ -41,6 +41,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.log.Log;
@@ -72,10 +73,11 @@ public class NewFileSystemExperimentHandler {
       Workspace workspace) {
     new NewFileSystemExperimentDialog(workspace, text)
         .showAndWait()
+        .map(ExperimentId::fromName)
         .ifPresent(name -> newExperiment(name, workspace, store));
   }
 
-  private void newExperiment(String name, Workspace workspace, Store<Path> store) {
+  private void newExperiment(ExperimentId name, Workspace workspace, Store<Path> store) {
     try {
       workspace.newExperiment(name, new StorageConfiguration<>(store, Path.of("")));
 

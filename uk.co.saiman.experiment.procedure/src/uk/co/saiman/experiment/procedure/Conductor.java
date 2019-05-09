@@ -35,18 +35,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
 import uk.co.saiman.experiment.production.ProductPath;
 import uk.co.saiman.experiment.production.Result;
-import uk.co.saiman.experiment.production.Results;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.procedure.event.ConductorEvent;
+import uk.co.saiman.experiment.production.Output;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
-public class Conductor implements Results {
+public class Conductor implements Output {
   private final StorageConfiguration<?> storageConfiguration;
 
   private final Map<ExperimentPath<?>, ExecutorProgress<?>> progress;
   private Procedure procedure;
+
+  private final HotObservable<ConductorEvent> events = new HotObservable<>();
 
   public Conductor(StorageConfiguration<?> storageConfiguration) {
     this.storageConfiguration = storageConfiguration;
@@ -80,7 +84,7 @@ public class Conductor implements Results {
   }
 
   public Optional<Procedure> procedure() {
-    return Optional.of(procedure);
+    return Optional.ofNullable(procedure);
   }
 
   public synchronized void interrupt() {
@@ -116,5 +120,9 @@ public class Conductor implements Results {
   public <T extends Result<?>> Observable<T> results(ProductPath<?, T> path) {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  public Observable<ConductorEvent> events() {
+    return events;
   }
 }

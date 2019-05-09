@@ -28,15 +28,14 @@
 package uk.co.saiman.comms.copley.impl;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static uk.co.saiman.comms.copley.CopleyController.CHECKSUM;
 import static uk.co.saiman.comms.copley.CopleyController.HEADER_SIZE;
-import static uk.co.saiman.comms.copley.CopleyController.WORD_SIZE;
 import static uk.co.saiman.comms.copley.CopleyOperationID.GET_VARIABLE;
 import static uk.co.saiman.comms.copley.CopleyOperationID.NO_OP;
 import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
 import static uk.co.saiman.comms.copley.ErrorCode.ILLEGAL_AXIS_NUMBER;
 import static uk.co.saiman.comms.copley.ErrorCode.SUCCESS;
 import static uk.co.saiman.comms.copley.VariableBank.ACTIVE;
+import static uk.co.saiman.log.Log.Level.INFO;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -45,12 +44,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import uk.co.saiman.bytes.conversion.ByteConverter;
+import uk.co.saiman.comms.copley.CommandHeader;
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyNode;
 import uk.co.saiman.comms.copley.CopleyOperationID;
-import uk.co.saiman.comms.copley.ErrorCode;
 import uk.co.saiman.comms.copley.OperatingMode;
+import uk.co.saiman.comms.copley.ResponseHeader;
 import uk.co.saiman.comms.copley.VariableIdentifier;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.messaging.DataBuffer;
 
 public class CopleyNodeImpl implements CopleyNode {
@@ -79,6 +80,7 @@ public class CopleyNodeImpl implements CopleyNode {
     this.comms = comms;
     this.nodeId = nodeId;
     this.nodeIndex = nodeIndex;
+
     int axisCount = countAxes();
     this.axes = new ArrayList<>(axisCount);
     for (int i = 0; i < axisCount; i++) {
@@ -137,52 +139,77 @@ public class CopleyNodeImpl implements CopleyNode {
   }
 
   byte[] executeCopleyCommand(CopleyOperationID operation, byte[] output) throws IOException {
-    try (DataBuffer buffer = comms.getReceiver().openDataBuffer(1024)) {
-      sendCopleyCommand(operation, output);
-      return receiveCopleyCommand(buffer);
+    synchronized (comms) {
+      try (DataBuffer buffer = comms.getReceiver().openDataBuffer(2048)) {
+        sendCopleyCommand(operation, output);
+        return receiveCopleyCommand(buffer);
+      }
     }
   }
 
   private void sendCopleyCommand(CopleyOperationID operation, byte[] output) throws IOException {
-    byte id = (byte) nodeId;
-    byte size = (byte) (output.length / WORD_SIZE);
-    byte opCode = operation.getCode();
-    byte checksum = (byte) (CHECKSUM ^ id ^ size ^ opCode);
-    for (byte outputByte : output)
-      checksum ^= outputByte;
+    try {
+      comms.getLog().log(INFO, "Sending copley command");
 
-    ByteBuffer message_buffer = ByteBuffer.allocate(HEADER_SIZE + output.length);
-    message_buffer.put(id);
-    message_buffer.put(checksum);
-    message_buffer.put(size);
-    message_buffer.put(opCode);
-    message_buffer.put(output);
+      var header = new CommandHeader(nodeId, operation, output);
+      var headerBytes = comms.getConverters().getConverter(CommandHeader.class).toBytes(header);
 
-    message_buffer.flip();
-    comms.getSender().sendData(message_buffer);
+      header = comms.getConverters().getConverter(CommandHeader.class).toObject(headerBytes);
+
+      comms.getLog().log(INFO, "Sending copley command header " + header);
+
+      ByteBuffer message_buffer = ByteBuffer.allocate(headerBytes.length + output.length);
+
+      message_buffer.put(headerBytes);
+      message_buffer.put(output);
+
+      message_buffer.flip();
+
+      comms.getLog().log(INFO, "Sending copley command data " + message_buffer);
+
+      comms.getSender().sendData(message_buffer);
+    } catch (CopleyErrorException e) {
+      throw e;
+    } catch (Exception e) {
+      comms.getLog().log(Level.ERROR, "Failed to send copley command", e);
+      throw e;
+    }
   }
 
   private byte[] receiveCopleyCommand(DataBuffer buffer) throws IOException {
-    ByteBuffer message_buffer = ByteBuffer.allocate(HEADER_SIZE);
-    buffer.readData(message_buffer, SECONDS, 2);
-    message_buffer.flip();
+    try {
+      comms.getLog().log(INFO, "Receiving copley response");
 
-    message_buffer.get(); // reserved
-    byte checksum = message_buffer.get();
-    int size = message_buffer.get() * WORD_SIZE;
-    ErrorCode errorCode = ErrorCode.values()[message_buffer.get()];
+      ByteBuffer message_buffer = ByteBuffer.allocate(HEADER_SIZE);
+      buffer.readData(message_buffer, SECONDS, 2);
+      message_buffer.flip();
 
-    message_buffer = ByteBuffer.allocate(size);
-    buffer.readData(message_buffer, SECONDS, 2);
-    message_buffer.flip();
+      var header = comms
+          .getConverters()
+          .getConverter(ResponseHeader.class)
+          .toObject(message_buffer.array());
 
-    if (errorCode != SUCCESS) {
-      throw new CopleyErrorException(errorCode);
+      comms.getLog().log(INFO, "Received copley response header " + header);
+
+      message_buffer = ByteBuffer.allocate(header.messageBytes());
+      buffer.readData(message_buffer, SECONDS, 2);
+      message_buffer.flip();
+
+      comms.getLog().log(INFO, "Received copley response data " + message_buffer);
+
+      if (header.errorCode() != SUCCESS) {
+        throw new CopleyErrorException(header.errorCode());
+      }
+
+      byte[] input = new byte[header.messageBytes()];
+      message_buffer.get(input);
+
+      return input;
+    } catch (CopleyErrorException e) {
+      throw e;
+    } catch (Exception e) {
+      comms.getLog().log(Level.ERROR, "Failed to receive copley command", e);
+      throw e;
     }
-
-    byte[] input = new byte[size];
-    message_buffer.get(input);
-
-    return input;
   }
 }

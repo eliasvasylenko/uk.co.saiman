@@ -29,27 +29,26 @@ package uk.co.saiman.msapex.experiment.workspace;
 
 import java.util.Objects;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 
 public class WorkspaceExperimentPath implements Comparable<WorkspaceExperimentPath> {
-  private final ExperimentIndex experimentIndex;
+  private final ExperimentId experimentIndex;
   private final ExperimentPath<Absolute> experimentPath;
 
-  WorkspaceExperimentPath(
-      ExperimentIndex experimentIndex,
-      ExperimentPath<Absolute> experimentPath) {
+  WorkspaceExperimentPath(ExperimentId experimentIndex, ExperimentPath<Absolute> experimentPath) {
     this.experimentIndex = experimentIndex;
     this.experimentPath = experimentPath;
   }
 
   public static WorkspaceExperimentPath define(
-      ExperimentIndex experimentIndex,
+      ExperimentId experimentIndex,
       ExperimentPath<Absolute> experimentPath) {
     return new WorkspaceExperimentPath(experimentIndex, experimentPath);
   }
 
-  public ExperimentIndex getExperimentIndex() {
+  public ExperimentId getExperimentId() {
     return experimentIndex;
   }
 
@@ -63,7 +62,7 @@ public class WorkspaceExperimentPath implements Comparable<WorkspaceExperimentPa
     int lastSlash = string.lastIndexOf('/');
 
     return define(
-        ExperimentIndex.define(string.substring(lastSlash + 1)),
+        ExperimentId.fromName(string.substring(lastSlash + 1)),
         ExperimentPath.absoluteFromString(string.substring(0, lastSlash)));
   }
 

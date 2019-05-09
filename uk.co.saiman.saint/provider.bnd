@@ -1,4 +1,5 @@
-Bundle-Name: SAI :: SAINT :: Provider
+Bundle-Name: SAI :: SAINT
+Bundle-SymbolicName: uk.co.saiman.saint
 
-Private-Package: \
-	uk.co.saiman.saint.impl
+Export-Package: \
+	uk.co.saiman.saint

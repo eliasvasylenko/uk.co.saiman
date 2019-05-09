@@ -44,8 +44,8 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.storage.Storage;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FileSystemStoreConfiguration;
@@ -138,6 +138,8 @@ public class FileSystemStore implements Store<Path> {
   }
 
   private Path getPath(Path experimentRoot, ExperimentPath<Absolute> path) {
-    return path.ids().reduce(rootPath.resolve(experimentRoot), (p, i) -> p.resolve(i), null);
+    return path
+        .ids()
+        .reduce(rootPath.resolve(experimentRoot), (p, i) -> p.resolve(i.toString()), null);
   }
 }

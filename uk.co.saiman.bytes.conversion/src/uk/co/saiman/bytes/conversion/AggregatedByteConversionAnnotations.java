@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.bytes.conversion;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 
@@ -72,5 +73,10 @@ final class AggregatedByteConversionAnnotations implements ByteConversionAnnotat
   @Override
   public ByteConversionAnnotations and(ByteConversionAnnotations more) {
     return new AggregatedByteConversionAnnotations(this, more);
+  }
+
+  @Override
+  public String toString() {
+    return getAll().distinct().map(Annotation::toString).collect(joining(", ", "(", ")"));
   }
 }

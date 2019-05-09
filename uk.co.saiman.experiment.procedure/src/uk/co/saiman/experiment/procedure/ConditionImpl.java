@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.experiment.procedure;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.production.Condition;
 import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.ProductPath;

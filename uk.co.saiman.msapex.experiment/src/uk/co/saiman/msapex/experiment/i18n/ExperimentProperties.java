@@ -30,8 +30,8 @@ package uk.co.saiman.msapex.experiment.i18n;
 import java.nio.file.Path;
 
 import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;
 
@@ -60,7 +60,7 @@ public interface ExperimentProperties {
 
   Localized<String> renameExperiment();
 
-  Localized<String> renameExperimentName(String name);
+  Localized<String> renameExperimentName(ExperimentId name);
 
   Localized<String> addSpectrumProcessor();
 
@@ -92,7 +92,7 @@ public interface ExperimentProperties {
 
   Localized<String> newExperimentFailedDi();
 
-  Localized<String> newExperimentFailedText(String name);
+  Localized<String> newExperimentFailedText(ExperimentId name);
 
   Localized<String> newExperimentFailedDescription();
 
@@ -109,5 +109,4 @@ public interface ExperimentProperties {
   Localized<String> attachStepFailedText(Step step, Executor<?> procedure);
 
   Localized<String> attachStepFailedDescription();
-
 }

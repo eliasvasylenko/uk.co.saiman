@@ -67,7 +67,9 @@ public final class ByteBuffers {
 
   public static String toHexString(ByteBuffer buffer) {
     byte[] bytes = new byte[buffer.remaining()];
+    int position = buffer.position();
     buffer.get(bytes);
+    buffer.position(position);
 
     char[] hexChars = new char[bytes.length * 2];
     for (int j = 0; j < bytes.length; j++) {

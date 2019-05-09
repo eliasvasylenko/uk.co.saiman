@@ -27,6 +27,11 @@
  */
 package uk.co.saiman.log.provider;
 
+import static java.lang.System.lineSeparator;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -98,15 +103,22 @@ public class LogProvider implements Log {
 
   @Override
   public void log(Level level, Throwable exception) {
-    log(level, exceptionMessage(exception));
+    log(level, exceptionMessage(exception) + stackTraceString(exception));
   }
 
   @Override
   public void log(Level level, String message, Throwable exception) {
-    log(level, message + " (" + exceptionMessage(exception) + ")");
+    log(level, message + " (" + exceptionMessage(exception) + ")" + stackTraceString(exception));
   }
 
   private String exceptionMessage(Throwable exception) {
     return exception.getMessage() == null ? exception.getClass().getName() : exception.getMessage();
+  }
+
+  private String stackTraceString(Throwable exception) {
+    StringWriter stringWriter = new StringWriter();
+    stringWriter.append(lineSeparator());
+    exception.printStackTrace(new PrintWriter(stringWriter));
+    return stringWriter.toString();
   }
 }

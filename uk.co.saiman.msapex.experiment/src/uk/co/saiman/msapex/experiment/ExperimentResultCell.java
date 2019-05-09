@@ -32,10 +32,10 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath;
 import uk.co.saiman.experiment.production.Observation;
 import uk.co.saiman.experiment.production.ProductPath;
-import uk.co.saiman.experiment.production.Results;
+import uk.co.saiman.experiment.production.Output;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -43,14 +43,14 @@ import uk.co.saiman.experiment.production.Results;
  * @author Elias N Vasylenko
  */
 public class ExperimentResultCell {
-  public static final String ID = "uk.co.saiman.msapex.experiment.cell.node";
+  public static final String ID = "uk.co.saiman.msapex.experiment.result.cell";
 
   @Inject
   private Observation<?> observation;
 
   @Inject
   @Optional
-  public void prepare(Cell cell, ExperimentPath<?> path, Results results) {
+  public void prepare(Cell cell, ExperimentPath<?> path, Output results) {
     /*
      * configure label
      */

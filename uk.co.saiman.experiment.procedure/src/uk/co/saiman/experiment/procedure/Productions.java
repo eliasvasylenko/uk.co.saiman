@@ -36,6 +36,7 @@ import uk.co.saiman.experiment.production.Observation;
 import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.requirement.NoRequirement;
 import uk.co.saiman.experiment.requirement.ProductRequirement;
 
 public class Productions {
@@ -94,7 +95,7 @@ public class Productions {
 
   @SuppressWarnings("unchecked")
   public static <S> Optional<Executor<Nothing>> asIndependent(Executor<?> executor) {
-    return executor.directRequirement().isIndependent()
+    return executor.directRequirement() instanceof NoRequirement
         ? Optional.of((Executor<Nothing>) executor)
         : Optional.empty();
   }

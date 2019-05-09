@@ -31,8 +31,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import uk.co.saiman.data.Data;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.production.Observation;
 import uk.co.saiman.experiment.production.ProductPath;
 import uk.co.saiman.experiment.production.Result;

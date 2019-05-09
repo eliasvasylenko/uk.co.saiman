@@ -28,25 +28,26 @@
 package uk.co.saiman.experiment;
 
 import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.path.ExperimentPath.defineAbsolute;
+import static uk.co.saiman.experiment.graph.ExperimentPath.defineAbsolute;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
-import java.util.TreeSet;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.event.RenameExperimentEvent;
+import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.production.Nothing;
-import uk.co.saiman.experiment.production.Results;
+import uk.co.saiman.experiment.production.Output;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
@@ -55,7 +56,6 @@ import uk.co.saiman.observable.Observable;
 
 public class Experiment {
   private ExperimentDefinition definition;
-  private NavigableSet<ExperimentPath<Absolute>> enabled = new TreeSet<>();
 
   private final Scheduler scheduler;
 
@@ -76,24 +76,26 @@ public class Experiment {
     return scheduler.getSchedule().get();
   }
 
-  public Results getResults() {
+  public Output getResults() {
     return scheduler.getResults();
   }
 
-  public String getId() {
-    return getSchedule().getScheduledProcedure().id();
+  public ExperimentId getId() {
+    return getDefinition().id();
   }
 
-  public void setId(String id) {
-    updateProcedure(p -> p.withId(id));
+  public synchronized void setId(ExperimentId id) {
+    ExperimentId previousId = getId();
+
+    if (updateDefinition(getDefinition().withId(id))) {
+      fireEvent(new RenameExperimentEvent(this, previousId));
+    }
   }
 
-  private synchronized boolean updateProcedure(
-      Function<ExperimentDefinition, ExperimentDefinition> modifier) {
-    var newProcedure = modifier.apply(definition);
-    boolean changed = !definition.equals(newProcedure);
+  private synchronized boolean updateDefinition(ExperimentDefinition definition) {
+    boolean changed = !this.definition.equals(definition);
     if (changed) {
-      definition = newProcedure;
+      this.definition = definition;
       scheduler.schedule(definition.procedure());
     }
     return changed;
@@ -107,33 +109,56 @@ public class Experiment {
     return events;
   }
 
-  public synchronized Step attach(StepDefinition<Nothing> step) {
-    List.of();
-    updateProcedure(p -> p.withStep(step));
+  public Observable<ConductorEvent> conductorEvents() {
+    return scheduler.conductorEvents();
+  }
 
-    return getStep(ExperimentPath.defineAbsolute().resolve(step.id()));
+  public synchronized Step attach(StepDefinition<Nothing> stepDefinition) {
+    boolean changed = updateDefinition(getDefinition().withSubstep(stepDefinition));
+
+    Step newStep = getIndependentStep(stepDefinition.id());
+    if (changed) {
+      fireEvent(new AddStepEvent(newStep));
+    }
+    return newStep;
   }
 
   public synchronized void close() {
 
   }
 
-  private Step getStep(ExperimentPath<Absolute> path) {
+  public Step getStep(ExperimentPath<Absolute> path) {
     var reference = steps.get(path);
     var step = reference == null ? null : reference.get();
     if (step == null) {
-      step = new Step(this, definition.findStep(path).get().executor(), path.toAbsolute());
+      step = new Step(this, definition.findSubstep(path).get().executor(), path.toAbsolute());
       steps.put(path, new SoftReference<>(step));
     }
     return step;
   }
 
-  void updateInstruction(ExperimentPath<?> path, StepDefinition instruction) {
-    // TODO Auto-generated method stub
-
+  Optional<StepDefinition<?>> getStepDefinition(ExperimentPath<Absolute> path) {
+    return getDefinition().findSubstep(path);
   }
 
-  public Stream<Step> getIndependentSteps() {
+  synchronized boolean updateStepDefinition(
+      ExperimentPath<Absolute> path,
+      StepDefinition<?> stepDefinition) {
+    return getDefinition()
+        .withSubstep(path, s -> Optional.ofNullable(stepDefinition))
+        .map(d -> updateDefinition(d))
+        .orElse(false);
+  }
+
+  void fireEvent(ExperimentEvent event) {
+    events.next(event);
+  }
+
+  public synchronized Step getIndependentStep(ExperimentId id) {
+    return getStep(ExperimentPath.defineAbsolute().resolve(id));
+  }
+
+  public synchronized Stream<Step> getIndependentSteps() {
     return definition
         .independentSteps()
         .map(step -> defineAbsolute().resolve(step.id()))

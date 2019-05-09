@@ -15,7 +15,7 @@ Export-Package: uk.co.saiman.experiment.chemicalmap
 	uk.co.saiman.data.function;version=snapshot,\
 	uk.co.saiman.data.spectrum;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.production;version=snapshot,\
+	uk.co.saiman.experiment.graph;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\

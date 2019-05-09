@@ -27,83 +27,69 @@
  */
 package uk.co.saiman.experiment.definition;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.production.Nothing;
 import uk.co.saiman.experiment.requirement.Requirement;
 
-public class ExperimentDefinition extends StepContainer<ExperimentDefinition> {
-  private final String id;
+public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefinition> {
+  private final ExperimentId id;
   private Procedure procedure;
 
-  private ExperimentDefinition(String id, List<StepDefinition<?>> steps) {
+  private ExperimentDefinition(ExperimentId id, List<StepDefinition<?>> steps) {
     super(steps);
-    this.id = validateName(id);
+    this.id = id;
   }
 
   private ExperimentDefinition(
-      String id,
+      ExperimentId id,
       List<StepDefinition<?>> steps,
-      Map<String, StepDefinition<?>> dependents) {
+      Map<ExperimentId, StepDefinition<?>> dependents) {
     super(steps, dependents);
-    this.id = validateName(id);
+    this.id = id;
   }
 
-  public static ExperimentDefinition define(String id) {
+  @Override
+  public boolean equals(Object obj) {
+    if (!super.equals(obj))
+      return false;
+
+    ExperimentDefinition that = (ExperimentDefinition) obj;
+
+    return Objects.equals(this.id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, super.hashCode());
+  }
+
+  public static ExperimentDefinition define(ExperimentId id) {
     return new ExperimentDefinition(id, List.of(), Map.of());
   }
 
-  public String id() {
+  public ExperimentId id() {
     return id;
   }
 
-  public ExperimentDefinition withId(String id) {
+  public ExperimentDefinition withId(ExperimentId id) {
     return new ExperimentDefinition(id, getSteps(), getDependents());
-  }
-
-  static String validateName(String name) {
-    if (!isNameValid(name)) {
-      throw new ExperimentDefinitionException(format("Invalid name for experiment %s", name));
-    }
-    return name;
-  }
-
-  public static boolean isNameValid(String name) {
-    final String ALPHANUMERIC = "[a-zA-Z0-9]+";
-    final String DIVIDER_CHARACTERS = "[ \\.\\-_]+";
-
-    return name != null
-        && name.matches(ALPHANUMERIC + "(" + DIVIDER_CHARACTERS + ALPHANUMERIC + ")*");
-  }
-
-  public Optional<StepDefinition<?>> findStep(ExperimentPath<?> path) {
-    path = path.toAbsolute();
-    if (path.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var ids = path.iterator();
-    var step = findStep(ids.next());
-    while (ids.hasNext() && step.isPresent()) {
-      step = step.flatMap(s -> s.findStep(ids.next()));
-    }
-    return step;
   }
 
   @Override
   ExperimentDefinition with(
       List<StepDefinition<?>> steps,
-      Map<String, StepDefinition<?>> dependents) {
+      Map<ExperimentId, StepDefinition<?>> dependents) {
     return new ExperimentDefinition(id, steps, dependents);
   }
 
@@ -114,7 +100,7 @@ public class ExperimentDefinition extends StepContainer<ExperimentDefinition> {
 
   @SuppressWarnings("unchecked")
   public Stream<StepDefinition<Nothing>> independentSteps() {
-    return steps()
+    return substeps()
         .filter(i -> i.executor().directRequirement().equals(Requirement.none()))
         .map(i -> (StepDefinition<Nothing>) i);
   }
@@ -126,9 +112,9 @@ public class ExperimentDefinition extends StepContainer<ExperimentDefinition> {
     return procedure;
   }
 
-  private List<Instruction<?>> closure(StepContainer<?> steps) {
+  private List<Instruction<?>> closure(StepContainer<?, ?> steps) {
     return steps
-        .steps()
+        .substeps()
         .flatMap(step -> closure(step, ExperimentPath.defineAbsolute()))
         .collect(toList());
   }
@@ -137,7 +123,7 @@ public class ExperimentDefinition extends StepContainer<ExperimentDefinition> {
     var p = path.resolve(step.id());
     return Stream
         .concat(
-            Stream.of(new Instruction<>(step.id(), step.variables(), step.executor(), p)),
-            step.steps().flatMap(s -> closure(s, p)));
+            Stream.of(new Instruction<>(p, step.variables(), step.executor())),
+            step.substeps().flatMap(s -> closure(s, p)));
   }
 }

@@ -42,8 +42,9 @@ import java.util.Optional;
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
 import org.junit.jupiter.api.Test;
 
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.path.ExperimentPath.Relative;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath.Relative;
 
 public class ExperimentPathTest {
   @Test

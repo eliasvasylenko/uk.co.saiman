@@ -37,10 +37,14 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainerElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.fx.ui.workbench.renderers.base.services.DnDService;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WDragTargetWidget.BasicDropLocation;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WDragTargetWidget.DropLocation;
+import org.eclipse.fx.ui.workbench.renderers.base.widget.WWidget;
+
+import javafx.scene.Node;
 
 public class DragAndDropAddon implements DnDService {
   private static final Object SEGREGATED_DND = "segregatedDnD";
@@ -92,7 +96,28 @@ public class DragAndDropAddon implements DnDService {
 
   @Override
   public boolean handleDetach(double x, double y, MUIElement sourceElement) {
-    return false;
+    Node sourceWidget = (Node) ((WWidget<?>) sourceElement.getWidget()).getWidget();
+    this.modelService
+        .detach(
+            (MPartSashContainerElement) sourceElement,
+            (int) x,
+            (int) y,
+            (int) sourceWidget.getBoundsInParent().getWidth(),
+            (int) sourceWidget.getBoundsInParent().getHeight());
+
+    MWindow window = getWindowFor(sourceElement);
+    // TODO why can't we maximize this window?
+
+    return true;
+  }
+
+  private MWindow getWindowFor(MUIElement element) {
+    MUIElement parent = element;
+    while (!(parent instanceof MWindow)) {
+      parent = parent.getParent();
+    }
+
+    return (MWindow) parent;
   }
 
   @Override

@@ -44,6 +44,7 @@ import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.Plan;
 import uk.co.saiman.experiment.definition.StepContainer;
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.instruction.ExecutorService;
 import uk.co.saiman.experiment.variables.Variables;
@@ -70,21 +71,23 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
       "saiman.procedure.v" + VERSION,
       VENDOR).withSuffix("json");
 
-  private static final MapIndex<String> ID = new MapIndex<>("id", stringAccessor());
+  private static final MapIndex<ExperimentId> ID = new MapIndex<>(
+      "id",
+      stringAccessor().map(ExperimentId::fromName, ExperimentId::name));
   private static final MapIndex<Plan> PLAN = new MapIndex<>(
       "plan",
       stringAccessor().map(Plan::valueOf, Plan::toString));
-  private static final String CONDUCTOR = "conductor";
+  private static final String EXECUTOR = "executor";
   private static final String VARIABLES = "variables";
   private static final String CHILDREN = "children";
 
-  private final MapIndex<Executor<?>> conductor;
+  private final MapIndex<Executor<?>> executor;
   private final MapIndex<Variables> variables;
 
   private final JsonStateMapFormat stateMapFormat;
 
-  public JsonExperimentDefinitionFormat(ExecutorService conductorService) {
-    this(conductorService, new JsonStateMapFormat());
+  public JsonExperimentDefinitionFormat(ExecutorService executorService) {
+    this(executorService, new JsonStateMapFormat());
   }
 
   public JsonExperimentDefinitionFormat(
@@ -92,8 +95,8 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
       JsonStateMapFormat stateMapFormat) {
     this.stateMapFormat = stateMapFormat;
 
-    this.conductor = new MapIndex<>(
-        CONDUCTOR,
+    this.executor = new MapIndex<>(
+        EXECUTOR,
         stringAccessor().map(conductorService::getExecutor, conductorService::getId));
 
     this.variables = new MapIndex<>(VARIABLES, mapAccessor(Variables::new, Variables::state));
@@ -118,24 +121,22 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
     return loadSteps(ExperimentDefinition.define(data.get(ID)), data.get(CHILDREN).asList());
   }
 
-  private <T extends StepContainer<? extends T>> T loadSteps(T container, StateList data) {
+  private <T extends StepContainer<?, ? extends T>> T loadSteps(T container, StateList data) {
     return data
         .stream()
         .map(State::asMap)
         .reduce(container, (p, s) -> loadStep(p, s), throwingMerger());
   }
 
-  private <T extends StepContainer<? extends T>> T loadStep(T container, StateMap data) {
+  private <T extends StepContainer<?, ? extends T>> T loadStep(T container, StateMap data) {
     StepDefinition<?> step = StepDefinition
-        .define(
-            data.get(ID),
-            data.get(variables),
-            (Executor<?>) data.get(conductor),
-            data.get(PLAN));
+        .define(data.get(ID), (Executor<?>) data.get(executor))
+        .withVariables(data.get(variables))
+        .withPlan(data.get(PLAN));
 
     step = this.<StepDefinition<?>>loadSteps(step, data.get(CHILDREN).asList());
 
-    return container.withStep(step);
+    return container.withSubstep(step);
   }
 
   @Override
@@ -161,7 +162,8 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
         .empty()
         .with(ID, step.id())
         .with(variables, step.variables())
-        .with(CHILDREN, saveSteps(step.steps().collect(toList())))
-        .with(PLAN, step.getPlan());
+        .with(CHILDREN, saveSteps(step.substeps().collect(toList())))
+        .with(PLAN, step.getPlan())
+        .with(executor, step.executor());
   }
 }

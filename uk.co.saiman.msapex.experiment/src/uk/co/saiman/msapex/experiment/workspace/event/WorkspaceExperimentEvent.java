@@ -59,7 +59,7 @@ public class WorkspaceExperimentEvent extends WorkspaceEvent {
         + "<"
         + kind()
         + ">("
-        + experiment().name()
+        + experiment().id()
         + ", "
         + experimentEvent()
         + ")";

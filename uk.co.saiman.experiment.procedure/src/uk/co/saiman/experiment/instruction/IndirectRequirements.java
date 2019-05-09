@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath;
 import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.experiment.requirement.ProductRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;

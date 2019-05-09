@@ -11,7 +11,7 @@ Export-Package: uk.co.saiman.experiment.sample
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 \
-	uk.co.saiman.experiment.production;version=snapshot,\
+	uk.co.saiman.experiment.graph;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\

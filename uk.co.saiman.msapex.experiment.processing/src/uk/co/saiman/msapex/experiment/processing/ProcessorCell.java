@@ -34,7 +34,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.utilities.EclipseUtilities;
+import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 
 public class ProcessorCell {
   public static final String ID = "uk.co.saiman.msapex.experiment.processing.cell.processor";
@@ -47,7 +47,7 @@ public class ProcessorCell {
 
   @PostConstruct
   public void prepare() {
-    EclipseUtilities.injectSupertypes(context, DataProcessor.class);
+    EclipseContextUtilities.injectSubtypes(context, DataProcessor.class);
   }
 
   @Inject

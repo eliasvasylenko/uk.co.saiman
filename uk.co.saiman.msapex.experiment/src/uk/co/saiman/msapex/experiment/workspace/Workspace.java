@@ -42,9 +42,11 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.instruction.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
+import uk.co.saiman.log.Log;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment.Status;
 import uk.co.saiman.msapex.experiment.workspace.event.AddExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.event.WorkspaceEvent;
@@ -62,16 +64,21 @@ public class Workspace {
 
   private final HotObservable<WorkspaceEvent> events;
 
+  private final Log log;
+
   public Workspace(
       Path rootPath,
       ExecutorService conductorService,
-      StorageService storageService) {
+      StorageService storageService,
+      Log log) {
     this.experiments = new HashSet<>();
 
     this.rootLocation = new PathLocation(rootPath);
     this.experimentFormat = new JsonExperimentFormat(conductorService, storageService);
 
     this.events = new HotObservable<>();
+
+    this.log = log;
   }
 
   public PathLocation getWorkspaceLocation() {
@@ -86,8 +93,8 @@ public class Workspace {
     return experiments.stream();
   }
 
-  public Optional<WorkspaceExperiment> getWorkspaceExperiment(String id) {
-    return experiments.stream().filter(experiment -> experiment.name().equals(id)).findAny();
+  public Optional<WorkspaceExperiment> getWorkspaceExperiment(ExperimentId id) {
+    return experiments.stream().filter(experiment -> experiment.id().equals(id)).findAny();
   }
 
   public Optional<Step> resolveStep(WorkspaceExperimentPath path) {
@@ -99,7 +106,7 @@ public class Workspace {
     return getWorkspaceExperiments().map(WorkspaceExperiment::experiment);
   }
 
-  public Optional<Experiment> getExperiment(String id) {
+  public Optional<Experiment> getExperiment(ExperimentId id) {
     return getWorkspaceExperiment(id).map(WorkspaceExperiment::experiment);
   }
 
@@ -113,10 +120,7 @@ public class Workspace {
 
   public Optional<WorkspaceExperimentPath> getPath(Step step) {
     return containsStep(step)
-        ? Optional
-            .of(
-                WorkspaceExperimentPath
-                    .define(ExperimentIndex.define(step.getExperiment().getId()), step.getPath()))
+        ? Optional.of(WorkspaceExperimentPath.define(step.getExperiment().getId(), step.getPath()))
         : Optional.empty();
   }
 
@@ -135,8 +139,8 @@ public class Workspace {
   }
 
   private WorkspaceExperiment addExperiment(
-      String name,
-      Function<String, WorkspaceExperiment> factory) {
+      ExperimentId name,
+      Function<ExperimentId, WorkspaceExperiment> factory) {
     synchronized (experiments) {
       if (getWorkspaceExperiment(name).isPresent()) {
         throw new ExperimentException(
@@ -151,11 +155,11 @@ public class Workspace {
     }
   }
 
-  public WorkspaceExperiment loadExperiment(String name) {
+  public WorkspaceExperiment loadExperiment(ExperimentId name) {
     return addExperiment(name, n -> new WorkspaceExperiment(this, n));
   }
 
-  public Experiment newExperiment(String name, StorageConfiguration<?> storageConfiguration) {
+  public Experiment newExperiment(ExperimentId name, StorageConfiguration<?> storageConfiguration) {
     return addExperiment(name, n -> new WorkspaceExperiment(this, n, storageConfiguration))
         .experiment();
   }
@@ -170,5 +174,9 @@ public class Workspace {
     synchronized (experiments) {
       experiments.remove(experiment);
     }
+  }
+
+  Log log() {
+    return log;
   }
 }

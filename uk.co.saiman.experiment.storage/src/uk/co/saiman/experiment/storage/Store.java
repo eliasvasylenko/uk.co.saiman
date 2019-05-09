@@ -29,8 +29,8 @@ package uk.co.saiman.experiment.storage;
 
 import java.io.IOException;
 
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.state.StateMap;
 
 /**

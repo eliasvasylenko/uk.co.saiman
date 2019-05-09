@@ -27,11 +27,13 @@
  */
 package uk.co.saiman.comms.copley;
 
+import uk.co.saiman.bytes.conversion.DTO;
 import uk.co.saiman.bytes.conversion.Offset;
 import uk.co.saiman.bytes.conversion.Size;
 
+@DTO
 public class Int16 {
-	@Offset(0)
-	@Size(value = 16)
-	public short value;
+  @Offset(0)
+  @Size(value = 16)
+  public short value;
 }

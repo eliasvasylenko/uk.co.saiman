@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.saint;
 
+import uk.co.saiman.properties.Localized;
+
 public interface SaintProperties {
-  String vacuumDeviceName();
+  Localized<String> stageExperimentStepName();
+
+  Localized<String> vacuumDeviceName();
 }

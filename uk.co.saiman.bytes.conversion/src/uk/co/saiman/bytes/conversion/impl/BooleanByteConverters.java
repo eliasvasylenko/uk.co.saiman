@@ -58,7 +58,7 @@ public class BooleanByteConverters implements ByteConverterProvider {
       return byteConverter(
           boolean.class,
           b -> new BitArray(size).with(0, size, b),
-          b -> b.stream().reduce((h, t) -> h || t).orElse(false));
+          b -> b.stream().limit(size).reduce((h, t) -> h || t).orElse(false));
     }
 
     return null;

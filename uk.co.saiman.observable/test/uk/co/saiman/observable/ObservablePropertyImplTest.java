@@ -29,6 +29,7 @@ package uk.co.saiman.observable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,6 +54,8 @@ public class ObservablePropertyImplTest {
   Observer<Change<String>> changeObserver;
   @Captor
   ArgumentCaptor<Change<String>> change;
+  @Captor
+  ArgumentCaptor<Throwable> failure;
 
   @Test
   public void getInitialValueTest() {
@@ -148,7 +151,9 @@ public class ObservablePropertyImplTest {
 
     var inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
-    inOrder.verify(downstreamObserver).onFail(problem);
+    inOrder.verify(downstreamObserver).onFail(failure.capture());
+    assertThat(failure.getValue(), instanceOf(MissingValueException.class));
+    assertThat(((MissingValueException) failure.getValue()).getCause(), equalTo(problem));
     inOrder.verifyNoMoreInteractions();
   }
 

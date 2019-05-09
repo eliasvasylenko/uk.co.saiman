@@ -31,15 +31,21 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 
 public abstract class ExperimentEvent {
+  private final Experiment experiment;
+  private final ExperimentDefinition definition;
+
+  public ExperimentEvent(Experiment experiment) {
+    this.experiment = experiment;
+    this.definition = experiment.getDefinition();
+  }
+
   public abstract ExperimentEventKind kind();
 
-  public ExperimentDefinition definition() {
-    // TODO Auto-generated method stub
-    return null;
+  public ExperimentDefinition experimentDefinition() {
+    return definition;
   }
 
   public Experiment experiment() {
-    // TODO Auto-generated method stub
-    return null;
+    return experiment;
   }
 }

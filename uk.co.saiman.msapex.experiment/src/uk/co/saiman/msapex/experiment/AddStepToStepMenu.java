@@ -92,7 +92,9 @@ public class AddStepToStepMenu {
 
   private <T extends Product> void addNode(Step step, ExperimentStepProvider<T> stepProvider) {
     try {
-      stepProvider.createStep().ifPresent(step::attach);
+      stepProvider
+          .createSteps(new DefineStepImpl<>(step.getDefinition(), stepProvider.executor()))
+          .forEach(step::attach);
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);

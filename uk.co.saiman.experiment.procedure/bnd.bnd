@@ -1,7 +1,7 @@
 Bundle-Name: SAI :: Experiment :: Procedure
 
 -buildpath: \
-	uk.co.saiman.experiment.production;version=snapshot,\
+	uk.co.saiman.experiment.graph;version=snapshot,\
 	uk.co.saiman.experiment.storage;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\

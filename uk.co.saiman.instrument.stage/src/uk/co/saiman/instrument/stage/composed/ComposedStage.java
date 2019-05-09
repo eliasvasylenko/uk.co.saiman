@@ -176,41 +176,44 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     };
   }
 
-  synchronized SampleState requestExchange() {
+  synchronized void requestExchange() {
     if (mode != Mode.EXCHANGING) {
       setRequestedLocation(Mode.EXCHANGING, exchangeLocation);
-
-      return sampleState().value().filter(s -> EXCHANGE_REQUESTED != s).get();
-    } else {
-      return sampleState().get();
     }
   }
 
-  synchronized SampleState requestAnalysis() {
+  synchronized void requestAnalysis() {
     if (mode != Mode.ANALYSING) {
       setRequestedLocation(Mode.ANALYSING, analysisLocation);
-
-      return sampleState().value().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
-    } else {
-      return sampleState().get();
     }
   }
 
-  synchronized SampleState requestAnalysisLocation(T location) {
+  synchronized void requestAnalysisLocation(T location) {
     if (!isLocationReachable(location)) {
       throw new IllegalArgumentException("Location unreachable " + location);
     }
 
     setRequestedLocation(Mode.ANALYSING, location);
+  }
 
-    return sampleState().value().filter(s -> ANALYSIS_LOCATION_REQUESTED != s).get();
+  SampleState awaitRequest() {
+    return sampleState()
+        .value()
+        .filter(s -> ANALYSIS_LOCATION_REQUESTED != s && EXCHANGE_REQUESTED != s)
+        .get();
+  }
+
+  private void assertRegistered() {
+    if (!getInstrumentRegistration().isRegistered()) {
+      throw new IllegalStateException("Unable to request location when stage is unregistered");
+    }
   }
 
   synchronized void setRequestedLocation(Mode mode, T location) {
-    if (getInstrumentRegistration().isRegistered()) {
-      this.mode = mode;
-      setRequestedLocationImpl(location);
-    }
+    assertRegistered();
+
+    this.mode = mode;
+    setRequestedLocationImpl(location);
   }
 
   @Override

@@ -29,25 +29,31 @@ package uk.co.saiman.experiment.event;
 
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.path.ExperimentPath;
-import uk.co.saiman.experiment.path.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 
 public abstract class ExperimentStepEvent extends ExperimentEvent {
+  private final Step step;
+  private final ExperimentPath<Absolute> path;
+
+  public ExperimentStepEvent(Step step) {
+    super(step.getExperiment());
+    this.step = step;
+    this.path = step.getPath();
+  }
+
   @Override
   public abstract ExperimentEventKind kind();
 
   public ExperimentPath<Absolute> path() {
-    // TODO Auto-generated method stub
-    return null;
+    return path;
   }
 
-  public StepDefinition instruction() {
-    // TODO Auto-generated method stub
-    return null;
+  public StepDefinition<?> stepDefinition() {
+    return experimentDefinition().findSubstep(path).get();
   }
 
   public Step step() {
-    // TODO Auto-generated method stub
-    return null;
+    return step;
   }
 }

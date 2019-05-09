@@ -36,11 +36,12 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.msapex.instrument.stage.StageDiagramSampleConfiguration;
 import uk.co.saiman.msapex.instrument.stage.XYStageDiagram;
+import uk.co.saiman.saint.SaintXYStageExecutor;
 
-@Component
+@Component(service = { XYStageDiagram.class, SaintStageDiagram.class })
 public class SaintStageDiagram extends XYStageDiagram {
   @Reference
-  private XYStage<?> stageDevice;
+  private SaintXYStageExecutor stageExecutor;
 
   @Activate
   void activate() {
@@ -49,7 +50,7 @@ public class SaintStageDiagram extends XYStageDiagram {
 
   @Override
   public XYStage<?> getStageDevice() {
-    return stageDevice;
+    return stageExecutor.sampleDevice();
   }
 
   @Override

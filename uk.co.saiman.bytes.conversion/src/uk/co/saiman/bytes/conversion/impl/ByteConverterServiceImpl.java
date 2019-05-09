@@ -82,7 +82,19 @@ public class ByteConverterServiceImpl implements ByteConverterService {
   @SuppressWarnings("unchecked")
   @Override
   public <T> CompositeByteConverter<T> getConverter(AnnotatedTypeToken<T> type) {
-    return (CompositeByteConverter<T>) typedByteConverters
-        .computeIfAbsent(type, t -> new CompositeByteConverter<>(this, t));
+    CompositeByteConverter<T> converter;
+
+    synchronized (typedByteConverters) {
+      converter = (CompositeByteConverter<T>) typedByteConverters.get(type);
+    }
+
+    if (converter == null) {
+      converter = new CompositeByteConverter<>(this, type);
+      synchronized (typedByteConverters) {
+        typedByteConverters.put(type, converter);
+      }
+    }
+
+    return converter;
   }
 }

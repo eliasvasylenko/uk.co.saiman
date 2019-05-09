@@ -27,20 +27,21 @@
  */
 package uk.co.saiman.instrument.stage.copley;
 
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.instrument.stage.composed.AxisState.DISCONNECTED;
 import static uk.co.saiman.instrument.stage.composed.AxisState.LOCATION_REQUESTED;
 import static uk.co.saiman.measurement.Units.metre;
 import static uk.co.saiman.observable.Observable.fixedRate;
-
-import java.util.function.Consumer;
+import static uk.co.saiman.observable.Observer.onFailure;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -52,10 +53,14 @@ import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.instrument.sample.SampleLocationUnknown;
 import uk.co.saiman.instrument.stage.composed.AxisState;
 import uk.co.saiman.instrument.stage.composed.StageAxis;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.measurement.scalar.Scalar;
+import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
+import uk.co.saiman.observable.OwnedMessage;
 
 @Designate(ocd = CopleyLinearAxis.CopleyLinearAxisConfiguration.class, factory = true)
 @Component(name = CopleyLinearAxis.CONFIGURATION_PID, configurationPid = CopleyLinearAxis.CONFIGURATION_PID, configurationPolicy = REQUIRE)
@@ -68,7 +73,9 @@ public class CopleyLinearAxis implements StageAxis<Length> {
     @AttributeDefinition(name = "Controller comms target", description = "The copley controller instance owning the axis")
     String comms_target();
 
-    int axis() default 0;
+    int axis()
+
+    default 0;
 
     int node() default 0;
   }
@@ -81,36 +88,68 @@ public class CopleyLinearAxis implements StageAxis<Length> {
 
   private final ObservableProperty<AxisState> axisState;
 
+  private final Log log;
+  private Disposable locationTracking;
+
   @Activate
   public CopleyLinearAxis(
       @Reference(name = "comms") CopleyController comms,
-      CopleyLinearAxisConfiguration configuration) {
-    this(comms, configuration.node(), configuration.axis());
+      CopleyLinearAxisConfiguration configuration,
+      @Reference Log log) {
+    this(comms, configuration.node(), configuration.axis(), log);
   }
 
-  public CopleyLinearAxis(CopleyController comms, int node, int axis) {
+  public CopleyLinearAxis(CopleyController comms, int node, int axis, Log log) {
+    this.log = log;
+
     this.comms = comms;
     this.node = node;
     this.axis = axis;
 
     this.actualLocation = new ObservablePropertyImpl<>(new SampleLocationUnknown());
-    updateActualLocation();
-    fixedRate(0, 50, MILLISECONDS).observe(o -> updateActualLocation());
-
     this.axisState = new ObservablePropertyImpl<>(DISCONNECTED);
-    axisState.value().observe(s -> System.out.println(s));
+
+    startLocationTracking();
+  }
+
+  protected synchronized void startLocationTracking() {
+    updateActualLocation();
+    locationTracking = fixedRate(0, 100, MILLISECONDS)
+        .weakReference(this)
+        .map(OwnedMessage::owner)
+        .then(onFailure(t -> log.log(Level.ERROR, t)))
+        .observe(CopleyLinearAxis::updateActualLocation);
+  }
+
+  @Deactivate
+  protected synchronized void stopLocationTracking() {
+    locationTracking.cancel();
   }
 
   @Override
   public synchronized void requestLocation(Quantity<Length> location) {
-    if (axisState.isEqual(LOCATION_REQUESTED))
+    if (axisState.isEqual(LOCATION_REQUESTED)) {
       throw new IllegalStateException("location already requested");
+    }
 
     axisState.set(LOCATION_REQUESTED);
 
-    comms
+    try {
+      var position = new Int32(getStepsFromLength(location));
+      getAxis().requestedPosition().set(position);
+    } catch (Exception e) {
+      axisState.set(DISCONNECTED);
+      log.log(Level.ERROR, "Failed to request axis position", e);
+      throw e;
+    }
+  }
+
+  private CopleyAxis getAxis() {
+    return comms
         .getAxis(this.node, this.axis)
-        .ifPresent(axis -> axis.requestedPosition().set(new Int32(getStepsFromLength(location))));
+        .orElseThrow(
+            () -> new IllegalStateException(
+                format("Cannot find axis %s at node %s", this.axis, this.node)));
   }
 
   @Override
@@ -120,11 +159,14 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   }
 
   void updateActualLocation() {
-    comms
-        .getAxis(this.node, this.axis)
-        .ifPresentOrElse(
-            axis -> actualLocation.set(getLengthFromSteps(axis.actualPosition().get().value)),
-            () -> actualLocation.setProblem(new SampleLocationUnknown()));
+    try {
+      var position = getAxis().actualPosition().get();
+      actualLocation.set(getLengthFromSteps(position.value));
+    } catch (Exception e) {
+      axisState.set(DISCONNECTED);
+      actualLocation.setProblem(new SampleLocationUnknown(e));
+      log.log(Level.ERROR, "Failed to determine axis position", e);
+    }
   }
 
   public int getStepsFromLength(Quantity<Length> length) {

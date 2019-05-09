@@ -34,7 +34,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
 
@@ -46,7 +46,12 @@ import uk.co.saiman.msapex.experiment.workspace.Workspace;
 public class NewFileSystemExperimentDialog extends TextInputDialog {
   public NewFileSystemExperimentDialog(Workspace workspace, ExperimentProperties text) {
     titleProperty().bind(wrap(text.renameExperiment()));
-    headerTextProperty().bind(wrap(text.renameExperimentName(text.newExperimentName().toString())));
+    headerTextProperty()
+        .bind(
+            wrap(
+                text
+                    .renameExperimentName(
+                        ExperimentId.fromName(text.newExperimentName().toString()))));
 
     GridPane content = (GridPane) getDialogPane().getContent();
     content.add(new Label("This is where we need to put format error messages..."), 0, 0);
@@ -57,9 +62,10 @@ public class NewFileSystemExperimentDialog extends TextInputDialog {
     okButton.setDisable(true);
     getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
 
-      boolean exists = workspace.getWorkspaceExperiment(newValue).isPresent();
+      boolean isValid = ExperimentId.isNameValid(newValue);
 
-      boolean isValid = ExperimentDefinition.isNameValid(newValue);
+      boolean exists = isValid
+          && workspace.getWorkspaceExperiment(ExperimentId.fromName(newValue)).isPresent();
 
       okButton.setDisable(!isValid || exists);
     });

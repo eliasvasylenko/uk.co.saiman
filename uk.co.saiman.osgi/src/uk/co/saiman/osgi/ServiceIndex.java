@@ -258,4 +258,9 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   public Observable<ServiveEvent> events() {
     return events;
   }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + recordsById;
+  }
 }

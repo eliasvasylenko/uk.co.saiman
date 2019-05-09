@@ -50,4 +50,8 @@ public class VariableIdentifier {
   @Offset(13)
   @Size(value = 3)
   public byte axis;
+
+  public VariableBank bank() {
+    return VariableBank.fromBit(bank);
+  }
 }

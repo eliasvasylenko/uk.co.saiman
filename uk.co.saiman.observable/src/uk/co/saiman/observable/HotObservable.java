@@ -100,7 +100,7 @@ public class HotObservable<M> implements Observable<M> {
       if (isLive()) {
         forObservers(singletonList(observation), ObservationImpl::onObserve);
 
-        if (opened) {
+        if (opened && !observation.isDisposed()) {
           try {
             open();
           } catch (Throwable e) {

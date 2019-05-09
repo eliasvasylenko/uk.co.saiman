@@ -38,6 +38,7 @@ import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentException;
+import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
@@ -60,12 +61,13 @@ public class RenameExperimentHandler {
 
   @Execute
   void execute(WorkspaceExperiment experiment) {
-    new RenameExperimentDialog(workspace, text, experiment.name())
+    new RenameExperimentDialog(workspace, text, experiment.id())
         .showAndWait()
+        .map(ExperimentId::fromName)
         .ifPresent(name -> renameExperiment(experiment, name));
   }
 
-  private void renameExperiment(WorkspaceExperiment experiment, String name) {
+  private void renameExperiment(WorkspaceExperiment experiment, ExperimentId name) {
     if (workspace.getWorkspaceExperiment(name).isPresent()) {
       // this should have been detected in the requestExperimentNameDialog logic.
       throw new ExperimentException(format("Experiment already exists with id %s", name));

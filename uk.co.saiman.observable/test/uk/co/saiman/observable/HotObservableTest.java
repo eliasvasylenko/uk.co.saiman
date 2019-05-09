@@ -66,7 +66,7 @@ public class HotObservableTest {
   public void startWhenLiveTest() {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
-    assertThrows(IllegalStateException.class, () -> observable.start());
+    observable.start();
   }
 
   @Test

@@ -51,6 +51,6 @@ public abstract class WorkspaceEvent {
 
   @Override
   public String toString() {
-    return WorkspaceEvent.class.getSimpleName() + "<" + kind() + ">(" + experiment().name() + ")";
+    return WorkspaceEvent.class.getSimpleName() + "<" + kind() + ">(" + experiment().id() + ")";
   }
 }

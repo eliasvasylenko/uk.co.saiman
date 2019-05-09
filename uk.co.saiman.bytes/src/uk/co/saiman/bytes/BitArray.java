@@ -55,8 +55,7 @@ public class BitArray {
   /**
    * Create a big-endian bit array of the given length, initialized with 0 fill.
    * 
-   * @param length
-   *          the number of bits
+   * @param length the number of bits
    */
   public BitArray(int length) {
     this.bits = new long[minimumContainingUnits(length, Long.SIZE)];
@@ -110,6 +109,9 @@ public class BitArray {
     return length;
   }
 
+  /**
+   * @return whether there are any bits in the array
+   */
   public boolean isEmpty() {
     return length == 0;
   }
@@ -127,6 +129,12 @@ public class BitArray {
       throw new IndexOutOfBoundsException(Integer.toString(index));
   }
 
+  /**
+   * Get the bit at the given index
+   * 
+   * @param index the index of the bit of interest
+   * @return the bit
+   */
   public boolean get(int index) {
     validateIndex(index);
     return (bits[getLongIndex(index)] & getLongMask(index)) != 0;
@@ -145,10 +153,8 @@ public class BitArray {
    * Derive a bit array from the receiver, whose contents are modified according
    * to the given value for the given bit index.
    * 
-   * @param index
-   *          the bit index
-   * @param value
-   *          the value for the bit in the derived array
+   * @param index the bit index
+   * @param value the value for the bit in the derived array
    * @return the derived bit array
    */
   public BitArray with(int index, boolean value) {
@@ -159,12 +165,9 @@ public class BitArray {
    * Derive a bit array from the receiver, whose contents are modified according
    * to the given value for the given bit index.
    * 
-   * @param from
-   *          the start bit index
-   * @param to
-   *          the end bit index
-   * @param value
-   *          the value for the bit in the derived array
+   * @param from  the start bit index
+   * @param to    the end bit index
+   * @param value the value for the bit in the derived array
    * @return the derived bit array
    */
   public BitArray with(int from, int to, boolean value) {
@@ -179,8 +182,7 @@ public class BitArray {
    * Derive a new bit array of the given length. Changes are made by truncating
    * from or appending to the end of the sequence.
    * 
-   * @param length
-   *          the new length
+   * @param length the new length
    * @return a derived bit array
    */
   public BitArray resize(int length) {
@@ -223,6 +225,9 @@ public class BitArray {
     int length = Math.max(length(), at + bitArray.length());
     BitArray spliced = new BitArray(length);
 
+    for (int i = 0; i < length(); i++) {
+      spliced.set(i, get(i));
+    }
     for (int i = 0; i < bitArray.length(); i++) {
       spliced.set(i + at, bitArray.get(i));
     }
@@ -296,14 +301,11 @@ public class BitArray {
   public static BitArray fromByteArray(byte[] bytes, Endianness endianness) {
     BitArray bits = new BitArray(bytes.length * Byte.SIZE);
 
-    int bytesPerLong = Long.SIZE / Byte.SIZE;
-
     for (int i = 0; i < bytes.length; i++) {
-      int longIndex = i / Long.SIZE;
-      int byteIndex = i % bytesPerLong;
-      bits.bits[longIndex] = bits.bits[longIndex] |= ((long) bytes[i] << ((bytesPerLong
-          - 1
-          - byteIndex) * Byte.SIZE));
+      int longIndex = i / Long.BYTES;
+      int byteIndex = i % Long.BYTES;
+      bits.bits[longIndex] = bits.bits[longIndex] |= ((bytes[i]
+          & 0xFFL) << ((Long.BYTES - 1 - byteIndex) * Byte.SIZE));
     }
 
     return bits;
@@ -318,12 +320,10 @@ public class BitArray {
 
     byte[] bytes = new byte[minimumContainingUnits(bits.length(), Byte.SIZE)];
 
-    int bytesPerLong = (Long.SIZE / Byte.SIZE);
-
     for (int i = 0; i < bytes.length; i++) {
-      int longIndex = i / Long.SIZE;
-      int byteIndex = i % bytesPerLong;
-      bytes[i] = (byte) (this.bits[longIndex] >> ((bytesPerLong - 1 - byteIndex) * Byte.SIZE));
+      int longIndex = i / Long.BYTES;
+      int byteIndex = i % Long.BYTES;
+      bytes[i] = (byte) (this.bits[longIndex] >> ((Long.BYTES - 1 - byteIndex) * Byte.SIZE));
     }
 
     return bytes;
@@ -375,8 +375,10 @@ public class BitArray {
     switch (endianness) {
     case BIG_ENDIAN:
       longValue = (long) value << (Long.SIZE - size);
+      break;
     case LITTLE_ENDIAN:
       longValue = Long.reverse(value & (FILLED_LONG >> (Long.SIZE - size)));
+      break;
     }
 
     return new BitArray(new long[] { longValue }, size);

@@ -49,4 +49,15 @@ public class AnnotatedTypeToken<T> extends TypeToken<T> {
   public static AnnotatedTypeToken<?> forType(AnnotatedType type) {
     return new AnnotatedTypeToken<>(type);
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof AnnotatedTypeToken<?>
+        && getAnnotatedType().equals(((AnnotatedTypeToken<?>) obj).getAnnotatedType());
+  }
+
+  @Override
+  public int hashCode() {
+    return getAnnotatedType().hashCode();
+  }
 }

@@ -28,10 +28,7 @@
 package uk.co.saiman.bytes;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.co.saiman.bytes.BitArray.fromBooleanArray;
-import static uk.co.saiman.bytes.Endianness.BIG_ENDIAN;
-import static uk.co.saiman.bytes.Endianness.LITTLE_ENDIAN;
 
 import java.util.stream.Stream;
 
@@ -41,35 +38,24 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class BitArrayBooleanArrayConversionTest {
   static class Conversions {
     private final boolean[] booleans;
-    private final long[] bigEndianLongs;
-    private final long[] littleEndianLongs;
+    private final long[] internalRepresentation;
 
-    public Conversions(boolean[] booleans, long[] bigEndianLongs, long[] littleEndianLongs) {
+    public Conversions(boolean[] booleans, long[] internalRepresentation) {
       this.booleans = booleans;
-      this.bigEndianLongs = bigEndianLongs;
-      this.littleEndianLongs = littleEndianLongs;
+      this.internalRepresentation = internalRepresentation;
     }
   }
 
   public static Stream<Conversions> conversions() {
     return Stream
         .of(
-            new Conversions(
-                new boolean[] { true },
-                new long[] { 0x8000000000000000L },
-                new long[] { 1L }),
+            new Conversions(new boolean[] { true }, new long[] { 0x8000000000000000L }),
 
-            new Conversions(new boolean[] { false }, new long[] { 0L }, new long[] { 0L }),
+            new Conversions(new boolean[] { false }, new long[] { 0L }),
 
-            new Conversions(
-                new boolean[] { true, false },
-                new long[] { 0x8000000000000000L },
-                new long[] { 1L }),
+            new Conversions(new boolean[] { true, false }, new long[] { 0x8000000000000000L }),
 
-            new Conversions(
-                new boolean[] { false, true },
-                new long[] { 0x4000000000000000L },
-                new long[] { 2L }),
+            new Conversions(new boolean[] { false, true }, new long[] { 0x4000000000000000L }),
 
             new Conversions(
                 new boolean[] {
@@ -145,8 +131,7 @@ public class BitArrayBooleanArrayConversionTest {
                     true,
                     true,
                     true },
-                new long[] { -1L, 0xFF00000000000000L },
-                new long[] { -1L, 0xFFL }),
+                new long[] { -1L, 0xFF00000000000000L }),
 
             new Conversions(
                 new boolean[] {
@@ -222,7 +207,6 @@ public class BitArrayBooleanArrayConversionTest {
                     false,
                     false,
                     false },
-                new long[] { 0L, 0L },
                 new long[] { 0L, 0L }));
   }
 
@@ -240,34 +224,6 @@ public class BitArrayBooleanArrayConversionTest {
   public void booleanArrayToBigEndianInternalRepresentationTest(Conversions conversions) {
     BitArray bits = fromBooleanArray(conversions.booleans);
 
-    assertArrayEquals(conversions.bigEndianLongs, bits.getBits());
-  }
-
-  @ParameterizedTest
-  @MethodSource("conversions")
-  public void booleanArrayToBigEndianLongTest(Conversions conversions) {
-    BitArray bits = fromBooleanArray(conversions.booleans);
-
-    for (int i = 0; i < conversions.littleEndianLongs.length; i++) {
-      long bigEndianResult = bits
-          .slice(Long.SIZE * i, bits.length())
-          .toNumber(Long.SIZE, BIG_ENDIAN);
-
-      assertEquals(conversions.bigEndianLongs[i], bigEndianResult);
-    }
-  }
-
-  @ParameterizedTest
-  @MethodSource("conversions")
-  public void booleanArrayToLittleEndianLongTest(Conversions conversions) {
-    BitArray bits = fromBooleanArray(conversions.booleans);
-
-    for (int i = 0; i < conversions.littleEndianLongs.length; i++) {
-      long littleEndianResult = bits
-          .slice(Long.SIZE * i, bits.length())
-          .toNumber(Long.SIZE, LITTLE_ENDIAN);
-
-      assertEquals(conversions.littleEndianLongs[i], littleEndianResult);
-    }
+    assertArrayEquals(conversions.internalRepresentation, bits.getBits());
   }
 }

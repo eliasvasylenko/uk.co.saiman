@@ -37,9 +37,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.production.Observation;
-import uk.co.saiman.experiment.production.Preparation;
+import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 
@@ -57,19 +55,17 @@ public class ExperimentEditorPart {
   @Inject
   private MCompositePart part;
 
-  private Step node;
+  private Step step;
 
   @PostConstruct
   void initialize() {
-    node = (Step) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
+    step = (Step) part.getTransientData().get(EDITOR_EXPERIMENT_NODE);
 
-    context.set(Step.class, node);
+    context.set(Step.class, step);
 
     concat(
-        node.getExecutor().variables().map(VariableDeclaration::variable).map(Variable::id),
-        concat(
-            Productions.preparations(node.getExecutor()).map(Preparation::id),
-            Productions.observations(node.getExecutor()).map(Observation::id)))
-                .forEach(context::declareModifiable);
+        step.getExecutor().products().map(Production::id),
+        step.getExecutor().variables().map(VariableDeclaration::variable).map(Variable::id))
+            .forEach(context::declareModifiable);
   }
 }
