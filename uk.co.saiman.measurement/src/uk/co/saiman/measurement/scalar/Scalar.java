@@ -138,4 +138,9 @@ public class Scalar<T extends Quantity<T>> implements Quantity<T>, Comparable<Qu
   public int compareTo(Quantity<T> o) {
     return Double.compare(amount, o.to(getUnit()).getValue().doubleValue());
   }
+
+  @Override
+  public String toString() {
+    return amount + " " + unit;
+  }
 }

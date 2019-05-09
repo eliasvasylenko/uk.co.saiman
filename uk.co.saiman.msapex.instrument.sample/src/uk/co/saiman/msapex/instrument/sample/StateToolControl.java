@@ -34,7 +34,6 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
-import uk.co.saiman.fx.FxUtilities;
 import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.observable.Disposable;
 

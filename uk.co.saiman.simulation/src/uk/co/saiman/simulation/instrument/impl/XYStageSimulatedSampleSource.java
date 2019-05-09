@@ -291,7 +291,7 @@ public class XYStageSimulatedSampleSource
   }
 
   int getImageY() {
-    return (int) (sampleImage.getHeight() * getSampleAreaPosition(XYCoordinate::getX));
+    return (int) (sampleImage.getHeight() * getSampleAreaPosition(XYCoordinate::getY));
   }
 
   @Override
