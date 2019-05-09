@@ -47,7 +47,6 @@ import static uk.co.saiman.comms.copley.impl.CopleyNodeImpl.NODE_ID_MASK;
 import static uk.co.saiman.log.Log.Level.ERROR;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -65,6 +63,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.bytes.conversion.ByteConverterService;
 import uk.co.saiman.comms.copley.CommandHeader;
 import uk.co.saiman.comms.copley.CopleyVariableID;
+import uk.co.saiman.comms.copley.EventStatusRegister;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.comms.copley.ResponseHeader;
 import uk.co.saiman.comms.copley.VariableIdentifier;
@@ -97,65 +96,83 @@ public class CopleyHardwareSimulation {
     int axes() default 1;
   }
 
-  @Reference
-  private Log log;
+  private final Log log;
 
-  @Reference
-  private ByteConverterService converters;
+  private final ByteConverterService converters;
 
-  @Reference
-  private DataSender response;
-  @Reference
-  private DataReceiver command;
+  private final DataSender response;
+  private final DataReceiver command;
+
   private Thread observation;
 
-  private int nodes;
-  private int axes;
+  private final int nodes;
+  private final int axes;
 
-  private Map<CopleyVariableID, SimulatedVariable> variables = new HashMap<>();
+  private final Map<CopleyVariableID, SimulatedVariable> variables = new HashMap<>();
+
+  private final ReferenceVariable<Int32> requestedPosition;
+  private final InterpolatedVariable<Int32> actualPosition;
+  private final ComputedVariable<EventStatusRegister> eventStatus;
 
   @Activate
-  synchronized void activate(CopleyHardwareSimulationConfiguration configuration)
+  public CopleyHardwareSimulation(
+      CopleyHardwareSimulationConfiguration configuration,
+      @Reference Log log,
+      @Reference ByteConverterService converters,
+      @Reference(name = "response") DataSender response,
+      @Reference(name = "command") DataReceiver command)
       throws IOException {
-    configure(configuration);
+    /*
+     * services
+     */
+    this.log = log;
+    this.converters = converters;
+    this.response = response;
+    this.command = command;
+
+    /*
+     * configuration
+     */
+    this.nodes = configuration.nodes();
+    this.axes = configuration.axes();
+    this.variables.clear();
+
+    /*
+     * variables
+     */
+    this.requestedPosition = new ReferenceVariable<>(
+        axes,
+        converters.getConverter(Int32.class),
+        new Int32(0));
+    this.actualPosition = new InterpolatedVariable<>(
+        axes,
+        requestedPosition,
+        MOTOR_SPEED_UNITS_PER_MILLISECOND,
+        i -> (double) i.value,
+        d -> new Int32(d.intValue()));
+    this.eventStatus = new ComputedVariable<>(converters.getConverter(EventStatusRegister.class)) {
+      @Override
+      public EventStatusRegister compute(int axis) {
+        var status = new EventStatusRegister();
+        status.motionActive = actualPosition.isMoving(axis);
+        return status;
+      }
+    };
+
+    variables.put(DRIVE_EVENT_STATUS, eventStatus);
+    variables.put(LATCHED_EVENT_STATUS, new ByteVariable(axes, 2));
+    variables.put(AMPLIFIER_STATE, new ByteVariable(axes, 1));
+    variables.put(TRAJECTORY_PROFILE_MODE, new ByteVariable(axes, 1));
+
+    variables.put(TRAJECTORY_POSITION_COUNTS, requestedPosition);
+    variables.put(ACTUAL_POSITION, actualPosition);
+
+    variables.put(MOTOR_ENCODER_UNITS, new ByteVariable(axes, 1));
+    variables.put(MOTOR_ENCODER_ANGULAR_RESOLUTION, new ByteVariable(axes, 2));
+    variables.put(MOTOR_ENCODER_LINEAR_RESOLUTION, new ByteVariable(axes, 1));
+    variables.put(MOTOR_ENCODER_DIRECTION, new ByteVariable(axes, 1));
+
     openObservation();
-  }
-
-  @Modified
-  synchronized void configure(CopleyHardwareSimulationConfiguration configuration)
-      throws IOException {
-    try {
-      nodes = configuration.nodes();
-      axes = configuration.axes();
-      variables.clear();
-
-      variables.put(DRIVE_EVENT_STATUS, new ByteVariable(axes, 2));
-      variables.put(LATCHED_EVENT_STATUS, new ByteVariable(axes, 2));
-      variables.put(AMPLIFIER_STATE, new ByteVariable(axes, 1));
-      variables.put(TRAJECTORY_PROFILE_MODE, new ByteVariable(axes, 1));
-
-      ReferenceVariable<Int32> requestedPosition = new ReferenceVariable<>(
-          axes,
-          converters.getConverter(Int32.class),
-          new Int32(0));
-      variables.put(TRAJECTORY_POSITION_COUNTS, requestedPosition);
-      variables
-          .put(
-              ACTUAL_POSITION,
-              new InterpolatedVariable<>(
-                  axes,
-                  requestedPosition,
-                  MOTOR_SPEED_UNITS_PER_MILLISECOND,
-                  i -> (double) i.value,
-                  d -> new Int32(d.intValue())));
-
-      variables.put(MOTOR_ENCODER_UNITS, new ByteVariable(axes, 1));
-      variables.put(MOTOR_ENCODER_ANGULAR_RESOLUTION, new ByteVariable(axes, 2));
-      variables.put(MOTOR_ENCODER_LINEAR_RESOLUTION, new ByteVariable(axes, 1));
-      variables.put(MOTOR_ENCODER_DIRECTION, new ByteVariable(axes, 1));
-    } catch (Exception e) {
-      log.log(ERROR, e);
-    }
   }
 
   @Deactivate
@@ -189,7 +206,7 @@ public class CopleyHardwareSimulation {
     }
   }
 
-  private synchronized CommandHeader readHeader(DataBuffer buffer) throws IOException {
+  private CommandHeader readHeader(DataBuffer buffer) throws IOException {
     ByteBuffer headerBytes = ByteBuffer.allocate(HEADER_SIZE);
     buffer.readData(headerBytes, TimeUnit.MILLISECONDS, Long.MAX_VALUE);
     headerBytes.flip();
@@ -199,8 +216,7 @@ public class CopleyHardwareSimulation {
     return header;
   }
 
-  private synchronized void readMessage(DataBuffer buffer, CommandHeader commandHeader)
-      throws IOException {
+  private void readMessage(DataBuffer buffer, CommandHeader commandHeader) throws IOException {
     ByteBuffer message = ByteBuffer.allocate(commandHeader.messageBytes());
     buffer.readData(message, TimeUnit.MILLISECONDS, Long.MAX_VALUE);
     message.flip();

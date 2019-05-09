@@ -79,7 +79,7 @@ class InterpolatedVariable<T> extends ComputedVariable<T> {
       double deltaPosition = (int) ((currentTime - lastTime) * speed);
 
       double currentPosition;
-      if (deltaPosition > abs(lastPosition - targetPosition)) {
+      if (deltaPosition >= abs(lastPosition - targetPosition)) {
         currentPosition = targetPosition;
       } else {
         currentPosition = lastPosition - compare(lastPosition, targetPosition) * deltaPosition;
@@ -89,6 +89,22 @@ class InterpolatedVariable<T> extends ComputedVariable<T> {
       this.lastPosition.set(axis, currentPosition);
 
       return fromDouble.apply(currentPosition);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  public boolean isMoving(int axis) {
+    try {
+      long lastTime = this.lastTime.get(axis);
+      double lastPosition = this.lastPosition.get(axis);
+
+      long currentTime = System.currentTimeMillis();
+      double targetPosition = toDouble.apply(target.getReference(axis, ACTIVE));
+      double deltaPosition = (int) ((currentTime - lastTime) * speed);
+
+      return deltaPosition < abs(lastPosition - targetPosition);
     } catch (Exception e) {
       e.printStackTrace();
       throw e;

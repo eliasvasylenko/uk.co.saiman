@@ -31,8 +31,10 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Optional;
 
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
+import uk.co.saiman.fx.FxUtilities;
 import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.observable.Disposable;
 
@@ -72,12 +74,14 @@ public class StateToolControl {
   }
 
   void updateLabel() {
-    if (device == null) {
-      label.setText("No device!");
-    } else {
-      // label.setText(device.requestedLocation().get() + " " +
-      // device.actualLocation().get());
-      label.setText(device.sampleState().get().toString());
-    }
+    Platform.runLater(() -> {
+      if (device == null) {
+        label.setText("No device!");
+      } else {
+        // label.setText(device.requestedLocation().get() + " " +
+        // device.actualLocation().get());
+        label.setText(device.sampleState().get().toString());
+      }
+    });
   }
 }

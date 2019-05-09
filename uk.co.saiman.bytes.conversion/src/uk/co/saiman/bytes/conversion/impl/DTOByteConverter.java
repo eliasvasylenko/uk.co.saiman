@@ -48,6 +48,17 @@ import uk.co.saiman.bytes.conversion.Offset;
 import uk.co.saiman.reflection.Types;
 import uk.co.saiman.reflection.token.AnnotatedTypeToken;
 
+/**
+ * A field-wise converter for DTO style objects. TODO This should probably be
+ * replaced with something based on records when they become available via
+ * Amber, as this will provide better safety and also allow us to infer more
+ * information about layout without needing e.g. Offset to be specified for
+ * every field.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T> the type of the DTO
+ */
 public class DTOByteConverter<T> implements ByteConverter<T> {
   private static class FieldConverter {
     private final Field field;

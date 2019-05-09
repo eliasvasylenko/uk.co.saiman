@@ -43,6 +43,15 @@ import uk.co.saiman.bytes.conversion.ByteConverter;
 import uk.co.saiman.bytes.conversion.ByteConverterProvider;
 import uk.co.saiman.reflection.token.AnnotatedTypeToken;
 
+/**
+ * This byte converter implementation is simply a dynamic wrapper which always
+ * fetches and delegates to the most appropriate converter which is available
+ * from the {@link ByteConverterServiceImpl service}.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T> the type of the object to be converted
+ */
 public class CompositeByteConverter<T> implements ByteConverter<T> {
   private final ByteConverterServiceImpl service;
   private final AnnotatedTypeToken<T> type;

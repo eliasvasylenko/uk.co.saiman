@@ -43,6 +43,10 @@ import java.lang.annotation.Target;
  * as to indicate that the annotated type should be handled by a converter which
  * {@link ByteConverterProvider#supportsAnnotation(Class) supports} the
  * annotation.
+ * <p>
+ * A converter provider is only applied to a target if it advertises
+ * {@link ByteConverterProvider#supportsAnnotation(Class) support} for all the
+ * {@link Convertible} annotations on the target.
  * 
  * @author Elias N Vasylenko
  */

@@ -30,7 +30,9 @@ package uk.co.saiman.instrument.stage.copley;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static uk.co.saiman.comms.copley.CopleyVariableID.DRIVE_EVENT_STATUS;
 import static uk.co.saiman.instrument.stage.composed.AxisState.DISCONNECTED;
+import static uk.co.saiman.instrument.stage.composed.AxisState.LOCATION_REACHED;
 import static uk.co.saiman.instrument.stage.composed.AxisState.LOCATION_REQUESTED;
 import static uk.co.saiman.measurement.Units.metre;
 import static uk.co.saiman.observable.Observable.fixedRate;
@@ -49,6 +51,8 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.comms.copley.CopleyAxis;
 import uk.co.saiman.comms.copley.CopleyController;
+import uk.co.saiman.comms.copley.CopleyException;
+import uk.co.saiman.comms.copley.EventStatusRegister;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.instrument.sample.SampleLocationUnknown;
 import uk.co.saiman.instrument.stage.composed.AxisState;
@@ -89,7 +93,7 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   private final ObservableProperty<AxisState> axisState;
 
   private final Log log;
-  private Disposable locationTracking;
+  private Disposable polling;
 
   @Activate
   public CopleyLinearAxis(
@@ -109,21 +113,21 @@ public class CopleyLinearAxis implements StageAxis<Length> {
     this.actualLocation = new ObservablePropertyImpl<>(new SampleLocationUnknown());
     this.axisState = new ObservablePropertyImpl<>(DISCONNECTED);
 
-    startLocationTracking();
+    startPolling();
   }
 
-  protected synchronized void startLocationTracking() {
-    updateActualLocation();
-    locationTracking = fixedRate(0, 100, MILLISECONDS)
+  protected synchronized void startPolling() {
+    poll();
+    polling = fixedRate(0, 100, MILLISECONDS)
         .weakReference(this)
         .map(OwnedMessage::owner)
         .then(onFailure(t -> log.log(Level.ERROR, t)))
-        .observe(CopleyLinearAxis::updateActualLocation);
+        .observe(CopleyLinearAxis::poll);
   }
 
   @Deactivate
-  protected synchronized void stopLocationTracking() {
-    locationTracking.cancel();
+  protected synchronized void stopPolling() {
+    polling.cancel();
   }
 
   @Override
@@ -156,6 +160,27 @@ public class CopleyLinearAxis implements StageAxis<Length> {
   public void abortRequest() {
     // TODO Auto-generated method stub
 
+  }
+
+  synchronized void poll() {
+    updateActualLocation();
+    updateStatus();
+  }
+
+  void updateStatus() {
+    try {
+      var status = (EventStatusRegister) getAxis().variable(DRIVE_EVENT_STATUS).get();
+      if (status.driveFault) {
+        throw new CopleyException("Drive fault");
+      }
+      if (!status.motionActive && axisState.isEqual(LOCATION_REQUESTED)) {
+        axisState.set(LOCATION_REACHED);
+      }
+    } catch (Exception e) {
+      axisState.set(DISCONNECTED);
+      actualLocation.setProblem(new SampleLocationUnknown(e));
+      log.log(Level.ERROR, "Failed to determine axis position", e);
+    }
   }
 
   void updateActualLocation() {

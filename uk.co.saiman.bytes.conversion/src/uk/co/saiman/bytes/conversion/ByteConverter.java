@@ -33,6 +33,9 @@ import java.util.function.Function;
 
 import uk.co.saiman.bytes.BitArray;
 
+/*
+ * TODO this API might benefit from pattern matching when available from project amber
+ */
 public interface ByteConverter<T> {
   BitArray toBits(T object);
 

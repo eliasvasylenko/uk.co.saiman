@@ -37,7 +37,6 @@ import java.lang.reflect.AnnotatedType;
  * the methods of this interface themselves.
  * 
  * @author Elias N Vasylenko
- *
  */
 public interface ByteConverterProvider {
   /**
@@ -49,8 +48,7 @@ public interface ByteConverterProvider {
    * {@link #getConverter(AnnotatedType, ByteConversionAnnotations, ByteConverterService)},
    * and only to pass annotations which are byte conversion annotations.
    * 
-   * @param annotation
-   *          a byte conversion annotation type
+   * @param annotation a byte conversion annotation type
    * @return true if the provider is able to provide a converter for a type with
    *         an annotation of the given type
    */
@@ -62,13 +60,11 @@ public interface ByteConverterProvider {
    * <p>
    * The system guarantees that null return values will be safely dealt with.
    * 
-   * @param type
-   *          the type we wish to convert
-   * @param annotations
-   *          byte conversion annotations to consider, which may be different from
-   *          those present on the type
-   * @param converters
-   *          the set of all converters, such that an implementation may delegate
+   * @param type        the type we wish to convert
+   * @param annotations byte conversion annotations to consider, which may be
+   *                    different from those present on the type
+   * @param converters  the set of all converters, such that an implementation may
+   *                    delegate
    * @return a converter for the given type, or null if the type is not supported
    */
   ByteConverter<?> getConverter(
