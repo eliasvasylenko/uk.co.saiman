@@ -36,6 +36,7 @@ import org.osgi.service.component.annotations.Component;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.instruction.ExecutorService;
 import uk.co.saiman.osgi.ServiceIndex;
+import uk.co.saiman.osgi.ServiceRecord;
 
 @Component
 public class ExecutorServiceImpl implements ExecutorService {
@@ -58,6 +59,6 @@ public class ExecutorServiceImpl implements ExecutorService {
 
   @Override
   public String getId(Executor<?> executor) {
-    return executors.findRecord(executor).get().id();
+    return executors.findRecord(executor).flatMap(ServiceRecord::id).get();
   }
 }

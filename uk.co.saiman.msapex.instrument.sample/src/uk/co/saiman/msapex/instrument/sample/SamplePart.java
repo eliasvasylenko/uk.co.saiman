@@ -27,13 +27,23 @@
  */
 package uk.co.saiman.msapex.instrument.sample;
 
+import static java.util.stream.Collectors.toSet;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
-import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.OSGiBundle;
 import org.eclipse.fx.core.di.LocalInstance;
+import org.osgi.framework.BundleContext;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -41,7 +51,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.msapex.instrument.sample.i18n.SampleDeviceProperties;
+import uk.co.saiman.osgi.ServiceIndex;
+import uk.co.saiman.osgi.ServiceRecord;
 
 /**
  * An Eclipse part for management and display of acquisition devices.
@@ -51,22 +64,99 @@ import uk.co.saiman.msapex.instrument.sample.i18n.SampleDeviceProperties;
 public class SamplePart {
   static final String ID = "uk.co.saiman.msapex.instrument.sample.part";
 
-  @Localize
-  @Inject
-  SampleDeviceProperties text;
+  private final SampleDeviceProperties text;
 
   @FXML
   private Pane samplePane;
   @FXML
   private Label noSelectionLabel;
+  @FXML
+  private Label noPanelForSelectionLabel;
 
-  @PostConstruct
-  void postConstruct(BorderPane container, @LocalInstance FXMLLoader loaderProvider) {
+  private final ServiceIndex<?, String, SampleDevice<?, ?>> deviceIndex;
+  private final ServiceIndex<?, SampleDevice<?, ?>, SampleDevicePanel> devicePanelIndex;
+
+  private SampleDevice<?, ?> device;
+  private SampleDevicePanel devicePanel;
+  private final Map<SampleDevicePanel, Pane> panes = new HashMap<>();
+
+  private final IEclipseContext context;
+
+  @Inject
+  public SamplePart(
+      BorderPane container,
+      IEclipseContext context,
+      @LocalInstance FXMLLoader loaderProvider,
+      @OSGiBundle BundleContext bundleContext,
+      @Localize SampleDeviceProperties text) {
+    this.context = context;
+
+    this.text = text;
+    this.deviceIndex = ServiceIndex
+        .open(bundleContext, SampleDevice.class, a -> (SampleDevice<?, ?>) a);
+    this.devicePanelIndex = ServiceIndex
+        .open(
+            bundleContext,
+            SampleDevicePanel.class,
+            Function.identity(),
+            (a, b) -> deviceIndex.findRecord(a.device()).map(ServiceRecord::serviceObject));
+
+    devicePanelIndex.events().observe(event -> updateAvailableDevicePanels());
+
     container.setCenter(buildWith(loaderProvider).controller(this).loadRoot());
+  }
+
+  @PreDestroy
+  void close() {
+    devicePanelIndex.close();
   }
 
   @FXML
   void initialize() {
     noSelectionLabel.textProperty().bind(wrap(text.noSampleSources()));
+    noPanelForSelectionLabel.textProperty().bind(wrap(text.noPanelForSampleSources()));
+  }
+
+  synchronized void updateAvailableDevicePanels() {
+    updateSelectedDevice(device);
+  }
+
+  @Inject
+  synchronized void updateSelectedDevice(@Optional SampleDevice<?, ?> device) {
+    var devicePanel = device == null
+        ? null
+        : devicePanelIndex.get(device).map(ServiceRecord::serviceObject).orElse(null);
+
+    panes
+        .keySet()
+        .retainAll(devicePanelIndex.records().map(ServiceRecord::serviceObject).collect(toSet()));
+
+    if (this.device != device) {
+      this.device = device;
+      noSelectionLabel.setVisible(device == null);
+    }
+
+    if (this.device != device || this.devicePanel != devicePanel) {
+      this.devicePanel = devicePanel;
+      noPanelForSelectionLabel.setVisible(device != null && devicePanel == null);
+
+      if (devicePanel == null) {
+        samplePane.getChildren().clear();
+
+      } else {
+        Pane pane = panes.computeIfAbsent(devicePanel, this::makePane);
+        if (!samplePane.getChildren().contains(pane)) {
+          samplePane.getChildren().setAll(pane);
+        }
+      }
+    }
+  }
+
+  private Pane makePane(SampleDevicePanel devicePane) {
+    Pane pane = new Pane();
+    IEclipseContext context = this.context.createChild();
+    context.set(Pane.class, pane);
+    ContextInjectionFactory.make(devicePane.paneModelClass(), context);
+    return pane;
   }
 }

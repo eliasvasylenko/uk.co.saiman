@@ -25,35 +25,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.msapex.experiment.step.provider;
+package uk.co.saiman.msapex.experiment.provider;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+public interface ExperimentProviderDescriptor {
+  String getLabel();
 
-import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.production.Dependency;
-import uk.co.saiman.experiment.production.Nothing;
-import uk.co.saiman.experiment.production.Product;
-import uk.co.saiman.properties.Localized;
+  String getId();
 
-public interface ExperimentStepProvider<T extends Dependency> {
-  Localized<String> name();
+  String getIconURI();
 
-  Executor<T> executor();
-
-  Stream<StepDefinition<T>> createSteps(DefineStep<T> defineStep);
-
-  @SuppressWarnings("unchecked")
-  default Optional<ExperimentStepProvider<? extends Product>> asDependent(Executor<?> executor) {
-    return Productions
-        .asDependent(executor(), executor)
-        .map(c -> (ExperimentStepProvider<? extends Product>) this);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <S> Optional<ExperimentStepProvider<Nothing>> asIndependent() {
-    return Productions.asIndependent(executor()).map(c -> (ExperimentStepProvider<Nothing>) this);
-  }
+  Class<? extends ExperimentProvider> getProviderClass();
 }

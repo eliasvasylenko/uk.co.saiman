@@ -41,6 +41,7 @@ import uk.co.saiman.data.resource.PathLocation;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
 import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.instruction.ExecutorService;
@@ -159,9 +160,18 @@ public class Workspace {
     return addExperiment(name, n -> new WorkspaceExperiment(this, n));
   }
 
-  public Experiment newExperiment(ExperimentId name, StorageConfiguration<?> storageConfiguration) {
-    return addExperiment(name, n -> new WorkspaceExperiment(this, n, storageConfiguration))
-        .experiment();
+  public WorkspaceExperiment newExperiment(
+      ExperimentId name,
+      StorageConfiguration<?> storageConfiguration) {
+    return addExperiment(
+        name,
+        n -> new WorkspaceExperiment(
+            this,
+            new Experiment(ExperimentDefinition.define(name), storageConfiguration)));
+  }
+
+  public WorkspaceExperiment addExperiment(Experiment experiment) {
+    return addExperiment(experiment.getId(), n -> new WorkspaceExperiment(this, experiment));
   }
 
   public boolean removeExperiment(Experiment experiment) {

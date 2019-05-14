@@ -28,9 +28,12 @@
 package uk.co.saiman.msapex.experiment;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
 import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
@@ -43,12 +46,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.production.Nothing;
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
-import uk.co.saiman.msapex.experiment.step.provider.ExperimentStepProvider;
-import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
+import uk.co.saiman.msapex.experiment.step.provider.StepProvider;
+import uk.co.saiman.msapex.experiment.step.provider.StepProviderDescriptor;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -56,10 +60,10 @@ import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
  * 
  * @author Elias N Vasylenko
  */
-public class AddStepToExperimentMenu {
+public class AddStepsToStepMenu {
   @Inject
   @Service
-  List<ExperimentStepProvider<?>> stepProviders;
+  List<StepProviderDescriptor> providerDescriptors;
   @Inject
   Log log;
   @Inject
@@ -67,39 +71,46 @@ public class AddStepToExperimentMenu {
   ExperimentProperties text;
 
   @AboutToShow
-  void aboutToShow(List<MMenuElement> items, WorkspaceExperiment experiment) {
-    stepProviders
+  void aboutToShow(List<MMenuElement> items, Step step, IEclipseContext context) {
+    providerDescriptors
         .stream()
-        .flatMap(provider -> provider.asIndependent().stream())
-        .map(provider -> createMenuItem(experiment, provider))
+        .filter(descriptor -> createProvider(step, descriptor, context).isPresent())
+        .map(descriptor -> createMenuItem(step, descriptor))
         .forEach(items::add);
   }
 
-  private MDirectMenuItem createMenuItem(
-      WorkspaceExperiment experiment,
-      ExperimentStepProvider<Nothing> stepProvider) {
+  private Optional<StepProvider<? extends Product>> createProvider(
+      Step step,
+      StepProviderDescriptor descriptor,
+      IEclipseContext context) {
+    return ContextInjectionFactory
+        .make(descriptor.getProviderClass(), context)
+        .asDependent(step.getExecutor());
+  }
+
+  private <T extends Product> MDirectMenuItem createMenuItem(
+      Step step,
+      StepProviderDescriptor descriptor) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-    moduleItem.setLabel(stepProvider.name().get());
+    moduleItem.setLabel(descriptor.getLabel());
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute
-      public void execute() {
-        addNode(experiment, stepProvider);
+      public void execute(IEclipseContext context) {
+        addStep(step, descriptor, createProvider(step, descriptor, context).get());
       }
     });
     return moduleItem;
   }
 
-  private void addNode(
-      WorkspaceExperiment experiment,
-      ExperimentStepProvider<Nothing> stepProvider) {
+  private <T extends Product> void addStep(
+      Step step,
+      StepProviderDescriptor descriptor,
+      StepProvider<T> provider) {
     try {
-      stepProvider
-          .createSteps(
-              new DefineStepImpl<>(
-                  experiment.experiment().getDefinition(),
-                  stepProvider.executor()))
-          .forEach(experiment.experiment()::attach);
+      provider
+          .createSteps(new DefineStepImpl<>(step.getDefinition(), provider.executor()))
+          .forEach(step::attach);
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);
@@ -107,7 +118,7 @@ public class AddStepToExperimentMenu {
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
       alert.setTitle(text.attachStepFailedDialog().toString());
-      alert.setHeaderText(text.attachStepFailedText(experiment, stepProvider.name()).toString());
+      alert.setHeaderText(text.attachStepFailedText(step, descriptor.getLabel()).toString());
       alert.setContentText(text.attachStepFailedDescription().toString());
       alert.showAndWait();
     }

@@ -39,4 +39,6 @@ public interface SampleDeviceProperties {
   Localized<String> noSampleDevices();
 
   Localized<String> noSampleSources();
+
+  Localized<String> noPanelForSampleSources();
 }

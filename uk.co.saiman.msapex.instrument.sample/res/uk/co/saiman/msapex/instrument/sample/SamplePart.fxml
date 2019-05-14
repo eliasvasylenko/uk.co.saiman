@@ -11,6 +11,8 @@
 
 	<children>
 		<Label fx:id="noSelectionLabel" />
+		
+		<Label fx:id="noPanelForSelectionLabel" />
 
 		<BorderPane fx:id="samplePane" />
 	</children>

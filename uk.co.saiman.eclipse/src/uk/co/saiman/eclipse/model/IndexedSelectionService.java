@@ -31,10 +31,10 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -51,34 +51,54 @@ import uk.co.saiman.osgi.ServiceIndex;
  *
  * @author Elias N Vasylenko
  */
-public abstract class IndexedSelectionService<T, U> {
+public abstract class IndexedSelectionService<T> {
   private final String selectionKey;
-  private final Class<U> contextType;
   private final MContribution contribution;
 
   private final IEclipseContext context;
   private final Log log;
 
   private final ServiceIndex<?, String, T> index;
-  private final Map<String, T> indexedSelection;
+  private final Set<String> selectedIndices;
 
-  public IndexedSelectionService(
+  protected IndexedSelectionService(
       String selectionKey,
-      Class<U> contextType,
       MContribution contribution,
       IEclipseContext context,
       Log log,
       ServiceIndex<?, String, T> index) {
     this.selectionKey = selectionKey;
-    this.contextType = contextType;
     this.contribution = contribution;
 
     this.context = context;
     this.log = log;
     this.index = index;
-    this.indexedSelection = new HashMap<>();
+    this.selectedIndices = new HashSet<>();
+  }
 
-    start();
+  public static <T, U> void startIndexedSelectionService(
+      String selectionKey,
+      MContribution contribution,
+      IEclipseContext context,
+      Log log,
+      ServiceIndex<?, String, T> index,
+      BiConsumer<? super IEclipseContext, ? super Collection<? extends T>> selectionToContextType,
+      Function<? super IEclipseContext, ? extends Collection<? extends T>> selectionFromContextType) {
+    var service = new IndexedSelectionService<>(selectionKey, contribution, context, log, index) {
+      @Override
+      protected void selectionToContextType(
+          IEclipseContext context,
+          Collection<? extends T> selection) {
+        selectionToContextType.accept(context, selection);
+      }
+
+      @Override
+      protected Collection<? extends T> selectionFromContextType(IEclipseContext context) {
+        return selectionFromContextType.apply(context);
+      }
+    };
+
+    service.start();
   }
 
   protected void start() {
@@ -88,9 +108,7 @@ public abstract class IndexedSelectionService<T, U> {
         .flatMap(s -> Stream.of(s.split(",")))
         .map(String::strip)
         .filter(not(String::isBlank))
-        .forEach(item -> indexedSelection.put(item, null));
-
-    context.declareModifiable(getContextType());
+        .forEach(item -> selectedIndices.add(item));
 
     index.events().observe(i -> updateSelection());
     updateSelection();
@@ -107,17 +125,17 @@ public abstract class IndexedSelectionService<T, U> {
         synchronized (IndexedSelectionService.this) {
           var selection = getSelection(context);
 
-          index.records().forEach(record -> {
+          index.records().forEach(record -> record.id().ifPresent(id -> {
             if (selection.contains(record.serviceObject())) {
-              indexedSelection.put(record.id(), record.serviceObject());
+              selectedIndices.add(id);
             } else {
-              indexedSelection.remove(record.id());
+              selectedIndices.remove(id);
             }
-          });
+          }));
 
           contribution
               .getPersistedState()
-              .put(selectionKey, indexedSelection.keySet().stream().collect(joining(",")));
+              .put(selectionKey, selectedIndices.stream().collect(joining(",")));
 
           return true;
         }
@@ -125,13 +143,11 @@ public abstract class IndexedSelectionService<T, U> {
     });
   }
 
-  protected Class<U> getContextType() {
-    return contextType;
-  }
+  protected abstract void selectionToContextType(
+      IEclipseContext context,
+      Collection<? extends T> selection);
 
-  protected abstract U selectionToContextType(Collection<? extends T> selection);
-
-  protected abstract Collection<? extends T> selectionFromContextType(U type);
+  protected abstract Collection<? extends T> selectionFromContextType(IEclipseContext context);
 
   private synchronized void updateSelection() {
     /*
@@ -144,28 +160,28 @@ public abstract class IndexedSelectionService<T, U> {
 
     boolean modified = false;
 
-    for (String selectedIndex : indexedSelection.keySet()) {
+    for (String selectedIndex : selectedIndices) {
       var selectedRecord = index.get(selectedIndex).orElse(null);
 
       if (selectedRecord != null) {
         var selectedObject = selectedRecord.serviceObject();
-        indexedSelection.put(selectedIndex, selectedObject);
+        selectedIndices.add(selectedIndex);
         modified = selection.add(selectedObject) || modified;
 
       } else {
-        var selectedObject = indexedSelection.put(selectedIndex, null);
+        var selectedObject = selectedIndices.remove(selectedIndex);
         modified = selection.remove(selectedObject) || modified;
       }
     }
 
     if (modified) {
-      context.modify(getContextType(), selectionToContextType(selection));
+      selectionToContextType(context, selection);
       context.processWaiting();
     }
   }
 
   private Set<T> getSelection(IEclipseContext context) {
-    U selection = context.get(getContextType());
-    return selection == null ? new HashSet<>() : new HashSet<>(selectionFromContextType(selection));
+    var selection = selectionFromContextType(context);
+    return selection == null ? new HashSet<>() : new HashSet<>(selection);
   }
 }

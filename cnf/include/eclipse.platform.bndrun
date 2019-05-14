@@ -87,6 +87,8 @@ runrequires.eclipse.p2.addon:\
 ## Run properties groups:
 -runproperties.eclipse:\
 	osgi.console=,\
+	eclipse.log.enabled=true,\
+	equinox.log.history.max=25,\
 	eclipse.consoleLog=true,\
 	equinox.use.ds=true,\
 	osgi.instance.area.default=./workspace,\

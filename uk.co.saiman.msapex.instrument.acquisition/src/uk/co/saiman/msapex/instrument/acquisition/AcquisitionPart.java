@@ -37,7 +37,6 @@ import static uk.co.saiman.measurement.Units.second;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,19 +93,20 @@ public class AcquisitionPart {
     if (chartPane == null)
       return;
 
-    Set<AcquisitionDevice<?>> newSelection = devices == null
+    var previousSelection = Set.copyOf(currentSelection);
+    currentSelection = devices == null
         ? emptySet()
         : devices.getSelectedDevices().collect(toCollection(LinkedHashSet::new));
 
-    for (AcquisitionDevice<?> oldDevice : List.copyOf(currentSelection)) {
-      if (!newSelection.remove(oldDevice)) {
+    for (AcquisitionDevice<?> oldDevice : previousSelection) {
+      if (!currentSelection.contains(oldDevice)) {
         deselectAcquisitionDevice(oldDevice);
-        currentSelection.remove(oldDevice);
       }
     }
-    for (AcquisitionDevice<?> newDevice : newSelection) {
-      selectAcquisitionDevice(newDevice);
-      currentSelection.add(newDevice);
+    for (AcquisitionDevice<?> newDevice : currentSelection) {
+      if (!previousSelection.contains(newDevice)) {
+        selectAcquisitionDevice(newDevice);
+      }
     }
   }
 

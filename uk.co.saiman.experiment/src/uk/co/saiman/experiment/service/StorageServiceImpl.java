@@ -39,6 +39,7 @@ import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.osgi.ServiceIndex;
+import uk.co.saiman.osgi.ServiceRecord;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 
@@ -67,7 +68,7 @@ public class StorageServiceImpl implements StorageService {
 
   @Override
   public <T> StateMap deconfigureStorage(StorageConfiguration<T> processor) {
-    String id = storeIndex.findRecord(processor.store()).get().id();
+    String id = storeIndex.findRecord(processor.store()).flatMap(ServiceRecord::id).get();
     return processor.deconfigure().with(STORE_ID, id);
   }
 }

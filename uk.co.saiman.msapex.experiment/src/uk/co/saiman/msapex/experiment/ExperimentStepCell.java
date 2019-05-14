@@ -180,7 +180,7 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void update(AddStepEvent event) {
-    if (Objects.equals(event.dependencyStep(), step)) {
+    if (event.dependencyStep().filter(step::equals).isPresent()) {
       updateChildren();
     }
   }
@@ -188,7 +188,7 @@ public class ExperimentStepCell {
   @Inject
   @Optional
   public void update(RemoveStepEvent event) {
-    if (Objects.equals(event.previousDependencyStep(), step)) {
+    if (event.previousDependencyStep().filter(step::equals).isPresent()) {
       updateChildren();
     }
   }

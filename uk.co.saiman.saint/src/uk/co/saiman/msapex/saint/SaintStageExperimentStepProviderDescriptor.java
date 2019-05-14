@@ -27,47 +27,44 @@
  */
 package uk.co.saiman.msapex.saint;
 
-import static uk.co.saiman.experiment.sample.XYStageExecutor.LOCATION;
-
-import java.util.stream.Stream;
-
-import javax.inject.Inject;
-
-import org.eclipse.e4.core.di.extensions.Service;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Nothing;
-import uk.co.saiman.measurement.Units;
-import uk.co.saiman.measurement.coordinate.XYCoordinate;
-import uk.co.saiman.msapex.experiment.step.provider.DefineStep;
 import uk.co.saiman.msapex.experiment.step.provider.StepProvider;
-import uk.co.saiman.saint.SaintXYStageExecutor;
+import uk.co.saiman.msapex.experiment.step.provider.StepProviderDescriptor;
+import uk.co.saiman.properties.PropertyLoader;
+import uk.co.saiman.saint.SaintProperties;
 
-public class SaintStageExperimentStepProvider implements StepProvider<Nothing> {
-  private final SaintStageDiagram stageDiagram;
-  private final SaintXYStageExecutor stageExecutor;
+@Component
+public class SaintStageExperimentStepProviderDescriptor implements StepProviderDescriptor {
+  public static final String ID = "uk.co.saiman.experiment.step.provider.xysample.saint";
 
-  @Inject
-  public SaintStageExperimentStepProvider(
-      @Service SaintStageDiagram stageDiagram,
-      @Service SaintXYStageExecutor stageExecutor) {
-    this.stageDiagram = stageDiagram;
-    this.stageExecutor = stageExecutor;
+  private final SaintProperties properties;
+
+  @Activate
+  public SaintStageExperimentStepProviderDescriptor(@Reference PropertyLoader properties) {
+    this.properties = properties.getProperties(SaintProperties.class);
   }
 
   @Override
-  public Executor<Nothing> executor() {
-    return stageExecutor;
+  public String getLabel() {
+    return properties.stageExperimentStepName().toString();
   }
 
   @Override
-  public Stream<StepDefinition<Nothing>> createSteps(DefineStep<Nothing> defineStep) {
-    // TODO set location from stage diagram, e.g. selected wells
-    var step = defineStep
-        .withName("Sample Position")
-        .withVariables(v -> v.with(LOCATION, new XYCoordinate<>(Units.metre().getUnit(), 0, 0)));
-    return Stream.of(step);
+  public String getId() {
+    return ID;
+  }
+
+  @Override
+  public String getIconURI() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Class<? extends StepProvider<?>> getProviderClass() {
+    return SaintStageExperimentStepProvider.class;
   }
 }

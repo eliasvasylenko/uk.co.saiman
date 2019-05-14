@@ -37,6 +37,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.felix.service.command.Descriptor;
@@ -119,6 +120,7 @@ public class MessagingCommands {
         .of(dataReceiverIndex, messageReceiverIndex, dataSenderIndex, messageSenderIndex)
         .flatMap(ServiceIndex::records)
         .map(ServiceRecord::id)
+        .flatMap(Optional::stream)
         .distinct();
   }
 
@@ -377,7 +379,7 @@ public class MessagingCommands {
             "messageBufferOpen",
             (messageBuffers.containsKey(channel) ? "yes" : "no"),
             "id",
-            channel.id(),
+            channel.id().orElse(null),
             "description",
             service.toString(),
             "receives",

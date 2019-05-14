@@ -31,7 +31,7 @@ import java.nio.file.Path;
 
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.msapex.experiment.workspace.Workspace;
 import uk.co.saiman.msapex.experiment.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;
 
@@ -90,9 +90,9 @@ public interface ExperimentProperties {
 
   Localized<String> renameExperimentFailedDescription();
 
-  Localized<String> newExperimentFailedDi();
+  Localized<String> newExperimentFailedDialog();
 
-  Localized<String> newExperimentFailedText(ExperimentId name);
+  Localized<String> newExperimentFailedText(Workspace workspace, String descriptor);
 
   Localized<String> newExperimentFailedDescription();
 
@@ -104,9 +104,11 @@ public interface ExperimentProperties {
 
   Localized<String> attachStepFailedDialog();
 
-  Localized<String> attachStepFailedText(WorkspaceExperiment experiment, Localized<String> name);
+  Localized<String> attachStepFailedText(WorkspaceExperiment experiment, String name);
 
-  Localized<String> attachStepFailedText(Step step, Executor<?> procedure);
+  Localized<String> attachStepFailedText(Step step, String name);
 
   Localized<String> attachStepFailedDescription();
+
+  Localized<String> newWorkspaceExperiment();
 }

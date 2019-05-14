@@ -30,8 +30,9 @@ package uk.co.saiman.msapex.instrument.vacuum;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
+import static uk.co.saiman.eclipse.model.IndexedSelectionService.startIndexedSelectionService;
 
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -46,7 +47,6 @@ import org.eclipse.fx.core.di.Service;
 import org.osgi.framework.BundleContext;
 
 import uk.co.saiman.eclipse.adapter.AdaptNamed;
-import uk.co.saiman.eclipse.model.IndexedSelectionService;
 import uk.co.saiman.instrument.vacuum.VacuumDevice;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.osgi.ServiceIndex;
@@ -61,9 +61,11 @@ public class VacuumAddon {
   private static final String SELECTED_DEVICES_KEY = "selected.devices";
 
   private final IEclipseContext context;
-  private final Log log;
 
   private final ServiceIndex<?, String, VacuumDevice<?>> deviceIndex;
+
+  @Inject
+  private EPartService partService;
 
   @Inject
   public VacuumAddon(
@@ -72,30 +74,23 @@ public class VacuumAddon {
       IEclipseContext context,
       @OSGiBundle BundleContext bundleContext) {
     this.context = context;
-    this.log = log;
     this.deviceIndex = ServiceIndex
         .open(bundleContext, VacuumDevice.class, a -> (VacuumDevice<?>) a);
 
-    new IndexedSelectionService<VacuumDevice<?>, VacuumDeviceSelection>(
+    context.declareModifiable(VacuumDeviceSelection.class);
+
+    startIndexedSelectionService(
         SELECTED_DEVICES_KEY,
-        VacuumDeviceSelection.class,
         addon,
         context,
         log,
-        deviceIndex) {
-
-      @Override
-      protected VacuumDeviceSelection selectionToContextType(
-          Collection<? extends VacuumDevice<?>> selection) {
-        return new VacuumDeviceSelection(selection);
-      }
-
-      @Override
-      protected Collection<? extends VacuumDevice<?>> selectionFromContextType(
-          VacuumDeviceSelection type) {
-        return type.getSelectedDevices().collect(toList());
-      }
-    };
+        deviceIndex,
+        (c, selection) -> c
+            .modify(VacuumDeviceSelection.class, new VacuumDeviceSelection(selection)),
+        c -> Stream
+            .ofNullable(c.get(VacuumDeviceSelection.class))
+            .flatMap(VacuumDeviceSelection::getSelectedDevices)
+            .collect(toList()));
   }
 
   @PreDestroy
@@ -104,15 +99,15 @@ public class VacuumAddon {
   }
 
   @Inject
-  synchronized void setSelection(
-      @Optional @AdaptNamed(ACTIVE_SELECTION) VacuumDevice<?> device,
-      EPartService partService,
-      @Optional VacuumDeviceSelection selection) {
+  synchronized void setSelection(@Optional @AdaptNamed(ACTIVE_SELECTION) VacuumDevice<?> device) {
+    var selection = context.get(VacuumDeviceSelection.class);
+
     if (device != null) {
       if (selection == null || !selection.getSelectedDevices().anyMatch(device::equals)) {
-        context.modify(VacuumDeviceSelection.class, new VacuumDeviceSelection(asList(device)));
+        selection = new VacuumDeviceSelection(asList(device));
+        context.modify(VacuumDeviceSelection.class, selection);
       }
-      partService.showPart(VacuumPart.ID, PartState.ACTIVATE);
+      partService.showPart(VacuumPart.ID, PartState.VISIBLE);
     }
   }
 }

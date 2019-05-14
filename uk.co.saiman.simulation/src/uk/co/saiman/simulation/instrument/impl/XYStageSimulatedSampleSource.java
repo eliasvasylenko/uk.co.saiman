@@ -165,7 +165,7 @@ public class XYStageSimulatedSampleSource
     this.cameraConnections = new HashSet<>();
 
     this.imageStream = new HotObservable<>();
-    imageStream
+    this.imageStream
         .executeOn(newSingleThreadExecutor())
         .filter(m -> !cameraConnections.isEmpty())
         .observe(o -> {

@@ -126,6 +126,7 @@ public class ExperimentAddon {
 
   private void registerWorkspaceStore(Path rootPath) {
     workspaceStore = new FileSystemStore(rootPath);
+    context.set(FileSystemStore.class, workspaceStore);
 
     Dictionary<String, String> configuration = new Hashtable<>();
     configuration.put(SERVICE_PID, WORKSPACE_STORE_ID);
@@ -140,6 +141,7 @@ public class ExperimentAddon {
   private void registerWorkspace(Path rootPath) {
     workspace = new Workspace(rootPath, conductorService, storageService, log);
     context.set(Workspace.class, workspace);
+
     loadWorkspace();
   }
 

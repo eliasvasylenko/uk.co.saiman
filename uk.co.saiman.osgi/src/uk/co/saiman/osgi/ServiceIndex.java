@@ -74,7 +74,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     private final ServiceReference<S> reference;
 
     private T object;
-    private U id;
+    private Optional<U> id;
     private int rank;
 
     public ServiceRecordImpl(ServiceReference<S> reference, T object) {
@@ -100,7 +100,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     }
 
     @Override
-    public U id() {
+    public Optional<U> id() {
       return id;
     }
 
@@ -115,7 +115,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     }
   }
 
-  private final BiFunction<T, ServiceReference<S>, U> indexer;
+  private final BiFunction<T, ServiceReference<S>, Optional<U>> indexer;
   private final Function<S, T> extractor;
   private final Map<U, List<ServiceRecord<S, U, T>>> recordsById = new HashMap<>();
   private final HotObservable<ServiveEvent> events = new HotObservable<>();
@@ -124,7 +124,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
       BundleContext context,
       Class<S> clazz,
       Function<S, T> extractor,
-      BiFunction<T, ServiceReference<S>, U> indexer) {
+      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
     super(context, clazz, null);
     this.extractor = extractor;
     this.indexer = indexer;
@@ -134,18 +134,20 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
       BundleContext context,
       String reference,
       Function<S, T> extractor,
-      BiFunction<T, ServiceReference<S>, U> indexer) {
+      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
     super(context, reference, null);
     this.extractor = extractor;
     this.indexer = indexer;
   }
 
+  private static <T, S> Optional<String> defaultIndexer(
+      T object,
+      ServiceReference<S> serviceReference) {
+    return Optional.ofNullable((String) serviceReference.getProperty(DEFAULT_KEY));
+  }
+
   public static <T> ServiceIndex<T, String, T> open(BundleContext context, Class<T> clazz) {
-    var serviceIndex = new ServiceIndex<>(
-        context,
-        clazz,
-        identity(),
-        (s, reference) -> (String) reference.getProperty(DEFAULT_KEY));
+    var serviceIndex = new ServiceIndex<>(context, clazz, identity(), ServiceIndex::defaultIndexer);
     serviceIndex.open();
     return serviceIndex;
   }
@@ -155,7 +157,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
         context,
         reference,
         identity(),
-        (s, r) -> (String) r.getProperty(DEFAULT_KEY));
+        ServiceIndex::defaultIndexer);
     serviceIndex.open();
     return serviceIndex;
   }
@@ -164,11 +166,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
       BundleContext context,
       Class<S> clazz,
       Function<S, T> extractor) {
-    var serviceIndex = new ServiceIndex<>(
-        context,
-        clazz,
-        extractor,
-        (s, reference) -> (String) reference.getProperty(DEFAULT_KEY));
+    var serviceIndex = new ServiceIndex<>(context, clazz, extractor, ServiceIndex::defaultIndexer);
     serviceIndex.open();
     return serviceIndex;
   }
@@ -177,30 +175,52 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
       BundleContext context,
       String reference,
       Function<S, T> extractor) {
-    ServiceIndex<S, String, T> serviceIndex = new ServiceIndex<>(
+    var serviceIndex = new ServiceIndex<>(
         context,
         reference,
         extractor,
-        (s, r) -> (String) r.getProperty(DEFAULT_KEY));
+        ServiceIndex::defaultIndexer);
+    serviceIndex.open();
+    return serviceIndex;
+  }
+
+  public static <S, U, T> ServiceIndex<S, U, T> open(
+      BundleContext context,
+      Class<S> clazz,
+      Function<S, T> extractor,
+      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
+    var serviceIndex = new ServiceIndex<>(context, clazz, extractor, indexer);
+    serviceIndex.open();
+    return serviceIndex;
+  }
+
+  public static <S, U, T> ServiceIndex<S, U, T> open(
+      BundleContext context,
+      String reference,
+      Function<S, T> extractor,
+      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
+    var serviceIndex = new ServiceIndex<>(context, reference, extractor, indexer);
     serviceIndex.open();
     return serviceIndex;
   }
 
   private void addRecordById(ServiceRecord<S, U, T> record) {
-    if (record.id() != null) {
-      recordsById.computeIfAbsent(record.id(), i -> new ArrayList<>()).add(record);
-      sort(recordsById.get(record.id()));
-    }
+    record.id().ifPresent(id -> {
+      recordsById.computeIfAbsent(id, i -> new ArrayList<>()).add(record);
+      sort(recordsById.get(id));
+    });
   }
 
   private void removeRecordById(ServiceRecord<S, U, T> record) {
-    var previousSet = recordsById.get(record.id());
-    if (previousSet != null) {
-      previousSet.remove(record);
-      if (previousSet.isEmpty()) {
-        recordsById.remove(record.id());
+    record.id().ifPresent(id -> {
+      var previousSet = recordsById.get(id);
+      if (previousSet != null) {
+        previousSet.remove(record);
+        if (previousSet.isEmpty()) {
+          recordsById.remove(id);
+        }
       }
-    }
+    });
   }
 
   @Override

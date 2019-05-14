@@ -31,7 +31,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.e4.ui.services.IServiceConstants.ACTIVE_SELECTION;
 
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -61,9 +61,11 @@ public class AcquisitionAddon {
   private static final String SELECTED_DEVICES_KEY = "selected.devices";
 
   private final IEclipseContext context;
-  private final Log log;
 
   private final ServiceIndex<?, String, AcquisitionDevice<?>> deviceIndex;
+
+  @Inject
+  private EPartService partService;
 
   @Inject
   public AcquisitionAddon(
@@ -72,30 +74,24 @@ public class AcquisitionAddon {
       IEclipseContext context,
       @OSGiBundle BundleContext bundleContext) {
     this.context = context;
-    this.log = log;
     this.deviceIndex = ServiceIndex
         .open(bundleContext, AcquisitionDevice.class, a -> (AcquisitionDevice<?>) a);
 
-    new IndexedSelectionService<AcquisitionDevice<?>, AcquisitionDeviceSelection>(
-        SELECTED_DEVICES_KEY,
-        AcquisitionDeviceSelection.class,
-        addon,
-        context,
-        log,
-        deviceIndex) {
-
-      @Override
-      protected AcquisitionDeviceSelection selectionToContextType(
-          Collection<? extends AcquisitionDevice<?>> selection) {
-        return new AcquisitionDeviceSelection(selection);
-      }
-
-      @Override
-      protected Collection<? extends AcquisitionDevice<?>> selectionFromContextType(
-          AcquisitionDeviceSelection type) {
-        return type.getSelectedDevices().collect(toList());
-      }
-    };
+    IndexedSelectionService
+        .startIndexedSelectionService(
+            SELECTED_DEVICES_KEY,
+            addon,
+            context,
+            log,
+            deviceIndex,
+            (c, selection) -> c
+                .modify(
+                    AcquisitionDeviceSelection.class,
+                    new AcquisitionDeviceSelection(selection)),
+            c -> Stream
+                .ofNullable(c.get(AcquisitionDeviceSelection.class))
+                .flatMap(AcquisitionDeviceSelection::getSelectedDevices)
+                .collect(toList()));
   }
 
   @PreDestroy
@@ -105,17 +101,15 @@ public class AcquisitionAddon {
 
   @Inject
   synchronized void setSelection(
-      @Optional @AdaptNamed(ACTIVE_SELECTION) AcquisitionDevice<?> device,
-      EPartService partService,
-      @Optional AcquisitionDeviceSelection selection) {
+      @Optional @AdaptNamed(ACTIVE_SELECTION) AcquisitionDevice<?> device) {
+    var selection = context.get(AcquisitionDeviceSelection.class);
+
     if (device != null) {
       if (selection == null || !selection.getSelectedDevices().anyMatch(device::equals)) {
-        context
-            .modify(
-                AcquisitionDeviceSelection.class,
-                new AcquisitionDeviceSelection(asList(device)));
+        selection = new AcquisitionDeviceSelection(asList(device));
+        context.modify(AcquisitionDeviceSelection.class, selection);
       }
-      partService.showPart(AcquisitionPart.ID, PartState.ACTIVATE);
+      partService.showPart(AcquisitionPart.ID, PartState.VISIBLE);
     }
   }
 }

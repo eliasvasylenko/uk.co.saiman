@@ -35,7 +35,6 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,20 +85,21 @@ public class VacuumPart {
     if (chartPane == null)
       return;
 
-    Set<VacuumDevice<?>> newSelection = devices == null
+    var previousSelection = Set.copyOf(currentSelection);
+    currentSelection = devices == null
         ? emptySet()
         : devices.getSelectedDevices().collect(toCollection(LinkedHashSet::new));
 
-    for (VacuumDevice<?> oldDevice : List.copyOf(currentSelection)) {
-      if (!newSelection.remove(oldDevice)) {
+    for (VacuumDevice<?> oldDevice : previousSelection) {
+      if (!currentSelection.contains(oldDevice)) {
         deselectVacuumDevice(oldDevice);
-        currentSelection.remove(oldDevice);
       }
     }
 
-    for (VacuumDevice<?> newDevice : newSelection) {
-      selectVacuumDevice(newDevice);
-      currentSelection.add(newDevice);
+    for (VacuumDevice<?> newDevice : currentSelection) {
+      if (!previousSelection.contains(newDevice)) {
+        selectVacuumDevice(newDevice);
+      }
     }
   }
 

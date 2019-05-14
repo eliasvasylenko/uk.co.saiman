@@ -27,67 +27,89 @@
  */
 package uk.co.saiman.msapex.experiment;
 
-import static org.osgi.framework.Constants.SERVICE_PID;
-import static uk.co.saiman.msapex.experiment.workspace.ExperimentAddon.WORKSPACE_STORE_ID;
-
-import java.nio.file.Path;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.core.di.extensions.Service;
+import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
+import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
+import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
+import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
+import org.eclipse.fx.core.di.Service;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.storage.StorageConfiguration;
-import uk.co.saiman.experiment.storage.Store;
+import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
+import uk.co.saiman.msapex.experiment.provider.ExperimentProvider;
+import uk.co.saiman.msapex.experiment.provider.ExperimentProviderDescriptor;
 import uk.co.saiman.msapex.experiment.workspace.Workspace;
 
 /**
- * Add an experiment to the workspace
+ * Track acquisition devices available through OSGi services and select which
+ * device to display in the acquisition part.
  * 
  * @author Elias N Vasylenko
  */
-public class NewFileSystemExperimentHandler {
-  private static final String FILE_SYSTEM_STORE_FILTER = "("
-      + SERVICE_PID
-      + "="
-      + WORKSPACE_STORE_ID
-      + ")";
-
+public class AddExperimentsMenu {
+  @Inject
+  @Service
+  List<ExperimentProviderDescriptor> providerDescriptors;
   @Inject
   Log log;
   @Inject
   @Localize
   ExperimentProperties text;
 
-  @Execute
-  void execute(
-      @Service(filterExpression = FILE_SYSTEM_STORE_FILTER) Store<Path> store,
-      Workspace workspace) {
-    new NewFileSystemExperimentDialog(workspace, text)
-        .showAndWait()
-        .map(ExperimentId::fromName)
-        .ifPresent(name -> newExperiment(name, workspace, store));
+  @AboutToShow
+  void aboutToShow(List<MMenuElement> items, Workspace workspace) {
+    providerDescriptors
+        .stream()
+        .map(descriptor -> createMenuItem(workspace, descriptor))
+        .forEach(items::add);
   }
 
-  private void newExperiment(ExperimentId name, Workspace workspace, Store<Path> store) {
+  private MDirectMenuItem createMenuItem(
+      Workspace workspace,
+      ExperimentProviderDescriptor descriptor) {
+    MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
+    moduleItem.setLabel(descriptor.getLabel());
+    moduleItem.setType(ItemType.PUSH);
+    moduleItem.setObject(new Object() {
+      @Execute
+      public void execute(IEclipseContext context) {
+        addExperiment(workspace, descriptor, context);
+      }
+    });
+    return moduleItem;
+  }
+
+  private <T extends Product> void addExperiment(
+      Workspace workspace,
+      ExperimentProviderDescriptor descriptor,
+      IEclipseContext context) {
     try {
-      workspace.newExperiment(name, new StorageConfiguration<>(store, Path.of("")));
+      ExperimentProvider provider = ContextInjectionFactory
+          .make(descriptor.getProviderClass(), context);
+      ;
+      provider.createExperiments().forEach(workspace::addExperiment);
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);
 
       Alert alert = new Alert(AlertType.ERROR);
       DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.newExperimentFailedDi().toString());
-      alert.setHeaderText(text.newExperimentFailedText(name).toString());
+      alert.setTitle(text.newExperimentFailedDialog().toString());
+      alert
+          .setHeaderText(text.newExperimentFailedText(workspace, descriptor.getLabel()).toString());
       alert.setContentText(text.newExperimentFailedDescription().toString());
       alert.showAndWait();
     }

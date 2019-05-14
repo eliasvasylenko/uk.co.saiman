@@ -38,6 +38,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.internal.events.EventBroker;
 
 import uk.co.saiman.instrument.sample.SampleDevice;
+import uk.co.saiman.instrument.sample.SampleState;
 
 public class RequestExchangeHandler {
   @Execute
@@ -48,11 +49,8 @@ public class RequestExchangeHandler {
   }
 
   @CanExecute
-  boolean canExecute(@Optional SampleDevice<?, ?> device) {
-    return device != null
-        && device
-            .sampleState()
-            .isMatching(
-                s -> s == ANALYSIS || s == ANALYSIS_LOCATION_FAILED || s == EXCHANGE_FAILED);
+  boolean canExecute(@Optional SampleState state) {
+    return state != null
+        && (state == ANALYSIS || state == ANALYSIS_LOCATION_FAILED || state == EXCHANGE_FAILED);
   }
 }

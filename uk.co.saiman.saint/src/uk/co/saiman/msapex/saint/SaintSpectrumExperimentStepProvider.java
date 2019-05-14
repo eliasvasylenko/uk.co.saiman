@@ -29,37 +29,29 @@ package uk.co.saiman.msapex.saint;
 
 import java.util.stream.Stream;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.di.extensions.Service;
 
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.production.Condition;
 import uk.co.saiman.msapex.experiment.step.provider.DefineStep;
-import uk.co.saiman.msapex.experiment.step.provider.ExperimentStepProvider;
-import uk.co.saiman.properties.Localized;
+import uk.co.saiman.msapex.experiment.step.provider.StepProvider;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.saint.SaintProperties;
 import uk.co.saiman.saint.SaintSpectrumExecutor;
 
-@Component
-public class SaintSpectrumExperimentStepProvider
-    implements ExperimentStepProvider<Condition<Void>> {
+public class SaintSpectrumExperimentStepProvider implements StepProvider<Condition<Void>> {
   private final SaintProperties properties;
   private final SaintSpectrumExecutor spectrumExecutor;
 
-  @Activate
+  @Inject
   public SaintSpectrumExperimentStepProvider(
-      @Reference PropertyLoader properties,
-      @Reference SaintSpectrumExecutor spectrumExecutor) {
+      @Service PropertyLoader properties,
+      @Service SaintSpectrumExecutor spectrumExecutor) {
     this.properties = properties.getProperties(SaintProperties.class);
     this.spectrumExecutor = spectrumExecutor;
-  }
-
-  @Override
-  public Localized<String> name() {
-    return properties.stageExperimentStepName();
   }
 
   @Override

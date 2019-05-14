@@ -49,8 +49,4 @@
 
 -runproperties.msapex:\
 	eclipse.product=uk.co.saiman.msapex.product,\
-	uk.co.saiman.configadmin.persistence=~/.saiman/config,\
-	osgi.console=,\
-	eclipse.log.enabled=true,\
-	equinox.log.history.max=25,\
-	eclipse.consoleLog=true
+	uk.co.saiman.configadmin.persistence=~/.saiman/config

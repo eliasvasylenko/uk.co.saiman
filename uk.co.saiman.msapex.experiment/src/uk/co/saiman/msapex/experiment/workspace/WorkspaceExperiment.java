@@ -32,9 +32,7 @@ import static uk.co.saiman.msapex.experiment.workspace.event.WorkspaceEventKind.
 import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.msapex.experiment.workspace.event.CloseExperimentEvent;
 import uk.co.saiman.msapex.experiment.workspace.event.OpenExperimentEvent;
@@ -56,12 +54,9 @@ public class WorkspaceExperiment {
   private Disposable eventsObservation;
   private Status status;
 
-  public WorkspaceExperiment(
-      Workspace workspace,
-      ExperimentId id,
-      StorageConfiguration<?> storageConfiguration) {
+  public WorkspaceExperiment(Workspace workspace, Experiment experiment) {
     this.workspace = workspace;
-    this.id = id;
+    this.id = experiment.getId();
     this.data = locateExperiment();
 
     if (data.getResource().exists()) {
@@ -69,7 +64,7 @@ public class WorkspaceExperiment {
           "Experiment file already exists at location " + data.getResource());
     }
 
-    this.experiment = new Experiment(ExperimentDefinition.define(id), storageConfiguration);
+    this.experiment = experiment;
     this.eventsObservation = observe();
     this.status = Status.OPEN;
 

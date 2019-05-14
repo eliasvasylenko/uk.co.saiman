@@ -27,28 +27,36 @@
  */
 package uk.co.saiman.msapex.experiment.provider.workspace;
 
-import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
-
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.msapex.experiment.provider.AddExperimentWizard;
+import uk.co.saiman.msapex.experiment.i18n.ExperimentProperties;
 import uk.co.saiman.msapex.experiment.provider.ExperimentProvider;
+import uk.co.saiman.msapex.experiment.provider.ExperimentProviderDescriptor;
+import uk.co.saiman.properties.PropertyLoader;
 
 @Component
-public class WorkspaceExperimentProviderDescriptor implements AddExperimentWizard {
+public class WorkspaceExperimentProviderDescriptor implements ExperimentProviderDescriptor {
+  public static final String ID = "uk.co.saiman.experiment.provider.workspace";
+
+  @Reference
+  PropertyLoader propertyLoader;
 
   @Override
   public String getLabel() {
-    return "New Workspace Experiment"; // TODO l10n
+    return propertyLoader
+        .getProperties(ExperimentProperties.class)
+        .newWorkspaceExperiment()
+        .toString();
   }
 
   @Override
   public String getId() {
-    return FILE_SYSTEM_STORE_ID;
+    return ID;
   }
 
   @Override
-  public Class<? extends ExperimentProvider> getFirstPage() {
+  public Class<? extends ExperimentProvider> getProviderClass() {
     return WorkspaceExperimentProvider.class;
   }
 

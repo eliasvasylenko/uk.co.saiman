@@ -56,9 +56,9 @@ public class CopleyService {
   public String getId(CopleyController controller) {
     return controllers
         .findRecord(controller)
+        .flatMap(ServiceRecord::id)
         .orElseThrow(
-            () -> new IllegalArgumentException("Cannot find id for controller " + controller))
-        .id();
+            () -> new IllegalArgumentException("Cannot find id for controller " + controller));
   }
 
   public CopleyController getController(String id) {
