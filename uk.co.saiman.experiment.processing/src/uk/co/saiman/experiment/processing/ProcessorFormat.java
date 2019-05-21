@@ -71,9 +71,9 @@ public class ProcessorFormat implements DataFormat<DataProcessor> {
   public Payload<? extends DataProcessor> load(ReadableByteChannel inputChannel)
       throws IOException {
     return new Payload<>(
-        processorService
-            .loadDeclaration(
-                ProcessorDeclaration.fromState(stateMapFormat.load(inputChannel).data)));
+        ProcessorDeclaration
+            .fromState(stateMapFormat.load(inputChannel).data)
+            .load(processorService));
   }
 
   @Override
@@ -82,7 +82,6 @@ public class ProcessorFormat implements DataFormat<DataProcessor> {
     stateMapFormat
         .save(
             outputChannel,
-            new Payload<>(
-                ProcessorDeclaration.toState(processorService.saveDeclaration(payload.data))));
+            new Payload<>(ProcessorDeclaration.save(processorService, payload.data).toState()));
   }
 }

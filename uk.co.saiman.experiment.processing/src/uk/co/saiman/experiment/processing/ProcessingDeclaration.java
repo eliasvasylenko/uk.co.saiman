@@ -29,6 +29,7 @@ package uk.co.saiman.experiment.processing;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.processing.Processing.toProcessing;
 import static uk.co.saiman.state.Accessor.listAccessor;
 import static uk.co.saiman.state.StateList.toStateList;
 
@@ -60,8 +61,19 @@ public class ProcessingDeclaration {
         .collect(toProcessingDeclaration());
   }
 
-  public static StateList toState(ProcessingDeclaration declaration) {
-    return declaration.processors().map(ProcessorDeclaration::toState).collect(toStateList());
+  public StateList toState() {
+    return processors().map(ProcessorDeclaration::toState).collect(toStateList());
+  }
+
+  public Processing load(ProcessingService service) {
+    return processors().map(p -> p.load(service)).collect(toProcessing());
+  }
+
+  public static ProcessingDeclaration save(ProcessingService service, Processing processing) {
+    return processing
+        .steps()
+        .map(processor -> ProcessorDeclaration.save(service, processor))
+        .collect(toProcessingDeclaration());
   }
 
   public Stream<ProcessorDeclaration> processors() {

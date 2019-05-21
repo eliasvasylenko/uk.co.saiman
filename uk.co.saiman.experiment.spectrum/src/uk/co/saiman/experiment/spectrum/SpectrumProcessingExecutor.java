@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
+import static uk.co.saiman.experiment.processing.ProcessingService.PROCESSING_VARIABLE;
 
 import java.util.stream.Stream;
 
@@ -76,8 +76,8 @@ public class SpectrumProcessingExecutor implements Executor<Result<Spectrum>> {
 
   @Override
   public void execute(ExecutionContext<Result<Spectrum>> context) {
-    DataProcessor processor = processingService
-        .loadDeclaration(context.getVariable(PROCESSING_VARIABLE))
+    DataProcessor processor = context
+        .getVariable(processingService, PROCESSING_VARIABLE)
         .getProcessor();
 
     context

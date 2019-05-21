@@ -32,16 +32,15 @@ import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.experiment.processing.MissingProcessor;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
-import uk.co.saiman.experiment.processing.ProcessorDeclaration;
 
 @Component
 public class ProcessingServiceImpl implements ProcessingService {
@@ -65,22 +64,13 @@ public class ProcessingServiceImpl implements ProcessingService {
   }
 
   @Override
-  public DataProcessor loadDeclaration(ProcessorDeclaration declaration) {
-    ProcessingStrategy<?> process = namedProcessors.get(declaration.id());
-
-    if (process != null) {
-      return process.configureProcessor(declaration.state());
-    } else {
-      return new MissingProcessor(declaration.id());
-    }
+  public Optional<ProcessingStrategy<?>> findStrategy(String id) {
+    return Optional.ofNullable(namedProcessors.get(id));
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public ProcessorDeclaration saveDeclaration(DataProcessor processor) {
-    ProcessingStrategy<?> process = processors.get(processor.getClass());
-    return new ProcessorDeclaration(
-        processor.getClass().getName(),
-        ((ProcessingStrategy<DataProcessor>) process).deconfigureProcessor(processor));
+  public <T extends DataProcessor> Optional<ProcessingStrategy<T>> findStrategy(Class<T> type) {
+    return Optional.ofNullable(processors.get(type)).map(s -> (ProcessingStrategy<T>) s);
   }
 }

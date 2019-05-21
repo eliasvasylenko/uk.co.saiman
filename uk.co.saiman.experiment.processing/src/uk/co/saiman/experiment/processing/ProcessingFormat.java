@@ -71,9 +71,9 @@ public class ProcessingFormat implements DataFormat<Processing> {
   @Override
   public Payload<? extends Processing> load(ReadableByteChannel inputChannel) throws IOException {
     return new Payload<>(
-        processorService
-            .loadDeclaration(
-                ProcessingDeclaration.fromState(stateListFormat.load(inputChannel).data)));
+        ProcessingDeclaration
+            .fromState(stateListFormat.load(inputChannel).data)
+            .load(processorService));
   }
 
   @Override
@@ -82,7 +82,6 @@ public class ProcessingFormat implements DataFormat<Processing> {
     stateListFormat
         .save(
             outputChannel,
-            new Payload<>(
-                ProcessingDeclaration.toState(processorService.saveDeclaration(payload.data))));
+            new Payload<>(ProcessingDeclaration.save(processorService, payload.data).toState()));
   }
 }

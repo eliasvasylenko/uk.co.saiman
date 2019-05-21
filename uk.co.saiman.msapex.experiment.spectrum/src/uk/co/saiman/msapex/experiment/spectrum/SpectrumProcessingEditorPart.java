@@ -74,7 +74,7 @@ public class SpectrumProcessingEditorPart {
 
     variables
         .get(PROCESSING_VARIABLE)
-        .map(processingService::loadDeclaration)
+        .map(declaration -> declaration.load(processingService))
         .ifPresent(p -> context.set(Processing.class, p));
 
     processingTree = treeService.createTree(ProcessingTree.ID, processingTreeScrollPane);

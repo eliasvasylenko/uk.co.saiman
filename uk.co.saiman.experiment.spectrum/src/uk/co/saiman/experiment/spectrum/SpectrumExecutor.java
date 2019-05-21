@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
+import static uk.co.saiman.experiment.processing.ProcessingService.PROCESSING_VARIABLE;
 
 import java.util.stream.Stream;
 
@@ -82,8 +82,8 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
         device.getSampleIntensityUnit());
 
     System.out.println("prepare processing");
-    DataProcessor processing = processingService()
-        .loadDeclaration(context.getVariable(PROCESSING_VARIABLE))
+    DataProcessor processing = context
+        .getVariable(processingService(), PROCESSING_VARIABLE)
         .getProcessor();
 
     System.out.println("fetching calibration");

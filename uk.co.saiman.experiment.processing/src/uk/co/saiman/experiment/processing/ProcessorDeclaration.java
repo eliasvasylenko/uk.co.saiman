@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.processing;
 import static uk.co.saiman.state.Accessor.mapAccessor;
 import static uk.co.saiman.state.Accessor.stringAccessor;
 
+import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
@@ -56,8 +57,26 @@ public class ProcessorDeclaration {
     return new ProcessorDeclaration(id, state.remove(PROCESSOR_ID));
   }
 
-  public static StateMap toState(ProcessorDeclaration declaration) {
-    return declaration.state().with(PROCESSOR_ID, declaration.id());
+  public StateMap toState() {
+    return state().with(PROCESSOR_ID, id());
+  }
+
+  public DataProcessor load(ProcessingService service) {
+    ProcessingStrategy<?> process = service.findStrategy(id()).get();
+
+    if (process != null) {
+      return process.configureProcessor(state());
+    } else {
+      return new MissingProcessor(id());
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static ProcessorDeclaration save(ProcessingService service, DataProcessor processor) {
+    ProcessingStrategy<?> process = service.findStrategy(processor.getClass()).get();
+    return new ProcessorDeclaration(
+        processor.getClass().getName(),
+        ((ProcessingStrategy<DataProcessor>) process).deconfigureProcessor(processor));
   }
 
   public String id() {

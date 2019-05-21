@@ -27,9 +27,7 @@
  */
 package uk.co.saiman.experiment.processing;
 
-import static uk.co.saiman.experiment.processing.Processing.toProcessing;
-import static uk.co.saiman.experiment.processing.ProcessingDeclaration.toProcessingDeclaration;
-
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
@@ -37,15 +35,7 @@ import uk.co.saiman.data.function.processing.DataProcessor;
 public interface ProcessingService {
   Stream<ProcessingStrategy<?>> strategies();
 
-  DataProcessor loadDeclaration(ProcessorDeclaration declaration);
+  Optional<ProcessingStrategy<?>> findStrategy(String id);
 
-  ProcessorDeclaration saveDeclaration(DataProcessor processor);
-
-  default Processing loadDeclaration(ProcessingDeclaration declaration) {
-    return declaration.processors().map(this::loadDeclaration).collect(toProcessing());
-  }
-
-  default ProcessingDeclaration saveDeclaration(Processing processing) {
-    return processing.steps().map(this::saveDeclaration).collect(toProcessingDeclaration());
-  }
+  <T extends DataProcessor> Optional<ProcessingStrategy<T>> findStrategy(Class<T> type);
 }

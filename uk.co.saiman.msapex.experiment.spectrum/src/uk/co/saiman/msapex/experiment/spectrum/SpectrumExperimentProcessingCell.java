@@ -46,6 +46,7 @@ import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.processing.Processing;
+import uk.co.saiman.experiment.processing.ProcessingDeclaration;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingExecutor;
 import uk.co.saiman.msapex.experiment.processing.ProcessorCell;
@@ -88,13 +89,16 @@ public class SpectrumExperimentProcessingCell {
         .setItems(
             ProcessorCell.ID,
             DataProcessor.class,
-            processing
-                .loadDeclaration(step.getVariables().get(PROCESSING_VARIABLE).orElseThrow())
+            step
+                .getVariables()
+                .get(PROCESSING_VARIABLE)
+                .orElseThrow()
+                .load(processing)
                 .steps()
                 .collect(toList()),
             r -> step
                 .setVariable(
                     PROCESSING_VARIABLE,
-                    v -> processing.saveDeclaration(new Processing(r))));
+                    v -> ProcessingDeclaration.save(processing, new Processing(r))));
   }
 }
