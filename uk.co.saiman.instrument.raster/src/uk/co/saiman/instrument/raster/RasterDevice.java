@@ -28,9 +28,9 @@
 package uk.co.saiman.instrument.raster;
 
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.ObservableValue;
 
-public interface RasterDevice<T extends RasterControl> extends Device<T> {
+public interface RasterDevice<T extends RasterController> extends Device<T> {
   int getRasterWidth();
 
   int getRasterHeight();
@@ -39,11 +39,7 @@ public interface RasterDevice<T extends RasterControl> extends Device<T> {
     return getRasterHeight() * getRasterWidth();
   }
 
-  boolean isRasterOperating();
-
-  RasterPosition getRasterPosition();
-
-  Observable<RasterPosition> rasterPositionEvents();
+  ObservableValue<RasterPosition> rasterPosition();
 
   RasterPattern getRasterPattern();
 }

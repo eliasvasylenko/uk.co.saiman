@@ -28,6 +28,7 @@
 package uk.co.saiman.observable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import uk.co.saiman.property.Property;
 
@@ -62,16 +63,16 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
    * @param initialProblem the initial problem
    * @return an observable property with the given default value
    */
-  static <T> ObservableProperty<T> over(Throwable initialProblem) {
+  static <T> ObservableProperty<T> over(Supplier<Throwable> initialProblem) {
     return new ObservablePropertyImpl<>(initialProblem);
   }
 
-  void setProblem(Throwable t);
+  void setProblem(Supplier<Throwable> t);
 
   @Override
   default T unset() {
     T t = tryGet().orElse(null);
-    setProblem(new NullPointerException());
+    setProblem(NullPointerException::new);
     return t;
   }
 

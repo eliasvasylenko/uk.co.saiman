@@ -132,7 +132,7 @@ public class ObservablePropertyImplTest {
     Throwable problem = new Throwable();
 
     property.value().observe(downstreamObserver);
-    property.setProblem(problem);
+    property.setProblem(() -> problem);
 
     var inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
@@ -146,7 +146,7 @@ public class ObservablePropertyImplTest {
     ObservableProperty<String> property = new ObservablePropertyImpl<>("initial");
     Throwable problem = new Throwable();
 
-    property.setProblem(problem);
+    property.setProblem(() -> problem);
     property.value().observe(downstreamObserver);
 
     var inOrder = inOrder(downstreamObserver);
@@ -162,7 +162,7 @@ public class ObservablePropertyImplTest {
     ObservableProperty<String> property = new ObservablePropertyImpl<>("initial");
     Throwable problem = new Throwable();
 
-    property.setProblem(problem);
+    property.setProblem(() -> problem);
     assertThrows(MissingValueException.class, () -> property.get());
   }
 
@@ -171,7 +171,7 @@ public class ObservablePropertyImplTest {
     ObservableProperty<String> property = new ObservablePropertyImpl<>("initial");
     Throwable problem = new Throwable();
 
-    property.setProblem(problem);
+    property.setProblem(() -> problem);
     property.set("message");
     assertThat(property.get(), equalTo("message"));
   }
@@ -218,7 +218,7 @@ public class ObservablePropertyImplTest {
   public void changeInitialToProblemTest() {
     ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
     observable.changes().observe(changeObserver);
-    observable.setProblem(new Throwable());
+    observable.setProblem(Throwable::new);
 
     var inOrder = inOrder(changeObserver);
     inOrder.verify(changeObserver).onObserve(any());
@@ -243,7 +243,7 @@ public class ObservablePropertyImplTest {
   public void changeProblemToNextMessageTest() {
     ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
     observable.changes().observe(changeObserver);
-    observable.setProblem(new Throwable());
+    observable.setProblem(Throwable::new);
     observable.set("message");
 
     var inOrder = inOrder(changeObserver);
@@ -263,8 +263,8 @@ public class ObservablePropertyImplTest {
   public void changeProblemToProblemTest() {
     ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
     observable.changes().observe(changeObserver);
-    observable.setProblem(new Throwable());
-    observable.setProblem(new Throwable());
+    observable.setProblem(Throwable::new);
+    observable.setProblem(Throwable::new);
 
     var inOrder = inOrder(changeObserver);
     inOrder.verify(changeObserver).onObserve(any());

@@ -27,9 +27,9 @@
  */
 package uk.co.saiman.instrument;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import uk.co.saiman.observable.ObservableValue;
 
@@ -57,24 +57,29 @@ import uk.co.saiman.observable.ObservableValue;
  * 
  * @param <T> the control interface for the device
  */
-public interface Device<T extends AutoCloseable> {
+public interface Device<T extends Controller> {
   /**
    * @return the human-readable and localized name of the device
    */
   String getName();
 
   /**
-   * Acquire a mutually exclusive lock on control of the device. The returned
-   * interface should provide access to all control and write-functionality of the
-   * device, but should not be required for reading from the device.
+   * Immediately acquire a mutually exclusive lock on control of the device. The
+   * returned interface should provide access to all control and
+   * write-functionality of the device, but should not be required for reading
+   * from the device.
    * 
    * @return an interface for interaction with the device
    */
-  default T acquireControl() {
-    return acquireControl(0, MILLISECONDS);
+  default Optional<? extends T> acquireControl() throws IllegalStateException {
+    try {
+      return Optional.of(acquireControl(0, TimeUnit.MILLISECONDS));
+    } catch (TimeoutException | InterruptedException | IllegalStateException e) {
+      return Optional.empty();
+    }
   }
 
-  T acquireControl(long timeout, TimeUnit unit);
+  T acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
 
   /**
    * Devices should only ever be registered to a single instrument, and must
@@ -93,5 +98,5 @@ public interface Device<T extends AutoCloseable> {
    * 
    * @return the connection state
    */
-  ObservableValue<ConnectionState> connectionState();
+  ObservableValue<DeviceStatus> status();
 }

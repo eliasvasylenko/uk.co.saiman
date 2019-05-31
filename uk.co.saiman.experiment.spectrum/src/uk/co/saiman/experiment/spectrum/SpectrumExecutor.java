@@ -27,8 +27,10 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.saiman.experiment.processing.ProcessingService.PROCESSING_VARIABLE;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
 
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import javax.measure.Unit;
@@ -44,6 +46,7 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.instruction.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.instruction.ExecutorException;
 import uk.co.saiman.experiment.instruction.IndirectRequirements;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.production.Condition;
@@ -83,7 +86,8 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
 
     System.out.println("prepare processing");
     DataProcessor processing = context
-        .getVariable(processingService(), PROCESSING_VARIABLE)
+        .getVariable(PROCESSING_VARIABLE)
+        .load(processingService())
         .getProcessor();
 
     System.out.println("fetching calibration");
@@ -115,7 +119,7 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
 
     System.out.println("start acquisition");
 
-    try (var control = device.acquireControl()) {
+    try (var control = device.acquireControl(2, SECONDS)) {
       control.startAcquisition();
 
       /*
@@ -139,6 +143,8 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
 
       context.setResultFormat(SPECTRUM, SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
       context.setResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
+    } catch (TimeoutException | InterruptedException e) {
+      throw new ExecutorException("Failed to acquire control of acquisition device", e);
     }
   }
 

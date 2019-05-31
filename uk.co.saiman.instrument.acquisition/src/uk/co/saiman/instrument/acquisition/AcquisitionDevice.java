@@ -45,7 +45,7 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface AcquisitionDevice<T extends AcquisitionControl> extends Device<T> {
+public interface AcquisitionDevice<T extends AcquisitionController> extends Device<T> {
   /**
    * Stop any acquisition experiment that may be in progress. This method revokes
    * control of any currently acquired {@link #acquireControl() control

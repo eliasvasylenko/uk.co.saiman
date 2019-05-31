@@ -43,7 +43,7 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface VacuumDevice<T extends VacuumControl> extends Device<T> {
+public interface VacuumDevice<T extends VacuumController> extends Device<T> {
 
   /**
    * @return the units of measurement of sample intensities

@@ -101,7 +101,6 @@ public class Conductor implements Output {
     }
 
     procedure = null;
-
   }
 
   @Override

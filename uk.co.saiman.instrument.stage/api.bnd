@@ -1,4 +1,0 @@
-Bundle-Name: SAI :: Instrument :: Stage
-Bundle-SymbolicName: uk.co.saiman.instrument.stage
-
-Export-Package: uk.co.saiman.instrument.stage

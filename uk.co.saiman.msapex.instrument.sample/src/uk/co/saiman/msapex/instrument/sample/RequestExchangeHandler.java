@@ -27,9 +27,12 @@
  */
 package uk.co.saiman.msapex.instrument.sample;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_LOCATION_FAILED;
+import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_FAILED;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_FAILED;
+
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
@@ -42,8 +45,10 @@ import uk.co.saiman.instrument.sample.SampleState;
 
 public class RequestExchangeHandler {
   @Execute
-  void execute(IEclipseContext context, SampleDevice<?, ?> device, EventBroker eventBroker) {
-    try (var control = device.acquireControl()) {
+  void execute(IEclipseContext context, SampleDevice<?, ?> device, EventBroker eventBroker)
+      throws TimeoutException,
+      InterruptedException {
+    try (var control = device.acquireControl(1, SECONDS)) {
       control.requestExchange();
     }
   }
@@ -51,6 +56,6 @@ public class RequestExchangeHandler {
   @CanExecute
   boolean canExecute(@Optional SampleState state) {
     return state != null
-        && (state == ANALYSIS || state == ANALYSIS_LOCATION_FAILED || state == EXCHANGE_FAILED);
+        && (state == ANALYSIS || state == ANALYSIS_FAILED || state == EXCHANGE_FAILED);
   }
 }

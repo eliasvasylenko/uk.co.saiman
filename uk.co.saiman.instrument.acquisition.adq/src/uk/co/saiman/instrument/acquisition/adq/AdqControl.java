@@ -27,6 +27,6 @@
  */
 package uk.co.saiman.instrument.acquisition.adq;
 
-import uk.co.saiman.instrument.acquisition.AcquisitionControl;
+import uk.co.saiman.instrument.acquisition.AcquisitionController;
 
-public interface AdqControl extends AcquisitionControl {}
+public interface AdqControl extends AcquisitionController {}

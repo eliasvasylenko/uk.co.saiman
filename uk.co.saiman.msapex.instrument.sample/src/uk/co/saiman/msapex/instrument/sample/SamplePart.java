@@ -51,6 +51,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.msapex.instrument.sample.i18n.SampleDeviceProperties;
 import uk.co.saiman.osgi.ServiceIndex;
@@ -62,6 +63,29 @@ import uk.co.saiman.osgi.ServiceRecord;
  * @author Elias N Vasylenko
  */
 public class SamplePart {
+  class PaneInstance {
+    private final Pane pane;
+    private final Object contextObject;
+
+    public PaneInstance(SampleDevicePanel devicePane) {
+      this.pane = new Pane();
+
+      IEclipseContext context = SamplePart.this.context.createChild();
+      context.set(Pane.class, pane);
+      context.set(SampleDevice.class, devicePane.device());
+      EclipseContextUtilities.injectSubtypes(context, SampleDevice.class);
+
+      this.contextObject = ContextInjectionFactory
+          .make(devicePane.paneModelClass(), SamplePart.this.context, context);
+
+      context.dispose();
+    }
+
+    public void dispose() {
+      ContextInjectionFactory.uninject(contextObject, context);
+    }
+  }
+
   static final String ID = "uk.co.saiman.msapex.instrument.sample.part";
 
   private final SampleDeviceProperties text;
@@ -78,7 +102,7 @@ public class SamplePart {
 
   private SampleDevice<?, ?> device;
   private SampleDevicePanel devicePanel;
-  private final Map<SampleDevicePanel, Pane> panes = new HashMap<>();
+  private final Map<SampleDevicePanel, PaneInstance> panes = new HashMap<>();
 
   private final IEclipseContext context;
 
@@ -127,9 +151,18 @@ public class SamplePart {
         ? null
         : devicePanelIndex.get(device).map(ServiceRecord::serviceObject).orElse(null);
 
-    panes
-        .keySet()
-        .retainAll(devicePanelIndex.records().map(ServiceRecord::serviceObject).collect(toSet()));
+    var availableDevices = devicePanelIndex
+        .records()
+        .map(ServiceRecord::serviceObject)
+        .collect(toSet());
+    var entryIterator = panes.entrySet().iterator();
+    while (entryIterator.hasNext()) {
+      var entry = entryIterator.next();
+      if (!availableDevices.contains(entry.getKey())) {
+        entryIterator.remove();
+        entry.getValue().dispose();
+      }
+    }
 
     if (this.device != device) {
       this.device = device;
@@ -144,19 +177,11 @@ public class SamplePart {
         samplePane.getChildren().clear();
 
       } else {
-        Pane pane = panes.computeIfAbsent(devicePanel, this::makePane);
-        if (!samplePane.getChildren().contains(pane)) {
-          samplePane.getChildren().setAll(pane);
+        PaneInstance pane = panes.computeIfAbsent(devicePanel, PaneInstance::new);
+        if (!samplePane.getChildren().contains(pane.pane)) {
+          samplePane.getChildren().setAll(pane.pane);
         }
       }
     }
-  }
-
-  private Pane makePane(SampleDevicePanel devicePane) {
-    Pane pane = new Pane();
-    IEclipseContext context = this.context.createChild();
-    context.set(Pane.class, pane);
-    ContextInjectionFactory.make(devicePane.paneModelClass(), context);
-    return pane;
   }
 }

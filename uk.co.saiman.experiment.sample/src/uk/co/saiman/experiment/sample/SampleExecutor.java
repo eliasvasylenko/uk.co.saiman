@@ -27,10 +27,14 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.instruction.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.instruction.ExecutorException;
 import uk.co.saiman.experiment.instruction.IndirectRequirements;
 import uk.co.saiman.experiment.production.Nothing;
 import uk.co.saiman.experiment.production.Preparation;
@@ -59,20 +63,17 @@ public interface SampleExecutor<T> extends Executor<Nothing> {
   default void execute(ExecutionContext<Nothing> context) {
     T location = context.getVariable(sampleLocation());
 
-    try (var control = sampleDevice().acquireControl()) {
-      control.requestAnalysisLocation(location);
+    try (var control = sampleDevice().acquireControl(2, SECONDS)) {
+      control.requestAnalysis(location);
       context.prepareCondition(samplePreparation(), null);
+    } catch (TimeoutException | InterruptedException e) {
+      throw new ExecutorException("Failed to acquire control of sample device", e);
     }
   }
 
   @Override
   default Stream<Production<?>> products() {
     return Stream.of(samplePreparation());
-  }
-
-  @Override
-  default Stream<VariableDeclaration> variables() {
-    return Stream.of(sampleLocation().declareRequired());
   }
 
   @Override
@@ -83,5 +84,10 @@ public interface SampleExecutor<T> extends Executor<Nothing> {
   @Override
   default Stream<IndirectRequirements> indirectRequirements() {
     return Stream.empty();
+  }
+
+  @Override
+  default Stream<VariableDeclaration> variables() {
+    return Stream.of(sampleLocation().declareRequired());
   }
 }

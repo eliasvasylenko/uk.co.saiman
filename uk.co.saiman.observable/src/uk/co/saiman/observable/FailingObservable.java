@@ -27,10 +27,12 @@
  */
 package uk.co.saiman.observable;
 
-public class FailingObservable<T> implements Observable<T> {
-  private final Throwable cause;
+import java.util.function.Supplier;
 
-  public FailingObservable(Throwable cause) {
+public class FailingObservable<T> implements Observable<T> {
+  private final Supplier<Throwable> cause;
+
+  public FailingObservable(Supplier<Throwable> cause) {
     this.cause = cause;
   }
 
@@ -49,7 +51,7 @@ public class FailingObservable<T> implements Observable<T> {
       protected void cancelImpl() {}
     };
     observation.onObserve();
-    observation.onFail(cause);
+    observation.onFail(cause.get());
     return observation;
   }
 }

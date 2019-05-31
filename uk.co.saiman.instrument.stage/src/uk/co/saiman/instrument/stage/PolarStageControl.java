@@ -31,4 +31,4 @@ import javax.measure.quantity.Length;
 
 import uk.co.saiman.measurement.coordinate.PolarCoordinate;
 
-public interface PolarStageControl extends StageControl<PolarCoordinate<Length>> {}
+public interface PolarStageControl extends StageController<PolarCoordinate<Length>> {}

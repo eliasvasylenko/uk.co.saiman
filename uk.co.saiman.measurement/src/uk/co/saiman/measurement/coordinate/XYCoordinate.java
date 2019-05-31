@@ -40,8 +40,7 @@ import uk.co.saiman.measurement.scalar.Scalar;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T>
- *          the type of unit of the axes
+ * @param <T> the type of unit of the axes
  */
 public class XYCoordinate<T extends Quantity<T>> {
   private final Quantity<T> x;
@@ -54,6 +53,40 @@ public class XYCoordinate<T extends Quantity<T>> {
 
   public XYCoordinate(Unit<T> unit, double x, double y) {
     this(new Scalar<>(unit, x), new Scalar<>(unit, y));
+  }
+
+  public XYCoordinate<T> add(XYCoordinate<T> other) {
+    return new XYCoordinate<>(x.add(other.x), y.add(other.y));
+  }
+
+  public XYCoordinate<T> subtract(XYCoordinate<T> other) {
+    return new XYCoordinate<>(x.subtract(other.x), y.subtract(other.y));
+  }
+
+  public XYCoordinate<T> multiply(Number number) {
+    return new XYCoordinate<>(x.multiply(number), y.multiply(number));
+  }
+
+  public XYCoordinate<?> multiply(Quantity<?> number) {
+    return multiplyCapture(number);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <Q extends Quantity<Q>> XYCoordinate<?> multiplyCapture(Quantity<?> number) {
+    return new XYCoordinate<>((Q) x.multiply(number), (Q) y.multiply(number));
+  }
+
+  public XYCoordinate<T> divide(Number number) {
+    return new XYCoordinate<>(x.divide(number), y.divide(number));
+  }
+
+  public XYCoordinate<?> divide(Quantity<?> number) {
+    return divideCapture(number);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <Q extends Quantity<Q>> XYCoordinate<?> divideCapture(Quantity<?> number) {
+    return new XYCoordinate<>((Q) x.divide(number), (Q) y.divide(number));
   }
 
   public Quantity<T> getX() {

@@ -30,57 +30,67 @@ package uk.co.saiman.instrument.sample;
 /**
  * An enumeration of the possible states for a {@link SampleDevice sample
  * device}.
- * 
+ * <p>
  * The {@link #EXCHANGE_REQUESTED} state may only be succeeded by
  * {@link #EXCHANGE} or {@link #EXCHANGE_FAILED}, while the
- * {@link #ANALYSIS_LOCATION_REQUESTED} state may only be succeeded by
- * {@link #ANALYSIS} or {@link #ANALYSIS_LOCATION_FAILED}.
- * 
- * The {@link #EXCHANGE_REQUESTED} and {@link #ANALYSIS_LOCATION_REQUESTED}
- * states may only be preceded by a state in which the hardware is stopped.
- * 
+ * {@link #ANALYSIS_REQUESTED} state may only be succeeded by {@link #ANALYSIS}
+ * or {@link #ANALYSIS_FAILED}.
+ * <p>
+ * The {@link #EXCHANGE_REQUESTED} and {@link #ANALYSIS_REQUESTED} states may
+ * only be preceded by a state in which the hardware is stopped.
+ * <p>
  * Conversely, a state in which the hardware is stopped should typically be
  * stable, i.e. should only be succeeded by {@link #EXCHANGE_REQUESTED} or
- * {@link #ANALYSIS_LOCATION_REQUESTED}. However in the event of hardware
- * failure or physical interference it is possible for the {@link #EXCHANGE} or
+ * {@link #ANALYSIS_REQUESTED}. However in the event of hardware failure or
+ * physical interference it is possible for the {@link #EXCHANGE} or
  * {@link #ANALYSIS} states to transition directly into {@link #EXCHANGE_FAILED}
- * or {@link #ANALYSIS_LOCATION_FAILED} respectively.
+ * or {@link #ANALYSIS_FAILED} respectively.
  * 
  * @author Elias N Vasylenko
  */
 public enum SampleState {
   /**
-   * Moving into exchange configuration. Hardware may be operational.
+   * Moving into exchange configuration.
    */
   EXCHANGE_REQUESTED,
 
   /**
-   * Exchange configuration not reached. Hardware stopped.
+   * Exchange configuration not reached.
    */
   EXCHANGE_FAILED,
 
   /**
-   * Exchange configuration reached. Hardware stopped.
+   * The device is not ready for analysis. The sample may be in the process of
+   * physical exchange. The meaning of a sample exchange is implementation
+   * dependent.
    */
   EXCHANGE,
 
   /**
-   * Moving into analysis configuration. Hardware may be operational.
+   * The device is ready for analysis, but no specific analysis location has been
+   * requested. The {@link SampleDevice#actualLocation() location} of the device
+   * may not be valid.
    */
-  ANALYSIS_LOCATION_REQUESTED,
+  READY,
 
   /**
-   * Analysis configuration not reached. Hardware stopped.
+   * An analysis location has been requested, but not yet reached.
    */
-  ANALYSIS_LOCATION_FAILED,
+  ANALYSIS_REQUESTED,
 
   /**
-   * Analysis configuration reached. Hardware stopped.
+   * An analysis location was requested, but could not be reached.
+   */
+  ANALYSIS_FAILED,
+
+  /**
+   * An analysis location was requested, and was reached. The
+   * {@link SampleDevice#actualLocation() location} of the device should be valid.
    * <p>
    * Depending on the type of hardware this may only indicate that the analysis
    * location is reached within a certain tolerance. Therefore this state does not
-   * necessarily indicate that the {@link SampleDevice#actualLocation() requested}
-   * and {@link SampleDevice#requestedLocation() actual} locations are
+   * necessarily indicate that the {@link SampleDevice#actualLocation() actual}
+   * and {@link SampleDevice#requestedLocation() requested} locations are
    * {@link #equals(Object) exactly equal}.
    */
   ANALYSIS

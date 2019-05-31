@@ -30,7 +30,6 @@ package uk.co.saiman.experiment.procedure;
 import static java.lang.String.format;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -45,7 +44,7 @@ import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.Result;
 import uk.co.saiman.experiment.requirement.ConditionRequirement;
 import uk.co.saiman.experiment.requirement.ResultRequirement;
-import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.Variables;
 
 public class ExecutorProgress<T extends Dependency> {
   private final Conductor scheduler;
@@ -129,7 +128,7 @@ public class ExecutorProgress<T extends Dependency> {
       }
 
       @Override
-      public <U> Optional<U> getOptionalVariable(Variable<U> variable) {
+      public Variables getVariables() {
         // TODO Auto-generated method stub
         return null;
       }

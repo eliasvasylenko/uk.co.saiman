@@ -41,7 +41,7 @@ import uk.co.saiman.observable.ObservableValue;
  *
  * @param <T> The analysis location space.
  */
-public interface SampleDevice<T, U extends SampleControl<T>> extends Device<U> {
+public interface SampleDevice<T, U extends SampleController<T>> extends Device<U> {
   ObservableValue<SampleState> sampleState();
 
   /**
@@ -50,12 +50,17 @@ public interface SampleDevice<T, U extends SampleControl<T>> extends Device<U> {
    * sample location. Implementations of this method should be idempotent and free
    * of side-effects.
    * 
-   * @param position
+   * @param location
    * @return true if the given sample location is valid for analysis and can be
    *         reached, false otherwise
    */
   boolean isLocationReachable(T location);
 
+  /**
+   * @return The last requested location. If the device is in the exchange state
+   *         or the ready state, the behavior of this method is left to the
+   *         discretion of the implementor.
+   */
   ObservableValue<T> requestedLocation();
 
   /**

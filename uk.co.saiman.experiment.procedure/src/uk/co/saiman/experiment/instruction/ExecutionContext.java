@@ -29,7 +29,6 @@ package uk.co.saiman.experiment.instruction;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -43,6 +42,7 @@ import uk.co.saiman.experiment.production.Result;
 import uk.co.saiman.experiment.requirement.ConditionRequirement;
 import uk.co.saiman.experiment.requirement.ResultRequirement;
 import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.Variables;
 
 /**
  * The context of an {@link Executor#execute(ExecutionContext) experiment
@@ -53,14 +53,15 @@ import uk.co.saiman.experiment.variables.Variable;
  * @param <S> the type of the direct requirement of the executing node
  */
 public interface ExecutionContext<S extends Dependency> {
+  Variables getVariables();
+
   default <T> T getVariable(Variable<T> variable) {
-    return getOptionalVariable(variable)
+    return getVariables()
+        .get(variable)
         .orElseThrow(
             () -> new ExecutorException(
                 format("Variable %s is not available for execution %s", variable, this)));
   }
-
-  <T> Optional<T> getOptionalVariable(Variable<T> variable);
 
   Instruction<S> instruction();
 

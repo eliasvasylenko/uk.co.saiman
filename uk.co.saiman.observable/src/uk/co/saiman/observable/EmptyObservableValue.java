@@ -28,17 +28,18 @@
 package uk.co.saiman.observable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class EmptyObservableValue<T> implements ObservableValue<T> {
-  private final Throwable cause;
+  private final Supplier<Throwable> cause;
 
-  public EmptyObservableValue(Throwable cause) {
+  public EmptyObservableValue(Supplier<Throwable> cause) {
     this.cause = cause;
   }
 
   @Override
   public T get() {
-    throw new MissingValueException(this, cause);
+    throw new MissingValueException(this, cause.get());
   }
 
   @Override

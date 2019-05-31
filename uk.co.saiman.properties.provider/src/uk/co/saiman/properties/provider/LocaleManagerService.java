@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -135,7 +136,7 @@ public class LocaleManagerService implements LocaleManager, LocaleProvider {
   }
 
   @Override
-  public void setProblem(Throwable t) {
+  public void setProblem(Supplier<Throwable> t) {
     component.setProblem(t);
   }
 

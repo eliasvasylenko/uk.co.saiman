@@ -29,6 +29,7 @@ package uk.co.saiman.observable;
 
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * A value which can be {@link #get() fetched} and observed for updates and
@@ -39,10 +40,8 @@ import java.util.function.Predicate;
  * this to an observer if it has already sent them a message event containing
  * the current value.
  * <p>
- * The value may enter an error state, in which case observers will receive a
- * {@link Observer#onFail(Throwable) failure event} and subsequent calls to
- * {@link #get()} should throw a {@link MissingValueException} as per
- * {@link Observable#get()} until a new valid value is available.
+ * The value may enter an error state, in which case {@link #value() value
+ * observers} will receive a {@link Observer#onFail(Throwable) failure event}.
  * <p>
  * A common example of an error state may be {@link NullPointerException} when
  * there is no value available.
@@ -104,8 +103,6 @@ public interface ObservableValue<T> {
       return Optional.empty();
     } catch (MissingValueException e) {
       return Optional.of(e.getCause() != null ? e.getCause() : e);
-    } catch (Throwable t) {
-      return Optional.of(t);
     }
   }
 
@@ -116,12 +113,12 @@ public interface ObservableValue<T> {
 
   Observable<T> value();
 
-  static <M> ObservableValue<M> empty(Throwable failure) {
+  static <M> ObservableValue<M> empty(Supplier<Throwable> failure) {
     return new EmptyObservableValue<>(failure);
   }
 
   static <M> ObservableValue<M> empty() {
-    return empty(new NullPointerException());
+    return empty(NullPointerException::new);
   }
 
   static <M> ObservableValue<M> of(M value) {

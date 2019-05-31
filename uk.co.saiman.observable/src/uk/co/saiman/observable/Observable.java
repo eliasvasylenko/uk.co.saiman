@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -151,38 +150,6 @@ public interface Observable<M> {
   }
 
   /**
-   * Block until we either receive the next message event of the next failure
-   * event. In the case of the former, return it, and in the case of the latter,
-   * throw a {@link MissingValueException}.
-   * 
-   * @return the next value
-   * @throws MissingValueException If a failure or completion event is received
-   *                               before the next message event. In the former
-   *                               case the cause will be the failure throwable,
-   *                               in the latter case an instance of
-   *                               {@link AlreadyCompletedException}.
-   */
-  default M get() {
-    CompletableFuture<M> result = getNext();
-
-    try {
-      return result.get();
-    } catch (ExecutionException e) {
-      throw new MissingValueException(this, e);
-    } catch (Exception e) {
-      throw new RuntimeException("Unexpected error", e);
-    }
-  }
-
-  default Optional<M> tryGet() {
-    try {
-      return Optional.of(get());
-    } catch (MissingValueException e) {
-      return Optional.empty();
-    }
-  }
-
-  /**
    * Derive a new observable by application of the given function. This gives the
    * same result as just applying the function to the observable directly, and
    * exists only to create a more natural fit into the fluent API by making the
@@ -264,46 +231,6 @@ public interface Observable<M> {
 
   default Observable<ObservableValue<M>> materialize() {
     return observer -> observe(new MaterializingObserver<>(observer));
-  }
-
-  default ObservableValue<M> toValue() {
-    ObservableProperty<M> value = tryGet()
-        .map(ObservablePropertyImpl::new)
-        .orElse(new ObservablePropertyImpl<>(new NullPointerException()));
-
-    requestUnbounded().observe(new Observer<M>() {
-      @Override
-      public void onNext(M message) {
-        value.set(message);
-      }
-
-      @Override
-      public void onFail(Throwable t) {
-        value.setProblem(t);
-      }
-    });
-    return value;
-  }
-
-  default ObservableValue<M> toValue(M initial) {
-    ObservableProperty<M> value = new ObservablePropertyImpl<>(tryGet().orElse(initial));
-    observe(new Observer<M>() {
-      @Override
-      public void onObserve(Observation observation) {
-        observation.requestUnbounded();
-      }
-
-      @Override
-      public void onNext(M message) {
-        value.set(message);
-      }
-
-      @Override
-      public void onFail(Throwable t) {
-        value.setProblem(t);
-      }
-    });
-    return value;
   }
 
   /**
@@ -662,7 +589,7 @@ public interface Observable<M> {
     return of(observables).concatMap(identity());
   }
 
-  static <M> Observable<M> failing(Throwable failure) {
+  static <M> Observable<M> failing(Supplier<Throwable> failure) {
     return new FailingObservable<>(failure);
   }
 

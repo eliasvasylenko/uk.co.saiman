@@ -38,6 +38,8 @@ import javax.measure.quantity.Length;
 
 import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import uk.co.saiman.instrument.stage.Stage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
@@ -54,8 +56,8 @@ import uk.co.saiman.msapex.annotations.XYAnnotation;
  *
  * @param <T> the coordinate type of the stage
  */
-public abstract class StageDiagram<T> {
-  private Image image;
+public abstract class StageDiagram<T> extends StackPane {
+  private final ImageView imageView = new ImageView();
 
   private AnnotationLayer<Length, Length> annotationLayer;
   private XYCoordinateBinding<Length> requestedCoordinates;
@@ -77,6 +79,9 @@ public abstract class StageDiagram<T> {
     annotationLayer.getAnnotations().add(actualPosition);
     actualPosition.measurementXProperty().bind(actualCoordinates.getX());
     actualPosition.measurementYProperty().bind(actualCoordinates.getY());
+
+    getChildren().add(imageView);
+    getChildren().add(annotationLayer);
   }
 
   public XYCoordinateBinding<Length> getRequestedCoordinates() {
@@ -96,11 +101,11 @@ public abstract class StageDiagram<T> {
   public abstract Stage<T, ?> getStageDevice();
 
   public Image getImage() {
-    return image;
+    return imageView.getImage();
   }
 
   protected void setImage(Image image) {
-    this.image = image;
+    this.imageView.setImage(image);
   }
 
   public AnnotationLayer<Length, Length> getAnnotationLayer() {

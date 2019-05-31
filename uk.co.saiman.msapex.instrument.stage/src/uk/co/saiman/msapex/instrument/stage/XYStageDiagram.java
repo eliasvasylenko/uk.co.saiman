@@ -35,19 +35,6 @@ import javafx.geometry.BoundingBox;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
-/*-
- * 
- * Options:
- * 
- * - ONE stage diagram available per stage (highest rank is chosen, default provided with low rank)
- * - Stage device wired to a diagram via OSGi
- * 
- *     pros:
- *       straightforward to get the diagram for a stage
- *     cons:
- *       custom UI for selecting e.g. different MALDI plates
- * 
- */
 public abstract class XYStageDiagram extends StageDiagram<XYCoordinate<Length>> {
   @Override
   public abstract XYStage<?> getStageDevice();

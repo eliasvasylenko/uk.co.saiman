@@ -31,6 +31,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A simple implementation of {@link ObservableProperty} which maintains a list
@@ -46,14 +47,18 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
   private final HotObservable<T> backingObservable;
 
   private T value;
-  private Throwable failure;
+  private Supplier<Throwable> failure;
 
   public ObservablePropertyImpl(T initialValue) {
     this.backingObservable = new HotObservable<>();
     this.value = requireNonNull(initialValue);
   }
 
-  public ObservablePropertyImpl(Throwable initialProblem) {
+  public ObservablePropertyImpl() {
+    this(NullPointerException::new);
+  }
+
+  public ObservablePropertyImpl(Supplier<Throwable> initialProblem) {
     this.backingObservable = new HotObservable<>();
     this.failure = requireNonNull(initialProblem);
   }
@@ -121,11 +126,11 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
   }
 
   @Override
-  public synchronized void setProblem(Throwable t) {
+  public synchronized void setProblem(Supplier<Throwable> t) {
     value = null;
     failure = t;
 
-    backingObservable.fail(t);
+    backingObservable.fail(t.get());
 
     backingObservable.start();
   }
@@ -133,7 +138,7 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
   @Override
   public synchronized T get() {
     if (value == null)
-      throw new MissingValueException(this, failure);
+      throw new MissingValueException(this, failure.get());
     return value;
   }
 

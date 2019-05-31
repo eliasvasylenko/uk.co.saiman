@@ -27,34 +27,61 @@
  */
 package uk.co.saiman.msapex.saint;
 
+import static uk.co.saiman.measurement.Units.metre;
+
 import java.util.stream.Stream;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import javax.measure.quantity.Length;
 
-import uk.co.saiman.instrument.stage.XYStage;
+import javafx.geometry.BoundingBox;
+import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import uk.co.saiman.msapex.instrument.stage.StageDiagram;
 import uk.co.saiman.msapex.instrument.stage.StageDiagramSampleConfiguration;
-import uk.co.saiman.msapex.instrument.stage.XYStageDiagram;
-import uk.co.saiman.saint.SaintXYStageExecutor;
+import uk.co.saiman.saint.stage.SamplePlateStage;
+import uk.co.saiman.saint.stage.SampleArea;
 
-@Component(service = { XYStageDiagram.class, SaintStageDiagram.class })
-public class SaintStageDiagram extends XYStageDiagram {
-  @Reference
-  private SaintXYStageExecutor stageExecutor;
+public class SaintStageDiagram extends StageDiagram<SampleArea> {
+  private final SamplePlateStage stage;
 
-  @Activate
-  void activate() {
-    initialize();
+  public SaintStageDiagram(SamplePlateStage stage) {
+    this.stage = stage;
+
+    SamplePlateStage stageDevice = getStageDevice();
+    initialize(metre().micro().getUnit());
+
+    XYCoordinate<Length> lower = getCoordinatesAtLocation(stageDevice.getLowerBound());
+    XYCoordinate<Length> upper = getCoordinatesAtLocation(stageDevice.getUpperBound());
+
+    getAnnotationLayer()
+        .setMeasurementBounds(
+            new BoundingBox(
+                lower.getX().getValue().doubleValue(),
+                lower.getY().getValue().doubleValue(),
+                upper.getX().getValue().doubleValue() - lower.getX().getValue().doubleValue(),
+                upper.getY().getValue().doubleValue() - lower.getY().getValue().doubleValue()));
   }
 
   @Override
-  public XYStage<?> getStageDevice() {
-    return stageExecutor.sampleDevice();
+  public SamplePlateStage getStageDevice() {
+    return stage;
   }
 
   @Override
   public Stream<? extends StageDiagramSampleConfiguration> getSampleConfigurations() {
     return Stream.empty();
+  }
+
+  @Override
+  public SampleArea getStageLocationAtCoordinates(XYCoordinate<Length> coordinates) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public XYCoordinate<Length> getCoordinatesAtStageLocation(SampleArea location) {
+    return getCoordinatesAtLocation(location.center());
+  }
+
+  public XYCoordinate<Length> getCoordinatesAtLocation(XYCoordinate<Length> location) {
+    return location;
   }
 }

@@ -40,7 +40,7 @@ import uk.co.saiman.msapex.experiment.step.provider.DefineStep;
 import uk.co.saiman.msapex.experiment.step.provider.StepProvider;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.saint.SaintProperties;
-import uk.co.saiman.saint.SaintSpectrumExecutor;
+import uk.co.saiman.saint.spectrum.SaintSpectrumExecutor;
 
 public class SaintSpectrumExperimentStepProvider implements StepProvider<Condition<Void>> {
   private final SaintProperties properties;

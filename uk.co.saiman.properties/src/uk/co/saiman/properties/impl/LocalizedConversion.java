@@ -79,7 +79,7 @@ public class LocalizedConversion implements PropertyValueConversion<Localized<?>
     private final List<?> arguments;
 
     public LocalizedImpl(List<?> arguments) {
-      super(new IllegalStateException("Locale has failed to initialize"));
+      super(() -> new IllegalStateException("Locale has failed to initialize"));
 
       this.arguments = arguments;
 

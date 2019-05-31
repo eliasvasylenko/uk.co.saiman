@@ -51,7 +51,7 @@ public class MaterializingObserver<T> extends PassthroughObserver<T, ObservableV
 
   @Override
   public void onFail(Throwable t) {
-    getDownstreamObserver().onNext(empty(t));
+    getDownstreamObserver().onNext(empty(() -> t));
 
     super.onComplete();
   }

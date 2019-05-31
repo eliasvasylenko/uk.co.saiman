@@ -51,4 +51,10 @@ public class ConditionImpl<T> implements Condition<T> {
   public ProductPath<Absolute, Condition<T>> path() {
     return path;
   }
+
+  @Override
+  public T value() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

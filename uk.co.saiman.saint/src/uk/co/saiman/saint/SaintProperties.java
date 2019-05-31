@@ -35,4 +35,6 @@ public interface SaintProperties {
   Localized<String> vacuumDeviceName();
 
   Localized<String> spectrumExperimentStepName();
+
+  Localized<String> sampleAreaStageDeviceName();
 }

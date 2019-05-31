@@ -28,6 +28,7 @@
 package uk.co.saiman.instrument.acquisition.adq.impl;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -36,7 +37,7 @@ import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.function.SampledContinuousFunction;
-import uk.co.saiman.instrument.ConnectionState;
+import uk.co.saiman.instrument.DeviceStatus;
 import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Device;
@@ -128,19 +129,21 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
   }
 
   @Override
+  public Adq114Control acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException,
+      InterruptedException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public InstrumentRegistration getInstrumentRegistration() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public ObservableValue<ConnectionState> connectionState() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Adq114Control acquireControl(long timeout, TimeUnit unit) {
+  public ObservableValue<DeviceStatus> status() {
     // TODO Auto-generated method stub
     return null;
   }

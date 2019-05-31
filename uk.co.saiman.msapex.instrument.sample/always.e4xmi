@@ -2,7 +2,7 @@
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_dboU0HzfEeeLpZ9wHq5Ynw">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_1Rc8EEJAEeiiI42mgJDa-A" featurename="commands" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Command" xmi:id="_FoteYEJBEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.command.requestexchange" commandName="Request Exchange"/>
-    <elements xsi:type="commands:Command" xmi:id="_KCPDYEJBEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.command.requestanalysis" commandName="Request Analysis"/>
+    <elements xsi:type="commands:Command" xmi:id="_KCPDYEJBEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.command.requestready" commandName="Request Ready"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_s0-FcELkEeiiI42mgJDa-A" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
     <elements xsi:type="basic:Part" xmi:id="_jPyEwHzfEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.instrument.sample.part" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.sample/uk.co.saiman.msapex.instrument.sample.SamplePart" label="Sample" iconURI="${fugue.icon.runtime}/size16/target.png">
@@ -10,7 +10,7 @@
       <toolbar xmi:id="_q9LOQHzfEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.instrument.stage.toolbar">
         <children xsi:type="menu:ToolControl" xmi:id="_NZ2D4EL7EeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.toolcontrol.state" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.sample/uk.co.saiman.msapex.instrument.sample.StateToolControl"/>
         <children xsi:type="menu:HandledToolItem" xmi:id="_w0_X0EJAEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.handledtoolitem.requestexchange" label="Exchange" command="_FoteYEJBEeiiI42mgJDa-A"/>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_6qFGQEJDEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.handledtoolitem.requestanalysis" label="Analyse" command="_KCPDYEJBEeiiI42mgJDa-A"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_6qFGQEJDEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.handledtoolitem.requestready" label="Ready" command="_KCPDYEJBEeiiI42mgJDa-A"/>
       </toolbar>
     </elements>
   </fragments>
@@ -19,6 +19,6 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_MrBx4EMCEeiiI42mgJDa-A" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Handler" xmi:id="_QIUYIEMCEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.handler.requestexchange" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.sample/uk.co.saiman.msapex.instrument.sample.RequestExchangeHandler" command="_FoteYEJBEeiiI42mgJDa-A"/>
-    <elements xsi:type="commands:Handler" xmi:id="_YbuYwEMCEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.handler.requestanalysis" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.sample/uk.co.saiman.msapex.instrument.sample.RequestAnalysisHandler" command="_KCPDYEJBEeiiI42mgJDa-A"/>
+    <elements xsi:type="commands:Handler" xmi:id="_YbuYwEMCEeiiI42mgJDa-A" elementId="uk.co.saiman.msapex.instrument.sample.handler.requestready" contributionURI="bundleclass://uk.co.saiman.msapex.instrument.sample/uk.co.saiman.msapex.instrument.sample.RequestReadyHandler" command="_KCPDYEJBEeiiI42mgJDa-A"/>
   </fragments>
 </fragment:ModelFragments>

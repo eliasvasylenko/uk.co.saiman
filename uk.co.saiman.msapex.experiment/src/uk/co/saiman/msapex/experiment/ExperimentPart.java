@@ -31,6 +31,7 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
@@ -55,10 +56,15 @@ public class ExperimentPart {
   private Control experimentTree;
 
   @PostConstruct
-  void initialize(BorderPane container, TreeService treeService, @LocalInstance FXMLLoader loader) {
+  void initialize(
+      BorderPane container,
+      TreeService treeService,
+      @LocalInstance FXMLLoader loader,
+      MApplication application) {
     container.setCenter(buildWith(loader).controller(this).loadRoot());
 
-    experimentTree = treeService.createTree(ExperimentTree.ID, experimentTreeScrollPane);
+    var treeModel = treeService.getTree(ExperimentTree.ID);
+    experimentTree = treeService.createTree(treeModel, experimentTreeScrollPane);
     experimentTreeScrollPane.setContent(experimentTree);
   }
 }

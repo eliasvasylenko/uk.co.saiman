@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.fx.ui.workbench.renderers.base.BaseRenderer;
@@ -199,23 +200,36 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
   protected void initWidget(Tree tree, WTree<TreeView<Cell>> widget) {
     super.initWidget(tree, widget);
 
+    var treeView = widget.getWidget();
+    treeView
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener(c -> refreshFocus(tree, treeView));
+    treeView.focusedProperty().addListener(c -> refreshFocus(tree, treeView));
+  }
+
+  private static void refreshFocus(Tree tree, TreeView<Cell> treeView) {
     MPart part = tree.getContext().get(MPart.class);
 
-    if (part != null) {
+    if (part != null && treeView.isFocused()) {
       ESelectionService selectionService = part.getContext().get(ESelectionService.class);
 
-      widget
-          .getWidget()
-          .getSelectionModel()
-          .selectedItemProperty()
-          .addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-              newValue.getValue().getContext().activateBranch();
-              selectionService.setSelection(((TreeItemImpl) newValue).getData());
-            } else {
-              selectionService.setSelection(null);
-            }
-          });
+      var selection = treeView.getSelectionModel().getSelectedItem();
+
+      if (selection != null) {
+        var treeItem = (TreeItemImpl) selection;
+        var cell = treeItem.getValue();
+        var object = cell.getObject();
+
+        selection.getValue().getContext().activateBranch();
+        selectionService.setSelection(treeItem.getData());
+
+        if (object != null) {
+          ContextInjectionFactory.invoke(object, Focus.class, cell.getContext(), null);
+        }
+      } else {
+        selectionService.setSelection(null);
+      }
     }
   }
 

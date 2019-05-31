@@ -42,4 +42,6 @@ public interface Condition<T> extends Product {
 
   @Override
   ProductPath<Absolute, Condition<T>> path();
+
+  T value();
 }

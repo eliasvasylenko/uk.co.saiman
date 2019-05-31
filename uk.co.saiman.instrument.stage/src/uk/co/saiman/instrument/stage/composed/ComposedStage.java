@@ -27,49 +27,46 @@
  */
 package uk.co.saiman.instrument.stage.composed;
 
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
-import static uk.co.saiman.instrument.ConnectionState.DISCONNECTED;
+import static uk.co.saiman.instrument.axis.AxisState.LOCATION_REACHED;
 import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_LOCATION_FAILED;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_LOCATION_REQUESTED;
+import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_FAILED;
+import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_REQUESTED;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_FAILED;
 import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_REQUESTED;
 import static uk.co.saiman.instrument.stage.composed.ComposedStage.Mode.ANALYSING;
 import static uk.co.saiman.observable.ObservableProperty.over;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 
-import uk.co.saiman.instrument.ConnectionState;
-import uk.co.saiman.instrument.DeviceImpl;
-import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
-import uk.co.saiman.instrument.InstrumentRegistration;
+import uk.co.saiman.instrument.axis.AxisDevice;
+import uk.co.saiman.instrument.axis.AxisState;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.Stage;
+import uk.co.saiman.instrument.stage.StageController;
+import uk.co.saiman.instrument.virtual.AbstractingDevice;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
-public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extends DeviceImpl<U>
+public abstract class ComposedStage<T, U extends StageController<T>> extends AbstractingDevice<U>
     implements Stage<T, U> {
   enum Mode {
     ANALYSING, EXCHANGING
   }
 
-  private final DeviceRegistration registration;
-  private final Set<StageAxis<?>> axes;
+  private final Set<AxisDevice<?, ?>> axes;
 
   private final T analysisLocation;
   private final T exchangeLocation;
   private Mode mode;
 
-  private final ObservableProperty<ConnectionState> connectionState;
   private final ObservableProperty<SampleState> sampleState;
 
   private final ObservableProperty<T> requestedLocation;
@@ -82,17 +79,17 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
       Instrument instrument,
       T analysisLocation,
       T exchangeLocation,
-      StageAxis<?>... axes) {
-    super(name);
-    this.axes = new HashSet<>(asList(axes));
+      AxisDevice<?, ?>... axes) {
+    super(name, instrument);
+    this.axes = Set.of(axes);
+    this.axes.forEach(axis -> new DeviceDependency<>(axis, true));
+
     this.analysisLocation = analysisLocation;
     this.exchangeLocation = exchangeLocation;
     this.mode = ANALYSING;
 
-    this.connectionState = over(DISCONNECTED);
-    this.sampleState = over(ANALYSIS_LOCATION_FAILED);
+    this.sampleState = over(ANALYSIS_FAILED);
     this.requestedLocation = ObservableProperty.over(exchangeLocation);
-    this.requestedLocation.value().observe(l -> setRequestedLocation(ANALYSING, l));
     this.actualLocation = ObservableProperty.over(exchangeLocation);
 
     this.axisObservations = concat(
@@ -101,17 +98,11 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
             .stream()
             .map(a -> a.actualLocation().value().observe(p -> updateActualLocation())))
                 .collect(toList());
-
-    this.registration = instrument.registerDevice(this);
   }
 
   @Override
-  public InstrumentRegistration getInstrumentRegistration() {
-    return registration.getInstrumentRegistration();
-  }
-
   protected void dispose() {
-    registration.deregister();
+    super.dispose();
     axisObservations.forEach(Disposable::cancel);
   }
 
@@ -119,17 +110,16 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     try {
       AxisState axisState = axes
           .stream()
-          .map(StageAxis::axisState)
-          .map(ObservableValue::get)
+          .map(AxisDevice::axisState)
+          .map(ObservableValue::tryGet)
+          .map(v -> v.orElse(AxisState.LOCATION_FAILED))
           .reduce(
               precedence(
-                  AxisState.DISCONNECTED,
                   AxisState.LOCATION_REQUESTED,
                   AxisState.LOCATION_FAILED,
                   AxisState.LOCATION_REACHED))
-          .orElse(AxisState.DISCONNECTED);
+          .orElse(LOCATION_REACHED);
 
-      updateConnectionState(axisState);
       updateSampleState(axisState);
     } catch (Exception e) {
       e.printStackTrace();
@@ -140,14 +130,6 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     actualLocation.set(getActualLocationImpl());
   }
 
-  private void updateConnectionState(AxisState axisState) {
-    ConnectionState connectionState = (axisState == AxisState.DISCONNECTED)
-        ? ConnectionState.DISCONNECTED
-        : ConnectionState.CONNECTED;
-
-    this.connectionState.set(connectionState);
-  }
-
   private void updateSampleState(AxisState axisState) {
     SampleState sampleState;
 
@@ -156,10 +138,10 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
       sampleState = mode == Mode.ANALYSING ? ANALYSIS : EXCHANGE;
       break;
     case LOCATION_REQUESTED:
-      sampleState = mode == Mode.ANALYSING ? ANALYSIS_LOCATION_REQUESTED : EXCHANGE_REQUESTED;
+      sampleState = mode == Mode.ANALYSING ? ANALYSIS_REQUESTED : EXCHANGE_REQUESTED;
       break;
     default:
-      sampleState = mode == Mode.ANALYSING ? ANALYSIS_LOCATION_FAILED : EXCHANGE_FAILED;
+      sampleState = mode == Mode.ANALYSING ? ANALYSIS_FAILED : EXCHANGE_FAILED;
       break;
     }
 
@@ -176,31 +158,42 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     };
   }
 
-  synchronized void requestExchange() {
+  protected synchronized void requestExchange(AbstractingControlLock lock) {
     if (mode != Mode.EXCHANGING) {
-      setRequestedLocation(Mode.EXCHANGING, exchangeLocation);
+      setRequestedLocation(lock, Mode.EXCHANGING, exchangeLocation);
     }
   }
 
-  synchronized void requestAnalysis() {
+  protected synchronized void requestAnalysis(AbstractingControlLock lock) {
     if (mode != Mode.ANALYSING) {
-      setRequestedLocation(Mode.ANALYSING, analysisLocation);
+      setRequestedLocation(lock, Mode.ANALYSING, analysisLocation);
     }
   }
 
-  synchronized void requestAnalysisLocation(T location) {
+  protected synchronized void requestAnalysisLocation(AbstractingControlLock lock, T location) {
     if (!isLocationReachable(location)) {
       throw new IllegalArgumentException("Location unreachable " + location);
     }
 
-    setRequestedLocation(Mode.ANALYSING, location);
+    setRequestedLocation(lock, Mode.ANALYSING, location);
   }
 
-  SampleState awaitRequest() {
+  protected SampleState awaitRequest(long time, TimeUnit unit) {
     return sampleState()
         .value()
-        .filter(s -> ANALYSIS_LOCATION_REQUESTED != s && EXCHANGE_REQUESTED != s)
-        .get();
+        .filter(s -> ANALYSIS_REQUESTED != s && EXCHANGE_REQUESTED != s)
+        .getNext()
+        .orTimeout(time, unit)
+        .join();
+  }
+
+  protected SampleState awaitReady(long time, TimeUnit unit) {
+    return sampleState()
+        .value()
+        .filter(s -> ANALYSIS_REQUESTED != s && EXCHANGE_REQUESTED != s && EXCHANGE != s)
+        .getNext()
+        .orTimeout(time, unit)
+        .join();
   }
 
   private void assertRegistered() {
@@ -209,16 +202,15 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     }
   }
 
-  synchronized void setRequestedLocation(Mode mode, T location) {
+  protected synchronized void setRequestedLocation(
+      AbstractingControlLock lock,
+      Mode mode,
+      T location) {
     assertRegistered();
 
     this.mode = mode;
-    setRequestedLocationImpl(location);
-  }
-
-  @Override
-  public ObservableValue<ConnectionState> connectionState() {
-    return connectionState;
+    this.requestedLocation.set(location);
+    setRequestedLocationImpl(lock, location);
   }
 
   @Override
@@ -236,12 +228,7 @@ public abstract class ComposedStage<T, U extends ComposedStageControl<T>> extend
     return actualLocation;
   }
 
-  @Override
-  public void abortRequest() {
-    axes.forEach(StageAxis::abortRequest);
-  }
-
   protected abstract T getActualLocationImpl();
 
-  protected abstract void setRequestedLocationImpl(T location);
+  protected abstract void setRequestedLocationImpl(AbstractingControlLock lock, T location);
 }

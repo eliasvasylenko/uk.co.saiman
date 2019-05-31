@@ -27,46 +27,85 @@
  */
 package uk.co.saiman.instrument.stage.composed;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+
+import java.util.concurrent.TimeUnit;
+
 import javax.measure.quantity.Length;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
 import uk.co.saiman.instrument.Instrument;
+import uk.co.saiman.instrument.axis.AxisDevice;
+import uk.co.saiman.instrument.sample.SampleDevice;
+import uk.co.saiman.instrument.sample.SampleState;
+import uk.co.saiman.instrument.stage.Stage;
 import uk.co.saiman.instrument.stage.XYStage;
+import uk.co.saiman.instrument.stage.XYStageController;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
-public abstract class ComposedXYStage<T extends ComposedXYStageControl>
-    extends ComposedStage<XYCoordinate<Length>, T> implements XYStage<T> {
-  private final StageAxis<Length> xAxis;
-  private final StageAxis<Length> yAxis;
+@Designate(ocd = ComposedXYStage.ComposedXYStageConfiguration.class, factory = true)
+@Component(name = ComposedXYStage.CONFIGURATION_PID, configurationPid = ComposedXYStage.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+    SampleDevice.class,
+    Stage.class,
+    XYStage.class })
+public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStageController>
+    implements XYStage<XYStageController> {
+  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.composed.xy";
 
-  private final XYCoordinate<Length> lowerBound;
-  private final XYCoordinate<Length> upperBound;
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "SAINT Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
+  public @interface ComposedXYStageConfiguration {
+    String name();
+
+    String exchangeLocation();
+
+    String analysisLocation();
+  }
+
+  private final AxisDevice<Length, ?> xAxis;
+  private final AxisDevice<Length, ?> yAxis;
+
+  @Activate
+  public ComposedXYStage(
+      @Reference(name = "instrument") Instrument instrument,
+      @Reference(name = "xAxis") AxisDevice<Length, ?> xAxis,
+      @Reference(name = "yAxis") AxisDevice<Length, ?> yAxis,
+      ComposedXYStageConfiguration configuration) {
+    this(
+        configuration.name(),
+        instrument,
+        xAxis,
+        yAxis,
+        XYCoordinate.fromString(configuration.analysisLocation()).asType(Length.class),
+        XYCoordinate.fromString(configuration.exchangeLocation()).asType(Length.class));
+  }
 
   public ComposedXYStage(
       String name,
       Instrument instrument,
-      StageAxis<Length> xAxis,
-      StageAxis<Length> yAxis,
-      XYCoordinate<Length> lowerBound,
-      XYCoordinate<Length> upperBound,
+      AxisDevice<Length, ?> xAxis,
+      AxisDevice<Length, ?> yAxis,
       XYCoordinate<Length> analysisLocation,
       XYCoordinate<Length> exchangeLocation) {
     super(name, instrument, analysisLocation, exchangeLocation, xAxis, yAxis);
 
     this.xAxis = xAxis;
     this.yAxis = yAxis;
-
-    this.lowerBound = lowerBound;
-    this.upperBound = upperBound;
   }
 
   @Override
   public XYCoordinate<Length> getLowerBound() {
-    return lowerBound;
+    return new XYCoordinate<>(xAxis.getLowerBound(), yAxis.getLowerBound());
   }
 
   @Override
   public XYCoordinate<Length> getUpperBound() {
-    return upperBound;
+    return new XYCoordinate<>(xAxis.getUpperBound(), yAxis.getUpperBound());
   }
 
   @Override
@@ -83,8 +122,45 @@ public abstract class ComposedXYStage<T extends ComposedXYStageControl>
   }
 
   @Override
-  protected void setRequestedLocationImpl(XYCoordinate<Length> location) {
-    xAxis.requestLocation(location.getX());
-    yAxis.requestLocation(location.getY());
+  protected void setRequestedLocationImpl(
+      AbstractingControlLock lock,
+      XYCoordinate<Length> location) {
+    lock.getController(xAxis).requestLocation(location.getX());
+    lock.getController(yAxis).requestLocation(location.getY());
+  }
+
+  @Override
+  protected XYStageController acquireControl(AbstractingControlLock lock) {
+    return new XYStageController() {
+      @Override
+      public void requestExchange() {
+        lock.run(() -> ComposedXYStage.this.requestExchange(lock));
+      }
+
+      @Override
+      public void requestAnalysis(XYCoordinate<Length> location) {
+        lock.run(() -> ComposedXYStage.this.requestAnalysisLocation(lock, location));
+      }
+
+      @Override
+      public void requestReady() {
+        lock.run(() -> ComposedXYStage.this.requestAnalysis(lock));
+      }
+
+      @Override
+      public void close() {
+        lock.close();
+      }
+
+      @Override
+      public SampleState awaitRequest(long time, TimeUnit unit) {
+        return lock.get(() -> ComposedXYStage.this.awaitRequest(time, unit));
+      }
+
+      @Override
+      public SampleState awaitReady(long time, TimeUnit unit) {
+        return lock.get(() -> ComposedXYStage.this.awaitReady(time, unit));
+      }
+    };
   }
 }

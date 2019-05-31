@@ -31,9 +31,6 @@ import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.currentThread;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
-import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
-import static uk.co.saiman.instrument.ConnectionState.CONNECTED;
 import static uk.co.saiman.log.Log.Level.ERROR;
 import static uk.co.saiman.measurement.Quantities.quantityFormat;
 import static uk.co.saiman.measurement.Units.count;
@@ -42,7 +39,6 @@ import static uk.co.saiman.observable.Observer.forObservation;
 import static uk.co.saiman.observable.Observer.onObservation;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -52,27 +48,22 @@ import javax.measure.quantity.Time;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.data.function.SampledContinuousFunction;
-import uk.co.saiman.instrument.ConnectionState;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceImpl;
-import uk.co.saiman.instrument.DeviceRegistration;
 import uk.co.saiman.instrument.Instrument;
-import uk.co.saiman.instrument.InstrumentRegistration;
-import uk.co.saiman.instrument.acquisition.AcquisitionControl;
+import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.acquisition.AcquisitionException;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.observable.Observation;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.simulation.SimulationProperties;
@@ -89,8 +80,8 @@ import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.Acquis
 @Component(configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
     Device.class,
     AcquisitionDevice.class })
-public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
-    implements AcquisitionDevice<AcquisitionControl> {
+public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController>
+    implements AcquisitionDevice<AcquisitionController> {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(name = "Simulated Acquisition Device Configuration", description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
   public @interface AcquisitionSimulationConfiguration {
@@ -157,7 +148,6 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
   private final Unit<Time> timeUnit;
 
   private final SimulationProperties simulationProperties;
-  private final DeviceRegistration instrumentRegistration;
   private final Log log;
 
   /*
@@ -167,9 +157,8 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
   private int acquisitionDepth;
   private int acquisitionCount;
 
-  @Reference(name = "detector", cardinality = OPTIONAL, policy = DYNAMIC)
-  private volatile DetectorSimulationService detectorService;
-  private volatile DetectorSimulation detector;
+  private final DetectorSimulationService detectorService;
+  private DetectorSimulation detector;
 
   /*
    * External Acquisition State
@@ -193,24 +182,28 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
       AcquisitionSimulationConfiguration configuration,
       @Reference PropertyLoader loader,
       @Reference Log log,
-      @Reference(name = "instrument") Instrument instrument) {
+      @Reference(name = "instrument") Instrument instrument,
+      @Reference(name = "detectorService") DetectorSimulationService detectorService) {
     this(
         quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class),
         loader.getProperties(SimulationProperties.class),
         log,
-        instrument);
+        instrument,
+        detectorService);
   }
 
   public SimulatedAcquisitionDevice(
       Quantity<Time> acquisitionResolution,
       SimulationProperties simulationProperties,
       Log log,
-      Instrument instrument) {
-    super(simulationProperties.acquisitionSimulationDeviceName().toString());
+      Instrument instrument,
+      DetectorSimulationService detectorService) {
+    super(simulationProperties.acquisitionSimulationDeviceName().toString(), instrument);
 
     this.acquisitionResolution = acquisitionResolution;
     this.simulationProperties = simulationProperties;
     this.log = log;
+    this.detectorService = detectorService;
 
     acquisitionBuffer = new HotObservable<>();
     dataListeners = new HotObservable<>();
@@ -233,32 +226,16 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
         .then(forObservation(o -> m -> o.requestNext()))
         .observe(this::acquired);
 
-    instrumentRegistration = instrument.registerDevice(this);
-
     initializeDetector();
 
     new Thread(this::acquire).start();
   }
 
   private void initializeDetector() {
-    detector = detectorService == null
-        ? null
-        : detectorService.getDetectorSimulation(getSampleDomain(), getSampleIntensityUnit());
-  }
-
-  @Deactivate
-  public void dispose() {
-    instrumentRegistration.deregister();
-  }
-
-  @Override
-  public InstrumentRegistration getInstrumentRegistration() {
-    return instrumentRegistration.getInstrumentRegistration();
+    detector = detectorService.getDetectorSimulation(getSampleDomain(), getSampleIntensityUnit());
   }
 
   protected DetectorSimulation getDetector() {
-    if (detector == null)
-      initializeDetector();
     return detector;
   }
 
@@ -452,12 +429,32 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionControl>
   }
 
   @Override
-  public ObservableValue<ConnectionState> connectionState() {
-    return ObservableValue.of(CONNECTED);
-  }
+  protected AcquisitionController acquireControl(ControlLock lock) {
+    return new AcquisitionController() {
+      @Override
+      public void startAcquisition() {
+        lock.run(SimulatedAcquisitionDevice.this::startAcquisition);
+      }
 
-  @Override
-  public AcquisitionControl acquireControl(long timeout, TimeUnit unit) {
-    return new SimulatedAcquisitionControl(this, timeout, unit);
+      @Override
+      public void setSampleDepth(int depth) {
+        lock.run(() -> SimulatedAcquisitionDevice.this.setSampleDepth(depth));
+      }
+
+      @Override
+      public void setAcquisitionTime(Quantity<Time> time) {
+        lock.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionTime(time));
+      }
+
+      @Override
+      public void setAcquisitionCount(int count) {
+        lock.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionCount(count));
+      }
+
+      @Override
+      public void close() {
+        lock.close();
+      }
+    };
   }
 }
