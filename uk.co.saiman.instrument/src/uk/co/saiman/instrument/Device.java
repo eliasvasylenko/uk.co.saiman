@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.instrument;
 
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -41,9 +40,9 @@ import uk.co.saiman.observable.ObservableValue;
  * A physical hardware device, generally speaking, is inherently a singleton
  * service with shared state. Because of this it is important to regulate access
  * when control is contested between multiple consumers. Exclusive control of a
- * device is therefore provided via a {@link #acquireControl() control
- * interface}, which can only be acquired by one consumer at a time, acting as a
- * write-lock over the functions of the device.
+ * device is therefore provided via a {@link #acquireControl(long , TimeUnit )
+ * control interface}, which can only be acquired by one consumer at a time,
+ * acting as a write-lock over the functions of the device.
  * <p>
  * Reading from the device needs no such regulation and should be provided via
  * methods directly on the implementing class of the device. Sometimes it may be
@@ -57,29 +56,15 @@ import uk.co.saiman.observable.ObservableValue;
  * 
  * @param <T> the control interface for the device
  */
-public interface Device<T extends Controller> {
+public interface Device<T> {
   /**
    * @return the human-readable and localized name of the device
    */
   String getName();
 
-  /**
-   * Immediately acquire a mutually exclusive lock on control of the device. The
-   * returned interface should provide access to all control and
-   * write-functionality of the device, but should not be required for reading
-   * from the device.
-   * 
-   * @return an interface for interaction with the device
-   */
-  default Optional<? extends T> acquireControl() throws IllegalStateException {
-    try {
-      return Optional.of(acquireControl(0, TimeUnit.MILLISECONDS));
-    } catch (TimeoutException | InterruptedException | IllegalStateException e) {
-      return Optional.empty();
-    }
-  }
-
-  T acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
+  Control<T> acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException,
+      InterruptedException;
 
   /**
    * Devices should only ever be registered to a single instrument, and must

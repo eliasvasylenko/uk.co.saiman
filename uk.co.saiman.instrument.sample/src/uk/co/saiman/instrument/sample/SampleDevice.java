@@ -42,7 +42,17 @@ import uk.co.saiman.observable.ObservableValue;
  * @param <T> The analysis location space.
  */
 public interface SampleDevice<T, U extends SampleController<T>> extends Device<U> {
-  ObservableValue<SampleState> sampleState();
+  /**
+   * In general no guarantee is made that a request will be fulfilled (or will
+   * fail) in a timely manner. Implementors may choose, however, to make such
+   * promises and to enter the {@link Failed failed} state if they are unable to
+   * fulfill them within some timeout period.
+   * 
+   * @return the currently requested sample state
+   */
+  ObservableValue<RequestedSampleState<T>> requestedSampleState();
+
+  ObservableValue<SampleState<T>> sampleState();
 
   /**
    * Generally for a positional stage this should be a straightforward check that
@@ -54,23 +64,20 @@ public interface SampleDevice<T, U extends SampleController<T>> extends Device<U
    * @return true if the given sample location is valid for analysis and can be
    *         reached, false otherwise
    */
-  boolean isLocationReachable(T location);
-
-  /**
-   * @return The last requested location. If the device is in the exchange state
-   *         or the ready state, the behavior of this method is left to the
-   *         discretion of the implementor.
-   */
-  ObservableValue<T> requestedLocation();
+  boolean isPositionReachable(T location);
 
   /**
    * The actual measured sample location.
    * <p>
    * For certain configurations of hardware and definitions of "location" the
    * implementation may define an error tolerance for the measured location
-   * compared to the requested location.
+   * compared to the requested location. As a result, when a
+   * {@link #requestedSampleState() requested} analysis position is
+   * {@link #sampleState() reached}, its {@link Analysis#position() position} may
+   * not be exactly {@link Object#equals(Object) equal} to the
+   * {@link #samplePosition() measured position}.
    * 
    * @return an observable over the actual sample location
    */
-  ObservableValue<T> actualLocation();
+  ObservableValue<T> samplePosition();
 }

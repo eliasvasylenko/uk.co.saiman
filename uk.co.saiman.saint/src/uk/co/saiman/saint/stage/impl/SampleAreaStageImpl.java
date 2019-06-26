@@ -34,6 +34,10 @@ import java.util.concurrent.TimeUnit;
 import javax.measure.quantity.Length;
 
 import uk.co.saiman.instrument.DeviceImpl;
+import uk.co.saiman.instrument.sample.Analysis;
+import uk.co.saiman.instrument.sample.Failed;
+import uk.co.saiman.instrument.sample.Ready;
+import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
@@ -44,7 +48,6 @@ import uk.co.saiman.saint.stage.SampleArea;
 import uk.co.saiman.saint.stage.SampleAreaStage;
 import uk.co.saiman.saint.stage.SampleAreaStageController;
 import uk.co.saiman.saint.stage.SamplePlateStage;
-import uk.co.saiman.saint.stage.SamplePlateStageController;
 
 /**
  * An implementation of a stage for the Saint instrument which is backed by an
@@ -56,108 +59,161 @@ import uk.co.saiman.saint.stage.SamplePlateStageController;
  */
 public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
     implements SampleAreaStage {
-  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.saint";
+  private final SaintStageManager stateManager;
 
   private static final XYCoordinate<Length> ZERO = new XYCoordinate<>(metre().getUnit(), 0, 0);
 
-  private final SamplePlateStageImpl samplePlate;
+  private final ObservableProperty<RequestedSampleState<XYCoordinate<Length>>> requestedSampleState;
+  private final ObservableProperty<SampleState<XYCoordinate<Length>>> sampleState;
 
-  private final ObservableProperty<XYCoordinate<Length>> requestedLocation;
-  private final ObservableProperty<XYCoordinate<Length>> actualLocation;
+  private final ObservableProperty<XYCoordinate<Length>> actualPosition;
 
-  public SampleAreaStageImpl(SamplePlateStageImpl samplePlate, SaintProperties properties) {
-    super(
-        properties.sampleAreaStageDeviceName().toString(),
-        samplePlate.getInstrumentRegistration().getInstrument());
-    this.samplePlate = samplePlate;
-    this.requestedLocation = ObservableProperty.over(ZERO);
-    this.actualLocation = ObservableProperty.over(ZERO);
-  }
+  public SampleAreaStageImpl(SaintProperties properties, SaintStageManager stateManager) {
+    super(properties.sampleAreaStageDeviceName().toString(), stateManager.getInstrument());
 
-  @Override
-  public ObservableValue<SampleState> sampleState() {
-    return samplePlate.sampleState();
-  }
+    this.stateManager = stateManager;
 
-  @Override
-  public XYCoordinate<Length> getLowerBound() {
-    return samplePlate.requestedLocation().tryGet().map(SampleArea::lowerBound).orElse(ZERO);
-  }
-
-  @Override
-  public XYCoordinate<Length> getUpperBound() {
-    return samplePlate.requestedLocation().tryGet().map(SampleArea::upperBound).orElse(ZERO);
-  }
-
-  @Override
-  public boolean isLocationReachable(XYCoordinate<Length> location) {
-    return samplePlate
-        .requestedLocation()
-        .tryGet()
-        .map(area -> area.isLocationReachable(location))
-        .orElse(ZERO.equals(location));
-  }
-
-  @Override
-  public ObservableValue<XYCoordinate<Length>> requestedLocation() {
-    return requestedLocation;
-  }
-
-  @Override
-  public ObservableValue<XYCoordinate<Length>> actualLocation() {
-    return actualLocation;
-  }
-
-  @Override
-  protected SampleAreaStageController acquireControl(ControlLock lock) {
-    return new SampleAreaStageController() {
-
-      @Override
-      public void requestExchange() {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public void requestReady() {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public void requestAnalysis(XYCoordinate<Length> location) {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public SampleState awaitRequest(long timeout, TimeUnit unit) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public SampleState awaitReady(long timeout, TimeUnit unit) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public void close() {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public SamplePlateStageController samplePlateStageController() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-    };
+    this.sampleState = ObservableProperty.over(SampleState.exchange());
+    this.requestedSampleState = ObservableProperty.over(SampleState.exchange());
+    this.actualPosition = ObservableProperty.over(NullPointerException::new);
   }
 
   @Override
   public SamplePlateStage samplePlateStage() {
-    return samplePlate;
+    return stateManager.samplePlateStage();
+  }
+
+  @Override
+  public XYCoordinate<Length> getLowerBound() {
+    return samplePlateStage()
+        .requestedSampleState()
+        .tryGet()
+        .filter(r -> r instanceof Analysis<?>)
+        .map(r -> ((Analysis<SampleArea>) r).position().lowerBound())
+        .orElse(ZERO);
+  }
+
+  @Override
+  public XYCoordinate<Length> getUpperBound() {
+    return samplePlateStage()
+        .requestedSampleState()
+        .tryGet()
+        .filter(r -> r instanceof Analysis<?>)
+        .map(r -> ((Analysis<SampleArea>) r).position().upperBound())
+        .orElse(ZERO);
+  }
+
+  @Override
+  public boolean isPositionReachable(XYCoordinate<Length> location) {
+    return samplePlateStage()
+        .requestedSampleState()
+        .tryGet()
+        .filter(r -> r instanceof Analysis<?>)
+        .map(r -> ((Analysis<SampleArea>) r).position().isLocationReachable(location))
+        .orElse(false);
+  }
+
+  @Override
+  public ObservableValue<SampleState<XYCoordinate<Length>>> sampleState() {
+    return sampleState;
+  }
+
+  @Override
+  public ObservableValue<RequestedSampleState<XYCoordinate<Length>>> requestedSampleState() {
+    return requestedSampleState;
+  }
+
+  @Override
+  public ObservableValue<XYCoordinate<Length>> samplePosition() {
+    return actualPosition;
+  }
+
+  private void processStateMachine() {
+    stateManager.processState();
+  }
+
+  private synchronized void validateRequestedOffset(XYCoordinate<Length> offset) {
+    var offsetFromLowerBound = samplePlateStage()
+        .requestedSampleState()
+        .tryGet()
+        .filter(r -> r instanceof Analysis<?>)
+        .map(r -> ((Analysis<SampleArea>) r).position().lowerBound())
+        .map(lowerBound -> offset.subtract(lowerBound))
+        .orElse(offset);
+
+    var offsetFromUpperBound = samplePlateStage()
+        .requestedSampleState()
+        .tryGet()
+        .filter(r -> r instanceof Analysis<?>)
+        .map(r -> ((Analysis<SampleArea>) r).position().upperBound())
+        .map(upperBound -> offset.subtract(upperBound))
+        .orElse(offset);
+
+    if (offsetFromLowerBound.getX().getValue().doubleValue() < 0
+        || offsetFromLowerBound.getY().getValue().doubleValue() < 0
+        || offsetFromUpperBound.getX().getValue().doubleValue() > 0
+        || offsetFromUpperBound.getY().getValue().doubleValue() > 0) {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  @Override
+  protected SampleAreaStageController acquireControl(ControlLock lock) {
+    lock.run(() -> processStateMachine());
+    return new SampleAreaStageController() {
+      @Override
+      public void close() {
+        lock.close(() -> processStateMachine());
+      }
+
+      @Override
+      public void requestExchange() {
+        lock.close(() -> {
+          requestedSampleState.set(SampleState.exchange());
+          processStateMachine();
+        });
+      }
+
+      @Override
+      public void requestReady() {
+        lock.run(() -> {
+          requestedSampleState.set(SampleState.ready());
+          processStateMachine();
+        });
+      }
+
+      @Override
+      public void requestAnalysis(XYCoordinate<Length> position) {
+        lock.run(() -> {
+          validateRequestedOffset(position);
+          requestedSampleState.set(SampleState.analysis(position));
+          processStateMachine();
+        });
+      }
+
+      @Override
+      public SampleState<XYCoordinate<Length>> awaitRequest(long time, TimeUnit unit) {
+        return lock
+            .get(
+                () -> sampleState
+                    .value()
+                    .filter(s -> requestedSampleState().isMatching(r -> r.equals(s)))
+                    .getNext()
+                    .orTimeout(time, unit)
+                    .join());
+      }
+
+      @Override
+      public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
+        return lock
+            .get(
+                () -> sampleState
+                    .value()
+                    .filter(s -> s instanceof Ready<?> || s instanceof Failed<?>)
+                    .getNext()
+                    .orTimeout(time, unit)
+                    .join());
+      }
+    };
   }
 }

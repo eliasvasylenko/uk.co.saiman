@@ -60,8 +60,8 @@ public class StateToolControl {
 
     this.device = device;
     if (device != null) {
-      requestedLocation = device.requestedLocation().value().observe(l -> updateLabel());
-      actualLocation = device.actualLocation().value().observe(l -> updateLabel());
+      requestedLocation = device.requestedSampleState().value().observe(l -> updateLabel());
+      actualLocation = device.samplePosition().value().observe(l -> updateLabel());
       sampleState = device.sampleState().value().observe(l -> updateLabel());
     } else {
       requestedLocation = null;

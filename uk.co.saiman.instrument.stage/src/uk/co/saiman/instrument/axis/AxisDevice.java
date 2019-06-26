@@ -41,5 +41,5 @@ public interface AxisDevice<T extends Quantity<T>, U extends AxisController<T>> 
 
   ObservableValue<Quantity<T>> requestedLocation();
 
-  ObservableValue<Quantity<T>> actualLocation();
+  ObservableValue<Quantity<T>> actualPosition();
 }

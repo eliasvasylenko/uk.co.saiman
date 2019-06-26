@@ -28,6 +28,7 @@
 package uk.co.saiman.observable;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -123,5 +124,40 @@ public interface ObservableValue<T> {
 
   static <M> ObservableValue<M> of(M value) {
     return new ImmutableObservableValue<>(value);
+  }
+
+  default <U> ObservableValue<U> map(Function<? super T, ? extends U> mapping) {
+    ObservableValue<T> owner = this;
+    return new ObservableValue<U>() {
+      @Override
+      public U get() {
+        return mapping.apply(owner.get());
+      }
+
+      @Override
+      public Optional<U> tryGet() {
+        return owner.tryGet().map(mapping::apply);
+      }
+
+      @Override
+      public Observable<Change<U>> changes() {
+        return owner.changes().map(change -> new Change<U>() {
+          @Override
+          public ObservableValue<U> previousValue() {
+            return change.previousValue().map(mapping);
+          }
+
+          @Override
+          public ObservableValue<U> newValue() {
+            return change.newValue().map(mapping);
+          }
+        });
+      }
+
+      @Override
+      public Observable<U> value() {
+        return owner.value().map(mapping);
+      }
+    };
   }
 }

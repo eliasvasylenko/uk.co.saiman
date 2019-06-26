@@ -41,6 +41,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import uk.co.saiman.instrument.sample.Analysis;
+import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.stage.Stage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.measurement.fx.XYCoordinateBinding;
@@ -67,8 +69,9 @@ public abstract class StageDiagram<T> extends StackPane {
     this.annotationLayer = new AnnotationLayer<>(unit, unit);
     Stage<T, ?> stageDevice = getStageDevice();
 
-    requestedCoordinates = stageLocationToCoordinates(wrap(stageDevice.requestedLocation()));
-    actualCoordinates = stageLocationToCoordinates(wrap(stageDevice.actualLocation()));
+    requestedCoordinates = stageLocationToCoordinates(
+        wrap(stageDevice.requestedSampleState().map(this::requestedStateToPosition)));
+    actualCoordinates = stageLocationToCoordinates(wrap(stageDevice.samplePosition()));
 
     XYAnnotation<Length, Length> requestedPosition = new ShapeAnnotation<>(new Circle(4));
     annotationLayer.getAnnotations().add(requestedPosition);
@@ -82,6 +85,14 @@ public abstract class StageDiagram<T> extends StackPane {
 
     getChildren().add(imageView);
     getChildren().add(annotationLayer);
+  }
+
+  public T requestedStateToPosition(RequestedSampleState<T> requestedState) {
+    if (requestedState instanceof Analysis<?>) {
+      return ((Analysis<T>) requestedState).position();
+    } else {
+      return null;
+    }
   }
 
   public XYCoordinateBinding<Length> getRequestedCoordinates() {

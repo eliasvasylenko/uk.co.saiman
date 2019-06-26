@@ -2,14 +2,15 @@ package uk.co.saiman.instrument;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.co.saiman.instrument.DeviceStatus.AVAILABLE;
 import static uk.co.saiman.instrument.DeviceStatus.DISPOSED;
 import static uk.co.saiman.instrument.DeviceStatus.INACCESSIBLE;
 import static uk.co.saiman.instrument.DeviceStatus.UNAVAILABLE;
 
-import org.junit.jupiter.api.Assertions;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,7 +27,7 @@ public class DeviceImplTest {
     void releaseControl();
   }
 
-  static interface SimpleController extends Controller {
+  static interface SimpleController {
     void command();
   }
 
@@ -37,19 +38,19 @@ public class DeviceImplTest {
     }
 
     @Override
-    protected SimpleController acquireControl(ControlLock lock) {
+    protected SimpleController createController(ControlContext context) {
       backingService.acquireControl();
       return new SimpleController() {
         @Override
-        public void close() {
-          lock.close(backingService::releaseControl);
-        }
-
-        @Override
         public void command() {
-          lock.run(backingService::command);
+          context.run(backingService::command);
         }
       };
+    }
+
+    @Override
+    protected void destroyController(ControlContext context) {
+      backingService.releaseControl();
     }
   }
 
@@ -78,24 +79,24 @@ public class DeviceImplTest {
   }
 
   @Test
-  public void acquireFailsWhenAlreadyAcquired() {
+  public void acquireFailsWhenAlreadyAcquired() throws TimeoutException, InterruptedException {
     var device = new SimpleDevice();
-    Assertions.assertTrue(device.acquireControl().isPresent());
-    Assertions.assertTrue(device.acquireControl().isEmpty());
+    assertFalse(device.acquireControl(0, SECONDS).isClosed());
+    assertThrows(TimeoutException.class, () -> device.acquireControl(0, SECONDS));
   }
 
   @Test
   public void acquireSucceedsAfterAcquireAndRelease() throws Exception {
     var device = new SimpleDevice();
-    var control = device.acquireControl().get();
+    var control = device.acquireControl(0, SECONDS);
     control.close();
-    Assertions.assertTrue(device.acquireControl().isPresent());
+    assertFalse(device.acquireControl(0, SECONDS).isClosed());
   }
 
   @Test
   public void getNameTest() throws Exception {
     var device = new SimpleDevice();
-    Assertions.assertEquals("simpleDevice", device.getName());
+    assertEquals("simpleDevice", device.getName());
   }
 
   @Test
@@ -119,7 +120,6 @@ public class DeviceImplTest {
     var device = new SimpleDevice();
     device.dispose();
     assertEquals(DISPOSED, device.status().get());
-    assertTrue(device.acquireControl().isEmpty());
     assertThrows(IllegalStateException.class, () -> device.acquireControl(0, SECONDS));
     assertEquals(DISPOSED, device.status().get());
   }
@@ -131,7 +131,7 @@ public class DeviceImplTest {
     var device = new SimpleDevice();
     device.setInaccessible();
     assertEquals(INACCESSIBLE, device.status().get());
-    assertTrue(device.acquireControl().isPresent());
+    assertFalse(device.acquireControl(0, SECONDS).isClosed());
     assertEquals(UNAVAILABLE, device.status().get());
   }
 
@@ -143,7 +143,9 @@ public class DeviceImplTest {
 
     var device = new SimpleDevice();
     assertEquals(AVAILABLE, device.status().get());
-    assertEquals(exception, assertThrows(RuntimeException.class, () -> device.acquireControl()));
+    assertEquals(
+        exception,
+        assertThrows(RuntimeException.class, () -> device.acquireControl(0, SECONDS)));
     assertEquals(INACCESSIBLE, device.status().get());
   }
 
@@ -172,7 +174,7 @@ public class DeviceImplTest {
     Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
 
     var device = new SimpleDevice();
-    var control = device.acquireControl().get();
+    var control = device.acquireControl(0, SECONDS).getController();
     device.setInaccessible();
     assertThrows(IllegalStateException.class, () -> control.command());
 
@@ -188,7 +190,7 @@ public class DeviceImplTest {
     Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
 
     var device = new SimpleDevice();
-    var control = device.acquireControl().get();
+    var control = device.acquireControl(0, SECONDS).getController();
     device.dispose();
     assertThrows(IllegalStateException.class, () -> control.command());
 

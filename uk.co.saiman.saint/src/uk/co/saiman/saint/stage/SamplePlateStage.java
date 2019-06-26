@@ -11,7 +11,5 @@ public interface SamplePlateStage extends Stage<SampleArea, SamplePlateStageCont
 
   XYCoordinate<Length> getUpperBound();
 
-  ObservableValue<XYCoordinate<Length>> requestedOffset();
-
-  SampleAreaStage sampleArea();
+  SampleAreaStage sampleAreaStage();
 }

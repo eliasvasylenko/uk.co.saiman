@@ -33,35 +33,6 @@ package uk.co.saiman.instrument.sample;
  * 
  * @author Elias N Vasylenko
  */
-public abstract class SampleState<T> {
-  private static final Failed<?> FAILED = new Failed<>();
-  private static final Transition<?> TRANSITION = new Transition<>();
-  private static final Ready<?> READY = new Ready<>();
-  private static final Exchange<?> EXCHANGE = new Exchange<>();
-
-  SampleState() {}
-
-  @SuppressWarnings("unchecked")
-  public static <T> Failed<T> failed() {
-    return (Failed<T>) FAILED;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Transition<T> transition() {
-    return (Transition<T>) TRANSITION;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Ready<T> ready() {
-    return (Ready<T>) READY;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Exchange<T> exchange() {
-    return (Exchange<T>) EXCHANGE;
-  }
-
-  public static <T> RequestedSampleState<T> analysis(T position) {
-    return new Analysis<>(position);
-  }
+public abstract class RequestedSampleState<T> extends SampleState<T> {
+  RequestedSampleState() {}
 }

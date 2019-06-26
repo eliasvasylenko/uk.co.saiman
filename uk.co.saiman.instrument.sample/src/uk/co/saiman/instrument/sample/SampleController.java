@@ -31,71 +31,63 @@ import java.util.concurrent.TimeUnit;
 
 import uk.co.saiman.instrument.Controller;
 
-public interface SampleController<T> extends Controller {
+public interface SampleController<T> {
   /**
-   * Request that the sample be prepared for exchange.
+   * Request that the sample be prepared for exchange. If the device is already in
+   * the requested state, do nothing.
    * <p>
    * Typically the exchange position for a given piece of hardware means that e.g.
    * the sample are is at atmosphere and/or any inlet valves are shut.
    * <p>
-   * The device will initially be put into the
-   * {@link SampleState#EXCHANGE_REQUESTED} state. The possible states to follow
-   * from this request are either {@link SampleState#EXCHANGE_FAILED} or
-   * {@link SampleState#EXCHANGE}.
-   * <p>
    * Note that a sample exchange is a physical process, and some devices may
    * require physical interaction in order to transition into the exchange state.
-   * In this case, this method have no function other than to enter the
-   * {@link SampleState#EXCHANGE_REQUESTED} state and thus indicate that the
-   * software is ready to continue.
+   * In this case, this method can only signal intent and may not directly
+   * initiate an exchange.
    */
   void requestExchange();
 
   /**
-   * Request readiness for analysis.
-   * <p>
-   * The device will initially be put into the
-   * {@link SampleState#ANALYSIS_REQUESTED} state. The possible states to follow
-   * from this request are either {@link SampleState#ANALYSIS_FAILED} or
-   * {@link SampleState#ANALYSIS}.
+   * Request readiness for analysis. If the device is already in the requested
+   * state, do nothing.
    * 
    * @param location the location to analyze
    */
   void requestReady();
 
   /**
-   * Request analysis at the given sample location.
+   * Request analysis at the given sample location. If the device is already in
+   * the requested state, do nothing.
    * <p>
-   * The device will initially be put into the
-   * {@link SampleState#ANALYSIS_REQUESTED} state. The possible states to follow
-   * from this request are either {@link SampleState#ANALYSIS_FAILED} or
-   * {@link SampleState#ANALYSIS}.
+   * The invocation may fail with an exception if the device is not in the ready
+   * state or the analysis state, or if the requested location is not reachable.
+   * <p>
+   * The device implementation may choose to hold an analysis location until some
+   * internal condition is cleared, for example to ensure that the device can
+   * safely participate in some collaborate process with other devices. This means
+   * that while the sample is in the analysis state any requests for new analysis
+   * locations or for exchange may not be immediately fulfilled.
    * 
-   * @param location the location to analyze
+   * @param position the location to analyze
    */
-  void requestAnalysis(T location);
+  void requestAnalysis(T position);
 
   /**
    * Invocation blocks until the previous request is fulfilled, or until a failure
    * state is reached. The failure state may be a result of the request timing
    * out.
    * 
-   * @return the state resulting from the previous request, one of
-   *         {@link SampleState#EXCHANGE_FAILED}, {@link SampleState#EXCHANGE},
-   *         {@link SampleState#ANALYSIS_FAILED}, or {@link SampleState#ANALYSIS}
+   * @return the state resulting from the previous request, one of {@link Failed},
+   *         {@link Exchange}, or {@link Ready}
    */
-  SampleState awaitRequest(long timeout, TimeUnit unit);
+  SampleState<T> awaitRequest(long timeout, TimeUnit unit);
 
   /**
    * Invocation blocks until the device enters the analysis state, or until a
    * failure state is reached. The failure state may be a result of the request
    * timing out.
    * 
-   * @return the state resulting from the previous request, one of
-   *         {@link SampleState#ANALYSIS_FAILED} or {@link SampleState#ANALYSIS}
+   * @return the state resulting from the previous request, one of {@link Failed}
+   *         or {@link Ready}
    */
-  SampleState awaitReady(long timeout, TimeUnit unit);
-
-  @Override
-  void close();
+  SampleState<T> awaitReady(long timeout, TimeUnit unit);
 }

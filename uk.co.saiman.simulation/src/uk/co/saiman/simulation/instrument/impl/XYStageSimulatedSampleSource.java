@@ -275,7 +275,7 @@ public class XYStageSimulatedSampleSource
         .subtract(stageDimension.apply(stageDevice.getLowerBound()));
 
     Quantity<Length> offset = stageDimension
-        .apply(stageDevice.actualLocation().get())
+        .apply(stageDevice.samplePosition().get())
         .subtract(stageDimension.apply(stageDevice.getLowerBound()));
 
     return offset

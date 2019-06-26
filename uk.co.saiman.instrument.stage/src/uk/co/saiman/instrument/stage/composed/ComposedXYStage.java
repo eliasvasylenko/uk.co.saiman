@@ -41,6 +41,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.axis.AxisDevice;
+import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.Stage;
@@ -109,7 +110,7 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   }
 
   @Override
-  public boolean isLocationReachable(XYCoordinate<Length> location) {
+  public boolean isPositionReachable(XYCoordinate<Length> location) {
     return (getLowerBound().getX().subtract(location.getX()).getValue().doubleValue() <= 0)
         && (getLowerBound().getY().subtract(location.getY()).getValue().doubleValue() <= 0)
         && (getUpperBound().getX().subtract(location.getX()).getValue().doubleValue() >= 0)
@@ -117,49 +118,45 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   }
 
   @Override
-  protected XYCoordinate<Length> getActualLocationImpl() {
-    return new XYCoordinate<>(xAxis.actualLocation().get(), yAxis.actualLocation().get());
+  protected XYCoordinate<Length> getActualPositionImpl() {
+    return new XYCoordinate<>(xAxis.actualPosition().get(), yAxis.actualPosition().get());
   }
 
   @Override
-  protected void setRequestedLocationImpl(
-      AbstractingControlLock lock,
-      XYCoordinate<Length> location) {
-    lock.getController(xAxis).requestLocation(location.getX());
-    lock.getController(yAxis).requestLocation(location.getY());
+  protected void setRequestedStateImpl(
+      ControlContext context,
+      RequestedSampleState<XYCoordinate<Length>> requestedState,
+      XYCoordinate<Length> requestedPosition) {
+    context.getController(xAxis).requestLocation(requestedPosition.getX());
+    context.getController(yAxis).requestLocation(requestedPosition.getY());
   }
 
   @Override
-  protected XYStageController acquireControl(AbstractingControlLock lock) {
+  protected XYStageController createDependentController(ControlContext context) {
     return new XYStageController() {
       @Override
       public void requestExchange() {
-        lock.run(() -> ComposedXYStage.this.requestExchange(lock));
+        ComposedXYStage.this.requestSampleState(context, SampleState.exchange());
       }
 
       @Override
       public void requestAnalysis(XYCoordinate<Length> location) {
-        lock.run(() -> ComposedXYStage.this.requestAnalysisLocation(lock, location));
+        ComposedXYStage.this.requestSampleState(context, SampleState.analysis(location));
       }
 
       @Override
       public void requestReady() {
-        lock.run(() -> ComposedXYStage.this.requestAnalysis(lock));
+        ComposedXYStage.this.requestSampleState(context, SampleState.ready());
       }
 
       @Override
-      public void close() {
-        lock.close();
+      public SampleState<XYCoordinate<Length>> awaitRequest(long time, TimeUnit unit) {
+        return context.get(() -> ComposedXYStage.this.awaitRequest(time, unit));
       }
 
       @Override
-      public SampleState awaitRequest(long time, TimeUnit unit) {
-        return lock.get(() -> ComposedXYStage.this.awaitRequest(time, unit));
-      }
-
-      @Override
-      public SampleState awaitReady(long time, TimeUnit unit) {
-        return lock.get(() -> ComposedXYStage.this.awaitReady(time, unit));
+      public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
+        return context.get(() -> ComposedXYStage.this.awaitReady(time, unit));
       }
     };
   }

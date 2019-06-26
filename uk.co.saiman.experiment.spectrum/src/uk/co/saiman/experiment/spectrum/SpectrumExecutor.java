@@ -120,7 +120,7 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
     System.out.println("start acquisition");
 
     try (var control = device.acquireControl(2, SECONDS)) {
-      control.startAcquisition();
+      control.getController().startAcquisition();
 
       /*
        * TODO some sort of invalidate/lazy-revalidate message passer

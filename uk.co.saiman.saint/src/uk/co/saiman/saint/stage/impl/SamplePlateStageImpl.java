@@ -27,155 +27,88 @@
  */
 package uk.co.saiman.saint.stage.impl;
 
-import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-
-import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
 import javax.measure.quantity.Length;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-
-import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.sample.SampleDevice;
+import uk.co.saiman.instrument.sample.Failed;
+import uk.co.saiman.instrument.sample.Ready;
+import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleState;
-import uk.co.saiman.instrument.stage.Stage;
-import uk.co.saiman.instrument.stage.XYStage;
-import uk.co.saiman.instrument.stage.XYStageController;
 import uk.co.saiman.instrument.virtual.AbstractingDevice;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
-import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.saint.SaintProperties;
 import uk.co.saiman.saint.stage.SampleArea;
 import uk.co.saiman.saint.stage.SampleAreaStage;
 import uk.co.saiman.saint.stage.SamplePlateStage;
 import uk.co.saiman.saint.stage.SamplePlateStageController;
 
-/**
- * An implementation of a stage for the Saint instrument which is backed by an
- * {@link XYStage} implementation. The backing stage must be rectangular, with
- * an accessible area over the Saint sample plate.
- * 
- * @author Elias N Vasylenko
- *
- */
-@Designate(ocd = SamplePlateStageImpl.SaintStageConfiguration.class, factory = true)
-@Component(name = SamplePlateStageImpl.CONFIGURATION_PID, configurationPid = SamplePlateStageImpl.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
-    SamplePlateStage.class,
-    SampleDevice.class,
-    Stage.class,
-    Device.class })
 public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageController>
     implements SamplePlateStage {
-  static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.saint";
+  private final SaintStageManager stateManager;
 
-  @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "SAINT Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
-  public @interface SaintStageConfiguration {
-    String name();
-  }
+  private final ObservableProperty<RequestedSampleState<SampleArea>> requestedSampleState;
+  private final ObservableProperty<SampleState<SampleArea>> sampleState;
 
-  private final XYStage<?> xyStage;
-  private final DeviceDependency<? extends XYStageController> xyStageController;
+  private final ObservableProperty<SampleArea> actualPosition;
 
-  private final ObservableProperty<XYCoordinate<Length>> requestedOffset;
-  private final ObservableProperty<SampleArea> requestedLocation;
-  private final ObservableProperty<SampleArea> actualLocation;
+  public SamplePlateStageImpl(SaintProperties properties, SaintStageManager stateManager) {
+    super(properties.samplePlateStageDeviceName().toString(), stateManager.getInstrument());
 
-  private final SampleAreaStageImpl sampleArea;
-  private ServiceRegistration<?> sampleAreaRegistration;
+    this.stateManager = stateManager;
 
-  @Activate
-  public SamplePlateStageImpl(
-      BundleContext context,
-      @Reference(name = "xyStage") XYStage<?> xyStage,
-      SaintStageConfiguration configuration,
-      @Reference PropertyLoader propertyLoader) {
-    this(configuration.name(), xyStage, propertyLoader.getProperties(SaintProperties.class));
-    this.sampleAreaRegistration = context
-        .registerService(
-            new String[] {
-                SampleAreaStage.class.getName(),
-                Stage.class.getName(),
-                SampleDevice.class.getName(),
-                Device.class.getName() },
-            this.sampleArea,
-            new Hashtable<>());
-  }
-
-  public SamplePlateStageImpl(String name, XYStage<?> xyStage, SaintProperties properties) {
-    super(name, xyStage.getInstrumentRegistration().getInstrument());
-    this.xyStage = xyStage;
-    this.xyStageController = new DeviceDependency<>(xyStage, true);
-
-    this.requestedOffset = ObservableProperty.over(NullPointerException::new);
-    this.requestedLocation = ObservableProperty.over(NullPointerException::new);
-    this.actualLocation = ObservableProperty.over(NullPointerException::new);
-
-    this.sampleArea = new SampleAreaStageImpl(this, properties);
-  }
-
-  @Deactivate
-  public void deactivate() {
-    if (sampleAreaRegistration != null) {
-      sampleAreaRegistration.unregister();
-      sampleAreaRegistration = null;
-    }
+    this.sampleState = ObservableProperty.over(SampleState.ready());
+    this.requestedSampleState = ObservableProperty.over(SampleState.ready());
+    this.actualPosition = ObservableProperty.over(NullPointerException::new);
   }
 
   @Override
-  public ObservableValue<SampleState> sampleState() {
-    return xyStage.sampleState();
+  public SampleAreaStage sampleAreaStage() {
+    return stateManager.sampleAreaStage();
   }
 
   @Override
-  public boolean isLocationReachable(SampleArea location) {
-    return xyStage.isLocationReachable(location.center().add(location.lowerBound()))
-        && xyStage.isLocationReachable(location.center().add(location.upperBound()));
+  public XYCoordinate<Length> getLowerBound() {
+    return stateManager.xyStage().getLowerBound();
   }
 
   @Override
-  public ObservableValue<XYCoordinate<Length>> requestedOffset() {
-    return requestedOffset;
-  }
-
-  private void setRequestedOffset(XYCoordinate<Length> offset) {
-    var offsetFromLowerBound = requestedLocation
-        .tryGet()
-        .map(SampleArea::lowerBound)
-        .map(lowerBound -> offset.subtract(lowerBound))
-        .orElse(offset);
-
-    var offsetFromUpperBound = requestedLocation
-        .tryGet()
-        .map(SampleArea::upperBound)
-        .map(upperBound -> offset.subtract(upperBound))
-        .orElse(offset);
-
-    if (offsetFromLowerBound.getX().getValue().doubleValue() < 0
-        || offsetFromLowerBound.getY().getValue().doubleValue() < 0
-        || offsetFromUpperBound.getX().getValue().doubleValue() > 0
-        || offsetFromUpperBound.getY().getValue().doubleValue() > 0) {
-      throw new IllegalArgumentException();
-    }
-    requestedOffset.set(offset);
+  public XYCoordinate<Length> getUpperBound() {
+    return stateManager.xyStage().getUpperBound();
   }
 
   @Override
-  public ObservableValue<SampleArea> requestedLocation() {
-    return requestedLocation;
+  public boolean isPositionReachable(SampleArea location) {
+    return stateManager.xyStage().isPositionReachable(location.center().add(location.lowerBound()))
+        && stateManager.xyStage().isPositionReachable(location.center().add(location.upperBound()));
   }
 
-  private void setRequestedLocation(SampleArea location) {
+  @Override
+  public ObservableValue<SampleState<SampleArea>> sampleState() {
+    return sampleState;
+  }
+
+  @Override
+  public ObservableValue<RequestedSampleState<SampleArea>> requestedSampleState() {
+    return requestedSampleState;
+  }
+
+  @Override
+  public ObservableValue<SampleArea> samplePosition() {
+    return actualPosition;
+  }
+
+  synchronized void updateXySampleState(SampleState<XYCoordinate<Length>> xyState) {
+    processStateMachine();
+  }
+
+  private void processStateMachine() {
+    stateManager.processState();
+  }
+
+  private synchronized void validateRequestedArea(SampleArea location) {
     var offsetFromLowerBound = location
         .center()
         .add(location.lowerBound())
@@ -185,86 +118,72 @@ public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageCont
         .add(location.upperBound())
         .subtract(getUpperBound());
 
-    if (offsetFromLowerBound.getX().getValue().doubleValue() < 0
-        || offsetFromLowerBound.getY().getValue().doubleValue() < 0
+    if (offsetFromLowerBound.getX().getValue().doubleValue() < -0
+        || offsetFromLowerBound.getY().getValue().doubleValue() < -0
         || offsetFromUpperBound.getX().getValue().doubleValue() > 0
         || offsetFromUpperBound.getY().getValue().doubleValue() > 0) {
       throw new IllegalArgumentException();
     }
-    requestedLocation.set(location);
-  }
-
-  @Override
-  public ObservableValue<SampleArea> actualLocation() {
-    return actualLocation;
-  }
-
-  public ObservableValue<XYCoordinate<Length>> requestedCoordinate() {
-    return xyStage.requestedLocation();
-  }
-
-  public ObservableValue<XYCoordinate<Length>> actualCoordinate() {
-    return xyStage.actualLocation();
-  }
-
-  private XYCoordinate<Length> getRequestedXYStageLocation() {
-    return requestedLocation.get().center().add(requestedOffset.get());
   }
 
   @Override
   protected SamplePlateStageController acquireControl(AbstractingControlLock lock) {
+    lock.run(() -> processStateMachine());
     return new SamplePlateStageController() {
       @Override
-      public void requestExchange() {
-        lock.getController(xyStageController).requestExchange();
+      public void close() {
+        lock.close(() -> processStateMachine());
       }
 
       @Override
-      public void requestAnalysis(SampleArea location) {
-        lock.run(() -> setRequestedLocation(location));
-        lock.getController(xyStageController).requestAnalysis(getRequestedXYStageLocation());
+      public void requestExchange() {
+        lock.run(() -> {
+          requestedSampleState.set(SampleState.exchange());
+          processStateMachine();
+        });
+      }
+
+      @Override
+      public void requestAnalysis(SampleArea position) {
+        lock.run(() -> {
+          validateRequestedArea(position);
+          requestedSampleState.set(SampleState.analysis(position));
+          processStateMachine();
+        });
       }
 
       @Override
       public void requestReady() {
-        lock.getController(xyStageController).requestReady();
+        lock.run(() -> {
+          requestedSampleState.set(SampleState.ready());
+          processStateMachine();
+        });
       }
 
       @Override
-      public void close() {
-        lock.close();
+      public SampleState<SampleArea> awaitRequest(long time, TimeUnit unit) {
+        return lock
+            .get(
+                () -> sampleState
+                    .value()
+                    .filter(s -> requestedSampleState().isMatching(r -> r.equals(s)))
+                    .getNext()
+                    .orTimeout(time, unit)
+                    .join());
       }
 
       @Override
-      public SampleState awaitRequest(long timeout, TimeUnit unit) {
-        return lock.getController(xyStageController).awaitRequest(timeout, unit);
+      public SampleState<SampleArea> awaitReady(long time, TimeUnit unit) {
+        return lock
+            .get(
+                () -> sampleState
+                    .value()
+                    .filter(s -> s instanceof Ready<?> || s instanceof Failed<?>)
+                    .getNext()
+                    .orTimeout(time, unit)
+                    .join());
       }
 
-      @Override
-      public SampleState awaitReady(long timeout, TimeUnit unit) {
-        return lock.getController(xyStageController).awaitReady(timeout, unit);
-      }
-
-      @Override
-      public void requestOffset(XYCoordinate<Length> offset) {
-        lock.run(() -> setRequestedOffset(offset));
-        lock.getController(xyStageController).requestAnalysis(getRequestedXYStageLocation());
-      }
     };
-  }
-
-  @Override
-  public XYCoordinate<Length> getLowerBound() {
-    return xyStage.getLowerBound();
-  }
-
-  @Override
-  public XYCoordinate<Length> getUpperBound() {
-    return xyStage.getUpperBound();
-  }
-
-  @Override
-  public SampleAreaStage sampleArea() {
-    return sampleArea;
   }
 }

@@ -63,8 +63,8 @@ public interface SampleExecutor<T> extends Executor<Nothing> {
   default void execute(ExecutionContext<Nothing> context) {
     T location = context.getVariable(sampleLocation());
 
-    try (var control = sampleDevice().acquireControl(2, SECONDS)) {
-      control.requestAnalysis(location);
+    try (var lock = sampleDevice().acquireControl(2, SECONDS)) {
+      lock.getController().requestAnalysis(location);
       context.prepareCondition(samplePreparation(), null);
     } catch (TimeoutException | InterruptedException e) {
       throw new ExecutorException("Failed to acquire control of sample device", e);

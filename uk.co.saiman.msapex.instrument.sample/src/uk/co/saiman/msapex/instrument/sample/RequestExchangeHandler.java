@@ -28,9 +28,6 @@
 package uk.co.saiman.msapex.instrument.sample;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_FAILED;
-import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_FAILED;
 
 import java.util.concurrent.TimeoutException;
 
@@ -40,6 +37,9 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.internal.events.EventBroker;
 
+import uk.co.saiman.instrument.sample.Exchange;
+import uk.co.saiman.instrument.sample.Failed;
+import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleDevice;
 import uk.co.saiman.instrument.sample.SampleState;
 
@@ -54,8 +54,9 @@ public class RequestExchangeHandler {
   }
 
   @CanExecute
-  boolean canExecute(@Optional SampleState state) {
-    return state != null
-        && (state == ANALYSIS || state == ANALYSIS_FAILED || state == EXCHANGE_FAILED);
+  boolean canExecute(
+      @Optional SampleState<?> state,
+      @Optional RequestedSampleState<?> requestedState) {
+    return !(requestedState instanceof Exchange<?>) || state instanceof Failed<?>;
   }
 }

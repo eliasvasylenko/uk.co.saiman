@@ -31,15 +31,13 @@ import static uk.co.saiman.instrument.DeviceStatus.AVAILABLE;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import uk.co.saiman.instrument.Controller;
+import uk.co.saiman.instrument.Control;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceImpl;
-import uk.co.saiman.instrument.DeviceStatus;
 import uk.co.saiman.instrument.Instrument;
-import uk.co.saiman.observable.Disposable;
 
 /**
  * An implementation of a virtual device which is an abstraction over any number
@@ -48,190 +46,92 @@ import uk.co.saiman.observable.Disposable;
  * @author Elias N Vasylenko
  *
  */
-public abstract class AbstractingDevice<U extends Controller> extends DeviceImpl<U> {
-  private Map<Device<?>, DeviceDependency<?>> dependencies = new HashMap<>();
+public abstract class AbstractingDevice<U> extends DeviceImpl<U> {
+  private final Map<Device<?>, DeviceDependency<?>> dependencies = new HashMap<>();
 
   public AbstractingDevice(String name, Instrument instrument) {
     super(name, instrument);
   }
 
   @Override
-  protected void dispose() {
-    synchronized (dependencies) {
-      dependencies.values().stream().forEach(DeviceDependency::releaseController);
-    }
+  protected synchronized void dispose() {
+    dependencies.values().stream().forEach(DeviceDependency::close);
     super.dispose();
   }
 
-  private void checkDependencies() {
-    synchronized (dependencies) {
-      if (dependencies.values().stream().allMatch(DeviceDependency::isAvailable)) {
-        setAccessible();
-      } else {
-        setInaccessible();
-      }
+  synchronized void checkDependencies() {
+    if (dependencies
+        .values()
+        .stream()
+        .allMatch(d -> d.getLock().isPresent() || d.getDevice().status().isEqual(AVAILABLE))) {
+      setAccessible();
+    } else {
+      setInaccessible();
     }
   }
 
   @Override
-  protected U acquireControl(ControlLock lock) {
+  protected U createController(ControlContext context) {
+    Map<Device<?>, Control<?>> dependencyControls = new HashMap<>();
+
     synchronized (dependencies) {
       try {
-        dependencies.values().stream().forEach(DeviceDependency::acquireController);
-        checkDependencies();
-      } catch (Exception e) {
-        dependencies.values().stream().forEach(dependency -> {
-          try {
-            if (!dependency.isAutoAcquire()) {
-              dependency.releaseController();
-            }
-          } catch (Exception e2) {
-            e.addSuppressed(e2);
+        for (var dependency : dependencies.values()) {
+          dependency.open();
+          var control = dependency.getLock();
+          if (control.isEmpty() || control.get().isClosed()) {
+            throw new IllegalStateException();
           }
-        });
-        throw e;
-      }
-    }
-
-    return acquireControl(new AbstractingControlLock(lock));
-  }
-
-  protected abstract U acquireControl(AbstractingControlLock lock);
-
-  @SuppressWarnings("unchecked")
-  protected <V extends Controller> Optional<DeviceDependency<V>> getDependency(Device<V> device) {
-    return Optional.ofNullable((DeviceDependency<V>) dependencies.get(device));
-  }
-
-  protected class DeviceDependency<V extends Controller> {
-    private final Device<V> device;
-    private final boolean autoAcquire;
-    private Optional<? extends V> controller = Optional.empty();
-    private Disposable observation;
-
-    public DeviceDependency(Device<V> device, boolean autoAcquire) {
-      this.device = device;
-      this.autoAcquire = autoAcquire;
-
-      this.observation = device
-          .status()
-          .value()
-          .weakReference(this)
-          .observe(status -> status.apply(DeviceDependency::updateStatus));
-
-      synchronized (dependencies) {
-        dependencies.put(device, this);
-      }
-    }
-
-    private void updateStatus(DeviceStatus status) {
-      try {
-        switch (status) {
-        case AVAILABLE:
-          if (autoAcquire) {
-            acquireController();
-          }
-          break;
-        case INACCESSIBLE:
-          releaseController();
-          break;
-        case UNAVAILABLE:
-          if (controller.isEmpty()) {
-            releaseController();
-          }
-          break;
-        case DISPOSED:
-          dispose();
-          break;
+          dependencyControls.put(dependency.getDevice(), control.get());
         }
-      } finally {
-        checkDependencies();
-      }
-    }
-
-    public boolean isAutoAcquire() {
-      return autoAcquire;
-    }
-
-    private synchronized void acquireController() {
-      if (controller.isEmpty()) {
-        controller = device.acquireControl();
-        controller.ifPresent(c -> {
-          try {
-            controllerAcquired(c);
-          } catch (Exception e) {
-            releaseControl();
-            throw e;
-          }
-        });
-      }
-    }
-
-    protected void controllerAcquired(V controller) {}
-
-    private synchronized boolean isAvailable() {
-      return controller.isPresent() || device.status().isEqual(AVAILABLE);
-    }
-
-    private synchronized void releaseController() {
-      try {
-        controller.ifPresent(Controller::close);
       } catch (Exception e) {
-        try {
-          controller = Optional.empty();
-          controllerReleased();
-        } catch (Exception e2) {
-          e.addSuppressed(e2);
+        for (var dependency : dependencies.values()) {
+          try {
+            dependency.close();
+          } catch (Exception ee) {
+            e.addSuppressed(ee);
+          }
         }
         throw e;
       }
-      controller = Optional.empty();
-      controllerReleased();
     }
 
-    protected void controllerReleased() {}
+    return createController(new DependentControlContext() {
+      @Override
+      public void run(Runnable runnable) {
+        context.run(runnable);
+      }
 
-    public void dispose() {
-      observation.cancel();
-    }
+      @Override
+      public <T> T get(Supplier<T> supplier) {
+        return context.get(supplier);
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public <T> T getController(Device<T> device) {
+        return (T) dependencyControls.get(device).getController();
+      }
+    });
   }
 
-  public class AbstractingControlLock {
-    private final ControlLock component;
+  @Override
+  protected void destroyController(ControlContext context) {
+    // TODO check all our device dependencies are still acquired
+  }
 
-    public AbstractingControlLock(ControlLock component) {
-      this.component = component;
-    }
+  protected abstract U createController(DependentControlContext context);
 
-    public boolean isOpen() {
-      return component.isOpen();
-    }
+  protected void addDependency(Device<?> device, long time, TimeUnit unit) {
+    DeviceDependency<?> dependency = new DeviceDependency<>(
+        device,
+        time,
+        unit,
+        dep -> checkDependencies());
+    dependencies.put(device, dependency);
+  }
 
-    public <V extends Controller> V getController(Device<V> device) {
-      return get(
-          () -> getDependency(device)
-              .flatMap(d -> d.controller)
-              .orElseThrow(IllegalStateException::new));
-    }
-
-    public <V extends Controller> V getController(DeviceDependency<V> dependency) {
-      return get(() -> dependency.controller.orElseThrow(IllegalStateException::new));
-    }
-
-    public void run(Runnable runnable) {
-      component.run(runnable);
-    }
-
-    public <T> T get(Supplier<T> supplier) {
-      return component.get(supplier);
-    }
-
-    public synchronized void close() {
-      component.close();
-    }
-
-    public synchronized void close(Runnable runnable) {
-      component.close(runnable);
-    }
+  public interface DependentControlContext extends ControlContext {
+    <T> T getController(Device<T> device);
   }
 }

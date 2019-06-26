@@ -28,6 +28,7 @@
 package uk.co.saiman.observable;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import uk.co.saiman.property.Property;
@@ -78,4 +79,52 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
 
   @Override
   Optional<T> tryGet();
+
+  @Override
+  default <U> ObservableProperty<U> map(
+      Function<? super T, ? extends U> mappingOut,
+      Function<? super U, ? extends T> mappingIn) {
+    ObservableProperty<T> owner = this;
+    return new ObservableProperty<U>() {
+      @Override
+      public U get() {
+        return mappingOut.apply(owner.get());
+      }
+
+      @Override
+      public Optional<U> tryGet() {
+        return owner.tryGet().map(mappingOut::apply);
+      }
+
+      @Override
+      public Observable<Change<U>> changes() {
+        return owner.changes().map(change -> new Change<U>() {
+          @Override
+          public ObservableValue<U> previousValue() {
+            return change.previousValue().map(mappingOut);
+          }
+
+          @Override
+          public ObservableValue<U> newValue() {
+            return change.newValue().map(mappingOut);
+          }
+        });
+      }
+
+      @Override
+      public Observable<U> value() {
+        return owner.value().map(mappingOut);
+      }
+
+      @Override
+      public U set(U to) {
+        return mappingOut.apply(owner.set(mappingIn.apply(to)));
+      }
+
+      @Override
+      public void setProblem(Supplier<Throwable> t) {
+        owner.setProblem(t);
+      }
+    };
+  }
 }

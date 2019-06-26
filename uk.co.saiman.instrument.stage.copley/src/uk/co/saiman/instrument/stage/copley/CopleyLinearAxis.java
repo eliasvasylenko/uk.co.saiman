@@ -225,7 +225,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   @Override
-  public ObservableValue<Quantity<Length>> actualLocation() {
+  public ObservableValue<Quantity<Length>> actualPosition() {
     return actualLocation;
   }
 

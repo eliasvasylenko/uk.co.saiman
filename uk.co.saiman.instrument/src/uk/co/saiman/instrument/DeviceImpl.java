@@ -41,13 +41,13 @@ import java.util.function.Supplier;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
-public abstract class DeviceImpl<T extends Controller> implements Device<T> {
+public abstract class DeviceImpl<T> implements Device<T> {
   private final String name;
   private final ObservableProperty<DeviceStatus> connectionState;
   private final DeviceRegistration registration;
 
   private final Semaphore semaphore = new Semaphore(1);
-  private volatile T lockedController;
+  private volatile ControlContextImpl lockedContext;
 
   public DeviceImpl(String name, Instrument instrument) {
     this.name = name;
@@ -58,9 +58,9 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
   protected void dispose() {
     synchronized (connectionState) {
       connectionState.set(DISPOSED);
-      releaseControl();
-      registration.deregister();
     }
+    closeController();
+    registration.deregister();
   }
 
   @Override
@@ -82,9 +82,9 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
     synchronized (connectionState) {
       if (!connectionState.isEqual(DISPOSED)) {
         connectionState.set(INACCESSIBLE);
-        releaseControl();
       }
     }
+    closeController();
   }
 
   protected void setAccessible() {
@@ -95,89 +95,121 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
     }
   }
 
-  protected abstract T acquireControl(ControlLock lock);
+  protected abstract T createController(ControlContext context);
+
+  protected void destroyController(ControlContext context) {}
 
   @Override
-  public T acquireControl(long timeout, TimeUnit unit)
+  public Control<T> acquireControl(long timeout, TimeUnit unit)
       throws TimeoutException,
       InterruptedException {
     if (!semaphore.tryAcquire(timeout, unit)) {
       throw new TimeoutException();
     }
-    ControlLock lock;
+    ControlContextImpl context;
     synchronized (connectionState) {
       if (connectionState.isEqual(DISPOSED)) {
         semaphore.release();
         throw new IllegalStateException();
       }
       connectionState.set(UNAVAILABLE);
-      lock = new ControlLock(this::releaseControl);
+      context = new ControlContextImpl();
     }
     try {
-      return lockedController = acquireControl(lock);
+      var controller = createController(context);
+      lockedContext = context;
+      return new ControlImpl(context, controller);
     } catch (Exception e) {
       connectionState.set(INACCESSIBLE);
-      lock.close();
-      lock = null;
+      context.close();
+      context = null;
       semaphore.release();
       throw e;
     }
   }
 
-  protected void releaseControl() {
+  private void releaseControl() {
     synchronized (connectionState) {
-      if (lockedController != null) {
-        lockedController.close();
-        lockedController = null;
+      try {
+        destroyController(lockedContext);
+      } finally {
+        if (!connectionState.isMatching(s -> s == DISPOSED || s == INACCESSIBLE)) {
+          connectionState.set(AVAILABLE);
+        }
+        lockedContext = null;
         semaphore.release();
-      }
-      if (!connectionState.isMatching(s -> s == DISPOSED || s == INACCESSIBLE)) {
-        connectionState.set(AVAILABLE);
       }
     }
   }
 
-  public static class ControlLock {
-    private volatile Runnable close;
+  protected void closeController() {
+    var lockedController = this.lockedContext;
+    if (lockedController != null) {
+      lockedController.close();
+    }
+  }
 
-    public ControlLock(Runnable close) {
-      this.close = close;
+  protected interface ControlContext {
+    void run(Runnable runnable);
+
+    <U> U get(Supplier<U> supplier);
+  }
+
+  public class ControlContextImpl implements ControlContext {
+    private volatile boolean closed = false;
+
+    public synchronized void close() {
+      if (!isClosed()) {
+        closed = true;
+        releaseControl();
+      }
     }
 
-    public synchronized boolean isOpen() {
-      return close != null;
+    public boolean isClosed() {
+      return closed;
     }
 
+    @Override
     public synchronized void run(Runnable runnable) {
-      if (!isOpen()) {
+      if (isClosed()) {
         throw new IllegalStateException();
       } else {
         runnable.run();
       }
     }
 
-    public synchronized <T> T get(Supplier<T> supplier) {
-      if (!isOpen()) {
+    @Override
+    public synchronized <U> U get(Supplier<U> supplier) {
+      if (isClosed()) {
         throw new IllegalStateException();
       } else {
         return supplier.get();
       }
     }
+  }
 
-    public synchronized void close() {
-      close(() -> {});
+  protected class ControlImpl implements Control<T> {
+    private final ControlContextImpl context;
+    private final T controller;
+
+    public ControlImpl(ControlContextImpl context, T controller) {
+      this.context = context;
+      this.controller = controller;
     }
 
-    public synchronized void close(Runnable runnable) {
-      if (isOpen()) {
-        try {
-          runnable.run();
-        } finally {
-          var close = this.close;
-          this.close = null;
-          close.run();
-        }
-      }
+    @Override
+    public void close() {
+      context.close();
+    }
+
+    @Override
+    public boolean isClosed() {
+      return context.isClosed();
+    }
+
+    @Override
+    public T getController() {
+      return controller;
     }
   }
 }

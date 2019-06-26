@@ -37,4 +37,6 @@ public interface SaintProperties {
   Localized<String> spectrumExperimentStepName();
 
   Localized<String> sampleAreaStageDeviceName();
+
+  Localized<String> samplePlateStageDeviceName();
 }

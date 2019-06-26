@@ -32,10 +32,12 @@ public enum DeviceStatus {
    * The device is currently available for control by a client.
    */
   AVAILABLE,
+
   /**
    * The device is currently under control by another client.
    */
   UNAVAILABLE,
+
   /**
    * The device is currently not accessible, due to some failure in connection or
    * operation.
@@ -46,6 +48,7 @@ public enum DeviceStatus {
    * in which case the device will transition to the {@link #UNAVAILABLE} state.
    */
   INACCESSIBLE,
+
   /**
    * The device is currently not accessible, due to being disposed. This state is
    * terminal.
