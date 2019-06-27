@@ -124,7 +124,7 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
 
   @Override
   protected void setRequestedStateImpl(
-      ControlContext context,
+      DependentControlContext context,
       RequestedSampleState<XYCoordinate<Length>> requestedState,
       XYCoordinate<Length> requestedPosition) {
     context.getController(xAxis).requestLocation(requestedPosition.getX());
@@ -132,7 +132,7 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   }
 
   @Override
-  protected XYStageController createDependentController(ControlContext context) {
+  protected XYStageController createController(DependentControlContext context) {
     return new XYStageController() {
       @Override
       public void requestExchange() {
@@ -157,6 +157,16 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
       @Override
       public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
         return context.get(() -> ComposedXYStage.this.awaitReady(time, unit));
+      }
+
+      @Override
+      public void close() {
+        context.close();
+      }
+
+      @Override
+      public boolean isClosed() {
+        return context.isClosed();
       }
     };
   }

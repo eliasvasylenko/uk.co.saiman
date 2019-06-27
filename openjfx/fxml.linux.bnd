@@ -1,0 +1,6 @@
+Bundle-Name: SAI :: FX :: javafx-fxml
+
+-includeresource: \
+	javafx.fxml.jar=${repo;org.openjfx:javafx-fxml:jar:linux}
+
+Java-Module: javafx.fxml

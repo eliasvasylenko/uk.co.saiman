@@ -1,0 +1,6 @@
+Bundle-Name: SAI :: FX :: javafx-swing
+
+-includeresource: \
+	javafx.swing.jar=${repo;org.openjfx:javafx-swing:jar:linux}
+
+Java-Module: javafx.swing

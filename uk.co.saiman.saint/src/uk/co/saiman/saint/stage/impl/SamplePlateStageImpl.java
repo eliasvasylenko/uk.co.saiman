@@ -31,11 +31,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.measure.quantity.Length;
 
+import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.sample.Failed;
 import uk.co.saiman.instrument.sample.Ready;
 import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleState;
-import uk.co.saiman.instrument.virtual.AbstractingDevice;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
@@ -45,7 +45,7 @@ import uk.co.saiman.saint.stage.SampleAreaStage;
 import uk.co.saiman.saint.stage.SamplePlateStage;
 import uk.co.saiman.saint.stage.SamplePlateStageController;
 
-public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageController>
+public class SamplePlateStageImpl extends DeviceImpl<SamplePlateStageController>
     implements SamplePlateStage {
   private final SaintStageManager stateManager;
 
@@ -127,17 +127,22 @@ public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageCont
   }
 
   @Override
-  protected SamplePlateStageController acquireControl(AbstractingControlLock lock) {
-    lock.run(() -> processStateMachine());
+  protected SamplePlateStageController createController(ControlContext context) {
+    context.run(() -> processStateMachine());
     return new SamplePlateStageController() {
       @Override
       public void close() {
-        lock.close(() -> processStateMachine());
+        context.close();
+      }
+
+      @Override
+      public boolean isClosed() {
+        return context.isClosed();
       }
 
       @Override
       public void requestExchange() {
-        lock.run(() -> {
+        context.run(() -> {
           requestedSampleState.set(SampleState.exchange());
           processStateMachine();
         });
@@ -145,7 +150,7 @@ public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageCont
 
       @Override
       public void requestAnalysis(SampleArea position) {
-        lock.run(() -> {
+        context.run(() -> {
           validateRequestedArea(position);
           requestedSampleState.set(SampleState.analysis(position));
           processStateMachine();
@@ -154,7 +159,7 @@ public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageCont
 
       @Override
       public void requestReady() {
-        lock.run(() -> {
+        context.run(() -> {
           requestedSampleState.set(SampleState.ready());
           processStateMachine();
         });
@@ -162,7 +167,7 @@ public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageCont
 
       @Override
       public SampleState<SampleArea> awaitRequest(long time, TimeUnit unit) {
-        return lock
+        return context
             .get(
                 () -> sampleState
                     .value()
@@ -174,7 +179,7 @@ public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageCont
 
       @Override
       public SampleState<SampleArea> awaitReady(long time, TimeUnit unit) {
-        return lock
+        return context
             .get(
                 () -> sampleState
                     .value()
@@ -183,7 +188,20 @@ public class SamplePlateStageImpl extends AbstractingDevice<SamplePlateStageCont
                     .orTimeout(time, unit)
                     .join());
       }
-
     };
+  }
+
+  @Override
+  protected void destroyController(ControlContext context) {
+    processStateMachine();
+    super.destroyController(context);
+  }
+
+  void requestReached() {
+    sampleState.set(requestedSampleState.get());
+  }
+
+  public void requestFailed() {
+    sampleState.set(SampleState.failed());
   }
 }

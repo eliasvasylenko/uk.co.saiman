@@ -3,11 +3,11 @@
 ########################
 
 ## Java Compiler Options
-javac.source:		11
-javac.target:		11
-javac.compliance:	11
+javac.source:		12
+javac.target:		12
+javac.compliance:	12
 javac.debug:		on
--runee:				JavaSE-11
+-runee:				JavaSE-12
 
 # The following lines are a hack to force IDE plugin publishing to P2 to work
 #Bundle-RequiredExecutionEnvironment: JavaSE-9
@@ -60,8 +60,8 @@ Bundle-Developers:\
 ## To enable baselining, uncomment the following lines:
 # -baseline: *
 
--buildrepo: Maven Local
--releaserepo: JFrog OSS
+-buildrepo: Maven_Local
+-releaserepo: JFrog_OSS
 
 -plugin.Central:\
 	aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
@@ -80,19 +80,19 @@ Bundle-Developers:\
 -plugin.Local:\
 \
 	aQute.bnd.deployer.repository.LocalIndexedRepo;\
-		name				=	"Local Index";\
+		name				=	"Local_Index";\
 		pretty				=	true;\
 		local				=	${build}/local
 
 -plugin.Build:\
 \
 	aQute.bnd.repository.maven.provider.MavenBndRepository;\
-		name				=	"Maven Local"
+		name				=	"Maven_Local"
 
 -plugin.Release:\
 \
 	aQute.bnd.repository.maven.provider.MavenBndRepository;\
-		name				=	"JFrog OSS";\
+		name				=	"JFrog_OSS";\
 		snapshotUrl			=	http://oss.jfrog.org/oss-snapshot-local
 
 -pluginpath.commonjs.repository: ${build}/local/uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-0.0.1.jar
@@ -115,7 +115,7 @@ Bundle-Developers:\
 
 -plugin.Eclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"Eclipse 2018‑12";\
+		name				=	"Eclipse_2018‑12";\
 		url					=	https://download.eclipse.org/releases/2018-12/
 		location			=	${build}/cache/eclipse-platform
 #		url					=	${fileuri;${build}/eclipse.platform.target};\
@@ -123,19 +123,16 @@ Bundle-Developers:\
 
 -plugin.efxclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"E(fx)clipse Runtime (3.5.0)";\
+		name				=	"E(fx)clipse_Runtime_(3.5.0)";\
 		url					=	https://download.eclipse.org/efxclipse/runtime-released/3.5.0/site/;\
 		location			=	${build}/cache/eclipse-fx
 
-javafx.platform: linux
-javafx.version: 11
--plugin.JavaFX:\
-	aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
-		name				=	"Java FX";\
-		transitive			=	false;\
-		releaseUrls			=	https://repo1.maven.org/maven2/;\
-		location			=	${build}/cache/javafx.xml;\
-		pom					=	${build}/javafx.xml
+javafx.version: 12
+-plugin.javafx = \
+	aQute.bnd.repository.maven.provider.MavenBndRepository;\
+		releaseUrl=https://repo.maven.apache.org/maven2/;\
+		index=${build}/javafx.mvn;\
+		name="Java_FX"
 
 ## Run requirement groups:
 -runrequires.base:\

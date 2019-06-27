@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.saint.
+ * This file is part of uk.co.saiman.instrument.
  *
- * uk.co.saiman.saint is free software: you can redistribute it and/or modify
+ * uk.co.saiman.instrument is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.saint is distributed in the hope that it will be useful,
+ * uk.co.saiman.instrument is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import uk.co.saiman.instrument.Control;
+import uk.co.saiman.instrument.Controller;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.Instrument;
@@ -46,7 +46,7 @@ import uk.co.saiman.instrument.Instrument;
  * @author Elias N Vasylenko
  *
  */
-public abstract class AbstractingDevice<U> extends DeviceImpl<U> {
+public abstract class AbstractingDevice<U extends Controller> extends DeviceImpl<U> {
   private final Map<Device<?>, DeviceDependency<?>> dependencies = new HashMap<>();
 
   public AbstractingDevice(String name, Instrument instrument) {
@@ -63,7 +63,8 @@ public abstract class AbstractingDevice<U> extends DeviceImpl<U> {
     if (dependencies
         .values()
         .stream()
-        .allMatch(d -> d.getLock().isPresent() || d.getDevice().status().isEqual(AVAILABLE))) {
+        .allMatch(
+            d -> d.getController().isPresent() || d.getDevice().status().isEqual(AVAILABLE))) {
       setAccessible();
     } else {
       setInaccessible();
@@ -72,13 +73,13 @@ public abstract class AbstractingDevice<U> extends DeviceImpl<U> {
 
   @Override
   protected U createController(ControlContext context) {
-    Map<Device<?>, Control<?>> dependencyControls = new HashMap<>();
+    Map<Device<?>, Controller> dependencyControls = new HashMap<>();
 
     synchronized (dependencies) {
       try {
         for (var dependency : dependencies.values()) {
           dependency.open();
-          var control = dependency.getLock();
+          var control = dependency.getController();
           if (control.isEmpty() || control.get().isClosed()) {
             throw new IllegalStateException();
           }
@@ -98,6 +99,16 @@ public abstract class AbstractingDevice<U> extends DeviceImpl<U> {
 
     return createController(new DependentControlContext() {
       @Override
+      public void close() {
+        context.close();
+      }
+
+      @Override
+      public boolean isClosed() {
+        return context.isClosed();
+      }
+
+      @Override
       public void run(Runnable runnable) {
         context.run(runnable);
       }
@@ -109,8 +120,8 @@ public abstract class AbstractingDevice<U> extends DeviceImpl<U> {
 
       @SuppressWarnings("unchecked")
       @Override
-      public <T> T getController(Device<T> device) {
-        return (T) dependencyControls.get(device).getController();
+      public <T extends Controller> T getController(Device<T> device) {
+        return (T) dependencyControls.get(device);
       }
     });
   }
@@ -132,6 +143,6 @@ public abstract class AbstractingDevice<U> extends DeviceImpl<U> {
   }
 
   public interface DependentControlContext extends ControlContext {
-    <T> T getController(Device<T> device);
+    <T extends Controller> T getController(Device<T> device);
   }
 }

@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import uk.co.saiman.instrument.Controller;
 
-public interface SampleController<T> {
+public interface SampleController<T> extends Controller {
   /**
    * Request that the sample be prepared for exchange. If the device is already in
    * the requested state, do nothing.
@@ -70,6 +70,16 @@ public interface SampleController<T> {
    * @param position the location to analyze
    */
   void requestAnalysis(T position);
+
+  default void request(RequestedSampleState<T> state) {
+    if (state instanceof Analysis<?>) {
+      requestAnalysis(((Analysis<T>) state).position());
+    } else if (state instanceof Ready<?>) {
+      requestReady();
+    } else if (state instanceof Exchange<?>) {
+      requestExchange();
+    }
+  }
 
   /**
    * Invocation blocks until the previous request is fulfilled, or until a failure

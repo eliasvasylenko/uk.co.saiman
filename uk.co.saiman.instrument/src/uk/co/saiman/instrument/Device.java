@@ -56,15 +56,13 @@ import uk.co.saiman.observable.ObservableValue;
  * 
  * @param <T> the control interface for the device
  */
-public interface Device<T> {
+public interface Device<T extends Controller> {
   /**
    * @return the human-readable and localized name of the device
    */
   String getName();
 
-  Control<T> acquireControl(long timeout, TimeUnit unit)
-      throws TimeoutException,
-      InterruptedException;
+  T acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
 
   /**
    * Devices should only ever be registered to a single instrument, and must

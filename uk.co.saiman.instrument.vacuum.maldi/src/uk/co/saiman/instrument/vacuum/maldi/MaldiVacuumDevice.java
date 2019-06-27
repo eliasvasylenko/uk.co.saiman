@@ -159,11 +159,16 @@ public class MaldiVacuumDevice extends DeviceImpl<VacuumController>
   }
 
   @Override
-  protected VacuumController acquireControl(ControlLock lock) {
+  protected VacuumController createController(ControlContext context) {
     return new VacuumController() {
       @Override
       public void close() {
-        lock.close();
+        context.close();
+      }
+
+      @Override
+      public boolean isClosed() {
+        return context.isClosed();
       }
     };
   }

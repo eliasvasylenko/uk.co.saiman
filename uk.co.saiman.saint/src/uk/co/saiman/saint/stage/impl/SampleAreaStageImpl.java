@@ -158,17 +158,22 @@ public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
   }
 
   @Override
-  protected SampleAreaStageController acquireControl(ControlLock lock) {
-    lock.run(() -> processStateMachine());
+  protected SampleAreaStageController createController(ControlContext context) {
+    context.run(() -> processStateMachine());
     return new SampleAreaStageController() {
       @Override
       public void close() {
-        lock.close(() -> processStateMachine());
+        context.close();
+      }
+
+      @Override
+      public boolean isClosed() {
+        return context.isClosed();
       }
 
       @Override
       public void requestExchange() {
-        lock.close(() -> {
+        context.run(() -> {
           requestedSampleState.set(SampleState.exchange());
           processStateMachine();
         });
@@ -176,7 +181,7 @@ public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
 
       @Override
       public void requestReady() {
-        lock.run(() -> {
+        context.run(() -> {
           requestedSampleState.set(SampleState.ready());
           processStateMachine();
         });
@@ -184,7 +189,7 @@ public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
 
       @Override
       public void requestAnalysis(XYCoordinate<Length> position) {
-        lock.run(() -> {
+        context.run(() -> {
           validateRequestedOffset(position);
           requestedSampleState.set(SampleState.analysis(position));
           processStateMachine();
@@ -193,7 +198,7 @@ public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
 
       @Override
       public SampleState<XYCoordinate<Length>> awaitRequest(long time, TimeUnit unit) {
-        return lock
+        return context
             .get(
                 () -> sampleState
                     .value()
@@ -205,7 +210,7 @@ public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
 
       @Override
       public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
-        return lock
+        return context
             .get(
                 () -> sampleState
                     .value()
@@ -215,5 +220,19 @@ public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
                     .join());
       }
     };
+  }
+
+  @Override
+  protected void destroyController(ControlContext context) {
+    processStateMachine();
+    super.destroyController(context);
+  }
+
+  void requestReached() {
+    sampleState.set(requestedSampleState.get());
+  }
+
+  public void requestFailed() {
+    sampleState.set(SampleState.failed());
   }
 }

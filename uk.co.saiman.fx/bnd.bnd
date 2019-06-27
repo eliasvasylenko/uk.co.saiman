@@ -1,6 +1,5 @@
-Export-Package: uk.co.saiman.fx
-
-Bundle-Name: SAI :: FX
+-include:\
+	${build}/include/fx.bnd
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
@@ -9,3 +8,7 @@ Bundle-Name: SAI :: FX
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot
+
+Bundle-Name: SAI :: FX
+
+Export-Package: uk.co.saiman.fx

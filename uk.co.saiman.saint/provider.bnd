@@ -4,7 +4,5 @@ Bundle-SymbolicName: uk.co.saiman.saint
 Export-Package: \
 	uk.co.saiman.saint,\
 	uk.co.saiman.saint.spectrum,\
-	uk.co.saiman.saint.stage
-
-Private-Package: \
+	uk.co.saiman.saint.stage,\
 	uk.co.saiman.saint.stage.impl

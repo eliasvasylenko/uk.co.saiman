@@ -30,9 +30,14 @@ package uk.co.saiman.instrument.acquisition.adq.impl;
 import javax.measure.Quantity;
 import javax.measure.quantity.Time;
 
+import uk.co.saiman.instrument.DeviceImpl.ControlContext;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
 
 public class Adq114ControlImpl extends AdqControlImpl implements Adq114Control {
+  public Adq114ControlImpl(ControlContext context) {
+    super(context);
+  }
+
   @Override
   public void startAcquisition() {
     // TODO Auto-generated method stub
@@ -53,12 +58,6 @@ public class Adq114ControlImpl extends AdqControlImpl implements Adq114Control {
 
   @Override
   public void setSampleDepth(int depth) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void close() {
     // TODO Auto-generated method stub
 
   }

@@ -79,7 +79,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
       AxisDevice<?, ?>... axes) {
     super(name, instrument);
     this.axes = Set.of(axes);
-    this.axes.forEach(axis -> constantDependency(axis, 2, SECONDS));
+    this.axes.forEach(axis -> addDependency(axis, 2, SECONDS));
     this.readyPosition = analysisPosition;
     this.exchangePosition = exchangePosition;
 
@@ -160,7 +160,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
   }
 
   protected synchronized void requestSampleState(
-      ControlContext context,
+      DependentControlContext context,
       RequestedSampleState<T> requestedSampleState) {
     context.run(() -> {
       if (!this.requestedSampleState.isEqual(requestedSampleState)) {
@@ -216,7 +216,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
   protected abstract T getActualPositionImpl();
 
   protected abstract void setRequestedStateImpl(
-      ControlContext context,
+      DependentControlContext context,
       RequestedSampleState<T> requestedSampleState,
       T requestedSamplePosition);
 }

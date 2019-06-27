@@ -119,8 +119,8 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
 
     System.out.println("start acquisition");
 
-    try (var control = device.acquireControl(2, SECONDS)) {
-      control.getController().startAcquisition();
+    try (var controller = device.acquireControl(2, SECONDS)) {
+      controller.startAcquisition();
 
       /*
        * TODO some sort of invalidate/lazy-revalidate message passer

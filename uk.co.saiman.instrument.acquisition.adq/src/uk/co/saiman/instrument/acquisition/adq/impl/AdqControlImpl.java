@@ -27,6 +27,12 @@
  */
 package uk.co.saiman.instrument.acquisition.adq.impl;
 
+import uk.co.saiman.instrument.ControllerImpl;
+import uk.co.saiman.instrument.DeviceImpl.ControlContext;
 import uk.co.saiman.instrument.acquisition.adq.AdqControl;
 
-public abstract class AdqControlImpl implements AdqControl {}
+public abstract class AdqControlImpl extends ControllerImpl implements AdqControl {
+  public AdqControlImpl(ControlContext context) {
+    super(context);
+  }
+}

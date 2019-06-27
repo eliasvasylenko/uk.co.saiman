@@ -429,31 +429,36 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   }
 
   @Override
-  protected AcquisitionController acquireControl(ControlLock lock) {
+  protected AcquisitionController createController(ControlContext context) {
     return new AcquisitionController() {
       @Override
       public void startAcquisition() {
-        lock.run(SimulatedAcquisitionDevice.this::startAcquisition);
+        context.run(SimulatedAcquisitionDevice.this::startAcquisition);
       }
 
       @Override
       public void setSampleDepth(int depth) {
-        lock.run(() -> SimulatedAcquisitionDevice.this.setSampleDepth(depth));
+        context.run(() -> SimulatedAcquisitionDevice.this.setSampleDepth(depth));
       }
 
       @Override
       public void setAcquisitionTime(Quantity<Time> time) {
-        lock.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionTime(time));
+        context.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionTime(time));
       }
 
       @Override
       public void setAcquisitionCount(int count) {
-        lock.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionCount(count));
+        context.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionCount(count));
       }
 
       @Override
       public void close() {
-        lock.close();
+        context.close();
+      }
+
+      @Override
+      public boolean isClosed() {
+        return context.isClosed();
       }
     };
   }

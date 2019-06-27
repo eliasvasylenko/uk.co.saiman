@@ -28,7 +28,6 @@ Bundle-Name: SAI :: MSApex :: Chemistry
 	org.eclipse.fx.ui.workbench.fx.source,\
 	org.eclipse.fx.ui.workbench.base,\
 	org.eclipse.fx.ui.workbench.base.source
-	
 
 Private-Package: uk.co.saiman.msapex.chemistry
 

@@ -1,3 +1,30 @@
+/*
+ * Copyright (C) 2019 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
+ *          ______         ___      ___________
+ *       ,'========\     ,'===\    /========== \
+ *      /== \___/== \  ,'==.== \   \__/== \___\/
+ *     /==_/____\__\/,'==__|== |     /==  /
+ *     \========`. ,'========= |    /==  /
+ *   ___`-___)== ,'== \____|== |   /==  /
+ *  /== \__.-==,'==  ,'    |== '__/==  /_
+ *  \======== /==  ,'      |== ========= \
+ *   \_____\.-\__\/        \__\\________\/
+ *
+ * This file is part of uk.co.saiman.instrument.
+ *
+ * uk.co.saiman.instrument is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uk.co.saiman.instrument is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package uk.co.saiman.instrument.virtual;
 
 import java.util.Optional;
@@ -5,21 +32,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import uk.co.saiman.instrument.Control;
+import uk.co.saiman.instrument.Controller;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceStatus;
 import uk.co.saiman.observable.Disposable;
 
-public class DeviceDependency<V> {
+public class DeviceDependency<V extends Controller> {
   private final Device<V> device;
   private final long acquireTimeout;
   private final TimeUnit acquireTimeoutUnit;
 
-  private volatile Control<V> lock;
+  private volatile V controller;
   private volatile Disposable observation;
 
   private final Runnable statusUpdated;
-  private final Consumer<Control<V>> controllerAcquired;
+  private final Consumer<V> controllerAcquired;
   private final Runnable controllerReleased;
 
   public DeviceDependency(
@@ -41,7 +68,7 @@ public class DeviceDependency<V> {
       long time,
       TimeUnit unit,
       Consumer<DeviceDependency<V>> statusUpdated,
-      Consumer<Control<V>> controllerAcquired,
+      Consumer<V> controllerAcquired,
       Runnable controllerReleased) {
     this.device = device;
     this.acquireTimeout = time;
@@ -94,7 +121,7 @@ public class DeviceDependency<V> {
     statusUpdated.run();
   }
 
-  protected void controllerAcquired(Control<V> lock) {
+  protected void controllerAcquired(V lock) {
     controllerAcquired.accept(lock);
   }
 
@@ -106,23 +133,19 @@ public class DeviceDependency<V> {
     return device;
   }
 
-  public synchronized Optional<Control<V>> getLock() {
-    return Optional.ofNullable(lock);
-  }
-
   public synchronized Optional<V> getController() {
-    return getLock().map(Control::getController);
+    return Optional.ofNullable(controller);
   }
 
   private synchronized void acquireController() {
-    if (lock == null) {
+    if (controller == null) {
       try {
-        lock = device.acquireControl(acquireTimeout, acquireTimeoutUnit);
+        controller = device.acquireControl(acquireTimeout, acquireTimeoutUnit);
       } catch (TimeoutException | InterruptedException e) {
         throw new IllegalStateException(e);
       }
       try {
-        controllerAcquired(lock);
+        controllerAcquired(controller);
       } catch (Exception e) {
         try {
           releaseController();
@@ -135,19 +158,19 @@ public class DeviceDependency<V> {
   }
 
   private synchronized void releaseController() {
-    if (lock != null) {
+    if (controller != null) {
       try {
-        lock.close();
+        controller.close();
       } catch (Exception e) {
         try {
-          lock = null;
+          controller = null;
           controllerReleased();
         } catch (Exception ee) {
           e.addSuppressed(ee);
         }
         throw e;
       }
-      lock = null;
+      controller = null;
       controllerReleased();
     }
   }

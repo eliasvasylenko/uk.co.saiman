@@ -1,0 +1,37 @@
+# This is just a quick little hack to get the javafx packages on the build path
+
+-buildpath.javafx=\
+	${repo;org.openjfx:javafx-base:jar:linux};version=file,\
+	${repo;org.openjfx:javafx-controls:jar:linux};version=file,\
+	${repo;org.openjfx:javafx-fxml:jar:linux};version=file,\
+	${repo;org.openjfx:javafx-graphics:jar:linux};version=file
+
+javafx.module.packages=\
+	javafx.graphics/javafx.scene=.,\
+	javafx.graphics/javafx.css=.,\
+	javafx.controls/javafx.scene.control=.,\
+	javafx.base/javafx.event=.,\
+	javafx.base/javafx.collections=.,\
+	javafx.graphics/javafx.css=.,\
+	javafx.graphics/com.sun.javafx.scene=.,\
+	javafx.graphics/javafx.scene=.,\
+	javafx.graphics/com.sun.javafx.scene.traversal=.,\
+	javafx.graphics/com.sun.javafx.css=.,\
+	javafx.controls/com.sun.javafx.scene.control.behavior=.,\
+	javafx.controls/com.sun.javafx.scene.control=.,\
+	javafx.controls/com.sun.javafx.scene.control.inputmap=.,\
+	javafx.base/com.sun.javafx.event=.,\
+	javafx.base/com.sun.javafx.collections=.,\
+	javafx.base/com.sun.javafx.runtime=.,\
+	javafx.graphics/com.sun.javafx.css=.,\
+	javafx.graphics/com.sun.javafx.application=.,\
+	javafx.graphics/com.sun.glass.ui=.,\
+	javafx.graphics/com.sun.javafx.tk.quantum=.
+
+Java-Module-AddExports: ${javafx.module.packages}
+Java-Module-AddOpens: ${javafx.module.packages}
+
+Import-Package: \
+	!com.sun.glass.ui,\
+	!javafx.*,\
+	!netscape.javascript,*\

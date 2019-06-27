@@ -1,0 +1,6 @@
+Bundle-Name: SAI :: FX :: javafx-controls
+
+-includeresource: \
+	javafx.controls.jar=${repo;org.openjfx:javafx-controls:jar:linux}
+
+Java-Module: javafx.controls

@@ -37,7 +37,6 @@ import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.function.SampledContinuousFunction;
-import uk.co.saiman.instrument.Control;
 import uk.co.saiman.instrument.DeviceStatus;
 import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
@@ -130,7 +129,7 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
   }
 
   @Override
-  public Control<Adq114Control> acquireControl(long timeout, TimeUnit unit)
+  public Adq114Control acquireControl(long timeout, TimeUnit unit)
       throws TimeoutException,
       InterruptedException {
     // TODO Auto-generated method stub

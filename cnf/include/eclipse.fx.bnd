@@ -1,3 +1,6 @@
+-include:\
+	${build}/include/fx.bnd
+
 ## Build path groups:
 -buildpath.eclipse.fx:\
 	org.eclipse.fx.core,\

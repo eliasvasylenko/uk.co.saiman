@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.instrument.acquisition;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
@@ -48,8 +50,8 @@ import uk.co.saiman.observable.Observable;
 public interface AcquisitionDevice<T extends AcquisitionController> extends Device<T> {
   /**
    * Stop any acquisition experiment that may be in progress. This method revokes
-   * control of any currently acquired {@link #acquireControl() control
-   * interface}.
+   * control of any currently acquired {@link #acquireControl(long, TimeUnit)
+   * control interface}.
    */
   void stopAcquisition();
 

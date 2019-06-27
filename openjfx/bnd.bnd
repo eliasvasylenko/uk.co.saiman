@@ -1,0 +1,12 @@
+-include:\
+	${build}/include/fx.bnd
+
+-buildpath: \
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot
+
+-sub: *.bnd

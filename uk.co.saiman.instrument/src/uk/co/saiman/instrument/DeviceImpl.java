@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
-public abstract class DeviceImpl<T> implements Device<T> {
+public abstract class DeviceImpl<T extends Controller> implements Device<T> {
   private final String name;
   private final ObservableProperty<DeviceStatus> connectionState;
   private final DeviceRegistration registration;
@@ -100,7 +100,7 @@ public abstract class DeviceImpl<T> implements Device<T> {
   protected void destroyController(ControlContext context) {}
 
   @Override
-  public Control<T> acquireControl(long timeout, TimeUnit unit)
+  public T acquireControl(long timeout, TimeUnit unit)
       throws TimeoutException,
       InterruptedException {
     if (!semaphore.tryAcquire(timeout, unit)) {
@@ -118,7 +118,7 @@ public abstract class DeviceImpl<T> implements Device<T> {
     try {
       var controller = createController(context);
       lockedContext = context;
-      return new ControlImpl(context, controller);
+      return controller;
     } catch (Exception e) {
       connectionState.set(INACCESSIBLE);
       context.close();
@@ -149,15 +149,20 @@ public abstract class DeviceImpl<T> implements Device<T> {
     }
   }
 
-  protected interface ControlContext {
+  public interface ControlContext {
+    void close();
+
+    boolean isClosed();
+
     void run(Runnable runnable);
 
     <U> U get(Supplier<U> supplier);
   }
 
-  public class ControlContextImpl implements ControlContext {
+  protected class ControlContextImpl implements ControlContext {
     private volatile boolean closed = false;
 
+    @Override
     public synchronized void close() {
       if (!isClosed()) {
         closed = true;
@@ -165,6 +170,7 @@ public abstract class DeviceImpl<T> implements Device<T> {
       }
     }
 
+    @Override
     public boolean isClosed() {
       return closed;
     }
@@ -185,31 +191,6 @@ public abstract class DeviceImpl<T> implements Device<T> {
       } else {
         return supplier.get();
       }
-    }
-  }
-
-  protected class ControlImpl implements Control<T> {
-    private final ControlContextImpl context;
-    private final T controller;
-
-    public ControlImpl(ControlContextImpl context, T controller) {
-      this.context = context;
-      this.controller = controller;
-    }
-
-    @Override
-    public void close() {
-      context.close();
-    }
-
-    @Override
-    public boolean isClosed() {
-      return context.isClosed();
-    }
-
-    @Override
-    public T getController() {
-      return controller;
     }
   }
 }

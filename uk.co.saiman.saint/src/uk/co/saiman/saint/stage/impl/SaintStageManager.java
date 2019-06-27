@@ -27,16 +27,11 @@
  */
 package uk.co.saiman.saint.stage.impl;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.instrument.DeviceStatus.UNAVAILABLE;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_READY;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_READY_REQUESTED;
-import static uk.co.saiman.instrument.sample.SampleState.ANALYSIS_REQUESTED;
-import static uk.co.saiman.instrument.sample.SampleState.EXCHANGE_REQUESTED;
 
 import java.util.Hashtable;
-import java.util.concurrent.TimeUnit;
 
 import javax.measure.quantity.Length;
 
@@ -62,11 +57,11 @@ import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.instrument.stage.XYStageController;
 import uk.co.saiman.instrument.virtual.DeviceDependency;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.saint.SaintProperties;
 import uk.co.saiman.saint.stage.SampleArea;
 import uk.co.saiman.saint.stage.SampleAreaStage;
-import uk.co.saiman.saint.stage.SampleAreaStageController;
 import uk.co.saiman.saint.stage.SamplePlateStage;
 
 /**
@@ -78,11 +73,7 @@ import uk.co.saiman.saint.stage.SamplePlateStage;
  *
  */
 @Designate(ocd = SaintStageManager.SaintStageConfiguration.class, factory = true)
-@Component(name = SaintStageManager.CONFIGURATION_PID, configurationPid = SaintStageManager.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
-    SamplePlateStage.class,
-    SampleDevice.class,
-    Stage.class,
-    Device.class })
+@Component(name = SaintStageManager.CONFIGURATION_PID, configurationPid = SaintStageManager.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = SaintStageManager.class)
 public class SaintStageManager {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.saint";
 
@@ -92,6 +83,7 @@ public class SaintStageManager {
 
   private final XYStage<?> xyStage;
   private DeviceDependency<? extends XYStageController> xyStageController;
+  private Disposable observer;
 
   private final SamplePlateStageImpl samplePlateStage;
   private ServiceRegistration<?> samplePlateRegistration;
@@ -100,13 +92,10 @@ public class SaintStageManager {
 
   public SaintStageManager(XYStage<?> xyStage, SaintProperties properties) {
     this.xyStage = xyStage;
-    this.xyStageController = deviceDependency(xyStage, true);
+    this.xyStageController = new DeviceDependency<>(xyStage, 5, SECONDS, d -> processState());
 
-    this.samplePlateStage = new SamplePlateStageImpl(this, properties);
-    this.sampleAreaStage = new SampleAreaStageImpl(this, properties);
-    this.stateMachine = new SaintStageManager(xyStage, xyStageController, this, sampleAreaStage);
-
-    xyStage.sampleState().value().observe(this::updateXySampleState);
+    this.samplePlateStage = new SamplePlateStageImpl(properties, this);
+    this.sampleAreaStage = new SampleAreaStageImpl(properties, this);
   }
 
   @Activate
@@ -142,10 +131,14 @@ public class SaintStageManager {
                 Device.class.getName() },
             this.samplePlateStage,
             new Hashtable<>());
+
+    open();
   }
 
   @Deactivate
   public void deactivate() {
+    close();
+
     if (sampleAreaRegistration != null) {
       sampleAreaRegistration.unregister();
       sampleAreaRegistration = null;
@@ -156,7 +149,17 @@ public class SaintStageManager {
     }
   }
 
-  public XYStage<?> xyStage() {
+  public synchronized void open() {
+    xyStageController.open();
+    observer = xyStage.sampleState().value().observe(s -> processState());
+  }
+
+  public synchronized void close() {
+    observer.cancel();
+    xyStageController.close();
+  }
+
+  XYStage<?> xyStage() {
     return xyStage;
   }
 
@@ -173,25 +176,22 @@ public class SaintStageManager {
   }
 
   synchronized void processState() {
+    var requestedSamplePlateState = samplePlateStage.requestedSampleState().get();
+    var requestedSampleAreaState = sampleAreaStage.requestedSampleState().get();
+
     if (isAtAnalysis()) {
       /*
        * Our sample area device is acquired and ready for analysis, so it is given
        * command of the XY stage controller.
        */
 
-      if (sampleAreaStage.requestedSampleState().get() instanceof Ready<?>) {
+      if (requestedSampleAreaState instanceof Ready<?>) {
 
-      } else if (sampleAreaStage.requestedSampleState().get() instanceof Analysis<?>) {
-        var requestedSampleState = (Analysis<SampleArea>) samplePlateStage
-            .requestedSampleState()
-            .get();
-        var sampleAreaRequestedSampleState = (Analysis<XYCoordinate<Length>>) sampleAreaStage
-            .requestedSampleState()
-            .get();
-        var analysisPosition = requestedSampleState
+      } else if (requestedSampleAreaState instanceof Analysis<?>) {
+        var analysisPosition = ((Analysis<SampleArea>) requestedSamplePlateState)
             .position()
             .center()
-            .add(sampleAreaRequestedSampleState.position());
+            .add(((Analysis<XYCoordinate<Length>>) requestedSampleAreaState).position());
 
         if (requestXyState(SampleState.analysis(analysisPosition))) {
           this.sampleAreaStage.requestReached();
@@ -205,28 +205,29 @@ public class SaintStageManager {
        * device is given command of the XY stage controller.
        */
 
-      if (requestedSampleState().get() instanceof Analysis<?>) {
-        requestXyPosition(requestedLocation.get().center());
-        if (xyStageState == ANALYSIS) {
-          this.sampleState.set(ANALYSIS);
-        } else if (xyStageState != ANALYSIS_REQUESTED) {
-          this.sampleState.set(FAILED);
+      if (requestedSamplePlateState instanceof Analysis<?>) {
+        var analysisPosition = ((Analysis<SampleArea>) requestedSamplePlateState)
+            .position()
+            .center();
+
+        if (requestXyState(SampleState.analysis(analysisPosition))) {
+          this.samplePlateStage.requestReached();
+        } else if (requestXyStateFailed()) {
+          this.samplePlateStage.requestFailed();
         }
 
-      } else if (requestedSampleState().get().equals(SampleState.exchange())) {
-        getController(this.xyStageController).requestExchange();
-        if (xyStage.sampleState().isMatching(s -> s instanceof Exchange<?>)) {
-          this.sampleState.set(EXCHANGE);
-        } else if (xyStageState != EXCHANGE_REQUESTED) {
-          this.sampleState.set(FAILED);
+      } else if (requestedSamplePlateState.equals(SampleState.exchange())) {
+        if (requestXyState(SampleState.exchange())) {
+          this.samplePlateStage.requestReached();
+        } else if (requestXyStateFailed()) {
+          this.samplePlateStage.requestFailed();
         }
 
-      } else if (requestedSampleState().get().equals(SampleState.ready())) {
-        getController(this.xyStageController).requestReady();
-        if (xyStageState == ANALYSIS_READY || xyStageState == ANALYSIS) {
-          this.sampleState.set(ANALYSIS_READY);
-        } else if (xyStageState != ANALYSIS_READY_REQUESTED) {
-          this.sampleState.set(FAILED);
+      } else if (requestedSamplePlateState.equals(SampleState.ready())) {
+        if (requestXyState(SampleState.ready())) {
+          this.samplePlateStage.requestReached();
+        } else if (requestXyStateFailed()) {
+          this.samplePlateStage.requestFailed();
         }
       }
     }
@@ -234,7 +235,7 @@ public class SaintStageManager {
 
   private boolean requestXyState(RequestedSampleState<XYCoordinate<Length>> state) {
     if (!xyStage.requestedSampleState().isEqual(state)) {
-      try (var control = xyStage.acquireControl(500, TimeUnit.MILLISECONDS)) {
+      try (var control = xyStageController.getController().get()) {
         control.request(state);
       }
     }
