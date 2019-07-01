@@ -2,8 +2,7 @@ Bundle-Name: SAI :: Eclipse
 
 -include:\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\

@@ -4,11 +4,10 @@ Export-Package: uk.co.saiman.msapex.editor
 -include:\
 	${build}/include/eclipse.platform.bnd,\
 	${build}/include/eclipse.fx.bnd,\
-	${build}/include/eclipse.plugin.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.plugin.bnd
 
 -includeresource:\
-	fragment.e4xmi
+	initial.e4xmi
 
 -buildpath:\
 	uk.co.saiman.collections;version=snapshot,\

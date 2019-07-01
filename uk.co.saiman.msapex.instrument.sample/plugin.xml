@@ -10,14 +10,5 @@
 			uri="always.e4xmi" />
     </extension>
 
-	<extension
-		id="initialModelContribution"
-    	point="org.eclipse.e4.workbench.model">
-
-		<fragment
-			apply="initial"
-			uri="initial.e4xmi" />
-    </extension>
-
 </plugin> 
 

@@ -35,7 +35,7 @@ Bundle-Name: SAI :: MSApex :: Simulation
 -includeresource:\
 	css=css,\
 	res,\
-	fragment.e4xmi
+	initial.e4xmi
 
 Private-Package: \
 	uk.co.saiman.msapex.simulation
