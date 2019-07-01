@@ -58,7 +58,7 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.composed.xy";
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "SAINT Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
+  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "Composed XY Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
   public @interface ComposedXYStageConfiguration {
     String name();
 

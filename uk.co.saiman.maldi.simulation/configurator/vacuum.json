@@ -1,0 +1,28 @@
+{
+	"uk.co.saiman.messaging.rabbitmq.host~maldivacuum": {
+		"url": "amqp://SAI@192.168.192.196/lt2",
+		"password": "LT2"
+	},
+	"uk.co.saiman.messaging.rabbitmq.exchange~maldivacuum.status": {
+		"host.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.host~maldivacuum)",
+		"exchangeName": "LaserToF",
+		"exchangeType": "fanout"
+	},
+	"uk.co.saiman.messaging.rabbitmq.queue~maldivacuum.status": {
+		"exchange.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.exchange~maldivacuum.status)"
+	},
+	"uk.co.saiman.messaging.rabbitmq.exchange~maldivacuum.command": {
+		"host.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.host~maldivacuum)",
+		"exchangeName": "LaserToFCommand",
+		"exchangeType": "fanout"
+	},
+	"uk.co.saiman.messaging.rabbitmq.publisher~maldivacuum.command": {
+		"exchange.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.exchange~maldivacuum.command)"
+	},
+	"uk.co.saiman.instrument.vacuum.maldi~maldivacuum": {
+		"instrument.target": "(service.pid=uk.co.saiman.instrument~maldi)",
+		"status.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.queue~maldivacuum.status)",
+		"command.target": "(service.pid=uk.co.saiman.messaging.rabbitmq.publisher~maldivacuum.command)",
+		"sampleResolution": "1s"
+	}
+}
