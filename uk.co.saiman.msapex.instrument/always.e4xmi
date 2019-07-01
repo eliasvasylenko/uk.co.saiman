@@ -11,10 +11,6 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_tNml4KHYEeeDWfjziciHZg" featurename="categories" parentElementId="uk.co.saiman.msapex.application">
     <elements xsi:type="commands:Category" xmi:id="_x3DdQKHYEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.category.instrument" name="Instrument" description="Instrument inspection and operation"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_C25pkKHZEeeDWfjziciHZg" featurename="handlers" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="commands:Handler" xmi:id="_ESYwIKHZEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handler.operate" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentOperateHandler" command="_rmrrYKHYEeeDWfjziciHZg"/>
-    <elements xsi:type="commands:Handler" xmi:id="_h1mWYKHZEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handler.standby" contributionURI="bundleclass://uk.co.saiman.msapex.instrument/uk.co.saiman.msapex.instrument.InstrumentStandbyHandler" command="_9TUFMKHYEeeDWfjziciHZg"/>
-  </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_E6PvcKHbEeeDWfjziciHZg" featurename="children" parentElementId="uk.co.saiman.msapex.menu" positionInList="after:uk.co.saiman.msapex.menu.file">
     <elements xsi:type="menu:Menu" xmi:id="_QMEpAKHbEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.menu.instrument" label="Instrument">
       <children xsi:type="menu:HandledMenuItem" xmi:id="_R7NrYKHbEeeDWfjziciHZg" elementId="uk.co.saiman.msapex.instrument.handledmenuitem.operate" label="Operate" command="_rmrrYKHYEeeDWfjziciHZg"/>

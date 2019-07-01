@@ -38,7 +38,6 @@ import javax.measure.quantity.Time;
 
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.DeviceStatus;
-import uk.co.saiman.instrument.InstrumentRegistration;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Device;
 import uk.co.saiman.instrument.acquisition.adq.AdqHardwareInterface;
@@ -132,12 +131,6 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
   public Adq114Control acquireControl(long timeout, TimeUnit unit)
       throws TimeoutException,
       InterruptedException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public InstrumentRegistration getInstrumentRegistration() {
     // TODO Auto-generated method stub
     return null;
   }

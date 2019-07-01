@@ -10,7 +10,7 @@
     <elements xsi:type="commands:Category" xmi:id="_dUNRUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.category" name="Chemistry" description="Chemical inspection"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_48rEgLRBEeeVS6ywMXk18Q" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
-    <elements xsi:type="basic:Part" xmi:id="_H6hW8IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.part.periodictable" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTablePart" label="Periodic Table" iconURI="${fugue.icon.runtime}/size16/application-table.png">
+    <elements xsi:type="basic:Part" xmi:id="_H6hW8IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.part.periodictable" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTablePart" label="Periodic Table" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/application-table.png">
       <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_N0O8UIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.toolbar.periodictable">
         <children xsi:type="menu:HandledToolItem" xmi:id="_rjdlUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.chemistry.handledtoolitem.periodictable.size" label="Size" command="_T7Fl0IDIEeeN2sgw5j4-sA">

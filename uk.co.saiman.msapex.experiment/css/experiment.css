@@ -4,21 +4,21 @@
 }
 
 #uk-co-saiman-msapex-experiment-handledtoolitem-addexperiment {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/book--plus.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book--plus.png");
 }
 #uk-co-saiman-msapex-experiment-handledtoolitem-runexperiment {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/book-open-next.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-open-next.png");
 }
 
 ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell :PROCESSING {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/clock.png");	
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/clock.png");	
 }
 ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell  {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/clock.png");	
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/clock.png");	
 }
 ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell :COMPLETION {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/tick-circle.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/tick-circle.png");
 }
 ModularTreeCell :uk-co-saiman-msapex-experiment-step-cell :FAILURE {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/exclamation-red.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/exclamation-red.png");
 }

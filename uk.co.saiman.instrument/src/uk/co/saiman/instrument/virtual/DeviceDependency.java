@@ -134,6 +134,7 @@ public class DeviceDependency<V extends Controller> {
   }
 
   public synchronized Optional<V> getController() {
+    acquireController();
     return Optional.ofNullable(controller);
   }
 

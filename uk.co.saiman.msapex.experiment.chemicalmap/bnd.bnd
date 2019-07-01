@@ -3,8 +3,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Chemical Map
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -buildpath:\
 	uk.co.saiman.utilities;version=snapshot,\
@@ -38,7 +37,7 @@ Export-Package:\
 	uk.co.saiman.msapex.experiment.chemicalmap.i18n
 
 -includeresource:\
-	{css=css},\
+	css=css,\
 	res,\
 	l10n,\
-	{always.e4xmi}
+	always.e4xmi

@@ -39,7 +39,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleDevice;
@@ -73,13 +72,11 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
 
   @Activate
   public ComposedXYStage(
-      @Reference(name = "instrument") Instrument instrument,
       @Reference(name = "xAxis") AxisDevice<Length, ?> xAxis,
       @Reference(name = "yAxis") AxisDevice<Length, ?> yAxis,
       ComposedXYStageConfiguration configuration) {
     this(
         configuration.name(),
-        instrument,
         xAxis,
         yAxis,
         XYCoordinate.fromString(configuration.analysisLocation()).asType(Length.class),
@@ -88,12 +85,11 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
 
   public ComposedXYStage(
       String name,
-      Instrument instrument,
       AxisDevice<Length, ?> xAxis,
       AxisDevice<Length, ?> yAxis,
       XYCoordinate<Length> analysisLocation,
       XYCoordinate<Length> exchangeLocation) {
-    super(name, instrument, analysisLocation, exchangeLocation, xAxis, yAxis);
+    super(name, analysisLocation, exchangeLocation, xAxis, yAxis);
 
     this.xAxis = xAxis;
     this.yAxis = yAxis;

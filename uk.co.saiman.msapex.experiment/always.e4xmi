@@ -13,7 +13,7 @@
     <elements xsi:type="commands:Category" xmi:id="_6M4fYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.msapex.experiment.category" name="Experiments" description="Experiment definition and processing"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.msapex.application">
-    <elements xsi:type="basic:CompositePart" xmi:id="_oPdkMNgkEeiOZN9m2H2j1w" elementId="uk.co.saiman.msapex.experiment.compositepart.editor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentEditorPart" label="Experiment" iconURI="${fugue.icon.runtime}/size16/book.png" closeable="true" selectedElement="_NwK4kNg9EeiDZrJmfrSjFA" horizontal="true">
+    <elements xsi:type="basic:CompositePart" xmi:id="_oPdkMNgkEeiOZN9m2H2j1w" elementId="uk.co.saiman.msapex.experiment.compositepart.editor" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentEditorPart" label="Experiment" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book.png" closeable="true" selectedElement="_NwK4kNg9EeiDZrJmfrSjFA" horizontal="true">
       <persistedState key="fx.stack.tabslocation" value="BOTTOM"/>
       <tags>segregatedDnD</tags>
       <tags>removeOnHide</tags>
@@ -58,7 +58,7 @@
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_iYArkLsiEeel5-btXoqucA" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
-    <elements xsi:type="basic:Part" xmi:id="_kxY9wLsiEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.part" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentPart" label="Experiments" iconURI="${fugue.icon.runtime}/size16/books.png">
+    <elements xsi:type="basic:Part" xmi:id="_kxY9wLsiEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.part" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.ExperimentPart" label="Experiments" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/books.png">
       <tags>Part-Toolbar-FullSpan</tags>
       <handlers xmi:id="_oewfgHZIEemo2uwS8nakcA" elementId="uk.co.saiman.msapex.experiment.handler.addworkspaceexperiment" contributionURI="bundleclass://uk.co.saiman.msapex.experiment/uk.co.saiman.msapex.experiment.AddWorkspaceExperimentHandler" command="_Vr8gwHZIEemo2uwS8nakcA"/>
       <toolbar xmi:id="_tFVJ4LsiEeel5-btXoqucA" elementId="uk.co.saiman.msapex.experiment.toolbar.0">

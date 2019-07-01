@@ -1,7 +1,7 @@
 .ModularTreeCell :DeviceContribution:CONNECTED #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/plug-connect.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/plug-connect.png");
 }
 
 .ModularTreeCell :DeviceContribution:DISCONNECTED #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/plug-disconnect.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/plug-disconnect.png");
 }

@@ -3,8 +3,7 @@ Bundle-Name: SAI :: MSApex :: Experiment
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -buildpath:\
 	uk.co.saiman.collections;version=snapshot,\
@@ -48,8 +47,8 @@ Export-Package: \
 Private-Package: uk.co.saiman.msapex.experiment.provider.workspace
 
 -includeresource:\
-	{css=css},\
+	css=css,\
 	res,\
 	l10n,\
-	{always.e4xmi},\
-	{initial.e4xmi}
+	always.e4xmi,\
+	initial.e4xmi

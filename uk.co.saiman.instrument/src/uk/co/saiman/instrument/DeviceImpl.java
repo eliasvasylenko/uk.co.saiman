@@ -44,15 +44,13 @@ import uk.co.saiman.observable.ObservableValue;
 public abstract class DeviceImpl<T extends Controller> implements Device<T> {
   private final String name;
   private final ObservableProperty<DeviceStatus> connectionState;
-  private final DeviceRegistration registration;
 
   private final Semaphore semaphore = new Semaphore(1);
   private volatile ControlContextImpl lockedContext;
 
-  public DeviceImpl(String name, Instrument instrument) {
+  public DeviceImpl(String name) {
     this.name = name;
     this.connectionState = over(INACCESSIBLE);
-    this.registration = instrument.registerDevice(this);
   }
 
   protected void dispose() {
@@ -60,17 +58,11 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
       connectionState.set(DISPOSED);
     }
     closeController();
-    registration.deregister();
   }
 
   @Override
   public String getName() {
     return name;
-  }
-
-  @Override
-  public InstrumentRegistration getInstrumentRegistration() {
-    return registration.getInstrumentRegistration();
   }
 
   @Override

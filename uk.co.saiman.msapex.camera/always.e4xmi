@@ -14,7 +14,7 @@
     <elements xsi:type="commands:Category" xmi:id="_VPhLoIGYEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.camera.category" name="Camera" description="Sample camera display"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_weARoLSaEeea0psSVURp7w" featurename="sharedElements" parentElementId="uk.co.saiman.msapex">
-    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.camera.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.camera/uk.co.saiman.msapex.camera.CameraPart" label="Camera" iconURI="${fugue.icon.runtime}/size16/camera.png">
+    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.camera.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.camera/uk.co.saiman.msapex.camera.CameraPart" label="Camera" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/camera.png">
       <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.msapex.camera.toolbar">
         <children xsi:type="menu:HandledToolItem" xmi:id="_1m0ekIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.msapex.camera.handledtoolitem.connect" label="Connect" command="_WM8RoIGiEeeN2sgw5j4-sA">

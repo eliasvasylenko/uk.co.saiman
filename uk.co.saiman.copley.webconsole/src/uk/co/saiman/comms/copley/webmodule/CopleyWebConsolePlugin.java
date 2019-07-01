@@ -59,7 +59,6 @@ import static org.apache.felix.webconsole.WebConsoleUtil.getVariableResolver;
 import static uk.co.saiman.comms.copley.webmodule.CopleyWebConsoleConstants.COPLEY_WEB_MODULE_NAME;
 import static uk.co.saiman.comms.copley.webmodule.CopleyWebConsoleConstants.COPLEY_WEB_MODULE_VERSION;
 import static uk.co.saiman.comms.copley.webmodule.CopleyWebConsolePlugin.COPLEY_PLUGIN_ID;
-import static uk.co.saiman.instrument.Instrument.INSTRUMENT_CATEGORY;
 import static uk.co.saiman.webmodule.WebModuleConstants.DEFAULT_ENTRY_POINT;
 import static uk.co.saiman.webmodule.WebModuleConstants.ESM;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.DEFAULT_RESOURCE_ROOT;
@@ -104,7 +103,7 @@ public class CopleyWebConsolePlugin extends SimpleWebConsolePlugin {
     super(
         COPLEY_PLUGIN_ID,
         "${copley.name}",
-        INSTRUMENT_CATEGORY,
+        "Instrument",
         new String[] { "${pluginRoot}/static/index.css" });
     this.template = this.readTemplateFile("/static/index.html");
   }

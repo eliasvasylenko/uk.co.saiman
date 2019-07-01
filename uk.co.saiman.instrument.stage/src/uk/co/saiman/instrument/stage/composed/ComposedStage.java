@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.axis.AxisState;
 import uk.co.saiman.instrument.sample.Analysis;
@@ -73,11 +72,10 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
 
   public ComposedStage(
       String name,
-      Instrument instrument,
       T analysisPosition,
       T exchangePosition,
       AxisDevice<?, ?>... axes) {
-    super(name, instrument);
+    super(name);
     this.axes = Set.of(axes);
     this.axes.forEach(axis -> addDependency(axis, 2, SECONDS));
     this.readyPosition = analysisPosition;
@@ -153,19 +151,11 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
     };
   }
 
-  private void assertRegistered() {
-    if (!getInstrumentRegistration().isRegistered()) {
-      throw new IllegalStateException("Unable to request location when stage is unregistered");
-    }
-  }
-
   protected synchronized void requestSampleState(
       DependentControlContext context,
       RequestedSampleState<T> requestedSampleState) {
     context.run(() -> {
       if (!this.requestedSampleState.isEqual(requestedSampleState)) {
-        assertRegistered();
-
         this.requestedSampleState.set(requestedSampleState);
         T requestedSamplePosition;
         if (requestedSampleState instanceof Analysis<?>) {

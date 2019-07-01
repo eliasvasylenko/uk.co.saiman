@@ -3,8 +3,7 @@ Bundle-Name: SAI :: MSApex :: Camera
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -buildpath:\
 	uk.co.saiman.camera;version=snapshot,\
@@ -20,11 +19,11 @@ Bundle-Name: SAI :: MSApex :: Camera
 	com.github.sarxos.webcam-capture
 
 -includeresource:\
-	{always.e4xmi},\
-	{initial.e4xmi},\
+	always.e4xmi,\
+	initial.e4xmi,\
 	res,\
 	l10n,\
-	{css=css}
+	css=css
 
 Export-Package:\
 	uk.co.saiman.msapex.camera,\

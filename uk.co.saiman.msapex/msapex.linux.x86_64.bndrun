@@ -179,7 +179,6 @@ runplatform: linux64
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.acquisition.adq;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
-	uk.co.saiman.instrument.provider;version=snapshot,\
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\

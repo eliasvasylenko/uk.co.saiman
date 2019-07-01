@@ -55,7 +55,6 @@ import uk.co.saiman.comms.copley.CopleyException;
 import uk.co.saiman.comms.copley.EventStatusRegister;
 import uk.co.saiman.comms.copley.Int32;
 import uk.co.saiman.instrument.DeviceImpl;
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.axis.AxisController;
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.axis.AxisState;
@@ -102,20 +101,14 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
 
   @Activate
   public CopleyLinearAxis(
-      @Reference(name = "instrument") Instrument instrument,
       @Reference(name = "comms") CopleyController comms,
       CopleyLinearAxisConfiguration configuration,
       @Reference Log log) {
-    this(instrument, comms, configuration.node(), configuration.axis(), log);
+    this(comms, configuration.node(), configuration.axis(), log);
   }
 
-  public CopleyLinearAxis(
-      Instrument instrument,
-      CopleyController comms,
-      int node,
-      int axis,
-      Log log) {
-    super("copley axis " + comms + " " + node + " " + axis, instrument);
+  public CopleyLinearAxis(CopleyController comms, int node, int axis, Log log) {
+    super("copley axis " + comms + " " + node + " " + axis);
     this.log = log;
 
     this.comms = comms;
@@ -130,7 +123,6 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   protected synchronized void startPolling() {
-    poll();
     polling = fixedRate(0, 100, MILLISECONDS)
         .weakReference(this)
         .map(OwnedMessage::owner)
@@ -181,6 +173,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
       if (status.driveFault) {
         throw new CopleyException("Drive fault");
       }
+      setAccessible();
       if (!status.motionActive && axisState.isEqual(LOCATION_REQUESTED)) {
         axisState.set(LOCATION_REACHED);
       }
@@ -195,6 +188,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   void updateActualLocation() {
     try {
       var position = getAxis().actualPosition().get();
+      setAccessible();
       actualLocation.set(getLengthFromSteps(position.value));
     } catch (Exception e) {
       setInaccessible();
@@ -207,6 +201,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   void updateRequestedLocation() {
     try {
       var position = getAxis().requestedPosition().get();
+      setAccessible();
       requestedLocation.set(getLengthFromSteps(position.value));
     } catch (Exception e) {
       setInaccessible();

@@ -3,8 +3,7 @@ Bundle-Name: SAI :: MSApex :: Chemistry
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -buildpath: \
 	javax.measure.unit-api,\
@@ -34,7 +33,7 @@ Private-Package: uk.co.saiman.msapex.chemistry
 Export-Package: uk.co.saiman.msapex.chemistry
 
 -includeresource: \
-	{always.e4xmi},\
-	{initial.e4xmi},\
+	always.e4xmi,\
+	initial.e4xmi,\
 	res,\
-	{css=css}
+	css=css

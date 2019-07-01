@@ -32,6 +32,7 @@ import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE
 import static uk.co.saiman.instrument.DeviceStatus.UNAVAILABLE;
 
 import java.util.Hashtable;
+import java.util.function.Function;
 
 import javax.measure.quantity.Length;
 
@@ -45,7 +46,6 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.sample.Analysis;
 import uk.co.saiman.instrument.sample.Exchange;
 import uk.co.saiman.instrument.sample.Ready;
@@ -73,7 +73,7 @@ import uk.co.saiman.saint.stage.SamplePlateStage;
  *
  */
 @Designate(ocd = SaintStageManager.SaintStageConfiguration.class, factory = true)
-@Component(name = SaintStageManager.CONFIGURATION_PID, configurationPid = SaintStageManager.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = SaintStageManager.class)
+@Component(name = SaintStageManager.CONFIGURATION_PID, configurationPid = SaintStageManager.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = SaintStageManager.class, immediate = true)
 public class SaintStageManager {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.saint";
 
@@ -171,10 +171,6 @@ public class SaintStageManager {
     return sampleAreaStage;
   }
 
-  public Instrument getInstrument() {
-    return xyStage.getInstrumentRegistration().getInstrument();
-  }
-
   synchronized void processState() {
     var requestedSamplePlateState = samplePlateStage.requestedSampleState().get();
     var requestedSampleAreaState = sampleAreaStage.requestedSampleState().get();
@@ -193,11 +189,10 @@ public class SaintStageManager {
             .center()
             .add(((Analysis<XYCoordinate<Length>>) requestedSampleAreaState).position());
 
-        if (requestXyState(SampleState.analysis(analysisPosition))) {
-          this.sampleAreaStage.requestReached();
-        } else if (requestXyStateFailed()) {
-          this.sampleAreaStage.requestFailed();
-        }
+        requestXyState(
+            SampleState.analysis(analysisPosition),
+            this.sampleAreaStage::requestReached,
+            this.sampleAreaStage::requestFailed);
       }
     } else {
       /*
@@ -205,51 +200,43 @@ public class SaintStageManager {
        * device is given command of the XY stage controller.
        */
 
-      if (requestedSamplePlateState instanceof Analysis<?>) {
-        var analysisPosition = ((Analysis<SampleArea>) requestedSamplePlateState)
-            .position()
-            .center();
-
-        if (requestXyState(SampleState.analysis(analysisPosition))) {
-          this.samplePlateStage.requestReached();
-        } else if (requestXyStateFailed()) {
-          this.samplePlateStage.requestFailed();
-        }
-
-      } else if (requestedSamplePlateState.equals(SampleState.exchange())) {
-        if (requestXyState(SampleState.exchange())) {
-          this.samplePlateStage.requestReached();
-        } else if (requestXyStateFailed()) {
-          this.samplePlateStage.requestFailed();
-        }
-
-      } else if (requestedSamplePlateState.equals(SampleState.ready())) {
-        if (requestXyState(SampleState.ready())) {
-          this.samplePlateStage.requestReached();
-        } else if (requestXyStateFailed()) {
-          this.samplePlateStage.requestFailed();
-        }
-      }
+      requestXyState(
+          mapRequestedSampleState(requestedSamplePlateState, SampleArea::center),
+          this.samplePlateStage::requestReached,
+          this.samplePlateStage::requestFailed);
     }
   }
 
-  private boolean requestXyState(RequestedSampleState<XYCoordinate<Length>> state) {
-    if (!xyStage.requestedSampleState().isEqual(state)) {
-      try (var control = xyStageController.getController().get()) {
+  @SuppressWarnings("unchecked")
+  private <T, U> RequestedSampleState<U> mapRequestedSampleState(
+      RequestedSampleState<T> requestedSampleState,
+      Function<? super T, ? extends U> mapping) {
+    if (requestedSampleState instanceof Analysis<?>) {
+      return SampleState.analysis(mapping.apply(((Analysis<T>) requestedSampleState).position()));
+    } else {
+      return (RequestedSampleState<U>) requestedSampleState;
+    }
+  }
+
+  private boolean requestXyState(
+      RequestedSampleState<XYCoordinate<Length>> state,
+      Runnable success,
+      Runnable failure) {
+    xyStageController.getController().ifPresentOrElse(control -> {
+      if (!xyStage.requestedSampleState().isEqual(state)) {
         control.request(state);
       }
-    }
+      success.run();
+    }, () -> {
+      failure.run();
+    });
     return xyStage.sampleState().isEqual(state);
   }
 
-  private boolean requestXyStateFailed() {
-    return xyStage.sampleState().isEqual(SampleState.failed());
-  }
-
   private boolean isAtAnalysis() {
-    return (samplePlateStage.sampleState().isMatching(s -> s instanceof Analysis<?>)
+    return samplePlateStage.sampleState().isMatching(s -> s instanceof Analysis<?>)
         && (samplePlateStage.requestedSampleState().isMatching(s -> s instanceof Analysis<?>)
             || (sampleAreaStage.status().isEqual(UNAVAILABLE)
-                && !sampleAreaStage.sampleState().isMatching(r -> r instanceof Exchange<?>))));
+                && !sampleAreaStage.sampleState().isMatching(r -> r instanceof Exchange<?>)));
   }
 }

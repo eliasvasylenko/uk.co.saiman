@@ -3,8 +3,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -buildpath:\
 	uk.co.saiman.collections;version=snapshot,\
@@ -46,4 +45,4 @@ Export-Package: \
 -includeresource:\
 	res,\
 	l10n,\
-	{always.e4xmi}
+	always.e4xmi

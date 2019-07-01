@@ -37,7 +37,6 @@ import java.util.function.Supplier;
 import uk.co.saiman.instrument.Controller;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceImpl;
-import uk.co.saiman.instrument.Instrument;
 
 /**
  * An implementation of a virtual device which is an abstraction over any number
@@ -49,8 +48,8 @@ import uk.co.saiman.instrument.Instrument;
 public abstract class AbstractingDevice<U extends Controller> extends DeviceImpl<U> {
   private final Map<Device<?>, DeviceDependency<?>> dependencies = new HashMap<>();
 
-  public AbstractingDevice(String name, Instrument instrument) {
-    super(name, instrument);
+  public AbstractingDevice(String name) {
+    super(name);
   }
 
   @Override

@@ -26,4 +26,4 @@ Bundle-Name: SAI :: MSApex :: Chart
 Export-Package: uk.co.saiman.msapex.chart
 
 -includeresource: \
-	{css=css}
+	css=css

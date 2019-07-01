@@ -1,9 +1,9 @@
 #uk-co-saiman-msapex-chemistry-periodictable-handledtoolitem-size {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/magnifier.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/magnifier.png");
 }
 
 #uk-co-saiman-msapex-chemistry-periodictable-directtoolitem-tables {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/application-table.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/application-table.png");
 }
 
 /*

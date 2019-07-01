@@ -31,6 +31,7 @@ import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.currentThread;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
+import static uk.co.saiman.instrument.DeviceStatus.DISPOSED;
 import static uk.co.saiman.log.Log.Level.ERROR;
 import static uk.co.saiman.measurement.Quantities.quantityFormat;
 import static uk.co.saiman.measurement.Units.count;
@@ -56,7 +57,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceImpl;
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.acquisition.AcquisitionException;
@@ -182,13 +182,11 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
       AcquisitionSimulationConfiguration configuration,
       @Reference PropertyLoader loader,
       @Reference Log log,
-      @Reference(name = "instrument") Instrument instrument,
       @Reference(name = "detectorService") DetectorSimulationService detectorService) {
     this(
         quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class),
         loader.getProperties(SimulationProperties.class),
         log,
-        instrument,
         detectorService);
   }
 
@@ -196,9 +194,8 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
       Quantity<Time> acquisitionResolution,
       SimulationProperties simulationProperties,
       Log log,
-      Instrument instrument,
       DetectorSimulationService detectorService) {
-    super(simulationProperties.acquisitionSimulationDeviceName().toString(), instrument);
+    super(simulationProperties.acquisitionSimulationDeviceName().toString());
 
     this.acquisitionResolution = acquisitionResolution;
     this.simulationProperties = simulationProperties;
@@ -288,7 +285,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   private void acquire() {
     currentThread().setPriority(MAX_PRIORITY);
 
-    while (getInstrumentRegistration().isRegistered()) {
+    while (status().isMatching(status -> status != DISPOSED)) {
       DetectorSimulation detector;
       int counter;
 

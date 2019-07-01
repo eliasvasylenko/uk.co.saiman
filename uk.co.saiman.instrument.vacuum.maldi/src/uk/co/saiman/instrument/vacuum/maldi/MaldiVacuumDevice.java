@@ -53,7 +53,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceImpl;
-import uk.co.saiman.instrument.Instrument;
 import uk.co.saiman.instrument.vacuum.VacuumController;
 import uk.co.saiman.instrument.vacuum.VacuumDevice;
 import uk.co.saiman.instrument.vacuum.VacuumSample;
@@ -100,13 +99,11 @@ public class MaldiVacuumDevice extends DeviceImpl<VacuumController>
   public MaldiVacuumDevice(
       MaldiVacuumConfiguration configuration,
       @Reference Log log,
-      @Reference Instrument instrument,
       @Reference(name = "status") MessageReceiver status,
       @Reference(name = "command") MessageSender command) {
     this(
         quantityFormat().parse(configuration.sampleResolution()).asType(Time.class),
         log,
-        instrument,
         status,
         command);
   }
@@ -114,10 +111,9 @@ public class MaldiVacuumDevice extends DeviceImpl<VacuumController>
   public MaldiVacuumDevice(
       Quantity<Time> sampleResolution,
       Log log,
-      Instrument instrument,
       MessageReceiver status,
       MessageSender command) {
-    super("MALDI Vacuum Device", instrument);
+    super("MALDI Vacuum Device");
 
     this.sampleResolution = sampleResolution;
     this.pressureUnit = pascal().getUnit();

@@ -3,8 +3,7 @@ Bundle-Name: SAI :: MSApex :: Simulation
 -include:\
 	${build}/include/eclipse.platform.bnd,\
 	${build}/include/eclipse.fx.bnd,\
-	${build}/include/eclipse.plugin.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.plugin.bnd
 
 -buildpath:\
 	uk.co.saiman.eclipse;version=snapshot,\
@@ -34,7 +33,7 @@ Bundle-Name: SAI :: MSApex :: Simulation
 
 
 -includeresource:\
-	{css=css},\
+	css=css,\
 	res,\
 	fragment.e4xmi
 

@@ -69,7 +69,7 @@ public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
   private final ObservableProperty<XYCoordinate<Length>> actualPosition;
 
   public SampleAreaStageImpl(SaintProperties properties, SaintStageManager stateManager) {
-    super(properties.sampleAreaStageDeviceName().toString(), stateManager.getInstrument());
+    super(properties.sampleAreaStageDeviceName().toString());
 
     this.stateManager = stateManager;
 

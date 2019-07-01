@@ -60,7 +60,7 @@ public class DeviceImplTest {
 
   class SimpleDevice extends DeviceImpl<SimpleController> {
     public SimpleDevice() {
-      super("simpleDevice", instrument);
+      super("simpleDevice");
       setAccessible();
     }
 
@@ -92,27 +92,11 @@ public class DeviceImplTest {
   }
 
   @Mock
-  Instrument instrument;
-  @Mock
-  DeviceRegistration deviceRegistration;
-  @Mock
-  InstrumentRegistration instrumentRegistration;
-  @Mock
   BackingService backingService;
 
   @Test
   public void createDeviceSucceeds() {
     new SimpleDevice();
-  }
-
-  @Test
-  public void getInstrumentRegistration() throws Exception {
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
-    Mockito.doReturn(instrumentRegistration).when(deviceRegistration).getInstrumentRegistration();
-
-    var device = new SimpleDevice();
-
-    assertEquals(instrumentRegistration, device.getInstrumentRegistration());
   }
 
   @Test
@@ -137,23 +121,7 @@ public class DeviceImplTest {
   }
 
   @Test
-  public void disposeDeregistersFromInstrument() throws Exception {
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
-
-    var device = new SimpleDevice();
-    device.dispose();
-    assertEquals(DISPOSED, device.status().get());
-
-    var inOrder = Mockito.inOrder(instrument, deviceRegistration);
-    inOrder.verify(instrument).registerDevice(device);
-    inOrder.verify(deviceRegistration).deregister();
-    inOrder.verifyNoMoreInteractions();
-  }
-
-  @Test
   public void acquireControlFailsAfterDispose() throws Exception {
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
-
     var device = new SimpleDevice();
     device.dispose();
     assertEquals(DISPOSED, device.status().get());
@@ -163,8 +131,6 @@ public class DeviceImplTest {
 
   @Test
   public void successfulAcquireControlWhenInaccessibleMakesUnavailable() throws Exception {
-    Mockito.when(instrument.registerDevice(Mockito.any())).thenReturn(deviceRegistration);
-
     var device = new SimpleDevice();
     device.setInaccessible();
     assertEquals(INACCESSIBLE, device.status().get());
@@ -175,7 +141,6 @@ public class DeviceImplTest {
   @Test
   public void unsuccessfulAcquireControlMakesInaccessible() throws Exception {
     RuntimeException exception = new RuntimeException();
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
     Mockito.doThrow(exception).when(backingService).acquireControl();
 
     var device = new SimpleDevice();
@@ -188,8 +153,6 @@ public class DeviceImplTest {
 
   @Test
   public void setInaccessibleWhenDisposedDoesNothing() throws Exception {
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
-
     var device = new SimpleDevice();
     device.dispose();
     device.setInaccessible();
@@ -198,8 +161,6 @@ public class DeviceImplTest {
 
   @Test
   public void setAccessibleWhenDisposedDoesNothing() throws Exception {
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
-
     var device = new SimpleDevice();
     device.dispose();
     device.setAccessible();
@@ -208,15 +169,12 @@ public class DeviceImplTest {
 
   @Test
   public void setInaccessibleWhenAcquiredControlReleasesControl() throws Exception {
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
-
     var device = new SimpleDevice();
     var control = device.acquireControl(0, SECONDS);
     device.setInaccessible();
     assertThrows(IllegalStateException.class, () -> control.command());
 
-    var inOrder = Mockito.inOrder(instrument, backingService, deviceRegistration);
-    inOrder.verify(instrument).registerDevice(device);
+    var inOrder = Mockito.inOrder(backingService);
     inOrder.verify(backingService).acquireControl();
     inOrder.verify(backingService).releaseControl();
     inOrder.verifyNoMoreInteractions();
@@ -224,18 +182,14 @@ public class DeviceImplTest {
 
   @Test
   public void disposeWhenAcquiredControlReleasesControl() throws Exception {
-    Mockito.doReturn(deviceRegistration).when(instrument).registerDevice(Mockito.any());
-
     var device = new SimpleDevice();
     var control = device.acquireControl(0, SECONDS);
     device.dispose();
     assertThrows(IllegalStateException.class, () -> control.command());
 
-    var inOrder = Mockito.inOrder(instrument, backingService, deviceRegistration);
-    inOrder.verify(instrument).registerDevice(device);
+    var inOrder = Mockito.inOrder(backingService);
     inOrder.verify(backingService).acquireControl();
     inOrder.verify(backingService).releaseControl();
-    inOrder.verify(deviceRegistration).deregister();
     inOrder.verifyNoMoreInteractions();
   }
 }

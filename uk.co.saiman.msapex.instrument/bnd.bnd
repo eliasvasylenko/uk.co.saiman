@@ -3,8 +3,7 @@ Bundle-Name: SAI :: MSApex :: Instrument
 -include:\
 	${build}/include/eclipse.plugin.bnd,\
 	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -buildpath: \
 	uk.co.saiman.fx;version=snapshot,\
@@ -32,8 +31,11 @@ Bundle-Name: SAI :: MSApex :: Instrument
 Private-Package: \
 	uk.co.saiman.msapex.instrument
 
+Export-Package: \
+	uk.co.saiman.msapex.instrument.device
+
 -includeresource: \
-	{always.e4xmi},\
-	{initial.e4xmi},\
+	always.e4xmi,\
+	initial.e4xmi,\
 	res,\
-	{css=css}
+	css=css

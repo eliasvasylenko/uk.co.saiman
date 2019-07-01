@@ -1,11 +1,11 @@
 .ModularTreeCell :SampleImageContribution #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/image.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/image.png");
 }
 
 .ModularTreeCell :ChemicalContribution #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/molecule.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/molecule.png");
 }
 
 .ModularTreeCell :SampleImageConfigurationContribution #text {
-	-fx-graphic: url("${fugue.icon.runtime}/size16/gear.png");
+	-fx-graphic: url("platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/gear.png");
 }

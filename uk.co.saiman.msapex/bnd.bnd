@@ -14,11 +14,10 @@ Import-Package:\
 -include:\
 	${build}/include/eclipse.platform.bnd,\
 	${build}/include/eclipse.plugin.bnd,\
-	${build}/include/eclipse.fx.bnd,\
-	${build}/include/fugue.icons.bnd
+	${build}/include/eclipse.fx.bnd
 
 -includeresource:\
 	{Application.e4xmi},\
-	{css=css},\
+	css=css,\
 	res,\
 	OSGI-INF/configurator=configurator

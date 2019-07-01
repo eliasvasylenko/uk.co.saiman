@@ -55,7 +55,7 @@ public class SamplePlateStageImpl extends DeviceImpl<SamplePlateStageController>
   private final ObservableProperty<SampleArea> actualPosition;
 
   public SamplePlateStageImpl(SaintProperties properties, SaintStageManager stateManager) {
-    super(properties.samplePlateStageDeviceName().toString(), stateManager.getInstrument());
+    super(properties.samplePlateStageDeviceName().toString());
 
     this.stateManager = stateManager;
 

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.function.Function;
+
 /**
  * An enumeration of the possible states for a {@link SampleDevice sample
  * device}.
