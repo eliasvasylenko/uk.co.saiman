@@ -38,22 +38,27 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.Resource;
+import uk.co.saiman.experiment.environment.StaticEnvironment;
 import uk.co.saiman.experiment.graph.ExperimentPath;
 import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.instruction.IndirectRequirements;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Productions;
 import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.requirement.AdditionalRequirement;
+import uk.co.saiman.experiment.requirement.AdditionalResultRequirement;
 import uk.co.saiman.experiment.schedule.Schedule;
+import uk.co.saiman.experiment.variables.Variables;
 
 public class Conflicts {
   private final Schedule schedule;
+  private final StaticEnvironment environment;
   private final Map<ExperimentPath<Absolute>, Change> differences;
 
-  public Conflicts(Schedule schedule) {
+  public Conflicts(Schedule schedule, StaticEnvironment environment) {
     this.schedule = schedule;
+    this.environment = environment;
 
     this.differences = new HashMap<>();
     schedule.getScheduledProcedure().paths().forEach(this::checkDifference);
@@ -146,21 +151,28 @@ public class Conflicts {
       return scheduledInstruction
           .map(Instruction::executor)
           .stream()
-          .flatMap(Executor::indirectRequirements)
+          .flatMap(Executor::additionalRequirements)
           .flatMap(this::resolveDependencies)
           .collect(toMap(Change::path, identity(), (a, b) -> a))
           .values()
           .stream();
     }
 
-    private Stream<Change> resolveDependencies(IndirectRequirements requirements) {
-      return scheduledInstruction
-          .stream()
-          .flatMap(requirements::dependencies)
-          .flatMap(dependency -> dependency.resolveAgainst(path).stream())
-          .flatMap(
-              path -> conflictingDependency(path, requirements.requirement().production())
-                  .stream());
+    private Stream<Change> resolveDependencies(AdditionalRequirement<?> requirement) {
+      if (requirement instanceof AdditionalResultRequirement<?>) {
+        var resultRequirement = (AdditionalResultRequirement<?>) requirement;
+        return scheduledInstruction
+            .stream()
+            .flatMap(
+                instruction -> resultRequirement
+                    .dependencies(
+                        instruction.path(),
+                        new Variables(environment, instruction.variableMap())))
+            .flatMap(dependency -> dependency.resolveAgainst(path).stream())
+            .flatMap(path -> conflictingDependency(path, resultRequirement.production()).stream());
+      } else {
+        return Stream.empty();
+      }
     }
 
     private Optional<Change> conflictingDependency(

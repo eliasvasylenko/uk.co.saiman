@@ -40,26 +40,20 @@ public class Preparation<T> extends Production<Condition<T>> {
   }
 
   private final String id;
-  private final Class<T> type;
   private final Evaluation evaluation;
 
-  public Preparation(String id, Class<T> type) {
-    this(id, type, Evaluation.ORDERED);
+  public Preparation(String id) {
+    this(id, Evaluation.ORDERED);
   }
 
-  public Preparation(String id, Class<T> type, Evaluation evaluation) {
+  public Preparation(String id, Evaluation evaluation) {
     this.id = id;
-    this.type = type;
     this.evaluation = evaluation;
   }
 
   @Override
   public String id() {
     return id;
-  }
-
-  public Class<T> type() {
-    return type;
   }
 
   public Evaluation evaluation() {

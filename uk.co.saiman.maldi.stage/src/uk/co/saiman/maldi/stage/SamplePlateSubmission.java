@@ -61,8 +61,8 @@ public class SamplePlateSubmission {
    * state is reached.
    * 
    * @return the state resulting from the previous request, one of
-   *         {@link SampleState#EXCHANGE_FAILED}, {@link SampleState#EXCHANGE},
-   *         {@link SampleState#ANALYSIS_FAILED}, or {@link SampleState#ANALYSIS}
+   *         {@link SampleState#failed()}, {@link SampleState#exchange()}, or
+   *         {@link SampleState#analysis(Object)}
    */
   public SampleState awaitRequest(long time, TimeUnit unit) {
     return stageControl.awaitRequest(time, unit);

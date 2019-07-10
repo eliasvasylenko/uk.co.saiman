@@ -1,6 +1,4 @@
 -buildpath:\
-	uk.co.saiman.eclipse;version=snapshot,\
-	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
@@ -19,10 +17,6 @@
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
-	uk.co.saiman.msapex.camera;version=snapshot,\
-	uk.co.saiman.msapex.chemistry;version=snapshot,\
-	uk.co.saiman.msapex.experiment;version=snapshot,\
-	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	javax.measure.unit-api
 

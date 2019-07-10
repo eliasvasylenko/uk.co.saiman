@@ -34,12 +34,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.dependency.Nothing;
 import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.graph.ExperimentPath;
 import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.production.Nothing;
 import uk.co.saiman.experiment.requirement.Requirement;
 
 public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefinition> {
@@ -101,7 +101,7 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
   @SuppressWarnings("unchecked")
   public Stream<StepDefinition<Nothing>> independentSteps() {
     return substeps()
-        .filter(i -> i.executor().directRequirement().equals(Requirement.none()))
+        .filter(i -> i.executor().mainRequirement().equals(Requirement.none()))
         .map(i -> (StepDefinition<Nothing>) i);
   }
 
@@ -123,7 +123,7 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
     var p = path.resolve(step.id());
     return Stream
         .concat(
-            Stream.of(new Instruction<>(p, step.variables(), step.executor())),
+            Stream.of(new Instruction<>(p, step.variableMap(), step.executor())),
             step.substeps().flatMap(s -> closure(s, p)));
   }
 }

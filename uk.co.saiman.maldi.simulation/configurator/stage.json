@@ -34,5 +34,7 @@
 	},
 	"uk.co.saiman.messaging.pipe~maldisimulation.copleycommand": {},
 	"uk.co.saiman.messaging.pipe~maldisimulation.copleyresponse": {},
-	"uk.co.saiman.maldi.xystageexecutor~maldisimulation": {}
+	"uk.co.saiman.maldi.xystageexecutor~maldisimulation": {
+		"uk.co.saiman.experiment.executors": "uk.co.saiman.maldisimulation"
+	}
 }

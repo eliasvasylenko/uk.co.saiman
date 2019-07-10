@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -132,10 +133,10 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
 
   private ServiceIndex(
       BundleContext context,
-      String reference,
+      Filter filter,
       Function<S, T> extractor,
       BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
-    super(context, reference, null);
+    super(context, filter, null);
     this.extractor = extractor;
     this.indexer = indexer;
   }
@@ -152,10 +153,10 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     return serviceIndex;
   }
 
-  public static <T> ServiceIndex<T, String, T> open(BundleContext context, String reference) {
+  public static <T> ServiceIndex<T, String, T> open(BundleContext context, Filter filter) {
     ServiceIndex<T, String, T> serviceIndex = new ServiceIndex<>(
         context,
-        reference,
+        filter,
         identity(),
         ServiceIndex::defaultIndexer);
     serviceIndex.open();
@@ -173,13 +174,9 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
 
   public static <S, T> ServiceIndex<S, String, T> open(
       BundleContext context,
-      String reference,
+      Filter filter,
       Function<S, T> extractor) {
-    var serviceIndex = new ServiceIndex<>(
-        context,
-        reference,
-        extractor,
-        ServiceIndex::defaultIndexer);
+    var serviceIndex = new ServiceIndex<>(context, filter, extractor, ServiceIndex::defaultIndexer);
     serviceIndex.open();
     return serviceIndex;
   }
@@ -196,10 +193,10 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
 
   public static <S, U, T> ServiceIndex<S, U, T> open(
       BundleContext context,
-      String reference,
+      Filter filter,
       Function<S, T> extractor,
       BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
-    var serviceIndex = new ServiceIndex<>(context, reference, extractor, indexer);
+    var serviceIndex = new ServiceIndex<>(context, filter, extractor, indexer);
     serviceIndex.open();
     return serviceIndex;
   }

@@ -29,6 +29,9 @@ package uk.co.saiman.experiment.variables;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.function.Function;
+
+import uk.co.saiman.experiment.environment.StaticEnvironment;
 import uk.co.saiman.state.Accessor;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
@@ -42,9 +45,16 @@ import uk.co.saiman.state.State;
  */
 public class Variable<T> {
   private final String id;
-  private final Accessor<T, ?> accessor;
+  private final Function<? super StaticEnvironment, ? extends Accessor<T, ?>> accessor;
 
   public Variable(String id, Accessor<T, ?> accessor) {
+    this.id = requireNonNull(id);
+    this.accessor = requireNonNull(e -> accessor);
+  }
+
+  public Variable(
+      String id,
+      Function<? super StaticEnvironment, ? extends Accessor<T, ?>> accessor) {
     this.id = requireNonNull(id);
     this.accessor = requireNonNull(accessor);
   }
@@ -53,8 +63,8 @@ public class Variable<T> {
     return id;
   }
 
-  public MapIndex<T> mapIndex() {
-    return new MapIndex<>(id, accessor);
+  public MapIndex<T> mapIndex(StaticEnvironment environment) {
+    return new MapIndex<>(id, accessor.apply(environment));
   }
 
   public VariableDeclaration declareRequired() {

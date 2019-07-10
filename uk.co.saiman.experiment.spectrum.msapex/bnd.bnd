@@ -1,0 +1,46 @@
+Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
+
+-include:\
+	${build}/include/eclipse.plugin.bnd
+
+-buildpath:\
+	uk.co.saiman.collections;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.eclipse.fx;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.data.function;version=snapshot,\
+	uk.co.saiman.data.spectrum;version=snapshot,\
+	uk.co.saiman.experiment;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.experiment.processing;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.msapex.editor;version=snapshot,\
+	uk.co.saiman.msapex.annotations;version=snapshot,\
+	uk.co.saiman.msapex.chart;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
+	uk.co.saiman.experiment.processing.msapex;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+\
+	javax.measure.unit-api
+
+Export-Package: \
+	uk.co.saiman.experiment.spectrum.msapex,\
+	uk.co.saiman.experiment.spectrum.msapex.i18n
+
+-includeresource:\
+	res,\
+	l10n,\
+	always.e4xmi

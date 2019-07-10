@@ -10,8 +10,8 @@ javac.debug:		on
 -runee:				JavaSE-12
 
 # The following lines are a hack to force IDE plugin publishing to P2 to work
-#Bundle-RequiredExecutionEnvironment: JavaSE-9
-#-noee: true
+Bundle-RequiredExecutionEnvironment: JavaSE-9
+-noee: true
 
 Git-Descriptor:		${system-allow-fail;git describe --dirty --always}
 Git-SHA:			${system-allow-fail;git rev-list -1 HEAD}
@@ -115,8 +115,8 @@ Bundle-Developers:\
 
 -plugin.Eclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"Eclipse_2018‑12";\
-		url					=	https://download.eclipse.org/releases/2018-12/
+		name				=	"Eclipse_2019‑06";\
+		url					=	https://download.eclipse.org/releases/2019-06/
 		location			=	${build}/cache/eclipse-platform
 #		url					=	${fileuri;${build}/eclipse.platform.target};\
 #		targetPlatform		=	true

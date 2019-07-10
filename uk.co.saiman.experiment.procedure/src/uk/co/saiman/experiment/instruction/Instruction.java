@@ -27,12 +27,12 @@
  */
 package uk.co.saiman.experiment.instruction;
 
+import uk.co.saiman.experiment.dependency.Dependency;
 import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.graph.ExperimentPath;
 import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.production.Dependency;
-import uk.co.saiman.experiment.variables.Variables;
+import uk.co.saiman.state.StateMap;
 
 /**
  * An experiment instruction is the machine-consumable unit of information to
@@ -52,17 +52,17 @@ import uk.co.saiman.experiment.variables.Variables;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of the {@link Executor#directRequirement() requirement}
+ * @param <T> the type of the {@link Executor#mainRequirement() requirement}
  *            of the instruction
  */
 public class Instruction<T extends Dependency> {
-  private final Variables variables;
+  private final StateMap variableMap;
   private final Executor<T> executor;
   private final ExperimentPath<Absolute> path;
 
-  public Instruction(ExperimentPath<Absolute> path, Variables variables, Executor<T> executor) {
+  public Instruction(ExperimentPath<Absolute> path, StateMap variableMap, Executor<T> executor) {
     this.path = path;
-    this.variables = variables;
+    this.variableMap = variableMap;
     this.executor = executor;
   }
 
@@ -70,8 +70,8 @@ public class Instruction<T extends Dependency> {
     return path;
   }
 
-  public Variables variables() {
-    return variables;
+  public StateMap variableMap() {
+    return variableMap;
   }
 
   public Executor<T> executor() {

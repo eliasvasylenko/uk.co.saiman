@@ -17,4 +17,5 @@ Export-Package: \
 	uk.co.saiman.experiment.instruction,\
 	uk.co.saiman.experiment.procedure,\
 	uk.co.saiman.experiment.procedure.event,\
+	uk.co.saiman.experiment.requirement,\
 	uk.co.saiman.experiment.variables

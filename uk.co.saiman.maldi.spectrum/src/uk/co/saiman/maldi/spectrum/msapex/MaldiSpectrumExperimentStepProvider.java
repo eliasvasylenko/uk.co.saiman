@@ -34,15 +34,18 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.extensions.Service;
 
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.environment.StaticEnvironment;
 import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.msapex.step.provider.DefineStep;
+import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
 import uk.co.saiman.experiment.production.Condition;
 import uk.co.saiman.maldi.spectrum.MaldiSpectrumExecutor;
 import uk.co.saiman.maldi.spectrum.i18n.MaldiSpectrumProperties;
-import uk.co.saiman.msapex.experiment.step.provider.DefineStep;
-import uk.co.saiman.msapex.experiment.step.provider.StepProvider;
+import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 import uk.co.saiman.properties.PropertyLoader;
 
-public class MaldiSpectrumExperimentStepProvider implements StepProvider<Condition<Void>> {
+public class MaldiSpectrumExperimentStepProvider
+    implements StepProvider<Condition<SamplePlateSubmission>> {
   private final MaldiSpectrumProperties properties;
   private final MaldiSpectrumExecutor spectrumExecutor;
 
@@ -55,13 +58,14 @@ public class MaldiSpectrumExperimentStepProvider implements StepProvider<Conditi
   }
 
   @Override
-  public Executor<Condition<Void>> executor() {
+  public Executor<Condition<SamplePlateSubmission>> executor() {
     return spectrumExecutor;
   }
 
   @Override
-  public Stream<StepDefinition<Condition<Void>>> createSteps(
-      DefineStep<Condition<Void>> defineStep) {
+  public Stream<StepDefinition<Condition<SamplePlateSubmission>>> createSteps(
+      StaticEnvironment environment,
+      DefineStep<Condition<SamplePlateSubmission>> defineStep) {
     return Stream.of(defineStep.withName("Spectrum"));
   }
 }

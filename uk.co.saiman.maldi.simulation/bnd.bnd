@@ -4,6 +4,9 @@ Private-Package: \
 	uk.co.saiman.maldi.simulation,\
 	uk.co.saiman.maldi.simulation.i18n
 
+-includeresource: \
+	OSGI-INF/configurator=configurator
+
 -buildpath: \
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

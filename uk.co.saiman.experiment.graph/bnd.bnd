@@ -12,6 +12,7 @@ Bundle-Name: SAI :: Experiment :: Products
 	uk.co.saiman.data;version=snapshot
 
 Export-Package: \
+	uk.co.saiman.experiment.dependency,\
+	uk.co.saiman.experiment.environment,\
 	uk.co.saiman.experiment.graph,\
-	uk.co.saiman.experiment.production,\
-	uk.co.saiman.experiment.requirement
+	uk.co.saiman.experiment.production

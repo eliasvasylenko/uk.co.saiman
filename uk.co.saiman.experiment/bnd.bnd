@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: Experiment :: Model
+Bundle-Name: SAI :: Experiment
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
@@ -20,5 +20,4 @@ Bundle-Name: SAI :: Experiment :: Model
 Export-Package: \
 	uk.co.saiman.experiment,\
 	uk.co.saiman.experiment.event,\
-	uk.co.saiman.experiment.format,\
-	uk.co.saiman.experiment.service
+	uk.co.saiman.experiment.format

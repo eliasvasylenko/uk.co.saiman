@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.dependency.Nothing;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
@@ -46,7 +47,6 @@ import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.graph.ExperimentPath;
 import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
-import uk.co.saiman.experiment.production.Nothing;
 import uk.co.saiman.experiment.production.Output;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;

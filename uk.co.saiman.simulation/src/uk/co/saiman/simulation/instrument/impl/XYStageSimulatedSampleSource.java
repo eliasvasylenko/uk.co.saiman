@@ -57,11 +57,9 @@ import uk.co.saiman.camera.CameraResolution;
 import uk.co.saiman.chemistry.ChemicalComposition;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
-import uk.co.saiman.msapex.camera.i18n.CameraProperties;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.PassthroughObserver;
-import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.simulation.instrument.ImageSimulatedSampleSource;
 import uk.co.saiman.simulation.instrument.SimulatedSample;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
@@ -141,8 +139,6 @@ public class XYStageSimulatedSampleSource
 
   private final XYStage<?> stageDevice;
 
-  private final CameraProperties cameraProperties;
-
   private final Set<CameraConnection> cameraConnections;
   private final HotObservable<CameraImage> imageStream;
 
@@ -158,10 +154,8 @@ public class XYStageSimulatedSampleSource
   @Activate
   public XYStageSimulatedSampleSource(
       @Reference XYStage<?> stageDevice,
-      XYStageSimulatedSampleSourceConfiguration configuration,
-      @Reference PropertyLoader propertyLoader) {
+      XYStageSimulatedSampleSourceConfiguration configuration) {
     this.stageDevice = stageDevice;
-    this.cameraProperties = propertyLoader.getProperties(CameraProperties.class);
     this.cameraConnections = new HashSet<>();
 
     this.imageStream = new HotObservable<>();
@@ -241,7 +235,7 @@ public class XYStageSimulatedSampleSource
 
   @Override
   public String getName() {
-    return cameraProperties.simulatedCameraName(stageDevice.getName()).toString();
+    return "Simulated Camera";
   }
 
   @Override

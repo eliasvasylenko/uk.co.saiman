@@ -44,7 +44,7 @@ import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
-public class SamplePlateStageImpl extends DeviceImpl<SamplePlateStageController>
+class SamplePlateStageImpl extends DeviceImpl<SamplePlateStageController>
     implements SamplePlateStage {
   private final MaldiStageManager stateManager;
 

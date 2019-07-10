@@ -36,19 +36,13 @@ package uk.co.saiman.experiment.production;
  */
 public class Observation<T> extends Production<Result<T>> {
   private final String id;
-  private final Class<T> type;
 
-  public Observation(String id, Class<T> type) {
+  public Observation(String id) {
     this.id = id;
-    this.type = type;
   }
 
   @Override
   public String id() {
     return id;
-  }
-
-  public Class<T> type() {
-    return type;
   }
 }

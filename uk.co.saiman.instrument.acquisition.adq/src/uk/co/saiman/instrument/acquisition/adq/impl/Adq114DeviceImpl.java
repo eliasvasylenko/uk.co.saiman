@@ -44,7 +44,7 @@ import uk.co.saiman.instrument.acquisition.adq.AdqHardwareInterface;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
 
-public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Adq114Device {
+public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
   public Adq114DeviceImpl(AdqDeviceManager manager) {
     super(manager);
   }

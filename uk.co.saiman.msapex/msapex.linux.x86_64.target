@@ -1,4 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="MSApex" sequenceNumber="113">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target name="MSApex" sequenceNumber="113">
 <locations>
 <location type="BndRunDescriptorLocation">
 <bndrun file="/uk.co.saiman.msapex/msapex.linux.x86_64.bndrun"/>

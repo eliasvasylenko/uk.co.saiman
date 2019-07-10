@@ -31,9 +31,9 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
+import uk.co.saiman.experiment.msapex.step.provider.StepProviderDescriptor;
 import uk.co.saiman.maldi.spectrum.i18n.MaldiSpectrumProperties;
-import uk.co.saiman.msapex.experiment.step.provider.StepProvider;
-import uk.co.saiman.msapex.experiment.step.provider.StepProviderDescriptor;
 import uk.co.saiman.properties.PropertyLoader;
 
 @Component

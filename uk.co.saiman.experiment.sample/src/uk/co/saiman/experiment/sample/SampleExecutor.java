@@ -27,23 +27,20 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.dependency.Nothing;
+import uk.co.saiman.experiment.environment.Provision;
 import uk.co.saiman.experiment.instruction.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.instruction.ExecutorException;
-import uk.co.saiman.experiment.instruction.IndirectRequirements;
-import uk.co.saiman.experiment.production.Nothing;
 import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.NoRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
-import uk.co.saiman.instrument.sample.SampleDevice;
+import uk.co.saiman.instrument.sample.SampleController;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -57,18 +54,15 @@ public interface SampleExecutor<T> extends Executor<Nothing> {
 
   Preparation<Void> samplePreparation();
 
-  SampleDevice<T, ?> sampleDevice();
+  Provision<? extends SampleController<T>> sampleDevice();
 
   @Override
   default void execute(ExecutionContext<Nothing> context) {
-    T location = context.getVariable(sampleLocation());
+    var location = context.getVariable(sampleLocation());
+    var controller = context.acquireResource(sampleDevice());
 
-    try (var controller = sampleDevice().acquireControl(2, SECONDS)) {
-      controller.requestAnalysis(location);
-      context.prepareCondition(samplePreparation(), null);
-    } catch (TimeoutException | InterruptedException e) {
-      throw new ExecutorException("Failed to acquire control of sample device", e);
-    }
+    controller.requestAnalysis(location);
+    context.prepareCondition(samplePreparation(), null);
   }
 
   @Override
@@ -77,12 +71,12 @@ public interface SampleExecutor<T> extends Executor<Nothing> {
   }
 
   @Override
-  default NoRequirement directRequirement() {
+  default NoRequirement mainRequirement() {
     return Requirement.none();
   }
 
   @Override
-  default Stream<IndirectRequirements> indirectRequirements() {
+  default Stream<AdditionalRequirement<?>> additionalRequirements() {
     return Stream.empty();
   }
 

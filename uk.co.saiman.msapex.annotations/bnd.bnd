@@ -1,8 +1,7 @@
 Bundle-Name: SAI :: MSApex :: Annotations
 
 -include:\
-	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd
+	${build}/include/eclipse.platform.bnd
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\

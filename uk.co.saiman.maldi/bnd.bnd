@@ -1,0 +1,30 @@
+Bundle-Name: SAI :: MALDI
+
+Private-Package: \
+	uk.co.saiman.maldi.msapex
+
+Export-Package: \
+	uk.co.saiman.maldi,\
+	uk.co.saiman.maldi.i18n
+
+-includeresource:\
+	initial.e4xmi,\
+	always.e4xmi
+
+-include:\
+	${build}/include/eclipse.plugin.bnd
+
+-buildpath:\
+	uk.co.saiman.optics;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.maldi.stage;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.data.function;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
+	uk.co.saiman.instrument.msapex;version=snapshot,\
+	javax.measure.unit-api

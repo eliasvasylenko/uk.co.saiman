@@ -27,10 +27,13 @@
  */
 package uk.co.saiman.experiment.chemicalmap;
 
+import uk.co.saiman.experiment.environment.Provision;
 import uk.co.saiman.experiment.instruction.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.production.Condition;
+import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
+import uk.co.saiman.instrument.raster.RasterController;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**
@@ -41,14 +44,18 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @author Elias N Vasylenko
  */
 public abstract class ChemicalMapExecutor implements Executor<Condition<Void>> {
-  protected abstract RasterDevice<?> getRasterDevice();
+  protected abstract Provision<AcquisitionController> getAcquisitionControlResource();
 
-  protected abstract AcquisitionDevice<?> getAcquisitionDevice();
+  protected abstract Provision<AcquisitionDevice<?>> getAcquisitionDeviceResource();
+
+  protected abstract Provision<RasterController> getRasterControlResource();
+
+  protected abstract Provision<RasterDevice<?>> getRasterDeviceResource();;
 
   @Override
   public void execute(ExecutionContext<Condition<Void>> context) {
-    AcquisitionDevice<?> acquisitionDevice = getAcquisitionDevice();
-    RasterDevice<?> rasterDevice = getRasterDevice();
+    var acquisitionController = context.acquireResource(getAcquisitionControlResource());
+    var acquisitionDevice = context.acquireResource(getAcquisitionDeviceResource());
 
     /*- TODO
     Consumer<Spectrum> writer = new CumulativeChemicalMapFormat()

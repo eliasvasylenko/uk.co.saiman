@@ -29,7 +29,7 @@ package uk.co.saiman.instrument.acquisition.adq;
 
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
-public interface AdqDevice<T extends AdqControl> extends AcquisitionDevice<T> {
+public interface AdqDevice extends AcquisitionDevice<AdqControl> {
   AdqProductId getProductId();
 
   AdqHardwareInterface getHardwareInterface();

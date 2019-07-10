@@ -28,54 +28,41 @@
 package uk.co.saiman.maldi.spectrum;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
+import static uk.co.saiman.experiment.service.ExperimentServiceConstants.EXECUTOR_ID;
+import static uk.co.saiman.maldi.acquisition.MaldiAcquisitionConstants.MALDI_ACQUISITION_CONTROLLER;
+import static uk.co.saiman.maldi.acquisition.MaldiAcquisitionConstants.MALDI_ACQUISITION_DEVICE;
+import static uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor.PLATE_SUBMISSION;
 import static uk.co.saiman.measurement.Units.dalton;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Mass;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.experiment.environment.Provision;
 import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.processing.ProcessingService;
-import uk.co.saiman.experiment.requirement.ConditionRequirement;
-import uk.co.saiman.experiment.requirement.Requirement;
-import uk.co.saiman.experiment.sample.XYStageExecutor;
+import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.spectrum.SpectrumExecutor;
+import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.maldi.spectrum.MaldiSpectrumExecutor.MaldiSpectrumExecutorConfiguration;
+import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 
 @Designate(ocd = MaldiSpectrumExecutorConfiguration.class, factory = true)
-@Component(configurationPid = MaldiSpectrumExecutor.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+@Component(configurationPid = MaldiSpectrumExecutor.EXECUTOR_ID, configurationPolicy = REQUIRE, service = {
     MaldiSpectrumExecutor.class,
     SpectrumExecutor.class,
-    Executor.class })
-public class MaldiSpectrumExecutor implements SpectrumExecutor {
+    Executor.class }, property = EXECUTOR_ID + "=" + MaldiSpectrumExecutor.EXECUTOR_ID)
+public class MaldiSpectrumExecutor implements SpectrumExecutor<SamplePlateSubmission> {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(name = "Maldi Spectrum Experiment Executor", description = "The experiment executor which manages acquisition of spectra")
   public @interface MaldiSpectrumExecutorConfiguration {}
 
-  static final String CONFIGURATION_PID = "uk.co.saiman.maldi.executor.spectrum";
+  public static final String EXECUTOR_ID = "uk.co.saiman.maldi.spectrum.executor";
 
   public static final String MALDI_SPECTRUM = "uk.co.saiman.maldi.spectrum.result";
-
-  private final AcquisitionDevice<?> acquisitionDevice;
-  private final ConditionRequirement<Void> sampleResource;
-  private final ProcessingService processingService;
-
-  @Activate
-  public MaldiSpectrumExecutor(
-      @Reference XYStageExecutor stageExperiment,
-      @Reference(cardinality = OPTIONAL) AcquisitionDevice<?> acquisitionDevice,
-      @Reference ProcessingService processingService) {
-    this.acquisitionDevice = acquisitionDevice;
-    this.sampleResource = Requirement.on(stageExperiment.samplePreparation());
-    this.processingService = processingService;
-  }
 
   @Override
   public Unit<Mass> getMassUnit() {
@@ -83,17 +70,17 @@ public class MaldiSpectrumExecutor implements SpectrumExecutor {
   }
 
   @Override
-  public AcquisitionDevice<?> getAcquisitionDevice() {
-    return acquisitionDevice;
+  public Provision<AcquisitionDevice<?>> acquisitionDevice() {
+    return MALDI_ACQUISITION_DEVICE;
   }
 
   @Override
-  public ConditionRequirement<Void> sampleResource() {
-    return sampleResource;
+  public Provision<AcquisitionController> acquisitionControl() {
+    return MALDI_ACQUISITION_CONTROLLER;
   }
 
   @Override
-  public ProcessingService processingService() {
-    return processingService;
+  public Preparation<SamplePlateSubmission> samplePreparation() {
+    return PLATE_SUBMISSION;
   }
 }

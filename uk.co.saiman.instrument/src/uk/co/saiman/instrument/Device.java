@@ -53,8 +53,6 @@ import uk.co.saiman.observable.ObservableValue;
  * interface and explain the consequences of this.
  * 
  * @author Elias N Vasylenko
- * 
- * @param <T> the control interface for the device
  */
 public interface Device<T extends Controller> {
   /**

@@ -29,7 +29,15 @@ package uk.co.saiman.instrument.acquisition.adq;
 
 import static uk.co.saiman.instrument.acquisition.adq.AdqProductId.ADQ114;
 
-public interface Adq114Device extends AdqDevice<Adq114Control> {
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+public interface Adq114Device extends AdqDevice {
+  @Override
+  Adq114Control acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException,
+      InterruptedException;
+
   @Override
   default AdqProductId getProductId() {
     return ADQ114;

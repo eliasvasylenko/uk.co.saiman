@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:saiman.ui="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui" xmi:id="_4s_PwKHXEeeDWfjziciHZg">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_bSAjAKHYEeeDWfjziciHZg" featurename="children" parentElementId="uk.co.saiman.toolbar.actions">
+    <elements xsi:type="menu:HandledToolItem" xmi:id="_m5gKkKHYEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.handledtoolitem.operate" label="Operate" command="_rmrrYKHYEeeDWfjziciHZg"/>
+    <elements xsi:type="menu:HandledToolItem" xmi:id="_rP40oKHbEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.handledtoolitem.standby" label="Standby" command="_9TUFMKHYEeeDWfjziciHZg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_otrd8KHYEeeDWfjziciHZg" featurename="commands" parentElementId="uk.co.saiman.application">
+    <elements xsi:type="commands:Command" xmi:id="_rmrrYKHYEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.command.operate" commandName="Operate" description="Enter instrument operating mode" category="_x3DdQKHYEeeDWfjziciHZg"/>
+    <elements xsi:type="commands:Command" xmi:id="_9TUFMKHYEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.command.standby" commandName="Standby" description="Enter instrument standby mode" category="_x3DdQKHYEeeDWfjziciHZg"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_tNml4KHYEeeDWfjziciHZg" featurename="categories" parentElementId="uk.co.saiman.application">
+    <elements xsi:type="commands:Category" xmi:id="_x3DdQKHYEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.category.instrument" name="Instrument" description="Instrument inspection and operation"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_E6PvcKHbEeeDWfjziciHZg" featurename="children" parentElementId="uk.co.saiman.menu" positionInList="after:uk.co.saiman.msapex.menu.file">
+    <elements xsi:type="menu:Menu" xmi:id="_QMEpAKHbEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.menu.instrument" label="Instrument">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_R7NrYKHbEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.handledmenuitem.operate" label="Operate" command="_rmrrYKHYEeeDWfjziciHZg"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_TkFGoKHbEeeDWfjziciHZg" elementId="uk.co.saiman.instrument.handledmenuitem.standby" label="Standby" command="_9TUFMKHYEeeDWfjziciHZg"/>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_0JgGkKwtEeioCuifABHnDQ" featurename="snippets" parentElementId="uk.co.saiman.application">
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_2zdLYKwtEeioCuifABHnDQ" elementId="uk.co.saiman.instrument.device.cell" contributionURI="bundleclass://uk.co.saiman.instrument.msapex/uk.co.saiman.instrument.msapex.DeviceCell">
+      <popupMenu xmi:id="_LE5EQKwuEeioCuifABHnDQ" elementId="uk.co.saiman.instrument.popupmenu.device" label="Device"/>
+    </elements>
+    <elements xsi:type="saiman.ui:Tree" xmi:id="_3J8YwKwtEeioCuifABHnDQ" elementId="uk.co.saiman.instrument.tree" contributionURI="bundleclass://uk.co.saiman.instrument.msapex/uk.co.saiman.instrument.msapex.InstrumentTree"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_zij0QELjEeiiI42mgJDa-A" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
+    <elements xsi:type="basic:Part" xmi:id="_liUsUELmEeiiI42mgJDa-A" elementId="uk.co.saiman.instrument.part" contributionURI="bundleclass://uk.co.saiman.instrument.msapex/uk.co.saiman.instrument.msapex.InstrumentPart" label="Instrument">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_XbhUQELnEeiiI42mgJDa-A" elementId="uk.co.saiman.instrument.toolbar.0"/>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

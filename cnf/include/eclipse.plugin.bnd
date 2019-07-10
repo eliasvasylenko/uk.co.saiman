@@ -1,4 +1,6 @@
--include: ${build}/include/utilities.bnd
+-include: \
+	${build}/include/utilities.bnd,\
+	${build}/include/eclipse.platform.bnd
 
 #### Define BSN ####
 

@@ -2,20 +2,19 @@ Bundle-Name: SAI :: MALDI :: Stage
 
 -includeresource:\
 	res,\
-	fragment.e4xmi
+	always.e4xmi,\
+	initial.e4xmi
 
 -include:\
-	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
 	${build}/include/eclipse.plugin.bnd
 
 Private-Package: \
-	uk.co.saiman.maldi.stage.msapex,\
 	uk.co.saiman.maldi.stage.impl
 
 Export-Package: \
 	uk.co.saiman.maldi.stage,\
-	uk.co.saiman.maldi.stage.i18n
+	uk.co.saiman.maldi.stage.i18n,\
+	uk.co.saiman.maldi.stage.msapex
 	
 -buildpath:\
 	uk.co.saiman.eclipse;version=snapshot,\
@@ -58,11 +57,12 @@ Export-Package: \
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.messaging;version=snapshot,\
 	uk.co.saiman.msapex.annotations;version=snapshot,\
-	uk.co.saiman.msapex.camera;version=snapshot,\
-	uk.co.saiman.msapex.chemistry;version=snapshot,\
-	uk.co.saiman.msapex.experiment;version=snapshot,\
-	uk.co.saiman.msapex.instrument.sample;version=snapshot,\
-	uk.co.saiman.msapex.instrument.stage;version=snapshot,\
+	uk.co.saiman.camera.msapex;version=snapshot,\
+	uk.co.saiman.chemistry.msapex;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
+	uk.co.saiman.instrument.msapex;version=snapshot,\
+	uk.co.saiman.instrument.sample.msapex;version=snapshot,\
+	uk.co.saiman.instrument.stage.msapex;version=snapshot,\
 	uk.co.saiman.simulation;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	javax.measure.unit-api

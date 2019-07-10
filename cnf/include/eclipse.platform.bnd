@@ -1,3 +1,6 @@
+-include: \
+	${build}/include/eclipse.fx.bnd
+
 ## Build path groups:
 -buildpath.eclipse:\
 	javax.inject,\

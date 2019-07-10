@@ -31,7 +31,6 @@ import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
 import static uk.co.saiman.data.format.RegistrationTree.VENDOR;
-import static uk.co.saiman.state.Accessor.mapAccessor;
 import static uk.co.saiman.state.Accessor.stringAccessor;
 
 import java.util.List;
@@ -47,7 +46,6 @@ import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.instruction.ExecutorService;
-import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
 import uk.co.saiman.state.StateList;
@@ -82,7 +80,6 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
   private static final String CHILDREN = "children";
 
   private final MapIndex<Executor<?>> executor;
-  private final MapIndex<Variables> variables;
 
   private final JsonStateMapFormat stateMapFormat;
 
@@ -98,8 +95,6 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
     this.executor = new MapIndex<>(
         EXECUTOR,
         stringAccessor().map(conductorService::getExecutor, conductorService::getId));
-
-    this.variables = new MapIndex<>(VARIABLES, mapAccessor(Variables::new, Variables::state));
   }
 
   @Override
@@ -131,7 +126,7 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
   private <T extends StepContainer<?, ? extends T>> T loadStep(T container, StateMap data) {
     StepDefinition<?> step = StepDefinition
         .define(data.get(ID), (Executor<?>) data.get(executor))
-        .withVariables(data.get(variables))
+        .withVariableMap(data.get(VARIABLES).asMap())
         .withPlan(data.get(PLAN));
 
     step = this.<StepDefinition<?>>loadSteps(step, data.get(CHILDREN).asList());
@@ -161,7 +156,7 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
     return StateMap
         .empty()
         .with(ID, step.id())
-        .with(variables, step.variables())
+        .with(VARIABLES, step.variableMap())
         .with(CHILDREN, saveSteps(step.substeps().collect(toList())))
         .with(PLAN, step.getPlan())
         .with(executor, step.executor());

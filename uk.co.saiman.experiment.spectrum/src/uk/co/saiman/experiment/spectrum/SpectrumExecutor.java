@@ -27,10 +27,8 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
+import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
 
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import javax.measure.Unit;
@@ -44,16 +42,18 @@ import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
+import uk.co.saiman.experiment.environment.Provision;
 import uk.co.saiman.experiment.instruction.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.instruction.ExecutorException;
-import uk.co.saiman.experiment.instruction.IndirectRequirements;
-import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.production.Condition;
 import uk.co.saiman.experiment.production.Observation;
+import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.ConditionRequirement;
+import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
+import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
 /**
@@ -63,32 +63,30 @@ import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
  * 
  * @author Elias N Vasylenko
  */
-public interface SpectrumExecutor extends Executor<Condition<Void>> {
+public interface SpectrumExecutor<T> extends Executor<Condition<T>> {
   String SPECTRUM_DATA_NAME = "spectrum";
-  Observation<Spectrum> SPECTRUM = new Observation<>("uk.co.saiman.data.spectrum", Spectrum.class);
+  Observation<Spectrum> SPECTRUM = new Observation<>("uk.co.saiman.data.spectrum");
 
   Unit<Mass> getMassUnit();
 
-  AcquisitionDevice<?> getAcquisitionDevice();
+  Provision<? extends AcquisitionDevice<?>> acquisitionDevice();
 
-  ConditionRequirement<Void> sampleResource();
+  Provision<? extends AcquisitionController> acquisitionControl();
 
-  ProcessingService processingService();
+  Preparation<T> samplePreparation();
 
   @Override
-  default void execute(ExecutionContext<Condition<Void>> context) {
+  default void execute(ExecutionContext<Condition<T>> context) {
+    var device = context.acquireResource(acquisitionDevice());
+
     System.out.println("create accumulator");
-    AcquisitionDevice<?> device = getAcquisitionDevice();
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
         device.acquisitionDataEvents(),
         device.getSampleDomain(),
         device.getSampleIntensityUnit());
 
     System.out.println("prepare processing");
-    DataProcessor processing = context
-        .getVariable(PROCESSING_VARIABLE)
-        .load(processingService())
-        .getProcessor();
+    DataProcessor processing = context.getVariable(PROCESSING_VARIABLE).getProcessor();
 
     System.out.println("fetching calibration");
     SpectrumCalibration calibration = new SpectrumCalibration() {
@@ -118,39 +116,35 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
                     () -> new SampledSpectrum(o.getLatestAccumulation(), calibration, processing)));
 
     System.out.println("start acquisition");
+    var controller = context.acquireResource(acquisitionControl());
+    controller.startAcquisition();
 
-    try (var controller = device.acquireControl(2, SECONDS)) {
-      controller.startAcquisition();
+    /*
+     * TODO some sort of invalidate/lazy-revalidate message passer
+     * 
+     * ContinuousFunctionAccumulator already has this, it provides an observable
+     * with backpressure which gives the latest spectrum every time it is requested
+     * and otherwise does no work (i.e. no array copying etc.). The limitation is
+     * that it can't notify a listener when a new item is actually available without
+     * actually doing the work and sending an item, the listener has to just request
+     * and see.
+     * 
+     * The problem is how to pass this through the Result API to users without
+     * losing the laziness so we can request at e.g. the monitor refresh rate.
+     * 
+     * Perhaps the observable type should be `Result<T>` rather than `T`?
+     */
 
-      /*
-       * TODO some sort of invalidate/lazy-revalidate message passer
-       * 
-       * ContinuousFunctionAccumulator already has this, it provides an observable
-       * with backpressure which gives the latest spectrum every time it is requested
-       * and otherwise does no work (i.e. no array copying etc.). The limitation is
-       * that it can't notify a listener when a new item is actually available without
-       * actually doing the work and sending an item, the listener has to just request
-       * and see.
-       * 
-       * The problem is how to pass this through the Result API to users without
-       * losing the laziness so we can request at e.g. the monitor refresh rate.
-       * 
-       * Perhaps the observable type should be `Result<T>` rather than `T`?
-       */
+    System.out.println("get result");
+    var accumulation = accumulator.getCompleteAccumulation();
 
-      System.out.println("get result");
-      var accumulation = accumulator.getCompleteAccumulation();
-
-      context.setResultFormat(SPECTRUM, SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
-      context.setResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
-    } catch (TimeoutException | InterruptedException e) {
-      throw new ExecutorException("Failed to acquire control of acquisition device", e);
-    }
+    context.setResultFormat(SPECTRUM, SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
+    context.setResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
   }
 
   @Override
-  default ConditionRequirement<Void> directRequirement() {
-    return sampleResource();
+  default ConditionRequirement<T> mainRequirement() {
+    return Requirement.on(samplePreparation());
   }
 
   @Override
@@ -164,7 +158,10 @@ public interface SpectrumExecutor extends Executor<Condition<Void>> {
   }
 
   @Override
-  default Stream<IndirectRequirements> indirectRequirements() {
-    return Stream.empty();
+  default Stream<AdditionalRequirement<?>> additionalRequirements() {
+    return Stream
+        .of(
+            AdditionalRequirement.on(acquisitionControl()),
+            AdditionalRequirement.on(acquisitionDevice()));
   }
 }

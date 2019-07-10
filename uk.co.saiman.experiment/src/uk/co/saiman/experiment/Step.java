@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.environment.StaticEnvironment;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.graph.ExperimentId;
@@ -63,6 +64,15 @@ public class Step {
     this.experiment = experiment;
     this.executor = conductor;
     this.path = path;
+  }
+
+  /*
+   * Environment
+   */
+
+  private StaticEnvironment getStaticEnvironment() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   /**
@@ -103,7 +113,7 @@ public class Step {
   }
 
   public <T> Optional<T> getVariable(Variable<T> variable) {
-    return getDefinition().variables().get(variable);
+    return getVariables().get(variable);
   }
 
   public <T> void setVariable(
@@ -113,7 +123,10 @@ public class Step {
       if (experiment
           .updateStepDefinition(
               path,
-              getDefinition().withVariables(variables -> variables.with(variable, value)))) {
+              getDefinition()
+                  .withVariables(
+                      getStaticEnvironment(),
+                      variables -> variables.with(variable, value)))) {
         experiment.fireEvent(new ChangeVariableEvent(this, variable));
       }
     }
@@ -129,14 +142,14 @@ public class Step {
    */
   public Optional<ProductPath<Absolute, ?>> getDependencyPath() {
     synchronized (experiment) {
-      return getExecutor().directRequirement() instanceof ProductRequirement<?>
+      return getExecutor().mainRequirement() instanceof ProductRequirement<?>
           ? path
               .parent()
               .map(
                   p -> ProductPath
                       .define(
                           p,
-                          ((ProductRequirement<?>) getExecutor().directRequirement()).production()))
+                          ((ProductRequirement<?>) getExecutor().mainRequirement()).production()))
           : Optional.empty();
     }
   }
@@ -160,9 +173,10 @@ public class Step {
     return experiment;
   }
 
+  @SuppressWarnings("unchecked")
   public <T extends Product> Step attach(StepDefinition<T> template) {
     return attach(
-        ((ProductRequirement<T>) template.executor().directRequirement()).production(),
+        ((ProductRequirement<T>) template.executor().mainRequirement()).production(),
         -1,
         template);
   }
@@ -218,11 +232,11 @@ public class Step {
 
   public Variables getVariables() {
     synchronized (experiment) {
-      return getDefinition().variables();
+      return getDefinition().variables(getStaticEnvironment());
     }
   }
 
   public Instruction<?> getInstruction() {
-    return new Instruction<>(path, getVariables(), getExecutor());
+    return new Instruction<>(path, getDefinition().variableMap(), getExecutor());
   }
 }

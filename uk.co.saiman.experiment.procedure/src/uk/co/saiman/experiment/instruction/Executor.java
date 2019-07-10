@@ -29,8 +29,9 @@ package uk.co.saiman.experiment.instruction;
 
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.production.Dependency;
+import uk.co.saiman.experiment.dependency.Dependency;
 import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 
@@ -46,7 +47,7 @@ import uk.co.saiman.experiment.variables.VariableDeclaration;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of the {@link #directRequirement() direct requirement}
+ * @param <T> the type of the {@link #mainRequirement() direct requirement}
  */
 public interface Executor<T extends Dependency> {
   /**
@@ -56,11 +57,11 @@ public interface Executor<T extends Dependency> {
    * 
    * @return the productions made by this executor
    */
-  Stream<Production<?>> products();
+  Stream<? extends Production<?>> products();
 
-  Requirement<T> directRequirement();
+  Requirement<? extends T> mainRequirement();
 
-  Stream<IndirectRequirements> indirectRequirements();
+  Stream<AdditionalRequirement<?>> additionalRequirements();
 
   /**
    * @return the set of required variables for experiments executed by this

@@ -35,12 +35,11 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.production.Dependency;
+import uk.co.saiman.experiment.dependency.Dependency;
+import uk.co.saiman.experiment.environment.Provision;
 import uk.co.saiman.experiment.production.Observation;
 import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.Result;
-import uk.co.saiman.experiment.requirement.ConditionRequirement;
-import uk.co.saiman.experiment.requirement.ResultRequirement;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.Variables;
 
@@ -67,11 +66,13 @@ public interface ExecutionContext<S extends Dependency> {
 
   S dependency();
 
-  <U> U acquireCondition(ConditionRequirement<U> resource);
+  <U> U acquireCondition(Preparation<U> requirement);
 
-  <U> Result<? extends U> acquireResult(ResultRequirement<U> requirement);
+  <U> Result<? extends U> acquireResult(Observation<U> requirement);
 
-  <U> Stream<Result<? extends U>> acquireResults(ResultRequirement<U> requirement);
+  <U> Stream<Result<? extends U>> acquireResults(Observation<U> requirement);
+
+  <U> U acquireResource(Provision<U> requirement);
 
   /**
    * Get a location which can be used to persist resource artifacts of this

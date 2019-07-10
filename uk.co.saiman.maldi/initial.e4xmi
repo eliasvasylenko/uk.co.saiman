@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_9O2YIKLbEemxZsBnDcR9jA">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_c7a3kKLcEemxZsBnDcR9jA" featurename="children" parentElementId="uk.co.saiman.perspectivestack">
+    <elements xsi:type="advanced:Perspective" xmi:id="_huvcoKLcEemxZsBnDcR9jA" elementId="uk.co.saiman.perspective.maldi" selectedElement="_huvcoaLcEemxZsBnDcR9jA">
+      <children xsi:type="basic:PartSashContainer" xmi:id="_huvcoaLcEemxZsBnDcR9jA" elementId="uk.co.saiman.partsashcontainer.root" selectedElement="_huvco6LcEemxZsBnDcR9jA" horizontal="true">
+        <children xsi:type="basic:PartStack" xmi:id="_huvcoqLcEemxZsBnDcR9jA" elementId="uk.co.saiman.partstack.overview" containerData="0.22"/>
+        <children xsi:type="basic:PartSashContainer" xmi:id="_huvco6LcEemxZsBnDcR9jA" elementId="uk.co.saiman.partsashcontainer.main" containerData="0.78">
+          <children xsi:type="basic:PartStack" xmi:id="_huvcpKLcEemxZsBnDcR9jA" elementId="uk.co.saiman.partstack.editor" containerData="0.5">
+            <tags>uk.co.saiman.msapex.partstack.editor</tags>
+            <tags>NoAutoCollapse</tags>
+          </children>
+          <children xsi:type="basic:PartStack" xmi:id="_huvcpaLcEemxZsBnDcR9jA" elementId="uk.co.saiman.partstack.status" containerData="0.5"/>
+        </children>
+      </children>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

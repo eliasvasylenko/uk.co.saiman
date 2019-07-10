@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.variables;
 import java.util.Optional;
 import java.util.function.Function;
 
+import uk.co.saiman.experiment.environment.StaticEnvironment;
 import uk.co.saiman.state.StateMap;
 
 /**
@@ -38,13 +39,16 @@ import uk.co.saiman.state.StateMap;
  * @author Elias N Vasylenko
  */
 public class Variables {
+  private final StaticEnvironment environment;
   private final StateMap state;
 
-  public Variables() {
+  public Variables(StaticEnvironment environment) {
+    this.environment = environment;
     this.state = StateMap.empty();
   }
 
-  public Variables(StateMap state) {
+  public Variables(StaticEnvironment environment, StateMap state) {
+    this.environment = environment;
     this.state = state;
   }
 
@@ -53,16 +57,18 @@ public class Variables {
   }
 
   public <T> Optional<T> get(Variable<T> variable) {
-    return state.getOptional(variable.mapIndex());
+    return state.getOptional(variable.mapIndex(environment));
   }
 
   public <U> Variables with(Variable<U> variable, U value) {
-    return new Variables(state.with(variable.mapIndex(), value));
+    return new Variables(environment, state.with(variable.mapIndex(environment), value));
   }
 
   public <U> Variables with(
       Variable<U> variable,
       Function<? super Optional<U>, ? extends U> value) {
-    return new Variables(state.with(variable.mapIndex(), value.apply(get(variable))));
+    return new Variables(
+        environment,
+        state.with(variable.mapIndex(environment), value.apply(get(variable))));
   }
 }

@@ -2,8 +2,6 @@ Private-Package: uk.co.saiman.msapex.editor.impl
 Export-Package: uk.co.saiman.msapex.editor
 
 -include:\
-	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd,\
 	${build}/include/eclipse.plugin.bnd
 
 -includeresource:\

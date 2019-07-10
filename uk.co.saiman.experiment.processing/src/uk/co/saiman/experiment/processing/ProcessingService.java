@@ -31,8 +31,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.experiment.environment.Provision;
 
 public interface ProcessingService {
+  public static final Provision<ProcessingService> PROCESSING_SERVICE_RESOURCE = new Provision<>(
+      "uk.co.saiman.processing.resource");
+
   Stream<ProcessingStrategy<?>> strategies();
 
   Optional<ProcessingStrategy<?>> findStrategy(String id);

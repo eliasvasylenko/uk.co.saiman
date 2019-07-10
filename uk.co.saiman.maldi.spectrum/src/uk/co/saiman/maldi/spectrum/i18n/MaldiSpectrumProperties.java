@@ -31,6 +31,4 @@ import uk.co.saiman.properties.Localized;
 
 public interface MaldiSpectrumProperties {
   Localized<String> spectrumExperimentStepName();
-
-  Localized<String> acquisitionDeviceName();
 }

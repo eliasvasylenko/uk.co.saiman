@@ -35,15 +35,15 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.resource.Location;
+import uk.co.saiman.experiment.dependency.Dependency;
+import uk.co.saiman.experiment.environment.Provision;
 import uk.co.saiman.experiment.instruction.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.production.Dependency;
 import uk.co.saiman.experiment.production.Observation;
 import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.Result;
 import uk.co.saiman.experiment.requirement.ConditionRequirement;
-import uk.co.saiman.experiment.requirement.ResultRequirement;
 import uk.co.saiman.experiment.variables.Variables;
 
 public class ExecutorProgress<T extends Dependency> {
@@ -72,25 +72,7 @@ public class ExecutorProgress<T extends Dependency> {
 
       @Override
       public T dependency() {
-        return executor.directRequirement() instanceof ConditionRequirement<?> ? null : null;
-      }
-
-      @Override
-      public <U> U acquireCondition(ConditionRequirement<U> resource) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public <U> Result<? extends U> acquireResult(ResultRequirement<U> requirement) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public <U> Stream<Result<? extends U>> acquireResults(ResultRequirement<U> requirement) {
-        // TODO Auto-generated method stub
-        return null;
+        return executor.mainRequirement() instanceof ConditionRequirement<?> ? null : null;
       }
 
       @Override
@@ -129,6 +111,30 @@ public class ExecutorProgress<T extends Dependency> {
 
       @Override
       public Variables getVariables() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public <U> U acquireCondition(Preparation<U> requirement) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public <U> Result<? extends U> acquireResult(Observation<U> requirement) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public <U> Stream<Result<? extends U>> acquireResults(Observation<U> requirement) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public <U> U acquireResource(Provision<U> requirement) {
         // TODO Auto-generated method stub
         return null;
       }

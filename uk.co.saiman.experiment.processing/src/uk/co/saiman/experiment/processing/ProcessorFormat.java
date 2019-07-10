@@ -39,6 +39,7 @@ import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.state.Accessor.MapAccessor;
 import uk.co.saiman.state.StateMap;
 
 public class ProcessorFormat implements DataFormat<DataProcessor> {
@@ -50,11 +51,11 @@ public class ProcessorFormat implements DataFormat<DataProcessor> {
       VENDOR).withSuffix("json");
 
   private final DataFormat<StateMap> stateMapFormat;
-  private final ProcessingService processorService;
+  private final MapAccessor<DataProcessor> processorAccessor;
 
   public ProcessorFormat(DataFormat<StateMap> stateMapFormat, ProcessingService processorService) {
     this.stateMapFormat = stateMapFormat;
-    this.processorService = processorService;
+    this.processorAccessor = ProcessingAccess.processorAccessor(processorService);
   }
 
   @Override
@@ -70,18 +71,12 @@ public class ProcessorFormat implements DataFormat<DataProcessor> {
   @Override
   public Payload<? extends DataProcessor> load(ReadableByteChannel inputChannel)
       throws IOException {
-    return new Payload<>(
-        ProcessorDeclaration
-            .fromState(stateMapFormat.load(inputChannel).data)
-            .load(processorService));
+    return new Payload<>(processorAccessor.read(stateMapFormat.load(inputChannel).data));
   }
 
   @Override
   public void save(WritableByteChannel outputChannel, Payload<? extends DataProcessor> payload)
       throws IOException {
-    stateMapFormat
-        .save(
-            outputChannel,
-            new Payload<>(ProcessorDeclaration.save(processorService, payload.data).toState()));
+    stateMapFormat.save(outputChannel, new Payload<>(processorAccessor.write(payload.data)));
   }
 }

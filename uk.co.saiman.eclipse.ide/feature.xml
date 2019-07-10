@@ -28,59 +28,59 @@
    </requires>
 
    <plugin
-         id="uk.co.saiman.collections"
-         download-size="0"
-         install-size="0"
-         version="0.0.1.201907100938"
-         unpack="false"/>
-
-   <plugin
-         id="uk.co.saiman.utilities"
-         download-size="0"
-         install-size="0"
-         version="0.0.1.201907100938"
-         unpack="false"/>
-
-   <plugin
-         id="uk.co.saiman.data"
-         download-size="0"
-         install-size="0"
-         version="0.0.1.201907100938"
-         unpack="false"/>
-
-   <plugin
          id="uk.co.saiman.eclipse.ui.edit"
          download-size="0"
          install-size="0"
-         version="0.0.1.201907101133"
+         version="0.0.1.201907101224"
          unpack="false"/>
 
    <plugin
          id="uk.co.saiman.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.0.1.201907101133"
-         unpack="false"/>
-
-   <plugin
-         id="uk.co.saiman.reflection.token"
-         download-size="0"
-         install-size="0"
-         version="0.0.1.201907100938"
-         unpack="false"/>
-
-   <plugin
-         id="uk.co.saiman.reflection"
-         download-size="0"
-         install-size="0"
-         version="0.0.1.201907100938"
+         version="0.0.1.201907101224"
          unpack="false"/>
 
    <plugin
          id="uk.co.saiman.bytes"
          download-size="0"
          install-size="0"
-         version="0.0.1.201907100938"
+         version="0.0.1.201907101202"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.collections"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201907101201"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.data"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201907101202"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.reflection"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201907101201"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.reflection.token"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201907101202"
+         unpack="false"/>
+
+   <plugin
+         id="uk.co.saiman.utilities"
+         download-size="0"
+         install-size="0"
+         version="0.0.1.201907101201"
          unpack="false"/>
 
 </feature>

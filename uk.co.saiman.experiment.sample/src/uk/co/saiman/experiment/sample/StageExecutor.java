@@ -27,8 +27,9 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import uk.co.saiman.experiment.environment.Provision;
 import uk.co.saiman.instrument.stage.PolarStage;
-import uk.co.saiman.instrument.stage.Stage;
+import uk.co.saiman.instrument.stage.StageController;
 
 /**
  * An {@link SampleExecutor experiment type} for {@link PolarStage radial stage
@@ -40,5 +41,5 @@ import uk.co.saiman.instrument.stage.Stage;
  */
 public interface StageExecutor<T> extends SampleExecutor<T> {
   @Override
-  Stage<T, ?> sampleDevice();
+  Provision<? extends StageController<T>> sampleDevice();
 }

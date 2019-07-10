@@ -34,11 +34,11 @@ import java.util.stream.Stream;
 import javax.measure.quantity.Length;
 
 import javafx.geometry.BoundingBox;
+import uk.co.saiman.instrument.stage.msapex.StageDiagram;
+import uk.co.saiman.instrument.stage.msapex.StageDiagramSampleConfiguration;
 import uk.co.saiman.maldi.stage.SampleArea;
 import uk.co.saiman.maldi.stage.SamplePlateStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
-import uk.co.saiman.msapex.instrument.stage.StageDiagram;
-import uk.co.saiman.msapex.instrument.stage.StageDiagramSampleConfiguration;
 
 public class MaldiStageDiagram extends StageDiagram<SampleArea> {
   private final SamplePlateStage stage;

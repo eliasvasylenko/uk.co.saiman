@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
-import static uk.co.saiman.experiment.processing.ProcessingDeclaration.PROCESSING_VARIABLE;
+import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
 
 import java.util.stream.Stream;
 
@@ -35,9 +35,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.SampledContinuousFunction;
@@ -46,10 +44,9 @@ import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.instruction.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.instruction.IndirectRequirements;
-import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.experiment.production.Result;
+import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.requirement.ResultRequirement;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
@@ -65,21 +62,9 @@ import uk.co.saiman.experiment.variables.VariableDeclaration;
 public class SpectrumProcessingExecutor implements Executor<Result<Spectrum>> {
   public static final String OUTPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.output";
 
-  private final ResultRequirement<Spectrum> inputSpectrum;
-  private final ProcessingService processingService;
-
-  @Activate
-  public SpectrumProcessingExecutor(@Reference ProcessingService processingService) {
-    this.inputSpectrum = Requirement.on(SpectrumExecutor.SPECTRUM);
-    this.processingService = processingService;
-  }
-
   @Override
   public void execute(ExecutionContext<Result<Spectrum>> context) {
-    DataProcessor processor = context
-        .getVariable(PROCESSING_VARIABLE)
-        .load(processingService)
-        .getProcessor();
+    DataProcessor processor = context.getVariable(PROCESSING_VARIABLE).getProcessor();
 
     context
         .dependency()
@@ -120,8 +105,8 @@ public class SpectrumProcessingExecutor implements Executor<Result<Spectrum>> {
   }
 
   @Override
-  public ResultRequirement<Spectrum> directRequirement() {
-    return inputSpectrum;
+  public ResultRequirement<Spectrum> mainRequirement() {
+    return Requirement.on(SpectrumExecutor.SPECTRUM);
   }
 
   @Override
@@ -135,7 +120,7 @@ public class SpectrumProcessingExecutor implements Executor<Result<Spectrum>> {
   }
 
   @Override
-  public Stream<IndirectRequirements> indirectRequirements() {
+  public Stream<AdditionalRequirement<?>> additionalRequirements() {
     return Stream.empty();
   }
 }

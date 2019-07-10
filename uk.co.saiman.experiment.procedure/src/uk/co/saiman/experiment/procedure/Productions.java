@@ -30,8 +30,8 @@ package uk.co.saiman.experiment.procedure;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.dependency.Nothing;
 import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Nothing;
 import uk.co.saiman.experiment.production.Observation;
 import uk.co.saiman.experiment.production.Preparation;
 import uk.co.saiman.experiment.production.Product;
@@ -74,11 +74,11 @@ public class Productions {
   public static Optional<Executor<? extends Product>> asDependent(
       Executor<?> executor,
       Executor<?> parentExecutor) {
-    return executor.directRequirement() instanceof ProductRequirement<?>
+    return executor.mainRequirement() instanceof ProductRequirement<?>
         && Productions
             .produces(
                 parentExecutor,
-                ((ProductRequirement<?>) executor.directRequirement()).production())
+                ((ProductRequirement<?>) executor.mainRequirement()).production())
                     ? Optional.of((Executor<? extends Product>) executor)
                     : Optional.empty();
   }
@@ -87,15 +87,15 @@ public class Productions {
   public static <T extends Product> Optional<Executor<? super T>> asDependent(
       Executor<?> executor,
       Production<T> production) {
-    return executor.directRequirement() instanceof ProductRequirement<?>
-        && ((ProductRequirement<?>) executor.directRequirement()).production().equals(production)
+    return executor.mainRequirement() instanceof ProductRequirement<?>
+        && ((ProductRequirement<?>) executor.mainRequirement()).production().equals(production)
             ? Optional.of((Executor<? super T>) executor)
             : Optional.empty();
   }
 
   @SuppressWarnings("unchecked")
   public static <S> Optional<Executor<Nothing>> asIndependent(Executor<?> executor) {
-    return executor.directRequirement() instanceof NoRequirement
+    return executor.mainRequirement() instanceof NoRequirement
         ? Optional.of((Executor<Nothing>) executor)
         : Optional.empty();
   }

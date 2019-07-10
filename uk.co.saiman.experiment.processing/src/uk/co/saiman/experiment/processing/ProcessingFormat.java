@@ -29,6 +29,7 @@ package uk.co.saiman.experiment.processing;
 
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
 import static uk.co.saiman.data.format.RegistrationTree.VENDOR;
+import static uk.co.saiman.experiment.processing.ProcessingAccess.processingAccessor;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
+import uk.co.saiman.state.Accessor.ListAccessor;
 import uk.co.saiman.state.StateList;
 
 public class ProcessingFormat implements DataFormat<Processing> {
@@ -49,18 +51,18 @@ public class ProcessingFormat implements DataFormat<Processing> {
       VENDOR).withSuffix("json");
 
   private final DataFormat<StateList> stateListFormat;
-  private final ProcessingService processorService;
+  private final ListAccessor<Processing> processingAccessor;
 
   public ProcessingFormat(
       DataFormat<StateList> stateListFormat,
       ProcessingService processorService) {
     this.stateListFormat = stateListFormat;
-    this.processorService = processorService;
+    this.processingAccessor = processingAccessor(processorService);
   }
 
   @Override
   public String getExtension() {
-    return "processor";
+    return "processing";
   }
 
   @Override
@@ -70,18 +72,12 @@ public class ProcessingFormat implements DataFormat<Processing> {
 
   @Override
   public Payload<? extends Processing> load(ReadableByteChannel inputChannel) throws IOException {
-    return new Payload<>(
-        ProcessingDeclaration
-            .fromState(stateListFormat.load(inputChannel).data)
-            .load(processorService));
+    return new Payload<>(processingAccessor.read(stateListFormat.load(inputChannel).data));
   }
 
   @Override
   public void save(WritableByteChannel outputChannel, Payload<? extends Processing> payload)
       throws IOException {
-    stateListFormat
-        .save(
-            outputChannel,
-            new Payload<>(ProcessingDeclaration.save(processorService, payload.data).toState()));
+    stateListFormat.save(outputChannel, new Payload<>(processingAccessor.write(payload.data)));
   }
 }

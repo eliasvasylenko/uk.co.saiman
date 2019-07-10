@@ -56,8 +56,7 @@ import uk.co.saiman.observable.ObservableValue;
  * @author Elias N Vasylenko
  *
  */
-public class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController>
-    implements SampleAreaStage {
+class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController> implements SampleAreaStage {
   private final MaldiStageManager stateManager;
 
   private static final XYCoordinate<Length> ZERO = new XYCoordinate<>(metre().getUnit(), 0, 0);
