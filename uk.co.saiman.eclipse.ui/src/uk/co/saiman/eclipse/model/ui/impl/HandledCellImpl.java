@@ -1,50 +1,30 @@
-/*
- * Copyright (C) 2019 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
- *          ______         ___      ___________
- *       ,'========\     ,'===\    /========== \
- *      /== \___/== \  ,'==.== \   \__/== \___\/
- *     /==_/____\__\/,'==__|== |     /==  /
- *     \========`. ,'========= |    /==  /
- *   ___`-___)== ,'== \____|== |   /==  /
- *  /== \__.-==,'==  ,'    |== '__/==  /_
- *  \======== /==  ,'      |== ========= \
- *   \_____\.-\__\/        \__\\________\/
- *
- * This file is part of uk.co.saiman.eclipse.ui.
- *
- * uk.co.saiman.eclipse.ui is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * uk.co.saiman.eclipse.ui is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 /**
  */
 package uk.co.saiman.eclipse.model.ui.impl;
 
 import java.util.Collection;
+
 import org.eclipse.core.commands.ParameterizedCommand;
+
 import org.eclipse.e4.ui.model.application.commands.MCommand;
 import org.eclipse.e4.ui.model.application.commands.MParameter;
+
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
 
 import org.eclipse.emf.common.util.EList;
+
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
+
 import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
-import uk.co.saiman.eclipse.model.ui.HandledCell;
+
+import uk.co.saiman.eclipse.model.ui.MHandledCell;
+import uk.co.saiman.eclipse.model.ui.MPackage;
 
 /**
  * <!-- begin-user-doc -->
@@ -61,7 +41,7 @@ import uk.co.saiman.eclipse.model.ui.HandledCell;
  *
  * @generated
  */
-public class HandledCellImpl extends CellImpl implements HandledCell {
+public class HandledCellImpl extends CellImpl implements MHandledCell {
   /**
    * The cached value of the '{@link #getCommand() <em>Command</em>}' reference.
    * <!-- begin-user-doc -->
@@ -77,6 +57,7 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @see #getWbCommand()
+   * @noreference
    * @generated
    * @ordered
    */
@@ -87,6 +68,7 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @see #getWbCommand()
+   * @noreference
    * @generated
    * @ordered
    */
@@ -118,7 +100,7 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
    */
   @Override
   protected EClass eStaticClass() {
-    return uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL;
+    return MPackage.Literals.HANDLED_CELL;
   }
 
   /**
@@ -126,13 +108,14 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public MCommand getCommand() {
     if (command != null && ((EObject)command).eIsProxy()) {
       InternalEObject oldCommand = (InternalEObject)command;
       command = (MCommand)eResolveProxy(oldCommand);
       if (command != oldCommand) {
         if (eNotificationRequired())
-          eNotify(new ENotificationImpl(this, Notification.RESOLVE, uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__COMMAND, oldCommand, command));
+          eNotify(new ENotificationImpl(this, Notification.RESOLVE, MPackage.HANDLED_CELL__COMMAND, oldCommand, command));
       }
     }
     return command;
@@ -152,18 +135,21 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setCommand(MCommand newCommand) {
     MCommand oldCommand = command;
     command = newCommand;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__COMMAND, oldCommand, command));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.HANDLED_CELL__COMMAND, oldCommand, command));
   }
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
+   * @noreference
    * @generated
    */
+  @Override
   public ParameterizedCommand getWbCommand() {
     return wbCommand;
   }
@@ -171,13 +157,15 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
+   * @noreference
    * @generated
    */
+  @Override
   public void setWbCommand(ParameterizedCommand newWbCommand) {
     ParameterizedCommand oldWbCommand = wbCommand;
     wbCommand = newWbCommand;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__WB_COMMAND, oldWbCommand, wbCommand));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.HANDLED_CELL__WB_COMMAND, oldWbCommand, wbCommand));
   }
 
   /**
@@ -185,9 +173,10 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EList<MParameter> getParameters() {
     if (parameters == null) {
-      parameters = new EObjectContainmentEList<MParameter>(MParameter.class, this, uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__PARAMETERS);
+      parameters = new EObjectContainmentEList<MParameter>(MParameter.class, this, MPackage.HANDLED_CELL__PARAMETERS);
     }
     return parameters;
   }
@@ -200,7 +189,7 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
   @Override
   public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__PARAMETERS:
+      case MPackage.HANDLED_CELL__PARAMETERS:
         return ((InternalEList<?>)getParameters()).basicRemove(otherEnd, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -214,12 +203,12 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
   @Override
   public Object eGet(int featureID, boolean resolve, boolean coreType) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__COMMAND:
+      case MPackage.HANDLED_CELL__COMMAND:
         if (resolve) return getCommand();
         return basicGetCommand();
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__WB_COMMAND:
+      case MPackage.HANDLED_CELL__WB_COMMAND:
         return getWbCommand();
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__PARAMETERS:
+      case MPackage.HANDLED_CELL__PARAMETERS:
         return getParameters();
     }
     return super.eGet(featureID, resolve, coreType);
@@ -234,13 +223,13 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
   @Override
   public void eSet(int featureID, Object newValue) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__COMMAND:
+      case MPackage.HANDLED_CELL__COMMAND:
         setCommand((MCommand)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__WB_COMMAND:
+      case MPackage.HANDLED_CELL__WB_COMMAND:
         setWbCommand((ParameterizedCommand)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__PARAMETERS:
+      case MPackage.HANDLED_CELL__PARAMETERS:
         getParameters().clear();
         getParameters().addAll((Collection<? extends MParameter>)newValue);
         return;
@@ -256,13 +245,13 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
   @Override
   public void eUnset(int featureID) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__COMMAND:
+      case MPackage.HANDLED_CELL__COMMAND:
         setCommand((MCommand)null);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__WB_COMMAND:
+      case MPackage.HANDLED_CELL__WB_COMMAND:
         setWbCommand(WB_COMMAND_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__PARAMETERS:
+      case MPackage.HANDLED_CELL__PARAMETERS:
         getParameters().clear();
         return;
     }
@@ -277,11 +266,11 @@ public class HandledCellImpl extends CellImpl implements HandledCell {
   @Override
   public boolean eIsSet(int featureID) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__COMMAND:
+      case MPackage.HANDLED_CELL__COMMAND:
         return command != null;
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__WB_COMMAND:
+      case MPackage.HANDLED_CELL__WB_COMMAND:
         return WB_COMMAND_EDEFAULT == null ? wbCommand != null : !WB_COMMAND_EDEFAULT.equals(wbCommand);
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__PARAMETERS:
+      case MPackage.HANDLED_CELL__PARAMETERS:
         return parameters != null && !parameters.isEmpty();
     }
     return super.eIsSet(featureID);

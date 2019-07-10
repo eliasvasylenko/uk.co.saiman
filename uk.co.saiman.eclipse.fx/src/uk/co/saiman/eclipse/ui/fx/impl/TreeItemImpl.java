@@ -38,8 +38,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.input.Dragboard;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.EditableCell;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MEditableCell;
 import uk.co.saiman.eclipse.ui.SaiUiModel;
 import uk.co.saiman.eclipse.ui.TransferDestination;
 import uk.co.saiman.eclipse.ui.fx.TransferCellHandler;
@@ -87,11 +87,11 @@ import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 /**
  * @author Elias N Vasylenko
  */
-public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
+public class TreeItemImpl extends TreeItem<MCell> implements IAdaptable {
   // ui container
   private final BorderPane container;
 
-  public TreeItemImpl(Cell domElement) {
+  public TreeItemImpl(MCell domElement) {
     container = new BorderPane();
     setGraphic(container);
     setValue(domElement);
@@ -120,7 +120,7 @@ public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
       return (U) this;
     }
 
-    if (adapter.isAssignableFrom(Cell.class)) {
+    if (adapter.isAssignableFrom(MCell.class)) {
       return (U) getValue();
     }
 
@@ -129,18 +129,18 @@ public class TreeItemImpl extends TreeItem<Cell> implements IAdaptable {
   }
 
   public void editingStarted() {
-    EditableCell cell = (EditableCell) getValue();
+    MEditableCell cell = (MEditableCell) getValue();
     cell.getTags().remove(SaiUiModel.EDIT_CANCELED);
     cell.setEditing(true);
   }
 
   public void editingComplete() {
-    EditableCell cell = (EditableCell) getValue();
+    MEditableCell cell = (MEditableCell) getValue();
     cell.setEditing(false);
   }
 
   public void editingCancelled() {
-    EditableCell cell = (EditableCell) getValue();
+    MEditableCell cell = (MEditableCell) getValue();
     cell.getTags().add(SaiUiModel.EDIT_CANCELED);
     cell.setEditing(false);
   }

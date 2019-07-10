@@ -1,13 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="eclipse.saiman">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target name="eclipse.saiman">
 	<locations>
-		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<repository location="http://download.eclipse.org/releases/2018-12"/>
-			<unit id="org.eclipse.emf.ecp.sdk.e4.feature.feature.group" version="1.19.0.20181205-1314"/>
-			<unit id="org.eclipse.e4.core.tools.feature.feature.group" version="4.10.0.v20181116-0958"/>
-		</location>
+		<location path="/home/eliasv/eclipse/java-latest/eclipse" type="Profile"/>
 		<location type="BndRepositoryLocation">
 			<repository name="Workspace uk.co.saiman"/>
 		</location>
 	</locations>
-	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
+	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-12"/>
 </target>

@@ -45,10 +45,11 @@ import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ViewerNotification;
 
-import uk.co.saiman.eclipse.model.ui.EditableCell;
+import uk.co.saiman.eclipse.model.ui.MEditableCell;
+import uk.co.saiman.eclipse.model.ui.MPackage;
 
 /**
- * This is the item provider adapter for a {@link uk.co.saiman.eclipse.model.ui.EditableCell} object.
+ * This is the item provider adapter for a {@link uk.co.saiman.eclipse.model.ui.MEditableCell} object.
  * <!-- begin-user-doc -->
  * <!-- end-user-doc -->
  * @generated
@@ -93,7 +94,7 @@ public class EditableCellItemProvider extends CellItemProvider {
          getResourceLocator(),
          getString("_UI_EditableCell_editing_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_EditableCell_editing_feature", "_UI_EditableCell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.EDITABLE_CELL__EDITING,
+         MPackage.Literals.EDITABLE_CELL__EDITING,
          true,
          false,
          false,
@@ -121,7 +122,7 @@ public class EditableCellItemProvider extends CellItemProvider {
    */
   @Override
   public String getText(Object object) {
-    String label = ((EditableCell)object).getLabel();
+    String label = ((MEditableCell)object).getLabel();
     return label == null || label.length() == 0 ?
       getString("_UI_EditableCell_type") :
       getString("_UI_EditableCell_type") + " " + label;
@@ -139,8 +140,8 @@ public class EditableCellItemProvider extends CellItemProvider {
   public void notifyChanged(Notification notification) {
     updateChildren(notification);
 
-    switch (notification.getFeatureID(EditableCell.class)) {
-      case uk.co.saiman.eclipse.model.ui.Package.EDITABLE_CELL__EDITING:
+    switch (notification.getFeatureID(MEditableCell.class)) {
+      case MPackage.EDITABLE_CELL__EDITING:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
     }

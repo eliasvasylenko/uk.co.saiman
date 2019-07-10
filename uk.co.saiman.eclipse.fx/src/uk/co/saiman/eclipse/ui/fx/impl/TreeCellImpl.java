@@ -45,8 +45,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import uk.co.saiman.collection.StreamUtilities;
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.EditableCell;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MEditableCell;
 import uk.co.saiman.eclipse.ui.SaiUiModel;
 import uk.co.saiman.eclipse.ui.TransferDestination;
 import uk.co.saiman.eclipse.ui.fx.TransferCellIn;
@@ -63,7 +63,7 @@ import uk.co.saiman.eclipse.ui.fx.widget.WCell;
  * 
  * @author Elias N Vasylenko
  */
-public class TreeCellImpl extends TreeCell<Cell> {
+public class TreeCellImpl extends TreeCell<MCell> {
   private static final String STYLE_CLASS = "ModularTreeCell";
   private static final PseudoClass DRAG_OVER_CLASS = getPseudoClass("drag-over");
   private static final PseudoClass DRAG_BEFORE_CLASS = getPseudoClass("drag-before");
@@ -78,8 +78,8 @@ public class TreeCellImpl extends TreeCell<Cell> {
   }
 
   @Override
-  protected void updateItem(Cell data, boolean empty) {
-    Cell previousData = getItem();
+  protected void updateItem(MCell data, boolean empty) {
+    MCell previousData = getItem();
     if (previousData != null && previousData.getWidget() != null) {
       ((WCell<?>) previousData.getWidget()).setIsEditingCallback(null);
     }
@@ -112,9 +112,9 @@ public class TreeCellImpl extends TreeCell<Cell> {
     setEditable(false);
   }
 
-  private <T> void updateItem(Cell data) {
+  private <T> void updateItem(MCell data) {
     setGraphic(getTreeItem().getGraphic());
-    setEditable(data instanceof EditableCell);
+    setEditable(data instanceof MEditableCell);
   }
 
   private void initializeEvents() {
@@ -277,7 +277,7 @@ public class TreeCellImpl extends TreeCell<Cell> {
   }
 
   @Override
-  public void commitEdit(Cell newValue) {
+  public void commitEdit(MCell newValue) {
     if (!isEditing())
       return;
 

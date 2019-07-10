@@ -106,7 +106,7 @@ public abstract class VListEditor extends AbstractComponentEditor {
       context = new EMFDataBindingContext();
       composite = createForm(parent, context, getMaster());
     }
-    final VirtualEntry<?> o = (VirtualEntry<?>) object;
+    final VirtualEntry<?,?> o = (VirtualEntry<?,?>) object;
     listEditor.getViewer().setInput(o.getList());
     getMaster().setValue(o.getOriginalParent());
     return composite;

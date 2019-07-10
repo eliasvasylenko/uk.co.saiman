@@ -42,7 +42,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
-import uk.co.saiman.eclipse.model.ui.EditableCell;
+import uk.co.saiman.eclipse.model.ui.MEditableCell;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.SaiUiModel;
 
@@ -53,7 +53,7 @@ public class EditableCellText extends StackPane {
   private Predicate<String> update;
 
   @Inject
-  EditableCell cell;
+  MEditableCell cell;
 
   public EditableCellText() {
     StackPane.setAlignment(label, Pos.CENTER_LEFT);

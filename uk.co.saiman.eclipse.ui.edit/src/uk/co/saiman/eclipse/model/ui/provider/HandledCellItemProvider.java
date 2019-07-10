@@ -48,7 +48,8 @@ import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ViewerNotification;
 
-import uk.co.saiman.eclipse.model.ui.HandledCell;
+import uk.co.saiman.eclipse.model.ui.MHandledCell;
+import uk.co.saiman.eclipse.model.ui.MPackage;
 
 /**
  * This is the item provider adapter for a {@link uk.co.saiman.eclipse.model.ui.HandledCell} object.
@@ -97,7 +98,7 @@ public class HandledCellItemProvider extends CellItemProvider {
          getResourceLocator(),
          getString("_UI_HandledCell_command_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_HandledCell_command_feature", "_UI_HandledCell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__COMMAND,
+         MPackage.Literals.HANDLED_CELL__COMMAND,
          true,
          false,
          true,
@@ -110,6 +111,7 @@ public class HandledCellItemProvider extends CellItemProvider {
    * This adds a property descriptor for the Wb Command feature.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
+   * @noreference
    * @generated
    */
   protected void addWbCommandPropertyDescriptor(Object object) {
@@ -119,7 +121,7 @@ public class HandledCellItemProvider extends CellItemProvider {
          getResourceLocator(),
          getString("_UI_HandledCell_wbCommand_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_HandledCell_wbCommand_feature", "_UI_HandledCell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__WB_COMMAND,
+         MPackage.Literals.HANDLED_CELL__WB_COMMAND,
          true,
          false,
          false,
@@ -140,7 +142,7 @@ public class HandledCellItemProvider extends CellItemProvider {
   public Collection<? extends EStructuralFeature> getChildrenFeatures(Object object) {
     if (childrenFeatures == null) {
       super.getChildrenFeatures(object);
-      childrenFeatures.add(uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__PARAMETERS);
+      childrenFeatures.add(MPackage.Literals.HANDLED_CELL__PARAMETERS);
     }
     return childrenFeatures;
   }
@@ -177,7 +179,7 @@ public class HandledCellItemProvider extends CellItemProvider {
    */
   @Override
   public String getText(Object object) {
-    String label = ((HandledCell)object).getLabel();
+    String label = ((MHandledCell)object).getLabel();
     return label == null || label.length() == 0 ?
       getString("_UI_HandledCell_type") :
       getString("_UI_HandledCell_type") + " " + label;
@@ -195,11 +197,11 @@ public class HandledCellItemProvider extends CellItemProvider {
   public void notifyChanged(Notification notification) {
     updateChildren(notification);
 
-    switch (notification.getFeatureID(HandledCell.class)) {
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__WB_COMMAND:
+    switch (notification.getFeatureID(MHandledCell.class)) {
+      case MPackage.HANDLED_CELL__WB_COMMAND:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.HANDLED_CELL__PARAMETERS:
+      case MPackage.HANDLED_CELL__PARAMETERS:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
         return;
     }
@@ -219,7 +221,7 @@ public class HandledCellItemProvider extends CellItemProvider {
 
     newChildDescriptors.add
       (createChildParameter
-        (uk.co.saiman.eclipse.model.ui.Package.Literals.HANDLED_CELL__PARAMETERS,
+        (MPackage.Literals.HANDLED_CELL__PARAMETERS,
          MCommandsFactory.INSTANCE.createParameter()));
   }
 

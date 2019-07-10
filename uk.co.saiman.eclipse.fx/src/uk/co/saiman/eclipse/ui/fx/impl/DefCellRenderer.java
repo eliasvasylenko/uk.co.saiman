@@ -64,21 +64,21 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.EditableCell;
-import uk.co.saiman.eclipse.model.ui.HandledCell;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MEditableCell;
+import uk.co.saiman.eclipse.model.ui.MHandledCell;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 import uk.co.saiman.function.ThrowingFunction;
 
 /**
- * default renderer for {@link Cell}
+ * default renderer for {@link MCell}
  */
 public class DefCellRenderer extends BaseCellRenderer<Pane> {
   private static final Object ACTION_UNAVAILABLE = new Object();
 
-  public static class CellImpl extends WWidgetImpl<Pane, Cell> implements WCell<Pane> {
+  public static class CellImpl extends WWidgetImpl<Pane, MCell> implements WCell<Pane> {
     @Inject
     @Log
     Logger logger;
@@ -99,12 +99,12 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
     private ThrowingFunction<IEclipseContext, Object, Exception> actionCallback;
 
     @Inject
-    public CellImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) Cell domElement) {
+    public CellImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) MCell domElement) {
       this.treeItem = new TreeItemImpl(domElement);
       setDomElement(domElement);
     }
 
-    public TreeItem<Cell> getTreeItem() {
+    public TreeItem<MCell> getTreeItem() {
       return treeItem;
     }
 
@@ -206,7 +206,7 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
     }
 
     @Override
-    protected void setUserData(WWidgetImpl<Pane, Cell> widget) {
+    protected void setUserData(WWidgetImpl<Pane, MCell> widget) {
       getWidget().setUserData(widget);
     }
 
@@ -239,12 +239,12 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       }
     }
 
-    private void contributeCommand(Pane node, Cell model) {
-      if (model instanceof EditableCell) {
+    private void contributeCommand(Pane node, MCell model) {
+      if (model instanceof MEditableCell) {
         actionCallback = context -> ACTION_UNAVAILABLE;
 
-      } else if (model instanceof HandledCell) {
-        HandledCell handledModel = (HandledCell) model;
+      } else if (model instanceof MHandledCell) {
+        MHandledCell handledModel = (MHandledCell) model;
 
         actionCallback = context -> {
           if (handledModel.getWbCommand() != null) {
@@ -304,7 +304,7 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
   }
 
   @Override
-  protected Class<? extends WCell<Pane>> getWidgetClass(Cell element) {
+  protected Class<? extends WCell<Pane>> getWidgetClass(MCell element) {
     return CellImpl.class;
   }
 }

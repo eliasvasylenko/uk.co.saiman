@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
-import static uk.co.saiman.eclipse.model.ui.Package.eINSTANCE;
+import static uk.co.saiman.eclipse.model.ui.MPackage.eINSTANCE;
 
 import org.eclipse.e4.tools.emf.ui.common.IEditorDescriptor;
 import org.eclipse.emf.ecore.EClass;

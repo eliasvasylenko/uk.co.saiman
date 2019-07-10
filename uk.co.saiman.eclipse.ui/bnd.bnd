@@ -3,9 +3,7 @@ Bundle-Description: \
 	Classes for working with Eclipse RCP and IDE projects with JavaFX.
 
 -include:\
-	${build}/include/eclipse.plugin.bnd,\
-	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd
+	${build}/include/eclipse.plugin.bnd
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
@@ -26,8 +24,7 @@ Export-Package: \
 	uk.co.saiman.eclipse.ui
 
 -includeresource: \
-	model=model,\
-	plugin.xml
+	model=model
 
 # entries below copied from PDE generated manifest
 Require-Bundle:\

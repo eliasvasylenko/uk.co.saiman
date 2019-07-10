@@ -3,9 +3,7 @@ Bundle-Description: \
 	Editors for Eclipse E4 model components
 
 -include:\
-	${build}/include/eclipse.plugin.bnd,\
-	${build}/include/eclipse.platform.bnd,\
-	${build}/include/eclipse.fx.bnd
+	${build}/include/eclipse.plugin.bnd
 
 -buildpath: \
 	uk.co.saiman.eclipse;version=snapshot,\

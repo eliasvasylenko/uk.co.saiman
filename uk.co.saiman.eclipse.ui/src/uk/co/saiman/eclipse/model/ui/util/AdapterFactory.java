@@ -31,7 +31,6 @@ package uk.co.saiman.eclipse.model.ui.util;
 
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.MContribution;
-
 import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
@@ -46,14 +45,13 @@ import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
 import org.eclipse.emf.ecore.EObject;
 
 import uk.co.saiman.eclipse.model.ui.*;
-import uk.co.saiman.eclipse.model.ui.Package;
 
 /**
  * <!-- begin-user-doc -->
  * The <b>Adapter Factory</b> for the model.
  * It provides an adapter <code>createXXX</code> method for each class of the model.
  * <!-- end-user-doc -->
- * @see uk.co.saiman.eclipse.model.ui.Package
+ * @see uk.co.saiman.eclipse.model.ui.MPackage
  * @generated
  */
 public class AdapterFactory extends AdapterFactoryImpl {
@@ -63,7 +61,7 @@ public class AdapterFactory extends AdapterFactoryImpl {
    * <!-- end-user-doc -->
    * @generated
    */
-  protected static Package modelPackage;
+  protected static MPackage modelPackage;
 
   /**
    * Creates an instance of the adapter factory.
@@ -73,7 +71,7 @@ public class AdapterFactory extends AdapterFactoryImpl {
    */
   public AdapterFactory() {
     if (modelPackage == null) {
-      modelPackage = Package.eINSTANCE;
+      modelPackage = MPackage.eINSTANCE;
     }
   }
 
@@ -105,19 +103,19 @@ public class AdapterFactory extends AdapterFactoryImpl {
   protected Switch<Adapter> modelSwitch =
     new Switch<Adapter>() {
       @Override
-      public Adapter caseCell(Cell object) {
+      public Adapter caseCell(MCell object) {
         return createCellAdapter();
       }
       @Override
-      public Adapter caseTree(Tree object) {
+      public Adapter caseTree(MTree object) {
         return createTreeAdapter();
       }
       @Override
-      public Adapter caseHandledCell(HandledCell object) {
+      public Adapter caseHandledCell(MHandledCell object) {
         return createHandledCellAdapter();
       }
       @Override
-      public Adapter caseEditableCell(EditableCell object) {
+      public Adapter caseEditableCell(MEditableCell object) {
         return createEditableCellAdapter();
       }
       @Override
@@ -173,13 +171,13 @@ public class AdapterFactory extends AdapterFactoryImpl {
 
 
   /**
-   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.Cell <em>Cell</em>}'.
+   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.MCell <em>Cell</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see uk.co.saiman.eclipse.model.ui.Cell
+   * @see uk.co.saiman.eclipse.model.ui.MCell
    * @generated
    */
   public Adapter createCellAdapter() {
@@ -187,13 +185,13 @@ public class AdapterFactory extends AdapterFactoryImpl {
   }
 
   /**
-   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.Tree <em>Tree</em>}'.
+   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.MTree <em>Tree</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see uk.co.saiman.eclipse.model.ui.Tree
+   * @see uk.co.saiman.eclipse.model.ui.MTree
    * @generated
    */
   public Adapter createTreeAdapter() {
@@ -201,13 +199,13 @@ public class AdapterFactory extends AdapterFactoryImpl {
   }
 
   /**
-   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.HandledCell <em>Handled Cell</em>}'.
+   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.MHandledCell <em>Handled Cell</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see uk.co.saiman.eclipse.model.ui.HandledCell
+   * @see uk.co.saiman.eclipse.model.ui.MHandledCell
    * @generated
    */
   public Adapter createHandledCellAdapter() {
@@ -215,13 +213,13 @@ public class AdapterFactory extends AdapterFactoryImpl {
   }
 
   /**
-   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.EditableCell <em>Editable Cell</em>}'.
+   * Creates a new adapter for an object of class '{@link uk.co.saiman.eclipse.model.ui.MEditableCell <em>Editable Cell</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see uk.co.saiman.eclipse.model.ui.EditableCell
+   * @see uk.co.saiman.eclipse.model.ui.MEditableCell
    * @generated
    */
   public Adapter createEditableCellAdapter() {

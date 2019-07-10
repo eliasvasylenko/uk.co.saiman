@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
-import static uk.co.saiman.eclipse.model.ui.Package.eINSTANCE;
+import static uk.co.saiman.eclipse.model.ui.MPackage.eINSTANCE;
 
 import java.util.ArrayList;
 import java.util.List;

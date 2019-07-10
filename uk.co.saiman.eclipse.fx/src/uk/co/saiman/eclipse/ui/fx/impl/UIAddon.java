@@ -51,8 +51,8 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.osgi.service.event.Event;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MTree;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.ui.SaiUiModel;
 import uk.co.saiman.eclipse.ui.fx.ClipboardService;
@@ -88,9 +88,9 @@ public class UIAddon {
     Object element = event.getProperty(UIEvents.EventTags.ELEMENT);
     boolean toBeRendered = (Boolean) event.getProperty(UIEvents.EventTags.NEW_VALUE);
     if (!toBeRendered) {
-      if (element instanceof Cell) {
+      if (element instanceof MCell) {
         // resourceParts.remove(partResources.remove(part));
-      } else if (element instanceof Tree) {
+      } else if (element instanceof MTree) {
 
       }
     }
@@ -110,12 +110,12 @@ public class UIAddon {
       if (value instanceof IEclipseContext && SET.equals(event.getProperty(TYPE))) {
         IEclipseContext context = (IEclipseContext) value;
 
-        if (element instanceof Tree) {
+        if (element instanceof MTree) {
           ChildrenServiceImpl.prepareChildContainer(context);
 
-        } else if (element instanceof Cell) {
+        } else if (element instanceof MCell) {
           ChildrenServiceImpl.prepareChildContainer(context);
-          ChildrenServiceImpl.prepareChild(context, (Cell) element);
+          ChildrenServiceImpl.prepareChild(context, (MCell) element);
         }
       }
     } catch (Exception e) {

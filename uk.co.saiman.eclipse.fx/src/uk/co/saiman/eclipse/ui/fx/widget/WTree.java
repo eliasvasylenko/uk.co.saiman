@@ -29,7 +29,7 @@ package uk.co.saiman.eclipse.ui.fx.widget;
 
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WWidget;
 
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MTree;
 
 /**
  * Abstraction of tree widget
@@ -37,7 +37,7 @@ import uk.co.saiman.eclipse.model.ui.Tree;
  * @param <N>
  *          the native widget
  */
-public interface WTree<N> extends WWidget<Tree> {
+public interface WTree<N> extends WWidget<MTree> {
   /**
    * Append a widget
    * 

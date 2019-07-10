@@ -1,30 +1,3 @@
-/*
- * Copyright (C) 2019 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
- *          ______         ___      ___________
- *       ,'========\     ,'===\    /========== \
- *      /== \___/== \  ,'==.== \   \__/== \___\/
- *     /==_/____\__\/,'==__|== |     /==  /
- *     \========`. ,'========= |    /==  /
- *   ___`-___)== ,'== \____|== |   /==  /
- *  /== \__.-==,'==  ,'    |== '__/==  /_
- *  \======== /==  ,'      |== ========= \
- *   \_____\.-\__\/        \__\\________\/
- *
- * This file is part of uk.co.saiman.eclipse.ui.
- *
- * uk.co.saiman.eclipse.ui is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * uk.co.saiman.eclipse.ui is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 /**
  */
 package uk.co.saiman.eclipse.model.ui.impl;
@@ -37,12 +10,16 @@ import java.util.Map;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import org.eclipse.e4.ui.model.LocalizationHelper;
+
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.MContribution;
 
 import org.eclipse.e4.ui.model.application.commands.MHandler;
 import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
+
 import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
+
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 import org.eclipse.e4.ui.model.application.impl.StringToObjectMapImpl;
 import org.eclipse.e4.ui.model.application.impl.StringToStringMapImpl;
@@ -57,6 +34,7 @@ import org.eclipse.e4.ui.model.application.ui.advanced.MPlaceholder;
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
 
 import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
+
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
 
@@ -76,7 +54,9 @@ import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
 import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.InternalEList;
-import uk.co.saiman.eclipse.model.ui.Cell;
+
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MPackage;
 
 /**
  * <!-- begin-user-doc -->
@@ -121,7 +101,7 @@ import uk.co.saiman.eclipse.model.ui.Cell;
  *
  * @generated
  */
-public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Container implements Cell {
+public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Container implements MCell {
   /**
    * The default value of the '{@link #getLabel() <em>Label</em>}' attribute.
    * <!-- begin-user-doc -->
@@ -538,7 +518,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    * @ordered
    */
-  protected EList<Cell> children;
+  protected EList<MCell> children;
 
   /**
    * The cached value of the '{@link #getSelectedElement() <em>Selected Element</em>}' reference.
@@ -548,7 +528,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    * @ordered
    */
-  protected Cell selectedElement;
+  protected MCell selectedElement;
 
   /**
    * The cached value of the '{@link #getHandlers() <em>Handlers</em>}' containment reference list.
@@ -606,7 +586,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    */
   @Override
   protected EClass eStaticClass() {
-    return uk.co.saiman.eclipse.model.ui.Package.Literals.CELL;
+    return MPackage.Literals.CELL;
   }
 
   /**
@@ -631,7 +611,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldLabel = label;
     label = newLabel;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__LABEL, oldLabel, label));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__LABEL, oldLabel, label));
   }
 
   /**
@@ -656,7 +636,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldIconURI = iconURI;
     iconURI = newIconURI;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__ICON_URI, oldIconURI, iconURI));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__ICON_URI, oldIconURI, iconURI));
   }
 
   /**
@@ -681,25 +661,76 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldTooltip = tooltip;
     tooltip = newTooltip;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__TOOLTIP, oldTooltip, tooltip));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__TOOLTIP, oldTooltip, tooltip));
   }
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
+   * @generated
    */
   @Override
   public String getLocalizedLabel() {
-    return getLabel();
+    return LocalizationHelper.getLocalizedFeature(UiPackageImpl.Literals.UI_LABEL__LABEL, this);
   }
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
+   * @generated
    */
   @Override
   public String getLocalizedTooltip() {
-    return getTooltip();
+    return LocalizationHelper.getLocalizedFeature(UiPackageImpl.Literals.UI_LABEL__TOOLTIP, this);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public IEclipseContext getContext() {
+    return context;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public void setContext(IEclipseContext newContext) {
+    IEclipseContext oldContext = context;
+    context = newContext;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__CONTEXT, oldContext, context));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public List<String> getVariables() {
+    if (variables == null) {
+      variables = new EDataTypeUniqueEList<String>(String.class, this, MPackage.CELL__VARIABLES);
+    }
+    return variables;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public Map<String, String> getProperties() {
+    if (properties == null) {
+      properties = new EcoreEMap<String,String>(ApplicationPackageImpl.Literals.STRING_TO_STRING_MAP, StringToStringMapImpl.class, this, MPackage.CELL__PROPERTIES);
+    }
+    return properties.map();
   }
 
   /**
@@ -722,7 +753,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldElementId = elementId;
     elementId = newElementId;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID, oldElementId, elementId));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__ELEMENT_ID, oldElementId, elementId));
   }
 
   /**
@@ -733,7 +764,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public Map<String, String> getPersistedState() {
     if (persistedState == null) {
-      persistedState = new EcoreEMap<String,String>(ApplicationPackageImpl.Literals.STRING_TO_STRING_MAP, StringToStringMapImpl.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE);
+      persistedState = new EcoreEMap<String,String>(ApplicationPackageImpl.Literals.STRING_TO_STRING_MAP, StringToStringMapImpl.class, this, MPackage.CELL__PERSISTED_STATE);
     }
     return persistedState.map();
   }
@@ -746,7 +777,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public List<String> getTags() {
     if (tags == null) {
-      tags = new EDataTypeUniqueEList<String>(String.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS);
+      tags = new EDataTypeUniqueEList<String>(String.class, this, MPackage.CELL__TAGS);
     }
     return tags;
   }
@@ -771,7 +802,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldContributorURI = contributorURI;
     contributorURI = newContributorURI;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI, oldContributorURI, contributorURI));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__CONTRIBUTOR_URI, oldContributorURI, contributorURI));
   }
 
   /**
@@ -782,7 +813,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public Map<String, Object> getTransientData() {
     if (transientData == null) {
-      transientData = new EcoreEMap<String,Object>(ApplicationPackageImpl.Literals.STRING_TO_OBJECT_MAP, StringToObjectMapImpl.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA);
+      transientData = new EcoreEMap<String,Object>(ApplicationPackageImpl.Literals.STRING_TO_OBJECT_MAP, StringToObjectMapImpl.class, this, MPackage.CELL__TRANSIENT_DATA);
     }
     return transientData.map();
   }
@@ -809,7 +840,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldContributionURI = contributionURI;
     contributionURI = newContributionURI;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI, oldContributionURI, contributionURI));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__CONTRIBUTION_URI, oldContributionURI, contributionURI));
   }
 
   /**
@@ -832,56 +863,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     Object oldObject = object;
     object = newObject;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT, oldObject, object));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public IEclipseContext getContext() {
-    return context;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void setContext(IEclipseContext newContext) {
-    IEclipseContext oldContext = context;
-    context = newContext;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT, oldContext, context));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public List<String> getVariables() {
-    if (variables == null) {
-      variables = new EDataTypeUniqueEList<String>(String.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES);
-    }
-    return variables;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public Map<String, String> getProperties() {
-    if (properties == null) {
-      properties = new EcoreEMap<String,String>(ApplicationPackageImpl.Literals.STRING_TO_STRING_MAP, StringToStringMapImpl.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES);
-    }
-    return properties.map();
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__OBJECT, oldObject, object));
   }
 
   /**
@@ -904,7 +886,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     Object oldWidget = widget;
     widget = newWidget;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET, oldWidget, widget));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__WIDGET, oldWidget, widget));
   }
 
   /**
@@ -927,7 +909,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     Object oldRenderer = renderer;
     renderer = newRenderer;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER, oldRenderer, renderer));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__RENDERER, oldRenderer, renderer));
   }
 
   /**
@@ -950,7 +932,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     boolean oldToBeRendered = toBeRendered;
     toBeRendered = newToBeRendered;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED, oldToBeRendered, toBeRendered));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__TO_BE_RENDERED, oldToBeRendered, toBeRendered));
   }
 
   /**
@@ -973,7 +955,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     boolean oldOnTop = onTop;
     onTop = newOnTop;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP, oldOnTop, onTop));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__ON_TOP, oldOnTop, onTop));
   }
 
   /**
@@ -996,7 +978,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     boolean oldVisible = visible;
     visible = newVisible;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE, oldVisible, visible));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__VISIBLE, oldVisible, visible));
   }
 
   /**
@@ -1004,10 +986,10 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  @Override
   @SuppressWarnings("unchecked")
+  @Override
   public MElementContainer<MUIElement> getParent() {
-    if (eContainerFeatureID() != uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT) return null;
+    if (eContainerFeatureID() != MPackage.CELL__PARENT) return null;
     return (MElementContainer<MUIElement>)eInternalContainer();
   }
 
@@ -1017,7 +999,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   public NotificationChain basicSetParent(MElementContainer<MUIElement> newParent, NotificationChain msgs) {
-    msgs = eBasicSetContainer((InternalEObject)newParent, uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT, msgs);
+    msgs = eBasicSetContainer((InternalEObject)newParent, MPackage.CELL__PARENT, msgs);
     return msgs;
   }
 
@@ -1028,7 +1010,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    */
   @Override
   public void setParent(MElementContainer<MUIElement> newParent) {
-    if (newParent != eInternalContainer() || (eContainerFeatureID() != uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT && newParent != null)) {
+    if (newParent != eInternalContainer() || (eContainerFeatureID() != MPackage.CELL__PARENT && newParent != null)) {
       if (EcoreUtil.isAncestor(this, (EObject)newParent))
         throw new IllegalArgumentException("Recursive containment not allowed for " + toString());
       NotificationChain msgs = null;
@@ -1040,7 +1022,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       if (msgs != null) msgs.dispatch();
     }
     else if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT, newParent, newParent));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__PARENT, newParent, newParent));
   }
 
   /**
@@ -1063,7 +1045,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldContainerData = containerData;
     containerData = newContainerData;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA, oldContainerData, containerData));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__CONTAINER_DATA, oldContainerData, containerData));
   }
 
   /**
@@ -1078,7 +1060,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
       curSharedRef = (MPlaceholder)eResolveProxy(oldCurSharedRef);
       if (curSharedRef != oldCurSharedRef) {
         if (eNotificationRequired())
-          eNotify(new ENotificationImpl(this, Notification.RESOLVE, uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF, oldCurSharedRef, curSharedRef));
+          eNotify(new ENotificationImpl(this, Notification.RESOLVE, MPackage.CELL__CUR_SHARED_REF, oldCurSharedRef, curSharedRef));
       }
     }
     return curSharedRef;
@@ -1103,7 +1085,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     MPlaceholder oldCurSharedRef = curSharedRef;
     curSharedRef = newCurSharedRef;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF, oldCurSharedRef, curSharedRef));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__CUR_SHARED_REF, oldCurSharedRef, curSharedRef));
   }
 
   /**
@@ -1125,7 +1107,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     MExpression oldVisibleWhen = visibleWhen;
     visibleWhen = newVisibleWhen;
     if (eNotificationRequired()) {
-      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN, oldVisibleWhen, newVisibleWhen);
+      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, MPackage.CELL__VISIBLE_WHEN, oldVisibleWhen, newVisibleWhen);
       if (msgs == null) msgs = notification; else msgs.add(notification);
     }
     return msgs;
@@ -1141,14 +1123,14 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     if (newVisibleWhen != visibleWhen) {
       NotificationChain msgs = null;
       if (visibleWhen != null)
-        msgs = ((InternalEObject)visibleWhen).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN, null, msgs);
+        msgs = ((InternalEObject)visibleWhen).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - MPackage.CELL__VISIBLE_WHEN, null, msgs);
       if (newVisibleWhen != null)
-        msgs = ((InternalEObject)newVisibleWhen).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN, null, msgs);
+        msgs = ((InternalEObject)newVisibleWhen).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - MPackage.CELL__VISIBLE_WHEN, null, msgs);
       msgs = basicSetVisibleWhen(newVisibleWhen, msgs);
       if (msgs != null) msgs.dispatch();
     }
     else if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN, newVisibleWhen, newVisibleWhen));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__VISIBLE_WHEN, newVisibleWhen, newVisibleWhen));
   }
 
   /**
@@ -1171,16 +1153,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     String oldAccessibilityPhrase = accessibilityPhrase;
     accessibilityPhrase = newAccessibilityPhrase;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE, oldAccessibilityPhrase, accessibilityPhrase));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   */
-  @Override
-  public String getLocalizedAccessibilityPhrase() {
-    return getAccessibilityPhrase();
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__ACCESSIBILITY_PHRASE, oldAccessibilityPhrase, accessibilityPhrase));
   }
 
   /**
@@ -1189,9 +1162,19 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
-  public List<Cell> getChildren() {
+  public String getLocalizedAccessibilityPhrase() {
+    return LocalizationHelper.getLocalizedAccessibilityPhrase(this);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public List<MCell> getChildren() {
     if (children == null) {
-      children = new EObjectContainmentWithInverseEList<Cell>(Cell.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN, UiPackageImpl.UI_ELEMENT__PARENT) { private static final long serialVersionUID = 1L; @Override public Class<?> getInverseFeatureClass() { return MUIElement.class; } };
+      children = new EObjectContainmentWithInverseEList<MCell>(MCell.class, this, MPackage.CELL__CHILDREN, UiPackageImpl.UI_ELEMENT__PARENT) { private static final long serialVersionUID = 1L; @Override public Class<?> getInverseFeatureClass() { return MUIElement.class; } };
     }
     return children;
   }
@@ -1202,13 +1185,13 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
-  public Cell getSelectedElement() {
+  public MCell getSelectedElement() {
     if (selectedElement != null && ((EObject)selectedElement).eIsProxy()) {
       InternalEObject oldSelectedElement = (InternalEObject)selectedElement;
-      selectedElement = (Cell)eResolveProxy(oldSelectedElement);
+      selectedElement = (MCell)eResolveProxy(oldSelectedElement);
       if (selectedElement != oldSelectedElement) {
         if (eNotificationRequired())
-          eNotify(new ENotificationImpl(this, Notification.RESOLVE, uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT, oldSelectedElement, selectedElement));
+          eNotify(new ENotificationImpl(this, Notification.RESOLVE, MPackage.CELL__SELECTED_ELEMENT, oldSelectedElement, selectedElement));
       }
     }
     return selectedElement;
@@ -1219,7 +1202,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
-  public Cell basicGetSelectedElement() {
+  public MCell basicGetSelectedElement() {
     return selectedElement;
   }
 
@@ -1229,11 +1212,11 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
-  public void setSelectedElement(Cell newSelectedElement) {
-    Cell oldSelectedElement = selectedElement;
+  public void setSelectedElement(MCell newSelectedElement) {
+    MCell oldSelectedElement = selectedElement;
     selectedElement = newSelectedElement;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT, oldSelectedElement, selectedElement));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__SELECTED_ELEMENT, oldSelectedElement, selectedElement));
   }
 
   /**
@@ -1244,7 +1227,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public List<MHandler> getHandlers() {
     if (handlers == null) {
-      handlers = new EObjectContainmentEList<MHandler>(MHandler.class, this, uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS);
+      handlers = new EObjectContainmentEList<MHandler>(MHandler.class, this, MPackage.CELL__HANDLERS);
     }
     return handlers;
   }
@@ -1268,7 +1251,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     MPopupMenu oldPopupMenu = popupMenu;
     popupMenu = newPopupMenu;
     if (eNotificationRequired()) {
-      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, oldPopupMenu, newPopupMenu);
+      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, MPackage.CELL__POPUP_MENU, oldPopupMenu, newPopupMenu);
       if (msgs == null) msgs = notification; else msgs.add(notification);
     }
     return msgs;
@@ -1284,14 +1267,14 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
     if (newPopupMenu != popupMenu) {
       NotificationChain msgs = null;
       if (popupMenu != null)
-        msgs = ((InternalEObject)popupMenu).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, null, msgs);
+        msgs = ((InternalEObject)popupMenu).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - MPackage.CELL__POPUP_MENU, null, msgs);
       if (newPopupMenu != null)
-        msgs = ((InternalEObject)newPopupMenu).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, null, msgs);
+        msgs = ((InternalEObject)newPopupMenu).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - MPackage.CELL__POPUP_MENU, null, msgs);
       msgs = basicSetPopupMenu(newPopupMenu, msgs);
       if (msgs != null) msgs.dispatch();
     }
     else if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU, newPopupMenu, newPopupMenu));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__POPUP_MENU, newPopupMenu, newPopupMenu));
   }
 
   /**
@@ -1299,6 +1282,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public boolean isExpanded() {
     return expanded;
   }
@@ -1308,19 +1292,26 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setExpanded(boolean newExpanded) {
     boolean oldExpanded = expanded;
     expanded = newExpanded;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED, oldExpanded, expanded));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.CELL__EXPANDED, oldExpanded, expanded));
   }
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
+   * @since 1.1
+   * @generated
    */
   @Override
   public void updateLocalization() {
+    if (eNotificationRequired()) {
+      eNotify(new ENotificationImpl(
+          this, Notification.SET, UiPackageImpl.UI_ELEMENT__LOCALIZED_ACCESSIBILITY_PHRASE, null, getLocalizedAccessibilityPhrase()));
+    }
   }
 
   /**
@@ -1332,11 +1323,11 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public NotificationChain eInverseAdd(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT:
+      case MPackage.CELL__PARENT:
         if (eInternalContainer() != null)
           msgs = eBasicRemoveFromContainer(msgs);
         return basicSetParent((MElementContainer<MUIElement>)otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
+      case MPackage.CELL__CHILDREN:
         return ((InternalEList<InternalEObject>)(InternalEList<?>)getChildren()).basicAdd(otherEnd, msgs);
     }
     return super.eInverseAdd(otherEnd, featureID, msgs);
@@ -1350,21 +1341,21 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
+      case MPackage.CELL__PROPERTIES:
         return ((InternalEList<?>)((EMap.InternalMapView<String, String>)getProperties()).eMap()).basicRemove(otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE:
+      case MPackage.CELL__PERSISTED_STATE:
         return ((InternalEList<?>)((EMap.InternalMapView<String, String>)getPersistedState()).eMap()).basicRemove(otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA:
+      case MPackage.CELL__TRANSIENT_DATA:
         return ((InternalEList<?>)((EMap.InternalMapView<String, Object>)getTransientData()).eMap()).basicRemove(otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT:
+      case MPackage.CELL__PARENT:
         return basicSetParent(null, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN:
+      case MPackage.CELL__VISIBLE_WHEN:
         return basicSetVisibleWhen(null, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
+      case MPackage.CELL__CHILDREN:
         return ((InternalEList<?>)getChildren()).basicRemove(otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+      case MPackage.CELL__HANDLERS:
         return ((InternalEList<?>)getHandlers()).basicRemove(otherEnd, msgs);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
+      case MPackage.CELL__POPUP_MENU:
         return basicSetPopupMenu(null, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -1378,7 +1369,7 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public NotificationChain eBasicRemoveFromContainerFeature(NotificationChain msgs) {
     switch (eContainerFeatureID()) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT:
+      case MPackage.CELL__PARENT:
         return eInternalContainer().eInverseRemove(this, UiPackageImpl.ELEMENT_CONTAINER__CHILDREN, MElementContainer.class, msgs);
     }
     return super.eBasicRemoveFromContainerFeature(msgs);
@@ -1392,72 +1383,72 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public Object eGet(int featureID, boolean resolve, boolean coreType) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LABEL:
+      case MPackage.CELL__LABEL:
         return getLabel();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ICON_URI:
+      case MPackage.CELL__ICON_URI:
         return getIconURI();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TOOLTIP:
+      case MPackage.CELL__TOOLTIP:
         return getTooltip();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_LABEL:
+      case MPackage.CELL__LOCALIZED_LABEL:
         return getLocalizedLabel();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_TOOLTIP:
+      case MPackage.CELL__LOCALIZED_TOOLTIP:
         return getLocalizedTooltip();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT:
+      case MPackage.CELL__CONTEXT:
         return getContext();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES:
+      case MPackage.CELL__VARIABLES:
         return getVariables();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
+      case MPackage.CELL__PROPERTIES:
         if (coreType) return ((EMap.InternalMapView<String, String>)getProperties()).eMap();
         else return getProperties();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID:
+      case MPackage.CELL__ELEMENT_ID:
         return getElementId();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE:
+      case MPackage.CELL__PERSISTED_STATE:
         if (coreType) return ((EMap.InternalMapView<String, String>)getPersistedState()).eMap();
         else return getPersistedState();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS:
+      case MPackage.CELL__TAGS:
         return getTags();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI:
+      case MPackage.CELL__CONTRIBUTOR_URI:
         return getContributorURI();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA:
+      case MPackage.CELL__TRANSIENT_DATA:
         if (coreType) return ((EMap.InternalMapView<String, Object>)getTransientData()).eMap();
         else return getTransientData();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI:
+      case MPackage.CELL__CONTRIBUTION_URI:
         return getContributionURI();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT:
+      case MPackage.CELL__OBJECT:
         return getObject();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET:
+      case MPackage.CELL__WIDGET:
         return getWidget();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER:
+      case MPackage.CELL__RENDERER:
         return getRenderer();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED:
+      case MPackage.CELL__TO_BE_RENDERED:
         return isToBeRendered();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP:
+      case MPackage.CELL__ON_TOP:
         return isOnTop();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE:
+      case MPackage.CELL__VISIBLE:
         return isVisible();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT:
+      case MPackage.CELL__PARENT:
         return getParent();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA:
+      case MPackage.CELL__CONTAINER_DATA:
         return getContainerData();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF:
+      case MPackage.CELL__CUR_SHARED_REF:
         if (resolve) return getCurSharedRef();
         return basicGetCurSharedRef();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN:
+      case MPackage.CELL__VISIBLE_WHEN:
         return getVisibleWhen();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__ACCESSIBILITY_PHRASE:
         return getAccessibilityPhrase();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
         return getLocalizedAccessibilityPhrase();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
+      case MPackage.CELL__CHILDREN:
         return getChildren();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
+      case MPackage.CELL__SELECTED_ELEMENT:
         if (resolve) return getSelectedElement();
         return basicGetSelectedElement();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+      case MPackage.CELL__HANDLERS:
         return getHandlers();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
+      case MPackage.CELL__POPUP_MENU:
         return getPopupMenu();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+      case MPackage.CELL__EXPANDED:
         return isExpanded();
     }
     return super.eGet(featureID, resolve, coreType);
@@ -1472,92 +1463,92 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public void eSet(int featureID, Object newValue) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LABEL:
+      case MPackage.CELL__LABEL:
         setLabel((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ICON_URI:
+      case MPackage.CELL__ICON_URI:
         setIconURI((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TOOLTIP:
+      case MPackage.CELL__TOOLTIP:
         setTooltip((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT:
+      case MPackage.CELL__CONTEXT:
         setContext((IEclipseContext)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES:
+      case MPackage.CELL__VARIABLES:
         getVariables().clear();
         getVariables().addAll((Collection<? extends String>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
+      case MPackage.CELL__PROPERTIES:
         ((EStructuralFeature.Setting)((EMap.InternalMapView<String, String>)getProperties()).eMap()).set(newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID:
+      case MPackage.CELL__ELEMENT_ID:
         setElementId((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE:
+      case MPackage.CELL__PERSISTED_STATE:
         ((EStructuralFeature.Setting)((EMap.InternalMapView<String, String>)getPersistedState()).eMap()).set(newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS:
+      case MPackage.CELL__TAGS:
         getTags().clear();
         getTags().addAll((Collection<? extends String>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI:
+      case MPackage.CELL__CONTRIBUTOR_URI:
         setContributorURI((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA:
+      case MPackage.CELL__TRANSIENT_DATA:
         ((EStructuralFeature.Setting)((EMap.InternalMapView<String, Object>)getTransientData()).eMap()).set(newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI:
+      case MPackage.CELL__CONTRIBUTION_URI:
         setContributionURI((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT:
+      case MPackage.CELL__OBJECT:
         setObject(newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET:
+      case MPackage.CELL__WIDGET:
         setWidget(newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER:
+      case MPackage.CELL__RENDERER:
         setRenderer(newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED:
+      case MPackage.CELL__TO_BE_RENDERED:
         setToBeRendered((Boolean)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP:
+      case MPackage.CELL__ON_TOP:
         setOnTop((Boolean)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE:
+      case MPackage.CELL__VISIBLE:
         setVisible((Boolean)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT:
+      case MPackage.CELL__PARENT:
         setParent((MElementContainer<MUIElement>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA:
+      case MPackage.CELL__CONTAINER_DATA:
         setContainerData((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF:
+      case MPackage.CELL__CUR_SHARED_REF:
         setCurSharedRef((MPlaceholder)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN:
+      case MPackage.CELL__VISIBLE_WHEN:
         setVisibleWhen((MExpression)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__ACCESSIBILITY_PHRASE:
         setAccessibilityPhrase((String)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
+      case MPackage.CELL__CHILDREN:
         getChildren().clear();
-        getChildren().addAll((Collection<? extends Cell>)newValue);
+        getChildren().addAll((Collection<? extends MCell>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
-        setSelectedElement((Cell)newValue);
+      case MPackage.CELL__SELECTED_ELEMENT:
+        setSelectedElement((MCell)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+      case MPackage.CELL__HANDLERS:
         getHandlers().clear();
         getHandlers().addAll((Collection<? extends MHandler>)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
+      case MPackage.CELL__POPUP_MENU:
         setPopupMenu((MPopupMenu)newValue);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+      case MPackage.CELL__EXPANDED:
         setExpanded((Boolean)newValue);
         return;
     }
@@ -1572,88 +1563,88 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public void eUnset(int featureID) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LABEL:
+      case MPackage.CELL__LABEL:
         setLabel(LABEL_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ICON_URI:
+      case MPackage.CELL__ICON_URI:
         setIconURI(ICON_URI_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TOOLTIP:
+      case MPackage.CELL__TOOLTIP:
         setTooltip(TOOLTIP_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT:
+      case MPackage.CELL__CONTEXT:
         setContext(CONTEXT_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES:
+      case MPackage.CELL__VARIABLES:
         getVariables().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
+      case MPackage.CELL__PROPERTIES:
         getProperties().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID:
+      case MPackage.CELL__ELEMENT_ID:
         setElementId(ELEMENT_ID_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE:
+      case MPackage.CELL__PERSISTED_STATE:
         getPersistedState().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS:
+      case MPackage.CELL__TAGS:
         getTags().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI:
+      case MPackage.CELL__CONTRIBUTOR_URI:
         setContributorURI(CONTRIBUTOR_URI_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA:
+      case MPackage.CELL__TRANSIENT_DATA:
         getTransientData().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI:
+      case MPackage.CELL__CONTRIBUTION_URI:
         setContributionURI(CONTRIBUTION_URI_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT:
+      case MPackage.CELL__OBJECT:
         setObject(OBJECT_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET:
+      case MPackage.CELL__WIDGET:
         setWidget(WIDGET_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER:
+      case MPackage.CELL__RENDERER:
         setRenderer(RENDERER_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED:
+      case MPackage.CELL__TO_BE_RENDERED:
         setToBeRendered(TO_BE_RENDERED_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP:
+      case MPackage.CELL__ON_TOP:
         setOnTop(ON_TOP_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE:
+      case MPackage.CELL__VISIBLE:
         setVisible(VISIBLE_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT:
+      case MPackage.CELL__PARENT:
         setParent((MElementContainer<MUIElement>)null);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA:
+      case MPackage.CELL__CONTAINER_DATA:
         setContainerData(CONTAINER_DATA_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF:
+      case MPackage.CELL__CUR_SHARED_REF:
         setCurSharedRef((MPlaceholder)null);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN:
+      case MPackage.CELL__VISIBLE_WHEN:
         setVisibleWhen((MExpression)null);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__ACCESSIBILITY_PHRASE:
         setAccessibilityPhrase(ACCESSIBILITY_PHRASE_EDEFAULT);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
+      case MPackage.CELL__CHILDREN:
         getChildren().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
-        setSelectedElement((Cell)null);
+      case MPackage.CELL__SELECTED_ELEMENT:
+        setSelectedElement((MCell)null);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+      case MPackage.CELL__HANDLERS:
         getHandlers().clear();
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
+      case MPackage.CELL__POPUP_MENU:
         setPopupMenu((MPopupMenu)null);
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+      case MPackage.CELL__EXPANDED:
         setExpanded(EXPANDED_EDEFAULT);
         return;
     }
@@ -1668,67 +1659,67 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   @Override
   public boolean eIsSet(int featureID) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LABEL:
+      case MPackage.CELL__LABEL:
         return LABEL_EDEFAULT == null ? label != null : !LABEL_EDEFAULT.equals(label);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ICON_URI:
+      case MPackage.CELL__ICON_URI:
         return ICON_URI_EDEFAULT == null ? iconURI != null : !ICON_URI_EDEFAULT.equals(iconURI);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TOOLTIP:
+      case MPackage.CELL__TOOLTIP:
         return TOOLTIP_EDEFAULT == null ? tooltip != null : !TOOLTIP_EDEFAULT.equals(tooltip);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_LABEL:
+      case MPackage.CELL__LOCALIZED_LABEL:
         return LOCALIZED_LABEL_EDEFAULT == null ? getLocalizedLabel() != null : !LOCALIZED_LABEL_EDEFAULT.equals(getLocalizedLabel());
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_TOOLTIP:
+      case MPackage.CELL__LOCALIZED_TOOLTIP:
         return LOCALIZED_TOOLTIP_EDEFAULT == null ? getLocalizedTooltip() != null : !LOCALIZED_TOOLTIP_EDEFAULT.equals(getLocalizedTooltip());
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT:
+      case MPackage.CELL__CONTEXT:
         return CONTEXT_EDEFAULT == null ? context != null : !CONTEXT_EDEFAULT.equals(context);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES:
+      case MPackage.CELL__VARIABLES:
         return variables != null && !variables.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
+      case MPackage.CELL__PROPERTIES:
         return properties != null && !properties.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID:
+      case MPackage.CELL__ELEMENT_ID:
         return ELEMENT_ID_EDEFAULT == null ? elementId != null : !ELEMENT_ID_EDEFAULT.equals(elementId);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE:
+      case MPackage.CELL__PERSISTED_STATE:
         return persistedState != null && !persistedState.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS:
+      case MPackage.CELL__TAGS:
         return tags != null && !tags.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI:
+      case MPackage.CELL__CONTRIBUTOR_URI:
         return CONTRIBUTOR_URI_EDEFAULT == null ? contributorURI != null : !CONTRIBUTOR_URI_EDEFAULT.equals(contributorURI);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA:
+      case MPackage.CELL__TRANSIENT_DATA:
         return transientData != null && !transientData.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI:
+      case MPackage.CELL__CONTRIBUTION_URI:
         return CONTRIBUTION_URI_EDEFAULT == null ? contributionURI != null : !CONTRIBUTION_URI_EDEFAULT.equals(contributionURI);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT:
+      case MPackage.CELL__OBJECT:
         return OBJECT_EDEFAULT == null ? object != null : !OBJECT_EDEFAULT.equals(object);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET:
+      case MPackage.CELL__WIDGET:
         return WIDGET_EDEFAULT == null ? widget != null : !WIDGET_EDEFAULT.equals(widget);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER:
+      case MPackage.CELL__RENDERER:
         return RENDERER_EDEFAULT == null ? renderer != null : !RENDERER_EDEFAULT.equals(renderer);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED:
+      case MPackage.CELL__TO_BE_RENDERED:
         return toBeRendered != TO_BE_RENDERED_EDEFAULT;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP:
+      case MPackage.CELL__ON_TOP:
         return onTop != ON_TOP_EDEFAULT;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE:
+      case MPackage.CELL__VISIBLE:
         return visible != VISIBLE_EDEFAULT;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT:
+      case MPackage.CELL__PARENT:
         return getParent() != null;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA:
+      case MPackage.CELL__CONTAINER_DATA:
         return CONTAINER_DATA_EDEFAULT == null ? containerData != null : !CONTAINER_DATA_EDEFAULT.equals(containerData);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF:
+      case MPackage.CELL__CUR_SHARED_REF:
         return curSharedRef != null;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN:
+      case MPackage.CELL__VISIBLE_WHEN:
         return visibleWhen != null;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__ACCESSIBILITY_PHRASE:
         return ACCESSIBILITY_PHRASE_EDEFAULT == null ? accessibilityPhrase != null : !ACCESSIBILITY_PHRASE_EDEFAULT.equals(accessibilityPhrase);
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
         return LOCALIZED_ACCESSIBILITY_PHRASE_EDEFAULT == null ? getLocalizedAccessibilityPhrase() != null : !LOCALIZED_ACCESSIBILITY_PHRASE_EDEFAULT.equals(getLocalizedAccessibilityPhrase());
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
+      case MPackage.CELL__CHILDREN:
         return children != null && !children.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT:
+      case MPackage.CELL__SELECTED_ELEMENT:
         return selectedElement != null;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+      case MPackage.CELL__HANDLERS:
         return handlers != null && !handlers.isEmpty();
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__POPUP_MENU:
+      case MPackage.CELL__POPUP_MENU:
         return popupMenu != null;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+      case MPackage.CELL__EXPANDED:
         return expanded != EXPANDED_EDEFAULT;
     }
     return super.eIsSet(featureID);
@@ -1743,55 +1734,55 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   public int eBaseStructuralFeatureID(int derivedFeatureID, Class<?> baseClass) {
     if (baseClass == MContext.class) {
       switch (derivedFeatureID) {
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT: return UiPackageImpl.CONTEXT__CONTEXT;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES: return UiPackageImpl.CONTEXT__VARIABLES;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES: return UiPackageImpl.CONTEXT__PROPERTIES;
+        case MPackage.CELL__CONTEXT: return UiPackageImpl.CONTEXT__CONTEXT;
+        case MPackage.CELL__VARIABLES: return UiPackageImpl.CONTEXT__VARIABLES;
+        case MPackage.CELL__PROPERTIES: return UiPackageImpl.CONTEXT__PROPERTIES;
         default: return -1;
       }
     }
     if (baseClass == MApplicationElement.class) {
       switch (derivedFeatureID) {
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID: return ApplicationPackageImpl.APPLICATION_ELEMENT__ELEMENT_ID;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE: return ApplicationPackageImpl.APPLICATION_ELEMENT__PERSISTED_STATE;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS: return ApplicationPackageImpl.APPLICATION_ELEMENT__TAGS;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI: return ApplicationPackageImpl.APPLICATION_ELEMENT__CONTRIBUTOR_URI;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA: return ApplicationPackageImpl.APPLICATION_ELEMENT__TRANSIENT_DATA;
+        case MPackage.CELL__ELEMENT_ID: return ApplicationPackageImpl.APPLICATION_ELEMENT__ELEMENT_ID;
+        case MPackage.CELL__PERSISTED_STATE: return ApplicationPackageImpl.APPLICATION_ELEMENT__PERSISTED_STATE;
+        case MPackage.CELL__TAGS: return ApplicationPackageImpl.APPLICATION_ELEMENT__TAGS;
+        case MPackage.CELL__CONTRIBUTOR_URI: return ApplicationPackageImpl.APPLICATION_ELEMENT__CONTRIBUTOR_URI;
+        case MPackage.CELL__TRANSIENT_DATA: return ApplicationPackageImpl.APPLICATION_ELEMENT__TRANSIENT_DATA;
         default: return -1;
       }
     }
     if (baseClass == MContribution.class) {
       switch (derivedFeatureID) {
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI: return ApplicationPackageImpl.CONTRIBUTION__CONTRIBUTION_URI;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT: return ApplicationPackageImpl.CONTRIBUTION__OBJECT;
+        case MPackage.CELL__CONTRIBUTION_URI: return ApplicationPackageImpl.CONTRIBUTION__CONTRIBUTION_URI;
+        case MPackage.CELL__OBJECT: return ApplicationPackageImpl.CONTRIBUTION__OBJECT;
         default: return -1;
       }
     }
     if (baseClass == MUIElement.class) {
       switch (derivedFeatureID) {
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET: return UiPackageImpl.UI_ELEMENT__WIDGET;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER: return UiPackageImpl.UI_ELEMENT__RENDERER;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED: return UiPackageImpl.UI_ELEMENT__TO_BE_RENDERED;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP: return UiPackageImpl.UI_ELEMENT__ON_TOP;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE: return UiPackageImpl.UI_ELEMENT__VISIBLE;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT: return UiPackageImpl.UI_ELEMENT__PARENT;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA: return UiPackageImpl.UI_ELEMENT__CONTAINER_DATA;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF: return UiPackageImpl.UI_ELEMENT__CUR_SHARED_REF;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN: return UiPackageImpl.UI_ELEMENT__VISIBLE_WHEN;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE: return UiPackageImpl.UI_ELEMENT__ACCESSIBILITY_PHRASE;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_ACCESSIBILITY_PHRASE: return UiPackageImpl.UI_ELEMENT__LOCALIZED_ACCESSIBILITY_PHRASE;
+        case MPackage.CELL__WIDGET: return UiPackageImpl.UI_ELEMENT__WIDGET;
+        case MPackage.CELL__RENDERER: return UiPackageImpl.UI_ELEMENT__RENDERER;
+        case MPackage.CELL__TO_BE_RENDERED: return UiPackageImpl.UI_ELEMENT__TO_BE_RENDERED;
+        case MPackage.CELL__ON_TOP: return UiPackageImpl.UI_ELEMENT__ON_TOP;
+        case MPackage.CELL__VISIBLE: return UiPackageImpl.UI_ELEMENT__VISIBLE;
+        case MPackage.CELL__PARENT: return UiPackageImpl.UI_ELEMENT__PARENT;
+        case MPackage.CELL__CONTAINER_DATA: return UiPackageImpl.UI_ELEMENT__CONTAINER_DATA;
+        case MPackage.CELL__CUR_SHARED_REF: return UiPackageImpl.UI_ELEMENT__CUR_SHARED_REF;
+        case MPackage.CELL__VISIBLE_WHEN: return UiPackageImpl.UI_ELEMENT__VISIBLE_WHEN;
+        case MPackage.CELL__ACCESSIBILITY_PHRASE: return UiPackageImpl.UI_ELEMENT__ACCESSIBILITY_PHRASE;
+        case MPackage.CELL__LOCALIZED_ACCESSIBILITY_PHRASE: return UiPackageImpl.UI_ELEMENT__LOCALIZED_ACCESSIBILITY_PHRASE;
         default: return -1;
       }
     }
     if (baseClass == MElementContainer.class) {
       switch (derivedFeatureID) {
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN: return UiPackageImpl.ELEMENT_CONTAINER__CHILDREN;
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT: return UiPackageImpl.ELEMENT_CONTAINER__SELECTED_ELEMENT;
+        case MPackage.CELL__CHILDREN: return UiPackageImpl.ELEMENT_CONTAINER__CHILDREN;
+        case MPackage.CELL__SELECTED_ELEMENT: return UiPackageImpl.ELEMENT_CONTAINER__SELECTED_ELEMENT;
         default: return -1;
       }
     }
     if (baseClass == MHandlerContainer.class) {
       switch (derivedFeatureID) {
-        case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS: return CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS;
+        case MPackage.CELL__HANDLERS: return CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS;
         default: return -1;
       }
     }
@@ -1807,55 +1798,55 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
   public int eDerivedStructuralFeatureID(int baseFeatureID, Class<?> baseClass) {
     if (baseClass == MContext.class) {
       switch (baseFeatureID) {
-        case UiPackageImpl.CONTEXT__CONTEXT: return uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT;
-        case UiPackageImpl.CONTEXT__VARIABLES: return uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES;
-        case UiPackageImpl.CONTEXT__PROPERTIES: return uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES;
+        case UiPackageImpl.CONTEXT__CONTEXT: return MPackage.CELL__CONTEXT;
+        case UiPackageImpl.CONTEXT__VARIABLES: return MPackage.CELL__VARIABLES;
+        case UiPackageImpl.CONTEXT__PROPERTIES: return MPackage.CELL__PROPERTIES;
         default: return -1;
       }
     }
     if (baseClass == MApplicationElement.class) {
       switch (baseFeatureID) {
-        case ApplicationPackageImpl.APPLICATION_ELEMENT__ELEMENT_ID: return uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID;
-        case ApplicationPackageImpl.APPLICATION_ELEMENT__PERSISTED_STATE: return uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE;
-        case ApplicationPackageImpl.APPLICATION_ELEMENT__TAGS: return uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS;
-        case ApplicationPackageImpl.APPLICATION_ELEMENT__CONTRIBUTOR_URI: return uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI;
-        case ApplicationPackageImpl.APPLICATION_ELEMENT__TRANSIENT_DATA: return uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA;
+        case ApplicationPackageImpl.APPLICATION_ELEMENT__ELEMENT_ID: return MPackage.CELL__ELEMENT_ID;
+        case ApplicationPackageImpl.APPLICATION_ELEMENT__PERSISTED_STATE: return MPackage.CELL__PERSISTED_STATE;
+        case ApplicationPackageImpl.APPLICATION_ELEMENT__TAGS: return MPackage.CELL__TAGS;
+        case ApplicationPackageImpl.APPLICATION_ELEMENT__CONTRIBUTOR_URI: return MPackage.CELL__CONTRIBUTOR_URI;
+        case ApplicationPackageImpl.APPLICATION_ELEMENT__TRANSIENT_DATA: return MPackage.CELL__TRANSIENT_DATA;
         default: return -1;
       }
     }
     if (baseClass == MContribution.class) {
       switch (baseFeatureID) {
-        case ApplicationPackageImpl.CONTRIBUTION__CONTRIBUTION_URI: return uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI;
-        case ApplicationPackageImpl.CONTRIBUTION__OBJECT: return uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT;
+        case ApplicationPackageImpl.CONTRIBUTION__CONTRIBUTION_URI: return MPackage.CELL__CONTRIBUTION_URI;
+        case ApplicationPackageImpl.CONTRIBUTION__OBJECT: return MPackage.CELL__OBJECT;
         default: return -1;
       }
     }
     if (baseClass == MUIElement.class) {
       switch (baseFeatureID) {
-        case UiPackageImpl.UI_ELEMENT__WIDGET: return uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET;
-        case UiPackageImpl.UI_ELEMENT__RENDERER: return uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER;
-        case UiPackageImpl.UI_ELEMENT__TO_BE_RENDERED: return uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED;
-        case UiPackageImpl.UI_ELEMENT__ON_TOP: return uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP;
-        case UiPackageImpl.UI_ELEMENT__VISIBLE: return uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE;
-        case UiPackageImpl.UI_ELEMENT__PARENT: return uk.co.saiman.eclipse.model.ui.Package.CELL__PARENT;
-        case UiPackageImpl.UI_ELEMENT__CONTAINER_DATA: return uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA;
-        case UiPackageImpl.UI_ELEMENT__CUR_SHARED_REF: return uk.co.saiman.eclipse.model.ui.Package.CELL__CUR_SHARED_REF;
-        case UiPackageImpl.UI_ELEMENT__VISIBLE_WHEN: return uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN;
-        case UiPackageImpl.UI_ELEMENT__ACCESSIBILITY_PHRASE: return uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE;
-        case UiPackageImpl.UI_ELEMENT__LOCALIZED_ACCESSIBILITY_PHRASE: return uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_ACCESSIBILITY_PHRASE;
+        case UiPackageImpl.UI_ELEMENT__WIDGET: return MPackage.CELL__WIDGET;
+        case UiPackageImpl.UI_ELEMENT__RENDERER: return MPackage.CELL__RENDERER;
+        case UiPackageImpl.UI_ELEMENT__TO_BE_RENDERED: return MPackage.CELL__TO_BE_RENDERED;
+        case UiPackageImpl.UI_ELEMENT__ON_TOP: return MPackage.CELL__ON_TOP;
+        case UiPackageImpl.UI_ELEMENT__VISIBLE: return MPackage.CELL__VISIBLE;
+        case UiPackageImpl.UI_ELEMENT__PARENT: return MPackage.CELL__PARENT;
+        case UiPackageImpl.UI_ELEMENT__CONTAINER_DATA: return MPackage.CELL__CONTAINER_DATA;
+        case UiPackageImpl.UI_ELEMENT__CUR_SHARED_REF: return MPackage.CELL__CUR_SHARED_REF;
+        case UiPackageImpl.UI_ELEMENT__VISIBLE_WHEN: return MPackage.CELL__VISIBLE_WHEN;
+        case UiPackageImpl.UI_ELEMENT__ACCESSIBILITY_PHRASE: return MPackage.CELL__ACCESSIBILITY_PHRASE;
+        case UiPackageImpl.UI_ELEMENT__LOCALIZED_ACCESSIBILITY_PHRASE: return MPackage.CELL__LOCALIZED_ACCESSIBILITY_PHRASE;
         default: return -1;
       }
     }
     if (baseClass == MElementContainer.class) {
       switch (baseFeatureID) {
-        case UiPackageImpl.ELEMENT_CONTAINER__CHILDREN: return uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN;
-        case UiPackageImpl.ELEMENT_CONTAINER__SELECTED_ELEMENT: return uk.co.saiman.eclipse.model.ui.Package.CELL__SELECTED_ELEMENT;
+        case UiPackageImpl.ELEMENT_CONTAINER__CHILDREN: return MPackage.CELL__CHILDREN;
+        case UiPackageImpl.ELEMENT_CONTAINER__SELECTED_ELEMENT: return MPackage.CELL__SELECTED_ELEMENT;
         default: return -1;
       }
     }
     if (baseClass == MHandlerContainer.class) {
       switch (baseFeatureID) {
-        case CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS: return uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS;
+        case CommandsPackageImpl.HANDLER_CONTAINER__HANDLERS: return MPackage.CELL__HANDLERS;
         default: return -1;
       }
     }
@@ -1868,9 +1859,50 @@ public class CellImpl extends org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Cont
    * @generated
    */
   @Override
+  public int eDerivedOperationID(int baseOperationID, Class<?> baseClass) {
+    if (baseClass == MContext.class) {
+      switch (baseOperationID) {
+        default: return -1;
+      }
+    }
+    if (baseClass == MApplicationElement.class) {
+      switch (baseOperationID) {
+        default: return -1;
+      }
+    }
+    if (baseClass == MContribution.class) {
+      switch (baseOperationID) {
+        default: return -1;
+      }
+    }
+    if (baseClass == MUIElement.class) {
+      switch (baseOperationID) {
+        case UiPackageImpl.UI_ELEMENT___UPDATE_LOCALIZATION: return MPackage.CELL___UPDATE_LOCALIZATION;
+        default: return -1;
+      }
+    }
+    if (baseClass == MElementContainer.class) {
+      switch (baseOperationID) {
+        default: return -1;
+      }
+    }
+    if (baseClass == MHandlerContainer.class) {
+      switch (baseOperationID) {
+        default: return -1;
+      }
+    }
+    return super.eDerivedOperationID(baseOperationID, baseClass);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
   public Object eInvoke(int operationID, EList<?> arguments) throws InvocationTargetException {
     switch (operationID) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL___UPDATE_LOCALIZATION:
+      case MPackage.CELL___UPDATE_LOCALIZATION:
         updateLocalization();
         return null;
     }

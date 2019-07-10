@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import javafx.scene.input.Dragboard;
-import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.TransferDestination;
 import uk.co.saiman.eclipse.ui.TransferFormat;
 import uk.co.saiman.eclipse.ui.TransferMode;
@@ -52,7 +52,7 @@ import uk.co.saiman.eclipse.ui.fx.TransferModes;
 
 public class TransferCellInImpl implements TransferCellIn {
   private final TransferDestination position;
-  private final Cell adjacentItem;
+  private final MCell adjacentItem;
   private final Map<TransferMode, Optional<? extends TransferInImpl<?>>> dropCandidates;
 
   public TransferCellInImpl(
@@ -60,7 +60,7 @@ public class TransferCellInImpl implements TransferCellIn {
       Dragboard clipboard,
       ClipboardService clipboardService,
       TransferDestination position,
-      Cell adjacentItem) {
+      MCell adjacentItem) {
     this.position = position;
     this.adjacentItem = adjacentItem;
 

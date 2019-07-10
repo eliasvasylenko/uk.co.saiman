@@ -69,9 +69,9 @@ import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.emf.edit.provider.ViewerNotification;
-
-import uk.co.saiman.eclipse.model.ui.Factory;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MFactory;
+import uk.co.saiman.eclipse.model.ui.MPackage;
+import uk.co.saiman.eclipse.model.ui.MTree;
 
 /**
  * This is the item provider adapter for a {@link uk.co.saiman.eclipse.model.ui.Tree} object.
@@ -495,7 +495,7 @@ public class TreeItemProvider
          getResourceLocator(),
          getString("_UI_Tree_editable_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_Tree_editable_feature", "_UI_Tree_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.TREE__EDITABLE,
+         MPackage.Literals.TREE__EDITABLE,
          true,
          false,
          false,
@@ -557,7 +557,7 @@ public class TreeItemProvider
    */
   @Override
   public String getText(Object object) {
-    IEclipseContext labelValue = ((Tree)object).getContext();
+    IEclipseContext labelValue = ((MTree)object).getContext();
     String label = labelValue == null ? null : labelValue.toString();
     return label == null || label.length() == 0 ?
       getString("_UI_Tree_type") :
@@ -576,31 +576,31 @@ public class TreeItemProvider
   public void notifyChanged(Notification notification) {
     updateChildren(notification);
 
-    switch (notification.getFeatureID(Tree.class)) {
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__CONTEXT:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__VARIABLES:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__ELEMENT_ID:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__TAGS:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__CONTRIBUTOR_URI:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__TRANSIENT_DATA:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__CONTRIBUTION_URI:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__OBJECT:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__WIDGET:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__RENDERER:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__TO_BE_RENDERED:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__ON_TOP:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__VISIBLE:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__CONTAINER_DATA:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__ACCESSIBILITY_PHRASE:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__LOCALIZED_ACCESSIBILITY_PHRASE:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__EDITABLE:
+    switch (notification.getFeatureID(MTree.class)) {
+      case MPackage.TREE__CONTEXT:
+      case MPackage.TREE__VARIABLES:
+      case MPackage.TREE__ELEMENT_ID:
+      case MPackage.TREE__TAGS:
+      case MPackage.TREE__CONTRIBUTOR_URI:
+      case MPackage.TREE__TRANSIENT_DATA:
+      case MPackage.TREE__CONTRIBUTION_URI:
+      case MPackage.TREE__OBJECT:
+      case MPackage.TREE__WIDGET:
+      case MPackage.TREE__RENDERER:
+      case MPackage.TREE__TO_BE_RENDERED:
+      case MPackage.TREE__ON_TOP:
+      case MPackage.TREE__VISIBLE:
+      case MPackage.TREE__CONTAINER_DATA:
+      case MPackage.TREE__ACCESSIBILITY_PHRASE:
+      case MPackage.TREE__LOCALIZED_ACCESSIBILITY_PHRASE:
+      case MPackage.TREE__EDITABLE:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__PROPERTIES:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__PERSISTED_STATE:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__VISIBLE_WHEN:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__CHILDREN:
-      case uk.co.saiman.eclipse.model.ui.Package.TREE__HANDLERS:
+      case MPackage.TREE__PROPERTIES:
+      case MPackage.TREE__PERSISTED_STATE:
+      case MPackage.TREE__VISIBLE_WHEN:
+      case MPackage.TREE__CHILDREN:
+      case MPackage.TREE__HANDLERS:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
         return;
     }
@@ -641,22 +641,22 @@ public class TreeItemProvider
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createCell()));
+         MFactory.eINSTANCE.createCell()));
 
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createTree()));
+         MFactory.eINSTANCE.createTree()));
 
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createHandledCell()));
+         MFactory.eINSTANCE.createHandledCell()));
 
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createEditableCell()));
+         MFactory.eINSTANCE.createEditableCell()));
 
     newChildDescriptors.add
       (createChildParameter

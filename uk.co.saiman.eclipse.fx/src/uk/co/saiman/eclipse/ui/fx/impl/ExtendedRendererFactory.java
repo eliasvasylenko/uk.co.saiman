@@ -34,8 +34,8 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.fx.ui.workbench.base.rendering.ElementRenderer;
 import org.eclipse.fx.ui.workbench.renderers.fx.DefWorkbenchRendererFactory;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MTree;
 
 public class ExtendedRendererFactory extends DefWorkbenchRendererFactory {
   private ElementRenderer<?, ?> cellRenderer;
@@ -49,12 +49,12 @@ public class ExtendedRendererFactory extends DefWorkbenchRendererFactory {
   @SuppressWarnings("unchecked")
   @Override
   public <R extends ElementRenderer<?, ?>> R getRenderer(MUIElement modelObject) {
-    if (modelObject instanceof Cell) {
+    if (modelObject instanceof MCell) {
       if (this.cellRenderer == null) {
         this.cellRenderer = make(getCellRendererClass());
       }
       return (R) this.cellRenderer;
-    } else if (modelObject instanceof Tree) {
+    } else if (modelObject instanceof MTree) {
       if (this.treeRenderer == null) {
         this.treeRenderer = make(getTreeRendererClass());
       }

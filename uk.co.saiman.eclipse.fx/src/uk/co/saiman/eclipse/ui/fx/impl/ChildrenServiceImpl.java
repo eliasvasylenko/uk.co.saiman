@@ -52,18 +52,18 @@ import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MTree;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 
 public class ChildrenServiceImpl implements ChildrenService {
   private class Children {
     private class Child {
-      private final Cell cell;
+      private final MCell cell;
       private Object item;
 
       public Child(Object item) {
-        this.cell = (Cell) models.cloneSnippet(application, modelElementId, null);
+        this.cell = (MCell) models.cloneSnippet(application, modelElementId, null);
         if (this.cell == null) {
           throw new IllegalArgumentException("Child does not exist " + modelElementId);
         }
@@ -71,7 +71,7 @@ public class ChildrenServiceImpl implements ChildrenService {
         this.item = item;
       }
 
-      public Cell cell() {
+      public MCell cell() {
         return cell;
       }
 
@@ -102,11 +102,11 @@ public class ChildrenServiceImpl implements ChildrenService {
       return updateSingle != null || updatePlural != null;
     }
 
-    public java.util.Optional<Child> getChild(Cell cell) {
+    public java.util.Optional<Child> getChild(MCell cell) {
       return children.stream().filter(c -> c.cell() == cell).findAny();
     }
 
-    public Object getValue(Cell cell) {
+    public Object getValue(MCell cell) {
       return getChild(cell).map(Child::item).orElse(null);
     }
 
@@ -118,8 +118,8 @@ public class ChildrenServiceImpl implements ChildrenService {
        * 
        * 
        */
-      for (Iterator<Cell> i = parent().getChildren().iterator(); i.hasNext();) {
-        Cell cell = i.next();
+      for (Iterator<MCell> i = parent().getChildren().iterator(); i.hasNext();) {
+        MCell cell = i.next();
         if (cell.getElementId().equals(modelElementId)) {
           i.remove();
         }
@@ -136,7 +136,7 @@ public class ChildrenServiceImpl implements ChildrenService {
       }
     }
 
-    public boolean updateChild(Cell cell, Object value) {
+    public boolean updateChild(MCell cell, Object value) {
       if (!parent().getChildren().contains(cell)) {
         cell.setToBeRendered(false);
         return false;
@@ -198,17 +198,17 @@ public class ChildrenServiceImpl implements ChildrenService {
 
   @Inject
   @Optional
-  private Cell parentCell;
+  private MCell parentCell;
   @Inject
   @Optional
-  private Tree parentTree;
+  private MTree parentTree;
 
   private final Map<String, Children> children = new HashMap<>();
 
   @Inject
   public ChildrenServiceImpl() {}
 
-  private MElementContainer<Cell> parent() {
+  private MElementContainer<MCell> parent() {
     return parentCell != null ? parentCell : parentTree;
   }
 
@@ -256,7 +256,7 @@ public class ChildrenServiceImpl implements ChildrenService {
     }
   }
 
-  static void prepareChild(IEclipseContext context, Cell cell) {
+  static void prepareChild(IEclipseContext context, MCell cell) {
     IEclipseContext parentContext = ((MContext) cell.getParent()).getContext();
     ChildrenServiceImpl parentService = (ChildrenServiceImpl) parentContext
         .get(ChildrenService.class);
@@ -264,7 +264,7 @@ public class ChildrenServiceImpl implements ChildrenService {
     parentService.prepareChildImpl(context, cell);
   }
 
-  private void prepareChildImpl(IEclipseContext context, Cell cell) {
+  private void prepareChildImpl(IEclipseContext context, MCell cell) {
     String key = cell.getProperties().get(PRIMARY_CONTEXT_KEY);
     if (key == null)
       return;

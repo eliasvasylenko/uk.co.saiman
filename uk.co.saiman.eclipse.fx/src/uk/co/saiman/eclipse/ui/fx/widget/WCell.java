@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WPopupMenu;
 import org.eclipse.fx.ui.workbench.renderers.base.widget.WWidget;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.MCell;
 
 /**
  * Abstraction of cell widget
@@ -40,7 +40,7 @@ import uk.co.saiman.eclipse.model.ui.Cell;
  * @param <N>
  *          the native widget
  */
-public interface WCell<N> extends WWidget<Cell> {
+public interface WCell<N> extends WWidget<MCell> {
   void setIsEditingCallback(Consumer<Boolean> editingCallback);
 
   /**

@@ -4,7 +4,7 @@
     modelName="UISaiman" rootExtendsInterface="" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl.Container"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="8.0" copyrightFields="false"
     usedGenPackages="../../org.eclipse.e4.ui.model.workbench/model/UIElements.genmodel#//application"
-    operationReflection="true" importOrganizing="true">
+    interfaceNamePattern="M{0}" classNamePattern="" operationReflection="true" importOrganizing="true">
   <foreignModel>UISaiman.ecore</foreignModel>
   <genPackages prefix="" basePackage="uk.co.saiman.eclipse.model" disposableProviderFactory="true"
       ecorePackage="UISaiman.ecore#/">

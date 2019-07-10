@@ -31,7 +31,6 @@ package uk.co.saiman.eclipse.model.ui.util;
 
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.MContribution;
-
 import org.eclipse.e4.ui.model.application.commands.MHandlerContainer;
 import org.eclipse.e4.ui.model.application.ui.MContext;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
@@ -42,7 +41,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 
 import uk.co.saiman.eclipse.model.ui.*;
-import uk.co.saiman.eclipse.model.ui.Package;
 
 /**
  * <!-- begin-user-doc -->
@@ -54,7 +52,7 @@ import uk.co.saiman.eclipse.model.ui.Package;
  * until a non-null result is returned,
  * which is the result of the switch.
  * <!-- end-user-doc -->
- * @see uk.co.saiman.eclipse.model.ui.Package
+ * @see uk.co.saiman.eclipse.model.ui.MPackage
  * @generated
  */
 public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
@@ -64,7 +62,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * <!-- end-user-doc -->
    * @generated
    */
-  protected static Package modelPackage;
+  protected static MPackage modelPackage;
 
   /**
    * Creates an instance of the switch.
@@ -74,7 +72,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    */
   public Switch() {
     if (modelPackage == null) {
-      modelPackage = Package.eINSTANCE;
+      modelPackage = MPackage.eINSTANCE;
     }
   }
 
@@ -101,8 +99,8 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
   @Override
   protected T1 doSwitch(int classifierID, EObject theEObject) {
     switch (classifierID) {
-      case Package.CELL: {
-        Cell cell = (Cell)theEObject;
+      case MPackage.CELL: {
+        MCell cell = (MCell)theEObject;
         T1 result = caseCell(cell);
         if (result == null) result = caseUILabel(cell);
         if (result == null) result = caseContext(cell);
@@ -115,8 +113,8 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
-      case Package.TREE: {
-        Tree tree = (Tree)theEObject;
+      case MPackage.TREE: {
+        MTree tree = (MTree)theEObject;
         T1 result = caseTree(tree);
         if (result == null) result = caseContext(tree);
         if (result == null) result = caseContribution(tree);
@@ -128,8 +126,8 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
-      case Package.HANDLED_CELL: {
-        HandledCell handledCell = (HandledCell)theEObject;
+      case MPackage.HANDLED_CELL: {
+        MHandledCell handledCell = (MHandledCell)theEObject;
         T1 result = caseHandledCell(handledCell);
         if (result == null) result = caseCell(handledCell);
         if (result == null) result = caseUILabel(handledCell);
@@ -143,8 +141,8 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
-      case Package.EDITABLE_CELL: {
-        EditableCell editableCell = (EditableCell)theEObject;
+      case MPackage.EDITABLE_CELL: {
+        MEditableCell editableCell = (MEditableCell)theEObject;
         T1 result = caseEditableCell(editableCell);
         if (result == null) result = caseCell(editableCell);
         if (result == null) result = caseUILabel(editableCell);
@@ -173,7 +171,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T1 caseCell(Cell object) {
+  public T1 caseCell(MCell object) {
     return null;
   }
 
@@ -188,7 +186,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T1 caseTree(Tree object) {
+  public T1 caseTree(MTree object) {
     return null;
   }
 
@@ -203,7 +201,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T1 caseHandledCell(HandledCell object) {
+  public T1 caseHandledCell(MHandledCell object) {
     return null;
   }
 
@@ -218,7 +216,7 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T1 caseEditableCell(EditableCell object) {
+  public T1 caseEditableCell(MEditableCell object) {
     return null;
   }
 
@@ -255,6 +253,22 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
   }
 
   /**
+   * Returns the result of interpreting the object as an instance of '<em>Context</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Context</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @since 1.0
+   * @generated
+   */
+  public T1 caseContext(MContext object) {
+    return null;
+  }
+
+  /**
    * Returns the result of interpreting the object as an instance of '<em>Element</em>'.
    * <!-- begin-user-doc -->
    * This implementation returns null;
@@ -283,22 +297,6 @@ public class Switch<T1> extends org.eclipse.emf.ecore.util.Switch<T1> {
    * @generated
    */
   public T1 caseContribution(MContribution object) {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>Context</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Context</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @since 1.0
-   * @generated
-   */
-  public T1 caseContext(MContext object) {
     return null;
   }
 

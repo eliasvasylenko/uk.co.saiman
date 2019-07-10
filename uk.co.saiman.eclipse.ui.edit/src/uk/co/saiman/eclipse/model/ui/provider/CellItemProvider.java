@@ -68,11 +68,12 @@ import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.emf.edit.provider.ViewerNotification;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.Factory;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MFactory;
+import uk.co.saiman.eclipse.model.ui.MPackage;
 
 /**
- * This is the item provider adapter for a {@link uk.co.saiman.eclipse.model.ui.Cell} object.
+ * This is the item provider adapter for a {@link uk.co.saiman.eclipse.model.ui.MCell} object.
  * <!-- begin-user-doc -->
  * <!-- end-user-doc -->
  * @generated
@@ -612,7 +613,7 @@ public class CellItemProvider
          getResourceLocator(),
          getString("_UI_Cell_popupMenu_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_Cell_popupMenu_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__POPUP_MENU,
+         MPackage.Literals.CELL__POPUP_MENU,
          true,
          false,
          true,
@@ -634,7 +635,7 @@ public class CellItemProvider
          getResourceLocator(),
          getString("_UI_Cell_expanded_feature"),
          getString("_UI_PropertyDescriptor_description", "_UI_Cell_expanded_feature", "_UI_Cell_type"),
-         uk.co.saiman.eclipse.model.ui.Package.Literals.CELL__EXPANDED,
+         MPackage.Literals.CELL__EXPANDED,
          true,
          false,
          false,
@@ -696,7 +697,7 @@ public class CellItemProvider
    */
   @Override
   public String getText(Object object) {
-    String label = ((Cell)object).getLabel();
+    String label = ((MCell)object).getLabel();
     return label == null || label.length() == 0 ?
       getString("_UI_Cell_type") :
       getString("_UI_Cell_type") + " " + label;
@@ -714,36 +715,36 @@ public class CellItemProvider
   public void notifyChanged(Notification notification) {
     updateChildren(notification);
 
-    switch (notification.getFeatureID(Cell.class)) {
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LABEL:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ICON_URI:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TOOLTIP:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_LABEL:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_TOOLTIP:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTEXT:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VARIABLES:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ELEMENT_ID:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TAGS:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTOR_URI:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TRANSIENT_DATA:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTRIBUTION_URI:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__OBJECT:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__WIDGET:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__RENDERER:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__TO_BE_RENDERED:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ON_TOP:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CONTAINER_DATA:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__ACCESSIBILITY_PHRASE:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__EXPANDED:
+    switch (notification.getFeatureID(MCell.class)) {
+      case MPackage.CELL__LABEL:
+      case MPackage.CELL__ICON_URI:
+      case MPackage.CELL__TOOLTIP:
+      case MPackage.CELL__LOCALIZED_LABEL:
+      case MPackage.CELL__LOCALIZED_TOOLTIP:
+      case MPackage.CELL__CONTEXT:
+      case MPackage.CELL__VARIABLES:
+      case MPackage.CELL__ELEMENT_ID:
+      case MPackage.CELL__TAGS:
+      case MPackage.CELL__CONTRIBUTOR_URI:
+      case MPackage.CELL__TRANSIENT_DATA:
+      case MPackage.CELL__CONTRIBUTION_URI:
+      case MPackage.CELL__OBJECT:
+      case MPackage.CELL__WIDGET:
+      case MPackage.CELL__RENDERER:
+      case MPackage.CELL__TO_BE_RENDERED:
+      case MPackage.CELL__ON_TOP:
+      case MPackage.CELL__VISIBLE:
+      case MPackage.CELL__CONTAINER_DATA:
+      case MPackage.CELL__ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__LOCALIZED_ACCESSIBILITY_PHRASE:
+      case MPackage.CELL__EXPANDED:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
         return;
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PROPERTIES:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__PERSISTED_STATE:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__VISIBLE_WHEN:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__CHILDREN:
-      case uk.co.saiman.eclipse.model.ui.Package.CELL__HANDLERS:
+      case MPackage.CELL__PROPERTIES:
+      case MPackage.CELL__PERSISTED_STATE:
+      case MPackage.CELL__VISIBLE_WHEN:
+      case MPackage.CELL__CHILDREN:
+      case MPackage.CELL__HANDLERS:
         fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
         return;
     }
@@ -784,22 +785,22 @@ public class CellItemProvider
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createCell()));
+         MFactory.eINSTANCE.createCell()));
 
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createTree()));
+         MFactory.eINSTANCE.createTree()));
 
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createHandledCell()));
+         MFactory.eINSTANCE.createHandledCell()));
 
     newChildDescriptors.add
       (createChildParameter
         (UiPackageImpl.Literals.ELEMENT_CONTAINER__CHILDREN,
-         Factory.eINSTANCE.createEditableCell()));
+         MFactory.eINSTANCE.createEditableCell()));
 
     newChildDescriptors.add
       (createChildParameter

@@ -50,8 +50,8 @@ import javafx.scene.control.TreeView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.PickResult;
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MTree;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.TransferCellHandler;
 import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
@@ -60,13 +60,13 @@ import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 import uk.co.saiman.eclipse.ui.fx.widget.WTree;
 
 /**
- * default renderer for {@link Tree}
+ * default renderer for {@link MTree}
  */
-public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
-  public static class TreeImpl extends WWidgetImpl<TreeView<Cell>, Tree>
-      implements WTree<TreeView<Cell>> {
+public class DefTreeRenderer extends BaseTreeRenderer<TreeView<MCell>> {
+  public static class TreeImpl extends WWidgetImpl<TreeView<MCell>, MTree>
+      implements WTree<TreeView<MCell>> {
     @Inject
-    public TreeImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) Tree domElement) {
+    public TreeImpl(@Named(BaseRenderer.CONTEXT_DOM_ELEMENT) MTree domElement) {
       setDomElement(domElement);
     }
 
@@ -101,8 +101,8 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
     }
 
     @Override
-    protected TreeView<Cell> createWidget() {
-      TreeView<Cell> tree = new TreeView<>();
+    protected TreeView<MCell> createWidget() {
+      TreeView<MCell> tree = new TreeView<>();
 
       tree.setCellFactory(v -> new TreeCellImpl());
       tree.setRoot(new TreeItem<>(null));
@@ -114,7 +114,7 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
     }
 
     @Override
-    protected void setUserData(WWidgetImpl<TreeView<Cell>, Tree> widget) {
+    protected void setUserData(WWidgetImpl<TreeView<MCell>, MTree> widget) {
       getWidget().setUserData(widget);
     }
 
@@ -152,7 +152,7 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
     }
 
     public void onKeyReleased(KeyEvent event) {
-      TreeItem<Cell> selectedItem = getWidget().getSelectionModel().getSelectedItem();
+      TreeItem<MCell> selectedItem = getWidget().getSelectionModel().getSelectedItem();
 
       if (selectedItem == null)
         return;
@@ -197,7 +197,7 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
   }
 
   @Override
-  protected void initWidget(Tree tree, WTree<TreeView<Cell>> widget) {
+  protected void initWidget(MTree tree, WTree<TreeView<MCell>> widget) {
     super.initWidget(tree, widget);
 
     var treeView = widget.getWidget();
@@ -208,7 +208,7 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
     treeView.focusedProperty().addListener(c -> refreshFocus(tree, treeView));
   }
 
-  private static void refreshFocus(Tree tree, TreeView<Cell> treeView) {
+  private static void refreshFocus(MTree tree, TreeView<MCell> treeView) {
     MPart part = tree.getContext().get(MPart.class);
 
     if (part != null && treeView.isFocused()) {
@@ -234,7 +234,7 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
   }
 
   @Override
-  protected void doProcessContent(Tree element) {
+  protected void doProcessContent(MTree element) {
     element
         .getContext()
         .set(
@@ -244,7 +244,7 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<Cell>> {
   }
 
   @Override
-  protected Class<? extends WTree<TreeView<Cell>>> getWidgetClass(Tree element) {
+  protected Class<? extends WTree<TreeView<MCell>>> getWidgetClass(MTree element) {
     return TreeImpl.class;
   }
 }

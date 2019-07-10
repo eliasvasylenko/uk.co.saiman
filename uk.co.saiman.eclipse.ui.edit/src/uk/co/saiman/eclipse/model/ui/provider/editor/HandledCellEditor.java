@@ -146,7 +146,7 @@ public class HandledCellEditor extends CellEditor {
 
     list
         .add(
-            new VirtualEntry<MParameter>(
+            new VirtualEntry<Object,MParameter>(
                 ModelEditor.VIRTUAL_PARAMETERS,
                 HANDLED_ITEM__PARAMETERS,
                 element,

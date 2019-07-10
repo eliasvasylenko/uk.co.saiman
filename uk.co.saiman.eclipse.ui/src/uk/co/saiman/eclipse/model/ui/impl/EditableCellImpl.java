@@ -1,30 +1,3 @@
-/*
- * Copyright (C) 2019 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
- *          ______         ___      ___________
- *       ,'========\     ,'===\    /========== \
- *      /== \___/== \  ,'==.== \   \__/== \___\/
- *     /==_/____\__\/,'==__|== |     /==  /
- *     \========`. ,'========= |    /==  /
- *   ___`-___)== ,'== \____|== |   /==  /
- *  /== \__.-==,'==  ,'    |== '__/==  /_
- *  \======== /==  ,'      |== ========= \
- *   \_____\.-\__\/        \__\\________\/
- *
- * This file is part of uk.co.saiman.eclipse.ui.
- *
- * uk.co.saiman.eclipse.ui is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * uk.co.saiman.eclipse.ui is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 /**
  */
 package uk.co.saiman.eclipse.model.ui.impl;
@@ -35,7 +8,8 @@ import org.eclipse.emf.ecore.EClass;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
-import uk.co.saiman.eclipse.model.ui.EditableCell;
+import uk.co.saiman.eclipse.model.ui.MEditableCell;
+import uk.co.saiman.eclipse.model.ui.MPackage;
 
 /**
  * <!-- begin-user-doc -->
@@ -50,7 +24,7 @@ import uk.co.saiman.eclipse.model.ui.EditableCell;
  *
  * @generated
  */
-public class EditableCellImpl extends CellImpl implements EditableCell {
+public class EditableCellImpl extends CellImpl implements MEditableCell {
   /**
    * The default value of the '{@link #isEditing() <em>Editing</em>}' attribute.
    * <!-- begin-user-doc -->
@@ -87,7 +61,7 @@ public class EditableCellImpl extends CellImpl implements EditableCell {
    */
   @Override
   protected EClass eStaticClass() {
-    return uk.co.saiman.eclipse.model.ui.Package.Literals.EDITABLE_CELL;
+    return MPackage.Literals.EDITABLE_CELL;
   }
 
   /**
@@ -95,6 +69,7 @@ public class EditableCellImpl extends CellImpl implements EditableCell {
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public boolean isEditing() {
     return editing;
   }
@@ -104,11 +79,12 @@ public class EditableCellImpl extends CellImpl implements EditableCell {
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public void setEditing(boolean newEditing) {
     boolean oldEditing = editing;
     editing = newEditing;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, uk.co.saiman.eclipse.model.ui.Package.EDITABLE_CELL__EDITING, oldEditing, editing));
+      eNotify(new ENotificationImpl(this, Notification.SET, MPackage.EDITABLE_CELL__EDITING, oldEditing, editing));
   }
 
   /**
@@ -119,7 +95,7 @@ public class EditableCellImpl extends CellImpl implements EditableCell {
   @Override
   public Object eGet(int featureID, boolean resolve, boolean coreType) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.EDITABLE_CELL__EDITING:
+      case MPackage.EDITABLE_CELL__EDITING:
         return isEditing();
     }
     return super.eGet(featureID, resolve, coreType);
@@ -133,7 +109,7 @@ public class EditableCellImpl extends CellImpl implements EditableCell {
   @Override
   public void eSet(int featureID, Object newValue) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.EDITABLE_CELL__EDITING:
+      case MPackage.EDITABLE_CELL__EDITING:
         setEditing((Boolean)newValue);
         return;
     }
@@ -148,7 +124,7 @@ public class EditableCellImpl extends CellImpl implements EditableCell {
   @Override
   public void eUnset(int featureID) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.EDITABLE_CELL__EDITING:
+      case MPackage.EDITABLE_CELL__EDITING:
         setEditing(EDITING_EDEFAULT);
         return;
     }
@@ -163,7 +139,7 @@ public class EditableCellImpl extends CellImpl implements EditableCell {
   @Override
   public boolean eIsSet(int featureID) {
     switch (featureID) {
-      case uk.co.saiman.eclipse.model.ui.Package.EDITABLE_CELL__EDITING:
+      case MPackage.EDITABLE_CELL__EDITING:
         return editing != EDITING_EDEFAULT;
     }
     return super.eIsSet(featureID);

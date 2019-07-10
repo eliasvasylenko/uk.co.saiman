@@ -37,17 +37,17 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.fx.ui.workbench.renderers.base.BaseItemContainerRenderer;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MTree;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 import uk.co.saiman.eclipse.ui.fx.widget.WTree;
 
 /**
- * Base renderer of {@link Tree}
+ * Base renderer of {@link MTree}
  * 
  * @param <N> the native widget type
  */
-public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree, Cell, WTree<N>> {
+public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<MTree, MCell, WTree<N>> {
   @Override
   protected void do_init(IEventBroker broker) {
     registerEventListener(broker, UIEvents.UILabel.TOPIC_ICONURI);
@@ -60,7 +60,7 @@ public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree
   }
 
   @Override
-  protected void doProcessContent(Tree element) {
+  protected void doProcessContent(MTree element) {
     WTree<N> tree = getWidget(element);
 
     if (tree == null) {
@@ -80,7 +80,7 @@ public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree
     Object newCell = contributionFactory.create(element.getContributionURI(), element.getContext());
     element.setObject(newCell);
 
-    for (Cell child : element.getChildren()) {
+    for (MCell child : element.getChildren()) {
       if (child.isToBeRendered()) {
         Object widget = child.getWidget();
         if (widget == null) {
@@ -94,8 +94,8 @@ public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree
   }
 
   @Override
-  public void handleChildrenRemove(Tree parent, Collection<Cell> cells) {
-    for (Cell cell : cells) {
+  public void handleChildrenRemove(MTree parent, Collection<MCell> cells) {
+    for (MCell cell : cells) {
       if (cell.isToBeRendered() && cell.getWidget() != null) {
         hideChild(parent, cell);
       }
@@ -103,8 +103,8 @@ public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree
   }
 
   @Override
-  public void handleChildrenAddition(Tree parent, Collection<Cell> cells) {
-    for (Cell cell : cells) {
+  public void handleChildrenAddition(MTree parent, Collection<MCell> cells) {
+    for (MCell cell : cells) {
       if (cell.isToBeRendered()) {
         if (cell.getWidget() == null) {
           engineCreateWidget(cell);
@@ -116,7 +116,7 @@ public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree
   }
 
   @Override
-  public void do_childRendered(Tree parentElement, MUIElement element) {
+  public void do_childRendered(MTree parentElement, MUIElement element) {
     if (inContentProcessing(parentElement) || !isChildRenderedAndVisible(element)) {
       return;
     }
@@ -137,7 +137,7 @@ public abstract class BaseTreeRenderer<N> extends BaseItemContainerRenderer<Tree
   }
 
   @Override
-  public void do_hideChild(Tree container, MUIElement cell) {
+  public void do_hideChild(MTree container, MUIElement cell) {
     WTree<N> tree = getWidget(container);
 
     if (tree == null) {

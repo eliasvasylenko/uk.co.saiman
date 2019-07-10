@@ -29,15 +29,15 @@ package uk.co.saiman.eclipse.ui.fx;
 
 import javafx.scene.Parent;
 import javafx.scene.control.Control;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MTree;
 
 public interface TreeService {
   String TEXT_ID = "text";
   String SUPPLEMENTAL_TEXT_ID = "supplementalText";
 
-  Control createTree(Tree treeModel, Parent owner);
+  Control createTree(MTree treeModel, Parent owner);
 
   Control createTree(String treeModelId, Parent owner);
 
-  Tree getTree(String treeModelId);
+  MTree getTree(String treeModelId);
 }

@@ -10,7 +10,7 @@
       <!-- @generated UISaiman -->
       <package
             uri="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui"
-            class="uk.co.saiman.eclipse.model.ui.Package"
+            class="uk.co.saiman.eclipse.model.ui.MPackage"
             genModel="model/UISaiman.genmodel"/>
    </extension>
 

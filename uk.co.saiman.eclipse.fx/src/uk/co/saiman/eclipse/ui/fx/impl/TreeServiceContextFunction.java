@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.Component;
 import javafx.scene.Parent;
 import javafx.scene.control.Control;
 import javafx.scene.control.TreeView;
-import uk.co.saiman.eclipse.model.ui.Tree;
+import uk.co.saiman.eclipse.model.ui.MTree;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
 import uk.co.saiman.eclipse.ui.fx.widget.WTree;
 
@@ -71,8 +71,8 @@ public class TreeServiceContextFunction implements IContextFunction {
     private Bundle bundle;
 
     @Override
-    public Control createTree(Tree treeModel, Parent owner) {
-      Tree tree = (Tree) treeModel;
+    public Control createTree(MTree treeModel, Parent owner) {
+      MTree tree = (MTree) treeModel;
 
       modelService.hostElement(tree, window, owner, context);
 
@@ -86,8 +86,8 @@ public class TreeServiceContextFunction implements IContextFunction {
     }
 
     @Override
-    public Tree getTree(String treeModelId) {
-      return (Tree) modelService.cloneSnippet(application, treeModelId, window);
+    public MTree getTree(String treeModelId) {
+      return (MTree) modelService.cloneSnippet(application, treeModelId, window);
     }
   }
 

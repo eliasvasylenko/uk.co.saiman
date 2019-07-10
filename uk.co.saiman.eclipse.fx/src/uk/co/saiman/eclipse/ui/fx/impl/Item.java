@@ -34,12 +34,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.TransferFormat;
 
 public class Item<T> {
   private final ItemList<T> owner;
-  private final Cell model;
+  private final MCell model;
   private final T object;
   private final Optional<Consumer<? super T>> update;
 
@@ -78,7 +78,7 @@ public class Item<T> {
                         .collect(toList())));
   }
 
-  public Cell getModel() {
+  public MCell getModel() {
     return model;
   }
 

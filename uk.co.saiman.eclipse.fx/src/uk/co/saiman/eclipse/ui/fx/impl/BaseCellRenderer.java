@@ -42,16 +42,16 @@ import org.eclipse.fx.ui.workbench.renderers.base.widget.WPopupMenu;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 
 /**
- * Base renderer of {@link Cell}
+ * Base renderer of {@link MCell}
  * 
  * @param <N> the native widget type
  */
-public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell, Cell, WCell<N>> {
+public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<MCell, MCell, WCell<N>> {
   /**
    * Eventbroker to use
    */
@@ -84,7 +84,7 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
 
         if (parent.getRenderer() == this && UIEvents.isSET(event)) {
           handleSetPopupMenu(
-              (Cell) parent,
+              (MCell) parent,
               (MPopupMenu) event.getProperty(UIEvents.EventTags.NEW_VALUE));
         }
       }
@@ -94,7 +94,7 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
   }
 
   @Override
-  protected void doProcessContent(Cell element) {
+  protected void doProcessContent(MCell element) {
     WCell<N> cell = getWidget(element);
 
     if (cell == null) {
@@ -118,7 +118,7 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
       handleSetPopupMenu(element, element.getPopupMenu());
     }
 
-    for (Cell child : new ArrayList<>(element.getChildren())) {
+    for (MCell child : new ArrayList<>(element.getChildren())) {
       if (child.isToBeRendered()) {
         Object widget = child.getWidget();
         if (widget == null) {
@@ -132,8 +132,8 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
   }
 
   @Override
-  public void handleChildrenRemove(Cell parent, Collection<Cell> cells) {
-    for (Cell cell : cells) {
+  public void handleChildrenRemove(MCell parent, Collection<MCell> cells) {
+    for (MCell cell : cells) {
       if (cell.isToBeRendered() && cell.getWidget() != null) {
         hideChild(parent, cell);
       }
@@ -141,8 +141,8 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
   }
 
   @Override
-  public void handleChildrenAddition(Cell parent, Collection<Cell> cells) {
-    for (Cell cell : cells) {
+  public void handleChildrenAddition(MCell parent, Collection<MCell> cells) {
+    for (MCell cell : cells) {
       if (cell.isToBeRendered()) {
         if (cell.getWidget() == null) {
           engineCreateWidget(cell);
@@ -153,7 +153,7 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
     }
   }
 
-  public void handleSetPopupMenu(Cell parent, MPopupMenu property) {
+  public void handleSetPopupMenu(MCell parent, MPopupMenu property) {
     if (property == null) {
       return;
     }
@@ -166,7 +166,7 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
   }
 
   @Override
-  public void do_childRendered(Cell parentElement, MUIElement element) {
+  public void do_childRendered(MCell parentElement, MUIElement element) {
     if (inContentProcessing(parentElement) || !isChildRenderedAndVisible(element)) {
       return;
     }
@@ -187,14 +187,14 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<Cell
   }
 
   @Override
-  public void do_hideChild(Cell container, MUIElement child) {
+  public void do_hideChild(MCell container, MUIElement child) {
     WCell<N> cell = getWidget(container);
 
     if (cell == null) {
       return;
     }
 
-    if (child instanceof Cell) {
+    if (child instanceof MCell) {
       WCell<?> widget = (WCell<?>) child.getWidget();
       if (widget != null) {
         cell.removeCell(widget);

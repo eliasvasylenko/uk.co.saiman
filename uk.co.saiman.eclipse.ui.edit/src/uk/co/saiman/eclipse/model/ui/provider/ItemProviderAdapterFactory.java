@@ -99,7 +99,7 @@ public class ItemProviderAdapterFactory extends AdapterFactory implements Compos
   }
 
   /**
-   * This keeps track of the one adapter used for all {@link uk.co.saiman.eclipse.model.ui.Cell} instances.
+   * This keeps track of the one adapter used for all {@link uk.co.saiman.eclipse.model.ui.MCell} instances.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -107,7 +107,7 @@ public class ItemProviderAdapterFactory extends AdapterFactory implements Compos
   protected CellItemProvider cellItemProvider;
 
   /**
-   * This creates an adapter for a {@link uk.co.saiman.eclipse.model.ui.Cell}.
+   * This creates an adapter for a {@link uk.co.saiman.eclipse.model.ui.MCell}.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -168,7 +168,7 @@ public class ItemProviderAdapterFactory extends AdapterFactory implements Compos
   }
 
   /**
-   * This keeps track of the one adapter used for all {@link uk.co.saiman.eclipse.model.ui.EditableCell} instances.
+   * This keeps track of the one adapter used for all {@link uk.co.saiman.eclipse.model.ui.MEditableCell} instances.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -176,7 +176,7 @@ public class ItemProviderAdapterFactory extends AdapterFactory implements Compos
   protected EditableCellItemProvider editableCellItemProvider;
 
   /**
-   * This creates an adapter for a {@link uk.co.saiman.eclipse.model.ui.EditableCell}.
+   * This creates an adapter for a {@link uk.co.saiman.eclipse.model.ui.MEditableCell}.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated

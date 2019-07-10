@@ -34,7 +34,7 @@ import org.eclipse.e4.ui.internal.workbench.E4XMIResource;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.MCell;
 
 public class CellToStringConverter extends Converter {
   private final Supplier<String> none;
@@ -46,7 +46,7 @@ public class CellToStringConverter extends Converter {
 
   @Override
   public String convert(Object fromObject) {
-    final Cell cmd = (Cell) fromObject;
+    final MCell cmd = (MCell) fromObject;
     String elementId = null;
     if (cmd != null && cmd.getElementId() != null && cmd.getElementId().trim().length() > 0) {
       elementId = cmd.getElementId();

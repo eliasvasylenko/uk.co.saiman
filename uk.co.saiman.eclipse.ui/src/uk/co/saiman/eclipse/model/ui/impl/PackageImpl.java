@@ -1,54 +1,33 @@
-/*
- * Copyright (C) 2019 Scientific Analysis Instruments Limited <contact@saiman.co.uk>
- *          ______         ___      ___________
- *       ,'========\     ,'===\    /========== \
- *      /== \___/== \  ,'==.== \   \__/== \___\/
- *     /==_/____\__\/,'==__|== |     /==  /
- *     \========`. ,'========= |    /==  /
- *   ___`-___)== ,'== \____|== |   /==  /
- *  /== \__.-==,'==  ,'    |== '__/==  /_
- *  \======== /==  ,'      |== ========= \
- *   \_____\.-\__\/        \__\\________\/
- *
- * This file is part of uk.co.saiman.eclipse.ui.
- *
- * uk.co.saiman.eclipse.ui is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * uk.co.saiman.eclipse.ui is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 /**
  */
 package uk.co.saiman.eclipse.model.ui.impl;
 
 import org.eclipse.e4.ui.model.application.commands.impl.CommandsPackageImpl;
+
 import org.eclipse.e4.ui.model.application.impl.ApplicationPackageImpl;
 
 import org.eclipse.e4.ui.model.application.ui.impl.UiPackageImpl;
 
 import org.eclipse.e4.ui.model.application.ui.menu.impl.MenuPackageImpl;
+
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EPackage;
-
 import org.eclipse.emf.ecore.EReference;
+
 import org.eclipse.emf.ecore.impl.EPackageImpl;
+
 import uk.co.saiman.data.format.MediaType;
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.EditableCell;
-import uk.co.saiman.eclipse.model.ui.Factory;
-import uk.co.saiman.eclipse.model.ui.HandledCell;
-import uk.co.saiman.eclipse.model.ui.Tree;
+
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MEditableCell;
+import uk.co.saiman.eclipse.model.ui.MHandledCell;
+import uk.co.saiman.eclipse.model.ui.MFactory;
+import uk.co.saiman.eclipse.model.ui.MPackage;
+import uk.co.saiman.eclipse.model.ui.MTree;
+
 import uk.co.saiman.eclipse.ui.TransferFormat;
 
 /**
@@ -57,7 +36,7 @@ import uk.co.saiman.eclipse.ui.TransferFormat;
  * <!-- end-user-doc -->
  * @generated
  */
-public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.model.ui.Package {
+public class PackageImpl extends EPackageImpl implements MPackage {
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -111,12 +90,12 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @see org.eclipse.emf.ecore.EPackage.Registry
-   * @see uk.co.saiman.eclipse.model.ui.Package#eNS_URI
+   * @see uk.co.saiman.eclipse.model.ui.MPackage#eNS_URI
    * @see #init()
    * @generated
    */
   private PackageImpl() {
-    super(eNS_URI, Factory.eINSTANCE);
+    super(eNS_URI, MFactory.eINSTANCE);
   }
 
   /**
@@ -129,7 +108,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
   /**
    * Creates, registers, and initializes the <b>Package</b> for this model, and for any others upon which it depends.
    *
-   * <p>This method is used to initialize {@link uk.co.saiman.eclipse.model.ui.Package#eINSTANCE} when that field is accessed.
+   * <p>This method is used to initialize {@link MPackage#eINSTANCE} when that field is accessed.
    * Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -138,8 +117,8 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * @see #initializePackageContents()
    * @generated
    */
-  public static uk.co.saiman.eclipse.model.ui.Package init() {
-    if (isInited) return (uk.co.saiman.eclipse.model.ui.Package)EPackage.Registry.INSTANCE.getEPackage(uk.co.saiman.eclipse.model.ui.Package.eNS_URI);
+  public static MPackage init() {
+    if (isInited) return (MPackage)EPackage.Registry.INSTANCE.getEPackage(MPackage.eNS_URI);
 
     // Obtain or create and register package
     Object registeredPackage = EPackage.Registry.INSTANCE.get(eNS_URI);
@@ -160,7 +139,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
     thePackage.freeze();
 
     // Update the registry and return the package
-    EPackage.Registry.INSTANCE.put(uk.co.saiman.eclipse.model.ui.Package.eNS_URI, thePackage);
+    EPackage.Registry.INSTANCE.put(MPackage.eNS_URI, thePackage);
     return thePackage;
   }
 
@@ -169,6 +148,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EClass getCell() {
     return cellEClass;
   }
@@ -178,6 +158,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EReference getCell_PopupMenu() {
     return (EReference)cellEClass.getEStructuralFeatures().get(0);
   }
@@ -187,6 +168,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EAttribute getCell_Expanded() {
     return (EAttribute)cellEClass.getEStructuralFeatures().get(1);
   }
@@ -196,6 +178,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EClass getTree() {
     return treeEClass;
   }
@@ -205,6 +188,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EAttribute getTree_Editable() {
     return (EAttribute)treeEClass.getEStructuralFeatures().get(0);
   }
@@ -214,6 +198,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EClass getHandledCell() {
     return handledCellEClass;
   }
@@ -223,6 +208,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EReference getHandledCell_Command() {
     return (EReference)handledCellEClass.getEStructuralFeatures().get(0);
   }
@@ -230,8 +216,10 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
+   * @noreference
    * @generated
    */
+  @Override
   public EAttribute getHandledCell_WbCommand() {
     return (EAttribute)handledCellEClass.getEStructuralFeatures().get(1);
   }
@@ -241,6 +229,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EReference getHandledCell_Parameters() {
     return (EReference)handledCellEClass.getEStructuralFeatures().get(2);
   }
@@ -250,6 +239,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EClass getEditableCell() {
     return editableCellEClass;
   }
@@ -259,6 +249,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EAttribute getEditableCell_Editing() {
     return (EAttribute)editableCellEClass.getEStructuralFeatures().get(0);
   }
@@ -268,6 +259,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EDataType getMediaType() {
     return mediaTypeEDataType;
   }
@@ -277,6 +269,7 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
+  @Override
   public EDataType getTransferFormat() {
     return transferFormatEDataType;
   }
@@ -286,8 +279,9 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
    * <!-- end-user-doc -->
    * @generated
    */
-  public Factory getFactory() {
-    return (Factory)getEFactoryInstance();
+  @Override
+  public MFactory getFactory() {
+    return (MFactory)getEFactoryInstance();
   }
 
   /**
@@ -390,20 +384,20 @@ public class PackageImpl extends EPackageImpl implements uk.co.saiman.eclipse.mo
     editableCellEClass.getESuperTypes().add(this.getCell());
 
     // Initialize classes, features, and operations; add parameters
-    initEClass(cellEClass, Cell.class, "Cell", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEReference(getCell_PopupMenu(), theMenuPackage.getPopupMenu(), null, "popupMenu", null, 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getCell_Expanded(), ecorePackage.getEBoolean(), "expanded", "false", 0, 1, Cell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEClass(cellEClass, MCell.class, "Cell", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getCell_PopupMenu(), theMenuPackage.getPopupMenu(), null, "popupMenu", null, 0, 1, MCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getCell_Expanded(), ecorePackage.getEBoolean(), "expanded", "false", 0, 1, MCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
-    initEClass(treeEClass, Tree.class, "Tree", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getTree_Editable(), ecorePackage.getEBoolean(), "editable", null, 0, 1, Tree.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEClass(treeEClass, MTree.class, "Tree", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getTree_Editable(), ecorePackage.getEBoolean(), "editable", null, 0, 1, MTree.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
-    initEClass(handledCellEClass, HandledCell.class, "HandledCell", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEReference(getHandledCell_Command(), theCommandsPackage.getCommand(), null, "command", null, 0, 1, HandledCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getHandledCell_WbCommand(), theCommandsPackage.getParameterizedCommand(), "wbCommand", null, 0, 1, HandledCell.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getHandledCell_Parameters(), theCommandsPackage.getParameter(), null, "parameters", null, 0, -1, HandledCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEClass(handledCellEClass, MHandledCell.class, "HandledCell", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getHandledCell_Command(), theCommandsPackage.getCommand(), null, "command", null, 0, 1, MHandledCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getHandledCell_WbCommand(), theCommandsPackage.getParameterizedCommand(), "wbCommand", null, 0, 1, MHandledCell.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getHandledCell_Parameters(), theCommandsPackage.getParameter(), null, "parameters", null, 0, -1, MHandledCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
-    initEClass(editableCellEClass, EditableCell.class, "EditableCell", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getEditableCell_Editing(), ecorePackage.getEBoolean(), "editing", "false", 0, 1, EditableCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEClass(editableCellEClass, MEditableCell.class, "EditableCell", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getEditableCell_Editing(), ecorePackage.getEBoolean(), "editing", "false", 0, 1, MEditableCell.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     // Initialize data types
     initEDataType(mediaTypeEDataType, MediaType.class, "MediaType", IS_SERIALIZABLE, !IS_GENERATED_INSTANCE_CLASS);

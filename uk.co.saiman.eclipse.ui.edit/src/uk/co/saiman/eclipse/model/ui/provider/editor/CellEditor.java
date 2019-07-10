@@ -28,7 +28,7 @@
 package uk.co.saiman.eclipse.model.ui.provider.editor;
 
 import static org.eclipse.e4.tools.emf.ui.internal.common.ModelEditor.VIRTUAL_HANDLER;
-import static uk.co.saiman.eclipse.model.ui.Package.eINSTANCE;
+import static uk.co.saiman.eclipse.model.ui.MPackage.eINSTANCE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,8 +79,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
-import uk.co.saiman.eclipse.model.ui.Package;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.model.ui.MPackage;
 import uk.co.saiman.eclipse.model.ui.provider.editor.ListComponentManager.Type;
 
 public class CellEditor extends AbstractEditor {
@@ -97,8 +97,8 @@ public class CellEditor extends AbstractEditor {
       .list(CommandsPackageImpl.Literals.HANDLER_CONTAINER__HANDLERS);
 
   @SuppressWarnings("unchecked")
-  private static final IValueProperty<Cell, ?> POPUP_MENU = EMFProperties
-      .value(Package.eINSTANCE.getCell_PopupMenu());
+  private static final IValueProperty<MCell, ?> POPUP_MENU = EMFProperties
+      .value(MPackage.eINSTANCE.getCell_PopupMenu());
   private Button createRemovePopupMenu;
 
   private Action addExpression;
@@ -179,7 +179,7 @@ public class CellEditor extends AbstractEditor {
   @Override
   protected void refreshEditor() {
     if (createRemovePopupMenu != null) {
-      createRemovePopupMenu.setSelection(((Cell) getMaster().getValue()).getPopupMenu() != null);
+      createRemovePopupMenu.setSelection(((MCell) getMaster().getValue()).getPopupMenu() != null);
     }
   }
 
@@ -282,7 +282,7 @@ public class CellEditor extends AbstractEditor {
     createRemovePopupMenu.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        final Cell window = (Cell) getMaster().getValue();
+        final MCell window = (MCell) getMaster().getValue();
         if (window.getPopupMenu() != null) {
           removePopupMenu();
         } else {
@@ -323,7 +323,7 @@ public class CellEditor extends AbstractEditor {
   public List<Action> getActions(Object element) {
     List<Action> actions = new ArrayList<>(super.getActions(element));
     actions.addAll(childrenComponent.getActions());
-    if (((Cell) getMaster().getValue()).getVisibleWhen() == null) {
+    if (((MCell) getMaster().getValue()).getVisibleWhen() == null) {
       actions.add(addExpression);
     }
     return actions;
@@ -340,7 +340,7 @@ public class CellEditor extends AbstractEditor {
 
     list
         .add(
-            new VirtualEntry<Object>(
+            new VirtualEntry<Object,Object>(
                 VIRTUAL_HANDLER,
                 HANDLER_CONTAINER__HANDLERS,
                 element,
@@ -363,7 +363,7 @@ public class CellEditor extends AbstractEditor {
       }
     });
 
-    final Cell cell = (Cell) element;
+    final MCell cell = (MCell) element;
     if (cell.getPopupMenu() != null) {
       list.add(0, cell.getPopupMenu());
     }
@@ -383,8 +383,8 @@ public class CellEditor extends AbstractEditor {
       }
     });
 
-    if (((Cell) element).getVisibleWhen() != null) {
-      list.add(0, ((Cell) element).getVisibleWhen());
+    if (((MCell) element).getVisibleWhen() != null) {
+      list.add(0, ((MCell) element).getVisibleWhen());
     }
     UI_ELEMENT__VISIBLE_WHEN.observe(element).addValueChangeListener(event -> {
       if (event.diff.getOldValue() != null) {

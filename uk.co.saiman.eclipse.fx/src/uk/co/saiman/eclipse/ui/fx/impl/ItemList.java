@@ -40,34 +40,34 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.TransferFormat;
 
 public class ItemList<T> {
-  private final Cell model;
+  private final MCell model;
   private final List<Item<T>> items;
   private final Optional<Consumer<? super List<? extends T>>> update;
 
-  public ItemList(Cell model, T object) {
+  public ItemList(MCell model, T object) {
     this.model = requireNonNull(model);
     this.items = asList(new Item<>(this, object));
     this.update = Optional.empty();
   }
 
-  public ItemList(Cell model, T object, Consumer<? super T> update) {
+  public ItemList(MCell model, T object, Consumer<? super T> update) {
     this.model = requireNonNull(model);
     this.items = asList(new Item<>(this, object, update));
     this.update = Optional.empty();
   }
 
-  public ItemList(Cell model, List<? extends T> objects) {
+  public ItemList(MCell model, List<? extends T> objects) {
     this.model = requireNonNull(model);
     this.items = objects.stream().map(object -> new Item<>(this, object)).collect(toList());
     this.update = Optional.empty();
   }
 
   public ItemList(
-      Cell model,
+      MCell model,
       List<? extends T> objects,
       Consumer<? super List<? extends T>> update) {
     this.model = requireNonNull(model);
@@ -90,7 +90,7 @@ public class ItemList<T> {
     return update;
   }
 
-  public Cell getModelSnippet() {
+  public MCell getModelSnippet() {
     return model;
   }
 

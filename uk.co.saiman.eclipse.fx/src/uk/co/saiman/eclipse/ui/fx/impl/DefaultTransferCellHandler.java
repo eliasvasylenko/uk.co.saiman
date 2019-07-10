@@ -41,7 +41,7 @@ import javax.inject.Inject;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
-import uk.co.saiman.eclipse.model.ui.Cell;
+import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.TransferDestination;
 import uk.co.saiman.eclipse.ui.TransferMode;
 import uk.co.saiman.eclipse.ui.fx.TransferCellHandler;
@@ -53,7 +53,7 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
   public DefaultTransferCellHandler() {}
 
   @Override
-  public TransferCellOut transferOut(Cell cell) {
+  public TransferCellOut transferOut(MCell cell) {
     boolean nullable = isModifiable(
         cell.getContext(),
         cell.getProperties().get(PRIMARY_CONTEXT_KEY)) && cell.getTags().contains(NULLABLE);
@@ -86,7 +86,7 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
   }
 
   @Override
-  public TransferCellIn transferIn(Cell cell, Dragboard clipboard, TransferDestination position) {
+  public TransferCellIn transferIn(MCell cell, Dragboard clipboard, TransferDestination position) {
     if (position != TransferDestination.OVER) {
       return TransferCellIn.UNSUPPORTED;
     }
@@ -113,11 +113,11 @@ public class DefaultTransferCellHandler implements TransferCellHandler {
     };
   }
 
-  static ClipboardContent serialize(Cell cell) {
+  static ClipboardContent serialize(MCell cell) {
     return new ClipboardContent(); // TODO
   }
 
-  static Object deserialize(Cell cell, Clipboard content) {
+  static Object deserialize(MCell cell, Clipboard content) {
     return null; // TODO
   }
 }
