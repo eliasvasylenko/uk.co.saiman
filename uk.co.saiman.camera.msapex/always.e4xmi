@@ -6,15 +6,15 @@
     <elements xsi:type="commands:Command" xmi:id="_ctRyIIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.command.disconnect" commandName="Disconnect" description="Close the connection to the selected camera device" category="_VPhLoIGYEeeN2sgw5j4-sA"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_Wgay0IGYEeeN2sgw5j4-sA" featurename="handlers" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="commands:Handler" xmi:id="_Zj7nIIGYEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.nextdevice" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.msapex.camera.SelectNextCameraHandler" command="_b1CuIIGYEeeN2sgw5j4-sA"/>
-    <elements xsi:type="commands:Handler" xmi:id="_kVLXoIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.connect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.msapex.camera.ConnectCameraHandler" command="_WM8RoIGiEeeN2sgw5j4-sA"/>
-    <elements xsi:type="commands:Handler" xmi:id="_tXjXEIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.disconnect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.msapex.camera.DisconnectCameraHandler" command="_ctRyIIGiEeeN2sgw5j4-sA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_Zj7nIIGYEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.nextdevice" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.SelectNextCameraHandler" command="_b1CuIIGYEeeN2sgw5j4-sA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_kVLXoIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.connect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.ConnectCameraHandler" command="_WM8RoIGiEeeN2sgw5j4-sA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_tXjXEIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.disconnect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.DisconnectCameraHandler" command="_ctRyIIGiEeeN2sgw5j4-sA"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_9rgHsIGXEeeN2sgw5j4-sA" featurename="categories" parentElementId="uk.co.saiman.application">
     <elements xsi:type="commands:Category" xmi:id="_VPhLoIGYEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.category" name="Camera" description="Sample camera display"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_weARoLSaEeea0psSVURp7w" featurename="sharedElements" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.camera.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.camera/uk.co.saiman.msapex.camera.CameraPart" label="Camera" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/camera.png">
+    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.camera.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.camera/uk.co.saiman.camera.msapex.CameraPart" label="Camera" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/camera.png">
       <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.camera.toolbar">
         <children xsi:type="menu:HandledToolItem" xmi:id="_1m0ekIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handledtoolitem.connect" label="Connect" command="_WM8RoIGiEeeN2sgw5j4-sA">
@@ -25,7 +25,7 @@
         </children>
         <children xsi:type="menu:HandledToolItem" xmi:id="_QwtzIIGaEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handledtoolitem.devices" label="Devices" command="_b1CuIIGYEeeN2sgw5j4-sA">
           <menu xmi:id="_U7294IGaEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.menu.devices">
-            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_G1cDgIGfEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.dynamicmenucontribution.devices" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.msapex.camera.CameraDevicesMenu"/>
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_G1cDgIGfEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.dynamicmenucontribution.devices" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraDevicesMenu"/>
           </menu>
         </children>
       </toolbar>

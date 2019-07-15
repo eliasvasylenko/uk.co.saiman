@@ -13,7 +13,6 @@ Bundle-Description: \
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
-	org.eclipse.osgi.compatibility.state,\
 	org.eclipse.emf.common,\
 	org.eclipse.emf.ecore
 

@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import uk.co.saiman.eclipse.utilities.ContextBuffer;
+
 public class ContextBuffer {
   private final Map<String, Object> values = new HashMap<>();
 

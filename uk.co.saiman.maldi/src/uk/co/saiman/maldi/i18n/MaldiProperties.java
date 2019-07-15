@@ -27,8 +27,4 @@
  */
 package uk.co.saiman.maldi.i18n;
 
-import uk.co.saiman.properties.Localized;
-
-public interface MaldiProperties {
-  Localized<String> acquisitionDeviceName();
-}
+public interface MaldiProperties {}

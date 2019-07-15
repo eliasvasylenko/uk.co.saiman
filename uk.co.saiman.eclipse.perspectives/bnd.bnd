@@ -1,0 +1,22 @@
+Bundle-Name: SAI :: Eclipse :: Perspectives
+
+-include:\
+	${build}/include/eclipse.plugin.bnd
+
+-buildpath: \
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot
+
+Bundle-Description: \
+	Classes for working with perspectives in Eclipse e4 projects
+
+Export-Package: \
+	uk.co.saiman.eclipse.part.command,\
+	uk.co.saiman.eclipse.perspective,\
+	uk.co.saiman.eclipse.perspective.command,\
+	uk.co.saiman.eclipse.perspective.addon
+
+-includeresource: \
+	l10n

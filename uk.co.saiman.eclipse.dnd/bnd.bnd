@@ -1,0 +1,19 @@
+Bundle-Name: SAI :: Eclipse :: Drag and Drop
+
+-include:\
+	${build}/include/eclipse.plugin.bnd
+
+-buildpath: \
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.osgi;version=snapshot
+
+Bundle-Description: \
+	Classes for enhancing drag and drop in Eclipse e4 RCP workspaces
+
+Private-Package: \
+	uk.co.saiman.eclipse.draganddrop.addon
+
+-includeresource: \
+	l10n

@@ -25,5 +25,4 @@ Bundle-Name: SAI :: MSApex :: Camera
 
 Export-Package: \
 	uk.co.saiman.camera.msapex,\
-	uk.co.saiman.msapex.camera.i18n
-	
+	uk.co.saiman.camera.msapex.i18n

@@ -5,6 +5,6 @@
     <elements xsi:type="advanced:Placeholder" xmi:id="_biYMQLSaEeea0psSVURp7w" elementId="uk.co.saiman.camera.placeholder.camera" ref="_dpg34LSaEeea0psSVURp7w"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_np-ZwLSmEeea0psSVURp7w" featurename="addons" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="application:Addon" xmi:id="_pnB8ULSmEeea0psSVURp7w" elementId="uk.co.saiman.camera.addon" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.msapex.camera.CameraAddon"/>
+    <elements xsi:type="application:Addon" xmi:id="_pnB8ULSmEeea0psSVURp7w" elementId="uk.co.saiman.camera.addon" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraAddon"/>
   </fragments>
 </fragment:ModelFragments>

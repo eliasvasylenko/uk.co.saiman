@@ -35,6 +35,8 @@ import java.lang.annotation.Target;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 
+import uk.co.saiman.eclipse.localization.LocalizationSupplier;
+
 /**
  * Marks an {@link Inject} field as requiring an implementation of a
  * localisation text interface. The injection will typically be provided by

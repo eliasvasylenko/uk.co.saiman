@@ -42,6 +42,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.properties.PropertyLoaderException;
 

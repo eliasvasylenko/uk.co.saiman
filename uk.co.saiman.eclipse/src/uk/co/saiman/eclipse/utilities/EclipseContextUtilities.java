@@ -41,6 +41,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.contexts.RunAndTrack;
 
 import uk.co.saiman.collection.StreamUtilities;
+import uk.co.saiman.eclipse.utilities.ContextBuffer;
 
 /**
  * General utilities for dealing with {@link IEclipseContext eclipse contexts}

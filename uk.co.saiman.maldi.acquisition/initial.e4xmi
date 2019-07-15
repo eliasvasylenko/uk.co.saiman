@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_OcW2MHw8EeeOa_AYtsDDjA">
   <imports xsi:type="basic:Part" xmi:id="__i9HUJwNEemfBqNGW7FeDQ" elementId="uk.co.saiman.maldi.acquisition.part"/>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_CZE_4JwOEemfBqNGW7FeDQ" featurename="children" parentElementId="uk.co.saiman.partstack.status">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_CZE_4JwOEemfBqNGW7FeDQ" featurename="children" parentElementId="uk.co.saiman.maldi.partstack.status">
     <elements xsi:type="advanced:Placeholder" xmi:id="_IStswJwOEemfBqNGW7FeDQ" elementId="uk.co.saiman.maldi.acquisition.placeholder" ref="__i9HUJwNEemfBqNGW7FeDQ" closeable="true"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_7Ppz8JyuEemfBqNGW7FeDQ" featurename="addons" parentElementId="uk.co.saiman.application">

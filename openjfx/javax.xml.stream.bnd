@@ -1,6 +1,6 @@
 Bundle-Name: SAI :: FX :: javax.xml.stream
 
--includeresource: \
-	javax.xml.stream.jar=${repo;javax.xml.stream;latest}
+#-includeresource: \
+#	javax.xml.stream.jar=${repo;javax.xml.stream;latest}
 
 Java-Module: javax.xml.stream

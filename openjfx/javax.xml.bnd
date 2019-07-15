@@ -1,6 +1,6 @@
 Bundle-Name: SAI :: FX :: javax.xml
 
--includeresource: \
-	javax.xml.jar=${repo;javax.xml;latest}
+#-includeresource: \
+#	javax.xml.jar=${repo;javax.xml;latest}
 
 Java-Module: javax.xml

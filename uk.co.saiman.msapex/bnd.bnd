@@ -1,11 +1,12 @@
 Bundle-Name: SAI :: MSApex
 
-Export-Package:\
-	uk.co.saiman.msapex.model,\
-	uk.co.saiman.msapex.addons
-
 Private-Package:\
 	uk.co.saiman.msapex
+
+-buildpath:\
+	uk.co.saiman.eclipse.dnd;version=snapshot,\
+	uk.co.saiman.eclipse.perspectives;version=snapshot
+	
 
 Import-Package:\
 	uk.co.saiman.eclipse.,\
@@ -18,4 +19,5 @@ Import-Package:\
 	{Application.e4xmi},\
 	css=css,\
 	res,\
-	OSGI-INF/configurator=configurator
+	OSGI-INF/configurator=configurator,\
+	l10n

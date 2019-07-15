@@ -3,14 +3,14 @@
 
 ## Build path groups:
 -buildpath.eclipse.fx:\
-	org.eclipse.fx.core,\
-	org.eclipse.fx.core.di,\
-	org.eclipse.fx.ui.animation,\
-	org.eclipse.fx.ui.controls,\
-	org.eclipse.fx.ui.databinding,\
-	org.eclipse.fx.ui.di,\
-	org.eclipse.fx.ui.dialogs,\
-	org.eclipse.fx.ui.services,\
-	org.eclipse.fx.ui.theme,\
-	org.eclipse.fx.ui.workbench.renderers.base,\
-	org.eclipse.fx.ui.workbench.services
+	org.eclipse.fx.core;version=latest,\
+	org.eclipse.fx.core.di;version=latest,\
+	org.eclipse.fx.ui.animation;version=latest,\
+	org.eclipse.fx.ui.controls;version=latest,\
+	org.eclipse.fx.ui.databinding;version=latest,\
+	org.eclipse.fx.ui.di;version=latest,\
+	org.eclipse.fx.ui.dialogs;version=latest,\
+	org.eclipse.fx.ui.services;version=latest,\
+	org.eclipse.fx.ui.theme;version=latest,\
+	org.eclipse.fx.ui.workbench.renderers.base;version=latest,\
+	org.eclipse.fx.ui.workbench.services;version=latest

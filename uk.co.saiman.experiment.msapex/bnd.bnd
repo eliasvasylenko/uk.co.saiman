@@ -15,7 +15,6 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.eclipse.ui;version=snapshot,\
-	uk.co.saiman.eclipse.ui.edit;version=snapshot,\
 	uk.co.saiman.eclipse.fx;version=snapshot,\
 	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\

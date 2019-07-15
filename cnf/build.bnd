@@ -113,19 +113,21 @@ Bundle-Developers:\
 		pom					=	${build}/apache.xml; \
 		location			=	${build}/cache/apache.xml
 
--plugin.Eclipse:\
-	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"Eclipse_2019‑06";\
-		url					=	https://download.eclipse.org/releases/2019-06/
-		location			=	${build}/cache/eclipse-platform
-#		url					=	${fileuri;${build}/eclipse.platform.target};\
-#		targetPlatform		=	true
+#-plugin.Eclipse:\
+#	aQute.bnd.repository.p2.provider.P2Repository;\
+#		name				=	"Eclipse_2019‑03";\
+#		location			=	${build}/cache/eclipse-platform;\
+#		url					=	https://download.eclipse.org/releases/2019-03/
+##		targetPlatform		=	true;\
+##		url					=	${fileuri;${build}/eclipse.platform.target}
 
 -plugin.efxclipse:\
 	aQute.bnd.repository.p2.provider.P2Repository;\
 		name				=	"E(fx)clipse_Runtime_(3.5.0)";\
-		url					=	https://download.eclipse.org/efxclipse/runtime-released/3.5.0/site/;\
-		location			=	${build}/cache/eclipse-fx
+		location			=	${build}/cache/eclipse-fx;\
+		targetPlatform		=	true;\
+		url					=	${fileuri;${build}/efxclipse.target}
+#		url					=	https://download.eclipse.org/efxclipse/runtime-released/3.5.0/site/
 
 javafx.version: 12
 -plugin.javafx = \

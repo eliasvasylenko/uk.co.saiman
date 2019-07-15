@@ -45,6 +45,7 @@ import org.eclipse.e4.core.internal.contexts.ContextObjectSupplier;
 import org.eclipse.e4.core.internal.di.Requestor;
 import org.osgi.service.component.annotations.Deactivate;
 
+import uk.co.saiman.eclipse.utilities.TransformingNamedObjectSupplier;
 import uk.co.saiman.properties.PropertyLoader;
 
 /**

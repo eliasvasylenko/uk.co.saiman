@@ -3,33 +3,30 @@
 
 ## Build path groups:
 -buildpath.eclipse:\
-	javax.inject,\
-	org.eclipse.core.commands,\
-	org.eclipse.core.contenttype,\
-	org.eclipse.core.databinding,\
-	org.eclipse.core.databinding.observable,\
-	org.eclipse.core.databinding.property,\
-	org.eclipse.core.expressions,\
-	org.eclipse.core.runtime,\
-	org.eclipse.e4.core.di,\
-	org.eclipse.e4.core.di.annotations,\
-	org.eclipse.e4.core.di.extensions,\
-	org.eclipse.e4.core.services,\
-	org.eclipse.e4.ui.bindings,\
-	org.eclipse.e4.ui.di,\
-	org.eclipse.e4.ui.model.workbench,\
-	org.eclipse.e4.ui.services,\
-	org.eclipse.e4.ui.workbench,\
-	org.eclipse.e4.core.commands,\
-	org.eclipse.e4.core.contexts,\
-	org.eclipse.equinox.app,\
-	org.eclipse.equinox.common,\
-	org.eclipse.jdt.annotation,\
-	org.eclipse.jface,\
-	org.eclipse.osgi,\
-	org.eclipse.osgi.services,\
-	org.eclipse.ui.workbench,\
-	javax.annotation
+	javax.inject;version=latest,\
+	javax.annotation;version=latest,\
+	org.eclipse.core.commands;version=latest,\
+	org.eclipse.core.contenttype;version=latest,\
+	org.eclipse.core.databinding;version=latest,\
+	org.eclipse.core.databinding.observable;version=latest,\
+	org.eclipse.core.databinding.property;version=latest,\
+	org.eclipse.core.expressions;version=latest,\
+	org.eclipse.core.runtime;version=latest,\
+	org.eclipse.e4.core.di;version=latest,\
+	org.eclipse.e4.core.di.annotations;version=latest,\
+	org.eclipse.e4.core.di.extensions;version=latest,\
+	org.eclipse.e4.core.services;version=latest,\
+	org.eclipse.e4.ui.di;version=latest,\
+	org.eclipse.e4.ui.model.workbench;version=latest,\
+	org.eclipse.e4.ui.services;version=latest,\
+	org.eclipse.e4.ui.workbench;version=latest,\
+	org.eclipse.e4.core.commands;version=latest,\
+	org.eclipse.e4.core.contexts;version=latest,\
+	org.eclipse.equinox.app;version=latest,\
+	org.eclipse.equinox.common;version=latest,\
+	org.eclipse.jdt.annotation;version=latest,\
+	org.eclipse.osgi;version=latest,\
+	org.eclipse.osgi.services;version=latest
 
 Import-Package:\
 	*;ui.workbench=!;common=!;registry=!;texteditor=!;text=!

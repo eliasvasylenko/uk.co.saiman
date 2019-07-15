@@ -9,7 +9,8 @@ Export-Package: \
 
 -includeresource:\
 	initial.e4xmi,\
-	always.e4xmi
+	always.e4xmi,\
+	l10n
 
 -include:\
 	${build}/include/eclipse.plugin.bnd
