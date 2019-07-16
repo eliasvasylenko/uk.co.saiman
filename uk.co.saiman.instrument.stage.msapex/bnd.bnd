@@ -27,10 +27,8 @@ Bundle-Name: SAI :: MSApex :: Stage
 	javax.measure.unit-api
 
 Export-Package: \
-	uk.co.saiman.instrument.stage.msapex,\
-	uk.co.saiman.instrument.stage.msapex.i18n
+	uk.co.saiman.instrument.stage.msapex
 
 -includeresource: \
-	res,\
 	l10n,\
 	css=css

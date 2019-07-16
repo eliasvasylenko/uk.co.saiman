@@ -26,8 +26,7 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Sample
 	javax.measure.unit-api
 
 Export-Package: \
-	uk.co.saiman.experiment.sample.msapex,\
-	uk.co.saiman.experiment.sample.msapex.i18n
+	uk.co.saiman.experiment.sample.msapex
 
 -includeresource: \
 	always.e4xmi,\

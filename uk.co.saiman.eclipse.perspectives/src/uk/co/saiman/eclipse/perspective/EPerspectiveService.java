@@ -3,7 +3,8 @@ package uk.co.saiman.eclipse.perspective;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 
 public interface EPerspectiveService {
-  public static final String SNIPPET_PERSPETIVE_STACK = "PerspectiveStack";
+  public static final String PERSPECTIVE_SOURCE_SNIPPET = "PerspectiveSourceSnippet";
+  public static final String PERSPECTIVE_TARGET_STACK = "PerspectiveTargetStack";
 
   /*
    * TODO when we drag a part out of a perspective into a new window with the dnd

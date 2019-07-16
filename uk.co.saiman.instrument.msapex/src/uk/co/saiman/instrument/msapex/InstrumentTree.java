@@ -38,7 +38,7 @@ import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.msapex.DeviceCell;
 
 public class InstrumentTree {
-  public static final String ID = "uk.co.saiman.instrument.msapex.tree";
+  public static final String ID = "uk.co.saiman.instrument.tree";
 
   @Inject
   public void prepare(@Service List<Device<?>> data, ChildrenService children) {

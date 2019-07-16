@@ -26,6 +26,7 @@ Export-Package: \
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
 	uk.co.saiman.instrument.msapex;version=snapshot,\
 	javax.measure.unit-api

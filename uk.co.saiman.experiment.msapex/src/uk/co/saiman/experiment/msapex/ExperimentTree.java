@@ -41,7 +41,7 @@ import uk.co.saiman.experiment.msapex.workspace.event.AddExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.RemoveExperimentEvent;
 
 public class ExperimentTree {
-  public static final String ID = "uk.co.saiman.experiment.msapex.tree";
+  public static final String ID = "uk.co.saiman.experiment.tree";
 
   @Inject
   private Workspace workspace;

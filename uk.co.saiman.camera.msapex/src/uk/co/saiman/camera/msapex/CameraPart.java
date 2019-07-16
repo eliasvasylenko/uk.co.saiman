@@ -149,14 +149,16 @@ public class CameraPart {
     WritableImage image = new WritableImage(cameraImage.getWidth(), cameraImage.getHeight());
     for (int x = 0; x < cameraImage.getWidth(); x++) {
       for (int y = 0; y < cameraImage.getHeight(); y++) {
-        image.getPixelWriter().setColor(
-            x,
-            y,
-            new Color(
-                cameraImage.getRed(x, y),
-                cameraImage.getGreen(x, y),
-                cameraImage.getBlue(x, y),
-                1));
+        image
+            .getPixelWriter()
+            .setColor(
+                x,
+                y,
+                new Color(
+                    cameraImage.getRed(x, y),
+                    cameraImage.getGreen(x, y),
+                    cameraImage.getBlue(x, y),
+                    1));
       }
     }
     cameraView.setImage(image);

@@ -28,6 +28,5 @@ Export-Package: \
 
 -includeresource: \
 	always.e4xmi,\
-	res,\
 	l10n,\
 	css=css

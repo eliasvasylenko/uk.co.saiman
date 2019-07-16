@@ -26,10 +26,8 @@ Bundle-Name: SAI :: MSApex :: Vacuum
 	javax.measure.unit-api
 
 Export-Package: \
-	uk.co.saiman.instrument.vacuum.msapex,\
-	uk.co.saiman.instrument.vacuum.msapex.i18n
+	uk.co.saiman.instrument.vacuum.msapex
 
 -includeresource: \
-	res,\
 	l10n,\
 	css=css

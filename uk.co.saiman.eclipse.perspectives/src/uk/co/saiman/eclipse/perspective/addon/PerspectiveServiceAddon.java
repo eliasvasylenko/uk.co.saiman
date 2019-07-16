@@ -1,7 +1,8 @@
 package uk.co.saiman.eclipse.perspective.addon;
 
 import static org.eclipse.e4.ui.workbench.modeling.EModelService.ANYWHERE;
-import static uk.co.saiman.eclipse.perspective.EPerspectiveService.SNIPPET_PERSPETIVE_STACK;
+import static uk.co.saiman.eclipse.perspective.EPerspectiveService.PERSPECTIVE_SOURCE_SNIPPET;
+import static uk.co.saiman.eclipse.perspective.EPerspectiveService.PERSPECTIVE_TARGET_STACK;
 
 import java.util.Objects;
 
@@ -21,6 +22,8 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import uk.co.saiman.eclipse.perspective.EPerspectiveService;
 
 public class PerspectiveServiceAddon {
+  private static final String CLONE_SUFFIX = ".clone";
+
   @Inject
   IEclipseContext context;
 
@@ -44,8 +47,8 @@ public class PerspectiveServiceAddon {
 
     for (var perspectiveStack : perspectiveStacks) {
       MSnippetContainer snippets = getSnippetContainer(perspectiveStack);
-      if (snippets != null) {
 
+      if (snippets != null) {
         for (var snippet : snippets.getSnippets()) {
           if (snippet != null) {
             clonePerspectiveSnippet(
@@ -76,7 +79,11 @@ public class PerspectiveServiceAddon {
 
     var existingIndex = -1;
     for (int i = 0; i < perspectiveStack.getChildren().size(); i++) {
-      if (snippetId.equals(perspectiveStack.getChildren().get(i).getElementId())) {
+      var existingPerspective = perspectiveStack.getChildren().get(i);
+      if (Objects
+          .equals(
+              snippetId,
+              existingPerspective.getPersistedState().get(PERSPECTIVE_SOURCE_SNIPPET))) {
         existingIndex = i;
         break;
       }
@@ -86,33 +93,21 @@ public class PerspectiveServiceAddon {
       return;
     }
 
-    var snippet = snippets
-        .getSnippets()
-        .stream()
-        .filter(s -> s instanceof MPerspective)
-        .filter(s -> snippetId.equals(s.getElementId()))
-        .findFirst()
-        .orElse(null);
+    MPerspective perspective = (MPerspective) modelService
+        .cloneSnippet(snippets, snippetId, modelService.getTopLevelWindowFor(perspectiveStack));
+    perspective.getPersistedState().put(PERSPECTIVE_SOURCE_SNIPPET, snippetId);
+    perspective.setElementId(snippetId + CLONE_SUFFIX);
 
-    if (snippet == null
-        || !Objects
-            .equals(
-                perspectiveStack.getElementId(),
-                snippet.getPersistedState().get(SNIPPET_PERSPETIVE_STACK))) {
+    System.out.println(perspective.getPersistedState());
+    if (perspective == null || !Objects
+        .equals(
+            perspectiveStack.getElementId(),
+            perspective.getPersistedState().get(PERSPECTIVE_TARGET_STACK))) {
       return;
     }
 
-    boolean reselect = false;
-
-    MPerspective perspective = (MPerspective) modelService
-        .cloneSnippet(
-            snippets,
-            ((MPerspective) snippet).getElementId(),
-            modelService.getTopLevelWindowFor(perspectiveStack));
-    perspective.setElementId(perspective.getElementId() + ".clone");
-
     if (existingIndex >= 0) {
-      reselect = perspectiveStack
+      boolean reselect = perspectiveStack
           .getSelectedElement() == perspectiveStack.getChildren().get(existingIndex);
       perspectiveStack.getChildren().set(existingIndex, perspective);
       if (reselect) {

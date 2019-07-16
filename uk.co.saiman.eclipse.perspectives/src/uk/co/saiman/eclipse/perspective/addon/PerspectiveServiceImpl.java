@@ -54,12 +54,6 @@ public class PerspectiveServiceImpl implements EPerspectiveService {
     return perspectiveStack;
   }
 
-  @Override
-  public MPerspective findPerspective(String perspectiveId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   private MWindow getWindow() {
     var window = this.window;
 
@@ -89,21 +83,24 @@ public class PerspectiveServiceImpl implements EPerspectiveService {
   }
 
   @Override
+  public MPerspective findPerspective(String perspectiveId) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public void resetPerspective(MPerspective perspective) {
     if (perspective == null) {
       return;
     }
 
-    if (perspective.getPersistedState().containsKey(SNIPPET_PERSPETIVE_STACK)) {
+    String snippetId = perspective.getPersistedState().get(PERSPECTIVE_SOURCE_SNIPPET);
+
+    if (snippetId != null) {
       var perspectiveStack = PerspectiveServiceAddon.getPerspectiveStack(perspective);
       var snippetContainer = PerspectiveServiceAddon.getSnippetContainer(perspectiveStack);
       if (snippetContainer != null) {
-        clonePerspectiveSnippet(
-            modelService,
-            snippetContainer,
-            perspective.getElementId(),
-            perspectiveStack,
-            true);
+        clonePerspectiveSnippet(modelService, snippetContainer, snippetId, perspectiveStack, true);
       }
     }
   }

@@ -7,7 +7,7 @@
     <handlers xmi:id="_EZmQAKR7EemBg4t2i85bHQ" elementId="uk.co.saiman.handler.openpart" contributionURI="bundleclass://uk.co.saiman.eclipse.perspectives/uk.co.saiman.eclipse.part.command.OpenPartHandler" command="_9ozRoKR6EemBg4t2i85bHQ"/>
     <handlers xmi:id="_cBtqoKcJEemBg4t2i85bHQ" elementId="uk.co.saiman.handler.closepart" contributionURI="bundleclass://uk.co.saiman.eclipse.perspectives/uk.co.saiman.eclipse.part.command.ClosePartHandler" command="_GmWk0KbTEemBg4t2i85bHQ"/>
     <snippets xsi:type="advanced:Perspective" xmi:id="_E_ohIKMOEemXD8_BDWO00A" elementId="uk.co.saiman.perspective.analysis" selectedElement="_zQGSYKMPEemXD8_BDWO00A" label="%analysis.perspective.name">
-      <persistedState key="PerspectiveStack" value="uk.co.saiman.perspectivestack"/>
+      <persistedState key="PerspectiveTargetStack" value="uk.co.saiman.perspectivestack"/>
       <children xsi:type="basic:PartSashContainer" xmi:id="_zQGSYKMPEemXD8_BDWO00A" elementId="uk.co.saiman.analysis.partsashcontainer.root" horizontal="true">
         <children xsi:type="basic:PartStack" xmi:id="_1htvsKMPEemXD8_BDWO00A" elementId="uk.co.saiman.analysis.partstack.overview" containerData="0.22"/>
         <children xsi:type="basic:PartStack" xmi:id="_5MTLEKMPEemXD8_BDWO00A" elementId="uk.co.saiman.analysis.partstack.editor" containerData="0.78">

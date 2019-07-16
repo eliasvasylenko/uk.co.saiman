@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_gYH_sELjEeiiI42mgJDa-A">
   <imports xsi:type="basic:Part" xmi:id="_E2FqMELnEeiiI42mgJDa-A" elementId="uk.co.saiman.instrument.part"/>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jO7NsELjEeiiI42mgJDa-A" featurename="children" parentElementId="uk.co.saiman.partstack.overview">
-    <elements xsi:type="advanced:Placeholder" xmi:id="_UvfBQELmEeiiI42mgJDa-A" elementId="uk.co.saiman.instrument.placeholder.0" ref="_E2FqMELnEeiiI42mgJDa-A"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jO7NsELjEeiiI42mgJDa-A" featurename="children" parentElementId="uk.co.saiman.analysis.partstack.overview">
+    <elements xsi:type="advanced:Placeholder" xmi:id="_UvfBQELmEeiiI42mgJDa-A" elementId="uk.co.saiman.instrument.placeholder" ref="_E2FqMELnEeiiI42mgJDa-A"/>
   </fragments>
 </fragment:ModelFragments>
