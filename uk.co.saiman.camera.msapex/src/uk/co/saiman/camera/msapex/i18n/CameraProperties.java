@@ -30,11 +30,7 @@ package uk.co.saiman.camera.msapex.i18n;
 import uk.co.saiman.properties.Localized;
 
 public interface CameraProperties {
-  Localized<String> cameraDevice();
-
   Localized<String> noCameraDevices();
 
   Localized<String> noCameraConnection();
-
-  Localized<String> simulatedCameraName(String qualifier);
 }

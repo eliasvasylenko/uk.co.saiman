@@ -5,10 +5,10 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.GridPane?>
-<?import uk.co.saiman.msapex.chemistry.ChemicalElementTile?>
+<?import uk.co.saiman.chemistry.msapex.ChemicalElementTile?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
-<?import uk.co.saiman.msapex.chemistry.PeriodicTableController?>
+<?import uk.co.saiman.chemistry.msapex.PeriodicTableController?>
 
 <BorderPane
 	xmlns="http://javafx.com/javafx/8"

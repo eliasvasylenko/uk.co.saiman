@@ -5,7 +5,7 @@ Bundle-Name: SAI :: MSApex :: Camera
 
 -buildpath:\
 	uk.co.saiman.camera;version=snapshot,\
-\
+	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.eclipse.fx;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
@@ -13,7 +13,6 @@ Bundle-Name: SAI :: MSApex :: Camera
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
-\
 	com.github.sarxos.webcam-capture
 
 -includeresource:\

@@ -23,7 +23,6 @@ import uk.co.saiman.eclipse.perspective.EPerspectiveService;
 import uk.co.saiman.eclipse.perspective.IPerspectiveContainer;
 
 public class OpenPartHandler {
-
   @Inject
   EPerspectiveService perspectiveService;
   @Inject

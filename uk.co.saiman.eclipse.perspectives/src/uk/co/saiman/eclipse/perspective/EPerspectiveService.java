@@ -19,7 +19,7 @@ public interface EPerspectiveService {
 
   MPerspective findPerspective(String perspectiveId);
 
-  void activatePerspective(MPerspective perspective);
-
   void resetPerspective(MPerspective perspective);
+
+  void activatePerspective(MPerspective perspective);
 }

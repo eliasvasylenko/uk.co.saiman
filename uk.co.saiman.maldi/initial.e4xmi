@@ -3,6 +3,7 @@
   <imports xsi:type="basic:Part" xmi:id="_61GEwKe4EemTTscWD7NgZg" elementId="uk.co.saiman.experiment.part"/>
   <imports xsi:type="basic:Part" xmi:id="_M4GXMKe5EemTTscWD7NgZg" elementId="uk.co.saiman.instrument.part"/>
   <imports xsi:type="basic:Part" xmi:id="_5W5FwKfWEemwIbmU0Ng0Kw" elementId="uk.co.saiman.camera.part"/>
+  <imports xsi:type="basic:Part" xmi:id="_CUdcQKhcEem7gZS_CxGklA" elementId="uk.co.saiman.chemistry.part.periodictable"/>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_c7a3kKLcEemxZsBnDcR9jA" featurename="snippets" parentElementId="uk.co.saiman.trimmedwindow">
     <elements xsi:type="advanced:Perspective" xmi:id="_huvcoKLcEemxZsBnDcR9jA" elementId="uk.co.saiman.perspective.maldi" selectedElement="_huvcoaLcEemxZsBnDcR9jA" label="%maldi.perspective.name">
       <persistedState key="PerspectiveTargetStack" value="uk.co.saiman.perspectivestack"/>
@@ -19,6 +20,7 @@
           <children xsi:type="basic:PartStack" xmi:id="_huvcpaLcEemxZsBnDcR9jA" elementId="uk.co.saiman.maldi.partstack.status" containerData="0.5">
             <tags>DefaultPartPlaceholderContainer</tags>
             <children xsi:type="advanced:Placeholder" xmi:id="__lUW4KfWEemwIbmU0Ng0Kw" elementId="uk.co.saiman.maldi.placeholder.camera" ref="_5W5FwKfWEemwIbmU0Ng0Kw" closeable="true"/>
+            <children xsi:type="advanced:Placeholder" xmi:id="__yzX0KhbEem7gZS_CxGklA" elementId="uk.co.saiman.maldi.placeholder.periodictable" ref="_CUdcQKhcEem7gZS_CxGklA" closeable="true"/>
           </children>
         </children>
       </children>

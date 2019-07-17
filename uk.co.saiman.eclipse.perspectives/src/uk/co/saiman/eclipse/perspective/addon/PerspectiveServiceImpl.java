@@ -47,21 +47,13 @@ public class PerspectiveServiceImpl implements EPerspectiveService {
     var perspectiveStack = this.perspectiveStack;
 
     if (perspectiveStack == null) {
-      perspectiveStack = PerspectiveServiceAddon
-          .getPerspectiveStack(modelService.getActivePerspective(getWindow()));
+      var activePart = partService.getActivePart();
+      var activePerspective = modelService.getPerspectiveFor(activePart);
+
+      perspectiveStack = PerspectiveServiceAddon.getPerspectiveStack(activePerspective);
     }
 
     return perspectiveStack;
-  }
-
-  private MWindow getWindow() {
-    var window = this.window;
-
-    if (window == null) {
-      window = application.getSelectedElement();
-    }
-
-    return window;
   }
 
   @Override
@@ -84,8 +76,20 @@ public class PerspectiveServiceImpl implements EPerspectiveService {
 
   @Override
   public MPerspective findPerspective(String perspectiveId) {
-    // TODO Auto-generated method stub
-    return null;
+    var perspectives = modelService
+        .findElements(application, perspectiveId, MPerspective.class, List.of());
+
+    if (perspectives.isEmpty()) {
+      return null;
+    }
+
+    var perspective = perspectives.get(0);
+
+    if (perspective == null) {
+      return null;
+    }
+
+    return perspective;
   }
 
   @Override

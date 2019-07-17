@@ -47,15 +47,24 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.e4.core.contexts.Active;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.di.extensions.OSGiBundle;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MAddon;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.UIEvents.EventTags;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.fx.core.di.Service;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
 
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.graph.ExperimentId;
@@ -70,6 +79,7 @@ import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.osgi.ServiceIndex;
 
 /**
  * Addon for registering an experiment workspace in the root application
@@ -109,6 +119,8 @@ public class ExperimentAddon {
   private FileSystemStore workspaceStore;
   private ServiceRegistration<?> workspaceStoreRegsitration;
 
+  private ServiceIndex<Environment, String, Environment> environments;
+
   @PostConstruct
   void initialize(@Named(INSTANCE_LOCATION) Location instanceLocation) throws URISyntaxException {
     try {
@@ -118,6 +130,8 @@ public class ExperimentAddon {
 
       initializeAdapters();
       initializeEvents();
+
+      environments = ServiceIndex.open(bundleContext, Environment.class);
     } catch (Exception e) {
       log.log(Level.ERROR, e);
       throw e;
@@ -205,6 +219,9 @@ public class ExperimentAddon {
     if (experimentNodeAdapterFactory != null) {
       experimentNodeAdapterFactory.unregister();
     }
+    if (environments != null) {
+      environments.close();
+    }
   }
 
   private void initializeAdapters() {
@@ -232,5 +249,46 @@ public class ExperimentAddon {
 
       log.log(INFO, workspaceEvent.toString());
     });
+  }
+
+  @Inject
+  @Optional
+  public void partActivated(@Active MPart part, EModelService modelService) {
+    /*
+     * When a new perspective is activated, set the perspective's environment on the
+     * root window.
+     */
+    var perspective = modelService.getPerspectiveFor(part);
+    var window = modelService.getTopLevelWindowFor(perspective);
+    window.getContext().set(Environment.class, perspective.getContext().get(Environment.class));
+  }
+
+  @Inject
+  @Optional
+  public void perspectiveCreated(@UIEventTopic(UIEvents.UIElement.TOPIC_TOBERENDERED) Event event) {
+    /*
+     * When a new perspective is created, associate it with an experiment
+     * environment.
+     * 
+     * TODO We will put an experiment environment service id property in the
+     * persisted state of each perspective of which to select an environment.
+     * 
+     * TODO it might make sense to promote the "analysis" perspective from the root
+     * msapex project to the experiment project, since doing otherwise creates a
+     * hidden coupling between the two projects (by way of this property). Besides,
+     * analysis is really a type of experiment anyway so it only makes sense to
+     * define it here.
+     */
+
+    Object element = event.getProperty(EventTags.ELEMENT);
+    if (!(element instanceof MPerspective)) {
+      return;
+    }
+
+    MPerspective perspective = (MPerspective) element;
+
+    System.out.println("Perspective created: " + perspective.getLabel());
+
+    throw new UnsupportedOperationException();
   }
 }

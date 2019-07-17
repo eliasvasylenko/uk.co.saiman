@@ -4,18 +4,18 @@
     <elements xsi:type="commands:Command" xmi:id="_T7Fl0IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.command.periodictable.resize" commandName="Periodic Table Resize" description="Resize the periodic table" category="_dUNRUIDIEeeN2sgw5j4-sA"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_YPrngIDIEeeN2sgw5j4-sA" featurename="handlers" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="commands:Handler" xmi:id="_anNfkIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.handler.periodictable.resize" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTableResize" command="_T7Fl0IDIEeeN2sgw5j4-sA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_anNfkIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.handler.periodictable.resize" contributionURI="bundleclass://uk.co.saiman.chemistry.msapex/uk.co.saiman.chemistry.msapex.PeriodicTableResize" command="_T7Fl0IDIEeeN2sgw5j4-sA"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_b0r_UIDIEeeN2sgw5j4-sA" featurename="categories" parentElementId="uk.co.saiman.application">
     <elements xsi:type="commands:Category" xmi:id="_dUNRUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.category" name="Chemistry" description="Chemical inspection"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_48rEgLRBEeeVS6ywMXk18Q" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
-    <elements xsi:type="basic:Part" xmi:id="_H6hW8IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.part.periodictable" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTablePart" label="Periodic Table" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/application-table.png">
+    <elements xsi:type="basic:Part" xmi:id="_H6hW8IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.part.periodictable" contributionURI="bundleclass://uk.co.saiman.chemistry.msapex/uk.co.saiman.chemistry.msapex.PeriodicTablePart" label="Periodic Table" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/application-table.png">
       <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_N0O8UIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.toolbar.periodictable">
         <children xsi:type="menu:HandledToolItem" xmi:id="_rjdlUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.handledtoolitem.periodictable.size" label="Size" command="_T7Fl0IDIEeeN2sgw5j4-sA">
           <menu xmi:id="__zPRUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.menu.periodictable.sizes">
-            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_EGpnQIDJEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.dynamicmenucontribution.sizes" contributionURI="bundleclass://uk.co.saiman.msapex.chemistry/uk.co.saiman.msapex.chemistry.PeriodicTableResize"/>
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_EGpnQIDJEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.dynamicmenucontribution.sizes" contributionURI="bundleclass://uk.co.saiman.chemistry.msapex/uk.co.saiman.chemistry.msapex.PeriodicTableResize"/>
           </menu>
         </children>
       </toolbar>

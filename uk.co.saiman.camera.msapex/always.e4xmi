@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:ui="http://www.eclipse.org/ui/2010/UIModel/application/ui" xmi:id="_vaQRoHl8EeWeCa5uXT_XfA">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_aZ0tUIGYEeeN2sgw5j4-sA" featurename="commands" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="commands:Command" xmi:id="_b1CuIIGYEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.command.nextdevice" commandName="Next Device" description="Select the next camera device in the available list" category="_VPhLoIGYEeeN2sgw5j4-sA"/>
-    <elements xsi:type="commands:Command" xmi:id="_WM8RoIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.command.connect" commandName="Connect" description="Open a connection to the selected camera device" category="_VPhLoIGYEeeN2sgw5j4-sA"/>
-    <elements xsi:type="commands:Command" xmi:id="_ctRyIIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.command.disconnect" commandName="Disconnect" description="Close the connection to the selected camera device" category="_VPhLoIGYEeeN2sgw5j4-sA"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:ui="http://www.eclipse.org/ui/2010/UIModel/application/ui" xmi:id="_bwxGQKhWEem7gZS_CxGklA">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_CZ5IIKhXEem7gZS_CxGklA" featurename="commands" parentElementId="uk.co.saiman.application">
+    <elements xsi:type="commands:Command" xmi:id="_FAhzMKhXEem7gZS_CxGklA" elementId="uk.co.saiman.camera.command.nextdevice" commandName="Next Device" description="Select the next camera device in the available list" category="_PvyyQKhXEem7gZS_CxGklA"/>
+    <elements xsi:type="commands:Command" xmi:id="_FOtZIKhXEem7gZS_CxGklA" elementId="uk.co.saiman.camera.command.connect" commandName="Connect" description="Open a connection to the selected camera device" category="_PvyyQKhXEem7gZS_CxGklA"/>
+    <elements xsi:type="commands:Command" xmi:id="_Fh9FQKhXEem7gZS_CxGklA" elementId="uk.co.saiman.camera.command.disconnect" commandName="Disconnect" description="Close the connection to the selected camera device" category="_PvyyQKhXEem7gZS_CxGklA"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_Wgay0IGYEeeN2sgw5j4-sA" featurename="handlers" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="commands:Handler" xmi:id="_Zj7nIIGYEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.nextdevice" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.SelectNextCameraHandler" command="_b1CuIIGYEeeN2sgw5j4-sA"/>
-    <elements xsi:type="commands:Handler" xmi:id="_kVLXoIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.connect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.ConnectCameraHandler" command="_WM8RoIGiEeeN2sgw5j4-sA"/>
-    <elements xsi:type="commands:Handler" xmi:id="_tXjXEIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handler.disconnect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.DisconnectCameraHandler" command="_ctRyIIGiEeeN2sgw5j4-sA"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_NEd0cKhXEem7gZS_CxGklA" featurename="categories" parentElementId="uk.co.saiman.application">
+    <elements xsi:type="commands:Category" xmi:id="_PvyyQKhXEem7gZS_CxGklA" elementId="uk.co.saiman.camera.category" name="Camera" description="Camera display"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_9rgHsIGXEeeN2sgw5j4-sA" featurename="categories" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="commands:Category" xmi:id="_VPhLoIGYEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.category" name="Camera" description="Sample camera display"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_YAmx4KhXEem7gZS_CxGklA" featurename="handlers" parentElementId="uk.co.saiman.application">
+    <elements xsi:type="commands:Handler" xmi:id="_amiSUKhXEem7gZS_CxGklA" elementId="uk.co.saiman.camera.handler.nextdevice" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.SelectNextCameraHandler" command="_FAhzMKhXEem7gZS_CxGklA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_a1NAcKhXEem7gZS_CxGklA" elementId="uk.co.saiman.camera.handler.connect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.ConnectCameraHandler" command="_FOtZIKhXEem7gZS_CxGklA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_bAitwKhXEem7gZS_CxGklA" elementId="uk.co.saiman.camera.handler.disconnect" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.DisconnectCameraHandler" command="_Fh9FQKhXEem7gZS_CxGklA"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_weARoLSaEeea0psSVURp7w" featurename="sharedElements" parentElementId="uk.co.saiman.application">
-    <elements xsi:type="basic:Part" xmi:id="_362u0Hl-EeWeCa5uXT_XfA" elementId="uk.co.saiman.camera.part" containerData="" contributionURI="bundleclass://uk.co.saiman.msapex.camera/uk.co.saiman.camera.msapex.CameraPart" label="Camera" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/camera.png">
-      <tags>Part-Toolbar-FullSpan</tags>
-      <toolbar xmi:id="_ioUyEHmOEeWeCa5uXT_XfA" elementId="uk.co.saiman.camera.toolbar">
-        <children xsi:type="menu:HandledToolItem" xmi:id="_1m0ekIGiEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handledtoolitem.connect" label="Connect" command="_WM8RoIGiEeeN2sgw5j4-sA">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_4aIBwIGkEeeN2sgw5j4-sA" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.msapex.camera.CameraDisconnectedExpression" tracking="true"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_UCN0QKhYEem7gZS_CxGklA" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
+    <elements xsi:type="basic:Part" xmi:id="_ZISWMKhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.part" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraPart" label="%camera" closeable="true">
+      <toolbar xmi:id="_mzVw8KhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.toolbar">
+        <children xsi:type="menu:HandledToolItem" xmi:id="_orflYKhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.handledtoolitem.cameradisconnect" label="%camera.disconnect" command="_Fh9FQKhXEem7gZS_CxGklA">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_rEHpoKhYEem7gZS_CxGklA" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraConnectedExpression"/>
         </children>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_-AoXQIGkEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handledtoolitem.disconnect" label="Disconnect" command="_ctRyIIGiEeeN2sgw5j4-sA">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_AjzeoIGlEeeN2sgw5j4-sA" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.msapex.camera.CameraConnectedExpression" tracking="true"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_qlt2YKhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.handledtoolitem.cameraconnect" label="%camera.connect" command="_FOtZIKhXEem7gZS_CxGklA">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_8jgRoKhYEem7gZS_CxGklA" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraDisconnectedExpression"/>
         </children>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_QwtzIIGaEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.handledtoolitem.devices" label="Devices" command="_b1CuIIGYEeeN2sgw5j4-sA">
-          <menu xmi:id="_U7294IGaEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.menu.devices">
-            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_G1cDgIGfEeeN2sgw5j4-sA" elementId="uk.co.saiman.camera.dynamicmenucontribution.devices" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraDevicesMenu"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_7J1I8KhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.handledtoolitem.cameradevice" label="%camera.devices" command="_FAhzMKhXEem7gZS_CxGklA">
+          <menu xmi:id="_7a5DwKhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.menu.devices" label="">
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_NobyQKhZEem7gZS_CxGklA" elementId="uk.co.saiman.camera.dynamicmenucontribution.devices" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraDevicesMenu"/>
           </menu>
         </children>
       </toolbar>
