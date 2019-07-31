@@ -36,16 +36,12 @@ import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
-import static org.osgi.framework.Constants.SERVICE_PID;
 import static uk.co.saiman.eclipse.perspective.EPerspectiveService.PERSPECTIVE_SOURCE_SNIPPET;
-import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 import static uk.co.saiman.log.Log.Level.INFO;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -65,29 +61,23 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.environment.SharedEnvironment;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
-import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.msapex.workspace.event.AddExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.RemoveExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEventKind;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceExperimentEvent;
-import uk.co.saiman.experiment.storage.StorageConfiguration;
-import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
 import uk.co.saiman.experiment.storage.service.StorageService;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.osgi.ServiceIndex;
-import uk.co.saiman.osgi.ServiceRecord;
-import uk.co.saiman.state.StateMap;
 
 /**
  * Addon for registering an experiment workspace in the root application
@@ -99,14 +89,10 @@ import uk.co.saiman.state.StateMap;
 public class ExperimentAddon {
   private static final String EXPERIMENTS = "experiments";
 
-  public static final String WORKSPACE_STORE_ID = FILE_SYSTEM_STORE_ID + "~" + "ExperimentAddon";
-
   public static final String ANALYSIS_PERSPECTIVE_ID = "uk.co.saiman.perspective.analysis";
 
   public static final String ANALYSIS_ENVIRONMENT_SERVICE_ID = "uk.co.saiman.experiment.environment.analysis";
   public static final String ENVIRONMENT_SERVICE_ID = "uk.co.saiman.experiment.environment";
-  public static final String STORAGE_SERVICE_ID = "uk.co.saiman.experiment.storage";
-  public static final String EXECUTOR_SERVICE_ID = "uk.co.saiman.experiment.executors";
 
   @Inject
   private IEclipseContext context;
@@ -125,25 +111,22 @@ public class ExperimentAddon {
 
   private Workspace workspace;
   private FileSystemStore workspaceStore;
-  private ServiceRegistration<?> workspaceStoreRegsitration;
 
   private ServiceIndex<SharedEnvironment, String, SharedEnvironment> environments;
 
-  private ServiceIndex<StorageService, String, StorageService> storage;
-  private StorageService storageService;
-
-  private ServiceIndex<ExecutorService, String, ExecutorService> executors;
-  private ExecutorService executorService;
+  private EclipseStorageService storageService;
+  private EclipseExecutorService executorService;
 
   @PostConstruct
   void initialize(@Named(INSTANCE_LOCATION) Location instanceLocation) throws URISyntaxException {
     try {
+      Path rootPath = Paths.get(instanceLocation.getURL().toURI());
+      registerWorkspaceStore(rootPath);
+
       initializeEnvironments();
       initializeStorage();
       initializeExecutors();
 
-      Path rootPath = Paths.get(instanceLocation.getURL().toURI());
-      registerWorkspaceStore(rootPath);
       registerWorkspace(rootPath);
 
       initializeAdapters();
@@ -159,73 +142,18 @@ public class ExperimentAddon {
   }
 
   private void initializeStorage() {
-    storage = ServiceIndex.open(bundleContext, StorageService.class, identity());
-    storageService = new StorageService() {
-      private java.util.Optional<StorageService> getBackingService() {
-        return storage
-            .highestRankedRecord(addon.getPersistedState().get(STORAGE_SERVICE_ID))
-            .tryGet()
-            .map(ServiceRecord::serviceObject);
-      }
-
-      @Override
-      public Stream<Store<?>> stores() {
-        return getBackingService().stream().flatMap(StorageService::stores);
-      }
-
-      @Override
-      public <T> StateMap deconfigureStorage(StorageConfiguration<T> processor) {
-        return getBackingService().orElseThrow().deconfigureStorage(processor);
-      }
-
-      @Override
-      public StorageConfiguration<?> configureStorage(StateMap persistedState) {
-        return getBackingService().orElseThrow().configureStorage(persistedState);
-      }
-    };
+    storageService = new EclipseStorageService(bundleContext, addon, workspaceStore);
     context.set(StorageService.class, storageService);
   }
 
   private void initializeExecutors() {
-    executors = ServiceIndex.open(bundleContext, ExecutorService.class, identity());
-    executorService = new ExecutorService() {
-      private java.util.Optional<ExecutorService> getBackingService() {
-        return executors
-            .highestRankedRecord(addon.getPersistedState().get(EXECUTOR_SERVICE_ID))
-            .tryGet()
-            .map(ServiceRecord::serviceObject);
-      }
-
-      @Override
-      public Stream<Executor> executors() {
-        return getBackingService().stream().flatMap(ExecutorService::executors);
-      }
-
-      @Override
-      public Executor getExecutor(String id) {
-        return getBackingService().orElseThrow().getExecutor(id);
-      }
-
-      @Override
-      public String getId(Executor procedure) {
-        return getBackingService().orElseThrow().getId(procedure);
-      }
-    };
+    executorService = new EclipseExecutorService(bundleContext, addon);
     context.set(ExecutorService.class, executorService);
   }
 
   private void registerWorkspaceStore(Path rootPath) {
     workspaceStore = new FileSystemStore(rootPath);
     context.set(FileSystemStore.class, workspaceStore);
-
-    Dictionary<String, String> configuration = new Hashtable<>();
-    configuration.put(SERVICE_PID, WORKSPACE_STORE_ID);
-
-    workspaceStoreRegsitration = bundleContext
-        .registerService(
-            new String[] { Store.class.getName(), FileSystemStore.class.getName() },
-            workspaceStore,
-            configuration);
   }
 
   private void registerWorkspace(Path rootPath) {
@@ -286,9 +214,6 @@ public class ExperimentAddon {
 
   @PreDestroy
   void destroy() {
-    if (workspaceStoreRegsitration != null) {
-      workspaceStoreRegsitration.unregister();
-    }
     if (experimentAdapterFactory != null) {
       experimentAdapterFactory.unregister();
     }
@@ -298,11 +223,11 @@ public class ExperimentAddon {
     if (environments != null) {
       environments.close();
     }
-    if (storage != null) {
-      storage.close();
+    if (storageService != null) {
+      storageService.close();
     }
-    if (executors != null) {
-      executors.close();
+    if (executorService != null) {
+      executorService.close();
     }
   }
 

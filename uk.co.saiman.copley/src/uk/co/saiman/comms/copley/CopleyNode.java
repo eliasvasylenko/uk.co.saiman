@@ -33,6 +33,8 @@ import java.util.stream.Stream;
 public interface CopleyNode {
   int getId();
 
+  int getIndex();
+
   OperatingMode getOperatingMode();
 
   void setOperatingMode(OperatingMode mode);

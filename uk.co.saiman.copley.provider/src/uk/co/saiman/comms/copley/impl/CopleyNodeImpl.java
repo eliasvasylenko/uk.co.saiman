@@ -114,6 +114,11 @@ public class CopleyNodeImpl implements CopleyNode {
   }
 
   @Override
+  public int getIndex() {
+    return nodeIndex;
+  }
+
+  @Override
   public OperatingMode getOperatingMode() {
     // TODO Auto-generated method stub
     return null;
