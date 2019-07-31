@@ -27,31 +27,14 @@
  */
 package uk.co.saiman.experiment.msapex.step.provider;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.dependency.Dependency;
-import uk.co.saiman.experiment.dependency.Nothing;
-import uk.co.saiman.experiment.environment.StaticEnvironment;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.production.Product;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.executor.Executor;
 
-public interface StepProvider<T extends Dependency> {
-  Executor<T> executor();
+public interface StepProvider {
+  Executor executor();
 
-  Stream<StepDefinition<T>> createSteps(StaticEnvironment environment, DefineStep<T> defineStep);
-
-  @SuppressWarnings("unchecked")
-  default Optional<StepProvider<? extends Product>> asDependent(Executor<?> executor) {
-    return Productions
-        .asDependent(executor(), executor)
-        .map(c -> (StepProvider<? extends Product>) this);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <S> Optional<StepProvider<Nothing>> asIndependent() {
-    return Productions.asIndependent(executor()).map(c -> (StepProvider<Nothing>) this);
-  }
+  Stream<StepDefinition> createSteps(SharedEnvironment environment, DefineStep defineStep);
 }

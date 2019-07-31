@@ -13,6 +13,7 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.eclipse.perspectives;version=snapshot,\
 	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.eclipse.ui;version=snapshot,\
 	uk.co.saiman.eclipse.fx;version=snapshot,\
@@ -23,7 +24,7 @@ Bundle-Name: SAI :: MSApex :: Experiment
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.definition;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.scheduling;version=snapshot,\
 	uk.co.saiman.experiment.storage;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
@@ -49,4 +50,6 @@ Private-Package: uk.co.saiman.experiment.msapex.provider.workspace
 	res,\
 	l10n,\
 	always.e4xmi,\
-	initial.e4xmi
+	initial.e4xmi,\
+	OSGI-INF/configurator=configurator
+	

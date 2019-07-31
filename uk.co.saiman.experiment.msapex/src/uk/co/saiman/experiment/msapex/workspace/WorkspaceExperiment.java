@@ -32,7 +32,7 @@ import static uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEventKind.
 import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.msapex.workspace.event.CloseExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.OpenExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.RemoveExperimentEvent;

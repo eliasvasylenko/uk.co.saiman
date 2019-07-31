@@ -2,7 +2,7 @@ Bundle-Name: SAI :: Experiment :: Definition
 
 -buildpath: \
 	uk.co.saiman.experiment.storage;version=snapshot,\
-	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\

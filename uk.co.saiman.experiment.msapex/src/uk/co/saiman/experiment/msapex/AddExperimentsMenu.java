@@ -45,11 +45,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
+import uk.co.saiman.experiment.dependency.Product;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.provider.ExperimentProvider;
 import uk.co.saiman.experiment.msapex.provider.ExperimentProviderDescriptor;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
-import uk.co.saiman.experiment.production.Product;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 

@@ -27,10 +27,11 @@
  */
 package uk.co.saiman.osgi;
 
-import static java.util.Collections.sort;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import uk.co.saiman.observable.HotObservable;
-import uk.co.saiman.observable.Observable;
+import uk.co.saiman.observable.ObservableValue;
 
 /**
  * A service index is an OSGi service tracker which dynamically registers
@@ -71,61 +72,20 @@ import uk.co.saiman.observable.Observable;
 public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U, T>> {
   private static final String DEFAULT_KEY = Constants.SERVICE_PID;
 
-  class ServiceRecordImpl implements ServiceRecord<S, U, T> {
-    private final ServiceReference<S> reference;
+  private final BiFunction<? super T, ? super ServiceReference<S>, ? extends Stream<? extends U>> indexer;
+  private final Function<? super S, ? extends T> extractor;
 
-    private T object;
-    private Optional<U> id;
-    private int rank;
+  private final Map<U, RankedServiceRecords<S, U, T>> records = new HashMap<>();
+  private final Map<U, WeakServiceRecords> emptyRecords = new HashMap<>();
+  private final ReferenceQueue<RankedServiceRecords<S, U, T>> recordReferenceQueue = new ReferenceQueue<>();
 
-    public ServiceRecordImpl(ServiceReference<S> reference, T object) {
-      this.reference = reference;
-      this.object = object;
-      refresh();
-    }
-
-    private void refresh() {
-      this.id = indexer.apply(object, reference);
-      Integer rank = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-      this.rank = rank == null ? 0 : rank;
-    }
-
-    @Override
-    public ServiceReference<S> serviceReference() {
-      return reference;
-    }
-
-    @Override
-    public T serviceObject() {
-      return object;
-    }
-
-    @Override
-    public Optional<U> id() {
-      return id;
-    }
-
-    @Override
-    public int rank() {
-      return rank;
-    }
-
-    @Override
-    public Bundle bundle() {
-      return reference.getBundle();
-    }
-  }
-
-  private final BiFunction<T, ServiceReference<S>, Optional<U>> indexer;
-  private final Function<S, T> extractor;
-  private final Map<U, List<ServiceRecord<S, U, T>>> recordsById = new HashMap<>();
-  private final HotObservable<ServiveEvent> events = new HotObservable<>();
+  private final HotObservable<ServiceEvent> events = new HotObservable<>();
 
   private ServiceIndex(
       BundleContext context,
       Class<S> clazz,
-      Function<S, T> extractor,
-      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
+      Function<? super S, ? extends T> extractor,
+      BiFunction<? super T, ? super ServiceReference<S>, ? extends Stream<? extends U>> indexer) {
     super(context, clazz, null);
     this.extractor = extractor;
     this.indexer = indexer;
@@ -134,17 +94,17 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   private ServiceIndex(
       BundleContext context,
       Filter filter,
-      Function<S, T> extractor,
-      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
+      Function<? super S, ? extends T> extractor,
+      BiFunction<? super T, ? super ServiceReference<S>, ? extends Stream<? extends U>> indexer) {
     super(context, filter, null);
     this.extractor = extractor;
     this.indexer = indexer;
   }
 
-  private static <T, S> Optional<String> defaultIndexer(
+  private static <T, S> Stream<String> defaultIndexer(
       T object,
       ServiceReference<S> serviceReference) {
-    return Optional.ofNullable((String) serviceReference.getProperty(DEFAULT_KEY));
+    return Optional.ofNullable((String) serviceReference.getProperty(DEFAULT_KEY)).stream();
   }
 
   public static <T> ServiceIndex<T, String, T> open(BundleContext context, Class<T> clazz) {
@@ -166,8 +126,12 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   public static <S, T> ServiceIndex<S, String, T> open(
       BundleContext context,
       Class<S> clazz,
-      Function<S, T> extractor) {
-    var serviceIndex = new ServiceIndex<>(context, clazz, extractor, ServiceIndex::defaultIndexer);
+      Function<? super S, ? extends T> extractor) {
+    ServiceIndex<S, String, T> serviceIndex = new ServiceIndex<>(
+        context,
+        clazz,
+        extractor,
+        ServiceIndex::defaultIndexer);
     serviceIndex.open();
     return serviceIndex;
   }
@@ -175,8 +139,12 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   public static <S, T> ServiceIndex<S, String, T> open(
       BundleContext context,
       Filter filter,
-      Function<S, T> extractor) {
-    var serviceIndex = new ServiceIndex<>(context, filter, extractor, ServiceIndex::defaultIndexer);
+      Function<? super S, ? extends T> extractor) {
+    ServiceIndex<S, String, T> serviceIndex = new ServiceIndex<>(
+        context,
+        filter,
+        extractor,
+        ServiceIndex::defaultIndexer);
     serviceIndex.open();
     return serviceIndex;
   }
@@ -184,9 +152,9 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
   public static <S, U, T> ServiceIndex<S, U, T> open(
       BundleContext context,
       Class<S> clazz,
-      Function<S, T> extractor,
-      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
-    var serviceIndex = new ServiceIndex<>(context, clazz, extractor, indexer);
+      Function<? super S, ? extends T> extractor,
+      BiFunction<? super T, ? super ServiceReference<S>, ? extends Stream<? extends U>> indexer) {
+    ServiceIndex<S, U, T> serviceIndex = new ServiceIndex<>(context, clazz, extractor, indexer);
     serviceIndex.open();
     return serviceIndex;
   }
@@ -195,26 +163,33 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
       BundleContext context,
       Filter filter,
       Function<S, T> extractor,
-      BiFunction<T, ServiceReference<S>, Optional<U>> indexer) {
+      BiFunction<? super T, ? super ServiceReference<S>, ? extends Stream<? extends U>> indexer) {
     var serviceIndex = new ServiceIndex<>(context, filter, extractor, indexer);
     serviceIndex.open();
     return serviceIndex;
   }
 
+  private RankedServiceRecords<S, U, T> getEmptyRecords(U index) {
+    return Optional
+        .ofNullable(emptyRecords.remove(index))
+        .flatMap(reference -> Optional.ofNullable(reference.get()))
+        .orElseGet(() -> new RankedServiceRecords<>(index));
+  }
+
   private void addRecordById(ServiceRecord<S, U, T> record) {
-    record.id().ifPresent(id -> {
-      recordsById.computeIfAbsent(id, i -> new ArrayList<>()).add(record);
-      sort(recordsById.get(id));
+    record.ids().forEach(id -> {
+      records.computeIfAbsent(id, this::getEmptyRecords).add(record);
     });
   }
 
   private void removeRecordById(ServiceRecord<S, U, T> record) {
-    record.id().ifPresent(id -> {
-      var previousSet = recordsById.get(id);
+    record.ids().forEach(id -> {
+      var previousSet = records.get(id);
       if (previousSet != null) {
         previousSet.remove(record);
         if (previousSet.isEmpty()) {
-          recordsById.remove(id);
+          records.remove(id);
+          emptyRecords.put(id, new WeakServiceRecords(previousSet));
         }
       }
     });
@@ -250,34 +225,95 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     events.next(new ServiceRemovedEvent(reference));
   }
 
-  public Stream<U> ids() {
-    return recordsById.keySet().stream();
+  public synchronized Stream<U> ids() {
+    return records.keySet().stream();
   }
 
-  public Stream<ServiceRecord<S, U, T>> records() {
-    return recordsById.values().stream().flatMap(List::stream).sorted();
+  public synchronized Stream<ServiceRecord<S, U, T>> records() {
+    return records.values().stream().flatMap(RankedServiceRecords::stream).sorted();
   }
 
-  public Stream<T> objects() {
-    return records().map(ServiceRecord::serviceObject);
-  }
-
-  public Optional<ServiceRecord<S, U, T>> findRecord(T serviceObject) {
+  public synchronized Optional<ServiceRecord<S, U, T>> findRecord(T serviceObject) {
     return records().filter(record -> record.serviceObject() == serviceObject).findFirst();
   }
 
-  public Optional<ServiceRecord<S, U, T>> get(U id) {
+  public synchronized ObservableValue<ServiceRecord<S, U, T>> highestRankedRecord(U id) {
     return Optional
-        .ofNullable(recordsById.get(id))
-        .flatMap(records -> records.stream().findFirst());
-  }
-
-  public Observable<ServiveEvent> events() {
-    return events;
+        .ofNullable(records.get(id))
+        .orElseGet(() -> getEmptyRecords(id))
+        .highestRankedRecord();
   }
 
   @Override
-  public String toString() {
-    return getClass().getSimpleName() + recordsById;
+  public synchronized String toString() {
+    return getClass().getSimpleName() + records;
+  }
+
+  public HotObservable<ServiceEvent> events() {
+    return events;
+  }
+
+  class ServiceRecordImpl implements ServiceRecord<S, U, T> {
+    private final ServiceReference<S> reference;
+
+    private T object;
+    private List<U> id;
+    private int rank;
+
+    public ServiceRecordImpl(ServiceReference<S> reference, T object) {
+      this.reference = reference;
+      this.object = object;
+      refresh();
+    }
+
+    private void refresh() {
+      this.id = indexer.apply(object, reference).collect(toList());
+      Integer rank = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+      this.rank = rank == null ? 0 : rank;
+    }
+
+    @Override
+    public ServiceReference<S> serviceReference() {
+      return reference;
+    }
+
+    @Override
+    public T serviceObject() {
+      return object;
+    }
+
+    @Override
+    public Stream<U> ids() {
+      return id.stream();
+    }
+
+    @Override
+    public int rank() {
+      return rank;
+    }
+
+    @Override
+    public Bundle bundle() {
+      return reference.getBundle();
+    }
+  }
+
+  class WeakServiceRecords extends WeakReference<RankedServiceRecords<S, U, T>> {
+    private final U id;
+
+    public WeakServiceRecords(RankedServiceRecords<S, U, T> referent) {
+      super(referent, recordReferenceQueue);
+      this.id = referent.id();
+    }
+
+    @Override
+    public void clear() {
+      super.clear();
+      synchronized (ServiceIndex.this) {
+        if (emptyRecords.get(id) == this) {
+          emptyRecords.remove(id);
+        }
+      }
+    }
   }
 }

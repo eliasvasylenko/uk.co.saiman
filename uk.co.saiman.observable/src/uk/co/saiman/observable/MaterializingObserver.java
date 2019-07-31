@@ -27,9 +27,6 @@
  */
 package uk.co.saiman.observable;
 
-import static uk.co.saiman.observable.ObservableValue.empty;
-import static uk.co.saiman.observable.ObservableValue.of;
-
 public class MaterializingObserver<T> extends PassthroughObserver<T, ObservableValue<T>> {
   public MaterializingObserver(Observer<? super ObservableValue<T>> downstreamObserver) {
     super(downstreamObserver);
@@ -46,12 +43,12 @@ public class MaterializingObserver<T> extends PassthroughObserver<T, ObservableV
 
   @Override
   public void onNext(T message) {
-    getDownstreamObserver().onNext(of(message));
+    getDownstreamObserver().onNext(ObservableValue.of(message));
   }
 
   @Override
   public void onFail(Throwable t) {
-    getDownstreamObserver().onNext(empty(() -> t));
+    getDownstreamObserver().onNext(ObservableValue.empty(() -> t));
 
     super.onComplete();
   }

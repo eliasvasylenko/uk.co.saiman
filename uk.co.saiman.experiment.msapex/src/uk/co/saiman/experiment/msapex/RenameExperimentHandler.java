@@ -38,7 +38,7 @@ import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentException;
-import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;

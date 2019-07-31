@@ -27,30 +27,29 @@
  */
 package uk.co.saiman.experiment.service.impl;
 
-import static org.osgi.framework.FrameworkUtil.createFilter;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 import static uk.co.saiman.state.Accessor.stringAccessor;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.experiment.service.ExperimentServiceConstants;
 import uk.co.saiman.experiment.service.impl.StorageServiceImpl.StorageServiceConfiguration;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
-import uk.co.saiman.experiment.storage.StorageService;
 import uk.co.saiman.experiment.storage.Store;
-import uk.co.saiman.osgi.ServiceIndex;
-import uk.co.saiman.osgi.ServiceRecord;
+import uk.co.saiman.experiment.storage.service.StorageService;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 
@@ -59,9 +58,7 @@ import uk.co.saiman.state.StateMap;
 public class StorageServiceImpl implements StorageService {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(name = "Storage Service", description = "A service over a set of available experiment storage implementations")
-  public @interface StorageServiceConfiguration {
-    String storeFilter() default "";
-  }
+  public @interface StorageServiceConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.storage";
 
@@ -69,44 +66,42 @@ public class StorageServiceImpl implements StorageService {
       ExperimentServiceConstants.STORE_ID,
       stringAccessor());
 
-  private final ServiceIndex<Store<?>, String, Store<?>> storeIndex;
+  private final Map<String, Store<?>> stores;
+  private final Map<Store<?>, String> ids;
 
   @Activate
-  public StorageServiceImpl(StorageServiceConfiguration configuration, BundleContext context)
-      throws InvalidSyntaxException {
-    String filterString = "(" + Constants.OBJECTCLASS + "=" + Store.class.getName() + ")";
-    if (!configuration.storeFilter().isBlank()) {
-      filterString = "(&" + filterString + configuration.storeFilter() + ")";
+  public StorageServiceImpl(
+      BundleContext context,
+      @Reference(name = "stores", policyOption = GREEDY) List<ServiceReference<Store<?>>> stores) {
+    this.stores = new HashMap<>();
+    this.ids = new HashMap<>();
+
+    for (var storeReference : stores) {
+      var store = context.getService(storeReference);
+      storeIndexer(storeReference).ifPresent(id -> {
+        this.stores.put(id, store);
+        this.ids.put(store, id);
+      });
     }
-    storeIndex = ServiceIndex
-        .open(
-            context,
-            createFilter(filterString),
-            Function.identity(),
-            StorageServiceImpl::storeIndexer);
   }
 
-  private static Optional<String> storeIndexer(
-      Store<?> object,
-      ServiceReference<Store<?>> serviceReference) {
+  private static Optional<String> storeIndexer(ServiceReference<Store<?>> serviceReference) {
     return Optional
         .ofNullable((String) serviceReference.getProperty(ExperimentServiceConstants.STORE_ID));
   }
 
   @Override
   public Stream<Store<?>> stores() {
-    return storeIndex.objects();
+    return stores.values().stream();
   }
 
   @Override
   public StorageConfiguration<?> configureStorage(StateMap persistedState) {
-    Store<?> store = storeIndex.get(persistedState.get(STORE_ID)).get().serviceObject();
-    return new StorageConfiguration<>(store, persistedState);
+    return new StorageConfiguration<>(stores.get(persistedState.get(STORE_ID)), persistedState);
   }
 
   @Override
   public <T> StateMap deconfigureStorage(StorageConfiguration<T> processor) {
-    String id = storeIndex.findRecord(processor.store()).flatMap(ServiceRecord::id).get();
-    return processor.deconfigure().with(STORE_ID, id);
+    return processor.deconfigure().with(STORE_ID, ids.get(processor.store()));
   }
 }

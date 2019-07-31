@@ -29,7 +29,7 @@ package uk.co.saiman.osgi;
 
 import org.osgi.framework.ServiceReference;
 
-public class ServiceRemovedEvent extends ServiveEvent {
+public class ServiceRemovedEvent extends ServiceEvent {
   private final ServiceReference<?> reference;
 
   public ServiceRemovedEvent(ServiceReference<?> reference) {

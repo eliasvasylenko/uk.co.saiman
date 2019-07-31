@@ -70,12 +70,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
 
   private final List<Disposable> axisObservations;
 
-  public ComposedStage(
-      String name,
-      T analysisPosition,
-      T exchangePosition,
-      AxisDevice<?, ?>... axes) {
-    super(name);
+  public ComposedStage(T analysisPosition, T exchangePosition, AxisDevice<?, ?>... axes) {
     this.axes = Set.of(axes);
     this.axes.forEach(axis -> addDependency(axis, 2, SECONDS));
     this.readyPosition = analysisPosition;

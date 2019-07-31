@@ -36,8 +36,8 @@ import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
+import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.graph.ExperimentId;
 import uk.co.saiman.experiment.msapex.NewFileSystemExperimentDialog;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.provider.ExperimentProvider;

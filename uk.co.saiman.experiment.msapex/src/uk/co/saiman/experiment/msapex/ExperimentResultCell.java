@@ -32,10 +32,10 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.model.ui.MCell;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.production.Observation;
-import uk.co.saiman.experiment.production.ProductPath;
-import uk.co.saiman.experiment.production.Output;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.dependency.ProductPath;
+import uk.co.saiman.experiment.dependency.source.Observation;
+import uk.co.saiman.experiment.output.Output;
 
 /**
  * Contribution for all experiment nodes in the experiment tree

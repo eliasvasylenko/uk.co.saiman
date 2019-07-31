@@ -27,7 +27,10 @@
  */
 package uk.co.saiman.instrument.virtual;
 
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
+
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -49,10 +52,13 @@ public class DeviceDependency<V extends Controller> {
   private final Consumer<V> controllerAcquired;
   private final Runnable controllerReleased;
 
+  private final Executor callbackExecutor;
+
   public DeviceDependency(
       Device<V> device,
       long time,
       TimeUnit unit,
+      Executor callbackExecutor,
       Consumer<DeviceDependency<V>> statusUpdated) {
     this.device = device;
     this.acquireTimeout = time;
@@ -61,12 +67,15 @@ public class DeviceDependency<V extends Controller> {
     this.statusUpdated = () -> statusUpdated.accept(this);
     this.controllerAcquired = lock -> {};
     this.controllerReleased = () -> {};
+
+    this.callbackExecutor = callbackExecutor;
   }
 
   public DeviceDependency(
       Device<V> device,
       long time,
       TimeUnit unit,
+      Executor callbackExecutor,
       Consumer<DeviceDependency<V>> statusUpdated,
       Consumer<V> controllerAcquired,
       Runnable controllerReleased) {
@@ -77,6 +86,8 @@ public class DeviceDependency<V extends Controller> {
     this.statusUpdated = () -> statusUpdated.accept(this);
     this.controllerAcquired = controllerAcquired;
     this.controllerReleased = controllerReleased;
+
+    this.callbackExecutor = callbackExecutor;
   }
 
   public synchronized void open() {
@@ -84,6 +95,7 @@ public class DeviceDependency<V extends Controller> {
       this.observation = device
           .status()
           .value()
+          .executeOn(newSingleThreadExecutor())
           .weakReference(this)
           .observe(status -> status.apply(DeviceDependency::updateStatus));
     }
@@ -101,7 +113,7 @@ public class DeviceDependency<V extends Controller> {
     try {
       switch (status) {
       case AVAILABLE:
-        acquireController();
+        acquireControl();
         break;
       case INACCESSIBLE:
         releaseController();
@@ -118,15 +130,15 @@ public class DeviceDependency<V extends Controller> {
   }
 
   protected void statusUpdated() {
-    statusUpdated.run();
+    callbackExecutor.execute(statusUpdated);
   }
 
   protected void controllerAcquired(V lock) {
-    controllerAcquired.accept(lock);
+    callbackExecutor.execute(() -> controllerAcquired.accept(lock));
   }
 
   protected void controllerReleased() {
-    controllerReleased.run();
+    callbackExecutor.execute(controllerReleased);
   }
 
   public Device<V> getDevice() {
@@ -134,11 +146,15 @@ public class DeviceDependency<V extends Controller> {
   }
 
   public synchronized Optional<V> getController() {
-    acquireController();
     return Optional.ofNullable(controller);
   }
 
-  private synchronized void acquireController() {
+  public synchronized Optional<V> acquireController() {
+    acquireControl();
+    return Optional.ofNullable(controller);
+  }
+
+  private synchronized void acquireControl() {
     if (controller == null) {
       try {
         controller = device.acquireControl(acquireTimeout, acquireTimeoutUnit);

@@ -55,11 +55,6 @@ import uk.co.saiman.observable.ObservableValue;
  * @author Elias N Vasylenko
  */
 public interface Device<T extends Controller> {
-  /**
-   * @return the human-readable and localized name of the device
-   */
-  String getName();
-
   T acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
 
   /**

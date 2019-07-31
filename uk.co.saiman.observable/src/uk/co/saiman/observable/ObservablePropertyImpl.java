@@ -44,7 +44,42 @@ import java.util.function.Supplier;
  * @param <T> the type of event message to produce
  */
 public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
-  private final HotObservable<T> backingObservable;
+  private static class Message<T> {
+    private final T value;
+    private final Supplier<Throwable> failure;
+
+    public Message(T value) {
+      this.value = Objects.requireNonNull(value);
+      this.failure = null;
+    }
+
+    public Message(Supplier<Throwable> failure) {
+      this.value = null;
+      this.failure = Objects.requireNonNull(failure);
+    }
+
+    public Optional<Supplier<Throwable>> failure() {
+      if (value != null) {
+        return Optional.empty();
+      } else {
+        return Optional.of(failure);
+      }
+    }
+
+    public Optional<T> value() {
+      return Optional.ofNullable(value);
+    }
+
+    public ObservableValue<T> materialize() {
+      if (value == null) {
+        return ObservableValue.empty(failure);
+      } else {
+        return ObservableValue.of(value);
+      }
+    }
+  }
+
+  private final HotObservable<Message<T>> backingObservable;
 
   private T value;
   private Supplier<Throwable> failure;
@@ -66,49 +101,56 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
   @Override
   public Observable<Change<T>> changes() {
     return observer -> backingObservable
-        .materialize()
-        .repeating()
-        .observe(new PassthroughObserver<ObservableValue<T>, Change<T>>(observer) {
-          private ObservableValue<T> previousValue;
+        .observe(new PassthroughObserver<Message<T>, Change<T>>(observer) {
+          private Message<T> previousValue;
 
           @Override
           public void onObserve(Observation observation) {
-            this.previousValue = currentState();
+            this.previousValue = getMessage();
             super.onObserve(observation);
           }
 
           @Override
-          public void onNext(ObservableValue<T> message) {
-            ObservableValue<T> previousValue = this.previousValue;
-            ObservableValue<T> newValue = message;
+          public void onNext(Message<T> message) {
+            Message<T> previousValue = this.previousValue;
+            Message<T> newValue = message;
             this.previousValue = newValue;
 
             getDownstreamObserver().onNext(new Change<T>() {
               @Override
               public ObservableValue<T> previousValue() {
-                return previousValue;
+                return previousValue.materialize();
               }
 
               @Override
               public ObservableValue<T> newValue() {
-                return newValue;
+                return newValue.materialize();
               }
             });
           }
         });
   }
 
-  public ObservableValue<T> currentState() {
+  public Message<T> getMessage() {
     if (value != null) {
-      return ObservableValue.of(value);
+      return new Message<>(value);
     } else {
-      return ObservableValue.empty(failure);
+      return new Message<>(failure);
     }
   }
 
   @Override
   public Observable<T> value() {
-    return backingObservable.prefixing(this::get);
+    return backingObservable
+        .prefixing(this::getMessage)
+        .asserting(Message::failure)
+        .map(Message::value)
+        .map(Optional::get);
+  }
+
+  @Override
+  public Observable<Optional<T>> optionalValue() {
+    return backingObservable.prefixing(this::getMessage).map(Message::value);
   }
 
   @Override
@@ -120,7 +162,7 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
     failure = null;
     this.value = value;
 
-    backingObservable.next(value);
+    backingObservable.next(new Message<>(value));
 
     return previous;
   }
@@ -130,9 +172,7 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
     value = null;
     failure = t;
 
-    backingObservable.fail(t.get());
-
-    backingObservable.start();
+    backingObservable.next(new Message<>(t));
   }
 
   @Override

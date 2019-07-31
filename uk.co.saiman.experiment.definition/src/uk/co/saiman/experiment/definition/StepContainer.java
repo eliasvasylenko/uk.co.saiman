@@ -45,15 +45,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.graph.ExperimentGraphEdge;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentRelation;
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
 
 public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepContainer<U, T>> {
-  private final List<StepDefinition<?>> steps;
-  private final Map<ExperimentId, StepDefinition<?>> dependents;
+  private final List<StepDefinition> steps;
+  private final Map<ExperimentId, StepDefinition> dependents;
 
-  StepContainer(List<StepDefinition<?>> steps) {
+  StepContainer(List<StepDefinition> steps) {
     this(
         steps,
         steps
@@ -61,16 +61,16 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
             .collect(toMap(StepDefinition::id, identity(), throwingMerger(), TreeMap::new)));
   }
 
-  StepContainer(List<StepDefinition<?>> steps, Map<ExperimentId, StepDefinition<?>> dependents) {
+  StepContainer(List<StepDefinition> steps, Map<ExperimentId, StepDefinition> dependents) {
     this.steps = steps;
     this.dependents = dependents;
   }
 
-  List<StepDefinition<?>> getSteps() {
+  List<StepDefinition> getSteps() {
     return steps;
   }
 
-  Map<ExperimentId, StepDefinition<?>> getDependents() {
+  Map<ExperimentId, StepDefinition> getDependents() {
     return dependents;
   }
 
@@ -91,17 +91,17 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
     return Objects.hash(steps);
   }
 
-  public Optional<StepDefinition<?>> findSubstep(ExperimentId id) {
+  public Optional<StepDefinition> findSubstep(ExperimentId id) {
     return Optional.ofNullable(dependents.get(id));
   }
 
-  public Stream<StepDefinition<?>> substeps() {
+  public Stream<StepDefinition> substeps() {
     return steps.stream();
   }
 
-  abstract T with(List<StepDefinition<?>> steps, Map<ExperimentId, StepDefinition<?>> dependents);
+  abstract T with(List<StepDefinition> steps, Map<ExperimentId, StepDefinition> dependents);
 
-  abstract T with(List<StepDefinition<?>> steps);
+  abstract T with(List<StepDefinition> steps);
 
   /**
    * Derive a new container with the step of the given ID removed, if it is
@@ -138,7 +138,7 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withSubstep(StepDefinition<?> step) {
+  public T withSubstep(StepDefinition step) {
     var dependents = new HashMap<>(this.dependents);
     var steps = new ArrayList<>(this.steps);
 
@@ -157,11 +157,11 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withSubsteps(Collection<? extends StepDefinition<?>> steps) {
+  public T withSubsteps(Collection<? extends StepDefinition> steps) {
     var dependents = new HashMap<>(this.dependents);
     var newSteps = new ArrayList<>(this.steps);
 
-    for (StepDefinition<?> step : steps) {
+    for (StepDefinition step : steps) {
       newSteps.remove(dependents.remove(step.id()));
       dependents.put(step.id(), step);
       newSteps.add(step);
@@ -186,7 +186,7 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
    */
   public T withSubstep(
       ExperimentId id,
-      Function<? super Optional<? extends StepDefinition<?>>, ? extends Optional<? extends StepDefinition<?>>> replacement) {
+      Function<? super Optional<? extends StepDefinition>, ? extends Optional<? extends StepDefinition>> replacement) {
     var without = withoutSubstep(id);
 
     return replacement.apply(findSubstep(id)).map(without::withSubstep).orElse(without);
@@ -202,12 +202,12 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
    *         change is made.
    */
   public T withSubsteps(
-      Function<? super Stream<? extends StepDefinition<?>>, ? extends Stream<? extends StepDefinition<?>>> transformation) {
+      Function<? super Stream<? extends StepDefinition>, ? extends Stream<? extends StepDefinition>> transformation) {
     var steps = substeps().collect(Collectors.toList());
     return withoutSubsteps().withSubsteps(transformation.apply(steps.stream()).collect(toList()));
   }
 
-  public Optional<StepDefinition<?>> findSubstep(ExperimentPath<U> path) {
+  public Optional<StepDefinition> findSubstep(ExperimentPath<U> path) {
     if (path.isEmpty()) {
       return Optional.empty();
     }
@@ -215,14 +215,14 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
     var ids = path.iterator();
     var id = ids.next();
 
-    if (!(id instanceof ExperimentGraphEdge.Dependent)) {
+    if (!(id instanceof ExperimentRelation.Dependent)) {
       throw new ExperimentDefinitionException(
           format("Cannot resolve step definition which is not direct descendent at %s", path));
     }
 
-    var step = findSubstep(((ExperimentGraphEdge.Dependent) id).id());
+    var step = findSubstep(((ExperimentRelation.Dependent) id).id());
     while (ids.hasNext() && step.isPresent()) {
-      step = step.flatMap(s -> s.findSubstep(((ExperimentGraphEdge.Dependent) ids.next()).id()));
+      step = step.flatMap(s -> s.findSubstep(((ExperimentRelation.Dependent) ids.next()).id()));
     }
     return step;
   }
@@ -240,7 +240,7 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
    */
   public Optional<T> withSubstep(
       ExperimentPath<U> path,
-      Function<? super StepDefinition<?>, ? extends Optional<? extends StepDefinition<?>>> replacement) {
+      Function<? super StepDefinition, ? extends Optional<? extends StepDefinition>> replacement) {
     if (path.isEmpty()) {
       throw new ExperimentDefinitionException(format("Cannot resolve step definition at %s", path));
     }

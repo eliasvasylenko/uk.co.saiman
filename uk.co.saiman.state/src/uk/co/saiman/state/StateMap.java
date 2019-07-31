@@ -28,6 +28,7 @@
 package uk.co.saiman.state;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.state.StateKind.MAP;
 
 import java.util.HashMap;
@@ -69,7 +70,7 @@ public class StateMap implements State {
 
   public StateMap with(String id, State value) {
     Map<String, State> entries = new HashMap<>(this.entries);
-    entries.put(id, value);
+    entries.put(id, requireNonNull(value));
     return new StateMap(entries);
   }
 

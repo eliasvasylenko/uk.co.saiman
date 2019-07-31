@@ -1,5 +1,0 @@
-{
-	"uk.co.saiman.experiment.executors~maldisimulation": {
-		"executorFilter": "(|(uk.co.saiman.experiment.executors=uk.co.saiman.maldisimulation)(!(uk.co.saiman.experiment.executors=*)))"
-	}
-}

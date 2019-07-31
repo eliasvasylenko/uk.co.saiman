@@ -42,14 +42,12 @@ import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
 public abstract class DeviceImpl<T extends Controller> implements Device<T> {
-  private final String name;
   private final ObservableProperty<DeviceStatus> connectionState;
 
   private final Semaphore semaphore = new Semaphore(1);
   private volatile ControlContextImpl lockedContext;
 
-  public DeviceImpl(String name) {
-    this.name = name;
+  public DeviceImpl() {
     this.connectionState = over(INACCESSIBLE);
   }
 
@@ -58,11 +56,6 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
       connectionState.set(DISPOSED);
     }
     closeController();
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

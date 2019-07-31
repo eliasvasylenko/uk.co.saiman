@@ -27,8 +27,8 @@
  */
 package uk.co.saiman.experiment.requirement;
 
-import uk.co.saiman.experiment.production.Observation;
-import uk.co.saiman.experiment.production.Result;
+import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.dependency.source.Observation;
 
 /**
  * An input to an experiment procedure should be wired up to an observation made
@@ -38,7 +38,7 @@ import uk.co.saiman.experiment.production.Result;
  *
  * @param <T> the type of the result we wish to find
  */
-public class ResultRequirement<T> extends ProductRequirement<Result<T>> {
+public class ResultRequirement<T> extends ProductRequirement<Result<? extends T>> {
   public enum Cardinality {
     SINGULAR, PLURAL
   }

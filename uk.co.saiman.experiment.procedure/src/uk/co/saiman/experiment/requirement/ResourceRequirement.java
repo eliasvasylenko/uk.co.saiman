@@ -2,8 +2,8 @@ package uk.co.saiman.experiment.requirement;
 
 import java.util.Objects;
 
-import uk.co.saiman.experiment.environment.Provision;
-import uk.co.saiman.experiment.environment.Resource;
+import uk.co.saiman.experiment.dependency.Resource;
+import uk.co.saiman.experiment.dependency.source.Provision;
 
 public class ResourceRequirement<T> extends SomeRequirement<Resource<T>> {
   private final Provision<T> provision;

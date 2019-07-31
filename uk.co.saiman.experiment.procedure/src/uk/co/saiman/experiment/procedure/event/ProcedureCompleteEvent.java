@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.procedure.event;
 
-import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.conductor.Conductor;
 import uk.co.saiman.experiment.procedure.Procedure;
 
 public class ProcedureCompleteEvent extends ConductorEvent {

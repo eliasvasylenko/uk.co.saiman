@@ -60,7 +60,6 @@ public class DeviceImplTest {
 
   class SimpleDevice extends DeviceImpl<SimpleController> {
     public SimpleDevice() {
-      super("simpleDevice");
       setAccessible();
     }
 
@@ -112,12 +111,6 @@ public class DeviceImplTest {
     var control = device.acquireControl(0, SECONDS);
     control.close();
     assertFalse(device.acquireControl(0, SECONDS).isClosed());
-  }
-
-  @Test
-  public void getNameTest() throws Exception {
-    var device = new SimpleDevice();
-    assertEquals("simpleDevice", device.getName());
   }
 
   @Test

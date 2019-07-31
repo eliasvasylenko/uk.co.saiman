@@ -52,7 +52,7 @@ public class SpectrumExperimentCell {
       MCell cell,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental,
       Step data,
-      Instruction<?> instruction) {
+      Instruction instruction) {
     cell = (MCell) (MUIElement) cell.getParent();
 
     cell

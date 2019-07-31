@@ -47,11 +47,12 @@ import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.environment.StaticEnvironment;
+import uk.co.saiman.experiment.dependency.Product;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
 import uk.co.saiman.experiment.msapex.step.provider.StepProviderDescriptor;
-import uk.co.saiman.experiment.production.Product;
+import uk.co.saiman.experiment.requirement.ProductRequirement;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -72,49 +73,46 @@ public class AddStepsToStepMenu {
   ExperimentProperties text;
 
   @Inject
-  StaticEnvironment environment;
+  SharedEnvironment environment;
 
   @AboutToShow
   void aboutToShow(List<MMenuElement> items, Step step, IEclipseContext context) {
     providerDescriptors
         .stream()
-        .filter(descriptor -> createProvider(step, descriptor, context).isPresent())
-        .map(descriptor -> createMenuItem(step, descriptor))
+        .flatMap(descriptor -> createMenuItem(step, context, descriptor).stream())
         .forEach(items::add);
   }
 
-  private Optional<StepProvider<? extends Product>> createProvider(
+  private <T extends Product> Optional<MDirectMenuItem> createMenuItem(
       Step step,
-      StepProviderDescriptor descriptor,
-      IEclipseContext context) {
-    return ContextInjectionFactory
-        .make(descriptor.getProviderClass(), context)
-        .asDependent(step.getExecutor());
-  }
-
-  private <T extends Product> MDirectMenuItem createMenuItem(
-      Step step,
+      IEclipseContext context,
       StepProviderDescriptor descriptor) {
+    var provider = ContextInjectionFactory.make(descriptor.getProviderClass(), context);
+
+    if (!(provider.executor().mainRequirement() instanceof ProductRequirement<?>)) {
+      return Optional.empty();
+    }
+
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
     moduleItem.setLabel(descriptor.getLabel());
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute
       public void execute(IEclipseContext context) {
-        addStep(step, descriptor, createProvider(step, descriptor, context).get());
+        addStep(step, descriptor, provider);
       }
     });
-    return moduleItem;
+    return Optional.of(moduleItem);
   }
 
   private <T extends Product> void addStep(
       Step step,
       StepProviderDescriptor descriptor,
-      StepProvider<T> provider) {
+      StepProvider provider) {
     try {
 
       provider
-          .createSteps(environment, new DefineStepImpl<>(step.getDefinition(), provider.executor()))
+          .createSteps(environment, new DefineStepImpl(step.getDefinition(), provider.executor()))
           .forEach(step::attach);
 
     } catch (Exception e) {

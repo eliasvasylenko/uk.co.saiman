@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.msapex.i18n;
 import java.nio.file.Path;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;

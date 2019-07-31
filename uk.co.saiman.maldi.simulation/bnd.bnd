@@ -1,8 +1,7 @@
 Bundle-Name: SAI :: MALDI :: Simulation
 
 Private-Package: \
-	uk.co.saiman.maldi.simulation,\
-	uk.co.saiman.maldi.simulation.i18n
+	uk.co.saiman.maldi.simulation
 
 -includeresource: \
 	OSGI-INF/configurator=configurator

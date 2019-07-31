@@ -32,7 +32,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.adapter.AdaptClass;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.production.Result;
+import uk.co.saiman.experiment.dependency.Result;
 
 /**
  * Contribution for all experiment nodes in the experiment tree

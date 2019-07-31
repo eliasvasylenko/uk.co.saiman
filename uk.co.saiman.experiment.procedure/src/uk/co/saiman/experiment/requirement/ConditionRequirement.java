@@ -27,10 +27,10 @@
  */
 package uk.co.saiman.experiment.requirement;
 
-import uk.co.saiman.experiment.production.Condition;
-import uk.co.saiman.experiment.production.Preparation;
+import uk.co.saiman.experiment.dependency.Condition;
+import uk.co.saiman.experiment.dependency.source.Preparation;
 
-public class ConditionRequirement<T> extends ProductRequirement<Condition<T>> {
+public class ConditionRequirement<T> extends ProductRequirement<Condition<? extends T>> {
   ConditionRequirement(Preparation<T> preparation) {
     super(preparation);
   }

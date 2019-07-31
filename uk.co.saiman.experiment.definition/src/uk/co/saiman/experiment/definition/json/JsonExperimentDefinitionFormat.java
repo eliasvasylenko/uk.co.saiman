@@ -39,13 +39,13 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
+import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.Plan;
 import uk.co.saiman.experiment.definition.StepContainer;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.instruction.ExecutorService;
+import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
 import uk.co.saiman.state.StateList;
@@ -79,7 +79,7 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
   private static final String VARIABLES = "variables";
   private static final String CHILDREN = "children";
 
-  private final MapIndex<Executor<?>> executor;
+  private final MapIndex<Executor> executor;
 
   private final JsonStateMapFormat stateMapFormat;
 
@@ -124,12 +124,12 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
   }
 
   private <T extends StepContainer<?, ? extends T>> T loadStep(T container, StateMap data) {
-    StepDefinition<?> step = StepDefinition
-        .define(data.get(ID), (Executor<?>) data.get(executor))
+    StepDefinition step = StepDefinition
+        .define(data.get(ID), (Executor) data.get(executor))
         .withVariableMap(data.get(VARIABLES).asMap())
         .withPlan(data.get(PLAN));
 
-    step = this.<StepDefinition<?>>loadSteps(step, data.get(CHILDREN).asList());
+    step = this.<StepDefinition>loadSteps(step, data.get(CHILDREN).asList());
 
     return container.withSubstep(step);
   }
@@ -146,13 +146,13 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
         .with(CHILDREN, saveSteps(procedure.independentSteps().collect(toList())));
   }
 
-  protected StateList saveSteps(List<StepDefinition<?>> steps) {
+  protected StateList saveSteps(List<StepDefinition> steps) {
     return steps
         .stream()
         .reduce(StateList.empty(), (l, s) -> l.withAdded(saveStep(s)), throwingMerger());
   }
 
-  protected StateMap saveStep(StepDefinition<?> step) {
+  protected StateMap saveStep(StepDefinition step) {
     return StateMap
         .empty()
         .with(ID, step.id())

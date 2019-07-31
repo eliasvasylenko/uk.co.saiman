@@ -35,4 +35,6 @@ Bundle-Name: SAI :: MSApex :: Simulation
 	res,\
 	initial.e4xmi
 
-Private-Package: uk.co.saiman.simulation.msapex
+Private-Package:\
+	uk.co.saiman.simulation.msapex,\
+	uk.co.saiman.simulation.msapex.i18n

@@ -54,8 +54,6 @@ class SamplePlateStageImpl extends DeviceImpl<SamplePlateStageController>
   private final ObservableProperty<SampleArea> actualPosition;
 
   public SamplePlateStageImpl(MaldiStageManager stateManager) {
-    super("Sample Plate Stage");
-
     this.stateManager = stateManager;
 
     this.sampleState = ObservableProperty.over(SampleState.ready());

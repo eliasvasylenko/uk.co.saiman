@@ -318,6 +318,18 @@ public interface Observable<M> {
    * @param condition the terminating condition
    * @return the derived observable
    */
+  default Observable<M> asserting(
+      Function<? super M, ? extends Optional<? extends Supplier<? extends Throwable>>> condition) {
+    return observer -> observe(new AssertingObserver<>(observer, condition));
+  }
+
+  /**
+   * Derive an observable which passes along only those messages which match the
+   * given condition.
+   * 
+   * @param condition the terminating condition
+   * @return the derived observable
+   */
   default Observable<M> filter(Predicate<? super M> condition) {
     return observer -> observe(new FilteringObserver<>(observer, condition));
   }

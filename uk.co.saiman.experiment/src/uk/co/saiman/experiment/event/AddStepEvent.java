@@ -32,8 +32,8 @@ import static uk.co.saiman.experiment.event.ExperimentEventKind.ADD_STEP;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.production.ProductPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.ProductPath;
 
 public class AddStepEvent extends ExperimentStepEvent {
   private final Optional<ProductPath<Absolute, ?>> dependencyPath;

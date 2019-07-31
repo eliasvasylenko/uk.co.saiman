@@ -67,8 +67,6 @@ class SampleAreaStageImpl extends DeviceImpl<SampleAreaStageController> implemen
   private final ObservableProperty<XYCoordinate<Length>> actualPosition;
 
   public SampleAreaStageImpl(MaldiStageManager stateManager) {
-    super("Sample Area Stage");
-
     this.stateManager = stateManager;
 
     this.sampleState = ObservableProperty.over(SampleState.exchange());

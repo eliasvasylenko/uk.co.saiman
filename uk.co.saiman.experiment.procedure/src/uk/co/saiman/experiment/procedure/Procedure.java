@@ -32,15 +32,14 @@ import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Instruction;
 
 /**
  * An experiment procedure is the machine-consumable bundle of information to
- * describe how a experiment should be {@link Conductor#conduct(Procedure)
- * conducted}.
+ * describe how a experiment should be conducted.
  * <p>
  * An experiment procedure describes a complete experiment graph, where each
  * node is described by its constituent {@link #instructions() instructions}.
@@ -55,9 +54,9 @@ import uk.co.saiman.experiment.instruction.Instruction;
  */
 public class Procedure {
   private final ExperimentId id;
-  private final LinkedHashMap<ExperimentPath<Absolute>, Instruction<?>> instructions;
+  private final LinkedHashMap<ExperimentPath<Absolute>, Instruction> instructions;
 
-  public Procedure(ExperimentId id, Collection<? extends Instruction<?>> instructions) {
+  public Procedure(ExperimentId id, Collection<? extends Instruction> instructions) {
     this.id = id;
     this.instructions = new LinkedHashMap<>();
     for (var instruction : instructions) {
@@ -69,7 +68,7 @@ public class Procedure {
     return id;
   }
 
-  public Stream<Instruction<?>> instructions() {
+  public Stream<Instruction> instructions() {
     return instructions.values().stream();
   }
 
@@ -77,7 +76,7 @@ public class Procedure {
     return instructions.keySet().stream();
   }
 
-  public Optional<Instruction<?>> instruction(ExperimentPath<?> path) {
+  public Optional<Instruction> instruction(ExperimentPath<?> path) {
     return Optional.ofNullable(instructions.get(path));
   }
 }

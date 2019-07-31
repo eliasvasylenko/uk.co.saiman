@@ -98,11 +98,11 @@ public class PerspectiveServiceAddon {
     perspective.getPersistedState().put(PERSPECTIVE_SOURCE_SNIPPET, snippetId);
     perspective.setElementId(snippetId + CLONE_SUFFIX);
 
-    System.out.println(perspective.getPersistedState());
-    if (perspective == null || !Objects
-        .equals(
-            perspectiveStack.getElementId(),
-            perspective.getPersistedState().get(PERSPECTIVE_TARGET_STACK))) {
+    if (perspective == null
+        || !Objects
+            .equals(
+                perspectiveStack.getElementId(),
+                perspective.getPersistedState().get(PERSPECTIVE_TARGET_STACK))) {
       return;
     }
 

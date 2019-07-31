@@ -31,18 +31,18 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.StaticEnvironment;
+import uk.co.saiman.experiment.dependency.Product;
+import uk.co.saiman.experiment.dependency.ProductPath;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.production.Product;
-import uk.co.saiman.experiment.production.ProductPath;
-import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.experiment.requirement.ProductRequirement;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.Variables;
@@ -56,11 +56,11 @@ import uk.co.saiman.experiment.variables.Variables;
  */
 public class Step {
   private final Experiment experiment;
-  private final Executor<?> executor;
+  private final Executor executor;
   private ExperimentPath<Absolute> path;
   private boolean scheduled;
 
-  Step(Experiment experiment, Executor<?> conductor, ExperimentPath<Absolute> path) {
+  Step(Experiment experiment, Executor conductor, ExperimentPath<Absolute> path) {
     this.experiment = experiment;
     this.executor = conductor;
     this.path = path;
@@ -70,7 +70,7 @@ public class Step {
    * Environment
    */
 
-  private StaticEnvironment getStaticEnvironment() {
+  private SharedEnvironment getStaticEnvironment() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -98,7 +98,7 @@ public class Step {
     return scheduled;
   }
 
-  public StepDefinition<?> getDefinition() {
+  public StepDefinition getDefinition() {
     synchronized (experiment) {
       return experiment.getStepDefinition(path).get();
     }
@@ -108,7 +108,7 @@ public class Step {
     return getDefinition().id();
   }
 
-  public Executor<?> getExecutor() {
+  public Executor getExecutor() {
     return executor;
   }
 
@@ -174,17 +174,14 @@ public class Step {
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends Product> Step attach(StepDefinition<T> template) {
+  public <T extends Product> Step attach(StepDefinition template) {
     return attach(
         ((ProductRequirement<T>) template.executor().mainRequirement()).production(),
         -1,
         template);
   }
 
-  public <V, T extends Product> Step attach(
-      Production<? extends T> production,
-      int index,
-      StepDefinition<T> stepDefinition) {
+  public <V> Step attach(Production<?> production, int index, StepDefinition stepDefinition) {
     synchronized (experiment) {
       boolean changed = experiment
           .updateStepDefinition(path, getDefinition().withSubstep(stepDefinition));
@@ -236,7 +233,7 @@ public class Step {
     }
   }
 
-  public Instruction<?> getInstruction() {
-    return new Instruction<>(path, getDefinition().variableMap(), getExecutor());
+  public Instruction getInstruction() {
+    return new Instruction(path, getDefinition().variableMap(), getExecutor());
   }
 }

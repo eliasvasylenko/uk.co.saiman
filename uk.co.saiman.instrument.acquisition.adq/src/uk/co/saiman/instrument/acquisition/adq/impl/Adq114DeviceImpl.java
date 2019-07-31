@@ -122,12 +122,6 @@ public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
   }
 
   @Override
-  public String getName() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public Adq114Control acquireControl(long timeout, TimeUnit unit)
       throws TimeoutException,
       InterruptedException {

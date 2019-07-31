@@ -34,7 +34,7 @@ import static uk.co.saiman.state.Accessor.stringAccessor;
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
-import uk.co.saiman.experiment.environment.Provision;
+import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.instrument.stage.XYStageController;

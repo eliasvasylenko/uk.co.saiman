@@ -34,5 +34,5 @@ public interface StepProviderDescriptor {
 
   String getIconURI();
 
-  Class<? extends StepProvider<?>> getProviderClass();
+  Class<? extends StepProvider> getProviderClass();
 }

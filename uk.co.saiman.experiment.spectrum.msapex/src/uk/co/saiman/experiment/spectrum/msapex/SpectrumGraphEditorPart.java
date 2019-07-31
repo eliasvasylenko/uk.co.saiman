@@ -42,7 +42,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.data.spectrum.Spectrum;
-import uk.co.saiman.experiment.production.Result;
+import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 import uk.co.saiman.msapex.chart.MetricTickUnits;

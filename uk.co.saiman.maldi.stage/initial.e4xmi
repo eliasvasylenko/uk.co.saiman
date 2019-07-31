@@ -4,7 +4,7 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_JOMHoKhxEem7gZS_CxGklA" featurename="children" parentElementId="uk.co.saiman.maldi.partstack.status">
     <elements xsi:type="advanced:Placeholder" xmi:id="_NJ9ZoKhxEem7gZS_CxGklA" elementId="uk.co.saiman.maldi.stage.placeholder" ref="_wLiigKhwEem7gZS_CxGklA" closeable="true"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_dBLxAKhxEem7gZS_CxGklA" featurename="addons" parentElementId="uk.co.saiman.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_dBLxAKhxEem7gZS_CxGklA" featurename="addons" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="application:Addon" xmi:id="_fUPYwKhxEem7gZS_CxGklA" elementId="uk.co.saiman.maldi.stage.addon" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.MaldiStageAddon"/>
   </fragments>
 </fragment:ModelFragments>

@@ -40,6 +40,7 @@ import javax.measure.quantity.Time;
 import javafx.scene.Node;
 import uk.co.saiman.data.function.ArraySampledContinuousFunction;
 import uk.co.saiman.data.function.IrregularSampledDomain;
+import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
 import uk.co.saiman.instrument.vacuum.VacuumDevice;
 import uk.co.saiman.instrument.vacuum.VacuumSample;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
@@ -51,11 +52,13 @@ public class PressureChart {
   private final ContinuousFunctionChart<Time, Pressure> chart;
   private final Deque<VacuumSample> samples;
 
-  public PressureChart(VacuumDevice<?> vacuumDevice) {
+  public PressureChart(
+      VacuumDevice<?> vacuumDevice,
+      DevicePresentationService presentationService) {
     this.chart = new ContinuousFunctionChart<Time, Pressure>(
         new QuantityAxis<>(new MetricTickUnits<>(second())),
         new QuantityAxis<>(new MetricTickUnits<>(pascal())).setPaddingApplied(true));
-    this.chart.setTitle(vacuumDevice.getName());
+    this.chart.setTitle(presentationService.present(vacuumDevice).getLocalizedLabel());
 
     this.samples = new ArrayDeque<>();
 

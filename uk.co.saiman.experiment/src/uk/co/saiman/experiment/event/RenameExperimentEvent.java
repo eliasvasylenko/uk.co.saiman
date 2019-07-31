@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.event;
 import static uk.co.saiman.experiment.event.ExperimentEventKind.RENAME_EXPERIMENT;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.graph.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentId;
 
 public class RenameExperimentEvent extends ExperimentEvent {
   private final ExperimentId previousId;

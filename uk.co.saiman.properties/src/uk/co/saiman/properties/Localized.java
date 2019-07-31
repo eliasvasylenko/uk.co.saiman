@@ -97,6 +97,11 @@ public interface Localized<T> extends ObservableValue<T> {
       public Observable<T> value() {
         return Observable.of(value);
       }
+
+      @Override
+      public Observable<Optional<T>> optionalValue() {
+        return Observable.of(Optional.of(Optional.of(value)));
+      }
     };
   }
 }

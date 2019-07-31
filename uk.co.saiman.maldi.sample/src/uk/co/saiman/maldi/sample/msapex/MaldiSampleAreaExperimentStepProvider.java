@@ -36,19 +36,16 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.extensions.Service;
 
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.StaticEnvironment;
-import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.msapex.step.provider.DefineStep;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
-import uk.co.saiman.experiment.production.Condition;
 import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor;
-import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 import uk.co.saiman.maldi.stage.msapex.MaldiStageDiagram;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
-public class MaldiSampleAreaExperimentStepProvider
-    implements StepProvider<Condition<SamplePlateSubmission>> {
+public class MaldiSampleAreaExperimentStepProvider implements StepProvider {
   private final MaldiStageDiagram stageDiagram;
   private final MaldiSampleAreaExecutor stageExecutor;
 
@@ -61,14 +58,12 @@ public class MaldiSampleAreaExperimentStepProvider
   }
 
   @Override
-  public Executor<Condition<SamplePlateSubmission>> executor() {
+  public Executor executor() {
     return stageExecutor;
   }
 
   @Override
-  public Stream<StepDefinition<Condition<SamplePlateSubmission>>> createSteps(
-      StaticEnvironment environment,
-      DefineStep<Condition<SamplePlateSubmission>> defineStep) {
+  public Stream<StepDefinition> createSteps(SharedEnvironment environment, DefineStep defineStep) {
     // TODO set location from stage diagram, e.g. selected wells
     var step = defineStep
         .withName("Sample Position")

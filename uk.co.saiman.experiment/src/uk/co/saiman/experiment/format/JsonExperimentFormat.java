@@ -38,9 +38,9 @@ import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
-import uk.co.saiman.experiment.instruction.ExecutorService;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
-import uk.co.saiman.experiment.storage.StorageService;
+import uk.co.saiman.experiment.storage.service.StorageService;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
@@ -61,23 +61,21 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   private final JsonStateMapFormat stateMapFormat;
   private final JsonExperimentDefinitionFormat definitionFormat;
 
-  public JsonExperimentFormat(ExecutorService procedureService, StorageService storageService) {
-    this(procedureService, storageService, new JsonStateMapFormat());
+  public JsonExperimentFormat(ExecutorService executorService, StorageService storageService) {
+    this(executorService, storageService, new JsonStateMapFormat());
   }
 
   public JsonExperimentFormat(
-      ExecutorService procedureService,
+      ExecutorService executorService,
       StorageService storageService,
       JsonStateMapFormat stateMapFormat) {
     this(
-        procedureService,
         storageService,
         stateMapFormat,
-        new JsonExperimentDefinitionFormat(procedureService, stateMapFormat));
+        new JsonExperimentDefinitionFormat(executorService, stateMapFormat));
   }
 
   public JsonExperimentFormat(
-      ExecutorService procedureService,
       StorageService storageService,
       JsonStateMapFormat stateMapFormat,
       JsonExperimentDefinitionFormat definitionFormat) {

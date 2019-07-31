@@ -27,28 +27,27 @@
  */
 package uk.co.saiman.experiment.service.impl;
 
-import static java.util.function.Function.identity;
-import static org.osgi.framework.FrameworkUtil.createFilter;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.instruction.ExecutorService;
+import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.service.ExperimentServiceConstants;
 import uk.co.saiman.experiment.service.impl.ExecutorServiceImpl.ExecutorServiceConfiguration;
-import uk.co.saiman.osgi.ServiceIndex;
-import uk.co.saiman.osgi.ServiceRecord;
 
 /**
  * An OSGi-based implementation of the {@link ExecutorService experiment
@@ -79,48 +78,46 @@ import uk.co.saiman.osgi.ServiceRecord;
 public class ExecutorServiceImpl implements ExecutorService {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(name = "Executor Service", description = "A service over a set of executors which may interact")
-  public @interface ExecutorServiceConfiguration {
-    String executorFilter() default "";
-  }
+  public @interface ExecutorServiceConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.executors";
 
-  private final ServiceIndex<?, String, Executor<?>> executors;
+  private final Map<String, Executor> executors;
+  private final Map<Executor, String> ids;
 
   @Activate
-  public ExecutorServiceImpl(ExecutorServiceConfiguration configuration, BundleContext context)
-      throws InvalidSyntaxException {
-    String filterString = "(" + Constants.OBJECTCLASS + "=" + Executor.class.getName() + ")";
-    if (!configuration.executorFilter().isBlank()) {
-      filterString = "(&" + filterString + configuration.executorFilter() + ")";
+  public ExecutorServiceImpl(
+      BundleContext context,
+      @Reference(name = "executors", policyOption = GREEDY) List<ServiceReference<Executor>> executors) {
+    this.executors = new HashMap<>();
+    this.ids = new HashMap<>();
+
+    for (var executorReference : executors) {
+      var executor = context.getService(executorReference);
+      executorIndexer(executorReference).ifPresent(id -> {
+        this.executors.put(id, executor);
+        this.ids.put(executor, id);
+      });
     }
-    executors = ServiceIndex
-        .open(
-            context,
-            createFilter(filterString),
-            identity(),
-            ExecutorServiceImpl::executorIndexer);
   }
 
-  private static Optional<String> executorIndexer(
-      Executor<?> object,
-      ServiceReference<Executor<?>> serviceReference) {
+  private static Optional<String> executorIndexer(ServiceReference<Executor> serviceReference) {
     return Optional
         .ofNullable((String) serviceReference.getProperty(ExperimentServiceConstants.EXECUTOR_ID));
   }
 
   @Override
-  public Stream<Executor<?>> executors() {
-    return executors.objects();
+  public Stream<Executor> executors() {
+    return executors.values().stream();
   }
 
   @Override
-  public Executor<?> getExecutor(String id) {
-    return executors.get(id).get().serviceObject();
+  public Executor getExecutor(String id) {
+    return executors.get(id);
   }
 
   @Override
-  public String getId(Executor<?> executor) {
-    return executors.findRecord(executor).flatMap(ServiceRecord::id).get();
+  public String getId(Executor executor) {
+    return ids.get(executor);
   }
 }

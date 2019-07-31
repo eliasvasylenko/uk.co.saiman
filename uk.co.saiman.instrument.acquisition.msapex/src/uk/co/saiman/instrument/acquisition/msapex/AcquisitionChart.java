@@ -33,7 +33,7 @@ import static uk.co.saiman.measurement.Units.second;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
 
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.BorderPane;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
@@ -42,7 +42,7 @@ import uk.co.saiman.msapex.chart.MetricTickUnits;
 import uk.co.saiman.msapex.chart.QuantityAxis;
 import uk.co.saiman.observable.Disposable;
 
-public class AcquisitionChart extends Pane {
+public class AcquisitionChart extends BorderPane {
   private final AcquisitionDevice<?> device;
   private final ContinuousFunctionSeries<Time, Dimensionless> series;
   private volatile Disposable observation;
@@ -55,11 +55,11 @@ public class AcquisitionChart extends Pane {
     ContinuousFunctionChart<Time, Dimensionless> chartController = new ContinuousFunctionChart<Time, Dimensionless>(
         new QuantityAxis<>(new MetricTickUnits<>(second())),
         new QuantityAxis<>(new MetricTickUnits<>(count())).setPaddingApplied(true));
-    chartController.setTitle(presentationService.getPresentation(device).getLabel());
+    chartController.setTitle(presentationService.present(device).getLocalizedLabel());
 
     this.series = chartController.addSeries();
 
-    getChildren().add(chartController);
+    setCenter(chartController);
   }
 
   public synchronized void open() {

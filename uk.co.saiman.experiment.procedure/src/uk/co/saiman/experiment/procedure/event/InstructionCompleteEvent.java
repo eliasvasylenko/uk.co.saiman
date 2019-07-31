@@ -27,18 +27,18 @@
  */
 package uk.co.saiman.experiment.procedure.event;
 
+import uk.co.saiman.experiment.conductor.Conductor;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.procedure.Conductor;
 
 public class InstructionCompleteEvent extends ConductorEvent {
-  private final Instruction<?> instruction;
+  private final Instruction instruction;
 
-  public InstructionCompleteEvent(Conductor scheduler, Instruction<?> instruction) {
+  public InstructionCompleteEvent(Conductor scheduler, Instruction instruction) {
     super(scheduler);
     this.instruction = instruction;
   }
 
-  public Instruction<?> instruction() {
+  public Instruction instruction() {
     return instruction;
   }
 

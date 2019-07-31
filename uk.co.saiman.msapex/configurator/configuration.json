@@ -1,6 +1,6 @@
 {
 	"uk.co.saiman.console.log": {
-		"enabled": false
+		"enabled": true
 	},
 	"uk.co.saiman.webmodules.server~msapex": {
 		"osgi.http.whiteboard.servlet.pattern": "/webmodules/*"

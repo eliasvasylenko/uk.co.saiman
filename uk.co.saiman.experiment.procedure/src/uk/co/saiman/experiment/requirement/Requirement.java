@@ -28,11 +28,11 @@
 package uk.co.saiman.experiment.requirement;
 
 import uk.co.saiman.experiment.dependency.Dependency;
-import uk.co.saiman.experiment.environment.Provision;
-import uk.co.saiman.experiment.production.Observation;
-import uk.co.saiman.experiment.production.Preparation;
-import uk.co.saiman.experiment.production.Product;
-import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.dependency.Product;
+import uk.co.saiman.experiment.dependency.source.Observation;
+import uk.co.saiman.experiment.dependency.source.Preparation;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.requirement.ResultRequirement.Cardinality;
 
 public abstract class Requirement<T extends Dependency> {

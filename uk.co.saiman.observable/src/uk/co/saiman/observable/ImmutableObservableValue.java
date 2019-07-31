@@ -27,13 +27,14 @@
  */
 package uk.co.saiman.observable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class ImmutableObservableValue<T> implements ObservableValue<T> {
   private final T value;
 
   public ImmutableObservableValue(T value) {
-    this.value = value;
+    this.value = Objects.requireNonNull(value);
   }
 
   @Override
@@ -54,5 +55,10 @@ public class ImmutableObservableValue<T> implements ObservableValue<T> {
   @Override
   public Observable<T> value() {
     return Observable.of(value);
+  }
+
+  @Override
+  public Observable<Optional<T>> optionalValue() {
+    return Observable.of(Optional.of(Optional.of(value)));
   }
 }

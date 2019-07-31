@@ -31,6 +31,8 @@ import static uk.co.saiman.instrument.DeviceStatus.AVAILABLE;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -46,11 +48,8 @@ import uk.co.saiman.instrument.DeviceImpl;
  *
  */
 public abstract class AbstractingDevice<U extends Controller> extends DeviceImpl<U> {
+  private final Executor checkDependencyExecutor = Executors.newSingleThreadExecutor();
   private final Map<Device<?>, DeviceDependency<?>> dependencies = new HashMap<>();
-
-  public AbstractingDevice(String name) {
-    super(name);
-  }
 
   @Override
   protected synchronized void dispose() {
@@ -78,7 +77,7 @@ public abstract class AbstractingDevice<U extends Controller> extends DeviceImpl
       try {
         for (var dependency : dependencies.values()) {
           dependency.open();
-          var control = dependency.getController();
+          var control = dependency.acquireController();
           if (control.isEmpty() || control.get().isClosed()) {
             throw new IllegalStateException();
           }
@@ -137,6 +136,7 @@ public abstract class AbstractingDevice<U extends Controller> extends DeviceImpl
         device,
         time,
         unit,
+        checkDependencyExecutor,
         dep -> checkDependencies());
     dependencies.put(device, dependency);
   }

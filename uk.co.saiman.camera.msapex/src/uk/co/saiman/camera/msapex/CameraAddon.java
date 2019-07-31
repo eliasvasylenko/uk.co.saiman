@@ -93,7 +93,7 @@ public class CameraAddon {
 
         // Set the default camera device to the last one which was selected
         deviceIndex.findRecord(device).ifPresent(service -> {
-          defaultCamera = service.id().orElse(null);
+          defaultCamera = service.ids().findFirst().orElse(null);
           addon.getPersistedState().put(SELECTED_DEVICE_KEY, defaultCamera);
         });
         defaultConnect = connection != null;
@@ -124,7 +124,7 @@ public class CameraAddon {
     CameraDevice currentDevice = context.get(CameraDevice.class);
 
     if (currentDevice == null) {
-      deviceIndex.get(defaultCamera).ifPresent(device -> {
+      deviceIndex.highestRankedRecord(defaultCamera).tryGet().ifPresent(device -> {
         boolean connect = defaultConnect;
         CameraSelectionHelper.selectCamera(context, device.serviceObject());
         if (connect) {

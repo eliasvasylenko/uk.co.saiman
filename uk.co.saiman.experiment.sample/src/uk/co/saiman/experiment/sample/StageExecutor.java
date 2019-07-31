@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.environment.Provision;
+import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.instrument.stage.PolarStage;
 import uk.co.saiman.instrument.stage.StageController;
 

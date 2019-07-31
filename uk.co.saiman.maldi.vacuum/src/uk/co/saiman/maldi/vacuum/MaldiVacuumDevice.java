@@ -113,8 +113,6 @@ public class MaldiVacuumDevice extends DeviceImpl<VacuumController>
       Log log,
       MessageReceiver status,
       MessageSender command) {
-    super("MALDI Vacuum Device");
-
     this.sampleResolution = sampleResolution;
     this.pressureUnit = pascal().getUnit();
     this.timeUnit = second().getUnit();

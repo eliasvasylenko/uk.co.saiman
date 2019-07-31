@@ -32,6 +32,8 @@ import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE
 import static uk.co.saiman.instrument.DeviceStatus.UNAVAILABLE;
 
 import java.util.Hashtable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 import javax.measure.quantity.Length;
@@ -79,6 +81,8 @@ public class MaldiStageManager {
   @ObjectClassDefinition(id = CONFIGURATION_PID, name = "MALDI Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
   public @interface MaldiStageConfiguration {}
 
+  private final Executor processStateQueue;
+
   private final XYStage<?> xyStage;
   private DeviceDependency<? extends XYStageController> xyStageController;
   private Disposable observer;
@@ -89,8 +93,15 @@ public class MaldiStageManager {
   private ServiceRegistration<?> sampleAreaRegistration;
 
   public MaldiStageManager(XYStage<?> xyStage) {
+    this.processStateQueue = Executors.newSingleThreadExecutor();
+
     this.xyStage = xyStage;
-    this.xyStageController = new DeviceDependency<>(xyStage, 5, SECONDS, d -> processState());
+    this.xyStageController = new DeviceDependency<>(
+        xyStage,
+        5,
+        SECONDS,
+        processStateQueue,
+        d -> processState());
 
     this.samplePlateStage = new SamplePlateStageImpl(this);
     this.sampleAreaStage = new SampleAreaStageImpl(this);
@@ -148,7 +159,11 @@ public class MaldiStageManager {
 
   public synchronized void open() {
     xyStageController.open();
-    observer = xyStage.sampleState().value().observe(s -> processState());
+    observer = xyStage
+        .sampleState()
+        .value()
+        .executeOn(processStateQueue)
+        .observe(s -> processState());
   }
 
   public synchronized void close() {
@@ -219,7 +234,7 @@ public class MaldiStageManager {
       RequestedSampleState<XYCoordinate<Length>> state,
       Runnable success,
       Runnable failure) {
-    xyStageController.getController().ifPresentOrElse(control -> {
+    xyStageController.acquireController().ifPresentOrElse(control -> {
       if (!xyStage.requestedSampleState().isEqual(state)) {
         control.request(state);
       }

@@ -42,13 +42,12 @@ import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
-import uk.co.saiman.experiment.environment.Provision;
-import uk.co.saiman.experiment.instruction.ExecutionContext;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Condition;
-import uk.co.saiman.experiment.production.Observation;
-import uk.co.saiman.experiment.production.Preparation;
-import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.dependency.source.Observation;
+import uk.co.saiman.experiment.dependency.source.Preparation;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.dependency.source.Provision;
+import uk.co.saiman.experiment.executor.ExecutionContext;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.ConditionRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;
@@ -63,7 +62,7 @@ import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
  * 
  * @author Elias N Vasylenko
  */
-public interface SpectrumExecutor<T> extends Executor<Condition<T>> {
+public interface SpectrumExecutor extends Executor {
   String SPECTRUM_DATA_NAME = "spectrum";
   Observation<Spectrum> SPECTRUM = new Observation<>("uk.co.saiman.data.spectrum");
 
@@ -73,11 +72,12 @@ public interface SpectrumExecutor<T> extends Executor<Condition<T>> {
 
   Provision<? extends AcquisitionController> acquisitionControl();
 
-  Preparation<T> samplePreparation();
+  Preparation<?> samplePreparation();
 
   @Override
-  default void execute(ExecutionContext<Condition<T>> context) {
-    var device = context.acquireResource(acquisitionDevice());
+  default void execute(ExecutionContext context) {
+    var device = context.acquireDependency(acquisitionDevice()).value();
+    var sample = context.acquireDependency(samplePreparation());
 
     System.out.println("create accumulator");
     ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
@@ -111,12 +111,12 @@ public interface SpectrumExecutor<T> extends Executor<Condition<T>> {
         .accumulation()
         .observe(
             o -> context
-                .setPartialResult(
+                .observePartialResult(
                     SPECTRUM,
                     () -> new SampledSpectrum(o.getLatestAccumulation(), calibration, processing)));
 
     System.out.println("start acquisition");
-    var controller = context.acquireResource(acquisitionControl());
+    var controller = context.acquireDependency(acquisitionControl()).value();
     controller.startAcquisition();
 
     /*
@@ -139,11 +139,11 @@ public interface SpectrumExecutor<T> extends Executor<Condition<T>> {
     var accumulation = accumulator.getCompleteAccumulation();
 
     context.setResultFormat(SPECTRUM, SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
-    context.setResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
+    context.observeResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
   }
 
   @Override
-  default ConditionRequirement<T> mainRequirement() {
+  default ConditionRequirement<?> mainRequirement() {
     return Requirement.on(samplePreparation());
   }
 

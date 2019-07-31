@@ -34,10 +34,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.dependency.Nothing;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.requirement.Requirement;
@@ -46,15 +45,15 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
   private final ExperimentId id;
   private Procedure procedure;
 
-  private ExperimentDefinition(ExperimentId id, List<StepDefinition<?>> steps) {
+  private ExperimentDefinition(ExperimentId id, List<StepDefinition> steps) {
     super(steps);
     this.id = id;
   }
 
   private ExperimentDefinition(
       ExperimentId id,
-      List<StepDefinition<?>> steps,
-      Map<ExperimentId, StepDefinition<?>> dependents) {
+      List<StepDefinition> steps,
+      Map<ExperimentId, StepDefinition> dependents) {
     super(steps, dependents);
     this.id = id;
   }
@@ -88,21 +87,18 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
 
   @Override
   ExperimentDefinition with(
-      List<StepDefinition<?>> steps,
-      Map<ExperimentId, StepDefinition<?>> dependents) {
+      List<StepDefinition> steps,
+      Map<ExperimentId, StepDefinition> dependents) {
     return new ExperimentDefinition(id, steps, dependents);
   }
 
   @Override
-  ExperimentDefinition with(List<StepDefinition<?>> steps) {
+  ExperimentDefinition with(List<StepDefinition> steps) {
     return new ExperimentDefinition(id, steps);
   }
 
-  @SuppressWarnings("unchecked")
-  public Stream<StepDefinition<Nothing>> independentSteps() {
-    return substeps()
-        .filter(i -> i.executor().mainRequirement().equals(Requirement.none()))
-        .map(i -> (StepDefinition<Nothing>) i);
+  public Stream<StepDefinition> independentSteps() {
+    return substeps().filter(i -> i.executor().mainRequirement().equals(Requirement.none()));
   }
 
   public Procedure procedure() {
@@ -112,18 +108,18 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
     return procedure;
   }
 
-  private List<Instruction<?>> closure(StepContainer<?, ?> steps) {
+  private List<Instruction> closure(StepContainer<?, ?> steps) {
     return steps
         .substeps()
         .flatMap(step -> closure(step, ExperimentPath.defineAbsolute()))
         .collect(toList());
   }
 
-  private Stream<Instruction<?>> closure(StepDefinition<?> step, ExperimentPath<Absolute> path) {
+  private Stream<Instruction> closure(StepDefinition step, ExperimentPath<Absolute> path) {
     var p = path.resolve(step.id());
     return Stream
         .concat(
-            Stream.of(new Instruction<>(p, step.variableMap(), step.executor())),
+            Stream.of(new Instruction(p, step.variableMap(), step.executor())),
             step.substeps().flatMap(s -> closure(s, p)));
   }
 }

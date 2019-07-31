@@ -29,12 +29,11 @@ package uk.co.saiman.experiment.sample;
 
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.dependency.Nothing;
-import uk.co.saiman.experiment.environment.Provision;
-import uk.co.saiman.experiment.instruction.ExecutionContext;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Preparation;
-import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.dependency.source.Preparation;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.dependency.source.Provision;
+import uk.co.saiman.experiment.executor.ExecutionContext;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.NoRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;
@@ -49,7 +48,7 @@ import uk.co.saiman.instrument.sample.SampleController;
  * 
  * @author Elias N Vasylenko
  */
-public interface SampleExecutor<T> extends Executor<Nothing> {
+public interface SampleExecutor<T> extends Executor {
   Variable<T> sampleLocation();
 
   Preparation<Void> samplePreparation();
@@ -57,9 +56,9 @@ public interface SampleExecutor<T> extends Executor<Nothing> {
   Provision<? extends SampleController<T>> sampleDevice();
 
   @Override
-  default void execute(ExecutionContext<Nothing> context) {
+  default void execute(ExecutionContext context) {
     var location = context.getVariable(sampleLocation());
-    var controller = context.acquireResource(sampleDevice());
+    var controller = context.acquireDependency(sampleDevice()).value();
 
     controller.requestAnalysis(location);
     context.prepareCondition(samplePreparation(), null);

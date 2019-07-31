@@ -13,7 +13,7 @@ Private-Package: uk.co.saiman.experiment.processing.impl
 \
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
 	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\

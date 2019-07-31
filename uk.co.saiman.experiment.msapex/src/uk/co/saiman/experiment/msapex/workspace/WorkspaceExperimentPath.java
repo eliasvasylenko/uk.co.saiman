@@ -29,9 +29,9 @@ package uk.co.saiman.experiment.msapex.workspace;
 
 import java.util.Objects;
 
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 
 public class WorkspaceExperimentPath implements Comparable<WorkspaceExperimentPath> {
   private final ExperimentId experimentIndex;

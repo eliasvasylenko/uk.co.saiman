@@ -44,7 +44,7 @@ Export-Package: \
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.definition;version=snapshot,\
-	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\

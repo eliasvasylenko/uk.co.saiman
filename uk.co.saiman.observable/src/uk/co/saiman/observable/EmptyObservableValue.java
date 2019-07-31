@@ -61,4 +61,9 @@ public class EmptyObservableValue<T> implements ObservableValue<T> {
   public Observable<T> value() {
     return Observable.failing(cause);
   }
+
+  @Override
+  public Observable<Optional<T>> optionalValue() {
+    return Observable.of(Optional.empty());
+  }
 }

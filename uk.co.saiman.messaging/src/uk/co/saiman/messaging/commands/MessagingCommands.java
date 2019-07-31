@@ -28,6 +28,7 @@
 package uk.co.saiman.messaging.commands;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.messaging.commands.MessagingCommands.COMMAND_FUNCTION_KEY;
 import static uk.co.saiman.messaging.commands.MessagingCommands.COMMAND_SCOPE_KEY;
@@ -37,7 +38,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.felix.service.command.Descriptor;
@@ -110,7 +110,7 @@ public class MessagingCommands {
   private ServiceRecord<?, String, ?> get(String id) throws IOException {
     return Stream
         .of(dataReceiverIndex, messageReceiverIndex, dataSenderIndex, messageSenderIndex)
-        .flatMap(index -> index.get(id).stream())
+        .flatMap(index -> index.highestRankedRecord(id).tryGet().stream())
         .findAny()
         .orElseThrow(() -> new IOException("Cannot find channel"));
   }
@@ -119,8 +119,7 @@ public class MessagingCommands {
     return Stream
         .of(dataReceiverIndex, messageReceiverIndex, dataSenderIndex, messageSenderIndex)
         .flatMap(ServiceIndex::records)
-        .map(ServiceRecord::id)
-        .flatMap(Optional::stream)
+        .flatMap(ServiceRecord::ids)
         .distinct();
   }
 
@@ -379,7 +378,7 @@ public class MessagingCommands {
             "messageBufferOpen",
             (messageBuffers.containsKey(channel) ? "yes" : "no"),
             "id",
-            channel.id().orElse(null),
+            channel.ids().collect(joining(", ", "[", "]")),
             "description",
             service.toString(),
             "receives",

@@ -60,8 +60,6 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(id = CONFIGURATION_PID, name = "Composed XY Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
   public @interface ComposedXYStageConfiguration {
-    String name();
-
     String exchangeLocation();
 
     String analysisLocation();
@@ -76,7 +74,6 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
       @Reference(name = "yAxis") AxisDevice<Length, ?> yAxis,
       ComposedXYStageConfiguration configuration) {
     this(
-        configuration.name(),
         xAxis,
         yAxis,
         XYCoordinate.fromString(configuration.analysisLocation()).asType(Length.class),
@@ -84,12 +81,11 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   }
 
   public ComposedXYStage(
-      String name,
       AxisDevice<Length, ?> xAxis,
       AxisDevice<Length, ?> yAxis,
       XYCoordinate<Length> analysisLocation,
       XYCoordinate<Length> exchangeLocation) {
-    super(name, analysisLocation, exchangeLocation, xAxis, yAxis);
+    super(analysisLocation, exchangeLocation, xAxis, yAxis);
 
     this.xAxis = xAxis;
     this.yAxis = yAxis;

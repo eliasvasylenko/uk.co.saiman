@@ -35,30 +35,29 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Relative;
 import uk.co.saiman.experiment.dependency.Dependency;
-import uk.co.saiman.experiment.environment.StaticEnvironment;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath.Relative;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Product;
-import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.dependency.Product;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.StateMap;
 
-public class StepDefinition<T extends Dependency>
-    extends StepContainer<Relative, StepDefinition<T>> {
+public class StepDefinition extends StepContainer<Relative, StepDefinition> {
   private final ExperimentId id;
   private final StateMap variableMap;
-  private final Executor<T> executor;
+  private final Executor executor;
   private final Plan plan;
 
   private StepDefinition(
       ExperimentId id,
-      Executor<T> executor,
+      Executor executor,
       StateMap variableMap,
       Plan plan,
-      List<StepDefinition<?>> steps) {
+      List<StepDefinition> steps) {
     super(steps);
     this.id = id;
     this.variableMap = variableMap;
@@ -68,11 +67,11 @@ public class StepDefinition<T extends Dependency>
 
   private StepDefinition(
       ExperimentId id,
-      Executor<T> executor,
+      Executor executor,
       StateMap variableMap,
       Plan plan,
-      List<StepDefinition<?>> steps,
-      Map<ExperimentId, StepDefinition<?>> dependents) {
+      List<StepDefinition> steps,
+      Map<ExperimentId, StepDefinition> dependents) {
     super(steps, dependents);
     this.id = id;
     this.variableMap = variableMap;
@@ -80,24 +79,22 @@ public class StepDefinition<T extends Dependency>
     this.plan = plan;
   }
 
-  public static <T extends Dependency> StepDefinition<T> define(
-      ExperimentId id,
-      Executor<T> executor) {
+  public static <T extends Dependency> StepDefinition define(ExperimentId id, Executor executor) {
     return define(id, executor, StateMap.empty());
   }
 
-  public static <T extends Dependency> StepDefinition<T> define(
+  public static <T extends Dependency> StepDefinition define(
       ExperimentId id,
-      Executor<T> executor,
+      Executor executor,
       Variables variables) {
     return define(id, executor, variables.state());
   }
 
-  private static <T extends Dependency> StepDefinition<T> define(
+  private static <T extends Dependency> StepDefinition define(
       ExperimentId id,
-      Executor<T> executor,
+      Executor executor,
       StateMap variableMap) {
-    return new StepDefinition<>(
+    return new StepDefinition(
         requireNonNull(id),
         requireNonNull(executor),
         requireNonNull(variableMap),
@@ -110,8 +107,8 @@ public class StepDefinition<T extends Dependency>
     return id;
   }
 
-  public StepDefinition<T> withId(ExperimentId id) {
-    return new StepDefinition<>(
+  public StepDefinition withId(ExperimentId id) {
+    return new StepDefinition(
         requireNonNull(id),
         executor,
         variableMap,
@@ -124,22 +121,22 @@ public class StepDefinition<T extends Dependency>
     return variableMap;
   }
 
-  public StepDefinition<T> withVariableMap(StateMap variableMap) {
-    return new StepDefinition<>(id, executor, variableMap, plan, getSteps(), getDependents());
+  public StepDefinition withVariableMap(StateMap variableMap) {
+    return new StepDefinition(id, executor, variableMap, plan, getSteps(), getDependents());
   }
 
-  public Variables variables(StaticEnvironment environment) {
+  public Variables variables(SharedEnvironment environment) {
     return new Variables(environment, variableMap);
   }
 
-  public StepDefinition<T> withVariables(Variables variables) {
-    return new StepDefinition<>(id, executor, variables.state(), plan, getSteps(), getDependents());
+  public StepDefinition withVariables(Variables variables) {
+    return new StepDefinition(id, executor, variables.state(), plan, getSteps(), getDependents());
   }
 
-  public StepDefinition<T> withVariables(
-      StaticEnvironment environment,
+  public StepDefinition withVariables(
+      SharedEnvironment environment,
       Function<? super Variables, ? extends Variables> update) {
-    return new StepDefinition<>(
+    return new StepDefinition(
         id,
         executor,
         update.apply(variables(environment)).state(),
@@ -148,7 +145,7 @@ public class StepDefinition<T extends Dependency>
         getDependents());
   }
 
-  public Executor<T> executor() {
+  public Executor executor() {
     return executor;
   }
 
@@ -157,7 +154,7 @@ public class StepDefinition<T extends Dependency>
     if (!super.equals(obj))
       return false;
 
-    StepDefinition<?> that = (StepDefinition<?>) obj;
+    StepDefinition that = (StepDefinition) obj;
 
     return Objects.equals(this.id, that.id)
         && Objects.equals(this.variableMap, that.variableMap)
@@ -170,26 +167,22 @@ public class StepDefinition<T extends Dependency>
   }
 
   @Override
-  StepDefinition<T> with(
-      List<StepDefinition<?>> steps,
-      Map<ExperimentId, StepDefinition<?>> dependents) {
-    return new StepDefinition<>(id, executor, variableMap, plan, steps, dependents);
+  StepDefinition with(List<StepDefinition> steps, Map<ExperimentId, StepDefinition> dependents) {
+    return new StepDefinition(id, executor, variableMap, plan, steps, dependents);
   }
 
   @Override
-  StepDefinition<T> with(List<StepDefinition<?>> steps) {
-    return new StepDefinition<>(id, executor, variableMap, plan, steps);
+  StepDefinition with(List<StepDefinition> steps) {
+    return new StepDefinition(id, executor, variableMap, plan, steps);
   }
 
-  @SuppressWarnings("unchecked")
-  public <U extends Product> Stream<StepDefinition<U>> dependentSteps(Production<U> production) {
+  public <U extends Product> Stream<StepDefinition> dependentSteps(Production<U> production) {
     return substeps()
-        .filter(i -> i.executor().mainRequirement().equals(Requirement.on(production)))
-        .map(i -> (StepDefinition<U>) i);
+        .filter(i -> i.executor().mainRequirement().equals(Requirement.on(production)));
   }
 
-  public StepDefinition<T> withPlan(Plan plan) {
-    return new StepDefinition<>(id, executor, variableMap, plan, getSteps(), getDependents());
+  public StepDefinition withPlan(Plan plan) {
+    return new StepDefinition(id, executor, variableMap, plan, getSteps(), getDependents());
   }
 
   public Plan getPlan() {

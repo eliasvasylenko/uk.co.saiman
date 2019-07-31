@@ -26,4 +26,5 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 @org.osgi.annotation.versioning.Version("1.0.0")
+@org.osgi.service.configurator.annotations.RequireConfigurator
 package uk.co.saiman.experiment.msapex;

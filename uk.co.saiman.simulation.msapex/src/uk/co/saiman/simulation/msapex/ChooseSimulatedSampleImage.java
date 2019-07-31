@@ -37,8 +37,8 @@ import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import uk.co.saiman.reflection.resource.Jar;
-import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.SimulatedSampleImage;
+import uk.co.saiman.simulation.msapex.i18n.SimulationProperties;
 
 /**
  * Add an experiment to the workspace

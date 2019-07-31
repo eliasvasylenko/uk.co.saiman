@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.procedure.event;
 
-import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.conductor.Conductor;
 
 public class InterruptEvent extends ConductorEvent {
   public InterruptEvent(Conductor conductor) {

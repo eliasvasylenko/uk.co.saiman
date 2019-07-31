@@ -27,10 +27,17 @@
  */
 package uk.co.saiman.experiment.msapex.workspace;
 
+import static java.util.function.Function.identity;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
+import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.NEW_VALUE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
+import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
 import static org.osgi.framework.Constants.SERVICE_PID;
+import static uk.co.saiman.eclipse.perspective.EPerspectiveService.PERSPECTIVE_SOURCE_SNIPPET;
 import static uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FILE_SYSTEM_STORE_ID;
 import static uk.co.saiman.log.Log.Level.INFO;
 
@@ -55,31 +62,32 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.UIEvents;
-import org.eclipse.e4.ui.workbench.UIEvents.EventTags;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.fx.core.di.Service;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 
-import uk.co.saiman.experiment.environment.Environment;
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.instruction.ExecutorService;
+import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.msapex.workspace.event.AddExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.RemoveExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEventKind;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceExperimentEvent;
-import uk.co.saiman.experiment.storage.StorageService;
+import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
+import uk.co.saiman.experiment.storage.service.StorageService;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.osgi.ServiceIndex;
+import uk.co.saiman.osgi.ServiceRecord;
+import uk.co.saiman.state.StateMap;
 
 /**
  * Addon for registering an experiment workspace in the root application
@@ -92,6 +100,13 @@ public class ExperimentAddon {
   private static final String EXPERIMENTS = "experiments";
 
   public static final String WORKSPACE_STORE_ID = FILE_SYSTEM_STORE_ID + "~" + "ExperimentAddon";
+
+  public static final String ANALYSIS_PERSPECTIVE_ID = "uk.co.saiman.perspective.analysis";
+
+  public static final String ANALYSIS_ENVIRONMENT_SERVICE_ID = "uk.co.saiman.experiment.environment.analysis";
+  public static final String ENVIRONMENT_SERVICE_ID = "uk.co.saiman.experiment.environment";
+  public static final String STORAGE_SERVICE_ID = "uk.co.saiman.experiment.storage";
+  public static final String EXECUTOR_SERVICE_ID = "uk.co.saiman.experiment.executors";
 
   @Inject
   private IEclipseContext context;
@@ -108,34 +123,95 @@ public class ExperimentAddon {
   private ExperimentStepAdapterFactory experimentNodeAdapterFactory;
   private ExperimentAdapterFactory experimentAdapterFactory;
 
-  @Inject
-  @Service
-  private ExecutorService conductorService;
-  @Inject
-  @Service
-  private StorageService storageService;
-
   private Workspace workspace;
   private FileSystemStore workspaceStore;
   private ServiceRegistration<?> workspaceStoreRegsitration;
 
-  private ServiceIndex<Environment, String, Environment> environments;
+  private ServiceIndex<SharedEnvironment, String, SharedEnvironment> environments;
+
+  private ServiceIndex<StorageService, String, StorageService> storage;
+  private StorageService storageService;
+
+  private ServiceIndex<ExecutorService, String, ExecutorService> executors;
+  private ExecutorService executorService;
 
   @PostConstruct
   void initialize(@Named(INSTANCE_LOCATION) Location instanceLocation) throws URISyntaxException {
     try {
+      initializeEnvironments();
+      initializeStorage();
+      initializeExecutors();
+
       Path rootPath = Paths.get(instanceLocation.getURL().toURI());
       registerWorkspaceStore(rootPath);
       registerWorkspace(rootPath);
 
       initializeAdapters();
       initializeEvents();
-
-      environments = ServiceIndex.open(bundleContext, Environment.class);
     } catch (Exception e) {
       log.log(Level.ERROR, e);
       throw e;
     }
+  }
+
+  private void initializeEnvironments() {
+    environments = ServiceIndex.open(bundleContext, SharedEnvironment.class, identity());
+  }
+
+  private void initializeStorage() {
+    storage = ServiceIndex.open(bundleContext, StorageService.class, identity());
+    storageService = new StorageService() {
+      private java.util.Optional<StorageService> getBackingService() {
+        return storage
+            .highestRankedRecord(addon.getPersistedState().get(STORAGE_SERVICE_ID))
+            .tryGet()
+            .map(ServiceRecord::serviceObject);
+      }
+
+      @Override
+      public Stream<Store<?>> stores() {
+        return getBackingService().stream().flatMap(StorageService::stores);
+      }
+
+      @Override
+      public <T> StateMap deconfigureStorage(StorageConfiguration<T> processor) {
+        return getBackingService().orElseThrow().deconfigureStorage(processor);
+      }
+
+      @Override
+      public StorageConfiguration<?> configureStorage(StateMap persistedState) {
+        return getBackingService().orElseThrow().configureStorage(persistedState);
+      }
+    };
+    context.set(StorageService.class, storageService);
+  }
+
+  private void initializeExecutors() {
+    executors = ServiceIndex.open(bundleContext, ExecutorService.class, identity());
+    executorService = new ExecutorService() {
+      private java.util.Optional<ExecutorService> getBackingService() {
+        return executors
+            .highestRankedRecord(addon.getPersistedState().get(EXECUTOR_SERVICE_ID))
+            .tryGet()
+            .map(ServiceRecord::serviceObject);
+      }
+
+      @Override
+      public Stream<Executor> executors() {
+        return getBackingService().stream().flatMap(ExecutorService::executors);
+      }
+
+      @Override
+      public Executor getExecutor(String id) {
+        return getBackingService().orElseThrow().getExecutor(id);
+      }
+
+      @Override
+      public String getId(Executor procedure) {
+        return getBackingService().orElseThrow().getId(procedure);
+      }
+    };
+    context.set(ExecutorService.class, executorService);
   }
 
   private void registerWorkspaceStore(Path rootPath) {
@@ -153,7 +229,7 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspace(Path rootPath) {
-    workspace = new Workspace(rootPath, conductorService, storageService, log);
+    workspace = new Workspace(rootPath, executorService, storageService, log);
     context.set(Workspace.class, workspace);
 
     loadWorkspace();
@@ -222,6 +298,12 @@ public class ExperimentAddon {
     if (environments != null) {
       environments.close();
     }
+    if (storage != null) {
+      storage.close();
+    }
+    if (executors != null) {
+      executors.close();
+    }
   }
 
   private void initializeAdapters() {
@@ -254,41 +336,59 @@ public class ExperimentAddon {
   @Inject
   @Optional
   public void partActivated(@Active MPart part, EModelService modelService) {
-    /*
-     * When a new perspective is activated, set the perspective's environment on the
-     * root window.
-     */
-    var perspective = modelService.getPerspectiveFor(part);
-    var window = modelService.getTopLevelWindowFor(perspective);
-    window.getContext().set(Environment.class, perspective.getContext().get(Environment.class));
+    try {
+      /*
+       * When a new perspective is activated, set the perspective's environment on the
+       * root window.
+       */
+      var perspective = modelService.getPerspectiveFor(part);
+      var window = modelService.getTopLevelWindowFor(perspective);
+      if (perspective != null && window != null) {
+        var windowContext = window.getContext();
+        var perspectiveContext = perspective.getContext();
+        windowContext.set(SharedEnvironment.class, perspectiveContext.get(SharedEnvironment.class));
+      }
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
+    }
   }
 
   @Inject
   @Optional
-  public void perspectiveCreated(@UIEventTopic(UIEvents.UIElement.TOPIC_TOBERENDERED) Event event) {
-    /*
-     * When a new perspective is created, associate it with an experiment
-     * environment.
-     * 
-     * TODO We will put an experiment environment service id property in the
-     * persisted state of each perspective of which to select an environment.
-     * 
-     * TODO it might make sense to promote the "analysis" perspective from the root
-     * msapex project to the experiment project, since doing otherwise creates a
-     * hidden coupling between the two projects (by way of this property). Besides,
-     * analysis is really a type of experiment anyway so it only makes sense to
-     * define it here.
-     */
+  private void perspectiveOpenListener(@UIEventTopic(TOPIC_CONTEXT) Event event) {
+    try {
+      Object value = event.getProperty(NEW_VALUE);
+      Object element = event.getProperty(ELEMENT);
 
-    Object element = event.getProperty(EventTags.ELEMENT);
-    if (!(element instanceof MPerspective)) {
-      return;
+      if (element instanceof MPerspective
+          && value instanceof IEclipseContext
+          && SET.equals(event.getProperty(TYPE))) {
+        IEclipseContext context = (IEclipseContext) value;
+        MPerspective perspective = (MPerspective) element;
+
+        String environmentId;
+        if (perspective
+            .getPersistedState()
+            .get(PERSPECTIVE_SOURCE_SNIPPET)
+            .equals(ANALYSIS_PERSPECTIVE_ID)) {
+          environmentId = addon.getPersistedState().get(ANALYSIS_ENVIRONMENT_SERVICE_ID);
+        } else {
+          environmentId = perspective.getPersistedState().get(ENVIRONMENT_SERVICE_ID);
+        }
+
+        environments.highestRankedRecord(environmentId).optionalValue().observe(record -> {
+          try {
+            record.ifPresent(r -> {
+              var environment = new EclipseSharedEnvironment(r.serviceObject());
+              context.set(SharedEnvironment.class, environment);
+            });
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        });
+      }
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
     }
-
-    MPerspective perspective = (MPerspective) element;
-
-    System.out.println("Perspective created: " + perspective.getLabel());
-
-    throw new UnsupportedOperationException();
   }
 }

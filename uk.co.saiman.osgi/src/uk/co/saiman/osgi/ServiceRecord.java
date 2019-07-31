@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.osgi;
 
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -48,7 +48,7 @@ public interface ServiceRecord<S, U, T> extends Comparable<ServiceRecord<?, ?, ?
    */
   T serviceObject();
 
-  Optional<U> id();
+  Stream<U> ids();
 
   int rank();
 

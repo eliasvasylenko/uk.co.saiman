@@ -38,7 +38,7 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import javafx.scene.control.Label;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.sample.SampleExecutor;
 import uk.co.saiman.experiment.variables.Variables;
 
@@ -47,10 +47,10 @@ public class SampleExperimentNodeCell {
   @PostConstruct
   public void prepare(
       MCell cell,
-      Executor<?> exec,
+      Executor exec,
       SampleExecutor<?> sampleExecutor,
       Variables variables,
-      StepDefinition<?> step,
+      StepDefinition step,
       @Named(SUPPLEMENTAL_TEXT) Label supplemental) {
     cell = (MCell) (MUIElement) cell.getParent();
 

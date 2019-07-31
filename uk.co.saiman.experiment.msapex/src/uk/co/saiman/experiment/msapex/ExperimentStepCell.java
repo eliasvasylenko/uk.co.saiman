@@ -50,17 +50,16 @@ import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
 import uk.co.saiman.experiment.event.RemoveStepEvent;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
-import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.production.ProductPath;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.msapex.editor.EditorService;
 
@@ -96,8 +95,7 @@ public class ExperimentStepCell {
 
   @CanExecute
   public boolean canExecute() {
-    return Productions.observations(step.getExecutor()).count() > 0
-        && editorService.getApplicableEditors(Step.class, step).findFirst().isPresent();
+    return editorService.getApplicableEditors(Step.class, step).findFirst().isPresent();
   }
 
   @Execute

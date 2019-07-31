@@ -45,11 +45,11 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.experiment.dependency.Nothing;
-import uk.co.saiman.experiment.instruction.ExecutionContext;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.instruction.ExecutorException;
-import uk.co.saiman.experiment.production.Preparation;
-import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.dependency.source.Preparation;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.executor.ExecutionContext;
+import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.ExecutorException;
 import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.variables.Variable;
@@ -65,7 +65,7 @@ import uk.co.saiman.osgi.ServiceIndex;
 @Component(configurationPid = MaldiSamplePlateExecutor.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
     MaldiSamplePlateExecutor.class,
     Executor.class })
-public class MaldiSamplePlateExecutor implements Executor<Nothing> {
+public class MaldiSamplePlateExecutor implements Executor {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(name = "Maldi XY Stage Experiment Executor", description = "The experiment executor which manages the positioning of the sample stage")
   public @interface MaldiXYStageExecutorConfiguration {}
@@ -126,10 +126,10 @@ public class MaldiSamplePlateExecutor implements Executor<Nothing> {
   }
 
   @Override
-  public void execute(ExecutionContext<Nothing> context) {
+  public void execute(ExecutionContext context) {
     var requestedPreparation = new SamplePreparation(
         context.getVariable(SAMPLE_PLATE_ID),
-        plateIndex.get(context.getVariable(SAMPLE_PLATE_ID)).get().serviceObject(),
+        plateIndex.highestRankedRecord(context.getVariable(SAMPLE_PLATE_ID)).get().serviceObject(),
         context.getVariables().get(SAMPLE_PLATE_BARCODE).orElse(null));
 
     try (var control = sampleDevice().acquireControl(2, SECONDS)) {

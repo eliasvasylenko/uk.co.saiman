@@ -27,14 +27,13 @@
  */
 package uk.co.saiman.experiment.msapex.step.provider;
 
+import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.dependency.Dependency;
-import uk.co.saiman.experiment.graph.ExperimentId;
 
-public interface DefineStep<T extends Dependency> {
-  default StepDefinition<T> withName(String name) {
+public interface DefineStep {
+  default StepDefinition withName(String name) {
     return withId(ExperimentId.fromName(name));
   }
 
-  StepDefinition<T> withId(ExperimentId id);
+  StepDefinition withId(ExperimentId id);
 }

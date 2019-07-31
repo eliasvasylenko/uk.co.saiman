@@ -61,12 +61,11 @@ import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.acquisition.AcquisitionException;
 import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.Observation;
-import uk.co.saiman.properties.PropertyLoader;
-import uk.co.saiman.simulation.SimulationProperties;
 import uk.co.saiman.simulation.instrument.DetectorSimulation;
 import uk.co.saiman.simulation.instrument.DetectorSimulationService;
 import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.AcquisitionSimulationConfiguration;
@@ -79,7 +78,7 @@ import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.Acquis
 @Designate(ocd = AcquisitionSimulationConfiguration.class, factory = true)
 @Component(configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
     Device.class,
-    AcquisitionDevice.class })
+    AcquisitionDevice.class }, immediate = true)
 public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController>
     implements AcquisitionDevice<AcquisitionController> {
   @SuppressWarnings("javadoc")
@@ -147,7 +146,6 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   private final Unit<Dimensionless> intensityUnit;
   private final Unit<Time> timeUnit;
 
-  private final SimulationProperties simulationProperties;
   private final Log log;
 
   /*
@@ -180,52 +178,51 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   @Activate
   public SimulatedAcquisitionDevice(
       AcquisitionSimulationConfiguration configuration,
-      @Reference PropertyLoader loader,
       @Reference Log log,
       @Reference(name = "detectorService") DetectorSimulationService detectorService) {
     this(
         quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class),
-        loader.getProperties(SimulationProperties.class),
         log,
         detectorService);
   }
 
   public SimulatedAcquisitionDevice(
       Quantity<Time> acquisitionResolution,
-      SimulationProperties simulationProperties,
       Log log,
       DetectorSimulationService detectorService) {
-    super(simulationProperties.acquisitionSimulationDeviceName().toString());
+    try {
+      this.acquisitionResolution = acquisitionResolution;
+      this.log = log;
+      this.detectorService = detectorService;
 
-    this.acquisitionResolution = acquisitionResolution;
-    this.simulationProperties = simulationProperties;
-    this.log = log;
-    this.detectorService = detectorService;
+      acquisitionBuffer = new HotObservable<>();
+      dataListeners = new HotObservable<>();
+      acquisitionListeners = new HotObservable<>();
+      acquisitionListeners.complete();
+      acquiring = false;
+      experiment = Optional.empty();
 
-    acquisitionBuffer = new HotObservable<>();
-    dataListeners = new HotObservable<>();
-    acquisitionListeners = new HotObservable<>();
-    acquisitionListeners.complete();
-    acquiring = false;
-    experiment = Optional.empty();
+      intensityUnit = count().getUnit();
+      timeUnit = second().getUnit();
 
-    intensityUnit = count().getUnit();
-    timeUnit = second().getUnit();
+      setAcquisitionTime(new Scalar<>(second(), DEFAULT_ACQUISITION_TIME_SECONDS));
+      setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
 
-    setAcquisitionTime(new Scalar<>(second(), DEFAULT_ACQUISITION_TIME_SECONDS));
-    setAcquisitionCount(DEFAULT_ACQUISITION_COUNT);
+      acquisitionBuffer
+          .aggregateBackpressure()
+          .concatMap(Observable::of)
+          .executeOn(newSingleThreadExecutor())
+          .then(onObservation(Observation::requestNext))
+          .then(forObservation(o -> m -> o.requestNext()))
+          .observe(this::acquired);
 
-    acquisitionBuffer
-        .aggregateBackpressure()
-        .concatMap(Observable::of)
-        .executeOn(newSingleThreadExecutor())
-        .then(onObservation(Observation::requestNext))
-        .then(forObservation(o -> m -> o.requestNext()))
-        .observe(this::acquired);
+      initializeDetector();
 
-    initializeDetector();
-
-    new Thread(this::acquire).start();
+      new Thread(this::acquire).start();
+    } catch (Exception e) {
+      log.log(Level.ERROR, e);
+      throw e;
+    }
   }
 
   private void initializeDetector() {
@@ -400,7 +397,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
 
   void setAcquisitionCount(int count) {
     if (count <= 0) {
-      throw new AcquisitionException(simulationProperties.invalidAcquisitionCount(count));
+      throw new AcquisitionException("Invalid Acquisition Count: " + count);
     }
     acquisitionCount = count;
   }
@@ -418,11 +415,6 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   @Override
   public Unit<Dimensionless> getSampleIntensityUnit() {
     return intensityUnit;
-  }
-
-  @Override
-  public String toString() {
-    return getName();
   }
 
   @Override

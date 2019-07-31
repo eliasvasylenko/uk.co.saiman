@@ -64,7 +64,7 @@ public class MaldiSpectrumExperimentStepProviderDescriptor implements StepProvid
   }
 
   @Override
-  public Class<? extends StepProvider<?>> getProviderClass() {
+  public Class<? extends StepProvider> getProviderClass() {
     return MaldiSpectrumExperimentStepProvider.class;
   }
 }

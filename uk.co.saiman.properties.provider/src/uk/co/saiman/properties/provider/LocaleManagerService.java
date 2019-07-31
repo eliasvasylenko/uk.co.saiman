@@ -149,4 +149,9 @@ public class LocaleManagerService implements LocaleManager, LocaleProvider {
   public Observable<Locale> value() {
     return component.value();
   }
+
+  @Override
+  public Observable<Optional<Locale>> optionalValue() {
+    return component.optionalValue();
+  }
 }

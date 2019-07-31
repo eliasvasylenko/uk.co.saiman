@@ -28,9 +28,9 @@
 package uk.co.saiman.experiment.event;
 
 import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
 
 public abstract class ExperimentStepEvent extends ExperimentEvent {
   private final Step step;
@@ -49,7 +49,7 @@ public abstract class ExperimentStepEvent extends ExperimentEvent {
     return path;
   }
 
-  public StepDefinition<?> stepDefinition() {
+  public StepDefinition stepDefinition() {
     return experimentDefinition().findSubstep(path).get();
   }
 

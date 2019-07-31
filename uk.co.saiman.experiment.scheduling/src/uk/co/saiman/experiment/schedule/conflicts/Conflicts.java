@@ -38,14 +38,13 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.Resource;
-import uk.co.saiman.experiment.environment.StaticEnvironment;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.procedure.Productions;
-import uk.co.saiman.experiment.production.Production;
 import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.AdditionalResultRequirement;
 import uk.co.saiman.experiment.schedule.Schedule;
@@ -53,10 +52,10 @@ import uk.co.saiman.experiment.variables.Variables;
 
 public class Conflicts {
   private final Schedule schedule;
-  private final StaticEnvironment environment;
+  private final SharedEnvironment environment;
   private final Map<ExperimentPath<Absolute>, Change> differences;
 
-  public Conflicts(Schedule schedule, StaticEnvironment environment) {
+  public Conflicts(Schedule schedule, SharedEnvironment environment) {
     this.schedule = schedule;
     this.environment = environment;
 
@@ -90,8 +89,8 @@ public class Conflicts {
   public class ChangeImpl implements Change {
     private final ExperimentPath<Absolute> path;
 
-    private final Optional<Instruction<?>> previousInstruction;
-    private final Optional<Instruction<?>> scheduledInstruction;
+    private final Optional<Instruction> previousInstruction;
+    private final Optional<Instruction> scheduledInstruction;
 
     public ChangeImpl(ExperimentPath<Absolute> path) {
       this.path = path;
@@ -108,12 +107,12 @@ public class Conflicts {
     }
 
     @Override
-    public Optional<Instruction<?>> currentInstruction() {
+    public Optional<Instruction> currentInstruction() {
       return previousInstruction;
     }
 
     @Override
-    public Optional<Instruction<?>> scheduledInstruction() {
+    public Optional<Instruction> scheduledInstruction() {
       return scheduledInstruction;
     }
 
@@ -141,7 +140,7 @@ public class Conflicts {
     }
 
     @Override
-    public Optional<Instruction<?>> conflictingInstruction() {
+    public Optional<Instruction> conflictingInstruction() {
       return previousInstruction
           .filter(state -> scheduledInstruction.filter(state::equals).isEmpty());
     }
@@ -181,7 +180,12 @@ public class Conflicts {
       return change(dependency)
           .filter(
               c -> c.isConflicting()
-                  || Productions.produces(c.scheduledInstruction().get().executor(), production));
+                  || c
+                      .scheduledInstruction()
+                      .get()
+                      .executor()
+                      .products()
+                      .anyMatch(production::equals));
     }
   }
 }

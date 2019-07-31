@@ -37,7 +37,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MCompositePart;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 

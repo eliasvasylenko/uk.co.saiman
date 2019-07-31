@@ -30,10 +30,10 @@ package uk.co.saiman.experiment.schedule;
 import java.io.IOException;
 import java.util.Optional;
 
-import uk.co.saiman.experiment.procedure.Conductor;
+import uk.co.saiman.experiment.conductor.Conductor;
+import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
-import uk.co.saiman.experiment.production.Output;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.observable.Observable;
 

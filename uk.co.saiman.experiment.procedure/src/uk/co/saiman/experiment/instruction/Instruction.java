@@ -27,17 +27,16 @@
  */
 package uk.co.saiman.experiment.instruction;
 
-import uk.co.saiman.experiment.dependency.Dependency;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.state.StateMap;
 
 /**
  * An experiment instruction is the machine-consumable unit of information to
- * describe how an experiment step should be
- * {@link Executor#execute(ExecutionContext) executed}.
+ * describe how an experiment step should be executed.
  * <p>
  * An experiment instruction corresponds to a node in an experiment graph, and
  * should typically be processed as part of a {@link Procedure procedure}.
@@ -51,16 +50,13 @@ import uk.co.saiman.state.StateMap;
  * order to prepare and direct experiment execution.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T> the type of the {@link Executor#mainRequirement() requirement}
- *            of the instruction
  */
-public class Instruction<T extends Dependency> {
+public class Instruction {
   private final StateMap variableMap;
-  private final Executor<T> executor;
+  private final Executor executor;
   private final ExperimentPath<Absolute> path;
 
-  public Instruction(ExperimentPath<Absolute> path, StateMap variableMap, Executor<T> executor) {
+  public Instruction(ExperimentPath<Absolute> path, StateMap variableMap, Executor executor) {
     this.path = path;
     this.variableMap = variableMap;
     this.executor = executor;
@@ -74,7 +70,7 @@ public class Instruction<T extends Dependency> {
     return variableMap;
   }
 
-  public Executor<T> executor() {
+  public Executor executor() {
     return executor;
   }
 

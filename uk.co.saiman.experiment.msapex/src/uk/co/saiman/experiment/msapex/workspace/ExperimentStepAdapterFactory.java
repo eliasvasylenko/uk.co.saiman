@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.IAdapterManager;
 
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.instruction.Executor;
+import uk.co.saiman.experiment.executor.Executor;
 
 public class ExperimentStepAdapterFactory implements IAdapterFactory {
   private final IAdapterManager adapterManager;

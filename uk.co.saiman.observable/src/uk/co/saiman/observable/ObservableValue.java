@@ -114,6 +114,8 @@ public interface ObservableValue<T> {
 
   Observable<T> value();
 
+  Observable<Optional<T>> optionalValue();
+
   static <M> ObservableValue<M> empty(Supplier<Throwable> failure) {
     return new EmptyObservableValue<>(failure);
   }
@@ -157,6 +159,11 @@ public interface ObservableValue<T> {
       @Override
       public Observable<U> value() {
         return owner.value().map(mapping);
+      }
+
+      @Override
+      public Observable<Optional<U>> optionalValue() {
+        return owner.optionalValue().map(v -> v.map(mapping));
       }
     };
   }

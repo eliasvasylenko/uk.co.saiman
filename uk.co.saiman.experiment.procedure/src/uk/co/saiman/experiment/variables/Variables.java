@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.variables;
 import java.util.Optional;
 import java.util.function.Function;
 
-import uk.co.saiman.experiment.environment.StaticEnvironment;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
 import uk.co.saiman.state.StateMap;
 
 /**
@@ -39,15 +39,15 @@ import uk.co.saiman.state.StateMap;
  * @author Elias N Vasylenko
  */
 public class Variables {
-  private final StaticEnvironment environment;
+  private final SharedEnvironment environment;
   private final StateMap state;
 
-  public Variables(StaticEnvironment environment) {
+  public Variables(SharedEnvironment environment) {
     this.environment = environment;
     this.state = StateMap.empty();
   }
 
-  public Variables(StaticEnvironment environment, StateMap state) {
+  public Variables(SharedEnvironment environment, StateMap state) {
     this.environment = environment;
     this.state = state;
   }

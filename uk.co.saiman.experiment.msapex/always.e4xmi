@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:saiman.ui="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui" xmlns:ui="http://www.eclipse.org/ui/2010/UIModel/application/ui" xmi:id="_OHELUHzvEeeLpZ9wHq5Ynw">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_xM00IHzvEeeLpZ9wHq5Ynw" featurename="commands" parentElementId="uk.co.saiman.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_xM00IHzvEeeLpZ9wHq5Ynw" featurename="commands" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="commands:Command" xmi:id="_RiIukHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.experiment.command.runexperiment" commandName="Run Experiment" description="Run the selected experiment" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_VMhVoHzwEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.experiment.command.removestep" commandName="Remove Step" description="Remove an experiment step from the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_7__6MN9EEee47os9dS7QbA" elementId="uk.co.saiman.experiment.command.renameexperiment" commandName="Rename Experiment" description="Rename the selected experiment" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
@@ -9,10 +9,10 @@
     <elements xsi:type="commands:Command" xmi:id="_RZeykO17Eeit7PIHEtez9Q" elementId="uk.co.saiman.experiment.command.removeexperiment" commandName="Remove Experiment" description="Remove an experiment from the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
     <elements xsi:type="commands:Command" xmi:id="_Vr8gwHZIEemo2uwS8nakcA" elementId="uk.co.saiman.experiment.command.addworkspaceexperiment" commandName="Add Workspace Experiment" description="Add a filesystem experiment to the workspace" category="_6M4fYHzvEeeLpZ9wHq5Ynw"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_4bs1oHzvEeeLpZ9wHq5Ynw" featurename="categories" parentElementId="uk.co.saiman.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_4bs1oHzvEeeLpZ9wHq5Ynw" featurename="categories" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="commands:Category" xmi:id="_6M4fYHzvEeeLpZ9wHq5Ynw" elementId="uk.co.saiman.experiment.category" name="Experiments" description="Experiment definition and processing"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_qgKwYLsgEeel5-btXoqucA" featurename="snippets" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="basic:CompositePart" xmi:id="_oPdkMNgkEeiOZN9m2H2j1w" elementId="uk.co.saiman.experiment.compositepart.editor" contributionURI="bundleclass://uk.co.saiman.experiment.msapex/uk.co.saiman.experiment.msapex.ExperimentEditorPart" label="Experiment" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book.png" closeable="true" selectedElement="_NwK4kNg9EeiDZrJmfrSjFA" horizontal="true">
       <persistedState key="fx.stack.tabslocation" value="BOTTOM"/>
       <tags>segregatedDnD</tags>

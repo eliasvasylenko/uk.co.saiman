@@ -29,8 +29,8 @@ package uk.co.saiman.experiment.requirement;
 
 import java.util.Objects;
 
-import uk.co.saiman.experiment.production.Product;
-import uk.co.saiman.experiment.production.Production;
+import uk.co.saiman.experiment.dependency.Product;
+import uk.co.saiman.experiment.dependency.source.Production;
 
 public abstract class ProductRequirement<T extends Product> extends SomeRequirement<T> {
   private final Production<T> production;

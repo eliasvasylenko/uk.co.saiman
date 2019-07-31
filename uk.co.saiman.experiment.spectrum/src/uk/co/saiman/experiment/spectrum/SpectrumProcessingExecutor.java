@@ -42,10 +42,9 @@ import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
-import uk.co.saiman.experiment.instruction.ExecutionContext;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Production;
-import uk.co.saiman.experiment.production.Result;
+import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.executor.ExecutionContext;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.requirement.AdditionalRequirement;
 import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.requirement.ResultRequirement;
@@ -59,22 +58,22 @@ import uk.co.saiman.experiment.variables.VariableDeclaration;
  * @author Elias N Vasylenko
  */
 @Component(service = Executor.class)
-public class SpectrumProcessingExecutor implements Executor<Result<Spectrum>> {
+public class SpectrumProcessingExecutor implements Executor {
   public static final String OUTPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.output";
 
   @Override
-  public void execute(ExecutionContext<Result<Spectrum>> context) {
+  public void execute(ExecutionContext context) {
     DataProcessor processor = context.getVariable(PROCESSING_VARIABLE).getProcessor();
 
     context
-        .dependency()
+        .acquireDependency(SpectrumExecutor.SPECTRUM)
         .updates()
         .reduceBackpressure((a, b) -> b)
         .requestNext()
         .partialMap(i -> i.value())
         .map(s -> processSpectrum(processor, s))
         .thenRequestNext()
-        .then(r -> context.setPartialResult(SpectrumExecutor.SPECTRUM, () -> r))
+        .then(r -> context.observePartialResult(SpectrumExecutor.SPECTRUM, () -> r))
         .join();
   }
 

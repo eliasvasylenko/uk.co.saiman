@@ -41,9 +41,9 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.experiment.environment.Provision;
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Preparation;
+import uk.co.saiman.experiment.dependency.source.Preparation;
+import uk.co.saiman.experiment.dependency.source.Provision;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.spectrum.SpectrumExecutor;
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
@@ -55,7 +55,7 @@ import uk.co.saiman.maldi.stage.SamplePlateSubmission;
     MaldiSpectrumExecutor.class,
     SpectrumExecutor.class,
     Executor.class }, property = EXECUTOR_ID + "=" + MaldiSpectrumExecutor.EXECUTOR_ID)
-public class MaldiSpectrumExecutor implements SpectrumExecutor<SamplePlateSubmission> {
+public class MaldiSpectrumExecutor implements SpectrumExecutor {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(name = "Maldi Spectrum Experiment Executor", description = "The experiment executor which manages acquisition of spectra")
   public @interface MaldiSpectrumExecutorConfiguration {}

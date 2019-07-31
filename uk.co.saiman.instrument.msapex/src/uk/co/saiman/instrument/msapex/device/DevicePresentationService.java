@@ -31,5 +31,5 @@ import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.msapex.device.DevicePresentation;
 
 public interface DevicePresentationService {
-  DevicePresentation getPresentation(Device<?> device);
+  DevicePresentation present(Device<?> device);
 }

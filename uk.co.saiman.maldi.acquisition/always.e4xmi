@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_6ikzIJwMEemfBqNGW7FeDQ">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_Iv-tAJwNEemfBqNGW7FeDQ" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
-    <elements xsi:type="basic:Part" xmi:id="_QuIPUJwNEemfBqNGW7FeDQ" elementId="uk.co.saiman.maldi.acquisition.part" label="%acquisition"/>
+    <elements xsi:type="basic:Part" xmi:id="_QuIPUJwNEemfBqNGW7FeDQ" elementId="uk.co.saiman.maldi.acquisition.part" contributionURI="bundleclass://uk.co.saiman.maldi.acquisition/uk.co.saiman.maldi.acquisition.msapex.MaldiAcquisitionPart" label="%acquisition" closeable="true">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_gcNV0LOHEem7DN3zrNpGgA" elementId="uk.co.saiman.maldi.acquisition.toolbar.0"/>
+    </elements>
   </fragments>
 </fragment:ModelFragments>

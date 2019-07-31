@@ -45,7 +45,7 @@ public interface LocaleProvider extends ObservableValue<Locale> {
   /**
    * As returned by {@link #getDefaultProvider()}.
    */
-  LocaleProvider DEFAULT_PROVIDER = new DefaultLocaleProvider();
+  LocaleProvider DEFAULT_PROVIDER = getStaticProvider(Locale.getDefault());
 
   /**
    * @return the current locale
@@ -85,34 +85,11 @@ public interface LocaleProvider extends ObservableValue<Locale> {
       public Optional<Locale> tryGet() {
         return Optional.of(locale);
       }
+
+      @Override
+      public Observable<Optional<Locale>> optionalValue() {
+        return Observable.of(Optional.of(Optional.of(locale)));
+      }
     };
-  }
-}
-
-class DefaultLocaleProvider implements LocaleProvider {
-  private final Locale locale;
-
-  public DefaultLocaleProvider() {
-    this.locale = Locale.getDefault();
-  }
-
-  @Override
-  public Locale get() {
-    return locale;
-  }
-
-  @Override
-  public Observable<Change<Locale>> changes() {
-    return Observable.empty();
-  }
-
-  @Override
-  public Optional<Locale> tryGet() {
-    return Optional.empty();
-  }
-
-  @Override
-  public Observable<Locale> value() {
-    return Observable.empty();
   }
 }

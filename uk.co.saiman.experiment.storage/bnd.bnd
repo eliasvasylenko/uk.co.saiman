@@ -2,7 +2,7 @@ Bundle-Name: SAI :: Experiment :: Model
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
-	uk.co.saiman.experiment.graph;version=snapshot,\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
@@ -15,4 +15,5 @@ Bundle-Name: SAI :: Experiment :: Model
 
 Export-Package: \
 	uk.co.saiman.experiment.storage,\
-	uk.co.saiman.experiment.storage.filesystem
+	uk.co.saiman.experiment.storage.filesystem,\
+	uk.co.saiman.experiment.storage.service

@@ -1,7 +1,7 @@
 package uk.co.saiman.experiment.requirement;
 
-import uk.co.saiman.experiment.environment.Provision;
-import uk.co.saiman.experiment.environment.Resource;
+import uk.co.saiman.experiment.dependency.Resource;
+import uk.co.saiman.experiment.dependency.source.Provision;
 
 public class AdditionalResourceRequirement<T> extends AdditionalRequirement<Resource<T>> {
   private final Provision<T> provision;

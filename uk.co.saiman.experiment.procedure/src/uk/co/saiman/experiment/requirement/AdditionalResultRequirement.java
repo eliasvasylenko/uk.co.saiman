@@ -30,10 +30,10 @@ package uk.co.saiman.experiment.requirement;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.production.Observation;
-import uk.co.saiman.experiment.production.Result;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.dependency.source.Observation;
 import uk.co.saiman.experiment.variables.Variables;
 
 public class AdditionalResultRequirement<T> extends AdditionalRequirement<Result<T>> {

@@ -56,14 +56,17 @@ public class CopleyService {
   public String getId(CopleyController controller) {
     return controllers
         .findRecord(controller)
-        .flatMap(ServiceRecord::id)
+        .stream()
+        .flatMap(ServiceRecord::ids)
+        .findFirst()
         .orElseThrow(
             () -> new IllegalArgumentException("Cannot find id for controller " + controller));
   }
 
   public CopleyController getController(String id) {
     return controllers
-        .get(id)
+        .highestRankedRecord(id)
+        .tryGet()
         .orElseThrow(() -> new IllegalArgumentException("Cannot find controller for id " + id))
         .serviceObject();
   }

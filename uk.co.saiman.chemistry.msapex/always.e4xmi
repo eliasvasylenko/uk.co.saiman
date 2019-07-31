@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="__OjsYIDHEeeN2sgw5j4-sA">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_RcD-oIDIEeeN2sgw5j4-sA" featurename="commands" parentElementId="uk.co.saiman.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_RcD-oIDIEeeN2sgw5j4-sA" featurename="commands" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="commands:Command" xmi:id="_T7Fl0IDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.command.periodictable.resize" commandName="Periodic Table Resize" description="Resize the periodic table" category="_dUNRUIDIEeeN2sgw5j4-sA"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_YPrngIDIEeeN2sgw5j4-sA" featurename="handlers" parentElementId="uk.co.saiman.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_YPrngIDIEeeN2sgw5j4-sA" featurename="handlers" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="commands:Handler" xmi:id="_anNfkIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.handler.periodictable.resize" contributionURI="bundleclass://uk.co.saiman.chemistry.msapex/uk.co.saiman.chemistry.msapex.PeriodicTableResize" command="_T7Fl0IDIEeeN2sgw5j4-sA"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_b0r_UIDIEeeN2sgw5j4-sA" featurename="categories" parentElementId="uk.co.saiman.application">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_b0r_UIDIEeeN2sgw5j4-sA" featurename="categories" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="commands:Category" xmi:id="_dUNRUIDIEeeN2sgw5j4-sA" elementId="uk.co.saiman.chemistry.category" name="Chemistry" description="Chemical inspection"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_48rEgLRBEeeVS6ywMXk18Q" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">

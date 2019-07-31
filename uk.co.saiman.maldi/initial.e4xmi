@@ -7,6 +7,7 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_c7a3kKLcEemxZsBnDcR9jA" featurename="snippets" parentElementId="uk.co.saiman.trimmedwindow">
     <elements xsi:type="advanced:Perspective" xmi:id="_huvcoKLcEemxZsBnDcR9jA" elementId="uk.co.saiman.perspective.maldi" selectedElement="_huvcoaLcEemxZsBnDcR9jA" label="%maldi.perspective.name">
       <persistedState key="PerspectiveTargetStack" value="uk.co.saiman.perspectivestack"/>
+      <persistedState key="uk.co.saiman.experiment.environment" value="uk.co.saiman.experiment.environment~maldi"/>
       <children xsi:type="basic:PartSashContainer" xmi:id="_huvcoaLcEemxZsBnDcR9jA" elementId="uk.co.saiman.maldi.partsashcontainer.root" selectedElement="_huvco6LcEemxZsBnDcR9jA" horizontal="true">
         <children xsi:type="basic:PartStack" xmi:id="_huvcoqLcEemxZsBnDcR9jA" elementId="uk.co.saiman.maldi.partstack.overview" containerData="0.22">
           <children xsi:type="advanced:Placeholder" xmi:id="_rmfMkKe4EemTTscWD7NgZg" elementId="uk.co.saiman.maldi.placeholder.experiment" ref="_61GEwKe4EemTTscWD7NgZg" closeable="true"/>

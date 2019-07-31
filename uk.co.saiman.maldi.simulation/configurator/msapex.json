@@ -1,0 +1,7 @@
+{
+	"uk.co.saiman.instrument.devicepresentation~acquisition.maldisimulation": {
+		"device": "uk.co.saiman.simulation.instrument.acquisition~maldisimulation",
+		"deviceLabel": "%acquisition.simulation.device",
+		"iconUri": ""
+	}
+}

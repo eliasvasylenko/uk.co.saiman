@@ -117,6 +117,11 @@ public interface ObservableProperty<T> extends ObservableValue<T>, Property<T> {
       }
 
       @Override
+      public Observable<Optional<U>> optionalValue() {
+        return owner.optionalValue().map(o -> o.map(mappingOut));
+      }
+
+      @Override
       public U set(U to) {
         return mappingOut.apply(owner.set(mappingIn.apply(to)));
       }

@@ -1,6 +1,6 @@
 {
 	"uk.co.saiman.simulation.adc~maldisimulation": {
-		"signalToNoiseRatio": "120",
+		"signalToNoiseRatio": 120,
 		"sampleSource.target": "(service.pid=uk.co.saiman.simulation.samplesource.xystage~maldisimulation)"
 	},
 	"uk.co.saiman.simulation.instrument.acquisition~maldisimulation": {
@@ -12,13 +12,5 @@
 		"cameraResolutionHeight": 240,
 		"viewAreaWidth": "20mm",
 		"stageDevice.target": "(service.pid=uk.co.saiman.instrument.stage.composed.xy~maldisimulation)"
-	},
-	"uk.co.saiman.maldi.spectrumexecutor~maldisimulation": {
-		"acquisitionDevice.target": "(service.pid=uk.co.saiman.maldi.acquisition.device~maldisimulation)",
-		"uk.co.saiman.experiment.executors": "uk.co.saiman.maldisimulation"
-	},
-	"uk.co.saiman.maldi.acquisition.device~maldisimulation": {
-		"acquisitionDevice.target": "(service.pid=uk.co.saiman.simulation.instrument.acquisition~maldisimulation)",
-		"sampleAreaStage.target": "(service.pid=uk.co.saiman.instrument.stage.maldi~maldisimulation)"
 	}
 }

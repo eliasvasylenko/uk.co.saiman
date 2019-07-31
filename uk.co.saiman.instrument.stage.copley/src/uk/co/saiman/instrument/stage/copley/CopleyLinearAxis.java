@@ -108,7 +108,6 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   public CopleyLinearAxis(CopleyController comms, int node, int axis, Log log) {
-    super("copley axis " + comms + " " + node + " " + axis);
     this.log = log;
 
     this.comms = comms;
@@ -120,6 +119,11 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
     this.axisState = new ObservablePropertyImpl<>(LOCATION_FAILED);
 
     startPolling();
+  }
+
+  @Override
+  public String toString() {
+    return "copley-axis(" + comms + "," + node + "," + axis + ")";
   }
 
   protected synchronized void startPolling() {

@@ -1,0 +1,12 @@
+{
+	"uk.co.saiman.experiment.executors~msapex": {
+		"executors.target": "(!(uk.co.saiman.experiment.executors=*))"
+	},
+	"uk.co.saiman.experiment.storage~msapex": {
+		"stores.target": "(!(uk.co.saiman.experiment.storage=*))"
+	},
+	"uk.co.saiman.experiment.environment~msapex": {
+		"limitedResources.target": "(!(uk.co.saiman.experiment.environment=*))",
+		"unlimitedResources.target": "(!(uk.co.saiman.experiment.environment=*))"
+	}
+}

@@ -47,12 +47,12 @@ import uk.co.saiman.experiment.variables.Variable;
 public class Processing {
   public static final Variable<Processing> PROCESSING_VARIABLE = new Variable<>(
       "uk.co.saiman.processing",
-      environment -> processingAccessor(environment.getStaticValue(PROCESSING_SERVICE_RESOURCE)));
+      environment -> processingAccessor(environment.provideValue(PROCESSING_SERVICE_RESOURCE)));
 
   public static final Variable<DataProcessor> PROCESSOR_VARIABLE = new Variable<>(
       "uk.co.saiman.processor",
       environment -> ProcessingAccess
-          .processorAccessor(environment.getStaticValue(PROCESSING_SERVICE_RESOURCE)));
+          .processorAccessor(environment.provideValue(PROCESSING_SERVICE_RESOURCE)));
 
   private List<DataProcessor> steps;
 

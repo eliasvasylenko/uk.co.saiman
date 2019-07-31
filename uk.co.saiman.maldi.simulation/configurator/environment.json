@@ -1,0 +1,10 @@
+{
+	"uk.co.saiman.experiment.environment~maldi": {
+		"limitedResources.target": "(|(uk.co.saiman.experiment.environment=uk.co.saiman.maldisimulation)(!(uk.co.saiman.experiment.environment=*)))",
+		"unlimitedResources.target": "(|(uk.co.saiman.experiment.environment=uk.co.saiman.maldisimulation)(!(uk.co.saiman.experiment.environment=*)))"
+	},
+	"uk.co.saiman.maldi.acquisition.resource~maldisimulation": {
+		"device.target": "(service.pid=uk.co.saiman.simulation.instrument.acquisition~maldisimulation)",
+		"uk.co.saiman.experiment.environment": "uk.co.saiman.maldisimulation"
+	}
+}

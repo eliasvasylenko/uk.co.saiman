@@ -29,12 +29,13 @@ package uk.co.saiman.observable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.calls;
 import static org.mockito.Mockito.inOrder;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,8 +53,12 @@ public class ObservablePropertyImplTest {
   Observer<String> downstreamObserver;
   @Mock
   Observer<Change<String>> changeObserver;
+  @Mock
+  Observer<Optional<String>> optionalObserver;
   @Captor
   ArgumentCaptor<Change<String>> change;
+  @Captor
+  ArgumentCaptor<Optional<String>> optional;
   @Captor
   ArgumentCaptor<Throwable> failure;
 
@@ -152,8 +157,7 @@ public class ObservablePropertyImplTest {
     var inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onFail(failure.capture());
-    assertThat(failure.getValue(), instanceOf(MissingValueException.class));
-    assertThat(((MissingValueException) failure.getValue()).getCause(), equalTo(problem));
+    assertThat(failure.getValue(), equalTo(problem));
     inOrder.verifyNoMoreInteractions();
   }
 
@@ -225,6 +229,21 @@ public class ObservablePropertyImplTest {
     inOrder.verify(changeObserver).onNext(change.capture());
     assertThat(change.getValue().previousValue().get(), equalTo("initial"));
     assertFalse(change.getValue().newValue().isPresent());
+    inOrder.verifyNoMoreInteractions();
+  }
+
+  @Test
+  public void changeInitialToProblemToNextMessageOptionalValueTest() {
+    ObservablePropertyImpl<String> observable = new ObservablePropertyImpl<>("initial");
+    observable.optionalValue().observe(optionalObserver);
+    observable.setProblem(Throwable::new);
+    observable.set("next");
+
+    var inOrder = inOrder(optionalObserver);
+    inOrder.verify(optionalObserver).onObserve(any());
+    inOrder.verify(optionalObserver).onNext(Optional.of("initial"));
+    inOrder.verify(optionalObserver).onNext(Optional.empty());
+    inOrder.verify(optionalObserver).onNext(Optional.of("next"));
     inOrder.verifyNoMoreInteractions();
   }
 

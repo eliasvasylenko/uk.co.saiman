@@ -34,13 +34,19 @@ import javax.inject.Inject;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.instrument.Device;
+import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
 
 public class DeviceCell {
-  public static final String ID = "uk.co.saiman.instrument.msapex.device.cell";
+  public static final String ID = "uk.co.saiman.instrument.device.cell";
 
   @Inject
-  public void prepare(HBox node, MCell cell, Device<?> item) {
-    cell.setLabel(item.getName());
+  public void prepare(
+      HBox node,
+      MCell cell,
+      Device<?> item,
+      DevicePresentationService presentationService) {
+    cell.setLabel(presentationService.present(item).getLocalizedLabel());
+    cell.setIconURI(presentationService.present(item).getIconURI());
 
     item.status().value().observe(state -> {
       node.pseudoClassStateChanged(getPseudoClass(state.toString()), true);

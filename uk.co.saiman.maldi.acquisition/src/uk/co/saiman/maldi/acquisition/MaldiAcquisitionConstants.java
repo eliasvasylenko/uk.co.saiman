@@ -1,6 +1,6 @@
 package uk.co.saiman.maldi.acquisition;
 
-import uk.co.saiman.experiment.environment.Provision;
+import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 

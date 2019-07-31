@@ -27,8 +27,7 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.instruction.Executor;
-import uk.co.saiman.experiment.production.Product;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.instrument.raster.RasterDevice;
 
 /**
@@ -37,6 +36,6 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * 
  * @author Elias N Vasylenko
  */
-public interface RasterExecutor<U extends Product> extends Executor<U> {
+public interface RasterExecutor extends Executor {
   RasterDevice<?> device();
 }

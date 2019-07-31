@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment;
 
 import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.graph.ExperimentPath.defineAbsolute;
+import static uk.co.saiman.experiment.declaration.ExperimentPath.defineAbsolute;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -37,17 +37,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.dependency.Nothing;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
-import uk.co.saiman.experiment.graph.ExperimentId;
-import uk.co.saiman.experiment.graph.ExperimentPath;
-import uk.co.saiman.experiment.graph.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
-import uk.co.saiman.experiment.production.Output;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
@@ -113,7 +112,7 @@ public class Experiment {
     return scheduler.conductorEvents();
   }
 
-  public synchronized Step attach(StepDefinition<Nothing> stepDefinition) {
+  public synchronized Step attach(StepDefinition stepDefinition) {
     boolean changed = updateDefinition(getDefinition().withSubstep(stepDefinition));
 
     Step newStep = getIndependentStep(stepDefinition.id());
@@ -137,13 +136,13 @@ public class Experiment {
     return step;
   }
 
-  Optional<StepDefinition<?>> getStepDefinition(ExperimentPath<Absolute> path) {
+  Optional<StepDefinition> getStepDefinition(ExperimentPath<Absolute> path) {
     return getDefinition().findSubstep(path);
   }
 
   synchronized boolean updateStepDefinition(
       ExperimentPath<Absolute> path,
-      StepDefinition<?> stepDefinition) {
+      StepDefinition stepDefinition) {
     return getDefinition()
         .withSubstep(path, s -> Optional.ofNullable(stepDefinition))
         .map(d -> updateDefinition(d))
