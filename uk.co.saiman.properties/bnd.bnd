@@ -12,7 +12,8 @@ Bundle-Description: \
 	OSGI-INF/l10n=l10n
 
 Export-Package: \
-	uk.co.saiman.properties
+	uk.co.saiman.properties,\
+	uk.co.saiman.properties.service
 
 Private-Package: \
 	uk.co.saiman.properties.impl

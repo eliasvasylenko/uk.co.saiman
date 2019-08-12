@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local_Index" increment="1555582207809">
+<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local_Index" increment="1565266272007">
   <resource>
     <capability namespace="osgi.identity">
       <attribute name="license" value="http://www.opensource.org/licenses/eclipse-1.0.php"/>
@@ -36,22 +36,22 @@
       <attribute name="license" value="GPL; link = http://www.gnu.org/licenses/"/>
       <attribute name="osgi.identity" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" value="0.0.1.201904181006" type="Version"/>
+      <attribute name="version" value="0.0.1.201908081210" type="Version"/>
       <attribute name="documentation" value="https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
-      <attribute name="bundle-version" value="0.0.1.201904181006" type="Version"/>
+      <attribute name="bundle-version" value="0.0.1.201908081210" type="Version"/>
       <attribute name="osgi.wiring.bundle" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
     <capability namespace="osgi.wiring.host">
-      <attribute name="bundle-version" value="0.0.1.201904181006" type="Version"/>
+      <attribute name="bundle-version" value="0.0.1.201908081210" type="Version"/>
       <attribute name="osgi.wiring.host" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
     <capability namespace="osgi.content">
-      <attribute name="size" value="3941953" type="Long"/>
+      <attribute name="size" value="3945275" type="Long"/>
       <attribute name="url" value="uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-0.0.1.jar"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>
-      <attribute name="osgi.content" value="E9FD8113E357DD34B96B24BFEA78937FCF6778C641C95D722ED6365C8201E2D3"/>
+      <attribute name="osgi.content" value="FAE7F99D3238E6E35770466FD24548FF104668BB8F83120CF3E28CC2E716615B"/>
     </capability>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.annotation.plugin)(&amp;(version&gt;=1.0.0)(!(version&gt;=2.0.0))))"/>
@@ -84,61 +84,61 @@
       <directive name="filter" value="(&amp;(osgi.wiring.package=jdk.internal.misc))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.ar)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.ar)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.arj)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.arj)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.cpio)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.cpio)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.dump)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.dump)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.jar)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.jar)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.sevenz)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.archivers.sevenz)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.brotli)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.brotli)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.bzip2)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.bzip2)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.deflate)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.deflate)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.deflate64)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.deflate64)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.lz4)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.lz4)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.lzma)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.lzma)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.lzw)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.lzw)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.pack200)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.pack200)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.snappy)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.snappy)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.xz)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.xz)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.z)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.z)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.zstandard)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.compressors.zstandard)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
-      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.parallel)(&amp;(version&gt;=1.18.0)(!(version&gt;=2.0.0))))"/>
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.apache.commons.compress.parallel)(&amp;(version&gt;=1.17.0)(!(version&gt;=2.0.0))))"/>
     </requirement>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=org.osgi.framework)(&amp;(version&gt;=1.9.0)(!(version&gt;=2.0.0))))"/>
@@ -163,9 +163,6 @@
     </requirement>
     <requirement namespace="osgi.implementation">
       <directive name="filter" value="(&amp;(osgi.implementation=osgi.http)(version&gt;=1.1.0)(!(version&gt;=2.0.0)))"/>
-    </requirement>
-    <requirement namespace="osgi.ee">
-      <directive name="filter" value="(&amp;(osgi.ee=JavaSE)(version=11))"/>
     </requirement>
   </resource>
 </repository>

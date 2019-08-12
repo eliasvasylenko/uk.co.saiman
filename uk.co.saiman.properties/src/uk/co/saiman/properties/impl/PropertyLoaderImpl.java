@@ -38,7 +38,17 @@ import uk.co.saiman.properties.PropertyResourceLoader;
 import uk.co.saiman.properties.PropertyValueConverter;
 
 public class PropertyLoaderImpl implements PropertyLoader {
-  private final ComputingMap<Class<?>, Object> localizationCache;
+  private static class AccessorConfiguration {
+    private Class<?> accessorClass;
+    private ClassLoader classLoader;
+
+    public AccessorConfiguration(Class<?> accessorClass, ClassLoader classLoader) {
+      this.accessorClass = accessorClass;
+      this.classLoader = classLoader;
+    }
+  }
+
+  private final ComputingMap<AccessorConfiguration, Object> localizationCache;
 
   private final LocaleProvider locale;
   private final PropertyResourceLoader resourceLoader;
@@ -48,8 +58,10 @@ public class PropertyLoaderImpl implements PropertyLoader {
   /**
    * Create a new {@link PropertyLoader} instance for the given initial locale.
    * 
-   * @param locale the initial locale
-   * @param log    the log for localization
+   * @param locale
+   *          the initial locale
+   * @param log
+   *          the log for localization
    */
   public PropertyLoaderImpl(
       LocaleProvider locale,
@@ -57,7 +69,7 @@ public class PropertyLoaderImpl implements PropertyLoader {
       PropertyValueConverter valueConverter,
       Log log) {
     localizationCache = new CacheComputingMap<>(
-        c -> new PropertyAccessorDelegate<>(this, c).getProxy(),
+        c -> new PropertyAccessorDelegate<>(this, c.accessorClass, c.classLoader).getProxy(),
         true);
 
     this.locale = locale;
@@ -85,7 +97,8 @@ public class PropertyLoaderImpl implements PropertyLoader {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> T getProperties(Class<T> accessorConfiguration) {
-    return (T) localizationCache.putGet(accessorConfiguration);
+  public <T> T getProperties(Class<T> accessorConfiguration, ClassLoader classLoader) {
+    return (T) localizationCache
+        .putGet(new AccessorConfiguration(accessorConfiguration, classLoader));
   }
 }

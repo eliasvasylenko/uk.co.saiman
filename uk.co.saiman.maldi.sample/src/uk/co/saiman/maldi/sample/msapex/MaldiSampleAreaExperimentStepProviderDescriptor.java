@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
 import uk.co.saiman.experiment.msapex.step.provider.StepProviderDescriptor;
 import uk.co.saiman.maldi.stage.i18n.MaldiStageProperties;
-import uk.co.saiman.properties.PropertyLoader;
 
 @Component
 public class MaldiSampleAreaExperimentStepProviderDescriptor implements StepProviderDescriptor {
@@ -43,13 +42,14 @@ public class MaldiSampleAreaExperimentStepProviderDescriptor implements StepProv
   private final MaldiStageProperties properties;
 
   @Activate
-  public MaldiSampleAreaExperimentStepProviderDescriptor(@Reference PropertyLoader properties) {
-    this.properties = properties.getProperties(MaldiStageProperties.class);
+  public MaldiSampleAreaExperimentStepProviderDescriptor(
+      @Reference MaldiStageProperties properties) {
+    this.properties = properties;
   }
 
   @Override
   public String getLabel() {
-    return properties.stageExperimentStepName().toString();
+    return properties.samplePlateExperimentStepName().toString();
   }
 
   @Override

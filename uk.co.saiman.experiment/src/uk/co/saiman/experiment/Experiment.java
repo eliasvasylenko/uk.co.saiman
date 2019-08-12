@@ -159,7 +159,7 @@ public class Experiment {
 
   public synchronized Stream<Step> getIndependentSteps() {
     return definition
-        .independentSteps()
+        .substeps()
         .map(step -> defineAbsolute().resolve(step.id()))
         .map(this::getStep);
   }

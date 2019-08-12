@@ -9,7 +9,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.acquisition.msapex.AcquisitionChart;
 import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
@@ -31,18 +31,20 @@ public class MaldiAcquisitionPart {
   private BorderPane container;
 
   @Inject
-  public void setEnvironment(@Optional SharedEnvironment environment) {
+  public void setEnvironment(@Optional GlobalEnvironment environment) {
     if (environment == null) {
       unsetDevice();
       return;
     }
 
-    try {
-      environment
-          .provideValueOptionally(MALDI_ACQUISITION_DEVICE)
-          .ifPresentOrElse(this::setDevice, this::unsetDevice);
-    } catch (Exception e) {
-      setDeviceFailed();
+    if (environment.providesValue(MALDI_ACQUISITION_DEVICE)) {
+      try {
+        setDevice(environment.provideValue(MALDI_ACQUISITION_DEVICE));
+      } catch (Exception e) {
+        setDeviceFailed();
+      }
+    } else {
+      unsetDevice();
     }
   }
 

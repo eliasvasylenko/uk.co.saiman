@@ -45,13 +45,7 @@ import org.eclipse.e4.core.internal.contexts.ContextObjectSupplier;
 import org.eclipse.e4.core.internal.di.Requestor;
 import org.osgi.service.component.annotations.Deactivate;
 
-import uk.co.saiman.eclipse.utilities.TransformingNamedObjectSupplier;
-import uk.co.saiman.properties.PropertyLoader;
-
 /**
- * Supplier for Eclipse DI contexts, to provide localization implementations of
- * a requested type via a {@link PropertyLoader}.
- *
  * @since 1.2
  */
 public abstract class TransformingNamedObjectSupplier<T extends Annotation>

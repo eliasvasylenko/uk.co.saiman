@@ -28,11 +28,16 @@
 package uk.co.saiman.maldi.stage.i18n;
 
 import uk.co.saiman.properties.Localized;
+import uk.co.saiman.properties.service.PropertiesService;
 
+@PropertiesService
 public interface MaldiStageProperties {
-  Localized<String> stageExperimentStepName();
+  Localized<String> samplePlateExperimentStepName();
+
+  Localized<String> sampleAreaExperimentStepName();
+
+  Localized<String> samplePlateStageDeviceName();
 
   Localized<String> sampleAreaStageDeviceName();
 
-  Localized<String> samplePlateStageDeviceName();
 }

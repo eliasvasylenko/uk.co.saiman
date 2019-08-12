@@ -37,13 +37,13 @@ import java.util.Set;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.tracker.BundleTracker;
 
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
@@ -58,15 +58,15 @@ import uk.co.saiman.log.Log.Level;
  * 
  * @author Elias N Vasylenko
  */
-public abstract class ExtenderManager implements SynchronousBundleListener {
+public abstract class ExtenderManager extends BundleTracker<Bundle> {
   private BundleContext context;
   private BundleCapability capability;
   private Log log;
   private final Set<Bundle> extendedBundles = new HashSet<>();
 
-  public ExtenderManager(ComponentContext context) {
-    this.context = context.getBundleContext();
-    this.context.addBundleListener(this);
+  public ExtenderManager(BundleContext context) {
+    super(context, Bundle.ACTIVE, null);
+    this.context = context;
 
     List<BundleCapability> extenderCapabilities = this.context
         .getBundle()
@@ -86,30 +86,22 @@ public abstract class ExtenderManager implements SynchronousBundleListener {
     capability = extenderCapabilities.get(0);
   }
 
+  protected Version getVersion() {
+    var version = capability.getAttributes().get(Constants.VERSION_ATTRIBUTE);
+    if (version instanceof Version) {
+      return (Version) version;
+    } else {
+      return Version.parseVersion(version.toString());
+    }
+  }
+
   protected Log getLog() {
     return forwardingLog(() -> log);
   }
 
-  @Deactivate
-  protected void deactivate(ComponentContext context) throws Exception {
-    this.context.removeBundleListener(this);
-  }
-
   @Override
-  public void bundleChanged(BundleEvent event) {
-    switch (event.getType()) {
-    case BundleEvent.STARTING:
-      tryRegister(event.getBundle());
-      break;
-
-    case BundleEvent.STOPPING:
-      tryUnregister(event.getBundle());
-      break;
-
-    case BundleEvent.UPDATED:
-      tryUpdate(event.getBundle());
-      break;
-    }
+  public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+    tryUpdate(bundle);
   }
 
   protected void tryUpdate(Bundle bundle) {
@@ -128,6 +120,12 @@ public abstract class ExtenderManager implements SynchronousBundleListener {
                   + "'",
               e);
     }
+  }
+
+  @Override
+  public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+    tryRegister(bundle);
+    return bundle;
   }
 
   protected void tryRegister(Bundle bundle) {
@@ -154,6 +152,11 @@ public abstract class ExtenderManager implements SynchronousBundleListener {
         .getRequirements(EXTENDER_NAMESPACE)
         .stream()
         .anyMatch(r -> r.matches(capability));
+  }
+
+  @Override
+  public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+    tryUnregister(bundle);
   }
 
   private void tryUnregister(Bundle bundle) {

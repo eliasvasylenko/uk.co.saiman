@@ -32,11 +32,11 @@ import static java.lang.String.format;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.extensions.Service;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
@@ -54,7 +54,7 @@ public class RenameExperimentHandler {
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
   @Inject
   Workspace workspace;

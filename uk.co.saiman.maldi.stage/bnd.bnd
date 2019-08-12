@@ -48,6 +48,7 @@ Export-Package: \
 	uk.co.saiman.experiment.chemicalmap;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.experiment.osgi;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\

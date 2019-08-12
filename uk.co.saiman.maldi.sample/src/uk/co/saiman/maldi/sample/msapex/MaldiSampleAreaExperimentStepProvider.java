@@ -28,6 +28,7 @@
 package uk.co.saiman.maldi.sample.msapex;
 
 import static uk.co.saiman.experiment.sample.XYStageExecutor.LOCATION;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
 
 import java.util.stream.Stream;
 
@@ -35,11 +36,15 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.extensions.Service;
 
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.msapex.step.provider.DefineStep;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
+import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor;
 import uk.co.saiman.maldi.stage.msapex.MaldiStageDiagram;
 import uk.co.saiman.measurement.Units;
@@ -58,18 +63,27 @@ public class MaldiSampleAreaExperimentStepProvider implements StepProvider {
   }
 
   @Override
-  public Executor executor() {
-    return stageExecutor;
+  public Stream<StepDefinition> provideSteps(
+      ExperimentDefinition experiment,
+      ExperimentPath<Absolute> path,
+      GlobalEnvironment environment) {
+    StepDefinition step = StepDefinition
+        .define(
+            ExperimentId.fromName("Sample Position"),
+            (Executor) stageExecutor,
+            new Variables(environment)
+                .with(LOCATION, new XYCoordinate<>(Units.metre().getUnit(), 0, 0)));
+    return Stream.of(step);
   }
 
   @Override
-  public Stream<StepDefinition> createSteps(SharedEnvironment environment, DefineStep defineStep) {
-    // TODO set location from stage diagram, e.g. selected wells
-    var step = defineStep
-        .withName("Sample Position")
-        .withVariables(
-            environment,
-            v -> v.with(LOCATION, new XYCoordinate<>(Units.metre().getUnit(), 0, 0)));
-    return Stream.of(step);
+  public boolean canProvideSteps(
+      ExperimentDefinition experiment,
+      ExperimentPath<Absolute> path,
+      GlobalEnvironment environment) {
+    return experiment
+        .findSubstep(path)
+        .filter(step -> step.productions().anyMatch(PLATE_SUBMISSION::equals))
+        .isPresent();
   }
 }

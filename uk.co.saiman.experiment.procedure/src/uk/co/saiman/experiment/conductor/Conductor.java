@@ -112,13 +112,14 @@ public class Conductor implements Output {
   }
 
   @Override
-  public <T extends Result<?>> T resolveResult(ProductPath<?, T> path) {
+  public <U extends ExperimentPath<U>> Stream<ProductPath<U, ? extends Result<?>>> resultPaths(
+      ExperimentPath<U> path) {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public <T extends Result<?>> Observable<T> results(ProductPath<?, T> path) {
+  public <T extends Result<?>> T resolveResult(ProductPath<?, T> path) {
     // TODO Auto-generated method stub
     return null;
   }

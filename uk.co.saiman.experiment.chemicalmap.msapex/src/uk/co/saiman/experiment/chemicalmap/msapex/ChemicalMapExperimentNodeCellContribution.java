@@ -30,14 +30,15 @@ package uk.co.saiman.experiment.chemicalmap.msapex;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import uk.co.saiman.eclipse.localization.Localize;
+import org.eclipse.e4.core.di.extensions.Service;
+
 import uk.co.saiman.experiment.chemicalmap.msapex.i18n.ChemicalMapProperties;
 
 public class ChemicalMapExperimentNodeCellContribution {
   public static final String ID = "uk.co.saiman.experiment.treecontribution.chemicalmap";
 
   @Inject
-  @Localize
+  @Service
   ChemicalMapProperties properties;
 
   @PostConstruct

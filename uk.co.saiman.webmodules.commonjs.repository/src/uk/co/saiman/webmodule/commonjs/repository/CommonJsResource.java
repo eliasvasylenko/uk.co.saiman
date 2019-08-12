@@ -147,8 +147,14 @@ public class CommonJsResource implements Resource {
 
       return new RequirementBuilder(EXTENDER_NAMESPACE)
           .setResource(this)
-          .addAttribute(EXTENDER_NAMESPACE, EXTENDER_NAME)
-          .addDirective(REQUIREMENT_FILTER_DIRECTIVE, versionRange.toFilter());
+          .addDirective(
+              REQUIREMENT_FILTER_DIRECTIVE,
+              new FilterBuilder()
+                  .and()
+                  .eq(EXTENDER_NAMESPACE, EXTENDER_NAME)
+                  .literal(versionRange.toFilter())
+                  .end()
+                  .toString());
     } catch (Exception e) {
       throw new RegistryResolutionException("Failed to generate extender requirement", e);
     }

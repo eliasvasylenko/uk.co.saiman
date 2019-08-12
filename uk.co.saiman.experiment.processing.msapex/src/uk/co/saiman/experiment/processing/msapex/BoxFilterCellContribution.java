@@ -27,11 +27,11 @@
  */
 package uk.co.saiman.experiment.processing.msapex;
 
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.data.function.processing.BoxFilter;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.msapex.i18n.ProcessingProperties;
@@ -56,7 +56,7 @@ public class BoxFilterCellContribution {
     public static final String ID = BoxFilterCellContribution.ID + ".width";
 
     @AboutToShow
-    void prepare(MCell cell, int value, @Localize ProcessingProperties properties) {
+    void prepare(MCell cell, int value, @Service ProcessingProperties properties) {
       cell.setLabel(properties.widthLabel().get());
     }
   }

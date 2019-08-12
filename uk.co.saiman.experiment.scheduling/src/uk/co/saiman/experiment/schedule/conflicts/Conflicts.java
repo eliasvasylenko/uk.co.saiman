@@ -32,7 +32,9 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -40,22 +42,21 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.source.Production;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
-import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.dependency.ProductPath;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.requirement.AdditionalRequirement;
-import uk.co.saiman.experiment.requirement.AdditionalResultRequirement;
 import uk.co.saiman.experiment.schedule.Schedule;
+import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
 
 public class Conflicts {
   private final Schedule schedule;
-  private final SharedEnvironment environment;
+  private final GlobalEnvironment environment;
   private final Map<ExperimentPath<Absolute>, Change> differences;
 
-  public Conflicts(Schedule schedule, SharedEnvironment environment) {
+  public Conflicts(Schedule schedule, GlobalEnvironment environment) {
     this.schedule = schedule;
     this.environment = environment;
 
@@ -148,44 +149,39 @@ public class Conflicts {
     @Override
     public Stream<Change> conflictingDependencies() {
       return scheduledInstruction
-          .map(Instruction::executor)
           .stream()
-          .flatMap(Executor::additionalRequirements)
           .flatMap(this::resolveDependencies)
           .collect(toMap(Change::path, identity(), (a, b) -> a))
           .values()
           .stream();
     }
 
-    private Stream<Change> resolveDependencies(AdditionalRequirement<?> requirement) {
-      if (requirement instanceof AdditionalResultRequirement<?>) {
-        var resultRequirement = (AdditionalResultRequirement<?>) requirement;
-        return scheduledInstruction
-            .stream()
-            .flatMap(
-                instruction -> resultRequirement
-                    .dependencies(
-                        instruction.path(),
-                        new Variables(environment, instruction.variableMap())))
-            .flatMap(dependency -> dependency.resolveAgainst(path).stream())
-            .flatMap(path -> conflictingDependency(path, resultRequirement.production()).stream());
-      } else {
-        return Stream.empty();
-      }
+    private Stream<Change> resolveDependencies(Instruction instruction) {
+      var executor = instruction.executor();
+      var variables = new Variables(environment, instruction.variableMap());
+
+      List<ProductPath<?, ?>> dependencies = new ArrayList<>();
+
+      executor.plan(new NoOpPlanningContext() {
+        @Override
+        public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
+          return variables.get(declaration.variable());
+        }
+
+        @Override
+        public void declareAdditionalRequirement(ProductPath<?, ?> path) {
+          dependencies.add(path);
+        }
+      });
+
+      return dependencies
+          .stream()
+          .flatMap(path -> path.resolveAgainst(instruction.path()).stream())
+          .flatMap(path -> conflictingDependency(path).stream());
     }
 
-    private Optional<Change> conflictingDependency(
-        ExperimentPath<Absolute> dependency,
-        Production<?> production) {
-      return change(dependency)
-          .filter(
-              c -> c.isConflicting()
-                  || c
-                      .scheduledInstruction()
-                      .get()
-                      .executor()
-                      .products()
-                      .anyMatch(production::equals));
+    private Optional<Change> conflictingDependency(ProductPath<Absolute, ?> path) {
+      return change(path.getExperimentPath()).filter(c -> c.isConflicting());
     }
   }
 }

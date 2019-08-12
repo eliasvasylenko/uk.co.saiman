@@ -33,8 +33,8 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Service;
 
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
@@ -47,7 +47,7 @@ import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
 
 public class WorkspaceExperimentProvider implements ExperimentProvider {
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
 
   @Inject

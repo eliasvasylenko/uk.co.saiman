@@ -18,7 +18,9 @@ Bundle-Name: SAI :: Experiment :: OSGi
 	json;version=latest
 
 Private-Package: \
-	uk.co.saiman.experiment.service.impl
+	uk.co.saiman.experiment.osgi.impl,\
+	uk.co.saiman.experiment.environment.osgi.impl
 
 Export-Package: \
-	uk.co.saiman.experiment.service
+	uk.co.saiman.experiment.osgi,\
+	uk.co.saiman.experiment.environment.osgi

@@ -83,7 +83,11 @@ public interface PropertyLoader {
    *          the sub-interface of {@link Properties} we wish to implement
    * @return an implementation of the accessor interface
    */
-  <T> T getProperties(Class<T> accessor);
+  default <T> T getProperties(Class<T> accessor) {
+    return getProperties(accessor, accessor.getClassLoader());
+  }
+
+  <T> T getProperties(Class<T> accessor, ClassLoader classLoader);
 
   static PropertyLoader getDefaultPropertyLoader() {
     return DEFAULT_PROPERTY_LOADER;

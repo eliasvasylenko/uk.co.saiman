@@ -28,65 +28,43 @@
 package uk.co.saiman.maldi.sample;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor.PLATE_SUBMISSION;
-import static uk.co.saiman.state.Accessor.stringAccessor;
-
-import java.util.stream.Stream;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.SAMPLE_WELL_ID;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.requirement.AdditionalRequirement;
-import uk.co.saiman.experiment.requirement.Requirement;
-import uk.co.saiman.experiment.variables.Variable;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
-import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor.MaldiXYStageExecutorConfiguration;
+import uk.co.saiman.experiment.executor.PlanningContext;
+import uk.co.saiman.experiment.variables.VariableCardinality;
+import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor.MaldiSampleAreaExecutorConfiguration;
 import uk.co.saiman.maldi.stage.SampleAreaHold;
-import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 
-@Designate(ocd = MaldiXYStageExecutorConfiguration.class, factory = true)
-@Component(configurationPid = MaldiSampleAreaExecutor.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+@Designate(ocd = MaldiSampleAreaExecutorConfiguration.class, factory = true)
+@Component(configurationPid = MaldiSampleAreaExecutor.CONFIGURATION_PID, configurationPolicy = OPTIONAL, service = {
     MaldiSampleAreaExecutor.class,
     Executor.class })
 public class MaldiSampleAreaExecutor implements Executor {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Maldi XY Stage Experiment Executor", description = "The experiment executor which manages the positioning of the sample stage")
-  public @interface MaldiXYStageExecutorConfiguration {}
+  @ObjectClassDefinition(name = "Maldi Sample Area Experiment Executor", description = "The experiment executor which manages the positioning of the sample stage")
+  public @interface MaldiSampleAreaExecutorConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.maldi.executor.xystage";
 
   public static final Preparation<SampleAreaHold> IN_POSITION = new Preparation<>(
       "uk.co.saiman.maldi.executor.inposition");
 
-  public static final Variable<String> SAMPLE_WELL_ID = new Variable<>(
-      "uk.co.saiman.maldi.variable.samplewell.id",
-      stringAccessor());
-
   @Override
-  public Stream<VariableDeclaration> variables() {
-    return Stream.of(SAMPLE_WELL_ID.declareRequired());
-  }
+  public void plan(PlanningContext context) {
+    context.declareVariable(SAMPLE_WELL_ID, VariableCardinality.REQUIRED);
 
-  @Override
-  public Stream<Production<?>> products() {
-    return Stream.of(IN_POSITION);
-  }
+    context.declareMainRequirement(PLATE_SUBMISSION);
 
-  @Override
-  public Requirement<Condition<? extends SamplePlateSubmission>> mainRequirement() {
-    return Requirement.on(PLATE_SUBMISSION);
-  }
-
-  @Override
-  public Stream<AdditionalRequirement<?>> additionalRequirements() {
-    return Stream.empty();
+    context.declareProduct(IN_POSITION);
   }
 
   @Override
@@ -113,7 +91,7 @@ public class MaldiSampleAreaExecutor implements Executor {
      * the UI.
      */
 
-    plateSubmission.requestAnalysisLocation(sampleArea);
+    plateSubmission.requestAnalysis(sampleArea);
     plateSubmission.awaitRequest(30, SECONDS);
     context.prepareCondition(IN_POSITION, null);
   }

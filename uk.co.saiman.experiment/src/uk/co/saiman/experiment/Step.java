@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -37,14 +39,16 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.dependency.Product;
 import uk.co.saiman.experiment.dependency.ProductPath;
+import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.dependency.source.Production;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.requirement.ProductRequirement;
 import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
 
 /**
@@ -70,7 +74,7 @@ public class Step {
    * Environment
    */
 
-  private SharedEnvironment getStaticEnvironment() {
+  private GlobalEnvironment getStaticEnvironment() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -136,24 +140,6 @@ public class Step {
    * Experiment Hierarchy
    */
 
-  /**
-   * @return the parent part of this experiment, if present, otherwise an empty
-   *         optional
-   */
-  public Optional<ProductPath<Absolute, ?>> getDependencyPath() {
-    synchronized (experiment) {
-      return getExecutor().mainRequirement() instanceof ProductRequirement<?>
-          ? path
-              .parent()
-              .map(
-                  p -> ProductPath
-                      .define(
-                          p,
-                          ((ProductRequirement<?>) getExecutor().mainRequirement()).production()))
-          : Optional.empty();
-    }
-  }
-
   public Optional<Step> getDependencyStep() {
     synchronized (experiment) {
       return path
@@ -173,18 +159,18 @@ public class Step {
     return experiment;
   }
 
-  @SuppressWarnings("unchecked")
-  public <T extends Product> Step attach(StepDefinition template) {
-    return attach(
-        ((ProductRequirement<T>) template.executor().mainRequirement()).production(),
-        -1,
-        template);
+  public Step attach(StepDefinition template) {
+    return attach(-1, template);
   }
 
-  public <V> Step attach(Production<?> production, int index, StepDefinition stepDefinition) {
+  public Step attach(int index, StepDefinition stepDefinition) {
     synchronized (experiment) {
       boolean changed = experiment
-          .updateStepDefinition(path, getDefinition().withSubstep(stepDefinition));
+          .updateStepDefinition(
+              path,
+              index < 0
+                  ? getDefinition().withSubstep(stepDefinition)
+                  : getDefinition().withSubstep(index, stepDefinition));
 
       Step newStep = getDependentStep(stepDefinition.id());
       if (changed) {
@@ -230,6 +216,28 @@ public class Step {
   public Variables getVariables() {
     synchronized (experiment) {
       return getDefinition().variables(getStaticEnvironment());
+    }
+  }
+
+  public Stream<VariableDeclaration<?>> getVariableDeclarations() {
+    List<VariableDeclaration<?>> declarations = new ArrayList<>();
+
+    var variables = getVariables();
+    getExecutor().plan(new NoOpPlanningContext() {
+      @Override
+      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
+        declareVariable(declaration);
+        return variables.get(declaration.variable());
+      }
+    });
+
+    return declarations.stream();
+  }
+
+  public Stream<? extends Result<?>> getResults() {
+    synchronized (experiment) {
+      var output = experiment.getResults();
+      return output.resultPaths(path).map(output::resolveResult);
     }
   }
 

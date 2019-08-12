@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment.msapex.provider;
 
 public interface ExperimentProviderDescriptor {
-  String getLabel();
+  String getLocalizedLabel();
 
   String getId();
 

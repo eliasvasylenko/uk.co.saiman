@@ -40,14 +40,10 @@ import org.eclipse.e4.core.di.suppliers.IRequestor;
 import org.osgi.service.component.annotations.Component;
 
 import uk.co.saiman.eclipse.utilities.TransformingNamedObjectSupplier;
-import uk.co.saiman.properties.PropertyLoader;
 import uk.co.saiman.property.IdentityProperty;
 import uk.co.saiman.property.Property;
 
 /**
- * Supplier for Eclipse DI contexts, to provide localization implementations of
- * a requested type via a {@link PropertyLoader}.
- *
  * @since 1.2
  */
 @Component(

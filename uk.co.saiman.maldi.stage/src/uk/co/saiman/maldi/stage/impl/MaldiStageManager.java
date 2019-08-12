@@ -114,13 +114,6 @@ public class MaldiStageManager {
       MaldiStageConfiguration configuration) {
     this(xyStage);
 
-    /*
-     * TODO need a new deviceDependency type, "non-acquiring", so both devices can
-     * be dependent upon the xyStage, even though it's the manager which acquires
-     * the xyController as a third party, on their behalf. change current boolean
-     * parameter to accept an enum...
-     */
-
     this.sampleAreaRegistration = context
         .registerService(
             new String[] {
@@ -175,11 +168,11 @@ public class MaldiStageManager {
     return xyStage;
   }
 
-  public SamplePlateStageImpl samplePlateStage() {
+  public SamplePlateStage samplePlateStage() {
     return samplePlateStage;
   }
 
-  public SampleAreaStageImpl sampleAreaStage() {
+  public SampleAreaStage sampleAreaStage() {
     return sampleAreaStage;
   }
 

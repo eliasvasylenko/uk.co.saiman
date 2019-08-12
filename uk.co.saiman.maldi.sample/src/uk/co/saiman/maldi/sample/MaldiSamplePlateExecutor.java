@@ -28,101 +28,57 @@
 package uk.co.saiman.maldi.sample;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static uk.co.saiman.state.Accessor.intAccessor;
-import static uk.co.saiman.state.Accessor.stringAccessor;
-
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.MALDI_SAMPLE_PLATE_CONTROLLER;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.SAMPLE_PLATE_BARCODE;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.SAMPLE_PLATE_ID;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.experiment.dependency.Nothing;
-import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.executor.ExecutorException;
-import uk.co.saiman.experiment.requirement.AdditionalRequirement;
-import uk.co.saiman.experiment.requirement.Requirement;
-import uk.co.saiman.experiment.variables.Variable;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
+import uk.co.saiman.experiment.executor.PlanningContext;
+import uk.co.saiman.experiment.variables.VariableCardinality;
 import uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor.MaldiXYStageExecutorConfiguration;
 import uk.co.saiman.maldi.stage.SamplePlate;
-import uk.co.saiman.maldi.stage.SamplePlateStage;
 import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 import uk.co.saiman.maldi.stage.SamplePreparation;
 import uk.co.saiman.osgi.ServiceIndex;
 
 @Designate(ocd = MaldiXYStageExecutorConfiguration.class, factory = true)
-@Component(configurationPid = MaldiSamplePlateExecutor.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+@Component(configurationPid = MaldiSamplePlateExecutor.CONFIGURATION_PID, configurationPolicy = OPTIONAL, service = {
     MaldiSamplePlateExecutor.class,
     Executor.class })
 public class MaldiSamplePlateExecutor implements Executor {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Maldi XY Stage Experiment Executor", description = "The experiment executor which manages the positioning of the sample stage")
+  @ObjectClassDefinition(name = "Maldi Sample Plate Experiment Executor", description = "The experiment executor which manages the positioning of the sample stage")
   public @interface MaldiXYStageExecutorConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.maldi.executor.sampleplate";
 
-  public static final Preparation<SamplePlateSubmission> PLATE_SUBMISSION = new Preparation<>(
-      "uk.co.saiman.maldi.executor.platesubmission");
-
-  public static final Variable<String> SAMPLE_PLATE_ID = new Variable<>(
-      "uk.co.saiman.maldi.variable.sampleplate.id",
-      stringAccessor());
-
-  public static final Variable<UUID> SAMPLE_PLATE_PREPARATION_ID = new Variable<>(
-      "uk.co.saiman.maldi.variable.sampleplate.preparationid",
-      stringAccessor().map(UUID::fromString, UUID::toString));
-
-  public static final Variable<Integer> SAMPLE_PLATE_BARCODE = new Variable<>(
-      "uk.co.saiman.maldi.variable.sampleplate.barcode",
-      intAccessor());
-
-  private final SamplePlateStage stageDevice;
   private final ServiceIndex<SamplePlate, String, SamplePlate> plateIndex;
 
   private SamplePreparation loadedPreparation;
 
   @Activate
-  public MaldiSamplePlateExecutor(
-      @Reference(name = "stageDevice") SamplePlateStage stageDevice,
-      BundleContext context) {
-    this.stageDevice = stageDevice;
+  public MaldiSamplePlateExecutor(BundleContext context) {
     this.plateIndex = ServiceIndex.open(context, SamplePlate.class);
     this.loadedPreparation = null;
   }
 
-  public SamplePlateStage sampleDevice() {
-    return stageDevice;
-  }
-
   @Override
-  public Stream<VariableDeclaration> variables() {
-    return Stream.of(SAMPLE_PLATE_ID.declareRequired(), SAMPLE_PLATE_BARCODE.declareOptional());
-  }
+  public void plan(PlanningContext context) {
+    context.declareVariable(SAMPLE_PLATE_ID, VariableCardinality.REQUIRED);
+    context.declareVariable(SAMPLE_PLATE_BARCODE, VariableCardinality.OPTIONAL);
 
-  @Override
-  public Stream<Production<?>> products() {
-    return Stream.of(PLATE_SUBMISSION);
-  }
+    context.declareResourceRequirement(MALDI_SAMPLE_PLATE_CONTROLLER);
 
-  @Override
-  public Requirement<Nothing> mainRequirement() {
-    return Requirement.none();
-  }
-
-  @Override
-  public Stream<AdditionalRequirement<?>> additionalRequirements() {
-    return Stream.empty();
+    context.declareProduct(PLATE_SUBMISSION);
   }
 
   @Override
@@ -132,27 +88,26 @@ public class MaldiSamplePlateExecutor implements Executor {
         plateIndex.highestRankedRecord(context.getVariable(SAMPLE_PLATE_ID)).get().serviceObject(),
         context.getVariables().get(SAMPLE_PLATE_BARCODE).orElse(null));
 
-    try (var control = sampleDevice().acquireControl(2, SECONDS)) {
-      /*
-       * TODO when we are *not* executing an experiment, we need to listen for
-       * exchanges and null the loadedPlate when they occur.
-       */
-      if ((loadedPreparation != null
-          && !loadedPreparation.id().equals(requestedPreparation.id()))) {
-        control.requestExchange();
-      } else {
-        control.requestReady();
-      }
-      control.awaitReady(5, MINUTES);
-      loadedPreparation = requestedPreparation;
+    var control = context.acquireResource(MALDI_SAMPLE_PLATE_CONTROLLER);
 
-      context
-          .prepareCondition(
-              PLATE_SUBMISSION,
-              new SamplePlateSubmission(control, loadedPreparation));
-
-    } catch (TimeoutException | InterruptedException e) {
-      new ExecutorException("Failed to acquire control of stage device", e);
+    /*
+     * TODO when we are *not* executing an experiment, we need to listen for
+     * exchanges and null the loadedPlate when they occur.
+     */
+    if ((loadedPreparation != null && !loadedPreparation.id().equals(requestedPreparation.id()))) {
+      control.requestExchange();
+    } else {
+      control.requestReady();
     }
+    /*
+     * Enough time for an exchange. If none is needed the controller should
+     * internally have a shorter time out to detect motor failure.
+     */
+    control.awaitReady(10, MINUTES);
+    loadedPreparation = requestedPreparation;
+
+    context
+        .prepareCondition(PLATE_SUBMISSION, new SamplePlateSubmission(control, loadedPreparation));
+
   }
 }

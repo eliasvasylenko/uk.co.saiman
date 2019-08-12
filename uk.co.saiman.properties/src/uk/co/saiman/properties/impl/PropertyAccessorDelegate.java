@@ -54,7 +54,8 @@ import uk.co.saiman.properties.PropertyValueConversion;
  * 
  * @author Elias N Vasylenko
  *
- * @param <A> the type of the delegating proxy
+ * @param <A>
+ *          the type of the delegating proxy
  */
 public class PropertyAccessorDelegate<A> {
   private static final Set<Method> DIRECT_METHODS = getDirectMethods();
@@ -65,18 +66,25 @@ public class PropertyAccessorDelegate<A> {
 
   private final PropertyLoaderImpl loader;
   private final Class<A> source;
+  private final ClassLoader classLoader;
   private final PropertyResource propertyResource;
 
   private final A proxy;
   private final Map<Method, PropertyValueConversion<?>> valueConversions = new ConcurrentHashMap<>();
 
   /**
-   * @param loader which created the delegate, to call back to
-   * @param source the property accessor class and configuration
+   * @param loader
+   *          which created the delegate, to call back to
+   * @param source
+   *          the property accessor class and configuration
    */
-  public PropertyAccessorDelegate(PropertyLoaderImpl loader, Class<A> source) {
+  public PropertyAccessorDelegate(
+      PropertyLoaderImpl loader,
+      Class<A> source,
+      ClassLoader classLoader) {
     this.loader = loader;
     this.source = source;
+    this.classLoader = new PropertyAccessorClassLoader(classLoader);
     this.propertyResource = loader.getResourceLoader().loadResource(source);
 
     if (!source.isInterface()) {
@@ -129,33 +137,37 @@ public class PropertyAccessorDelegate<A> {
 
   @SuppressWarnings("unchecked")
   private A createProxy(Class<A> accessor) {
-    ClassLoader classLoader = new PropertyAccessorClassLoader(accessor.getClassLoader());
+    ClassLoader threadLocal = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(classLoader);
+      return (A) Proxy
+          .newProxyInstance(
+              classLoader,
+              new Class<?>[] { accessor },
+              (Object p, Method method, Object[] args) -> {
+                if (DIRECT_METHODS.contains(method)) {
+                  return method.invoke(PropertyAccessorDelegate.this, args);
+                }
 
-    return (A) Proxy
-        .newProxyInstance(
-            classLoader,
-            new Class<?>[] { accessor },
-            (Object p, Method method, Object[] args) -> {
-              if (DIRECT_METHODS.contains(method)) {
-                return method.invoke(PropertyAccessorDelegate.this, args);
-              }
+                if (method.isDefault()) {
+                  return MethodHandles
+                      .privateLookupIn(accessor, MethodHandles.lookup())
+                      .unreflectSpecial(method, method.getDeclaringClass())
+                      .bindTo(p)
+                      .invokeWithArguments(args);
+                }
 
-              if (method.isDefault()) {
-                return MethodHandles
-                    .privateLookupIn(accessor, MethodHandles.lookup())
-                    .unreflectSpecial(method, method.getDeclaringClass())
-                    .bindTo(p)
-                    .invokeWithArguments(args);
-              }
+                PropertyValueConversion<?> conversion = loadPropertyConversion(method);
 
-              PropertyValueConversion<?> conversion = loadPropertyConversion(method);
+                if (args == null) {
+                  args = new Object[] {};
+                }
 
-              if (args == null) {
-                args = new Object[] {};
-              }
-
-              return conversion.applyConversion(asList(args));
-            });
+                return conversion.applyConversion(asList(args));
+              });
+    } finally {
+      Thread.currentThread().setContextClassLoader(threadLocal);
+    }
   }
 
   class PropertyAccessorClassLoader extends ClassLoader {
@@ -168,7 +180,10 @@ public class PropertyAccessorDelegate<A> {
       if (name.equals(PropertyAccessorDelegate.class.getName())) {
         return PropertyAccessorDelegate.class;
       } else {
-        return super.findClass(name);
+        System.out.println("   loading ... " + name);
+        var clazz = super.findClass(name);
+        System.out.println(" loaded " + name + "!");
+        return clazz;
       }
     }
   }

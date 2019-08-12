@@ -27,18 +27,13 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import java.util.stream.Stream;
-
 import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.requirement.AdditionalRequirement;
-import uk.co.saiman.experiment.requirement.NoRequirement;
-import uk.co.saiman.experiment.requirement.Requirement;
+import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.variables.Variable;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
+import uk.co.saiman.experiment.variables.VariableCardinality;
 import uk.co.saiman.instrument.sample.SampleController;
 
 /**
@@ -56,31 +51,17 @@ public interface SampleExecutor<T> extends Executor {
   Provision<? extends SampleController<T>> sampleDevice();
 
   @Override
+  default void plan(PlanningContext context) {
+    context.declareVariable(sampleLocation(), VariableCardinality.REQUIRED);
+    context.declareProduct(samplePreparation());
+  }
+
+  @Override
   default void execute(ExecutionContext context) {
     var location = context.getVariable(sampleLocation());
     var controller = context.acquireDependency(sampleDevice()).value();
 
     controller.requestAnalysis(location);
     context.prepareCondition(samplePreparation(), null);
-  }
-
-  @Override
-  default Stream<Production<?>> products() {
-    return Stream.of(samplePreparation());
-  }
-
-  @Override
-  default NoRequirement mainRequirement() {
-    return Requirement.none();
-  }
-
-  @Override
-  default Stream<AdditionalRequirement<?>> additionalRequirements() {
-    return Stream.empty();
-  }
-
-  @Override
-  default Stream<VariableDeclaration> variables() {
-    return Stream.of(sampleLocation().declareRequired());
   }
 }

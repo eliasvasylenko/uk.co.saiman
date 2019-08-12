@@ -36,23 +36,23 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.processing.Processing;
+import uk.co.saiman.experiment.processing.msapex.ProcessorCell;
 import uk.co.saiman.experiment.spectrum.SpectrumProcessingExecutor;
 import uk.co.saiman.experiment.spectrum.msapex.i18n.SpectrumProperties;
-import uk.co.saiman.experiment.processing.msapex.ProcessorCell;
 
 public class SpectrumExperimentProcessingCell {
   @Inject
-  @Localize
+  @Service
   private SpectrumProperties properties;
   @Inject
   private Step step;

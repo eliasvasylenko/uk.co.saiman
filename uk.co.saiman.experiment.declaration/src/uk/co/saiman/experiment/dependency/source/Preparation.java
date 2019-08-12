@@ -36,7 +36,7 @@ import uk.co.saiman.experiment.dependency.Condition;
  * 
  * @param <T> The type of condition prepared
  */
-public class Preparation<T> extends Production<Condition<? extends T>> {
+public final class Preparation<T> extends Production<Condition<? extends T>> {
   public enum Evaluation {
     ORDERED, UNORDERED, PARALLEL
   }

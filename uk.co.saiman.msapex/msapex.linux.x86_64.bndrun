@@ -248,7 +248,8 @@ runplatform: linux64
 	uk.co.saiman.webmodule.ungap.template-tag-arguments.esm;version=latest,\
 	uk.co.saiman.webmodule.ungap.template-literal.esm;version=latest,\
 	uk.co.saiman.webmodule.ungap.import-node.esm;version=latest,\
-	uk.co.saiman.webmodule.ungap.essential-map.esm;version=latest,\
+	uk.co.saiman.webmodule.ungap.essential-map.esm;version='[0.1.7.REL,0.1.8)',\
+	uk.co.saiman.webmodule.ungap.essential-map.esm;version='[0.2.0.REL,0.2.1)',\
 	com.sun.jna;version='[4.5.1,4.5.2)',\
 	javax.ws.rs-api;version=latest,\
 	org.apache.aries.javax.jax.rs-api;version='[1.0.1,1.0.2)',\

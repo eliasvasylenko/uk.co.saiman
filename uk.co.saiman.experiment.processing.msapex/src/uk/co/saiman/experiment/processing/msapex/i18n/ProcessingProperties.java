@@ -28,7 +28,9 @@
 package uk.co.saiman.experiment.processing.msapex.i18n;
 
 import uk.co.saiman.properties.Localized;
+import uk.co.saiman.properties.service.PropertiesService;
 
+@PropertiesService
 public interface ProcessingProperties {
   Localized<String> convolutionProcessor();
 

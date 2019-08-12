@@ -26,7 +26,9 @@ Bundle-Name: SAI :: MSApex :: Simulation
 	uk.co.saiman.chemistry.msapex;version=snapshot,\
 	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.instrument.stage.msapex;version=snapshot,\
+	uk.co.saiman.instrument.msapex;version=snapshot,\
 	uk.co.saiman.simulation;version=snapshot,\
+	uk.co.saiman.simulation.provider;version=snapshot,\
 	javax.measure.unit-api
 
 

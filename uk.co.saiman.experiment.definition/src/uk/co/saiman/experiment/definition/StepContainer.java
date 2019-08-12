@@ -130,6 +130,10 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
     return with(List.of(), Map.of());
   }
 
+  public T withSubstep(StepDefinition step) {
+    return withSubstep(steps.size(), step);
+  }
+
   /**
    * Derive a new container including the given step. Any step sharing the same ID
    * with the new step will be replaced.
@@ -138,11 +142,19 @@ public abstract class StepContainer<U extends ExperimentPath<U>, T extends StepC
    * @return The derived container, or optionally the receiving container if no
    *         change is made.
    */
-  public T withSubstep(StepDefinition step) {
+  public T withSubstep(int index, StepDefinition step) {
     var dependents = new HashMap<>(this.dependents);
     var steps = new ArrayList<>(this.steps);
 
-    steps.remove(dependents.remove(step.id()));
+    var previousStep = dependents.remove(step.id());
+    if (previousStep != null) {
+      var previousStepIndex = steps.indexOf(previousStep);
+      if (previousStepIndex < index) {
+        index--;
+      }
+      steps.remove(previousStepIndex);
+    }
+
     dependents.put(step.id(), step);
     steps.add(step);
 

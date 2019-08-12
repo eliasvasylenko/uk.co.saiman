@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.data.spectrum;
 
+import java.util.function.Function;
+
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
 import javax.measure.quantity.Mass;
@@ -38,6 +40,28 @@ public interface SpectrumCalibration {
   Unit<Mass> getMassUnit();
 
   double getMass(double time);
+
+  static SpectrumCalibration withUnits(
+      Unit<Time> time,
+      Unit<Mass> mass,
+      Function<Double, Double> function) {
+    return new SpectrumCalibration() {
+      @Override
+      public Unit<Time> getTimeUnit() {
+        return time;
+      }
+
+      @Override
+      public Unit<Mass> getMassUnit() {
+        return mass;
+      }
+
+      @Override
+      public double getMass(double time) {
+        return function.apply(time);
+      }
+    };
+  }
 
   default SpectrumCalibration withTimeUnit(Unit<Time> time) {
     SpectrumCalibration baseCalibration = this;

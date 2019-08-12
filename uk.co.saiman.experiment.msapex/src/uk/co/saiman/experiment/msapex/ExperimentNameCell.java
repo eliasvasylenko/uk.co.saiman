@@ -36,13 +36,13 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Service;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
 import uk.co.saiman.experiment.declaration.ExperimentId;
@@ -64,7 +64,7 @@ public class ExperimentNameCell {
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
 
   @Inject

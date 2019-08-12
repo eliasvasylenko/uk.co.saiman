@@ -39,7 +39,6 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.requirement.Requirement;
 
 public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefinition> {
   private final ExperimentId id;
@@ -95,10 +94,6 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
   @Override
   ExperimentDefinition with(List<StepDefinition> steps) {
     return new ExperimentDefinition(id, steps);
-  }
-
-  public Stream<StepDefinition> independentSteps() {
-    return substeps().filter(i -> i.executor().mainRequirement().equals(Requirement.none()));
   }
 
   public Procedure procedure() {

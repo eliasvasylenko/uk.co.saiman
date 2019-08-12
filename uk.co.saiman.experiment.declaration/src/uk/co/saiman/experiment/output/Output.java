@@ -29,14 +29,15 @@ package uk.co.saiman.experiment.output;
 
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.observable.Observable;
 
 public interface Output {
   Stream<Result<?>> results();
 
-  <T extends Result<?>> T resolveResult(ProductPath<?, T> path);
+  <U extends ExperimentPath<U>> Stream<ProductPath<U, ? extends Result<?>>> resultPaths(
+      ExperimentPath<U> path);
 
-  <T extends Result<?>> Observable<T> results(ProductPath<?, T> path);
+  <T extends Result<?>> T resolveResult(ProductPath<?, T> path);
 }

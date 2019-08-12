@@ -38,11 +38,9 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Relative;
 import uk.co.saiman.experiment.dependency.Dependency;
-import uk.co.saiman.experiment.dependency.Product;
 import uk.co.saiman.experiment.dependency.source.Production;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.requirement.Requirement;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.StateMap;
 
@@ -125,7 +123,7 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
     return new StepDefinition(id, executor, variableMap, plan, getSteps(), getDependents());
   }
 
-  public Variables variables(SharedEnvironment environment) {
+  public Variables variables(GlobalEnvironment environment) {
     return new Variables(environment, variableMap);
   }
 
@@ -134,7 +132,7 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
   }
 
   public StepDefinition withVariables(
-      SharedEnvironment environment,
+      GlobalEnvironment environment,
       Function<? super Variables, ? extends Variables> update) {
     return new StepDefinition(
         id,
@@ -147,6 +145,11 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
 
   public Executor executor() {
     return executor;
+  }
+
+  public Stream<Production<?>> productions() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
@@ -174,11 +177,6 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
   @Override
   StepDefinition with(List<StepDefinition> steps) {
     return new StepDefinition(id, executor, variableMap, plan, steps);
-  }
-
-  public <U extends Product> Stream<StepDefinition> dependentSteps(Production<U> production) {
-    return substeps()
-        .filter(i -> i.executor().mainRequirement().equals(Requirement.on(production)));
   }
 
   public StepDefinition withPlan(Plan plan) {

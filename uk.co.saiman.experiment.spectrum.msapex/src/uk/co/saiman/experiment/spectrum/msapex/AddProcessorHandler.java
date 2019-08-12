@@ -42,7 +42,6 @@ import org.eclipse.fx.core.di.Service;
 
 import javafx.scene.control.ChoiceDialog;
 import uk.co.saiman.eclipse.adapter.AdaptClass;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.processing.Processing;
@@ -66,7 +65,7 @@ public class AddProcessorHandler {
   @Execute
   void execute(
       @AdaptClass(Step.class) Processing configuration,
-      @Localize ExperimentProperties text) {
+      @Service ExperimentProperties text) {
     requestProcessorType(text.addSpectrumProcessor(), text.addSpectrumProcessorDescription())
         .ifPresent(
             processor -> context

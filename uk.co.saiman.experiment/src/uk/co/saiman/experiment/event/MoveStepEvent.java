@@ -31,22 +31,16 @@ import java.util.Optional;
 
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ProductPath;
 
 public class MoveStepEvent extends ExperimentStepEvent {
   private final ExperimentId previousId;
-  private final Optional<ProductPath<Absolute, ?>> previousDependencyPath;
-  private final Optional<ProductPath<Absolute, ?>> dependencyPath;
   private final Optional<Step> previousDependencyStep;
   private final Optional<Step> dependencyStep;
 
   public MoveStepEvent(Step step, Optional<Step> previousParent, ExperimentId previousId) {
     super(step);
     this.previousId = previousId;
-    this.previousDependencyPath = step.getDependencyPath();
     this.previousDependencyStep = previousParent;
-    this.dependencyPath = step.getDependencyPath();
     this.dependencyStep = step.getDependencyStep();
   }
 
@@ -63,16 +57,8 @@ public class MoveStepEvent extends ExperimentStepEvent {
     return stepDefinition().id();
   }
 
-  public Optional<ProductPath<Absolute, ?>> previousDependencyPath() {
-    return previousDependencyPath;
-  }
-
   public Optional<Step> previousDependencyStep() {
     return previousDependencyStep;
-  }
-
-  public Optional<ProductPath<Absolute, ?>> dependencyPath() {
-    return dependencyPath;
   }
 
   public Optional<Step> dependencyStep() {

@@ -27,7 +27,8 @@ Bundle-Name: SAI :: MSApex :: Acquisition
 	javax.measure.unit-api
 
 Export-Package: \
-	uk.co.saiman.instrument.acquisition.msapex
+	uk.co.saiman.instrument.acquisition.msapex,\
+	uk.co.saiman.instrument.acquisition.msapex.i18n
 
 -includeresource: \
 	l10n,\

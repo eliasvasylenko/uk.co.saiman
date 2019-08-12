@@ -48,6 +48,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableValue;
 
 /**
@@ -67,7 +68,8 @@ import uk.co.saiman.observable.ObservableValue;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of the service to track
+ * @param <T>
+ *          the type of the service to track
  */
 public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U, T>> {
   private static final String DEFAULT_KEY = Constants.SERVICE_PID;
@@ -249,7 +251,7 @@ public class ServiceIndex<S, U, T> extends ServiceTracker<S, ServiceRecord<S, U,
     return getClass().getSimpleName() + records;
   }
 
-  public HotObservable<ServiceEvent> events() {
+  public Observable<ServiceEvent> events() {
     return events;
   }
 

@@ -27,58 +27,29 @@
  */
 package uk.co.saiman.experiment.executor;
 
-import java.util.stream.Stream;
-
-import uk.co.saiman.experiment.dependency.source.Production;
-import uk.co.saiman.experiment.requirement.AdditionalRequirement;
-import uk.co.saiman.experiment.requirement.Requirement;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
+import uk.co.saiman.experiment.instruction.Instruction;
 
 /**
- * An implementation of this interface represents a type of experiment node
- * which can appear in an experiment, for example "Spectrum", "Chemical Map",
- * "Stage Position", etc. Only one instance of such an implementation typically
- * needs to be registered with any given workspace.
- * 
+ * An implementation of this interface represents a method of executing an
+ * experiment {@link Instruction instruction}.
  * <p>
- * The experiment type instance contains methods for managing the state and
- * processing of nodes of its type.
+ * 
  * 
  * @author Elias N Vasylenko
  */
 public interface Executor {
   /**
-   * It is required that productions be returned in the order in which they are
-   * fulfilled, as this ordering is used to validate that experiment step
-   * interdependencies are satisfiable.
+   * Plan the experiment by declaring requirements and validating variables.
    * 
-   * @return the productions made by this executor
+   * @param context the planning context
    */
-  Stream<? extends Production<?>> products();
-
-  Requirement<?> mainRequirement();
-
-  Stream<AdditionalRequirement<?>> additionalRequirements();
+  void plan(PlanningContext context);
 
   /**
-   * @return the set of required variables for experiments executed by this
-   *         executor
-   */
-  Stream<VariableDeclaration> variables();
-
-  /*
-   * Execution is cheap and resources are unlimited, so we may proceed
-   * automatically when necessary
-   */
-  default boolean isAutomatic() {
-    return false;
-  }
-
-  /**
-   * Process this experiment type for a given node.
+   * Execute the experiment by acquiring requirements and inspecting variables,
+   * then preparing conditions and observing results.
    * 
-   * @param instruction the instruction to execute
-   * @param context     the execution context
+   * @param context the execution context
    */
   void execute(ExecutionContext context);
 }

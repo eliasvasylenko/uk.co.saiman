@@ -59,6 +59,11 @@ public class PropertyLoaderService implements PropertyLoader {
   }
 
   @Override
+  public <T> T getProperties(Class<T> accessor, ClassLoader classLoader) {
+    return propertyLoader.getProperties(accessor);
+  }
+
+  @Override
   public <T> T getProperties(Class<T> accessor) {
     return propertyLoader.getProperties(accessor);
   }

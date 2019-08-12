@@ -36,7 +36,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.extensions.Service;
 
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.msapex.device.DevicePresentation;
+import uk.co.saiman.instrument.msapex.device.DevicePresenter;
 import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
 
 /**
@@ -47,13 +47,13 @@ import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
 public class InstrumentAddon {
   @Service
   @Inject
-  List<DevicePresentation> presentations;
+  List<DevicePresenter> presentations;
 
   @PostConstruct
   void initialize(IEclipseContext context) {
     context.set(DevicePresentationService.class, new DevicePresentationService() {
       @Override
-      public DevicePresentation present(Device<?> device) {
+      public DevicePresenter present(Device<?> device) {
         return presentations
             .stream()
             .filter(p -> p.presentsDevice(device))

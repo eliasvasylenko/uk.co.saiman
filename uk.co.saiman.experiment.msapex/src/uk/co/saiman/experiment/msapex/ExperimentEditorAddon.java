@@ -38,12 +38,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
@@ -72,9 +72,6 @@ public class ExperimentEditorAddon implements EditorProvider {
   private EModelService modelService;
   @Inject
   private MApplication application;
-  @Inject
-  @Localize
-  private ExperimentProperties text;
   @Inject
   private Log log;
 

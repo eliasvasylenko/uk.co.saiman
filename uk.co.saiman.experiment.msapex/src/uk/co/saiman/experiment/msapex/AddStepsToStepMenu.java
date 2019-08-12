@@ -45,14 +45,12 @@ import org.eclipse.fx.core.di.Service;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.dependency.Product;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
 import uk.co.saiman.experiment.msapex.step.provider.StepProviderDescriptor;
-import uk.co.saiman.experiment.requirement.ProductRequirement;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -69,11 +67,11 @@ public class AddStepsToStepMenu {
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
 
   @Inject
-  SharedEnvironment environment;
+  GlobalEnvironment environment;
 
   @AboutToShow
   void aboutToShow(List<MMenuElement> items, Step step, IEclipseContext context) {
@@ -89,7 +87,8 @@ public class AddStepsToStepMenu {
       StepProviderDescriptor descriptor) {
     var provider = ContextInjectionFactory.make(descriptor.getProviderClass(), context);
 
-    if (!(provider.executor().mainRequirement() instanceof ProductRequirement<?>)) {
+    if (!provider
+        .canProvideSteps(step.getExperiment().getDefinition(), step.getPath(), environment)) {
       return Optional.empty();
     }
 
@@ -112,7 +111,7 @@ public class AddStepsToStepMenu {
     try {
 
       provider
-          .createSteps(environment, new DefineStepImpl(step.getDefinition(), provider.executor()))
+          .provideSteps(step.getExperiment().getDefinition(), step.getPath(), environment)
           .forEach(step::attach);
 
     } catch (Exception e) {

@@ -28,8 +28,8 @@
 package uk.co.saiman.instrument.msapex.device;
 
 import uk.co.saiman.instrument.Device;
-import uk.co.saiman.instrument.msapex.device.DevicePresentation;
+import uk.co.saiman.instrument.msapex.device.DevicePresenter;
 
 public interface DevicePresentationService {
-  DevicePresentation present(Device<?> device);
+  DevicePresenter present(Device<?> device);
 }

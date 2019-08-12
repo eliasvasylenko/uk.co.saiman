@@ -30,8 +30,8 @@ package uk.co.saiman.experiment.msapex;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.extensions.Service;
 
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.log.Log;
@@ -45,7 +45,7 @@ public class ScheduleStepHandler {
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
 
   @Execute

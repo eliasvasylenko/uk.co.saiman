@@ -32,18 +32,18 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.model.application.ui.MDirtyable;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.chemicalmap.msapex.i18n.ChemicalMapProperties;
 
 public class ChemicalMapImageEditorPart {
   @Inject
-  @Localize
+  @Service
   ChemicalMapProperties properties;
 
   @Inject

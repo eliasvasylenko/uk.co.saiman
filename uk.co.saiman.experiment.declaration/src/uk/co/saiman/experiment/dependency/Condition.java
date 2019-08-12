@@ -46,4 +46,7 @@ public interface Condition<T> extends Product, AutoCloseable {
   ProductPath<Absolute, Condition<? extends T>> path();
 
   T value();
+
+  @Override
+  void close();
 }

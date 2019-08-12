@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
 import uk.co.saiman.experiment.msapex.step.provider.StepProviderDescriptor;
 import uk.co.saiman.maldi.spectrum.i18n.MaldiSpectrumProperties;
-import uk.co.saiman.properties.PropertyLoader;
 
 @Component
 public class MaldiSpectrumExperimentStepProviderDescriptor implements StepProviderDescriptor {
@@ -43,8 +42,9 @@ public class MaldiSpectrumExperimentStepProviderDescriptor implements StepProvid
   private final MaldiSpectrumProperties properties;
 
   @Activate
-  public MaldiSpectrumExperimentStepProviderDescriptor(@Reference PropertyLoader properties) {
-    this.properties = properties.getProperties(MaldiSpectrumProperties.class);
+  public MaldiSpectrumExperimentStepProviderDescriptor(
+      @Reference MaldiSpectrumProperties properties) {
+    this.properties = properties;
   }
 
   @Override

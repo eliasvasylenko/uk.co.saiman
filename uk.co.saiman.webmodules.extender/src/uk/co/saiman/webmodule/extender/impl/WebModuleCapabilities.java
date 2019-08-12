@@ -34,7 +34,6 @@ import static uk.co.saiman.webmodule.WebModuleConstants.ID_ATTRIBUTE;
 import static uk.co.saiman.webmodule.WebModuleConstants.VERSION_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDER_VERSION_ATTRIBUTE;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -55,7 +54,8 @@ public class WebModuleCapabilities {
   public WebModuleCapabilities(Bundle bundle) {
     this.bundle = bundle;
     this.dependencies = new WebModuleDependencies(bundle, this::requirementsUpdatedListener);
-    this.registrations = new ArrayList<>();
+
+    this.registrations = emptyList();
 
     update();
   }

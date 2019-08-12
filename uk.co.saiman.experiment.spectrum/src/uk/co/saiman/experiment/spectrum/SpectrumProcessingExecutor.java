@@ -29,8 +29,6 @@ package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
 
-import java.util.stream.Stream;
-
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
@@ -42,13 +40,10 @@ import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
-import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.requirement.AdditionalRequirement;
-import uk.co.saiman.experiment.requirement.Requirement;
-import uk.co.saiman.experiment.requirement.ResultRequirement;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
+import uk.co.saiman.experiment.executor.PlanningContext;
+import uk.co.saiman.experiment.variables.VariableCardinality;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -60,6 +55,13 @@ import uk.co.saiman.experiment.variables.VariableDeclaration;
 @Component(service = Executor.class)
 public class SpectrumProcessingExecutor implements Executor {
   public static final String OUTPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.output";
+
+  @Override
+  public void plan(PlanningContext context) {
+    context.declareMainRequirement(SpectrumExecutor.SPECTRUM);
+    context.declareVariable(PROCESSING_VARIABLE, VariableCardinality.OPTIONAL);
+    context.declareProduct(SpectrumExecutor.SPECTRUM);
+  }
 
   @Override
   public void execute(ExecutionContext context) {
@@ -101,25 +103,5 @@ public class SpectrumProcessingExecutor implements Executor {
         return spectrum.getCalibration();
       }
     };
-  }
-
-  @Override
-  public ResultRequirement<Spectrum> mainRequirement() {
-    return Requirement.on(SpectrumExecutor.SPECTRUM);
-  }
-
-  @Override
-  public Stream<Production<?>> products() {
-    return Stream.of(SpectrumExecutor.SPECTRUM);
-  }
-
-  @Override
-  public Stream<VariableDeclaration> variables() {
-    return Stream.of(PROCESSING_VARIABLE.declareOptional());
-  }
-
-  @Override
-  public Stream<AdditionalRequirement<?>> additionalRequirements() {
-    return Stream.empty();
   }
 }

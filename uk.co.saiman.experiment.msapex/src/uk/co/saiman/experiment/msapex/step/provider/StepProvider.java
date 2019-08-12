@@ -29,12 +29,20 @@ package uk.co.saiman.experiment.msapex.step.provider;
 
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
-import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 
 public interface StepProvider {
-  Executor executor();
+  boolean canProvideSteps(
+      ExperimentDefinition experiment,
+      ExperimentPath<Absolute> path,
+      GlobalEnvironment environment);
 
-  Stream<StepDefinition> createSteps(SharedEnvironment environment, DefineStep defineStep);
+  Stream<StepDefinition> provideSteps(
+      ExperimentDefinition experiment,
+      ExperimentPath<Absolute> path,
+      GlobalEnvironment environment);
 }

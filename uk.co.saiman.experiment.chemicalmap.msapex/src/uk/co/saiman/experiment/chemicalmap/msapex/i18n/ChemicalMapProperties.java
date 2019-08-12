@@ -29,7 +29,9 @@ package uk.co.saiman.experiment.chemicalmap.msapex.i18n;
 
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.properties.Localized;
+import uk.co.saiman.properties.service.PropertiesService;
 
+@PropertiesService
 public interface ChemicalMapProperties {
   ExperimentProperties experiment();
 

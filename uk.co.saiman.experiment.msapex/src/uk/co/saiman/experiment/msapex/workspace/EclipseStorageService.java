@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import org.eclipse.e4.ui.model.application.MAddon;
 import org.osgi.framework.BundleContext;
 
-import uk.co.saiman.experiment.service.ExperimentServiceConstants;
+import uk.co.saiman.experiment.osgi.ExperimentServiceConstants;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;

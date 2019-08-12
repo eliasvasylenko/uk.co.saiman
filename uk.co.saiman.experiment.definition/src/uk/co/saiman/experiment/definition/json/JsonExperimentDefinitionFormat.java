@@ -143,7 +143,7 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
     return StateMap
         .empty()
         .with(ID, procedure.id())
-        .with(CHILDREN, saveSteps(procedure.independentSteps().collect(toList())));
+        .with(CHILDREN, saveSteps(procedure.substeps().collect(toList())));
   }
 
   protected StateList saveSteps(List<StepDefinition> steps) {

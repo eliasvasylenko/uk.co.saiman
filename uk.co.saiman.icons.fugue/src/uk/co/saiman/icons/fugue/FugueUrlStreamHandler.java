@@ -48,7 +48,8 @@ public class FugueUrlStreamHandler extends AbstractURLStreamHandlerService {
 
       @Override
       public InputStream getInputStream() throws IOException {
-        return FugueUrlStreamHandler.class.getResourceAsStream("/" + url.getPath());
+        return FugueUrlStreamHandler.class
+            .getResourceAsStream("/uk/co/saiman/icons/fugue/" + url.getPath());
       }
 
       @Override

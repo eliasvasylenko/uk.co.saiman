@@ -35,14 +35,15 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.dependency.Something;
 import uk.co.saiman.experiment.dependency.source.Observation;
 import uk.co.saiman.experiment.dependency.source.Preparation;
 import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.dependency.source.Source;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.Variables;
+import uk.co.saiman.log.Log;
 
 /**
  * The context of an {@link Executor#execute(ExecutionContext) experiment
@@ -64,11 +65,11 @@ public interface ExecutionContext {
 
   <T extends Something> T acquireDependency(Source<T> source);
 
-  <U> Stream<Result<? extends U>> acquireDependencies(Observation<U> requirement);
+  <T extends Something> Stream<T> acquireDependencies(Source<T> requirement);
 
-  <T> T acquireCondition(Provision<T> source);
+  <T> T acquireCondition(Preparation<T> source);
 
-  <T> T acquireResource(Preparation<T> source);
+  <T> T acquireResource(Provision<T> source);
 
   <T> T acquireResult(Observation<T> source);
 
@@ -135,4 +136,6 @@ public interface ExecutionContext {
     observePartialResult(observation, () -> value);
     completeObservation(observation);
   }
+
+  Log log();
 }

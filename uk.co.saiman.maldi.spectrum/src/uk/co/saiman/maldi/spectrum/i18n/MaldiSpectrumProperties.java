@@ -28,7 +28,9 @@
 package uk.co.saiman.maldi.spectrum.i18n;
 
 import uk.co.saiman.properties.Localized;
+import uk.co.saiman.properties.service.PropertiesService;
 
+@PropertiesService
 public interface MaldiSpectrumProperties {
   Localized<String> spectrumExperimentStepName();
 }

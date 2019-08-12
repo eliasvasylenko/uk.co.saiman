@@ -27,27 +27,28 @@
  */
 package uk.co.saiman.experiment.msapex.provider.workspace;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.provider.ExperimentProvider;
 import uk.co.saiman.experiment.msapex.provider.ExperimentProviderDescriptor;
-import uk.co.saiman.properties.PropertyLoader;
 
 @Component
 public class WorkspaceExperimentProviderDescriptor implements ExperimentProviderDescriptor {
   public static final String ID = "uk.co.saiman.experiment.provider.workspace";
 
-  @Reference
-  PropertyLoader propertyLoader;
+  private final ExperimentProperties properties;
+
+  @Activate
+  public WorkspaceExperimentProviderDescriptor(@Reference ExperimentProperties properties) {
+    this.properties = properties;
+  }
 
   @Override
-  public String getLabel() {
-    return propertyLoader
-        .getProperties(ExperimentProperties.class)
-        .newWorkspaceExperiment()
-        .toString();
+  public String getLocalizedLabel() {
+    return properties.newWorkspaceExperiment().toString();
   }
 
   @Override
@@ -62,7 +63,6 @@ public class WorkspaceExperimentProviderDescriptor implements ExperimentProvider
 
   @Override
   public String getIconURI() {
-    // TODO Auto-generated method stub
-    return null;
+    return "fugue:size16/books.png";
   }
 }

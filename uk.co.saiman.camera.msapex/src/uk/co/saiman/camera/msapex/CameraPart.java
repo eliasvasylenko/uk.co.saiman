@@ -37,6 +37,7 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.application.Platform;
@@ -52,7 +53,6 @@ import uk.co.saiman.camera.CameraConnection;
 import uk.co.saiman.camera.CameraDevice;
 import uk.co.saiman.camera.CameraImage;
 import uk.co.saiman.camera.msapex.i18n.CameraProperties;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.observable.Disposable;
 
 /**
@@ -61,7 +61,7 @@ import uk.co.saiman.observable.Disposable;
  * @author Elias N Vasylenko
  */
 public class CameraPart {
-  @Localize
+  @Service
   @Inject
   CameraProperties text;
 

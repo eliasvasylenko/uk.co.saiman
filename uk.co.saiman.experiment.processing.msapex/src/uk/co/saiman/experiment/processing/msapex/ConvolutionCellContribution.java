@@ -27,11 +27,11 @@
  */
 package uk.co.saiman.experiment.processing.msapex;
 
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.di.AboutToShow;
 
 import javafx.scene.layout.HBox;
 import uk.co.saiman.data.function.processing.Convolution;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.experiment.processing.msapex.i18n.ProcessingProperties;
@@ -67,7 +67,7 @@ public class ConvolutionCellContribution {
     public void prepare(
         MCell cell,
         double[] convolutionVector,
-        @Localize ProcessingProperties properties) {
+        @Service ProcessingProperties properties) {
       cell.setLabel(properties.vectorLabel().get());
     }
   }
@@ -79,7 +79,7 @@ public class ConvolutionCellContribution {
     public void prepare(
         MCell cell,
         int convolutionVectorCentre,
-        @Localize ProcessingProperties properties) {
+        @Service ProcessingProperties properties) {
       cell.setLabel(properties.centreLabel().get());
     }
   }

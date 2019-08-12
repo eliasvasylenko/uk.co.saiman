@@ -1,10 +1,7 @@
 {
-	"uk.co.saiman.experiment.environment~maldi": {
-		"limitedResources.target": "(|(uk.co.saiman.experiment.environment=uk.co.saiman.maldisimulation)(!(uk.co.saiman.experiment.environment=*)))",
-		"unlimitedResources.target": "(|(uk.co.saiman.experiment.environment=uk.co.saiman.maldisimulation)(!(uk.co.saiman.experiment.environment=*)))"
-	},
-	"uk.co.saiman.maldi.acquisition.resource~maldisimulation": {
-		"device.target": "(service.pid=uk.co.saiman.simulation.instrument.acquisition~maldisimulation)",
-		"uk.co.saiman.experiment.environment": "uk.co.saiman.maldisimulation"
+	"uk.co.saiman.experiment.msapex.environment~maldisimulation": {
+		"targetPerspectiveId": "uk.co.saiman.perspective.analysis",
+		"sharedResourceFilter": "(&(provision-id=*)(|(environment-id=maldisimulation)(!(environment-id=*))))",
+		"exclusiveResourceProviders.target": "(|(environment-id=maldisimulation)(!(environment-id=*)))"
 	}
 }

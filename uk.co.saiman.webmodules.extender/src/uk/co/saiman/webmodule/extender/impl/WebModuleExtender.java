@@ -32,10 +32,11 @@ import java.util.Map;
 
 import org.osgi.annotation.bundle.Capability;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.namespace.extender.ExtenderNamespace;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
 import uk.co.saiman.osgi.ExtenderManager;
 import uk.co.saiman.webmodule.extender.WebModuleExtenderConstants;
@@ -49,8 +50,15 @@ public class WebModuleExtender extends ExtenderManager {
   private final Map<Bundle, WebModuleCapabilities> bundleCapabilities = new HashMap<>();
 
   @Activate
-  public WebModuleExtender(ComponentContext context) {
+  public WebModuleExtender(BundleContext context) {
     super(context);
+    open();
+  }
+
+  @Deactivate
+  @Override
+  public void close() {
+    super.close();
   }
 
   @Override

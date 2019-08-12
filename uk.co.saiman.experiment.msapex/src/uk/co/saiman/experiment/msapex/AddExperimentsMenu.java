@@ -44,7 +44,6 @@ import org.eclipse.fx.core.di.Service;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.dependency.Product;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.provider.ExperimentProvider;
@@ -66,7 +65,7 @@ public class AddExperimentsMenu {
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
 
   @AboutToShow
@@ -81,7 +80,8 @@ public class AddExperimentsMenu {
       Workspace workspace,
       ExperimentProviderDescriptor descriptor) {
     MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-    moduleItem.setLabel(descriptor.getLabel());
+    moduleItem.setLabel(descriptor.getLocalizedLabel());
+    moduleItem.setIconURI(descriptor.getIconURI());
     moduleItem.setType(ItemType.PUSH);
     moduleItem.setObject(new Object() {
       @Execute
@@ -109,7 +109,8 @@ public class AddExperimentsMenu {
       DialogUtilities.addStackTrace(alert, e);
       alert.setTitle(text.newExperimentFailedDialog().toString());
       alert
-          .setHeaderText(text.newExperimentFailedText(workspace, descriptor.getLabel()).toString());
+          .setHeaderText(
+              text.newExperimentFailedText(workspace, descriptor.getLocalizedLabel()).toString());
       alert.setContentText(text.newExperimentFailedDescription().toString());
       alert.showAndWait();
     }

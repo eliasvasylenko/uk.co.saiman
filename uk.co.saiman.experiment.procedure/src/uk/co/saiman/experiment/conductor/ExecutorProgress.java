@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.dependency.Something;
 import uk.co.saiman.experiment.dependency.source.Observation;
 import uk.co.saiman.experiment.dependency.source.Preparation;
@@ -45,6 +44,7 @@ import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.variables.Variables;
+import uk.co.saiman.log.Log;
 
 public class ExecutorProgress {
   private final Conductor scheduler;
@@ -114,25 +114,31 @@ public class ExecutorProgress {
       }
 
       @Override
-      public <U> Stream<Result<? extends U>> acquireDependencies(Observation<U> requirement) {
+      public <T extends Something> Stream<T> acquireDependencies(Source<T> requirement) {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <U> U acquireCondition(Provision<U> source) {
+      public <T> T acquireCondition(Preparation<T> source) {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <U> U acquireResource(Preparation<U> source) {
+      public <T> T acquireResource(Provision<T> source) {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <U> U acquireResult(Observation<U> source) {
+      public <T> T acquireResult(Observation<T> source) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public Log log() {
         // TODO Auto-generated method stub
         return null;
       }

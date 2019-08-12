@@ -32,26 +32,18 @@ import static uk.co.saiman.experiment.event.ExperimentEventKind.ADD_STEP;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ProductPath;
 
 public class AddStepEvent extends ExperimentStepEvent {
-  private final Optional<ProductPath<Absolute, ?>> dependencyPath;
   private final Optional<Step> dependencyStep;
 
   public AddStepEvent(Step step) {
     super(step);
-    this.dependencyPath = step.getDependencyPath();
     this.dependencyStep = step.getDependencyStep();
   }
 
   @Override
   public ExperimentEventKind kind() {
     return ADD_STEP;
-  }
-
-  public Optional<ProductPath<Absolute, ?>> dependencyPath() {
-    return dependencyPath;
   }
 
   public Optional<Step> dependencyStep() {

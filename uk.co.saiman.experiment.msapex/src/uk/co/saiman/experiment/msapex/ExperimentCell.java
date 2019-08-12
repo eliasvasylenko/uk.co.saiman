@@ -35,6 +35,7 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.osgi.service.event.Event;
@@ -46,7 +47,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
@@ -66,12 +66,12 @@ import uk.co.saiman.log.Log.Level;
  * @author Elias N Vasylenko
  */
 public class ExperimentCell {
-  public static final String ID = "uk.co.saiman.experiment.msapex.cell";
+  public static final String ID = "uk.co.saiman.experiment.cell";
 
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
   @Inject
   IEclipseContext context;
@@ -203,10 +203,8 @@ public class ExperimentCell {
       cell
           .setIconURI(
               (experiment.status() == Status.CLOSED)
-                  ? "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-small.png"
-                  : cell.isExpanded()
-                      ? "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book-open.png"
-                      : "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/book.png");
+                  ? "fugue:size16/book-small.png"
+                  : cell.isExpanded() ? "fugue:size16/book-open.png" : "fugue:size16/book.png");
     } catch (Exception e) {
       log.log(Level.ERROR, "Problem updating icon", e);
     }

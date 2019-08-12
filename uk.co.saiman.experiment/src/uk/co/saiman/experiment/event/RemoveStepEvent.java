@@ -32,26 +32,18 @@ import static uk.co.saiman.experiment.event.ExperimentEventKind.REMOVE_STEP;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ProductPath;
 
 public class RemoveStepEvent extends ExperimentStepEvent {
-  private final  Optional<ProductPath<Absolute, ?>> previousDependencyPath;
   private final Optional<Step> previousDependencyStep;
 
   public RemoveStepEvent(Step step, Optional<Step> previousParent) {
     super(step);
-    this.previousDependencyPath = step.getDependencyPath();
     this.previousDependencyStep = previousParent;
   }
 
   @Override
   public ExperimentEventKind kind() {
     return REMOVE_STEP;
-  }
-
-  public Optional<ProductPath<Absolute, ?>> previousDependencyPath() {
-    return previousDependencyPath;
   }
 
   public Optional<Step> previousDependencyStep() {

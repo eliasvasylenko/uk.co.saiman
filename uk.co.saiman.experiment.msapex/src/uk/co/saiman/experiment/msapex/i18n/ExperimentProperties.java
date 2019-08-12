@@ -34,6 +34,7 @@ import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
 import uk.co.saiman.properties.Localized;
+import uk.co.saiman.properties.service.PropertiesService;
 
 /**
  * Properties interface for texts relating to experiments.
@@ -41,6 +42,7 @@ import uk.co.saiman.properties.Localized;
  * @author Elias N Vasylenko
  */
 @SuppressWarnings("javadoc")
+@PropertiesService
 public interface ExperimentProperties {
   Localized<String> newExperiment();
 

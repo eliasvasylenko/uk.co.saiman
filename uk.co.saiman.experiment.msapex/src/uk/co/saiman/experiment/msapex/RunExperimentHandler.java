@@ -30,11 +30,11 @@ package uk.co.saiman.experiment.msapex;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.extensions.Service;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
 import uk.co.saiman.log.Log;
@@ -49,7 +49,7 @@ public class RunExperimentHandler {
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
 
   @Execute

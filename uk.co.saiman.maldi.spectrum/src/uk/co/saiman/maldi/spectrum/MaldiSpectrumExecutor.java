@@ -27,11 +27,11 @@
  */
 package uk.co.saiman.maldi.spectrum;
 
-import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
-import static uk.co.saiman.experiment.service.ExperimentServiceConstants.EXECUTOR_ID;
+import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static uk.co.saiman.experiment.osgi.ExperimentServiceConstants.EXECUTOR_ID;
 import static uk.co.saiman.maldi.acquisition.MaldiAcquisitionConstants.MALDI_ACQUISITION_CONTROLLER;
 import static uk.co.saiman.maldi.acquisition.MaldiAcquisitionConstants.MALDI_ACQUISITION_DEVICE;
-import static uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor.PLATE_SUBMISSION;
+import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
 import static uk.co.saiman.measurement.Units.dalton;
 
 import javax.measure.Unit;
@@ -51,7 +51,7 @@ import uk.co.saiman.maldi.spectrum.MaldiSpectrumExecutor.MaldiSpectrumExecutorCo
 import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 
 @Designate(ocd = MaldiSpectrumExecutorConfiguration.class, factory = true)
-@Component(configurationPid = MaldiSpectrumExecutor.EXECUTOR_ID, configurationPolicy = REQUIRE, service = {
+@Component(configurationPid = MaldiSpectrumExecutor.EXECUTOR_ID, configurationPolicy = OPTIONAL, service = {
     MaldiSpectrumExecutor.class,
     SpectrumExecutor.class,
     Executor.class }, property = EXECUTOR_ID + "=" + MaldiSpectrumExecutor.EXECUTOR_ID)
@@ -61,8 +61,6 @@ public class MaldiSpectrumExecutor implements SpectrumExecutor {
   public @interface MaldiSpectrumExecutorConfiguration {}
 
   public static final String EXECUTOR_ID = "uk.co.saiman.maldi.spectrum.executor";
-
-  public static final String MALDI_SPECTRUM = "uk.co.saiman.maldi.spectrum.result";
 
   @Override
   public Unit<Mass> getMassUnit() {

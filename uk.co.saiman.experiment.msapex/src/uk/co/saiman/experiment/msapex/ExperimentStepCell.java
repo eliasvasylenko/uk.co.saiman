@@ -39,20 +39,19 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Service;
 
 import javafx.css.PseudoClass;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.ui.ChildrenService;
 import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
@@ -75,7 +74,7 @@ public class ExperimentStepCell {
       SUPPLEMENTAL_TEXT.replace('.', '-'));
 
   @Inject
-  @Localize
+  @Service
   private ExperimentProperties text;
   @Inject
   private EditorService editorService;
@@ -141,20 +140,6 @@ public class ExperimentStepCell {
     context.set(Executor.class, step.getExecutor());
 
     EclipseContextUtilities.injectSubtypes(context, Executor.class);
-
-    EclipseContextUtilities.injectDerived(context, Step.class, (step, buffer) -> {
-      step
-          .getDependencyPath()
-          .ifPresent(productPath -> buffer.set(ProductPath.class.getName(), productPath));
-
-      step.getExecutor().products().forEach(production -> {
-        buffer.set(production.id(), production);
-      });
-
-      step.getExecutor().variables().forEach(variableDeclaration -> {
-        buffer.set(variableDeclaration.variable().id(), variableDeclaration.variable());
-      });
-    });
 
     /*
      * Inject events

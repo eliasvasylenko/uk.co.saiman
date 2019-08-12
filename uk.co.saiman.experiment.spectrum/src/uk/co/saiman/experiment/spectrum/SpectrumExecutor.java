@@ -28,14 +28,14 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
-
-import java.util.stream.Stream;
+import static uk.co.saiman.experiment.variables.VariableCardinality.REQUIRED;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
+import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.spectrum.ContinuousFunctionAccumulator;
 import uk.co.saiman.data.spectrum.SampledSpectrum;
@@ -44,16 +44,13 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.dependency.source.Observation;
 import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.requirement.AdditionalRequirement;
-import uk.co.saiman.experiment.requirement.ConditionRequirement;
-import uk.co.saiman.experiment.requirement.Requirement;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
+import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
+import uk.co.saiman.log.Log.Level;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -75,93 +72,75 @@ public interface SpectrumExecutor extends Executor {
   Preparation<?> samplePreparation();
 
   @Override
+  default void plan(PlanningContext context) {
+    context.declareVariable(PROCESSING_VARIABLE, REQUIRED);
+    context.declareMainRequirement(samplePreparation());
+    context.declareResourceRequirement(acquisitionDevice());
+    context.declareResourceRequirement(acquisitionControl());
+    context.declareProduct(SPECTRUM);
+  }
+
+  @Override
   default void execute(ExecutionContext context) {
-    var device = context.acquireDependency(acquisitionDevice()).value();
-    var sample = context.acquireDependency(samplePreparation());
+    var device = context.acquireResource(acquisitionDevice());
 
-    System.out.println("create accumulator");
-    ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
-        device.acquisitionDataEvents(),
-        device.getSampleDomain(),
-        device.getSampleIntensityUnit());
-
-    System.out.println("prepare processing");
+    context.log().log(Level.INFO, "preparing processing...");
     DataProcessor processing = context.getVariable(PROCESSING_VARIABLE).getProcessor();
 
-    System.out.println("fetching calibration");
-    SpectrumCalibration calibration = new SpectrumCalibration() {
-      @Override
-      public Unit<Time> getTimeUnit() {
-        return device.getSampleTimeUnit();
-      }
+    context.log().log(Level.INFO, "preparing calibration...");
+    SpectrumCalibration calibration = SpectrumCalibration
+        .withUnits(device.getSampleTimeUnit(), SpectrumExecutor.this.getMassUnit(), time -> time);
 
-      @Override
-      public Unit<Mass> getMassUnit() {
-        return SpectrumExecutor.this.getMassUnit();
-      }
+    SampledContinuousFunction<Time, Dimensionless> accumulation;
 
-      @Override
-      public double getMass(double time) {
-        return time;
-      }
-    };
+    context.log().log(Level.INFO, "holding sample...");
+    try (var sample = context.acquireDependency(samplePreparation())) {
+      context.log().log(Level.INFO, "acquired sample hold");
 
-    System.out.println("attach observer");
-    accumulator
-        .accumulation()
-        .observe(
-            o -> context
-                .observePartialResult(
-                    SPECTRUM,
-                    () -> new SampledSpectrum(o.getLatestAccumulation(), calibration, processing)));
+      context.log().log(Level.INFO, "creating accumulator...");
 
-    System.out.println("start acquisition");
-    var controller = context.acquireDependency(acquisitionControl()).value();
-    controller.startAcquisition();
+      ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
+          device.acquisitionDataEvents(),
+          device.getSampleDomain(),
+          device.getSampleIntensityUnit());
 
-    /*
-     * TODO some sort of invalidate/lazy-revalidate message passer
-     * 
-     * ContinuousFunctionAccumulator already has this, it provides an observable
-     * with backpressure which gives the latest spectrum every time it is requested
-     * and otherwise does no work (i.e. no array copying etc.). The limitation is
-     * that it can't notify a listener when a new item is actually available without
-     * actually doing the work and sending an item, the listener has to just request
-     * and see.
-     * 
-     * The problem is how to pass this through the Result API to users without
-     * losing the laziness so we can request at e.g. the monitor refresh rate.
-     * 
-     * Perhaps the observable type should be `Result<T>` rather than `T`?
-     */
+      context.log().log(Level.INFO, "attaching observer...");
+      accumulator
+          .accumulation()
+          .observe(
+              o -> context
+                  .observePartialResult(
+                      SPECTRUM,
+                      () -> new SampledSpectrum(
+                          o.getLatestAccumulation(),
+                          calibration,
+                          processing)));
 
-    System.out.println("get result");
-    var accumulation = accumulator.getCompleteAccumulation();
+      context.log().log(Level.INFO, "starting acquisition...");
+      var controller = context.acquireDependency(acquisitionControl()).value();
+      controller.startAcquisition();
+
+      /*
+       * TODO some sort of invalidate/lazy-revalidate message passer
+       * 
+       * ContinuousFunctionAccumulator already has this, it provides an observable
+       * with backpressure which gives the latest spectrum every time it is requested
+       * and otherwise does no work (i.e. no array copying etc.). The limitation is
+       * that it can't notify a listener when a new item is actually available without
+       * actually doing the work and sending an item, the listener has to just request
+       * and see.
+       * 
+       * The problem is how to pass this through the Result API to users without
+       * losing the laziness so we can request at e.g. the monitor refresh rate.
+       * 
+       * Perhaps the observable type should be `Result<T>` rather than `T`?
+       */
+
+      context.log().log(Level.INFO, "acquired result");
+      accumulation = accumulator.getCompleteAccumulation();
+    }
 
     context.setResultFormat(SPECTRUM, SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
     context.observeResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
-  }
-
-  @Override
-  default ConditionRequirement<?> mainRequirement() {
-    return Requirement.on(samplePreparation());
-  }
-
-  @Override
-  default Stream<Production<?>> products() {
-    return Stream.of(SPECTRUM);
-  }
-
-  @Override
-  default Stream<VariableDeclaration> variables() {
-    return Stream.of(PROCESSING_VARIABLE.declareRequired());
-  }
-
-  @Override
-  default Stream<AdditionalRequirement<?>> additionalRequirements() {
-    return Stream
-        .of(
-            AdditionalRequirement.on(acquisitionControl()),
-            AdditionalRequirement.on(acquisitionDevice()));
   }
 }

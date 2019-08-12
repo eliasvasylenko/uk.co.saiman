@@ -59,7 +59,7 @@ public class ConditionImpl<T> implements Condition<T> {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     // TODO Auto-generated method stub
 
   }

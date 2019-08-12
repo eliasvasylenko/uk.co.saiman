@@ -33,10 +33,10 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 
 import javafx.scene.control.Label;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.instruction.Instruction;
@@ -44,7 +44,7 @@ import uk.co.saiman.experiment.spectrum.msapex.i18n.SpectrumProperties;
 
 public class SpectrumExperimentCell {
   @Inject
-  @Localize
+  @Service
   SpectrumProperties properties;
 
   @PostConstruct

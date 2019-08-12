@@ -1,4 +1,4 @@
-package uk.co.saiman.experiment.service;
+package uk.co.saiman.experiment.osgi;
 
 public final class ExperimentServiceConstants {
   public static final String EXECUTOR_ID = "uk.co.saiman.experiment.executor.id";

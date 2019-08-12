@@ -36,7 +36,7 @@ import uk.co.saiman.experiment.dependency.Result;
  *
  * @param <T> the type of the result we wish to find
  */
-public class Observation<T> extends Production<Result<? extends T>> {
+public final class Observation<T> extends Production<Result<? extends T>> {
   private final String id;
 
   public Observation(String id) {

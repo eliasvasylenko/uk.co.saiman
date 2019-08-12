@@ -45,13 +45,12 @@ import org.eclipse.fx.core.di.Service;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.eclipse.localization.Localize;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
 import uk.co.saiman.experiment.msapex.step.provider.StepProviderDescriptor;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
-import uk.co.saiman.experiment.requirement.NoRequirement;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -68,11 +67,11 @@ public class AddStepsToExperimentMenu {
   @Inject
   Log log;
   @Inject
-  @Localize
+  @Service
   ExperimentProperties text;
 
   @Inject
-  SharedEnvironment environment;
+  GlobalEnvironment environment;
 
   @AboutToShow
   void aboutToShow(
@@ -91,7 +90,11 @@ public class AddStepsToExperimentMenu {
       StepProviderDescriptor descriptor) {
     var provider = ContextInjectionFactory.make(descriptor.getProviderClass(), context);
 
-    if (!(provider.executor().mainRequirement() instanceof NoRequirement)) {
+    if (!provider
+        .canProvideSteps(
+            experiment.experiment().getDefinition(),
+            ExperimentPath.defineAbsolute(),
+            environment)) {
       return Optional.empty();
     }
 
@@ -114,9 +117,10 @@ public class AddStepsToExperimentMenu {
     try {
 
       provider
-          .createSteps(
-              environment,
-              new DefineStepImpl(experiment.experiment().getDefinition(), provider.executor()))
+          .provideSteps(
+              experiment.experiment().getDefinition(),
+              ExperimentPath.defineAbsolute(),
+              environment)
           .forEach(experiment.experiment()::attach);
 
     } catch (Exception e) {

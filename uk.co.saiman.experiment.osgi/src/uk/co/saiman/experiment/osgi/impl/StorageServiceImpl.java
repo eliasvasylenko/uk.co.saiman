@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.service.impl;
+package uk.co.saiman.experiment.osgi.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
@@ -45,8 +45,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.experiment.service.ExperimentServiceConstants;
-import uk.co.saiman.experiment.service.impl.StorageServiceImpl.StorageServiceConfiguration;
+import uk.co.saiman.experiment.osgi.ExperimentServiceConstants;
+import uk.co.saiman.experiment.osgi.impl.StorageServiceImpl.StorageServiceConfiguration;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.service.StorageService;

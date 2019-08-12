@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Function;
 
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.state.Accessor;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.State;
@@ -45,7 +45,7 @@ import uk.co.saiman.state.State;
  */
 public class Variable<T> {
   private final String id;
-  private final Function<? super SharedEnvironment, ? extends Accessor<T, ?>> accessor;
+  private final Function<? super GlobalEnvironment, ? extends Accessor<T, ?>> accessor;
 
   public Variable(String id, Accessor<T, ?> accessor) {
     this.id = requireNonNull(id);
@@ -54,7 +54,7 @@ public class Variable<T> {
 
   public Variable(
       String id,
-      Function<? super SharedEnvironment, ? extends Accessor<T, ?>> accessor) {
+      Function<? super GlobalEnvironment, ? extends Accessor<T, ?>> accessor) {
     this.id = requireNonNull(id);
     this.accessor = requireNonNull(accessor);
   }
@@ -63,19 +63,7 @@ public class Variable<T> {
     return id;
   }
 
-  public MapIndex<T> mapIndex(SharedEnvironment environment) {
+  public MapIndex<T> mapIndex(GlobalEnvironment environment) {
     return new MapIndex<>(id, accessor.apply(environment));
-  }
-
-  public VariableDeclaration declareRequired() {
-    return declare(VariableCardinality.REQUIRED);
-  }
-
-  public VariableDeclaration declareOptional() {
-    return declare(VariableCardinality.OPTIONAL);
-  }
-
-  public VariableDeclaration declare(VariableCardinality cardinality) {
-    return new VariableDeclaration(this, cardinality);
   }
 }

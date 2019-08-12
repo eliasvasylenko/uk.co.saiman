@@ -33,6 +33,7 @@ import static uk.co.saiman.fx.FxmlLoadBuilder.buildWith;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.fx.core.di.LocalInstance;
 
 import javafx.fxml.FXML;
@@ -40,7 +41,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Control;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.eclipse.localization.Localize;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.spectrum.msapex.i18n.SpectrumProperties;
@@ -48,7 +48,7 @@ import uk.co.saiman.experiment.variables.Variables;
 
 public class SpectrumProcessingEditorPart {
   @Inject
-  @Localize
+  @Service
   private SpectrumProperties properties;
 
   @FXML

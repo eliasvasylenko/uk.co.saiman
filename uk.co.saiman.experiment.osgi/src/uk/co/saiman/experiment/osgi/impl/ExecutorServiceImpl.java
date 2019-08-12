@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.service.impl;
+package uk.co.saiman.experiment.osgi.impl;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
@@ -46,8 +46,8 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
-import uk.co.saiman.experiment.service.ExperimentServiceConstants;
-import uk.co.saiman.experiment.service.impl.ExecutorServiceImpl.ExecutorServiceConfiguration;
+import uk.co.saiman.experiment.osgi.ExperimentServiceConstants;
+import uk.co.saiman.experiment.osgi.impl.ExecutorServiceImpl.ExecutorServiceConfiguration;
 
 /**
  * An OSGi-based implementation of the {@link ExecutorService experiment

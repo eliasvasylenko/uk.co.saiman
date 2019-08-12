@@ -33,34 +33,39 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.extensions.Service;
 
+import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
-import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.msapex.step.provider.DefineStep;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
 import uk.co.saiman.maldi.spectrum.MaldiSpectrumExecutor;
-import uk.co.saiman.maldi.spectrum.i18n.MaldiSpectrumProperties;
-import uk.co.saiman.properties.PropertyLoader;
 
 public class MaldiSpectrumExperimentStepProvider implements StepProvider {
-  private final MaldiSpectrumProperties properties;
   private final MaldiSpectrumExecutor spectrumExecutor;
 
   @Inject
-  public MaldiSpectrumExperimentStepProvider(
-      @Service PropertyLoader properties,
-      @Service MaldiSpectrumExecutor spectrumExecutor) {
-    this.properties = properties.getProperties(MaldiSpectrumProperties.class);
+  public MaldiSpectrumExperimentStepProvider(@Service MaldiSpectrumExecutor spectrumExecutor) {
     this.spectrumExecutor = spectrumExecutor;
   }
 
   @Override
-  public Executor executor() {
-    return spectrumExecutor;
+  public boolean canProvideSteps(
+      ExperimentDefinition experiment,
+      ExperimentPath<Absolute> path,
+      GlobalEnvironment environment) {
+    return experiment
+        .findSubstep(path)
+        .filter(step -> step.productions().anyMatch(spectrumExecutor.samplePreparation()::equals))
+        .isPresent();
   }
 
   @Override
-  public Stream<StepDefinition> createSteps(SharedEnvironment environment, DefineStep defineStep) {
-    return Stream.of(defineStep.withName("Spectrum"));
+  public Stream<StepDefinition> provideSteps(
+      ExperimentDefinition experiment,
+      ExperimentPath<Absolute> path,
+      GlobalEnvironment environment) {
+    return Stream.of(StepDefinition.define(ExperimentId.fromName("Spectrum"), spectrumExecutor));
   }
 }

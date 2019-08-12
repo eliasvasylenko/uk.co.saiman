@@ -64,7 +64,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.environment.SharedEnvironment;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
@@ -112,7 +112,7 @@ public class ExperimentAddon {
   private Workspace workspace;
   private FileSystemStore workspaceStore;
 
-  private ServiceIndex<SharedEnvironment, String, SharedEnvironment> environments;
+  private ServiceIndex<GlobalEnvironment, String, GlobalEnvironment> environments;
 
   private EclipseStorageService storageService;
   private EclipseExecutorService executorService;
@@ -138,7 +138,7 @@ public class ExperimentAddon {
   }
 
   private void initializeEnvironments() {
-    environments = ServiceIndex.open(bundleContext, SharedEnvironment.class, identity());
+    environments = ServiceIndex.open(bundleContext, GlobalEnvironment.class, identity());
   }
 
   private void initializeStorage() {
@@ -271,7 +271,7 @@ public class ExperimentAddon {
       if (perspective != null && window != null) {
         var windowContext = window.getContext();
         var perspectiveContext = perspective.getContext();
-        windowContext.set(SharedEnvironment.class, perspectiveContext.get(SharedEnvironment.class));
+        windowContext.set(GlobalEnvironment.class, perspectiveContext.get(GlobalEnvironment.class));
       }
     } catch (Exception e) {
       log.log(Level.ERROR, e);
@@ -304,8 +304,8 @@ public class ExperimentAddon {
         environments.highestRankedRecord(environmentId).optionalValue().observe(record -> {
           try {
             record.ifPresent(r -> {
-              var environment = new EclipseSharedEnvironment(r.serviceObject());
-              context.set(SharedEnvironment.class, environment);
+              var environment = r.serviceObject();
+              context.set(GlobalEnvironment.class, environment);
             });
           } catch (Exception e) {
             e.printStackTrace();
