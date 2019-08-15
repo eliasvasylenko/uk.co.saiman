@@ -29,47 +29,47 @@ package uk.co.saiman.maldi.sample;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
-import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
+import static uk.co.saiman.experiment.requirement.Requirement.onCondition;
 import static uk.co.saiman.maldi.stage.MaldiStageConstants.SAMPLE_WELL_ID;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.experiment.dependency.source.Preparation;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.variables.VariableCardinality;
 import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor.MaldiSampleAreaExecutorConfiguration;
 import uk.co.saiman.maldi.stage.SampleAreaHold;
+import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 
 @Designate(ocd = MaldiSampleAreaExecutorConfiguration.class, factory = true)
-@Component(configurationPid = MaldiSampleAreaExecutor.CONFIGURATION_PID, configurationPolicy = OPTIONAL, service = {
-    MaldiSampleAreaExecutor.class,
-    Executor.class })
+@Component(
+    configurationPid = MaldiSampleAreaExecutor.CONFIGURATION_PID,
+    configurationPolicy = OPTIONAL,
+    service = { MaldiSampleAreaExecutor.class, Executor.class })
 public class MaldiSampleAreaExecutor implements Executor {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Maldi Sample Area Experiment Executor", description = "The experiment executor which manages the positioning of the sample stage")
+  @ObjectClassDefinition(
+      name = "Maldi Sample Area Experiment Executor",
+      description = "The experiment executor which manages the positioning of the sample stage")
   public @interface MaldiSampleAreaExecutorConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.maldi.executor.xystage";
-
-  public static final Preparation<SampleAreaHold> IN_POSITION = new Preparation<>(
-      "uk.co.saiman.maldi.executor.inposition");
 
   @Override
   public void plan(PlanningContext context) {
     context.declareVariable(SAMPLE_WELL_ID, VariableCardinality.REQUIRED);
 
-    context.declareMainRequirement(PLATE_SUBMISSION);
+    context.declareMainRequirement(onCondition(SamplePlateSubmission.class));
 
-    context.declareProduct(IN_POSITION);
+    context.preparesCondition(SampleAreaHold.class);
   }
 
   @Override
   public void execute(ExecutionContext context) {
-    var plateSubmission = context.acquireDependency(PLATE_SUBMISSION).value();
+    var plateSubmission = context.acquireCondition(SamplePlateSubmission.class).value();
 
     var sampleArea = plateSubmission
         .samplePreparation()
@@ -93,6 +93,6 @@ public class MaldiSampleAreaExecutor implements Executor {
 
     plateSubmission.requestAnalysis(sampleArea);
     plateSubmission.awaitRequest(30, SECONDS);
-    context.prepareCondition(IN_POSITION, null);
+    context.prepareCondition(SampleAreaHold.class, null);
   }
 }

@@ -1,7 +1,10 @@
 {
-	"uk.co.saiman.experiment.msapex.environment~maldisimulation": {
-		"targetPerspectiveId": "uk.co.saiman.perspective.analysis",
-		"sharedResourceFilter": "(&(provision-id=*)(|(environment-id=maldisimulation)(!(environment-id=*))))",
+	"uk.co.saiman.experiment.environment.local~maldisimulation": {
+		"target-perspective-id": "uk.co.saiman.perspective.maldi",
 		"exclusiveResourceProviders.target": "(|(environment-id=maldisimulation)(!(environment-id=*)))"
+	},
+	"uk.co.saiman.experiment.environment.global~maldisimulation": {
+		"target-perspective-id": "uk.co.saiman.perspective.maldi",
+		"sharedResourceFilter": "(&(provision-id=*)(|(environment-id=maldisimulation)(!(environment-id=*))))"
 	}
 }

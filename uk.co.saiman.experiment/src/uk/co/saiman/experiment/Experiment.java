@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment;
 
 import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.declaration.ExperimentPath.defineAbsolute;
+import static uk.co.saiman.experiment.declaration.ExperimentPath.toRoot;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -154,13 +154,13 @@ public class Experiment {
   }
 
   public synchronized Step getIndependentStep(ExperimentId id) {
-    return getStep(ExperimentPath.defineAbsolute().resolve(id));
+    return getStep(ExperimentPath.toRoot().resolve(id));
   }
 
   public synchronized Stream<Step> getIndependentSteps() {
     return definition
         .substeps()
-        .map(step -> defineAbsolute().resolve(step.id()))
+        .map(step -> toRoot().resolve(step.id()))
         .map(this::getStep);
   }
 }

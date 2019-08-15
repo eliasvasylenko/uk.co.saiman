@@ -27,34 +27,18 @@
  */
 package uk.co.saiman.experiment.requirement;
 
-import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.dependency.source.Observation;
+import uk.co.saiman.experiment.dependency.Condition;
 
 /**
- * An input to an experiment procedure should be wired up to an observation made
- * by a preceding procedure.
+ * A preparation of a condition by an experiment procedure.
  * 
  * @author Elias N Vasylenko
- *
- * @param <T> the type of the result we wish to find
+ * 
+ * @param <T>
+ *          The type of condition prepared
  */
-public class ResultRequirement<T> extends ProductRequirement<Result<? extends T>> {
-  public enum Cardinality {
-    SINGULAR, PLURAL
-  }
-
-  private final Cardinality cardinality;
-
-  ResultRequirement(Observation<T> observation) {
-    this(observation, Cardinality.SINGULAR);
-  }
-
-  ResultRequirement(Observation<T> observation, Cardinality cardinality) {
-    super(observation);
-    this.cardinality = cardinality;
-  }
-
-  public Cardinality cardinality() {
-    return cardinality;
+public final class Preparation<T> extends Production<T, Condition<T>> {
+  Preparation(Class<T> type) {
+    super(type);
   }
 }

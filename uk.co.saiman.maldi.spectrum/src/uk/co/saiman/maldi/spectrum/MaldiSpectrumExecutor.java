@@ -29,9 +29,6 @@ package uk.co.saiman.maldi.spectrum;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static uk.co.saiman.experiment.osgi.ExperimentServiceConstants.EXECUTOR_ID;
-import static uk.co.saiman.maldi.acquisition.MaldiAcquisitionConstants.MALDI_ACQUISITION_CONTROLLER;
-import static uk.co.saiman.maldi.acquisition.MaldiAcquisitionConstants.MALDI_ACQUISITION_DEVICE;
-import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
 import static uk.co.saiman.measurement.Units.dalton;
 
 import javax.measure.Unit;
@@ -41,8 +38,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.spectrum.SpectrumExecutor;
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
@@ -51,13 +46,16 @@ import uk.co.saiman.maldi.spectrum.MaldiSpectrumExecutor.MaldiSpectrumExecutorCo
 import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 
 @Designate(ocd = MaldiSpectrumExecutorConfiguration.class, factory = true)
-@Component(configurationPid = MaldiSpectrumExecutor.EXECUTOR_ID, configurationPolicy = OPTIONAL, service = {
-    MaldiSpectrumExecutor.class,
-    SpectrumExecutor.class,
-    Executor.class }, property = EXECUTOR_ID + "=" + MaldiSpectrumExecutor.EXECUTOR_ID)
+@Component(
+    configurationPid = MaldiSpectrumExecutor.EXECUTOR_ID,
+    configurationPolicy = OPTIONAL,
+    service = { MaldiSpectrumExecutor.class, SpectrumExecutor.class, Executor.class },
+    property = EXECUTOR_ID + "=" + MaldiSpectrumExecutor.EXECUTOR_ID)
 public class MaldiSpectrumExecutor implements SpectrumExecutor {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Maldi Spectrum Experiment Executor", description = "The experiment executor which manages acquisition of spectra")
+  @ObjectClassDefinition(
+      name = "Maldi Spectrum Experiment Executor",
+      description = "The experiment executor which manages acquisition of spectra")
   public @interface MaldiSpectrumExecutorConfiguration {}
 
   public static final String EXECUTOR_ID = "uk.co.saiman.maldi.spectrum.executor";
@@ -68,17 +66,17 @@ public class MaldiSpectrumExecutor implements SpectrumExecutor {
   }
 
   @Override
-  public Provision<AcquisitionDevice<?>> acquisitionDevice() {
-    return MALDI_ACQUISITION_DEVICE;
+  public Class acquisitionDevice() {
+    return AcquisitionDevice.class;
   }
 
   @Override
-  public Provision<AcquisitionController> acquisitionControl() {
-    return MALDI_ACQUISITION_CONTROLLER;
+  public Class<AcquisitionController> acquisitionControl() {
+    return AcquisitionController.class;
   }
 
   @Override
-  public Preparation<SamplePlateSubmission> samplePreparation() {
-    return PLATE_SUBMISSION;
+  public Class<SamplePlateSubmission> samplePreparation() {
+    return SamplePlateSubmission.class;
   }
 }

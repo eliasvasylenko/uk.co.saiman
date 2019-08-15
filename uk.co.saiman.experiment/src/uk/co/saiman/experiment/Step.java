@@ -37,16 +37,15 @@ import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.dependency.Product;
-import uk.co.saiman.experiment.dependency.ProductPath;
+import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
@@ -192,8 +191,12 @@ public class Step {
     return path;
   }
 
-  public <T extends Product> ProductPath<Absolute, T> getPath(Production<T> capability) {
-    return ProductPath.define(path, capability);
+  public <T> ProductPath<Absolute, Result<T>> getResultPath(Class<T> type) {
+    return ProductPath.toResult(path, type);
+  }
+
+  public <T> ProductPath<Absolute, Condition<T>> getConditionPath(Class<T> type) {
+    return ProductPath.toCondition(path, type);
   }
 
   public Step resolve(ExperimentPath<Absolute> path) {

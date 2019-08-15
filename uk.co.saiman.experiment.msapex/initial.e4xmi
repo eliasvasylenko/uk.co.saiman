@@ -8,7 +8,6 @@
     <elements xsi:type="application:Addon" xmi:id="_97V3YeyUEei7pqb_YKjS4g" elementId="uk.co.saiman.experiment.addon" contributionURI="bundleclass://uk.co.saiman.experiment.msapex/uk.co.saiman.experiment.msapex.workspace.ExperimentAddon">
       <persistedState key="uk.co.saiman.experiment.storage" value="uk.co.saiman.experiment.storage~msapex"/>
       <persistedState key="uk.co.saiman.experiment.executors" value="uk.co.saiman.experiment.executors~msapex"/>
-      <persistedState key="uk.co.saiman.experiment.environment.analysis" value="uk.co.saiman.experiment.environment~msapex"/>
     </elements>
     <elements xsi:type="application:Addon" xmi:id="_97V3YuyUEei7pqb_YKjS4g" elementId="uk.co.saiman.experiment.addon.editor" contributionURI="bundleclass://uk.co.saiman.experiment.msapex/uk.co.saiman.experiment.msapex.ExperimentEditorAddon"/>
   </fragments>

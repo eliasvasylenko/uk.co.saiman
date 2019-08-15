@@ -62,15 +62,15 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
     this.ids = ids;
   }
 
-  public static ExperimentPath<Relative> defineRelative() {
-    return defineRelative(0);
+  public static ExperimentPath<Relative> toSelf() {
+    return toAncestor(0);
   }
 
-  public static ExperimentPath<Relative> defineRelative(int ancestor) {
+  public static ExperimentPath<Relative> toAncestor(int ancestor) {
     return new Relative(ancestor, emptyList());
   }
 
-  public static ExperimentPath<Absolute> defineAbsolute() {
+  public static ExperimentPath<Absolute> toRoot() {
     return new Absolute(emptyList());
   }
 
@@ -81,11 +81,11 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
 
     if (string.startsWith(SEPARATOR)) {
       string = string.substring(SEPARATOR.length());
-      path = defineAbsolute();
+      path = toRoot();
 
     } else if (string.startsWith(SELF + SEPARATOR)) {
       string = string.substring(SELF.length() + SEPARATOR.length());
-      path = defineRelative();
+      path = toSelf();
 
     } else {
       int ancestor = 0;
@@ -93,7 +93,7 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
         ancestor++;
         string = string.substring(PARENT.length() + SEPARATOR.length());
       }
-      path = defineRelative(ancestor);
+      path = toAncestor(ancestor);
     }
 
     path = stream(string.split(SEPARATOR))
@@ -214,13 +214,13 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
   public abstract Optional<ExperimentPath<Absolute>> resolveAgainst(ExperimentPath<Absolute> path);
 
   public ExperimentPath<Absolute> toAbsolute() {
-    return resolveAgainst(defineAbsolute()).get();
+    return resolveAgainst(toRoot()).get();
   }
 
   public ExperimentPath<Relative> relativeTo(ExperimentPath<?> path) {
     return path
         .ids()
-        .reduce(defineRelative(0).resolve(ids), ExperimentPath::relativeTo, throwingMerger());
+        .reduce(toAncestor(0).resolve(ids), ExperimentPath::relativeTo, throwingMerger());
   }
 
   public ExperimentPath<Relative> relativeTo(ExperimentId id) {

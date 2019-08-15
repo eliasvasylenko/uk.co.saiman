@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
+import static uk.co.saiman.experiment.requirement.Requirement.onResult;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -58,9 +59,9 @@ public class SpectrumProcessingExecutor implements Executor {
 
   @Override
   public void plan(PlanningContext context) {
-    context.declareMainRequirement(SpectrumExecutor.SPECTRUM);
+    context.declareMainRequirement(onResult(Spectrum.class));
     context.declareVariable(PROCESSING_VARIABLE, VariableCardinality.OPTIONAL);
-    context.declareProduct(SpectrumExecutor.SPECTRUM);
+    context.observesResult(Spectrum.class);
   }
 
   @Override
@@ -68,14 +69,14 @@ public class SpectrumProcessingExecutor implements Executor {
     DataProcessor processor = context.getVariable(PROCESSING_VARIABLE).getProcessor();
 
     context
-        .acquireDependency(SpectrumExecutor.SPECTRUM)
+        .acquireResult(Spectrum.class)
         .updates()
         .reduceBackpressure((a, b) -> b)
         .requestNext()
         .partialMap(i -> i.value())
         .map(s -> processSpectrum(processor, s))
         .thenRequestNext()
-        .then(r -> context.observePartialResult(SpectrumExecutor.SPECTRUM, () -> r))
+        .then(r -> context.observePartialResult(Spectrum.class, () -> r))
         .join();
   }
 

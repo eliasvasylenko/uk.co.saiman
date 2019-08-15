@@ -5,9 +5,12 @@
 	"uk.co.saiman.experiment.storage~msapex": {
 		"stores.target": "(!(uk.co.saiman.experiment.storage=*))"
 	},
-	"uk.co.saiman.experiment.msapex.environment~msapex.analysis": {
-		"targetPerspectiveId": "uk.co.saiman.perspective.analysis",
-		"sharedResources.target": "(&(provision-id=*)(|(environment-id=msapex.analysis)(!(environment-id=*))))",
+	"uk.co.saiman.experiment.environment.local~msapex": {
+		"target-perspective-id": "uk.co.saiman.perspective.analysis",
 		"exclusiveResourceProviders.target": "(|(environment-id=msapex.analysis)(!(environment-id=*)))"
+	},
+	"uk.co.saiman.experiment.environment.global~msapex": {
+		"target-perspective-id": "uk.co.saiman.perspective.analysis",
+		"sharedResourcesFilter": "(&(provision-id=*)(|(environment-id=msapex.analysis)(!(environment-id=*))))"
 	}
 }

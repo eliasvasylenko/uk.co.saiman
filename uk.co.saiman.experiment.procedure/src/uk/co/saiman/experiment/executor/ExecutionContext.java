@@ -35,12 +35,9 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.dependency.Something;
-import uk.co.saiman.experiment.dependency.source.Observation;
-import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Provision;
-import uk.co.saiman.experiment.dependency.source.Source;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.dependency.Condition;
+import uk.co.saiman.experiment.dependency.Resource;
+import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.log.Log;
@@ -63,21 +60,19 @@ public interface ExecutionContext {
                 format("Variable %s is not available for execution %s", variable, this)));
   }
 
-  <T extends Something> T acquireDependency(Source<T> source);
+  <T> Condition<T> acquireCondition(Class<T> source);
 
-  <T extends Something> Stream<T> acquireDependencies(Source<T> requirement);
+  <T> Resource<T> acquireResource(Class<T> source);
 
-  <T> T acquireCondition(Preparation<T> source);
+  <T> Result<T> acquireResult(Class<T> source);
 
-  <T> T acquireResource(Provision<T> source);
-
-  <T> T acquireResult(Observation<T> source);
+  <T> Stream<Result<T>> acquireResults(Class<T> source);
 
   /**
    * Get a location which can be used to persist resource artifacts of this
    * execution. Typically a resource in this location is used to construct one or
    * more related {@link Data data} instances, one of which will be set as the
-   * {@link #setResultData(Observation, Data) result} of the execution.
+   * {@link #setResultData(Class, Data) result} of the execution.
    * <p>
    * The location will be empty before execution begins.
    * 
@@ -85,7 +80,7 @@ public interface ExecutionContext {
    */
   Location getLocation();
 
-  <U> void prepareCondition(Preparation<U> condition, U resource);
+  <U> void prepareCondition(Class<U> condition, U resource);
 
   /**
    * Set a preliminary partial result value for this execution.
@@ -96,11 +91,12 @@ public interface ExecutionContext {
    * {@link Executor#execute(ExecutionContext) execution} once processing
    * completes.
    * 
-   * @param value an invalidation representing the preliminary result
+   * @param value
+   *          an invalidation representing the preliminary result
    */
-  <R> void observePartialResult(Observation<R> observation, Supplier<? extends R> value);
+  <R> void observePartialResult(Class<R> observation, Supplier<? extends R> value);
 
-  void completeObservation(Observation<?> observation);
+  void completeObservation(Class<?> observation);
 
   /**
    * Set the result data for this execution. If the {@link Data#get() value} of
@@ -110,11 +106,10 @@ public interface ExecutionContext {
    * performed during the experiment process rather than saved until the end.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of
-   * {@link #setResultFormat(Observation, String, DataFormat)} during the same
-   * execution.
+   * precludes invocation of {@link #setResultFormat(Class, String, DataFormat)}
+   * during the same execution.
    */
-  <R> void setResultData(Observation<R> observation, Data<R> data);
+  <R> void setResultData(Class<R> observation, Data<R> data);
 
   /**
    * Set the result format for this execution. If invoked, then once the
@@ -122,17 +117,19 @@ public interface ExecutionContext {
    * value will be persisted according to the given file name and format.
    * <p>
    * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultData(Observation, Data)} during the
-   * same execution.
+   * precludes invocation of {@link #setResultData(Class, Data)} during the same
+   * execution.
    * 
-   * @param name   the name of the result data file
-   * @param format the format of the result data file
+   * @param name
+   *          the name of the result data file
+   * @param format
+   *          the format of the result data file
    */
-  default <R> void setResultFormat(Observation<R> observation, String name, DataFormat<R> format) {
+  default <R> void setResultFormat(Class<R> observation, String name, DataFormat<R> format) {
     setResultData(observation, Data.locate(getLocation(), name, format));
   }
 
-  default <R> void observeResult(Observation<R> observation, R value) {
+  default <R> void observeResult(Class<R> observation, R value) {
     observePartialResult(observation, () -> value);
     completeObservation(observation);
   }

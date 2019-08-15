@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext;
@@ -46,20 +44,20 @@ import uk.co.saiman.instrument.sample.SampleController;
 public interface SampleExecutor<T> extends Executor {
   Variable<T> sampleLocation();
 
-  Preparation<Void> samplePreparation();
+  Class<?> samplePreparation();
 
-  Provision<? extends SampleController<T>> sampleDevice();
+  Class<? extends SampleController<T>> sampleDevice();
 
   @Override
   default void plan(PlanningContext context) {
     context.declareVariable(sampleLocation(), VariableCardinality.REQUIRED);
-    context.declareProduct(samplePreparation());
+    context.preparesCondition(samplePreparation());
   }
 
   @Override
   default void execute(ExecutionContext context) {
     var location = context.getVariable(sampleLocation());
-    var controller = context.acquireDependency(sampleDevice()).value();
+    var controller = context.acquireResource(sampleDevice()).value();
 
     controller.requestAnalysis(location);
     context.prepareCondition(samplePreparation(), null);

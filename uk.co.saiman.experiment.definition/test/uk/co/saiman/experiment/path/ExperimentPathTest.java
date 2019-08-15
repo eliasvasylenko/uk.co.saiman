@@ -49,7 +49,7 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Relative;
 public class ExperimentPathTest {
   @Test
   public void testEmptyAbsolutePath() {
-    ExperimentPath<Absolute> path = ExperimentPath.defineAbsolute();
+    ExperimentPath<Absolute> path = ExperimentPath.toRoot();
 
     assertThat(path.ancestorDepth(), equalTo(0));
     assertThat(path.ids().collect(toList()), empty());
@@ -58,7 +58,7 @@ public class ExperimentPathTest {
 
   @Test
   public void testEmptyRelativePath() {
-    ExperimentPath<Relative> path = ExperimentPath.defineRelative();
+    ExperimentPath<Relative> path = ExperimentPath.toSelf();
 
     assertThat(path.ancestorDepth(), equalTo(0));
     assertThat(path.ids().collect(toList()), empty());
@@ -67,14 +67,14 @@ public class ExperimentPathTest {
 
   @Test
   public void testParentOfEmptyAbsolutePath() {
-    Optional<ExperimentPath<Absolute>> path = ExperimentPath.defineAbsolute().parent();
+    Optional<ExperimentPath<Absolute>> path = ExperimentPath.toRoot().parent();
 
     assertTrue(path.isEmpty());
   }
 
   @Test
   public void testParentOfEmptyRelativePath() {
-    ExperimentPath<Relative> path = ExperimentPath.defineRelative().parent().get();
+    ExperimentPath<Relative> path = ExperimentPath.toSelf().parent().get();
 
     assertThat(path.ancestorDepth(), equalTo(1));
     assertThat(path.ids().collect(toList()), empty());
@@ -83,7 +83,7 @@ public class ExperimentPathTest {
 
   @Test
   public void testParentOfAbsolutePath() {
-    ExperimentPath<Absolute> path = ExperimentPath.defineAbsolute().resolve("id").parent().get();
+    ExperimentPath<Absolute> path = ExperimentPath.toRoot().resolve("id").parent().get();
 
     assertThat(path.ancestorDepth(), equalTo(0));
     assertThat(path.ids().collect(toList()), empty());
@@ -92,7 +92,7 @@ public class ExperimentPathTest {
 
   @Test
   public void testParentOfRelativePath() {
-    ExperimentPath<Relative> path = ExperimentPath.defineRelative().resolve("id").parent().get();
+    ExperimentPath<Relative> path = ExperimentPath.toSelf().resolve("id").parent().get();
 
     assertThat(path.ancestorDepth(), equalTo(0));
     assertThat(path.ids().collect(toList()), empty());
@@ -101,7 +101,7 @@ public class ExperimentPathTest {
 
   @Test
   public void testResolveChildOfPath() {
-    ExperimentPath<Relative> path = ExperimentPath.defineRelative().resolve("id");
+    ExperimentPath<Relative> path = ExperimentPath.toSelf().resolve("id");
 
     assertThat(path.ancestorDepth(), equalTo(0));
     assertThat(path.ids().collect(toList()), contains("id"));
@@ -110,27 +110,27 @@ public class ExperimentPathTest {
   @Test
   public void testWithAncestorEquality() {
     ExperimentPath<Relative> path1 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .parent()
         .get()
         .parent()
         .get()
         .resolve("true");
     ExperimentPath<Relative> path2 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .parent()
         .get()
         .parent()
         .get()
         .resolve("true");
     ExperimentPath<Relative> path3 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .parent()
         .get()
         .parent()
         .get()
         .resolve("false");
-    ExperimentPath<Relative> path4 = ExperimentPath.defineRelative().parent().get().resolve("true");
+    ExperimentPath<Relative> path4 = ExperimentPath.toSelf().parent().get().resolve("true");
 
     assertEquals(path1, path2);
     assertNotEquals(path1, path3);
@@ -141,10 +141,10 @@ public class ExperimentPathTest {
 
   @Test
   public void testWithDepthEquality() {
-    ExperimentPath<Relative> path1 = ExperimentPath.defineRelative().resolve("a").resolve("b");
-    ExperimentPath<Relative> path2 = ExperimentPath.defineRelative().resolve("a").resolve("b");
+    ExperimentPath<Relative> path1 = ExperimentPath.toSelf().resolve("a").resolve("b");
+    ExperimentPath<Relative> path2 = ExperimentPath.toSelf().resolve("a").resolve("b");
     ExperimentPath<Relative> path3 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .resolve("a")
         .resolve("b")
         .resolve("c");
@@ -157,20 +157,20 @@ public class ExperimentPathTest {
   @Test
   public void testWithAncerstorOrdering() {
     ExperimentPath<Relative> path1 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .parent()
         .get()
         .parent()
         .get()
         .resolve("true");
     ExperimentPath<Relative> path2 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .parent()
         .get()
         .parent()
         .get()
         .resolve("true");
-    ExperimentPath<Relative> path3 = ExperimentPath.defineRelative().parent().get().resolve("true");
+    ExperimentPath<Relative> path3 = ExperimentPath.toSelf().parent().get().resolve("true");
 
     assertThat(path1, comparatorMatcher().comparesEqualTo(path2));
     assertThat(path1, comparatorMatcher().lessThan(path3));
@@ -179,10 +179,10 @@ public class ExperimentPathTest {
 
   @Test
   public void testWithDepthOrdering() {
-    ExperimentPath<Relative> path1 = ExperimentPath.defineRelative().resolve("a").resolve("b");
-    ExperimentPath<Relative> path2 = ExperimentPath.defineRelative().resolve("a").resolve("b");
+    ExperimentPath<Relative> path1 = ExperimentPath.toSelf().resolve("a").resolve("b");
+    ExperimentPath<Relative> path2 = ExperimentPath.toSelf().resolve("a").resolve("b");
     ExperimentPath<Relative> path3 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .resolve("a")
         .resolve("b")
         .resolve("c");
@@ -195,12 +195,12 @@ public class ExperimentPathTest {
   @Test
   public void testAtDepthOrdering() {
     ExperimentPath<Relative> path1 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .resolve("a")
         .resolve("b")
         .resolve("c");
     ExperimentPath<Relative> path2 = ExperimentPath
-        .defineRelative()
+        .toSelf()
         .resolve("a")
         .resolve("b")
         .resolve("d");

@@ -27,10 +27,21 @@
  */
 package uk.co.saiman.experiment.requirement;
 
-import uk.co.saiman.experiment.dependency.Nothing;
+import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.experiment.dependency.Product;
 
-public class NoRequirement extends Requirement<Nothing> {
-  static final NoRequirement INSTANCE = new NoRequirement();
-
-  private NoRequirement() {}
+/**
+ * A production is simply a representation of an API point. In particular, it
+ * represents an artifact which can be produced as a result of conducting a
+ * procedure, and the Java type which the product may be materialized as.
+ * <p>
+ * Production instances are intended to be static, and do not prescribe the
+ * method of collecting or storing the product data. The data should be stored
+ * according to a {@link DataFormat format} which is compatible with the type of
+ * the product.
+ */
+public abstract class Production<T, U extends Product<T>> extends Requirement<T, U> {
+  Production(Class<?> type) {
+    super(type);
+  }
 }

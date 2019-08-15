@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.osgi.service.component.annotations.Component;
 
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.environment.osgi.CloseableResourceProvider;
 import uk.co.saiman.experiment.environment.osgi.ExclusiveResourceProvider;
@@ -14,8 +13,8 @@ public class MaldiSampleAreaControllerResource
     implements CloseableResourceProvider<SampleAreaStageController> {
 
   @Override
-  public Provision<SampleAreaStageController> getProvision() {
-    return MaldiStageConstants.MALDI_SAMPLE_AREA_CONTROLLER;
+  public Class<SampleAreaStageController> getProvision() {
+    return SampleAreaStageController.class;
   }
 
   @Override
@@ -23,8 +22,6 @@ public class MaldiSampleAreaControllerResource
       GlobalEnvironment globalEnvironment,
       long timeout,
       TimeUnit unit) throws Exception {
-    return globalEnvironment
-        .provideValue(MaldiStageConstants.MALDI_SAMPLE_AREA_DEVICE)
-        .acquireControl(timeout, unit);
+    return globalEnvironment.provideValue(SampleAreaStage.class).acquireControl(timeout, unit);
   }
 }

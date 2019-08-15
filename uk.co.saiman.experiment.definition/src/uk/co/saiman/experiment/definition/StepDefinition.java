@@ -38,9 +38,9 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Relative;
 import uk.co.saiman.experiment.dependency.Dependency;
-import uk.co.saiman.experiment.dependency.source.Production;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.requirement.Production;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.StateMap;
 
@@ -147,7 +147,7 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
     return executor;
   }
 
-  public Stream<Production<?>> productions() {
+  public Stream<Production<?, ?>> productions() {
     // TODO Auto-generated method stub
     return null;
   }

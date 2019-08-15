@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.experiment.sample;
 
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.instrument.stage.PolarStage;
 import uk.co.saiman.instrument.stage.StageController;
 
@@ -37,9 +36,10 @@ import uk.co.saiman.instrument.stage.StageController;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of sample configuration for the instrument
+ * @param <T>
+ *          the type of sample configuration for the instrument
  */
 public interface StageExecutor<T> extends SampleExecutor<T> {
   @Override
-  Provision<? extends StageController<T>> sampleDevice();
+  Class<? extends StageController<T>> sampleDevice();
 }

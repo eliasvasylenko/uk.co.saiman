@@ -2,9 +2,8 @@ package uk.co.saiman.experiment.executor;
 
 import java.util.Optional;
 
-import uk.co.saiman.experiment.dependency.ProductPath;
-import uk.co.saiman.experiment.dependency.source.Production;
-import uk.co.saiman.experiment.dependency.source.Provision;
+import uk.co.saiman.experiment.requirement.ProductPath;
+import uk.co.saiman.experiment.requirement.Production;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableCardinality;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
@@ -16,30 +15,39 @@ public interface PlanningContext {
     return declareVariable(new VariableDeclaration<>(variable, cardinality));
   }
 
-  void declareMainRequirement(Production<?> production);
+  void declareMainRequirement(Production<?, ?> production);
 
   void declareAdditionalRequirement(ProductPath<?, ?> path);
 
-  void declareResourceRequirement(Provision<?> source);
+  void declareResourceRequirement(Class<?> type);
 
-  void requestAutomaticExecution();
+  void executesAutomatically();
 
-  void declareProduct(Production<?> production);
+  void observesResult(Class<?> production);
+
+  default void preparesCondition(Class<?> type) {
+    preparesCondition(type, Evaluation.ORDERED);
+  }
+
+  void preparesCondition(Class<?> type, Evaluation evaluation);
 
   interface NoOpPlanningContext extends PlanningContext {
     @Override
-    default void declareMainRequirement(Production<?> production) {}
+    default void declareMainRequirement(Production<?, ?> production) {}
 
     @Override
     default void declareAdditionalRequirement(ProductPath<?, ?> path) {}
 
     @Override
-    default void declareResourceRequirement(Provision<?> source) {}
+    default void declareResourceRequirement(Class<?> type) {}
 
     @Override
-    default void requestAutomaticExecution() {}
+    default void executesAutomatically() {}
 
     @Override
-    default void declareProduct(Production<?> production) {}
+    default void observesResult(Class<?> production) {}
+
+    @Override
+    default void preparesCondition(Class<?> type, Evaluation evaluation) {}
   }
 }

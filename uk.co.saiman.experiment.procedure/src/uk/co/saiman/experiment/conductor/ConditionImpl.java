@@ -30,25 +30,24 @@ package uk.co.saiman.experiment.conductor;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
-import uk.co.saiman.experiment.dependency.ProductPath;
-import uk.co.saiman.experiment.dependency.source.Preparation;
+import uk.co.saiman.experiment.requirement.ProductPath;
 
 public class ConditionImpl<T> implements Condition<T> {
-  private final Preparation<T> preparation;
-  private final ProductPath<Absolute, Condition<? extends T>> path;
+  private final Class<T> type;
+  private final ProductPath<Absolute, Condition<T>> path;
 
-  public ConditionImpl(Preparation<T> preparation, ExperimentPath<Absolute> experimentPath) {
-    this.preparation = preparation;
-    this.path = ProductPath.define(experimentPath, preparation);
+  public ConditionImpl(Class<T> type, ExperimentPath<Absolute> experimentPath) {
+    this.type = type;
+    this.path = ProductPath.toCondition(experimentPath, type);
   }
 
   @Override
-  public Preparation<T> source() {
-    return preparation;
+  public Class<T> type() {
+    return type;
   }
 
   @Override
-  public ProductPath<Absolute, Condition<? extends T>> path() {
+  public ProductPath<Absolute, Condition<T>> path() {
     return path;
   }
 

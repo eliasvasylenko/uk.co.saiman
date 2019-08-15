@@ -28,12 +28,9 @@
 package uk.co.saiman.experiment.dependency;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.requirement.ProductPath;
 
 // TODO sealed type
-public interface Product extends Something {
-  @Override
-  Production<?> source();
-
-  ProductPath<Absolute, ?> path();
+public interface Product<T> extends Dependency<T> {
+  ProductPath<Absolute, ? extends Product<T>> path();
 }

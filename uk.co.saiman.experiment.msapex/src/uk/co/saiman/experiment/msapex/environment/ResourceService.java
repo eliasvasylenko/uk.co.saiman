@@ -4,17 +4,18 @@ import static java.util.function.Function.identity;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.extensions.OSGiBundle;
+import org.eclipse.e4.core.di.extensions.Service;
 import org.osgi.framework.BundleContext;
 
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.osgi.ServiceIndex;
 
 public class ResourceService {
@@ -25,17 +26,23 @@ public class ResourceService {
   @OSGiBundle
   private BundleContext bundleContext;
 
-  private ServiceIndex<EclipseEnvironmentService, String, EclipseEnvironmentService> sharedResources;
-  private final Map<Provision<?>, ResourcePresenter> resourcePresenters = new HashMap<>();
+  @Inject
+  @Service
+  private LocalEnvironmentService localEnvironmentService;
+
+  private ServiceIndex<GlobalEnvironment, String, GlobalEnvironment> sharedResources;
+  private final Map<Class<?>, ResourcePresenter<?>> resourcePresenters = new HashMap<>();
 
   @PostConstruct
   void initialize() {
     sharedResources = ServiceIndex
         .open(
             bundleContext,
-            EclipseEnvironmentService.class,
+            GlobalEnvironment.class,
             identity(),
-            (e, s) -> Stream.of(e.getTargetPerspectiveId()));
+            (e, s) -> Optional
+                .ofNullable(s.getProperty("target-perspective-id").toString())
+                .stream());
   }
 
   /*
@@ -77,20 +84,4 @@ public class ResourceService {
    * 
    * 
    */
-
-  protected GlobalEnvironment createSharedEnvironment(EclipseEnvironmentService service) {
-    return new GlobalEnvironment() {
-      @Override
-      public Stream<Provision<?>> providedValues() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public <T> T provideValue(Provision<T> provision) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-    };
-  }
 }

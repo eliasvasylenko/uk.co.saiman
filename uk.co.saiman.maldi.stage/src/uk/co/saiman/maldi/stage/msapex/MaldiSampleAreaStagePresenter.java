@@ -4,9 +4,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.msapex.environment.ResourcePresenter;
-import uk.co.saiman.maldi.stage.MaldiStageConstants;
 import uk.co.saiman.maldi.stage.SamplePlateStage;
 import uk.co.saiman.maldi.stage.i18n.MaldiStageProperties;
 
@@ -30,12 +28,7 @@ public class MaldiSampleAreaStagePresenter implements ResourcePresenter<SamplePl
   }
 
   @Override
-  public Class<? super SamplePlateStage> getResourceClass() {
+  public Class<SamplePlateStage> getResourceClass() {
     return SamplePlateStage.class;
-  }
-
-  @Override
-  public Provision<SamplePlateStage> getProvision() {
-    return MaldiStageConstants.MALDI_SAMPLE_PLATE_DEVICE;
   }
 }

@@ -64,15 +64,20 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
 @Designate(ocd = MaldiVacuumConfiguration.class, factory = true)
-@Component(configurationPid = MaldiVacuumDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
-    Device.class,
-    VacuumDevice.class })
+@Component(
+    configurationPid = MaldiVacuumDevice.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE,
+    service = { Device.class, VacuumDevice.class })
 public class MaldiVacuumDevice extends DeviceImpl<VacuumController>
     implements VacuumDevice<VacuumController> {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Maldi Vacuum Device", description = "A vaccum device implementation for MALDI")
+  @ObjectClassDefinition(
+      name = "Maldi Vacuum Device",
+      description = "A vaccum device implementation for MALDI")
   public @interface MaldiVacuumConfiguration {
-    @AttributeDefinition(name = "Sample Resolution", description = "The minimum resolvable units of time for samples")
+    @AttributeDefinition(
+        name = "Sample Resolution",
+        description = "The minimum resolvable units of time for samples")
     String sampleResolution() default DEFAULT_SAMPLE_RESOLUTION_SECONDS + "s";
   }
 

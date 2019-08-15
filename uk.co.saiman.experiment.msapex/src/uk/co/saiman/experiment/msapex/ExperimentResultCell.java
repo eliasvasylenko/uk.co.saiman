@@ -33,9 +33,8 @@ import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.dependency.ProductPath;
-import uk.co.saiman.experiment.dependency.source.Observation;
 import uk.co.saiman.experiment.output.Output;
+import uk.co.saiman.experiment.requirement.Observation;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -55,14 +54,10 @@ public class ExperimentResultCell {
      * configure label
      */
     results
-        .resolveResult(ProductPath.define(path, observation))
+        .resolveResult(path, observation)
         .value()
         .ifPresentOrElse(
-            result -> cell
-                .setIconURI(
-                    "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document-binary.png"),
-            () -> cell
-                .setIconURI(
-                    "platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/document.png"));
+            result -> cell.setIconURI("fugue:size16/document-binary.png"),
+            () -> cell.setIconURI("fugue:size16/document.png"));
   }
 }

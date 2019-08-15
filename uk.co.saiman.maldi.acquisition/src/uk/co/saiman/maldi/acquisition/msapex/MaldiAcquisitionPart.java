@@ -1,7 +1,5 @@
 package uk.co.saiman.maldi.acquisition.msapex;
 
-import static uk.co.saiman.maldi.acquisition.MaldiAcquisitionConstants.MALDI_ACQUISITION_DEVICE;
-
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -37,9 +35,9 @@ public class MaldiAcquisitionPart {
       return;
     }
 
-    if (environment.providesValue(MALDI_ACQUISITION_DEVICE)) {
+    if (environment.providesValue(AcquisitionDevice.class)) {
       try {
-        setDevice(environment.provideValue(MALDI_ACQUISITION_DEVICE));
+        setDevice(environment.provideValue(AcquisitionDevice.class));
       } catch (Exception e) {
         setDeviceFailed();
       }

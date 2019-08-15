@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
+import static uk.co.saiman.experiment.requirement.Requirement.onCondition;
 import static uk.co.saiman.experiment.variables.VariableCardinality.REQUIRED;
 
 import javax.measure.Unit;
@@ -42,9 +43,6 @@ import uk.co.saiman.data.spectrum.SampledSpectrum;
 import uk.co.saiman.data.spectrum.Spectrum;
 import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
-import uk.co.saiman.experiment.dependency.source.Observation;
-import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext;
@@ -61,28 +59,27 @@ import uk.co.saiman.log.Log.Level;
  */
 public interface SpectrumExecutor extends Executor {
   String SPECTRUM_DATA_NAME = "spectrum";
-  Observation<Spectrum> SPECTRUM = new Observation<>("uk.co.saiman.data.spectrum");
 
   Unit<Mass> getMassUnit();
 
-  Provision<? extends AcquisitionDevice<?>> acquisitionDevice();
+  Class<? extends AcquisitionDevice<?>> acquisitionDevice();
 
-  Provision<? extends AcquisitionController> acquisitionControl();
+  Class<? extends AcquisitionController> acquisitionControl();
 
-  Preparation<?> samplePreparation();
+  Class<?> samplePreparation();
 
   @Override
   default void plan(PlanningContext context) {
     context.declareVariable(PROCESSING_VARIABLE, REQUIRED);
-    context.declareMainRequirement(samplePreparation());
+    context.declareMainRequirement(onCondition(samplePreparation()));
     context.declareResourceRequirement(acquisitionDevice());
     context.declareResourceRequirement(acquisitionControl());
-    context.declareProduct(SPECTRUM);
+    context.observesResult(Spectrum.class);
   }
 
   @Override
   default void execute(ExecutionContext context) {
-    var device = context.acquireResource(acquisitionDevice());
+    var device = context.acquireResource(acquisitionDevice()).value();
 
     context.log().log(Level.INFO, "preparing processing...");
     DataProcessor processing = context.getVariable(PROCESSING_VARIABLE).getProcessor();
@@ -94,7 +91,7 @@ public interface SpectrumExecutor extends Executor {
     SampledContinuousFunction<Time, Dimensionless> accumulation;
 
     context.log().log(Level.INFO, "holding sample...");
-    try (var sample = context.acquireDependency(samplePreparation())) {
+    try (var sample = context.acquireCondition(samplePreparation())) {
       context.log().log(Level.INFO, "acquired sample hold");
 
       context.log().log(Level.INFO, "creating accumulator...");
@@ -110,14 +107,14 @@ public interface SpectrumExecutor extends Executor {
           .observe(
               o -> context
                   .observePartialResult(
-                      SPECTRUM,
+                      Spectrum.class,
                       () -> new SampledSpectrum(
                           o.getLatestAccumulation(),
                           calibration,
                           processing)));
 
       context.log().log(Level.INFO, "starting acquisition...");
-      var controller = context.acquireDependency(acquisitionControl()).value();
+      var controller = context.acquireResource(acquisitionControl()).value();
       controller.startAcquisition();
 
       /*
@@ -140,7 +137,12 @@ public interface SpectrumExecutor extends Executor {
       accumulation = accumulator.getCompleteAccumulation();
     }
 
-    context.setResultFormat(SPECTRUM, SPECTRUM_DATA_NAME, new RegularSampledSpectrumFormat(null));
-    context.observeResult(SPECTRUM, new SampledSpectrum(accumulation, calibration, processing));
+    context
+        .setResultFormat(
+            Spectrum.class,
+            SPECTRUM_DATA_NAME,
+            new RegularSampledSpectrumFormat(null));
+    context
+        .observeResult(Spectrum.class, new SampledSpectrum(accumulation, calibration, processing));
   }
 }

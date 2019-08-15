@@ -32,7 +32,6 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.data.function.processing.DataProcessor.identity;
 import static uk.co.saiman.experiment.processing.ProcessingAccess.processingAccessor;
-import static uk.co.saiman.experiment.processing.ProcessingService.PROCESSING_SERVICE_RESOURCE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,12 +46,12 @@ import uk.co.saiman.experiment.variables.Variable;
 public class Processing {
   public static final Variable<Processing> PROCESSING_VARIABLE = new Variable<>(
       "uk.co.saiman.processing",
-      environment -> processingAccessor(environment.provideValue(PROCESSING_SERVICE_RESOURCE)));
+      environment -> processingAccessor(environment.provideValue(ProcessingService.class)));
 
   public static final Variable<DataProcessor> PROCESSOR_VARIABLE = new Variable<>(
       "uk.co.saiman.processor",
       environment -> ProcessingAccess
-          .processorAccessor(environment.provideValue(PROCESSING_SERVICE_RESOURCE)));
+          .processorAccessor(environment.provideValue(ProcessingService.class)));
 
   private List<DataProcessor> steps;
 

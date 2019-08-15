@@ -28,7 +28,6 @@
 package uk.co.saiman.maldi.sample.msapex;
 
 import static uk.co.saiman.experiment.sample.XYStageExecutor.LOCATION;
-import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
 
 import java.util.stream.Stream;
 
@@ -41,11 +40,14 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.msapex.step.provider.StepProvider;
+import uk.co.saiman.experiment.requirement.Production;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor;
+import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 import uk.co.saiman.maldi.stage.msapex.MaldiStageDiagram;
 import uk.co.saiman.measurement.Units;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
@@ -83,7 +85,12 @@ public class MaldiSampleAreaExperimentStepProvider implements StepProvider {
       GlobalEnvironment environment) {
     return experiment
         .findSubstep(path)
-        .filter(step -> step.productions().anyMatch(PLATE_SUBMISSION::equals))
+        .filter(
+            step -> step
+                .productions()
+                .filter(p -> p instanceof Condition<?>)
+                .map(Production::type)
+                .anyMatch(SamplePlateSubmission.class::equals))
         .isPresent();
   }
 }

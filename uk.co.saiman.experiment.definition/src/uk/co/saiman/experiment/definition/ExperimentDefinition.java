@@ -106,7 +106,7 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
   private List<Instruction> closure(StepContainer<?, ?> steps) {
     return steps
         .substeps()
-        .flatMap(step -> closure(step, ExperimentPath.defineAbsolute()))
+        .flatMap(step -> closure(step, ExperimentPath.toRoot()))
         .collect(toList());
   }
 

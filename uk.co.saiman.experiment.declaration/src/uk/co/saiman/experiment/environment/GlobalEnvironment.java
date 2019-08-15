@@ -2,14 +2,12 @@ package uk.co.saiman.experiment.environment;
 
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.dependency.source.Provision;
-
 public interface GlobalEnvironment {
-  Stream<Provision<?>> providedValues();
+  Stream<Class<?>> providedValues();
 
-  default boolean providesValue(Provision<?> provision) {
+  default boolean providesValue(Class<?> provision) {
     return providedValues().anyMatch(provision::equals);
   }
 
-  <T> T provideValue(Provision<T> provision);
+  <T> T provideValue(Class<T> provision);
 }

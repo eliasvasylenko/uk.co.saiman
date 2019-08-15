@@ -27,11 +27,15 @@
  */
 package uk.co.saiman.experiment.output;
 
+import static uk.co.saiman.experiment.requirement.ProductPath.toProduction;
+import static uk.co.saiman.experiment.requirement.ProductPath.toResult;
+
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.requirement.Observation;
+import uk.co.saiman.experiment.requirement.ProductPath;
 
 public interface Output {
   Stream<Result<?>> results();
@@ -40,4 +44,12 @@ public interface Output {
       ExperimentPath<U> path);
 
   <T extends Result<?>> T resolveResult(ProductPath<?, T> path);
+
+  default <T> Result<T> resolveResult(ExperimentPath<?> path, Class<T> type) {
+    return resolveResult(toResult(path, type));
+  }
+
+  default <T> Result<T> resolveResult(ExperimentPath<?> path, Observation<T> observation) {
+    return resolveResult(toProduction(path, observation));
+  }
 }

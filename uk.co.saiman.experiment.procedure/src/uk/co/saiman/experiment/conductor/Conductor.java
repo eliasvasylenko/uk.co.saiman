@@ -37,11 +37,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
+import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -97,7 +97,7 @@ public class Conductor implements Output {
     interrupt();
 
     try {
-      storageConfiguration.locateStorage(ExperimentPath.defineAbsolute()).deallocate();
+      storageConfiguration.locateStorage(ExperimentPath.toRoot()).deallocate();
     } catch (IOException e) {
       throw new ConductorException(format("Unable to clear conducted procedure %s", procedure), e);
     }

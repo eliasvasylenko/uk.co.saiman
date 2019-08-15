@@ -93,7 +93,7 @@ public class AddStepsToExperimentMenu {
     if (!provider
         .canProvideSteps(
             experiment.experiment().getDefinition(),
-            ExperimentPath.defineAbsolute(),
+            ExperimentPath.toRoot(),
             environment)) {
       return Optional.empty();
     }
@@ -119,7 +119,7 @@ public class AddStepsToExperimentMenu {
       provider
           .provideSteps(
               experiment.experiment().getDefinition(),
-              ExperimentPath.defineAbsolute(),
+              ExperimentPath.toRoot(),
               environment)
           .forEach(experiment.experiment()::attach);
 

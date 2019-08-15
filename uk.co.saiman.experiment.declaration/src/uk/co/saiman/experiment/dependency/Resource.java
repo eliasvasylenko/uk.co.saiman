@@ -2,32 +2,28 @@ package uk.co.saiman.experiment.dependency;
 
 import java.util.function.Function;
 
-import uk.co.saiman.experiment.dependency.source.Provision;
 import uk.co.saiman.experiment.environment.ResourceClosedException;
 import uk.co.saiman.experiment.environment.ResourceClosingException;
 
-public interface Resource<T> extends Something, AutoCloseable {
-  @Override
-  Provision<T> source();
-
+public interface Resource<T> extends Dependency<T>, AutoCloseable {
   T value();
 
   @Override
   void close();
 
-  static <T extends AutoCloseable> Resource<T> over(Provision<T> provision, T value) {
+  static <T extends AutoCloseable> Resource<T> over(Class<T> provision, T value) {
     return over(provision, value, v -> v);
   }
 
   static <T> Resource<T> over(
-      Provision<T> provision,
+      Class<T> provision,
       T value,
       Function<? super T, ? extends AutoCloseable> close) {
     return new Resource<T>() {
       boolean closed = false;
 
       @Override
-      public Provision<T> source() {
+      public Class<T> type() {
         return provision;
       }
 

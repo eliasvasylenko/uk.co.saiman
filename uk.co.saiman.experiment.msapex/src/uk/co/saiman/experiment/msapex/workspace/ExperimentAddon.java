@@ -38,10 +38,12 @@ import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.TYPE;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTypes.SET;
 import static uk.co.saiman.eclipse.perspective.EPerspectiveService.PERSPECTIVE_SOURCE_SNIPPET;
 import static uk.co.saiman.log.Log.Level.INFO;
+import static uk.co.saiman.observable.Observer.forObservation;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -61,10 +63,12 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
@@ -91,8 +95,7 @@ public class ExperimentAddon {
 
   public static final String ANALYSIS_PERSPECTIVE_ID = "uk.co.saiman.perspective.analysis";
 
-  public static final String ANALYSIS_ENVIRONMENT_SERVICE_ID = "uk.co.saiman.experiment.environment.analysis";
-  public static final String ENVIRONMENT_SERVICE_ID = "uk.co.saiman.experiment.environment";
+  public static final String TARGET_PERSPECTIVE_ID = "target-perspective-id";
 
   @Inject
   private IEclipseContext context;
@@ -112,7 +115,8 @@ public class ExperimentAddon {
   private Workspace workspace;
   private FileSystemStore workspaceStore;
 
-  private ServiceIndex<GlobalEnvironment, String, GlobalEnvironment> environments;
+  private ServiceIndex<GlobalEnvironment, String, GlobalEnvironment> globalEnvironments;
+  private ServiceIndex<LocalEnvironmentService, String, LocalEnvironmentService> localEnvironments;
 
   private EclipseStorageService storageService;
   private EclipseExecutorService executorService;
@@ -138,7 +142,29 @@ public class ExperimentAddon {
   }
 
   private void initializeEnvironments() {
-    environments = ServiceIndex.open(bundleContext, GlobalEnvironment.class, identity());
+    globalEnvironments = ServiceIndex
+        .open(
+            bundleContext,
+            GlobalEnvironment.class,
+            identity(),
+            (a, b) -> environmentTargetPerspective(b));
+    localEnvironments = ServiceIndex
+        .open(
+            bundleContext,
+            LocalEnvironmentService.class,
+            identity(),
+            (a, b) -> environmentTargetPerspective(b));
+  }
+
+  public static Stream<String> environmentTargetPerspective(ServiceReference<?> record) {
+    Object targetPerspective = record.getProperty(TARGET_PERSPECTIVE_ID);
+    if (targetPerspective instanceof Object[]) {
+      return Stream.of((Object[]) targetPerspective).map(Objects::toString);
+    } else if (targetPerspective != null) {
+      return Stream.of(targetPerspective.toString());
+    } else {
+      return Stream.empty();
+    }
   }
 
   private void initializeStorage() {
@@ -220,8 +246,11 @@ public class ExperimentAddon {
     if (experimentNodeAdapterFactory != null) {
       experimentNodeAdapterFactory.unregister();
     }
-    if (environments != null) {
-      environments.close();
+    if (globalEnvironments != null) {
+      globalEnvironments.close();
+    }
+    if (localEnvironments != null) {
+      localEnvironments.close();
     }
     if (storageService != null) {
       storageService.close();
@@ -291,26 +320,41 @@ public class ExperimentAddon {
         IEclipseContext context = (IEclipseContext) value;
         MPerspective perspective = (MPerspective) element;
 
-        String environmentId;
-        if (perspective
-            .getPersistedState()
-            .get(PERSPECTIVE_SOURCE_SNIPPET)
-            .equals(ANALYSIS_PERSPECTIVE_ID)) {
-          environmentId = addon.getPersistedState().get(ANALYSIS_ENVIRONMENT_SERVICE_ID);
-        } else {
-          environmentId = perspective.getPersistedState().get(ENVIRONMENT_SERVICE_ID);
+        String perspectiveId = perspective.getPersistedState().get(PERSPECTIVE_SOURCE_SNIPPET);
+        if (perspectiveId == null) {
+          perspectiveId = perspective.getElementId();
         }
 
-        environments.highestRankedRecord(environmentId).optionalValue().observe(record -> {
-          try {
-            record.ifPresent(r -> {
-              var environment = r.serviceObject();
-              context.set(GlobalEnvironment.class, environment);
-            });
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        });
+        localEnvironments
+            .highestRankedRecord(perspectiveId)
+            .optionalValue()
+            .weakReference(context)
+            .observe(forObservation(o -> record -> {
+              try {
+                record.message().ifPresent(r -> {
+                  var environment = r.serviceObject();
+                  record.owner().set(LocalEnvironmentService.class, environment);
+                });
+              } catch (Exception e) {
+                o.cancel();
+                e.printStackTrace();
+              }
+            }));
+        globalEnvironments
+            .highestRankedRecord(perspectiveId)
+            .optionalValue()
+            .weakReference(context)
+            .observe(forObservation(o -> record -> {
+              try {
+                record.message().ifPresent(r -> {
+                  var environment = r.serviceObject();
+                  record.owner().set(GlobalEnvironment.class, environment);
+                });
+              } catch (Exception e) {
+                o.cancel();
+                e.printStackTrace();
+              }
+            }));
       }
     } catch (Exception e) {
       log.log(Level.ERROR, e);

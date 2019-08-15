@@ -35,11 +35,9 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.dependency.Something;
-import uk.co.saiman.experiment.dependency.source.Observation;
-import uk.co.saiman.experiment.dependency.source.Preparation;
-import uk.co.saiman.experiment.dependency.source.Provision;
-import uk.co.saiman.experiment.dependency.source.Source;
+import uk.co.saiman.experiment.dependency.Condition;
+import uk.co.saiman.experiment.dependency.Resource;
+import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
@@ -76,65 +74,57 @@ public class ExecutorProgress {
       }
 
       @Override
-      public <U> void prepareCondition(Preparation<U> condition, U resource) {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public <R> void observePartialResult(
-          Observation<R> observation,
-          Supplier<? extends R> value) {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public <R> void setResultData(Observation<R> observation, Data<R> data) {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
-      public void completeObservation(Observation<?> observation) {
-        // TODO Auto-generated method stub
-
-      }
-
-      @Override
       public Variables getVariables() {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <U extends Something> U acquireDependency(Source<U> source) {
+      public <T> Condition<T> acquireCondition(Class<T> source) {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <T extends Something> Stream<T> acquireDependencies(Source<T> requirement) {
+      public <T> Resource<T> acquireResource(Class<T> source) {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <T> T acquireCondition(Preparation<T> source) {
+      public <T> Result<T> acquireResult(Class<T> source) {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <T> T acquireResource(Provision<T> source) {
+      public <T> Stream<Result<T>> acquireResults(Class<T> source) {
         // TODO Auto-generated method stub
         return null;
       }
 
       @Override
-      public <T> T acquireResult(Observation<T> source) {
+      public <U> void prepareCondition(Class<U> condition, U resource) {
         // TODO Auto-generated method stub
-        return null;
+        
+      }
+
+      @Override
+      public <R> void observePartialResult(Class<R> observation, Supplier<? extends R> value) {
+        // TODO Auto-generated method stub
+        
+      }
+
+      @Override
+      public void completeObservation(Class<?> observation) {
+        // TODO Auto-generated method stub
+        
+      }
+
+      @Override
+      public <R> void setResultData(Class<R> observation, Data<R> data) {
+        // TODO Auto-generated method stub
+        
       }
 
       @Override

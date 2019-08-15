@@ -33,9 +33,8 @@ import java.util.function.Supplier;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.dependency.source.Observation;
+import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
@@ -44,11 +43,12 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the data type of the result
+ * @param <T>
+ *          the data type of the result
  */
 public class ResultImpl<T> implements Result<T> {
-  private final Observation<T> observation;
-  private final ProductPath<Absolute, Result<? extends T>> path;
+  private final Class<T> observation;
+  private final ProductPath<Absolute, Result<T>> path;
 
   private Supplier<? extends T> valueSupplier;
   private T value;
@@ -58,14 +58,10 @@ public class ResultImpl<T> implements Result<T> {
   private boolean dirty;
   private final HotObservable<Result<T>> updates;
 
-  ResultImpl(Observation<T> observation, ExperimentPath<Absolute> experimentPath) {
+  ResultImpl(Class<T> observation, ExperimentPath<Absolute> experimentPath) {
     this.observation = observation;
-    this.path = ProductPath.define(experimentPath, observation);
+    this.path = ProductPath.toResult(experimentPath, observation);
     this.updates = new HotObservable<>();
-  }
-
-  public Observation<T> getObservation() {
-    return observation;
   }
 
   private void update() {
@@ -172,13 +168,12 @@ public class ResultImpl<T> implements Result<T> {
   }
 
   @Override
-  public Observation<T> source() {
-    // TODO Auto-generated method stub
-    return null;
+  public Class<T> type() {
+    return observation;
   }
 
   @Override
-  public ProductPath<Absolute, Result<? extends T>> path() {
+  public ProductPath<Absolute, Result<T>> path() {
     return path;
   }
 

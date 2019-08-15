@@ -28,6 +28,7 @@
 package uk.co.saiman.instrument.acquisition;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -156,4 +157,7 @@ public interface AcquisitionDevice<T extends AcquisitionController> extends Devi
             .doubleValue(),
         0);
   }
+
+  @Override
+  T acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
 }

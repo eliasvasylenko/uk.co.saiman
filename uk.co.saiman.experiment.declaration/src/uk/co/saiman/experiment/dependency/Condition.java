@@ -28,7 +28,7 @@
 package uk.co.saiman.experiment.dependency;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.source.Preparation;
+import uk.co.saiman.experiment.requirement.ProductPath;
 
 /**
  * A condition which may be produced by a preparation during the conducting of
@@ -36,14 +36,12 @@ import uk.co.saiman.experiment.dependency.source.Preparation;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the data type of the condition
+ * @param <T>
+ *          the data type of the condition
  */
-public interface Condition<T> extends Product, AutoCloseable {
+public interface Condition<T> extends Product<T>, AutoCloseable {
   @Override
-  Preparation<T> source();
-
-  @Override
-  ProductPath<Absolute, Condition<? extends T>> path();
+  ProductPath<Absolute, Condition<T>> path();
 
   T value();
 

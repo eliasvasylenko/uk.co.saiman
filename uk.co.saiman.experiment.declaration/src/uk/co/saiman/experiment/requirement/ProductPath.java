@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.dependency;
+package uk.co.saiman.experiment.requirement;
 
 import static uk.co.saiman.collection.EquivalenceComparator.identityComparator;
 
@@ -35,24 +35,37 @@ import java.util.Optional;
 import uk.co.saiman.collection.EquivalenceComparator;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.source.Production;
+import uk.co.saiman.experiment.dependency.Condition;
+import uk.co.saiman.experiment.dependency.Product;
+import uk.co.saiman.experiment.dependency.Result;
 
-public class ProductPath<T extends ExperimentPath<T>, U extends Product>
+public class ProductPath<T extends ExperimentPath<T>, U extends Product<?>>
     implements Comparable<ProductPath<?, ?>> {
-  private final EquivalenceComparator<Production<?>> productionComparator;
+  private static final EquivalenceComparator<Production<?, ?>> IDENTITY_COMPARATOR = identityComparator();
 
   private final ExperimentPath<T> experimentPath;
-  private final Production<U> production;
+  private final Production<?, U> production;
 
-  ProductPath(ExperimentPath<T> experimentPath, Production<U> production) {
+  ProductPath(ExperimentPath<T> experimentPath, Production<?, U> production) {
     this.experimentPath = experimentPath;
     this.production = production;
-    this.productionComparator = identityComparator();
   }
 
-  public static <T extends ExperimentPath<T>, U extends Product> ProductPath<T, U> define(
+  public static <T extends ExperimentPath<T>, U> ProductPath<T, Result<U>> toResult(
       ExperimentPath<T> experimentPath,
-      Production<U> production) {
+      Class<U> type) {
+    return new ProductPath<>(experimentPath, Requirement.onResult(type));
+  }
+
+  public static <T extends ExperimentPath<T>, U> ProductPath<T, Condition<U>> toCondition(
+      ExperimentPath<T> experimentPath,
+      Class<U> type) {
+    return new ProductPath<>(experimentPath, Requirement.onCondition(type));
+  }
+
+  public static <T extends ExperimentPath<T>, U extends Product<?>> ProductPath<T, U> toProduction(
+      ExperimentPath<T> experimentPath,
+      Production<?, U> production) {
     return new ProductPath<>(experimentPath, production);
   }
 
@@ -60,18 +73,18 @@ public class ProductPath<T extends ExperimentPath<T>, U extends Product>
     return experimentPath;
   }
 
-  public Production<U> getProduction() {
+  public Production<?, U> getProduction() {
     return production;
   }
 
   public Optional<ProductPath<Absolute, U>> resolveAgainst(ExperimentPath<Absolute> path) {
     return experimentPath
         .resolveAgainst(path)
-        .map(experimentPath -> define(experimentPath, production));
+        .map(experimentPath -> toProduction(experimentPath, production));
   }
 
   public ProductPath<Absolute, U> toAbsolute() {
-    return define(experimentPath.toAbsolute(), production);
+    return toProduction(experimentPath.toAbsolute(), production);
   }
 
   @Override
@@ -100,11 +113,14 @@ public class ProductPath<T extends ExperimentPath<T>, U extends Product>
   @Override
   public int compareTo(ProductPath<?, ?> that) {
     int comparePath = this.experimentPath.compareTo(that.experimentPath);
-    int compareProductionId = this.production.id().compareTo(that.production.id());
+    int compareProductionId = this.production
+        .getClass()
+        .getName()
+        .compareTo(that.production.getClass().getName());
     return comparePath != 0
         ? comparePath
         : compareProductionId != 0
             ? compareProductionId
-            : productionComparator.compare(this.production, that.production);
+            : IDENTITY_COMPARATOR.compare(this.production, that.production);
   }
 }

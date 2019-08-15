@@ -29,8 +29,6 @@ package uk.co.saiman.maldi.sample;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
-import static uk.co.saiman.maldi.stage.MaldiStageConstants.MALDI_SAMPLE_PLATE_CONTROLLER;
-import static uk.co.saiman.maldi.stage.MaldiStageConstants.PLATE_SUBMISSION;
 import static uk.co.saiman.maldi.stage.MaldiStageConstants.SAMPLE_PLATE_BARCODE;
 import static uk.co.saiman.maldi.stage.MaldiStageConstants.SAMPLE_PLATE_ID;
 
@@ -46,17 +44,21 @@ import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.variables.VariableCardinality;
 import uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor.MaldiXYStageExecutorConfiguration;
 import uk.co.saiman.maldi.stage.SamplePlate;
+import uk.co.saiman.maldi.stage.SamplePlateStageController;
 import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 import uk.co.saiman.maldi.stage.SamplePreparation;
 import uk.co.saiman.osgi.ServiceIndex;
 
 @Designate(ocd = MaldiXYStageExecutorConfiguration.class, factory = true)
-@Component(configurationPid = MaldiSamplePlateExecutor.CONFIGURATION_PID, configurationPolicy = OPTIONAL, service = {
-    MaldiSamplePlateExecutor.class,
-    Executor.class })
+@Component(
+    configurationPid = MaldiSamplePlateExecutor.CONFIGURATION_PID,
+    configurationPolicy = OPTIONAL,
+    service = { MaldiSamplePlateExecutor.class, Executor.class })
 public class MaldiSamplePlateExecutor implements Executor {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Maldi Sample Plate Experiment Executor", description = "The experiment executor which manages the positioning of the sample stage")
+  @ObjectClassDefinition(
+      name = "Maldi Sample Plate Experiment Executor",
+      description = "The experiment executor which manages the positioning of the sample stage")
   public @interface MaldiXYStageExecutorConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.maldi.executor.sampleplate";
@@ -76,9 +78,9 @@ public class MaldiSamplePlateExecutor implements Executor {
     context.declareVariable(SAMPLE_PLATE_ID, VariableCardinality.REQUIRED);
     context.declareVariable(SAMPLE_PLATE_BARCODE, VariableCardinality.OPTIONAL);
 
-    context.declareResourceRequirement(MALDI_SAMPLE_PLATE_CONTROLLER);
+    context.declareResourceRequirement(SamplePlateStageController.class);
 
-    context.declareProduct(PLATE_SUBMISSION);
+    context.preparesCondition(SamplePlateSubmission.class);
   }
 
   @Override
@@ -88,7 +90,7 @@ public class MaldiSamplePlateExecutor implements Executor {
         plateIndex.highestRankedRecord(context.getVariable(SAMPLE_PLATE_ID)).get().serviceObject(),
         context.getVariables().get(SAMPLE_PLATE_BARCODE).orElse(null));
 
-    var control = context.acquireResource(MALDI_SAMPLE_PLATE_CONTROLLER);
+    var control = context.acquireResource(SamplePlateStageController.class).value();
 
     /*
      * TODO when we are *not* executing an experiment, we need to listen for
@@ -107,7 +109,9 @@ public class MaldiSamplePlateExecutor implements Executor {
     loadedPreparation = requestedPreparation;
 
     context
-        .prepareCondition(PLATE_SUBMISSION, new SamplePlateSubmission(control, loadedPreparation));
+        .prepareCondition(
+            SamplePlateSubmission.class,
+            new SamplePlateSubmission(control, loadedPreparation));
 
   }
 }

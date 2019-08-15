@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.dependency;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.source.Observation;
+import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.observable.Observable;
 
 /**
@@ -39,16 +39,14 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the data type of the result
+ * @param <T>
+ *          the data type of the result
  */
-public interface Result<T> extends Product {
+public interface Result<T> extends Product<T> {
   Observable<Result<T>> updates();
 
   @Override
-  Observation<T> source();
-
-  @Override
-  ProductPath<Absolute, Result<? extends T>> path();
+  ProductPath<Absolute, Result<T>> path();
 
   boolean isEmpty();
 

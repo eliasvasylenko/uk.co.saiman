@@ -25,19 +25,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.dependency.source;
+package uk.co.saiman.experiment.requirement;
 
-import uk.co.saiman.experiment.dependency.Something;
+import uk.co.saiman.experiment.dependency.Result;
 
 /**
- * A source is simply a representation of an API point. In particular, it
- * represents an artifact which can acquired during the execution of an
- * experiment procedure, and the Java type which the artifact may be
- * materialized as.
+ * An observation of a result by an experiment procedure.
+ * 
+ * @author Elias N Vasylenko
+ *
+ * @param <T>
+ *          the type of the result we wish to find
  */
-public abstract class Source<T extends Something> {
-  // TODO sealed interface when language feature becomes available
-  Source() {}
-
-  public abstract String id();
+public final class Observation<T> extends Production<T, Result<T>> {
+  Observation(Class<?> type) {
+    super(type);
+  }
 }

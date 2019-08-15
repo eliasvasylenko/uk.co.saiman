@@ -13,7 +13,7 @@ Bundle-Name: SAI :: Experiment :: Products
 
 Export-Package: \
 	uk.co.saiman.experiment.dependency,\
-	uk.co.saiman.experiment.dependency.source,\
+	uk.co.saiman.experiment.requirement,\
 	uk.co.saiman.experiment.environment,\
 	uk.co.saiman.experiment.environment.service,\
 	uk.co.saiman.experiment.declaration,\
