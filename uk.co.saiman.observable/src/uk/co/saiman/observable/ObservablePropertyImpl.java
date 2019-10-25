@@ -41,7 +41,8 @@ import java.util.function.Supplier;
  * synchronized on the implementation object.
  * 
  * @author Elias N Vasylenko
- * @param <T> the type of event message to produce
+ * @param <T>
+ *          the type of event message to produce
  */
 public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
   private static class Message<T> {
@@ -155,8 +156,9 @@ public class ObservablePropertyImpl<T> implements ObservableProperty<T> {
 
   @Override
   public synchronized T set(T value) {
-    if (failure == null && Objects.equals(this.value, value))
+    if (failure == null && Objects.equals(this.value, value)) {
       return value;
+    }
 
     T previous = this.value;
     failure = null;

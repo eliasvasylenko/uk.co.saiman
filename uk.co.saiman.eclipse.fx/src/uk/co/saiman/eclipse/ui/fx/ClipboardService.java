@@ -27,8 +27,16 @@
  */
 package uk.co.saiman.eclipse.ui.fx;
 
+import java.util.Optional;
+
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import uk.co.saiman.data.format.DataFormat;
 
 public interface ClipboardService {
   public ClipboardCache getCache(Clipboard clipboard);
+
+  public <T> Optional<T> getValue(Clipboard clipboard, DataFormat<T> format);
+
+  public <T> void putValue(ClipboardContent clipboardContent, DataFormat<T> format, T value);
 }

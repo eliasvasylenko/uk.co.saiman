@@ -165,6 +165,7 @@ runplatform: linux64
 	uk.co.saiman.experiment.scheduling;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.experiment.storage;version=snapshot,\
+	uk.co.saiman.experiment.sampleplate;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\
 	openjfx.base.linux;version=snapshot,\
 	openjfx.controls.linux;version=snapshot,\
@@ -193,7 +194,6 @@ runplatform: linux64
 	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.experiment.chemicalmap.msapex;version=snapshot,\
 	uk.co.saiman.experiment.spectrum.msapex;version=snapshot,\
-	uk.co.saiman.experiment.sample.msapex;version=snapshot,\
 	uk.co.saiman.experiment.processing.msapex;version=snapshot,\
 	uk.co.saiman.instrument.msapex;version=snapshot,\
 	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\
@@ -212,7 +212,6 @@ runplatform: linux64
 	uk.co.saiman.maldi.acquisition;version=snapshot,\
 	uk.co.saiman.maldi.spectrum;version=snapshot,\
 	uk.co.saiman.maldi.stage;version=snapshot,\
-	uk.co.saiman.maldi.sample;version=snapshot,\
 	uk.co.saiman.maldi.vacuum;version=snapshot,\
 	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.simulation;version=snapshot,\

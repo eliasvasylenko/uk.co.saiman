@@ -29,6 +29,7 @@ package uk.co.saiman.experiment.declaration;
 
 import static java.lang.String.format;
 
+import java.util.Collection;
 import java.util.Objects;
 
 // TODO value and record type
@@ -44,6 +45,17 @@ public class ExperimentId implements Comparable<ExperimentId> {
 
   public static ExperimentId fromName(String name) {
     return new ExperimentId(name);
+  }
+
+  public static ExperimentId nextAvailableFromName(
+      String name,
+      Collection<? extends ExperimentId> existingIds) {
+    var id = new ExperimentId(name);
+    int i = 0;
+    while (existingIds.contains(id)) {
+      id = new ExperimentId(name + " " + i++);
+    }
+    return id;
   }
 
   public static boolean isNameValid(String name) {

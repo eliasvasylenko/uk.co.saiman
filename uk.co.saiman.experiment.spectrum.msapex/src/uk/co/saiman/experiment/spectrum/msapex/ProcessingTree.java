@@ -27,27 +27,24 @@
  */
 package uk.co.saiman.experiment.spectrum.msapex;
 
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
-import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
-import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.ui.Children;
+import uk.co.saiman.eclipse.utilities.ContextBuffer;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.msapex.ProcessorCell;
 
 public class ProcessingTree {
   public static final String ID = "uk.co.saiman.experiment.processing.tree";
 
-  @Inject
-  public void prepare(IEclipseContext context, Processing processing, ChildrenService children) {
-    children
-        .setItems(
-            ProcessorCell.ID,
-            DataProcessor.class,
-            processing.steps().collect(toList()),
-            r -> context.modify(Processing.class, new Processing(r)));
+  @Children(snippetId = ProcessorCell.ID)
+  public Stream<ContextBuffer> updateChildren(@Optional Processing processing) {
+    if (processing == null) {
+      return null;
+    }
+    return processing.steps().map(step -> ContextBuffer.empty().set(DataProcessor.class, step));
   }
 }

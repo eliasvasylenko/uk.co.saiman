@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.spectrum;
 
+import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
 import static uk.co.saiman.experiment.requirement.Requirement.onResult;
 
@@ -35,6 +36,8 @@ import javax.measure.quantity.Mass;
 import javax.measure.quantity.Time;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.SampledContinuousFunction;
@@ -44,6 +47,8 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext;
+import uk.co.saiman.experiment.osgi.ExperimentServiceConstants;
+import uk.co.saiman.experiment.spectrum.SpectrumProcessingExecutor.SpectrumProcessingExecutorConfiguration;
 import uk.co.saiman.experiment.variables.VariableCardinality;
 
 /**
@@ -53,8 +58,22 @@ import uk.co.saiman.experiment.variables.VariableCardinality;
  * 
  * @author Elias N Vasylenko
  */
-@Component(service = Executor.class)
+@Designate(ocd = SpectrumProcessingExecutorConfiguration.class, factory = true)
+@Component(
+    configurationPid = SpectrumProcessingExecutor.CONFIGURATION_PID,
+    configurationPolicy = OPTIONAL,
+    property = ExperimentServiceConstants.EXECUTOR_ID
+        + "="
+        + SpectrumProcessingExecutor.SPECTRUM_PROCESSING_EXECUTOR)
 public class SpectrumProcessingExecutor implements Executor {
+  @SuppressWarnings("javadoc")
+  @ObjectClassDefinition(
+      name = "Spectrum Processing Experiment Executor",
+      description = "The experiment executor which manages processing of spectra")
+  public @interface SpectrumProcessingExecutorConfiguration {}
+
+  public static final String SPECTRUM_PROCESSING_EXECUTOR = "uk.co.saiman.executor.spectrum.processing";
+  public static final String CONFIGURATION_PID = SPECTRUM_PROCESSING_EXECUTOR + ".impl";
   public static final String OUTPUT_SPECTRUM = "uk.co.saiman.experiment.spectrum.processing.output";
 
   @Override

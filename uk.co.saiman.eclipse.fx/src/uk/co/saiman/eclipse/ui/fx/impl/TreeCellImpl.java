@@ -28,13 +28,16 @@
 package uk.co.saiman.eclipse.ui.fx.impl;
 
 import static javafx.css.PseudoClass.getPseudoClass;
-import static uk.co.saiman.eclipse.ui.TransferDestination.AFTER_CHILD;
-import static uk.co.saiman.eclipse.ui.TransferDestination.BEFORE_CHILD;
-import static uk.co.saiman.eclipse.ui.TransferDestination.OVER;
 import static uk.co.saiman.eclipse.ui.fx.TransferModes.fromJavaFXTransferMode;
+import static uk.co.saiman.eclipse.ui.fx.impl.TransferDestination.AFTER_CHILD;
+import static uk.co.saiman.eclipse.ui.fx.impl.TransferDestination.BEFORE_CHILD;
+import static uk.co.saiman.eclipse.ui.fx.impl.TransferDestination.OVER;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.eclipse.e4.ui.model.application.MContribution;
+import org.eclipse.e4.ui.model.application.ui.MContext;
 
 import javafx.beans.InvalidationListener;
 import javafx.css.PseudoClass;
@@ -44,13 +47,11 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
 import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.model.ui.MEditableCell;
 import uk.co.saiman.eclipse.ui.SaiUiModel;
-import uk.co.saiman.eclipse.ui.TransferDestination;
-import uk.co.saiman.eclipse.ui.fx.TransferCellIn;
-import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 import uk.co.saiman.eclipse.ui.fx.TransferModes;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 
@@ -118,91 +119,136 @@ public class TreeCellImpl extends TreeCell<MCell> {
   }
 
   private void initializeEvents() {
-    setOnDragDetected(event -> {
-      if (getTreeItem() == null) {
-        return;
-      }
-      if (dragCandidate == null) {
-        dragCandidate = getModularTreeItem().transferOut();
-      }
-      if (!dragCandidate.supportedTransferModes().isEmpty()) {
+    setOnDragDetected(this::dragDetected);
+    setOnDragDone(this::dragDone);
+    setOnDragOver(this::dragOver);
+    setOnDragEntered(this::dragEntered);
+    setOnDragExited(this::dragExited);
+    setOnDragDropped(this::dragDropped);
+  }
+
+  public void dragDetected(MouseEvent event) {
+    if (getTreeItem() == null) {
+      return;
+    }
+    dragCandidate = transferOut();
+    if (dragCandidate.supportedTransferModes().isEmpty()) {
+      dragCandidate = null;
+    } else {
+      event.consume();
+
+      Dragboard db = startDragAndDrop(
+          dragCandidate
+              .supportedTransferModes()
+              .stream()
+              .map(TransferModes::toJavaFXTransferMode)
+              .flatMap(StreamUtilities::streamOptional)
+              .toArray(javafx.scene.input.TransferMode[]::new));
+      db.setContent(dragCandidate.getClipboardContent());
+    }
+  }
+
+  public void dragDone(DragEvent event) {
+    if (getTreeItem() == null) {
+      return;
+    }
+    if (event.isAccepted()) {
+      event.consume();
+      handleDrag(event.getTransferMode());
+    }
+  }
+
+  private void handleDrag(javafx.scene.input.TransferMode transferMode) {
+    if (dragCandidate != null) {
+      dragCandidate.handle(fromJavaFXTransferMode(transferMode));
+      dragCandidate = null;
+    }
+  }
+
+  public void dragOver(DragEvent event) {
+    if (getModularTreeItem() != null && event.getGestureSource() != this) {
+      TransferDestination position = getDropPosition(event);
+      if (position != null) {
         event.consume();
+        event
+            .acceptTransferModes(
+                dropCandidates
+                    .get(position)
+                    .supportedTransferModes()
+                    .stream()
+                    .map(TransferModes::toJavaFXTransferMode)
+                    .flatMap(StreamUtilities::streamOptional)
+                    .toArray(javafx.scene.input.TransferMode[]::new));
 
-        Dragboard db = startDragAndDrop(
-            dragCandidate
-                .supportedTransferModes()
-                .stream()
-                .map(TransferModes::toJavaFXTransferMode)
-                .flatMap(StreamUtilities::streamOptional)
-                .toArray(javafx.scene.input.TransferMode[]::new));
-        db.setContent(dragCandidate.getClipboardContent());
-      }
-    });
-    setOnDragDone(event -> {
-      if (getTreeItem() == null) {
-        return;
-      }
-      if (event.isAccepted()) {
-        event.consume();
-
-        dragCandidate.handle(fromJavaFXTransferMode(event.getTransferMode()));
-        dragCandidate = null;
-      }
-    });
-
-    setOnDragOver(event -> {
-      if (getModularTreeItem() != null && event.getGestureSource() != this) {
-        TransferDestination position = getDropPosition(event);
-        if (position != null) {
-          event.consume();
-          event
-              .acceptTransferModes(
-                  dropCandidates
-                      .get(position)
-                      .supportedTransferModes()
-                      .stream()
-                      .map(TransferModes::toJavaFXTransferMode)
-                      .flatMap(StreamUtilities::streamOptional)
-                      .toArray(javafx.scene.input.TransferMode[]::new));
-
-          decorateDrag(position);
-        } else {
-          undecorateDrag();
-        }
-      }
-    });
-    setOnDragEntered(event -> {
-      if (getModularTreeItem() != null) {
-        for (TransferDestination position : TransferDestination.values()) {
-          TransferCellIn candidate = getModularTreeItem()
-              .transferIn(event.getDragboard(), position);
-          if (!candidate.supportedTransferModes().isEmpty()) {
-            dropCandidates.put(position, candidate);
-          }
-        }
-        if (!dropCandidates.isEmpty()) {
-          event.consume();
-        }
-      }
-    });
-    setOnDragExited(event -> {
-      if (!dropCandidates.isEmpty()) {
-        dropCandidates.clear();
-        event.consume();
+        decorateDrag(position);
+      } else {
         undecorateDrag();
       }
-    });
-    setOnDragDropped(event -> {
-      if (event.isAccepted() && event.getGestureTarget() == this) {
-        event.consume();
-        event.setDropCompleted(true);
+    }
+  }
 
-        TransferDestination position = getDropPosition(event);
-        dropCandidates
-            .get(position)
-            .handle(fromJavaFXTransferMode(event.getAcceptedTransferMode()));
+  public void dragEntered(DragEvent event) {
+    if (getModularTreeItem() != null && getItem().isToBeRendered()) {
+      for (TransferDestination position : TransferDestination.values()) {
+        TransferCellIn candidate = transferIn(event.getDragboard(), position);
+        if (!candidate.supportedTransferModes().isEmpty()) {
+          dropCandidates.put(position, candidate);
+        }
       }
-    });
+      if (!dropCandidates.isEmpty()) {
+        event.consume();
+      }
+    }
+  }
+
+  public void dragExited(DragEvent event) {
+    if (!dropCandidates.isEmpty()) {
+      dropCandidates.clear();
+      event.consume();
+      undecorateDrag();
+    }
+  }
+
+  public void dragDropped(DragEvent event) {
+    if (event.isAccepted() && event.getGestureTarget() == this) {
+      var source = event.getGestureSource();
+      if (source instanceof TreeCellImpl) {
+        var node = (TreeCellImpl) source;
+        /*
+         * TODO we have to handle the removal from the source before we handle the drop,
+         * otherwise it's possible that there will be a spurious collision between the
+         * dropped item and itself, since it might already exist in the same container.
+         */
+        node.handleDrag(event.getAcceptedTransferMode());
+      }
+
+      event.consume();
+      event.setDropCompleted(true);
+
+      TransferDestination position = getDropPosition(event);
+      dropCandidates.get(position).handle(fromJavaFXTransferMode(event.getAcceptedTransferMode()));
+    }
+  }
+
+  public TransferCellOut transferOut() {
+    return new TransferCellOut(getItem().getObject(), getItem().getContext());
+  }
+
+  public TransferCellIn transferIn(Dragboard clipboard, TransferDestination position) {
+    switch (position) {
+    case BEFORE_CHILD:
+    case AFTER_CHILD:
+      var parent = getItem().getParent();
+      return new TransferCellIn(
+          ((MContribution) parent).getObject(),
+          ((MContext) parent).getContext(),
+          clipboard,
+          position,
+          getItem());
+
+    default:
+      return new TransferCellIn(getItem().getObject(), getItem().getContext(), clipboard);
+    }
   }
 
   private void decorateDrag(TransferDestination position) {

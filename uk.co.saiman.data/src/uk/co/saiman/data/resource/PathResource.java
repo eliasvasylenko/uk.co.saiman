@@ -31,7 +31,6 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static uk.co.saiman.bytes.Channels.pipe;
 
 import java.io.IOException;
 import java.nio.channels.ByteChannel;
@@ -39,6 +38,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import uk.co.saiman.bytes.Channels;
 
 public class PathResource implements Resource {
   private final Path path;
@@ -75,7 +76,7 @@ public class PathResource implements Resource {
       }
     } else {
       destination.create();
-      pipe(read(), destination.write());
+      Channels.transfer(read(), destination.write());
       delete();
     }
     return destination;

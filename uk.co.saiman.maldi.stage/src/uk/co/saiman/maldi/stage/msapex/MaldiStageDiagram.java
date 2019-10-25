@@ -29,59 +29,39 @@ package uk.co.saiman.maldi.stage.msapex;
 
 import static uk.co.saiman.measurement.Units.metre;
 
-import java.util.stream.Stream;
-
+import javax.measure.Unit;
 import javax.measure.quantity.Length;
 
-import javafx.geometry.BoundingBox;
-import uk.co.saiman.instrument.stage.msapex.StageDiagram;
-import uk.co.saiman.instrument.stage.msapex.StageDiagramSampleConfiguration;
-import uk.co.saiman.maldi.stage.SampleArea;
-import uk.co.saiman.maldi.stage.SamplePlateStage;
-import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import org.eclipse.e4.ui.model.application.ui.menu.MPopupMenu;
 
-public class MaldiStageDiagram extends StageDiagram<SampleArea> {
-  private final SamplePlateStage stage;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.image.Image;
+import javafx.scene.input.ContextMenuEvent;
+import uk.co.saiman.instrument.stage.msapex.XYStageDiagram;
+import uk.co.saiman.maldi.stage.MaldiStage;
 
-  public MaldiStageDiagram(SamplePlateStage stage) {
-    this.stage = stage;
+public class MaldiStageDiagram extends XYStageDiagram {
+  private MPopupMenu popupMenu;
 
-    SamplePlateStage stageDevice = getStageDevice();
-    initialize(metre().micro().getUnit());
+  public MaldiStageDiagram(MaldiStage stage, Image image) {
+    this(stage, image, metre().micro().getUnit());
+  }
 
-    XYCoordinate<Length> lower = getCoordinatesAtLocation(stageDevice.getLowerBound());
-    XYCoordinate<Length> upper = getCoordinatesAtLocation(stageDevice.getUpperBound());
+  public MaldiStageDiagram(MaldiStage stage, Image image, Unit<Length> unit) {
+    super(stage, unit);
 
-    getAnnotationLayer()
-        .setMeasurementBounds(
-            new BoundingBox(
-                lower.getX().getValue().doubleValue(),
-                lower.getY().getValue().doubleValue(),
-                upper.getX().getValue().doubleValue() - lower.getX().getValue().doubleValue(),
-                upper.getY().getValue().doubleValue() - lower.getY().getValue().doubleValue()));
+    addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+      if (popupMenu != null) {
+        ((ContextMenu) popupMenu.getWidget()).show(this, event.getScreenX(), event.getScreenY());
+      }
+      event.consume();
+    });
+
+    setImage(image);
   }
 
   @Override
-  public SamplePlateStage getStageDevice() {
-    return stage;
-  }
-
-  @Override
-  public Stream<? extends StageDiagramSampleConfiguration> getSampleConfigurations() {
-    return Stream.empty();
-  }
-
-  @Override
-  public SampleArea getStageLocationAtCoordinates(XYCoordinate<Length> coordinates) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public XYCoordinate<Length> getCoordinatesAtStageLocation(SampleArea location) {
-    return getCoordinatesAtLocation(location.center());
-  }
-
-  public XYCoordinate<Length> getCoordinatesAtLocation(XYCoordinate<Length> location) {
-    return location;
+  public MaldiStage getStageDevice() {
+    return (MaldiStage) super.getStageDevice();
   }
 }

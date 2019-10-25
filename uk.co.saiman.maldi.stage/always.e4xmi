@@ -1,6 +1,55 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_YHMYsKhwEem7gZS_CxGklA">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_dIl2AKhwEem7gZS_CxGklA" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
-    <elements xsi:type="basic:Part" xmi:id="_f_ZrEKhwEem7gZS_CxGklA" elementId="uk.co.saiman.maldi.stage.part" label="%stage.part" closeable="true"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:saiman.ui="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui" xmi:id="_5U2oQJy7EemfBqNGW7FeDQ">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_xZyIMMNUEem9S4y7HZD3iQ" featurename="snippets" parentElementId="uk.co.saiman.maldi.window.snippets">
+    <elements xsi:type="menu:HandledMenuItem" xmi:id="_pBR0oMPiEem9S4y7HZD3iQ" elementId="uk.co.saiman.maldi.stage.handledmenuitem.addsampleplate" label="%addSamplePlate" command="_utFg4MPiEem9S4y7HZD3iQ">
+      <tags>ExperimentStepProvider</tags>
+      <tags>hideOnDisable</tags>
+    </elements>
+    <elements xsi:type="menu:HandledMenuItem" xmi:id="_uj4tYNujEem9wKVjehG4zQ" elementId="uk.co.saiman.maldi.stage.handledmenuitem.addsamplearea" label="%addSampleArea" command="_qATNcNujEem9wKVjehG4zQ">
+      <tags>ExperimentStepProvider</tags>
+      <tags>hideOnDisable</tags>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_tRvkQMPiEem9S4y7HZD3iQ" featurename="commands" parentElementId="uk.co.saiman.application.msapex">
+    <elements xsi:type="commands:Command" xmi:id="_utFg4MPiEem9S4y7HZD3iQ" elementId="uk.co.saiman.maldi.stage.command.addsampleplate" commandName="%addSamplePlate"/>
+    <elements xsi:type="commands:Command" xmi:id="_qATNcNujEem9wKVjehG4zQ" elementId="uk.co.saiman.maldi.stage.command.addsamplearea" commandName="%addSampleArea"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_xOxagMPiEem9S4y7HZD3iQ" featurename="handlers" parentElementId="uk.co.saiman.application.msapex">
+    <elements xsi:type="commands:Handler" xmi:id="_yg2GYMPiEem9S4y7HZD3iQ" elementId="uk.co.saiman.maldi.stage.handler.addsampleplate" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.AddMaldiSamplePlateStepHandler" command="_utFg4MPiEem9S4y7HZD3iQ"/>
+    <elements xsi:type="commands:Handler" xmi:id="_zmBxkNujEem9wKVjehG4zQ" elementId="uk.co.saiman.maldi.stage.handler.addsamplearea" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.AddMaldiSampleAreaStepsHandler" command="_qATNcNujEem9wKVjehG4zQ"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_PuvTUMToEem9S4y7HZD3iQ" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
+    <elements xsi:type="basic:Part" xmi:id="_PuvTUcToEem9S4y7HZD3iQ" elementId="uk.co.saiman.maldi.stage.part" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.MaldiStagePart" label="%stagePart" closeable="true">
+      <tags>Part-Toolbar-FullSpan</tags>
+      <toolbar xmi:id="_PuvTUsToEem9S4y7HZD3iQ" elementId="uk.co.saiman.maldi.stage.toolbar">
+        <children xsi:type="menu:DirectToolItem" xmi:id="_GOxM0M5HEem9BOuk_QLyDw" elementId="uk.co.saiman.maldi.stage.directtoolitem.selectplate" label="%selectPlate" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.SelectNextPlateToolItem">
+          <menu xmi:id="_5bJ68M5HEem9BOuk_QLyDw" elementId="uk.co.saiman.maldi.stage.menu.selectplate">
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_6o9x4M5HEem9BOuk_QLyDw" elementId="uk.co.saiman.maldi.stage.dynamicmenucontribution.selectplate" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.SelectPlateMenuContribution"/>
+          </menu>
+        </children>
+        <children xsi:type="menu:ToolControl" xmi:id="_tIr5MM5GEem9BOuk_QLyDw" elementId="uk.co.saiman.maldi.stage.toolcontrol.spacer">
+          <tags>TrimBarLayout.SPACER</tags>
+        </children>
+      </toolbar>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_YJ4GYM1pEemgYLu2XBhibQ" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
+    <elements xsi:type="basic:Part" xmi:id="_tGecIM1pEemgYLu2XBhibQ" elementId="uk.co.saiman.maldi.stage.part.plate.96well" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.Maldi96WellPlatePart" label="%96well" iconURI="platform:/plugin/uk.co.saiman.maldi.stage/slides/96-well-icon.jpg">
+      <persistedState key="uk.co.saiman.maldi.sampleplate.id" value="96well"/>
+    </elements>
+    <elements xsi:type="basic:Part" xmi:id="_nWfe0M5LEem9BOuk_QLyDw" elementId="uk.co.saiman.maldi.stage.part.plate.96wellwithcal" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.Maldi96WellCalibrantPlatePart" label="%96wellWithCal" iconURI="platform:/plugin/uk.co.saiman.maldi.stage/slides/96-well-with-cal-icon.jpg">
+      <persistedState key="uk.co.saiman.maldi.sampleplate.id" value="96wellWithCal"/>
+    </elements>
+    <elements xsi:type="basic:Part" xmi:id="_kc17sM5MEem9BOuk_QLyDw" elementId="uk.co.saiman.maldi.stage.part.plate.96wellwithdm" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.Maldi96WellDataMatrixPlatePart" label="%96wellWithDM" iconURI="platform:/plugin/uk.co.saiman.maldi.stage/slides/96-well-with-dm-icon.jpg">
+      <persistedState key="uk.co.saiman.maldi.sampleplate.id" value="96wellWithDM"/>
+    </elements>
+    <elements xsi:type="basic:Part" xmi:id="_DCHb4M5NEem9BOuk_QLyDw" elementId="uk.co.saiman.maldi.stage.part.plate.imaging" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.MaldiImagingPlatePart" label="%imaging" iconURI="platform:/plugin/uk.co.saiman.maldi.stage/slides/imaging-icon.jpg">
+      <persistedState key="uk.co.saiman.maldi.sampleplate.id" value="imaging"/>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_fRnLkOZ3Eemlx_ulNqNl5g" featurename="children" parentElementId="uk.co.saiman.experiment.step.cell">
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_6QF5UOZ5Eemlx_ulNqNl5g" label="%samplePlate" iconURI="fugue:size16/layer.png" elementId="uk.co.saiman.maldi.stage.cell.sampleplate" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.SamplePlateCell"/>
+    <elements xsi:type="saiman.ui:EditableCell" xmi:id="_k7ZzsOZ5Eemlx_ulNqNl5g" label="%barcode" iconURI="fugue:size16/barcode-2d.png" elementId="uk.co.saiman.maldi.stage.editablecell.barcode" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.BarcodeCell"/>
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_Vl-XcOkOEemKXt0hvCdPug" label="%sampleArea" iconURI="fugue:size16/layer-resize.png" elementId="uk.co.saiman.maldi.stage.cell.samplearea" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.SampleAreaCell"/>
   </fragments>
 </fragment:ModelFragments>

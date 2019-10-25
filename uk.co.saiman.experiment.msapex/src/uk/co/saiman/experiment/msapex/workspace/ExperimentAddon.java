@@ -183,7 +183,12 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspace(Path rootPath) {
-    workspace = new Workspace(rootPath, executorService, storageService, log);
+    workspace = new Workspace(
+        rootPath,
+        executorService,
+        storageService,
+        () -> context.get(GlobalEnvironment.class),
+        log);
     context.set(Workspace.class, workspace);
 
     loadWorkspace();
@@ -269,6 +274,7 @@ public class ExperimentAddon {
 
   private void initializeEvents() {
     workspace.events().weakReference(this).observe(o -> {
+
       var workspaceEvent = o.message();
       o.owner().context.set(WorkspaceEvent.class, workspaceEvent);
       o.owner().context.remove(WorkspaceEvent.class);
@@ -300,7 +306,11 @@ public class ExperimentAddon {
       if (perspective != null && window != null) {
         var windowContext = window.getContext();
         var perspectiveContext = perspective.getContext();
-        windowContext.set(GlobalEnvironment.class, perspectiveContext.get(GlobalEnvironment.class));
+
+        var globalEnvironment = perspectiveContext.get(GlobalEnvironment.class);
+
+        windowContext.set(GlobalEnvironment.class, globalEnvironment);
+        this.context.set(GlobalEnvironment.class, globalEnvironment);
       }
     } catch (Exception e) {
       log.log(Level.ERROR, e);
@@ -337,7 +347,7 @@ public class ExperimentAddon {
                 });
               } catch (Exception e) {
                 o.cancel();
-                e.printStackTrace();
+                log.log(Level.ERROR, "Failed to set local environment in eclipse context", e);
               }
             }));
         globalEnvironments
@@ -352,7 +362,7 @@ public class ExperimentAddon {
                 });
               } catch (Exception e) {
                 o.cancel();
-                e.printStackTrace();
+                log.log(Level.ERROR, "Failed to set global environment in eclipse context", e);
               }
             }));
       }

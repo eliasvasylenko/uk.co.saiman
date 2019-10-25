@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_AXtyQKfZEemwIbmU0Ng0Kw"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_AXtyQKfZEemwIbmU0Ng0Kw">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_bO_OsMV9EemgYLu2XBhibQ" featurename="windows" parentElementId="uk.co.saiman.perspective.maldi">
+    <elements xsi:type="basic:Window" xmi:id="_dPJIkMV9EemgYLu2XBhibQ" elementId="uk.co.saiman.maldi.window.snippets" toBeRendered="false"/>
+  </fragments>
+</fragment:ModelFragments>

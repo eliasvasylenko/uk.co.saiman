@@ -1,10 +1,8 @@
 {
 	"uk.co.saiman.experiment.environment.local~maldisimulation": {
-		"target-perspective-id": "uk.co.saiman.perspective.maldi",
-		"exclusiveResourceProviders.target": "(|(environment-id=maldisimulation)(!(environment-id=*)))"
+		"target-perspective-id": "uk.co.saiman.perspective.maldi"
 	},
 	"uk.co.saiman.experiment.environment.global~maldisimulation": {
-		"target-perspective-id": "uk.co.saiman.perspective.maldi",
-		"sharedResourceFilter": "(&(provision-id=*)(|(environment-id=maldisimulation)(!(environment-id=*))))"
+		"target-perspective-id": "uk.co.saiman.perspective.maldi"
 	}
 }

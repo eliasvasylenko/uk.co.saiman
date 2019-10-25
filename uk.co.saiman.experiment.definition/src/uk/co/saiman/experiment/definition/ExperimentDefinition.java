@@ -40,7 +40,7 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 
-public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefinition> {
+public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinition> {
   private final ExperimentId id;
   private Procedure procedure;
 
@@ -103,7 +103,7 @@ public class ExperimentDefinition extends StepContainer<Absolute, ExperimentDefi
     return procedure;
   }
 
-  private List<Instruction> closure(StepContainer<?, ?> steps) {
+  private List<Instruction> closure(Definition<?, ?> steps) {
     return steps
         .substeps()
         .flatMap(step -> closure(step, ExperimentPath.toRoot()))

@@ -27,10 +27,6 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
-import static java.util.Collections.reverse;
-import static uk.co.saiman.eclipse.ui.TransferMode.DISCARD;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -39,7 +35,6 @@ import javax.inject.Named;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.fx.ui.workbench.renderers.base.BaseRenderer;
 import org.eclipse.fx.ui.workbench.renderers.fx.widget.WWidgetImpl;
 
@@ -53,8 +48,6 @@ import javafx.scene.input.PickResult;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.model.ui.MTree;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
-import uk.co.saiman.eclipse.ui.fx.TransferCellHandler;
-import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 import uk.co.saiman.eclipse.ui.fx.impl.DefCellRenderer.CellImpl;
 import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 import uk.co.saiman.eclipse.ui.fx.widget.WTree;
@@ -135,17 +128,6 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<MCell>> {
 
     public void onKeyPressed(KeyEvent event) {
       switch (event.getCode()) {
-      case DELETE:
-        event.consume();
-        List<TreeItem<?>> selection = new ArrayList<>(
-            getWidget().getSelectionModel().getSelectedItems());
-        reverse(selection);
-        for (TreeItem<?> treeItem : selection) {
-          TransferCellOut transfer = ((TreeItemImpl) treeItem).transferOut();
-          if (transfer.supportedTransferModes().contains(DISCARD)) {
-            transfer.handle(DISCARD);
-          }
-        }
       default:
         break;
       }
@@ -212,8 +194,6 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<MCell>> {
     MPart part = tree.getContext().get(MPart.class);
 
     if (part != null && treeView.isFocused()) {
-      ESelectionService selectionService = part.getContext().get(ESelectionService.class);
-
       var selection = treeView.getSelectionModel().getSelectedItem();
 
       if (selection != null) {
@@ -222,25 +202,12 @@ public class DefTreeRenderer extends BaseTreeRenderer<TreeView<MCell>> {
         var object = cell.getObject();
 
         selection.getValue().getContext().activateBranch();
-        selectionService.setSelection(treeItem.getData());
 
         if (object != null) {
           ContextInjectionFactory.invoke(object, Focus.class, cell.getContext(), null);
         }
-      } else {
-        selectionService.setSelection(null);
       }
     }
-  }
-
-  @Override
-  protected void doProcessContent(MTree element) {
-    element
-        .getContext()
-        .set(
-            TransferCellHandler.class,
-            ContextInjectionFactory.make(DefaultTransferCellHandler.class, element.getContext()));
-    super.doProcessContent(element);
   }
 
   @Override

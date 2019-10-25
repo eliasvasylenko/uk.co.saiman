@@ -2,7 +2,9 @@ package uk.co.saiman.experiment.environment.osgi.impl;
 
 import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static uk.co.saiman.experiment.environment.osgi.EnvironmentServiceConstants.ENVIRONMENT_FILTER_ATTRIBUTE;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -29,6 +31,7 @@ import uk.co.saiman.experiment.environment.osgi.impl.GlobalEnvironmentService.Gl
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.osgi.ServiceIndex;
+import uk.co.saiman.osgi.ServiceRecord;
 
 @Designate(ocd = GlobalEnvironmentServiceConfiguration.class, factory = true)
 @Component(
@@ -37,15 +40,11 @@ import uk.co.saiman.osgi.ServiceIndex;
     enabled = true,
     immediate = true)
 public class GlobalEnvironmentService {
-  public static final String PROVISION_ID_ATTRIBUTE = "provision-id";
-
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "Global Environment Service",
       description = "A service for management of global experiment environments for shared resources")
-  public @interface GlobalEnvironmentServiceConfiguration {
-    String sharedResourceFilter() default "(" + PROVISION_ID_ATTRIBUTE + "=*)";
-  }
+  public @interface GlobalEnvironmentServiceConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.environment.global";
 
@@ -58,17 +57,22 @@ public class GlobalEnvironmentService {
       GlobalEnvironmentServiceConfiguration configuration,
       BundleContext context,
       @Reference Log log,
-      Map<String, Object> properties) throws InvalidSyntaxException {
+      Map<String, Object> environmentProperties) throws InvalidSyntaxException {
     this.log = log;
+
+    Dictionary<String, Object> dictionary = new Hashtable<>(environmentProperties);
+
+    var resourceFilter = "(" + ENVIRONMENT_FILTER_ATTRIBUTE + "=*)";
 
     resourceIndex = ServiceIndex
         .open(
             context,
-            FrameworkUtil.createFilter(configuration.sharedResourceFilter()),
+            FrameworkUtil.createFilter(resourceFilter),
             Function.identity(),
-            (a, b) -> resourceIndexer(b));
-    resourceIndex.events().observe(o -> registerService(context, properties));
-    registerService(context, properties);
+            (a, b) -> resourceIndexer(dictionary, b));
+
+    resourceIndex.events().observe(o -> registerService(context, dictionary));
+    registerService(context, dictionary);
   }
 
   @Deactivate
@@ -76,9 +80,26 @@ public class GlobalEnvironmentService {
     resourceIndex.close();
   }
 
-  private Stream<Class<?>> resourceIndexer(ServiceReference<?> serviceReference) {
-    var classNames = (String[]) serviceReference.getProperty(OBJECTCLASS);
-    var classLoader = serviceReference.getBundle().adapt(BundleWiring.class).getClassLoader();
+  private Stream<Class<?>> resourceIndexer(
+      Dictionary<String, Object> environmentProperties,
+      ServiceReference<?> resourceService) {
+    String filterString = resourceService.getProperty(ENVIRONMENT_FILTER_ATTRIBUTE).toString();
+
+    if (!"*".equals(filterString)) {
+      try {
+        var filter = FrameworkUtil.createFilter(filterString);
+
+        if (!filter.match(environmentProperties)) {
+          return Stream.empty();
+        }
+      } catch (Exception e) {
+        log.log(Level.ERROR, e);
+        return Stream.empty();
+      }
+    }
+
+    var classNames = (String[]) resourceService.getProperty(OBJECTCLASS);
+    var classLoader = resourceService.getBundle().adapt(BundleWiring.class).getClassLoader();
     return Stream.of(classNames).flatMap(className -> {
       try {
         return Stream.of(classLoader.loadClass(className));
@@ -90,15 +111,22 @@ public class GlobalEnvironmentService {
     });
   }
 
-  private synchronized void registerService(BundleContext context, Map<String, Object> properties) {
+  private synchronized void registerService(
+      BundleContext context,
+      Dictionary<String, Object> environmentProperties) {
     if (serviceRegistration != null) {
       serviceRegistration.unregister();
     }
-    var values = new HashMap<Class<?>, Object>();
 
+    var values = new HashMap<Class<?>, Object>();
     resourceIndex
         .ids()
-        .forEach(id -> values.put(id, resourceIndex.highestRankedRecord(id).get().serviceObject()));
+        .forEach(
+            id -> resourceIndex
+                .highestRankedRecord(id)
+                .tryGet()
+                .map(ServiceRecord::serviceObject)
+                .ifPresent(object -> values.put(id, object)));
 
     var globalEnvironment = new GlobalEnvironment() {
       @Override
@@ -125,6 +153,6 @@ public class GlobalEnvironmentService {
       }
     };
     serviceRegistration = context
-        .registerService(GlobalEnvironment.class, globalEnvironment, new Hashtable<>(properties));
+        .registerService(GlobalEnvironment.class, globalEnvironment, environmentProperties);
   }
 }

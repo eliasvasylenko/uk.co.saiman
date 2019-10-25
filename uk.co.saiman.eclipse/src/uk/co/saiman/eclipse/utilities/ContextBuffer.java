@@ -29,9 +29,8 @@ package uk.co.saiman.eclipse.utilities;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
-
-import uk.co.saiman.eclipse.utilities.ContextBuffer;
 
 public class ContextBuffer {
   private final Map<String, Object> values = new HashMap<>();
@@ -68,5 +67,19 @@ public class ContextBuffer {
 
   public boolean isEmpty() {
     return values.isEmpty();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ContextBuffer)) {
+      return false;
+    }
+    var that = (ContextBuffer) obj;
+    return Objects.equals(this.values, that.values);
+  }
+
+  @Override
+  public int hashCode() {
+    return values.hashCode();
   }
 }

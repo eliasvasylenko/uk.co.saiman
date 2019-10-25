@@ -1,5 +1,5 @@
 Bundle-Name: SAI :: Instrument :: Stage :: Copley
-
+ 
 -buildpath: \
 	uk.co.saiman.mathematics;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\

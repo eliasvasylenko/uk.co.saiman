@@ -29,4 +29,8 @@ package uk.co.saiman.state;
 
 public class UnexpectedStateKindException extends RuntimeException {
   private static final long serialVersionUID = 1L;
+
+  public UnexpectedStateKindException(StateKind expected, StateKind was) {
+    super("expected " + expected + ", was " + was);
+  }
 }

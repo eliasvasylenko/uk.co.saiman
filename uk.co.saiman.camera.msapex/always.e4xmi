@@ -15,6 +15,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_UCN0QKhYEem7gZS_CxGklA" featurename="sharedElements" parentElementId="uk.co.saiman.trimmedwindow">
     <elements xsi:type="basic:Part" xmi:id="_ZISWMKhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.part" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraPart" label="%camera" closeable="true">
+      <tags>Part-Toolbar-FullSpan</tags>
       <toolbar xmi:id="_mzVw8KhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.toolbar">
         <children xsi:type="menu:HandledToolItem" xmi:id="_orflYKhYEem7gZS_CxGklA" elementId="uk.co.saiman.camera.handledtoolitem.cameradisconnect" label="%camera.disconnect" command="_Fh9FQKhXEem7gZS_CxGklA">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_rEHpoKhYEem7gZS_CxGklA" contributionURI="bundleclass://uk.co.saiman.camera.msapex/uk.co.saiman.camera.msapex.CameraConnectedExpression"/>

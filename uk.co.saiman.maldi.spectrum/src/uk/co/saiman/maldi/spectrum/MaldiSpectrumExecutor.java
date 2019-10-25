@@ -29,6 +29,10 @@ package uk.co.saiman.maldi.spectrum;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static uk.co.saiman.experiment.osgi.ExperimentServiceConstants.EXECUTOR_ID;
+import static uk.co.saiman.experiment.variables.VariableCardinality.REQUIRED;
+import static uk.co.saiman.maldi.spectrum.MaldiSpectrumConstants.SPECTRUM_ACQUISITION_COUNT;
+import static uk.co.saiman.maldi.spectrum.MaldiSpectrumConstants.SPECTRUM_EXECUTOR;
+import static uk.co.saiman.maldi.spectrum.MaldiSpectrumConstants.SPECTRUM_MASS_LIMIT;
 import static uk.co.saiman.measurement.Units.dalton;
 
 import javax.measure.Unit;
@@ -39,18 +43,19 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.spectrum.SpectrumExecutor;
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
+import uk.co.saiman.maldi.sample.SampleAreaHold;
 import uk.co.saiman.maldi.spectrum.MaldiSpectrumExecutor.MaldiSpectrumExecutorConfiguration;
-import uk.co.saiman.maldi.stage.SamplePlateSubmission;
 
 @Designate(ocd = MaldiSpectrumExecutorConfiguration.class, factory = true)
 @Component(
-    configurationPid = MaldiSpectrumExecutor.EXECUTOR_ID,
+    configurationPid = MaldiSpectrumExecutor.CONFIGURATION_PID,
     configurationPolicy = OPTIONAL,
     service = { MaldiSpectrumExecutor.class, SpectrumExecutor.class, Executor.class },
-    property = EXECUTOR_ID + "=" + MaldiSpectrumExecutor.EXECUTOR_ID)
+    property = EXECUTOR_ID + "=" + SPECTRUM_EXECUTOR)
 public class MaldiSpectrumExecutor implements SpectrumExecutor {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
@@ -58,7 +63,7 @@ public class MaldiSpectrumExecutor implements SpectrumExecutor {
       description = "The experiment executor which manages acquisition of spectra")
   public @interface MaldiSpectrumExecutorConfiguration {}
 
-  public static final String EXECUTOR_ID = "uk.co.saiman.maldi.spectrum.executor";
+  public static final String CONFIGURATION_PID = SPECTRUM_EXECUTOR + ".impl";
 
   @Override
   public Unit<Mass> getMassUnit() {
@@ -76,7 +81,14 @@ public class MaldiSpectrumExecutor implements SpectrumExecutor {
   }
 
   @Override
-  public Class<SamplePlateSubmission> samplePreparation() {
-    return SamplePlateSubmission.class;
+  public Class<SampleAreaHold> samplePreparation() {
+    return SampleAreaHold.class;
+  }
+
+  @Override
+  public void plan(PlanningContext context) {
+    context.declareVariable(SPECTRUM_MASS_LIMIT, REQUIRED);
+    context.declareVariable(SPECTRUM_ACQUISITION_COUNT, REQUIRED);
+    SpectrumExecutor.super.plan(context);
   }
 }

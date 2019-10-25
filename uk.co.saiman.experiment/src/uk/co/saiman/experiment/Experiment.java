@@ -33,8 +33,11 @@ import static uk.co.saiman.experiment.declaration.ExperimentPath.toRoot;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
@@ -42,14 +45,19 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.event.AddStepEvent;
+import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
+import uk.co.saiman.experiment.event.MoveStepEvent;
+import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
@@ -62,9 +70,19 @@ public class Experiment {
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
 
-  public Experiment(ExperimentDefinition procedure, StorageConfiguration<?> storageConfiguration) {
+  private final Supplier<GlobalEnvironment> globalEnvironment;
+
+  public Experiment(
+      ExperimentDefinition procedure,
+      StorageConfiguration<?> storageConfiguration,
+      Supplier<GlobalEnvironment> globalEnvironment) {
+    this.globalEnvironment = globalEnvironment;
     this.definition = requireNonNull(procedure);
     this.scheduler = new Scheduler(storageConfiguration);
+  }
+
+  GlobalEnvironment getGlobalEnvironment() {
+    return globalEnvironment.get();
   }
 
   public ExperimentDefinition getDefinition() {
@@ -113,9 +131,14 @@ public class Experiment {
   }
 
   public synchronized Step attach(StepDefinition stepDefinition) {
+    if (getDefinition().findSubstep(stepDefinition.id()).isPresent()) {
+      throw new ExperimentException(
+          "Experiment step already exists with id " + stepDefinition.id());
+    }
+
     boolean changed = updateDefinition(getDefinition().withSubstep(stepDefinition));
 
-    Step newStep = getIndependentStep(stepDefinition.id());
+    Step newStep = getIndependentStep(stepDefinition.id()).get();
     if (changed) {
       fireEvent(new AddStepEvent(newStep));
     }
@@ -126,21 +149,30 @@ public class Experiment {
 
   }
 
-  public Step getStep(ExperimentPath<Absolute> path) {
+  public Optional<Step> getStep(ExperimentPath<Absolute> path) {
     var reference = steps.get(path);
-    var step = reference == null ? null : reference.get();
-    if (step == null) {
-      step = new Step(this, definition.findSubstep(path).get().executor(), path.toAbsolute());
-      steps.put(path, new SoftReference<>(step));
+
+    if (reference != null) {
+      var step = reference.get();
+      if (step != null) {
+        return Optional.of(step);
+      }
     }
-    return step;
+
+    return definition
+        .findSubstep(path)
+        .map(step -> new Step(this, step.executor(), path.toAbsolute()))
+        .map(step -> {
+          steps.put(path, new SoftReference<>(step));
+          return step;
+        });
   }
 
   Optional<StepDefinition> getStepDefinition(ExperimentPath<Absolute> path) {
     return getDefinition().findSubstep(path);
   }
 
-  synchronized boolean updateStepDefinition(
+  private synchronized boolean updateStepDefinition(
       ExperimentPath<Absolute> path,
       StepDefinition stepDefinition) {
     return getDefinition()
@@ -149,11 +181,91 @@ public class Experiment {
         .orElse(false);
   }
 
-  void fireEvent(ExperimentEvent event) {
+  synchronized Step addStep(Step parent, int index, StepDefinition stepDefinition) {
+    var parentDefinition = parent.getDefinition();
+    if (parentDefinition.findSubstep(stepDefinition.id()).isPresent()) {
+      throw new ExperimentException(
+          "Experiment step already exists with id " + stepDefinition.id());
+    }
+
+    var path = parent.getPath();
+
+    updateStepDefinition(
+        path,
+        index < 0
+            ? parentDefinition.withSubstep(stepDefinition)
+            : parentDefinition.withSubstep(index, stepDefinition));
+
+    var step = parent.getDependentStep(stepDefinition.id()).get();
+
+    fireEvent(new AddStepEvent(step));
+
+    return step;
+  }
+
+  synchronized void removeStep(Step step) {
+    var path = step.getPath();
+
+    for (var stepPath : List.copyOf(steps.keySet())) {
+      if (stepPath.relativeTo(path).ancestorDepth() == 0) {
+        steps.remove(stepPath);
+      }
+    }
+
+    /*
+     * TODO remove all children in map
+     */
+    if (updateStepDefinition(path, null)) {
+      fireEvent(new RemoveStepEvent(step, path.parent().flatMap(this::getStep)));
+    }
+  }
+
+  synchronized void moveStep(Step step, ExperimentId id) {
+    var previousId = step.getId();
+    if (previousId.equals(id)) {
+      return;
+    }
+
+    var path = step.getPath();
+    var parentDefinition = path.parent().flatMap(this::getStepDefinition).get();
+    if (parentDefinition.findSubstep(id).isPresent()) {
+      throw new ExperimentException("Experiment step already exists with id " + id);
+    }
+
+    for (var stepPath : List.copyOf(steps.keySet())) {
+      var relativePath = stepPath.relativeTo(path);
+      if (relativePath.ancestorDepth() == 0) {
+        var newPath = path.parent().get().resolve(id).resolve(relativePath).get();
+        steps.put(newPath, steps.remove(stepPath));
+      }
+    }
+
+    if (updateStepDefinition(path, getStepDefinition(path).get().withId(id))) {
+      fireEvent(new MoveStepEvent(step, step.getDependencyStep(), path.id(path.depth() - 1)));
+    }
+  }
+
+  public <T> void updateStep(
+      Step step,
+      Variable<T> variable,
+      Function<? super Optional<T>, ? extends Optional<T>> value) {
+    var path = step.getPath();
+    if (updateStepDefinition(
+        path,
+        getStepDefinition(path)
+            .get()
+            .withVariables(
+                getGlobalEnvironment(),
+                variables -> variables.withOpt(variable, value)))) {
+      fireEvent(new ChangeVariableEvent(step, variable));
+    }
+  }
+
+  private void fireEvent(ExperimentEvent event) {
     events.next(event);
   }
 
-  public synchronized Step getIndependentStep(ExperimentId id) {
+  public synchronized Optional<Step> getIndependentStep(ExperimentId id) {
     return getStep(ExperimentPath.toRoot().resolve(id));
   }
 
@@ -161,6 +273,7 @@ public class Experiment {
     return definition
         .substeps()
         .map(step -> toRoot().resolve(step.id()))
-        .map(this::getStep);
+        .map(this::getStep)
+        .flatMap(Optional::stream);
   }
 }

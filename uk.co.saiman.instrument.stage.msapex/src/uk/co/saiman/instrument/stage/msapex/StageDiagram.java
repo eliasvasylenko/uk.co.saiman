@@ -28,28 +28,20 @@
 package uk.co.saiman.instrument.stage.msapex;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
-import static uk.co.saiman.fx.FxUtilities.wrap;
-import static uk.co.saiman.measurement.fx.CoordinateBindings.createCoordinateBinding;
-
-import java.util.stream.Stream;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Length;
 
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Circle;
 import uk.co.saiman.instrument.sample.Analysis;
 import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.stage.Stage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
-import uk.co.saiman.measurement.fx.XYCoordinateBinding;
 import uk.co.saiman.msapex.annotations.AnnotationLayer;
-import uk.co.saiman.msapex.annotations.ShapeAnnotation;
-import uk.co.saiman.msapex.annotations.XYAnnotation;
-import uk.co.saiman.instrument.stage.msapex.StageDiagramSampleConfiguration;
 
 /**
  * A visualization of the sample area of a stage mapped into cartesian
@@ -57,60 +49,86 @@ import uk.co.saiman.instrument.stage.msapex.StageDiagramSampleConfiguration;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the coordinate type of the stage
+ * @param <T>
+ *          the coordinate type of the stage
  */
 public abstract class StageDiagram<T> extends StackPane {
-  private final ImageView imageView = new ImageView();
+  private final Stage<T, ?> stage;
+  private final ImageView imageView;
+  private final AnnotationLayer<Length, Length> annotationLayer;
 
-  private AnnotationLayer<Length, Length> annotationLayer;
-  private XYCoordinateBinding<Length> requestedCoordinates;
-  private XYCoordinateBinding<Length> actualCoordinates;
+  private StagePositionAnnotation requestedPosition;
+  private StagePositionAnnotation actualPosition;
+  private Unit<Length> unit;
 
-  protected void initialize(Unit<Length> unit) {
+  protected StageDiagram(Stage<T, ?> stage, Unit<Length> unit) {
+    this.stage = stage;
+    this.imageView = new ImageView();
     this.annotationLayer = new AnnotationLayer<>(unit, unit);
-    Stage<T, ?> stageDevice = getStageDevice();
-
-    requestedCoordinates = stageLocationToCoordinates(
-        wrap(stageDevice.requestedSampleState().map(this::requestedStateToPosition)));
-    actualCoordinates = stageLocationToCoordinates(wrap(stageDevice.samplePosition()));
-
-    XYAnnotation<Length, Length> requestedPosition = new ShapeAnnotation<>(new Circle(4));
-    annotationLayer.getAnnotations().add(requestedPosition);
-    requestedPosition.measurementXProperty().bind(requestedCoordinates.getX());
-    requestedPosition.measurementYProperty().bind(requestedCoordinates.getY());
-
-    XYAnnotation<Length, Length> actualPosition = new ShapeAnnotation<>(new Circle(4));
-    annotationLayer.getAnnotations().add(actualPosition);
-    actualPosition.measurementXProperty().bind(actualCoordinates.getX());
-    actualPosition.measurementYProperty().bind(actualCoordinates.getY());
+    this.unit = unit;
 
     getChildren().add(imageView);
     getChildren().add(annotationLayer);
+
+    requestedPosition = new StagePositionAnnotation();
+    annotationLayer.getAnnotations().add(requestedPosition);
+    stage
+        .requestedSampleState()
+        .optionalValue()
+        .observe(o -> o.ifPresentOrElse(this::setRequestedState, this::unsetRequestedState));
+
+    actualPosition = new StagePositionAnnotation();
+    annotationLayer.getAnnotations().add(actualPosition);
+    stage
+        .samplePosition()
+        .optionalValue()
+        .observe(o -> o.ifPresentOrElse(this::setPosition, this::unsetPosition));
+
+    imageView.fitWidthProperty().bind(annotationLayer.widthProperty());
+    imageView.fitHeightProperty().bind(annotationLayer.heightProperty());
+    imageView.layoutXProperty().bind(annotationLayer.layoutXProperty());
+    imageView.layoutYProperty().bind(annotationLayer.layoutYProperty());
+    imageView.setPreserveRatio(false);
+    imageView.setManaged(false);
   }
 
-  public T requestedStateToPosition(RequestedSampleState<T> requestedState) {
+  public Unit<Length> getUnit() {
+    return unit;
+  }
+
+  public void setRequestedState(RequestedSampleState<T> requestedState) {
     if (requestedState instanceof Analysis<?>) {
-      return ((Analysis<T>) requestedState).position();
+      T position = ((Analysis<T>) requestedState).position();
+      requestedPosition.setMeasurementX(getCoordinatesAtStageLocation(position).getX());
+      requestedPosition.setMeasurementY(getCoordinatesAtStageLocation(position).getY());
+      requestedPosition.setVisible(true);
     } else {
-      return null;
+      requestedPosition.setVisible(false);
     }
   }
 
-  public XYCoordinateBinding<Length> getRequestedCoordinates() {
-    return requestedCoordinates;
+  public void unsetRequestedState() {
+    requestedPosition.setVisible(false);
   }
 
-  public XYCoordinateBinding<Length> getActualCoordinates() {
-    return actualCoordinates;
+  public void setPosition(T position) {
+    actualPosition.setMeasurementX(getCoordinatesAtStageLocation(position).getX());
+    actualPosition.setMeasurementY(getCoordinatesAtStageLocation(position).getY());
+    actualPosition.setVisible(true);
   }
 
-  public XYCoordinateBinding<Length> stageLocationToCoordinates(
+  public void unsetPosition() {
+    actualPosition.setVisible(false);
+  }
+
+  public ObjectBinding<XYCoordinate<Length>> stageLocationToCoordinates(
       ObservableValue<? extends T> location) {
-    return createCoordinateBinding(
-        createObjectBinding(() -> getCoordinatesAtStageLocation(location.getValue()), location));
+    return createObjectBinding(() -> getCoordinatesAtStageLocation(location.getValue()), location);
   }
 
-  public abstract Stage<T, ?> getStageDevice();
+  public Stage<T, ?> getStageDevice() {
+    return stage;
+  }
 
   public Image getImage() {
     return imageView.getImage();
@@ -127,6 +145,4 @@ public abstract class StageDiagram<T> extends StackPane {
   public abstract T getStageLocationAtCoordinates(XYCoordinate<Length> coordinates);
 
   public abstract XYCoordinate<Length> getCoordinatesAtStageLocation(T location);
-
-  public abstract Stream<? extends StageDiagramSampleConfiguration> getSampleConfigurations();
 }

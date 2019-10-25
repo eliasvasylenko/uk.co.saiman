@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.state;
 
+import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.state.StateKind.PROPERTY;
 
 import java.util.Objects;
@@ -35,7 +36,7 @@ public class StateProperty implements State {
   private final String value;
 
   public StateProperty(String value) {
-    this.value = value;
+    this.value = requireNonNull(value);
   }
 
   public String getValue() {
@@ -66,5 +67,10 @@ public class StateProperty implements State {
   @Override
   public int hashCode() {
     return Objects.hash(value);
-  };
+  }
+
+  @Override
+  public String toString() {
+    return value;
+  }
 }

@@ -50,7 +50,7 @@ public class PerspectiveServiceAddon {
 
       if (snippets != null) {
         for (var snippet : snippets.getSnippets()) {
-          if (snippet != null) {
+          if (snippet != null && snippet instanceof MPerspective) {
             clonePerspectiveSnippet(
                 modelService,
                 snippets,

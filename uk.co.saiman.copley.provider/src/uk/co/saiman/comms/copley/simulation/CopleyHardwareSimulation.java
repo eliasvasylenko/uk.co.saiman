@@ -75,24 +75,36 @@ import uk.co.saiman.messaging.DataReceiver;
 import uk.co.saiman.messaging.DataSender;
 
 @Designate(ocd = CopleyHardwareSimulationConfiguration.class, factory = true)
-@Component(name = CopleyHardwareSimulation.CONFIGURATION_PID, configurationPid = CopleyHardwareSimulation.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+@Component(
+    name = CopleyHardwareSimulation.CONFIGURATION_PID,
+    configurationPid = CopleyHardwareSimulation.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
 public class CopleyHardwareSimulation {
   static final String CONFIGURATION_PID = "uk.co.saiman.comms.copley.simulation";
 
   private static final double MOTOR_SPEED_UNITS_PER_MILLISECOND = 10;
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "Copley Comms Hardware Simulation Configuration", description = "A configuration for a simulation of the Copley motor control interface")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "Copley Comms Hardware Simulation Configuration",
+      description = "A configuration for a simulation of the Copley motor control interface")
   public @interface CopleyHardwareSimulationConfiguration {
-    @AttributeDefinition(name = "Serial Port", description = "The serial port for the hardware simulation")
+    @AttributeDefinition(
+        name = "Serial Port",
+        description = "The serial port for the hardware simulation")
     String port_target();
 
-    @AttributeDefinition(name = "Node Count", description = "The number of nodes for multi-drop mode dispatch, or 0 for one direct connection")
+    @AttributeDefinition(
+        name = "Node Count",
+        description = "The number of nodes for multi-drop mode dispatch, or 0 for one direct connection")
     int nodes()
 
     default 0;
 
-    @AttributeDefinition(name = "Axis Count", description = "The number of axes supported by the drive")
+    @AttributeDefinition(
+        name = "Axis Count",
+        description = "The number of axes supported by the drive")
     int axes() default 1;
   }
 
@@ -120,8 +132,7 @@ public class CopleyHardwareSimulation {
       @Reference Log log,
       @Reference ByteConverterService converters,
       @Reference(name = "response") DataSender response,
-      @Reference(name = "command") DataReceiver command)
-      throws IOException {
+      @Reference(name = "command") DataReceiver command) throws IOException {
     /*
      * services
      */

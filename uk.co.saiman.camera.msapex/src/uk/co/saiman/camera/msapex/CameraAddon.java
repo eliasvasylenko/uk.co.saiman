@@ -124,7 +124,10 @@ public class CameraAddon {
     CameraDevice currentDevice = context.get(CameraDevice.class);
 
     if (currentDevice == null) {
-      deviceIndex.highestRankedRecord(defaultCamera).tryGet().ifPresent(device -> {
+      var findDefault = ((defaultCamera == null)
+          ? deviceIndex.records().findFirst()
+          : deviceIndex.highestRankedRecord(defaultCamera).tryGet());
+      findDefault.ifPresent(device -> {
         boolean connect = defaultConnect;
         CameraSelectionHelper.selectCamera(context, device.serviceObject());
         if (connect) {

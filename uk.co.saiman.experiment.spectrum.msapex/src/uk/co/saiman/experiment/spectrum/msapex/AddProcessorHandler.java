@@ -28,23 +28,24 @@
 package uk.co.saiman.experiment.spectrum.msapex;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
 import static uk.co.saiman.fx.FxUtilities.wrap;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.fx.core.di.Service;
 
 import javafx.scene.control.ChoiceDialog;
-import uk.co.saiman.eclipse.adapter.AdaptClass;
-import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.Experiment;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
-import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
 import uk.co.saiman.properties.Localized;
@@ -54,22 +55,34 @@ public class AddProcessorHandler {
   @Inject
   private ProcessingService processingService;
 
-  @Inject
-  private IEclipseContext context;
-
   @CanExecute
-  boolean canExecute(@Optional @AdaptClass(Step.class) Processing configuration) {
-    return configuration != null;
+  boolean canExecute(
+      ExecutorService executors,
+      Experiment experiment,
+      ExperimentPath<Absolute> path) {
+    return experiment
+        .getStep(path)
+        .flatMap(step -> step.getVariable(PROCESSING_VARIABLE))
+        .isPresent();
   }
 
   @Execute
   void execute(
-      @AdaptClass(Step.class) Processing configuration,
+      ExecutorService executors,
+      Experiment experiment,
+      ExperimentPath<Absolute> path,
+      GlobalEnvironment environment,
       @Service ExperimentProperties text) {
     requestProcessorType(text.addSpectrumProcessor(), text.addSpectrumProcessorDescription())
         .ifPresent(
-            processor -> context
-                .set(Processing.class, configuration.withStep(processor.createProcessor())));
+            processor -> experiment
+                .getStep(path)
+                .ifPresent(
+                    step -> step
+                        .updateVariable(
+                            PROCESSING_VARIABLE,
+                            processing -> processing
+                                .map(p -> p.withStep(processor.createProcessor())))));
   }
 
   private java.util.Optional<ProcessingStrategy<?>> requestProcessorType(

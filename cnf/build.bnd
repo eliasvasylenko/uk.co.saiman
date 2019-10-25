@@ -10,8 +10,8 @@ javac.debug:		on
 -runee:				JavaSE-12
 
 # The following lines are a hack to force IDE plugin publishing to P2 to work
-Bundle-RequiredExecutionEnvironment: JavaSE-9
--noee: true
+#Bundle-RequiredExecutionEnvironment: JavaSE-9
+#-noee: true
 
 Git-Descriptor:		${system-allow-fail;git describe --dirty --always}
 Git-SHA:			${system-allow-fail;git rev-list -1 HEAD}

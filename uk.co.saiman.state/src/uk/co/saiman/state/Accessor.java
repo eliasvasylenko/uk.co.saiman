@@ -36,6 +36,7 @@ import static uk.co.saiman.state.StateList.toStateList;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -48,8 +49,10 @@ import java.util.stream.Stream;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of the Java object
- * @param <U> the type of the state object
+ * @param <T>
+ *          the type of the Java object
+ * @param <U>
+ *          the type of the state object
  */
 /*
  * TODO add API for creating accessors over multiple types of state, e.g. can
@@ -76,7 +79,18 @@ public interface Accessor<T, U extends State> {
     default <V> PropertyAccessor<V> map(
         Function<? super T, ? extends V> read,
         Function<? super V, ? extends T> write) {
-      return propertyAccessor(s -> read.apply(read(s)), s -> write(write.apply(s)));
+      var owner = this;
+      return new PropertyAccessor<>() {
+        @Override
+        public V read(StateProperty data) {
+          return read.apply(owner.read(data));
+        }
+
+        @Override
+        public StateProperty write(V value) {
+          return owner.write(write.apply(value));
+        }
+      };
     }
   }
 
@@ -90,7 +104,18 @@ public interface Accessor<T, U extends State> {
     default <V> MapAccessor<V> map(
         Function<? super T, ? extends V> read,
         Function<? super V, ? extends T> write) {
-      return mapAccessor(s -> read.apply(read(s)), s -> write(write.apply(s)));
+      var owner = this;
+      return new MapAccessor<>() {
+        @Override
+        public V read(StateMap data) {
+          return read.apply(owner.read(data));
+        }
+
+        @Override
+        public StateMap write(V value) {
+          return owner.write(write.apply(value));
+        }
+      };
     }
   }
 
@@ -104,60 +129,65 @@ public interface Accessor<T, U extends State> {
     default <V> ListAccessor<V> map(
         Function<? super T, ? extends V> read,
         Function<? super V, ? extends T> write) {
-      return listAccessor(s -> read.apply(read(s)), s -> write(write.apply(s)));
+      var owner = this;
+      return new ListAccessor<>() {
+        @Override
+        public V read(StateList data) {
+          return read.apply(owner.read(data));
+        }
+
+        @Override
+        public StateList write(V value) {
+          return owner.write(write.apply(value));
+        }
+      };
     }
   }
 
-  static <T> PropertyAccessor<T> propertyAccessor(
-      Function<? super StateProperty, ? extends T> read,
-      Function<? super T, ? extends StateProperty> write) {
-    return new PropertyAccessor<T>() {
+  static PropertyAccessor<StateProperty> propertyAccessor() {
+    return new PropertyAccessor<>() {
       @Override
-      public T read(StateProperty data) {
-        return read.apply(data);
+      public StateProperty read(StateProperty data) {
+        return data;
       }
 
       @Override
-      public StateProperty write(T value) {
-        return write.apply(value);
+      public StateProperty write(StateProperty value) {
+        return value;
       }
     };
   }
 
-  static <T> MapAccessor<T> mapAccessor(
-      Function<? super StateMap, ? extends T> read,
-      Function<? super T, ? extends StateMap> write) {
-    return new MapAccessor<T>() {
+  static MapAccessor<StateMap> mapAccessor() {
+    return new MapAccessor<>() {
       @Override
-      public T read(StateMap data) {
-        return read.apply(data);
+      public StateMap read(StateMap data) {
+        return data;
       }
 
       @Override
-      public StateMap write(T value) {
-        return write.apply(value);
+      public StateMap write(StateMap value) {
+        return value;
       }
     };
   }
 
-  static <T> ListAccessor<T> listAccessor(
-      Function<? super StateList, ? extends T> read,
-      Function<? super T, ? extends StateList> write) {
-    return new ListAccessor<T>() {
+  static <T> ListAccessor<StateList> listAccessor() {
+    return new ListAccessor<>() {
       @Override
-      public T read(StateList data) {
-        return read.apply(data);
+      public StateList read(StateList data) {
+        return data;
       }
 
       @Override
-      public StateList write(T value) {
-        return write.apply(value);
+      public StateList write(StateList value) {
+        return value;
       }
     };
   }
 
   static PropertyAccessor<String> stringAccessor() {
-    return propertyAccessor(StateProperty::getValue, StateProperty::new);
+    return propertyAccessor().map(StateProperty::getValue, StateProperty::new);
   }
 
   static PropertyAccessor<Integer> intAccessor() {
@@ -182,9 +212,10 @@ public interface Accessor<T, U extends State> {
 
   @SuppressWarnings("unchecked")
   default ListAccessor<Stream<T>> toStreamAccessor() {
-    return listAccessor(
-        s -> s.stream().map(e -> read((U) e)),
-        a -> a.map(e -> write(e)).collect(toStateList()));
+    return listAccessor()
+        .map(
+            s -> s.stream().map(e -> read((U) e)),
+            a -> a.map(e -> write(e)).collect(toStateList()));
   }
 
   default ListAccessor<T[]> toArrayAccessor(IntFunction<T[]> newArray) {
@@ -197,5 +228,15 @@ public interface Accessor<T, U extends State> {
 
   default ListAccessor<Set<T>> toSetAccessor() {
     return toStreamAccessor().map(s -> s.collect(toSet()), Set::stream);
+  }
+
+  @SuppressWarnings("unchecked")
+  default MapAccessor<Optional<T>> toOptionalAccessor() {
+    return mapAccessor()
+        .map(
+            s -> s.getOptional("value").map(v -> read((U) v.as(getKind()))),
+            o -> o
+                .map(v -> StateMap.empty().with("value", write(v)))
+                .orElseGet(() -> StateMap.empty()));
   }
 }

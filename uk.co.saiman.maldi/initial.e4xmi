@@ -25,6 +25,7 @@
           </children>
         </children>
       </children>
+      <children xsi:type="advanced:Area" xmi:id="_XhbfMMV6EemgYLu2XBhibQ" elementId="uk.co.saiman.maldi.area.snippets" toBeRendered="false" visible="false"/>
     </elements>
   </fragments>
 </fragment:ModelFragments>

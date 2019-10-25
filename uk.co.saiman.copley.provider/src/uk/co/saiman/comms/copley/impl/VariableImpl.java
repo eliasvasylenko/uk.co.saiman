@@ -32,9 +32,6 @@ import static uk.co.saiman.comms.copley.CopleyOperationID.COPY_VARIABLE;
 import static uk.co.saiman.comms.copley.CopleyOperationID.GET_VARIABLE;
 import static uk.co.saiman.comms.copley.CopleyOperationID.SET_VARIABLE;
 
-import java.nio.ByteBuffer;
-
-import uk.co.saiman.bytes.ByteBuffers;
 import uk.co.saiman.comms.copley.CopleyVariableID;
 import uk.co.saiman.comms.copley.Variable;
 import uk.co.saiman.comms.copley.VariableBank;

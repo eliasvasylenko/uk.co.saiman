@@ -6,8 +6,7 @@
 	"uk.co.saiman.simulation.instrument.acquisition~maldisimulation": {
 		"acquisitionResolution": "2.5E-7s",
 		"detector.target": "(service.pid=uk.co.saiman.simulation.adc~maldisimulation)",
-		"provision-id": "uk.co.saiman.maldi.acquisition.device.provision",
-		"environment-id": "maldisimulation"
+		"environment.filter": "(service.pid=uk.co.saiman.experiment.environment.global~maldisimulation)"
 	},
 	"uk.co.saiman.simulation.samplesource.xystage~maldisimulation": {
 		"cameraResolutionWidth": 320,

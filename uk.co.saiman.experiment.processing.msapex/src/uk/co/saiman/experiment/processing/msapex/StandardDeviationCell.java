@@ -29,7 +29,6 @@ package uk.co.saiman.experiment.processing.msapex;
 
 import static uk.co.saiman.experiment.msapex.ExperimentStepCell.SUPPLEMENTAL_PSEUDO_CLASS;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -38,6 +37,8 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.data.function.processing.GaussianSmooth;
+import uk.co.saiman.eclipse.model.ui.MCell;
+import uk.co.saiman.eclipse.ui.ToBeRendered;
 import uk.co.saiman.eclipse.ui.fx.EditableCellText;
 
 public class StandardDeviationCell {
@@ -46,11 +47,15 @@ public class StandardDeviationCell {
   @Inject
   IEclipseContext context;
 
-  @Optional
-  @PostConstruct
-  public void prepare(HBox node, GaussianSmooth entry) {
+  @Inject
+  public StandardDeviationCell(MCell cell, HBox node) {
     node.getChildren().add(editor);
     editor.getLabel().pseudoClassStateChanged(SUPPLEMENTAL_PSEUDO_CLASS, true);
+  }
+
+  @ToBeRendered
+  public static boolean render(@Optional GaussianSmooth entry) {
+    return entry != null;
   }
 
   @Optional

@@ -37,7 +37,7 @@ import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 
 public class ProcessorCell {
-  public static final String ID = "uk.co.saiman.experiment.processing.msapex.cell.processor";
+  public static final String ID = "uk.co.saiman.experiment.processing.cell.processor";
 
   @Inject
   private IEclipseContext context;
@@ -49,6 +49,36 @@ public class ProcessorCell {
   public void prepare() {
     EclipseContextUtilities.injectSubtypes(context, DataProcessor.class);
   }
+
+  /*
+   * 
+   * 
+   * 
+   * 
+   * TODO Should use a similar system to adding child steps. Each processor should
+   * have its own menu item snippet and the context menu can scrape the model to
+   * collect them all. That way if any special UI needs to be presented it will be
+   * straightforward, with total flexibility. It also means localization is taken
+   * care of.
+   * 
+   * Problem with this (same as with the experiment step adding system) there is
+   * no good way to carry the icon selection forward to the cell renderer.
+   * 
+   * 
+   * 
+   * 
+   * TODO the "eclipse e4 way" to solve this might be to add custom annotations to
+   * execute on the "object" of the model item to identify which processors they
+   * can apply to e.g.
+   * 
+   * @CanApply boolean appliesTo(DataProcessor p) { return p instanceof
+   * GaussianProcessor; }
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
 
   @Inject
   public void inject(DataProcessor entry) {

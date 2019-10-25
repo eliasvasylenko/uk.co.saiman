@@ -29,23 +29,23 @@ package uk.co.saiman.instrument.stage.msapex;
 
 import static uk.co.saiman.measurement.Units.metre;
 
+import javax.measure.Unit;
 import javax.measure.quantity.Length;
 
 import javafx.geometry.BoundingBox;
 import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
-import uk.co.saiman.instrument.stage.msapex.StageDiagram;
 
 public abstract class XYStageDiagram extends StageDiagram<XYCoordinate<Length>> {
-  @Override
-  public abstract XYStage<?> getStageDevice();
+  public XYStageDiagram(XYStage<?> stage) {
+    this(stage, metre().micro().getUnit());
+  }
 
-  protected void initialize() {
-    XYStage<?> stageDevice = getStageDevice();
-    initialize(metre().micro().getUnit());
+  public XYStageDiagram(XYStage<?> stage, Unit<Length> unit) {
+    super(stage, unit);
 
-    XYCoordinate<Length> lower = getCoordinatesAtStageLocation(stageDevice.getLowerBound());
-    XYCoordinate<Length> upper = getCoordinatesAtStageLocation(stageDevice.getUpperBound());
+    XYCoordinate<Length> lower = getCoordinatesAtStageLocation(stage.getLowerBound()).to(unit);
+    XYCoordinate<Length> upper = getCoordinatesAtStageLocation(stage.getUpperBound()).to(unit);
 
     getAnnotationLayer()
         .setMeasurementBounds(
@@ -54,6 +54,11 @@ public abstract class XYStageDiagram extends StageDiagram<XYCoordinate<Length>> 
                 lower.getY().getValue().doubleValue(),
                 upper.getX().getValue().doubleValue() - lower.getX().getValue().doubleValue(),
                 upper.getY().getValue().doubleValue() - lower.getY().getValue().doubleValue()));
+  }
+
+  @Override
+  public XYStage<?> getStageDevice() {
+    return (XYStage<?>) super.getStageDevice();
   }
 
   @Override

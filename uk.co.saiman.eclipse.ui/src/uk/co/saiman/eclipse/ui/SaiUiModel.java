@@ -27,30 +27,35 @@
  */
 package uk.co.saiman.eclipse.ui;
 
-import org.eclipse.e4.ui.model.application.ui.MContext;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-
 public class SaiUiModel {
   private SaiUiModel() {}
 
-  /**
-   * The primary context key for a {@link MUIElement UI element}, to be set on the
-   * {@link MContext#getProperties() context properties} of the element. If the
-   * primary key is not present in the context of the element then the element may
-   * be {@link #HIDE_ON_NULL automatically hidden} or
-   * {@link EPartService#REMOVE_ON_HIDE_TAG removed}.
-   * <p>
-   * The primary key may also be used by other services which expect to be have a
-   * value associated with a UI element, e.g. for copy and paste or drag and drop
-   * transfers.
-   */
-  public static final String PRIMARY_CONTEXT_KEY = "primaryContextKey";
-  public static final String NULLABLE = "nullable";
-  public static final String HIDE_ON_NULL = "hideOnNull";
+  public static final String EAGER_INIT = "eagerInitialization";
 
   public static final String TRANSFER_MEDIA_TYPE = "transferMediaType";
   public static final String TRANSFER_FORMAT = "transferFormat";
 
   public static final String EDIT_CANCELED = "editCancelled";
+
+  /*
+   * TODO alternative to our "primaryContextKey" system, which is kinda arcane.
+   * Better to express the concept in code rather than some magic tags & context
+   * values on the model items!
+   * 
+   * TODO Explore whether drag and drop can be done in a similar way, as that is
+   * also done with primaryContextKey currently! I expect it can. Much simpler and
+   * better.
+   * 
+   * @StartDrag returns the draggable item
+   * 
+   * @DropOver @DropBefore @DropAfter perform the appropriate actions. Fantastic!
+   * Way better than the awkward TransferCellHandler shit.
+   * 
+   * TODO can we replace the ChildrenService in the same way? A specially
+   * annotated method simply returns a list of objects. Is automatically
+   * reinjected any time one of the things it was injected with changes.
+   * 
+   * @GenerageChildren("id.of.child.node")
+   * 
+   */
 }

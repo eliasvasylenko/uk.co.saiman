@@ -75,6 +75,6 @@ public class Instruction {
   }
 
   public ExperimentId id() {
-    return path().id(0);
+    return path().ids().reduce((a, b) -> b).get();
   }
 }

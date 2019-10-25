@@ -1,17 +1,30 @@
 package uk.co.saiman.maldi.stage.msapex;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.di.annotations.Optional;
 
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
-import uk.co.saiman.maldi.stage.SampleAreaStage;
-import uk.co.saiman.maldi.stage.SamplePlateStage;
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.variables.Variables;
 
 public class MaldiStagePart {
-  @PostConstruct
-  void initialize(
-      BorderPane container,
-      SamplePlateStage samplePlateStage,
-      SampleAreaStage sampleAreaStage,
-      DevicePresentationService devicePresentation) {}
+  @Inject
+  private BorderPane container;
+
+  @Inject
+  void setSamplePlate(@Optional SamplePlatePresenter presenter) {
+    if (presenter != null) {
+      container.setCenter(presenter.getWidget());
+    } else {
+      container.setCenter(null);
+    }
+  }
+  
+  @Inject
+  void setStep(@Optional Step step, @Optional Variables variables) {
+    if (step != null) {
+      
+    }
+  }
 }

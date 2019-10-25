@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.measurement.scalar;
 
+import java.util.Objects;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
@@ -98,7 +100,7 @@ public class Scalar<T extends Quantity<T>> implements Quantity<T>, Comparable<Qu
   public Scalar<T> to(Unit<T> unit) {
     return unit.equals(getUnit())
         ? this
-        : new Scalar<>(unit, getUnit().getConverterTo(unit).convert(getValue()).doubleValue());
+        : new Scalar<>(unit, getUnit().getConverterTo(unit).convert(getValue()));
   }
 
   @SuppressWarnings("unchecked")
@@ -142,5 +144,19 @@ public class Scalar<T extends Quantity<T>> implements Quantity<T>, Comparable<Qu
   @Override
   public String toString() {
     return amount + " " + unit;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Scalar<?>)) {
+      return false;
+    }
+    var that = (Scalar<?>) obj;
+    return this.unit.equals(that.unit) && this.amount == that.amount;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(amount, unit);
   }
 }

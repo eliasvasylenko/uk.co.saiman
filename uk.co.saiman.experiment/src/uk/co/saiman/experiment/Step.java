@@ -27,10 +27,13 @@
  */
 package uk.co.saiman.experiment;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
@@ -40,8 +43,7 @@ import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.event.AddStepEvent;
-import uk.co.saiman.experiment.event.ChangeVariableEvent;
+import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
@@ -62,6 +64,7 @@ public class Step {
   private final Executor executor;
   private ExperimentPath<Absolute> path;
   private boolean scheduled;
+  private boolean detached;
 
   Step(Experiment experiment, Executor conductor, ExperimentPath<Absolute> path) {
     this.experiment = experiment;
@@ -73,9 +76,8 @@ public class Step {
    * Environment
    */
 
-  private GlobalEnvironment getStaticEnvironment() {
-    // TODO Auto-generated method stub
-    return null;
+  private GlobalEnvironment getGlobalEnvironment() {
+    return experiment.getGlobalEnvironment();
   }
 
   /**
@@ -102,37 +104,41 @@ public class Step {
   }
 
   public StepDefinition getDefinition() {
-    synchronized (experiment) {
-      return experiment.getStepDefinition(path).get();
-    }
+    return lock(() -> experiment.getStepDefinition(path).get());
   }
 
   public ExperimentId getId() {
-    return getDefinition().id();
+    return path.id(path.depth() - 1);
+  }
+
+  public void setId(ExperimentId id) {
+    lock(() -> {
+      experiment.moveStep(this, id);
+    });
   }
 
   public Executor getExecutor() {
     return executor;
   }
 
+  public Variables getVariables() {
+    return lock(() -> getDefinition().variables(getGlobalEnvironment()));
+  }
+
   public <T> Optional<T> getVariable(Variable<T> variable) {
     return getVariables().get(variable);
   }
 
-  public <T> void setVariable(
+  public <T> void setVariable(Variable<T> variable, T value) {
+    updateVariable(variable, previous -> Optional.ofNullable(value));
+  }
+
+  public <T> void updateVariable(
       Variable<T> variable,
-      Function<? super Optional<T>, ? extends T> value) {
-    synchronized (experiment) {
-      if (experiment
-          .updateStepDefinition(
-              path,
-              getDefinition()
-                  .withVariables(
-                      getStaticEnvironment(),
-                      variables -> variables.with(variable, value)))) {
-        experiment.fireEvent(new ChangeVariableEvent(this, variable));
-      }
-    }
+      Function<? super Optional<T>, ? extends Optional<T>> value) {
+    lock(() -> {
+      experiment.updateStep(this, variable, value);
+    });
   }
 
   /*
@@ -140,22 +146,40 @@ public class Step {
    */
 
   public Optional<Step> getDependencyStep() {
-    synchronized (experiment) {
-      return path
-          .parent()
-          .filter(path -> !path.isEmpty())
-          .map(parentPath -> getExperiment().getStep(parentPath));
-    }
+    return lock(
+        () -> path
+            .parent()
+            .filter(path -> !path.isEmpty())
+            .flatMap(parentPath -> getExperiment().getStep(parentPath)));
   }
 
-  public synchronized Step getDependentStep(ExperimentId id) {
-    synchronized (experiment) {
-      return experiment.getStep(path.resolve(id));
-    }
+  public Optional<Step> getDependentStep(ExperimentId id) {
+    return lock(() -> experiment.getStep(path.resolve(id)));
   }
 
   public Experiment getExperiment() {
     return experiment;
+  }
+
+  protected void lock(Runnable action) {
+    lock(() -> {
+      action.run();
+      return null;
+    });
+  }
+
+  protected <T> T lock(Supplier<T> action) {
+    assertAttached();
+    synchronized (experiment) {
+      assertAttached();
+      return action.get();
+    }
+  }
+
+  private void assertAttached() {
+    if (detached) {
+      throw new ExperimentException("Experiment step is detached from experiment " + path);
+    }
   }
 
   public Step attach(StepDefinition template) {
@@ -163,28 +187,16 @@ public class Step {
   }
 
   public Step attach(int index, StepDefinition stepDefinition) {
-    synchronized (experiment) {
-      boolean changed = experiment
-          .updateStepDefinition(
-              path,
-              index < 0
-                  ? getDefinition().withSubstep(stepDefinition)
-                  : getDefinition().withSubstep(index, stepDefinition));
-
-      Step newStep = getDependentStep(stepDefinition.id());
-      if (changed) {
-        experiment.fireEvent(new AddStepEvent(newStep));
-      }
-      return newStep;
-    }
+    return lock(() -> {
+      return experiment.addStep(this, index, stepDefinition);
+    });
   }
 
   public void detach() {
-    synchronized (experiment) {
-
-      // TODO
-
-    }
+    lock(() -> {
+      detached = true;
+      experiment.removeStep(this);
+    });
   }
 
   public ExperimentPath<Absolute> getPath() {
@@ -203,23 +215,65 @@ public class Step {
     throw new UnsupportedOperationException();
   }
 
-  public Stream<? extends Step> getDependentSteps() {
-    synchronized (experiment) {
+  public Stream<Step> getDependentSteps() {
+    return lock(() -> {
       return getDefinition()
           .substeps()
           .map(step -> path.resolve(step.id()))
-          .map(experiment::getStep);
-    }
+          .map(experiment::getStep)
+          .flatMap(Optional::stream)
+          .collect(toList()); // call the terminal op while we're still in the lock
+    }).stream();
   }
 
   public boolean isDetached() {
     return false;
   }
 
-  public Variables getVariables() {
-    synchronized (experiment) {
-      return getDefinition().variables(getStaticEnvironment());
-    }
+  public Stream<Class<?>> getObservations() {
+    List<Class<?>> observations = new ArrayList<>();
+
+    var variables = getVariables();
+    getExecutor().plan(new NoOpPlanningContext() {
+      @Override
+      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
+        return variables.get(declaration.variable());
+      }
+
+      @Override
+      public void observesResult(Class<?> production) {
+        observations.add(production);
+      }
+    });
+
+    return observations.stream();
+  }
+
+  public boolean prepares(Class<?> type) {
+    return getPreparations().anyMatch(type::equals);
+  }
+
+  public boolean observes(Class<?> type) {
+    return getObservations().anyMatch(type::equals);
+  }
+
+  public Stream<Class<?>> getPreparations() {
+    List<Class<?>> preparations = new ArrayList<>();
+
+    var variables = getVariables();
+    getExecutor().plan(new NoOpPlanningContext() {
+      @Override
+      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
+        return variables.get(declaration.variable());
+      }
+
+      @Override
+      public void preparesCondition(Class<?> type, Evaluation evaluation) {
+        preparations.add(type);
+      }
+    });
+
+    return preparations.stream();
   }
 
   public Stream<VariableDeclaration<?>> getVariableDeclarations() {
@@ -229,7 +283,7 @@ public class Step {
     getExecutor().plan(new NoOpPlanningContext() {
       @Override
       public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
-        declareVariable(declaration);
+        declarations.add(declaration);
         return variables.get(declaration.variable());
       }
     });
@@ -238,13 +292,22 @@ public class Step {
   }
 
   public Stream<? extends Result<?>> getResults() {
-    synchronized (experiment) {
+    return lock(() -> {
       var output = experiment.getResults();
-      return output.resultPaths(path).map(output::resolveResult);
-    }
+      return output.resultPaths(path).map(output::resolveResult).collect(toList());
+      // call the terminal op while we're still in the lock
+    }).stream();
   }
 
   public Instruction getInstruction() {
     return new Instruction(path, getDefinition().variableMap(), getExecutor());
+  }
+
+  public int getIndex() {
+    return (int) getDependencyStep()
+        .map(Step::getDependentSteps)
+        .orElseGet(experiment::getIndependentSteps)
+        .takeWhile(s -> s != this)
+        .count();
   }
 }

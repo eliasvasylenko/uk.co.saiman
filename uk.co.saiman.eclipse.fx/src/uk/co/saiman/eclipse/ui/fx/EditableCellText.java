@@ -52,23 +52,26 @@ public class EditableCellText extends StackPane {
   private final TextField field = new TextField();
   private Predicate<String> update;
 
-  @Inject
-  MEditableCell cell;
-
   public EditableCellText() {
     StackPane.setAlignment(label, Pos.CENTER_LEFT);
     getChildren().add(label);
     getChildren().add(field);
-    field.setOnAction(event -> {
-      cell.setEditing(false);
-      event.consume();
-    });
   }
 
+  @Optional
   @Inject
-  public void editing(@Optional @UIEventTopic(SaiUiEvents.EditableCell.TOPIC_EDITING) Event event) {
+  public void editing(
+      MEditableCell cell,
+      @Optional @UIEventTopic(SaiUiEvents.EditableCell.TOPIC_EDITING) Event event) {
     if (event != null && event.getProperty(UIEvents.EventTags.ELEMENT) != cell) {
       return;
+    }
+
+    if (cell.isEditing()) {
+      field.setOnAction(e -> {
+        cell.setEditing(false);
+        e.consume();
+      });
     }
 
     label.setVisible(!cell.isEditing());
@@ -112,8 +115,19 @@ public class EditableCellText extends StackPane {
     };
   }
 
-  public void setTryUpdate(Predicate<String> update) {
+  public void setConditionalUpdate(Predicate<String> update) {
     this.update = update;
+  }
+
+  public void setTryUpdate(Consumer<String> update) {
+    this.update = name -> {
+      try {
+        update.accept(name);
+      } catch (Exception e) {
+        return false;
+      }
+      return true;
+    };
   }
 
   public Label getLabel() {

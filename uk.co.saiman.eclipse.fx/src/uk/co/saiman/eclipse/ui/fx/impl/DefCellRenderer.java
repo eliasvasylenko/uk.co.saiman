@@ -171,8 +171,11 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
 
     @Override
     protected Pane createWidget() {
-      Pane node = CustomContainerSupport.createContainerPane(this.logger, context);
-      node = node == null ? new HBox() : node;
+      Pane pane = CustomContainerSupport.createContainerPane(this.logger, context);
+      if (pane == null) {
+        pane = new HBox();
+      }
+      Pane node = pane;
 
       Label label = new Label();
       label.setId(TreeService.TEXT_ID);
@@ -193,7 +196,7 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       });
 
       node.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-        showContextMenu(event.getScreenX(), event.getScreenY());
+        showContextMenu(node, event.getScreenX(), event.getScreenY());
         event.consume();
       });
       node.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
@@ -290,9 +293,9 @@ public class DefCellRenderer extends BaseCellRenderer<Pane> {
       popupMenu.addEventHandler(KeyEvent.ANY, Event::consume);
     }
 
-    private void showContextMenu(double screenX, double screenY) {
+    private void showContextMenu(Pane node, double screenX, double screenY) {
       if (popupMenu != null) {
-        popupMenu.show(getWidget(), screenX, screenY);
+        popupMenu.show(node, screenX, screenY);
       }
     }
 

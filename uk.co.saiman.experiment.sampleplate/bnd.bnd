@@ -1,0 +1,25 @@
+Bundle-Name: SAI :: Experiment :: Sample Plate
+
+Export-Package: uk.co.saiman.experiment.sampleplate
+
+-buildpath:\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+	uk.co.saiman.measurement.coordinates;version=snapshot,\
+	uk.co.saiman.reflection;version=snapshot,\
+	uk.co.saiman.reflection.token;version=snapshot,\
+\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
+	uk.co.saiman.experiment.osgi;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.instrument.raster;version=snapshot,\
+	uk.co.saiman.instrument.sample;version=snapshot,\
+	uk.co.saiman.instrument.stage;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.state;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+\
+	javax.measure.unit-api

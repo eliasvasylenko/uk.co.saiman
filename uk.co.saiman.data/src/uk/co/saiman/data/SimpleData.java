@@ -28,10 +28,11 @@
 package uk.co.saiman.data;
 
 import static java.util.Objects.requireNonNull;
+import static uk.co.saiman.bytes.Channels.transfer;
+import static uk.co.saiman.bytes.TransferBuffer.openBuffer;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.Objects;
 
 import uk.co.saiman.data.format.DataFormat;
@@ -104,8 +105,16 @@ public class SimpleData<T> implements Data<T> {
         } catch (IOException e) {
           throw new DataException("Failed to create data", e);
         }
-        try (WritableByteChannel writeChannel = resource.write()) {
-          format.save(writeChannel, new Payload<>(value));
+        try {
+          var buffer = openBuffer();
+          try (var writeToBuffer = buffer.openWritableChannel();
+              var readFromBuffer = buffer.openReadableChannel()) {
+            format.save(writeToBuffer, new Payload<>(value));
+            /*
+             * Write to a buffer first so we don't nuke the resource if our save fails.
+             */
+            transfer(readFromBuffer, resource.write());
+          }
         } catch (IOException e) {
           var failed = new DataException("Failed to write data", e);
           try {

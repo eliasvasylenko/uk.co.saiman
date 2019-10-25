@@ -24,9 +24,10 @@ public final class ProcessingAccess {
   }
 
   public static MapAccessor<DataProcessor> processorAccessor(ProcessingService service) {
-    return mapAccessor(
-        state -> processorFromState(service, state),
-        processor -> processorToState(service, processor));
+    return mapAccessor()
+        .map(
+            state -> processorFromState(service, state),
+            processor -> processorToState(service, processor));
   }
 
   private static DataProcessor processorFromState(ProcessingService service, StateMap state) {

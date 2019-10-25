@@ -4,7 +4,6 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_jmBBQLvzEei0KbRa7VpFDA" featurename="snippets" parentElementId="uk.co.saiman.application.msapex">
     <elements xsi:type="saiman.ui:Cell" xmi:id="_o5Y_YLvzEei0KbRa7VpFDA" label="Processor" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/gear-small.png" elementId="uk.co.saiman.experiment.processing.cell.processor" contributionURI="bundleclass://uk.co.saiman.experiment.processing.msapex/uk.co.saiman.experiment.processing.msapex.ProcessorCell">
       <children xsi:type="saiman.ui:EditableCell" xmi:id="_I5vEUMCzEei5uP7Co-v20Q" label="Standard Deviation" elementId="uk.co.saiman.experiment.processing.editablecell.gaussiansmooth.standarddeviation" contributionURI="bundleclass://uk.co.saiman.experiment.processing.msapex/uk.co.saiman.experiment.processing.msapex.StandardDeviationCell">
-        <properties key="primaryContextKey" value="uk.co.saiman.data.function.processing.GaussianSmooth"/>
         <tags>removeOnHide</tags>
         <tags>hideOnNull</tags>
       </children>

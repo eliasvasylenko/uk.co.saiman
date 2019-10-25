@@ -31,8 +31,6 @@ import static uk.co.saiman.state.StateKind.LIST;
 import static uk.co.saiman.state.StateKind.MAP;
 import static uk.co.saiman.state.StateKind.PROPERTY;
 
-import java.util.Optional;
-
 /**
  * An immutable piece of data which can easily be transformed according to
  * {@link Accessor type-safe accessors}.
@@ -42,42 +40,22 @@ import java.util.Optional;
 public interface State {
   StateKind getKind();
 
-  @SuppressWarnings("unchecked")
-  default <T, U extends State> Optional<T> tryGet(Accessor<T, U> accessor) {
-    return getKind() == accessor.getKind()
-        ? Optional.of(accessor.read((U) this))
-        : Optional.empty();
-  }
-
-  /*
-   * TODO with amber generic enums, refactor to only need #as method.
-   */
-
   default State as(StateKind kind) {
     if (getKind() != kind) {
-      throw new UnexpectedStateKindException();
+      throw new UnexpectedStateKindException(kind, getKind());
     }
     return this;
   }
 
   default StateProperty asProperty() {
-    if (getKind() != PROPERTY) {
-      throw new UnexpectedStateKindException();
-    }
-    return (StateProperty) this;
+    return (StateProperty) as(PROPERTY);
   }
 
   default StateMap asMap() {
-    if (getKind() != MAP) {
-      throw new UnexpectedStateKindException();
-    }
-    return (StateMap) this;
+    return (StateMap) as(MAP);
   }
 
   default StateList asList() {
-    if (getKind() != LIST) {
-      throw new UnexpectedStateKindException();
-    }
-    return (StateList) this;
+    return (StateList) as(LIST);
   }
 }

@@ -64,11 +64,17 @@ import uk.co.saiman.webmodule.WebModule;
 
 @RequireHttpWhiteboard
 @Designate(ocd = WebModuleServlet.ModuleServerConfiguration.class, factory = true)
-@Component(service = Servlet.class, immediate = true, configurationPid = WebModuleServlet.CONFIGURATION_PID, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(
+    service = Servlet.class,
+    immediate = true,
+    configurationPid = WebModuleServlet.CONFIGURATION_PID,
+    configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class WebModuleServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
 
-  @ObjectClassDefinition(name = "Module Server Configuration", description = "The module server provides OSGi powered dependency management for javascript modules")
+  @ObjectClassDefinition(
+      name = "Module Server Configuration",
+      description = "The module server provides OSGi powered dependency management for javascript modules")
   public @interface ModuleServerConfiguration {
     @AttributeDefinition(name = "Servlet pattern")
     String osgi_http_whiteboard_servlet_pattern() default "/"
@@ -83,6 +89,7 @@ public class WebModuleServlet extends HttpServlet {
   @Reference
   private Log log;
 
+  private Map<ServiceReference<?>, WebModule> loadedModules = new HashMap<>();
   private Map<PackageId, Map<Version, NavigableSet<ServiceReference<WebModule>>>> modules = new HashMap<>();
 
   @Activate
@@ -96,8 +103,9 @@ public class WebModuleServlet extends HttpServlet {
 
   @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
   synchronized void register(ServiceReference<WebModule> registration) {
-    WebModule module = registration.getBundle().getBundleContext().getService(registration);
+    WebModule module = context.getService(registration);
     synchronized (modules) {
+      loadedModules.put(registration, module);
       modules
           .computeIfAbsent(module.id(), id -> new HashMap<>())
           .computeIfAbsent(module.version(), version -> new TreeSet<>())
@@ -106,8 +114,9 @@ public class WebModuleServlet extends HttpServlet {
   }
 
   synchronized void unregister(ServiceReference<WebModule> registration) {
-    WebModule module = registration.getBundle().getBundleContext().getService(registration);
     synchronized (modules) {
+      WebModule module = loadedModules.remove(registration);
+
       Map<Version, NavigableSet<ServiceReference<WebModule>>> versions = modules.get(module.id());
       Set<ServiceReference<WebModule>> references = versions.get(module.version());
       if (references.remove(registration)) {
@@ -117,6 +126,7 @@ public class WebModuleServlet extends HttpServlet {
         }
       }
     }
+    context.ungetService(registration);
   }
 
   @Override
@@ -162,8 +172,7 @@ public class WebModuleServlet extends HttpServlet {
       HttpServletRequest request,
       HttpServletResponse response,
       String bundleName,
-      String bundleVersion)
-      throws IOException {
+      String bundleVersion) throws IOException {
     Bundle bundle = getBundle(bundleName, bundleVersion);
 
     if (bundle == null) {
@@ -174,6 +183,8 @@ public class WebModuleServlet extends HttpServlet {
     BundleImportMap configuration = new BundleImportMap(bundle, request.getServletPath());
 
     configuration.writeImportMap(response.getOutputStream());
+    
+    configuration.close();
   }
 
   private void writeResource(HttpServletResponse response, String resource) throws IOException {
@@ -206,8 +217,7 @@ public class WebModuleServlet extends HttpServlet {
       HttpServletResponse response,
       String moduleName,
       String moduleVersion,
-      String resource)
-      throws IOException {
+      String resource) throws IOException {
     moduleName = URLDecoder.decode(moduleName, "UTF-8");
 
     WebModule module;
@@ -218,7 +228,8 @@ public class WebModuleServlet extends HttpServlet {
             .get(Version.parseVersion(moduleVersion))
             .descendingIterator()
             .next();
-        module = registration.getBundle().getBundleContext().getService(registration);
+
+        module = loadedModules.get(registration);
       } catch (NullPointerException e) {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;

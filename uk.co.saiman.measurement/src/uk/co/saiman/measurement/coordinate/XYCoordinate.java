@@ -40,7 +40,8 @@ import uk.co.saiman.measurement.scalar.Scalar;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of unit of the axes
+ * @param <T>
+ *          the type of unit of the axes
  */
 public class XYCoordinate<T extends Quantity<T>> {
   private final Quantity<T> x;
@@ -111,6 +112,14 @@ public class XYCoordinate<T extends Quantity<T>> {
 
   public double getYValue() {
     return y.getValue().doubleValue();
+  }
+
+  public Quantity<T> getLength() {
+    var unit = x.getUnit();
+    var x = this.x.to(unit).getValue().doubleValue();
+    var y = this.y.to(unit).getValue().doubleValue();
+
+    return new Scalar<>(unit, Math.sqrt(x * x + y * y));
   }
 
   public XYCoordinate<T> to(Unit<T> unit) {

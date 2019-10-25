@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_u8zT8KhvEem7gZS_CxGklA">
-  <imports xsi:type="basic:Part" xmi:id="_wLiigKhwEem7gZS_CxGklA" elementId="uk.co.saiman.maldi.stage.part"/>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_JOMHoKhxEem7gZS_CxGklA" featurename="children" parentElementId="uk.co.saiman.maldi.partstack.status">
-    <elements xsi:type="advanced:Placeholder" xmi:id="_NJ9ZoKhxEem7gZS_CxGklA" elementId="uk.co.saiman.maldi.stage.placeholder" ref="_wLiigKhwEem7gZS_CxGklA" closeable="true"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_7RCoIJy7EemfBqNGW7FeDQ">
+  <imports xsi:type="basic:Part" xmi:id="_xJL9gMVvEemgYLu2XBhibQ" elementId="uk.co.saiman.maldi.stage.part"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_SCVGkMToEem9S4y7HZD3iQ" featurename="children" parentElementId="uk.co.saiman.maldi.partstack.status">
+    <elements xsi:type="advanced:Placeholder" xmi:id="_SCVGkcToEem9S4y7HZD3iQ" elementId="uk.co.saiman.maldi.stage.placeholder" ref="_xJL9gMVvEemgYLu2XBhibQ" closeable="true"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_dBLxAKhxEem7gZS_CxGklA" featurename="addons" parentElementId="uk.co.saiman.application.msapex">
-    <elements xsi:type="application:Addon" xmi:id="_fUPYwKhxEem7gZS_CxGklA" elementId="uk.co.saiman.maldi.stage.addon" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.MaldiStageAddon"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_aZnLAMigEemgYLu2XBhibQ" featurename="addons" parentElementId="uk.co.saiman.application.msapex">
+    <elements xsi:type="application:Addon" xmi:id="_bSpEwMigEemgYLu2XBhibQ" elementId="uk.co.saiman.maldi.stage.addon" contributionURI="bundleclass://uk.co.saiman.maldi.stage/uk.co.saiman.maldi.stage.msapex.MaldiStageAddon"/>
   </fragments>
 </fragment:ModelFragments>

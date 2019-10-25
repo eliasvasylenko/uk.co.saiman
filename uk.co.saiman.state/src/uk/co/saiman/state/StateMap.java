@@ -150,4 +150,9 @@ public class StateMap implements State {
   public int hashCode() {
     return Objects.hash(entries);
   };
+
+  @Override
+  public String toString() {
+    return entries.toString();
+  }
 }

@@ -27,23 +27,28 @@
  */
 package uk.co.saiman.msapex.annotations;
 
+import static java.util.function.Function.identity;
 import static javafx.collections.FXCollections.observableSet;
+import static uk.co.saiman.fx.bindings.FluentObjectBinding.over;
 
 import java.util.HashSet;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import javafx.beans.WeakInvalidationListener;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
+import uk.co.saiman.measurement.scalar.Scalar;
 
 public class AnnotationLayer<X extends Quantity<X>, Y extends Quantity<Y>> extends Region {
   private final ObjectProperty<Unit<X>> unitX;
@@ -69,20 +74,26 @@ public class AnnotationLayer<X extends Quantity<X>, Y extends Quantity<Y>> exten
 
     measurementBounds = new SimpleObjectProperty<>(new BoundingBox(0, 0, 1, 1));
 
-    annotations.addListener(new WeakInvalidationListener(i -> {
-      getChildren().retainAll(annotations);
-      for (Annotation<X, Y> annotation : annotations) {
-        if (!getChildren().contains(annotation)) {
-          getChildren().add(annotation);
-        }
+    annotations.addListener((SetChangeListener<Annotation<X, Y>>) i -> {
+      if (i.wasRemoved()) {
+        getChildren().remove(i.getElementRemoved());
       }
-    }));
+      if (i.wasAdded()) {
+        getChildren().add(i.getElementAdded());
+      }
+    });
+
+    Rectangle clip = new Rectangle();
+    setClip(clip);
+    layoutBoundsProperty().addListener((ov, oldValue, newValue) -> {
+      clip.setWidth(newValue.getWidth());
+      clip.setHeight(newValue.getHeight());
+    });
   }
 
   @Override
-  public void resizeRelocate(double x, double y, double width, double height) {
-    super.resizeRelocate(x, y, width, height);
-    setClip(new Rectangle(0, 0, width, height));
+  public void resize(double width, double height) {
+    super.resize(width, height);
   }
 
   public ObservableSet<Annotation<X, Y>> getAnnotations() {
@@ -126,36 +137,75 @@ public class AnnotationLayer<X extends Quantity<X>, Y extends Quantity<Y>> exten
     unitY.set(value);
   }
 
-  public double measurementToLocalWidth(double measurement) {
-    return measurement * getWidth() / measurementBounds.getValue().getWidth();
+  public DoubleBinding measurementToLocalWidth(Quantity<X> measurement) {
+    return over(measurementBounds)
+        .withDependency(unitX, widthProperty())
+        .filter(b -> measurement != null)
+        .map(b -> measurement.to(unitX.get()).getValue().doubleValue() * getWidth() / b.getWidth())
+        .orDefault(0d)
+        .mapToDouble(identity());
   }
 
-  public double measurementToLocalHeight(double measurement) {
-    return measurement * getHeight() / measurementBounds.getValue().getHeight();
+  public DoubleBinding measurementToLocalHeight(Quantity<Y> measurement) {
+    return over(measurementBounds)
+        .withDependency(unitY, heightProperty())
+        .filter(b -> measurement != null)
+        .map(
+            b -> measurement.to(unitY.get()).getValue().doubleValue() * getHeight() / b.getHeight())
+        .orDefault(0d)
+        .mapToDouble(identity());
   }
 
-  public double localWidthToMeasurement(double local) {
-    return local * measurementBounds.getValue().getWidth() / getWidth();
+  public ObjectBinding<Quantity<X>> localWidthToMeasurement(double local) {
+    return over(measurementBounds)
+        .withDependency(unitX, widthProperty())
+        .map(b -> local * b.getWidth() / getWidth())
+        .map(v -> new Scalar<>(unitX.get(), v));
   }
 
-  public double localHeightToMeasurement(double local) {
-    return local * measurementBounds.getValue().getHeight() / getHeight();
+  public ObjectBinding<Quantity<Y>> localHeightToMeasurement(double local) {
+    return over(measurementBounds)
+        .withDependency(unitY, heightProperty())
+        .map(b -> local * b.getHeight() / getHeight())
+        .map(v -> new Scalar<>(unitY.get(), v));
   }
 
-  public double measurementToLocalX(double measurement) {
-    return measurementToLocalWidth(measurement - measurementBounds.getValue().getMinX());
+  public DoubleBinding measurementToLocalX(Quantity<X> measurement) {
+    return over(measurementBounds)
+        .withDependency(unitX, widthProperty())
+        .filter(b -> measurement != null)
+        .map(
+            b -> (measurement.to(unitX.get()).getValue().doubleValue() - b.getMinX())
+                * getWidth()
+                / b.getWidth())
+        .orDefault(0d)
+        .mapToDouble(identity());
   }
 
-  public double measurementToLocalY(double measurement) {
-    return measurementToLocalHeight(measurement - measurementBounds.getValue().getMinY());
+  public DoubleBinding measurementToLocalY(Quantity<Y> measurement) {
+    return over(measurementBounds)
+        .withDependency(unitY, heightProperty())
+        .filter(b -> measurement != null)
+        .map(
+            b -> (measurement.to(unitY.get()).getValue().doubleValue() - b.getMinY())
+                * getHeight()
+                / b.getHeight())
+        .orDefault(0d)
+        .mapToDouble(identity());
   }
 
-  public double localXToMeasurement(double local) {
-    return localWidthToMeasurement(local) + measurementBounds.getValue().getMinX();
+  public ObjectBinding<Quantity<X>> localXToMeasurement(double local) {
+    return over(measurementBounds)
+        .withDependency(unitX, widthProperty())
+        .map(b -> local * b.getWidth() / getWidth() + b.getMinX())
+        .map(v -> new Scalar<>(unitX.get(), v));
   }
 
-  public double localYToMeasurement(double local) {
-    return localHeightToMeasurement(local) + measurementBounds.getValue().getMinY();
+  public ObjectBinding<Quantity<Y>> localYToMeasurement(double local) {
+    return over(measurementBounds)
+        .withDependency(unitY, heightProperty())
+        .map(b -> local * b.getHeight() / getHeight() + b.getMinY())
+        .map(v -> new Scalar<>(unitY.get(), v));
   }
 
   @Override

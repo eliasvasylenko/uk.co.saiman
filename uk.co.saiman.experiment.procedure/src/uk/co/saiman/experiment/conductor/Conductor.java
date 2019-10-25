@@ -79,7 +79,7 @@ public class Conductor implements Output {
     }
     procedure
         .instructions()
-        .filter(instruction -> progress.containsKey(instruction.path()))
+        .filter(instruction -> !progress.containsKey(instruction.path()))
         .forEach(
             instruction -> progress
                 .put(instruction.path(), new ExecutorProgress(this, instruction)));

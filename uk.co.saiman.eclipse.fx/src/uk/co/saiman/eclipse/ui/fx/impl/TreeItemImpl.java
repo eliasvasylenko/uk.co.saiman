@@ -27,63 +27,17 @@
  */
 package uk.co.saiman.eclipse.ui.fx.impl;
 
-import static uk.co.saiman.eclipse.ui.SaiUiModel.PRIMARY_CONTEXT_KEY;
-
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.e4.core.services.adapter.Adapter;
 
 import javafx.scene.control.TreeItem;
-import javafx.scene.input.Dragboard;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.eclipse.model.ui.MEditableCell;
 import uk.co.saiman.eclipse.ui.SaiUiModel;
-import uk.co.saiman.eclipse.ui.TransferDestination;
-import uk.co.saiman.eclipse.ui.fx.TransferCellHandler;
-import uk.co.saiman.eclipse.ui.fx.TransferCellIn;
-import uk.co.saiman.eclipse.ui.fx.TransferCellOut;
 
-/*
- * TODO Cells need a "context value" property to define which their main value
- * coming from the context is. This way we can know which object needs to have
- * the cells {@link Cell#getTransferFormats() transfer formats} applied to it
- * for drag/drop/copy/paste etc.
- * 
- * When we drag/copy it's easy to know what to do. Serialize the value of the
- * selected cell.
- * 
- * When we drop it's more difficult.
- * 
- * When we drop OVER a cell, find the first child the clipboard is compatible
- * with and for which the context value is modifiable, and set it (and set it to
- * be rendered if necessary).
- * 
- * Failing that, if the cell we drop over itself is compatible and modifiable
- * ... maybe set it or maybe do nothing.
- * 
- * What about dropping BEFORE or AFTER an item? same behavior as dropping over
- * the parent, or nothing. Can't really think of any useful way to apply the
- * drop target semantics.
- * 
- * What about dropping OVER an item with no existing compatible children? i.e. a
- * situation where we can add new children. How do we know what kind of child to
- * turn the clipboard data into? We could add some mechanism to the model itself
- * such as child prototypes / child contributions (in the manner of
- * menu-contributions) but the behavior would be very complex (much moreso than
- * menu-contributions) and it wouldn't nicely map to the nice
- * {@link ChildrenService} API. It may be simpler just to allow manual addition
- * of transfer handlers.
- * 
- * Should these also be considered part of the model api? Should they be FX
- * specific? Should they be accessed through the context?
- * 
- * How does this tie in with copy/paste {@link Handler handlers}? Add handlers
- * which just forward to this system, or use handlers as the mechanism to
- * implement the system?
- */
 /**
  * @author Elias N Vasylenko
  */
@@ -101,14 +55,6 @@ public class TreeItemImpl extends TreeItem<MCell> implements IAdaptable {
     container.setCenter(widget);
   }
 
-  public Object getData() {
-    String contextValue = getValue().getProperties().get(PRIMARY_CONTEXT_KEY);
-    if (contextValue == null) {
-      return null;
-    }
-    return getValue().getContext().get(contextValue);
-  }
-
   public Stream<TreeItemImpl> getModularChildren() {
     return getChildren().stream().map(c -> (TreeItemImpl) c);
   }
@@ -124,8 +70,10 @@ public class TreeItemImpl extends TreeItem<MCell> implements IAdaptable {
       return (U) getValue();
     }
 
-    Object data = getData();
-    return getValue().getContext().get(Adapter.class).adapt(data, adapter);
+    // Object data = getData();
+    // return getValue().getContext().get(Adapter.class).adapt(data, adapter);
+
+    return null;
   }
 
   public void editingStarted() {
@@ -143,16 +91,5 @@ public class TreeItemImpl extends TreeItem<MCell> implements IAdaptable {
     MEditableCell cell = (MEditableCell) getValue();
     cell.getTags().add(SaiUiModel.EDIT_CANCELED);
     cell.setEditing(false);
-  }
-
-  TransferCellOut transferOut() {
-    return getValue().getContext().get(TransferCellHandler.class).transferOut(getValue());
-  }
-
-  TransferCellIn transferIn(Dragboard clipboard, TransferDestination position) {
-    return getValue()
-        .getContext()
-        .get(TransferCellHandler.class)
-        .transferIn(getValue(), clipboard, position);
   }
 }

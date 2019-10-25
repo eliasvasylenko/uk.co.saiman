@@ -52,9 +52,10 @@ public interface XYStageExecutor extends StageExecutor<XYCoordinate<Length>> {
   MapIndex<Quantity<Length>> Y = lengthAccessor("yOffset");
   Variable<XYCoordinate<Length>> LOCATION = new Variable<>(
       "xySampleLocation",
-      mapAccessor(
-          s -> new XYCoordinate<>(s.get(X), s.get(Y)),
-          l -> StateMap.empty().with(X, l.getX()).with(Y, l.getY())));
+      mapAccessor()
+          .map(
+              s -> new XYCoordinate<>(s.get(X), s.get(Y)),
+              l -> StateMap.empty().with(X, l.getX()).with(Y, l.getY())));
 
   private static MapIndex<Quantity<Length>> lengthAccessor(String value) {
     return new MapIndex<>(

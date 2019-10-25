@@ -64,6 +64,12 @@ public class ExecutorProgress {
   public void conduct(Executor executor) {
     executor.execute(new ExecutionContext() {
       @Override
+      public String getId() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
       public Location getLocation() {
         try {
           return scheduler.storageConfiguration().locateStorage(instruction.path()).location();
@@ -106,25 +112,25 @@ public class ExecutorProgress {
       @Override
       public <U> void prepareCondition(Class<U> condition, U resource) {
         // TODO Auto-generated method stub
-        
+
       }
 
       @Override
       public <R> void observePartialResult(Class<R> observation, Supplier<? extends R> value) {
         // TODO Auto-generated method stub
-        
+
       }
 
       @Override
       public void completeObservation(Class<?> observation) {
         // TODO Auto-generated method stub
-        
+
       }
 
       @Override
       public <R> void setResultData(Class<R> observation, Data<R> data) {
         // TODO Auto-generated method stub
-        
+
       }
 
       @Override

@@ -1,2 +1,27 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_6WcBEJy7EemfBqNGW7FeDQ"/>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:saiman.ui="http://www.saiman.co.uk/eclipse/2018/UISaiman/ui" xmi:id="_6WcBEJy7EemfBqNGW7FeDQ">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_IbyoIOmdEemKXt0hvCdPug" featurename="snippets" parentElementId="uk.co.saiman.maldi.window.snippets">
+    <elements xsi:type="menu:HandledMenuItem" xmi:id="_QMs_sOmdEemKXt0hvCdPug" elementId="uk.co.saiman.maldi.spectrum.handledmenuitem.addspectrum" label="%addSpectrum" command="_vI-DkOmdEemKXt0hvCdPug">
+      <tags>ExperimentStepProvider</tags>
+      <tags>hideOnDisable</tags>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_4Ss6IOmbEemKXt0hvCdPug" featurename="children" parentElementId="uk.co.saiman.experiment.step.cell">
+    <elements xsi:type="saiman.ui:EditableCell" xmi:id="_irr-UOmvEemKXt0hvCdPug" label="%massLimit" iconURI="fugue:size16/ruler.png" elementId="uk.co.saiman.maldi.spectrum.editablecell.masslimit" contributionURI="bundleclass://uk.co.saiman.maldi.spectrum/uk.co.saiman.maldi.spectrum.msapex.MassLimitCell">
+      <properties key="primaryContextKey" value="uk.co.saiman.maldi.variable.spectrum.masslimit"/>
+      <tags>hideOnNull</tags>
+      <tags>removeOnHide</tags>
+    </elements>
+    <elements xsi:type="saiman.ui:EditableCell" xmi:id="_i7bDcOmvEemKXt0hvCdPug" label="%acquisitionCount" iconURI="" elementId="uk.co.saiman.maldi.spectrum.editablecell.acquisitioncount" contributionURI="bundleclass://uk.co.saiman.maldi.spectrum/uk.co.saiman.maldi.spectrum.msapex.AcquisitionCountCell">
+      <properties key="primaryContextKey" value="uk.co.saiman.maldi.variable.spectrum.acquisitioncount"/>
+      <tags>hideOnNull</tags>
+      <tags>removeOnHide</tags>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_tTRtQOmdEemKXt0hvCdPug" featurename="commands" parentElementId="uk.co.saiman.application.msapex">
+    <elements xsi:type="commands:Command" xmi:id="_vI-DkOmdEemKXt0hvCdPug" elementId="uk.co.saiman.maldi.spectrum.command.addspectrum" commandName="%addSpectrum"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_x-_OcOmdEemKXt0hvCdPug" featurename="handlers" parentElementId="uk.co.saiman.application.msapex">
+    <elements xsi:type="commands:Handler" xmi:id="_0kBXAOmdEemKXt0hvCdPug" elementId="uk.co.saiman.maldi.spectrum.handler.0" contributionURI="bundleclass://uk.co.saiman.maldi.spectrum/uk.co.saiman.maldi.spectrum.msapex.AddMaldiSpectrumStepHandler" command="_vI-DkOmdEemKXt0hvCdPug"/>
+  </fragments>
+</fragment:ModelFragments>

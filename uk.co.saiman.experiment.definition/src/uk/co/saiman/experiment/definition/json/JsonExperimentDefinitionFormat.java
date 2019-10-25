@@ -41,8 +41,8 @@ import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.definition.Plan;
-import uk.co.saiman.experiment.definition.StepContainer;
+import uk.co.saiman.experiment.definition.ExecutionPlan;
+import uk.co.saiman.experiment.definition.Definition;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
@@ -66,15 +66,15 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
   public static final String FILE_EXTENSION = "jed"; // json experiment definition
   public static final MediaType MEDIA_TYPE = new MediaType(
       APPLICATION_TYPE,
-      "saiman.procedure.v" + VERSION,
+      "saiman.experiment.definition.v" + VERSION,
       VENDOR).withSuffix("json");
 
   private static final MapIndex<ExperimentId> ID = new MapIndex<>(
       "id",
       stringAccessor().map(ExperimentId::fromName, ExperimentId::name));
-  private static final MapIndex<Plan> PLAN = new MapIndex<>(
+  private static final MapIndex<ExecutionPlan> PLAN = new MapIndex<>(
       "plan",
-      stringAccessor().map(Plan::valueOf, Plan::toString));
+      stringAccessor().map(ExecutionPlan::valueOf, ExecutionPlan::toString));
   private static final String EXECUTOR = "executor";
   private static final String VARIABLES = "variables";
   private static final String CHILDREN = "children";
@@ -116,14 +116,14 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
     return loadSteps(ExperimentDefinition.define(data.get(ID)), data.get(CHILDREN).asList());
   }
 
-  private <T extends StepContainer<?, ? extends T>> T loadSteps(T container, StateList data) {
+  private <T extends Definition<?, ? extends T>> T loadSteps(T container, StateList data) {
     return data
         .stream()
         .map(State::asMap)
         .reduce(container, (p, s) -> loadStep(p, s), throwingMerger());
   }
 
-  private <T extends StepContainer<?, ? extends T>> T loadStep(T container, StateMap data) {
+  private <T extends Definition<?, ? extends T>> T loadStep(T container, StateMap data) {
     StepDefinition step = StepDefinition
         .define(data.get(ID), (Executor) data.get(executor))
         .withVariableMap(data.get(VARIABLES).asMap())

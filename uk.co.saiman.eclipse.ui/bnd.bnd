@@ -6,6 +6,7 @@ Bundle-Description: \
 	${build}/include/eclipse.plugin.bnd
 
 -buildpath: \
+	uk.co.saiman.eclipse;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\

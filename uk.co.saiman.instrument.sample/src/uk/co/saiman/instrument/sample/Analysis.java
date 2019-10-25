@@ -47,4 +47,9 @@ public class Analysis<T> extends RequestedSampleState<T> {
   public T position() {
     return position;
   }
+
+  @Override
+  public String toString() {
+    return super.toString() + "(" + position + ")";
+  }
 }

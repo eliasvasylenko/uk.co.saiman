@@ -50,6 +50,8 @@ import uk.co.saiman.log.Log;
  * @author Elias N Vasylenko
  */
 public interface ExecutionContext {
+  String getId();
+
   Variables getVariables();
 
   default <T> T getVariable(Variable<T> variable) {

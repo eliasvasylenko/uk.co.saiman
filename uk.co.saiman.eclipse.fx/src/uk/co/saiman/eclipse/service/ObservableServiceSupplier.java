@@ -144,6 +144,7 @@ public class ObservableServiceSupplier extends ExtendedObjectSupplier {
 
       references.addListener((ListChangeListener<ServiceReference<T>>) c -> {
         value.set(context.getService(references.get(0)));
+        context.ungetService(references.get(0)); // dirty hack
       });
 
       return value;

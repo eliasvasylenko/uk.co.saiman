@@ -27,11 +27,27 @@
  */
 package uk.co.saiman.eclipse.ui;
 
+import static java.util.Collections.unmodifiableSet;
+
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import uk.co.saiman.data.format.DataFormat;
 
-public interface TransferFormat<T> {
+public class TransferFormat<T> {
+  private final DataFormat<T> format;
+  private final Set<TransferMode> transferModes;
+
+  public TransferFormat(DataFormat<T> format, Collection<? extends TransferMode> transferModes) {
+    this.format = format;
+    this.transferModes = unmodifiableSet(new HashSet<>(transferModes));
+  }
+
+  public DataFormat<T> dataFormat() {
+    return format;
+  }
+
   /**
    * The transfer modes which a data target may accept in this format.
    * <p>
@@ -41,7 +57,7 @@ public interface TransferFormat<T> {
    * 
    * @return a set of the accepted transfer modes
    */
-  Set<TransferMode> transferModes();
-
-  DataFormat<T> dataFormat();
+  public Set<TransferMode> transferModes() {
+    return transferModes;
+  }
 }

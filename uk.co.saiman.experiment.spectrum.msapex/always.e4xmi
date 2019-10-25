@@ -26,21 +26,26 @@
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_gNrtILvrEei0KbRa7VpFDA" featurename="children" parentElementId="uk.co.saiman.experiment.step.cell">
-    <elements xsi:type="saiman.ui:Cell" xmi:id="_ugeA0LvsEei0KbRa7VpFDA" label="Processing" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/gear.png" elementId="uk.co.saiman.experiment.spectrum.processing.cell" contributionURI="bundleclass://uk.co.saiman.experiment.spectrum.msapex/uk.co.saiman.experiment.spectrum.msapex.SpectrumExperimentProcessingCell">
-      <properties key="primaryContextKey" value="uk.co.saiman.experiment.spectrum.SpectrumProcessingExecutor"/>
+    <elements xsi:type="saiman.ui:Cell" xmi:id="_ugeA0LvsEei0KbRa7VpFDA" label="Processing" iconURI="platform:/plugin/uk.co.saiman.icons.fugue/uk/co/saiman/icons/fugue/size16/gear.png" elementId="uk.co.saiman.experiment.spectrum.processing.cell" contributionURI="bundleclass://uk.co.saiman.experiment.spectrum.msapex/uk.co.saiman.experiment.spectrum.msapex.SpectrumProcessingCell">
+      <properties key="primaryContextKey" value="uk.co.saiman.processing.variable"/>
       <tags>removeOnHide</tags>
       <tags>hideOnNull</tags>
       <popupMenu xmi:id="_wt-aMLvsEei0KbRa7VpFDA" elementId="uk.co.saiman.experiment.spectrum.popupmenu.0">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_yAfK8LvsEei0KbRa7VpFDA" elementId="uk.co.saiman.experiment.spectrum.handledmenuitem.addprocessing" label="Add Processor" command="_ZXfj8M7DEeePVOUOTm0QwA"/>
       </popupMenu>
     </elements>
-    <elements xsi:type="saiman.ui:Cell" xmi:id="_RHKeEMGKEei_zvpki5Htzg" elementId="uk.co.saiman.experiment.spectrum.cell" contributionURI="bundleclass://uk.co.saiman.experiment.spectrum.msapex/uk.co.saiman.experiment.spectrum.msapex.SpectrumExperimentCell" visible="false">
-      <properties key="primaryContextKey" value="uk.co.saiman.experiment.spectrum.SpectrumExecutor"/>
-      <tags>removeOnHide</tags>
-      <tags>hideOnNull</tags>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_7md2oLwAEeiIO74NhBcGww" featurename="handlers" parentElementId="uk.co.saiman.application.msapex">
+    <elements xsi:type="commands:Handler" xmi:id="_9mNg0LwAEeiIO74NhBcGww" elementId="uk.co.saiman.experiment.spectrum.handler.addprocessor" contributionURI="bundleclass://uk.co.saiman.experiment.spectrum.msapex/uk.co.saiman.experiment.spectrum.msapex.AddProcessorHandler" command="_ZXfj8M7DEeePVOUOTm0QwA"/>
+    <elements xsi:type="commands:Handler" xmi:id="_dCQZIOqKEem34tplevmwuQ" elementId="uk.co.saiman.experiment.spectrum.handler.addprocessing" contributionURI="bundleclass://uk.co.saiman.experiment.spectrum.msapex/uk.co.saiman.experiment.spectrum.msapex.AddProcessingHandler" command="_1mQv4OqJEem34tplevmwuQ"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_fg9ssOqJEem34tplevmwuQ" featurename="snippets" parentElementId="uk.co.saiman.trimmedwindow">
+    <elements xsi:type="menu:HandledMenuItem" xmi:id="_roFPgOqJEem34tplevmwuQ" elementId="uk.co.saiman.experiment.spectrum.handledmenuitem.addprocessing" label="%addProcessing" command="_1mQv4OqJEem34tplevmwuQ">
+      <tags>ExperimentStepProvider</tags>
+      <tags>hideOnDisable</tags>
     </elements>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_7md2oLwAEeiIO74NhBcGww" featurename="handlers" parentElementId="uk.co.saiman.experiment.cell.node">
-    <elements xsi:type="commands:Handler" xmi:id="_9mNg0LwAEeiIO74NhBcGww" elementId="uk.co.saiman.experiment.spectrum.handler.addprocessor" contributionURI="bundleclass://uk.co.saiman.experiment.spectrum.msapex/uk.co.saiman.experiment.spectrum.msapex.AddProcessorHandler" command="_ZXfj8M7DEeePVOUOTm0QwA"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_0GowMOqJEem34tplevmwuQ" featurename="commands" parentElementId="uk.co.saiman.application.msapex">
+    <elements xsi:type="commands:Command" xmi:id="_1mQv4OqJEem34tplevmwuQ" elementId="uk.co.saiman.experiment.spectrum.command.addprocessing" commandName="%addProcessing"/>
   </fragments>
 </fragment:ModelFragments>

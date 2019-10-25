@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.format.DataFormat;
@@ -43,6 +44,7 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment.Status;
@@ -58,10 +60,12 @@ public class Workspace {
   static final String WORKSPACE = "workspace";
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.filesystem.workspace";
 
-  private final Set<WorkspaceExperiment> experiments;
+  private final Supplier<GlobalEnvironment> environment;
 
   private final PathLocation rootLocation;
   private final DataFormat<Experiment> experimentFormat;
+
+  private final Set<WorkspaceExperiment> experiments;
 
   private final HotObservable<WorkspaceEvent> events;
 
@@ -71,11 +75,14 @@ public class Workspace {
       Path rootPath,
       ExecutorService conductorService,
       StorageService storageService,
+      Supplier<GlobalEnvironment> environment,
       Log log) {
     this.experiments = new HashSet<>();
 
     this.rootLocation = new PathLocation(rootPath);
-    this.experimentFormat = new JsonExperimentFormat(conductorService, storageService);
+    this.experimentFormat = new JsonExperimentFormat(conductorService, storageService, environment);
+
+    this.environment = environment;
 
     this.events = new HotObservable<>();
 
@@ -167,7 +174,7 @@ public class Workspace {
         name,
         n -> new WorkspaceExperiment(
             this,
-            new Experiment(ExperimentDefinition.define(name), storageConfiguration)));
+            new Experiment(ExperimentDefinition.define(name), storageConfiguration, environment)));
   }
 
   public WorkspaceExperiment addExperiment(Experiment experiment) {

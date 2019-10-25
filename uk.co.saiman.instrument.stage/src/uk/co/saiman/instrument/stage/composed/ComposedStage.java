@@ -29,7 +29,6 @@ package uk.co.saiman.instrument.stage.composed;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
 import static uk.co.saiman.instrument.axis.AxisState.LOCATION_REACHED;
 import static uk.co.saiman.observable.ObservableProperty.over;
 
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
+import java.util.stream.Stream;
 
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.axis.AxisState;
@@ -80,12 +80,16 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
     this.sampleState = over(SampleState.failed());
     this.actualPosition = ObservableProperty.over(NullPointerException::new);
 
-    this.axisObservations = concat(
-        this.axes.stream().map(a -> a.axisState().value().observe(s -> updateState())),
-        this.axes
-            .stream()
-            .map(a -> a.actualPosition().value().observe(p -> updateActualPosition())))
-                .collect(toList());
+    this.axisObservations = this.axes
+        .stream()
+        .flatMap(
+            a -> Stream
+                .of(
+                    a.axisState().optionalValue().observe(s -> updateState()),
+                    a.actualPosition().optionalValue().observe(p -> updateActualPosition())))
+        .collect(toList());
+
+    updateState();
   }
 
   @Override
@@ -115,7 +119,9 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
   }
 
   private void updateActualPosition() {
-    actualPosition.set(getActualPositionImpl());
+    try {
+      actualPosition.set(getActualPositionImpl());
+    } catch (Exception e) {}
   }
 
   private void updateSampleState(AxisState axisState) {
@@ -139,9 +145,11 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
   @SafeVarargs
   private final <V> BinaryOperator<V> precedence(V... precedence) {
     return (a, b) -> {
-      for (V option : precedence)
-        if (a == option || b == option)
+      for (V option : precedence) {
+        if (a == option || b == option) {
           return option;
+        }
+      }
       return precedence[0];
     };
   }

@@ -30,20 +30,27 @@ package uk.co.saiman.eclipse.ui.fx.impl;
 import static java.nio.channels.Channels.newChannel;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.nio.channels.Channels;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Creatable;
 
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import uk.co.saiman.data.format.DataFormat;
+import uk.co.saiman.data.format.Payload;
+import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.eclipse.ui.fx.ClipboardCache;
 import uk.co.saiman.eclipse.ui.fx.ClipboardService;
 import uk.co.saiman.eclipse.ui.fx.MediaTypes;
@@ -118,5 +125,61 @@ public class ClipboardServiceImpl implements ClipboardService {
         return cacheContainer.getData(clipboard, format);
       }
     };
+  }
+
+  @Override
+  public <T> Optional<T> getValue(Clipboard clipboard, DataFormat<T> format) {
+    return getCache(clipboard).getData(format).or(() -> deserialize(clipboard, format));
+  }
+
+  private <T> Optional<T> deserialize(Clipboard clipboard, DataFormat<T> format) {
+    return format
+        .getMediaTypes()
+        .map(MediaTypes::toDataFormat)
+        .distinct()
+        .map(clipboard::getContent)
+        .filter(Objects::nonNull)
+        .flatMap(data -> {
+          if (data instanceof String && format instanceof TextFormat<?>) {
+            var value = ((TextFormat<T>) format).decodeString((String) data);
+            return Stream.of(value);
+          }
+
+          if (data instanceof byte[]) {
+            ByteArrayInputStream bytes = new ByteArrayInputStream((byte[]) data);
+            try {
+              var value = format.load(Channels.newChannel(bytes));
+              return Stream.of(value);
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          }
+          return Stream.empty();
+        })
+        .findFirst()
+        .map(p -> p.data);
+  }
+
+  @Override
+  public <T> void putValue(ClipboardContent clipboardContent, DataFormat<T> format, T value) {
+    Object data;
+    Payload<T> payload = new Payload<>(value);
+    if (format instanceof TextFormat<?>) {
+      data = ((TextFormat<T>) format).encodeString(payload);
+
+    } else {
+      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+      try {
+        format.save(Channels.newChannel(bytes), payload);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      data = bytes.toByteArray();
+    }
+    format
+        .getMediaTypes()
+        .map(MediaTypes::toDataFormat)
+        .distinct()
+        .forEach(f -> clipboardContent.put(f, data));
   }
 }

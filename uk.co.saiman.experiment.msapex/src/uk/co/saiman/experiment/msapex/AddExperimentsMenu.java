@@ -27,30 +27,21 @@
  */
 package uk.co.saiman.experiment.msapex;
 
+import static org.eclipse.e4.ui.workbench.modeling.EModelService.PRESENTATION;
+
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.di.AboutToShow;
-import org.eclipse.e4.ui.model.application.ui.menu.ItemType;
-import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.MSnippetContainer;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
-import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.fx.core.di.Service;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import uk.co.saiman.eclipse.dialog.DialogUtilities;
-import uk.co.saiman.experiment.dependency.Product;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
-import uk.co.saiman.experiment.msapex.provider.ExperimentProvider;
-import uk.co.saiman.experiment.msapex.provider.ExperimentProviderDescriptor;
-import uk.co.saiman.experiment.msapex.workspace.Workspace;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.log.Log.Level;
 
 /**
  * Track acquisition devices available through OSGi services and select which
@@ -59,9 +50,8 @@ import uk.co.saiman.log.Log.Level;
  * @author Elias N Vasylenko
  */
 public class AddExperimentsMenu {
-  @Inject
-  @Service
-  List<ExperimentProviderDescriptor> providerDescriptors;
+  private static final String EXPERIMENT_PROVIDER_TAG = "ExperimentProvider";
+
   @Inject
   Log log;
   @Inject
@@ -69,50 +59,16 @@ public class AddExperimentsMenu {
   ExperimentProperties text;
 
   @AboutToShow
-  void aboutToShow(List<MMenuElement> items, Workspace workspace) {
-    providerDescriptors
+  void aboutToShow(List<MMenuElement> items, EModelService models, MApplication application) {
+    models
+        .findElements(application, MSnippetContainer.class, PRESENTATION, e -> true)
         .stream()
-        .map(descriptor -> createMenuItem(workspace, descriptor))
+        .map(MSnippetContainer::getSnippets)
+        .flatMap(List::stream)
+        .filter(
+            snippet -> snippet instanceof MMenuElement
+                && snippet.getTags().contains(EXPERIMENT_PROVIDER_TAG))
+        .map(snippet -> (MMenuElement) models.cloneElement(snippet, null))
         .forEach(items::add);
-  }
-
-  private MDirectMenuItem createMenuItem(
-      Workspace workspace,
-      ExperimentProviderDescriptor descriptor) {
-    MDirectMenuItem moduleItem = MMenuFactory.INSTANCE.createDirectMenuItem();
-    moduleItem.setLabel(descriptor.getLocalizedLabel());
-    moduleItem.setIconURI(descriptor.getIconURI());
-    moduleItem.setType(ItemType.PUSH);
-    moduleItem.setObject(new Object() {
-      @Execute
-      public void execute(IEclipseContext context) {
-        addExperiment(workspace, descriptor, context);
-      }
-    });
-    return moduleItem;
-  }
-
-  private <T extends Product> void addExperiment(
-      Workspace workspace,
-      ExperimentProviderDescriptor descriptor,
-      IEclipseContext context) {
-    try {
-      ExperimentProvider provider = ContextInjectionFactory
-          .make(descriptor.getProviderClass(), context);
-      ;
-      provider.createExperiments().forEach(workspace::addExperiment);
-
-    } catch (Exception e) {
-      log.log(Level.ERROR, e);
-
-      Alert alert = new Alert(AlertType.ERROR);
-      DialogUtilities.addStackTrace(alert, e);
-      alert.setTitle(text.newExperimentFailedDialog().toString());
-      alert
-          .setHeaderText(
-              text.newExperimentFailedText(workspace, descriptor.getLocalizedLabel()).toString());
-      alert.setContentText(text.newExperimentFailedDescription().toString());
-      alert.showAndWait();
-    }
   }
 }

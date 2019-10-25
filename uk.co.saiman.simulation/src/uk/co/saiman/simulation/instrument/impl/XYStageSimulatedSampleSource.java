@@ -77,24 +77,38 @@ import uk.co.saiman.simulation.instrument.impl.XYStageSimulatedSampleSource.XYSt
  * @author Elias N Vasylenko
  */
 @Designate(ocd = XYStageSimulatedSampleSourceConfiguration.class, factory = true)
-@Component(name = XYStageSimulatedSampleSource.CONFIGURATION_PID, configurationPid = XYStageSimulatedSampleSource.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+@Component(
+    name = XYStageSimulatedSampleSource.CONFIGURATION_PID,
+    configurationPid = XYStageSimulatedSampleSource.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
 public class XYStageSimulatedSampleSource
     implements ImageSimulatedSampleSource, SimulatedSampleSource, CameraDevice {
   static final String CONFIGURATION_PID = "uk.co.saiman.simulation.samplesource.xystage";
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "XY Stage Simulated Sample Source Configuration", description = "The configuration for a sample simulation over an two dimensional, linear stage")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "XY Stage Simulated Sample Source Configuration",
+      description = "The configuration for a sample simulation over an two dimensional, linear stage")
   public @interface XYStageSimulatedSampleSourceConfiguration {
-    @AttributeDefinition(name = "Stage Device", description = "The OSGi reference filter for the stage")
+    @AttributeDefinition(
+        name = "Stage Device",
+        description = "The OSGi reference filter for the stage")
     String stageDevice_target() default "(objectClass=uk.co.saiman.instrument.stage.XYStage)";
 
-    @AttributeDefinition(name = "Horizontal camera resolution", description = "The horizontal resolution of the simulated camera feed of the sample stage in pixels")
+    @AttributeDefinition(
+        name = "Horizontal camera resolution",
+        description = "The horizontal resolution of the simulated camera feed of the sample stage in pixels")
     int cameraResolutionWidth() default 320;
 
-    @AttributeDefinition(name = "Vertical camera resolution", description = "The vertical resolution of the simulated camera feed of the sample stage in pixels")
+    @AttributeDefinition(
+        name = "Vertical camera resolution",
+        description = "The vertical resolution of the simulated camera feed of the sample stage in pixels")
     int cameraResolutionHeight() default 240;
 
-    @AttributeDefinition(name = "View area width", description = "The width of the visible area of the plate")
+    @AttributeDefinition(
+        name = "View area width",
+        description = "The width of the visible area of the plate")
     String viewAreaWidth() default "10mm";
   }
 
@@ -264,15 +278,19 @@ public class XYStageSimulatedSampleSource
 
   private double getSampleAreaPosition(
       Function<XYCoordinate<Length>, Quantity<Length>> stageDimension) {
-    Quantity<Length> range = stageDimension
-        .apply(stageDevice.getUpperBound())
-        .subtract(stageDimension.apply(stageDevice.getLowerBound()));
+    var lowerBound = stageDimension.apply(stageDevice.getLowerBound());
+    var upperBound = stageDimension.apply(stageDevice.getUpperBound());
 
-    Quantity<Length> offset = stageDimension
-        .apply(stageDevice.samplePosition().get())
-        .subtract(stageDimension.apply(stageDevice.getLowerBound()));
+    var samplePosition = stageDevice
+        .samplePosition()
+        .tryGet()
+        .map(stageDimension::apply)
+        .orElse(lowerBound);
 
-    return offset
+    var range = upperBound.subtract(lowerBound);
+    var sampleOffset = samplePosition.subtract(lowerBound);
+
+    return sampleOffset
         .divide(range)
         .asType(Dimensionless.class)
         .to(count().getUnit())

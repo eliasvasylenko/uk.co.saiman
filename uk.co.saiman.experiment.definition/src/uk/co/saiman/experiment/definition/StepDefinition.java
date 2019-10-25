@@ -37,24 +37,23 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Relative;
-import uk.co.saiman.experiment.dependency.Dependency;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.requirement.Production;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.StateMap;
 
-public class StepDefinition extends StepContainer<Relative, StepDefinition> {
+public class StepDefinition extends Definition<Relative, StepDefinition> {
   private final ExperimentId id;
   private final StateMap variableMap;
   private final Executor executor;
-  private final Plan plan;
+  private final ExecutionPlan plan;
 
   private StepDefinition(
       ExperimentId id,
       Executor executor,
       StateMap variableMap,
-      Plan plan,
+      ExecutionPlan plan,
       List<StepDefinition> steps) {
     super(steps);
     this.id = id;
@@ -67,7 +66,7 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
       ExperimentId id,
       Executor executor,
       StateMap variableMap,
-      Plan plan,
+      ExecutionPlan plan,
       List<StepDefinition> steps,
       Map<ExperimentId, StepDefinition> dependents) {
     super(steps, dependents);
@@ -77,26 +76,20 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
     this.plan = plan;
   }
 
-  public static <T extends Dependency> StepDefinition define(ExperimentId id, Executor executor) {
+  public static StepDefinition define(ExperimentId id, Executor executor) {
     return define(id, executor, StateMap.empty());
   }
 
-  public static <T extends Dependency> StepDefinition define(
-      ExperimentId id,
-      Executor executor,
-      Variables variables) {
+  public static StepDefinition define(ExperimentId id, Executor executor, Variables variables) {
     return define(id, executor, variables.state());
   }
 
-  private static <T extends Dependency> StepDefinition define(
-      ExperimentId id,
-      Executor executor,
-      StateMap variableMap) {
+  private static StepDefinition define(ExperimentId id, Executor executor, StateMap variableMap) {
     return new StepDefinition(
         requireNonNull(id),
         requireNonNull(executor),
         requireNonNull(variableMap),
-        Plan.WITHHOLD,
+        ExecutionPlan.WITHHOLD,
         List.of(),
         Map.of());
   }
@@ -179,11 +172,11 @@ public class StepDefinition extends StepContainer<Relative, StepDefinition> {
     return new StepDefinition(id, executor, variableMap, plan, steps);
   }
 
-  public StepDefinition withPlan(Plan plan) {
+  public StepDefinition withPlan(ExecutionPlan plan) {
     return new StepDefinition(id, executor, variableMap, plan, getSteps(), getDependents());
   }
 
-  public Plan getPlan() {
+  public ExecutionPlan getPlan() {
     return plan;
   }
 }

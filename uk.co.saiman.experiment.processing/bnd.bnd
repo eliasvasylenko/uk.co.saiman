@@ -11,6 +11,7 @@ Private-Package: uk.co.saiman.experiment.processing.impl
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 \
+	uk.co.saiman.experiment.osgi;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\

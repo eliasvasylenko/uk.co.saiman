@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.variables;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -43,13 +45,13 @@ public class Variables {
   private final StateMap state;
 
   public Variables(GlobalEnvironment environment) {
-    this.environment = environment;
+    this.environment = requireNonNull(environment);
     this.state = StateMap.empty();
   }
 
   public Variables(GlobalEnvironment environment, StateMap state) {
-    this.environment = environment;
-    this.state = state;
+    this.environment = requireNonNull(environment);
+    this.state = requireNonNull(state);
   }
 
   public StateMap state() {
@@ -64,11 +66,15 @@ public class Variables {
     return new Variables(environment, state.with(variable.mapIndex(environment), value));
   }
 
-  public <U> Variables with(
+  public <U> Variables withOpt(
       Variable<U> variable,
-      Function<? super Optional<U>, ? extends U> value) {
-    return new Variables(
-        environment,
-        state.with(variable.mapIndex(environment), value.apply(get(variable))));
+      Function<? super Optional<U>, ? extends Optional<? extends U>> value) {
+    return value
+        .apply(get(variable))
+        .map(
+            newValue -> new Variables(
+                environment,
+                state.with(variable.mapIndex(environment), newValue)))
+        .orElseGet(() -> new Variables(environment, state.remove(variable.mapIndex(environment))));
   }
 }

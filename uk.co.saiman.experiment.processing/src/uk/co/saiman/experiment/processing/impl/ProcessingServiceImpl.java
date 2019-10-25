@@ -39,10 +39,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.data.function.processing.DataProcessor;
+import uk.co.saiman.experiment.environment.osgi.SharedResource;
 import uk.co.saiman.experiment.processing.ProcessingService;
 import uk.co.saiman.experiment.processing.ProcessingStrategy;
 
 @Component
+@SharedResource
 public class ProcessingServiceImpl implements ProcessingService {
   private final Map<Class<? extends DataProcessor>, ProcessingStrategy<?>> processors = new HashMap<>();
   private final Map<String, ProcessingStrategy<?>> namedProcessors = new HashMap<>();

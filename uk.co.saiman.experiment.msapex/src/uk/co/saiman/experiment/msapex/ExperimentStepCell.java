@@ -27,14 +27,20 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import static java.util.stream.Collectors.toList;
 import static javafx.css.PseudoClass.getPseudoClass;
+import static uk.co.saiman.eclipse.ui.TransferMode.COPY;
+import static uk.co.saiman.eclipse.ui.TransferMode.DISCARD;
+import static uk.co.saiman.eclipse.ui.TransferMode.MOVE;
 
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Named;
 
+import org.eclipse.e4.core.contexts.IContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -47,16 +53,26 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.model.ui.MCell;
-import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.ui.BeginTransfer;
+import uk.co.saiman.eclipse.ui.Children;
+import uk.co.saiman.eclipse.ui.CompleteTransfer;
+import uk.co.saiman.eclipse.ui.Remove;
+import uk.co.saiman.eclipse.ui.TransferFormat;
+import uk.co.saiman.eclipse.ui.TransferSink;
+import uk.co.saiman.eclipse.ui.TransferSource;
+import uk.co.saiman.eclipse.ui.fx.impl.TransferDestination;
+import uk.co.saiman.eclipse.utilities.ContextBuffer;
 import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.definition.json.JsonStepDefinitionFormat;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
 import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.variables.Variables;
@@ -68,10 +84,12 @@ import uk.co.saiman.msapex.editor.EditorService;
  * @author Elias N Vasylenko
  */
 public class ExperimentStepCell {
-  public static final String ID = "uk.co.saiman.experiment.msapex.step.cell";
+  public static final String ID = "uk.co.saiman.experiment.step.cell";
   public static final String SUPPLEMENTAL_TEXT = ID + ".supplemental";
   public static final PseudoClass SUPPLEMENTAL_PSEUDO_CLASS = getPseudoClass(
       SUPPLEMENTAL_TEXT.replace('.', '-'));
+
+  public static final String PARENT_STEP = "uk.co.saiman.experiment.step.cell.parent";
 
   @Inject
   @Service
@@ -89,8 +107,7 @@ public class ExperimentStepCell {
   @Inject
   private MCell cell;
 
-  @Inject
-  private ChildrenService children;
+  private TransferFormat<StepDefinition> stepTransferFormat;
 
   @CanExecute
   public boolean canExecute() {
@@ -110,7 +127,7 @@ public class ExperimentStepCell {
   }
 
   @PostConstruct
-  public void prepare(HBox node) {
+  public void prepare(HBox node, ExecutorService executorService) {
     /*
      * configure label
      */
@@ -141,6 +158,25 @@ public class ExperimentStepCell {
 
     EclipseContextUtilities.injectSubtypes(context, Executor.class);
 
+    EclipseContextUtilities
+        .injectDerived(
+            context,
+            Variables.class,
+            (v, c) -> step
+                .getVariableDeclarations()
+                .forEach(dec -> c.set(dec.variable().id(), new IContextFunction() {
+                  String id = dec.variable().id();
+
+                  @Override
+                  public Object compute(IEclipseContext context, String contextKey) {
+                    if (contextKey.equals(id)) {
+                      return context.get(Step.class).getVariable(dec.variable());
+                    } else {
+                      return null;
+                    }
+                  }
+                })));
+
     /*
      * Inject events
      */
@@ -149,7 +185,42 @@ public class ExperimentStepCell {
      * Children
      */
     updatePath();
-    updateChildren();
+
+    /*
+     * Transfer
+     */
+    stepTransferFormat = new TransferFormat<>(
+        new JsonStepDefinitionFormat(executorService),
+        EnumSet.of(COPY, MOVE, DISCARD));
+  }
+
+  @BeginTransfer
+  public TransferSource beginTransfer() {
+    System.out.println(" begin transfer at " + step);
+    return new TransferSource().with(stepTransferFormat, step.getDefinition());
+  }
+
+  @CompleteTransfer
+  public TransferSink completeTransfer(
+      TransferDestination destination,
+      @Optional @Named(CompleteTransfer.SIBLING) MCell sibling) {
+    return new TransferSink().with(stepTransferFormat, definition -> {
+      int index;
+      if (sibling != null && sibling.getContext().get(PARENT_STEP) == step) {
+        index = sibling.getContext().get(Step.class).getIndex();
+        if (destination == TransferDestination.AFTER_CHILD) {
+          index++;
+        }
+      } else {
+        index = (int) step.getDependentSteps().count();
+      }
+      step.attach(index, definition);
+    });
+  }
+
+  @Remove
+  public void remove() {
+    step.detach();
   }
 
   @Inject
@@ -162,37 +233,35 @@ public class ExperimentStepCell {
 
   @Inject
   @Optional
-  public void update(AddStepEvent event) {
-    if (event.dependencyStep().filter(step::equals).isPresent()) {
-      updateChildren();
-    }
-  }
-
-  @Inject
-  @Optional
-  public void update(RemoveStepEvent event) {
-    if (event.previousDependencyStep().filter(step::equals).isPresent()) {
-      updateChildren();
-    }
-  }
-
-  @Inject
-  @Optional
   public void update(ChangeVariableEvent event) {
     if (Objects.equals(event.step(), step)) {
       // TODO update context?
     }
   }
 
-  @Inject
-  @Optional
   public void updatePath() {
     cell.setLabel(step.getId().name());
     context.set(ExperimentPath.class, step.getPath());
   }
 
-  private void updateChildren() {
-    children
-        .setItems(ExperimentStepCell.ID, Step.class, step.getDependentSteps().collect(toList()));
+  @Children(snippetId = ExperimentStepCell.ID)
+  private Stream<? extends ContextBuffer> updateChildren(
+      @Optional AddStepEvent addition,
+      @Optional RemoveStepEvent removal) {
+    var hasAddition = addition != null
+        && addition.dependencyStep().filter(step::equals).isPresent();
+    var hasRemoval = removal != null
+        && removal.previousDependencyStep().filter(step::equals).isPresent();
+    if (!hasAddition && !hasRemoval) {
+      return null;
+    }
+    return updateChildren();
+  }
+
+  @Children(snippetId = ExperimentStepCell.ID)
+  private Stream<? extends ContextBuffer> updateChildren() {
+    return step
+        .getDependentSteps()
+        .map(step -> ContextBuffer.empty().set(Step.class, step).set(PARENT_STEP, this.step));
   }
 }

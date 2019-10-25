@@ -32,15 +32,18 @@ import static org.osgi.service.component.annotations.ReferencePolicyOption.GREED
 import static uk.co.saiman.state.Accessor.stringAccessor;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -57,7 +60,9 @@ import uk.co.saiman.state.StateMap;
 @Component(configurationPid = StorageServiceImpl.CONFIGURATION_PID, configurationPolicy = OPTIONAL)
 public class StorageServiceImpl implements StorageService {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Storage Service", description = "A service over a set of available experiment storage implementations")
+  @ObjectClassDefinition(
+      name = "Storage Service",
+      description = "A service over a set of available experiment storage implementations")
   public @interface StorageServiceConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.storage";
@@ -66,6 +71,9 @@ public class StorageServiceImpl implements StorageService {
       ExperimentServiceConstants.STORE_ID,
       stringAccessor());
 
+  private final BundleContext context;
+  private final Set<ServiceReference<?>> references;
+
   private final Map<String, Store<?>> stores;
   private final Map<Store<?>, String> ids;
 
@@ -73,16 +81,25 @@ public class StorageServiceImpl implements StorageService {
   public StorageServiceImpl(
       BundleContext context,
       @Reference(name = "stores", policyOption = GREEDY) List<ServiceReference<Store<?>>> stores) {
+    this.context = context;
+    this.references = new HashSet<>();
+
     this.stores = new HashMap<>();
     this.ids = new HashMap<>();
 
     for (var storeReference : stores) {
       var store = context.getService(storeReference);
+      references.add(storeReference);
       storeIndexer(storeReference).ifPresent(id -> {
         this.stores.put(id, store);
         this.ids.put(store, id);
       });
     }
+  }
+
+  @Deactivate
+  public void deactivate() {
+    references.forEach(context::ungetService);
   }
 
   private static Optional<String> storeIndexer(ServiceReference<Store<?>> serviceReference) {

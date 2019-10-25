@@ -31,15 +31,18 @@ import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONA
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -77,10 +80,15 @@ import uk.co.saiman.experiment.osgi.impl.ExecutorServiceImpl.ExecutorServiceConf
 @Component(configurationPid = ExecutorServiceImpl.CONFIGURATION_PID, configurationPolicy = OPTIONAL)
 public class ExecutorServiceImpl implements ExecutorService {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Executor Service", description = "A service over a set of executors which may interact")
+  @ObjectClassDefinition(
+      name = "Executor Service",
+      description = "A service over a set of executors which may interact")
   public @interface ExecutorServiceConfiguration {}
 
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.executors";
+
+  private final BundleContext context;
+  private final Set<ServiceReference<?>> references;
 
   private final Map<String, Executor> executors;
   private final Map<Executor, String> ids;
@@ -88,17 +96,28 @@ public class ExecutorServiceImpl implements ExecutorService {
   @Activate
   public ExecutorServiceImpl(
       BundleContext context,
-      @Reference(name = "executors", policyOption = GREEDY) List<ServiceReference<Executor>> executors) {
+      @Reference(
+          name = "executors",
+          policyOption = GREEDY) List<ServiceReference<Executor>> executors) {
+    this.context = context;
+    this.references = new HashSet<>();
+
     this.executors = new HashMap<>();
     this.ids = new HashMap<>();
 
     for (var executorReference : executors) {
       var executor = context.getService(executorReference);
+      references.add(executorReference);
       executorIndexer(executorReference).ifPresent(id -> {
         this.executors.put(id, executor);
         this.ids.put(executor, id);
       });
     }
+  }
+
+  @Deactivate
+  public void deactivate() {
+    references.forEach(context::ungetService);
   }
 
   private static Optional<String> executorIndexer(ServiceReference<Executor> serviceReference) {

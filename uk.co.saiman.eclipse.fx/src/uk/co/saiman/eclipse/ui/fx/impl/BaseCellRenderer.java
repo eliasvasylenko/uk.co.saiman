@@ -49,9 +49,11 @@ import uk.co.saiman.eclipse.ui.fx.widget.WCell;
 /**
  * Base renderer of {@link MCell}
  * 
- * @param <N> the native widget type
+ * @param <N>
+ *          the native widget type
  */
-public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<MCell, MCell, WCell<N>> {
+public abstract class BaseCellRenderer<N>
+    extends BaseItemContainerRenderer<MCell, MCell, WCell<N>> {
   /**
    * Eventbroker to use
    */
@@ -112,6 +114,11 @@ public abstract class BaseCellRenderer<N> extends BaseItemContainerRenderer<MCel
 
     IContributionFactory contributionFactory = element.getContext().get(IContributionFactory.class);
     Object newCell = contributionFactory.create(element.getContributionURI(), element.getContext());
+
+    if (!element.isToBeRendered()) {
+      return;
+    }
+
     element.setObject(newCell);
 
     if (element.getPopupMenu() != null) {

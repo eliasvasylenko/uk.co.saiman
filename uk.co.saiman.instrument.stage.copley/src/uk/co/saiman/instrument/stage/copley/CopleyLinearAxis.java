@@ -69,20 +69,26 @@ import uk.co.saiman.observable.ObservableValue;
 import uk.co.saiman.observable.OwnedMessage;
 
 @Designate(ocd = CopleyLinearAxis.CopleyLinearAxisConfiguration.class, factory = true)
-@Component(name = CopleyLinearAxis.CONFIGURATION_PID, configurationPid = CopleyLinearAxis.CONFIGURATION_PID, configurationPolicy = REQUIRE)
+@Component(
+    name = CopleyLinearAxis.CONFIGURATION_PID,
+    configurationPid = CopleyLinearAxis.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE)
 public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
     implements AxisDevice<Length, AxisController<Length>> {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.linear";
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "Copley Stage Linear Axis Configuration", description = "The configuration for a linear Copley motor axis for a modular stage")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "Copley Stage Linear Axis Configuration",
+      description = "The configuration for a linear Copley motor axis for a modular stage")
   public @interface CopleyLinearAxisConfiguration {
-    @AttributeDefinition(name = "Controller comms target", description = "The copley controller instance owning the axis")
+    @AttributeDefinition(
+        name = "Controller comms target",
+        description = "The copley controller instance owning the axis")
     String comms_target();
 
-    int axis()
-
-    default 0;
+    int axis() default 0;
 
     int node() default 0;
   }
@@ -91,8 +97,8 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   private final int node;
   private final int axis;
 
-  private final ObservableProperty<Quantity<Length>> actualLocation;
-  private final ObservableProperty<Quantity<Length>> requestedLocation;
+  private final ObservableProperty<Quantity<Length>> actualPosition;
+  private final ObservableProperty<Quantity<Length>> requestedPosition;
 
   private final ObservableProperty<AxisState> axisState;
 
@@ -114,8 +120,8 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
     this.node = node;
     this.axis = axis;
 
-    this.actualLocation = new ObservablePropertyImpl<>(SampleLocationUnknown::new);
-    this.requestedLocation = new ObservablePropertyImpl<>(SampleLocationUnknown::new);
+    this.actualPosition = new ObservablePropertyImpl<>(SampleLocationUnknown::new);
+    this.requestedPosition = new ObservablePropertyImpl<>(SampleLocationUnknown::new);
     this.axisState = new ObservablePropertyImpl<>(LOCATION_FAILED);
 
     startPolling();
@@ -127,7 +133,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   protected synchronized void startPolling() {
-    polling = fixedRate(0, 100, MILLISECONDS)
+    polling = fixedRate(1000, 100, MILLISECONDS)
         .weakReference(this)
         .map(OwnedMessage::owner)
         .then(onFailure(t -> log.log(Level.ERROR, t)))
@@ -135,7 +141,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   @Deactivate
-  protected synchronized void stopPolling() {
+  public void stopPolling() {
     polling.cancel();
   }
 
@@ -184,7 +190,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
     } catch (Exception e) {
       setInaccessible();
       axisState.set(LOCATION_FAILED);
-      actualLocation.setProblem(() -> new SampleLocationUnknown(e));
+      actualPosition.setProblem(() -> new SampleLocationUnknown(e));
       log.log(Level.ERROR, "Failed to determine axis position", e);
     }
   }
@@ -193,11 +199,11 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
     try {
       var position = getAxis().actualPosition().get();
       setAccessible();
-      actualLocation.set(getLengthFromSteps(position.value));
+      actualPosition.set(getLengthFromSteps(position.value));
     } catch (Exception e) {
       setInaccessible();
       axisState.set(LOCATION_FAILED);
-      actualLocation.setProblem(() -> new SampleLocationUnknown(e));
+      actualPosition.setProblem(() -> new SampleLocationUnknown(e));
       log.log(Level.ERROR, "Failed to determine axis position", e);
     }
   }
@@ -206,11 +212,11 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
     try {
       var position = getAxis().requestedPosition().get();
       setAccessible();
-      requestedLocation.set(getLengthFromSteps(position.value));
+      requestedPosition.set(getLengthFromSteps(position.value));
     } catch (Exception e) {
       setInaccessible();
       axisState.set(LOCATION_FAILED);
-      requestedLocation.setProblem(() -> new SampleLocationUnknown(e));
+      requestedPosition.setProblem(() -> new SampleLocationUnknown(e));
       log.log(Level.ERROR, "Failed to determine axis position", e);
     }
   }
@@ -225,12 +231,12 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
 
   @Override
   public ObservableValue<Quantity<Length>> actualPosition() {
-    return actualLocation;
+    return actualPosition;
   }
 
   @Override
-  public ObservableValue<Quantity<Length>> requestedLocation() {
-    return requestedLocation;
+  public ObservableValue<Quantity<Length>> requestedPosition() {
+    return requestedPosition;
   }
 
   @Override

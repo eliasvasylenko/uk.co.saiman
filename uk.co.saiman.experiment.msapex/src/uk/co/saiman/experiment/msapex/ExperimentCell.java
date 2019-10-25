@@ -27,8 +27,7 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -48,15 +47,21 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import uk.co.saiman.eclipse.dialog.DialogUtilities;
 import uk.co.saiman.eclipse.model.ui.MCell;
-import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.ui.Children;
+import uk.co.saiman.eclipse.ui.CompleteTransfer;
 import uk.co.saiman.eclipse.ui.SaiUiEvents;
+import uk.co.saiman.eclipse.ui.TransferSink;
+import uk.co.saiman.eclipse.utilities.ContextBuffer;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment.Status;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
+import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -83,28 +88,6 @@ public class ExperimentCell {
 
   @Inject
   MCell cell;
-  @Inject
-  ChildrenService children;
-
-  @Optional
-  @Inject
-  public void execute(@UIEventTopic(SaiUiEvents.Cell.TOPIC_EXPANDED) @Optional Event expanded) {
-    if (cell.isExpanded()) {
-      try {
-        experiment.open();
-
-      } catch (Exception e) {
-        log.log(Level.ERROR, e);
-
-        Alert alert = new Alert(AlertType.ERROR);
-        DialogUtilities.addStackTrace(alert, e);
-        alert.setTitle(text.openExperimentFailedDialog().toString());
-        alert.setHeaderText(text.openExperimentFailedText(experiment).toString());
-        alert.setContentText(text.openExperimentFailedDescription().toString());
-        alert.showAndWait();
-      }
-    }
-  }
 
   @PostConstruct
   public void prepare(HBox node) {
@@ -148,16 +131,25 @@ public class ExperimentCell {
     }
   }
 
+  @CompleteTransfer
+  public TransferSink completeTransfer() {
+    System.out.println(" complete transfer at " + experiment);
+    return new TransferSink();
+  }
+
   private void open() {
     context.set(Experiment.class, experiment.experiment());
+    context.set(ExperimentDefinition.class, experiment.experiment().getDefinition());
+    context.set(Procedure.class, experiment.experiment().getDefinition().procedure());
+    context.set(ExperimentPath.class, ExperimentPath.toRoot());
     updateIcon();
-    updateChildren();
   }
 
   private void close() {
-    removeChildren();
     context.remove(Experiment.class);
-    context.remove(Step.class);
+    context.remove(ExperimentDefinition.class);
+    context.remove(Procedure.class);
+    context.remove(ExperimentPath.class);
     updateIcon();
   }
 
@@ -166,27 +158,27 @@ public class ExperimentCell {
   public void update(ExperimentEvent event) {
     if (experiment.status() == Status.OPEN && event.experiment() == experiment.experiment()) {
       cell.setLabel(event.experimentDefinition().id().name());
-      updateChildren();
     }
   }
 
-  private void removeChildren() {
-    try {
-      children.setItems(ExperimentStepCell.ID, Step.class, emptyList());
-    } catch (Exception e) {
-      log.log(Level.ERROR, "Problem removing children", e);
+  @Children(snippetId = ExperimentStepCell.ID)
+  private Stream<ContextBuffer> updateChildren(
+      @Optional WorkspaceEvent workspaceEvent,
+      @Optional ExperimentEvent experimentEvent) {
+    if ((experiment.status() != Status.OPEN
+        || experimentEvent != null && experimentEvent.experiment() != experiment.experiment())
+        || (workspaceEvent != null && workspaceEvent.experiment() != experiment)) {
+      return null;
     }
-  }
 
-  private void updateChildren() {
-    try {
-      children
-          .setItems(
-              ExperimentStepCell.ID,
-              Step.class,
-              experiment.experiment().getIndependentSteps().collect(toList()));
-    } catch (Exception e) {
-      log.log(Level.ERROR, "Problem updating children", e);
+    switch (experiment.status()) {
+    case OPEN:
+      return experiment
+          .experiment()
+          .getIndependentSteps()
+          .map(step -> ContextBuffer.empty().set(Step.class, step));
+    default:
+      return Stream.empty();
     }
   }
 
@@ -195,6 +187,21 @@ public class ExperimentCell {
   public void expanded(@UIEventTopic(SaiUiEvents.Cell.TOPIC_EXPANDED) Event expanded) {
     if (expanded.getProperty(UIEvents.EventTags.ELEMENT) == cell) {
       updateIcon();
+    }
+    if (cell.isExpanded()) {
+      try {
+        experiment.open();
+
+      } catch (Exception e) {
+        log.log(Level.ERROR, e);
+
+        Alert alert = new Alert(AlertType.ERROR);
+        DialogUtilities.addStackTrace(alert, e);
+        alert.setTitle(text.openExperimentFailedDialog().toString());
+        alert.setHeaderText(text.openExperimentFailedText(experiment).toString());
+        alert.setContentText(text.openExperimentFailedDescription().toString());
+        alert.showAndWait();
+      }
     }
   }
 

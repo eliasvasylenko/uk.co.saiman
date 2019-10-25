@@ -44,12 +44,14 @@ import uk.co.saiman.data.function.processing.DataProcessor;
 import uk.co.saiman.experiment.variables.Variable;
 
 public class Processing {
+  public static final String PROCESSING_VARIABLE_ID = "uk.co.saiman.processing.variable";
   public static final Variable<Processing> PROCESSING_VARIABLE = new Variable<>(
-      "uk.co.saiman.processing",
+      PROCESSING_VARIABLE_ID,
       environment -> processingAccessor(environment.provideValue(ProcessingService.class)));
 
+  public static final String PROCESSOR_VARIABLE_ID = "uk.co.saiman.processor.variable";
   public static final Variable<DataProcessor> PROCESSOR_VARIABLE = new Variable<>(
-      "uk.co.saiman.processor",
+      PROCESSOR_VARIABLE_ID,
       environment -> ProcessingAccess
           .processorAccessor(environment.provideValue(ProcessingService.class)));
 

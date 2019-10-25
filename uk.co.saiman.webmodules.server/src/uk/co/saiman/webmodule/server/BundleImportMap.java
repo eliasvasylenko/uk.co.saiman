@@ -55,12 +55,25 @@ public class BundleImportMap {
   private final JSONObject importMap;
 
   public BundleImportMap(Bundle bundle, String pathRoot) {
-    var visibleModules = getVisibleWebModules(bundle);
-    var visibleModulesClosure = getVisibleWebModulesClosure(visibleModules);
+    var moduleReferences = getVisibleWebModules(bundle);
 
-    this.importMap = configureImportMap(pathRoot, visibleModules, visibleModulesClosure);
+    try {
+      var visibleModules = moduleReferences
+          .stream()
+          .map(bundle.getBundleContext()::getService)
+          .collect(toSet());
+      var visibleModulesClosure = getVisibleWebModulesClosure(visibleModules);
 
-    System.out.println(toString());
+      this.importMap = configureImportMap(pathRoot, visibleModules, visibleModulesClosure);
+
+    } finally {
+      moduleReferences.forEach(bundle.getBundleContext()::ungetService);
+    }
+  }
+
+  public void close() {
+    // TODO Auto-generated method stub
+
   }
 
   @Override
@@ -88,12 +101,12 @@ public class BundleImportMap {
     }
   }
 
-  private static Set<WebModule> getVisibleWebModules(Bundle bundle) {
+  @SuppressWarnings("unchecked")
+  private static Set<ServiceReference<WebModule>> getVisibleWebModules(Bundle bundle) {
     return unmodifiableSet(
         concat(stream(bundle.getRegisteredServices()), stream(bundle.getServicesInUse()))
             .filter(BundleImportMap::isWebModule)
-            .map(reference -> bundle.getBundleContext().getService(reference))
-            .map(service -> (WebModule) service)
+            .map(reference -> (ServiceReference<WebModule>) reference)
             .collect(toSet()));
   }
 

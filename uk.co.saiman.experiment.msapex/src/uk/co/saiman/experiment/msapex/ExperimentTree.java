@@ -27,14 +27,14 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Optional;
 
-import uk.co.saiman.eclipse.ui.ChildrenService;
+import uk.co.saiman.eclipse.ui.Children;
+import uk.co.saiman.eclipse.utilities.ContextBuffer;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
 import uk.co.saiman.experiment.msapex.workspace.event.AddExperimentEvent;
@@ -46,31 +46,12 @@ public class ExperimentTree {
   @Inject
   private Workspace workspace;
 
-  @Inject
-  private ChildrenService children;
-
-  @PostConstruct
-  void initialize() {
-    updateChildren();
-  }
-
-  @Inject
-  @Optional
-  public void update(AddExperimentEvent event) {
-    updateChildren();
-  }
-
-  @Inject
-  @Optional
-  public void update(RemoveExperimentEvent event) {
-    updateChildren();
-  }
-
-  private void updateChildren() {
-    children
-        .setItems(
-            ExperimentCell.ID,
-            WorkspaceExperiment.class,
-            workspace.getWorkspaceExperiments().collect(toList()));
+  @Children(snippetId = ExperimentCell.ID)
+  private Stream<ContextBuffer> updateChildren(
+      @Optional AddExperimentEvent addition,
+      @Optional RemoveExperimentEvent removal) {
+    return workspace
+        .getWorkspaceExperiments()
+        .map(experiment -> ContextBuffer.empty().set(WorkspaceExperiment.class, experiment));
   }
 }

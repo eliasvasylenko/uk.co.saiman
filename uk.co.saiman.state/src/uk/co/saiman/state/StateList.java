@@ -175,5 +175,10 @@ public class StateList implements State, Iterable<State> {
   @Override
   public int hashCode() {
     return Objects.hash(elements);
-  };
+  }
+
+  @Override
+  public String toString() {
+    return elements.toString();
+  }
 }

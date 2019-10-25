@@ -31,6 +31,7 @@ import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
 import static uk.co.saiman.data.format.RegistrationTree.VENDOR;
 import static uk.co.saiman.state.Accessor.mapAccessor;
 
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.format.MediaType;
@@ -38,6 +39,7 @@ import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.service.StorageService;
@@ -60,33 +62,42 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
   private final JsonStateMapFormat stateMapFormat;
   private final JsonExperimentDefinitionFormat definitionFormat;
+  private final Supplier<GlobalEnvironment> environment;
 
-  public JsonExperimentFormat(ExecutorService executorService, StorageService storageService) {
-    this(executorService, storageService, new JsonStateMapFormat());
+  public JsonExperimentFormat(
+      ExecutorService executorService,
+      StorageService storageService,
+      Supplier<GlobalEnvironment> environment) {
+    this(executorService, storageService, environment, new JsonStateMapFormat());
   }
 
   public JsonExperimentFormat(
       ExecutorService executorService,
       StorageService storageService,
+      Supplier<GlobalEnvironment> environment,
       JsonStateMapFormat stateMapFormat) {
     this(
         storageService,
+        environment,
         stateMapFormat,
         new JsonExperimentDefinitionFormat(executorService, stateMapFormat));
   }
 
   public JsonExperimentFormat(
       StorageService storageService,
+      Supplier<GlobalEnvironment> environment,
       JsonStateMapFormat stateMapFormat,
       JsonExperimentDefinitionFormat definitionFormat) {
     this.stateMapFormat = stateMapFormat;
     this.definitionFormat = definitionFormat;
+    this.environment = environment;
 
     this.storage = new MapIndex<>(
         STORAGE,
-        mapAccessor(
-            s -> storageService.configureStorage(s),
-            r -> storageService.deconfigureStorage(r)));
+        mapAccessor()
+            .map(
+                s -> storageService.configureStorage(s),
+                r -> storageService.deconfigureStorage(r)));
   }
 
   @Override
@@ -105,7 +116,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
-    return new Experiment(definitionFormat.loadProcedure(data), data.get(storage));
+    return new Experiment(definitionFormat.loadProcedure(data), data.get(storage), environment);
   }
 
   @Override

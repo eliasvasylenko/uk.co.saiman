@@ -41,7 +41,6 @@ Export-Package: \
 	uk.co.saiman.experiment.msapex.environment,\
 	uk.co.saiman.experiment.msapex.i18n,\
 	uk.co.saiman.experiment.msapex.provider,\
-	uk.co.saiman.experiment.msapex.step.provider,\
 	uk.co.saiman.experiment.msapex.workspace,\
 	uk.co.saiman.experiment.msapex.workspace.event
 

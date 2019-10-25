@@ -39,7 +39,7 @@ public interface AxisDevice<T extends Quantity<T>, U extends AxisController<T>> 
 
   Quantity<T> getUpperBound();
 
-  ObservableValue<Quantity<T>> requestedLocation();
+  ObservableValue<Quantity<T>> requestedPosition();
 
   ObservableValue<Quantity<T>> actualPosition();
 }
