@@ -61,8 +61,8 @@ import uk.co.saiman.observable.OwnedMessage;
  * @author Elias N Vasylenko
  */
 public class ExperimentEditorAddon implements EditorProvider {
-  public static final String EDITOR_EXPERIMENT_PATH = "uk.co.saiman.msapex.editor.experiment.path";
-  public static final String EDITOR_EXPERIMENT_NODE = "uk.co.saiman.msapex.editor.experiment.node";
+  public static final String EDITOR_EXPERIMENT_PATH = "uk.co.saiman.editor.experiment.path";
+  public static final String EDITOR_EXPERIMENT_NODE = "uk.co.saiman.editor.experiment.node";
 
   @Inject
   private Workspace workspace;

@@ -53,4 +53,3 @@ Private-Package: uk.co.saiman.experiment.msapex.provider.workspace
 	always.e4xmi,\
 	initial.e4xmi,\
 	OSGI-INF/configurator=configurator
-	

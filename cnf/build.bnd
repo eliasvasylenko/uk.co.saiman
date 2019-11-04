@@ -106,6 +106,7 @@ Bundle-Developers:\
 		optionalAttributes	=	"main, description"
 
 -plugin.Apache:\
+\
 	aQute.bnd.repository.maven.pom.provider.BndPomRepository; \
 		name				=	Apache; \
 		snapshotUrls		=	https://repository.apache.org/content/groups/snapshots; \
@@ -121,7 +122,16 @@ Bundle-Developers:\
 ##		targetPlatform		=	true;\
 ##		url					=	${fileuri;${build}/eclipse.platform.target}
 
+#-plugin.EclipsePlatform:\
+#\
+#	aQute.bnd.repository.p2.provider.P2Repository;\
+#		name				=	"Eclipse_2019-03";\
+#		location			=	${build}/cache/eclipse-platform;\
+#		targetPlatform		=	true;\
+#		url					=	${fileuri;${build}/eclipse.platform.target}
+
 -plugin.efxclipse:\
+\
 	aQute.bnd.repository.p2.provider.P2Repository;\
 		name				=	"E(fx)clipse_Runtime_(3.5.0)";\
 		location			=	${build}/cache/eclipse-fx;\

@@ -13,6 +13,7 @@ Export-Package: uk.co.saiman.msapex.editor
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.text;version=snapshot,\
 	uk.co.saiman.mathematics;version=snapshot,\
+	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.reflection;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.fx;version=snapshot,\

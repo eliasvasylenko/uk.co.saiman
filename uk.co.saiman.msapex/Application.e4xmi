@@ -10,8 +10,10 @@
       <persistedState key="PerspectiveTargetStack" value="uk.co.saiman.perspectivestack"/>
       <children xsi:type="basic:PartSashContainer" xmi:id="_zQGSYKMPEemXD8_BDWO00A" elementId="uk.co.saiman.analysis.partsashcontainer.root" horizontal="true">
         <children xsi:type="basic:PartStack" xmi:id="_1htvsKMPEemXD8_BDWO00A" elementId="uk.co.saiman.analysis.partstack.overview" containerData="0.22"/>
-        <children xsi:type="basic:PartStack" xmi:id="_5MTLEKMPEemXD8_BDWO00A" elementId="uk.co.saiman.analysis.partstack.editor" containerData="0.78">
-          <tags>DefaultPartPlaceholderContainer</tags>
+        <children xsi:type="basic:PartSashContainer" xmi:id="_77JaMP8VEemh-a9i83x9uA" elementId="uk.co.saiman.analysis.partsashcontainer.main" containerData="0.78">
+          <children xsi:type="basic:PartStack" xmi:id="_FZs_UP8WEemh-a9i83x9uA" elementId="uk.co.saiman.analysis.partstack.status">
+            <tags>DefaultPartPlaceholderContainer</tags>
+          </children>
         </children>
       </children>
     </snippets>

@@ -49,7 +49,7 @@ import uk.co.saiman.msapex.editor.EditorProvider;
 import uk.co.saiman.msapex.editor.EditorService;
 
 public class EditorAddon implements EditorService {
-  private static final String EDITOR_STACK_ID = "uk.co.saiman.msapex.partstack.editor";
+  private static final String EDITOR_STACK_ID = "uk.co.saiman.editor.partstack";
 
   private final Set<EditorProvider> editorProviders = new HashSet<>();
 

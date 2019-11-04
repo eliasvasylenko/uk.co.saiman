@@ -44,7 +44,7 @@ import uk.co.saiman.experiment.Step;
  * @author Elias N Vasylenko
  */
 public class ExperimentEditorPart {
-  public static final String ID = "uk.co.saiman.experiment.msapex.compositepart.editor";
+  public static final String ID = "uk.co.saiman.experiment.compositepart.editor";
 
   @Inject
   private IEclipseContext context;
