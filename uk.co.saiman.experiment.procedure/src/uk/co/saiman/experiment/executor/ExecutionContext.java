@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.Location;
+import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.Resource;
 import uk.co.saiman.experiment.dependency.Result;
@@ -50,7 +51,7 @@ import uk.co.saiman.log.Log;
  * @author Elias N Vasylenko
  */
 public interface ExecutionContext {
-  String getId();
+  ExperimentId getId();
 
   Variables getVariables();
 

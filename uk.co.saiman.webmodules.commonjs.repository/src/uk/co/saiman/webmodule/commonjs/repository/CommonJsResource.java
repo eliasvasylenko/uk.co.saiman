@@ -29,6 +29,10 @@ package uk.co.saiman.webmodule.commonjs.repository;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
 import static org.osgi.namespace.extender.ExtenderNamespace.EXTENDER_NAMESPACE;
 import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
 import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
@@ -93,7 +97,11 @@ public class CommonJsResource implements Resource {
     this.requirements = concat(
         Stream.of(createExtenderRequirement()),
         createDependencyRequirements(bundleVersion)).collect(toList());
-    this.capabilities = Stream.of(createModuleServiceCapability()).collect(toList());
+    this.capabilities = Stream
+        .of(
+            createModuleServiceCapability(),
+            identityCapability(bundleVersion.getBundle().getBundleSymbolicName(format)))
+        .collect(toList());
   }
 
   private String getEntryPoint(JSONObject json, BundleVersionConfiguration configuration) {
@@ -131,6 +139,20 @@ public class CommonJsResource implements Resource {
           .addAttribute(RESOURCE_ROOT_ATTRIBUTE, RESOURCE_ROOT)
           .addAttribute(ENTRY_POINT_ATTRIBUTE, entryPoint)
           .addAttribute(FORMAT_ATTRIBUTE, format.toString());
+
+      return builder;
+    } catch (Exception e) {
+      throw new RegistryResolutionException("Failed to generate module capability", e);
+    }
+  }
+
+  private CapReqBuilder identityCapability(String bsn) {
+    try {
+      CapReqBuilder builder = new CapabilityBuilder(this, IDENTITY_NAMESPACE)
+          .setResource(this)
+          .addAttribute(IDENTITY_NAMESPACE, bsn)
+          .addAttribute(CAPABILITY_VERSION_ATTRIBUTE, version)
+          .addAttribute(CAPABILITY_TYPE_ATTRIBUTE, TYPE_BUNDLE);
 
       return builder;
     } catch (Exception e) {

@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
 
 /**
@@ -55,13 +56,18 @@ import uk.co.saiman.experiment.instruction.Instruction;
 public class Procedure {
   private final ExperimentId id;
   private final LinkedHashMap<ExperimentPath<Absolute>, Instruction> instructions;
+  private final GlobalEnvironment environment;
 
-  public Procedure(ExperimentId id, Collection<? extends Instruction> instructions) {
+  public Procedure(
+      ExperimentId id,
+      Collection<? extends Instruction> instructions,
+      GlobalEnvironment environment) {
     this.id = id;
     this.instructions = new LinkedHashMap<>();
     for (var instruction : instructions) {
       this.instructions.put(instruction.path(), instruction);
     }
+    this.environment = environment;
   }
 
   public ExperimentId id() {
@@ -70,6 +76,10 @@ public class Procedure {
 
   public Stream<Instruction> instructions() {
     return instructions.values().stream();
+  }
+
+  public GlobalEnvironment environment() {
+    return environment;
   }
 
   public Stream<ExperimentPath<Absolute>> paths() {

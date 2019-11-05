@@ -61,7 +61,6 @@ import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment.Status;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
-import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -140,7 +139,6 @@ public class ExperimentCell {
   private void open() {
     context.set(Experiment.class, experiment.experiment());
     context.set(ExperimentDefinition.class, experiment.experiment().getDefinition());
-    context.set(Procedure.class, experiment.experiment().getDefinition().procedure());
     context.set(ExperimentPath.class, ExperimentPath.toRoot());
     updateIcon();
   }
@@ -148,7 +146,6 @@ public class ExperimentCell {
   private void close() {
     context.remove(Experiment.class);
     context.remove(ExperimentDefinition.class);
-    context.remove(Procedure.class);
     context.remove(ExperimentPath.class);
     updateIcon();
   }

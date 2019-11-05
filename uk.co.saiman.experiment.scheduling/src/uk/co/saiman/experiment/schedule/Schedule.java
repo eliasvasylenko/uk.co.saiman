@@ -66,8 +66,7 @@ public class Schedule {
   }
 
   public Output conduct() {
-    scheduler.getConductor().conduct(scheduledProcedure);
-    return scheduler.getConductor();
+    return scheduler.conduct(this);
   }
 
   public Observable<ConductorEvent> events() {

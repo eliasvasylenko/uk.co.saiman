@@ -42,7 +42,7 @@ import org.osgi.annotation.bundle.Requirement;
         + CAPABILITY_OBJECTCLASS_ATTRIBUTE
         + "=org.apache.felix.service.command.Converter)("
         + RequireConverter.TYPE
-        + "=${converterType}))",
+        + "=${#converterType}))",
     effective = EFFECTIVE_ACTIVE)
 @Retention(CLASS)
 public @interface RequireConverter {

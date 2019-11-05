@@ -113,7 +113,7 @@ public class Experiment {
     boolean changed = !this.definition.equals(definition);
     if (changed) {
       this.definition = definition;
-      scheduler.schedule(definition.procedure());
+      scheduler.schedule(definition.procedure(getGlobalEnvironment()));
     }
     return changed;
   }

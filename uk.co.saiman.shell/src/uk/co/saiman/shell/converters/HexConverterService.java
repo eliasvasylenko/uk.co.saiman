@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.shell.converters;
 
+import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
+import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
 import static uk.co.saiman.bytes.ByteBuffers.fromPrefixedHexString;
 import static uk.co.saiman.bytes.ByteBuffers.toPrefixedHexString;
 import static uk.co.saiman.shell.converters.RequireConverter.TYPE;
@@ -34,13 +36,21 @@ import static uk.co.saiman.shell.converters.RequireConverter.TYPE;
 import java.nio.ByteBuffer;
 
 import org.apache.felix.service.command.Converter;
+import org.osgi.annotation.bundle.Capability;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.propertytypes.ServiceDescription;
 
 /**
  * Converter from hex strings to byte buffers for the GoGo shell
  * 
  * @author Elias N Vasylenko
  */
+@ServiceDescription("java.nio.ByteBuffer")
+@Capability(
+    namespace = SERVICE_NAMESPACE,
+    attribute = {
+        CAPABILITY_OBJECTCLASS_ATTRIBUTE + "=org.apache.felix.service.command.Converter",
+        TYPE + "=java.nio.ByteBuffer" })
 @Component(property = TYPE + "=java.nio.ByteBuffer")
 public class HexConverterService implements Converter {
   @Override

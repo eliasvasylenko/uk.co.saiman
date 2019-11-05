@@ -57,7 +57,7 @@ import uk.co.saiman.observable.Observable;
  */
 public class Scheduler {
   private Schedule schedule;
-  private Conductor conductor;
+  private final Conductor conductor;
 
   public Scheduler(StorageConfiguration<?> storageConfiguration) {
     this.schedule = null;
@@ -85,16 +85,6 @@ public class Scheduler {
     return schedule;
   }
 
-  public synchronized Optional<Schedule> scheduleReset() {
-    return getConductor().procedure().map(this::schedule);
-  }
-
-  private void assertFresh(Schedule schedule) {
-    if (this.schedule != schedule) {
-      throw new SchedulingException("Schedule is stale");
-    }
-  }
-
   synchronized void unschedule(Schedule schedule) {
     assertFresh(schedule);
 
@@ -107,6 +97,23 @@ public class Scheduler {
 
   synchronized void clear() throws IOException {
     conductor.clear();
+  }
+
+  synchronized Output conduct(Schedule schedule) {
+    assertFresh(schedule);
+
+    conductor.conduct(schedule.getScheduledProcedure());
+    return conductor;
+  }
+
+  public synchronized Optional<Schedule> scheduleReset() {
+    return getConductor().procedure().map(this::schedule);
+  }
+
+  private void assertFresh(Schedule schedule) {
+    if (this.schedule != schedule) {
+      throw new SchedulingException("Schedule is stale");
+    }
   }
 
   public Observable<ConductorEvent> conductorEvents() {

@@ -28,6 +28,7 @@ Bundle-Description: \
 	org.eclipse.swt.gtk.linux.x86_64,\
 	org.eclipse.jdt.ui,\
 	org.eclipse.jdt.core,\
+	org.eclipse.jface,\
 	org.eclipse.jface.databinding
 
 Export-Package: \

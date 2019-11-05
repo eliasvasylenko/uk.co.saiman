@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 
@@ -96,9 +97,9 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
     return new ExperimentDefinition(id, steps);
   }
 
-  public Procedure procedure() {
+  public Procedure procedure(GlobalEnvironment environment) {
     if (procedure == null) {
-      procedure = new Procedure(id, closure(this));
+      procedure = new Procedure(id, closure(this), environment);
     }
     return procedure;
   }

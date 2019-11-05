@@ -114,26 +114,10 @@ Bundle-Developers:\
 		pom					=	${build}/apache.xml; \
 		location			=	${build}/cache/apache.xml
 
-#-plugin.Eclipse:\
-#	aQute.bnd.repository.p2.provider.P2Repository;\
-#		name				=	"Eclipse_2019‑03";\
-#		location			=	${build}/cache/eclipse-platform;\
-#		url					=	https://download.eclipse.org/releases/2019-03/
-##		targetPlatform		=	true;\
-##		url					=	${fileuri;${build}/eclipse.platform.target}
-
-#-plugin.EclipsePlatform:\
-#\
-#	aQute.bnd.repository.p2.provider.P2Repository;\
-#		name				=	"Eclipse_2019-03";\
-#		location			=	${build}/cache/eclipse-platform;\
-#		targetPlatform		=	true;\
-#		url					=	${fileuri;${build}/eclipse.platform.target}
-
 -plugin.efxclipse:\
 \
 	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"E(fx)clipse_Runtime_(3.5.0)";\
+		name				=	"E(fx)clipse";\
 		location			=	${build}/cache/eclipse-fx;\
 		targetPlatform		=	true;\
 		url					=	${fileuri;${build}/efxclipse.target}
@@ -142,13 +126,34 @@ Bundle-Developers:\
 javafx.version: 12
 -plugin.javafx = \
 	aQute.bnd.repository.maven.provider.MavenBndRepository;\
-		releaseUrl=https://repo.maven.apache.org/maven2/;\
-		index=${build}/javafx.mvn;\
-		name="Java_FX"
+		name				=	"FX";\
+		releaseUrl			=	https://repo.maven.apache.org/maven2/;\
+		index				=	${build}/javafx.mvn
+
+# Uncomment to build "uk.co.saiman.eclipse.ui.edit"
+# This repo is not compatible with the latest e(fx)clipse
+#eclipse.platform.version: 2019-09
+#-plugin.EclipsePlatform:\
+#	aQute.bnd.repository.p2.provider.P2Repository;\
+#		name				=	"Eclipse_Platform";\
+#		location			=	${build}/cache/eclipse-platform-${eclipse.platform.version};\
+#		url					=	https://download.eclipse.org/releases/${eclipse.platform.version}/
+
+-runrepos:\
+	Central,\
+	Bnd,\
+	Local_Index,\
+	NPM,\
+	Apache,\
+	E(fx)clipse,\
+	FX,\
+	Workspace
 
 ## Run requirement groups:
 -runrequires.base:\
 	bnd.identity; id=org.apache.felix.log
+-runblacklist:\
+	bnd.identity; id=osgi.cmpn
 
 # Build path groups:
 -buildpath.base=\

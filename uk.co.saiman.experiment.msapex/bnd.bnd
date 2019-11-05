@@ -36,15 +36,13 @@ Bundle-Name: SAI :: Experiment :: MSApex
 	javax.measure.unit-api,\
 	org.eclipse.emf.common
 
-Export-Package: \
+Export-Package:\
 	uk.co.saiman.experiment.msapex,\
 	uk.co.saiman.experiment.msapex.environment,\
 	uk.co.saiman.experiment.msapex.i18n,\
 	uk.co.saiman.experiment.msapex.provider,\
 	uk.co.saiman.experiment.msapex.workspace,\
 	uk.co.saiman.experiment.msapex.workspace.event
-
-Private-Package: uk.co.saiman.experiment.msapex.provider.workspace
 
 -includeresource:\
 	css=css,\

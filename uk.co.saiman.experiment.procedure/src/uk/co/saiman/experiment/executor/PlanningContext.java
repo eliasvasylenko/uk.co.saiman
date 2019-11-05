@@ -26,7 +26,7 @@ public interface PlanningContext {
   void observesResult(Class<?> production);
 
   default void preparesCondition(Class<?> type) {
-    preparesCondition(type, Evaluation.ORDERED);
+    preparesCondition(type, Evaluation.INDEPENDENT);
   }
 
   void preparesCondition(Class<?> type, Evaluation evaluation);
