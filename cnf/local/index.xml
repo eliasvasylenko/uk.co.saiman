@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local_Index" increment="1572968530877">
+<repository xmlns="http://www.osgi.org/xmlns/repository/v1.0.0" name="Local_Index" increment="1572969303274">
   <resource>
     <capability namespace="osgi.identity">
       <attribute name="license" value="http://www.opensource.org/licenses/eclipse-1.0.php"/>
@@ -36,22 +36,22 @@
       <attribute name="license" value="GPL; link = http://www.gnu.org/licenses/"/>
       <attribute name="osgi.identity" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
       <attribute name="type" value="osgi.bundle"/>
-      <attribute name="version" value="0.0.1.201911051539" type="Version"/>
+      <attribute name="version" value="0.0.1.201911051554" type="Version"/>
       <attribute name="documentation" value="https://github.com/Scientific-Analysis-Instruments/uk.co.saiman/wiki"/>
     </capability>
     <capability namespace="osgi.wiring.bundle">
-      <attribute name="bundle-version" value="0.0.1.201911051539" type="Version"/>
+      <attribute name="bundle-version" value="0.0.1.201911051554" type="Version"/>
       <attribute name="osgi.wiring.bundle" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
     <capability namespace="osgi.wiring.host">
-      <attribute name="bundle-version" value="0.0.1.201911051539" type="Version"/>
+      <attribute name="bundle-version" value="0.0.1.201911051554" type="Version"/>
       <attribute name="osgi.wiring.host" value="uk.co.saiman.webmodules.commonjs.repository.plugin"/>
     </capability>
     <capability namespace="osgi.content">
-      <attribute name="size" value="3949938" type="Long"/>
+      <attribute name="size" value="3950056" type="Long"/>
       <attribute name="url" value="uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-0.0.1.jar"/>
       <attribute name="mime" value="application/vnd.osgi.bundle"/>
-      <attribute name="osgi.content" value="98DE565BE070AEA0F834ADF4DC5E31CE43D9BC9B568457EA3734A7DEAA869A09"/>
+      <attribute name="osgi.content" value="7341A9139A0F1367951DC525C2ADF69B7A15F69374263FADD385AB8132014C7A"/>
     </capability>
     <requirement namespace="osgi.wiring.package">
       <directive name="filter" value="(&amp;(osgi.wiring.package=aQute.bnd.annotation.plugin)(&amp;(version&gt;=1.0.0)(!(version&gt;=2.0.0))))"/>

@@ -34,10 +34,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
@@ -53,16 +51,19 @@ public class EditorAddon implements EditorService {
 
   private final Set<EditorProvider> editorProviders = new HashSet<>();
 
-  @Inject
-  private MApplication application;
-  @Inject
-  private EPartService partService;
-  @Inject
-  private EModelService modelService;
+  private final MApplication application;
+  private final EPartService partService;
+  private final EModelService modelService;
 
-  @PostConstruct
-  void initialize(IEclipseContext context) {
-    context.set(EditorService.class, this);
+  @Inject
+  public EditorAddon(
+      MApplication application,
+      EPartService partService,
+      EModelService modelService) {
+    this.application = application;
+    this.partService = partService;
+    this.modelService = modelService;
+    application.getContext().set(EditorService.class, this);
   }
 
   @Override

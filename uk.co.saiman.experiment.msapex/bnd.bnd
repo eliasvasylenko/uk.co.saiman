@@ -3,6 +3,12 @@ Bundle-Name: SAI :: Experiment :: MSApex
 -include:\
 	${build}/include/eclipse.plugin.bnd
 
+
+# this may be needed for e4 model interdependencies to function correctly...
+Require-Bundle:\
+	uk.co.saiman.msapex,\
+	uk.co.saiman.msapex.editor
+
 -buildpath:\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
@@ -19,6 +25,7 @@ Bundle-Name: SAI :: Experiment :: MSApex
 	uk.co.saiman.eclipse.fx;version=snapshot,\
 	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\

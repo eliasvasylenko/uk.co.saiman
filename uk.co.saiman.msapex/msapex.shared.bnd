@@ -23,6 +23,7 @@
 	bnd.identity; id=uk.co.saiman.chemistry.msapex,\
 	bnd.identity; id=uk.co.saiman.experiment.msapex,\
 	bnd.identity; id=uk.co.saiman.experiment.chemicalmap.msapex,\
+	bnd.identity; id=uk.co.saiman.experiment.processing.msapex,\
 	bnd.identity; id=uk.co.saiman.experiment.spectrum.msapex,\
 	bnd.identity; id=uk.co.saiman.instrument.msapex,\
 	bnd.identity; id=uk.co.saiman.instrument.acquisition.msapex,\
@@ -41,7 +42,13 @@
 	bnd.identity; id=uk.co.saiman.webconsole.branding,\
 	bnd.identity; id=uk.co.saiman.webconsole,\
 	bnd.identity; id=uk.co.saiman.instrument.stage.copley,\
-	bnd.identity; id=uk.co.saiman.copley.webconsole
+	bnd.identity; id=uk.co.saiman.copley.webconsole,\
+\
+	bnd.identity; id=openjfx.base.linux,\
+	bnd.identity; id=openjfx.controls.linux,\
+	bnd.identity; id=openjfx.fxml.linux,\
+	bnd.identity; id=openjfx.graphics.linux,\
+	bnd.identity; id=openjfx.swing.linux
 
 -runfw:\
 	org.eclipse.osgi

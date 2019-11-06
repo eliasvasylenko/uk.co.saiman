@@ -15,7 +15,20 @@ Export-Package: \
 -include:\
 	${build}/include/eclipse.plugin.bnd
 
+# this may be needed for e4 model interdependencies to function correctly...
+Require-Bundle:\
+	uk.co.saiman.camera.msapex,\
+	uk.co.saiman.chemistry.msapex,\
+	uk.co.saiman.experiment.msapex,\
+	uk.co.saiman.instrument.msapex,\
+	uk.co.saiman.msapex.editor
+
 -buildpath:\
+	uk.co.saiman.camera.msapex;version=snapshot,\
+	uk.co.saiman.chemistry.msapex;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
+	uk.co.saiman.instrument.msapex;version=snapshot,\
+	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.optics;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\

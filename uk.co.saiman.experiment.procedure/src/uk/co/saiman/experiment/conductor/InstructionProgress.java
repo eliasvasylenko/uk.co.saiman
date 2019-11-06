@@ -30,7 +30,11 @@ package uk.co.saiman.experiment.conductor;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -58,6 +62,8 @@ public class InstructionProgress {
 
   private Variables variables;
 
+  private final Map<Production<?, ?>, Set<InstructionProgress>> dependents;
+
   public InstructionProgress(
       Conductor conductor,
       Instruction instruction,
@@ -65,6 +71,7 @@ public class InstructionProgress {
     this.conductor = conductor;
     this.instruction = instruction;
     this.environment = environment;
+    this.dependents = new HashMap<>();
   }
 
   public Conductor getConductor() {
@@ -97,9 +104,12 @@ public class InstructionProgress {
 
   }
 
-  protected void addDependent(Production<?, ?> production, PlanningContext planningContext) {
-    // TODO Auto-generated method stub
+  protected void addDependent(Production<?, ?> production, InstructionProgress dependent) {
+    dependents.computeIfAbsent(production, p -> new HashSet<>()).add(dependent);
+  }
 
+  protected Stream<InstructionProgress> getDependents(Production<?, ?> production) {
+    return dependents.getOrDefault(production, Set.of()).stream();
   }
 
   /**
@@ -135,7 +145,7 @@ public class InstructionProgress {
         assertLive();
 
         instruction.path().parent().flatMap(conductor::findInstruction).ifPresent(dependency -> {
-          dependency.addDependent(production, this);
+          dependency.addDependent(production, InstructionProgress.this);
         });
       }
 
@@ -148,7 +158,7 @@ public class InstructionProgress {
             .resolveAgainst(instruction.path())
             .flatMap(conductor::findInstruction)
             .ifPresent(dependency -> {
-              dependency.addDependent(path.getProduction(), this);
+              dependency.addDependent(path.getProduction(), InstructionProgress.this);
             });
       }
     };

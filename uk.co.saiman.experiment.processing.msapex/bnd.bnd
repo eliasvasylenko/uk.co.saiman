@@ -3,6 +3,10 @@ Bundle-Name: SAI :: MSApex :: Experiment :: Spectrum
 -include:\
 	${build}/include/eclipse.plugin.bnd
 
+# this may be needed for e4 model interdependencies to function correctly...
+Require-Bundle:\
+	uk.co.saiman.experiment.msapex
+
 -buildpath:\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\

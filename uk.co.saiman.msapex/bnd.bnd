@@ -3,6 +3,11 @@ Bundle-Name: SAI :: MSApex
 Private-Package:\
 	uk.co.saiman.msapex
 
+# this may be needed for e4 model interdependencies to function correctly...
+Require-Bundle:\
+	uk.co.saiman.eclipse.dnd,\
+	uk.co.saiman.eclipse.perspectives
+
 -buildpath:\
 	uk.co.saiman.eclipse.dnd;version=snapshot,\
 	uk.co.saiman.eclipse.perspectives;version=snapshot

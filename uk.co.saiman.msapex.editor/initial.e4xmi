@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="63927f67-1fd4-4375-aa80-637888daa353">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_ri0p8LP-Eeea0psSVURp7w" featurename="addons" parentElementId="uk.co.saiman.application.msapex">
-    <elements xsi:type="application:Addon" xmi:id="_t9i_8LP-Eeea0psSVURp7w" elementId="uk.co.saiman.editor.addon.editor" contributionURI="bundleclass://uk.co.saiman.msapex.editor/uk.co.saiman.msapex.editor.impl.EditorAddon"/>
-    <elements xsi:type="application:Addon" xmi:id="_DfrKoLsQEeel5-btXoqucA" elementId="uk.co.saiman.editor.addon.editor.file" contributionURI="bundleclass://uk.co.saiman.msapex.editor/uk.co.saiman.msapex.editor.impl.FileEditorAddon"/>
+    <elements xsi:type="application:Addon" xmi:id="_t9i_8LP-Eeea0psSVURp7w" elementId="uk.co.saiman.editor.addon" contributionURI="bundleclass://uk.co.saiman.msapex.editor/uk.co.saiman.msapex.editor.impl.EditorAddon"/>
+    <elements xsi:type="application:Addon" xmi:id="_DfrKoLsQEeel5-btXoqucA" elementId="uk.co.saiman.editor.addon.file" contributionURI="bundleclass://uk.co.saiman.msapex.editor/uk.co.saiman.msapex.editor.impl.FileEditorAddon"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_5xrBsP8UEemh-a9i83x9uA" featurename="children" parentElementId="uk.co.saiman.analysis.partsashcontainer.main" positionInList="first">
     <elements xsi:type="advanced:Placeholder" xmi:id="__N3koP8UEemh-a9i83x9uA" elementId="uk.co.saiman.editor.placeholder" ref="_hQ4hkP8WEemh-a9i83x9uA"/>

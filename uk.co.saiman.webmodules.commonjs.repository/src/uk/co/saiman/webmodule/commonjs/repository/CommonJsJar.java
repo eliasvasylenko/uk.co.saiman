@@ -152,7 +152,9 @@ public class CommonJsJar {
     Parameters capabilities = new Parameters();
 
     resource.getRequirements().forEach(req -> requirements.add(req.getNamespace(), req.toAttrs()));
-    resource.getCapabilities().forEach(cap -> capabilities.add(cap.getNamespace(), cap.toAttrs()));
+    resource
+        .getManifestCapabilities()
+        .forEach(cap -> capabilities.add(cap.getNamespace(), cap.toAttrs()));
 
     main.putValue(Constants.REQUIRE_CAPABILITY, requirements.toString());
     main.putValue(Constants.PROVIDE_CAPABILITY, capabilities.toString());

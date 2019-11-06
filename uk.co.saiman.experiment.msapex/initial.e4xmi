@@ -4,7 +4,7 @@
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_TCBq8LsgEeel5-btXoqucA" featurename="children" parentElementId="uk.co.saiman.analysis.partstack.overview">
     <elements xsi:type="advanced:Placeholder" xmi:id="_WlejkLsgEeel5-btXoqucA" elementId="uk.co.saiman.experiment.placeholder" ref="_X2WVkLsgEeel5-btXoqucA"/>
   </fragments>
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_97V3YOyUEei7pqb_YKjS4g" featurename="addons" parentElementId="uk.co.saiman.application.msapex">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_97V3YOyUEei7pqb_YKjS4g" featurename="addons" parentElementId="uk.co.saiman.application.msapex" positionInList="">
     <elements xsi:type="application:Addon" xmi:id="_97V3YeyUEei7pqb_YKjS4g" elementId="uk.co.saiman.experiment.addon" contributionURI="bundleclass://uk.co.saiman.experiment.msapex/uk.co.saiman.experiment.msapex.workspace.ExperimentAddon">
       <persistedState key="uk.co.saiman.experiment.storage" value="uk.co.saiman.experiment.storage~msapex"/>
       <persistedState key="uk.co.saiman.experiment.executors" value="uk.co.saiman.experiment.executors~msapex"/>

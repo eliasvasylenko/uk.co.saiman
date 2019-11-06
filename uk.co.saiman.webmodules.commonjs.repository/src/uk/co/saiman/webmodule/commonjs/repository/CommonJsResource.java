@@ -78,7 +78,8 @@ public class CommonJsResource implements Resource {
   private final String entryPoint;
 
   private final List<CapReqBuilder> requirements;
-  private final List<CapReqBuilder> capabilities;
+  private final List<CapReqBuilder> resourceCapabilities;
+  private final List<CapReqBuilder> manifestCapabilities;
 
   CommonJsResource(CommonJsBundleVersion bundleVersion, BundleVersionConfiguration configuration) {
     this.name = bundleVersion.getBundle().getModuleName();
@@ -97,11 +98,9 @@ public class CommonJsResource implements Resource {
     this.requirements = concat(
         Stream.of(createExtenderRequirement()),
         createDependencyRequirements(bundleVersion)).collect(toList());
-    this.capabilities = Stream
-        .of(
-            createModuleServiceCapability(),
-            identityCapability(bundleVersion.getBundle().getBundleSymbolicName(format)))
-        .collect(toList());
+    this.resourceCapabilities = List
+        .of(identityCapability(bundleVersion.getBundle().getBundleSymbolicName(format)));
+    this.manifestCapabilities = List.of(createModuleServiceCapability());
   }
 
   private String getEntryPoint(JSONObject json, BundleVersionConfiguration configuration) {
@@ -246,8 +245,12 @@ public class CommonJsResource implements Resource {
     return entryPoint;
   }
 
-  public Stream<CapReqBuilder> getCapabilities() {
-    return capabilities.stream();
+  public Stream<CapReqBuilder> getResourceCapabilities() {
+    return resourceCapabilities.stream();
+  }
+
+  public Stream<CapReqBuilder> getManifestCapabilities() {
+    return manifestCapabilities.stream();
   }
 
   public Stream<CapReqBuilder> getRequirements() {
@@ -256,7 +259,8 @@ public class CommonJsResource implements Resource {
 
   @Override
   public List<Capability> getCapabilities(String namespace) {
-    return getCapabilities()
+    return Stream
+        .concat(getResourceCapabilities(), getManifestCapabilities())
         .filter(c -> namespace == null || c.getNamespace().equals(namespace))
         .map(CapReqBuilder::buildCapability)
         .collect(toList());

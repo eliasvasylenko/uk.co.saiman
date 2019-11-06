@@ -20,6 +20,8 @@ import org.eclipse.e4.ui.model.application.ui.advanced.MPerspectiveStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.eclipse.perspective.EPerspectiveService;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 
 public class PerspectiveServiceAddon {
   private static final String CLONE_SUFFIX = ".clone";
@@ -32,6 +34,9 @@ public class PerspectiveServiceAddon {
 
   @Inject
   MApplication application;
+
+  @Inject
+  Log log;
 
   @PostConstruct
   public void initialize() {
@@ -51,12 +56,17 @@ public class PerspectiveServiceAddon {
       if (snippets != null) {
         for (var snippet : snippets.getSnippets()) {
           if (snippet != null && snippet instanceof MPerspective) {
-            clonePerspectiveSnippet(
-                modelService,
-                snippets,
-                snippet.getElementId(),
-                perspectiveStack,
-                false);
+            try {
+              clonePerspectiveSnippet(
+                  modelService,
+                  snippets,
+                  snippet.getElementId(),
+                  perspectiveStack,
+                  false);
+            } catch (Exception e) {
+              log.log(Level.ERROR, "Failed to clone perspective snippet " + snippet, e);
+              return;
+            }
           }
         }
       }
@@ -95,6 +105,7 @@ public class PerspectiveServiceAddon {
 
     MPerspective perspective = (MPerspective) modelService
         .cloneSnippet(snippets, snippetId, modelService.getTopLevelWindowFor(perspectiveStack));
+
     perspective.getPersistedState().put(PERSPECTIVE_SOURCE_SNIPPET, snippetId);
     perspective.setElementId(snippetId + CLONE_SUFFIX);
 
