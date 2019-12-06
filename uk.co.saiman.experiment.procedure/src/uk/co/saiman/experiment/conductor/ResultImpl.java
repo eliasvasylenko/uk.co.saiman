@@ -33,8 +33,8 @@ import java.util.function.Supplier;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 

@@ -30,7 +30,6 @@ package uk.co.saiman.maldi.sample;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static uk.co.saiman.experiment.osgi.ExperimentServiceConstants.EXECUTOR_ID;
-import static uk.co.saiman.experiment.requirement.Requirement.onCondition;
 import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_AREA;
 import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_AREA_EXECUTOR;
 
@@ -63,7 +62,7 @@ public class MaldiSampleAreaExecutor implements Executor {
   public void plan(PlanningContext context) {
     context.declareVariable(SAMPLE_AREA, VariableCardinality.REQUIRED);
 
-    context.declareMainRequirement(onCondition(SamplePlateSubmission.class));
+    context.declareConditionRequirement(SamplePlateSubmission.class);
 
     context.preparesCondition(SampleAreaHold.class);
   }

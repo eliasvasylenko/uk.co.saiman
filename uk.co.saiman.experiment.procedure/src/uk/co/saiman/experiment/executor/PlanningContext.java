@@ -2,8 +2,7 @@ package uk.co.saiman.experiment.executor;
 
 import java.util.Optional;
 
-import uk.co.saiman.experiment.requirement.ProductPath;
-import uk.co.saiman.experiment.requirement.Production;
+import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableCardinality;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
@@ -15,9 +14,11 @@ public interface PlanningContext {
     return declareVariable(new VariableDeclaration<>(variable, cardinality));
   }
 
-  void declareMainRequirement(Production<?, ?> production);
+  void declareResultRequirement(Class<?> production);
 
-  void declareAdditionalRequirement(ProductPath<?, ?> path);
+  void declareConditionRequirement(Class<?> production);
+
+  void declareAdditionalResultRequirement(ResultPath<?, ?> path);
 
   void declareResourceRequirement(Class<?> type);
 
@@ -33,10 +34,13 @@ public interface PlanningContext {
 
   interface NoOpPlanningContext extends PlanningContext {
     @Override
-    default void declareMainRequirement(Production<?, ?> production) {}
+    default void declareResultRequirement(Class<?> production) {}
 
     @Override
-    default void declareAdditionalRequirement(ProductPath<?, ?> path) {}
+    default void declareConditionRequirement(Class<?> production) {}
+
+    @Override
+    default void declareAdditionalResultRequirement(ResultPath<?, ?> path) {}
 
     @Override
     default void declareResourceRequirement(Class<?> type) {}
@@ -49,5 +53,68 @@ public interface PlanningContext {
 
     @Override
     default void preparesCondition(Class<?> type, Evaluation evaluation) {}
+  }
+
+  public default void useOnce(Executor executor) {
+    var parent = this;
+    var context = new PlanningContext() {
+      private boolean done = false;
+
+      private void assertLive() {
+        if (done) {
+          throw new IllegalStateException();
+        }
+      }
+
+      @Override
+      public void preparesCondition(Class<?> type, Evaluation evaluation) {
+        assertLive();
+        parent.preparesCondition(type, evaluation);
+      }
+
+      @Override
+      public void observesResult(Class<?> production) {
+        assertLive();
+        parent.observesResult(production);
+      }
+
+      @Override
+      public void executesAutomatically() {
+        assertLive();
+        parent.executesAutomatically();
+      }
+
+      @Override
+      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
+        assertLive();
+        return parent.declareVariable(declaration);
+      }
+
+      @Override
+      public void declareResultRequirement(Class<?> production) {
+        assertLive();
+        parent.declareResultRequirement(production);
+      }
+
+      @Override
+      public void declareResourceRequirement(Class<?> type) {
+        assertLive();
+        parent.declareResourceRequirement(type);
+      }
+
+      @Override
+      public void declareConditionRequirement(Class<?> production) {
+        assertLive();
+        parent.declareConditionRequirement(production);
+      }
+
+      @Override
+      public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
+        assertLive();
+        declareAdditionalResultRequirement(path);
+      }
+    };
+    executor.plan(context);
+    context.done = true;
   }
 }

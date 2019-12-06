@@ -28,7 +28,6 @@
 package uk.co.saiman.experiment.spectrum;
 
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
-import static uk.co.saiman.experiment.requirement.Requirement.onCondition;
 import static uk.co.saiman.experiment.variables.VariableCardinality.REQUIRED;
 
 import javax.measure.Unit;
@@ -71,7 +70,7 @@ public interface SpectrumExecutor extends Executor {
   @Override
   default void plan(PlanningContext context) {
     context.declareVariable(PROCESSING_VARIABLE, REQUIRED);
-    context.declareMainRequirement(onCondition(samplePreparation()));
+    context.declareConditionRequirement(samplePreparation());
     context.declareResourceRequirement(acquisitionDevice());
     context.declareResourceRequirement(acquisitionControl());
     context.observesResult(Spectrum.class);

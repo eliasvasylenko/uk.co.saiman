@@ -28,6 +28,8 @@
 package uk.co.saiman.experiment;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
+import static uk.co.saiman.experiment.definition.ExecutionPlan.WITHHOLD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,13 +43,13 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.dependency.Condition;
+import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
@@ -63,7 +65,6 @@ public class Step {
   private final Experiment experiment;
   private final Executor executor;
   private ExperimentPath<Absolute> path;
-  private boolean scheduled;
   private boolean detached;
 
   Step(Experiment experiment, Executor conductor, ExperimentPath<Absolute> path) {
@@ -81,26 +82,24 @@ public class Step {
   }
 
   /**
-   * Add the step to the schedule. This doesn't necessarily being processing,
-   * though if processing is already underway this will schedule the step as part
-   * of the ongoing process.
+   * Add the step to the schedule. All dependent steps, and all dependency steps,
+   * are also added to the schedule.
    */
   public void schedule() {
-    // TODO lock and set parents as scheduled
-    scheduled = true;
+    lock(() -> {
+      experiment.planStep(this, EXECUTE);
+    });
   }
 
   /**
-   * Remove the step from the schedule, canceling ongoing procedures or deleting
-   * observed results where appropriate.
+   * Remove the step from the schedule. All dependent steps, and all dependency
+   * steps are also removed from the schedule, except for those dependencies which
+   * are also required by other, unrelated steps.
    */
   public void unschedule() {
-    // TODO lock and set parents as scheduled
-    scheduled = false;
-  }
-
-  public boolean isScheduled() {
-    return scheduled;
+    lock(() -> {
+      experiment.planStep(this, WITHHOLD);
+    });
   }
 
   public StepDefinition getDefinition() {

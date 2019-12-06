@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment.definition;
 
 import static java.util.Objects.requireNonNull;
+import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,6 @@ import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Relative;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.requirement.Production;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.StateMap;
 
@@ -54,26 +54,15 @@ public class StepDefinition extends Definition<Relative, StepDefinition> {
       Executor executor,
       StateMap variableMap,
       ExecutionPlan plan,
-      List<StepDefinition> steps) {
-    super(steps);
-    this.id = id;
-    this.variableMap = variableMap;
-    this.executor = executor;
-    this.plan = plan;
-  }
-
-  private StepDefinition(
-      ExperimentId id,
-      Executor executor,
-      StateMap variableMap,
-      ExecutionPlan plan,
       List<StepDefinition> steps,
       Map<ExperimentId, StepDefinition> dependents) {
     super(steps, dependents);
     this.id = id;
     this.variableMap = variableMap;
     this.executor = executor;
-    this.plan = plan;
+    this.plan = steps.stream().map(StepDefinition::getPlan).anyMatch(EXECUTE::equals)
+        ? EXECUTE
+        : plan;
   }
 
   public static StepDefinition define(ExperimentId id, Executor executor) {
@@ -140,7 +129,12 @@ public class StepDefinition extends Definition<Relative, StepDefinition> {
     return executor;
   }
 
-  public Stream<Production<?, ?>> productions() {
+  public Stream<Class<?>> resultsObserved() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public Stream<Class<?>> conditionsPrepared() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -165,11 +159,6 @@ public class StepDefinition extends Definition<Relative, StepDefinition> {
   @Override
   StepDefinition with(List<StepDefinition> steps, Map<ExperimentId, StepDefinition> dependents) {
     return new StepDefinition(id, executor, variableMap, plan, steps, dependents);
-  }
-
-  @Override
-  StepDefinition with(List<StepDefinition> steps) {
-    return new StepDefinition(id, executor, variableMap, plan, steps);
   }
 
   public StepDefinition withPlan(ExecutionPlan plan) {

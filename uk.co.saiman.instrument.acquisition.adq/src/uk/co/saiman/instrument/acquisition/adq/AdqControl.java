@@ -29,4 +29,12 @@ package uk.co.saiman.instrument.acquisition.adq;
 
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
 
-public interface AdqControl extends AcquisitionController {}
+public interface AdqControl extends AcquisitionController {
+  void setTriggerMode(TriggerMode triggerMode);
+
+  void softwareTrigger();
+
+  void setTestPatternMode(TestPatternMode testPatternMode);
+
+  void setTestPatternConstant(int testPatternConstant);
+}

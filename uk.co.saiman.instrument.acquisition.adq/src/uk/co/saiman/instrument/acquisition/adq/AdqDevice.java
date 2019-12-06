@@ -29,8 +29,20 @@ package uk.co.saiman.instrument.acquisition.adq;
 
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
-public interface AdqDevice extends AcquisitionDevice<AdqControl> {
+public interface AdqDevice<T extends AdqControl> extends AcquisitionDevice<T> {
+  String getSerialNumber();
+
   AdqProductId getProductId();
 
+  ProductFamily getProductFamily();
+
   AdqHardwareInterface getHardwareInterface();
+
+  FirmwareRevision getFirmwareRevisionFpga(FpgaTarget target);
+
+  TriggerMode getTriggerMode();
+
+  TestPatternMode getTestPatternMode();
+
+  int getTestPatternConstant();
 }

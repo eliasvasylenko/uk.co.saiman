@@ -114,14 +114,15 @@ Bundle-Developers:\
 		pom					=	${build}/apache.xml; \
 		location			=	${build}/cache/apache.xml
 
+efxclipse.version: 3.6.0
 -plugin.efxclipse:\
 \
 	aQute.bnd.repository.p2.provider.P2Repository;\
-		name				=	"E(fx)clipse";\
-		location			=	${build}/cache/eclipse-fx;\
+		name				=	"E(fx)clipse_${efxclipse.version}";\
+		location			=	${build}/cache/eclipse-fx-${efxclipse.version};\
 		targetPlatform		=	true;\
-		url					=	${fileuri;${build}/efxclipse.target}
-#		url					=	https://download.eclipse.org/efxclipse/runtime-released/3.5.0/site/
+		url					=	${fileuri;${build}/efxclipse.${efxclipse.version}.target}
+#		url					=	https://download.eclipse.org/efxclipse/runtime-released/${efxclipse.version}/site/
 
 javafx.version: 12
 -plugin.javafx = \
@@ -135,8 +136,10 @@ javafx.version: 12
 #eclipse.platform.version: 2019-09
 #-plugin.EclipsePlatform:\
 #	aQute.bnd.repository.p2.provider.P2Repository;\
-#		name				=	"Eclipse_Platform";\
+#		name				=	"Eclipse_Platform_${eclipse.platform.version}";\
 #		location			=	${build}/cache/eclipse-platform-${eclipse.platform.version};\
+#		targetPlatform		=	true;\
+#		url					=	${fileuri;${build}/eclipse.platform.${eclipse.platform.version}.target}
 #		url					=	https://download.eclipse.org/releases/${eclipse.platform.version}/
 
 -runrepos:\

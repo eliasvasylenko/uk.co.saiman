@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.requirement;
+package uk.co.saiman.experiment.dependency;
 
 import static uk.co.saiman.collection.EquivalenceComparator.identityComparator;
 
@@ -35,18 +35,15 @@ import java.util.Optional;
 import uk.co.saiman.collection.EquivalenceComparator;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.Condition;
-import uk.co.saiman.experiment.dependency.Product;
-import uk.co.saiman.experiment.dependency.Result;
 
-public class ProductPath<T extends ExperimentPath<T>, U extends Product<?>>
+public abstract class ProductPath<T extends ExperimentPath<T>, U extends Product<?>>
     implements Comparable<ProductPath<?, ?>> {
-  private static final EquivalenceComparator<Production<?, ?>> IDENTITY_COMPARATOR = identityComparator();
+  private static final EquivalenceComparator<Class<?>> IDENTITY_COMPARATOR = identityComparator();
 
   private final ExperimentPath<T> experimentPath;
-  private final Production<?, U> production;
+  private final Class<?> production;
 
-  ProductPath(ExperimentPath<T> experimentPath, Production<?, U> production) {
+  ProductPath(ExperimentPath<T> experimentPath, Class<?> production) {
     this.experimentPath = experimentPath;
     this.production = production;
   }
@@ -54,38 +51,29 @@ public class ProductPath<T extends ExperimentPath<T>, U extends Product<?>>
   public static <T extends ExperimentPath<T>, U> ProductPath<T, Result<U>> toResult(
       ExperimentPath<T> experimentPath,
       Class<U> type) {
-    return new ProductPath<>(experimentPath, Requirement.onResult(type));
+    return new ResultPath<>(experimentPath, type);
   }
 
   public static <T extends ExperimentPath<T>, U> ProductPath<T, Condition<U>> toCondition(
       ExperimentPath<T> experimentPath,
       Class<U> type) {
-    return new ProductPath<>(experimentPath, Requirement.onCondition(type));
-  }
-
-  public static <T extends ExperimentPath<T>, U extends Product<?>> ProductPath<T, U> toProduction(
-      ExperimentPath<T> experimentPath,
-      Production<?, U> production) {
-    return new ProductPath<>(experimentPath, production);
+    return new ConditionPath<>(experimentPath, type);
   }
 
   public ExperimentPath<T> getExperimentPath() {
     return experimentPath;
   }
 
-  public Production<?, U> getProduction() {
+  public Class<?> getProduction() {
     return production;
   }
 
-  public Optional<ProductPath<Absolute, U>> resolveAgainst(ExperimentPath<Absolute> path) {
-    return experimentPath
-        .resolveAgainst(path)
-        .map(experimentPath -> toProduction(experimentPath, production));
-  }
+  abstract <V extends ExperimentPath<V>> ProductPath<V, U> moveTo(ExperimentPath<V> experimentPath);
 
-  public ProductPath<Absolute, U> toAbsolute() {
-    return toProduction(experimentPath.toAbsolute(), production);
-  }
+  public abstract Optional<? extends ProductPath<Absolute, U>> resolveAgainst(
+      ExperimentPath<Absolute> path);
+
+  public abstract ProductPath<Absolute, U> toAbsolute();
 
   @Override
   public String toString() {

@@ -10,14 +10,14 @@
  *  \======== /==  ,'      |== ========= \
  *   \_____\.-\__\/        \__\\________\/
  *
- * This file is part of uk.co.saiman.instrument.acquisition.adq.
+ * This file is part of uk.co.saiman.experiment.
  *
- * uk.co.saiman.instrument.acquisition.adq is free software: you can redistribute it and/or modify
+ * uk.co.saiman.experiment is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * uk.co.saiman.instrument.acquisition.adq is distributed in the hope that it will be useful,
+ * uk.co.saiman.experiment is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,40 +25,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.instrument.acquisition.adq.impl;
+package uk.co.saiman.experiment.event;
 
-import javax.measure.Quantity;
-import javax.measure.quantity.Time;
+import static uk.co.saiman.experiment.event.ExperimentEventKind.CHANGE_VARIABLE;
 
-import uk.co.saiman.instrument.DeviceImpl.ControlContext;
-import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
+import uk.co.saiman.experiment.Step;
+import uk.co.saiman.experiment.definition.ExecutionPlan;
 
-public class Adq114ControlImpl extends AdqControlImpl implements Adq114Control {
-  public Adq114ControlImpl(ControlContext context) {
-    super(context);
+public class PlanStepEvent extends ExperimentStepEvent {
+  private final ExecutionPlan plan;
+
+  public PlanStepEvent(Step step, ExecutionPlan plan) {
+    super(step);
+    this.plan = plan;
+  }
+
+  public ExecutionPlan plan() {
+    return plan;
   }
 
   @Override
-  public void startAcquisition() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void setAcquisitionCount(int count) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void setAcquisitionTime(Quantity<Time> time) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void setSampleDepth(int depth) {
-    // TODO Auto-generated method stub
-
+  public ExperimentEventKind kind() {
+    return CHANGE_VARIABLE;
   }
 }

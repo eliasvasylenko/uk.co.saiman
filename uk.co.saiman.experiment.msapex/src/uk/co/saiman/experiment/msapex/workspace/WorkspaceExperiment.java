@@ -90,7 +90,7 @@ public class WorkspaceExperiment {
     return id.name();
   }
 
-  public void open() {
+  public synchronized Experiment open() {
     switch (status) {
     case CLOSED:
       this.data.load();
@@ -106,9 +106,10 @@ public class WorkspaceExperiment {
       throw new ExperimentException("Cannot load removed experiment %s" + id);
     default:
     }
+    return experiment;
   }
 
-  public void close() {
+  public synchronized void close() {
     switch (status) {
     case OPEN:
       this.eventsObservation.cancel();
@@ -128,7 +129,7 @@ public class WorkspaceExperiment {
     }
   }
 
-  public void save() {
+  public synchronized void save() {
     switch (status) {
     case OPEN:
       data.relocate(workspace.getWorkspaceLocation(), id.name());
@@ -185,10 +186,5 @@ public class WorkspaceExperiment {
 
   public ExperimentId id() {
     return id;
-  }
-
-  public synchronized Experiment experiment() {
-    open();
-    return experiment;
   }
 }

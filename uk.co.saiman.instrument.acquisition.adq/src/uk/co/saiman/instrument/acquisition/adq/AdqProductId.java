@@ -47,13 +47,22 @@ public enum AdqProductId {
   ADQ208(0x001E),
   DSU(0x001F);
 
-  private final int pid;
+  private final int id;
 
   AdqProductId(int id) {
-    this.pid = id;
+    this.id = id;
   }
 
-  public int getPid() {
-    return pid;
+  public static AdqProductId fromId(int id) {
+    for (var productId : values()) {
+      if (productId.getId() == id) {
+        return productId;
+      }
+    }
+    throw new IllegalArgumentException("Unrecognised Product ID " + id);
+  }
+
+  public int getId() {
+    return id;
   }
 }

@@ -45,21 +45,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.declaration.ExperimentRelation;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentRelation;
 
 public abstract class Definition<U extends ExperimentPath<U>, T extends Definition<U, T>> {
   private final List<StepDefinition> steps;
   private final Map<ExperimentId, StepDefinition> dependents;
-
-  Definition(List<StepDefinition> steps) {
-    this(
-        steps,
-        steps
-            .stream()
-            .collect(toMap(StepDefinition::id, identity(), throwingMerger(), TreeMap::new)));
-  }
 
   Definition(List<StepDefinition> steps, Map<ExperimentId, StepDefinition> dependents) {
     this.steps = steps;
@@ -101,7 +93,13 @@ public abstract class Definition<U extends ExperimentPath<U>, T extends Definiti
 
   abstract T with(List<StepDefinition> steps, Map<ExperimentId, StepDefinition> dependents);
 
-  abstract T with(List<StepDefinition> steps);
+  T with(List<StepDefinition> steps) {
+    return with(
+        steps,
+        steps
+            .stream()
+            .collect(toMap(StepDefinition::id, identity(), throwingMerger(), TreeMap::new)));
+  }
 
   /**
    * Derive a new container with the step of the given ID removed, if it is

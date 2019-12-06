@@ -36,6 +36,10 @@ public abstract class ControllerImpl implements Controller {
     this.context = context;
   }
 
+  protected ControlContext context() {
+    return context;
+  }
+
   @Override
   public void close() {
     context.close();

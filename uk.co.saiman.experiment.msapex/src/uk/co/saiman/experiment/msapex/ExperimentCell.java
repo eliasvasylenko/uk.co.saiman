@@ -137,8 +137,8 @@ public class ExperimentCell {
   }
 
   private void open() {
-    context.set(Experiment.class, experiment.experiment());
-    context.set(ExperimentDefinition.class, experiment.experiment().getDefinition());
+    context.set(Experiment.class, experiment.open());
+    context.set(ExperimentDefinition.class, experiment.open().getDefinition());
     context.set(ExperimentPath.class, ExperimentPath.toRoot());
     updateIcon();
   }
@@ -153,7 +153,7 @@ public class ExperimentCell {
   @Inject
   @Optional
   public void update(ExperimentEvent event) {
-    if (experiment.status() == Status.OPEN && event.experiment() == experiment.experiment()) {
+    if (experiment.status() == Status.OPEN && event.experiment() == experiment.open()) {
       cell.setLabel(event.experimentDefinition().id().name());
     }
   }
@@ -163,7 +163,7 @@ public class ExperimentCell {
       @Optional WorkspaceEvent workspaceEvent,
       @Optional ExperimentEvent experimentEvent) {
     if ((experiment.status() != Status.OPEN
-        || experimentEvent != null && experimentEvent.experiment() != experiment.experiment())
+        || experimentEvent != null && experimentEvent.experiment() != experiment.open())
         || (workspaceEvent != null && workspaceEvent.experiment() != experiment)) {
       return null;
     }
@@ -171,7 +171,7 @@ public class ExperimentCell {
     switch (experiment.status()) {
     case OPEN:
       return experiment
-          .experiment()
+          .open()
           .getIndependentSteps()
           .map(step -> ContextBuffer.empty().set(Step.class, step));
     default:

@@ -109,7 +109,7 @@ public class ExperimentNameCell {
   @Optional
   public void updateName(RenameExperimentEvent event) {
     if (experiment.status() == Status.OPEN
-        && Objects.equals(event.experiment(), experiment.experiment())) {
+        && Objects.equals(event.experiment(), experiment.open())) {
       nameEditor.setText(event.id().name());
     }
   }

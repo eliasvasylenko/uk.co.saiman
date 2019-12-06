@@ -27,32 +27,35 @@
  */
 package uk.co.saiman.instrument.acquisition.adq.impl;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Time;
 
-import uk.co.saiman.data.function.SampledContinuousFunction;
-import uk.co.saiman.instrument.DeviceStatus;
-import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
-import uk.co.saiman.instrument.acquisition.adq.Adq114Device;
-import uk.co.saiman.instrument.acquisition.adq.AdqHardwareInterface;
-import uk.co.saiman.observable.Observable;
-import uk.co.saiman.observable.ObservableValue;
+import com.sun.jna.Pointer;
 
-public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
+import uk.co.saiman.data.function.SampledContinuousFunction;
+import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
+import uk.co.saiman.instrument.acquisition.adq.Adq114DataFormat;
+import uk.co.saiman.instrument.acquisition.adq.Adq114Device;
+import uk.co.saiman.instrument.acquisition.adq.impl.AdqDeviceManager.AdqLib;
+import uk.co.saiman.observable.Observable;
+
+public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Adq114Device {
+  private Adq114DataFormat dataFormat = Adq114DataFormat.PACKED_14BIT;
+
   public Adq114DeviceImpl(AdqDeviceManager manager) {
     super(manager);
   }
 
+  public Adq114DeviceImpl(AdqDeviceManager manager, String serialNumber) {
+    super(manager, serialNumber);
+  }
+
   @Override
-  public AdqHardwareInterface getHardwareInterface() {
-    // TODO Auto-generated method stub
-    return null;
+  public Adq114DataFormat getDataFormat() {
+    return dataFormat;
   }
 
   @Override
@@ -122,16 +125,47 @@ public class Adq114DeviceImpl extends AdqDeviceImpl implements Adq114Device {
   }
 
   @Override
-  public Adq114Control acquireControl(long timeout, TimeUnit unit)
-      throws TimeoutException,
-      InterruptedException {
-    // TODO Auto-generated method stub
-    return null;
+  protected Adq114Control createController(ControlContext context) {
+    return new Adq114ControlImpl(context);
   }
 
-  @Override
-  public ObservableValue<DeviceStatus> status() {
-    // TODO Auto-generated method stub
-    return null;
+  public class Adq114ControlImpl extends AdqControlImpl implements Adq114Control {
+    public Adq114ControlImpl(ControlContext context) {
+      super(context);
+    }
+
+    @Override
+    public void setDataFormat(Adq114DataFormat dataFormat) {
+      Adq114DeviceImpl.this.dataFormat = dataFormat;
+    }
+
+    @Override
+    public void setAcquisitionCount(int count) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void setAcquisitionTime(Quantity<Time> time) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void setSampleDepth(int depth) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    protected void startAcquisition(AdqLib lib, Pointer controlUnit, int deviceNumber) {
+      try (var acquisition = new WaveformAveragingStreamingAcquisition(
+          Adq114DeviceImpl.this,
+          lib,
+          controlUnit,
+          deviceNumber)) {
+        acquisition.acquire();
+      }
+    }
   }
 }

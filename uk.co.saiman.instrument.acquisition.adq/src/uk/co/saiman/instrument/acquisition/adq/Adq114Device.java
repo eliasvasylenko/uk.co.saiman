@@ -32,14 +32,15 @@ import static uk.co.saiman.instrument.acquisition.adq.AdqProductId.ADQ114;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public interface Adq114Device extends AdqDevice {
+public interface Adq114Device extends AdqDevice<Adq114Control> {
   @Override
   Adq114Control acquireControl(long timeout, TimeUnit unit)
-      throws TimeoutException,
-      InterruptedException;
+      throws TimeoutException, InterruptedException;
 
   @Override
   default AdqProductId getProductId() {
     return ADQ114;
   }
+
+  Adq114DataFormat getDataFormat();
 }

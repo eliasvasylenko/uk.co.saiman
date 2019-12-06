@@ -110,12 +110,8 @@ public class Workspace {
     return null;
   }
 
-  public Stream<Experiment> getExperiments() {
-    return getWorkspaceExperiments().map(WorkspaceExperiment::experiment);
-  }
-
   public Optional<Experiment> getExperiment(ExperimentId id) {
-    return getWorkspaceExperiment(id).map(WorkspaceExperiment::experiment);
+    return getWorkspaceExperiment(id).map(WorkspaceExperiment::open);
   }
 
   public boolean containsExperiment(Experiment experiment) {
@@ -135,7 +131,7 @@ public class Workspace {
   public Optional<WorkspaceExperiment> getWorkspaceExperiment(Experiment experiment) {
     return getWorkspaceExperiment(experiment.getId())
         .filter(e -> e.status() == Status.OPEN)
-        .filter(e -> e.experiment() == experiment);
+        .filter(e -> e.open() == experiment);
   }
 
   void nextEvent(WorkspaceEvent event) {

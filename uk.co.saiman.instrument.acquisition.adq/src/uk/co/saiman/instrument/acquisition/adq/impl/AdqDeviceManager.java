@@ -27,109 +27,315 @@
  */
 package uk.co.saiman.instrument.acquisition.adq.impl;
 
-import static uk.co.saiman.instrument.acquisition.adq.ProductFamily.K7;
-import static uk.co.saiman.instrument.acquisition.adq.ProductFamily.V5;
-import static uk.co.saiman.instrument.acquisition.adq.ProductFamily.V6;
-import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.LOCAL_COPY;
-import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.MIXED;
-import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.SVN_MANAGED;
-import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.SVN_UPDATED;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
-import uk.co.saiman.instrument.acquisition.adq.FirmwareRevision;
-import uk.co.saiman.instrument.acquisition.adq.FpgaTarget;
-import uk.co.saiman.instrument.acquisition.adq.ProductFamily;
-import uk.co.saiman.instrument.acquisition.adq.RevisionInformation;
+import uk.co.saiman.instrument.acquisition.adq.AdqException;
+import uk.co.saiman.instrument.acquisition.adq.AdqProductId;
+import uk.co.saiman.instrument.acquisition.adq.TraceLevel;
 
 @Component(service = AdqDeviceManager.class, immediate = true)
-public class AdqDeviceManager {
-  interface AdqLib extends Library {
+public class AdqDeviceManager implements AutoCloseable {
+  public interface AdqLib extends Library {
+    /*
+     * Control Unit API
+     */
+
     Pointer CreateADQControlUnit();
 
-    int ADQControlUnit_FindDevices();
+    void DeleteADQControlUnit(Pointer controlUnit);
+
+    int ADQAPI_GetRevision();
+
+    int ADQControlUnit_FindDevices(Pointer controlUnit);
+
+    String ADQ_GetBoardSerialNumber(Pointer controlUnit, int adqNumber);
+
+    String ADQ_GetCardOption(Pointer controlUnit, int adqNumber);
+
+    int ADQControlUnit_GetFailedDeviceCount(Pointer controlUnit);
+
+    int ADQControlUnit_GetLastFailedDeviceError(Pointer controlUnit);
+
+    int ADQControlUnit_EnableErrorTrace(
+        Pointer controlUnit,
+        int traceLevel,
+        String traceFileDirectory);
+
+    int ADQControlUnit_EnableErrorTraceAppend(
+        Pointer controlUnit,
+        int traceLevel,
+        String traceFileDirectory);
+
+    /*
+     * ADQ_API
+     */
+
+    int ADQ_GetProductID(Pointer controlUnit, int adqNumber);
 
     int ADQ_GetProductFamily(Pointer controlUnit, int deviceNumber, Pointer familyInt);
 
     Pointer ADQ_GetRevision(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_Blink(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetErrorVector(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetLastError(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_IsAlive(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_ReBootADQFromFlash(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_RunRecorderSelfTest(Pointer controlUnit, int deviceNumber, Pointer inoutVector);
+
+    int ADQ_IsUSBDevice(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_IsUSB3Device(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_IsPCIeDevice(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_SetTriggerMode(Pointer controlUnit, int deviceNumber, int triggerMode);
+
+    int ADQ_GetTriggerMode(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_DisarmTrigger(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_ArmTrigger(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_SWTrig(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetAcquiredAll(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_SetTestPatternMode(Pointer controlUnit, int deviceNumber, int testPatternMode);
+
+    int ADQ_SetTestPatternConstant(Pointer controlUnit, int deviceNumber, int testPatternConstant);
+
+    int ADQ_MultiRecordSetup(
+        Pointer controlUnit,
+        int deviceNumber,
+        int recordCount,
+        int samplesPerRecord);
+
+    int ADQ_MultiRecordClose(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetStreamStatus(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_SetStreamStatus(Pointer controlUnit, int deviceNumber, int status);
+
+    int ADQ_StartStreaming(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_SetClockSource(Pointer controlUnit, int deviceNumber, int clockSource);
+
+    int ADQ_SetPllFreqDivider(Pointer controlUnit, int deviceNumber, int pllDivider);
+
+    int ADQ_GetData(
+        Pointer controlUnit,
+        int deviceNumber,
+        Pointer[] buffers,
+        int bufferSize,
+        int bytesPerSample,
+        int startRecord,
+        int recordCount,
+        int channelsMask,
+        int startSample,
+        int samplesCount,
+        int transferMode);
+
+    int ADQ_SetDataFormat(Pointer controlUnit, int deviceNumber, int dataFormat);
+
+    int ADQ_CollectDataNextPage(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetSamplesPerPage(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetStreamOverflow(Pointer controlUnit, int deviceNumber);
+
+    Pointer ADQ_GetPtrStream(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_WaveformAveragingArm(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_WaveformAveragingDisarm(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_WaveformAveragingStartReadout(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_WaveformAveragingShutdown(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetTransferBufferStatus(Pointer controlUnit, int deviceNumber, Memory buffersFilled);
+
+    int ADQ_FlushDMA(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_WaveformAveragingGetStatus(
+        Pointer controlUnit,
+        int deviceNumber,
+        Pointer /* char */ ready,
+        Pointer /* int */ recordsCompleted,
+        Pointer /* char */ inIdle);
+
+    int ADQ_SetTransferTimeout(Pointer controlUnit, int deviceNumber, int milliseconds);
+
+    int ADQ_WaveformAveragingParseDataStream(
+        Pointer controlUnit,
+        int deviceNumber,
+        int samplesPerRecord,
+        Pointer dataStream,
+        Pointer[] dataTarget);
+
+    int ADQ_SetTransferBuffers(
+        Pointer controlUnit,
+        int deviceNumber,
+        int numberOfBuffers,
+        int bufferSize);
+
+    int ADQ_WaveformAveragingSetup(
+        Pointer controlUnit,
+        int deviceNumber,
+        int numberOfWaveforms,
+        int samplesPerRecord,
+        int preTrigSamples,
+        int holdOffSamples,
+        int flags);
+
+    int ADQ_WaveformAveragingSoftwareTrigger(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_TriggeredStreamingSetupV5(
+        Pointer controlUnit,
+        int deviceNumber,
+        int samplesPerRecord,
+        int preTrigSamples,
+        int holdOffSamples,
+        int flags);/*-
+                   int armMode,
+                   int readOutSpeed,
+                   int channel);*/
+
+    int ADQ_TriggeredStreamingArmV5(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_TriggeredStreamingDisarmV5(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_SetTriggeredStreamingTotalNofRecords(
+        Pointer controlUnit,
+        int deviceNumber,
+        int MaxNofRecordsTotal);
+
+    int ADQ_GetTriggeredStreamingRecordSizeBytes(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetTriggeredStreamingHeaderSizeBytes(Pointer controlUnit, int deviceNumber);
+
+    int ADQ_GetTriggeredStreamingRecords(
+        Pointer controlUnit,
+        int deviceNumber,
+        int NofRecordsToRead,
+        Pointer[] /* void **/ data_buf,
+        Pointer /* void */ header_buf,
+        Pointer /* int */ NofRecordsRead);
+
+    int ADQ_TriggeredStreamingGetNofRecordsCompleted(
+        Pointer controlUnit,
+        int deviceNumber,
+        int ChannelsMask,
+        Pointer /* int */ NofRecordsCompleted);
+
+    int ADQ_TriggeredStreamingGetStatusV5(
+        Pointer controlUnit,
+        int deviceNumber,
+        Pointer /* char */ ready,
+        Pointer /* int */ recordsCompleted,
+        Pointer /* char */ inIdle);
   }
 
-  private static final AdqLib LIB;
+  static final AdqLib LIB;
 
   static {
     LIB = Native.loadLibrary("adq", AdqLib.class);
   }
 
   private final Pointer controlUnit;
-  private final int numberOfDevices;
+
+  private final Map<String, Integer> devices = new HashMap<>();
 
   public AdqDeviceManager() {
     controlUnit = LIB.CreateADQControlUnit();
-    numberOfDevices = 0;// LIB.ADQControlUnit_FindDevices();
-  }
-
-  public int getNumberOfDevices() {
-    return numberOfDevices;
-  }
-
-  public ProductFamily getProductFamily(int deviceNumber) {
-    Pointer family = new Memory(Integer.BYTES).getPointer(0);
-
-    LIB.ADQ_GetProductFamily(controlUnit, deviceNumber, family);
-    int familyId = family.getInt(0);
-    switch (familyId) {
-    case 5:
-      return V5;
-    case 6:
-      return V6;
-    case 7:
-      return K7;
-    default:
-      throw new IllegalStateException("Unexpected product family id " + familyId);
+    if (controlUnit == null) {
+      throw new IllegalStateException("Failed to create control unit");
     }
   }
 
-  public FirmwareRevision getFirmwareRevisionFpga(int deviceNumber, FpgaTarget target) {
-    ProductFamily productFamily = getProductFamily(deviceNumber);
+  public void setLog(TraceLevel traceLevel, Path logPath) {
+    if (!(Files.isDirectory(logPath) || Files.isRegularFile(logPath))) {
+      throw new IllegalArgumentException("Invalid log path %s, must be file or directory");
+    }
+    Objects.requireNonNull(traceLevel);
+    var errorTrace = LIB
+        .ADQControlUnit_EnableErrorTrace(
+            controlUnit,
+            TraceLevel.INFO.ordinal(),
+            logPath.toAbsolutePath().toString());
+    if (errorTrace != 1) {
+      throw new AdqException("Failed to open " + traceLevel + " log at " + logPath);
+    }
+  }
 
-    int offset;
-    if (target == FpgaTarget.ALG_FPGA) {
-      if (productFamily == V6) {
-        offset = 0;
-      } else {
-        offset = 3;
-      }
-    } else {
-      if (productFamily == V6) {
-        throw new IllegalArgumentException(
-            "Product family " + V6 + " does not support FPGA target " + target);
-      }
-      offset = 0;
+  @Override
+  @Deactivate
+  public void close() {
+    LIB.DeleteADQControlUnit(controlUnit);
+  }
+
+  Pointer getControlUnit() {
+    return controlUnit;
+  }
+
+  synchronized Stream<String> getDevices(AdqProductId productId) {
+    refreshDevices();
+    return devices
+        .entrySet()
+        .stream()
+        .filter(e -> getProductId(e.getValue()) == productId)
+        .map(Entry::getKey);
+  }
+
+  private synchronized void refreshDevices() {
+    int deviceCount = LIB.ADQControlUnit_FindDevices(controlUnit);
+
+    if (LIB.ADQControlUnit_GetFailedDeviceCount(controlUnit) > 0) {
+      System.out.println("Failed! " + LIB.ADQControlUnit_GetLastFailedDeviceError(controlUnit));
     }
 
-    Pointer revision = LIB.ADQ_GetRevision(controlUnit, deviceNumber);
-    int revisionNumber = revision.getInt(0 + offset);
-    int svnManaged = revision.getInt(1 + offset);
-    int svnUpdated = revision.getInt(2 + offset);
-    RevisionInformation revisionInformation = svnManaged == 0
-        ? (svnUpdated == 0 ? SVN_UPDATED : SVN_MANAGED)
-        : (svnUpdated == 0 ? LOCAL_COPY : MIXED);
+    devices.clear();
+    for (int i = 1; i <= deviceCount; i++) {
+      var serialNumber = LIB.ADQ_GetBoardSerialNumber(controlUnit, i);
 
-    return new FirmwareRevision() {
-      @Override
-      public int revisionNumber() {
-        return revisionNumber;
-      }
+      devices.put(serialNumber, i);
+    }
+  }
 
-      @Override
-      public RevisionInformation information() {
-        return revisionInformation;
-      }
-    };
+  synchronized int getDeviceNumber(String serialNumber) {
+    var deviceNumber = devices.get(serialNumber);
+    if (deviceNumber == null) {
+      refreshDevices();
+      deviceNumber = devices.get(serialNumber);
+    }
+    return deviceNumber;
+  }
+
+  synchronized AdqProductId getProductId(int deviceNumber) {
+    return AdqProductId.fromId(LIB.ADQ_GetProductID(controlUnit, deviceNumber));
+  }
+
+  public static int getApiRevision() {
+    return LIB.ADQAPI_GetRevision();
   }
 }

@@ -29,7 +29,6 @@ package uk.co.saiman.experiment.spectrum;
 
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
-import static uk.co.saiman.experiment.requirement.Requirement.onResult;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -78,7 +77,7 @@ public class SpectrumProcessingExecutor implements Executor {
 
   @Override
   public void plan(PlanningContext context) {
-    context.declareMainRequirement(onResult(Spectrum.class));
+    context.declareResultRequirement(Spectrum.class);
     context.declareVariable(PROCESSING_VARIABLE, VariableCardinality.OPTIONAL);
     context.observesResult(Spectrum.class);
   }

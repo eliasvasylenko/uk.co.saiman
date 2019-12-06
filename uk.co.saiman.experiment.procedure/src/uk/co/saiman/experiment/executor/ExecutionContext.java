@@ -138,4 +138,91 @@ public interface ExecutionContext {
   }
 
   Log log();
+
+  public default void useOnce(Executor executor) {
+    var parent = this;
+    var context = new ExecutionContext() {
+      private boolean done = false;
+
+      private void assertLive() {
+        if (done) {
+          throw new IllegalStateException();
+        }
+      }
+
+      @Override
+      public ExperimentId getId() {
+        assertLive();
+        return parent.getId();
+      }
+
+      @Override
+      public Variables getVariables() {
+        assertLive();
+        return parent.getVariables();
+      }
+
+      @Override
+      public <T> Condition<T> acquireCondition(Class<T> source) {
+        assertLive();
+        return parent.acquireCondition(source);
+      }
+
+      @Override
+      public <T> Resource<T> acquireResource(Class<T> source) {
+        assertLive();
+        return parent.acquireResource(source);
+      }
+
+      @Override
+      public <T> Result<T> acquireResult(Class<T> source) {
+        assertLive();
+        return parent.acquireResult(source);
+      }
+
+      @Override
+      public <T> Stream<Result<T>> acquireResults(Class<T> source) {
+        assertLive();
+        return parent.acquireResults(source);
+      }
+
+      @Override
+      public Location getLocation() {
+        assertLive();
+        return parent.getLocation();
+      }
+
+      @Override
+      public <U> void prepareCondition(Class<U> condition, U resource) {
+        assertLive();
+        parent.prepareCondition(condition, resource);
+      }
+
+      @Override
+      public <R> void observePartialResult(Class<R> observation, Supplier<? extends R> value) {
+        assertLive();
+        parent.observePartialResult(observation, value);
+      }
+
+      @Override
+      public void completeObservation(Class<?> observation) {
+        assertLive();
+        parent.completeObservation(observation);
+      }
+
+      @Override
+      public <R> void setResultData(Class<R> observation, Data<R> data) {
+        assertLive();
+        parent.setResultData(observation, data);
+      }
+
+      @Override
+      public Log log() {
+        assertLive();
+        return parent.log();
+      }
+    };
+    executor.execute(context);
+    context.done = true;
+  }
 }

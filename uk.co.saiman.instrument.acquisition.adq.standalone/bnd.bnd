@@ -1,0 +1,12 @@
+Bundle-Name: SAI :: SP Devices :: ADQ Standalone
+
+Export-Package: \
+	uk.co.saiman.instrument.acquisition.adq.standalone
+
+-buildpath: \
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.instrument.acquisition.adq;version=snapshot,\
+	com.sun.jna;version=latest

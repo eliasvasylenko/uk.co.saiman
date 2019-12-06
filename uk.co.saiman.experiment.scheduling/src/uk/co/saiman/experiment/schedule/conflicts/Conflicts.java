@@ -42,11 +42,12 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.ProductPath;
+import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
@@ -169,7 +170,7 @@ public class Conflicts {
         }
 
         @Override
-        public void declareAdditionalRequirement(ProductPath<?, ?> path) {
+        public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
           dependencies.add(path);
         }
       });

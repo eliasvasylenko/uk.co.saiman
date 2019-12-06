@@ -30,7 +30,6 @@ package uk.co.saiman.experiment.dependency;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.observable.Observable;
 
 /**

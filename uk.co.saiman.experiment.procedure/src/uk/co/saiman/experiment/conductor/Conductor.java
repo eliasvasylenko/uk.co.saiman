@@ -29,9 +29,9 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -40,11 +40,12 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
-import uk.co.saiman.experiment.requirement.ProductPath;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.HotObservable;
@@ -54,7 +55,7 @@ public class Conductor implements Output {
   private final StorageConfiguration<?> storageConfiguration;
   private final Executor executor;
 
-  private final Map<ExperimentPath<?>, InstructionProgress> progress;
+  private Map<ExperimentPath<Absolute>, InstructionExecution> progress;
   private Procedure procedure;
 
   private final HotObservable<ConductorEvent> events = new HotObservable<>();
@@ -63,7 +64,7 @@ public class Conductor implements Output {
     this.storageConfiguration = requireNonNull(storageConfiguration);
     this.executor = Executors.defaultThreadFactory()::newThread;
 
-    this.progress = new HashMap<>();
+    this.progress = Map.of();
   }
 
   void execute(Runnable runnable) {
@@ -80,38 +81,33 @@ public class Conductor implements Output {
   }
 
   public synchronized void conduct(Procedure procedure) {
+    System.out.println("conduct: " + procedure);
+
     this.procedure = procedure;
 
-    // add new instructions
-    procedure
+    var procedureDependents = new ProcedureDependents(procedure);
+
+    var previousProgress = progress;
+    progress = procedure
         .instructions()
-        .filter(instruction -> !progress.containsKey(instruction.path()))
-        .forEach(
-            instruction -> this.progress
-                .put(
-                    instruction.path(),
-                    new InstructionProgress(this, instruction, procedure.environment())));
+        .collect(
+            toMap(
+                Instruction::path,
+                instruction -> this.progress
+                    .getOrDefault(instruction.path(), new InstructionExecution(this))
+                    .update(
+                        instruction,
+                        procedureDependents.getInstructionDependents(instruction.path()),
+                        procedure.environment())));
 
-    // update or remove existing instructions
-    var progressIterator = progress.entrySet().iterator();
-    while (progressIterator.hasNext()) {
-      var progress = progressIterator.next();
-
-      procedure
-          .instruction(progress.getKey())
-          .ifPresentOrElse(
-              instruction -> progress.getValue().update(instruction, procedure.environment()),
-              () -> {
-                progress.getValue().interrupt();
-                progressIterator.remove();
-              });
-    }
+    previousProgress.keySet().removeAll(progress.keySet());
+    previousProgress.values().forEach(InstructionExecution::interrupt);
 
     // now they're all present, kick them off
-    this.progress.values().forEach(InstructionProgress::begin);
+    this.progress.values().forEach(InstructionExecution::execute);
   }
 
-  Optional<InstructionProgress> findInstruction(ExperimentPath<Absolute> path) {
+  Optional<InstructionExecution> findInstruction(ExperimentPath<Absolute> path) {
     return Optional.ofNullable(progress.get(path));
   }
 

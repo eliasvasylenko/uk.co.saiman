@@ -29,6 +29,7 @@ package uk.co.saiman.experiment;
 
 import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.experiment.declaration.ExperimentPath.toRoot;
+import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -43,6 +44,7 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.definition.ExecutionPlan;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
@@ -50,11 +52,11 @@ import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
+import uk.co.saiman.experiment.event.PlanStepEvent;
 import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
-import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.variables.Variable;
@@ -77,8 +79,10 @@ public class Experiment {
       StorageConfiguration<?> storageConfiguration,
       Supplier<GlobalEnvironment> globalEnvironment) {
     this.globalEnvironment = globalEnvironment;
-    this.definition = requireNonNull(procedure);
+    this.definition = null;
     this.scheduler = new Scheduler(storageConfiguration);
+
+    updateDefinition(requireNonNull(procedure));
   }
 
   GlobalEnvironment getGlobalEnvironment() {
@@ -89,8 +93,16 @@ public class Experiment {
     return definition;
   }
 
-  public Schedule getSchedule() {
-    return scheduler.getSchedule().get();
+  public synchronized void scheduleAll() {
+    updateDefinition(definition.withSubsteps(steps -> steps.map(Experiment::withPlan)));
+  }
+
+  public synchronized void conduct() {
+    scheduler.getSchedule().get().conduct();
+  }
+
+  static StepDefinition withPlan(StepDefinition step) {
+    return step.withPlan(EXECUTE).withSubsteps(steps -> steps.map(Experiment::withPlan));
   }
 
   public Output getResults() {
@@ -110,7 +122,7 @@ public class Experiment {
   }
 
   private synchronized boolean updateDefinition(ExperimentDefinition definition) {
-    boolean changed = !this.definition.equals(definition);
+    boolean changed = !definition.equals(this.definition);
     if (changed) {
       this.definition = definition;
       scheduler.schedule(definition.procedure(getGlobalEnvironment()));
@@ -245,7 +257,7 @@ public class Experiment {
     }
   }
 
-  public <T> void updateStep(
+  synchronized <T> void updateStep(
       Step step,
       Variable<T> variable,
       Function<? super Optional<T>, ? extends Optional<T>> value) {
@@ -258,6 +270,13 @@ public class Experiment {
                 getGlobalEnvironment(),
                 variables -> variables.withOpt(variable, value)))) {
       fireEvent(new ChangeVariableEvent(step, variable));
+    }
+  }
+
+  synchronized <T> void planStep(Step step, ExecutionPlan plan) {
+    var path = step.getPath();
+    if (updateStepDefinition(path, getStepDefinition(path).get().withPlan(plan))) {
+      fireEvent(new PlanStepEvent(step, plan));
     }
   }
 

@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.conductor;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
-import uk.co.saiman.experiment.requirement.ProductPath;
+import uk.co.saiman.experiment.dependency.ProductPath;
 
 public class ConditionImpl<T> implements Condition<T> {
   private final Class<T> type;

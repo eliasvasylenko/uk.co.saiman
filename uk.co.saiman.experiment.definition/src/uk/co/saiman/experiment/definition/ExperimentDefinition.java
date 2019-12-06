@@ -28,6 +28,7 @@
 package uk.co.saiman.experiment.definition;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
 
 import java.util.List;
 import java.util.Map;
@@ -44,11 +45,6 @@ import uk.co.saiman.experiment.procedure.Procedure;
 public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinition> {
   private final ExperimentId id;
   private Procedure procedure;
-
-  private ExperimentDefinition(ExperimentId id, List<StepDefinition> steps) {
-    super(steps);
-    this.id = id;
-  }
 
   private ExperimentDefinition(
       ExperimentId id,
@@ -92,11 +88,6 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
     return new ExperimentDefinition(id, steps, dependents);
   }
 
-  @Override
-  ExperimentDefinition with(List<StepDefinition> steps) {
-    return new ExperimentDefinition(id, steps);
-  }
-
   public Procedure procedure(GlobalEnvironment environment) {
     if (procedure == null) {
       procedure = new Procedure(id, closure(this), environment);
@@ -115,7 +106,9 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
     var p = path.resolve(step.id());
     return Stream
         .concat(
-            Stream.of(new Instruction(p, step.variableMap(), step.executor())),
+            step.getPlan() == EXECUTE
+                ? Stream.of(new Instruction(p, step.variableMap(), step.executor()))
+                : Stream.empty(),
             step.substeps().flatMap(s -> closure(s, p)));
   }
 }

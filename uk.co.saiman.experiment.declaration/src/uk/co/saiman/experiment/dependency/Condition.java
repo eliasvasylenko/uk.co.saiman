@@ -28,7 +28,6 @@
 package uk.co.saiman.experiment.dependency;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.requirement.ProductPath;
 
 /**
  * A condition which may be produced by a preparation during the conducting of

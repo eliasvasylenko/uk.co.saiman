@@ -34,7 +34,6 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import uk.co.saiman.eclipse.model.ui.MCell;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.output.Output;
-import uk.co.saiman.experiment.requirement.Observation;
 
 /**
  * Contribution for all experiment nodes in the experiment tree
@@ -45,7 +44,7 @@ public class ExperimentResultCell {
   public static final String ID = "uk.co.saiman.experiment.msapex.result.cell";
 
   @Inject
-  private Observation<?> observation;
+  private Class<?> observation;
 
   @Inject
   @Optional
