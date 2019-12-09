@@ -32,11 +32,9 @@ import static uk.co.saiman.instrument.acquisition.adq.FpgaTarget.COMM_FPGA;
 import static uk.co.saiman.instrument.acquisition.adq.TestPatternMode.COUNT_ALTERNATING;
 import static uk.co.saiman.instrument.acquisition.adq.TriggerMode.SOFTWARE_TRIGGER;
 
-import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import uk.co.saiman.instrument.acquisition.adq.TraceLevel;
 import uk.co.saiman.instrument.acquisition.adq.impl.Adq114DeviceImpl;
 import uk.co.saiman.instrument.acquisition.adq.impl.AdqDeviceManager;
 
@@ -45,12 +43,14 @@ public class AdqStandalone {
     System.out.println("API revision: " + AdqDeviceManager.getApiRevision());
 
     try (var deviceManager = new AdqDeviceManager()) {
+      /*-
       deviceManager
           .setLog(
               TraceLevel.INFO,
               Path
                   .of(
                       "/home/eliasv/git/uk.co.saiman/uk.co.saiman.instrument.acquisition.adq.standalone/generated/"));
+       */
 
       var device = new Adq114DeviceImpl(deviceManager);
 

@@ -28,12 +28,10 @@ Bundle-NativeCode:\
 		osname=linux,\
 	linux-x86-64/libadq.so;\
 		processor=x86_64;\
-		osname=linux
-
-no:\
-	win32-x86/libadq.dll;\
+		osname=linux,\
+	win32-x86/adq.dll;\
 		processor=x86;\
 		osname=windows,\
-	win32-x86-64/libadq.dll;\
+	win32-x86-64/adq.dll;\
 		processor=x86_64;\
-		osname=windows \
+		osname=windows
