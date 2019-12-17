@@ -1,3 +1,6 @@
+-include:\
+	${build}/include/eclipse.fx.bndrun
+
 ## Run path groups:
 -runpath.eclipse:\
 	${def;runpath.eclipse.${runplatform}}
@@ -30,9 +33,6 @@ runpath.eclipse.linux64:\
 	bnd.identity; id=org.eclipse.equinox.launcher
 
 runrequires.eclipse.win64:\
-	bnd.identity; id=org.eclipse.core.filesystem.win32.x86_64,\
-	bnd.identity; id=org.eclipse.core.resources.win32.x86_64,\
-	bnd.identity; id=org.eclipse.equinox.security.win32.x86_64,\
 	bnd.identity; id=org.eclipse.equinox.launcher.win32.win32.x86_64
 
 runrequires.eclipse.linux64:\

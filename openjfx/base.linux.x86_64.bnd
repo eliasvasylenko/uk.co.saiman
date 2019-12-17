@@ -4,3 +4,9 @@ Bundle-Name: SAI :: FX :: javafx-base
 	javafx.base.jar=${repo;org.openjfx:javafx-base:jar:linux}
 
 Java-Module: javafx.base
+
+Require-Capability: \
+	osgi.native; filter:="(&\
+		(osgi.native.osname~=Linux)\
+		(osgi.native.processor~=x86-64)\
+	)"

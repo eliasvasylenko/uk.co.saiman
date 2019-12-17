@@ -28,7 +28,7 @@
 package uk.co.saiman.instrument.acquisition.adq;
 
 public enum TriggerMode {
-  SOFTWARE_TRIGGER, EXTERNAL_TRIGGER_1, LEVEL_TRIGGER, INTERNAL_TRIGGER;
+  SOFTWARE, EXTERNAL_1, LEVEL, INTERNAL;
 
   /*
    * There are many more trigger modes documented, but we probably won't need

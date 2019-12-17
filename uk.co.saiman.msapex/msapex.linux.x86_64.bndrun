@@ -6,6 +6,18 @@ runplatform: linux64
 	osgi.os=linux,\
 	osgi.arch=x86_64
 
+-runsystemcapabilities: \
+	osgi.native;\
+		osgi.native.osname=Linux;\
+		osgi.native.processor=x86-64
+
+-runrequires.win32: \
+	bnd.identity; id=openjfx.base.linux.x86_64,\
+	bnd.identity; id=openjfx.controls.linux.x86_64,\
+	bnd.identity; id=openjfx.fxml.linux.x86_64,\
+	bnd.identity; id=openjfx.graphics.linux.x86_64,\
+	bnd.identity; id=openjfx.swing.linux.x86_64
+
 -runvm.linux: \
 	-Djdk.gtk.version=2
 
@@ -226,3 +238,4 @@ runplatform: linux64
 	uk.co.saiman.webmodules.extender;version='[0.0.1,0.0.2)',\
 	uk.co.saiman.webmodules.i18n;version='[0.0.1,0.0.2)',\
 	uk.co.saiman.eclipse.dnd;version='[0.0.1,0.0.2)'
+

@@ -1,0 +1,12 @@
+Bundle-Name: SAI :: FX :: javafx-base
+
+-includeresource: \
+	javafx.base.jar=${repo;org.openjfx:javafx-base:jar:win}
+
+Java-Module: javafx.base
+
+Require-Capability: \
+	osgi.native; filter:="(&\
+		(osgi.native.osname~=Win32)\
+		(osgi.native.processor~=x86-64)\
+	)"

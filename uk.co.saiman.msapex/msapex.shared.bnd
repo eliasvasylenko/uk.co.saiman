@@ -1,8 +1,7 @@
 -include:\
 	${build}/include/felix.bndrun,\
 	${build}/include/utilities.bnd,\
-	${build}/include/eclipse.platform.bndrun,\
-	${build}/include/eclipse.fx.bndrun
+	${build}/include/eclipse.platform.bndrun
 
 -runrequires.msapex: \
 	bnd.identity; id=org.apache.felix.configadmin,\
@@ -42,13 +41,7 @@
 	bnd.identity; id=uk.co.saiman.webconsole.branding,\
 	bnd.identity; id=uk.co.saiman.webconsole,\
 	bnd.identity; id=uk.co.saiman.instrument.stage.copley,\
-	bnd.identity; id=uk.co.saiman.copley.webconsole,\
-\
-	bnd.identity; id=openjfx.base.linux,\
-	bnd.identity; id=openjfx.controls.linux,\
-	bnd.identity; id=openjfx.fxml.linux,\
-	bnd.identity; id=openjfx.graphics.linux,\
-	bnd.identity; id=openjfx.swing.linux
+	bnd.identity; id=uk.co.saiman.copley.webconsole
 
 -runfw:\
 	org.eclipse.osgi

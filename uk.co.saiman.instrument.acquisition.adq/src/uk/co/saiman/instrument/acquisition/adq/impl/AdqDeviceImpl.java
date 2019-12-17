@@ -27,9 +27,12 @@
  */
 package uk.co.saiman.instrument.acquisition.adq.impl;
 
+import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.instrument.acquisition.adq.AdqHardwareInterface.PCIE;
 import static uk.co.saiman.instrument.acquisition.adq.AdqHardwareInterface.USB;
 import static uk.co.saiman.instrument.acquisition.adq.AdqHardwareInterface.USB3;
+import static uk.co.saiman.instrument.acquisition.adq.FpgaTarget.ALG_FPGA;
+import static uk.co.saiman.instrument.acquisition.adq.FpgaTarget.COMM_FPGA;
 import static uk.co.saiman.instrument.acquisition.adq.ProductFamily.K7;
 import static uk.co.saiman.instrument.acquisition.adq.ProductFamily.V5;
 import static uk.co.saiman.instrument.acquisition.adq.ProductFamily.V6;
@@ -37,10 +40,17 @@ import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.LOCAL_
 import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.MIXED;
 import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.SVN_MANAGED;
 import static uk.co.saiman.instrument.acquisition.adq.RevisionInformation.SVN_UPDATED;
+import static uk.co.saiman.log.Log.Level.INFO;
+import static uk.co.saiman.measurement.Units.second;
+
+import javax.measure.Quantity;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Time;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
+import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ControllerImpl;
 import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.DeviceStatus;
@@ -54,6 +64,10 @@ import uk.co.saiman.instrument.acquisition.adq.RevisionInformation;
 import uk.co.saiman.instrument.acquisition.adq.TestPatternMode;
 import uk.co.saiman.instrument.acquisition.adq.TriggerMode;
 import uk.co.saiman.instrument.acquisition.adq.impl.AdqDeviceManager.AdqLib;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.measurement.scalar.Scalar;
+import uk.co.saiman.observable.HotObservable;
+import uk.co.saiman.observable.Observable;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
@@ -74,17 +88,96 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
   private final AdqDeviceManager manager;
   private String serialNumber;
 
-  private TriggerMode triggerMode;
+  private int acquisitionCount = 1;
+  private int sampleDepth = 1;
+  private TriggerMode triggerMode = TriggerMode.SOFTWARE;
   private TestPatternMode testPatternMode = TestPatternMode.NORMAL_OPERATION;
   private int testPatternConstant = 0;
 
-  public AdqDeviceImpl(AdqDeviceManager manager) {
-    this.manager = manager;
+  private final HotObservable<SampledContinuousFunction<Time, Dimensionless>> dataObservable = new HotObservable<>();
+  private final HotObservable<SampledContinuousFunction<Time, Dimensionless>> acquisitionDataObservable = new HotObservable<>();
+  private boolean acquiring = false;
+
+  private final Log log;
+
+  protected AdqDeviceImpl(AdqDeviceManager manager, String serialNumber, Log log) {
+    this.manager = requireNonNull(manager);
+    this.serialNumber = serialNumber;
+    this.log = requireNonNull(log);
+
+    log.log(INFO, "Device ID: " + getProductId());
+    log.log(INFO, "Serial No: " + getSerialNumber());
+    log.log(INFO, "Product Family: " + getProductFamily());
+    log.log(INFO, "Firmware ALG: " + getFirmwareRevisionFpga(ALG_FPGA));
+    log.log(INFO, "Firmware COMM: " + getFirmwareRevisionFpga(COMM_FPGA));
+    log.log(INFO, "Hardware Interface: " + getHardwareInterface());
   }
 
-  public AdqDeviceImpl(AdqDeviceManager manager, String serialNumber) {
-    this.manager = manager;
-    this.serialNumber = serialNumber;
+  protected void setAcquisitionCount(int count) {
+    this.acquisitionCount = count;
+  }
+
+  protected void setAcquisitionTime(Quantity<Time> time) {
+    setSampleDepth(time.divide(getSampleResolution()).getValue().intValue());
+  }
+
+  protected void setSampleDepth(int depth) {
+    this.sampleDepth = depth;
+  }
+
+  protected void setTriggerMode(TriggerMode triggerMode) {
+    this.triggerMode = triggerMode;
+  }
+
+  protected void setTestPatternMode(TestPatternMode testPatternMode) {
+    this.testPatternMode = testPatternMode;
+  }
+
+  protected void setTestPatternConstant(int testPatternConstant) {
+    this.testPatternConstant = testPatternConstant;
+  }
+
+  protected Log getLog() {
+    return log;
+  }
+
+  protected void nextData(SampledContinuousFunction<Time, Dimensionless> data) {
+    dataObservable.next(data);
+  }
+
+  @Override
+  public boolean isAcquiring() {
+    return acquiring;
+  }
+
+  @Override
+  public Observable<SampledContinuousFunction<Time, Dimensionless>> dataEvents() {
+    return dataObservable;
+  }
+
+  @Override
+  public Observable<SampledContinuousFunction<Time, Dimensionless>> acquisitionDataEvents() {
+    return acquisitionDataObservable;
+  }
+
+  @Override
+  public int getAcquisitionCount() {
+    return acquisitionCount;
+  }
+
+  @Override
+  public Quantity<Time> getSampleResolution() {
+    return new Scalar<>(second().getUnit(), 1).multiply(getSampleFrequency()).asType(Time.class);
+  }
+
+  @Override
+  public Quantity<Time> getAcquisitionTime() {
+    return getSampleResolution().multiply(sampleDepth);
+  }
+
+  @Override
+  public int getSampleDepth() {
+    return sampleDepth;
   }
 
   @Override
@@ -219,18 +312,33 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
     }
 
     @Override
+    public void setAcquisitionCount(int count) {
+      AdqDeviceImpl.this.setAcquisitionCount(count);
+    }
+
+    @Override
+    public void setAcquisitionTime(Quantity<Time> time) {
+      AdqDeviceImpl.this.setAcquisitionTime(time);
+    }
+
+    @Override
+    public void setSampleDepth(int depth) {
+      AdqDeviceImpl.this.setSampleDepth(depth);
+    }
+
+    @Override
     public void setTriggerMode(TriggerMode triggerMode) {
-      AdqDeviceImpl.this.triggerMode = triggerMode;
+      AdqDeviceImpl.this.setTriggerMode(triggerMode);
     }
 
     @Override
     public void setTestPatternMode(TestPatternMode testPatternMode) {
-      AdqDeviceImpl.this.testPatternMode = testPatternMode;
+      AdqDeviceImpl.this.setTestPatternMode(testPatternMode);
     }
 
     @Override
     public void setTestPatternConstant(int testPatternConstant) {
-      AdqDeviceImpl.this.testPatternConstant = testPatternConstant;
+      AdqDeviceImpl.this.setTestPatternConstant(testPatternConstant);
     }
 
     @Override
@@ -241,7 +349,14 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
     @Override
     public void startAcquisition() {
       context().run(() -> run((lib, controlUnit, deviceNumber) -> {
-        startAcquisition(lib, controlUnit, deviceNumber);
+        try {
+          acquiring = true;
+          startAcquisition(lib, controlUnit, deviceNumber);
+        } finally {
+          acquisitionDataObservable.complete();
+          acquiring = false;
+          acquisitionDataObservable.start();
+        }
       }));
     }
 

@@ -76,15 +76,21 @@ import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.Acquis
  * @author Elias N Vasylenko
  */
 @Designate(ocd = AcquisitionSimulationConfiguration.class, factory = true)
-@Component(configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
-    Device.class,
-    AcquisitionDevice.class }, immediate = true)
+@Component(
+    configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE,
+    service = { Device.class, AcquisitionDevice.class },
+    immediate = true)
 public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController>
     implements AcquisitionDevice<AcquisitionController> {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "Simulated Acquisition Device Configuration", description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
+  @ObjectClassDefinition(
+      name = "Simulated Acquisition Device Configuration",
+      description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
   public @interface AcquisitionSimulationConfiguration {
-    @AttributeDefinition(name = "Acquisition Resolution", description = "The minimum resolvable units of time for samples")
+    @AttributeDefinition(
+        name = "Acquisition Resolution",
+        description = "The minimum resolvable units of time for samples")
     String acquisitionResolution() default DEFAULT_ACQUISITION_RESOLUTION_SECONDS + "s";
   }
 
@@ -331,8 +337,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
     } catch (InterruptedException e) {}
   }
 
-  @Override
-  public void stopAcquisition() {
+  protected void stopAcquisition() {
     synchronized (acquiringLock) {
       if (experiment.isPresent()) {
         experiment = Optional.empty();
@@ -344,11 +349,6 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   @Override
   public boolean isAcquiring() {
     return acquiring;
-  }
-
-  @Override
-  public SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData() {
-    return acquisitionData;
   }
 
   @Override

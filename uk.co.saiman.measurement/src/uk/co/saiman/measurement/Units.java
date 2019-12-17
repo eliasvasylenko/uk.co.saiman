@@ -31,6 +31,7 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.AmountOfSubstance;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Frequency;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Pressure;
@@ -60,6 +61,10 @@ public final class Units {
 
   public static MetricUnitBuilder<Time> second() {
     return withMetricUnit(SI.SECOND);
+  }
+
+  public static MetricUnitBuilder<Frequency> hertz() {
+    return withMetricUnit(SI.HERTZ);
   }
 
   public static UnitBuilder<Dimensionless> percent() {

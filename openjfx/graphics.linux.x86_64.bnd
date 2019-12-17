@@ -4,3 +4,9 @@ Bundle-Name: SAI :: FX :: javafx-graphics
 	javafx.graphics.jar=${repo;org.openjfx:javafx-graphics:jar:linux}
 
 Java-Module: javafx.graphics
+
+Require-Capability: \
+	osgi.native; filter:="(&\
+		(osgi.native.osname~=Linux)\
+		(osgi.native.processor~=x86-64)\
+	)"

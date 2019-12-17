@@ -27,6 +27,10 @@
  */
 package uk.co.saiman.instrument.acquisition.adq.impl;
 
+import static uk.co.saiman.measurement.Units.count;
+import static uk.co.saiman.measurement.Units.hertz;
+import static uk.co.saiman.measurement.Units.second;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
@@ -35,93 +39,60 @@ import javax.measure.quantity.Time;
 
 import com.sun.jna.Pointer;
 
-import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
 import uk.co.saiman.instrument.acquisition.adq.Adq114DataFormat;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Device;
 import uk.co.saiman.instrument.acquisition.adq.impl.AdqDeviceManager.AdqLib;
-import uk.co.saiman.observable.Observable;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.measurement.scalar.Scalar;
 
 public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Adq114Device {
-  private Adq114DataFormat dataFormat = Adq114DataFormat.PACKED_14BIT;
+  private static final Quantity<Frequency> REFERENCE_FREQUENCY = new Scalar<>(hertz().mega(), 10);
+  private static final int PLL_MULTIPLIER = 160;
+  private static final int DEFAULT_SAMPLE_DEPTH = 512 * 32;
+  private static final Adq114DataFormat DATA_FORMAT = Adq114DataFormat.UNPACKED_32BIT;
 
-  public Adq114DeviceImpl(AdqDeviceManager manager) {
-    super(manager);
+  private int pllDivider = 2;
+  private int accumulations = 1;
+
+  public Adq114DeviceImpl(AdqDeviceManager manager, Log log) {
+    this(manager, null, log);
   }
 
-  public Adq114DeviceImpl(AdqDeviceManager manager, String serialNumber) {
-    super(manager, serialNumber);
-  }
+  public Adq114DeviceImpl(AdqDeviceManager manager, String serialNumber, Log log) {
+    super(manager, serialNumber, log);
 
-  @Override
-  public Adq114DataFormat getDataFormat() {
-    return dataFormat;
-  }
-
-  @Override
-  public void stopAcquisition() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public boolean isAcquiring() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public Unit<Dimensionless> getSampleIntensityUnit() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Unit<Time> getSampleTimeUnit() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Observable<SampledContinuousFunction<Time, Dimensionless>> dataEvents() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public int getAcquisitionCount() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public Quantity<Time> getSampleResolution() {
-    // TODO Auto-generated method stub
-    return null;
+    setSampleDepth(DEFAULT_SAMPLE_DEPTH);
   }
 
   @Override
   public Quantity<Frequency> getSampleFrequency() {
-    // TODO Auto-generated method stub
-    return null;
+    return REFERENCE_FREQUENCY.multiply(PLL_MULTIPLIER).divide(pllDivider);
   }
 
   @Override
-  public Quantity<Time> getAcquisitionTime() {
-    // TODO Auto-generated method stub
-    return null;
+  public int getPllDivider() {
+    return pllDivider;
   }
 
   @Override
-  public int getSampleDepth() {
-    // TODO Auto-generated method stub
-    return 0;
+  public int getAccumulationsPerAcquisition() {
+    return accumulations;
+  }
+
+  @Override
+  public Adq114DataFormat getDataFormat() {
+    return DATA_FORMAT;
+  }
+
+  @Override
+  public Unit<Dimensionless> getSampleIntensityUnit() {
+    return count().getUnit();
+  }
+
+  @Override
+  public Unit<Time> getSampleTimeUnit() {
+    return second().micro().getUnit();
   }
 
   @Override
@@ -135,26 +106,16 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
     }
 
     @Override
-    public void setDataFormat(Adq114DataFormat dataFormat) {
-      Adq114DeviceImpl.this.dataFormat = dataFormat;
+    public void setPllDivider(int pllDivider) {
+      if (pllDivider < 2 || pllDivider > 20) {
+        throw new IndexOutOfBoundsException(pllDivider);
+      }
+      Adq114DeviceImpl.this.pllDivider = pllDivider;
     }
 
     @Override
-    public void setAcquisitionCount(int count) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setAcquisitionTime(Quantity<Time> time) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setSampleDepth(int depth) {
-      // TODO Auto-generated method stub
-
+    public void setAccumulationsPerAcquisition(int accumulations) {
+      Adq114DeviceImpl.this.accumulations = accumulations;
     }
 
     @Override
@@ -163,7 +124,8 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
           Adq114DeviceImpl.this,
           lib,
           controlUnit,
-          deviceNumber)) {
+          deviceNumber,
+          getLog())) {
         acquisition.acquire();
       }
     }

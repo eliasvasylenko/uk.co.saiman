@@ -28,5 +28,7 @@
 package uk.co.saiman.instrument.acquisition.adq;
 
 public interface Adq114Control extends AdqControl {
-  void setDataFormat(Adq114DataFormat dataFormat);
+  void setPllDivider(int pllDivider);
+
+  void setAccumulationsPerAcquisition(int accumulations);
 }

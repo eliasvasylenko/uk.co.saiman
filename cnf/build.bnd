@@ -124,7 +124,7 @@ efxclipse.version: 3.6.0
 		url					=	${fileuri;${build}/efxclipse.${efxclipse.version}.target}
 #		url					=	https://download.eclipse.org/efxclipse/runtime-released/${efxclipse.version}/site/
 
-javafx.version: 12
+javafx.version: 13
 -plugin.javafx = \
 	aQute.bnd.repository.maven.provider.MavenBndRepository;\
 		name				=	"FX";\
@@ -143,14 +143,14 @@ javafx.version: 12
 #		url					=	https://download.eclipse.org/releases/${eclipse.platform.version}/
 
 -runrepos:\
-	Central,\
-	Bnd,\
-	Local_Index,\
-	NPM,\
+	Workspace,\
 	Apache,\
-	E(fx)clipse,\
+	Bnd,\
+	Central,\
+	Local_Index,\
+	E(fx)clipse_3.6.0,\
 	FX,\
-	Workspace
+	NPM
 
 ## Run requirement groups:
 -runrequires.base:\

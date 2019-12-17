@@ -50,13 +50,6 @@ import uk.co.saiman.observable.Observable;
  */
 public interface AcquisitionDevice<T extends AcquisitionController> extends Device<T> {
   /**
-   * Stop any acquisition experiment that may be in progress. This method revokes
-   * control of any currently acquired {@link #acquireControl(long, TimeUnit)
-   * control interface}.
-   */
-  void stopAcquisition();
-
-  /**
    * @return true if the module is currently in acquisition, false otherwise
    */
   boolean isAcquiring();
@@ -72,19 +65,13 @@ public interface AcquisitionDevice<T extends AcquisitionController> extends Devi
   Unit<Time> getSampleTimeUnit();
 
   /**
-   * @return The last acquired acquisition data. This leaves the format of the
-   *         acquired data to the discretion of the implementing hardware module.
-   */
-  SampledContinuousFunction<Time, Dimensionless> getLastAcquisitionData();
-
-  /**
    * Add or remove data event observers.
    * <p>
-   * The observers may be triggered with data events that happen outside the scope
-   * of an actual acquisition experiment, in the case of an "always on" instrument
-   * setup. In this case, the {@link #isAcquiring()} method will indicate whether
-   * the event is related to an experiment if invoked by a listener to a data
-   * event.
+   * The observers may be triggered with data events that happen outside the
+   * scope of an actual acquisition experiment, in the case of an "always on"
+   * instrument setup. In this case, the {@link #isAcquiring()} method will
+   * indicate whether the event is related to an experiment if invoked by a
+   * listener to a data event.
    * 
    * @return an observable interface for registering data event listeners
    */
@@ -99,9 +86,7 @@ public interface AcquisitionDevice<T extends AcquisitionController> extends Devi
    * 
    * @return an observable interface for registering data event listeners
    */
-  default Observable<SampledContinuousFunction<Time, Dimensionless>> acquisitionDataEvents() {
-    return dataEvents().dropWhile(m -> !isAcquiring()).takeWhile(m -> isAcquiring());
-  }
+  Observable<SampledContinuousFunction<Time, Dimensionless>> acquisitionDataEvents();
 
   /**
    * Get the total acquisition count for a single experiment.
@@ -120,8 +105,9 @@ public interface AcquisitionDevice<T extends AcquisitionController> extends Devi
   Quantity<Time> getSampleResolution();
 
   /**
-   * Get the sample frequency in the acquired sampled continuous function. Unless
-   * otherwise specified by a subclass this may be considered to be a constant.
+   * Get the sample frequency in the acquired sampled continuous function.
+   * Unless otherwise specified by a subclass this may be considered to be a
+   * constant.
    * 
    * @return the sample frequency
    */

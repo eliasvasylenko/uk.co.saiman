@@ -43,4 +43,8 @@ public interface Adq114Device extends AdqDevice<Adq114Control> {
   }
 
   Adq114DataFormat getDataFormat();
+
+  int getPllDivider();
+
+  int getAccumulationsPerAcquisition();
 }

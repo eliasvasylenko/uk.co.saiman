@@ -52,9 +52,9 @@ public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends 
   private final SampledRange<UR> range;
 
   /**
-   * Instantiate with the given number of samples, values, and intensities. Arrays
-   * are copied into the function, truncated to the sample length given, or padded
-   * with 0s.
+   * Instantiate with the given number of samples, values, and intensities.
+   * Arrays are copied into the function, truncated to the sample length given,
+   * or padded with 0s.
    * 
    * @param domain
    *          the domain of the function
@@ -77,7 +77,7 @@ public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends 
   }
 
   protected SampledRange<UR> createDefaultRange(Function<Integer, Double> intensityAtIndex) {
-    return new SampledRange<UR>(this) {
+    return new SampledRange<>(this) {
       @Override
       public Unit<UR> getUnit() {
         return rangeUnit;

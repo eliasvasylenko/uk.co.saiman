@@ -22,14 +22,6 @@
 -runrequires.eclipse.fx.p2:\
 	bnd.identity; id=org.eclipse.fx.core.p2
 
--runpath.javafx:\
-	org.openjfx:javafx-graphics:jar:linux,\
-	org.openjfx:javafx-base:jar:linux,\
-	org.openjfx:javafx-controls:jar:linux,\
-	org.openjfx:javafx-fxml:jar:linux,\
-	org.openjfx:javafx-swing:jar:linux
-
-
 -runproperties.javafx:\
 	org.osgi.framework.bootdelegation="\
 		javax.xml,\
@@ -38,4 +30,3 @@
 	",\
 	osgi.frameworkParentClassloader=app,\
 	osgi.parentClassloader=app
-
