@@ -83,7 +83,7 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
 
   private final int sampleDepth;
   private final int samplesPerRecord;
-  private final int numberOfWaveforms;
+  private final int recordsPerAverage;
   private final int numberOfAverages;
   private final int numberOfChannels;
   private final int numberOfBuffers;
@@ -114,9 +114,8 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
     this.sampleTimeUnit = device.getSampleTimeUnit();
 
     this.sampleDepth = device.getSampleDepth();
-    // TODO derive samplesPerRecord, next valid size up
     this.samplesPerRecord = ((int) Math.ceil(sampleDepth / 128.0)) * 128;
-    this.numberOfWaveforms = device.getAccumulationsPerAcquisition();
+    this.recordsPerAverage = device.getAccumulationsPerAcquisition();
     this.numberOfAverages = device.getAcquisitionCount();
     this.numberOfChannels = NUMBER_OF_CHANNELS;
     this.numberOfBuffers = NUMBER_OF_BUFFERS;
@@ -147,7 +146,7 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
             .ADQ_WaveformAveragingSetup(
                 controlUnit,
                 deviceNumber,
-                numberOfWaveforms,
+                recordsPerAverage,
                 samplesPerRecord,
                 0,
                 0,
@@ -165,7 +164,9 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
 
     check(lib.ADQ_WaveformAveragingArm(controlUnit, deviceNumber));
 
-    this.dataStream = new Memory(samplesPerRecord * numberOfChannels * Integer.BYTES);
+    lib.ADQ_WaveformAveragingStartReadout(controlUnit, deviceNumber);
+
+    this.dataStream = new Memory(bufferSize);
     this.dataTarget = new Pointer[AdqDeviceImpl.MAX_CHANNEL_COUNT];
     this.spectrumData = new double[sampleDepth];
     this.dataObservable = device::nextData;
@@ -205,7 +206,7 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
         log.log(INFO, "purging buffers");
 
         if (triggerMode == SOFTWARE) {
-          for (int t = 0; t < numberOfWaveforms; t++) {
+          for (int t = 0; t < recordsPerAverage; t++) {
             check(lib.ADQ_SWTrig(controlUnit, deviceNumber));
           }
         }
@@ -238,15 +239,7 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
     }
 
     while (recordCounter < numberOfAverages) {
-      // If trigger mode is software trigger ....
-      // ...issue enough software triggers to
-      // produce a single averaged record
       log.log(INFO, "WFA Record " + recordCounter);
-      if (triggerMode == SOFTWARE) {
-        for (int t = 0; t < numberOfWaveforms; t++) {
-          check(lib.ADQ_SWTrig(controlUnit, deviceNumber));
-        }
-      }
 
       if (nextData()) {
         recordCounter++;
@@ -264,6 +257,8 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
   }
 
   private boolean nextData() {
+    trigger();
+
     boolean bufferReady = isReadyTransferStatus(lib, controlUnit, deviceNumber);
 
     int lastError = lib.ADQ_GetLastError(controlUnit, deviceNumber);
@@ -281,6 +276,17 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
     }
 
     return bufferReady;
+  }
+
+  private void trigger() {
+    // If trigger mode is software trigger ....
+    // ...issue enough software triggers to
+    // produce a single averaged record
+    if (triggerMode == SOFTWARE) {
+      for (int t = 0; t < recordsPerAverage; t++) {
+        check(lib.ADQ_SWTrig(controlUnit, deviceNumber));
+      }
+    }
   }
 
   private void collectData() {
@@ -310,12 +316,15 @@ public class WaveformAveragingStreamingAcquisition implements AdqAcquisition {
             dataStream,
             dataTarget);
 
-    var data = dataTarget[0];
+    var data = dataStream;
+    // var data = dataTarget[0];
 
     int byteOffset = 0;
     for (int i = 0; i < sampleDepth; i++) {
-      spectrumData[i] = data.getInt(byteOffset);
-      byteOffset += 4;
+      int value = data.getInt(byteOffset);
+      spectrumData[i] = value;
+      // System.out.println(Integer.toBinaryString(value));
+      byteOffset += Integer.BYTES;
     }
 
     dataObservable

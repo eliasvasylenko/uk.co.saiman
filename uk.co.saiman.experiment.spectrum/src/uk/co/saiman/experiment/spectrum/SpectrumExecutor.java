@@ -119,12 +119,12 @@ public interface SpectrumExecutor extends Executor {
       /*
        * TODO some sort of invalidate/lazy-revalidate message passer
        * 
-       * ContinuousFunctionAccumulator already has this, it provides an observable
-       * with backpressure which gives the latest spectrum every time it is requested
-       * and otherwise does no work (i.e. no array copying etc.). The limitation is
-       * that it can't notify a listener when a new item is actually available without
-       * actually doing the work and sending an item, the listener has to just request
-       * and see.
+       * ContinuousFunctionAccumulator already has this, it provides an
+       * observable with backpressure which gives the latest spectrum every time
+       * it is requested and otherwise does no work (i.e. no array copying
+       * etc.). The limitation is that it can't notify a listener when a new
+       * item is actually available without actually doing the work and sending
+       * an item, the listener has to just request and see.
        * 
        * The problem is how to pass this through the Result API to users without
        * losing the laziness so we can request at e.g. the monitor refresh rate.

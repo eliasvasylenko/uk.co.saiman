@@ -103,6 +103,8 @@ public class ExperimentAddon {
   @OSGiBundle
   private BundleContext bundleContext;
   @Inject
+  private LocalEnvironmentService localEnvironmentService;
+  @Inject
   private MAddon addon;
   @Inject
   private Log log;
@@ -188,6 +190,7 @@ public class ExperimentAddon {
         executorService,
         storageService,
         () -> context.get(GlobalEnvironment.class),
+        localEnvironmentService,
         log);
     context.set(Workspace.class, workspace);
 
@@ -298,8 +301,8 @@ public class ExperimentAddon {
   public void partActivated(@Active MPart part, EModelService modelService) {
     try {
       /*
-       * When a new perspective is activated, set the perspective's environment on the
-       * root window.
+       * When a new perspective is activated, set the perspective's environment
+       * on the root window.
        */
       var perspective = modelService.getPerspectiveFor(part);
       var window = modelService.getTopLevelWindowFor(perspective);
@@ -324,8 +327,7 @@ public class ExperimentAddon {
       Object value = event.getProperty(NEW_VALUE);
       Object element = event.getProperty(ELEMENT);
 
-      if (element instanceof MPerspective
-          && value instanceof IEclipseContext
+      if (element instanceof MPerspective && value instanceof IEclipseContext
           && SET.equals(event.getProperty(TYPE))) {
         IEclipseContext context = (IEclipseContext) value;
         MPerspective perspective = (MPerspective) element;

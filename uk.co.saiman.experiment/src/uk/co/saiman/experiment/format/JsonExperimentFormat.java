@@ -40,9 +40,11 @@ import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.service.StorageService;
+import uk.co.saiman.log.Log;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
@@ -63,34 +65,52 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   private final JsonStateMapFormat stateMapFormat;
   private final JsonExperimentDefinitionFormat definitionFormat;
   private final Supplier<GlobalEnvironment> environment;
+  private final LocalEnvironmentService localEnvironmentService;
+
+  private final Log log;
 
   public JsonExperimentFormat(
       ExecutorService executorService,
       StorageService storageService,
-      Supplier<GlobalEnvironment> environment) {
-    this(executorService, storageService, environment, new JsonStateMapFormat());
+      Supplier<GlobalEnvironment> environment,
+      LocalEnvironmentService localEnvironmentService,
+      Log log) {
+    this(
+        executorService,
+        storageService,
+        environment,
+        localEnvironmentService,
+        new JsonStateMapFormat(),
+        log);
   }
 
   public JsonExperimentFormat(
       ExecutorService executorService,
       StorageService storageService,
       Supplier<GlobalEnvironment> environment,
-      JsonStateMapFormat stateMapFormat) {
+      LocalEnvironmentService localEnvironmentService,
+      JsonStateMapFormat stateMapFormat,
+      Log log) {
     this(
         storageService,
         environment,
+        localEnvironmentService,
         stateMapFormat,
-        new JsonExperimentDefinitionFormat(executorService, stateMapFormat));
+        new JsonExperimentDefinitionFormat(executorService, stateMapFormat),
+        log);
   }
 
   public JsonExperimentFormat(
       StorageService storageService,
       Supplier<GlobalEnvironment> environment,
+      LocalEnvironmentService localEnvironmentService,
       JsonStateMapFormat stateMapFormat,
-      JsonExperimentDefinitionFormat definitionFormat) {
+      JsonExperimentDefinitionFormat definitionFormat,
+      Log log) {
     this.stateMapFormat = stateMapFormat;
     this.definitionFormat = definitionFormat;
     this.environment = environment;
+    this.localEnvironmentService = localEnvironmentService;
 
     this.storage = new MapIndex<>(
         STORAGE,
@@ -98,6 +118,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
             .map(
                 s -> storageService.configureStorage(s),
                 r -> storageService.deconfigureStorage(r)));
+
+    this.log = log;
   }
 
   @Override
@@ -116,7 +138,13 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
-    return new Experiment(definitionFormat.loadProcedure(data), data.get(storage), environment);
+    var definition = definitionFormat.loadDefinition(data);
+    return new Experiment(
+        definition,
+        data.get(storage),
+        environment,
+        localEnvironmentService,
+        log.mapMessage(s -> definition.id() + ": " + s));
   }
 
   @Override
@@ -126,7 +154,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
   protected StateMap saveExperiment(Experiment data) {
     return definitionFormat
-        .saveProcedure(data.getDefinition())
+        .saveDefinition(data.getDefinition())
         .with(storage, data.getStorageConfiguration());
   }
 }

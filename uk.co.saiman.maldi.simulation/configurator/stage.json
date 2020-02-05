@@ -1,7 +1,8 @@
 {
 	"uk.co.saiman.maldi.stage~maldisimulation": {
 		"stage.target": "(service.pid=uk.co.saiman.instrument.stage.composed.xy~maldisimulation)",
-		"offset": "(-27.5 mm, -20 mm)"
+		"offset": "(-27.5 mm, -20 mm)",
+		"environment.filter": "(service.pid=uk.co.saiman.experiment.environment.global~maldisimulation)"
 	},
 	"uk.co.saiman.instrument.stage.composed.xy~maldisimulation": {
 		"name": "maldi Stage",
@@ -9,8 +10,7 @@
 		"exchangeLocation": "0mm, -100mm",
 		"analysisLocation": "0mm, 0mm",
 		"xAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.linear~maldisimulation.x)",
-		"yAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.linear~maldisimulation.y)",
-		"environment.filter": "(service.pid=uk.co.saiman.experiment.environment.global~maldisimulation)"
+		"yAxis.target": "(service.pid=uk.co.saiman.instrument.stage.copley.linear~maldisimulation.y)"
 	},
 	"uk.co.saiman.instrument.stage.copley.linear~maldisimulation.x": {
 		"axis": 0,

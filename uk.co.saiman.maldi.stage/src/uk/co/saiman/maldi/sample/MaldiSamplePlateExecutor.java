@@ -84,33 +84,40 @@ public class MaldiSamplePlateExecutor implements Executor {
 
   @Override
   public void execute(ExecutionContext context) {
+    System.out.println("get variables ...");
     var requestedPreparation = new MaldiSamplePreparation(
         context.getVariable(SAMPLE_PLATE_PREPARATION_ID),
         context.getVariable(SAMPLE_PLATE),
         context.getVariables().get(SAMPLE_PLATE_BARCODE).flatMap(b -> b).orElse(null));
+    System.out.println("got!");
 
+    System.out.println("acquire resource ...");
     var control = context.acquireResource(MaldiStageController.class).value();
+    System.out.println("acquired!");
 
+    System.out.println("submit request ...");
     /*
      * TODO when we are *not* executing an experiment, we need to listen for
      * exchanges and null the loadedPlate when they occur.
      */
-    if (loadedPreparation == null
-        || loadedPreparation.id().equals(requestedPreparation.id())
-        || (loadedPreparation.plate().equals(requestedPreparation.plate())
-            && loadedPreparation
-                .barcode()
-                .flatMap(l -> requestedPreparation.barcode().filter(l::equals))
-                .isPresent())) {
+    if (loadedPreparation == null || loadedPreparation.id().equals(requestedPreparation.id())
+        || (loadedPreparation.plate().equals(requestedPreparation.plate()) && loadedPreparation
+            .barcode()
+            .flatMap(l -> requestedPreparation.barcode().filter(l::equals))
+            .isPresent())) {
       control.requestReady();
     } else {
       control.requestExchange();
     }
+    System.out.println("requested!");
+
     /*
      * Enough time for an exchange. If none is needed the controller should
      * internally have a shorter time out to detect motor failure.
      */
+    System.out.println("await ready ...");
     control.awaitReady(10, MINUTES);
+    System.out.println("ready!");
     loadedPreparation = requestedPreparation;
 
     context

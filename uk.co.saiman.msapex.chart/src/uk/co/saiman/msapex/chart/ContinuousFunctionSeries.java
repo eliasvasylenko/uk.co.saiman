@@ -82,8 +82,7 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
 
       ContinuousFunctionSeries<?, ?>.RenderInformation that = (ContinuousFunctionSeries<?, ?>.RenderInformation) obj;
 
-      return this.lowerBound == that.lowerBound
-          && this.upperBound == that.upperBound
+      return this.lowerBound == that.lowerBound && this.upperBound == that.upperBound
           && this.pixelLength == that.pixelLength;
     }
   }
@@ -94,16 +93,19 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
   private final Series<Number, Number> series;
 
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a
+   * {@link Series}.
    */
   public ContinuousFunctionSeries() {
     series = new Series<>(FXCollections.observableArrayList());
   }
 
   /**
-   * Create a mapping from a given {@link ContinuousFunction} to a {@link Series}.
+   * Create a mapping from a given {@link ContinuousFunction} to a
+   * {@link Series}.
    * 
-   * @param name the name of the series
+   * @param name
+   *          the name of the series
    */
   public ContinuousFunctionSeries(String name) {
     this();
@@ -126,7 +128,8 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
       } catch (Exception e) {
         lastPreparedContinuousFunction = null;
         /*
-         * TODO deal properly with the exception. Perhaps display a message on the chart
+         * TODO deal properly with the exception. Perhaps display a message on
+         * the chart
          */
       }
       latestContinuousFunction = null;
@@ -140,11 +143,13 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
 
   /**
    * Render the {@link #setContinuousFunction(ContinuousFunction) latest set
-   * continuous function} into the {@link #getSeries() series} for the given range
-   * and resolution.
+   * continuous function} into the {@link #getSeries() series} for the given
+   * range and resolution.
    * 
-   * @param domain the domain to render over
-   * @param range  the range to render into
+   * @param domain
+   *          the domain to render over
+   * @param range
+   *          the range to render into
    */
   public void render(Range<X> domain, Range<Y> range) {
     ContinuousFunction<X, Y> lastPreparedContinuousFunction;
@@ -197,7 +202,7 @@ public class ContinuousFunctionSeries<X extends Quantity<X>, Y extends Quantity<
   private SampledContinuousFunction<X, ?> resampleLastRendered(
       ContinuousFunction<X, ?> latestRenderedContinuousFunction,
       Range<X> range) {
-    SampledDomain<X> resolvableDomain = new RegularSampledDomain<X>(
+    SampledDomain<X> resolvableDomain = new RegularSampledDomain<>(
         range.tickUnit().unit(),
         (int) range.pixelLength(),
         range.pixelLength() / (range.upperBound() - range.lowerBound()),

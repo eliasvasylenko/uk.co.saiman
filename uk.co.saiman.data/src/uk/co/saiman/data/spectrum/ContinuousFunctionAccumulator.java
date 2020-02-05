@@ -52,8 +52,10 @@ import uk.co.saiman.observable.Observation;
  * 
  * @author Elias N Vasylenko
  *
- * @param <UD> the type of the units of measurement of values in the domain
- * @param <UR> the type of the units of measurement of values in the range
+ * @param <UD>
+ *          the type of the units of measurement of values in the domain
+ * @param <UR>
+ *          the type of the units of measurement of values in the range
  */
 public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Quantity<UR>> {
   private final SampledDomain<UD> domain;
@@ -66,8 +68,10 @@ public class ContinuousFunctionAccumulator<UD extends Quantity<UD>, UR extends Q
   private final HotObservable<ContinuousFunctionAccumulator<UD, UR>> accumulation = new HotObservable<>();
 
   /**
-   * @param domain    the domain of the accumulated function
-   * @param unitRange the unit of the accumulation dimension
+   * @param domain
+   *          the domain of the accumulated function
+   * @param unitRange
+   *          the unit of the accumulation dimension
    */
   public ContinuousFunctionAccumulator(
       Observable<SampledContinuousFunction<UD, UR>> source,

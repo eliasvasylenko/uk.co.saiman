@@ -54,8 +54,8 @@ import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.instrument.ControllerImpl;
 import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.DeviceStatus;
-import uk.co.saiman.instrument.acquisition.adq.AdqControl;
 import uk.co.saiman.instrument.acquisition.adq.AdqDevice;
+import uk.co.saiman.instrument.acquisition.adq.AdqDevice.AdqControl;
 import uk.co.saiman.instrument.acquisition.adq.AdqHardwareInterface;
 import uk.co.saiman.instrument.acquisition.adq.FirmwareRevision;
 import uk.co.saiman.instrument.acquisition.adq.FpgaTarget;
@@ -113,6 +113,11 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
     log.log(INFO, "Hardware Interface: " + getHardwareInterface());
   }
 
+  @Override
+  public String toString() {
+    return getProductId().toString();
+  }
+
   protected void setAcquisitionCount(int count) {
     this.acquisitionCount = count;
   }
@@ -137,12 +142,41 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
     this.testPatternConstant = testPatternConstant;
   }
 
+  @Override
+  public double getGain(boolean relative) {
+    return get((lib, controlUnit, deviceNumber) -> {
+      var gain = new Memory(Integer.BYTES);
+      var offset = new Memory(Integer.BYTES);
+      int channel = 1;
+      if (!relative) {
+        channel = channel & (1 << 7);
+      }
+      lib.ADQ_GetGainAndOffset(controlUnit, deviceNumber, (byte) channel, gain, offset);
+      return gain.getInt(0) / 1024d;
+    });
+  }
+
+  @Override
+  public int getOffset(boolean relative) {
+    return get((lib, controlUnit, deviceNumber) -> {
+      var gain = new Memory(Integer.BYTES);
+      var offset = new Memory(Integer.BYTES);
+      int channel = 1;
+      if (!relative) {
+        channel = channel & (1 << 7);
+      }
+      lib.ADQ_GetGainAndOffset(controlUnit, deviceNumber, (byte) channel, gain, offset);
+      return offset.getInt(0);
+    });
+  }
+
   protected Log getLog() {
     return log;
   }
 
   protected void nextData(SampledContinuousFunction<Time, Dimensionless> data) {
     dataObservable.next(data);
+    acquisitionDataObservable.next(data);
   }
 
   @Override
@@ -186,18 +220,20 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
   }
 
   protected <U> U get(AdqGetter<U> getter) {
-    synchronized (AdqDeviceManager.LIB) {
+    return AdqDeviceManager.getWithLib(lib -> {
       initialize();
       var controlUnit = manager.getControlUnit();
       var deviceNumber = manager.getDeviceNumber(serialNumber);
-      return getter.perform(AdqDeviceManager.LIB, controlUnit, deviceNumber);
-    }
+      return getter.perform(lib, controlUnit, deviceNumber);
+    });
   }
 
   protected void run(AdqAction action) {
-    get((lib, controlUnit, deviceNumber) -> {
+    AdqDeviceManager.runWithLib(lib -> {
+      initialize();
+      var controlUnit = manager.getControlUnit();
+      var deviceNumber = manager.getDeviceNumber(serialNumber);
       action.perform(lib, controlUnit, deviceNumber);
-      return null;
     });
   }
 
@@ -309,6 +345,23 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
   public abstract class AdqControlImpl extends ControllerImpl implements AdqControl {
     public AdqControlImpl(ControlContext context) {
       super(context);
+    }
+
+    @Override
+    public void setGainAndOffset(double gain, int offset, boolean relativeToDefault) {
+      run((lib, controlUnit, deviceNumber) -> {
+        int channel = 1;
+        if (!relativeToDefault) {
+          channel = channel & (1 << 7);
+        }
+        lib
+            .ADQ_SetGainAndOffset(
+                controlUnit,
+                deviceNumber,
+                (byte) channel,
+                (int) (gain * 1024),
+                offset);
+      });
     }
 
     @Override

@@ -48,6 +48,7 @@ import uk.co.saiman.experiment.definition.ExecutionPlan;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
@@ -60,6 +61,7 @@ import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.variables.Variable;
+import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
@@ -77,10 +79,12 @@ public class Experiment {
   public Experiment(
       ExperimentDefinition procedure,
       StorageConfiguration<?> storageConfiguration,
-      Supplier<GlobalEnvironment> globalEnvironment) {
+      Supplier<GlobalEnvironment> globalEnvironment,
+      LocalEnvironmentService localEnvironmentService,
+      Log log) {
     this.globalEnvironment = globalEnvironment;
     this.definition = null;
-    this.scheduler = new Scheduler(storageConfiguration);
+    this.scheduler = new Scheduler(storageConfiguration, localEnvironmentService, log);
 
     updateDefinition(requireNonNull(procedure));
   }
@@ -94,15 +98,15 @@ public class Experiment {
   }
 
   public synchronized void scheduleAll() {
-    updateDefinition(definition.withSubsteps(steps -> steps.map(Experiment::withPlan)));
+    updateDefinition(definition.withSubsteps(steps -> steps.map(Experiment::withScheduled)));
   }
 
   public synchronized void conduct() {
     scheduler.getSchedule().get().conduct();
   }
 
-  static StepDefinition withPlan(StepDefinition step) {
-    return step.withPlan(EXECUTE).withSubsteps(steps -> steps.map(Experiment::withPlan));
+  static StepDefinition withScheduled(StepDefinition step) {
+    return step.withPlan(EXECUTE).withSubsteps(steps -> steps.map(Experiment::withScheduled));
   }
 
   public Output getResults() {

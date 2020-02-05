@@ -146,14 +146,14 @@ public class StepDefinition extends Definition<Relative, StepDefinition> {
 
     StepDefinition that = (StepDefinition) obj;
 
-    return Objects.equals(this.id, that.id)
+    return Objects.equals(this.id, that.id) && Objects.equals(this.executor, that.executor)
         && Objects.equals(this.variableMap, that.variableMap)
-        && Objects.equals(this.executor, that.executor);
+        && Objects.equals(this.plan, that.plan);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, variableMap, executor, super.hashCode());
+    return Objects.hash(id, executor, variableMap, plan, super.hashCode());
   }
 
   @Override

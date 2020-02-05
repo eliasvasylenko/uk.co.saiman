@@ -27,9 +27,9 @@ Bundle-Name: SAI :: MSApex :: Instrument
 \
 	javax.measure.unit-api
 
-Private-Package: uk.co.saiman.instrument.msapex
-
-Export-Package: uk.co.saiman.instrument.msapex.device
+Export-Package: \
+	uk.co.saiman.instrument.msapex,\
+	uk.co.saiman.instrument.msapex.device
 
 -includeresource: \
 	always.e4xmi,\

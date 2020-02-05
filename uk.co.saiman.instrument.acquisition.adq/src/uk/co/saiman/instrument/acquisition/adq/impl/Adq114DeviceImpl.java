@@ -39,9 +39,9 @@ import javax.measure.quantity.Time;
 
 import com.sun.jna.Pointer;
 
-import uk.co.saiman.instrument.acquisition.adq.Adq114Control;
 import uk.co.saiman.instrument.acquisition.adq.Adq114DataFormat;
 import uk.co.saiman.instrument.acquisition.adq.Adq114Device;
+import uk.co.saiman.instrument.acquisition.adq.Adq114Device.Adq114Control;
 import uk.co.saiman.instrument.acquisition.adq.impl.AdqDeviceManager.AdqLib;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.measurement.scalar.Scalar;
@@ -120,7 +120,7 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
 
     @Override
     protected void startAcquisition(AdqLib lib, Pointer controlUnit, int deviceNumber) {
-      try (var acquisition = new WaveformAveragingStreamingAcquisition(
+      try (var acquisition = new MultiRecordAcquisition(
           Adq114DeviceImpl.this,
           lib,
           controlUnit,

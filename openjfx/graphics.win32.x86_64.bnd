@@ -10,9 +10,3 @@ Require-Capability: \
 		(osgi.native.osname~=Win32)\
 		(osgi.native.processor~=x86-64)\
 	)"
-
-Eclipse-PlatformFilter: \
-	(&\
-		(osgi.os=win32)\
-		(osgi.arch=x86_64)\
-	)

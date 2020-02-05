@@ -35,7 +35,9 @@ import javax.measure.quantity.Time;
 
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
+import uk.co.saiman.instrument.msapex.DefaultDevicePresentation;
 import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
+import uk.co.saiman.instrument.msapex.device.DevicePresenter;
 import uk.co.saiman.msapex.chart.ContinuousFunctionChart;
 import uk.co.saiman.msapex.chart.ContinuousFunctionSeries;
 import uk.co.saiman.msapex.chart.MetricTickUnits;
@@ -47,15 +49,27 @@ public class AcquisitionChart extends BorderPane {
   private final ContinuousFunctionSeries<Time, Dimensionless> series;
   private volatile Disposable observation;
 
+  public AcquisitionChart(AcquisitionDevice<?> device) {
+    this(device, new DefaultDevicePresentation(device));
+  }
+
   public AcquisitionChart(
       AcquisitionDevice<?> device,
       DevicePresentationService presentationService) {
+    this(device, presentationService.present(device));
+  }
+
+  public AcquisitionChart(AcquisitionDevice<?> device, DevicePresenter presenter) {
+    this(device, presenter.getLocalizedLabel());
+  }
+
+  public AcquisitionChart(AcquisitionDevice<?> device, String localizedLabel) {
     this.device = device;
 
-    ContinuousFunctionChart<Time, Dimensionless> chartController = new ContinuousFunctionChart<Time, Dimensionless>(
+    ContinuousFunctionChart<Time, Dimensionless> chartController = new ContinuousFunctionChart<>(
         new QuantityAxis<>(new MetricTickUnits<>(second())),
         new QuantityAxis<>(new MetricTickUnits<>(count())).setPaddingApplied(true));
-    chartController.setTitle(presentationService.present(device).getLocalizedLabel());
+    chartController.setTitle(localizedLabel);
 
     this.series = chartController.addSeries();
 

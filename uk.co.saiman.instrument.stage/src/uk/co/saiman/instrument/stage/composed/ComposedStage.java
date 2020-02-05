@@ -174,12 +174,13 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
   }
 
   protected SampleState<T> awaitRequest(long time, TimeUnit unit) {
-    return sampleState()
-        .value()
-        .filter(s -> requestedSampleState().isMatching(r -> r.equals(s)))
-        .getNext()
-        .orTimeout(time, unit)
-        .join();
+    return sampleState().value().filter(s -> {
+      System.out.println("     *");
+      System.out.println("     *");
+      System.out.println("     *");
+      System.out.println("     * awaiting request " + s + " <- " + requestedSampleState().get());
+      return requestedSampleState().isMatching(r -> r.equals(s));
+    }).getNext().orTimeout(time, unit).join();
   }
 
   protected SampleState<T> awaitReady(long time, TimeUnit unit) {

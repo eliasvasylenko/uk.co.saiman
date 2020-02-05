@@ -46,7 +46,8 @@ public class SamplePlateSubmission {
 
   public SampleAreaHold beginAnalysis(MaldiSampleArea location, long time, TimeUnit unit) {
     stageControl.requestAnalysis(location.center());
-    stageControl.awaitRequest(time, unit);
+    var ana = stageControl.awaitRequest(time, unit);
+    System.out.println(" ? " + ana);
     return new SampleAreaHold(stageControl, location);
   }
 

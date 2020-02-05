@@ -31,10 +31,12 @@ import java.io.IOException;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.conductor.Conductor;
+import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.Observable;
 
 /**
@@ -59,9 +61,12 @@ public class Scheduler {
   private Schedule schedule;
   private final Conductor conductor;
 
-  public Scheduler(StorageConfiguration<?> storageConfiguration) {
+  public Scheduler(
+      StorageConfiguration<?> storageConfiguration,
+      LocalEnvironmentService environmentService,
+      Log log) {
     this.schedule = null;
-    this.conductor = new Conductor(storageConfiguration);
+    this.conductor = new Conductor(storageConfiguration, environmentService, log);
   }
 
   public Optional<Schedule> getSchedule() {

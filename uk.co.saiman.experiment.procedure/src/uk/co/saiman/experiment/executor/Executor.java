@@ -41,7 +41,8 @@ public interface Executor {
   /**
    * Plan the experiment by declaring requirements and validating variables.
    * 
-   * @param context the planning context
+   * @param context
+   *          the planning context
    */
   void plan(PlanningContext context);
 
@@ -49,7 +50,8 @@ public interface Executor {
    * Execute the experiment by acquiring requirements and inspecting variables,
    * then preparing conditions and observing results.
    * 
-   * @param context the execution context
+   * @param context
+   *          the execution context
    */
   void execute(ExecutionContext context);
 }

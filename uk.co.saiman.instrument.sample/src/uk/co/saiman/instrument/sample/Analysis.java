@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.Objects;
+
 /**
  * An analysis location was requested, and was reached. The
  * {@link SampleDevice#samplePosition() location} of the device should be valid.
@@ -51,5 +53,19 @@ public class Analysis<T> extends RequestedSampleState<T> {
   @Override
   public String toString() {
     return super.toString() + "(" + position + ")";
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || (obj.getClass() != Analysis.class)) {
+      return false;
+    }
+    Analysis<?> that = (Analysis<?>) obj;
+    return Objects.equals(this.position, that.position);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(position);
   }
 }

@@ -27,11 +27,24 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.Objects;
+
 /**
  * The device is ready for analysis, but no specific analysis location has been
  * requested. The {@link SampleDevice#samplePosition() location} of the device
  * may not be valid.
  */
 public class Ready<T> extends RequestedSampleState<T> {
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || (obj.getClass() != Ready.class)) {
+      return false;
+    }
+    return true;
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(Ready.class);
+  }
 }

@@ -30,7 +30,6 @@ package uk.co.saiman.experiment.environment.osgi.impl;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,22 +90,27 @@ public class LocalEnvironmentServiceImpl implements LocalEnvironmentService {
   }
 
   @Override
-  public LocalEnvironment openLocalEnvironment(
-      GlobalEnvironment globalEnvironment,
-      Collection<? extends Class<?>> resources,
-      long timeout,
-      TimeUnit unit) {
+  public LocalEnvironment openLocalEnvironment(GlobalEnvironment globalEnvironment) {
     Map<Class<?>, Resource<?>> resourceMap = new HashMap<>();
-
-    resources
-        .stream()
-        .map(c -> getResource((Class<?>) c, globalEnvironment, timeout, unit))
-        .forEach(r -> resourceMap.put(r.type(), r));
 
     return new LocalEnvironment() {
       @Override
-      public void close() throws Exception {
+      public void acquireResources(
+          java.util.Collection<? extends java.lang.Class<?>> resources,
+          long timeout,
+          TimeUnit unit) {
+        Map<Class<?>, Resource<?>> newResourceMap = new HashMap<>();
+        resources
+            .stream()
+            .map(c -> getResource((Class<?>) c, globalEnvironment, timeout, unit))
+            .forEach(r -> newResourceMap.put(r.type(), r));
+        resourceMap.putAll(newResourceMap);
+      }
+
+      @Override
+      public void close() {
         resourceMap.values().forEach(Resource::close);
+        resourceMap.clear();
       }
 
       @Override

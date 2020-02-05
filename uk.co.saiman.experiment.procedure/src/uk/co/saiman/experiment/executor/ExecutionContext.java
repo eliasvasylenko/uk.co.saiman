@@ -69,13 +69,13 @@ public interface ExecutionContext {
 
   <T> Result<T> acquireResult(Class<T> source);
 
-  <T> Stream<Result<T>> acquireResults(Class<T> source);
+  <T> Stream<Result<T>> acquireAdditionalResults(Class<T> source);
 
   /**
    * Get a location which can be used to persist resource artifacts of this
-   * execution. Typically a resource in this location is used to construct one or
-   * more related {@link Data data} instances, one of which will be set as the
-   * {@link #setResultData(Class, Data) result} of the execution.
+   * execution. Typically a resource in this location is used to construct one
+   * or more related {@link Data data} instances, one of which will be set as
+   * the {@link #setResultData(Class, Data) result} of the execution.
    * <p>
    * The location will be empty before execution begins.
    * 
@@ -89,8 +89,8 @@ public interface ExecutionContext {
    * Set a preliminary partial result value for this execution.
    * <p>
    * This method may be invoked multiple times during processing. The purpose is
-   * to support live-updating of result data, and any values passed to this method
-   * will be overridden by the return value of
+   * to support live-updating of result data, and any values passed to this
+   * method will be overridden by the return value of
    * {@link Executor#execute(ExecutionContext) execution} once processing
    * completes.
    * 
@@ -108,20 +108,22 @@ public interface ExecutionContext {
    * does not have to be rewritten. This means that expensive disk IO can be
    * performed during the experiment process rather than saved until the end.
    * <p>
-   * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultFormat(Class, String, DataFormat)}
-   * during the same execution.
+   * This method may be invoked at most once during any given execution, and
+   * this precludes invocation of
+   * {@link #setResultFormat(Class, String, DataFormat)} during the same
+   * execution.
    */
   <R> void setResultData(Class<R> observation, Data<R> data);
 
   /**
    * Set the result format for this execution. If invoked, then once the
-   * {@link Executor#execute(ExecutionContext) execution} is complete the returned
-   * value will be persisted according to the given file name and format.
+   * {@link Executor#execute(ExecutionContext) execution} is complete the
+   * returned value will be persisted according to the given file name and
+   * format.
    * <p>
-   * This method may be invoked at most once during any given execution, and this
-   * precludes invocation of {@link #setResultData(Class, Data)} during the same
-   * execution.
+   * This method may be invoked at most once during any given execution, and
+   * this precludes invocation of {@link #setResultData(Class, Data)} during the
+   * same execution.
    * 
    * @param name
    *          the name of the result data file
@@ -181,9 +183,9 @@ public interface ExecutionContext {
       }
 
       @Override
-      public <T> Stream<Result<T>> acquireResults(Class<T> source) {
+      public <T> Stream<Result<T>> acquireAdditionalResults(Class<T> source) {
         assertLive();
-        return parent.acquireResults(source);
+        return parent.acquireAdditionalResults(source);
       }
 
       @Override

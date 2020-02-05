@@ -31,7 +31,6 @@ Bundle-Name: SAI :: MSApex :: Simulation
 	uk.co.saiman.simulation.provider;version=snapshot,\
 	javax.measure.unit-api
 
-
 -includeresource:\
 	css=css,\
 	res,\

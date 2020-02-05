@@ -27,18 +27,23 @@
  */
 package uk.co.saiman.experiment.conductor;
 
+import static java.util.Objects.requireNonNull;
+
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
+import uk.co.saiman.experiment.dependency.ConditionClosedException;
 import uk.co.saiman.experiment.dependency.ProductPath;
 
 public class ConditionImpl<T> implements Condition<T> {
   private final Class<T> type;
   private final ProductPath<Absolute, Condition<T>> path;
+  private T value;
 
-  public ConditionImpl(Class<T> type, ExperimentPath<Absolute> experimentPath) {
-    this.type = type;
+  public ConditionImpl(Class<T> type, ExperimentPath<Absolute> experimentPath, T value) {
+    this.type = requireNonNull(type);
     this.path = ProductPath.toCondition(experimentPath, type);
+    this.value = requireNonNull(value);
   }
 
   @Override
@@ -53,13 +58,15 @@ public class ConditionImpl<T> implements Condition<T> {
 
   @Override
   public T value() {
-    // TODO Auto-generated method stub
-    return null;
+    T value = this.value;
+    if (value == null) {
+      throw new ConditionClosedException(type);
+    }
+    return value;
   }
 
   @Override
   public void close() {
-    // TODO Auto-generated method stub
-
+    value = null;
   }
 }

@@ -156,7 +156,8 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
   /**
    * Get the string label name for a tick mark with the given value
    *
-   * @param value The value to format into a tick label string
+   * @param value
+   *          The value to format into a tick label string
    * @return A formatted string for the given value
    */
   @Override
@@ -172,7 +173,7 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
    */
   @Override
   protected Range<T> getRange() {
-    return new Range<T>(
+    return new Range<>(
         getLowerBound(),
         getUpperBound(),
         getDisplayPosition(getUpperBound()) - getDisplayPosition(getLowerBound()),
@@ -183,11 +184,13 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
   }
 
   /**
-   * Called to set the current axis range to the given range. If isAnimating() is
-   * true then this method should animate the range to the new range.
+   * Called to set the current axis range to the given range. If isAnimating()
+   * is true then this method should animate the range to the new range.
    *
-   * @param range   A range object returned from autoRange()
-   * @param animate If true animate the change in range
+   * @param rangeObject
+   *          A range object returned from autoRange()
+   * @param animate
+   *          If true animate the change in range
    */
   @Override
   protected void setRange(Object rangeObject, boolean animate) {
@@ -209,8 +212,10 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
    * Measure the size of the label for given tick mark value. This uses the font
    * that is set for the tick marks
    *
-   * @param value tick mark value
-   * @param range range to use during calculations
+   * @param value
+   *          tick mark value
+   * @param rangeObject
+   *          range to use during calculations
    * @return size of tick mark label for given value
    */
   @Override
@@ -232,8 +237,10 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
   /**
    * Calculate a list of all the data values for each tick mark in range
    *
-   * @param length The length of the axis in display units
-   * @param range  A range object returned from autoRange()
+   * @param length
+   *          The length of the axis in display units
+   * @param rangeObject
+   *          A range object returned from autoRange()
    * @return A list of tick marks that fit along the axis if it was the given
    *         length
    */
@@ -263,10 +270,14 @@ public class QuantityAxis<T extends Quantity<T>> extends ValueAxis<Number> {
    * Called to set the upper and lower bound and anything else that needs to be
    * auto-ranged
    *
-   * @param minValue  The min data value that needs to be plotted on this axis
-   * @param maxValue  The max data value that needs to be plotted on this axis
-   * @param length    The length of the axis in display coordinates
-   * @param labelSize The approximate average size a label takes along the axis
+   * @param minValue
+   *          The min data value that needs to be plotted on this axis
+   * @param maxValue
+   *          The max data value that needs to be plotted on this axis
+   * @param pixelLength
+   *          The length of the axis in display coordinates
+   * @param labelSize
+   *          The approximate average size a label takes along the axis
    * @return The calculated range
    */
   @Override

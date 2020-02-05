@@ -27,7 +27,9 @@
  */
 package uk.co.saiman.instrument.acquisition.adq;
 
+import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
+import uk.co.saiman.instrument.acquisition.adq.AdqDevice.AdqControl;
 
 public interface AdqDevice<T extends AdqControl> extends AcquisitionDevice<T> {
   String getSerialNumber();
@@ -45,4 +47,20 @@ public interface AdqDevice<T extends AdqControl> extends AcquisitionDevice<T> {
   TestPatternMode getTestPatternMode();
 
   int getTestPatternConstant();
+
+  double getGain(boolean relative);
+
+  int getOffset(boolean relative);
+
+  public interface AdqControl extends AcquisitionController {
+    void setTriggerMode(TriggerMode triggerMode);
+
+    void softwareTrigger();
+
+    void setTestPatternMode(TestPatternMode testPatternMode);
+
+    void setTestPatternConstant(int testPatternConstant);
+
+    void setGainAndOffset(double gain, int offset, boolean relativeToDefault);
+  }
 }

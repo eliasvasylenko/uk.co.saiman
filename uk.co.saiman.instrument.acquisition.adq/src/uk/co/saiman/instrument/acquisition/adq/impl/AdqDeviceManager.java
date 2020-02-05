@@ -27,12 +27,16 @@
  */
 package uk.co.saiman.instrument.acquisition.adq.impl;
 
+import static uk.co.saiman.log.Log.Level.INFO;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
@@ -46,6 +50,8 @@ import com.sun.jna.Pointer;
 import uk.co.saiman.instrument.acquisition.adq.AdqException;
 import uk.co.saiman.instrument.acquisition.adq.AdqProductId;
 import uk.co.saiman.instrument.acquisition.adq.TraceLevel;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 
 @Component(service = AdqDeviceManager.class, immediate = true)
 public class AdqDeviceManager implements AutoCloseable {
@@ -254,9 +260,23 @@ public class AdqDeviceManager implements AutoCloseable {
         Pointer /* char */ ready,
         Pointer /* int */ recordsCompleted,
         Pointer /* char */ inIdle);
+
+    int ADQ_SetGainAndOffset(
+        Pointer controlUnit,
+        int deviceNumber,
+        byte channel,
+        int gain,
+        int offset);
+
+    int ADQ_GetGainAndOffset(
+        Pointer controlUnit,
+        int deviceNumber,
+        byte channel,
+        Pointer /* int */ gain,
+        Pointer /* int */ offset);
   }
 
-  static final AdqLib LIB;
+  private static final AdqLib LIB;
 
   static {
     LIB = Native.loadLibrary("adq", AdqLib.class);
@@ -266,10 +286,16 @@ public class AdqDeviceManager implements AutoCloseable {
 
   private final Map<String, Integer> devices = new HashMap<>();
 
-  public AdqDeviceManager() {
-    controlUnit = LIB.CreateADQControlUnit();
+  private final Log log;
+
+  public AdqDeviceManager(Log log) {
+    this.log = log;
+
+    controlUnit = getWithLib(AdqLib::CreateADQControlUnit);
     if (controlUnit == null) {
       throw new IllegalStateException("Failed to create control unit");
+    } else {
+      log.log(INFO, "API revision: " + AdqDeviceManager.getApiRevision());
     }
   }
 
@@ -278,20 +304,23 @@ public class AdqDeviceManager implements AutoCloseable {
       throw new IllegalArgumentException("Invalid log path %s, must be file or directory");
     }
     Objects.requireNonNull(traceLevel);
-    var errorTrace = LIB
-        .ADQControlUnit_EnableErrorTrace(
-            controlUnit,
-            TraceLevel.INFO.ordinal(),
-            logPath.toAbsolutePath().toString());
+    var errorTrace = getWithLib(
+        lib -> lib
+            .ADQControlUnit_EnableErrorTrace(
+                controlUnit,
+                TraceLevel.INFO.ordinal(),
+                logPath.toAbsolutePath().toString()));
     if (errorTrace != 1) {
-      throw new AdqException("Failed to open " + traceLevel + " log at " + logPath);
+      var e = new AdqException("Failed to open " + traceLevel + " log at " + logPath);
+      log.log(Level.ERROR, e);
+      throw e;
     }
   }
 
   @Override
   @Deactivate
   public void close() {
-    LIB.DeleteADQControlUnit(controlUnit);
+    runWithLib(lib -> lib.DeleteADQControlUnit(controlUnit));
   }
 
   Pointer getControlUnit() {
@@ -308,18 +337,23 @@ public class AdqDeviceManager implements AutoCloseable {
   }
 
   private synchronized void refreshDevices() {
-    int deviceCount = LIB.ADQControlUnit_FindDevices(controlUnit);
+    runWithLib(lib -> {
+      int deviceCount = lib.ADQControlUnit_FindDevices(controlUnit);
 
-    if (LIB.ADQControlUnit_GetFailedDeviceCount(controlUnit) > 0) {
-      System.out.println("Failed! " + LIB.ADQControlUnit_GetLastFailedDeviceError(controlUnit));
-    }
+      if (lib.ADQControlUnit_GetFailedDeviceCount(controlUnit) > 0) {
+        var e = new AdqException(
+            "Failed to get devices " + lib.ADQControlUnit_GetLastFailedDeviceError(controlUnit));
+        log.log(Level.ERROR, e);
+        throw e;
+      }
 
-    devices.clear();
-    for (int i = 1; i <= deviceCount; i++) {
-      var serialNumber = LIB.ADQ_GetBoardSerialNumber(controlUnit, i);
+      devices.clear();
+      for (int i = 1; i <= deviceCount; i++) {
+        var serialNumber = lib.ADQ_GetBoardSerialNumber(controlUnit, i);
 
-      devices.put(serialNumber, i);
-    }
+        devices.put(serialNumber, i);
+      }
+    });
   }
 
   synchronized int getDeviceNumber(String serialNumber) {
@@ -332,10 +366,21 @@ public class AdqDeviceManager implements AutoCloseable {
   }
 
   synchronized AdqProductId getProductId(int deviceNumber) {
-    return AdqProductId.fromId(LIB.ADQ_GetProductID(controlUnit, deviceNumber));
+    return AdqProductId.fromId(getWithLib(lib -> lib.ADQ_GetProductID(controlUnit, deviceNumber)));
   }
 
   public static int getApiRevision() {
-    return LIB.ADQAPI_GetRevision();
+    return getWithLib(AdqLib::ADQAPI_GetRevision);
+  }
+
+  static void runWithLib(Consumer<AdqLib> action) {
+    getWithLib(lib -> {
+      action.accept(lib);
+      return null;
+    });
+  }
+
+  static <T> T getWithLib(Function<AdqLib, T> action) {
+    return action.apply(LIB);
   }
 }

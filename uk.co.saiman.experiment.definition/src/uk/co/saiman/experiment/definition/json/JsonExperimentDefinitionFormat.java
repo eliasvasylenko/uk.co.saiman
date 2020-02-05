@@ -40,9 +40,9 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.definition.ExecutionPlan;
 import uk.co.saiman.experiment.definition.Definition;
+import uk.co.saiman.experiment.definition.ExecutionPlan;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
@@ -63,7 +63,8 @@ import uk.co.saiman.state.json.JsonStateMapFormat;
 public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefinition> {
   public static final int VERSION = 1;
 
-  public static final String FILE_EXTENSION = "jed"; // json experiment definition
+  public static final String FILE_EXTENSION = "jed"; // json experiment
+                                                     // definition
   public static final MediaType MEDIA_TYPE = new MediaType(
       APPLICATION_TYPE,
       "saiman.experiment.definition.v" + VERSION,
@@ -109,10 +110,10 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
 
   @Override
   public Payload<? extends ExperimentDefinition> decodeString(String string) {
-    return new Payload<>(loadProcedure(stateMapFormat.decodeString(string).data));
+    return new Payload<>(loadDefinition(stateMapFormat.decodeString(string).data));
   }
 
-  public ExperimentDefinition loadProcedure(StateMap data) {
+  public ExperimentDefinition loadDefinition(StateMap data) {
     return loadSteps(ExperimentDefinition.define(data.get(ID)), data.get(CHILDREN).asList());
   }
 
@@ -125,21 +126,21 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
 
   private <T extends Definition<?, ? extends T>> T loadStep(T container, StateMap data) {
     StepDefinition step = StepDefinition
-        .define(data.get(ID), (Executor) data.get(executor))
+        .define(data.get(ID), data.get(executor))
         .withVariableMap(data.get(VARIABLES).asMap())
         .withPlan(data.get(PLAN));
 
-    step = this.<StepDefinition>loadSteps(step, data.get(CHILDREN).asList());
+    step = this.<StepDefinition> loadSteps(step, data.get(CHILDREN).asList());
 
     return container.withSubstep(step);
   }
 
   @Override
   public String encodeString(Payload<? extends ExperimentDefinition> payload) {
-    return stateMapFormat.encodeString(new Payload<>(saveProcedure(payload.data)));
+    return stateMapFormat.encodeString(new Payload<>(saveDefinition(payload.data)));
   }
 
-  public StateMap saveProcedure(ExperimentDefinition procedure) {
+  public StateMap saveDefinition(ExperimentDefinition procedure) {
     return StateMap
         .empty()
         .with(ID, procedure.id())

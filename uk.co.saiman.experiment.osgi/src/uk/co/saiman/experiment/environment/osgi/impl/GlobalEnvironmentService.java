@@ -88,6 +88,7 @@ public class GlobalEnvironmentService {
     this.log = log;
 
     Dictionary<String, Object> dictionary = new Hashtable<>(environmentProperties);
+    log.log(Level.INFO, "Global environment dictionary: " + dictionary);
 
     var resourceFilter = "(" + ENVIRONMENT_FILTER_ATTRIBUTE + "=*)";
 
@@ -100,6 +101,7 @@ public class GlobalEnvironmentService {
 
     resourceIndex.events().observe(o -> registerService(context, dictionary));
     registerService(context, dictionary);
+    log.log(Level.INFO, "Registered global environment: " + this);
   }
 
   @Deactivate
@@ -110,6 +112,7 @@ public class GlobalEnvironmentService {
   private Stream<Class<?>> resourceIndexer(
       Dictionary<String, Object> environmentProperties,
       ServiceReference<?> resourceService) {
+
     String filterString = resourceService.getProperty(ENVIRONMENT_FILTER_ATTRIBUTE).toString();
 
     if (!"*".equals(filterString)) {
@@ -127,11 +130,12 @@ public class GlobalEnvironmentService {
 
     var classNames = (String[]) resourceService.getProperty(OBJECTCLASS);
     var classLoader = resourceService.getBundle().adapt(BundleWiring.class).getClassLoader();
+
     return Stream.of(classNames).flatMap(className -> {
       try {
+        log.log(Level.INFO, "Loading class for environment: " + className + " @ " + this);
         return Stream.of(classLoader.loadClass(className));
       } catch (ClassNotFoundException e) {
-        e.printStackTrace();
         log.log(Level.ERROR, e);
         return Stream.empty();
       }

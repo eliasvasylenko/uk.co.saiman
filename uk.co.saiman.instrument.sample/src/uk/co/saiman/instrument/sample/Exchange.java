@@ -27,11 +27,24 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.Objects;
+
 /**
  * The device is not ready for analysis. The sample may be in the process of
  * physical exchange. The meaning of a sample exchange is implementation
  * dependent.
  */
 public class Exchange<T> extends RequestedSampleState<T> {
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || (obj.getClass() != Exchange.class)) {
+      return false;
+    }
+    return true;
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(Exchange.class);
+  }
 }

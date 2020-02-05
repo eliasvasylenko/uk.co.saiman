@@ -37,7 +37,7 @@ import uk.co.saiman.experiment.sampleplate.SamplePreparation;
 public class MaldiSamplePreparation extends SamplePreparation {
   private final Integer barcode;
 
-  private MaldiSamplePreparation(UUID id, MaldiSamplePlate plate, Integer barcode) {
+  public MaldiSamplePreparation(UUID id, MaldiSamplePlate plate, Integer barcode) {
     super(id, plate);
     this.barcode = barcode;
   }
@@ -47,7 +47,7 @@ public class MaldiSamplePreparation extends SamplePreparation {
   }
 
   public MaldiSamplePreparation(UUID id, MaldiSamplePlate plate) {
-    this(id, plate, null);
+    this(id, plate, (Integer) null);
   }
 
   public MaldiSamplePreparation(MaldiSamplePlate plate, int barcode) {
@@ -55,7 +55,7 @@ public class MaldiSamplePreparation extends SamplePreparation {
   }
 
   public MaldiSamplePreparation(MaldiSamplePlate plate) {
-    this(UUID.randomUUID(), plate, null);
+    this(UUID.randomUUID(), plate, (Integer) null);
   }
 
   @Override

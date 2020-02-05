@@ -27,12 +27,29 @@
  */
 package uk.co.saiman.experiment.environment;
 
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.dependency.Resource;
 
 public interface LocalEnvironment extends AutoCloseable {
   GlobalEnvironment getGlobalEnvironment();
+
+  /**
+   * If the resources cannot be acquired then an exception is thrown. Previously
+   * acquired resources continue to be held. Clients should take care not to try
+   * to keep waiting for the new resources to be available and retrying
+   * acquisition if they already hold some, as this may cause deadlock.
+   * 
+   * @param resources
+   * @param timeout
+   * @param unit
+   */
+  public void acquireResources(
+      Collection<? extends Class<?>> resources,
+      long timeout,
+      TimeUnit unit);
 
   Stream<Class<?>> providedResources();
 

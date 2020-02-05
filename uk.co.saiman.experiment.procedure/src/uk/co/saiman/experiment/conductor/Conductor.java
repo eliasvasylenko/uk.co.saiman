@@ -29,6 +29,8 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
@@ -42,9 +44,11 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log;
@@ -53,6 +57,8 @@ import uk.co.saiman.observable.Observable;
 
 public class Conductor implements Output {
   private final StorageConfiguration<?> storageConfiguration;
+  private final LocalEnvironmentService environmentService;
+  private final Log log;
   private final Executor executor;
 
   private Map<ExperimentPath<Absolute>, InstructionExecution> progress;
@@ -60,8 +66,14 @@ public class Conductor implements Output {
 
   private final HotObservable<ConductorEvent> events = new HotObservable<>();
 
-  public Conductor(StorageConfiguration<?> storageConfiguration) {
+  public Conductor(
+      StorageConfiguration<?> storageConfiguration,
+      LocalEnvironmentService environmentService,
+      Log log) {
     this.storageConfiguration = requireNonNull(storageConfiguration);
+    this.environmentService = environmentService;
+    this.log = log;
+
     this.executor = Executors.defaultThreadFactory()::newThread;
 
     this.progress = Map.of();
@@ -72,8 +84,7 @@ public class Conductor implements Output {
   }
 
   Log log() {
-    // TODO Auto-generated method stub
-    return null;
+    return log;
   }
 
   public StorageConfiguration<?> storageConfiguration() {
@@ -81,14 +92,17 @@ public class Conductor implements Output {
   }
 
   public synchronized void conduct(Procedure procedure) {
-    System.out.println("conduct: " + procedure);
+    System.out.println("Conducting");
+    System.out.println(" - procedure " + procedure.id());
+    System.out
+        .println(
+            " - instructions " + procedure.instructions().map(Instruction::id).collect(toList()));
 
-    this.procedure = procedure;
+    var procedureDependents = Procedures.getDependents(procedure);
 
-    var procedureDependents = new ProcedureDependents(procedure);
+    var environment = Procedures.openEnvironment(procedure, environmentService, 2, SECONDS);
 
-    var previousProgress = progress;
-    progress = procedure
+    var progress = procedure
         .instructions()
         .collect(
             toMap(
@@ -98,13 +112,19 @@ public class Conductor implements Output {
                     .update(
                         instruction,
                         procedureDependents.getInstructionDependents(instruction.path()),
-                        procedure.environment())));
+                        environment)));
+    var previousProgress = this.progress;
+
+    this.procedure = procedure;
+    this.progress = progress;
 
     previousProgress.keySet().removeAll(progress.keySet());
     previousProgress.values().forEach(InstructionExecution::interrupt);
 
     // now they're all present, kick them off
     this.progress.values().forEach(InstructionExecution::execute);
+
+    System.out.println("Conducting Started");
   }
 
   Optional<InstructionExecution> findInstruction(ExperimentPath<Absolute> path) {

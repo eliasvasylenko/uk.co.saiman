@@ -42,7 +42,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
@@ -134,8 +133,8 @@ public abstract class Definition<U extends ExperimentPath<U>, T extends Definiti
   }
 
   /**
-   * Derive a new container including the given step. Any step sharing the same ID
-   * with the new step will be replaced.
+   * Derive a new container including the given step. Any step sharing the same
+   * ID with the new step will be replaced.
    * 
    * @param step
    *          the step to add
@@ -162,8 +161,8 @@ public abstract class Definition<U extends ExperimentPath<U>, T extends Definiti
   }
 
   /**
-   * Derive a new container including the given steps. Any steps sharing the same
-   * ID with a new step will be replaced.
+   * Derive a new container including the given steps. Any steps sharing the
+   * same ID with a new step will be replaced.
    * 
    * @param steps
    *          the steps to add
@@ -186,10 +185,10 @@ public abstract class Definition<U extends ExperimentPath<U>, T extends Definiti
   /**
    * Derive a new container, optionally performing a removal and addition of an
    * step. If an step of the given ID is present, it will be removed from the
-   * resulting container, and will be passed to the given function in an Optional,
-   * otherwise an empty Optional will be passed. If the function returns an
-   * Optional containing an step, that step will be present in the resulting
-   * container.
+   * resulting container, and will be passed to the given function in an
+   * Optional, otherwise an empty Optional will be passed. If the function
+   * returns an Optional containing an step, that step will be present in the
+   * resulting container.
    * 
    * @param id
    *          the ID of the step to replace
@@ -219,8 +218,7 @@ public abstract class Definition<U extends ExperimentPath<U>, T extends Definiti
    */
   public T withSubsteps(
       Function<? super Stream<? extends StepDefinition>, ? extends Stream<? extends StepDefinition>> transformation) {
-    var steps = substeps().collect(Collectors.toList());
-    return withoutSubsteps().withSubsteps(transformation.apply(steps.stream()).collect(toList()));
+    return withoutSubsteps().withSubsteps(transformation.apply(substeps()).collect(toList()));
   }
 
   public Optional<StepDefinition> findSubstep(ExperimentPath<U> path) {
@@ -244,8 +242,8 @@ public abstract class Definition<U extends ExperimentPath<U>, T extends Definiti
   }
 
   /**
-   * Derive a new container, performing an optional replacement of the step at the
-   * given path.
+   * Derive a new container, performing an optional replacement of the step at
+   * the given path.
    * 
    * @param path
    *          the path of the step to replace
@@ -253,8 +251,8 @@ public abstract class Definition<U extends ExperimentPath<U>, T extends Definiti
    *          a function accepting the existing step and returning its optional
    *          replacement, or an empty optional to indicate that the step should
    *          be removed from the derived container
-   * @return An optional containing the derived container, or an empty optional if
-   *         a step could not be found at the given path.
+   * @return An optional containing the derived container, or an empty optional
+   *         if a step could not be found at the given path.
    */
   public Optional<T> withSubstep(
       ExperimentPath<U> path,

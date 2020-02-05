@@ -45,6 +45,7 @@ import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment.Status;
@@ -61,6 +62,7 @@ public class Workspace {
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.filesystem.workspace";
 
   private final Supplier<GlobalEnvironment> environment;
+  private final LocalEnvironmentService localEnvironmentService;
 
   private final PathLocation rootLocation;
   private final DataFormat<Experiment> experimentFormat;
@@ -76,13 +78,20 @@ public class Workspace {
       ExecutorService conductorService,
       StorageService storageService,
       Supplier<GlobalEnvironment> environment,
+      LocalEnvironmentService localEnvironmentService,
       Log log) {
     this.experiments = new HashSet<>();
 
     this.rootLocation = new PathLocation(rootPath);
-    this.experimentFormat = new JsonExperimentFormat(conductorService, storageService, environment);
+    this.experimentFormat = new JsonExperimentFormat(
+        conductorService,
+        storageService,
+        environment,
+        localEnvironmentService,
+        log);
 
     this.environment = environment;
+    this.localEnvironmentService = localEnvironmentService;
 
     this.events = new HotObservable<>();
 
@@ -170,7 +179,12 @@ public class Workspace {
         name,
         n -> new WorkspaceExperiment(
             this,
-            new Experiment(ExperimentDefinition.define(name), storageConfiguration, environment)));
+            new Experiment(
+                ExperimentDefinition.define(name),
+                storageConfiguration,
+                environment,
+                localEnvironmentService,
+                log)));
   }
 
   public WorkspaceExperiment addExperiment(Experiment experiment) {
