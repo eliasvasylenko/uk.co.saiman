@@ -48,13 +48,13 @@ public abstract class ProductPath<T extends ExperimentPath<T>, U extends Product
     this.production = production;
   }
 
-  public static <T extends ExperimentPath<T>, U> ProductPath<T, Result<U>> toResult(
+  public static <T extends ExperimentPath<T>, U> ResultPath<T, U> toResult(
       ExperimentPath<T> experimentPath,
       Class<U> type) {
     return new ResultPath<>(experimentPath, type);
   }
 
-  public static <T extends ExperimentPath<T>, U> ProductPath<T, Condition<U>> toCondition(
+  public static <T extends ExperimentPath<T>, U> ConditionPath<T, U> toCondition(
       ExperimentPath<T> experimentPath,
       Class<U> type) {
     return new ConditionPath<>(experimentPath, type);

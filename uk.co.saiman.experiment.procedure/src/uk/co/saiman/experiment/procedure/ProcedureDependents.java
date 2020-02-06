@@ -29,21 +29,17 @@ package uk.co.saiman.experiment.procedure;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
-import uk.co.saiman.experiment.variables.Variables;
 
 public class ProcedureDependents {
   enum DependencyKind {
-    CONDITION, RESULT, ADDITIONAL_RESULT
+    CONDITION, RESULT, ADDITIONAL_RESULT, ORDERING
   }
 
   static class Dependency {
@@ -114,14 +110,7 @@ public class ProcedureDependents {
   }
 
   void addInstruction(GlobalEnvironment environment, Instruction instruction) {
-    var planningContext = new PlanningContext.NoOpPlanningContext() {
-      private final Variables variables = new Variables(environment, instruction.variableMap());
-
-      @Override
-      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
-        return variables.get(declaration.variable());
-      }
-
+    Procedures.plan(instruction, environment, variables -> new InstructionPlanningContext() {
       @Override
       public void declareResultRequirement(Class<?> production) {
         instruction.path().parent().ifPresent(dependency -> {
@@ -135,6 +124,12 @@ public class ProcedureDependents {
         instruction.path().parent().ifPresent(dependency -> {
           addDependency(
               new Dependency(DependencyKind.CONDITION, production, instruction.path(), dependency));
+          
+          var parent = instructionDependencies.get(dependency);
+          if (parent != null) {
+            // TODO add ordering dependencies iff the condition is declared on the parent as ORDERED
+            parent.
+          }
         });
       }
 
@@ -149,9 +144,7 @@ public class ProcedureDependents {
                   dependency));
         });
       }
-    };
-
-    planningContext.useOnce(instruction.executor());
+    });
   }
 
   void addDependency(Dependency dependency) {

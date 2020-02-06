@@ -69,4 +69,8 @@ public class ConditionImpl<T> implements Condition<T> {
   public void close() {
     value = null;
   }
+
+  public boolean isOpen() {
+    return value != null;
+  }
 }

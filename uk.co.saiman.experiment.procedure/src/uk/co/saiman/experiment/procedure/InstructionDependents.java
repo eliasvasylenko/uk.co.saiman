@@ -27,65 +27,78 @@
  */
 package uk.co.saiman.experiment.procedure;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.ConditionPath;
+import uk.co.saiman.experiment.dependency.ProductPath;
+import uk.co.saiman.experiment.dependency.ResultPath;
 
 public class InstructionDependents {
   private static final InstructionDependents EMPTY = new InstructionDependents();
 
-  private final Map<Class<?>, Set<ExperimentPath<Absolute>>> conditionDependents;
-  private final Map<Class<?>, Set<ExperimentPath<Absolute>>> resultDependents;
+  private final Set<ConditionPath<Absolute, ?>> conditionDependents;
+  private final Set<ResultPath<Absolute, ?>> resultDependents;
+  private final Set<ExperimentPath<Absolute>> orderingDependents;
 
   public static InstructionDependents empty() {
     return EMPTY;
   }
 
   private InstructionDependents() {
-    conditionDependents = Map.of();
-    resultDependents = Map.of();
+    conditionDependents = Set.of();
+    resultDependents = Set.of();
+    orderingDependents = Set.of();
   }
 
   private InstructionDependents(
-      Map<Class<?>, Set<ExperimentPath<Absolute>>> conditionDependents,
-      Map<Class<?>, Set<ExperimentPath<Absolute>>> resultDependents) {
+      Set<ConditionPath<Absolute, ?>> conditionDependents,
+      Set<ResultPath<Absolute, ?>> resultDependents,
+      Set<ExperimentPath<Absolute>> orderingDependents) {
     this.conditionDependents = conditionDependents;
     this.resultDependents = resultDependents;
+    this.orderingDependents = orderingDependents;
   }
 
-  public Stream<Class<?>> getConditionDependents() {
-    return conditionDependents.keySet().stream();
+  public Stream<ConditionPath<Absolute, ?>> getConditionDependents() {
+    return conditionDependents.stream();
   }
 
-  public Stream<Class<?>> getResultDependents() {
-    return resultDependents.keySet().stream();
+  public Stream<ResultPath<Absolute, ?>> getResultDependents() {
+    return resultDependents.stream();
   }
 
-  public Stream<ExperimentPath<Absolute>> getConditionDependents(Class<?> production) {
-    return Optional.ofNullable(conditionDependents.get(production)).stream().flatMap(Set::stream);
+  public Stream<ExperimentPath<Absolute>> getOrderingDependents() {
+    return orderingDependents.stream();
   }
 
-  public Stream<ExperimentPath<Absolute>> getResultDependents(Class<?> production) {
-    return Optional.ofNullable(resultDependents.get(production)).stream().flatMap(Set::stream);
-  }
-
-  private static <T, U> Map<T, Set<U>> with(Map<T, Set<U>> dependents, T production, U path) {
-    var newDependents = new HashMap<>(dependents);
-    newDependents.computeIfAbsent(production, p -> new LinkedHashSet<>()).add(path);
+  private static <T> Set<T> with(Set<T> dependents, T dependent) {
+    var newDependents = new LinkedHashSet<>(dependents);
+    newDependents.add(dependent);
     return newDependents;
   }
 
   InstructionDependents withConditionDependent(Class<?> production, ExperimentPath<Absolute> path) {
-    return new InstructionDependents(with(conditionDependents, production, path), resultDependents);
+    return new InstructionDependents(
+        with(conditionDependents, ProductPath.toCondition(path, production)),
+        resultDependents,
+        orderingDependents);
   }
 
   InstructionDependents withResultDependent(Class<?> production, ExperimentPath<Absolute> path) {
-    return new InstructionDependents(conditionDependents, with(resultDependents, production, path));
+    return new InstructionDependents(
+        conditionDependents,
+        with(resultDependents, ProductPath.toResult(path, production)),
+        orderingDependents);
+  }
+
+  InstructionDependents withOrderingDependent(ExperimentPath<Absolute> path) {
+    return new InstructionDependents(
+        conditionDependents,
+        resultDependents,
+        with(orderingDependents, path));
   }
 }

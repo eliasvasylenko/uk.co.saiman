@@ -45,12 +45,11 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
 import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.schedule.Schedule;
-import uk.co.saiman.experiment.variables.VariableDeclaration;
-import uk.co.saiman.experiment.variables.Variables;
 
 public class Conflicts {
   private final Schedule schedule;
@@ -121,8 +120,7 @@ public class Conflicts {
     @Override
     public boolean isConflicting() {
       try {
-        return conflictingInstruction().isPresent()
-            || conflictingResources().findAny().isPresent()
+        return conflictingInstruction().isPresent() || conflictingResources().findAny().isPresent()
             || conflictingDependencies().findAny().isPresent();
       } catch (IOException e) {
         return true;
@@ -158,17 +156,9 @@ public class Conflicts {
     }
 
     private Stream<Change> resolveDependencies(Instruction instruction) {
-      var executor = instruction.executor();
-      var variables = new Variables(environment, instruction.variableMap());
-
       List<ProductPath<?, ?>> dependencies = new ArrayList<>();
 
-      executor.plan(new NoOpPlanningContext() {
-        @Override
-        public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
-          return variables.get(declaration.variable());
-        }
-
+      Procedures.plan(instruction, environment, variables -> new InstructionPlanningContext() {
         @Override
         public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
           dependencies.add(path);

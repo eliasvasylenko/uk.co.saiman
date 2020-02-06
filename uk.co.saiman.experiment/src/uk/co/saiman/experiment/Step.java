@@ -31,8 +31,6 @@ import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
 import static uk.co.saiman.experiment.definition.ExecutionPlan.WITHHOLD;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -46,10 +44,9 @@ import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.executor.PlanningContext.NoOpPlanningContext;
 import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
@@ -230,22 +227,7 @@ public class Step {
   }
 
   public Stream<Class<?>> getObservations() {
-    List<Class<?>> observations = new ArrayList<>();
-
-    var variables = getVariables();
-    getExecutor().plan(new NoOpPlanningContext() {
-      @Override
-      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
-        return variables.get(declaration.variable());
-      }
-
-      @Override
-      public void observesResult(Class<?> production) {
-        observations.add(production);
-      }
-    });
-
-    return observations.stream();
+    return Procedures.getObservations(getInstruction(), getGlobalEnvironment());
   }
 
   public boolean prepares(Class<?> type) {
@@ -257,37 +239,11 @@ public class Step {
   }
 
   public Stream<Class<?>> getPreparations() {
-    List<Class<?>> preparations = new ArrayList<>();
-
-    var variables = getVariables();
-    getExecutor().plan(new NoOpPlanningContext() {
-      @Override
-      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
-        return variables.get(declaration.variable());
-      }
-
-      @Override
-      public void preparesCondition(Class<?> type, Evaluation evaluation) {
-        preparations.add(type);
-      }
-    });
-
-    return preparations.stream();
+    return Procedures.getPreparations(getInstruction(), getGlobalEnvironment());
   }
 
   public Stream<VariableDeclaration<?>> getVariableDeclarations() {
-    List<VariableDeclaration<?>> declarations = new ArrayList<>();
-
-    var variables = getVariables();
-    getExecutor().plan(new NoOpPlanningContext() {
-      @Override
-      public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
-        declarations.add(declaration);
-        return variables.get(declaration.variable());
-      }
-    });
-
-    return declarations.stream();
+    return Procedures.getVariableDeclarations(getInstruction(), getGlobalEnvironment());
   }
 
   public Stream<? extends Result<?>> getResults() {
