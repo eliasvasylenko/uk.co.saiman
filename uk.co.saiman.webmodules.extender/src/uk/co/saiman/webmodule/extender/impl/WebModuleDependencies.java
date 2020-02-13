@@ -65,8 +65,6 @@ class WebModuleDependencies {
   }
 
   public void update() {
-    boolean fulfilled;
-
     synchronized (wires) {
       dispose();
       bundle
@@ -76,13 +74,9 @@ class WebModuleDependencies {
           .filter(WebModuleDependencies::isExtenderRequirement)
           .map(wire -> new WebModuleWires(wire, refresh))
           .forEach(wires -> this.wires.put(wires.getWire(), wires));
-
-      fulfilled = wires.isEmpty();
     }
 
-    if (fulfilled) {
-      refresh.run();
-    }
+    refresh.run();
   }
 
   public Optional<List<WebModule>> getWebModules() {

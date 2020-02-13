@@ -1,4 +1,4 @@
-import whatever from 'actions.js'
+import { proposalTypes, CONNECTION_STATES, POLLING_STATES, setFilter, clearFilter } from './actions.js'
 
 /*
  * The model represents our entire application state. It is the single source of truth.
@@ -35,7 +35,6 @@ let model = {
 	/*
 	 * Commands
 	 */
-	pollingStatus: POLLING_STATES.DISABLED,
 	entriesFilter: "",
 	entries: [],
 	entriesByID: {},
@@ -65,6 +64,8 @@ export const onAccept = (response) => {
  * fit.
  *
  * The model currently accepts all the proposals defined in actions.js
+ *
+ * Handling should be IDEMPOTENT
  */
 export const propose = (action) => {
 	if (typeof action.error !== typeof undefined) {

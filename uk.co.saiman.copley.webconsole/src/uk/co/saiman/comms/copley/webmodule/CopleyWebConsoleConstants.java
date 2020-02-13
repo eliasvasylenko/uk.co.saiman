@@ -40,7 +40,6 @@ import uk.co.saiman.webmodule.ProvideWebModule;
  * 
  * @author Elias N Vasylenko
  */
-@ProvideWebModule(id = COPLEY_WEB_MODULE_NAME, version = COPLEY_WEB_MODULE_VERSION, entryPoint = DEFAULT_ENTRY_POINT, resourceRoot = DEFAULT_RESOURCE_ROOT, format = ESM)
 public interface CopleyWebConsoleConstants {
   final String COPLEY_WEB_MODULE_NAME = "@saiman/copley";
   final String COPLEY_WEB_MODULE_VERSION = "1.0.0";

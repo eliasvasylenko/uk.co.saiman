@@ -1,10 +1,10 @@
 import view from './view.js'
-import actions from './actions.js'
-import { onUpdate as onModelUpdate, propose } from './model.js'
+import { proposalTypes, CONNECTION_STATES, POLLING_STATES, setFilter, clearFilter } from './actions.js'
+import { onAccept as onModelAccept, propose } from './model.js'
 
 const state = {
 	init: () => {
-		onModelUpdate(render)
+		onModelAccept(render)
 	},
 	render: (model) => {
 		state.representation(model)
@@ -26,7 +26,7 @@ const state = {
 		}
 
 		view.display(representation);
-	}
+	},
 };
 
 export const init = state.init

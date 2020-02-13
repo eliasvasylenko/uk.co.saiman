@@ -2,7 +2,7 @@ import { html, render } from 'lighterhtml'
 
 import { MapTable, StatLine } from '@saiman/webconsole'
 
-import CopleyTable from './variables.js'
+import { CopleyTable } from './variables.js'
 
 const CopleyInformation = ({ name, connection, bundle, setConnectionOpen }) => {
   const entries = {

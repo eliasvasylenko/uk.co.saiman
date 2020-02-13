@@ -77,8 +77,7 @@ public class WebModuleServlet extends HttpServlet {
       description = "The module server provides OSGi powered dependency management for javascript modules")
   public @interface ModuleServerConfiguration {
     @AttributeDefinition(name = "Servlet pattern")
-    String osgi_http_whiteboard_servlet_pattern() default "/"
-        + WebModuleServlet.CONFIGURATION_PID
+    String osgi_http_whiteboard_servlet_pattern() default "/" + WebModuleServlet.CONFIGURATION_PID
         + "/*";
   }
 
@@ -93,7 +92,8 @@ public class WebModuleServlet extends HttpServlet {
   private Map<PackageId, Map<Version, NavigableSet<ServiceReference<WebModule>>>> modules = new HashMap<>();
 
   @Activate
-  void activate(ModuleServerConfiguration config, BundleContext context) throws Exception {
+  public WebModuleServlet(ModuleServerConfiguration config, BundleContext context)
+      throws Exception {
     // this.config = config;
     this.context = context;
   }
@@ -183,7 +183,7 @@ public class WebModuleServlet extends HttpServlet {
     BundleImportMap configuration = new BundleImportMap(bundle, request.getServletPath());
 
     configuration.writeImportMap(response.getOutputStream());
-    
+
     configuration.close();
   }
 

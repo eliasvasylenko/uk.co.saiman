@@ -151,9 +151,3 @@ const mapDispatchToProps = dispatch => ({
   execute: (entry, action, payload) => dispatch(sendExecutionRequest(entry, action, payload)),
   changeOutputValue: (entry, item, index, value) => dispatch(changeOutputValue(entry, item, index, value))
 })
-
-const CommsTableController = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(CommsTable)
-

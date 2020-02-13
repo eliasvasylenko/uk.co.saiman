@@ -47,12 +47,12 @@ import org.osgi.annotation.bundle.Capability;
 
 import uk.co.saiman.webmodule.extender.RequireWebModuleExtender;
 
+@RequireWebModuleExtender
 @Capability(
     namespace = SERVICE_NAMESPACE,
     attribute = {
         CAPABILITY_OBJECTCLASS_ATTRIBUTE + "=uk.co.saiman.webmodule.WebModule",
         EXTENDER_VERSION_ATTRIBUTE + "=" + EXTENDER_VERSION })
-@RequireWebModuleExtender
 @Retention(RetentionPolicy.CLASS)
 public @interface ProvideWebModule {
   @Attribute

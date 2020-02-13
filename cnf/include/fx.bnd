@@ -7,29 +7,28 @@
 	${repo;org.openjfx:javafx-graphics:jar:linux};version=file
 
 javafx.module.packages=\
-	javafx.graphics/javafx.scene=.,\
-	javafx.graphics/javafx.css=.,\
-	javafx.controls/javafx.scene.control=.,\
 	javafx.base/javafx.event=.,\
 	javafx.base/javafx.collections=.,\
-	javafx.graphics/javafx.css=.,\
-	javafx.graphics/com.sun.javafx.scene=.,\
-	javafx.graphics/javafx.scene=.,\
-	javafx.graphics/com.sun.javafx.scene.traversal=.,\
-	javafx.graphics/com.sun.javafx.css=.,\
-	javafx.controls/com.sun.javafx.scene.control.behavior=.,\
-	javafx.controls/com.sun.javafx.scene.control=.,\
-	javafx.controls/com.sun.javafx.scene.control.inputmap=.,\
 	javafx.base/com.sun.javafx.event=.,\
 	javafx.base/com.sun.javafx.collections=.,\
 	javafx.base/com.sun.javafx.runtime=.,\
+	javafx.controls/javafx.scene.control=.,\
+	javafx.controls/com.sun.javafx.scene.control.behavior=.,\
+	javafx.controls/com.sun.javafx.scene.control=.,\
+	javafx.controls/com.sun.javafx.scene.control.inputmap=.,\
+	javafx.graphics/javafx.scene=.,\
+	javafx.graphics/javafx.css=.,\
+	javafx.graphics/javafx.scene=.,\
+	javafx.graphics/com.sun.javafx.scene=.,\
+	javafx.graphics/com.sun.javafx.scene.traversal=.,\
+	javafx.graphics/com.sun.javafx.css=.,\
 	javafx.graphics/com.sun.javafx.css=.,\
 	javafx.graphics/com.sun.javafx.application=.,\
 	javafx.graphics/com.sun.glass.ui=.,\
 	javafx.graphics/com.sun.javafx.tk.quantum=.,\
-	javafx.graphics/com.sun.javafx.tk=.,\
-	javafx.graphics/com.sun.prism=.,\
-	javafx.graphics/com.sun.prism.d3d=.
+	javafx.graphics/com.sun.javafx.tk=.
+#	javafx.graphics/com.sun.prism=.,\
+#	javafx.graphics/com.sun.prism.d3d=.
 
 Java-Module-AddExports: ${javafx.module.packages}
 Java-Module-AddOpens: ${javafx.module.packages}
