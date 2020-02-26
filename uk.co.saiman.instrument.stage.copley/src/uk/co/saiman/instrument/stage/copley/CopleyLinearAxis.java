@@ -245,21 +245,23 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   @Override
-  protected AxisController<Length> createController(ControlContext lock) {
-    return new AxisController<Length>() {
+  protected AxisController<Length> createController(ControlContext context) {
+    return new AxisController<>() {
       @Override
       public void requestLocation(Quantity<Length> location) {
-        lock.run(() -> CopleyLinearAxis.this.requestLocation(location));
+        try (var lock = context.acquireLock()) {
+          CopleyLinearAxis.this.requestLocation(location);
+        }
       }
 
       @Override
       public void close() {
-        lock.close();
+        context.close();
       }
 
       @Override
-      public boolean isClosed() {
-        return lock.isClosed();
+      public boolean isOpen() {
+        return context.isOpen();
       }
     };
   }

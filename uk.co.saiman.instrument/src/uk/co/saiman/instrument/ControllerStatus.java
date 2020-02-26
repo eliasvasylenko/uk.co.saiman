@@ -27,27 +27,14 @@
  */
 package uk.co.saiman.instrument;
 
-import uk.co.saiman.instrument.DeviceImpl.ControlContext;
-import uk.co.saiman.locking.Lock;
+public enum ControllerStatus {
+  /**
+   * The device is currently available for control by a client.
+   */
+  AVAILABLE,
 
-public abstract class ControllerImpl implements Controller {
-  private final ControlContext context;
-
-  public ControllerImpl(ControlContext context) {
-    this.context = context;
-  }
-
-  protected Lock acquireLock() {
-    return context.acquireLock();
-  }
-
-  @Override
-  public void close() {
-    context.close();
-  }
-
-  @Override
-  public boolean isOpen() {
-    return context.isOpen();
-  }
+  /**
+   * The device is currently under control by another client or disposed.
+   */
+  UNAVAILABLE
 }

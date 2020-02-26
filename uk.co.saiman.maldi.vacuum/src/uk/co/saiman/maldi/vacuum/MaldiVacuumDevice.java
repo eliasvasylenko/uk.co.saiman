@@ -166,8 +166,8 @@ public class MaldiVacuumDevice extends DeviceImpl<VacuumController>
       }
 
       @Override
-      public boolean isClosed() {
-        return context.isClosed();
+      public boolean isOpen() {
+        return context.isOpen();
       }
     };
   }

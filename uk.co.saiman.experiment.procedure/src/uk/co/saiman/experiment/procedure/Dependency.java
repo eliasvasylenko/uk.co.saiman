@@ -25,56 +25,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.conductor;
-
-import static java.util.Objects.requireNonNull;
+package uk.co.saiman.experiment.procedure;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.Condition;
-import uk.co.saiman.experiment.dependency.ConditionClosedException;
-import uk.co.saiman.experiment.dependency.ProductPath;
 
-public class ConditionImpl<T> implements Condition<T> {
-  private final Class<T> type;
-  private final ProductPath<Absolute, Condition<T>> path;
-  private T value;
-
-  public ConditionImpl(Class<T> type, ExperimentPath<Absolute> experimentPath, T value) {
-    this.type = requireNonNull(type);
-    this.path = ProductPath.toCondition(experimentPath, type);
-    this.value = requireNonNull(value);
+public class Dependency {
+  public enum Kind {
+    CONDITION, RESULT, ADDITIONAL_RESULT, ORDERING
   }
 
-  InstructionExecution getExecution() {
+  private final Kind kind;
+  private final Class<?> production;
+  private final ExperimentPath<Absolute> from;
+  private final ExperimentPath<Absolute> to;
 
+  public Dependency(
+      Kind kind,
+      Class<?> production,
+      ExperimentPath<Absolute> from,
+      ExperimentPath<Absolute> to) {
+    this.kind = kind;
+    this.production = production;
+    this.from = from;
+    this.to = to;
   }
 
-  @Override
-  public Class<T> type() {
-    return type;
+  public Kind kind() {
+    return kind;
   }
 
-  @Override
-  public ProductPath<Absolute, Condition<T>> path() {
-    return path;
+  public Class<?> production() {
+    return production;
   }
 
-  @Override
-  public T value() {
-    T value = this.value;
-    if (value == null) {
-      throw new ConditionClosedException(type);
-    }
-    return value;
+  public ExperimentPath<Absolute> from() {
+    return from;
   }
 
-  @Override
-  public void close() {
-    value = null;
-  }
-
-  public boolean isOpen() {
-    return value != null;
+  public ExperimentPath<Absolute> to() {
+    return to;
   }
 }

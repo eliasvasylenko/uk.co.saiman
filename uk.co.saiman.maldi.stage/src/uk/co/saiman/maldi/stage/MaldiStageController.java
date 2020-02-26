@@ -73,7 +73,7 @@ public class MaldiStageController implements XYStageController {
   }
 
   @Override
-  public boolean isClosed() {
-    return controller.isClosed();
+  public boolean isOpen() {
+    return controller.isOpen();
   }
 }

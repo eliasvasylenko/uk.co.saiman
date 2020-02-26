@@ -61,7 +61,6 @@ import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.acquisition.AcquisitionException;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.measurement.scalar.Scalar;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -226,7 +225,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
 
       new Thread(this::acquire).start();
     } catch (Exception e) {
-      log.log(Level.ERROR, e);
+      log.log(ERROR, e);
       throw e;
     }
   }
@@ -422,22 +421,30 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
     return new AcquisitionController() {
       @Override
       public void startAcquisition() {
-        context.run(SimulatedAcquisitionDevice.this::startAcquisition);
+        try (var lock = context.acquireLock()) {
+          SimulatedAcquisitionDevice.this.startAcquisition();
+        }
       }
 
       @Override
       public void setSampleDepth(int depth) {
-        context.run(() -> SimulatedAcquisitionDevice.this.setSampleDepth(depth));
+        try (var lock = context.acquireLock()) {
+          SimulatedAcquisitionDevice.this.setSampleDepth(depth);
+        }
       }
 
       @Override
       public void setAcquisitionTime(Quantity<Time> time) {
-        context.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionTime(time));
+        try (var lock = context.acquireLock()) {
+          SimulatedAcquisitionDevice.this.setAcquisitionTime(time);
+        }
       }
 
       @Override
       public void setAcquisitionCount(int count) {
-        context.run(() -> SimulatedAcquisitionDevice.this.setAcquisitionCount(count));
+        try (var lock = context.acquireLock()) {
+          SimulatedAcquisitionDevice.this.setAcquisitionCount(count);
+        }
       }
 
       @Override
@@ -446,8 +453,8 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
       }
 
       @Override
-      public boolean isClosed() {
-        return context.isClosed();
+      public boolean isOpen() {
+        return context.isOpen();
       }
     };
   }

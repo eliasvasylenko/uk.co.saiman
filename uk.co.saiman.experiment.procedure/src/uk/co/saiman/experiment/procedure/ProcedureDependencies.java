@@ -35,101 +35,74 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Dependency.Kind;
 
-public class ProcedureDependents {
-  enum DependencyKind {
-    CONDITION, RESULT, ADDITIONAL_RESULT, ORDERING
-  }
+public class ProcedureDependencies {
+  private final Map<ExperimentPath<Absolute>, InstructionDependencies> instructionDependencies;
 
-  static class Dependency {
-    private final DependencyKind kind;
-    private final Class<?> production;
-    private final ExperimentPath<Absolute> from;
-    private final ExperimentPath<Absolute> to;
-
-    public Dependency(
-        DependencyKind kind,
-        Class<?> production,
-        ExperimentPath<Absolute> from,
-        ExperimentPath<Absolute> to) {
-      this.kind = kind;
-      this.production = production;
-      this.from = from;
-      this.to = to;
-    }
-
-    public DependencyKind kind() {
-      return kind;
-    }
-
-    public Class<?> production() {
-      return production;
-    }
-
-    public ExperimentPath<Absolute> from() {
-      return from;
-    }
-
-    public ExperimentPath<Absolute> to() {
-      return to;
-    }
-  }
-
-  private final Map<ExperimentPath<Absolute>, InstructionDependents> instructionDependencies;
-
-  ProcedureDependents(Procedure procedure) {
+  ProcedureDependencies(Procedure procedure) {
     instructionDependencies = new HashMap<>();
     procedure
         .instructions()
-        .forEach(instruction -> addInstruction(procedure.environment(), instruction));
+        .forEach(instruction -> addInstruction(procedure.environment(), procedure, instruction));
   }
 
-  public InstructionDependents getInstructionDependents(ExperimentPath<Absolute> path) {
-    return instructionDependencies.getOrDefault(path, InstructionDependents.empty());
+  public InstructionDependencies getInstructionDependents(ExperimentPath<Absolute> path) {
+    return instructionDependencies.computeIfAbsent(path, InstructionDependencies::new);
   }
 
-  InstructionDependents updateInstructionDependents(
+  InstructionDependencies updateInstructionDependents(
       ExperimentPath<Absolute> path,
-      Function<InstructionDependents, InstructionDependents> action) {
+      Function<InstructionDependencies, InstructionDependencies> action) {
     return instructionDependencies.put(path, action.apply(getInstructionDependents(path)));
   }
 
-  static InstructionDependents withDependent(
-      InstructionDependents dependencies,
-      Dependency dependency) {
-    switch (dependency.kind()) {
-    case CONDITION:
-      return dependencies.withConditionDependent(dependency.production(), dependency.from());
-    case RESULT:
-    case ADDITIONAL_RESULT:
-      return dependencies.withResultDependent(dependency.production(), dependency.from());
-    default:
-      throw new AssertionError();
-    }
-  }
-
-  void addInstruction(GlobalEnvironment environment, Instruction instruction) {
+  private void addInstruction(
+      GlobalEnvironment environment,
+      Procedure procedure,
+      Instruction instruction) {
     Procedures.plan(instruction, environment, variables -> new InstructionPlanningContext() {
+      @Override
+      public void preparesCondition(Class<?> type, Evaluation evaluation) {
+        updateInstructionDependents(instruction.path(), d -> d.withEvaluation(type, evaluation));
+      }
+
       @Override
       public void declareResultRequirement(Class<?> production) {
         instruction.path().parent().ifPresent(dependency -> {
-          addDependency(
-              new Dependency(DependencyKind.RESULT, production, instruction.path(), dependency));
+          addDependency(new Dependency(Kind.RESULT, production, instruction.path(), dependency));
         });
       }
 
       @Override
       public void declareConditionRequirement(Class<?> production) {
         instruction.path().parent().ifPresent(dependency -> {
-          addDependency(
-              new Dependency(DependencyKind.CONDITION, production, instruction.path(), dependency));
-          
-          var parent = instructionDependencies.get(dependency);
-          if (parent != null) {
-            // TODO add ordering dependencies iff the condition is declared on the parent as ORDERED
-            parent.
-          }
+          var parent = getInstructionDependents(dependency);
+          /*
+           * If the condition we're consuming is ordered, we must declare an
+           * additional ordering dependency on the the last instruction to
+           * consume that condition.
+           */
+          parent
+              .getEvaluation(production)
+              .filter(Evaluation.ORDERED::equals)
+              .ifPresent(
+                  e -> parent
+                      .getDependenciesTo()
+                      .filter(d -> d.kind() == Kind.CONDITION && d.production() == production)
+                      .reduce((a, b) -> b)
+                      .map(Dependency::from)
+                      .ifPresent(
+                          orderingDependency -> addDependency(
+                              new Dependency(
+                                  Kind.ORDERING,
+                                  production,
+                                  instruction.path(),
+                                  orderingDependency))));
+
+          addDependency(new Dependency(Kind.CONDITION, production, instruction.path(), dependency));
         });
       }
 
@@ -138,7 +111,7 @@ public class ProcedureDependents {
         path.getExperimentPath().resolveAgainst(instruction.path()).ifPresent(dependency -> {
           addDependency(
               new Dependency(
-                  DependencyKind.ADDITIONAL_RESULT,
+                  Kind.ADDITIONAL_RESULT,
                   path.getProduction(),
                   instruction.path(),
                   dependency));
@@ -148,6 +121,7 @@ public class ProcedureDependents {
   }
 
   void addDependency(Dependency dependency) {
-    updateInstructionDependents(dependency.to(), d -> withDependent(d, dependency));
+    updateInstructionDependents(dependency.to(), d -> d.withDependency(dependency));
+    updateInstructionDependents(dependency.from(), d -> d.withDependency(dependency));
   }
 }

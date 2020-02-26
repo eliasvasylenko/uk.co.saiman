@@ -27,9 +27,11 @@
  */
 package uk.co.saiman.instrument.stage.composed;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.quantity.Length;
 
@@ -39,6 +41,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.instrument.axis.AxisController;
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleDevice;
@@ -49,16 +52,20 @@ import uk.co.saiman.instrument.stage.XYStageController;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
 @Designate(ocd = ComposedXYStage.ComposedXYStageConfiguration.class, factory = true)
-@Component(name = ComposedXYStage.CONFIGURATION_PID, configurationPid = ComposedXYStage.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
-    SampleDevice.class,
-    Stage.class,
-    XYStage.class })
+@Component(
+    name = ComposedXYStage.CONFIGURATION_PID,
+    configurationPid = ComposedXYStage.CONFIGURATION_PID,
+    configurationPolicy = REQUIRE,
+    service = { SampleDevice.class, Stage.class, XYStage.class })
 public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStageController>
     implements XYStage<XYStageController> {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.composed.xy";
 
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(id = CONFIGURATION_PID, name = "Composed XY Stage Configuration", description = "The configuration for a modular stage composed of an x axis and a y axis")
+  @ObjectClassDefinition(
+      id = CONFIGURATION_PID,
+      name = "Composed XY Stage Configuration",
+      description = "The configuration for a modular stage composed of an x axis and a y axis")
   public @interface ComposedXYStageConfiguration {
     String exchangeLocation();
 
@@ -67,6 +74,9 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
 
   private final AxisDevice<Length, ?> xAxis;
   private final AxisDevice<Length, ?> yAxis;
+
+  private AxisController<Length> xController;
+  private AxisController<Length> yController;
 
   @Activate
   public ComposedXYStage(
@@ -116,50 +126,92 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
 
   @Override
   protected void setRequestedStateImpl(
-      DependentControlContext context,
       RequestedSampleState<XYCoordinate<Length>> requestedState,
       XYCoordinate<Length> requestedPosition) {
-    context.getController(xAxis).requestLocation(requestedPosition.getX());
-    context.getController(yAxis).requestLocation(requestedPosition.getY());
+    xController.requestLocation(requestedPosition.getX());
+    yController.requestLocation(requestedPosition.getY());
   }
 
   @Override
-  protected XYStageController createController(DependentControlContext context) {
-    return new XYStageController() {
-      @Override
-      public void requestExchange() {
-        ComposedXYStage.this.requestSampleState(context, SampleState.exchange());
-      }
+  protected void destroyController(ControlContext context) {
+    super.destroyController(context);
 
-      @Override
-      public void requestAnalysis(XYCoordinate<Length> location) {
-        ComposedXYStage.this.requestSampleState(context, SampleState.analysis(location));
-      }
+    try {
+      xController.close();
+    } finally {
+      yController.close();
+    }
+  }
 
-      @Override
-      public void requestReady() {
-        ComposedXYStage.this.requestSampleState(context, SampleState.ready());
-      }
+  @Override
+  protected XYStageController createController(ControlContext context)
+      throws TimeoutException, InterruptedException {
+    try {
+      xController = xAxis.acquireControl(2, SECONDS);
+      yController = yAxis.acquireControl(2, SECONDS);
 
-      @Override
-      public SampleState<XYCoordinate<Length>> awaitRequest(long time, TimeUnit unit) {
-        return context.get(() -> ComposedXYStage.this.awaitRequest(time, unit));
-      }
+      return new XYStageController() {
+        @Override
+        public void requestExchange() {
+          try (var lock = context.acquireLock()) {
+            ComposedXYStage.this.requestSampleState(SampleState.exchange());
+          }
+        }
 
-      @Override
-      public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
-        return context.get(() -> ComposedXYStage.this.awaitReady(time, unit));
-      }
+        @Override
+        public void requestAnalysis(XYCoordinate<Length> location) {
+          try (var lock = context.acquireLock()) {
+            ComposedXYStage.this.requestSampleState(SampleState.analysis(location));
+          }
+        }
 
-      @Override
-      public void close() {
-        context.close();
-      }
+        @Override
+        public void requestReady() {
+          try (var lock = context.acquireLock()) {
+            ComposedXYStage.this.requestSampleState(SampleState.ready());
+          }
+        }
 
-      @Override
-      public boolean isClosed() {
-        return context.isClosed();
+        @Override
+        public SampleState<XYCoordinate<Length>> awaitRequest(long time, TimeUnit unit) {
+          try (var lock = context.acquireLock()) {
+            return ComposedXYStage.this.awaitRequest(time, unit);
+          }
+        }
+
+        @Override
+        public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
+          try (var lock = context.acquireLock()) {
+            return ComposedXYStage.this.awaitReady(time, unit);
+          }
+        }
+
+        @Override
+        public void close() {
+          context.close();
+        }
+
+        @Override
+        public boolean isOpen() {
+          return context.isOpen();
+        }
+      };
+    } catch (Throwable t) {
+      if (xController != null) {
+        try {
+          xController.close();
+        } catch (Exception e) {
+          t.addSuppressed(e);
+        }
       }
-    };
+      if (yController != null) {
+        try {
+          yController.close();
+        } catch (Exception e) {
+          t.addSuppressed(e);
+        }
+      }
+      throw t;
+    }
   }
 }

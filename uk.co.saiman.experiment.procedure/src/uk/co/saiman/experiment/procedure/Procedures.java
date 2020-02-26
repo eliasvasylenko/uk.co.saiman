@@ -8,9 +8,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ConditionPath;
-import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.environment.LocalEnvironment;
@@ -25,8 +22,8 @@ import uk.co.saiman.experiment.variables.Variables;
 public final class Procedures {
   private Procedures() {}
 
-  public static ProcedureDependents getDependents(Procedure procedure) {
-    return new ProcedureDependents(procedure);
+  public static ProcedureDependencies getDependents(Procedure procedure) {
+    return new ProcedureDependencies(procedure);
   }
 
   public static LocalEnvironment openEnvironment(
@@ -93,6 +90,7 @@ public final class Procedures {
       GlobalEnvironment environment) {
     var resources = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
+      @Override
       public void declareResourceRequirement(Class<?> type) {
         resources.add(type);
       }
@@ -100,55 +98,12 @@ public final class Procedures {
     return resources.stream();
   }
 
-  public static Optional<ConditionPath<Absolute, ?>> getConditionDependency(
-      Instruction instruction,
-      GlobalEnvironment environment) {
-    var conditions = new ArrayList<Class<?>>();
-    plan(instruction, environment, variables -> new InstructionPlanningContext() {
-      public void declareConditionRequirement(Class<?> type) {
-        conditions.clear();
-        conditions.add(type);
-      }
-    });
-    return conditions
-        .stream()
-        .findAny()
-        .flatMap(type -> instruction.path().parent().map(p -> ProductPath.toCondition(p, type)));
-  }
-
-  public static Optional<ResultPath<Absolute, ?>> getResultDependency(
-      Instruction instruction,
-      GlobalEnvironment environment) {
-    var conditions = new ArrayList<Class<?>>();
-    plan(instruction, environment, variables -> new InstructionPlanningContext() {
-      public void declareResultRequirement(Class<?> type) {
-        conditions.clear();
-        conditions.add(type);
-      }
-    });
-    return conditions
-        .stream()
-        .findAny()
-        .flatMap(type -> instruction.path().parent().map(p -> ProductPath.toResult(p, type)));
-  }
-
-  public static Stream<ResultPath<Absolute, ?>> getAdditionalResultDependencies(
-      Instruction instruction,
-      GlobalEnvironment environment) {
-    var results = new ArrayList<ResultPath<?, ?>>();
-    plan(instruction, environment, variables -> new InstructionPlanningContext() {
-      public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
-        results.add(path);
-      }
-    });
-    return results.stream().flatMap(p -> p.resolveAgainst(instruction.path()).stream());
-  }
-
   public static Stream<Class<?>> getPreparedConditions(
       Instruction instruction,
       GlobalEnvironment environment) {
     var conditions = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
+      @Override
       public void preparesCondition(Class<?> type, Evaluation evaluation) {
         conditions.add(type);
       }
@@ -161,6 +116,7 @@ public final class Procedures {
       GlobalEnvironment environment) {
     var results = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
+      @Override
       public void observesResult(Class<?> type) {
         results.add(type);
       }
@@ -174,6 +130,7 @@ public final class Procedures {
       Class<?> source) {
     var conditions = new ArrayList<Evaluation>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
+      @Override
       public void preparesCondition(Class<?> type, Evaluation evaluation) {
         if (type == source) {
           conditions.clear();

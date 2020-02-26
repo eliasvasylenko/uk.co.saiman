@@ -90,25 +90,27 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
 
   public Procedure procedure(GlobalEnvironment environment) {
     if (procedure == null) {
-      procedure = new Procedure(id, closure(this), environment);
+      procedure = new Procedure(
+          id,
+          substepsClosure(this, ExperimentPath.toRoot()).collect(toList()),
+          environment);
     }
     return procedure;
   }
 
-  private List<Instruction> closure(Definition<?, ?> steps) {
-    return steps
-        .substeps()
-        .flatMap(step -> closure(step, ExperimentPath.toRoot()))
-        .collect(toList());
+  private Stream<Instruction> substepsClosure(
+      Definition<?, ?> steps,
+      ExperimentPath<Absolute> parentPath) {
+    return steps.substeps().flatMap(step -> stepClosure(step, parentPath));
   }
 
-  private Stream<Instruction> closure(StepDefinition step, ExperimentPath<Absolute> path) {
+  private Stream<Instruction> stepClosure(StepDefinition step, ExperimentPath<Absolute> path) {
     var p = path.resolve(step.id());
     return Stream
         .concat(
             step.getPlan() == EXECUTE
                 ? Stream.of(new Instruction(p, step.variableMap(), step.executor()))
                 : Stream.empty(),
-            step.substeps().flatMap(s -> closure(s, p)));
+            substepsClosure(step, p));
   }
 }

@@ -29,29 +29,19 @@ package uk.co.saiman.instrument;
 
 public enum DeviceStatus {
   /**
-   * The device is currently available for control by a client.
+   * The device is currently accessible.
    */
-  AVAILABLE,
+  ACCESSIBLE,
 
   /**
-   * The device is currently under control by another client.
-   */
-  UNAVAILABLE,
-
-  /**
-   * The device is currently not accessible, due to some failure in connection or
-   * operation.
-   * <p>
-   * When the device enters this state, any acquired control of the device must be
-   * released. Subsequent attempting to acquire control of the device may still
-   * succeed, depending on the implementation and the reason for inaccessibility,
-   * in which case the device will transition to the {@link #UNAVAILABLE} state.
+   * The device is currently not accessible, due to some failure in connection
+   * or operation.
    */
   INACCESSIBLE,
 
   /**
-   * The device is currently not accessible, due to being disposed. This state is
-   * terminal.
+   * The device is currently not accessible, due to being disposed. This state
+   * is terminal.
    */
   DISPOSED
 }

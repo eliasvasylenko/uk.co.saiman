@@ -31,6 +31,11 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static uk.co.saiman.experiment.procedure.Dependency.Kind.ADDITIONAL_RESULT;
+import static uk.co.saiman.experiment.procedure.Dependency.Kind.CONDITION;
+import static uk.co.saiman.experiment.procedure.Dependency.Kind.ORDERING;
+import static uk.co.saiman.experiment.procedure.Dependency.Kind.RESULT;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,6 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
@@ -53,7 +59,9 @@ import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.ExecutionCancelledException;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.procedure.InstructionDependents;
+import uk.co.saiman.experiment.procedure.Dependency.Kind;
+import uk.co.saiman.experiment.procedure.Dependency;
+import uk.co.saiman.experiment.procedure.InstructionDependencies;
 import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.log.Log;
@@ -63,22 +71,21 @@ public class InstructionExecution {
    * Configured
    */
   private final Conductor conductor;
+  private final java.util.concurrent.locks.Condition dependencyReady;
 
   private Instruction instruction;
-  private InstructionDependents dependencts;
+  private InstructionDependencies dependencies;
   private LocalEnvironment environment;
 
-  private final ConditionPreparations preparations;
-
-  private final Map<Class<?>, ResultImpl<?>> observedResults = new HashMap<>();
-
-  private final Map<Class<?>, InstructionExecution> consumedConditions = new HashMap<>();
-  private final Map<Class<?>, Set<InstructionExecution>> consumedResults = new HashMap<>();
+  private final ConditionPreparations conditionPreparations;
+  private final ResultObservations resultObservations;
 
   private Thread executionThread;
 
   public InstructionExecution(Conductor conductor) {
     this.conductor = conductor;
+    this.conditionPreparations = new ConditionPreparations(conductor.lock(), () -> dependencies);
+    this.resultObservations = new ResultObservations(conductor.lock(), () -> dependencies);
   }
 
   public Conductor getConductor() {
@@ -87,63 +94,70 @@ public class InstructionExecution {
 
   InstructionExecution update(
       Instruction instruction,
-      InstructionDependents dependents,
+      InstructionDependencies dependencies,
       LocalEnvironment environment) {
     if (this.instruction != null && !this.instruction.path().equals(instruction.path())) {
       throw new IllegalStateException("This shouldn't happen!");
     }
 
-    if (!isCompatibleConfiguration(instruction)) {
+    var previousDependencies = this.dependencies;
+    var previousInstruction = this.instruction;
+
+    if (!isCompatibleConfiguration(instruction, previousInstruction) || !isCompatibleOrdering()) {
       interrupt();
-      dependents.getResultDependents().forEach(result -> {
-        conductor
-            .findInstruction(result.getExperimentPath())
-            .filter(
-                dependent -> dependent.consumedResults.get(result.getProduction()).contains(this))
-            .ifPresent(InstructionExecution::interrupt);
-      });
-      dependents
-          .getConditionDependents()
-          .forEach(
-              condition -> conductor
-                  .findInstruction(condition.getExperimentPath())
-                  .filter(
-                      dependent -> dependent.consumedConditions
-                          .get(condition.getProduction())
-                          .equals(this))
-                  .ifPresent(InstructionExecution::interrupt));
-      dependents
-          .getOrderingDependents()
-          .map(conductor::findInstruction)
-          .flatMap(Optional::stream)
-          .forEach(InstructionExecution::interrupt);
     }
 
+    this.dependencies = requireNonNull(dependencies);
     this.instruction = requireNonNull(instruction);
-    this.dependencts = requireNonNull(dependents);
     this.environment = requireNonNull(environment);
 
     return this;
   }
 
-  private boolean isCompatibleConfiguration(Instruction instruction) {
-    return this.instruction != null && (this.instruction.id().equals(instruction.id())
-        && this.instruction.executor().equals(instruction.executor())
-        && this.instruction.variableMap().equals(instruction.variableMap()));
+  private boolean isCompatibleConfiguration(
+      Instruction instruction,
+      Instruction previousInstruction) {
+    return previousInstruction != null && (previousInstruction.id().equals(instruction.id())
+        && previousInstruction.executor().equals(instruction.executor())
+        && previousInstruction.variableMap().equals(instruction.variableMap()));
+  }
+
+  private boolean isCompatibleOrdering() {
+    /*
+     * 
+     * TODO
+     * 
+     * for UNORDERED/ORDERED if the consumer is invalidated...
+     * 
+     * or for ORDERED if there is a new consumer who's ordering puts it before
+     * someone who has already consumed the condition ...
+     * 
+     * or for ORDERED if existing completed consumers switch order
+     * 
+     * the performer must be invalidated.
+     * 
+     * 
+     * 
+     */
+    // TODO Auto-generated method stub
+    return false;
   }
 
   void execute() {
     /*
      * 
-     * TODO detect if already conducting and whether dependencies have changed and
-     * continue/interrupt as appropriate
+     * TODO detect if already conducting and whether dependencies have changed
+     * and continue/interrupt as appropriate
      * 
      */
 
     System.out.println("Executing");
     System.out.println(" - instruction: " + instruction.id());
-    System.out.println(" - conditions: " + dependencts.getConditionDependents().collect(toList()));
-    System.out.println(" - results " + dependencts.getResultDependents().collect(toList()));
+    System.out
+        .println(" - dependencies to this: " + dependencies.getDependenciesTo().collect(toList()));
+    System.out
+        .println(
+            " - dependencies from this: " + dependencies.getDependenciesTo().collect(toList()));
 
     var executionContext = new ExecutionContext() {
       @Override
@@ -168,47 +182,67 @@ public class InstructionExecution {
 
       @Override
       public <T> Condition<T> acquireCondition(Class<T> source) {
-        synchronized (conductor) {
-          var dependency = Procedures
-              .getConditionDependency(instruction, environment.getGlobalEnvironment())
-              .filter(p -> p.getProduction() == source)
-              .map(ProductPath::getExperimentPath)
-              .flatMap(conductor::findInstruction)
-              .orElseThrow(
-                  () -> new ConductorException(
-                      format(
-                          "Failed to acquire condition %s for instruction %s",
-                          source,
-                          instruction.path())));
+        conductor.lock().lock();
+        try {
+          do {
+            var orderingDependency = dependencies
+                .getDependenciesFrom()
+                .filter(d -> d.production() == source && d.kind() == ORDERING)
+                .map(Dependency::to)
+                .map(conductor::findInstruction)
+                .flatMap(Optional::stream)
+                .reduce((a, b) -> b)
+                .orElse(null);
 
-          System.out.println(" £££££££££££££");
-          System.out.println(source);
-          System.out
-              .println(
-                  Procedures
-                      .getConditionDependency(instruction, environment.getGlobalEnvironment()));
+            var conditionDependency = dependencies
+                .getDependenciesFrom()
+                .filter(d -> d.production() == source && d.kind() == CONDITION)
+                .map(Dependency::to)
+                .map(conductor::findInstruction)
+                .flatMap(Optional::stream)
+                .reduce((a, b) -> b)
+                .orElseThrow(
+                    () -> new ConductorException(
+                        format(
+                            "Failed to acquire condition %s for instruction %s",
+                            source,
+                            instruction.path())));
 
-          return dependency.consumeCondition(source, InstructionExecution.this);
+            if (orderingDependency == null || orderingDependency.isDone().consumedConditions
+                .get(source) == conditionDependency) {
+              return conditionDependency.conditionPreparations
+                  .consume(source, InstructionExecution.this);
+            }
+            dependencyReady.await();
+          } while (true);
+        } finally {
+          conductor.lock().unlock();
         }
       }
 
       @Override
       public <T> Resource<T> acquireResource(Class<T> source) {
         System.out.println("     -> -> ->");
-        synchronized (conductor) {
+        conductor.lock().lock();
+        try {
           System.out.println("        -> -> -> !!!!");
           return environment.provideResource(source);
+        } finally {
+          conductor.lock().unlock();
         }
       }
 
       @Override
       public <T> Result<T> acquireResult(Class<T> source) {
-        synchronized (conductor) {
-          var dependency = Procedures
-              .getResultDependency(instruction, environment.getGlobalEnvironment())
-              .filter(p -> p.getProduction() == source)
-              .map(ProductPath::getExperimentPath)
-              .flatMap(conductor::findInstruction)
+        conductor.lock().lock();
+        try {
+          var dependency = dependencies
+              .getDependenciesFrom()
+              .filter(d -> d.production() == source && d.kind() == RESULT)
+              .map(Dependency::to)
+              .map(conductor::findInstruction)
+              .flatMap(Optional::stream)
+              .reduce((a, b) -> b)
               .orElseThrow(
                   () -> new ConductorException(
                       format(
@@ -217,30 +251,38 @@ public class InstructionExecution {
                           instruction.path())));
 
           return dependency.consumeResult(source);
+        } finally {
+          conductor.lock().unlock();
         }
       }
 
       @Override
       public <T> Stream<Result<T>> acquireAdditionalResults(Class<T> source) {
-        synchronized (conductor) {
-          return Procedures
-              .getAdditionalResultDependencies(instruction, environment.getGlobalEnvironment())
-              .filter(p -> p.getProduction() == source)
-              .map(ProductPath::getExperimentPath)
+        conductor.lock().lock();
+        try {
+          return dependencies
+              .getDependenciesFrom()
+              .filter(d -> d.production() == source && d.kind() == ADDITIONAL_RESULT)
+              .map(Dependency::to)
               .map(conductor::findInstruction)
               .flatMap(Optional::stream)
               .map(dependency -> dependency.consumeResult(source));
+        } finally {
+          conductor.lock().unlock();
         }
       }
 
       @Override
       public <U> void prepareCondition(Class<U> condition, U resource) {
-        var conditionDependents = dependencts
+        conditionPreparations.prepare(condition, resource);
+
+        var conditionDependents = dependencies
             .getConditionDependents(condition)
             .collect(toCollection(HashSet::new));
 
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        synchronized (conductor) {
+        conductor.lock().lock();
+        try {
           var conditionDependents = dependencies
               .getConditionDependents(condition)
               .collect(toCollection(HashSet::new));
@@ -264,6 +306,8 @@ public class InstructionExecution {
             preparedCondition = null;
             preparedConditionValue = null;
           }
+        } finally {
+          conductor.lock().unlock();
         }
       }
 
@@ -295,8 +339,12 @@ public class InstructionExecution {
       try {
         executionContext.useOnce(instruction.executor());
       } finally {
-        synchronized (conductor) {
+        conductor.lock().lock();
+        try {
           executionThread = null;
+        } finally {
+          consumedConditions.values().forEach(Condition::close);
+          conductor.lock().unlock();
         }
       }
     });
@@ -316,7 +364,7 @@ public class InstructionExecution {
             format("Failed to acquire result %s from instruction %s", source, instruction.path()));
       }
       try {
-        conductor.wait();
+        conductor.lock().newCondition().
       } catch (InterruptedException e) {
         throw new ExecutionCancelledException(e);
       }
@@ -324,54 +372,51 @@ public class InstructionExecution {
     return new ResultImpl<>(source, instruction.path());
   }
 
-  @SuppressWarnings("unchecked")
-  protected <T> Condition<T> consumeCondition(Class<T> source, InstructionExecution consumer) {
-    while (source != preparedCondition && isReady(source, consumer)) {
-      if (preparedConditions.contains(source) || !isRunning()) {
-        throw new ConductorException(
-            format(
-                "Failed to acquire condition %s from instruction %s",
-                source,
-                instruction.path()));
-      }
-      try {
-        System.out.println("await condition " + source);
-        System.out.println("prepared " + preparedCondition);
-        System.out.println("prepared in " + instruction.path());
-        conductor.wait();
-      } catch (InterruptedException e) {
-        throw new ExecutionCancelledException(e);
-      }
+  void interruptDependency(Dependency dependency) {
+    boolean invalidate;
+
+    switch (dependency.kind()) {
+    case RESULT:
+    case ADDITIONAL_RESULT:
+      invalidate = Optional
+          .ofNullable(consumedResults.get(dependency.production()))
+          .stream()
+          .flatMap(Set::stream)
+          .map(r -> r.getExecution().instruction.path())
+          .anyMatch(dependency.to()::equals);
+      break;
+    case CONDITION:
+      invalidate = Optional
+          .ofNullable(consumedConditions.get(dependency.production()))
+          .map(c -> c.getExecution().instruction.path())
+          .filter(dependency.to()::equals)
+          .isPresent();
+      break;
+    case ORDERING:
+      invalidate = consumedConditions.containsKey(dependency.production());
+      break;
+    default:
+      throw new AssertionError();
     }
-    return (Condition<T>) preparedConditionValue;
-  }
 
-  private boolean isReady(Class<?> source, InstructionExecution consumer) {
-    var evaluation = Procedures
-        .getPreparedConditionEvaluation(instruction, environment.getGlobalEnvironment(), source)
-        .orElse(Evaluation.INDEPENDENT);
-
-    switch (evaluation) {
-    case INDEPENDENT:
-    case PARALLEL:
-      return true;
-    case ORDERED:
-      if () {
-        // TODO ordering is satisfied simply by waiting for our dependencies, since ordering is now a kind of dependency in our dependents list.
-        return false;
-      }
-    case UNORDERED:
-      return !preparedConditionValue.isOpen();
+    if (invalidate) {
+      interrupt();
     }
   }
 
   void interrupt() {
+    conditionPreparations.consumers().forEach(InstructionExecution::interrupt);
+    resultObservations.consumers().forEach(InstructionExecution::interrupt);
+
     if (executionThread != null) {
       executionThread.interrupt();
+
       try {
         executionThread.join();
-      } catch (ExecutionCancelledException | InterruptedException e) {}
-      executionThread = null;
+
+      } catch (ExecutionCancelledException | InterruptedException e) {} finally {
+        executionThread = null;
+      }
     }
   }
 }

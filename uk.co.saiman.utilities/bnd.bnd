@@ -1,11 +1,3 @@
-Export-Package: \
-	uk.co.saiman.flowcontrol,\
-	uk.co.saiman.function,\
-	uk.co.saiman.log,\
-	uk.co.saiman.reflection.classloading,\
-	uk.co.saiman.utility,\
-	uk.co.saiman.property
-
 Bundle-Name: SAI :: Utilities
 Bundle-Description: \
 	Common Java utilities for SAI projects, including generic \

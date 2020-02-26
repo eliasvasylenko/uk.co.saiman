@@ -27,155 +27,168 @@
  */
 package uk.co.saiman.instrument;
 
-import static uk.co.saiman.instrument.DeviceStatus.AVAILABLE;
+import static uk.co.saiman.instrument.ControllerStatus.AVAILABLE;
+import static uk.co.saiman.instrument.ControllerStatus.UNAVAILABLE;
+import static uk.co.saiman.instrument.DeviceStatus.ACCESSIBLE;
 import static uk.co.saiman.instrument.DeviceStatus.DISPOSED;
 import static uk.co.saiman.instrument.DeviceStatus.INACCESSIBLE;
-import static uk.co.saiman.instrument.DeviceStatus.UNAVAILABLE;
 import static uk.co.saiman.observable.ObservableProperty.over;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
 
+import uk.co.saiman.locking.Lock;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
 public abstract class DeviceImpl<T extends Controller> implements Device<T> {
-  private final ObservableProperty<DeviceStatus> connectionState;
+  private final ObservableProperty<DeviceStatus> status;
+  private final ObservableProperty<ControllerStatus> controllerStatus;
 
-  private final Semaphore semaphore = new Semaphore(1);
+  private final Semaphore deviceSemaphore = new Semaphore(1);
   private volatile ControlContextImpl lockedContext;
 
   public DeviceImpl() {
-    this.connectionState = over(INACCESSIBLE);
-  }
-
-  protected void dispose() {
-    synchronized (connectionState) {
-      connectionState.set(DISPOSED);
-    }
-    closeController();
+    this.status = over(INACCESSIBLE);
+    this.controllerStatus = over(AVAILABLE);
   }
 
   @Override
   public ObservableValue<DeviceStatus> status() {
-    return connectionState;
+    return status;
+  }
+
+  @Override
+  public ObservableValue<ControllerStatus> controllerStatus() {
+    return controllerStatus;
+  }
+
+  protected void setDisposed() {
+    synchronized (status) {
+      status.set(DISPOSED);
+    }
   }
 
   protected void setInaccessible() {
-    synchronized (connectionState) {
-      if (!connectionState.isEqual(DISPOSED)) {
-        connectionState.set(INACCESSIBLE);
+    synchronized (status) {
+      if (!status.isEqual(DISPOSED)) {
+        status.set(INACCESSIBLE);
       }
     }
-    closeController();
   }
 
   protected void setAccessible() {
-    synchronized (connectionState) {
-      if (connectionState.isEqual(INACCESSIBLE)) {
-        connectionState.set(AVAILABLE);
+    synchronized (status) {
+      if (!status.isEqual(DISPOSED)) {
+        status.set(ACCESSIBLE);
       }
     }
   }
 
-  protected abstract T createController(ControlContext context);
+  protected abstract T createController(ControlContext context)
+      throws TimeoutException, InterruptedException;
 
   protected void destroyController(ControlContext context) {}
 
   @Override
   public T acquireControl(long timeout, TimeUnit unit)
-      throws TimeoutException,
-      InterruptedException {
-    if (!semaphore.tryAcquire(timeout, unit)) {
+      throws TimeoutException, InterruptedException {
+    if (!deviceSemaphore.tryAcquire(timeout, unit)) {
       throw new TimeoutException();
     }
-    ControlContextImpl context;
-    synchronized (connectionState) {
-      if (connectionState.isEqual(DISPOSED)) {
-        semaphore.release();
+
+    try {
+      if (status.isEqual(DISPOSED)) {
         throw new IllegalStateException();
       }
-      connectionState.set(UNAVAILABLE);
-      context = new ControlContextImpl();
-    }
-    try {
-      var controller = createController(context);
-      lockedContext = context;
-      return controller;
+
+      try {
+        lockedContext = new ControlContextImpl();
+
+        var controller = createController(lockedContext);
+
+        controllerStatus.set(UNAVAILABLE);
+        status.set(ACCESSIBLE);
+
+        return controller;
+
+      } catch (Exception e) {
+        lockedContext = null;
+
+        controllerStatus.set(AVAILABLE);
+        status.set(INACCESSIBLE);
+
+        throw e;
+      }
     } catch (Exception e) {
-      connectionState.set(INACCESSIBLE);
-      context.close();
-      context = null;
-      semaphore.release();
+      deviceSemaphore.release();
+
       throw e;
     }
   }
 
-  private void releaseControl() {
-    synchronized (connectionState) {
+  private void releaseControl(ControlContextImpl control) {
+    if (lockedContext == control) {
       try {
+        controllerStatus.set(AVAILABLE);
+        status.set(INACCESSIBLE);
+
         destroyController(lockedContext);
       } finally {
-        if (!connectionState.isMatching(s -> s == DISPOSED || s == INACCESSIBLE)) {
-          connectionState.set(AVAILABLE);
-        }
         lockedContext = null;
-        semaphore.release();
+        deviceSemaphore.release();
       }
-    }
-  }
-
-  protected void closeController() {
-    var lockedController = this.lockedContext;
-    if (lockedController != null) {
-      lockedController.close();
     }
   }
 
   public interface ControlContext {
     void close();
 
-    boolean isClosed();
+    boolean isOpen();
 
-    void run(Runnable runnable);
-
-    <U> U get(Supplier<U> supplier);
+    Lock acquireLock();
   }
 
   protected class ControlContextImpl implements ControlContext {
-    private volatile boolean closed = false;
+    private final Semaphore controllerSemaphore = new Semaphore(1);
 
     @Override
-    public synchronized void close() {
-      if (!isClosed()) {
-        closed = true;
-        releaseControl();
+    public void close() {
+      /*
+       * TODO if lock is acquired by any run/get, interrupt them?
+       */
+      controllerSemaphore.acquireUninterruptibly();
+      try {
+        releaseControl(this);
+      } finally {
+        controllerSemaphore.release();
       }
     }
 
     @Override
-    public boolean isClosed() {
-      return closed;
+    public boolean isOpen() {
+      controllerSemaphore.acquireUninterruptibly();
+      try {
+        return lockedContext == this;
+      } finally {
+        controllerSemaphore.release();
+      }
     }
 
     @Override
-    public synchronized void run(Runnable runnable) {
-      if (isClosed()) {
+    public Lock acquireLock() {
+      Lock unlock = () -> controllerSemaphore.release();
+      try {
+        controllerSemaphore.acquire();
+      } catch (InterruptedException e) {
+        throw new DeviceException(e);
+      }
+      if (lockedContext != this || status.isEqual(DISPOSED)) {
+        unlock.close();
         throw new IllegalStateException();
-      } else {
-        runnable.run();
       }
-    }
-
-    @Override
-    public synchronized <U> U get(Supplier<U> supplier) {
-      if (isClosed()) {
-        throw new IllegalStateException();
-      } else {
-        return supplier.get();
-      }
+      return unlock;
     }
   }
 }

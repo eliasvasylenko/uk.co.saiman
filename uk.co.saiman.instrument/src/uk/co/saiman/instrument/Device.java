@@ -64,4 +64,6 @@ public interface Device<T extends Controller> {
    * @return the connection state
    */
   ObservableValue<DeviceStatus> status();
+
+  ObservableValue<ControllerStatus> controllerStatus();
 }

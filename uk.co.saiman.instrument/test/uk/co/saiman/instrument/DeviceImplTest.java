@@ -29,12 +29,13 @@ package uk.co.saiman.instrument;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static uk.co.saiman.instrument.DeviceStatus.AVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.co.saiman.instrument.ControllerStatus.AVAILABLE;
+import static uk.co.saiman.instrument.ControllerStatus.UNAVAILABLE;
+import static uk.co.saiman.instrument.DeviceStatus.ACCESSIBLE;
 import static uk.co.saiman.instrument.DeviceStatus.DISPOSED;
 import static uk.co.saiman.instrument.DeviceStatus.INACCESSIBLE;
-import static uk.co.saiman.instrument.DeviceStatus.UNAVAILABLE;
 
 import java.util.concurrent.TimeoutException;
 
@@ -69,7 +70,10 @@ public class DeviceImplTest {
       return new SimpleController() {
         @Override
         public void command() {
-          context.run(backingService::command);
+          try (var lock = context.acquireLock()) {
+            backingService.command();
+          }
+          setAccessible(); // it worked
         }
 
         @Override
@@ -78,8 +82,8 @@ public class DeviceImplTest {
         }
 
         @Override
-        public boolean isClosed() {
-          return context.isClosed();
+        public boolean isOpen() {
+          return context.isOpen();
         }
       };
     }
@@ -101,7 +105,7 @@ public class DeviceImplTest {
   @Test
   public void acquireFailsWhenAlreadyAcquired() throws TimeoutException, InterruptedException {
     var device = new SimpleDevice();
-    assertFalse(device.acquireControl(0, SECONDS).isClosed());
+    assertTrue(device.acquireControl(0, SECONDS).isOpen());
     assertThrows(TimeoutException.class, () -> device.acquireControl(0, SECONDS));
   }
 
@@ -110,13 +114,13 @@ public class DeviceImplTest {
     var device = new SimpleDevice();
     var control = device.acquireControl(0, SECONDS);
     control.close();
-    assertFalse(device.acquireControl(0, SECONDS).isClosed());
+    assertTrue(device.acquireControl(0, SECONDS).isOpen());
   }
 
   @Test
   public void acquireControlFailsAfterDispose() throws Exception {
     var device = new SimpleDevice();
-    device.dispose();
+    device.setDisposed();
     assertEquals(DISPOSED, device.status().get());
     assertThrows(IllegalStateException.class, () -> device.acquireControl(0, SECONDS));
     assertEquals(DISPOSED, device.status().get());
@@ -127,8 +131,10 @@ public class DeviceImplTest {
     var device = new SimpleDevice();
     device.setInaccessible();
     assertEquals(INACCESSIBLE, device.status().get());
-    assertFalse(device.acquireControl(0, SECONDS).isClosed());
-    assertEquals(UNAVAILABLE, device.status().get());
+    assertEquals(AVAILABLE, device.controllerStatus().get());
+    assertTrue(device.acquireControl(0, SECONDS).isOpen());
+    assertEquals(ACCESSIBLE, device.status().get());
+    assertEquals(UNAVAILABLE, device.controllerStatus().get());
   }
 
   @Test
@@ -137,17 +143,19 @@ public class DeviceImplTest {
     Mockito.doThrow(exception).when(backingService).acquireControl();
 
     var device = new SimpleDevice();
-    assertEquals(AVAILABLE, device.status().get());
+    assertEquals(ACCESSIBLE, device.status().get());
+    assertEquals(AVAILABLE, device.controllerStatus().get());
     assertEquals(
         exception,
         assertThrows(RuntimeException.class, () -> device.acquireControl(0, SECONDS)));
     assertEquals(INACCESSIBLE, device.status().get());
+    assertEquals(AVAILABLE, device.controllerStatus().get());
   }
 
   @Test
   public void setInaccessibleWhenDisposedDoesNothing() throws Exception {
     var device = new SimpleDevice();
-    device.dispose();
+    device.setDisposed();
     device.setInaccessible();
     assertEquals(DISPOSED, device.status().get());
   }
@@ -155,34 +163,24 @@ public class DeviceImplTest {
   @Test
   public void setAccessibleWhenDisposedDoesNothing() throws Exception {
     var device = new SimpleDevice();
-    device.dispose();
+    device.setDisposed();
     device.setAccessible();
     assertEquals(DISPOSED, device.status().get());
   }
 
   @Test
-  public void setInaccessibleWhenAcquiredControlReleasesControl() throws Exception {
+  public void successfulAcquireLockWhenInaccessibleMakesUnavailable() throws Exception {
     var device = new SimpleDevice();
     var control = device.acquireControl(0, SECONDS);
     device.setInaccessible();
-    assertThrows(IllegalStateException.class, () -> control.command());
+    control.command();
+
+    assertEquals(ACCESSIBLE, device.status().get());
+    assertEquals(UNAVAILABLE, device.controllerStatus().get());
 
     var inOrder = Mockito.inOrder(backingService);
     inOrder.verify(backingService).acquireControl();
-    inOrder.verify(backingService).releaseControl();
-    inOrder.verifyNoMoreInteractions();
-  }
-
-  @Test
-  public void disposeWhenAcquiredControlReleasesControl() throws Exception {
-    var device = new SimpleDevice();
-    var control = device.acquireControl(0, SECONDS);
-    device.dispose();
-    assertThrows(IllegalStateException.class, () -> control.command());
-
-    var inOrder = Mockito.inOrder(backingService);
-    inOrder.verify(backingService).acquireControl();
-    inOrder.verify(backingService).releaseControl();
+    inOrder.verify(backingService).command();
     inOrder.verifyNoMoreInteractions();
   }
 }

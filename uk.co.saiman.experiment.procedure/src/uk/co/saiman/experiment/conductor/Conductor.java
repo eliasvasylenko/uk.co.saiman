@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
@@ -56,6 +58,8 @@ import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
 public class Conductor implements Output {
+  private final ReentrantLock lock;
+
   private final StorageConfiguration<?> storageConfiguration;
   private final LocalEnvironmentService environmentService;
   private final Log log;
@@ -70,6 +74,8 @@ public class Conductor implements Output {
       StorageConfiguration<?> storageConfiguration,
       LocalEnvironmentService environmentService,
       Log log) {
+    this.lock = new ReentrantLock();
+
     this.storageConfiguration = requireNonNull(storageConfiguration);
     this.environmentService = environmentService;
     this.log = log;
@@ -91,40 +97,45 @@ public class Conductor implements Output {
     return storageConfiguration;
   }
 
-  public synchronized void conduct(Procedure procedure) {
-    System.out.println("Conducting");
-    System.out.println(" - procedure " + procedure.id());
-    System.out
-        .println(
-            " - instructions " + procedure.instructions().map(Instruction::id).collect(toList()));
+  public void conduct(Procedure procedure) {
+    lock.lock();
+    try {
+      System.out.println("Conducting");
+      System.out.println(" - procedure " + procedure.id());
+      System.out
+          .println(
+              " - instructions " + procedure.instructions().map(Instruction::id).collect(toList()));
 
-    var procedureDependents = Procedures.getDependents(procedure);
+      var procedureDependents = Procedures.getDependents(procedure);
 
-    var environment = Procedures.openEnvironment(procedure, environmentService, 2, SECONDS);
+      var environment = Procedures.openEnvironment(procedure, environmentService, 2, SECONDS);
 
-    var progress = procedure
-        .instructions()
-        .collect(
-            toMap(
-                Instruction::path,
-                instruction -> this.progress
-                    .getOrDefault(instruction.path(), new InstructionExecution(this))
-                    .update(
-                        instruction,
-                        procedureDependents.getInstructionDependents(instruction.path()),
-                        environment)));
-    var previousProgress = this.progress;
+      var progress = procedure
+          .instructions()
+          .collect(
+              toMap(
+                  Instruction::path,
+                  instruction -> this.progress
+                      .getOrDefault(instruction.path(), new InstructionExecution(this))
+                      .update(
+                          instruction,
+                          procedureDependents.getInstructionDependents(instruction.path()),
+                          environment)));
+      var previousProgress = this.progress;
 
-    this.procedure = procedure;
-    this.progress = progress;
+      this.procedure = procedure;
+      this.progress = progress;
 
-    previousProgress.keySet().removeAll(progress.keySet());
-    previousProgress.values().forEach(InstructionExecution::interrupt);
+      previousProgress.keySet().removeAll(progress.keySet());
+      previousProgress.values().forEach(InstructionExecution::interrupt);
 
-    // now they're all present, kick them off
-    this.progress.values().forEach(InstructionExecution::execute);
+      // now they're all present, kick them off
+      this.progress.values().forEach(InstructionExecution::execute);
 
-    System.out.println("Conducting Started");
+      System.out.println("Conducting Started");
+    } finally {
+      lock.unlock();
+    }
   }
 
   Optional<InstructionExecution> findInstruction(ExperimentPath<Absolute> path) {
@@ -135,25 +146,41 @@ public class Conductor implements Output {
     return Optional.ofNullable(procedure);
   }
 
-  public synchronized void interrupt() {
-    var progressIterator = progress.entrySet().iterator();
-    while (progressIterator.hasNext()) {
-      var progress = progressIterator.next();
+  public void interrupt() {
+    lock.lock();
+    try {
+      var progressIterator = progress.entrySet().iterator();
+      while (progressIterator.hasNext()) {
+        var progress = progressIterator.next();
 
-      progress.getValue().interrupt();
+        progress.getValue().interrupt();
+      }
+    } finally {
+      lock.unlock();
     }
   }
 
-  public synchronized void clear() {
-    interrupt();
-
+  public void clear() {
+    lock.lock();
     try {
-      storageConfiguration.locateStorage(ExperimentPath.toRoot()).deallocate();
-    } catch (IOException e) {
-      throw new ConductorException(format("Unable to clear conducted procedure %s", procedure), e);
-    }
+      interrupt();
 
-    procedure = null;
+      try {
+        storageConfiguration.locateStorage(ExperimentPath.toRoot()).deallocate();
+      } catch (IOException e) {
+        throw new ConductorException(
+            format("Unable to clear conducted procedure %s", procedure),
+            e);
+      }
+
+      procedure = null;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  Lock lock() {
+    return lock;
   }
 
   @Override

@@ -41,6 +41,7 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+import uk.co.saiman.instrument.ControllerStatus;
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.DeviceStatus;
 import uk.co.saiman.instrument.sample.RequestedSampleState;
@@ -122,6 +123,11 @@ public class MaldiStage implements XYStage<MaldiStageController> {
   public MaldiStageController acquireControl(long timeout, TimeUnit unit)
       throws TimeoutException, InterruptedException {
     return new MaldiStageController(stage.acquireControl(timeout, unit));
+  }
+
+  @Override
+  public ObservableValue<ControllerStatus> controllerStatus() {
+    return stage.controllerStatus();
   }
 
   @Override

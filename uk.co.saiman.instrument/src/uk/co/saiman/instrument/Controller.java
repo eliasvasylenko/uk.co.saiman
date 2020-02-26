@@ -31,5 +31,5 @@ public interface Controller extends AutoCloseable {
   @Override
   void close();
 
-  boolean isClosed();
+  boolean isOpen();
 }

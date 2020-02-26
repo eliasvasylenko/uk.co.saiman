@@ -201,7 +201,7 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
 
   @Override
   public Quantity<Time> getSampleResolution() {
-    return new Scalar<>(second().getUnit(), 1).multiply(getSampleFrequency()).asType(Time.class);
+    return new Scalar<>(second().getUnit(), 1).divide(getSampleFrequency()).asType(Time.class);
   }
 
   @Override
@@ -396,21 +396,25 @@ public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
 
     @Override
     public void softwareTrigger() {
-      context().run(() -> run(AdqLib::ADQ_SWTrig));
+      try (var lock = acquireLock()) {
+        run(AdqLib::ADQ_SWTrig);
+      }
     }
 
     @Override
     public void startAcquisition() {
-      context().run(() -> run((lib, controlUnit, deviceNumber) -> {
-        try {
-          acquiring = true;
-          startAcquisition(lib, controlUnit, deviceNumber);
-        } finally {
-          acquisitionDataObservable.complete();
-          acquiring = false;
-          acquisitionDataObservable.start();
-        }
-      }));
+      try (var lock = acquireLock()) {
+        run((lib, controlUnit, deviceNumber) -> {
+          try {
+            acquiring = true;
+            startAcquisition(lib, controlUnit, deviceNumber);
+          } finally {
+            acquisitionDataObservable.complete();
+            acquiring = false;
+            acquisitionDataObservable.start();
+          }
+        });
+      }
     }
 
     protected abstract void startAcquisition(AdqLib lib, Pointer controlUnit, int deviceNumber);

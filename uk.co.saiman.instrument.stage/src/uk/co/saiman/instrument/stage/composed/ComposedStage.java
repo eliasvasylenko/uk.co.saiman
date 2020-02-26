@@ -27,17 +27,14 @@
  */
 package uk.co.saiman.instrument.stage.composed;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.instrument.axis.AxisState.LOCATION_REACHED;
 import static uk.co.saiman.observable.ObservableProperty.over;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 
+import uk.co.saiman.instrument.DeviceImpl;
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.axis.AxisState;
 import uk.co.saiman.instrument.sample.Analysis;
@@ -48,18 +45,17 @@ import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleState;
 import uk.co.saiman.instrument.stage.Stage;
 import uk.co.saiman.instrument.stage.StageController;
-import uk.co.saiman.instrument.virtual.AbstractingDevice;
 import uk.co.saiman.observable.Disposable;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
-public abstract class ComposedStage<T, U extends StageController<T>> extends AbstractingDevice<U>
+public abstract class ComposedStage<T, U extends StageController<T>> extends DeviceImpl<U>
     implements Stage<T, U> {
   enum Mode {
     ANALYSING, EXCHANGING
   }
 
-  private final Set<AxisDevice<?, ?>> axes;
+  private final List<AxisDevice<?, ?>> axes;
   private final T readyPosition;
   private final T exchangePosition;
 
@@ -71,8 +67,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
   private final List<Disposable> axisObservations;
 
   public ComposedStage(T analysisPosition, T exchangePosition, AxisDevice<?, ?>... axes) {
-    this.axes = Set.of(axes);
-    this.axes.forEach(axis -> addDependency(axis, 2, SECONDS));
+    this.axes = List.of(axes);
     this.readyPosition = analysisPosition;
     this.exchangePosition = exchangePosition;
 
@@ -80,39 +75,50 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
     this.sampleState = over(SampleState.failed());
     this.actualPosition = ObservableProperty.over(NullPointerException::new);
 
-    this.axisObservations = this.axes
-        .stream()
-        .flatMap(
-            a -> Stream
-                .of(
-                    a.axisState().optionalValue().observe(s -> updateState()),
-                    a.actualPosition().optionalValue().observe(p -> updateActualPosition())))
-        .collect(toList());
+    this.axisObservations = this.axes.stream().flatMap(this::observeAxis).collect(toList());
 
     updateState();
   }
 
+  private Stream<Disposable> observeAxis(AxisDevice<?, ?> axis) {
+    return Stream
+        .of(
+            axis.status().optionalValue().observe(s -> updateStatus()),
+            axis.axisState().optionalValue().observe(s -> updateState()),
+            axis.actualPosition().optionalValue().observe(p -> updateActualPosition()));
+  }
+
   @Override
-  protected void dispose() {
-    super.dispose();
+  protected void setDisposed() {
+    super.setDisposed();
     axisObservations.forEach(Disposable::cancel);
+  }
+
+  private void updateStatus() {
+
   }
 
   private void updateState() {
     try {
-      AxisState axisState = axes
+      var axisStates = axes
           .stream()
           .map(AxisDevice::axisState)
           .map(ObservableValue::tryGet)
           .map(v -> v.orElse(AxisState.LOCATION_FAILED))
-          .reduce(
-              precedence(
-                  AxisState.LOCATION_REQUESTED,
-                  AxisState.LOCATION_FAILED,
-                  AxisState.LOCATION_REACHED))
-          .orElse(LOCATION_REACHED);
+          .collect(toList());
 
-      updateSampleState(axisState);
+      SampleState<T> sampleState;
+      if (axisStates.stream().anyMatch(AxisState.LOCATION_FAILED::equals)) {
+        sampleState = SampleState.failed();
+
+      } else if (axisStates.stream().anyMatch(AxisState.LOCATION_REQUESTED::equals)) {
+        sampleState = SampleState.transition();
+
+      } else {
+        sampleState = requestedSampleState.get();
+      }
+
+      this.sampleState.set(sampleState);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -124,63 +130,28 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
     } catch (Exception e) {}
   }
 
-  private void updateSampleState(AxisState axisState) {
-    SampleState<T> sampleState;
-
-    switch (axisState) {
-    case LOCATION_REACHED:
-      sampleState = requestedSampleState.get();
-      break;
-    case LOCATION_REQUESTED:
-      sampleState = SampleState.transition();
-      break;
-    default:
-      sampleState = SampleState.failed();
-      break;
+  protected synchronized void requestSampleState(RequestedSampleState<T> requestedSampleState) {
+    if (!this.requestedSampleState.isEqual(requestedSampleState)) {
+      this.requestedSampleState.set(requestedSampleState);
+      T requestedSamplePosition;
+      if (requestedSampleState instanceof Analysis<?>) {
+        requestedSamplePosition = ((Analysis<T>) requestedSampleState).position();
+      } else if (requestedSampleState instanceof Exchange<?>) {
+        requestedSamplePosition = exchangePosition;
+      } else {
+        requestedSamplePosition = readyPosition;
+      }
+      setRequestedStateImpl(requestedSampleState, requestedSamplePosition);
     }
-
-    this.sampleState.set(sampleState);
-  }
-
-  @SafeVarargs
-  private final <V> BinaryOperator<V> precedence(V... precedence) {
-    return (a, b) -> {
-      for (V option : precedence) {
-        if (a == option || b == option) {
-          return option;
-        }
-      }
-      return precedence[0];
-    };
-  }
-
-  protected synchronized void requestSampleState(
-      DependentControlContext context,
-      RequestedSampleState<T> requestedSampleState) {
-    context.run(() -> {
-      if (!this.requestedSampleState.isEqual(requestedSampleState)) {
-        this.requestedSampleState.set(requestedSampleState);
-        T requestedSamplePosition;
-        if (requestedSampleState instanceof Analysis<?>) {
-          requestedSamplePosition = ((Analysis<T>) requestedSampleState).position();
-        } else if (requestedSampleState instanceof Exchange<?>) {
-          requestedSamplePosition = exchangePosition;
-        } else {
-          requestedSamplePosition = readyPosition;
-        }
-        setRequestedStateImpl(context, requestedSampleState, requestedSamplePosition);
-      }
-    });
   }
 
   protected SampleState<T> awaitRequest(long time, TimeUnit unit) {
-    return sampleState().value().filter(s -> {
-      System.out.println("     *");
-      System.out.println("     *");
-      System.out.println("     *");
-      System.out.println("     * awaiting request " + s + " <- " + requestedSampleState().get());
-      return requestedSampleState().isMatching(r -> r.equals(s));
-    }).getNext().orTimeout(time, unit).join();
+    return sampleState()
+        .value()
+        .filter(requestedSampleState()::isEqual)
+        .getNext()
+        .orTimeout(time, unit)
+        .join();
   }
 
   protected SampleState<T> awaitReady(long time, TimeUnit unit) {
@@ -210,7 +181,6 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Abs
   protected abstract T getActualPositionImpl();
 
   protected abstract void setRequestedStateImpl(
-      DependentControlContext context,
       RequestedSampleState<T> requestedSampleState,
       T requestedSamplePosition);
 }

@@ -86,7 +86,7 @@ public interface ObservableValue<T> {
     return tryGet().isPresent();
   }
 
-  default boolean isEqual(T value) {
+  default boolean isEqual(Object value) {
     return isMatching(value::equals);
   }
 
@@ -130,7 +130,7 @@ public interface ObservableValue<T> {
 
   default <U> ObservableValue<U> map(Function<? super T, ? extends U> mapping) {
     ObservableValue<T> owner = this;
-    return new ObservableValue<U>() {
+    return new ObservableValue<>() {
       @Override
       public U get() {
         return mapping.apply(owner.get());

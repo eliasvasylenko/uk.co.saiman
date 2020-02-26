@@ -33,24 +33,22 @@ import uk.co.saiman.instrument.Controller;
 
 public interface SampleController<T> extends Controller {
   /**
-   * Request that the sample be prepared for exchange. If the device is already in
-   * the requested state, do nothing.
+   * Request that the sample be prepared for exchange. If the device is already
+   * in the requested state, do nothing.
    * <p>
-   * Typically the exchange position for a given piece of hardware means that e.g.
-   * the sample are is at atmosphere and/or any inlet valves are shut.
+   * Typically the exchange position for a given piece of hardware means that
+   * e.g. the sample are is at atmosphere and/or any inlet valves are shut.
    * <p>
    * Note that a sample exchange is a physical process, and some devices may
-   * require physical interaction in order to transition into the exchange state.
-   * In this case, this method can only signal intent and may not directly
-   * initiate an exchange.
+   * require physical interaction in order to transition into the exchange
+   * state. In this case, this method can only signal intent and may not
+   * directly initiate an exchange.
    */
   void requestExchange();
 
   /**
    * Request readiness for analysis. If the device is already in the requested
    * state, do nothing.
-   * 
-   * @param location the location to analyze
    */
   void requestReady();
 
@@ -61,13 +59,14 @@ public interface SampleController<T> extends Controller {
    * The invocation may fail with an exception if the device is not in the ready
    * state or the analysis state, or if the requested location is not reachable.
    * <p>
-   * The device implementation may choose to hold an analysis location until some
-   * internal condition is cleared, for example to ensure that the device can
-   * safely participate in some collaborate process with other devices. This means
-   * that while the sample is in the analysis state any requests for new analysis
-   * locations or for exchange may not be immediately fulfilled.
+   * The device implementation may choose to hold an analysis location until
+   * some internal condition is cleared, for example to ensure that the device
+   * can safely participate in some collaborate process with other devices. This
+   * means that while the sample is in the analysis state any requests for new
+   * analysis locations or for exchange may not be immediately fulfilled.
    * 
-   * @param position the location to analyze
+   * @param position
+   *          the location to analyze
    */
   void requestAnalysis(T position);
 
@@ -82,12 +81,12 @@ public interface SampleController<T> extends Controller {
   }
 
   /**
-   * Invocation blocks until the previous request is fulfilled, or until a failure
-   * state is reached. The failure state may be a result of the request timing
-   * out.
+   * Invocation blocks until the previous request is fulfilled, or until a
+   * failure state is reached. The failure state may be a result of the request
+   * timing out.
    * 
-   * @return the state resulting from the previous request, one of {@link Failed},
-   *         {@link Exchange}, or {@link Ready}
+   * @return the state resulting from the previous request, one of
+   *         {@link Failed}, {@link Exchange}, or {@link Ready}
    */
   SampleState<T> awaitRequest(long timeout, TimeUnit unit);
 
@@ -96,8 +95,8 @@ public interface SampleController<T> extends Controller {
    * failure state is reached. The failure state may be a result of the request
    * timing out.
    * 
-   * @return the state resulting from the previous request, one of {@link Failed}
-   *         or {@link Ready}
+   * @return the state resulting from the previous request, one of
+   *         {@link Failed} or {@link Ready}
    */
   SampleState<T> awaitReady(long timeout, TimeUnit unit);
 }
