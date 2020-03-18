@@ -22,10 +22,6 @@ import uk.co.saiman.experiment.variables.Variables;
 public final class Procedures {
   private Procedures() {}
 
-  public static ProcedureDependencies getDependents(Procedure procedure) {
-    return new ProcedureDependencies(procedure);
-  }
-
   public static LocalEnvironment openEnvironment(
       Procedure procedure,
       LocalEnvironmentService environmentService,

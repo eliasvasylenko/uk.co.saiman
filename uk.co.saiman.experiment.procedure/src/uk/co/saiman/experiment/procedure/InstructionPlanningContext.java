@@ -17,7 +17,7 @@ public interface InstructionPlanningContext {
 
   default void executesAutomatically() {}
 
-  default void observesResult(Class<?> production) {}
+  default void observesResult(Class<?> type) {}
 
   default void preparesCondition(Class<?> type, Evaluation evaluation) {}
 }

@@ -45,7 +45,7 @@ public interface Result<T> extends Product<T> {
   Observable<Result<T>> updates();
 
   @Override
-  ProductPath<Absolute, Result<T>> path();
+  ResultPath<Absolute, T> path();
 
   boolean isEmpty();
 

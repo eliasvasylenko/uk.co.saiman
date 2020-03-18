@@ -40,7 +40,7 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
  */
 public interface Condition<T> extends Product<T>, AutoCloseable {
   @Override
-  ProductPath<Absolute, Condition<T>> path();
+  ConditionPath<Absolute, T> path();
 
   T value();
 

@@ -30,10 +30,9 @@ package uk.co.saiman.experiment.conductor;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -47,7 +46,6 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
-import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Procedures;
@@ -65,7 +63,7 @@ public class Conductor implements Output {
   private final Log log;
   private final Executor executor;
 
-  private Map<ExperimentPath<Absolute>, InstructionExecution> progress;
+  private final Map<ExperimentPath<Absolute>, InstructionExecution> progress;
   private Procedure procedure;
 
   private final HotObservable<ConductorEvent> events = new HotObservable<>();
@@ -82,7 +80,7 @@ public class Conductor implements Output {
 
     this.executor = Executors.defaultThreadFactory()::newThread;
 
-    this.progress = Map.of();
+    this.progress = new HashMap<>();
   }
 
   void execute(Runnable runnable) {
@@ -100,39 +98,22 @@ public class Conductor implements Output {
   public void conduct(Procedure procedure) {
     lock.lock();
     try {
-      System.out.println("Conducting");
-      System.out.println(" - procedure " + procedure.id());
-      System.out
-          .println(
-              " - instructions " + procedure.instructions().map(Instruction::id).collect(toList()));
-
-      var procedureDependents = Procedures.getDependents(procedure);
-
       var environment = Procedures.openEnvironment(procedure, environmentService, 2, SECONDS);
 
-      var progress = procedure
+      this.progress.values().forEach(InstructionExecution::markDirty);
+      procedure
           .instructions()
-          .collect(
-              toMap(
-                  Instruction::path,
-                  instruction -> this.progress
-                      .getOrDefault(instruction.path(), new InstructionExecution(this))
-                      .update(
-                          instruction,
-                          procedureDependents.getInstructionDependents(instruction.path()),
-                          environment)));
-      var previousProgress = this.progress;
+          .forEach(
+              instruction -> this.progress
+                  .compute(
+                      instruction.path(),
+                      (path, execution) -> Optional
+                          .ofNullable(execution)
+                          .orElseGet(() -> new InstructionExecution(this, path))
+                          .update(instruction, environment)));
+      this.progress.replaceAll((path, execution) -> execution.execute() ? execution : null);
 
       this.procedure = procedure;
-      this.progress = progress;
-
-      previousProgress.keySet().removeAll(progress.keySet());
-      previousProgress.values().forEach(InstructionExecution::interrupt);
-
-      // now they're all present, kick them off
-      this.progress.values().forEach(InstructionExecution::execute);
-
-      System.out.println("Conducting Started");
     } finally {
       lock.unlock();
     }
