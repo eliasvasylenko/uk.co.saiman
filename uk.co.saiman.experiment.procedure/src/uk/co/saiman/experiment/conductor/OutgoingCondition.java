@@ -1,5 +1,9 @@
 package uk.co.saiman.experiment.conductor;
 
+import static uk.co.saiman.experiment.executor.Evaluation.ORDERED;
+import static uk.co.saiman.experiment.executor.Evaluation.PARALLEL_TOGETHER;
+import static uk.co.saiman.experiment.executor.Evaluation.SERIAL_TOGETHER;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -7,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
-import uk.co.saiman.experiment.conductor.IncomingCondition.DependencyState;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ConditionPath;
@@ -37,17 +40,20 @@ class OutgoingCondition<T> {
     if (resource == null) {
       return false;
     }
+    // TODO switch statement in java 14
     boolean acquire;
     switch (evaluation) {
     case ORDERED:
-      acquire = acquiredConsumers.stream().allMatch(c -> c.getState() == DependencyState.DONE)
+      acquire = acquiredConsumers.stream().allMatch(c -> c.getState() == IncomingDependencyState.DONE)
           && nextConsumer() == conditionDependency;
-    case UNORDERED:
-      acquire = acquiredConsumers.stream().allMatch(c -> c.getState() == DependencyState.DONE);
-    case PARALLEL:
-    case INDEPENDENT:
+      break;
+    case SERIAL_TOGETHER:
+    case SERIAL:
+      acquire = acquiredConsumers.stream().allMatch(c -> c.getState() == IncomingDependencyState.DONE);
+      break;
     default:
       acquire = true;
+      break;
     }
     if (acquire) {
       this.acquiredConsumers.add(conditionDependency);
@@ -68,30 +74,38 @@ class OutgoingCondition<T> {
     this.resource = Objects.requireNonNull(resource);
 
     try {
-      while (consumers.stream().anyMatch(c -> c.state != DependencyState.DONE)) {
+      while (consumers.values().stream().anyMatch(c -> c.state != IncomingDependencyState.DONE)) {
         lockCondition.signalAll();
         lockCondition.await();
       }
     } catch (InterruptedException e) {
       throw new ConductorException("Cancelled preparation", e);
     } finally {
+      System.out.println("  ####### DONE PREPARE! " + consumers);
       resource = null;
     }
   }
 
   public IncomingCondition<T> addConsumer(ExperimentPath<Absolute> path) {
-    var dependency = new IncomingCondition<>(this, lockCondition);
-    consumers.add(dependency);
-    return dependency;
+    System.out.println("   adding consumer! " + path);
+    return consumers.computeIfAbsent(path, p -> new IncomingCondition<>(this, lockCondition));
   }
 
   public void invalidate() {
-    consumers.forEach(IncomingCondition::invalidate);
+    consumers.values().forEach(IncomingCondition::invalidatedOutgoing);
     consumers.clear();
+    acquiredConsumers.clear();
+  }
+
+  public void invalidatedIncoming(IncomingCondition<T> incoming) {
+    if (acquiredConsumers.contains(incoming) && (evaluation == ORDERED
+        || evaluation == PARALLEL_TOGETHER || evaluation == SERIAL_TOGETHER)) {
+      invalidate();
+    }
   }
 
   public void terminate() {
-    consumers.forEach(IncomingCondition::done);
+    consumers.values().forEach(IncomingCondition::done);
   }
 
   Lock lock() {

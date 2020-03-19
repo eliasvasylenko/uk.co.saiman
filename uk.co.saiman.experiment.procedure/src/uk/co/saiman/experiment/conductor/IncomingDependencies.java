@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.conductor.OutgoingResults.ResultObservation.IncomingResult;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
@@ -55,7 +54,7 @@ public class IncomingDependencies {
                       "Cannot declare multiple primary condition requirements");
                 }
                 incomingCondition = getParent()
-                    .map(dependency -> dependency.addConditionConsumer(production))
+                    .map(dependency -> dependency.addConditionConsumer(production, path))
                     .orElse(null);
               }
 
@@ -70,7 +69,7 @@ public class IncomingDependencies {
                       "Cannot depend on results and conditions at the same time");
                 }
                 incomingResult = getParent()
-                    .map(dependency -> dependency.addResultConsumer(production))
+                    .map(dependency -> dependency.addResultConsumer(production, path))
                     .orElse(null);
               }
 
@@ -83,7 +82,11 @@ public class IncomingDependencies {
                 getParent()
                     .ifPresent(
                         dependency -> additionalIncomingResults
-                            .add(dependency.addResultConsumer(path.getProduction())));
+                            .add(
+                                dependency
+                                    .addResultConsumer(
+                                        path.getProduction(),
+                                        IncomingDependencies.this.path)));
               }
             });
   }
@@ -102,7 +105,7 @@ public class IncomingDependencies {
 
   @SuppressWarnings("unchecked")
   public <T> Result<T> acquireResult(Class<T> source) {
-    if (incomingResult == null || incomingResult.type() != source) {
+    if (incomingResult == null || incomingResult.outgoingPath().getProduction() != source) {
       throw new ConductorException("No result dependency declared on " + source);
     }
     return ((IncomingResult<T>) incomingResult).acquire();
@@ -114,7 +117,7 @@ public class IncomingDependencies {
         .ofNullable(additionalIncomingResults)
         .stream()
         .flatMap(List::stream)
-        .filter(r -> r.type() == source)
+        .filter(r -> r.outgoingPath().getProduction() == source)
         .map(r -> (IncomingResult<T>) r)
         .map(IncomingResult::acquire)
         .collect(toList())
@@ -131,6 +134,20 @@ public class IncomingDependencies {
     if (additionalIncomingResults != null) {
       for (var resultDependency : additionalIncomingResults) {
         resultDependency.done();
+      }
+    }
+  }
+
+  public void invalidate() {
+    if (incomingCondition != null) {
+      incomingCondition.invalidateIncoming();
+    }
+    if (incomingResult != null) {
+      incomingResult.invalidateIncoming();
+    }
+    if (additionalIncomingResults != null) {
+      for (var resultDependency : additionalIncomingResults) {
+        resultDependency.invalidateIncoming();
       }
     }
   }

@@ -29,6 +29,7 @@ package uk.co.saiman.maldi.sample;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
+import static uk.co.saiman.experiment.executor.Evaluation.SERIAL;
 import static uk.co.saiman.experiment.osgi.ExperimentServiceConstants.EXECUTOR_ID;
 import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_PLATE;
 import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_PLATE_BARCODE;
@@ -79,7 +80,7 @@ public class MaldiSamplePlateExecutor implements Executor {
 
     context.declareResourceRequirement(MaldiStageController.class);
 
-    context.preparesCondition(SamplePlateSubmission.class);
+    context.preparesCondition(SamplePlateSubmission.class, SERIAL);
   }
 
   @Override

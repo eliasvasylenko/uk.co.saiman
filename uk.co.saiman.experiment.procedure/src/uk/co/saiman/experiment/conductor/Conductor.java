@@ -100,7 +100,14 @@ public class Conductor implements Output {
     try {
       var environment = Procedures.openEnvironment(procedure, environmentService, 2, SECONDS);
 
-      this.progress.values().forEach(InstructionExecution::markDirty);
+      Procedures.validateDependencies(procedure);
+
+      this.progress
+          .values()
+          .stream()
+          .filter(execution -> procedure.instruction(execution.getPath()).isEmpty())
+          .forEach(InstructionExecution::markRemoved);
+
       procedure
           .instructions()
           .forEach(
@@ -109,8 +116,13 @@ public class Conductor implements Output {
                       instruction.path(),
                       (path, execution) -> Optional
                           .ofNullable(execution)
-                          .orElseGet(() -> new InstructionExecution(this, path))
-                          .update(instruction, environment)));
+                          .orElseGet(() -> new InstructionExecution(this, path)))
+                  .updateInstruction(instruction, environment));
+
+      procedure
+          .instructions()
+          .forEach(instruction -> this.progress.get(instruction.path()).updateDependencies());
+
       this.progress.replaceAll((path, execution) -> execution.execute() ? execution : null);
 
       this.procedure = procedure;

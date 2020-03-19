@@ -104,6 +104,7 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
       }
 
       try {
+        System.out.println("     @! acquire! " + this);
         lockedContext = new ControlContextImpl();
 
         var controller = createController(lockedContext);
@@ -114,6 +115,7 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
         return controller;
 
       } catch (Exception e) {
+        System.out.println("     @! fail! " + this);
         lockedContext = null;
 
         controllerStatus.set(AVAILABLE);
@@ -136,6 +138,7 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
 
         destroyController(lockedContext);
       } finally {
+        System.out.println("     @! release! " + this);
         lockedContext = null;
         deviceSemaphore.release();
       }
@@ -178,15 +181,19 @@ public abstract class DeviceImpl<T extends Controller> implements Device<T> {
 
     @Override
     public Lock acquireLock() {
-      Lock unlock = () -> controllerSemaphore.release();
+      Lock unlock = controllerSemaphore::release;
       try {
         controllerSemaphore.acquire();
       } catch (InterruptedException e) {
         throw new DeviceException(e);
       }
-      if (lockedContext != this || status.isEqual(DISPOSED)) {
+      if (lockedContext != this) {
         unlock.close();
-        throw new IllegalStateException();
+        throw new DeviceException("Controller is stale");
+      }
+      if (status.isEqual(DISPOSED)) {
+        unlock.close();
+        throw new DeviceException("Device has been disposed");
       }
       return unlock;
     }

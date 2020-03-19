@@ -29,20 +29,18 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.conductor.InstructionExecution.UpdateStatus.DIRTY;
 import static uk.co.saiman.experiment.conductor.InstructionExecution.UpdateStatus.INVALID;
+import static uk.co.saiman.experiment.conductor.InstructionExecution.UpdateStatus.REMOVED;
 import static uk.co.saiman.experiment.conductor.InstructionExecution.UpdateStatus.VALID;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.resource.Location;
-import uk.co.saiman.experiment.conductor.OutgoingResults.ResultObservation.IncomingResult;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
@@ -66,22 +64,21 @@ public class InstructionExecution {
    */
   enum UpdateStatus {
     /**
-     * The update has been made and appears to be valid. External factors may still
-     * mark this as invalid. If the status is valid when execution resumes, it can
-     * resume safely.
+     * The instruction has been updated and the execution state appears to remain
+     * valid. External factors may still mark this as invalid. If the status is
+     * valid when execution resumes, it can resume safely.
      */
     VALID,
     /**
-     * The update has been flagged as invalidating. If the status is invalid when
-     * execution resumes, it must terminate and restart.
+     * The instruction has been updated and the execution has been flagged as
+     * invalidated. If the status is invalid when execution resumes, it must
+     * terminate and restart.
      */
     INVALID,
     /**
-     * The update has not been made yet. If the status is dirty when execution
-     * resumes, this indicates that the execution is no longer needed and should
-     * terminate.
+     * The instruction has been removed from the procedure and should be terminated.
      */
-    DIRTY
+    REMOVED
   }
 
   /*
@@ -111,10 +108,14 @@ public class InstructionExecution {
     this.path = path;
 
     this.outgoingConditions = new OutgoingConditions(conductor.lock(), path);
-    this.outgoingResults = new OutgoingResults(conductor.lock());
+    this.outgoingResults = new OutgoingResults(conductor.lock(), path);
     this.incomingDependencies = new IncomingDependencies(conductor, path);
 
-    markDirty();
+    this.updateStatus = VALID;
+  }
+
+  public ExperimentPath<Absolute> getPath() {
+    return path;
   }
 
   public Instruction getInstruction() {
@@ -125,76 +126,72 @@ public class InstructionExecution {
     return conductor;
   }
 
-  void markDirty() {
-    updateStatus = DIRTY;
-
-    outgoingConditions.invalidate();
-    outgoingResults.invalidate();
-  }
-
-  InstructionExecution update(Instruction instruction, LocalEnvironment environment) {
+  void updateInstruction(Instruction instruction, LocalEnvironment environment) {
     requireNonNull(instruction);
     requireNonNull(environment);
 
-    if (!this.path.equals(instruction.path())) {
+    if (instruction != null && !this.path.equals(instruction.path())) {
       throw new IllegalStateException("This shouldn't happen!");
     }
 
-    outgoingConditions.update(instruction, environment);
-    incomingDependencies.update(instruction, environment);
-
-    updateStatus = isCompatibleConfiguration(instruction, this.instruction) ? VALID : INVALID;
+    if (!isCompatibleConfiguration(instruction, this.instruction)) {
+      markInvalidated();
+    }
 
     this.instruction = instruction;
     this.environment = environment;
-
-    return this;
   }
 
-  protected <T> IncomingCondition<T> addConditionConsumer(Class<T> type) {
-    if (updateStatus != DIRTY) {
-      return outgoingConditions
-          .getOutgoingCondition(type)
-          .map(c -> c.addConsumer(path))
-          .orElseThrow(
-              () -> new ConductorException(
-                  "Cannot add dependency on missing condition " + type + " to " + path));
+  void updateDependencies() {
+    if (updateStatus != REMOVED) {
+      outgoingConditions.update(instruction, environment);
+      incomingDependencies.update(instruction, environment);
     }
-    throw new ConductorException(
-        "Cannot add forward dependency on condition " + type + " to " + path);
   }
 
-  protected <T> IncomingResult<T> addResultConsumer(Class<T> type) {
-    if (updateStatus != DIRTY) {
-      return outgoingResults.addConsumer(type);
-    }
-    throw new ConductorException("Cannot add forward dependency on result " + type + " to " + path);
+  protected <T> IncomingCondition<T> addConditionConsumer(
+      Class<T> condition,
+      ExperimentPath<Absolute> path) {
+    return outgoingConditions
+        .getOutgoingCondition(condition)
+        .orElseThrow(
+            () -> new ConductorException(
+                "Cannot add dependency on missing condition " + condition + " to " + this.path))
+        .addConsumer(path);
+  }
+
+  protected <T> IncomingResult<T> addResultConsumer(
+      Class<T> result,
+      ExperimentPath<Absolute> path) {
+    return outgoingResults
+        .getOutgoingResult(result)
+        .orElseThrow(
+            () -> new ConductorException(
+                "Cannot add dependency on missing result " + result + " to " + this.path))
+        .addConsumer(path);
   }
 
   private boolean isCompatibleConfiguration(
       Instruction instruction,
       Instruction previousInstruction) {
-    return previousInstruction != null
+    return instruction != null && previousInstruction != null
         && (previousInstruction.id().equals(instruction.id())
             && previousInstruction.executor().equals(instruction.executor())
             && previousInstruction.variableMap().equals(instruction.variableMap()));
   }
 
   boolean execute() {
-    if (updateStatus == DIRTY) {
+    switch (updateStatus) {
+    case INVALID:
+      interrupt();
+      break;
+    case REMOVED:
       interrupt();
       return false;
+    default:
+      break;
     }
-    if (updateStatus == INVALID) {
-      interrupt();
-    }
-
-    /*
-     * 
-     * TODO detect if already conducting and whether dependencies have changed and
-     * continue/interrupt as appropriate
-     * 
-     */
+    updateStatus = VALID;
 
     Set<Resource<?>> acquiredResources = new HashSet<>();
 
@@ -332,6 +329,22 @@ public class InstructionExecution {
 
   boolean isRunning() {
     return executionThread != null;
+  }
+
+  void markRemoved() {
+    markInvalidated();
+    updateStatus = REMOVED;
+    instruction = null;
+    environment = null;
+  }
+
+  void markInvalidated() {
+    if (updateStatus != INVALID && updateStatus != REMOVED) {
+      updateStatus = INVALID;
+      incomingDependencies.invalidate();
+      outgoingConditions.invalidate();
+      outgoingResults.invalidate();
+    }
   }
 
   void interrupt() {

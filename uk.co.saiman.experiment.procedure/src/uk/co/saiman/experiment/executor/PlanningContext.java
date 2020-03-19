@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.executor;
 
+import static uk.co.saiman.experiment.executor.Evaluation.PARALLEL;
+
 import java.util.Optional;
 
 import uk.co.saiman.experiment.dependency.ResultPath;
@@ -54,7 +56,7 @@ public interface PlanningContext {
   void observesResult(Class<?> production);
 
   default void preparesCondition(Class<?> type) {
-    preparesCondition(type, Evaluation.INDEPENDENT);
+    preparesCondition(type, PARALLEL);
   }
 
   void preparesCondition(Class<?> type, Evaluation evaluation);

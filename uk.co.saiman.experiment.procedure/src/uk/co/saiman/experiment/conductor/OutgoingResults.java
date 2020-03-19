@@ -1,69 +1,64 @@
 package uk.co.saiman.experiment.conductor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
-import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.conductor.OutgoingResults.ResultObservation.IncomingResult;
-import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.environment.LocalEnvironment;
+import uk.co.saiman.experiment.executor.Evaluation;
+import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
+import uk.co.saiman.experiment.procedure.Procedures;
 
 public class OutgoingResults {
-  public static class ResultObservation<T> {
-    public static class IncomingResult<T> {
-      private final Class<T> type;
-
-      public IncomingResult(Class<T> type) {
-        this.type = type;
-      }
-
-      public Result<T> acquire() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      public Class<T> type() {
-        return type;
-      }
-
-      public void done() {
-        // TODO Auto-generated method stub
-
-      }
-    }
-  }
-
   private final Lock lock;
+  private final ExperimentPath<Absolute> path;
+  private final Map<Class<?>, OutgoingResult<?>> resultPreparations;
 
-  public OutgoingResults(Lock lock) {
+  public OutgoingResults(Lock lock, ExperimentPath<Absolute> path) {
     this.lock = lock;
+    this.path = path;
+    this.resultPreparations = new HashMap<>();
   }
 
-  public Stream<InstructionExecution> consumers() {
-    // TODO Auto-generated method stub
-    return null;
+  public void addOutgoingResult(Class<?> type, Evaluation evaluation) {}
+
+  public <T> Optional<OutgoingResult<T>> getOutgoingResult(Class<T> type) {
+    @SuppressWarnings("unchecked")
+    var preparation = (OutgoingResult<T>) resultPreparations.get(type);
+    return Optional.ofNullable(preparation);
+  }
+
+  Lock lock() {
+    return lock;
+  }
+
+  ExperimentPath<Absolute> path() {
+    return path;
+  }
+
+  public void update(Instruction instruction, LocalEnvironment environment) {
+    Procedures
+        .plan(
+            instruction,
+            environment.getGlobalEnvironment(),
+            variables -> new InstructionPlanningContext() {
+              @Override
+              public void observesResult(Class<?> type) {
+                resultPreparations.put(type, new OutgoingResult<>(OutgoingResults.this, type));
+              }
+            });
+
   }
 
   public void invalidate() {
-    // TODO Auto-generated method stub
-
-  }
-
-  public void add(Class<?> type) {
-    // TODO Auto-generated method stub
-
-  }
-
-  public <T> IncomingResult<T> addConsumer(Class<T> type) {
-    return null;
-    // TODO Auto-generated method stub
+    resultPreparations.values().forEach(OutgoingResult::invalidate);
   }
 
   public void terminate() {
-    // TODO Auto-generated method stub
-
-  }
-
-  public <T> Result<T> acquire(Class<T> source, InstructionExecution consumer) {
-    // TODO Auto-generated method stub
-    return null;
+    resultPreparations.values().forEach(OutgoingResult::terminate);
   }
 }

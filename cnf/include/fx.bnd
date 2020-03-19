@@ -26,7 +26,8 @@ javafx.module.packages=\
 	javafx.graphics/com.sun.javafx.application=.,\
 	javafx.graphics/com.sun.glass.ui=.,\
 	javafx.graphics/com.sun.javafx.tk.quantum=.,\
-	javafx.graphics/com.sun.javafx.tk=.
+	javafx.graphics/com.sun.javafx.tk=.,\
+	javafx.graphics/com.sun.glass.ui=.
 #	javafx.graphics/com.sun.prism=.,\
 #	javafx.graphics/com.sun.prism.d3d=.
 

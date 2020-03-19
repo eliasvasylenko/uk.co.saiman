@@ -2,25 +2,27 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.lang.String.format;
 
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.Condition;
-import uk.co.saiman.experiment.dependency.ConditionClosedException;
-import uk.co.saiman.experiment.dependency.ConditionPath;
+import java.util.Optional;
 
-class IncomingCondition<T> {
-  private final OutgoingCondition<T> outgoing;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.dependency.ResultPath;
+import uk.co.saiman.observable.Observable;
+
+class IncomingResult<T> {
+  private final OutgoingResult<T> outgoing;
   private final java.util.concurrent.locks.Condition lockCondition;
   IncomingDependencyState state;
 
-  public IncomingCondition(
-      OutgoingCondition<T> outgoing,
+  public IncomingResult(
+      OutgoingResult<T> outgoing,
       java.util.concurrent.locks.Condition lockCondition) {
     this.outgoing = outgoing;
     this.lockCondition = lockCondition;
     this.state = IncomingDependencyState.WAITING;
   }
 
-  public Condition<T> acquire() {
+  public Result<T> acquire() {
     try {
       while (!outgoing.beginAcquire(this)) {
         if (state == IncomingDependencyState.DONE) {
@@ -35,7 +37,7 @@ class IncomingCondition<T> {
           format("Failed to acquire dependency to condition %s", outgoingPath()),
           e);
     }
-    return new Condition<T>() {
+    return new Result<T>() {
       @SuppressWarnings("unchecked")
       @Override
       public Class<T> type() {
@@ -43,45 +45,51 @@ class IncomingCondition<T> {
       }
 
       @Override
-      public ConditionPath<Absolute, T> path() {
+      public ResultPath<Absolute, T> path() {
         return path();
       }
 
       @Override
-      public T value() {
-        outgoing.lock().lock();
-        try {
-          if (getState() == IncomingDependencyState.DONE) {
-            throw new ConditionClosedException(type());
-          }
-          return outgoing.resource();
-        } finally {
-          outgoing.lock().unlock();
-        }
+      public Observable<Result<T>> updates() {
+        // TODO Auto-generated method stub
+        return null;
       }
 
       @Override
-      public void close() {
-        outgoing.lock().lock();
-        try {
-          done();
-        } finally {
-          outgoing.lock().unlock();
-        }
+      public boolean isEmpty() {
+        // TODO Auto-generated method stub
+        return false;
+      }
+
+      @Override
+      public boolean isComplete() {
+        // TODO Auto-generated method stub
+        return false;
+      }
+
+      @Override
+      public boolean isPartial() {
+        // TODO Auto-generated method stub
+        return false;
+      }
+
+      @Override
+      public Optional<T> value() {
+        // TODO Auto-generated method stub
+        return null;
       }
     };
   }
 
   void invalidateIncoming() {
     state = IncomingDependencyState.WAITING;
-    outgoing.invalidatedIncoming(this);
   }
 
   void invalidatedOutgoing() {
     state = IncomingDependencyState.WAITING;
   }
 
-  ConditionPath<Absolute, T> outgoingPath() {
+  ResultPath<Absolute, T> outgoingPath() {
     return outgoing.path();
   }
 
