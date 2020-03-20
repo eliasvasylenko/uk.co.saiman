@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.procedure;
 
+import static uk.co.saiman.experiment.declaration.ExperimentPath.toRoot;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Optional;
@@ -34,9 +36,9 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 /**
  * An experiment procedure is the machine-consumable bundle of information to
@@ -55,7 +57,7 @@ import uk.co.saiman.experiment.instruction.Instruction;
  */
 public class Procedure {
   private final ExperimentId id;
-  private final LinkedHashMap<ExperimentPath<Absolute>, Instruction> instructions;
+  private final LinkedHashMap<WorkspaceExperimentPath, Instruction> instructions;
   private final GlobalEnvironment environment;
 
   public Procedure(
@@ -65,7 +67,7 @@ public class Procedure {
     this.id = id;
     this.instructions = new LinkedHashMap<>();
     for (var instruction : instructions) {
-      this.instructions.put(instruction.path(), instruction);
+      this.instructions.put(WorkspaceExperimentPath.define(id, instruction.path()), instruction);
     }
     this.environment = environment;
   }
@@ -82,11 +84,19 @@ public class Procedure {
     return environment;
   }
 
-  public Stream<ExperimentPath<Absolute>> paths() {
+  public WorkspaceExperimentPath path() {
+    return WorkspaceExperimentPath.define(id, toRoot());
+  }
+
+  public Stream<WorkspaceExperimentPath> instructionPaths() {
     return instructions.keySet().stream();
   }
 
-  public Optional<Instruction> instruction(ExperimentPath<?> path) {
+  public Optional<Instruction> instruction(WorkspaceExperimentPath path) {
     return Optional.ofNullable(instructions.get(path));
+  }
+
+  public Optional<Instruction> instruction(ExperimentPath<?> path) {
+    return instruction(WorkspaceExperimentPath.define(id, path.toAbsolute()));
   }
 }

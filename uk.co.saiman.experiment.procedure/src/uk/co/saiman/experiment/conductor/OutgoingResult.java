@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ProductPath;
-import uk.co.saiman.experiment.dependency.ResultPath;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 class OutgoingResult<T> {
   private final OutgoingResults results;
@@ -18,7 +15,7 @@ class OutgoingResult<T> {
 
   private final java.util.concurrent.locks.Condition lockCondition;
 
-  private final HashMap<ExperimentPath<Absolute>, IncomingResult<T>> consumers = new LinkedHashMap<>();
+  private final HashMap<WorkspaceExperimentPath, IncomingResult<T>> consumers = new LinkedHashMap<>();
   private final List<IncomingResult<T>> acquiredResults = new ArrayList<>();
   private T resource;
 
@@ -53,7 +50,7 @@ class OutgoingResult<T> {
     }
   }
 
-  public IncomingResult<T> addConsumer(ExperimentPath<Absolute> path) {
+  public IncomingResult<T> addConsumer(WorkspaceExperimentPath path) {
     System.out.println("   adding consumer! " + path);
     return consumers.computeIfAbsent(path, p -> new IncomingResult<>(this, lockCondition));
   }
@@ -72,8 +69,12 @@ class OutgoingResult<T> {
     return results.lock();
   }
 
-  ResultPath<Absolute, T> path() {
-    return ProductPath.toResult(results.path(), type);
+  WorkspaceExperimentPath path() {
+    return results.path();
+  }
+
+  public Class<T> type() {
+    return type;
   }
 
   T resource() {

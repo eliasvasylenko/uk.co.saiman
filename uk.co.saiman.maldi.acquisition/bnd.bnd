@@ -24,7 +24,7 @@ Export-Package: \
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument;version=snapshot,\
-	uk.co.saiman.experiment.declaration;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.osgi;version=snapshot,\
 	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.instrument.acquisition.msapex;version=snapshot,\

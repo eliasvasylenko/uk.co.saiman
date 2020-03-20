@@ -42,8 +42,6 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.Resource;
 import uk.co.saiman.experiment.dependency.Result;
@@ -52,6 +50,7 @@ import uk.co.saiman.experiment.executor.ExecutionCancelledException;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.variables.Variables;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
 
 public class InstructionExecution {
@@ -85,7 +84,7 @@ public class InstructionExecution {
    * Conductor
    */
   private final Conductor conductor;
-  private final ExperimentPath<Absolute> path;
+  private final WorkspaceExperimentPath path;
 
   /*
    * Configuration
@@ -103,7 +102,7 @@ public class InstructionExecution {
 
   private Thread executionThread;
 
-  public InstructionExecution(Conductor conductor, ExperimentPath<Absolute> path) {
+  public InstructionExecution(Conductor conductor, WorkspaceExperimentPath path) {
     this.conductor = conductor;
     this.path = path;
 
@@ -114,7 +113,7 @@ public class InstructionExecution {
     this.updateStatus = VALID;
   }
 
-  public ExperimentPath<Absolute> getPath() {
+  public WorkspaceExperimentPath getPath() {
     return path;
   }
 
@@ -130,7 +129,7 @@ public class InstructionExecution {
     requireNonNull(instruction);
     requireNonNull(environment);
 
-    if (instruction != null && !this.path.equals(instruction.path())) {
+    if (!this.path.getExperimentPath().equals(instruction.path())) {
       throw new IllegalStateException("This shouldn't happen!");
     }
 
@@ -151,7 +150,7 @@ public class InstructionExecution {
 
   protected <T> IncomingCondition<T> addConditionConsumer(
       Class<T> condition,
-      ExperimentPath<Absolute> path) {
+      WorkspaceExperimentPath path) {
     return outgoingConditions
         .getOutgoingCondition(condition)
         .orElseThrow(
@@ -160,9 +159,7 @@ public class InstructionExecution {
         .addConsumer(path);
   }
 
-  protected <T> IncomingResult<T> addResultConsumer(
-      Class<T> result,
-      ExperimentPath<Absolute> path) {
+  protected <T> IncomingResult<T> addResultConsumer(Class<T> result, WorkspaceExperimentPath path) {
     return outgoingResults
         .getOutgoingResult(result)
         .orElseThrow(
@@ -175,9 +172,9 @@ public class InstructionExecution {
       Instruction instruction,
       Instruction previousInstruction) {
     return instruction != null && previousInstruction != null
-        && (previousInstruction.id().equals(instruction.id())
-            && previousInstruction.executor().equals(instruction.executor())
-            && previousInstruction.variableMap().equals(instruction.variableMap()));
+        && previousInstruction.id().equals(instruction.id())
+        && previousInstruction.executor().equals(instruction.executor())
+        && previousInstruction.variableMap().equals(instruction.variableMap());
   }
 
   boolean execute() {
@@ -204,7 +201,7 @@ public class InstructionExecution {
       @Override
       public Location getLocation() {
         try {
-          return conductor.storageConfiguration().locateStorage(instruction.path()).location();
+          return conductor.storageConfiguration().locateStorage(path).location();
         } catch (IOException e) {
           throw new ConductorException(
               format("Failed to allocate storage for %s", instruction.path()));

@@ -11,11 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ConditionPath;
-import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.executor.Evaluation;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 class OutgoingCondition<T> {
   private final OutgoingConditions conditions;
@@ -24,7 +21,7 @@ class OutgoingCondition<T> {
 
   private final java.util.concurrent.locks.Condition lockCondition;
 
-  private final HashMap<ExperimentPath<Absolute>, IncomingCondition<T>> consumers = new LinkedHashMap<>();
+  private final HashMap<WorkspaceExperimentPath, IncomingCondition<T>> consumers = new LinkedHashMap<>();
   private final List<IncomingCondition<T>> acquiredConsumers = new ArrayList<>();
   private T resource;
 
@@ -44,12 +41,16 @@ class OutgoingCondition<T> {
     boolean acquire;
     switch (evaluation) {
     case ORDERED:
-      acquire = acquiredConsumers.stream().allMatch(c -> c.getState() == IncomingDependencyState.DONE)
+      acquire = acquiredConsumers
+          .stream()
+          .allMatch(c -> c.getState() == IncomingDependencyState.DONE)
           && nextConsumer() == conditionDependency;
       break;
     case SERIAL_TOGETHER:
     case SERIAL:
-      acquire = acquiredConsumers.stream().allMatch(c -> c.getState() == IncomingDependencyState.DONE);
+      acquire = acquiredConsumers
+          .stream()
+          .allMatch(c -> c.getState() == IncomingDependencyState.DONE);
       break;
     default:
       acquire = true;
@@ -86,7 +87,7 @@ class OutgoingCondition<T> {
     }
   }
 
-  public IncomingCondition<T> addConsumer(ExperimentPath<Absolute> path) {
+  public IncomingCondition<T> addConsumer(WorkspaceExperimentPath path) {
     System.out.println("   adding consumer! " + path);
     return consumers.computeIfAbsent(path, p -> new IncomingCondition<>(this, lockCondition));
   }
@@ -112,8 +113,12 @@ class OutgoingCondition<T> {
     return conditions.lock();
   }
 
-  ConditionPath<Absolute, T> path() {
-    return ProductPath.toCondition(conditions.path(), type);
+  WorkspaceExperimentPath path() {
+    return conditions.path();
+  }
+
+  public Class<T> type() {
+    return type;
   }
 
   T resource() {

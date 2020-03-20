@@ -30,46 +30,30 @@ package uk.co.saiman.experiment.storage;
 import java.io.IOException;
 
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
-import uk.co.saiman.state.StateMap;
 
 /**
- * A store defines a strategy for arranging locations to read, and write
+ * A result store defines a strategy for locating, reading, and writing
  * experiment result data, typically for persistent storage.
  * 
  * @author Elias N Vasylenko
  */
-public class StorageConfiguration<T> {
-  private final Store<T> store;
-  private final T configuration;
+public abstract class DelegatingStore<T, U> implements Store<T> {
+  private final Store<U> delegate;
 
-  public Store<T> store() {
-    return store;
+  public DelegatingStore(Store<U> delegate) {
+    this.delegate = delegate;
   }
 
-  public T configuration() {
-    return configuration;
+  protected abstract U configureDelegate(T configuration, WorkspaceExperimentPath path);
+
+  public Storage allocateStorage(T configuration, WorkspaceExperimentPath path) throws IOException {
+    return delegate.allocateStorage(configureDelegate(configuration, path), path);
   }
 
-  public StorageConfiguration(Store<T> store, StateMap persistedState) {
-    this.store = store;
-    this.configuration = store.configure(persistedState);
-  }
-
-  public StorageConfiguration(Store<T> storage, T configuration) {
-    this.store = storage;
-    this.configuration = configuration;
-  }
-
-  public Storage relocateStorage(WorkspaceExperimentPath path, Storage previousStore)
-      throws IOException {
-    return store.relocateStorage(configuration, path, previousStore);
-  }
-
-  public Storage locateStorage(WorkspaceExperimentPath path) throws IOException {
-    return store.allocateStorage(configuration, path);
-  }
-
-  public StateMap deconfigure() {
-    return store.deconfigure(configuration);
+  public Storage relocateStorage(
+      T configuration,
+      WorkspaceExperimentPath path,
+      Storage previousStorage) throws IOException {
+    return delegate.relocateStorage(configureDelegate(configuration, path), path, previousStorage);
   }
 }

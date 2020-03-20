@@ -29,9 +29,6 @@ package uk.co.saiman.experiment.dependency;
 
 import java.util.function.Function;
 
-import uk.co.saiman.experiment.environment.ResourceClosedException;
-import uk.co.saiman.experiment.environment.ResourceClosingException;
-
 public interface Resource<T> extends Dependency<T>, AutoCloseable {
   T value();
 

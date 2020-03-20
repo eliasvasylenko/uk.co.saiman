@@ -38,31 +38,29 @@ import java.nio.file.Paths;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.data.resource.Location;
 import uk.co.saiman.data.resource.PathLocation;
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.storage.Storage;
 import uk.co.saiman.experiment.storage.Store;
 import uk.co.saiman.experiment.storage.filesystem.FileSystemStore.FileSystemStoreConfiguration;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 
 @Designate(ocd = FileSystemStoreConfiguration.class, factory = true)
-@Component(name = FileSystemStore.FILE_SYSTEM_STORE_ID, configurationPolicy = REQUIRE, service = {
-    Store.class,
-    FileSystemStore.class })
+@Component(
+    name = FileSystemStore.FILE_SYSTEM_STORE_ID,
+    configurationPolicy = REQUIRE,
+    service = { Store.class, FileSystemStore.class })
 public class FileSystemStore implements Store<Path> {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(name = "File System Store Configuration", description = "The configuration for a file-system-based experiment result store")
-  public @interface FileSystemStoreConfiguration {
-    @AttributeDefinition(name = "Store Root", description = "The default root path for the store, to resolve relative locations")
-    String rootPath();
-  }
+  @ObjectClassDefinition(
+      name = "File System Store Configuration",
+      description = "The configuration for a file-system-based experiment result store")
+  public @interface FileSystemStoreConfiguration {}
 
   public static final String FILE_SYSTEM_STORE_ID = "uk.co.saiman.experiment.store.filesystem";
 
@@ -88,20 +86,12 @@ public class FileSystemStore implements Store<Path> {
       "path",
       stringAccessor().map(p -> Paths.get(p), p -> p.toString()));
 
-  private final Path rootPath;
-
   @Activate
   public FileSystemStore(FileSystemStoreConfiguration configuration) {
-    this(Paths.get(configuration.rootPath()));
+    this();
   }
 
-  public FileSystemStore(Path rootPath) {
-    this.rootPath = rootPath;
-  }
-
-  public Path getRootPath() {
-    return rootPath;
-  }
+  public FileSystemStore() {}
 
   @Override
   public Path configure(StateMap stateMap) {
@@ -114,16 +104,15 @@ public class FileSystemStore implements Store<Path> {
   }
 
   @Override
-  public Storage allocateStorage(Path experimentRoot, ExperimentPath<Absolute> path) {
+  public Storage allocateStorage(Path experimentRoot, WorkspaceExperimentPath path) {
     return new PathStorage(getPath(experimentRoot, path));
   }
 
   @Override
   public Storage relocateStorage(
       Path experimentRoot,
-      ExperimentPath<Absolute> path,
-      Storage previousStorage)
-      throws IOException {
+      WorkspaceExperimentPath path,
+      Storage previousStorage) throws IOException {
     if (previousStorage.location() instanceof PathLocation) {
       Path previousPath = ((PathLocation) previousStorage.location()).getPath();
       Path newPath = getPath(experimentRoot, path);
@@ -137,9 +126,9 @@ public class FileSystemStore implements Store<Path> {
     return Store.super.relocateStorage(experimentRoot, path, previousStorage);
   }
 
-  private Path getPath(Path experimentRoot, ExperimentPath<Absolute> path) {
+  private Path getPath(Path experimentRoot, WorkspaceExperimentPath path) {
     return path
         .ids()
-        .reduce(rootPath.resolve(experimentRoot), (p, i) -> p.resolve(i.toString()), null);
+        .reduce(experimentRoot, (p, i) -> p.resolve(i.toString()), (p1, p2) -> p1.resolve(p2));
   }
 }

@@ -27,14 +27,19 @@ class IncomingResult<T> {
       while (!outgoing.beginAcquire(this)) {
         if (state == IncomingDependencyState.DONE) {
           throw new ConductorException(
-              format("Failed to prepare dependency to condition %s", outgoingPath()));
+              format(
+                  "Failed to prepare dependency to result %s at %s",
+                  outgoing.type(),
+                  outgoing.path()));
         }
         lockCondition.await();
       }
       state = IncomingDependencyState.ACQUIRED;
     } catch (InterruptedException e) {
       throw new ConductorException(
-          format("Failed to acquire dependency to condition %s", outgoingPath()),
+          format(
+              "Failed to acquire dependency to result %s at %s" + outgoing.type(),
+              outgoing.path()),
           e);
     }
     return new Result<T>() {
@@ -89,8 +94,8 @@ class IncomingResult<T> {
     state = IncomingDependencyState.WAITING;
   }
 
-  ResultPath<Absolute, T> outgoingPath() {
-    return outgoing.path();
+  public Class<T> type() {
+    return outgoing.type();
   }
 
   public void done() {

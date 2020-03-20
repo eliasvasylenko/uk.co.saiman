@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.storage;
 import java.io.IOException;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.state.StateMap;
 
 /**
@@ -47,11 +47,13 @@ public interface Store<T> {
   /**
    * Arrange a location to allocate storage for an experiment path.
    * 
-   * @param node the node whose data storage we wish to locate
+   * @param node
+   *          the node whose data storage we wish to locate
    * @return the location at which to store experiment results
-   * @throws IOException if the storage is not accessible
+   * @throws IOException
+   *           if the storage is not accessible
    */
-  Storage allocateStorage(T configuration, ExperimentPath<Absolute> path) throws IOException;
+  Storage allocateStorage(T configuration, WorkspaceExperimentPath path) throws IOException;
 
   /**
    * Given a node whose {@link #allocateStorage(Object, ExperimentPath) arranged
@@ -70,15 +72,15 @@ public interface Store<T> {
    * 
    * @param node
    * @param previousStorage
-   * @throws IOException If the data could not be moved. Wherever possible
-   *                     exceptional termination should leave the result data
-   *                     intact at the original location.
+   * @throws IOException
+   *           If the data could not be moved. Wherever possible exceptional
+   *           termination should leave the result data intact at the original
+   *           location.
    */
   default Storage relocateStorage(
       T configuration,
-      ExperimentPath<Absolute> path,
-      Storage previousStorage)
-      throws IOException {
+      WorkspaceExperimentPath path,
+      Storage previousStorage) throws IOException {
     Storage storage = allocateStorage(configuration, path);
 
     try {

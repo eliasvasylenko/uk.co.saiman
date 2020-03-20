@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.dependency.ResultPath;
@@ -16,16 +14,17 @@ import uk.co.saiman.experiment.environment.LocalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
 import uk.co.saiman.experiment.procedure.Procedures;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public class IncomingDependencies {
   private final Conductor conductor;
-  private final ExperimentPath<Absolute> path;
+  private final WorkspaceExperimentPath path;
 
   private IncomingCondition<?> incomingCondition;
   private IncomingResult<?> incomingResult;
   private List<IncomingResult<?>> additionalIncomingResults;
 
-  public IncomingDependencies(Conductor conductor, ExperimentPath<Absolute> path) {
+  public IncomingDependencies(Conductor conductor, WorkspaceExperimentPath path) {
     this.conductor = conductor;
     this.path = path;
   }
@@ -92,12 +91,16 @@ public class IncomingDependencies {
   }
 
   protected Optional<InstructionExecution> getParent() {
-    return path.parent().flatMap(conductor::findInstruction);
+    return path
+        .getExperimentPath()
+        .parent()
+        .map(p -> WorkspaceExperimentPath.define(path.getExperimentId(), p))
+        .flatMap(conductor::findInstruction);
   }
 
   @SuppressWarnings("unchecked")
   public <T> Condition<T> acquireCondition(Class<T> source) {
-    if (incomingCondition == null || incomingCondition.outgoingPath().getProduction() != source) {
+    if (incomingCondition == null || incomingCondition.type() != source) {
       throw new ConductorException("No condition dependency declared on " + source);
     }
     return ((IncomingCondition<T>) incomingCondition).acquire();
@@ -105,7 +108,7 @@ public class IncomingDependencies {
 
   @SuppressWarnings("unchecked")
   public <T> Result<T> acquireResult(Class<T> source) {
-    if (incomingResult == null || incomingResult.outgoingPath().getProduction() != source) {
+    if (incomingResult == null || incomingResult.type() != source) {
       throw new ConductorException("No result dependency declared on " + source);
     }
     return ((IncomingResult<T>) incomingResult).acquire();
@@ -117,7 +120,7 @@ public class IncomingDependencies {
         .ofNullable(additionalIncomingResults)
         .stream()
         .flatMap(List::stream)
-        .filter(r -> r.outgoingPath().getProduction() == source)
+        .filter(r -> r.type() == source)
         .map(r -> (IncomingResult<T>) r)
         .map(IncomingResult::acquire)
         .collect(toList())

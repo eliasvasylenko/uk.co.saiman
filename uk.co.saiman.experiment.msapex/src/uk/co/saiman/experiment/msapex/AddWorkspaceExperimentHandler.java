@@ -27,8 +27,6 @@
  */
 package uk.co.saiman.experiment.msapex;
 
-import java.nio.file.Path;
-
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -42,7 +40,7 @@ import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
-import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
+import uk.co.saiman.experiment.storage.filesystem.SharedFileSystemStore;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 
@@ -63,7 +61,7 @@ public class AddWorkspaceExperimentHandler {
   @Inject
   Workspace workspace;
   @Inject
-  FileSystemStore store;
+  SharedFileSystemStore store;
 
   @Execute
   void execute() {
@@ -73,9 +71,9 @@ public class AddWorkspaceExperimentHandler {
         .ifPresent(name -> newExperiment(name, workspace, store));
   }
 
-  private void newExperiment(ExperimentId name, Workspace workspace, Store<Path> store) {
+  private void newExperiment(ExperimentId name, Workspace workspace, Store<Void> store) {
     try {
-      workspace.newExperiment(name, new StorageConfiguration<>(store, Path.of("")));
+      workspace.newExperiment(name, new StorageConfiguration<>(store, (Void) null));
 
     } catch (Exception e) {
       log.log(Level.ERROR, e);

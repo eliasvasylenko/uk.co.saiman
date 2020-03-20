@@ -39,7 +39,7 @@ import org.osgi.framework.BundleContext;
 import uk.co.saiman.experiment.osgi.ExperimentServiceConstants;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.Store;
-import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
+import uk.co.saiman.experiment.storage.filesystem.SharedFileSystemStore;
 import uk.co.saiman.experiment.storage.service.StorageService;
 import uk.co.saiman.osgi.ServiceIndex;
 import uk.co.saiman.osgi.ServiceRecord;
@@ -57,12 +57,12 @@ public class EclipseStorageService implements StorageService {
 
   private final ServiceIndex<StorageService, String, StorageService> storage;
   private final MAddon addon;
-  private final FileSystemStore workspaceStore;
+  private final SharedFileSystemStore workspaceStore;
 
   public EclipseStorageService(
       BundleContext bundleContext,
       MAddon addon,
-      FileSystemStore workspaceStore) {
+      SharedFileSystemStore workspaceStore) {
     this.storage = ServiceIndex.open(bundleContext, StorageService.class, identity());
     this.addon = addon;
     this.workspaceStore = workspaceStore;

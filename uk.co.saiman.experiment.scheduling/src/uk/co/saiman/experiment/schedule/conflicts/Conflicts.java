@@ -42,7 +42,6 @@ import java.util.stream.Stream;
 import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
@@ -50,22 +49,23 @@ import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.schedule.Schedule;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public class Conflicts {
   private final Schedule schedule;
   private final GlobalEnvironment environment;
-  private final Map<ExperimentPath<Absolute>, Change> differences;
+  private final Map<WorkspaceExperimentPath, Change> differences;
 
   public Conflicts(Schedule schedule, GlobalEnvironment environment) {
     this.schedule = schedule;
     this.environment = environment;
 
     this.differences = new HashMap<>();
-    schedule.getScheduledProcedure().paths().forEach(this::checkDifference);
+    schedule.getScheduledProcedure().instructionPaths().forEach(this::checkDifference);
     schedule
         .getPreviouslyConductedProcedure()
         .stream()
-        .flatMap(Procedure::paths)
+        .flatMap(Procedure::instructionPaths)
         .forEach(this::checkDifference);
   }
 
@@ -77,33 +77,35 @@ public class Conflicts {
     return differences.values().stream();
   }
 
-  public Optional<Change> change(ExperimentPath<Absolute> path) {
+  public Optional<Change> change(WorkspaceExperimentPath path) {
     return Optional.ofNullable(differences.get(path));
   }
 
-  private void checkDifference(ExperimentPath<Absolute> experimentPath) {
+  private void checkDifference(WorkspaceExperimentPath experimentPath) {
     if (!differences.containsKey(experimentPath)) {
       differences.put(experimentPath, new ChangeImpl(experimentPath));
     }
   }
 
   public class ChangeImpl implements Change {
-    private final ExperimentPath<Absolute> path;
+    private final WorkspaceExperimentPath path;
 
     private final Optional<Instruction> previousInstruction;
     private final Optional<Instruction> scheduledInstruction;
 
-    public ChangeImpl(ExperimentPath<Absolute> path) {
+    public ChangeImpl(WorkspaceExperimentPath path) {
       this.path = path;
 
       this.previousInstruction = schedule
           .getPreviouslyConductedProcedure()
-          .flatMap(p -> p.instruction(path));
-      this.scheduledInstruction = schedule.getScheduledProcedure().instruction(path);
+          .flatMap(p -> p.instruction(path.getExperimentPath()));
+      this.scheduledInstruction = schedule
+          .getScheduledProcedure()
+          .instruction(path.getExperimentPath());
     }
 
     @Override
-    public ExperimentPath<Absolute> path() {
+    public WorkspaceExperimentPath path() {
       return path;
     }
 
@@ -129,7 +131,7 @@ public class Conflicts {
 
     @Override
     public Stream<Resource> conflictingResources() throws IOException {
-      return currentInstruction().isEmpty()
+      return currentInstruction().isPresent()
           ? schedule
               .getScheduler()
               .getStorageConfiguration()
@@ -155,24 +157,37 @@ public class Conflicts {
           .stream();
     }
 
-    private Stream<Change> resolveDependencies(Instruction instruction) {
-      List<ProductPath<?, ?>> dependencies = new ArrayList<>();
+    private Stream<Change> resolveDependencies(Instruction scheduledInstruction) {
+      List<ExperimentPath<Absolute>> dependencies = new ArrayList<>();
 
-      Procedures.plan(instruction, environment, variables -> new InstructionPlanningContext() {
-        @Override
-        public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
-          dependencies.add(path);
-        }
-      });
+      Procedures
+          .plan(scheduledInstruction, environment, variables -> new InstructionPlanningContext() {
+            @Override
+            public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
+              path
+                  .getExperimentPath()
+                  .resolveAgainst(scheduledInstruction.path())
+                  .ifPresent(dependencies::add);
+            }
+
+            public void declareConditionRequirement(java.lang.Class<?> production) {
+              scheduledInstruction.path().parent().ifPresent(dependencies::add);
+            }
+
+            public void declareResultRequirement(java.lang.Class<?> production) {
+              scheduledInstruction.path().parent().ifPresent(dependencies::add);
+            }
+          });
 
       return dependencies
           .stream()
-          .flatMap(path -> path.resolveAgainst(instruction.path()).stream())
+          .flatMap(path -> path.resolveAgainst(scheduledInstruction.path()).stream())
           .flatMap(path -> conflictingDependency(path).stream());
     }
 
-    private Optional<Change> conflictingDependency(ProductPath<Absolute, ?> path) {
-      return change(path.getExperimentPath()).filter(c -> c.isConflicting());
+    private Optional<Change> conflictingDependency(ExperimentPath<Absolute> path) {
+      return change(WorkspaceExperimentPath.define(this.path.getExperimentId(), path))
+          .filter(c -> c.isConflicting());
     }
   }
 }

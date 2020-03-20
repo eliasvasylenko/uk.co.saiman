@@ -77,7 +77,7 @@ import uk.co.saiman.experiment.msapex.workspace.event.RemoveExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEventKind;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceExperimentEvent;
-import uk.co.saiman.experiment.storage.filesystem.FileSystemStore;
+import uk.co.saiman.experiment.storage.filesystem.SharedFileSystemStore;
 import uk.co.saiman.experiment.storage.service.StorageService;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
@@ -115,7 +115,7 @@ public class ExperimentAddon {
   private ExperimentAdapterFactory experimentAdapterFactory;
 
   private Workspace workspace;
-  private FileSystemStore workspaceStore;
+  private SharedFileSystemStore workspaceStore;
 
   private ServiceIndex<GlobalEnvironment, String, GlobalEnvironment> globalEnvironments;
   private ServiceIndex<LocalEnvironmentService, String, LocalEnvironmentService> localEnvironments;
@@ -180,8 +180,8 @@ public class ExperimentAddon {
   }
 
   private void registerWorkspaceStore(Path rootPath) {
-    workspaceStore = new FileSystemStore(rootPath);
-    context.set(FileSystemStore.class, workspaceStore);
+    workspaceStore = new SharedFileSystemStore(rootPath);
+    context.set(SharedFileSystemStore.class, workspaceStore);
   }
 
   private void registerWorkspace(Path rootPath) {
@@ -301,8 +301,8 @@ public class ExperimentAddon {
   public void partActivated(@Active MPart part, EModelService modelService) {
     try {
       /*
-       * When a new perspective is activated, set the perspective's environment
-       * on the root window.
+       * When a new perspective is activated, set the perspective's environment on the
+       * root window.
        */
       var perspective = modelService.getPerspectiveFor(part);
       var window = modelService.getTopLevelWindowFor(perspective);

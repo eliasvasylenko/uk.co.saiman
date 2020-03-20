@@ -38,7 +38,7 @@ public class ExperimentId implements Comparable<ExperimentId> {
 
   private ExperimentId(String name) {
     if (!isNameValid(name)) {
-      throw new ExperimentDeclarationException(format("Invalid name for experiment id %s", name));
+      throw new ExperimentDeclarationException(format("Invalid name for experiment id '%s'", name));
     }
     this.name = Objects.requireNonNull(name);
   }

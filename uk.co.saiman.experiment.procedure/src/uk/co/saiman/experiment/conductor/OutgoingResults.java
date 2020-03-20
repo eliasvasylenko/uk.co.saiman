@@ -5,20 +5,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.environment.LocalEnvironment;
 import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
 import uk.co.saiman.experiment.procedure.Procedures;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public class OutgoingResults {
   private final Lock lock;
-  private final ExperimentPath<Absolute> path;
+  private final WorkspaceExperimentPath path;
   private final Map<Class<?>, OutgoingResult<?>> resultPreparations;
 
-  public OutgoingResults(Lock lock, ExperimentPath<Absolute> path) {
+  public OutgoingResults(Lock lock, WorkspaceExperimentPath path) {
     this.lock = lock;
     this.path = path;
     this.resultPreparations = new HashMap<>();
@@ -36,7 +35,7 @@ public class OutgoingResults {
     return lock;
   }
 
-  ExperimentPath<Absolute> path() {
+  WorkspaceExperimentPath path() {
     return path;
   }
 

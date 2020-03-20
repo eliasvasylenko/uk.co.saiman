@@ -42,7 +42,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
@@ -51,6 +50,7 @@ import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -63,7 +63,7 @@ public class Conductor implements Output {
   private final Log log;
   private final Executor executor;
 
-  private final Map<ExperimentPath<Absolute>, InstructionExecution> progress;
+  private final Map<WorkspaceExperimentPath, InstructionExecution> progress;
   private Procedure procedure;
 
   private final HotObservable<ConductorEvent> events = new HotObservable<>();
@@ -109,19 +109,17 @@ public class Conductor implements Output {
           .forEach(InstructionExecution::markRemoved);
 
       procedure
-          .instructions()
+          .instructionPaths()
           .forEach(
-              instruction -> this.progress
+              path -> this.progress
                   .compute(
-                      instruction.path(),
-                      (path, execution) -> Optional
+                      path,
+                      (p, execution) -> Optional
                           .ofNullable(execution)
-                          .orElseGet(() -> new InstructionExecution(this, path)))
-                  .updateInstruction(instruction, environment));
+                          .orElseGet(() -> new InstructionExecution(this, p)))
+                  .updateInstruction(procedure.instruction(path).get(), environment));
 
-      procedure
-          .instructions()
-          .forEach(instruction -> this.progress.get(instruction.path()).updateDependencies());
+      procedure.instructionPaths().forEach(path -> this.progress.get(path).updateDependencies());
 
       this.progress.replaceAll((path, execution) -> execution.execute() ? execution : null);
 
@@ -131,7 +129,7 @@ public class Conductor implements Output {
     }
   }
 
-  Optional<InstructionExecution> findInstruction(ExperimentPath<Absolute> path) {
+  Optional<InstructionExecution> findInstruction(WorkspaceExperimentPath path) {
     return Optional.ofNullable(progress.get(path));
   }
 
@@ -159,7 +157,7 @@ public class Conductor implements Output {
       interrupt();
 
       try {
-        storageConfiguration.locateStorage(ExperimentPath.toRoot()).deallocate();
+        storageConfiguration.locateStorage(procedure.path()).deallocate();
       } catch (IOException e) {
         throw new ConductorException(
             format("Unable to clear conducted procedure %s", procedure),
