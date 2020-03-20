@@ -58,7 +58,7 @@ import uk.co.saiman.measurement.coordinate.XYCoordinate;
     configurationPolicy = REQUIRE,
     service = { SampleDevice.class, Stage.class, XYStage.class })
 public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStageController>
-    implements XYStage<XYStageController> {
+    implements XYStage {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.composed.xy";
 
   @SuppressWarnings("javadoc")
@@ -72,16 +72,16 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
     String analysisLocation();
   }
 
-  private final AxisDevice<Length, ?> xAxis;
-  private final AxisDevice<Length, ?> yAxis;
+  private final AxisDevice<Length> xAxis;
+  private final AxisDevice<Length> yAxis;
 
   private AxisController<Length> xController;
   private AxisController<Length> yController;
 
   @Activate
   public ComposedXYStage(
-      @Reference(name = "xAxis") AxisDevice<Length, ?> xAxis,
-      @Reference(name = "yAxis") AxisDevice<Length, ?> yAxis,
+      @Reference(name = "xAxis") AxisDevice<Length> xAxis,
+      @Reference(name = "yAxis") AxisDevice<Length> yAxis,
       ComposedXYStageConfiguration configuration) {
     this(
         xAxis,
@@ -91,8 +91,8 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   }
 
   public ComposedXYStage(
-      AxisDevice<Length, ?> xAxis,
-      AxisDevice<Length, ?> yAxis,
+      AxisDevice<Length> xAxis,
+      AxisDevice<Length> yAxis,
       XYCoordinate<Length> analysisLocation,
       XYCoordinate<Length> exchangeLocation) {
     super(analysisLocation, exchangeLocation, xAxis, yAxis);

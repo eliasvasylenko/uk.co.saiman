@@ -151,7 +151,7 @@ public class XYStageSimulatedSampleSource
     }
   };
 
-  private final XYStage<?> stageDevice;
+  private final XYStage stageDevice;
 
   private final Set<CameraConnection> cameraConnections;
   private final HotObservable<CameraImage> imageStream;
@@ -167,7 +167,7 @@ public class XYStageSimulatedSampleSource
 
   @Activate
   public XYStageSimulatedSampleSource(
-      @Reference XYStage<?> stageDevice,
+      @Reference XYStage stageDevice,
       XYStageSimulatedSampleSourceConfiguration configuration) {
     this.stageDevice = stageDevice;
     this.cameraConnections = new HashSet<>();
@@ -313,9 +313,7 @@ public class XYStageSimulatedSampleSource
 
     Map<ChemicalComposition, Double> sampleChemicals = new HashMap<>();
 
-    if (imageX >= 0
-        && imageX < sampleImage.getWidth()
-        && imageY >= 0
+    if (imageX >= 0 && imageX < sampleImage.getWidth() && imageY >= 0
         && imageY < sampleImage.getHeight()) {
       sampleChemicals.put(redChemical, sampleImage.getRed(imageX, imageY));
       sampleChemicals.put(greenChemical, sampleImage.getGreen(imageX, imageY));

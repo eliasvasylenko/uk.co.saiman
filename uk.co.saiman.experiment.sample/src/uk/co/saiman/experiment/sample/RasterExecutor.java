@@ -37,5 +37,5 @@ import uk.co.saiman.instrument.raster.RasterDevice;
  * @author Elias N Vasylenko
  */
 public interface RasterExecutor extends Executor {
-  RasterDevice<?> device();
+  RasterDevice device();
 }

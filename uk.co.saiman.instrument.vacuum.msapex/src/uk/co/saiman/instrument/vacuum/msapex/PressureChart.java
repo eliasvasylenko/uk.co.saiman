@@ -52,9 +52,7 @@ public class PressureChart {
   private final ContinuousFunctionChart<Time, Pressure> chart;
   private final Deque<VacuumSample> samples;
 
-  public PressureChart(
-      VacuumDevice<?> vacuumDevice,
-      DevicePresentationService presentationService) {
+  public PressureChart(VacuumDevice vacuumDevice, DevicePresentationService presentationService) {
     this.chart = new ContinuousFunctionChart<Time, Pressure>(
         new QuantityAxis<>(new MetricTickUnits<>(second())),
         new QuantityAxis<>(new MetricTickUnits<>(pascal())).setPaddingApplied(true));

@@ -27,6 +27,9 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.observable.ObservableValue;
 
@@ -39,9 +42,14 @@ import uk.co.saiman.observable.ObservableValue;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> The analysis location space.
+ * @param <T>
+ *          The analysis location space.
  */
-public interface SampleDevice<T, U extends SampleController<T>> extends Device<U> {
+public interface SampleDevice<T> extends Device {
+  @Override
+  SampleController<T> acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
+
   /**
    * In general no guarantee is made that a request will be fulfilled (or will
    * fail) in a timely manner. Implementors may choose, however, to make such

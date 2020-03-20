@@ -44,11 +44,11 @@ import uk.co.saiman.instrument.raster.RasterDevice;
 public abstract class ChemicalMapExecutor implements Executor {
   protected abstract Class<? extends AcquisitionController> getAcquisitionControlResource();
 
-  protected abstract Class<? extends AcquisitionDevice<?>> getAcquisitionDeviceResource();
+  protected abstract Class<? extends AcquisitionDevice> getAcquisitionDeviceResource();
 
   protected abstract Class<? extends RasterController> getRasterControlResource();
 
-  protected abstract Class<? extends RasterDevice<?>> getRasterDeviceResource();;
+  protected abstract Class<? extends RasterDevice> getRasterDeviceResource();;
 
   @Override
   public void execute(ExecutionContext context) {

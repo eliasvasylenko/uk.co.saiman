@@ -54,8 +54,8 @@ import uk.co.saiman.observable.ObservableValue;
  * 
  * @author Elias N Vasylenko
  */
-public interface Device<T extends Controller> {
-  T acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
+public interface Device {
+  Controller acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
 
   /**
    * Get an observable value over the state of the connection to the hardware

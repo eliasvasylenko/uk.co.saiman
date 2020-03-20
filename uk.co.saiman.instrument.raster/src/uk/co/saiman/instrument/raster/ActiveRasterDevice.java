@@ -27,4 +27,11 @@
  */
 package uk.co.saiman.instrument.raster;
 
-public interface ActiveRasterDevice<T extends ActiveRasterController> extends RasterDevice<T> {}
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+public interface ActiveRasterDevice extends RasterDevice {
+  @Override
+  ActiveRasterController acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
+}

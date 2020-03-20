@@ -32,7 +32,6 @@ import org.osgi.service.component.annotations.Component;
 import uk.co.saiman.experiment.msapex.environment.ResourcePresenter;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 
-@SuppressWarnings("rawtypes")
 @Component(enabled = true, immediate = true)
 public class MaldiAcquisitionPresenter implements ResourcePresenter<AcquisitionDevice> {
   @Override

@@ -40,7 +40,7 @@ public class InstrumentTree {
   public static final String ID = "uk.co.saiman.instrument.tree";
 
   @Children(snippetId = DeviceCell.ID)
-  public Stream<ContextBuffer> updateChildren(@Service List<Device<?>> data) {
+  public Stream<ContextBuffer> updateChildren(@Service List<Device> data) {
     return data.stream().map(device -> ContextBuffer.empty().set(Device.class, device));
   }
 }

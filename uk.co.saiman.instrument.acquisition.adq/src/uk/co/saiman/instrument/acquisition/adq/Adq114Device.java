@@ -32,10 +32,7 @@ import static uk.co.saiman.instrument.acquisition.adq.AdqProductId.ADQ114;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import uk.co.saiman.instrument.acquisition.adq.Adq114Device.Adq114Control;
-import uk.co.saiman.instrument.acquisition.adq.AdqDevice.AdqControl;
-
-public interface Adq114Device extends AdqDevice<Adq114Control> {
+public interface Adq114Device extends AdqDevice {
   @Override
   Adq114Control acquireControl(long timeout, TimeUnit unit)
       throws TimeoutException, InterruptedException;

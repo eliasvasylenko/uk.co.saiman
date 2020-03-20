@@ -48,7 +48,7 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface AcquisitionDevice<T extends AcquisitionController> extends Device<T> {
+public interface AcquisitionDevice extends Device {
   /**
    * @return true if the module is currently in acquisition, false otherwise
    */
@@ -145,5 +145,5 @@ public interface AcquisitionDevice<T extends AcquisitionController> extends Devi
   }
 
   @Override
-  T acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
+  AcquisitionController acquireControl(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException;
 }

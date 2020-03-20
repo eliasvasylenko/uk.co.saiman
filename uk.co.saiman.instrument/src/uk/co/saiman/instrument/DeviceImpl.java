@@ -42,7 +42,7 @@ import uk.co.saiman.locking.Lock;
 import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
-public abstract class DeviceImpl<T extends Controller> implements Device<T> {
+public abstract class DeviceImpl<T extends Controller> implements Device {
   private final ObservableProperty<DeviceStatus> status;
   private final ObservableProperty<ControllerStatus> controllerStatus;
 

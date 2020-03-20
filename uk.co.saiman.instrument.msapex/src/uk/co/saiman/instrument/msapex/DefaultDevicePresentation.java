@@ -31,9 +31,9 @@ import uk.co.saiman.instrument.Device;
 import uk.co.saiman.instrument.msapex.device.DevicePresenter;
 
 public class DefaultDevicePresentation implements DevicePresenter {
-  private final Device<?> device;
+  private final Device device;
 
-  public DefaultDevicePresentation(Device<?> device) {
+  public DefaultDevicePresentation(Device device) {
     this.device = device;
   }
 
@@ -48,7 +48,7 @@ public class DefaultDevicePresentation implements DevicePresenter {
   }
 
   @Override
-  public boolean presentsDevice(Device<?> device) {
+  public boolean presentsDevice(Device device) {
     return device == this.device;
   }
 }

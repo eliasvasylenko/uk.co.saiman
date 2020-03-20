@@ -68,8 +68,7 @@ import uk.co.saiman.observable.Observable;
     configurationPid = MaldiVacuumDevice.CONFIGURATION_PID,
     configurationPolicy = REQUIRE,
     service = { Device.class, VacuumDevice.class })
-public class MaldiVacuumDevice extends DeviceImpl<VacuumController>
-    implements VacuumDevice<VacuumController> {
+public class MaldiVacuumDevice extends DeviceImpl<VacuumController> implements VacuumDevice {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "Maldi Vacuum Device",

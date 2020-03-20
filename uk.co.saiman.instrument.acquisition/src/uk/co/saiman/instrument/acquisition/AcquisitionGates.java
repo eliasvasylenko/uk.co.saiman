@@ -47,7 +47,7 @@ public interface AcquisitionGates {
    * @return An {@link AcquisitionDevice} instance which can be configured via
    *         this {@link AcquisitionGates} instance.
    */
-  AcquisitionDevice<?> acquisitionModule();
+  AcquisitionDevice acquisitionModule();
 
   /**
    * Get the time before which acquisition data should be ignored. This is
@@ -61,7 +61,8 @@ public interface AcquisitionGates {
    * Set the time before which acquisition data should be ignored. This is
    * absolute regardless of any gates which overlap with this period.
    * 
-   * @param newStartTime The start time of useful acquisition data in milliseconds
+   * @param newStartTime
+   *          The start time of useful acquisition data in milliseconds
    */
   void setStartTime(double newStartTime);
 
@@ -71,8 +72,8 @@ public interface AcquisitionGates {
   Set<Interval<Double>> getPassGates();
 
   /**
-   * @param gates The set of pass gates to participate in this acquisition gate
-   *              set.
+   * @param gates
+   *          The set of pass gates to participate in this acquisition gate set.
    */
   void setPassGates(Set<Interval<Double>> gates);
 
@@ -82,8 +83,8 @@ public interface AcquisitionGates {
   Set<Interval<Double>> getFailGates();
 
   /**
-   * @param gates The set of fail gates to participate in this acquisition gate
-   *              set.
+   * @param gates
+   *          The set of fail gates to participate in this acquisition gate set.
    */
   void setFailGates(Set<Interval<Double>> gates);
 
@@ -94,12 +95,12 @@ public interface AcquisitionGates {
    * time, subtracting the number of fail gates containing that time, is greater
    * or equal to 0.
    * 
-   * @param time The time we wish to check
+   * @param time
+   *          The time we wish to check
    * @return True if the given time passes the gate filter, false otherwise
    */
   default boolean passes(double time) {
-    return (time > getStartTime())
-        && getPassGates().stream().filter(r -> r.contains(time)).count()
-            - getFailGates().stream().filter(r -> r.contains(time)).count() >= 0;
+    return (time > getStartTime()) && getPassGates().stream().filter(r -> r.contains(time)).count()
+        - getFailGates().stream().filter(r -> r.contains(time)).count() >= 0;
   }
 }

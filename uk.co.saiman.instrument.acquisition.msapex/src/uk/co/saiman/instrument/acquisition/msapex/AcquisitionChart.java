@@ -45,25 +45,23 @@ import uk.co.saiman.msapex.chart.QuantityAxis;
 import uk.co.saiman.observable.Disposable;
 
 public class AcquisitionChart extends BorderPane {
-  private final AcquisitionDevice<?> device;
+  private final AcquisitionDevice device;
   private final ContinuousFunctionSeries<Time, Dimensionless> series;
   private volatile Disposable observation;
 
-  public AcquisitionChart(AcquisitionDevice<?> device) {
+  public AcquisitionChart(AcquisitionDevice device) {
     this(device, new DefaultDevicePresentation(device));
   }
 
-  public AcquisitionChart(
-      AcquisitionDevice<?> device,
-      DevicePresentationService presentationService) {
+  public AcquisitionChart(AcquisitionDevice device, DevicePresentationService presentationService) {
     this(device, presentationService.present(device));
   }
 
-  public AcquisitionChart(AcquisitionDevice<?> device, DevicePresenter presenter) {
+  public AcquisitionChart(AcquisitionDevice device, DevicePresenter presenter) {
     this(device, presenter.getLocalizedLabel());
   }
 
-  public AcquisitionChart(AcquisitionDevice<?> device, String localizedLabel) {
+  public AcquisitionChart(AcquisitionDevice device, String localizedLabel) {
     this.device = device;
 
     ContinuousFunctionChart<Time, Dimensionless> chartController = new ContinuousFunctionChart<>(

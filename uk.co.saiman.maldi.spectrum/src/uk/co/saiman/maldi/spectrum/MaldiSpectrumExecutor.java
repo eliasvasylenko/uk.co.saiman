@@ -71,7 +71,7 @@ public class MaldiSpectrumExecutor implements SpectrumExecutor {
   }
 
   @Override
-  public Class acquisitionDevice() {
+  public Class<AcquisitionDevice> acquisitionDevice() {
     return AcquisitionDevice.class;
   }
 

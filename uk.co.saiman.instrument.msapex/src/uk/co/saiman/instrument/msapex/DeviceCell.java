@@ -43,7 +43,7 @@ public class DeviceCell {
   public void prepare(
       HBox node,
       MCell cell,
-      Device<?> item,
+      Device item,
       DevicePresentationService presentationService) {
     cell.setLabel(presentationService.present(item).getLocalizedLabel());
     cell.setIconURI(presentationService.present(item).getIconURI());

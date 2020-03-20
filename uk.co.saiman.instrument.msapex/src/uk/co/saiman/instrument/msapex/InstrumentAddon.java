@@ -53,7 +53,7 @@ public class InstrumentAddon {
   void initialize(IEclipseContext context) {
     context.set(DevicePresentationService.class, new DevicePresentationService() {
       @Override
-      public DevicePresenter present(Device<?> device) {
+      public DevicePresenter present(Device device) {
         return presentations
             .stream()
             .filter(p -> p.presentsDevice(device))

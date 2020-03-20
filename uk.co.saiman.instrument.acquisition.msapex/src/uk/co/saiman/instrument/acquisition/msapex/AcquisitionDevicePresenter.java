@@ -58,7 +58,7 @@ public class AcquisitionDevicePresenter implements DevicePresenter {
   }
 
   @Override
-  public boolean presentsDevice(Device<?> device) {
+  public boolean presentsDevice(Device device) {
     return device instanceof AcquisitionDevice;
   }
 }

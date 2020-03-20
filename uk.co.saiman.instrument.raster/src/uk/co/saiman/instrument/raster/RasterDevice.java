@@ -27,10 +27,17 @@
  */
 package uk.co.saiman.instrument.raster;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.observable.ObservableValue;
 
-public interface RasterDevice<T extends RasterController> extends Device<T> {
+public interface RasterDevice extends Device {
+  @Override
+  RasterController acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
+
   int getRasterWidth();
 
   int getRasterHeight();

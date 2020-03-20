@@ -53,7 +53,7 @@ import uk.co.saiman.msapex.annotations.AnnotationLayer;
  *          the coordinate type of the stage
  */
 public abstract class StageDiagram<T> extends StackPane {
-  private final Stage<T, ?> stage;
+  private final Stage<T> stage;
   private final ImageView imageView;
   private final AnnotationLayer<Length, Length> annotationLayer;
 
@@ -61,7 +61,7 @@ public abstract class StageDiagram<T> extends StackPane {
   private StagePositionAnnotation actualPosition;
   private Unit<Length> unit;
 
-  protected StageDiagram(Stage<T, ?> stage, Unit<Length> unit) {
+  protected StageDiagram(Stage<T> stage, Unit<Length> unit) {
     this.stage = stage;
     this.imageView = new ImageView();
     this.annotationLayer = new AnnotationLayer<>(unit, unit);
@@ -126,7 +126,7 @@ public abstract class StageDiagram<T> extends StackPane {
     return createObjectBinding(() -> getCoordinatesAtStageLocation(location.getValue()), location);
   }
 
-  public Stage<T, ?> getStageDevice() {
+  public Stage<T> getStageDevice() {
     return stage;
   }
 

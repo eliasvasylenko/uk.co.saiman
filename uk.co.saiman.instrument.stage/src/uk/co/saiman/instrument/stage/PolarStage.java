@@ -27,12 +27,19 @@
  */
 package uk.co.saiman.instrument.stage;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 import uk.co.saiman.measurement.coordinate.PolarCoordinate;
 
-public interface PolarStage<T extends PolarStageControl> extends Stage<PolarCoordinate<Length>, T> {
+public interface PolarStage extends Stage<PolarCoordinate<Length>> {
+  @Override
+  PolarStageController acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
+
   /**
    * @return The minimally containing radial upper bound of all
    *         {@link #isPositionReachable(Object) reachable} positions of the

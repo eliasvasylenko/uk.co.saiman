@@ -73,7 +73,7 @@ public class MaldiAcquisitionPart {
     }
   }
 
-  public void setDevice(AcquisitionDevice<?> device) {
+  public void setDevice(AcquisitionDevice device) {
     Platform.runLater(() -> {
       System.out.println(" happy with : " + device);
       synchronized (this) {

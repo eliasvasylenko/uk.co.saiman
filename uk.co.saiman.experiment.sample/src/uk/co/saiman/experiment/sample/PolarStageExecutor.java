@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.sample;
 import javax.measure.quantity.Length;
 
 import uk.co.saiman.instrument.stage.PolarStage;
-import uk.co.saiman.instrument.stage.PolarStageControl;
+import uk.co.saiman.instrument.stage.PolarStageController;
 import uk.co.saiman.measurement.coordinate.PolarCoordinate;
 
 /**
@@ -41,5 +41,5 @@ import uk.co.saiman.measurement.coordinate.PolarCoordinate;
  */
 public interface PolarStageExecutor extends StageExecutor<PolarCoordinate<Length>> {
   @Override
-  Class<? extends PolarStageControl> sampleDevice();
+  Class<? extends PolarStageController> sampleDevice();
 }

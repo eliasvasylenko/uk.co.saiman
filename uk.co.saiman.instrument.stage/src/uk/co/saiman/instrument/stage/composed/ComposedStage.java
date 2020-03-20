@@ -50,12 +50,12 @@ import uk.co.saiman.observable.ObservableProperty;
 import uk.co.saiman.observable.ObservableValue;
 
 public abstract class ComposedStage<T, U extends StageController<T>> extends DeviceImpl<U>
-    implements Stage<T, U> {
+    implements Stage<T> {
   enum Mode {
     ANALYSING, EXCHANGING
   }
 
-  private final List<AxisDevice<?, ?>> axes;
+  private final List<AxisDevice<?>> axes;
   private final T readyPosition;
   private final T exchangePosition;
 
@@ -66,7 +66,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
 
   private final List<Disposable> axisObservations;
 
-  public ComposedStage(T analysisPosition, T exchangePosition, AxisDevice<?, ?>... axes) {
+  public ComposedStage(T analysisPosition, T exchangePosition, AxisDevice<?>... axes) {
     this.axes = List.of(axes);
     this.readyPosition = analysisPosition;
     this.exchangePosition = exchangePosition;
@@ -80,7 +80,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
     updateState();
   }
 
-  private Stream<Disposable> observeAxis(AxisDevice<?, ?> axis) {
+  private Stream<Disposable> observeAxis(AxisDevice<?> axis) {
     return Stream
         .of(
             axis.status().optionalValue().observe(s -> updateStatus()),

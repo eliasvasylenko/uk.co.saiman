@@ -34,5 +34,5 @@ public interface DevicePresenter {
 
   String getIconURI();
 
-  boolean presentsDevice(Device<?> device);
+  boolean presentsDevice(Device device);
 }

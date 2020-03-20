@@ -27,12 +27,19 @@
  */
 package uk.co.saiman.instrument.axis;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.measure.Quantity;
 
 import uk.co.saiman.instrument.Device;
 import uk.co.saiman.observable.ObservableValue;
 
-public interface AxisDevice<T extends Quantity<T>, U extends AxisController<T>> extends Device<U> {
+public interface AxisDevice<T extends Quantity<T>> extends Device {
+  @Override
+  AxisController<T> acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
+
   ObservableValue<AxisState> axisState();
 
   Quantity<T> getLowerBound();

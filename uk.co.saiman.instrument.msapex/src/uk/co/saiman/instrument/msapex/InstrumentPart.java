@@ -39,7 +39,6 @@ import javafx.scene.control.Control;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import uk.co.saiman.eclipse.ui.fx.TreeService;
-import uk.co.saiman.instrument.msapex.InstrumentTree;
 
 /**
  * Instrument management view part. For the management of hardware devices.

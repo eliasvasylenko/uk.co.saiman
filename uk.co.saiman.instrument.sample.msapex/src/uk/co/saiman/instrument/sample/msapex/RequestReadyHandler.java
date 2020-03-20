@@ -46,9 +46,8 @@ import uk.co.saiman.instrument.sample.SampleState;
 
 public class RequestReadyHandler {
   @Execute
-  void execute(IEclipseContext context, SampleDevice<?, ?> device, EventBroker eventBroker)
-      throws TimeoutException,
-      InterruptedException {
+  void execute(IEclipseContext context, SampleDevice<?> device, EventBroker eventBroker)
+      throws TimeoutException, InterruptedException {
     try (var control = device.acquireControl(1, SECONDS)) {
       control.requestReady();
     }

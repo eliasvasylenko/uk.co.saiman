@@ -27,11 +27,13 @@
  */
 package uk.co.saiman.instrument.acquisition.adq;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
-import uk.co.saiman.instrument.acquisition.adq.AdqDevice.AdqControl;
 
-public interface AdqDevice<T extends AdqControl> extends AcquisitionDevice<T> {
+public interface AdqDevice extends AcquisitionDevice {
   String getSerialNumber();
 
   AdqProductId getProductId();
@@ -51,6 +53,10 @@ public interface AdqDevice<T extends AdqControl> extends AcquisitionDevice<T> {
   double getGain(boolean relative);
 
   int getOffset(boolean relative);
+
+  @Override
+  AdqControl acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
 
   public interface AdqControl extends AcquisitionController {
     void setTriggerMode(TriggerMode triggerMode);

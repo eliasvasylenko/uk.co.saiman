@@ -28,6 +28,8 @@
 package uk.co.saiman.instrument.vacuum;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -43,7 +45,10 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface VacuumDevice<T extends VacuumController> extends Device<T> {
+public interface VacuumDevice extends Device {
+  @Override
+  VacuumController acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
 
   /**
    * @return the units of measurement of sample intensities

@@ -74,7 +74,7 @@ import uk.co.saiman.observable.OwnedMessage;
     configurationPid = CopleyLinearAxis.CONFIGURATION_PID,
     configurationPolicy = REQUIRE)
 public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
-    implements AxisDevice<Length, AxisController<Length>> {
+    implements AxisDevice<Length> {
   static final String CONFIGURATION_PID = "uk.co.saiman.instrument.stage.copley.linear";
 
   @SuppressWarnings("javadoc")

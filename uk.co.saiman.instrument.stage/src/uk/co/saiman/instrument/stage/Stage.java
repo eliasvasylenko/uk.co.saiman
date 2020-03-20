@@ -27,6 +27,9 @@
  */
 package uk.co.saiman.instrument.stage;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import uk.co.saiman.instrument.sample.SampleDevice;
 
 /**
@@ -34,6 +37,11 @@ import uk.co.saiman.instrument.sample.SampleDevice;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> The type of a coordinate.
+ * @param <T>
+ *          The type of a coordinate.
  */
-public interface Stage<T, U extends StageController<T>> extends SampleDevice<T, U> {}
+public interface Stage<T> extends SampleDevice<T> {
+  @Override
+  StageController<T> acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
+}

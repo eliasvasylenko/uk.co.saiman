@@ -81,7 +81,7 @@ import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.Acquis
     service = { Device.class, AcquisitionDevice.class },
     immediate = true)
 public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController>
-    implements AcquisitionDevice<AcquisitionController> {
+    implements AcquisitionDevice {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(
       name = "Simulated Acquisition Device Configuration",

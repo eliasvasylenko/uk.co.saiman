@@ -58,7 +58,7 @@ import uk.co.saiman.observable.ObservableValue;
     configurationPolicy = REQUIRE,
     service = { Device.class, XYStage.class, Stage.class, MaldiStage.class },
     immediate = true)
-public class MaldiStage implements XYStage<MaldiStageController> {
+public class MaldiStage implements XYStage {
   @SuppressWarnings("javadoc")
   @ObjectClassDefinition(name = "Maldi Stage")
   public @interface MaldiStageConfiguration {
@@ -72,7 +72,7 @@ public class MaldiStage implements XYStage<MaldiStageController> {
   static final String DEFAULT_LOWER_BOUND = "(-27.5 mm, -20 mm)";
   static final String DEFAULT_UPPER_BOUND = "(27.5 mm, 20 mm)";
 
-  private final XYStage<?> stage;
+  private final XYStage stage;
   private final XYCoordinate<Length> offset;
   private final XYCoordinate<Length> lowerBound;
   private final XYCoordinate<Length> upperBound;
@@ -80,7 +80,7 @@ public class MaldiStage implements XYStage<MaldiStageController> {
   @Activate
   public MaldiStage(
       MaldiStageConfiguration configuration,
-      @Reference(name = "stage") XYStage<?> stage) {
+      @Reference(name = "stage") XYStage stage) {
     this(
         stage,
         XYCoordinate.fromString(configuration.offset()).asType(Length.class),
@@ -89,7 +89,7 @@ public class MaldiStage implements XYStage<MaldiStageController> {
   }
 
   public MaldiStage(
-      XYStage<?> stage,
+      XYStage stage,
       XYCoordinate<Length> offset,
       XYCoordinate<Length> lowerBound,
       XYCoordinate<Length> upperBound) {

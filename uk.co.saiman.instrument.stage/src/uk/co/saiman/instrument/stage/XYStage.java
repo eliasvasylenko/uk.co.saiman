@@ -27,11 +27,18 @@
  */
 package uk.co.saiman.instrument.stage;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.measure.quantity.Length;
 
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
-public interface XYStage<T extends XYStageController> extends Stage<XYCoordinate<Length>, T> {
+public interface XYStage extends Stage<XYCoordinate<Length>> {
+  @Override
+  XYStageController acquireControl(long timeout, TimeUnit unit)
+      throws TimeoutException, InterruptedException;
+
   /**
    * 
    * @return The minimally containing lower bound of all

@@ -73,7 +73,7 @@ import uk.co.saiman.observable.ObservablePropertyImpl;
 import uk.co.saiman.observable.ObservableValue;
 
 public abstract class AdqDeviceImpl<T extends AdqControl> extends DeviceImpl<T>
-    implements AdqDevice<T> {
+    implements AdqDevice {
   protected static final int MAX_CHANNEL_COUNT = 8;
 
   protected interface AdqGetter<T> {

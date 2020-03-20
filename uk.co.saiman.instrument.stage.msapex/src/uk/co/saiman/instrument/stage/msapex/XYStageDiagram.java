@@ -37,11 +37,11 @@ import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
 public abstract class XYStageDiagram extends StageDiagram<XYCoordinate<Length>> {
-  public XYStageDiagram(XYStage<?> stage) {
+  public XYStageDiagram(XYStage stage) {
     this(stage, metre().micro().getUnit());
   }
 
-  public XYStageDiagram(XYStage<?> stage, Unit<Length> unit) {
+  public XYStageDiagram(XYStage stage, Unit<Length> unit) {
     super(stage, unit);
 
     XYCoordinate<Length> lower = getCoordinatesAtStageLocation(stage.getLowerBound()).to(unit);
@@ -57,8 +57,8 @@ public abstract class XYStageDiagram extends StageDiagram<XYCoordinate<Length>> 
   }
 
   @Override
-  public XYStage<?> getStageDevice() {
-    return (XYStage<?>) super.getStageDevice();
+  public XYStage getStageDevice() {
+    return (XYStage) super.getStageDevice();
   }
 
   @Override
