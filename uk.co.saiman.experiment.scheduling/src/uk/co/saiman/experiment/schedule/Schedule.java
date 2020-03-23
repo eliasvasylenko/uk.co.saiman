@@ -29,10 +29,10 @@ package uk.co.saiman.experiment.schedule;
 
 import java.util.Optional;
 
+import uk.co.saiman.experiment.conductor.event.ConductorEvent;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 

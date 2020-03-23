@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.msapex.workspace;
 import static uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEventKind.EXPERIMENT;
 
 import uk.co.saiman.data.Data;
+import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.declaration.ExperimentId;
@@ -57,7 +58,8 @@ public class WorkspaceExperiment {
   public WorkspaceExperiment(Workspace workspace, Experiment experiment) {
     this.workspace = workspace;
     this.id = experiment.getId();
-    this.data = locateExperiment();
+    this.data = Data
+        .locate(workspace.getWorkspaceLocation(), id.name(), workspace.getExperimentFormat());
 
     if (data.getResource().exists()) {
       throw new ExperimentException(
@@ -72,17 +74,23 @@ public class WorkspaceExperiment {
     this.data.save();
   }
 
-  public WorkspaceExperiment(Workspace workspace, ExperimentId name) {
+  public WorkspaceExperiment(Workspace workspace, Resource resource) {
+    if (!resource.hasExtension(workspace.getExperimentFormat().getExtension())) {
+      throw new ExperimentException("Experiment file has wrong extension " + resource);
+    }
+
     this.workspace = workspace;
-    this.id = name;
-    this.data = locateExperiment();
+    this.id = ExperimentId
+        .fromName(
+            resource
+                .getName()
+                .substring(
+                    0,
+                    resource.getName().length()
+                        - workspace.getExperimentFormat().getExtension().length() - 1));
+    this.data = Data.locate(resource, workspace.getExperimentFormat());
 
     this.status = Status.CLOSED;
-  }
-
-  private Data<Experiment> locateExperiment() {
-    return Data
-        .locate(workspace.getWorkspaceLocation(), id.name(), workspace.getExperimentFormat());
   }
 
   @Override
@@ -95,8 +103,8 @@ public class WorkspaceExperiment {
     case CLOSED:
       this.data.load();
       this.experiment = data.get();
-
       this.status = Status.OPEN;
+
       nextEvent(new OpenExperimentEvent(workspace, this));
 
       this.eventsObservation = observe();

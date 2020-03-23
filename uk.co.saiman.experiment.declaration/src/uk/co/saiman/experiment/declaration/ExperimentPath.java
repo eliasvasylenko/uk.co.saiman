@@ -105,11 +105,11 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
   }
 
   public static ExperimentPath<Relative> relativeFromString(String string) {
-    var path = ExperimentPath.fromString(string);
+    var path = fromString(string);
     if (path instanceof Relative) {
       return (Relative) path;
     } else {
-      throw new IllegalArgumentException();
+      throw new ExperimentDeclarationException("Experiment path must be relative");
     }
   }
 
@@ -118,7 +118,7 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
     if (path instanceof Absolute) {
       return (Absolute) path;
     } else {
-      throw new IllegalArgumentException();
+      throw new ExperimentDeclarationException("Experiment path must be absolute");
     }
   }
 

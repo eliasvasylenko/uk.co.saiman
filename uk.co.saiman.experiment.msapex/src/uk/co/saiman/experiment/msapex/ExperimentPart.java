@@ -48,9 +48,6 @@ import uk.co.saiman.eclipse.ui.fx.TreeService;
  * @author Elias N Vasylenko
  */
 public class ExperimentPart {
-  static final String OSGI_SERVICE = "osgi.service";
-  static final String ADD_EXPERIMENT_COMMAND = "uk.co.saiman.experiment.command.addexperiment";
-
   @FXML
   private ScrollPane experimentTreeScrollPane;
   private Control experimentTree;

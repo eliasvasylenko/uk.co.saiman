@@ -41,6 +41,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import uk.co.saiman.experiment.conductor.event.ConductorEvent;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
@@ -56,8 +57,8 @@ import uk.co.saiman.experiment.event.MoveStepEvent;
 import uk.co.saiman.experiment.event.PlanStepEvent;
 import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
-import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.variables.Variable;
@@ -79,14 +80,23 @@ public class Experiment {
   public Experiment(
       ExperimentDefinition procedure,
       StorageConfiguration<?> storageConfiguration,
+      ExecutorService executorService,
       Supplier<GlobalEnvironment> globalEnvironment,
       LocalEnvironmentService localEnvironmentService,
       Log log) {
     this.globalEnvironment = globalEnvironment;
     this.definition = null;
-    this.scheduler = new Scheduler(storageConfiguration, localEnvironmentService, log);
+    this.scheduler = new Scheduler(
+        storageConfiguration,
+        executorService,
+        localEnvironmentService,
+        log);
 
     updateDefinition(requireNonNull(procedure));
+  }
+
+  public ExecutorService getExecutorService() {
+    return scheduler.getExecutorService();
   }
 
   GlobalEnvironment getGlobalEnvironment() {

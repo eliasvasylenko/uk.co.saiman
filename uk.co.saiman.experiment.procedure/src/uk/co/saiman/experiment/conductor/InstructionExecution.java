@@ -91,6 +91,49 @@ public class InstructionExecution {
    */
   private Instruction instruction;
   private LocalEnvironment environment;
+  private Data<Instruction> data;
+
+  /*
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO more disciplined approach to data/storage/location management
+   * 
+   * If execution terminates unsuccessfully, clear entire location.
+   * 
+   * Written instruction must always be consistent with data files on disk, that
+   * means we must do things in this order on update:
+   * 
+   * - delete last instruction file
+   * 
+   * - cancel last instruction
+   * 
+   * - delete all written data
+   * 
+   * - write new instruction file
+   * 
+   * - begin new execution
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
 
   /*
    * Dependencies
@@ -179,18 +222,25 @@ public class InstructionExecution {
 
   boolean execute() {
     switch (updateStatus) {
+    case VALID:
+      return true;
     case INVALID:
       interrupt();
       break;
     case REMOVED:
+    default:
       interrupt();
       return false;
-    default:
-      break;
     }
     updateStatus = VALID;
 
     Set<Resource<?>> acquiredResources = new HashSet<>();
+
+    var instruction = this.instruction;
+    var environment = this.environment;
+    var outgoingConditions = this.outgoingConditions;
+    var outgoingResults = this.outgoingResults;
+    var incomingDependencies = this.incomingDependencies;
 
     var executionContext = new ExecutionContext() {
       @Override
@@ -303,6 +353,14 @@ public class InstructionExecution {
 
     executionThread = new Thread(() -> {
       try {
+        data = Data
+            .locate(
+                executionContext.getLocation(),
+                instruction.id().name(),
+                conductor.instructionFormat());
+        data.set(instruction);
+        data.save();
+
         executionContext.useOnce(instruction.executor());
       } finally {
         conductor.lock().lock();
@@ -337,6 +395,11 @@ public class InstructionExecution {
 
   void markInvalidated() {
     if (updateStatus != INVALID && updateStatus != REMOVED) {
+      if (data != null) {
+        data.set(null);
+        data.save();
+        data = null;
+      }
       updateStatus = INVALID;
       incomingDependencies.invalidate();
       outgoingConditions.invalidate();

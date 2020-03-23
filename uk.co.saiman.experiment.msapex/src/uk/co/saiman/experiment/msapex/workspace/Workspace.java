@@ -33,12 +33,12 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.format.DataFormat;
 import uk.co.saiman.data.resource.PathLocation;
+import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.Step;
@@ -54,6 +54,7 @@ import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.service.StorageService;
 import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
@@ -65,7 +66,7 @@ public class Workspace {
   private final LocalEnvironmentService localEnvironmentService;
 
   private final PathLocation rootLocation;
-  private final DataFormat<Experiment> experimentFormat;
+  private final JsonExperimentFormat experimentFormat;
 
   private final Set<WorkspaceExperiment> experiments;
 
@@ -151,15 +152,27 @@ public class Workspace {
     return events;
   }
 
-  private WorkspaceExperiment addExperiment(
-      ExperimentId name,
-      Function<ExperimentId, WorkspaceExperiment> factory) {
+  public void syncExperiments() {
+    try {
+      String extension = getExperimentFormat().getExtension();
+      getWorkspaceLocation()
+          .resources()
+          .filter(r -> r.hasExtension(extension))
+          .forEach(this::loadExperiment);
+
+    } catch (Exception e) {
+      ExperimentException ee = new ExperimentException("Problem synchronizing workspace", e);
+      log.log(Level.ERROR, ee);
+      throw ee;
+    }
+  }
+
+  private WorkspaceExperiment addExperiment(WorkspaceExperiment experiment) {
     synchronized (experiments) {
-      if (getWorkspaceExperiment(name).isPresent()) {
+      if (getWorkspaceExperiment(experiment.id()).isPresent()) {
         throw new ExperimentException(
-            format("Workspace already contains experiment named %s", name));
+            format("Workspace already contains experiment named %s", experiment.id()));
       }
-      var experiment = factory.apply(name);
 
       experiments.add(experiment);
       nextEvent(new AddExperimentEvent(this, experiment));
@@ -168,27 +181,25 @@ public class Workspace {
     }
   }
 
-  public WorkspaceExperiment loadExperiment(ExperimentId name) {
-    return addExperiment(name, n -> new WorkspaceExperiment(this, n));
+  public WorkspaceExperiment loadExperiment(Resource resource) {
+    return addExperiment(new WorkspaceExperiment(this, resource));
   }
 
   public WorkspaceExperiment newExperiment(
       ExperimentId name,
       StorageConfiguration<?> storageConfiguration) {
     return addExperiment(
-        name,
-        n -> new WorkspaceExperiment(
-            this,
-            new Experiment(
-                ExperimentDefinition.define(name),
-                storageConfiguration,
-                environment,
-                localEnvironmentService,
-                log)));
+        new Experiment(
+            ExperimentDefinition.define(name),
+            storageConfiguration,
+            experimentFormat.getExecutorService(),
+            environment,
+            localEnvironmentService,
+            log));
   }
 
   public WorkspaceExperiment addExperiment(Experiment experiment) {
-    return addExperiment(experiment.getId(), n -> new WorkspaceExperiment(this, experiment));
+    return addExperiment(new WorkspaceExperiment(this, experiment));
   }
 
   public boolean removeExperiment(Experiment experiment) {

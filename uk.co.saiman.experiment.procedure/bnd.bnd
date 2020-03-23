@@ -15,12 +15,12 @@ Bundle-Name: SAI :: Experiment :: Procedure
 
 Export-Package: \
 	uk.co.saiman.experiment.conductor,\
+	uk.co.saiman.experiment.conductor.event,\
 	uk.co.saiman.experiment.environment,\
 	uk.co.saiman.experiment.environment.service,\
 	uk.co.saiman.experiment.executor,\
 	uk.co.saiman.experiment.executor.service,\
 	uk.co.saiman.experiment.instruction,\
 	uk.co.saiman.experiment.procedure,\
-	uk.co.saiman.experiment.procedure.event,\
-	uk.co.saiman.experiment.requirement,\
+	uk.co.saiman.experiment.procedure.json,\
 	uk.co.saiman.experiment.variables

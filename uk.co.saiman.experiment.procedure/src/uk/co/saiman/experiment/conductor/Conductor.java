@@ -41,14 +41,18 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
+import uk.co.saiman.data.Data;
+import uk.co.saiman.experiment.conductor.event.ConductorEvent;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Procedures;
-import uk.co.saiman.experiment.procedure.event.ConductorEvent;
+import uk.co.saiman.experiment.procedure.json.JsonInstructionFormat;
+import uk.co.saiman.experiment.procedure.json.JsonProcedureFormat;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
@@ -59,22 +63,26 @@ public class Conductor implements Output {
   private final ReentrantLock lock;
 
   private final StorageConfiguration<?> storageConfiguration;
+  private final JsonInstructionFormat instructionFormat;
   private final LocalEnvironmentService environmentService;
   private final Log log;
   private final Executor executor;
 
   private final Map<WorkspaceExperimentPath, InstructionExecution> progress;
   private Procedure procedure;
+  private Data<Procedure> data;
 
   private final HotObservable<ConductorEvent> events = new HotObservable<>();
 
   public Conductor(
       StorageConfiguration<?> storageConfiguration,
+      ExecutorService executorService,
       LocalEnvironmentService environmentService,
       Log log) {
     this.lock = new ReentrantLock();
 
     this.storageConfiguration = requireNonNull(storageConfiguration);
+    this.instructionFormat = new JsonInstructionFormat(executorService);
     this.environmentService = environmentService;
     this.log = log;
 
@@ -91,7 +99,11 @@ public class Conductor implements Output {
     return log;
   }
 
-  public StorageConfiguration<?> storageConfiguration() {
+  JsonInstructionFormat instructionFormat() {
+    return instructionFormat;
+  }
+
+  StorageConfiguration<?> storageConfiguration() {
     return storageConfiguration;
   }
 
@@ -101,6 +113,18 @@ public class Conductor implements Output {
       var environment = Procedures.openEnvironment(procedure, environmentService, 2, SECONDS);
 
       Procedures.validateDependencies(procedure);
+
+      var storage = storageConfiguration.locateStorage(procedure.path());
+
+      var procedureFormat = new JsonProcedureFormat(instructionFormat, procedure.environment());
+
+      if (data != null) {
+        data.unset();
+        data.save();
+      }
+      data = Data.locate(storage.location(), procedure.id().name(), procedureFormat);
+      data.set(procedure);
+      data.save();
 
       this.progress
           .values()
@@ -124,6 +148,8 @@ public class Conductor implements Output {
       this.progress.replaceAll((path, execution) -> execution.execute() ? execution : null);
 
       this.procedure = procedure;
+    } catch (IOException e) {
+      throw new ConductorException(format("Unable to conduct procedure %s", procedure), e);
     } finally {
       lock.unlock();
     }

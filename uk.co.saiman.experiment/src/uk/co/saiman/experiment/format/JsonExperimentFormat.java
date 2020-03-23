@@ -39,6 +39,7 @@ import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
+import uk.co.saiman.experiment.definition.json.JsonStepDefinitionFormat;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
@@ -49,10 +50,15 @@ import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
 
+/**
+ * The .exp format, for loading experiment step definitions.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class JsonExperimentFormat implements TextFormat<Experiment> {
   public static final int VERSION = 1;
 
-  public static final String FILE_EXTENSION = "jem"; // json experiment model
+  public static final String FILE_EXTENSION = "exp";
   public static final MediaType MEDIA_TYPE = new MediaType(
       APPLICATION_TYPE,
       "saiman.experiment.v" + VERSION,
@@ -63,7 +69,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   private final MapIndex<StorageConfiguration<?>> storage;
 
   private final JsonStateMapFormat stateMapFormat;
-  private final JsonExperimentDefinitionFormat definitionFormat;
+  private final ExecutorService executorService;
   private final Supplier<GlobalEnvironment> environment;
   private final LocalEnvironmentService localEnvironmentService;
 
@@ -91,24 +97,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
       LocalEnvironmentService localEnvironmentService,
       JsonStateMapFormat stateMapFormat,
       Log log) {
-    this(
-        storageService,
-        environment,
-        localEnvironmentService,
-        stateMapFormat,
-        new JsonExperimentDefinitionFormat(executorService, stateMapFormat),
-        log);
-  }
-
-  public JsonExperimentFormat(
-      StorageService storageService,
-      Supplier<GlobalEnvironment> environment,
-      LocalEnvironmentService localEnvironmentService,
-      JsonStateMapFormat stateMapFormat,
-      JsonExperimentDefinitionFormat definitionFormat,
-      Log log) {
     this.stateMapFormat = stateMapFormat;
-    this.definitionFormat = definitionFormat;
+    this.executorService = executorService;
     this.environment = environment;
     this.localEnvironmentService = localEnvironmentService;
 
@@ -120,6 +110,10 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
                 r -> storageService.deconfigureStorage(r)));
 
     this.log = log;
+  }
+
+  public ExecutorService getExecutorService() {
+    return executorService;
   }
 
   @Override
@@ -138,10 +132,13 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
+    var definitionFormat = new JsonExperimentDefinitionFormat(
+        new JsonStepDefinitionFormat(executorService, stateMapFormat));
     var definition = definitionFormat.loadDefinition(data);
     return new Experiment(
         definition,
         data.get(storage),
+        executorService,
         environment,
         localEnvironmentService,
         log.mapMessage(s -> definition.id() + ": " + s));
@@ -153,6 +150,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected StateMap saveExperiment(Experiment data) {
+    var definitionFormat = new JsonExperimentDefinitionFormat(
+        new JsonStepDefinitionFormat(data.getExecutorService(), stateMapFormat));
     return definitionFormat
         .saveDefinition(data.getDefinition())
         .with(storage, data.getStorageConfiguration());

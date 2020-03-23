@@ -25,25 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.procedure.event;
-
-import uk.co.saiman.experiment.conductor.Conductor;
-import uk.co.saiman.experiment.instruction.Instruction;
-
-public class InstructionCompleteEvent extends ConductorEvent {
-  private final Instruction instruction;
-
-  public InstructionCompleteEvent(Conductor scheduler, Instruction instruction) {
-    super(scheduler);
-    this.instruction = instruction;
-  }
-
-  public Instruction instruction() {
-    return instruction;
-  }
-
-  @Override
-  public ConductorEventKind kind() {
-    return ConductorEventKind.INSTRUCTION_COMPLETE;
-  }
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.experiment.conductor.event;

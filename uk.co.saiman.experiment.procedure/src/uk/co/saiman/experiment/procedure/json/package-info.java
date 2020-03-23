@@ -25,20 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.procedure.event;
+@Version("1.0.0")
+package uk.co.saiman.experiment.procedure.json;
 
-import uk.co.saiman.experiment.conductor.Conductor;
-
-public abstract class ConductorEvent {
-  private final Conductor conductor;
-
-  public ConductorEvent(Conductor scheduler) {
-    this.conductor = scheduler;
-  }
-
-  public Conductor conductor() {
-    return conductor;
-  }
-
-  public abstract ConductorEventKind kind();
-}
+import org.osgi.annotation.versioning.Version;

@@ -31,10 +31,11 @@ import java.io.IOException;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.conductor.Conductor;
+import uk.co.saiman.experiment.conductor.event.ConductorEvent;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.procedure.event.ConductorEvent;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.Observable;
@@ -59,14 +60,27 @@ import uk.co.saiman.observable.Observable;
  */
 public class Scheduler {
   private Schedule schedule;
+  private final StorageConfiguration<?> storageConfiguration;
+  private final ExecutorService executorService;
   private final Conductor conductor;
 
   public Scheduler(
       StorageConfiguration<?> storageConfiguration,
+      ExecutorService executorService,
       LocalEnvironmentService environmentService,
       Log log) {
     this.schedule = null;
-    this.conductor = new Conductor(storageConfiguration, environmentService, log);
+    this.storageConfiguration = storageConfiguration;
+    this.executorService = executorService;
+    this.conductor = new Conductor(storageConfiguration, executorService, environmentService, log);
+  }
+
+  public StorageConfiguration<?> getStorageConfiguration() {
+    return storageConfiguration;
+  }
+
+  public ExecutorService getExecutorService() {
+    return executorService;
   }
 
   public Optional<Schedule> getSchedule() {
@@ -79,10 +93,6 @@ public class Scheduler {
 
   public Output getResults() {
     return conductor;
-  }
-
-  public StorageConfiguration<?> getStorageConfiguration() {
-    return conductor.storageConfiguration();
   }
 
   public synchronized Schedule schedule(Procedure procedure) {

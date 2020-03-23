@@ -29,6 +29,7 @@ package uk.co.saiman.experiment.msapex.workspace;
 
 import java.util.Objects;
 
+import uk.co.saiman.experiment.declaration.ExperimentDeclarationException;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
@@ -59,16 +60,24 @@ public class WorkspaceExperimentPath implements Comparable<WorkspaceExperimentPa
   public static WorkspaceExperimentPath fromString(String string) {
     string = string.strip();
 
-    int lastSlash = string.lastIndexOf('/');
+    if (string.startsWith("/")) {
+      throw new ExperimentDeclarationException("Workspace experiment path must be absolute");
+    }
+
+    int firstSlash = string.indexOf('/', 1);
+
+    if (firstSlash < 0) {
+      throw new ExperimentDeclarationException("Workspace experiment path must contain subpath");
+    }
 
     return define(
-        ExperimentId.fromName(string.substring(lastSlash + 1)),
-        ExperimentPath.absoluteFromString(string.substring(0, lastSlash)));
+        ExperimentId.fromName(string.substring(1, firstSlash)),
+        ExperimentPath.absoluteFromString(string.substring(firstSlash)));
   }
 
   @Override
   public String toString() {
-    return experimentIndex.toString() + experimentPath.toString();
+    return "/" + experimentIndex.toString() + experimentPath.toString();
   }
 
   @Override

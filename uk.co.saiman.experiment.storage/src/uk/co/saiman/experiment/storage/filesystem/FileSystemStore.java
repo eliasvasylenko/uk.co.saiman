@@ -128,6 +128,7 @@ public class FileSystemStore implements Store<Path> {
 
   private Path getPath(Path experimentRoot, WorkspaceExperimentPath path) {
     return path
+        .getExperimentPath()
         .ids()
         .reduce(experimentRoot, (p, i) -> p.resolve(i.toString()), (p1, p2) -> p1.resolve(p2));
   }

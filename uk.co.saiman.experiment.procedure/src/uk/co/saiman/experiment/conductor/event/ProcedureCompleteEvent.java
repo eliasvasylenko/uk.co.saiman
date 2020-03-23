@@ -25,17 +25,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.procedure.event;
+package uk.co.saiman.experiment.conductor.event;
 
 import uk.co.saiman.experiment.conductor.Conductor;
+import uk.co.saiman.experiment.procedure.Procedure;
 
-public class InterruptEvent extends ConductorEvent {
-  public InterruptEvent(Conductor conductor) {
-    super(conductor);
+public class ProcedureCompleteEvent extends ConductorEvent {
+  private final Procedure procedure;
+
+  public ProcedureCompleteEvent(Conductor scheduler, Procedure procedure) {
+    super(scheduler);
+    this.procedure = procedure;
+  }
+
+  public Procedure procedure() {
+    return procedure;
   }
 
   @Override
   public ConductorEventKind kind() {
-    return ConductorEventKind.PROCEDURE_COMPLETE;
+    return ConductorEventKind.INTERRUPT;
   }
 }

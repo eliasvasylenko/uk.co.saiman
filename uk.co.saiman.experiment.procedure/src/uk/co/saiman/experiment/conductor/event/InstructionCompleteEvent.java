@@ -25,16 +25,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.procedure.event;
+package uk.co.saiman.experiment.conductor.event;
 
 import uk.co.saiman.experiment.conductor.Conductor;
 import uk.co.saiman.experiment.instruction.Instruction;
 
-public class InstructionBeginEvent extends ConductorEvent {
+public class InstructionCompleteEvent extends ConductorEvent {
   private final Instruction instruction;
 
-  public InstructionBeginEvent(Conductor conductor, Instruction instruction) {
-    super(conductor);
+  public InstructionCompleteEvent(Conductor scheduler, Instruction instruction) {
+    super(scheduler);
     this.instruction = instruction;
   }
 
@@ -44,6 +44,6 @@ public class InstructionBeginEvent extends ConductorEvent {
 
   @Override
   public ConductorEventKind kind() {
-    return ConductorEventKind.INSTRUCTION_BEGIN;
+    return ConductorEventKind.INSTRUCTION_COMPLETE;
   }
 }

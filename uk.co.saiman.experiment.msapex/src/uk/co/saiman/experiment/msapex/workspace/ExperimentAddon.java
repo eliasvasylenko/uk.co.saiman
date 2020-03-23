@@ -28,8 +28,6 @@
 package uk.co.saiman.experiment.msapex.workspace;
 
 import static java.util.function.Function.identity;
-import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.joining;
 import static org.eclipse.e4.ui.internal.workbench.E4Workbench.INSTANCE_LOCATION;
 import static org.eclipse.e4.ui.workbench.UIEvents.Context.TOPIC_CONTEXT;
 import static org.eclipse.e4.ui.workbench.UIEvents.EventTags.ELEMENT;
@@ -66,14 +64,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 
-import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.event.ExperimentEvent;
-import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
-import uk.co.saiman.experiment.msapex.workspace.event.AddExperimentEvent;
-import uk.co.saiman.experiment.msapex.workspace.event.RemoveExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEventKind;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceExperimentEvent;
@@ -91,8 +85,6 @@ import uk.co.saiman.osgi.ServiceIndex;
  * @author Elias N Vasylenko
  */
 public class ExperimentAddon {
-  private static final String EXPERIMENTS = "experiments";
-
   public static final String ANALYSIS_PERSPECTIVE_ID = "uk.co.saiman.perspective.analysis";
 
   public static final String TARGET_PERSPECTIVE_ID = "target-perspective-id";
@@ -194,56 +186,7 @@ public class ExperimentAddon {
         log);
     context.set(Workspace.class, workspace);
 
-    loadWorkspace();
-  }
-
-  @Inject
-  @Optional
-  public void update(RenameExperimentEvent event) {
-    saveWorkspace();
-  }
-
-  @Inject
-  @Optional
-  public void update(AddExperimentEvent event) {
-    saveWorkspace();
-  }
-
-  @Inject
-  @Optional
-  public void update(RemoveExperimentEvent event) {
-    saveWorkspace();
-  }
-
-  private void loadWorkspace() {
-    try {
-      String experiments = addon.getPersistedState().get(EXPERIMENTS);
-      if (experiments != null) {
-        Stream
-            .of(experiments.split(","))
-            .map(String::strip)
-            .filter(not(String::isBlank))
-            .map(ExperimentId::fromName)
-            .forEach(workspace::loadExperiment);
-      }
-    } catch (Exception e) {
-      log.log(Level.ERROR, "Problem loading workspace", e);
-      throw e;
-    }
-  }
-
-  private void saveWorkspace() {
-    try {
-      String experiments = workspace
-          .getWorkspaceExperiments()
-          .map(WorkspaceExperiment::id)
-          .map(ExperimentId::name)
-          .collect(joining(","));
-      addon.getPersistedState().put(EXPERIMENTS, experiments);
-    } catch (Exception e) {
-      log.log(Level.ERROR, "Problem saving workspace", e);
-      throw e;
-    }
+    workspace.syncExperiments();
   }
 
   @PreDestroy
