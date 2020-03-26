@@ -42,16 +42,31 @@ import uk.co.saiman.observable.Observable;
  *          the data type of the result
  */
 public interface Result<T> extends Product<T> {
-  Observable<Result<T>> updates();
+  static enum ResultStatus {
+    /**
+     * The result is not yet observed
+     */
+    READY,
+    /**
+     * The result is being observed and a partial value is available
+     */
+    OBSERVING,
+    /**
+     * The result was observed and a complete value is available
+     */
+    OBSERVED,
+    /**
+     * The result was not observed, something went wrong
+     */
+    FAILED
+  }
+
+  ResultStatus status();
 
   @Override
   ResultPath<Absolute, T> path();
 
-  boolean isEmpty();
-
-  boolean isComplete();
-
-  boolean isPartial();
-
   Optional<T> value();
+
+  Observable<Result<T>> updates();
 }

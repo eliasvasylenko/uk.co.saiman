@@ -90,7 +90,7 @@ public class IncomingDependencies {
             });
   }
 
-  protected Optional<InstructionExecution> getParent() {
+  protected Optional<ExecutionManager> getParent() {
     return path
         .getExperimentPath()
         .parent()

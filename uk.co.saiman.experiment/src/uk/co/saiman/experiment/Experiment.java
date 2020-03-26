@@ -41,7 +41,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import uk.co.saiman.experiment.conductor.event.ConductorEvent;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
@@ -59,6 +58,8 @@ import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
+import uk.co.saiman.experiment.output.event.OutputEvent;
+import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.variables.Variable;
@@ -70,6 +71,7 @@ public class Experiment {
   private ExperimentDefinition definition;
 
   private final Scheduler scheduler;
+  private Output output;
 
   private Map<ExperimentPath<Absolute>, Reference<Step>> steps = new HashMap<>();
 
@@ -91,6 +93,7 @@ public class Experiment {
         executorService,
         localEnvironmentService,
         log);
+    this.output = Output.EMPTY;
 
     updateDefinition(requireNonNull(procedure));
   }
@@ -112,7 +115,7 @@ public class Experiment {
   }
 
   public synchronized void conduct() {
-    scheduler.getSchedule().get().conduct();
+    output = scheduler.getSchedule().map(Schedule::conduct).orElse(Output.EMPTY);
   }
 
   static StepDefinition withScheduled(StepDefinition step) {
@@ -120,7 +123,7 @@ public class Experiment {
   }
 
   public Output getResults() {
-    return scheduler.getResults();
+    return output;
   }
 
   public ExperimentId getId() {
@@ -152,8 +155,8 @@ public class Experiment {
     return events;
   }
 
-  public Observable<ConductorEvent> conductorEvents() {
-    return scheduler.conductorEvents();
+  public Observable<OutputEvent> conductorEvents() {
+    return output.events();
   }
 
   public synchronized Step attach(StepDefinition stepDefinition) {

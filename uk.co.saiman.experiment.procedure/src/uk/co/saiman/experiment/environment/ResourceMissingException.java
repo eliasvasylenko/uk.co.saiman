@@ -30,7 +30,14 @@ package uk.co.saiman.experiment.environment;
 public class ResourceMissingException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
+  private final Class<?> provision;
+
   public ResourceMissingException(Class<?> provision) {
     super(provision.getName());
+    this.provision = provision;
+  }
+
+  public Class<?> getProvision() {
+    return provision;
   }
 }

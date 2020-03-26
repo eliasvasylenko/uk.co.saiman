@@ -25,17 +25,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.conductor.event;
+package uk.co.saiman.experiment.output.event;
 
-import uk.co.saiman.experiment.conductor.Conductor;
+public enum OutputEventKind {
+  /**
+   * The conductor has begun to generate output for the procedure.
+   */
+  BEGIN,
 
-public class ProcedureBeginEvent extends ConductorEvent {
-  public ProcedureBeginEvent(Conductor scheduler) {
-    super(scheduler);
-  }
+  /**
+   * The conductor has finished generating output for the procedure. Output may or
+   * may not have been generated successfully.
+   */
+  END,
 
-  @Override
-  public ConductorEventKind kind() {
-    return ConductorEventKind.PROCEDURE_BEGIN;
-  }
+  /**
+   * The generated output has been superseded by a new procedure, the prior
+   * procedure may or may not have completed.
+   */
+  SUCCEED
 }

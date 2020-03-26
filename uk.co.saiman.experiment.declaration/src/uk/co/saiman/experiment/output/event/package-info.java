@@ -25,23 +25,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.conductor.event;
-
-public enum ConductorEventKind {
-  /**
-   * Begin the conducting the procedure.
-   */
-  PROCEDURE_BEGIN,
-
-  /**
-   * Complete the currently conducting procedure.
-   */
-  PROCEDURE_COMPLETE,
-  
-  /**
-   * Procedure has been interrupted
-   */
-  INTERRUPT,
-  INSTRUCTION_BEGIN,
-  INSTRUCTION_COMPLETE
-}
+@org.osgi.annotation.versioning.Version("1.0.0")
+package uk.co.saiman.experiment.output.event;

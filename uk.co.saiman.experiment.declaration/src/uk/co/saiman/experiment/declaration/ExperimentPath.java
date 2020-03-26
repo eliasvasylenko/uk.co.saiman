@@ -52,6 +52,25 @@ import java.util.stream.Stream;
  */
 public abstract class ExperimentPath<T extends ExperimentPath<T>>
     implements Comparable<ExperimentPath<?>> {
+  // TODO value and record type
+  public static abstract class ExperimentRelation {
+    ExperimentRelation() {}
+
+    public static class Dependent extends ExperimentRelation {
+      private final ExperimentId id;
+
+      public Dependent(ExperimentId id) {
+        this.id = id;
+      }
+
+      public ExperimentId id() {
+        return id;
+      }
+    }
+
+    public static class Dependency extends ExperimentRelation {}
+  }
+
   public static final String SEPARATOR = "/";
   public static final String SELF = ".";
   public static final String PARENT = "..";

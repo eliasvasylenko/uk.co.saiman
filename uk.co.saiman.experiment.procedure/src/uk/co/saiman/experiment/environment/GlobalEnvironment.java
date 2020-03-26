@@ -30,6 +30,18 @@ package uk.co.saiman.experiment.environment;
 import java.util.stream.Stream;
 
 public interface GlobalEnvironment {
+  public static GlobalEnvironment EMPTY = new GlobalEnvironment() {
+    @Override
+    public Stream<Class<?>> providedValues() {
+      return Stream.of();
+    }
+
+    @Override
+    public <T> T provideValue(Class<T> provision) {
+      throw new ResourceMissingException(provision);
+    }
+  };
+
   Stream<Class<?>> providedValues();
 
   default boolean providesValue(Class<?> provision) {

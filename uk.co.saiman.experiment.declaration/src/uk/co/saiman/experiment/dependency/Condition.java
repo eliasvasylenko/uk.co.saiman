@@ -39,6 +39,27 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
  *          the data type of the condition
  */
 public interface Condition<T> extends Product<T>, AutoCloseable {
+  static enum ConditionStatus {
+    /**
+     * The condition is not yet prepared
+     */
+    READY,
+    /**
+     * The condition is being prepared and is available to be consumed
+     */
+    PREPARING,
+    /**
+     * The condition was prepared and is no longer available to be consumed
+     */
+    PREPARED,
+    /**
+     * The condition was not prepared, something went wrong
+     */
+    FAILED
+  }
+
+  ConditionStatus status();
+
   @Override
   ConditionPath<Absolute, T> path();
 

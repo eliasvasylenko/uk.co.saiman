@@ -30,7 +30,19 @@ package uk.co.saiman.experiment.environment;
 public class ResourceUnavailableException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
+  private final Class<?> provision;
+
   public ResourceUnavailableException(Class<?> provision, Throwable cause) {
     super(provision.getName(), cause);
+    this.provision = provision;
+  }
+
+  public ResourceUnavailableException(Class<?> provision) {
+    super(provision.getName());
+    this.provision = provision;
+  }
+
+  public Class<?> getProvision() {
+    return provision;
   }
 }

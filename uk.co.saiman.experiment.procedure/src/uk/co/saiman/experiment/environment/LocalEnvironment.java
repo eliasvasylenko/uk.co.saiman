@@ -34,6 +34,36 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.dependency.Resource;
 
 public interface LocalEnvironment extends AutoCloseable {
+  LocalEnvironment EMPTY = new LocalEnvironment() {
+    @Override
+    public void acquireResources(
+        java.util.Collection<? extends java.lang.Class<?>> resources,
+        long timeout,
+        TimeUnit unit) {
+      resources.stream().findAny().ifPresent(type -> {
+        throw new ResourceUnavailableException(type);
+      });
+    }
+
+    @Override
+    public void close() {}
+
+    @Override
+    public Stream<Class<?>> providedResources() {
+      return Stream.empty();
+    }
+
+    @Override
+    public <T> Resource<T> provideResource(Class<T> provision) {
+      throw new ResourceMissingException(provision);
+    }
+
+    @Override
+    public GlobalEnvironment getGlobalEnvironment() {
+      return GlobalEnvironment.EMPTY;
+    }
+  };
+
   GlobalEnvironment getGlobalEnvironment();
 
   /**

@@ -118,10 +118,14 @@ public class LocalEnvironmentServiceImpl implements LocalEnvironmentService {
         return resourceMap.keySet().stream();
       }
 
-      @SuppressWarnings("unchecked")
       @Override
       public <T> Resource<T> provideResource(Class<T> provision) {
-        return (Resource<T>) resourceMap.get(provision);
+        @SuppressWarnings("unchecked")
+        var resource = (Resource<T>) resourceMap.get(provision);
+        if (resource == null) {
+          throw new ResourceMissingException(provision);
+        }
+        return resource;
       }
 
       @Override

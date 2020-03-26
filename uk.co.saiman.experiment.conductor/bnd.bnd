@@ -3,6 +3,7 @@ Bundle-Name: SAI :: Experiment :: Procedure
 -buildpath: \
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.storage;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
@@ -14,11 +15,4 @@ Bundle-Name: SAI :: Experiment :: Procedure
 	uk.co.saiman.data;version=snapshot
 
 Export-Package: \
-	uk.co.saiman.experiment.environment,\
-	uk.co.saiman.experiment.environment.service,\
-	uk.co.saiman.experiment.executor,\
-	uk.co.saiman.experiment.executor.service,\
-	uk.co.saiman.experiment.instruction,\
-	uk.co.saiman.experiment.procedure,\
-	uk.co.saiman.experiment.procedure.json,\
-	uk.co.saiman.experiment.variables
+	uk.co.saiman.experiment.conductor

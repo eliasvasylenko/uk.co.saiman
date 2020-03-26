@@ -29,9 +29,9 @@ package uk.co.saiman.experiment.schedule;
 
 import java.util.Optional;
 
-import uk.co.saiman.experiment.conductor.event.ConductorEvent;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.output.Output;
+import uk.co.saiman.experiment.output.event.OutputEvent;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
@@ -41,7 +41,7 @@ public class Schedule {
   private final Procedure scheduledProcedure;
   private final Optional<Procedure> previouslyConductedProcedure;
 
-  private final HotObservable<ConductorEvent> events = new HotObservable<>();
+  private final HotObservable<OutputEvent> events = new HotObservable<>();
 
   public Schedule(Scheduler scheduler, Procedure procedure) {
     this.scheduler = scheduler;
@@ -69,7 +69,7 @@ public class Schedule {
     return scheduler.conduct(this);
   }
 
-  public Observable<ConductorEvent> events() {
+  public Observable<OutputEvent> events() {
     return events;
   }
 

@@ -31,10 +31,10 @@ import java.io.IOException;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.conductor.Conductor;
-import uk.co.saiman.experiment.conductor.event.ConductorEvent;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
+import uk.co.saiman.experiment.output.event.OutputEvent;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log;
@@ -91,10 +91,6 @@ public class Scheduler {
     return conductor;
   }
 
-  public Output getResults() {
-    return conductor;
-  }
-
   public synchronized Schedule schedule(Procedure procedure) {
     schedule = new Schedule(this, procedure);
     return schedule;
@@ -131,7 +127,7 @@ public class Scheduler {
     }
   }
 
-  public Observable<ConductorEvent> conductorEvents() {
+  public Observable<OutputEvent> conductorEvents() {
     return conductor.events();
   }
 }

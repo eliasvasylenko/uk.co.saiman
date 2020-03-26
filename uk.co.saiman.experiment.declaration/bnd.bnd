@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: Experiment :: Products
+Bundle-Name: SAI :: Experiment :: Declaration
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
@@ -16,4 +16,5 @@ Export-Package: \
 	uk.co.saiman.experiment.requirement,\
 	uk.co.saiman.experiment.declaration,\
 	uk.co.saiman.experiment.output,\
+	uk.co.saiman.experiment.output.event,\
 	uk.co.saiman.experiment.workspace

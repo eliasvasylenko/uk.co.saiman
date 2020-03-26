@@ -29,11 +29,14 @@ package uk.co.saiman.experiment.output;
 
 import static uk.co.saiman.experiment.dependency.ProductPath.toResult;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.output.event.OutputEvent;
+import uk.co.saiman.observable.Observable;
 
 public interface Output {
   Stream<Result<?>> results();
@@ -46,4 +49,35 @@ public interface Output {
   default <T> Result<T> resolveResult(ExperimentPath<?> path, Class<T> type) {
     return resolveResult(toResult(path, type));
   }
+
+  Observable<OutputEvent> events();
+
+  Optional<Output> successiveOutput();
+
+  /*
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * "output events" only deal with broad strokes.
+   * 
+   * If you want events about results/conditions you have to resolve them and
+   * query them directly. API is available here to resolve them, and on Result and
+   * Condition to watch for changes in status.
+   * 
+   * TODO Likewise, if you want events about instruction progress you have to query
+   * them directly API is yet to be designed for this, but will live here.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
 }

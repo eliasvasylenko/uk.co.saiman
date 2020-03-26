@@ -25,5 +25,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-@org.osgi.annotation.versioning.Version("1.0.0")
-package uk.co.saiman.experiment.conductor.event;
+package uk.co.saiman.experiment.output.event;
+
+import uk.co.saiman.experiment.output.Output;
+
+public class OutputSucceededEvent extends OutputEvent {
+  private Output supersedingOutput;
+
+  public OutputSucceededEvent(Output output, Output supersedingOutput) {
+    super(output);
+    this.supersedingOutput = supersedingOutput;
+  }
+
+  public Output getSupersedingOutput() {
+    return supersedingOutput;
+  }
+
+  @Override
+  public OutputEventKind kind() {
+    return OutputEventKind.SUCCEED;
+  }
+}

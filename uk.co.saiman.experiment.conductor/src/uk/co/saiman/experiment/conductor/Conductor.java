@@ -39,16 +39,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
-import uk.co.saiman.experiment.conductor.event.ConductorEvent;
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.dependency.ProductPath;
-import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
-import uk.co.saiman.experiment.output.Output;
+import uk.co.saiman.experiment.output.event.OutputEvent;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.procedure.json.JsonInstructionFormat;
@@ -57,9 +52,8 @@ import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.HotObservable;
-import uk.co.saiman.observable.Observable;
 
-public class Conductor implements Output {
+public class Conductor {
   private final ReentrantLock lock;
 
   private final StorageConfiguration<?> storageConfiguration;
@@ -68,11 +62,11 @@ public class Conductor implements Output {
   private final Log log;
   private final Executor executor;
 
-  private final Map<WorkspaceExperimentPath, InstructionExecution> progress;
+  private final Map<WorkspaceExperimentPath, ExecutionManager> progress;
   private Procedure procedure;
   private Data<Procedure> data;
 
-  private final HotObservable<ConductorEvent> events = new HotObservable<>();
+  private final HotObservable<OutputEvent> events = new HotObservable<>();
 
   public Conductor(
       StorageConfiguration<?> storageConfiguration,
@@ -108,8 +102,9 @@ public class Conductor implements Output {
   }
 
   public void conduct(Procedure procedure) {
-    lock.lock();
     try {
+      lock.lock();
+
       var environment = Procedures.openEnvironment(procedure, environmentService, 2, SECONDS);
 
       Procedures.validateDependencies(procedure);
@@ -130,7 +125,7 @@ public class Conductor implements Output {
           .values()
           .stream()
           .filter(execution -> procedure.instruction(execution.getPath()).isEmpty())
-          .forEach(InstructionExecution::markRemoved);
+          .forEach(ExecutionManager::markRemoved);
 
       procedure
           .instructionPaths()
@@ -140,7 +135,7 @@ public class Conductor implements Output {
                       path,
                       (p, execution) -> Optional
                           .ofNullable(execution)
-                          .orElseGet(() -> new InstructionExecution(this, p)))
+                          .orElseGet(() -> new ExecutionManager(this, p)))
                   .updateInstruction(procedure.instruction(path).get(), environment));
 
       procedure.instructionPaths().forEach(path -> this.progress.get(path).updateDependencies());
@@ -148,14 +143,16 @@ public class Conductor implements Output {
       this.progress.replaceAll((path, execution) -> execution.execute() ? execution : null);
 
       this.procedure = procedure;
+
     } catch (IOException e) {
       throw new ConductorException(format("Unable to conduct procedure %s", procedure), e);
+
     } finally {
       lock.unlock();
     }
   }
 
-  Optional<InstructionExecution> findInstruction(WorkspaceExperimentPath path) {
+  Optional<ExecutionManager> findInstruction(WorkspaceExperimentPath path) {
     return Optional.ofNullable(progress.get(path));
   }
 
@@ -163,34 +160,25 @@ public class Conductor implements Output {
     return Optional.ofNullable(procedure);
   }
 
-  public void interrupt() {
-    lock.lock();
-    try {
-      var progressIterator = progress.entrySet().iterator();
-      while (progressIterator.hasNext()) {
-        var progress = progressIterator.next();
-
-        progress.getValue().interrupt();
-      }
-    } finally {
-      lock.unlock();
-    }
-  }
-
   public void clear() {
-    lock.lock();
     try {
-      interrupt();
+      lock.lock();
 
-      try {
-        storageConfiguration.locateStorage(procedure.path()).deallocate();
-      } catch (IOException e) {
-        throw new ConductorException(
-            format("Unable to clear conducted procedure %s", procedure),
-            e);
+      Procedures.validateDependencies(procedure);
+
+      if (data != null) {
+        data.unset();
+        data.save();
       }
 
-      procedure = null;
+      this.progress.values().stream().forEach(execution -> {
+        execution.markRemoved();
+        execution.execute();
+      });
+
+      this.progress.clear();
+      this.procedure = null;
+
     } finally {
       lock.unlock();
     }
@@ -198,28 +186,5 @@ public class Conductor implements Output {
 
   Lock lock() {
     return lock;
-  }
-
-  @Override
-  public Stream<Result<?>> results() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public <U extends ExperimentPath<U>> Stream<ProductPath<U, ? extends Result<?>>> resultPaths(
-      ExperimentPath<U> path) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public <T extends Result<?>> T resolveResult(ProductPath<?, T> path) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public Observable<ConductorEvent> events() {
-    return events;
   }
 }

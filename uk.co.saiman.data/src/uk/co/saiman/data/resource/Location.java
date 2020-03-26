@@ -30,6 +30,19 @@ package uk.co.saiman.data.resource;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+/**
+ * An abstraction over a set of named binary resources.
+ * 
+ * There is no restriction on the underlying storage mechanism, but a location
+ * can be thought of as a simple flat filesystem, where a file is analogous to a
+ * resource.
+ * 
+ * A location does not explicitly manage resource hierarchically with a
+ * directory structure as in a typical file system, however resource names
+ * containing slashes can be thought of as hierarchical paths by convention. So
+ * for example an implementation backed by a file system may choose to store
+ * resources with slashes in their names in subdirectories.
+ */
 public interface Location {
   /**
    * Get all resources at the location.
@@ -49,8 +62,10 @@ public interface Location {
    * the name, so we cannot determine where to split the string. Because of this
    * the representation of a resource name is flattened to a single string.
    * 
-   * @param name      the name of the file
-   * @param extension the extension of the file
+   * @param name
+   *          the name of the file
+   * @param extension
+   *          the extension of the file
    * @return a resource with the derived name [name].[extension]
    * @throws IOException
    */

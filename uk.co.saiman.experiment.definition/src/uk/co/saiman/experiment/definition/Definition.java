@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentRelation;
+import uk.co.saiman.experiment.declaration.ExperimentPath.ExperimentRelation;
 
 public abstract class Definition<U extends ExperimentPath<U>, T extends Definition<U, T>> {
   private final List<StepDefinition> steps;

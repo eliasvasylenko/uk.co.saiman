@@ -2,33 +2,31 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.dependency.ResultPath;
-import uk.co.saiman.observable.Observable;
+import uk.co.saiman.experiment.dependency.Condition;
+import uk.co.saiman.experiment.dependency.ConditionClosedException;
+import uk.co.saiman.experiment.dependency.ConditionPath;
 
-class IncomingResult<T> {
-  private final OutgoingResult<T> outgoing;
+class IncomingCondition<T> {
+  private final OutgoingCondition<T> outgoing;
   private final java.util.concurrent.locks.Condition lockCondition;
   IncomingDependencyState state;
 
-  public IncomingResult(
-      OutgoingResult<T> outgoing,
+  public IncomingCondition(
+      OutgoingCondition<T> outgoing,
       java.util.concurrent.locks.Condition lockCondition) {
     this.outgoing = outgoing;
     this.lockCondition = lockCondition;
     this.state = IncomingDependencyState.WAITING;
   }
 
-  public Result<T> acquire() {
+  public Condition<T> acquire() {
     try {
       while (!outgoing.beginAcquire(this)) {
         if (state == IncomingDependencyState.DONE) {
           throw new ConductorException(
               format(
-                  "Failed to prepare dependency to result %s at %s",
+                  "Failed to prepare dependency to condition %s at %s",
                   outgoing.type(),
                   outgoing.path()));
         }
@@ -38,11 +36,12 @@ class IncomingResult<T> {
     } catch (InterruptedException e) {
       throw new ConductorException(
           format(
-              "Failed to acquire dependency to result %s at %s" + outgoing.type(),
+              "Failed to acquire dependency to condition %s at %s",
+              outgoing.type(),
               outgoing.path()),
           e);
     }
-    return new Result<T>() {
+    return new Condition<T>() {
       @SuppressWarnings("unchecked")
       @Override
       public Class<T> type() {
@@ -50,52 +49,48 @@ class IncomingResult<T> {
       }
 
       @Override
-      public ResultPath<Absolute, T> path() {
+      public ConditionStatus status() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public ConditionPath<Absolute, T> path() {
         return path();
       }
 
       @Override
-      public Observable<Result<T>> updates() {
-        // TODO Auto-generated method stub
-        return null;
+      public T value() {
+        outgoing.lock().lock();
+        try {
+          if (getState() == IncomingDependencyState.DONE) {
+            throw new ConditionClosedException(type());
+          }
+          return outgoing.resource();
+        } finally {
+          outgoing.lock().unlock();
+        }
       }
 
       @Override
-      public boolean isEmpty() {
-        // TODO Auto-generated method stub
-        return false;
-      }
-
-      @Override
-      public boolean isComplete() {
-        // TODO Auto-generated method stub
-        return false;
-      }
-
-      @Override
-      public boolean isPartial() {
-        // TODO Auto-generated method stub
-        return false;
-      }
-
-      @Override
-      public Optional<T> value() {
-        // TODO Auto-generated method stub
-        return null;
+      public void close() {
+        outgoing.lock().lock();
+        try {
+          done();
+        } finally {
+          outgoing.lock().unlock();
+        }
       }
     };
   }
 
   void invalidateIncoming() {
     state = IncomingDependencyState.WAITING;
+    outgoing.invalidatedIncoming(this);
   }
 
   void invalidatedOutgoing() {
     state = IncomingDependencyState.WAITING;
-  }
-
-  public Class<T> type() {
-    return outgoing.type();
   }
 
   public void done() {
@@ -105,5 +100,9 @@ class IncomingResult<T> {
 
   public IncomingDependencyState getState() {
     return this.state;
+  }
+
+  public Class<T> type() {
+    return outgoing.type();
   }
 }
