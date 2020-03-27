@@ -61,7 +61,11 @@ public class Conflicts {
     this.environment = environment;
 
     this.differences = new HashMap<>();
-    schedule.getScheduledProcedure().instructionPaths().forEach(this::checkDifference);
+    schedule
+        .getScheduledProcedure()
+        .stream()
+        .flatMap(Procedure::instructionPaths)
+        .forEach(this::checkDifference);
     schedule
         .getPreviouslyConductedProcedure()
         .stream()
@@ -101,7 +105,7 @@ public class Conflicts {
           .flatMap(p -> p.instruction(path.getExperimentPath()));
       this.scheduledInstruction = schedule
           .getScheduledProcedure()
-          .instruction(path.getExperimentPath());
+          .flatMap(p -> p.instruction(path.getExperimentPath()));
     }
 
     @Override

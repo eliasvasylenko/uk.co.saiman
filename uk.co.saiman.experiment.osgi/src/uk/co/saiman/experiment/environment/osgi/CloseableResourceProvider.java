@@ -43,6 +43,6 @@ public interface CloseableResourceProvider<T extends AutoCloseable>
       long timeout,
       TimeUnit unit) throws Exception {
     var value = deriveValue(globalEnvironment, timeout, unit);
-    return new ExclusiveResource<>(value, identity());
+    return new ExclusiveResource<>(getProvision(), value, identity());
   }
 }

@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.environment.osgi.impl;
 
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
@@ -34,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
@@ -44,10 +48,12 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import uk.co.saiman.experiment.dependency.Resource;
+import uk.co.saiman.experiment.dependency.ResourceClosingException;
 import uk.co.saiman.experiment.environment.GlobalEnvironment;
 import uk.co.saiman.experiment.environment.LocalEnvironment;
 import uk.co.saiman.experiment.environment.ResourceMissingException;
 import uk.co.saiman.experiment.environment.ResourceUnavailableException;
+import uk.co.saiman.experiment.environment.osgi.ExclusiveResource;
 import uk.co.saiman.experiment.environment.osgi.ExclusiveResourceProvider;
 import uk.co.saiman.experiment.environment.osgi.impl.LocalEnvironmentServiceImpl.LocalEnvironmentServiceConfiguration;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
@@ -89,43 +95,143 @@ public class LocalEnvironmentServiceImpl implements LocalEnvironmentService {
     return Stream.of(provider.getProvision());
   }
 
+  private <T> ExclusiveResource<T> getExclusiveResource(
+      Class<T> type,
+      GlobalEnvironment globalEnvironment,
+      long timeout,
+      TimeUnit unit) {
+    if (executors.containsKey(type)) {
+      try {
+        @SuppressWarnings("unchecked")
+        var exclusiveResource = ((ExclusiveResourceProvider<T>) executors.get(type))
+            .deriveResource(globalEnvironment, timeout, unit);
+        return exclusiveResource;
+      } catch (Exception e) {
+        throw new ResourceUnavailableException(type, e);
+      }
+    } else {
+      throw new ResourceMissingException(type);
+    }
+  }
+
   @Override
   public LocalEnvironment openLocalEnvironment(GlobalEnvironment globalEnvironment) {
-    Map<Class<?>, Resource<?>> resourceMap = new HashMap<>();
-
     return new LocalEnvironment() {
+      private final ReentrantLock lock = new ReentrantLock();
+
+      private final Map<Class<?>, ExclusiveResource<?>> exclusiveResources = new HashMap<>();
+      private final Map<Class<?>, Condition> heldExclusiveResources = new HashMap<>();
+
       @Override
       public void acquireResources(
           java.util.Collection<? extends java.lang.Class<?>> resources,
           long timeout,
           TimeUnit unit) {
-        Map<Class<?>, Resource<?>> newResourceMap = new HashMap<>();
-        resources
-            .stream()
-            .map(c -> getResource((Class<?>) c, globalEnvironment, timeout, unit))
-            .forEach(r -> newResourceMap.put(r.type(), r));
-        resourceMap.putAll(newResourceMap);
+        try {
+          lock.lock();
+
+          resources = resources
+              .stream()
+              .filter(not(globalEnvironment::providesValue))
+              .collect(toList());
+
+          resources
+              .stream()
+              .<ExclusiveResource<?>>map(
+                  r -> getExclusiveResource(r, globalEnvironment, timeout, unit))
+              .collect(toList())
+              .stream()
+              .forEach(r -> this.exclusiveResources.put(r.getType(), r));
+        } finally {
+          lock.unlock();
+        }
       }
 
       @Override
       public void close() {
-        resourceMap.values().forEach(Resource::close);
-        resourceMap.clear();
+        try {
+          lock.lock();
+
+          heldExclusiveResources.values().forEach(Condition::signalAll);
+          exclusiveResources.entrySet().stream().flatMap(c -> {
+            try {
+              c.getValue().close();
+              return Stream.empty();
+            } catch (Exception e) {
+              return Stream.of(new ResourceClosingException(c.getKey(), e));
+            }
+          }).reduce((e1, e2) -> {
+            e1.addSuppressed(e2);
+            return e1;
+          }).ifPresent(e -> {
+            throw e;
+          });
+
+        } finally {
+          heldExclusiveResources.clear();
+          exclusiveResources.clear();
+
+          lock.unlock();
+        }
       }
 
       @Override
       public Stream<Class<?>> providedResources() {
-        return resourceMap.keySet().stream();
+        try {
+          lock.lock();
+
+          return Stream
+              .of(globalEnvironment.providedValues(), exclusiveResources.keySet().stream())
+              .flatMap(s -> s)
+              .collect(toList())
+              .stream();
+        } finally {
+          lock.unlock();
+        }
       }
 
       @Override
       public <T> Resource<T> provideResource(Class<T> provision) {
-        @SuppressWarnings("unchecked")
-        var resource = (Resource<T>) resourceMap.get(provision);
-        if (resource == null) {
-          throw new ResourceMissingException(provision);
+        try {
+          lock.lock();
+
+          if (globalEnvironment.providesValue(provision)) {
+            return Resource
+                .over(provision, globalEnvironment.provideValue(provision), t -> () -> {});
+          }
+
+          while (heldExclusiveResources.containsKey(provision)) {
+            heldExclusiveResources.get(provision).await();
+          }
+
+          @SuppressWarnings("unchecked")
+          var exclusiveResource = (ExclusiveResource<T>) exclusiveResources.get(provision);
+          if (exclusiveResource == null) {
+            throw new ResourceMissingException(provision);
+          }
+
+          Condition condition = lock.newCondition();
+          heldExclusiveResources.put(provision, condition);
+          var resource = Resource.over(provision, exclusiveResource.getValue(), e -> () -> {
+            try {
+              lock.lock();
+              var c = heldExclusiveResources.remove(provision);
+              if (c != null) {
+                c.signalAll();
+              }
+
+            } finally {
+              lock.unlock();
+            }
+          });
+          return resource;
+
+        } catch (InterruptedException e) {
+          throw new ResourceUnavailableException(provision, e);
+
+        } finally {
+          lock.unlock();
         }
-        return resource;
       }
 
       @Override
@@ -133,26 +239,5 @@ public class LocalEnvironmentServiceImpl implements LocalEnvironmentService {
         return globalEnvironment;
       }
     };
-  }
-
-  private <T> Resource<T> getResource(
-      Class<T> type,
-      GlobalEnvironment globalEnvironment,
-      long timeout,
-      TimeUnit unit) {
-    if (globalEnvironment.providesValue(type)) {
-      return Resource.over(type, globalEnvironment.provideValue(type), t -> () -> {});
-    } else if (executors.containsKey(type)) {
-      try {
-        @SuppressWarnings("unchecked")
-        var exclusiveResource = ((ExclusiveResourceProvider<T>) executors.get(type))
-            .deriveResource(globalEnvironment, timeout, unit);
-        return Resource.over(type, exclusiveResource.getValue(), e -> exclusiveResource);
-      } catch (Exception e) {
-        throw new ResourceUnavailableException(type, e);
-      }
-    } else {
-      throw new ResourceMissingException(type);
-    }
   }
 }

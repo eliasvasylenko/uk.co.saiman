@@ -36,6 +36,6 @@ public class OutputCompleteEvent extends OutputEvent {
 
   @Override
   public OutputEventKind kind() {
-    return OutputEventKind.END;
+    return OutputEventKind.ENDING;
   }
 }

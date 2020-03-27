@@ -33,4 +33,8 @@ public class ResourceClosingException extends RuntimeException {
   public ResourceClosingException(Class<?> provision) {
     super(provision.getName());
   }
+
+  public ResourceClosingException(Class<?> provision, Throwable cause) {
+    super(provision.getName(), cause);
+  }
 }

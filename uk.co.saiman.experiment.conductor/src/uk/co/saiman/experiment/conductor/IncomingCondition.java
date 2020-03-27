@@ -94,8 +94,10 @@ class IncomingCondition<T> {
   }
 
   public void done() {
-    this.state = IncomingDependencyState.DONE;
-    this.lockCondition.signalAll();
+    if (this.state != IncomingDependencyState.DONE) {
+      this.state = IncomingDependencyState.DONE;
+      this.lockCondition.signalAll();
+    }
   }
 
   public IncomingDependencyState getState() {

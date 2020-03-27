@@ -20,6 +20,7 @@ import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 
 public class Execution {
   private final Conductor conductor;
@@ -31,7 +32,9 @@ public class Execution {
   private final OutgoingResults outgoingResults;
   private final IncomingDependencies incomingDependencies;
 
-  private final Thread executionThread;
+  private Location location;
+  private Thread executionThread;
+  private boolean completed = false;
 
   public Execution(
       Conductor conductor,
@@ -53,10 +56,6 @@ public class Execution {
     this.executionThread = new Thread(this::run);
   }
 
-  private Location getLocation() throws IOException {
-    return conductor.storageConfiguration().locateStorage(path).location();
-  }
-
   private ExecutionContext createExecutionContext(Consumer<Resource<?>> acquiredResource) {
     return new ExecutionContext() {
       @Override
@@ -66,7 +65,7 @@ public class Execution {
 
       @Override
       public Location getLocation() {
-        return getLocation();
+        return location;
       }
 
       @Override
@@ -178,40 +177,65 @@ public class Execution {
         outgoingResults.terminate();
         incomingDependencies.terminate();
 
-        acquiredResources.forEach(Resource::close);
+        acquiredResources.stream().flatMap(r -> {
+          try {
+            r.close();
+            return Stream.empty();
+          } catch (RuntimeException e) {
+            return Stream.of(e);
+          }
+        }).reduce((e1, e2) -> {
+          e1.addSuppressed(e2);
+          return e1;
+        }).ifPresent(r -> {
+          throw r;
+        });
+
       } finally {
-        conductor.lock().unlock();
+        try {
+          completed = true;
+          conductor.completeExecution(this);
+
+        } finally {
+          conductor.lock().unlock();
+        }
       }
     }
   }
 
-  void start() throws IOException {
+  public boolean isRunComplete() {
+    return completed;
+  }
+
+  void start() {
     try {
       prepareLocation();
+      executionThread.start();
+
     } catch (Exception e) {
       outgoingConditions.terminate();
       outgoingResults.terminate();
       incomingDependencies.terminate();
 
-      throw e;
+      conductor.log().log(Level.ERROR, "Failed to start experiment.", e);
     }
-
-    executionThread.start();
   }
 
-  void stop() throws IOException {
+  void stop() {
     try {
-      executionThread.interrupt();
-      executionThread.join();
+      try {
+        executionThread.interrupt();
+        executionThread.join();
+      } catch (ExecutionCancelledException | InterruptedException e) {}
 
-    } catch (ExecutionCancelledException | InterruptedException e) {
-
-    } finally {
       outgoingConditions.terminate();
       outgoingResults.terminate();
       incomingDependencies.terminate();
 
       clearLocation();
+
+    } catch (Exception e) {
+      conductor.log().log(Level.ERROR, "Failed to stop experiment.", e);
     }
   }
 
@@ -219,9 +243,11 @@ public class Execution {
     try {
       conductor.lock().lock();
 
-      var data = Data.locate(getLocation(), instruction.id().name(), conductor.instructionFormat());
+      location = conductor.storageConfiguration().locateStorage(path).location();
+      var data = Data.locate(location, instruction.id().name(), conductor.instructionFormat());
       data.set(instruction);
       data.save();
+
     } finally {
       conductor.lock().unlock();
     }
@@ -231,18 +257,23 @@ public class Execution {
     try {
       conductor.lock().lock();
 
-      getLocation().resources().flatMap(r -> {
+      var re = location.resources().flatMap(r -> {
         try {
           r.delete();
           return Stream.empty();
-        } catch (Exception e) {
+        } catch (IOException e) {
           return Stream.of(e);
         }
       }).reduce((e1, e2) -> {
         e1.addSuppressed(e2);
         return e1;
       }).orElse(null);
+      if (re != null) {
+        throw re;
+      }
+
     } finally {
+      location = null;
       conductor.lock().unlock();
     }
   }

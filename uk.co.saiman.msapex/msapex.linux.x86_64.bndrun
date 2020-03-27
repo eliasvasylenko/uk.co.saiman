@@ -239,5 +239,6 @@ runplatform: linux64
 	uk.co.saiman.webmodules.extender;version=snapshot,\
 	uk.co.saiman.webmodules.i18n;version=snapshot,\
 	uk.co.saiman.webmodules.semver;version=snapshot,\
-	uk.co.saiman.webmodules.server;version=snapshot
+	uk.co.saiman.webmodules.server;version=snapshot,\
+	uk.co.saiman.experiment.conductor;version=snapshot
 

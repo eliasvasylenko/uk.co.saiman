@@ -36,6 +36,6 @@ public class OutputBeginEvent extends OutputEvent {
 
   @Override
   public OutputEventKind kind() {
-    return OutputEventKind.BEGIN;
+    return OutputEventKind.BEGINNING;
   }
 }

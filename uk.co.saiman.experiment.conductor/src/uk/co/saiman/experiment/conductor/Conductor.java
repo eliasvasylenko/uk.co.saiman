@@ -31,7 +31,6 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +42,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
-import uk.co.saiman.experiment.output.event.OutputEvent;
+import uk.co.saiman.experiment.output.Output;
+import uk.co.saiman.experiment.output.event.OutputBeginEvent;
+import uk.co.saiman.experiment.output.event.OutputSucceededEvent;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.procedure.json.JsonInstructionFormat;
@@ -51,7 +52,6 @@ import uk.co.saiman.experiment.procedure.json.JsonProcedureFormat;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.observable.HotObservable;
 
 public class Conductor {
   private final ReentrantLock lock;
@@ -66,7 +66,7 @@ public class Conductor {
   private Procedure procedure;
   private Data<Procedure> data;
 
-  private final HotObservable<OutputEvent> events = new HotObservable<>();
+  private ConductorOutput output = new ConductorOutput();
 
   public Conductor(
       StorageConfiguration<?> storageConfiguration,
@@ -101,7 +101,19 @@ public class Conductor {
     return storageConfiguration;
   }
 
-  public void conduct(Procedure procedure) {
+  public Output getOutput() {
+    return output;
+  }
+
+  private Output nextOutput() {
+    var supersedingOutput = new ConductorOutput();
+    this.output.nextEvent(new OutputSucceededEvent(this.output, supersedingOutput));
+    this.output = supersedingOutput;
+    this.output.nextEvent(new OutputBeginEvent(output));
+    return this.output;
+  }
+
+  public Output conduct(Procedure procedure) {
     try {
       lock.lock();
 
@@ -144,12 +156,47 @@ public class Conductor {
 
       this.procedure = procedure;
 
-    } catch (IOException e) {
+      return nextOutput();
+
+      /*
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * TODO we must close the environment when the experiment is complete!!!!
+       * 
+       * 
+       * TODO we also need to emit a completed event at that point
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       */
+
+    } catch (Exception e) {
       throw new ConductorException(format("Unable to conduct procedure %s", procedure), e);
 
     } finally {
       lock.unlock();
     }
+  }
+
+  void completeExecution(Execution execution) {
+    // TODO Auto-generated method stub
+
   }
 
   Optional<ExecutionManager> findInstruction(WorkspaceExperimentPath path) {
@@ -160,7 +207,7 @@ public class Conductor {
     return Optional.ofNullable(procedure);
   }
 
-  public void clear() {
+  public Output clear() {
     try {
       lock.lock();
 
@@ -178,6 +225,8 @@ public class Conductor {
 
       this.progress.clear();
       this.procedure = null;
+
+      return nextOutput();
 
     } finally {
       lock.unlock();

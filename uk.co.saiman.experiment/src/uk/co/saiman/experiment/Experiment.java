@@ -58,7 +58,6 @@ import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
-import uk.co.saiman.experiment.output.event.OutputEvent;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
@@ -71,7 +70,6 @@ public class Experiment {
   private ExperimentDefinition definition;
 
   private final Scheduler scheduler;
-  private Output output;
 
   private Map<ExperimentPath<Absolute>, Reference<Step>> steps = new HashMap<>();
 
@@ -93,7 +91,6 @@ public class Experiment {
         executorService,
         localEnvironmentService,
         log);
-    this.output = Output.EMPTY;
 
     updateDefinition(requireNonNull(procedure));
   }
@@ -114,16 +111,16 @@ public class Experiment {
     updateDefinition(definition.withSubsteps(steps -> steps.map(Experiment::withScheduled)));
   }
 
-  public synchronized void conduct() {
-    output = scheduler.getSchedule().map(Schedule::conduct).orElse(Output.EMPTY);
+  public synchronized Output conduct() {
+    return scheduler.getSchedule().map(Schedule::conduct).orElseGet(() -> scheduler.getOutput());
   }
 
   static StepDefinition withScheduled(StepDefinition step) {
     return step.withPlan(EXECUTE).withSubsteps(steps -> steps.map(Experiment::withScheduled));
   }
 
-  public Output getResults() {
-    return output;
+  public Output getOutput() {
+    return scheduler.getOutput();
   }
 
   public ExperimentId getId() {
@@ -142,7 +139,7 @@ public class Experiment {
     boolean changed = !definition.equals(this.definition);
     if (changed) {
       this.definition = definition;
-      scheduler.schedule(definition.procedure(getGlobalEnvironment()));
+      scheduler.scheduleProcedure(definition.procedure(getGlobalEnvironment()));
     }
     return changed;
   }
@@ -153,10 +150,6 @@ public class Experiment {
 
   public Observable<ExperimentEvent> events() {
     return events;
-  }
-
-  public Observable<OutputEvent> conductorEvents() {
-    return output.events();
   }
 
   public synchronized Step attach(StepDefinition stepDefinition) {

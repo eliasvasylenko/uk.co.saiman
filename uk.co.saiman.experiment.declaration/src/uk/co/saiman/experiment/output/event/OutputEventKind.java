@@ -31,17 +31,17 @@ public enum OutputEventKind {
   /**
    * The conductor has begun to generate output for the procedure.
    */
-  BEGIN,
+  BEGINNING,
 
   /**
    * The conductor has finished generating output for the procedure. Output may or
    * may not have been generated successfully.
    */
-  END,
+  ENDING,
 
   /**
    * The generated output has been superseded by a new procedure, the prior
    * procedure may or may not have completed.
    */
-  SUCCEED
+  SUCCESSION
 }

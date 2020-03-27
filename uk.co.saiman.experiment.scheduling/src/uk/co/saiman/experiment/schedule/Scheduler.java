@@ -27,28 +27,21 @@
  */
 package uk.co.saiman.experiment.schedule;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import uk.co.saiman.experiment.conductor.Conductor;
 import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
-import uk.co.saiman.experiment.output.event.OutputEvent;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log;
-import uk.co.saiman.observable.Observable;
 
 /**
  * A scheduler provides management and feedback facilities around a target
  * conductor. It allows users to schedule a procedure to be conducted, then
  * inspect what changes this would incur against the previously conducted
  * experiment, if any, before proceeding.
- * <p>
- * A scheduler should not be shared between multiple clients. While updates are
- * atomic and thread safe, clients who wish to make sure there are no
- * invalidations before proceeding
  * <p>
  * TODO "automatic" executors should be processed as soon as they are scheduled,
  * regardless of what data would be overwritten as a result. This requires the
@@ -91,8 +84,17 @@ public class Scheduler {
     return conductor;
   }
 
-  public synchronized Schedule schedule(Procedure procedure) {
+  public Output getOutput() {
+    return conductor.getOutput();
+  }
+
+  public synchronized Schedule scheduleProcedure(Procedure procedure) {
     schedule = new Schedule(this, procedure);
+    return schedule;
+  }
+
+  public synchronized Schedule scheduleClear() {
+    schedule = new Schedule(this, null);
     return schedule;
   }
 
@@ -102,32 +104,15 @@ public class Scheduler {
     this.schedule = null;
   }
 
-  synchronized void interrupt() {
-    // TODO cancel if we're processing
-  }
-
-  synchronized void clear() throws IOException {
-    conductor.clear();
-  }
-
   synchronized Output conduct(Schedule schedule) {
     assertFresh(schedule);
 
-    conductor.conduct(schedule.getScheduledProcedure());
-    return conductor;
-  }
-
-  public synchronized Optional<Schedule> scheduleReset() {
-    return getConductor().procedure().map(this::schedule);
+    return schedule.getScheduledProcedure().map(conductor::conduct).orElseGet(conductor::clear);
   }
 
   private void assertFresh(Schedule schedule) {
     if (this.schedule != schedule) {
       throw new SchedulingException("Schedule is stale");
     }
-  }
-
-  public Observable<OutputEvent> conductorEvents() {
-    return conductor.events();
   }
 }

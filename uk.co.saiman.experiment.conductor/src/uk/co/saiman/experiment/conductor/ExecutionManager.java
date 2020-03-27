@@ -35,7 +35,6 @@ import static uk.co.saiman.experiment.conductor.ExecutionManager.UpdateStatus.VA
 import uk.co.saiman.experiment.environment.LocalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
-import uk.co.saiman.log.Log.Level;
 
 public class ExecutionManager {
   /**
@@ -84,7 +83,6 @@ public class ExecutionManager {
   private final OutgoingResults outgoingResults;
   private final IncomingDependencies incomingDependencies;
 
-  private Thread executionThread;
   private Execution execution;
 
   public ExecutionManager(Conductor conductor, WorkspaceExperimentPath path) {
@@ -167,45 +165,27 @@ public class ExecutionManager {
       return true;
     }
 
-    try {
-      if (execution != null) {
-        execution.stop();
-      }
-    } catch (Exception e) {
-      conductor.log().log(Level.ERROR, "Failed to stop experiment.", e);
-
-      throw e;
-    } finally {
+    if (execution != null) {
+      execution.stop();
       execution = null;
     }
 
     if (updateStatus == REMOVED) {
       return false;
     }
-
     updateStatus = VALID;
 
-    try {
-      execution = new Execution(
-          conductor,
-          path,
-          instruction,
-          environment,
-          outgoingConditions,
-          outgoingResults,
-          incomingDependencies);
-
-      execution.start();
-    } catch (Exception e) {
-      conductor.log().log(Level.ERROR, "Failed to start experiment.", e);
-      throw e;
-    }
+    execution = new Execution(
+        conductor,
+        path,
+        instruction,
+        environment,
+        outgoingConditions,
+        outgoingResults,
+        incomingDependencies);
+    execution.start();
 
     return true;
-  }
-
-  boolean isRunning() {
-    return executionThread != null;
   }
 
   void markRemoved() {

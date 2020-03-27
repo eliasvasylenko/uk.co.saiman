@@ -43,6 +43,6 @@ public class OutputSucceededEvent extends OutputEvent {
 
   @Override
   public OutputEventKind kind() {
-    return OutputEventKind.SUCCEED;
+    return OutputEventKind.SUCCESSION;
   }
 }

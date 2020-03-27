@@ -29,7 +29,6 @@ package uk.co.saiman.experiment.schedule;
 
 import java.util.Optional;
 
-import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.output.event.OutputEvent;
 import uk.co.saiman.experiment.procedure.Procedure;
@@ -38,14 +37,14 @@ import uk.co.saiman.observable.Observable;
 
 public class Schedule {
   private final Scheduler scheduler;
-  private final Procedure scheduledProcedure;
+  private final Optional<Procedure> scheduledProcedure;
   private final Optional<Procedure> previouslyConductedProcedure;
 
   private final HotObservable<OutputEvent> events = new HotObservable<>();
 
   public Schedule(Scheduler scheduler, Procedure procedure) {
     this.scheduler = scheduler;
-    this.scheduledProcedure = procedure;
+    this.scheduledProcedure = Optional.ofNullable(procedure);
     this.previouslyConductedProcedure = scheduler.getConductor().procedure();
   }
 
@@ -57,7 +56,7 @@ public class Schedule {
     return previouslyConductedProcedure;
   }
 
-  public Procedure getScheduledProcedure() {
+  public Optional<Procedure> getScheduledProcedure() {
     return scheduledProcedure;
   }
 
@@ -71,9 +70,5 @@ public class Schedule {
 
   public Observable<OutputEvent> events() {
     return events;
-  }
-
-  Optional<Instruction> getParent(Instruction instruction) {
-    return instruction.path().parent().flatMap(scheduledProcedure::instruction);
   }
 }

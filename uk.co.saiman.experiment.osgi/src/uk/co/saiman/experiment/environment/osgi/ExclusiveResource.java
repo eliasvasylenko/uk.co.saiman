@@ -30,12 +30,21 @@ package uk.co.saiman.experiment.environment.osgi;
 import java.util.function.Function;
 
 public final class ExclusiveResource<T> implements AutoCloseable {
+  private final Class<T> type;
   private final T value;
   private final Function<? super T, ? extends AutoCloseable> close;
 
-  public ExclusiveResource(T value, Function<? super T, ? extends AutoCloseable> close) {
+  public ExclusiveResource(
+      Class<T> type,
+      T value,
+      Function<? super T, ? extends AutoCloseable> close) {
+    this.type = type;
     this.value = value;
     this.close = close;
+  }
+
+  public Class<T> getType() {
+    return type;
   }
 
   public T getValue() {

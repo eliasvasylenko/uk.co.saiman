@@ -248,7 +248,7 @@ public class Step {
 
   public Stream<? extends Result<?>> getResults() {
     return lock(() -> {
-      var output = experiment.getResults();
+      var output = experiment.getOutput();
       return output.resultPaths(path).map(output::resolveResult).collect(toList());
       // call the terminal op while we're still in the lock
     }).stream();
