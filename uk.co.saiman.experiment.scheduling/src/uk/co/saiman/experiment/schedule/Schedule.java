@@ -45,7 +45,7 @@ public class Schedule {
   public Schedule(Scheduler scheduler, Procedure procedure) {
     this.scheduler = scheduler;
     this.scheduledProcedure = Optional.ofNullable(procedure);
-    this.previouslyConductedProcedure = scheduler.getConductor().procedure();
+    this.previouslyConductedProcedure = scheduler.getConductor().getOutput().procedure();
   }
 
   public Scheduler getScheduler() {

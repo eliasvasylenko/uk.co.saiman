@@ -35,6 +35,10 @@ import uk.co.saiman.state.StateMap;
 /**
  * A store defines a strategy for arranging locations to read, and write
  * experiment result data, typically for persistent storage.
+ * <p>
+ * Storage configurations of the same type should always give out
+ * {@link Storage} instances over the same underlying storage for the same
+ * configuration and path.
  * 
  * @author Elias N Vasylenko
  */

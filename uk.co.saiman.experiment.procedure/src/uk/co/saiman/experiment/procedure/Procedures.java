@@ -249,8 +249,7 @@ public final class Procedures {
     });
   }
 
-  public static void validateDependencies(Procedure procedure) {
-    // TODO Auto-generated method stub
-
+  public static Procedure validateDependencies(Procedure procedure) {
+    return procedure;
   }
 }

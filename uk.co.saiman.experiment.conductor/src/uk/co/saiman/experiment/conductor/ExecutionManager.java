@@ -32,6 +32,8 @@ import static uk.co.saiman.experiment.conductor.ExecutionManager.UpdateStatus.IN
 import static uk.co.saiman.experiment.conductor.ExecutionManager.UpdateStatus.REMOVED;
 import static uk.co.saiman.experiment.conductor.ExecutionManager.UpdateStatus.VALID;
 
+import java.util.Optional;
+
 import uk.co.saiman.experiment.environment.LocalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
@@ -85,7 +87,7 @@ public class ExecutionManager {
 
   private Execution execution;
 
-  public ExecutionManager(Conductor conductor, WorkspaceExperimentPath path) {
+  public ExecutionManager(ConductorOutput conductor, WorkspaceExperimentPath path) {
     this.conductor = conductor;
     this.path = path;
 
@@ -160,7 +162,7 @@ public class ExecutionManager {
         && previousInstruction.variableMap().equals(instruction.variableMap());
   }
 
-  boolean execute() {
+  Optional<Execution> execute() {
     if (updateStatus == VALID) {
       return true;
     }
