@@ -30,15 +30,15 @@ package uk.co.saiman.experiment.output.event;
 import uk.co.saiman.experiment.output.Output;
 
 public class OutputSucceededEvent extends OutputEvent {
-  private Output supersedingOutput;
+  private Output successiveOutput;
 
-  public OutputSucceededEvent(Output output, Output supersedingOutput) {
+  public OutputSucceededEvent(Output output) {
     super(output);
-    this.supersedingOutput = supersedingOutput;
+    this.successiveOutput = output.successiveOutput().get();
   }
 
-  public Output getSupersedingOutput() {
-    return supersedingOutput;
+  public Output getSuccessiveOutput() {
+    return successiveOutput;
   }
 
   @Override

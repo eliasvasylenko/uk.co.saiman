@@ -29,13 +29,11 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.experiment.conductor.ExecutionManager.UpdateStatus.INVALID;
-import static uk.co.saiman.experiment.conductor.ExecutionManager.UpdateStatus.REMOVED;
 import static uk.co.saiman.experiment.conductor.ExecutionManager.UpdateStatus.VALID;
-
-import java.util.Optional;
 
 import uk.co.saiman.experiment.environment.LocalEnvironment;
 import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public class ExecutionManager {
@@ -58,11 +56,7 @@ public class ExecutionManager {
      * invalidated. If the status is invalid when execution resumes, it must
      * terminate and restart.
      */
-    INVALID,
-    /**
-     * The instruction has been removed from the procedure and should be terminated.
-     */
-    REMOVED
+    INVALID
   }
 
   /*
@@ -70,6 +64,8 @@ public class ExecutionManager {
    */
   private final Conductor conductor;
   private final WorkspaceExperimentPath path;
+
+  private ConductorOutput output;
 
   /*
    * Configuration
@@ -87,10 +83,37 @@ public class ExecutionManager {
 
   private Execution execution;
 
-  public ExecutionManager(ConductorOutput conductor, WorkspaceExperimentPath path) {
+  public ExecutionManager(Conductor conductor, WorkspaceExperimentPath path) {
     this.conductor = conductor;
     this.path = path;
 
+    /*
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * TODO these maybe need to be attached to a specific execution, not an
+     * execution manager?
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     this.outgoingConditions = new OutgoingConditions(conductor.lock(), path);
     this.outgoingResults = new OutgoingResults(conductor.lock(), path);
     this.incomingDependencies = new IncomingDependencies(conductor, path);
@@ -110,13 +133,9 @@ public class ExecutionManager {
     return conductor;
   }
 
-  void updateInstruction(Instruction instruction, LocalEnvironment environment) {
-    requireNonNull(instruction);
+  void updateInstruction(Procedure procedure, LocalEnvironment environment) {
+    var instruction = procedure.instruction(path).get();
     requireNonNull(environment);
-
-    if (!this.path.getExperimentPath().equals(instruction.path())) {
-      throw new IllegalStateException("This shouldn't happen!");
-    }
 
     if (!isCompatibleConfiguration(instruction, this.instruction)) {
       markInvalidated();
@@ -126,11 +145,10 @@ public class ExecutionManager {
     this.environment = environment;
   }
 
-  void updateDependencies() {
-    if (updateStatus != REMOVED) {
-      outgoingConditions.update(instruction, environment);
-      incomingDependencies.update(instruction, environment);
-    }
+  void updateDependencies(ConductorOutput output) {
+    this.output = output;
+    outgoingConditions.update(instruction, environment);
+    incomingDependencies.update(output, instruction, environment);
   }
 
   protected <T> IncomingCondition<T> addConditionConsumer(
@@ -162,23 +180,15 @@ public class ExecutionManager {
         && previousInstruction.variableMap().equals(instruction.variableMap());
   }
 
-  Optional<Execution> execute() {
+  void execute() {
     if (updateStatus == VALID) {
-      return true;
+      return;
     }
 
-    if (execution != null) {
-      execution.stop();
-      execution = null;
-    }
-
-    if (updateStatus == REMOVED) {
-      return false;
-    }
-    updateStatus = VALID;
+    stopExecution();
 
     execution = new Execution(
-        conductor,
+        output,
         path,
         instruction,
         environment,
@@ -186,23 +196,33 @@ public class ExecutionManager {
         outgoingResults,
         incomingDependencies);
     execution.start();
-
-    return true;
   }
 
-  void markRemoved() {
+  void remove() {
     markInvalidated();
-    updateStatus = REMOVED;
     instruction = null;
     environment = null;
+    stopExecution();
+  }
+
+  private void stopExecution() {
+    if (execution != null) {
+      execution.stop();
+      execution = null;
+      updateStatus = VALID;
+    }
   }
 
   void markInvalidated() {
-    if (updateStatus != INVALID && updateStatus != REMOVED) {
+    if (updateStatus == VALID) {
       updateStatus = INVALID;
       incomingDependencies.invalidate();
       outgoingConditions.invalidate();
       outgoingResults.invalidate();
     }
+  }
+
+  void join() {
+    execution.join();
   }
 }

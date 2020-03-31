@@ -29,7 +29,7 @@ public class IncomingDependencies {
     this.path = path;
   }
 
-  void update(Instruction instruction, LocalEnvironment environment) {
+  void update(ConductorOutput output, Instruction instruction, LocalEnvironment environment) {
     requireNonNull(instruction);
     requireNonNull(environment);
 
@@ -52,7 +52,7 @@ public class IncomingDependencies {
                   throw new ConductorException(
                       "Cannot declare multiple primary condition requirements");
                 }
-                incomingCondition = getParent()
+                incomingCondition = getParent(output)
                     .map(dependency -> dependency.addConditionConsumer(production, path))
                     .orElse(null);
               }
@@ -67,7 +67,7 @@ public class IncomingDependencies {
                   throw new ConductorException(
                       "Cannot depend on results and conditions at the same time");
                 }
-                incomingResult = getParent()
+                incomingResult = getParent(output)
                     .map(dependency -> dependency.addResultConsumer(production, path))
                     .orElse(null);
               }
@@ -78,7 +78,7 @@ public class IncomingDependencies {
                   throw new ConductorException(
                       "Cannot depend on results and conditions at the same time");
                 }
-                getParent()
+                getParent(output)
                     .ifPresent(
                         dependency -> additionalIncomingResults
                             .add(
@@ -90,12 +90,12 @@ public class IncomingDependencies {
             });
   }
 
-  protected Optional<ExecutionManager> getParent() {
+  protected Optional<ExecutionManager> getParent(ConductorOutput output) {
     return path
         .getExperimentPath()
         .parent()
         .map(p -> WorkspaceExperimentPath.define(path.getExperimentId(), p))
-        .flatMap(conductor::findInstruction);
+        .flatMap(output::findInstruction);
   }
 
   @SuppressWarnings("unchecked")

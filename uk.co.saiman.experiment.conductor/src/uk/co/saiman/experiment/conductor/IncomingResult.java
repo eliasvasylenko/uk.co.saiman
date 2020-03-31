@@ -12,7 +12,7 @@ import uk.co.saiman.observable.Observable;
 class IncomingResult<T> {
   private final OutgoingResult<T> outgoing;
   private final java.util.concurrent.locks.Condition lockCondition;
-  IncomingDependencyState state;
+  private IncomingDependencyState state;
 
   public IncomingResult(
       OutgoingResult<T> outgoing,

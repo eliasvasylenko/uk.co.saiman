@@ -27,19 +27,16 @@ public final class Procedures {
       LocalEnvironmentService environmentService,
       int time,
       TimeUnit unit) {
-    var environment = environmentService.openLocalEnvironment(procedure.environment());
-    environment
-        .acquireResources(
+    return environmentService
+        .openLocalEnvironment(
+            procedure.environment(),
             procedure
                 .instructions()
                 .flatMap(
-                    instruction -> getResourceDependencies(
-                        instruction,
-                        environment.getGlobalEnvironment()))
+                    instruction -> getResourceDependencies(instruction, procedure.environment()))
                 .collect(toList()),
             time,
             unit);
-    return environment;
   }
 
   public static Stream<Class<?>> getObservations(

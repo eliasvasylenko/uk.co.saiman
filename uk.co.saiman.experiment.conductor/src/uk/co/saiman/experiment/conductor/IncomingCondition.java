@@ -10,7 +10,7 @@ import uk.co.saiman.experiment.dependency.ConditionPath;
 class IncomingCondition<T> {
   private final OutgoingCondition<T> outgoing;
   private final java.util.concurrent.locks.Condition lockCondition;
-  IncomingDependencyState state;
+  private IncomingDependencyState state;
 
   public IncomingCondition(
       OutgoingCondition<T> outgoing,

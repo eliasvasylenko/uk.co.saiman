@@ -38,7 +38,10 @@ class OutgoingResult<T> {
     this.resource = Objects.requireNonNull(resource);
 
     try {
-      while (consumers.values().stream().anyMatch(c -> c.state != IncomingDependencyState.DONE)) {
+      while (consumers
+          .values()
+          .stream()
+          .anyMatch(c -> c.getState() != IncomingDependencyState.DONE)) {
         lockCondition.signalAll();
         lockCondition.await();
       }

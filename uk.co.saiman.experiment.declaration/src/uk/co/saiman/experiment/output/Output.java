@@ -36,7 +36,6 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.output.event.OutputEvent;
-import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.observable.Observable;
 
 public interface Output {

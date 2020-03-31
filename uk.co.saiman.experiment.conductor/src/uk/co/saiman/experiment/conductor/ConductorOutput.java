@@ -2,9 +2,12 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toMap;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.Data;
@@ -19,109 +22,81 @@ import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.procedure.json.JsonProcedureFormat;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
 public class ConductorOutput implements Output {
   private final Conductor conductor;
   private final Procedure procedure;
-  private final LocalEnvironment environment;
   private final Data<Procedure> data;
-
   private final Map<WorkspaceExperimentPath, ExecutionManager> progress;
+
+  private LocalEnvironment environment;
+
   private final HotObservable<OutputEvent> events = new HotObservable<>();
 
-  private Output successor;
+  private ConductorOutput successor;
 
   ConductorOutput(Conductor conductor) {
     this.conductor = conductor;
     this.procedure = null;
+    this.data = null;
     this.progress = Map.of();
   }
 
   private ConductorOutput(
-      ConductorOutput previous,
+      Conductor conductor,
       Procedure procedure,
-      LocalEnvironment environment,
-      Data<Procedure> data) {
-    this.conductor = previous.conductor;
+      Data<Procedure> data,
+      Map<WorkspaceExperimentPath, ExecutionManager> progress) {
+    this.conductor = conductor;
     this.procedure = procedure;
-    this.environment = environment;
     this.data = data;
+    this.progress = progress;
+  }
 
+  private void start() throws Exception {
+    environment = Procedures.openEnvironment(procedure, conductor.environmentService(), 2, SECONDS);
     try {
-      conductor.lock().lock();
-
       data.set(procedure);
       data.save();
 
+      System.out.println(" PROC: " + procedure);
+      System.out.println(" PROG: " + progress);
+
       procedure
           .instructionPaths()
-          .forEach(
-              path -> this.progress
-                  .compute(
-                      path,
-                      (p, execution) -> Optional
-                          .ofNullable(execution)
-                          .orElseGet(() -> new ExecutionManager(this, p)))
-                  .updateInstruction(procedure.instruction(path).get(), environment));
-
-      procedure.instructionPaths().forEach(path -> this.progress.get(path).updateDependencies());
-
-      this.progress.replaceAll((path, execution) -> execution.execute() ? execution : null);
-
-      /*
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * TODO we must close the environment when the experiment is complete!!!!
-       * 
-       * 
-       * TODO we also need to emit a completed event at that point
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       */
+          .forEach(i -> progress.get(i).updateInstruction(procedure, environment));
+      procedure.instructionPaths().forEach(i -> progress.get(i).updateDependencies(this));
+      procedure.instructionPaths().forEach(i -> progress.get(i).execute());
 
       // is there any point in this? it will always just immediately follow an
       // outputsucceeded event on the previous output...
       // nextOutput.nextEvent(new OutputBeginEvent(output));
-    } catch (Exception e) {
-      environment.close();
-      throw e;
 
     } finally {
-      conductor.lock().unlock();
+      // TODO attach environment close and end event to the join of any executor
+      // threads.
+      conductor.getExecutor().execute(() -> {
+        try {
+          progress.values().forEach(e -> {
+            try {
+              e.join();
+            } catch (Exception x) {}
+          });
+
+        } finally {
+          try {
+            environment.close();
+          } catch (Exception e) {
+            throw new ConductorException(
+                format("Failed to complete procedure normally %s", procedure),
+                e);
+          }
+        }
+      });
     }
-  }
-
-  private void succeeded(Procedure successor) {
-    if (data != null) {
-      data.unset();
-      data.save();
-    }
-
-    progress.values().stream().forEach(execution -> {
-      execution.markRemoved();
-      execution.execute();
-    });
-
-    events.next(new OutputSucceededEvent(this, successor));
   }
 
   @Override
@@ -145,22 +120,18 @@ public class ConductorOutput implements Output {
 
   @Override
   public Observable<OutputEvent> events() {
-    // TODO Auto-generated method stub
-    return null;
+    return events;
   }
 
   @Override
   public Optional<Output> successiveOutput() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public void nextEvent(OutputEvent outputEvent) {
-    // TODO Auto-generated method stub
-
+    return Optional.ofNullable(successor);
   }
 
   Optional<ExecutionManager> findInstruction(WorkspaceExperimentPath path) {
+    System.out.println("   find " + path);
+    System.out.println(progress);
+    System.out.println(progress.get(path));
     return Optional.ofNullable(progress.get(path));
   }
 
@@ -178,86 +149,83 @@ public class ConductorOutput implements Output {
           procedure.environment());
       var data = Data.locate(storage.location(), procedure.id().name(), procedureFormat);
 
-      /*
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       * We've tried putting openEnvironment here so that if it fails we don't have to
-       * terminate the existing conductor output. But it's a bit awkward since we also
-       * want to be careful about the ownership of the environment and closing it when
-       * it's not needed any more ... and that's hard to do when we're passing it in
-       * to its owner.
-       * 
-       * 
-       * 
-       * TODO Probably a better idea to just skip all this complexity and only try
-       * opening the environment once we've already succeeded this conductor output.
-       * 
-       * 
-       * 
-       * 
-       * 
-       * 
-       */
-      var environment = Procedures
-          .openEnvironment(procedure, conductor.environmentService(), 2, SECONDS);
       try {
-        return succeed(new ConductorOutput(this, procedure, environment, data));
-      } catch (Exception e) {
-        try {
-          environment.close();
-        } catch (Exception e2) {
-          e.addSuppressed(e2);
-        }
-        throw e;
+        conductor.lock().lock();
+
+        clearData();
+        var progress = inheritOrTerminateProgress(procedure);
+
+        successor = new ConductorOutput(conductor, procedure, data, progress);
+        events.next(new OutputSucceededEvent(this));
+
+        successor.start();
+
+        return successor;
+
+      } finally {
+        conductor.lock().unlock();
       }
     } catch (Exception e) {
-      throw new ConductorException(format("Unable to conduct procedure %s", procedure), e);
+      var ce = new ConductorException(format("Unable to conduct procedure %s", procedure), e);
+      conductor.log().log(Level.ERROR, ce);
+      throw ce;
     }
   }
 
   public ConductorOutput succeedWithClear() {
     try {
-      return succeed(new ConductorOutput(this, null, null, null));
+      try {
+        conductor.lock().lock();
+
+        clearData();
+        terminateProgress();
+
+        successor = new ConductorOutput(conductor);
+        events.next(new OutputSucceededEvent(this));
+
+        return successor;
+
+      } finally {
+        conductor.lock().unlock();
+      }
     } catch (Exception e) {
-      throw new ConductorException(format("Unable to terminate conductor"), e);
+      var ce = new ConductorException(format("Unable to terminate conductor"), e);
+      conductor.log().log(Level.ERROR, ce);
+      throw ce;
     }
   }
 
-  private ConductorOutput succeed(ConductorOutput successor) throws Exception {
-    try {
-      conductor.lock().lock();
-
-      if (data != null) {
-        data.unset();
-        data.save();
-      }
-
-      progress
-          .values()
-          .stream()
-          .filter(
-              execution -> successor
-                  .procedure()
-                  .flatMap(p -> p.instruction(execution.getPath()))
-                  .isEmpty())
-          .forEach(execution -> {
-            execution.markRemoved();
-            execution.execute();
-          });
-
-      this.successor = successor;
-      events.next(new OutputSucceededEvent(this, successor));
-
-      return successor;
-
-    } finally {
-      conductor.lock().unlock();
+  private void clearData() {
+    if (data != null) {
+      data.unset();
+      data.save();
     }
+  }
+
+  private Map<WorkspaceExperimentPath, ExecutionManager> inheritOrTerminateProgress(
+      Procedure procedure) {
+    var thisProgress = new HashMap<>(this.progress);
+    var progress = procedure
+        .instructionPaths()
+        .collect(
+            toMap(
+                Function.identity(),
+                p -> Optional
+                    .ofNullable(thisProgress.remove(p))
+                    .orElseGet(() -> new ExecutionManager(conductor, p))));
+    thisProgress.values().forEach(ExecutionManager::remove);
+    return progress;
+  }
+
+  private void terminateProgress() {
+    this.progress.values().forEach(ExecutionManager::remove);
+  }
+
+  Conductor getConductor() {
+    return conductor;
+  }
+
+  LocalEnvironment environment() {
+    return environment;
   }
 }

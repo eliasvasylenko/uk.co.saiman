@@ -3,6 +3,7 @@ package uk.co.saiman.experiment.conductor;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -24,6 +25,7 @@ import uk.co.saiman.log.Log.Level;
 
 public class Execution {
   private final Conductor conductor;
+  private final ConductorOutput output;
   private final WorkspaceExperimentPath path;
 
   private final Instruction instruction;
@@ -33,18 +35,19 @@ public class Execution {
   private final IncomingDependencies incomingDependencies;
 
   private Location location;
-  private Thread executionThread;
+  private Future<?> executionThread;
   private boolean completed = false;
 
   public Execution(
-      Conductor conductor,
+      ConductorOutput output,
       WorkspaceExperimentPath path,
       Instruction instruction,
       LocalEnvironment environment,
       OutgoingConditions outgoingConditions,
       OutgoingResults outgoingResults,
       IncomingDependencies incomingDependencies) {
-    this.conductor = conductor;
+    this.conductor = output.getConductor();
+    this.output = output;
     this.path = path;
 
     this.instruction = instruction;
@@ -52,8 +55,6 @@ public class Execution {
     this.outgoingConditions = outgoingConditions;
     this.outgoingResults = outgoingResults;
     this.incomingDependencies = incomingDependencies;
-
-    this.executionThread = new Thread(this::run);
   }
 
   private ExecutionContext createExecutionContext(Consumer<Resource<?>> acquiredResource) {
@@ -163,43 +164,51 @@ public class Execution {
   }
 
   void run() {
-    Set<Resource<?>> acquiredResources = new HashSet<Resource<?>>();
+    var acquiredResources = new HashSet<Resource<?>>();
 
     try {
       var executionContext = createExecutionContext(acquiredResources::add);
 
       executionContext.useOnce(instruction.executor());
+    } catch (Exception e) {
+      conductor.log().log(Level.ERROR, e);
+      throw e;
+
     } finally {
-      try {
-        conductor.lock().lock();
+      completeRun(acquiredResources);
+    }
+  }
 
-        outgoingConditions.terminate();
-        outgoingResults.terminate();
-        incomingDependencies.terminate();
+  private void completeRun(Set<Resource<?>> acquiredResources) {
+    try {
+      conductor.lock().lock();
 
-        acquiredResources.stream().flatMap(r -> {
-          try {
-            r.close();
-            return Stream.empty();
-          } catch (RuntimeException e) {
-            return Stream.of(e);
-          }
-        }).reduce((e1, e2) -> {
-          e1.addSuppressed(e2);
-          return e1;
-        }).ifPresent(r -> {
-          throw r;
-        });
+      completed = true;
 
-      } finally {
+      outgoingConditions.terminate();
+      outgoingResults.terminate();
+      incomingDependencies.terminate();
+
+      acquiredResources.stream().flatMap(r -> {
         try {
-          completed = true;
-          conductor.completeExecution(this);
-
-        } finally {
-          conductor.lock().unlock();
+          r.close();
+          return Stream.empty();
+        } catch (RuntimeException e) {
+          return Stream.of(e);
         }
-      }
+      }).reduce((e1, e2) -> {
+        e1.addSuppressed(e2);
+        return e1;
+      }).ifPresent(r -> {
+        throw r;
+      });
+
+    } catch (Exception e) {
+      conductor.log().log(Level.ERROR, e);
+      throw e;
+
+    } finally {
+      conductor.lock().unlock();
     }
   }
 
@@ -210,7 +219,7 @@ public class Execution {
   void start() {
     try {
       prepareLocation();
-      executionThread.start();
+      executionThread = conductor.getExecutor().submit(this::run);
 
     } catch (Exception e) {
       outgoingConditions.terminate();
@@ -223,19 +232,25 @@ public class Execution {
 
   void stop() {
     try {
-      try {
-        executionThread.interrupt();
-        executionThread.join();
-      } catch (ExecutionCancelledException | InterruptedException e) {}
-
-      outgoingConditions.terminate();
-      outgoingResults.terminate();
-      incomingDependencies.terminate();
+      if (executionThread != null) {
+        try {
+          executionThread.cancel(true);
+          executionThread.get();
+        } catch (ExecutionCancelledException | InterruptedException e) {}
+      }
 
       clearLocation();
 
     } catch (Exception e) {
       conductor.log().log(Level.ERROR, "Failed to stop experiment.", e);
+    }
+  }
+
+  void join() {
+    if (executionThread != null) {
+      try {
+        executionThread.get();
+      } catch (Exception e) {}
     }
   }
 

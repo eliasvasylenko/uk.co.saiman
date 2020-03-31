@@ -32,12 +32,15 @@ import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
@@ -115,37 +118,22 @@ public class LocalEnvironmentServiceImpl implements LocalEnvironmentService {
   }
 
   @Override
-  public LocalEnvironment openLocalEnvironment(GlobalEnvironment globalEnvironment) {
+  public LocalEnvironment openLocalEnvironment(
+      GlobalEnvironment globalEnvironment,
+      Collection<? extends java.lang.Class<?>> resources,
+      long timeout,
+      TimeUnit unit) {
+
+    Map<Class<?>, ExclusiveResource<?>> exclusiveResources = resources
+        .stream()
+        .filter(not(globalEnvironment::providesValue))
+        .<ExclusiveResource<?>>map(r -> getExclusiveResource(r, globalEnvironment, timeout, unit))
+        .collect(Collectors.toMap(ExclusiveResource::getType, Function.identity()));
+
     return new LocalEnvironment() {
       private final ReentrantLock lock = new ReentrantLock();
 
-      private final Map<Class<?>, ExclusiveResource<?>> exclusiveResources = new HashMap<>();
       private final Map<Class<?>, Condition> heldExclusiveResources = new HashMap<>();
-
-      @Override
-      public void acquireResources(
-          java.util.Collection<? extends java.lang.Class<?>> resources,
-          long timeout,
-          TimeUnit unit) {
-        try {
-          lock.lock();
-
-          resources = resources
-              .stream()
-              .filter(not(globalEnvironment::providesValue))
-              .collect(toList());
-
-          resources
-              .stream()
-              .<ExclusiveResource<?>>map(
-                  r -> getExclusiveResource(r, globalEnvironment, timeout, unit))
-              .collect(toList())
-              .stream()
-              .forEach(r -> this.exclusiveResources.put(r.getType(), r));
-        } finally {
-          lock.unlock();
-        }
-      }
 
       @Override
       public void close() {
@@ -239,5 +227,18 @@ public class LocalEnvironmentServiceImpl implements LocalEnvironmentService {
         return globalEnvironment;
       }
     };
+  }
+
+  @Override
+  public LocalEnvironment openLocalEnvironment(
+      LocalEnvironment localEnvironment,
+      Collection<? extends Class<?>> resources,
+      long timeout,
+      TimeUnit unit) {
+    /*
+     * TODO inherit the resources already available in the given local environment,
+     * acquire the rest
+     */
+    throw new UnsupportedOperationException();
   }
 }

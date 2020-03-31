@@ -39,6 +39,7 @@ import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_PLATE_PREPAR
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
@@ -46,6 +47,8 @@ import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.variables.VariableCardinality;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor.MaldiXYStageExecutorConfiguration;
 import uk.co.saiman.maldi.sampleplate.MaldiSamplePreparation;
 import uk.co.saiman.maldi.stage.MaldiStageController;
@@ -65,10 +68,12 @@ public class MaldiSamplePlateExecutor implements Executor {
 
   static final String CONFIGURATION_PID = SAMPLE_PLATE_EXECUTOR + ".impl";
 
+  private final Log log;
   private MaldiSamplePreparation loadedPreparation;
 
   @Activate
-  public MaldiSamplePlateExecutor(BundleContext context) {
+  public MaldiSamplePlateExecutor(BundleContext context, @Reference Log log) {
+    this.log = log;
     this.loadedPreparation = null;
   }
 
@@ -85,18 +90,14 @@ public class MaldiSamplePlateExecutor implements Executor {
 
   @Override
   public void execute(ExecutionContext context) {
-    System.out.println("get variables ...");
     var requestedPreparation = new MaldiSamplePreparation(
         context.getVariable(SAMPLE_PLATE_PREPARATION_ID),
         context.getVariable(SAMPLE_PLATE),
         context.getVariables().get(SAMPLE_PLATE_BARCODE).flatMap(b -> b).orElse(null));
-    System.out.println("got!");
+    log.log(Level.INFO, "Sample plate preparation " + requestedPreparation);
 
-    System.out.println("acquire resource ...");
     var control = context.acquireResource(MaldiStageController.class).value();
-    System.out.println("acquired!");
 
-    System.out.println("submit request ...");
     /*
      * TODO when we are *not* executing an experiment, we need to listen for
      * exchanges and null the loadedPlate when they occur.
@@ -110,15 +111,13 @@ public class MaldiSamplePlateExecutor implements Executor {
     } else {
       control.requestExchange();
     }
-    System.out.println("requested!");
 
     /*
      * Enough time for an exchange. If none is needed the controller should
      * internally have a shorter time out to detect motor failure.
      */
-    System.out.println("await ready ...");
+    log.log(Level.INFO, "Awaiting sample plate");
     control.awaitReady(10, MINUTES);
-    System.out.println("ready!");
     loadedPreparation = requestedPreparation;
 
     context

@@ -28,10 +28,10 @@
 package uk.co.saiman.experiment.conductor;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,13 +43,29 @@ import uk.co.saiman.experiment.procedure.json.JsonInstructionFormat;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log;
 
+/**
+ * Conductor for expresiment procedures.
+ * <p>
+ * A procedure consists of a set of instructions, and to conduct a procedure
+ * means to execute all of those instructions. Instructions may produce output,
+ * and may depend on one another. The conductor must arrange the execution of
+ * instructions so that their interdependencies can be satisfied, and gather
+ * their collective outputs.
+ * <p>
+ * A conductor may be reused any number of times, but only one procedure may be
+ * conducted at a time. Conducting a new procedure will overwrite the outputs of
+ * any prior procedures, unless some of the instructions are the same and it is
+ * possible to reuse previous outputs.
+ * 
+ * @author Elias N Vasylenko
+ */
 public class Conductor {
   private final StorageConfiguration<?> storageConfiguration;
   private final JsonInstructionFormat instructionFormat;
   private final LocalEnvironmentService environmentService;
   private final Log log;
 
-  private final Executor executor;
+  private final java.util.concurrent.ExecutorService executor;
   private final ReentrantLock lock;
 
   private ConductorOutput output;
@@ -64,7 +80,12 @@ public class Conductor {
     this.environmentService = requireNonNull(environmentService);
     this.log = log;
 
-    this.executor = Executors.defaultThreadFactory()::newThread;
+    this.executor = new ThreadPoolExecutor(
+        8,
+        Integer.MAX_VALUE,
+        2,
+        SECONDS,
+        new SynchronousQueue<>());
     this.lock = new ReentrantLock();
 
     this.output = new ConductorOutput(this);
@@ -86,7 +107,7 @@ public class Conductor {
     return log;
   }
 
-  Executor getExecutor() {
+  java.util.concurrent.ExecutorService getExecutor() {
     return executor;
   }
 
