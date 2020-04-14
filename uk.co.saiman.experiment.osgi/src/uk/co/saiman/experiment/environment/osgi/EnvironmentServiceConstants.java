@@ -31,4 +31,10 @@ public final class EnvironmentServiceConstants {
   private EnvironmentServiceConstants() {}
 
   public static final String ENVIRONMENT_FILTER_ATTRIBUTE = "environment.filter";
+
+  public static final String RESOURCE_AVAILABILITY_ATTRIBUTE = "resource.availability";
+
+  public static final String RESOURCE_AVAILABILITY_SHARED = "shared";
+
+  public static final String RESOURCE_AVAILABILITY_EXCLUSIVE = "exclusive";
 }

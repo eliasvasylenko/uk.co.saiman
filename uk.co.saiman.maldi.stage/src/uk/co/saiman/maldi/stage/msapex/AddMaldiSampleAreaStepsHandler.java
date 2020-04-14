@@ -41,7 +41,7 @@ import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.maldi.sample.SamplePlateSubmission;
@@ -53,7 +53,7 @@ public class AddMaldiSampleAreaStepsHandler {
       Experiment experiment,
       ExperimentPath<Absolute> path,
       @Optional SampleAreaSelection sampleAreaSelection,
-      GlobalEnvironment environment) {
+      Environment environment) {
     if (sampleAreaSelection == null) {
       return;
     }

@@ -32,7 +32,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Optional;
 import java.util.function.Function;
 
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.SharedEnvironment;
 import uk.co.saiman.state.StateMap;
 
 /**
@@ -41,15 +41,15 @@ import uk.co.saiman.state.StateMap;
  * @author Elias N Vasylenko
  */
 public class Variables {
-  private final GlobalEnvironment environment;
+  private final SharedEnvironment environment;
   private final StateMap state;
 
-  public Variables(GlobalEnvironment environment) {
+  public Variables(SharedEnvironment environment) {
     this.environment = requireNonNull(environment);
     this.state = StateMap.empty();
   }
 
-  public Variables(GlobalEnvironment environment, StateMap state) {
+  public Variables(SharedEnvironment environment, StateMap state) {
     this.environment = requireNonNull(environment);
     this.state = requireNonNull(state);
   }

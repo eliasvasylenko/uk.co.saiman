@@ -28,13 +28,20 @@
 package uk.co.saiman.instrument.stage.composed;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.observable.ObservableProperty.over;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import javax.measure.Quantity;
+
+import uk.co.saiman.instrument.Controller;
 import uk.co.saiman.instrument.DeviceImpl;
+import uk.co.saiman.instrument.axis.AxisController;
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.axis.AxisState;
 import uk.co.saiman.instrument.sample.Analysis;
@@ -56,28 +63,43 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
   }
 
   private final List<AxisDevice<?>> axes;
+  private final Map<AxisDevice<?>, AxisController<?>> controllers;
+
   private final T readyPosition;
   private final T exchangePosition;
 
-  private final ObservableProperty<RequestedSampleState<T>> requestedSampleState;
+  private final ObservableProperty<Optional<RequestedSampleState<T>>> requestedSampleState;
+  private RequestedSampleState<T> lastRequestedSampleState;
   private final ObservableProperty<SampleState<T>> sampleState;
 
-  private final ObservableProperty<T> actualPosition;
+  private final ObservableProperty<Optional<T>> actualPosition;
 
   private final List<Disposable> axisObservations;
 
-  public ComposedStage(T analysisPosition, T exchangePosition, AxisDevice<?>... axes) {
+  public ComposedStage(T analysisPosition, T exchangePosition, AxisDevice<?>... axes)
+      throws InterruptedException, TimeoutException {
     this.axes = List.of(axes);
+    this.controllers = new HashMap<>();
+    for (var axis : this.axes) {
+      this.controllers.put(axis, axis.acquireControl(100, TimeUnit.MILLISECONDS));
+    }
+
     this.readyPosition = analysisPosition;
     this.exchangePosition = exchangePosition;
 
-    this.requestedSampleState = over(SampleState.ready());
-    this.sampleState = over(SampleState.failed());
+    this.requestedSampleState = ObservableProperty.over(Optional.empty());
+    this.lastRequestedSampleState = null;
+    this.sampleState = ObservableProperty.over(SampleState.failed());
     this.actualPosition = ObservableProperty.over(NullPointerException::new);
 
     this.axisObservations = this.axes.stream().flatMap(this::observeAxis).collect(toList());
 
     updateState();
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <V extends Quantity<V>> AxisController<V> getAxisController(AxisDevice<V> axis) {
+    return (AxisController<V>) controllers.get(axis);
   }
 
   private Stream<Disposable> observeAxis(AxisDevice<?> axis) {
@@ -92,6 +114,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
   protected void setDisposed() {
     super.setDisposed();
     axisObservations.forEach(Disposable::cancel);
+    controllers.values().forEach(Controller::close);
   }
 
   private void updateStatus() {
@@ -115,7 +138,7 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
         sampleState = SampleState.transition();
 
       } else {
-        sampleState = requestedSampleState.get();
+        sampleState = Optional.ofNullable(lastRequestedSampleState).orElse(SampleState.ready());
       }
 
       this.sampleState.set(sampleState);
@@ -126,13 +149,16 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
 
   private void updateActualPosition() {
     try {
-      actualPosition.set(getActualPositionImpl());
-    } catch (Exception e) {}
+      actualPosition.set(Optional.of(getActualPositionImpl()));
+    } catch (Exception e) {
+      actualPosition.setProblem(() -> new IllegalStateException(e));
+    }
   }
 
   protected synchronized void requestSampleState(RequestedSampleState<T> requestedSampleState) {
-    if (!this.requestedSampleState.isEqual(requestedSampleState)) {
-      this.requestedSampleState.set(requestedSampleState);
+    if (!this.requestedSampleState.isValueEqual(Optional.of(requestedSampleState))) {
+      this.requestedSampleState.set(Optional.of(requestedSampleState));
+      this.lastRequestedSampleState = requestedSampleState;
       T requestedSamplePosition;
       if (requestedSampleState instanceof Analysis<?>) {
         requestedSamplePosition = ((Analysis<T>) requestedSampleState).position();
@@ -145,10 +171,14 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
     }
   }
 
+  protected synchronized void withdrawRequest() {
+    this.requestedSampleState.set(Optional.empty());
+  }
+
   protected SampleState<T> awaitRequest(long time, TimeUnit unit) {
     return sampleState()
         .value()
-        .filter(requestedSampleState()::isEqual)
+        .filter(s -> requestedSampleState().isValueEqual(Optional.of(s)))
         .getNext()
         .orTimeout(time, unit)
         .join();
@@ -164,12 +194,12 @@ public abstract class ComposedStage<T, U extends StageController<T>> extends Dev
   }
 
   @Override
-  public ObservableValue<T> samplePosition() {
+  public ObservableValue<Optional<T>> samplePosition() {
     return actualPosition;
   }
 
   @Override
-  public ObservableValue<RequestedSampleState<T>> requestedSampleState() {
+  public ObservableValue<Optional<RequestedSampleState<T>>> requestedSampleState() {
     return requestedSampleState;
   }
 

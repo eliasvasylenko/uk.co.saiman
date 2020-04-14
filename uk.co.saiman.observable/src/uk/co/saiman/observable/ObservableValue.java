@@ -49,7 +49,8 @@ import java.util.function.Supplier;
  * 
  * @author Elias N Vasylenko
  *
- * @param <T> the type of the value
+ * @param <T>
+ *          the type of the value
  */
 public interface ObservableValue<T> {
   /**
@@ -57,7 +58,8 @@ public interface ObservableValue<T> {
    * 
    * @author Elias N Vasylenko
    *
-   * @param <T> the type of the value
+   * @param <T>
+   *          the type of the value
    */
   interface Change<T> {
     ObservableValue<T> previousValue();
@@ -82,15 +84,15 @@ public interface ObservableValue<T> {
    */
   Optional<T> tryGet();
 
-  default boolean isPresent() {
+  default boolean isValuePresent() {
     return tryGet().isPresent();
   }
 
-  default boolean isEqual(Object value) {
-    return isMatching(value::equals);
+  default boolean isValueEqual(Object value) {
+    return testValue(value::equals);
   }
 
-  default boolean isMatching(Predicate<? super T> value) {
+  default boolean testValue(Predicate<? super T> value) {
     return tryGet().filter(value::test).isPresent();
   }
 

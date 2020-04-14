@@ -14,7 +14,7 @@ import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.Resource;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.environment.LocalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.ExecutionCancelledException;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.instruction.Instruction;
@@ -29,20 +29,21 @@ public class Execution {
   private final WorkspaceExperimentPath path;
 
   private final Instruction instruction;
-  private final LocalEnvironment environment;
+  private final Environment environment;
   private final OutgoingConditions outgoingConditions;
   private final OutgoingResults outgoingResults;
   private final IncomingDependencies incomingDependencies;
 
   private Location location;
   private Future<?> executionThread;
+  private boolean valid = true;
   private boolean completed = false;
 
   public Execution(
       ConductorOutput output,
       WorkspaceExperimentPath path,
       Instruction instruction,
-      LocalEnvironment environment,
+      Environment environment,
       OutgoingConditions outgoingConditions,
       OutgoingResults outgoingResults,
       IncomingDependencies incomingDependencies) {
@@ -65,13 +66,18 @@ public class Execution {
       }
 
       @Override
+      public WorkspaceExperimentPath getPath() {
+        return path;
+      }
+
+      @Override
       public Location getLocation() {
         return location;
       }
 
       @Override
       public Variables getVariables() {
-        return new Variables(environment.getGlobalEnvironment(), instruction.variableMap());
+        return new Variables(environment, instruction.variableMap());
       }
 
       @Override
@@ -117,7 +123,7 @@ public class Execution {
       }
 
       @Override
-      public <U> void prepareCondition(Class<U> condition, U resource) {
+      public <U> void prepareCondition(Class<U> condition, Supplier<? extends U> resource) {
         conductor.lock().lock();
         try {
           outgoingConditions.getOutgoingCondition(condition).ifPresent(o -> o.prepare(resource));
@@ -290,6 +296,21 @@ public class Execution {
     } finally {
       location = null;
       conductor.lock().unlock();
+    }
+  }
+
+  boolean isValid() {
+    return valid;
+  }
+
+  void invalidate() {
+    if (valid) {
+      valid = false;
+      incomingDependencies.invalidate();
+      outgoingConditions.invalidate();
+      outgoingResults.invalidate();
+
+      stop();
     }
   }
 }

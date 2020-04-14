@@ -41,7 +41,7 @@ import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.processing.Processing;
 import uk.co.saiman.experiment.variables.Variables;
@@ -61,7 +61,7 @@ public class AddProcessingHandler {
       ExecutorService executors,
       Experiment experiment,
       ExperimentPath<Absolute> path,
-      GlobalEnvironment environment) {
+      Environment environment) {
     var processingExecutor = executors.getExecutor(SPECTRUM_PROCESSING_EXECUTOR);
 
     var parent = experiment.getStep(path).orElse(null);

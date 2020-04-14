@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 
-import uk.co.saiman.experiment.environment.LocalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
@@ -39,18 +39,14 @@ class OutgoingConditions {
     return path;
   }
 
-  public void update(Instruction instruction, LocalEnvironment environment) {
-    Procedures
-        .plan(
-            instruction,
-            environment.getGlobalEnvironment(),
-            variables -> new InstructionPlanningContext() {
-              @Override
-              public void preparesCondition(Class<?> type, Evaluation evaluation) {
-                conditionPreparations
-                    .put(type, new OutgoingCondition<>(OutgoingConditions.this, type, evaluation));
-              }
-            });
+  public void update(Instruction instruction, Environment environment) {
+    Procedures.plan(instruction, environment, variables -> new InstructionPlanningContext() {
+      @Override
+      public void preparesCondition(Class<?> type, Evaluation evaluation) {
+        conditionPreparations
+            .put(type, new OutgoingCondition<>(OutgoingConditions.this, type, evaluation));
+      }
+    });
 
   }
 

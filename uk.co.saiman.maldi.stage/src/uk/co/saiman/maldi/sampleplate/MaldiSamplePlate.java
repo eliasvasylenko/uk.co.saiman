@@ -32,12 +32,32 @@ import java.util.Optional;
 import javax.measure.quantity.Length;
 
 import uk.co.saiman.experiment.sampleplate.SamplePlate;
+import uk.co.saiman.measurement.Units;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.state.StateMap;
 
 public interface MaldiSamplePlate extends SamplePlate {
+  static final XYCoordinate<Length> LOWER_BOUND = new XYCoordinate<>(
+      Units.metre().milli().getUnit(),
+      -27.5,
+      -20);
+  static final XYCoordinate<Length> UPPER_BOUND = new XYCoordinate<>(
+      Units.metre().milli().getUnit(),
+      27.5,
+      20);
+
   Optional<XYCoordinate<Length>> barcodeLocation();
 
   @Override
   MaldiSampleArea sampleArea(StateMap state);
+
+  @Override
+  default XYCoordinate<Length> lowerBound() {
+    return LOWER_BOUND;
+  }
+
+  @Override
+  default XYCoordinate<Length> upperBound() {
+    return UPPER_BOUND;
+  }
 }

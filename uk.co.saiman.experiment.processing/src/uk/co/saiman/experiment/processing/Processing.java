@@ -47,13 +47,14 @@ public class Processing {
   public static final String PROCESSING_VARIABLE_ID = "uk.co.saiman.processing.variable";
   public static final Variable<Processing> PROCESSING_VARIABLE = new Variable<>(
       PROCESSING_VARIABLE_ID,
-      environment -> processingAccessor(environment.provideValue(ProcessingService.class)));
+      environment -> processingAccessor(
+          environment.provideSharedResource(ProcessingService.class)));
 
   public static final String PROCESSOR_VARIABLE_ID = "uk.co.saiman.processor.variable";
   public static final Variable<DataProcessor> PROCESSOR_VARIABLE = new Variable<>(
       PROCESSOR_VARIABLE_ID,
       environment -> ProcessingAccess
-          .processorAccessor(environment.provideValue(ProcessingService.class)));
+          .processorAccessor(environment.provideSharedResource(ProcessingService.class)));
 
   private List<DataProcessor> steps;
 

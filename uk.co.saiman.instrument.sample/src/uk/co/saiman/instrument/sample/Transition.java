@@ -27,9 +27,24 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.Objects;
+
 /**
  * A state was requested and has not yet been reached.
  */
 public class Transition<T> extends SampleState<T> {
+  Transition() {}
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || (obj.getClass() != Transition.class)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(Transition.class);
+  }
 }

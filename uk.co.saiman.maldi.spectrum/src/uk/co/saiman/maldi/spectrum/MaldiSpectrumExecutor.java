@@ -45,7 +45,6 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.spectrum.SpectrumExecutor;
-import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.maldi.sample.SampleAreaHold;
 import uk.co.saiman.maldi.spectrum.MaldiSpectrumExecutor.MaldiSpectrumExecutorConfiguration;
@@ -73,11 +72,6 @@ public class MaldiSpectrumExecutor implements SpectrumExecutor {
   @Override
   public Class<AcquisitionDevice> acquisitionDevice() {
     return AcquisitionDevice.class;
-  }
-
-  @Override
-  public Class<AcquisitionController> acquisitionControl() {
-    return AcquisitionController.class;
   }
 
   @Override

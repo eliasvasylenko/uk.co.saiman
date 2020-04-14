@@ -31,7 +31,6 @@ import static uk.co.saiman.state.Accessor.intAccessor;
 import static uk.co.saiman.state.Accessor.stringAccessor;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.maldi.sampleplate.MaldiSamplePlate;
@@ -55,15 +54,15 @@ public final class MaldiSampleConstants {
   public static final Variable<MaldiSamplePlate> SAMPLE_PLATE = new Variable<>(
       SAMPLE_PLATE_ID,
       globals -> {
-        var plateIndex = globals.provideValue(MaldiSamplePlateIndex.class);
+        var plateIndex = globals.provideSharedResource(MaldiSamplePlateIndex.class);
         return stringAccessor()
             .map(id -> plateIndex.getSamplePlate(id).get(), plate -> plateIndex.getId(plate).get());
       });
 
   public static final String SAMPLE_PLATE_PREPARATION_ID_ID = "uk.co.saiman.maldi.variable.sampleplate.preparationid";
-  public static final Variable<UUID> SAMPLE_PLATE_PREPARATION_ID = new Variable<>(
+  public static final Variable<String> SAMPLE_PLATE_PREPARATION_ID = new Variable<>(
       SAMPLE_PLATE_PREPARATION_ID_ID,
-      stringAccessor().map(UUID::fromString, UUID::toString));
+      stringAccessor());
 
   public static final String SAMPLE_PLATE_BARCODE_ID = "uk.co.saiman.maldi.variable.sampleplate.barcode";
   public static final Variable<Optional<Integer>> SAMPLE_PLATE_BARCODE = new Variable<>(

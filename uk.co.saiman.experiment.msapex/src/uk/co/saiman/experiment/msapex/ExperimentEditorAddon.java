@@ -45,7 +45,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.msapex.workspace.Workspace;
-import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperimentPath;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.msapex.editor.Editor;
 import uk.co.saiman.msapex.editor.EditorProvider;

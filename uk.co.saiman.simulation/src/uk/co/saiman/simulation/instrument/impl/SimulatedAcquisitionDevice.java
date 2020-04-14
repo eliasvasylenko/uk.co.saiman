@@ -40,6 +40,7 @@ import static uk.co.saiman.observable.Observer.forObservation;
 import static uk.co.saiman.observable.Observer.onObservation;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -287,7 +288,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   private void acquire() {
     currentThread().setPriority(MAX_PRIORITY);
 
-    while (status().isMatching(status -> status != DISPOSED)) {
+    while (status().testValue(status -> status != DISPOSED)) {
       DetectorSimulation detector;
       int counter;
 
@@ -417,7 +418,10 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   }
 
   @Override
-  protected AcquisitionController createController(ControlContext context) {
+  protected AcquisitionController createController(
+      ControlContext context,
+      long timeout,
+      TimeUnit unit) {
     return new AcquisitionController() {
       @Override
       public void startAcquisition() {

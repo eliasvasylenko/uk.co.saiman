@@ -27,12 +27,16 @@
  */
 package uk.co.saiman.experiment.sample;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.ExecutorException;
 import uk.co.saiman.experiment.executor.PlanningContext;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableCardinality;
-import uk.co.saiman.instrument.sample.SampleController;
+import uk.co.saiman.instrument.sample.SampleDevice;
 
 /**
  * Configure the sample position to perform an experiment at. Typically most
@@ -46,7 +50,7 @@ public interface SampleExecutor<T> extends Executor {
 
   Class<?> samplePreparation();
 
-  Class<? extends SampleController<T>> sampleDevice();
+  Class<? extends SampleDevice<T>> sampleDevice();
 
   @Override
   default void plan(PlanningContext context) {
@@ -57,9 +61,14 @@ public interface SampleExecutor<T> extends Executor {
   @Override
   default void execute(ExecutionContext context) {
     var location = context.getVariable(sampleLocation());
-    var controller = context.acquireResource(sampleDevice()).value();
+    var device = context.acquireResource(sampleDevice()).value();
 
-    controller.requestAnalysis(location);
-    context.prepareCondition(samplePreparation(), null);
+    try (var controller = device.acquireControl(10, TimeUnit.SECONDS)) {
+      controller.requestAnalysis(location);
+      context.prepareCondition(samplePreparation(), null);
+
+    } catch (InterruptedException | TimeoutException e) {
+      throw new ExecutorException("Failed to acquire control of sample device.", e);
+    }
   }
 }

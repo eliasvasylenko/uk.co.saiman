@@ -37,6 +37,7 @@ import static uk.co.saiman.observable.Observer.onFailure;
 import static uk.co.saiman.observable.Observer.onObservation;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -157,7 +158,7 @@ public class MaldiVacuumDevice extends DeviceImpl<VacuumController> implements V
   }
 
   @Override
-  protected VacuumController createController(ControlContext context) {
+  protected VacuumController createController(ControlContext context, long timeout, TimeUnit unit) {
     return new VacuumController() {
       @Override
       public void close() {

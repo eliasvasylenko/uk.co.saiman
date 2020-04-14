@@ -47,8 +47,7 @@ import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.ExecutionPlan;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.ExperimentEvent;
@@ -75,22 +74,17 @@ public class Experiment {
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
 
-  private final Supplier<GlobalEnvironment> globalEnvironment;
+  private final Supplier<Environment> environment;
 
   public Experiment(
       ExperimentDefinition procedure,
       StorageConfiguration<?> storageConfiguration,
       ExecutorService executorService,
-      Supplier<GlobalEnvironment> globalEnvironment,
-      LocalEnvironmentService localEnvironmentService,
+      Supplier<Environment> environment,
       Log log) {
-    this.globalEnvironment = globalEnvironment;
+    this.environment = environment;
     this.definition = null;
-    this.scheduler = new Scheduler(
-        storageConfiguration,
-        executorService,
-        localEnvironmentService,
-        log);
+    this.scheduler = new Scheduler(storageConfiguration, executorService, environment, log);
 
     updateDefinition(requireNonNull(procedure));
   }
@@ -99,8 +93,8 @@ public class Experiment {
     return scheduler.getExecutorService();
   }
 
-  GlobalEnvironment getGlobalEnvironment() {
-    return globalEnvironment.get();
+  Environment getGlobalEnvironment() {
+    return environment.get();
   }
 
   public ExperimentDefinition getDefinition() {

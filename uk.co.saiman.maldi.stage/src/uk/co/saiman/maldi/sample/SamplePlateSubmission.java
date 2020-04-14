@@ -29,26 +29,30 @@ package uk.co.saiman.maldi.sample;
 
 import java.util.concurrent.TimeUnit;
 
+import uk.co.saiman.instrument.stage.XYStage;
 import uk.co.saiman.maldi.sampleplate.MaldiSampleArea;
 import uk.co.saiman.maldi.sampleplate.MaldiSamplePreparation;
+import uk.co.saiman.maldi.stage.MaldiStage;
 import uk.co.saiman.maldi.stage.MaldiStageController;
 
 public class SamplePlateSubmission {
+  private final MaldiStage stage;
   private final MaldiStageController stageControl;
   private final MaldiSamplePreparation samplePreparation;
 
   public SamplePlateSubmission(
+      MaldiStage stage,
       MaldiStageController stageControl,
       MaldiSamplePreparation samplePreparation) {
+    this.stage = stage;
     this.stageControl = stageControl;
     this.samplePreparation = samplePreparation;
   }
 
-  public SampleAreaHold beginAnalysis(MaldiSampleArea location, long time, TimeUnit unit) {
-    stageControl.requestAnalysis(location.center());
-    var ana = stageControl.awaitRequest(time, unit);
-    System.out.println(" ? " + ana);
-    return new SampleAreaHold(stageControl, location);
+  public XYStage beginAnalysis(MaldiSampleArea location, long time, TimeUnit unit) {
+    stageControl.requestAnalysis(location);
+    stageControl.awaitRequest(time, unit);
+    return stage.sampleAreaStage();
   }
 
   public MaldiSamplePreparation samplePreparation() {

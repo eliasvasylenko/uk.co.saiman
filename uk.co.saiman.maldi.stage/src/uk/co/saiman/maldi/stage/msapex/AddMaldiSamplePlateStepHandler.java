@@ -32,7 +32,6 @@ import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_AREA;
 import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_AREA_EXECUTOR;
 import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_PLATE;
 import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_PLATE_EXECUTOR;
-import static uk.co.saiman.maldi.sample.MaldiSampleConstants.SAMPLE_PLATE_PREPARATION_ID;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -44,11 +43,10 @@ import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.maldi.sampleplate.MaldiSamplePlate;
-import uk.co.saiman.maldi.sampleplate.MaldiSamplePreparation;
 
 public class AddMaldiSamplePlateStepHandler {
   @Execute
@@ -57,13 +55,9 @@ public class AddMaldiSamplePlateStepHandler {
       Experiment experiment,
       @Optional MaldiSamplePlate samplePlate,
       @Optional SampleAreaSelection sampleAreaSelection,
-      GlobalEnvironment environment) {
+      Environment environment) {
     var plateExecutor = executors.getExecutor(SAMPLE_PLATE_EXECUTOR);
     var areaExecutor = executors.getExecutor(SAMPLE_AREA_EXECUTOR);
-
-    var samplePreparation = new MaldiSamplePreparation(samplePlate);
-    var id = samplePreparation.id();
-    var plate = samplePreparation.plate();
 
     var step = StepDefinition
         .define(
@@ -72,9 +66,7 @@ public class AddMaldiSamplePlateStepHandler {
                     "Sample Plate",
                     experiment.getIndependentSteps().map(Step::getId).collect(toList())),
             plateExecutor,
-            new Variables(environment)
-                .with(SAMPLE_PLATE, plate)
-                .with(SAMPLE_PLATE_PREPARATION_ID, id));
+            new Variables(environment).with(SAMPLE_PLATE, samplePlate));
 
     if (sampleAreaSelection != null) {
       var areas = sampleAreaSelection.sampleAreas().collect(toList());
@@ -83,7 +75,8 @@ public class AddMaldiSamplePlateStepHandler {
         var substep = StepDefinition
             .define(stepId, areaExecutor)
             .withVariables(
-                new Variables(environment).with(SAMPLE_AREA, plate.persistSampleArea(sampleArea)));
+                new Variables(environment)
+                    .with(SAMPLE_AREA, samplePlate.persistSampleArea(sampleArea)));
         step = step.withSubstep(substep);
       }
     }
@@ -97,7 +90,6 @@ public class AddMaldiSamplePlateStepHandler {
       Experiment experiment,
       @Optional ExperimentPath<Absolute> path) {
     return executors.getExecutor(SAMPLE_PLATE_EXECUTOR) != null
-        && executors.getExecutor(SAMPLE_AREA_EXECUTOR) != null
-        && (path == null || path.isEmpty());
+        && executors.getExecutor(SAMPLE_AREA_EXECUTOR) != null && (path == null || path.isEmpty());
   }
 }

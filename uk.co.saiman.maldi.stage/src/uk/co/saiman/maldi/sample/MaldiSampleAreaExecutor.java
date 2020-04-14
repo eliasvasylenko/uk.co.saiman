@@ -78,6 +78,35 @@ public class MaldiSampleAreaExecutor implements Executor {
         .sampleArea(context.getVariable(SAMPLE_AREA));
 
     /*
+     * TODO what if we want to model a lock on performing an experiment over a
+     * device, but actually give up control of that device? Wouldn't that mean
+     * multiple experiments can consume it at once??
+     * 
+     * Subtle refinement to the goal of the resource system: Instead of experiments
+     * getting exclusive access to a controller (which it might give up), it should
+     * get exclusive access to a device, then it can choose whether or not to try to
+     * acquire control while still being safe from interference from other
+     * experiments.
+     * 
+     * TODO this might mean we can simplify the resource system and get rid of the
+     * "local/global environment" crap entirely! We just have a single "environment"
+     * (which is equivalent to the previous global one, but the distinction no
+     * longer has significance.)
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
      * TODO we need to include raster operation here. Instantiate a virtual raster
      * device over the stage location? But then how do we present the virtual raster
      * in the UI if it's a transient thing?
@@ -89,9 +118,13 @@ public class MaldiSampleAreaExecutor implements Executor {
      * started the experiment should have the authority to give permission to
      * control the raster during the experiment. The executor should HAND control to
      * the UI.
+     * 
+     * TODO or alternatively, anyone should have permission to do anything so long
+     * as they acquire it from the device. If the experiment wants exclusive control
+     * then they should acquire a lock!
      */
 
-    var sampleHold = plateSubmission.beginAnalysis(sampleArea, 30, SECONDS);
-    context.prepareCondition(SampleAreaHold.class, sampleHold);
+    var sampleAreaStage = plateSubmission.beginAnalysis(sampleArea, 30, SECONDS);
+    context.prepareCondition(SampleAreaHold.class, () -> new SampleAreaHold(sampleAreaStage));
   }
 }

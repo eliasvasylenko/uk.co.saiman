@@ -53,7 +53,7 @@ public class EmptyObservableValue<T> implements ObservableValue<T> {
   }
 
   @Override
-  public boolean isPresent() {
+  public boolean isValuePresent() {
     return false;
   }
 

@@ -82,8 +82,8 @@ public class MaldiSampleWellAnnotation extends EllipseAnnotation<Length, Length>
 
     getShape().setStrokeWidth(1);
 
-    setMeasurementX(sampleWell.center().getX());
-    setMeasurementY(sampleWell.center().getY());
+    setMeasurementX(sampleWell.rest().getX());
+    setMeasurementY(sampleWell.rest().getY());
 
     this.selected = new SimpleBooleanProperty(false);
     this.state = new SimpleObjectProperty<>(EXCLUDED);

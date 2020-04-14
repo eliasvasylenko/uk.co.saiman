@@ -39,7 +39,7 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.state.Accessor;
@@ -71,11 +71,11 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
 
   private final JsonStateMapFormat stateMapFormat;
 
-  private final GlobalEnvironment environment;
+  private final Environment environment;
 
   public JsonProcedureFormat(
       JsonInstructionFormat instructionFormat,
-      GlobalEnvironment environment) {
+      Environment environment) {
     this.environment = environment;
     this.stateMapFormat = instructionFormat.getStateMapFormat();
     this.children = new MapIndex<>(

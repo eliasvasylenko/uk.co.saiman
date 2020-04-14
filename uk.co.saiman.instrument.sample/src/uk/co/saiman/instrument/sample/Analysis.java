@@ -42,7 +42,7 @@ import java.util.Objects;
 public class Analysis<T> extends RequestedSampleState<T> {
   private final T position;
 
-  public Analysis(T position) {
+  Analysis(T position) {
     this.position = position;
   }
 

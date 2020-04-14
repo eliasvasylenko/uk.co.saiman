@@ -35,6 +35,8 @@ import java.util.Objects;
  * may not be valid.
  */
 public class Ready<T> extends RequestedSampleState<T> {
+  Ready() {}
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null || (obj.getClass() != Ready.class)) {

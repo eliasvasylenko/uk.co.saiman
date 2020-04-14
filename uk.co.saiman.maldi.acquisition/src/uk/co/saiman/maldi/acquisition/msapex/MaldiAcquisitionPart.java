@@ -34,7 +34,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.instrument.acquisition.msapex.AcquisitionChart;
 import uk.co.saiman.instrument.msapex.device.DevicePresentationService;
@@ -56,15 +56,15 @@ public class MaldiAcquisitionPart {
   private BorderPane container;
 
   @Inject
-  public void setEnvironment(@Optional GlobalEnvironment environment) {
+  public void setEnvironment(@Optional Environment environment) {
     if (environment == null) {
       unsetDevice();
       return;
     }
 
-    if (environment.providesValue(AcquisitionDevice.class)) {
+    if (environment.providesResource(AcquisitionDevice.class)) {
       try {
-        setDevice(environment.provideValue(AcquisitionDevice.class));
+        setDevice(environment.provideResource(AcquisitionDevice.class).value());
       } catch (Exception e) {
         setDeviceFailed();
       }

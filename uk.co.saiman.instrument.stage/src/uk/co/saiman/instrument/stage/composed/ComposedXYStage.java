@@ -27,7 +27,6 @@
  */
 package uk.co.saiman.instrument.stage.composed;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 
 import java.util.concurrent.TimeUnit;
@@ -37,11 +36,11 @@ import javax.measure.quantity.Length;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import uk.co.saiman.instrument.axis.AxisController;
 import uk.co.saiman.instrument.axis.AxisDevice;
 import uk.co.saiman.instrument.sample.RequestedSampleState;
 import uk.co.saiman.instrument.sample.SampleDevice;
@@ -75,14 +74,11 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   private final AxisDevice<Length> xAxis;
   private final AxisDevice<Length> yAxis;
 
-  private AxisController<Length> xController;
-  private AxisController<Length> yController;
-
   @Activate
   public ComposedXYStage(
       @Reference(name = "xAxis") AxisDevice<Length> xAxis,
       @Reference(name = "yAxis") AxisDevice<Length> yAxis,
-      ComposedXYStageConfiguration configuration) {
+      ComposedXYStageConfiguration configuration) throws InterruptedException, TimeoutException {
     this(
         xAxis,
         yAxis,
@@ -94,11 +90,17 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
       AxisDevice<Length> xAxis,
       AxisDevice<Length> yAxis,
       XYCoordinate<Length> analysisLocation,
-      XYCoordinate<Length> exchangeLocation) {
+      XYCoordinate<Length> exchangeLocation) throws InterruptedException, TimeoutException {
     super(analysisLocation, exchangeLocation, xAxis, yAxis);
 
     this.xAxis = xAxis;
     this.yAxis = yAxis;
+  }
+
+  @Deactivate
+  @Override
+  protected void setDisposed() {
+    super.setDisposed();
   }
 
   @Override
@@ -128,90 +130,65 @@ public class ComposedXYStage extends ComposedStage<XYCoordinate<Length>, XYStage
   protected void setRequestedStateImpl(
       RequestedSampleState<XYCoordinate<Length>> requestedState,
       XYCoordinate<Length> requestedPosition) {
-    xController.requestLocation(requestedPosition.getX());
-    yController.requestLocation(requestedPosition.getY());
+    getAxisController(xAxis).requestLocation(requestedPosition.getX());
+    getAxisController(yAxis).requestLocation(requestedPosition.getY());
   }
 
   @Override
-  protected void destroyController(ControlContext context) {
-    super.destroyController(context);
-
-    try {
-      xController.close();
-    } finally {
-      yController.close();
-    }
-  }
-
-  @Override
-  protected XYStageController createController(ControlContext context)
+  protected XYStageController createController(ControlContext context, long timeout, TimeUnit unit)
       throws TimeoutException, InterruptedException {
-    try {
-      xController = xAxis.acquireControl(2, SECONDS);
-      yController = yAxis.acquireControl(2, SECONDS);
-
-      return new XYStageController() {
-        @Override
-        public void requestExchange() {
-          try (var lock = context.acquireLock()) {
-            ComposedXYStage.this.requestSampleState(SampleState.exchange());
-          }
-        }
-
-        @Override
-        public void requestAnalysis(XYCoordinate<Length> location) {
-          try (var lock = context.acquireLock()) {
-            ComposedXYStage.this.requestSampleState(SampleState.analysis(location));
-          }
-        }
-
-        @Override
-        public void requestReady() {
-          try (var lock = context.acquireLock()) {
-            ComposedXYStage.this.requestSampleState(SampleState.ready());
-          }
-        }
-
-        @Override
-        public SampleState<XYCoordinate<Length>> awaitRequest(long time, TimeUnit unit) {
-          try (var lock = context.acquireLock()) {
-            return ComposedXYStage.this.awaitRequest(time, unit);
-          }
-        }
-
-        @Override
-        public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
-          try (var lock = context.acquireLock()) {
-            return ComposedXYStage.this.awaitReady(time, unit);
-          }
-        }
-
-        @Override
-        public void close() {
-          context.close();
-        }
-
-        @Override
-        public boolean isOpen() {
-          return context.isOpen();
-        }
-      };
-    } catch (Throwable t) {
-      if (xController != null) {
-        try {
-          xController.close();
-        } catch (Exception e) {
-          t.addSuppressed(e);
+    return new XYStageController() {
+      @Override
+      public void withdrawRequest() {
+        try (var lock = context.acquireLock()) {
+          ComposedXYStage.this.withdrawRequest();
         }
       }
-      if (yController != null) {
-        try {
-          yController.close();
-        } catch (Exception e) {
-          t.addSuppressed(e);
+
+      @Override
+      public void requestExchange() {
+        try (var lock = context.acquireLock()) {
+          ComposedXYStage.this.requestSampleState(SampleState.exchange());
         }
       }
-      throw t;
-    }
+
+      @Override
+      public void requestAnalysis(XYCoordinate<Length> location) {
+        try (var lock = context.acquireLock()) {
+          ComposedXYStage.this.requestSampleState(SampleState.analysis(location));
+        }
+      }
+
+      @Override
+      public void requestReady() {
+        try (var lock = context.acquireLock()) {
+          ComposedXYStage.this.requestSampleState(SampleState.ready());
+        }
+      }
+
+      @Override
+      public SampleState<XYCoordinate<Length>> awaitRequest(long time, TimeUnit unit) {
+        try (var lock = context.acquireLock()) {
+          return ComposedXYStage.this.awaitRequest(time, unit);
+        }
+      }
+
+      @Override
+      public SampleState<XYCoordinate<Length>> awaitReady(long time, TimeUnit unit) {
+        try (var lock = context.acquireLock()) {
+          return ComposedXYStage.this.awaitReady(time, unit);
+        }
+      }
+
+      @Override
+      public void close() {
+        context.close();
+      }
+
+      @Override
+      public boolean isOpen() {
+        return context.isOpen();
+      }
+    };
   }
 }

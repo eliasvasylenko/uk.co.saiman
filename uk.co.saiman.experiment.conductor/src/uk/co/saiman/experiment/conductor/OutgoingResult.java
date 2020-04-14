@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
+import uk.co.saiman.experiment.conductor.IncomingDependencies.IncomingDependencyState;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 class OutgoingResult<T> {

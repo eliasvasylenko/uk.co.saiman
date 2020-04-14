@@ -37,13 +37,13 @@ Private-Package: \
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.osgi;version=snapshot,\
 	uk.co.saiman.experiment.msapex;version=snapshot,\
-	uk.co.saiman.experiment.sampleplate;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.definition;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.msapex.annotations;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
+	uk.co.saiman.instrument.sampleplate;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.instrument.msapex;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\

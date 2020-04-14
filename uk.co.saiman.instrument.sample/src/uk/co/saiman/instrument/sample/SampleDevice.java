@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -54,11 +55,11 @@ public interface SampleDevice<T> extends Device {
    * In general no guarantee is made that a request will be fulfilled (or will
    * fail) in a timely manner. Implementors may choose, however, to make such
    * promises and to enter the {@link Failed failed} state if they are unable to
-   * fulfill them within some timeout period.
+   * fulfil them within some timeout period.
    * 
    * @return the currently requested sample state
    */
-  ObservableValue<RequestedSampleState<T>> requestedSampleState();
+  ObservableValue<Optional<RequestedSampleState<T>>> requestedSampleState();
 
   ObservableValue<SampleState<T>> sampleState();
 
@@ -77,15 +78,24 @@ public interface SampleDevice<T> extends Device {
   /**
    * The actual measured sample location.
    * <p>
-   * For certain configurations of hardware and definitions of "location" the
-   * implementation may define an error tolerance for the measured location
-   * compared to the requested location. As a result, when a
-   * {@link #requestedSampleState() requested} analysis position is
-   * {@link #sampleState() reached}, its {@link Analysis#position() position} may
-   * not be exactly {@link Object#equals(Object) equal} to the
-   * {@link #samplePosition() measured position}.
+   * For different configurations of hardware the sample position may be defined
+   * with slightly different behavior.
+   * <p>
+   * For instance, if the sample position may be selected over a continuous domain
+   * then the implementation may report changes in sample position reflecting the
+   * "motion" of the hardware as it approaches requested position. It may also
+   * define an error tolerance for the measured location compared to the requested
+   * location. As a result, when a {@link #requestedSampleState() requested}
+   * analysis position is {@link #sampleState() reached}, its
+   * {@link Analysis#position() position} may not be exactly
+   * {@link Object#equals(Object) equal} to the {@link #samplePosition() measured
+   * position}.
+   * <p>
+   * Alternatively, if the sample position may be selected over a discrete domain
+   * then the implementation may not report any sample position at all until the
+   * requested position has been reached.
    * 
    * @return an observable over the actual sample location
    */
-  ObservableValue<T> samplePosition();
+  ObservableValue<Optional<T>> samplePosition();
 }

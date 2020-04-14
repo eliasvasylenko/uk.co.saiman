@@ -30,6 +30,9 @@ package uk.co.saiman.experiment.spectrum;
 import static uk.co.saiman.experiment.processing.Processing.PROCESSING_VARIABLE;
 import static uk.co.saiman.experiment.variables.VariableCardinality.REQUIRED;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Mass;
@@ -44,8 +47,8 @@ import uk.co.saiman.data.spectrum.SpectrumCalibration;
 import uk.co.saiman.data.spectrum.format.RegularSampledSpectrumFormat;
 import uk.co.saiman.experiment.executor.ExecutionContext;
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.ExecutorException;
 import uk.co.saiman.experiment.executor.PlanningContext;
-import uk.co.saiman.instrument.acquisition.AcquisitionController;
 import uk.co.saiman.instrument.acquisition.AcquisitionDevice;
 import uk.co.saiman.log.Log.Level;
 
@@ -63,8 +66,6 @@ public interface SpectrumExecutor extends Executor {
 
   Class<? extends AcquisitionDevice> acquisitionDevice();
 
-  Class<? extends AcquisitionController> acquisitionControl();
-
   Class<?> samplePreparation();
 
   @Override
@@ -72,7 +73,6 @@ public interface SpectrumExecutor extends Executor {
     context.declareVariable(PROCESSING_VARIABLE, REQUIRED);
     context.declareConditionRequirement(samplePreparation());
     context.declareResourceRequirement(acquisitionDevice());
-    context.declareResourceRequirement(acquisitionControl());
     context.observesResult(Spectrum.class);
   }
 
@@ -89,31 +89,28 @@ public interface SpectrumExecutor extends Executor {
 
     SampledContinuousFunction<Time, Dimensionless> accumulation;
 
+    context.log().log(Level.INFO, "creating accumulator...");
+
+    ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
+        device.acquisitionDataEvents(),
+        device.getSampleDomain(),
+        device.getSampleIntensityUnit());
+
+    context.log().log(Level.INFO, "attaching observer...");
+    accumulator
+        .accumulation()
+        .observe(
+            o -> context
+                .observePartialResult(
+                    Spectrum.class,
+                    () -> new SampledSpectrum(o.getLatestAccumulation(), calibration, processing)));
+
     context.log().log(Level.INFO, "holding sample...");
-    try (var sample = context.acquireCondition(samplePreparation())) {
-      context.log().log(Level.INFO, "acquired sample hold");
+    context.log().log(Level.INFO, "starting acquisition...");
 
-      context.log().log(Level.INFO, "creating accumulator...");
+    try (var sample = context.acquireCondition(samplePreparation());
+        var controller = device.acquireControl(10, TimeUnit.SECONDS)) {
 
-      ContinuousFunctionAccumulator<Time, Dimensionless> accumulator = new ContinuousFunctionAccumulator<>(
-          device.acquisitionDataEvents(),
-          device.getSampleDomain(),
-          device.getSampleIntensityUnit());
-
-      context.log().log(Level.INFO, "attaching observer...");
-      accumulator
-          .accumulation()
-          .observe(
-              o -> context
-                  .observePartialResult(
-                      Spectrum.class,
-                      () -> new SampledSpectrum(
-                          o.getLatestAccumulation(),
-                          calibration,
-                          processing)));
-
-      context.log().log(Level.INFO, "starting acquisition...");
-      var controller = context.acquireResource(acquisitionControl()).value();
       controller.startAcquisition();
 
       /*
@@ -134,6 +131,9 @@ public interface SpectrumExecutor extends Executor {
 
       context.log().log(Level.INFO, "acquired result");
       accumulation = accumulator.getCompleteAccumulation();
+
+    } catch (InterruptedException | TimeoutException e) {
+      throw new ExecutorException("Failed to acquire control of acquisition device.");
     }
 
     context

@@ -34,8 +34,9 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
-import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
@@ -62,7 +63,7 @@ import uk.co.saiman.log.Log;
 public class Conductor {
   private final StorageConfiguration<?> storageConfiguration;
   private final JsonInstructionFormat instructionFormat;
-  private final LocalEnvironmentService environmentService;
+  private final Supplier<Environment> environment;
   private final Log log;
 
   private final java.util.concurrent.ExecutorService executor;
@@ -73,11 +74,11 @@ public class Conductor {
   public Conductor(
       StorageConfiguration<?> storageConfiguration,
       ExecutorService executorService,
-      LocalEnvironmentService environmentService,
+      Supplier<Environment> environment,
       Log log) {
     this.storageConfiguration = requireNonNull(storageConfiguration);
     this.instructionFormat = new JsonInstructionFormat(executorService);
-    this.environmentService = requireNonNull(environmentService);
+    this.environment = requireNonNull(environment);
     this.log = log;
 
     this.executor = new ThreadPoolExecutor(
@@ -99,8 +100,8 @@ public class Conductor {
     return instructionFormat;
   }
 
-  LocalEnvironmentService environmentService() {
-    return environmentService;
+  Environment createEnvironment() {
+    return environment.get();
   }
 
   Log log() {

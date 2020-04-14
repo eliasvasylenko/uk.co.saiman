@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Relative;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.StateMap;
@@ -105,7 +105,7 @@ public class StepDefinition extends Definition<Relative, StepDefinition> {
     return new StepDefinition(id, executor, variableMap, plan, getSteps(), getDependents());
   }
 
-  public Variables variables(GlobalEnvironment environment) {
+  public Variables variables(Environment environment) {
     return new Variables(environment, variableMap);
   }
 
@@ -114,7 +114,7 @@ public class StepDefinition extends Definition<Relative, StepDefinition> {
   }
 
   public StepDefinition withVariables(
-      GlobalEnvironment environment,
+      Environment environment,
       Function<? super Variables, ? extends Variables> update) {
     return new StepDefinition(
         id,

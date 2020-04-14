@@ -27,33 +27,16 @@
  */
 package uk.co.saiman.maldi.sample;
 
-import java.util.concurrent.TimeUnit;
-
-import javax.measure.quantity.Length;
-
-import uk.co.saiman.instrument.stage.XYStageController;
-import uk.co.saiman.maldi.sampleplate.MaldiSampleArea;
-import uk.co.saiman.maldi.stage.MaldiStageController;
-import uk.co.saiman.measurement.coordinate.XYCoordinate;
+import uk.co.saiman.instrument.stage.XYStage;
 
 public class SampleAreaHold {
-  private final XYStageController stageControl;
-  private final MaldiSampleArea sampleArea;
+  private final XYStage stage;
 
-  public SampleAreaHold(MaldiStageController stageControl, MaldiSampleArea sampleArea) {
-    this.stageControl = stageControl;
-    this.sampleArea = sampleArea;
+  public SampleAreaHold(XYStage stage) {
+    this.stage = stage;
   }
 
-  public void setAnalysisLocation(XYCoordinate<Length> offset, long time, TimeUnit unit) {
-    if (!sampleArea.isLocationReachable(offset)) {
-      throw new OffsetUnreachableException(offset);
-    }
-    stageControl.requestAnalysis(offset.add(sampleArea.center()));
-    stageControl.awaitRequest(time, unit);
-  }
-
-  public MaldiSampleArea sampleArea() {
-    return sampleArea;
+  public XYStage sampleAreaStage() {
+    return stage;
   }
 }

@@ -64,8 +64,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
@@ -95,8 +94,6 @@ public class ExperimentAddon {
   @OSGiBundle
   private BundleContext bundleContext;
   @Inject
-  private LocalEnvironmentService localEnvironmentService;
-  @Inject
   private MAddon addon;
   @Inject
   private Log log;
@@ -109,8 +106,7 @@ public class ExperimentAddon {
   private Workspace workspace;
   private SharedFileSystemStore workspaceStore;
 
-  private ServiceIndex<GlobalEnvironment, String, GlobalEnvironment> globalEnvironments;
-  private ServiceIndex<LocalEnvironmentService, String, LocalEnvironmentService> localEnvironments;
+  private ServiceIndex<Environment, String, Environment> environments;
 
   private EclipseStorageService storageService;
   private EclipseExecutorService executorService;
@@ -136,16 +132,10 @@ public class ExperimentAddon {
   }
 
   private void initializeEnvironments() {
-    globalEnvironments = ServiceIndex
+    environments = ServiceIndex
         .open(
             bundleContext,
-            GlobalEnvironment.class,
-            identity(),
-            (a, b) -> environmentTargetPerspective(b));
-    localEnvironments = ServiceIndex
-        .open(
-            bundleContext,
-            LocalEnvironmentService.class,
+            Environment.class,
             identity(),
             (a, b) -> environmentTargetPerspective(b));
   }
@@ -181,8 +171,7 @@ public class ExperimentAddon {
         rootPath,
         executorService,
         storageService,
-        () -> context.get(GlobalEnvironment.class),
-        localEnvironmentService,
+        () -> context.get(Environment.class),
         log);
     context.set(Workspace.class, workspace);
 
@@ -197,11 +186,8 @@ public class ExperimentAddon {
     if (experimentNodeAdapterFactory != null) {
       experimentNodeAdapterFactory.unregister();
     }
-    if (globalEnvironments != null) {
-      globalEnvironments.close();
-    }
-    if (localEnvironments != null) {
-      localEnvironments.close();
+    if (environments != null) {
+      environments.close();
     }
     if (storageService != null) {
       storageService.close();
@@ -253,10 +239,10 @@ public class ExperimentAddon {
         var windowContext = window.getContext();
         var perspectiveContext = perspective.getContext();
 
-        var globalEnvironment = perspectiveContext.get(GlobalEnvironment.class);
+        var globalEnvironment = perspectiveContext.get(Environment.class);
 
-        windowContext.set(GlobalEnvironment.class, globalEnvironment);
-        this.context.set(GlobalEnvironment.class, globalEnvironment);
+        windowContext.set(Environment.class, globalEnvironment);
+        this.context.set(Environment.class, globalEnvironment);
       }
     } catch (Exception e) {
       log.log(Level.ERROR, e);
@@ -280,7 +266,7 @@ public class ExperimentAddon {
           perspectiveId = perspective.getElementId();
         }
 
-        localEnvironments
+        environments
             .highestRankedRecord(perspectiveId)
             .optionalValue()
             .weakReference(context)
@@ -288,22 +274,7 @@ public class ExperimentAddon {
               try {
                 record.message().ifPresent(r -> {
                   var environment = r.serviceObject();
-                  record.owner().set(LocalEnvironmentService.class, environment);
-                });
-              } catch (Exception e) {
-                o.cancel();
-                log.log(Level.ERROR, "Failed to set local environment in eclipse context", e);
-              }
-            }));
-        globalEnvironments
-            .highestRankedRecord(perspectiveId)
-            .optionalValue()
-            .weakReference(context)
-            .observe(forObservation(o -> record -> {
-              try {
-                record.message().ifPresent(r -> {
-                  var environment = r.serviceObject();
-                  record.owner().set(GlobalEnvironment.class, environment);
+                  record.owner().set(Environment.class, environment);
                 });
               } catch (Exception e) {
                 o.cancel();

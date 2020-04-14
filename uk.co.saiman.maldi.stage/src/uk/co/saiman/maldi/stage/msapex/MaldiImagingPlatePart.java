@@ -34,14 +34,14 @@ import javafx.scene.layout.BorderPane;
 import uk.co.saiman.maldi.stage.MaldiStage;
 
 public class MaldiImagingPlatePart {
-  private final MaldiStageDiagram diagram;
+  private final MaldiSamplePlateDiagram diagram;
 
   @Inject
   public MaldiImagingPlatePart(
       BorderPane container,
       MaldiStage stage,
       SamplePlatePresenter presenter) {
-    diagram = new MaldiStageDiagram(
+    diagram = new MaldiSamplePlateDiagram(
         stage,
         new Image(getClass().getClassLoader().getResourceAsStream("/slides/imaging.jpg")));
     container.setCenter(diagram);

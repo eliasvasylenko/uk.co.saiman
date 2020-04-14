@@ -43,7 +43,7 @@ import javafx.scene.control.ChoiceDialog;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.processing.ProcessingService;
@@ -71,7 +71,7 @@ public class AddProcessorHandler {
       ExecutorService executors,
       Experiment experiment,
       ExperimentPath<Absolute> path,
-      GlobalEnvironment environment,
+      Environment environment,
       @Service ExperimentProperties text) {
     requestProcessorType(text.addSpectrumProcessor(), text.addSpectrumProcessorDescription())
         .ifPresent(

@@ -72,7 +72,7 @@ public abstract class DeviceImpl<T extends Controller> implements Device {
 
   protected void setInaccessible() {
     synchronized (status) {
-      if (!status.isEqual(DISPOSED)) {
+      if (!status.isValueEqual(DISPOSED)) {
         status.set(INACCESSIBLE);
       }
     }
@@ -80,13 +80,13 @@ public abstract class DeviceImpl<T extends Controller> implements Device {
 
   protected void setAccessible() {
     synchronized (status) {
-      if (!status.isEqual(DISPOSED)) {
+      if (!status.isValueEqual(DISPOSED)) {
         status.set(ACCESSIBLE);
       }
     }
   }
 
-  protected abstract T createController(ControlContext context)
+  protected abstract T createController(ControlContext context, long timeout, TimeUnit unit)
       throws TimeoutException, InterruptedException;
 
   protected void destroyController(ControlContext context) {}
@@ -99,7 +99,7 @@ public abstract class DeviceImpl<T extends Controller> implements Device {
     }
 
     try {
-      if (status.isEqual(DISPOSED)) {
+      if (status.isValueEqual(DISPOSED)) {
         throw new IllegalStateException();
       }
 
@@ -107,7 +107,7 @@ public abstract class DeviceImpl<T extends Controller> implements Device {
         System.out.println("     @! acquire! " + this);
         lockedContext = new ControlContextImpl();
 
-        var controller = createController(lockedContext);
+        var controller = createController(lockedContext, timeout, unit);
 
         controllerStatus.set(UNAVAILABLE);
         status.set(ACCESSIBLE);
@@ -191,7 +191,7 @@ public abstract class DeviceImpl<T extends Controller> implements Device {
         unlock.close();
         throw new DeviceException("Controller is stale");
       }
-      if (status.isEqual(DISPOSED)) {
+      if (status.isValueEqual(DISPOSED)) {
         unlock.close();
         throw new DeviceException("Device has been disposed");
       }

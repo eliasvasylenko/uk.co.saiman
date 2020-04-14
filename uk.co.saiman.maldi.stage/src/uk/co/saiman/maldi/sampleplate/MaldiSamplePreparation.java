@@ -28,8 +28,6 @@
 package uk.co.saiman.maldi.sampleplate;
 
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.sampleplate.SamplePreparation;
 
@@ -37,25 +35,17 @@ import uk.co.saiman.experiment.sampleplate.SamplePreparation;
 public class MaldiSamplePreparation extends SamplePreparation {
   private final Integer barcode;
 
-  public MaldiSamplePreparation(UUID id, MaldiSamplePlate plate, Integer barcode) {
+  public MaldiSamplePreparation(String id, MaldiSamplePlate plate, Integer barcode) {
     super(id, plate);
     this.barcode = barcode;
   }
 
-  public MaldiSamplePreparation(UUID id, MaldiSamplePlate plate, int barcode) {
+  public MaldiSamplePreparation(String id, MaldiSamplePlate plate, int barcode) {
     this(id, plate, (Integer) barcode);
   }
 
-  public MaldiSamplePreparation(UUID id, MaldiSamplePlate plate) {
+  public MaldiSamplePreparation(String id, MaldiSamplePlate plate) {
     this(id, plate, (Integer) null);
-  }
-
-  public MaldiSamplePreparation(MaldiSamplePlate plate, int barcode) {
-    this(UUID.randomUUID(), plate, barcode);
-  }
-
-  public MaldiSamplePreparation(MaldiSamplePlate plate) {
-    this(UUID.randomUUID(), plate, (Integer) null);
   }
 
   @Override
@@ -65,15 +55,5 @@ public class MaldiSamplePreparation extends SamplePreparation {
 
   public Optional<Integer> barcode() {
     return Optional.ofNullable(barcode);
-  }
-
-  @Override
-  public Stream<MaldiSampleArea> sampleAreas() {
-    return super.sampleAreas().map(MaldiSampleArea.class::cast);
-  }
-
-  @Override
-  public Optional<MaldiSampleArea> sampleArea(String id) {
-    return super.sampleArea(id).map(MaldiSampleArea.class::cast);
   }
 }

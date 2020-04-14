@@ -1,17 +1,16 @@
 package uk.co.saiman.experiment.procedure;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.function.Predicate.not;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.dependency.ResultPath;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.environment.LocalEnvironment;
-import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.environment.Environment;
+import uk.co.saiman.experiment.environment.ResourceMissingException;
 import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.PlanningContext;
@@ -22,26 +21,23 @@ import uk.co.saiman.experiment.variables.Variables;
 public final class Procedures {
   private Procedures() {}
 
-  public static LocalEnvironment openEnvironment(
-      Procedure procedure,
-      LocalEnvironmentService environmentService,
-      int time,
-      TimeUnit unit) {
-    return environmentService
-        .openLocalEnvironment(
-            procedure.environment(),
-            procedure
-                .instructions()
-                .flatMap(
-                    instruction -> getResourceDependencies(instruction, procedure.environment()))
-                .collect(toList()),
-            time,
-            unit);
+  public static void validateEnvironment(Procedure procedure, Environment environment) {
+    var resources = environment.resources().collect(Collectors.toSet());
+    procedure
+        .instructions()
+        .flatMap(instruction -> getResourceDependencies(instruction, procedure.environment()))
+        .filter(not(resources::contains))
+        .map(ResourceMissingException::new)
+        .reduce((e1, e2) -> {
+          e1.addSuppressed(e2);
+          return e1;
+        })
+        .ifPresent(e -> {
+          throw e;
+        });
   }
 
-  public static Stream<Class<?>> getObservations(
-      Instruction instruction,
-      GlobalEnvironment environment) {
+  public static Stream<Class<?>> getObservations(Instruction instruction, Environment environment) {
     var observations = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
       @Override
@@ -52,9 +48,7 @@ public final class Procedures {
     return observations.stream();
   }
 
-  public static Stream<Class<?>> getPreparations(
-      Instruction instruction,
-      GlobalEnvironment environment) {
+  public static Stream<Class<?>> getPreparations(Instruction instruction, Environment environment) {
     var preparations = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
       @Override
@@ -67,7 +61,7 @@ public final class Procedures {
 
   public static Stream<VariableDeclaration<?>> getVariableDeclarations(
       Instruction instruction,
-      GlobalEnvironment environment) {
+      Environment environment) {
     var declarations = new ArrayList<VariableDeclaration<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
       @Override
@@ -80,7 +74,7 @@ public final class Procedures {
 
   public static Stream<Class<?>> getResourceDependencies(
       Instruction instruction,
-      GlobalEnvironment environment) {
+      Environment environment) {
     var resources = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
       @Override
@@ -93,7 +87,7 @@ public final class Procedures {
 
   public static Stream<Class<?>> getPreparedConditions(
       Instruction instruction,
-      GlobalEnvironment environment) {
+      Environment environment) {
     var conditions = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
       @Override
@@ -106,7 +100,7 @@ public final class Procedures {
 
   public static Stream<Class<?>> getObservedResults(
       Instruction instruction,
-      GlobalEnvironment environment) {
+      Environment environment) {
     var results = new ArrayList<Class<?>>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
       @Override
@@ -119,7 +113,7 @@ public final class Procedures {
 
   public static Optional<Evaluation> getPreparedConditionEvaluation(
       Instruction instruction,
-      GlobalEnvironment environment,
+      Environment environment,
       Class<?> source) {
     var conditions = new ArrayList<Evaluation>();
     plan(instruction, environment, variables -> new InstructionPlanningContext() {
@@ -198,7 +192,7 @@ public final class Procedures {
 
   public static void plan(
       Instruction instruction,
-      GlobalEnvironment environment,
+      Environment environment,
       Function<Variables, InstructionPlanningContext> planner) {
     var variables = new Variables(environment, instruction.variableMap());
     var context = planner.apply(variables);

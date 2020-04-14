@@ -43,7 +43,7 @@ import uk.co.saiman.data.resource.Resource;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.ResultPath;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
 import uk.co.saiman.experiment.procedure.Procedure;
@@ -53,10 +53,10 @@ import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public class Conflicts {
   private final Schedule schedule;
-  private final GlobalEnvironment environment;
+  private final Environment environment;
   private final Map<WorkspaceExperimentPath, Change> differences;
 
-  public Conflicts(Schedule schedule, GlobalEnvironment environment) {
+  public Conflicts(Schedule schedule, Environment environment) {
     this.schedule = schedule;
     this.environment = environment;
 

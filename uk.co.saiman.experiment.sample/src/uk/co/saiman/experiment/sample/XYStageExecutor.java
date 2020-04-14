@@ -36,7 +36,6 @@ import javax.measure.quantity.Length;
 
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.instrument.stage.XYStage;
-import uk.co.saiman.instrument.stage.XYStageController;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
@@ -65,7 +64,7 @@ public interface XYStageExecutor extends StageExecutor<XYCoordinate<Length>> {
   }
 
   @Override
-  Class<? extends XYStageController> sampleDevice();
+  Class<? extends XYStage> sampleDevice();
 
   @Override
   default Variable<XYCoordinate<Length>> sampleLocation() {

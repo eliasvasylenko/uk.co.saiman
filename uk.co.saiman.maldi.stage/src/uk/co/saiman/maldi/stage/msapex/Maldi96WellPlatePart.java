@@ -45,7 +45,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import uk.co.saiman.fx.bindings.FluentObjectBinding;
-import uk.co.saiman.instrument.stage.msapex.XYStageDiagram;
+import uk.co.saiman.instrument.stage.msapex.SamplePlateDiagram;
 import uk.co.saiman.maldi.sampleplates.Maldi96WellPlate;
 import uk.co.saiman.maldi.sampleplates.MaldiSampleWell;
 import uk.co.saiman.maldi.stage.MaldiStage;
@@ -54,7 +54,7 @@ import uk.co.saiman.msapex.annotations.DragAnnotation;
 
 public class Maldi96WellPlatePart {
   private Maldi96WellPlate samplePlate;
-  private final MaldiStageDiagram stageDiagram;
+  private final MaldiSamplePlateDiagram stageDiagram;
   private final MaldiSampleWellDiagram sampleWellDiagram;
 
   private final IEclipseContext context;
@@ -75,7 +75,7 @@ public class Maldi96WellPlatePart {
     HBox diagrams = new HBox();
     container.setLeft(diagrams);
 
-    stageDiagram = new MaldiStageDiagram(
+    stageDiagram = new MaldiSamplePlateDiagram(
         stage,
         new Image(getClass().getClassLoader().getResourceAsStream("/slides/96-well.jpg")));
     fixRatioToHeight(stageDiagram, diagrams);
@@ -89,7 +89,7 @@ public class Maldi96WellPlatePart {
     stageDiagram.getAnnotationLayer().getAnnotations().add(dragAnnotation);
   }
 
-  private void fixRatioToHeight(XYStageDiagram diagram, HBox container) {
+  private void fixRatioToHeight(SamplePlateDiagram diagram, HBox container) {
     var ratio = FluentObjectBinding
         .over(diagram.getAnnotationLayer().measurementBoundsProperty())
         .mapToDouble(bounds -> bounds.getWidth() / bounds.getHeight());
@@ -174,6 +174,8 @@ public class Maldi96WellPlatePart {
 
     this.samplePlate = samplePlate;
 
+    stageDiagram.setSamplePlate(samplePlate);
+    sampleWellDiagram.setSamplePlate(samplePlate);
     setSampleWellAnnotations(samplePlate, stageAnnotations, stageDiagram.getAnnotationLayer());
     setSampleWellAnnotations(
         samplePlate,

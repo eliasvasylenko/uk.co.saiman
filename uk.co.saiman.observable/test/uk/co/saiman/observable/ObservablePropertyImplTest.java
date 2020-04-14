@@ -228,7 +228,7 @@ public class ObservablePropertyImplTest {
     inOrder.verify(changeObserver).onObserve(any());
     inOrder.verify(changeObserver).onNext(change.capture());
     assertThat(change.getValue().previousValue().get(), equalTo("initial"));
-    assertFalse(change.getValue().newValue().isPresent());
+    assertFalse(change.getValue().newValue().isValuePresent());
     inOrder.verifyNoMoreInteractions();
   }
 
@@ -270,10 +270,10 @@ public class ObservablePropertyImplTest {
     inOrder.verify(changeObserver, calls(1)).onNext(change.capture());
 
     assertThat(change.getValue().previousValue().get(), equalTo("initial"));
-    assertFalse(change.getValue().newValue().isPresent());
+    assertFalse(change.getValue().newValue().isValuePresent());
 
     inOrder.verify(changeObserver).onNext(change.capture());
-    assertFalse(change.getValue().previousValue().isPresent());
+    assertFalse(change.getValue().previousValue().isValuePresent());
     assertThat(change.getValue().newValue().get(), equalTo("message"));
     inOrder.verifyNoMoreInteractions();
   }
@@ -290,11 +290,11 @@ public class ObservablePropertyImplTest {
 
     inOrder.verify(changeObserver, calls(1)).onNext(change.capture());
     assertThat(change.getValue().previousValue().get(), equalTo("initial"));
-    assertFalse(change.getValue().newValue().isPresent());
+    assertFalse(change.getValue().newValue().isValuePresent());
 
     inOrder.verify(changeObserver).onNext(change.capture());
-    assertFalse(change.getValue().previousValue().isPresent());
-    assertFalse(change.getValue().newValue().isPresent());
+    assertFalse(change.getValue().previousValue().isValuePresent());
+    assertFalse(change.getValue().newValue().isValuePresent());
     inOrder.verifyNoMoreInteractions();
   }
 

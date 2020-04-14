@@ -40,8 +40,7 @@ import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
 import uk.co.saiman.experiment.definition.json.JsonStepDefinitionFormat;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.service.StorageService;
@@ -70,37 +69,27 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
   private final JsonStateMapFormat stateMapFormat;
   private final ExecutorService executorService;
-  private final Supplier<GlobalEnvironment> environment;
-  private final LocalEnvironmentService localEnvironmentService;
+  private final Supplier<Environment> environment;
 
   private final Log log;
 
   public JsonExperimentFormat(
       ExecutorService executorService,
       StorageService storageService,
-      Supplier<GlobalEnvironment> environment,
-      LocalEnvironmentService localEnvironmentService,
+      Supplier<Environment> environment,
       Log log) {
-    this(
-        executorService,
-        storageService,
-        environment,
-        localEnvironmentService,
-        new JsonStateMapFormat(),
-        log);
+    this(executorService, storageService, environment, new JsonStateMapFormat(), log);
   }
 
   public JsonExperimentFormat(
       ExecutorService executorService,
       StorageService storageService,
-      Supplier<GlobalEnvironment> environment,
-      LocalEnvironmentService localEnvironmentService,
+      Supplier<Environment> environment,
       JsonStateMapFormat stateMapFormat,
       Log log) {
     this.stateMapFormat = stateMapFormat;
     this.executorService = executorService;
     this.environment = environment;
-    this.localEnvironmentService = localEnvironmentService;
 
     this.storage = new MapIndex<>(
         STORAGE,
@@ -140,7 +129,6 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
         data.get(storage),
         executorService,
         environment,
-        localEnvironmentService,
         log.mapMessage(s -> definition.id() + ": " + s));
   }
 

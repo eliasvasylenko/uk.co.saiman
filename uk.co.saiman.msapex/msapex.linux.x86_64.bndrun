@@ -184,7 +184,6 @@ runplatform: linux64
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
 	uk.co.saiman.experiment.processing.msapex;version=snapshot,\
-	uk.co.saiman.experiment.sampleplate;version=snapshot,\
 	uk.co.saiman.experiment.scheduling;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.experiment.spectrum.msapex;version=snapshot,\
@@ -197,6 +196,7 @@ runplatform: linux64
 	uk.co.saiman.instrument.msapex;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.instrument.sample.msapex;version=snapshot,\
+	uk.co.saiman.instrument.sampleplate;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.instrument.stage.copley;version=snapshot,\
 	uk.co.saiman.instrument.stage.msapex;version=snapshot,\

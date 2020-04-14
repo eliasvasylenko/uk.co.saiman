@@ -43,12 +43,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import uk.co.saiman.instrument.stage.msapex.XYStageDiagram;
+import uk.co.saiman.instrument.stage.msapex.SamplePlateDiagram;
 import uk.co.saiman.maldi.sampleplates.MaldiSampleWell;
 import uk.co.saiman.maldi.stage.MaldiStage;
 import uk.co.saiman.measurement.coordinate.XYCoordinate;
 
-public class MaldiSampleWellDiagram extends XYStageDiagram {
+public class MaldiSampleWellDiagram extends SamplePlateDiagram {
   private final ObjectProperty<MaldiSampleWell> sampleWell;
 
   private final Rectangle measurementBounds = new Rectangle(-0.5, -0.5, 1, 1);
@@ -75,29 +75,6 @@ public class MaldiSampleWellDiagram extends XYStageDiagram {
         .bind(measurementBounds.boundsInParentProperty());
   }
 
-  private void updateSampleWell(MaldiSampleWell sampleWell) {
-    if (sampleWell != null) {
-      var position = sampleWell.center().to(getUnit());
-      var size = new XYCoordinate<>(sampleWell.radius(), sampleWell.radius())
-          .to(getUnit())
-          .multiply(2.5);
-
-      translate.setToX(position.getXValue());
-      translate.setToY(position.getYValue());
-
-      scale.setToX(size.getXValue());
-      scale.setToY(size.getYValue());
-
-      measurementAnimation.play();
-
-      try (var controller = getStageDevice().acquireControl(0, TimeUnit.MILLISECONDS)) {
-        controller.requestAnalysis(position);
-      } catch (TimeoutException | InterruptedException e) {
-        // this is okay, it just means someone else has control of the stage
-      }
-    }
-  }
-
   public ObjectProperty<MaldiSampleWell> sampleWellProperty() {
     return sampleWell;
   }
@@ -109,4 +86,33 @@ public class MaldiSampleWellDiagram extends XYStageDiagram {
   public void setSampleWell(MaldiSampleWell value) {
     sampleWell.set(value);
   }
+
+  protected void updateSampleWell(MaldiSampleWell sampleWell) {
+    if (sampleWell != null) {
+
+      var position = sampleWell.rest().to(getUnit());
+      translate.setToX(position.getXValue());
+      translate.setToY(position.getYValue());
+
+      var size = new XYCoordinate<>(sampleWell.radius(), sampleWell.radius())
+          .to(getUnit())
+          .multiply(2.5);
+      scale.setToX(size.getXValue());
+      scale.setToY(size.getYValue());
+
+      measurementAnimation.play();
+
+      try (var controller = getStage().acquireControl(0, TimeUnit.MILLISECONDS)) {
+        controller.requestAnalysis(sampleWell);
+      } catch (TimeoutException | InterruptedException e) {
+        /*
+         * This is okay, it just means someone else has control of the stage. We could
+         * include some kind of visual indication of this, but it's not critical.
+         */
+      }
+    }
+  }
+
+  @Override
+  protected void updateSamplePlateBounds(XYCoordinate<Length> lower, XYCoordinate<Length> upper) {}
 }

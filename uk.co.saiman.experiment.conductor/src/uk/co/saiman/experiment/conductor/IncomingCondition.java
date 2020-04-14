@@ -2,6 +2,7 @@ package uk.co.saiman.experiment.conductor;
 
 import static java.lang.String.format;
 
+import uk.co.saiman.experiment.conductor.IncomingDependencies.IncomingDependencyState;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.ConditionClosedException;
@@ -66,7 +67,7 @@ class IncomingCondition<T> {
           if (getState() == IncomingDependencyState.DONE) {
             throw new ConditionClosedException(type());
           }
-          return outgoing.resource();
+          return outgoing.nextResource();
         } finally {
           outgoing.lock().unlock();
         }

@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
@@ -58,12 +58,12 @@ import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 public class Procedure {
   private final ExperimentId id;
   private final LinkedHashMap<WorkspaceExperimentPath, Instruction> instructions;
-  private final GlobalEnvironment environment;
+  private final Environment environment;
 
   public Procedure(
       ExperimentId id,
       Collection<? extends Instruction> instructions,
-      GlobalEnvironment environment) {
+      Environment environment) {
     this.id = id;
     this.instructions = new LinkedHashMap<>();
     for (var instruction : instructions) {
@@ -80,7 +80,7 @@ public class Procedure {
     return instructions.values().stream();
   }
 
-  public GlobalEnvironment environment() {
+  public Environment environment() {
     return environment;
   }
 

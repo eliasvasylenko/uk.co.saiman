@@ -35,6 +35,8 @@ import java.util.Objects;
  * dependent.
  */
 public class Exchange<T> extends RequestedSampleState<T> {
+  Exchange() {}
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null || (obj.getClass() != Exchange.class)) {

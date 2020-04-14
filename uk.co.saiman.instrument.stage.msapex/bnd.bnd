@@ -15,9 +15,10 @@ Bundle-Name: SAI :: MSApex :: Stage
 \
 	uk.co.saiman.msapex;version=snapshot,\
 	uk.co.saiman.instrument.sample.msapex;version=snapshot,\
-	uk.co.saiman.experiment.sample;version=snapshot,\
-	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
+	uk.co.saiman.experiment.sample;version=snapshot,\
+	uk.co.saiman.instrument.sampleplate;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\

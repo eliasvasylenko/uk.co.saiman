@@ -44,8 +44,7 @@ import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment.Status;
@@ -53,6 +52,7 @@ import uk.co.saiman.experiment.msapex.workspace.event.AddExperimentEvent;
 import uk.co.saiman.experiment.msapex.workspace.event.WorkspaceEvent;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.storage.service.StorageService;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.HotObservable;
@@ -62,8 +62,7 @@ public class Workspace {
   static final String WORKSPACE = "workspace";
   static final String CONFIGURATION_PID = "uk.co.saiman.experiment.filesystem.workspace";
 
-  private final Supplier<GlobalEnvironment> environment;
-  private final LocalEnvironmentService localEnvironmentService;
+  private final Supplier<Environment> environment;
 
   private final PathLocation rootLocation;
   private final JsonExperimentFormat experimentFormat;
@@ -78,8 +77,7 @@ public class Workspace {
       Path rootPath,
       ExecutorService conductorService,
       StorageService storageService,
-      Supplier<GlobalEnvironment> environment,
-      LocalEnvironmentService localEnvironmentService,
+      Supplier<Environment> environment,
       Log log) {
     this.experiments = new HashSet<>();
 
@@ -88,11 +86,9 @@ public class Workspace {
         conductorService,
         storageService,
         environment,
-        localEnvironmentService,
         log);
 
     this.environment = environment;
-    this.localEnvironmentService = localEnvironmentService;
 
     this.events = new HotObservable<>();
 
@@ -194,7 +190,6 @@ public class Workspace {
             storageConfiguration,
             experimentFormat.getExecutorService(),
             environment,
-            localEnvironmentService,
             log));
   }
 

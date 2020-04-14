@@ -27,7 +27,24 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.Objects;
+
 /**
  * A state was requested but could not be reached.
  */
-public class Failed<T> extends SampleState<T> {}
+public class Failed<T> extends SampleState<T> {
+  Failed() {}
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || (obj.getClass() != Failed.class)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(Failed.class);
+  }
+}

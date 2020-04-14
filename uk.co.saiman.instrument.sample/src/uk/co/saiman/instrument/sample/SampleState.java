@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.instrument.sample;
 
+import java.util.function.Function;
+
 /**
  * An enumeration of the possible states for a {@link SampleDevice sample
  * device}.
@@ -61,12 +63,32 @@ public abstract class SampleState<T> {
     return (Exchange<T>) EXCHANGE;
   }
 
-  public static <T> RequestedSampleState<T> analysis(T position) {
+  public static <T> Analysis<T> analysis(T position) {
     return new Analysis<>(position);
   }
 
   @Override
   public String toString() {
     return getClass().getSimpleName();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T, U> SampleState<U> map(
+      SampleState<T> state,
+      Function<? super T, ? extends U> mapping) {
+    if (state instanceof Analysis<?>) {
+      var analysis = (Analysis<T>) state;
+      var position = mapping.apply(analysis.position());
+
+      if (position == null) {
+        return failed();
+
+      } else {
+        return new Analysis<U>(position);
+      }
+
+    } else {
+      return (SampleState<U>) state;
+    }
   }
 }

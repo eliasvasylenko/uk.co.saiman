@@ -10,7 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Supplier;
 
+import uk.co.saiman.experiment.conductor.IncomingDependencies.IncomingDependencyState;
 import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
@@ -23,7 +25,7 @@ class OutgoingCondition<T> {
 
   private final HashMap<WorkspaceExperimentPath, IncomingCondition<T>> consumers = new LinkedHashMap<>();
   private final List<IncomingCondition<T>> acquiredConsumers = new ArrayList<>();
-  private T resource;
+  private Supplier<? extends T> resource;
 
   public OutgoingCondition(OutgoingConditions conditions, Class<T> type, Evaluation evaluation) {
     this.conditions = conditions;
@@ -71,7 +73,7 @@ class OutgoingCondition<T> {
         .orElse(null);
   }
 
-  public void prepare(T resource) {
+  public void prepare(Supplier<? extends T> resource) {
     this.resource = Objects.requireNonNull(resource);
 
     try {
@@ -124,7 +126,7 @@ class OutgoingCondition<T> {
     return type;
   }
 
-  T resource() {
-    return resource;
+  T nextResource() {
+    return resource.get();
   }
 }

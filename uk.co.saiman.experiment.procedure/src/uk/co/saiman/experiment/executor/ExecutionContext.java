@@ -41,6 +41,7 @@ import uk.co.saiman.experiment.dependency.Resource;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.Variables;
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
 
 /**
@@ -51,6 +52,8 @@ import uk.co.saiman.log.Log;
  * @author Elias N Vasylenko
  */
 public interface ExecutionContext {
+  WorkspaceExperimentPath getPath();
+
   ExperimentId getId();
 
   Variables getVariables();
@@ -73,9 +76,9 @@ public interface ExecutionContext {
 
   /**
    * Get a location which can be used to persist resource artifacts of this
-   * execution. Typically a resource in this location is used to construct one
-   * or more related {@link Data data} instances, one of which will be set as
-   * the {@link #setResultData(Class, Data) result} of the execution.
+   * execution. Typically a resource in this location is used to construct one or
+   * more related {@link Data data} instances, one of which will be set as the
+   * {@link #setResultData(Class, Data) result} of the execution.
    * <p>
    * The location will be empty before execution begins.
    * 
@@ -83,14 +86,14 @@ public interface ExecutionContext {
    */
   Location getLocation();
 
-  <U> void prepareCondition(Class<U> condition, U resource);
+  <U> void prepareCondition(Class<U> condition, Supplier<? extends U> resource);
 
   /**
    * Set a preliminary partial result value for this execution.
    * <p>
    * This method may be invoked multiple times during processing. The purpose is
-   * to support live-updating of result data, and any values passed to this
-   * method will be overridden by the return value of
+   * to support live-updating of result data, and any values passed to this method
+   * will be overridden by the return value of
    * {@link Executor#execute(ExecutionContext) execution} once processing
    * completes.
    * 
@@ -108,22 +111,20 @@ public interface ExecutionContext {
    * does not have to be rewritten. This means that expensive disk IO can be
    * performed during the experiment process rather than saved until the end.
    * <p>
-   * This method may be invoked at most once during any given execution, and
-   * this precludes invocation of
-   * {@link #setResultFormat(Class, String, DataFormat)} during the same
-   * execution.
+   * This method may be invoked at most once during any given execution, and this
+   * precludes invocation of {@link #setResultFormat(Class, String, DataFormat)}
+   * during the same execution.
    */
   <R> void setResultData(Class<R> observation, Data<R> data);
 
   /**
    * Set the result format for this execution. If invoked, then once the
-   * {@link Executor#execute(ExecutionContext) execution} is complete the
-   * returned value will be persisted according to the given file name and
-   * format.
+   * {@link Executor#execute(ExecutionContext) execution} is complete the returned
+   * value will be persisted according to the given file name and format.
    * <p>
-   * This method may be invoked at most once during any given execution, and
-   * this precludes invocation of {@link #setResultData(Class, Data)} during the
-   * same execution.
+   * This method may be invoked at most once during any given execution, and this
+   * precludes invocation of {@link #setResultData(Class, Data)} during the same
+   * execution.
    * 
    * @param name
    *          the name of the result data file
@@ -150,6 +151,12 @@ public interface ExecutionContext {
         if (done) {
           throw new IllegalStateException();
         }
+      }
+
+      @Override
+      public WorkspaceExperimentPath getPath() {
+        assertLive();
+        return parent.getPath();
       }
 
       @Override
@@ -195,7 +202,7 @@ public interface ExecutionContext {
       }
 
       @Override
-      public <U> void prepareCondition(Class<U> condition, U resource) {
+      public <U> void prepareCondition(Class<U> condition, Supplier<? extends U> resource) {
         assertLive();
         parent.prepareCondition(condition, resource);
       }

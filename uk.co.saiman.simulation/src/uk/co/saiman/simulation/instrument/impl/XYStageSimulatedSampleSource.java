@@ -28,6 +28,7 @@
 package uk.co.saiman.simulation.instrument.impl;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static java.util.function.Function.identity;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static uk.co.saiman.measurement.Quantities.quantityFormat;
 import static uk.co.saiman.measurement.Units.count;
@@ -284,6 +285,7 @@ public class XYStageSimulatedSampleSource
     var samplePosition = stageDevice
         .samplePosition()
         .tryGet()
+        .flatMap(identity())
         .map(stageDimension::apply)
         .orElse(lowerBound);
 

@@ -38,6 +38,8 @@ import static uk.co.saiman.measurement.Units.metre;
 import static uk.co.saiman.observable.Observable.fixedRate;
 import static uk.co.saiman.observable.Observer.onFailure;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
@@ -146,7 +148,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   protected synchronized void requestLocation(Quantity<Length> location) {
-    if (axisState.isEqual(LOCATION_REQUESTED)) {
+    if (axisState.isValueEqual(LOCATION_REQUESTED)) {
       throw new IllegalStateException("location already requested");
     }
 
@@ -184,7 +186,7 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
         throw new CopleyException("Drive fault");
       }
       setAccessible();
-      if (!status.motionActive && axisState.isEqual(LOCATION_REQUESTED)) {
+      if (!status.motionActive && axisState.isValueEqual(LOCATION_REQUESTED)) {
         axisState.set(LOCATION_REACHED);
       }
     } catch (Exception e) {
@@ -245,7 +247,10 @@ public class CopleyLinearAxis extends DeviceImpl<AxisController<Length>>
   }
 
   @Override
-  protected AxisController<Length> createController(ControlContext context) {
+  protected AxisController<Length> createController(
+      ControlContext context,
+      long timeout,
+      TimeUnit unit) {
     return new AxisController<>() {
       @Override
       public void requestLocation(Quantity<Length> location) {

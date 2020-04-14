@@ -37,6 +37,7 @@ import static uk.co.saiman.instrument.DeviceStatus.ACCESSIBLE;
 import static uk.co.saiman.instrument.DeviceStatus.DISPOSED;
 import static uk.co.saiman.instrument.DeviceStatus.INACCESSIBLE;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
@@ -65,7 +66,10 @@ public class DeviceImplTest {
     }
 
     @Override
-    protected SimpleController createController(ControlContext context) {
+    protected SimpleController createController(
+        ControlContext context,
+        long timeout,
+        TimeUnit unit) {
       backingService.acquireControl();
       return new SimpleController() {
         @Override

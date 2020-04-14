@@ -38,11 +38,9 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.extensions.OSGiBundle;
-import org.eclipse.e4.core.di.extensions.Service;
 import org.osgi.framework.BundleContext;
 
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
-import uk.co.saiman.experiment.environment.service.LocalEnvironmentService;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.osgi.ServiceIndex;
 
 public class ResourceService {
@@ -53,11 +51,7 @@ public class ResourceService {
   @OSGiBundle
   private BundleContext bundleContext;
 
-  @Inject
-  @Service
-  private LocalEnvironmentService localEnvironmentService;
-
-  private ServiceIndex<GlobalEnvironment, String, GlobalEnvironment> sharedResources;
+  private ServiceIndex<Environment, String, Environment> sharedResources;
   private final Map<Class<?>, ResourcePresenter<?>> resourcePresenters = new HashMap<>();
 
   @PostConstruct
@@ -65,7 +59,7 @@ public class ResourceService {
     sharedResources = ServiceIndex
         .open(
             bundleContext,
-            GlobalEnvironment.class,
+            Environment.class,
             identity(),
             (e, s) -> Optional
                 .ofNullable(s.getProperty("target-perspective-id").toString())

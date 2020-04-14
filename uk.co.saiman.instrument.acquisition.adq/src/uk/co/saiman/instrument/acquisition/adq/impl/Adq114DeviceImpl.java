@@ -31,6 +31,8 @@ import static uk.co.saiman.measurement.Units.count;
 import static uk.co.saiman.measurement.Units.hertz;
 import static uk.co.saiman.measurement.Units.second;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
@@ -96,7 +98,7 @@ public class Adq114DeviceImpl extends AdqDeviceImpl<Adq114Control> implements Ad
   }
 
   @Override
-  protected Adq114Control createController(ControlContext context) {
+  protected Adq114Control createController(ControlContext context, long timeout, TimeUnit unit) {
     return new Adq114ControlImpl(context);
   }
 

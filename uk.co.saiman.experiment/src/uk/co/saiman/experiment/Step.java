@@ -43,7 +43,7 @@ import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.environment.GlobalEnvironment;
+import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedures;
@@ -74,7 +74,7 @@ public class Step {
    * Environment
    */
 
-  private GlobalEnvironment getGlobalEnvironment() {
+  private Environment getGlobalEnvironment() {
     return experiment.getGlobalEnvironment();
   }
 
