@@ -39,6 +39,7 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -69,7 +70,7 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(downstreamObserver, identity, accumulator);
+    InOrder inOrder = inOrder(downstreamObserver, identity, accumulator);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(identity).get();
     inOrder.verify(accumulator).apply("identity", "message");
@@ -86,7 +87,7 @@ public class BackpressureReducingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    var inOrder = inOrder(downstreamObserver, identity, accumulator);
+    InOrder inOrder = inOrder(downstreamObserver, identity, accumulator);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(identity).get();
     inOrder.verify(accumulator).apply("identity", "message1");
@@ -105,7 +106,7 @@ public class BackpressureReducingObserverTest {
     test.onNext("message");
     test.onComplete();
 
-    var inOrder = inOrder(downstreamObserver, identity, accumulator);
+    InOrder inOrder = inOrder(downstreamObserver, identity, accumulator);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(identity).get();
     inOrder.verify(accumulator).apply("identity", "message");
@@ -123,7 +124,7 @@ public class BackpressureReducingObserverTest {
     test.onNext("message1");
     test.onNext("message2");
 
-    var inOrder = inOrder(downstreamObserver, initial, accumulator);
+    InOrder inOrder = inOrder(downstreamObserver, initial, accumulator);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(initial).apply("message1");
     inOrder.verify(accumulator).apply("initial", "message2");
@@ -137,7 +138,7 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.onComplete();
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onComplete();
     inOrder.verifyNoMoreInteractions();
@@ -153,7 +154,7 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.getObservation().requestNext();
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verifyNoMoreInteractions();
   }
@@ -168,7 +169,7 @@ public class BackpressureReducingObserverTest {
     test.onObserve(upstreamObservation);
     test.getObservation().requestNext();
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verifyNoMoreInteractions();
   }
@@ -186,7 +187,7 @@ public class BackpressureReducingObserverTest {
     test.onNext("message");
     test.getObservation().requestNext();
 
-    var inOrder = inOrder(downstreamObserver, initial);
+    InOrder inOrder = inOrder(downstreamObserver, initial);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(initial).apply("message");
     inOrder.verify(downstreamObserver).onNext("initial");

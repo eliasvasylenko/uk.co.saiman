@@ -42,6 +42,7 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -66,7 +67,7 @@ public class SafeObserverTest {
     test.getObservation().cancel();
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(upstreamObservation).cancel();
     inOrder.verify(downstreamObserver, times(0)).onNext(any());
@@ -79,7 +80,7 @@ public class SafeObserverTest {
     test.onComplete();
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onComplete();
     inOrder.verify(downstreamObserver, times(0)).onNext(any());
@@ -102,7 +103,7 @@ public class SafeObserverTest {
     Observer<String> test = new SafeObserver<>(downstreamObserver);
     test.onObserve(upstreamObservation);
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onFail(throwable);
     inOrder.verifyNoMoreInteractions();
@@ -119,7 +120,7 @@ public class SafeObserverTest {
     test.getObservation().requestNext();
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
     inOrder.verify(downstreamObserver).onFail(throwable);
@@ -133,7 +134,7 @@ public class SafeObserverTest {
     test.getObservation().requestNext();
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
     inOrder.verifyNoMoreInteractions();
@@ -145,7 +146,7 @@ public class SafeObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onFail(isA(UnexpectedMessageException.class));
     inOrder.verifyNoMoreInteractions();

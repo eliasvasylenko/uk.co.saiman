@@ -33,6 +33,7 @@ import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -52,7 +53,7 @@ public class DropWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
     inOrder.verifyNoMoreInteractions();
@@ -65,7 +66,7 @@ public class DropWhileObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(upstreamObservation).requestNext();
     inOrder.verifyNoMoreInteractions();
@@ -79,7 +80,7 @@ public class DropWhileObserverTest {
     test.onNext("pass");
     test.onNext("fail");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(upstreamObservation).requestNext();
     inOrder.verify(downstreamObserver).onNext("fail");
@@ -94,7 +95,7 @@ public class DropWhileObserverTest {
     test.onNext("fail");
     test.onNext("pass");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("fail");
     inOrder.verify(downstreamObserver).onNext("pass");

@@ -33,6 +33,7 @@ import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -52,7 +53,7 @@ public class FilteringObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(downstreamObserver, upstreamObservation);
+    InOrder inOrder = inOrder(downstreamObserver, upstreamObservation);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(upstreamObservation).requestNext();
     inOrder.verifyNoMoreInteractions();
@@ -65,7 +66,7 @@ public class FilteringObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(downstreamObserver, upstreamObservation);
+    InOrder inOrder = inOrder(downstreamObserver, upstreamObservation);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
     inOrder.verifyNoMoreInteractions();
@@ -81,7 +82,7 @@ public class FilteringObserverTest {
     test.onNext("three");
     test.onNext("four");
 
-    var inOrder = inOrder(downstreamObserver, upstreamObservation);
+    InOrder inOrder = inOrder(downstreamObserver, upstreamObservation);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(upstreamObservation).requestNext();
     inOrder.verify(downstreamObserver).onNext("two");

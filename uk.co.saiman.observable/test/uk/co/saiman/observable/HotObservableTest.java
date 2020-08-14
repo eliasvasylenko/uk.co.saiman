@@ -36,6 +36,7 @@ import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -50,7 +51,7 @@ public class HotObservableTest {
     HotObservable<String> observable = new HotObservable<>();
     observable.observe(downstreamObserver);
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verifyNoMoreInteractions();
   }
@@ -136,7 +137,7 @@ public class HotObservableTest {
     observable.observe(downstreamObserver);
     observable.next("message");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
     inOrder.verifyNoMoreInteractions();
@@ -148,7 +149,7 @@ public class HotObservableTest {
     observable.observe(downstreamObserver);
     observable.complete();
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onComplete();
     inOrder.verifyNoMoreInteractions();
@@ -162,7 +163,7 @@ public class HotObservableTest {
     observable.observe(downstreamObserver);
     observable.fail(t);
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onFail(t);
     inOrder.verifyNoMoreInteractions();

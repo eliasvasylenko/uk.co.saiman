@@ -32,6 +32,7 @@ import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -60,7 +61,7 @@ public class PassthroughObserverTest {
 
     test.onObserve(upstreamObservation);
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
     inOrder.verifyNoMoreInteractions();
   }
@@ -72,7 +73,7 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
     inOrder.verifyNoMoreInteractions();
@@ -87,7 +88,7 @@ public class PassthroughObserverTest {
     test.onNext("message2");
     test.onNext("message3");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message1");
     inOrder.verify(downstreamObserver).onNext("message2");
@@ -102,7 +103,7 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onComplete();
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onComplete();
     inOrder.verifyNoMoreInteractions();
@@ -117,7 +118,7 @@ public class PassthroughObserverTest {
     test.onObserve(upstreamObservation);
     test.onFail(t);
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onFail(t);
     inOrder.verifyNoMoreInteractions();

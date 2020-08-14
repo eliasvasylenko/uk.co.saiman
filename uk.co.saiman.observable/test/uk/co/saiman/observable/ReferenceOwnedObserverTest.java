@@ -37,6 +37,7 @@ import java.lang.ref.WeakReference;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -110,7 +111,7 @@ public class ReferenceOwnedObserverTest {
     weakReferenceTest();
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
     inOrder.verify(downstreamObserver).onNext(any());
     inOrder.verifyNoMoreInteractions();
@@ -129,7 +130,7 @@ public class ReferenceOwnedObserverTest {
     weakReferenceTest();
     test.onNext("message2");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
     inOrder.verify(downstreamObserver).onNext(any());
     inOrder.verify(upstreamObservation).cancel();

@@ -65,7 +65,7 @@ public class TransferBuffer {
 
     } else {
       size = to.remaining();
-      var bytes = new byte[size];
+      byte[] bytes = new byte[size];
       from.get(bytes);
       to.put(bytes);
     }
@@ -130,7 +130,7 @@ public class TransferBuffer {
       @Override
       public int read(ByteBuffer to) throws IOException {
         synchronized (TransferBuffer.this) {
-          var buffer = buffers.peek();
+          ByteBuffer buffer = buffers.peek();
           if (buffer != head && buffer.position() == 0) {
             buffers.poll();
             buffer = buffers.peek();

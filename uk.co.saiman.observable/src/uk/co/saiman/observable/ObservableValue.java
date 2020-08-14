@@ -132,7 +132,7 @@ public interface ObservableValue<T> {
 
   default <U> ObservableValue<U> map(Function<? super T, ? extends U> mapping) {
     ObservableValue<T> owner = this;
-    return new ObservableValue<>() {
+    return new ObservableValue<U>() {
       @Override
       public U get() {
         return mapping.apply(owner.get());

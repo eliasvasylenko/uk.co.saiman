@@ -37,6 +37,7 @@ import java.util.concurrent.Executor;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -61,7 +62,7 @@ public class ExecutorObserverTest {
     test.getObservation().requestNext();
     test.onNext("message");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
   }
@@ -73,7 +74,7 @@ public class ExecutorObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verifyNoMoreInteractions();
   }
 
@@ -84,7 +85,7 @@ public class ExecutorObserverTest {
     test.onObserve(upstreamObservation);
     test.onNext("message");
 
-    var inOrder = inOrder(executor, upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(executor, upstreamObservation, downstreamObserver);
     inOrder.verify(executor, times(2)).execute(any());
     inOrder.verifyNoMoreInteractions();
   }
@@ -98,7 +99,7 @@ public class ExecutorObserverTest {
     Observer<String> test = new ExecutorObserver<>(downstreamObserver, r -> r.run());
     test.onObserve(upstreamObservation);
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onFail(throwable);
   }
@@ -115,7 +116,7 @@ public class ExecutorObserverTest {
     test.getObservation().requestNext();
     test.onNext("message");
 
-    var inOrder = inOrder(upstreamObservation, downstreamObserver);
+    InOrder inOrder = inOrder(upstreamObservation, downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(any());
     inOrder.verify(downstreamObserver).onNext("message");
     inOrder.verify(downstreamObserver).onFail(throwable);

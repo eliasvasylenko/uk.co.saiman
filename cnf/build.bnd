@@ -95,7 +95,7 @@ Bundle-Developers:\
 		name				=	"JFrog_OSS";\
 		snapshotUrl			=	http://oss.jfrog.org/oss-snapshot-local
 
--pluginpath.commonjs.repository: ${build}/local/uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-0.0.1.jar
+-pluginpath.commonjs: ${build}/local/uk.co.saiman.webmodules.commonjs.repository.plugin/uk.co.saiman.webmodules.commonjs.repository.plugin-0.0.1.jar
 -plugin.NPM:\
 \
 	uk.co.saiman.webmodule.commonjs.repository.bnd.CommonJsRepositoryPlugin;\

@@ -32,6 +32,7 @@ import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -54,7 +55,7 @@ public class MappingObserverTest {
     test.onNext("three");
     test.onNext("four");
 
-    var inOrder = inOrder(downstreamObserver);
+    InOrder inOrder = inOrder(downstreamObserver);
     inOrder.verify(downstreamObserver).onObserve(upstreamObservation);
     inOrder.verify(downstreamObserver).onNext("one!");
     inOrder.verify(downstreamObserver).onNext("two!");
