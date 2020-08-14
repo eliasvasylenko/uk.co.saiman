@@ -35,3 +35,8 @@ local.properties
 *~
 /bnd/cache/
 /.gradle/
+
+# Nix files #
+#############
+default.nix
+.envrc
