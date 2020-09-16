@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genericXMLMessage>
+        <headers>
+                <user>SAI</user>
+                <plateBarcode>NOTIMPLEMENTED</plateBarcode>
+        </headers>
+        <payload>
+                <wellExperiments>
+                        <experiment>
+                                <EName>12_May_31_11_16_A02_LinearProtein</EName>
+                                <EGroup>12_05_30th</EGroup>
+                                <ERoot>C:\SAIDataSystem\Data\SAI</ERoot>
+                                <ESampleId></ESampleId>
+                                <EUsername>SAI</EUsername>
+                                <EEquipmentId>EquipmentId</EEquipmentId>
+                                <EMALDIIonSource>Positive_Ion_200um</EMALDIIonSource>
+                                <EMALDIToFAnalyser>Linear_Bacteria</EMALDIToFAnalyser>
+                                <EMALDIDataCollection>andromas</EMALDIDataCollection>
+                                <EMALDIOptimisationParameters>Bacteria</EMALDIOptimisationParameters>
+                                <EMALDIInternalCalibration>NoInternalCal</EMALDIInternalCalibration>
+                                <EMALDIMassSpectrumPeakDetectionSetup>Bacteria</EMALDIMassSpectrumPeakDetectionSetup>
+                                <EMALDIProcessingMethod>listpeaks</EMALDIProcessingMethod>
+                                <EWellName>A02</EWellName>
+                                <ESlideName>96 Well Plate with DM</ESlideName>
+                        </experiment>
+                        <experiment>
+                                <EName>12_May_31_11_17_A03_LinearProtein</EName>
+                                <EGroup>12_05_30th</EGroup>
+                                <ERoot>C:\SAIDataSystem\Data\SAI</ERoot>
+                                <ESampleId></ESampleId>
+                                <EUsername>SAI</EUsername>
+                                <EEquipmentId>EquipmentId</EEquipmentId>
+                                <EMALDIIonSource>Positive_Ion_200um</EMALDIIonSource>
+                                <EMALDIToFAnalyser>Linear_Bacteria</EMALDIToFAnalyser>
+                                <EMALDIDataCollection>andromas</EMALDIDataCollection>
+                                <EMALDIOptimisationParameters>Bacteria</EMALDIOptimisationParameters>
+                                <EMALDIInternalCalibration>NoInternalCal</EMALDIInternalCalibration>
+                                <EMALDIMassSpectrumPeakDetectionSetup>Bacteria</EMALDIMassSpectrumPeakDetectionSetup>
+                                <EMALDIProcessingMethod>listpeaks</EMALDIProcessingMethod>
+                                <EWellName>A03</EWellName>
+                                <ESlideName>96 Well Plate with DM</ESlideName>
+                        </experiment>
+                        <experiment>
+                                <EName>12_May_31_11_18_A04_LinearProtein</EName>
+                                <EGroup>12_05_30th</EGroup>
+                                <ERoot>C:\SAIDataSystem\Data\SAI</ERoot>
+                                <ESampleId></ESampleId>
+                                <EUsername>SAI</EUsername>
+                                <EEquipmentId>EquipmentId</EEquipmentId>
+                                <EMALDIIonSource>Positive_Ion_200um</EMALDIIonSource>
+                                <EMALDIToFAnalyser>Linear_Bacteria</EMALDIToFAnalyser>
+                                <EMALDIDataCollection>andromas</EMALDIDataCollection>
+                                <EMALDIOptimisationParameters>Bacteria</EMALDIOptimisationParameters>
+                                <EMALDIInternalCalibration>NoInternalCal</EMALDIInternalCalibration>
+                                <EMALDIMassSpectrumPeakDetectionSetup>Bacteria</EMALDIMassSpectrumPeakDetectionSetup>
+                                <EMALDIProcessingMethod>listpeaks</EMALDIProcessingMethod>
+                                <EWellName>A04</EWellName>
+                                <ESlideName>96 Well Plate with DM</ESlideName>
+                        </experiment>
+                        <experiment>
+                                <EName>12_May_31_11_19_A05_LinearProtein</EName>
+                                <EGroup>12_05_30th</EGroup>
+                                <ERoot>C:\SAIDataSystem\Data\SAI</ERoot>
+                                <ESampleId></ESampleId>
+                                <EUsername>SAI</EUsername>
+                                <EEquipmentId>EquipmentId</EEquipmentId>
+                                <EMALDIIonSource>Positive_Ion_200um</EMALDIIonSource>
+                                <EMALDIToFAnalyser>Linear_Bacteria</EMALDIToFAnalyser>
+                                <EMALDIDataCollection>andromas</EMALDIDataCollection>
+                                <EMALDIOptimisationParameters>Bacteria</EMALDIOptimisationParameters>
+                                <EMALDIInternalCalibration>NoInternalCal</EMALDIInternalCalibration>
+                                <EMALDIMassSpectrumPeakDetectionSetup>Bacteria</EMALDIMassSpectrumPeakDetectionSetup>
+                                <EMALDIProcessingMethod>listpeaks</EMALDIProcessingMethod>
+                                <EWellName>A05</EWellName>
+                                <ESlideName>96 Well Plate with DM</ESlideName>
+                        </experiment>
+                        <experiment>
+                                <EName>12_May_31_11_20_A06_LinearProtein</EName>
+                                <EGroup>12_05_30th</EGroup>
+                                <ERoot>C:\SAIDataSystem\Data\SAI</ERoot>
+                                <ESampleId></ESampleId>
+                                <EUsername>SAI</EUsername>
+                                <EEquipmentId>EquipmentId</EEquipmentId>
+                                <EMALDIIonSource>Positive_Ion_200um</EMALDIIonSource>
+                                <EMALDIToFAnalyser>Linear_Bacteria</EMALDIToFAnalyser>
+                                <EMALDIDataCollection>andromas</EMALDIDataCollection>
+                                <EMALDIOptimisationParameters>Bacteria</EMALDIOptimisationParameters>
+                                <EMALDIInternalCalibration>NoInternalCal</EMALDIInternalCalibration>
+                                <EMALDIMassSpectrumPeakDetectionSetup>Bacteria</EMALDIMassSpectrumPeakDetectionSetup>
+                                <EMALDIProcessingMethod>listpeaks</EMALDIProcessingMethod>
+                                <EWellName>A06</EWellName>
+                                <ESlideName>96 Well Plate with DM</ESlideName>
+                        </experiment>
+                </wellExperiments>
+        </payload>
+</genericXMLMessage>

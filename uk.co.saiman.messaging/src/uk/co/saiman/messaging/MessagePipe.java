@@ -41,11 +41,7 @@ import uk.co.saiman.observable.Observable;
 
 @Designate(ocd = MessagePipeConfiguration.class, factory = true)
 @Component(configurationPid = MessagePipe.CONFIGURATION_PID, immediate = true, configurationPolicy = REQUIRE, service = {
-    MessageChannel.class,
-    MessageSender.class,
-    MessageReceiver.class,
-    DataChannel.class,
-    DataSender.class,
+    MessageChannel.class, MessageSender.class, MessageReceiver.class, DataChannel.class, DataSender.class,
     DataReceiver.class })
 public class MessagePipe implements MessageChannel {
   @SuppressWarnings("javadoc")
@@ -62,11 +58,21 @@ public class MessagePipe implements MessageChannel {
 
   @Override
   public void sendMessage(ByteBuffer message) {
-    messages.next(message);
+    int pos = message.position();
+    int lim = message.limit();
+
+    var target = ByteBuffer.allocate(message.remaining());
+    target.put(message);
+    target.flip();
+
+    message.position(pos);
+    message.limit(lim);
+
+    messages.next(target.asReadOnlyBuffer());
   }
 
   @Override
   public Observable<ByteBuffer> receiveMessages() {
-    return messages;
+    return messages.map(ByteBuffer::duplicate);
   }
 }

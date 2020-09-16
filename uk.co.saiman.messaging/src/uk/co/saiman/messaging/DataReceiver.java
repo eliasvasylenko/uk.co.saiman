@@ -40,7 +40,7 @@ import uk.co.saiman.observable.Observable;
  * 
  * @author Elias N Vasylenko
  */
-public interface DataReceiver {
+public interface DataReceiver extends DataEndpoint {
   Observable<ByteBuffer> receiveData();
 
   default DataBuffer openDataBuffer(int size) throws IOException {
@@ -48,7 +48,7 @@ public interface DataReceiver {
   }
 
   default DataReceiver packeting(int size) {
-    return new PackatingDataReceiver(this, size);
+    return new PacketingDataReceiver(this, size);
   }
 
   default ReadableByteChannel openByteChannel(int bufferSize) throws IOException {

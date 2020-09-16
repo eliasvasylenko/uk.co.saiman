@@ -9,17 +9,22 @@ Bundle-Name: SAI :: Experiment :: OSGi
 	uk.co.saiman.experiment.storage;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.reflection.token;version=snapshot,\
 	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
+	org.apache.felix.gogo.command,\
+	org.apache.felix.gogo.runtime,\
+	org.apache.felix.gogo.shell,\
 	json;version=latest
 
 Private-Package: \
 	uk.co.saiman.experiment.osgi.impl,\
-	uk.co.saiman.experiment.environment.osgi.impl
+	uk.co.saiman.experiment.environment.osgi.impl,\
+	uk.co.saiman.experiment.commands
 
 Export-Package: \
 	uk.co.saiman.experiment.osgi,\

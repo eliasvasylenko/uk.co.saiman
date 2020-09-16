@@ -33,8 +33,9 @@ import java.nio.ByteBuffer;
 public interface MessageSender extends DataSender {
   @Override
   default int sendData(ByteBuffer message) throws IOException {
+    int size = message.remaining();
     sendMessage(message);
-    return 0;
+    return size;
   }
 
   void sendMessage(ByteBuffer message) throws IOException;

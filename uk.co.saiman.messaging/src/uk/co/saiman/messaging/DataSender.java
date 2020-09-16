@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-public interface DataSender {
+public interface DataSender extends DataEndpoint {
   int sendData(ByteBuffer message) throws IOException;
 
   default WritableByteChannel asByteChannel() {

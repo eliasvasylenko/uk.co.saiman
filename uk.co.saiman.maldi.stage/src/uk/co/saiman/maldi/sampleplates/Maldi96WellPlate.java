@@ -46,8 +46,7 @@ import uk.co.saiman.measurement.coordinate.XYCoordinate;
 import uk.co.saiman.measurement.scalar.Scalar;
 
 @Component(property = MaldiSamplePlateIndex.SAMPLE_PLATE_ID + "=" + Maldi96WellPlate.ID)
-public class Maldi96WellPlate extends IndexedSamplePlate<MaldiSampleWell>
-    implements MaldiSamplePlate {
+public class Maldi96WellPlate extends IndexedSamplePlate<MaldiSampleWell> implements MaldiSamplePlate {
   public static final String ID = "96well";
 
   private static final char FIRST_ROW = 'A';
@@ -58,12 +57,8 @@ public class Maldi96WellPlate extends IndexedSamplePlate<MaldiSampleWell>
 
   private static final Quantity<Length> RADIUS = new Scalar<>(Units.metre().milli(), 1.5);
 
-  private static final Quantity<Length> FIRST_ROW_OFFSET = new Scalar<>(
-      Units.metre().milli(),
-      -15.75);
-  private static final Quantity<Length> FIRST_COLUMN_OFFSET = new Scalar<>(
-      Units.metre().milli(),
-      -24.75);
+  private static final Quantity<Length> FIRST_ROW_OFFSET = new Scalar<>(Units.metre().milli(), -15.75);
+  private static final Quantity<Length> FIRST_COLUMN_OFFSET = new Scalar<>(Units.metre().milli(), -24.75);
   private static final Quantity<Length> SPACING = new Scalar<>(Units.metre().milli(), 4.5);
 
   public Maldi96WellPlate() {
@@ -71,10 +66,7 @@ public class Maldi96WellPlate extends IndexedSamplePlate<MaldiSampleWell>
   }
 
   private static Stream<MaldiSampleWell> createRows() {
-    return IntStream
-        .rangeClosed(FIRST_ROW, LAST_ROW)
-        .mapToObj(Row::new)
-        .flatMap(Maldi96WellPlate::createColumns);
+    return IntStream.rangeClosed(FIRST_ROW, LAST_ROW).mapToObj(Row::new).flatMap(Maldi96WellPlate::createColumns);
   }
 
   private static Stream<MaldiSampleWell> createColumns(Row row) {
@@ -86,7 +78,7 @@ public class Maldi96WellPlate extends IndexedSamplePlate<MaldiSampleWell>
 
   private static MaldiSampleWell createWell(Column column, Row row) {
     return new MaldiSampleWell(
-        Character.toString(row.character()) + Integer.toString(column.number()),
+        Character.toString(row.character()) + (column.number() < 10 ? "0" : "") + Integer.toString(column.number()),
         new XYCoordinate<>(column.offset(), row.offset()),
         RADIUS);
   }

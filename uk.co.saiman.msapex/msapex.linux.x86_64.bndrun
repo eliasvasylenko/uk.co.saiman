@@ -11,7 +11,7 @@ runplatform: linux64
 		osgi.native.osname=Linux;\
 		osgi.native.processor=x86-64
 
--runrequires.win32: \
+-runrequires.linux: \
 	bnd.identity; id=openjfx.base.linux.x86_64,\
 	bnd.identity; id=openjfx.controls.linux.x86_64,\
 	bnd.identity; id=openjfx.fxml.linux.x86_64,\

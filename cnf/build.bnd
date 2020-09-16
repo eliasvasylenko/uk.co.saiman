@@ -153,7 +153,7 @@ javafx.version: 13
 	NPM
 
 ## Run requirement groups:
--runrequires.base:\
+-runrequires.logging:\
 	bnd.identity; id=org.apache.felix.log
 -runblacklist:\
 	bnd.identity; id=osgi.cmpn

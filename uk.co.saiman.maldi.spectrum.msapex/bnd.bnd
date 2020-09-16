@@ -1,0 +1,40 @@
+Bundle-Name: SAI :: MALDI :: Spectrum
+
+Export-Package: \
+	uk.co.saiman.maldi.spectrum.i18n,\
+	uk.co.saiman.maldi.spectrum.msapex
+
+-includeresource:\
+	res,\
+	initial.e4xmi,\
+	always.e4xmi,\
+	l10n
+
+-include:\
+	${build}/include/eclipse.plugin.bnd
+
+-buildpath:\
+	uk.co.saiman.eclipse;version=snapshot,\
+	uk.co.saiman.eclipse.ui;version=snapshot,\
+	uk.co.saiman.eclipse.fx;version=snapshot,\
+	uk.co.saiman.fx;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.state;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.data.spectrum;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.experiment;version=snapshot,\
+	uk.co.saiman.experiment.msapex;version=snapshot,\
+	uk.co.saiman.experiment.osgi;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.experiment.definition;version=snapshot,\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
+	uk.co.saiman.experiment.processing;version=snapshot,\
+	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+	uk.co.saiman.maldi.spectrum;version=snapshot,\
+	uk.co.saiman.maldi.stage;version=snapshot,\
+	javax.measure.unit-api

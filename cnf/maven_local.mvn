@@ -112,3 +112,9 @@ uk.co.saiman:uk.co.saiman.copley.provider:0.0.1-SNAPSHOT
 uk.co.saiman:uk.co.saiman.copley.webconsole:0.0.1-SNAPSHOT
 uk.co.saiman:uk.co.saiman.maldi.stage:0.0.1-SNAPSHOT
 uk.co.saiman:uk.co.saiman.maldi.spectrum:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.experiment.queueimport:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.maldi.legacy.queue:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.maldi.msapex:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.maldi.acquisition.msapex:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.maldi.stage.msapex:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.maldi.spectrum.msapex:0.0.1-SNAPSHOT

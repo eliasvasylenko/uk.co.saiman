@@ -2,8 +2,6 @@ Bundle-Name: SAI :: MALDI :: Stage
 
 Export-Package: \
 	uk.co.saiman.maldi.sample,\
-	uk.co.saiman.maldi.sample.i18n,\
-	uk.co.saiman.maldi.stage.msapex,\
 	uk.co.saiman.maldi.sampleplate,\
 	uk.co.saiman.maldi.sampleplates,\
 	uk.co.saiman.maldi.stage
@@ -11,21 +9,7 @@ Export-Package: \
 Private-Package: \
 	uk.co.saiman.maldi.sampleplate.osgi
 
--includeresource:\
-	res,\
-	slides=slides,\
-	initial.e4xmi,\
-	always.e4xmi,\
-	l10n
-
--include:\
-	${build}/include/eclipse.plugin.bnd
-
 -buildpath: \
-	uk.co.saiman.eclipse;version=snapshot,\
-	uk.co.saiman.eclipse.ui;version=snapshot,\
-	uk.co.saiman.eclipse.fx;version=snapshot,\
-	uk.co.saiman.fx;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.state;version=snapshot,\
 	uk.co.saiman.osgi;version=snapshot,\
@@ -36,18 +20,14 @@ Private-Package: \
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.osgi;version=snapshot,\
-	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.definition;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
-	uk.co.saiman.msapex.annotations;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
 	uk.co.saiman.instrument.sampleplate;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
-	uk.co.saiman.instrument.msapex;version=snapshot,\
 	uk.co.saiman.measurement;version=snapshot,\
 	uk.co.saiman.measurement.fx;version=snapshot,\
 	uk.co.saiman.measurement.coordinates;version=snapshot,\
-	javax.measure.unit-api,\
-	uk.co.saiman.instrument.stage.msapex
+	javax.measure.unit-api

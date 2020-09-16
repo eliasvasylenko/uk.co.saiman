@@ -95,14 +95,14 @@ public class JSerialPortService implements CommsPort {
       serialPort.setBaudRate(9600);
       serialPort.setNumStopBits(ONE_STOP_BIT);
       serialPort.setParity(NO_PARITY);
-      serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 1000, 1000);
+      serialPort.setComPortTimeouts(TIMEOUT_READ_BLOCKING | TIMEOUT_WRITE_BLOCKING, 100, 100);
       serialPort.addDataListener(new SerialPortDataListener() {
         @Override
         public void serialEvent(SerialPortEvent event) {
           if (event.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
             byte[] bytes = new byte[serialPort.bytesAvailable()];
             serialPort.readBytes(bytes, bytes.length);
-            receive.next(ByteBuffer.wrap(bytes));
+            receive.next(ByteBuffer.wrap(bytes).asReadOnlyBuffer());
           }
         }
 
@@ -140,6 +140,6 @@ public class JSerialPortService implements CommsPort {
 
   @Override
   public Observable<ByteBuffer> receiveData() {
-    return receive;
+    return receive.map(ByteBuffer::duplicate);
   }
 }

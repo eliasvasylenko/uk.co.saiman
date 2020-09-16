@@ -130,7 +130,7 @@ public class RabbitQueue implements MessageReceiver, DataReceiver {
             AMQP.BasicProperties properties,
             byte[] body)
             throws IOException {
-          receive.next(wrap(body));
+          receive.next(wrap(body).asReadOnlyBuffer());
         }
       };
       channel.basicConsume(queue, true, consumer);
@@ -157,6 +157,6 @@ public class RabbitQueue implements MessageReceiver, DataReceiver {
 
   @Override
   public Observable<ByteBuffer> receiveMessages() {
-    return receive;
+    return receive.map(ByteBuffer::duplicate);
   }
 }

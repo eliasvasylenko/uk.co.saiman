@@ -27,33 +27,36 @@
  */
 package uk.co.saiman.messaging.commands;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.messaging.commands.MessagingCommands.COMMAND_FUNCTION_KEY;
-import static uk.co.saiman.messaging.commands.MessagingCommands.COMMAND_SCOPE_KEY;
+import static org.osgi.service.component.annotations.ReferencePolicyOption.GREEDY;
+import static uk.co.saiman.shell.converters.ShellProperties.COMMAND_FUNCTION_KEY;
+import static uk.co.saiman.shell.converters.ShellProperties.COMMAND_SCOPE_PROPERTY;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.command.Descriptor;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 
-import uk.co.saiman.messaging.DataBuffer;
+import uk.co.saiman.messaging.DataChannel;
+import uk.co.saiman.messaging.DataEndpoint;
 import uk.co.saiman.messaging.DataReceiver;
 import uk.co.saiman.messaging.DataSender;
-import uk.co.saiman.messaging.MessageBuffer;
+import uk.co.saiman.messaging.MessageChannel;
 import uk.co.saiman.messaging.MessageReceiver;
 import uk.co.saiman.messaging.MessageSender;
-import uk.co.saiman.osgi.ServiceIndex;
-import uk.co.saiman.osgi.ServiceRecord;
 import uk.co.saiman.shell.converters.RequireConverter;
 
 /**
@@ -62,285 +65,70 @@ import uk.co.saiman.shell.converters.RequireConverter;
  * @author Elias N Vasylenko
  */
 @RequireConverter(converterType = ByteBuffer.class)
-@Component(immediate = true, service = MessagingCommands.class, property = {
-    COMMAND_SCOPE_KEY + "=channel",
-    COMMAND_FUNCTION_KEY + "=openDataBuffer",
-    COMMAND_FUNCTION_KEY + "=openMessageBuffer",
-    COMMAND_FUNCTION_KEY + "=closeBuffers",
-    COMMAND_FUNCTION_KEY + "=sendData",
-    COMMAND_FUNCTION_KEY + "=receiveData",
-    COMMAND_FUNCTION_KEY + "=sendMessage",
-    COMMAND_FUNCTION_KEY + "=receiveMessage",
-    COMMAND_FUNCTION_KEY + "=list",
-    COMMAND_FUNCTION_KEY + "=inspect" })
-public class MessagingCommands {
-  public static final String COMMAND_SCOPE_KEY = "osgi.command.scope";
-  public static final String COMMAND_FUNCTION_KEY = "osgi.command.function";
+@Component(immediate = true, property = { COMMAND_SCOPE_PROPERTY, COMMAND_FUNCTION_KEY + "=listEndpoints",
+    COMMAND_FUNCTION_KEY + "=getEndpoint", COMMAND_FUNCTION_KEY + "=inspectEndpoint",
+    COMMAND_FUNCTION_KEY + "=sendData", COMMAND_FUNCTION_KEY + "=receiveData", COMMAND_FUNCTION_KEY + "=sendMessage",
+    COMMAND_FUNCTION_KEY + "=receiveMessage" })
+public class MessagingCommands implements Converter {
+  private final BundleContext context;
+  private final List<ServiceReference<?>> references;
+  private final Map<String, DataEndpoint> endpoints;
+  private final Map<DataEndpoint, String> ids;
 
-  private final ServiceIndex<?, String, DataReceiver> dataReceiverIndex;
-  private final ServiceIndex<?, String, DataSender> dataSenderIndex;
-  private final ServiceIndex<?, String, MessageReceiver> messageReceiverIndex;
-  private final ServiceIndex<?, String, MessageSender> messageSenderIndex;
-
-  private Map<ServiceRecord<?, String, ?>, DataBuffer> dataBuffers = new HashMap<>();
-  private Map<ServiceRecord<?, String, ?>, MessageBuffer> messageBuffers = new HashMap<>();
+  private void getServices(List<? extends ServiceReference<? extends DataEndpoint>> references) {
+    for (var reference : references) {
+      var pid = reference.getProperty("service.pid").toString();
+      if (!this.endpoints.containsKey(pid)) {
+        var service = context.getService(reference);
+        this.endpoints.put(pid, service);
+        this.ids.putIfAbsent(service, pid);
+        this.references.add(reference);
+      }
+    }
+  }
 
   @Activate
-  public MessagingCommands(BundleContext context) {
-    dataReceiverIndex = ServiceIndex.open(context, DataReceiver.class);
-    dataSenderIndex = ServiceIndex.open(context, DataSender.class);
-    messageReceiverIndex = ServiceIndex.open(context, MessageReceiver.class);
-    messageSenderIndex = ServiceIndex.open(context, MessageSender.class);
+  public MessagingCommands(
+      BundleContext context,
+      @Reference(policyOption = GREEDY) List<ServiceReference<DataReceiver>> dataReceivers,
+      @Reference(policyOption = GREEDY) List<ServiceReference<DataSender>> dataSenders,
+      @Reference(policyOption = GREEDY) List<ServiceReference<MessageReceiver>> messageReceivers,
+      @Reference(policyOption = GREEDY) List<ServiceReference<MessageSender>> messageSenders) {
+    this.context = context;
+    this.references = new ArrayList<>();
+    this.endpoints = new LinkedHashMap<>();
+    this.ids = new HashMap<>();
+    getServices(dataReceivers);
+    getServices(dataSenders);
+    getServices(messageReceivers);
+    getServices(messageSenders);
   }
 
   @Deactivate
   void deactivate() throws Exception {
-    dataReceiverIndex.close();
-    dataSenderIndex.close();
-    messageReceiverIndex.close();
-    messageSenderIndex.close();
-    for (var dataBuffer : dataBuffers.values()) {
-      dataBuffer.close();
-    }
-    for (var messageBuffer : messageBuffers.values()) {
-      messageBuffer.close();
-    }
+    references.forEach(context::ungetService);
   }
 
-  private ServiceRecord<?, String, ?> get(String id) throws IOException {
-    return Stream
-        .of(dataReceiverIndex, messageReceiverIndex, dataSenderIndex, messageSenderIndex)
-        .flatMap(index -> index.highestRankedRecord(id).tryGet().stream())
-        .findAny()
-        .orElseThrow(() -> new IOException("Cannot find channel"));
+  @Override
+  public Object convert(Class<?> type, Object object) {
+    if (!(object instanceof CharSequence)) {
+      return null;
+    }
+
+    var endpoint = endpoints.get(object.toString());
+
+    if (type.isInstance(endpoint) && (type == DataEndpoint.class || type == DataReceiver.class
+        || type == DataSender.class || type == DataChannel.class || type == MessageReceiver.class
+        || type == MessageSender.class || type == MessageChannel.class)) {
+      return endpoint;
+    }
+
+    return null;
   }
 
-  private Stream<String> records() {
-    return Stream
-        .of(dataReceiverIndex, messageReceiverIndex, dataSenderIndex, messageSenderIndex)
-        .flatMap(ServiceIndex::records)
-        .flatMap(ServiceRecord::ids)
-        .distinct();
-  }
-
-  public static final String CHANNEL_ID = "the PID of the channel service";
-
-  public static final String DATA_BUFFER_SIZE = "the size of the data buffer in bytes";
-
-  public static final String OPEN_DATA_DESCRIPTOR = "open the given channel for reading data";
-
-  /**
-   * Command: {@value #OPEN_DATA_DESCRIPTOR}
-   * 
-   * @param id {@value #CHANNEL_ID}
-   * @throws IOException problem opening the channel
-   */
-  @Descriptor(OPEN_DATA_DESCRIPTOR)
-  public void openDataBuffer(
-      @Descriptor(CHANNEL_ID) String id,
-      @Descriptor(DATA_BUFFER_SIZE) int bufferSize)
-      throws IOException {
-    var channel = get(id);
-
-    if (!(channel.serviceObject() instanceof DataReceiver)) {
-      throw new IOException(format("Cannot open channel %s for receiving data", channel));
-    }
-
-    synchronized (dataBuffers) {
-      dataBuffers.get(channel).close();
-      dataBuffers.put(channel, ((DataReceiver) channel.serviceObject()).openDataBuffer(bufferSize));
-    }
-  }
-
-  public static final String MESSAGE_BUFFER_SIZE = "the size of the message buffer";
-
-  public static final String OPEN_MESSAGE_DESCRIPTOR = "open the given channel for reading messages";
-
-  /**
-   * Command: {@value #OPEN_MESSAGE_DESCRIPTOR}
-   * 
-   * @param id {@value #CHANNEL_ID}
-   * @throws IOException problem opening the channel
-   */
-  @Descriptor(OPEN_MESSAGE_DESCRIPTOR)
-  public void openMessageBuffer(
-      @Descriptor(CHANNEL_ID) String id,
-      @Descriptor(MESSAGE_BUFFER_SIZE) int bufferSize)
-      throws IOException {
-    var channel = get(id);
-
-    if (!(channel.serviceObject() instanceof MessageReceiver)) {
-      throw new IOException(format("Cannot open channel %s for receiving messages", channel));
-    }
-
-    synchronized (messageBuffers) {
-      messageBuffers.get(channel).close();
-      messageBuffers
-          .put(channel, ((MessageReceiver) channel.serviceObject()).openMessageBuffer(bufferSize));
-    }
-  }
-
-  public static final String CLOSE_BUFFERS_DESCRIPTOR = "close any open buffers for the given channel";
-
-  /**
-   * Command: {@value #CLOSE_BUFFERS_DESCRIPTOR}
-   * 
-   * @param id {@value #CHANNEL_ID}
-   * @throws IOException problem closing the channel
-   */
-  @Descriptor(CLOSE_BUFFERS_DESCRIPTOR)
-  public void closeBuffers(@Descriptor(CHANNEL_ID) String id) throws IOException {
-    var channel = get(id);
-
-    synchronized (dataBuffers) {
-      var dataBuffer = dataBuffers.get(channel);
-      if (dataBuffer != null) {
-        dataBuffer.close();
-      }
-    }
-    synchronized (messageBuffers) {
-      var messageBuffer = messageBuffers.get(channel);
-      if (messageBuffer != null) {
-        messageBuffer.close();
-      }
-    }
-  }
-
-  public static final String SEND_DATA_DESCRIPTOR = "write the given bytes to the given channel";
-  public static final String SEND_DATA = "the bytes to write to the channel";
-
-  /**
-   * Command: {@value #SEND_DATA_DESCRIPTOR}
-   * 
-   * @param id   {@value #CHANNEL_ID}
-   * @param data {@link #SEND_DATA}
-   * @throws IOException problem writing the byte
-   */
-  @Descriptor(SEND_DATA_DESCRIPTOR)
-  public int sendData(@Descriptor(CHANNEL_ID) String id, @Descriptor(SEND_DATA) ByteBuffer data)
-      throws IOException {
-    var channel = get(id);
-
-    if (!(channel.serviceObject() instanceof DataSender)) {
-      throw new IOException(format("Cannot open channel %s for sending data", channel));
-    }
-
-    return ((DataSender) channel.serviceObject()).sendData(data);
-  }
-
-  public static final String RECEIVE_DATA_BYTES_DESCRIPTOR = "read a number of bytes from the open channel";
-  public static final String RECEIVE_BYTE_COUNT = "the number of bytes to read";
-
-  /**
-   * Command: {@value #RECEIVE_DATA_BYTES_DESCRIPTOR}
-   * 
-   * @param id        {@value #CHANNEL_ID}
-   * @param byteCount {@value #RECEIVE_BYTE_COUNT}
-   * @return the bytes read from the channel
-   * @throws IOException problem reading the bytes
-   */
-  @Descriptor(RECEIVE_DATA_BYTES_DESCRIPTOR)
-  public ByteBuffer receiveData(
-      @Descriptor(CHANNEL_ID) String id,
-      @Descriptor(RECEIVE_BYTE_COUNT) int byteCount)
-      throws IOException {
-    var channel = get(id);
-
-    DataBuffer dataBuffer;
-    synchronized (dataBuffers) {
-      dataBuffer = dataBuffers.get(channel);
-    }
-
-    if (dataBuffer == null) {
-      throw new IOException(
-          format("No data buffer is open for channel %s", channel.serviceObject()));
-    }
-
-    ByteBuffer buffer = ByteBuffer.allocate(byteCount);
-    dataBuffer.readData(buffer);
-    buffer.flip();
-
-    return buffer;
-  }
-
-  public static final String RECEIVE_DATA_DESCRIPTOR = "read all available bytes from the open channel";
-
-  /**
-   * Command: {@value #RECEIVE_DATA_DESCRIPTOR}
-   * 
-   * @param id {@value #CHANNEL_ID}
-   * @return the bytes read from the channel
-   * @throws IOException problem reading the bytes
-   */
-  @Descriptor(RECEIVE_DATA_DESCRIPTOR)
-  public ByteBuffer receiveData(@Descriptor(CHANNEL_ID) String id) throws IOException {
-    var channel = get(id);
-
-    DataBuffer dataBuffer;
-    synchronized (dataBuffers) {
-      dataBuffer = dataBuffers.get(channel);
-    }
-
-    if (dataBuffer == null) {
-      throw new IOException(
-          format("No data buffer is open for channel %s", channel.serviceObject()));
-    }
-
-    ByteBuffer buffer = ByteBuffer.allocate(dataBuffer.availableBytes());
-    dataBuffer.readData(buffer);
-    buffer.flip();
-
-    return buffer;
-  }
-
-  public static final String SEND_MESSAGE_DESCRIPTOR = "write the given message to the given channel";
-  public static final String SEND_MESSAGE = "the message to write to the channel";
-
-  /**
-   * Command: {@value #SEND_MESSAGE_DESCRIPTOR}
-   * 
-   * @param id   {@value #CHANNEL_ID}
-   * @param data {@link #SEND_MESSAGE}
-   * @throws IOException problem writing the byte
-   */
-  @Descriptor(SEND_MESSAGE_DESCRIPTOR)
-  public void sendMessage(
-      @Descriptor(CHANNEL_ID) String id,
-      @Descriptor(SEND_MESSAGE) ByteBuffer data)
-      throws IOException {
-    var channel = get(id);
-
-    if (!(channel.serviceObject() instanceof MessageSender)) {
-      throw new IOException(format("Cannot open channel %s for sending messages", channel));
-    }
-
-    ((MessageSender) channel.serviceObject()).sendMessage(data);
-  }
-
-  public static final String RECEIVE_MESSAGE_DESCRIPTOR = "read a message the open channel";
-
-  /**
-   * Command: {@value #RECEIVE_MESSAGE_DESCRIPTOR}
-   * 
-   * @param id {@value #CHANNEL_ID}
-   * @return the message read from the channel
-   * @throws IOException problem reading the message
-   */
-  @Descriptor(RECEIVE_MESSAGE_DESCRIPTOR)
-  public ByteBuffer receiveMessage(@Descriptor(CHANNEL_ID) String id) throws IOException {
-    var channel = get(id);
-
-    MessageBuffer messageBuffer;
-    synchronized (messageBuffers) {
-      messageBuffer = messageBuffers.get(channel);
-    }
-
-    if (messageBuffer == null) {
-      throw new IOException(
-          format("No data buffer is open for channel %s", channel.serviceObject()));
-    }
-
-    return messageBuffer.readMessage();
+  @Override
+  public String format(Object object, int p1, Converter p2) {
+    return ids.get(object);
   }
 
   public static final String LIST_DESCRIPTOR = "list all available channels by their system names";
@@ -351,43 +139,125 @@ public class MessagingCommands {
    * @return a list of all serial channels on the system
    */
   @Descriptor(LIST_DESCRIPTOR)
-  public List<String> list() {
-    return records().collect(toList());
+  public List<String> listEndpoints() {
+    return List.copyOf(endpoints.keySet());
   }
+
+  public static final String ENDPOINT_ID = "the PID of an endpoint service";
+
+  public static final String GET_DESCRIPTOR = "fetch a channel by its system name";
+
+  /**
+   * Command: {@value #GET_DESCRIPTOR}
+   * 
+   * @param id {@value #ENDPOINT_ID}
+   * @return an endpoint id
+   * @throws IOException if the endpoint cannot be found
+   */
+  @Descriptor(INSPECT_DESCRIPTOR)
+  private DataEndpoint getEndpoint(@Descriptor(ENDPOINT_ID) String id) throws IOException {
+    return Optional.ofNullable(endpoints.get(id)).orElseThrow(() -> new IOException("Cannot find endpoint"));
+  }
+
+  public static final String ENDPOINT = "an endpoint service implementation";
 
   public static final String INSPECT_DESCRIPTOR = "inspect known details of the given channel";
 
   /**
    * Command: {@value #INSPECT_DESCRIPTOR}
    * 
-   * @param channelId {@value #CHANNEL_ID}
+   * @param channelId {@value #ENDPOINT_ID}
    * @return a mapping from item names to data
    * @throws IOException if the channel cannot be found
    */
   @Descriptor(INSPECT_DESCRIPTOR)
-  public Map<String, String> inspect(@Descriptor(CHANNEL_ID) String channelId) throws IOException {
-    return inspect(get(channelId));
-  }
-
-  private Map<String, String> inspect(ServiceRecord<?, String, ?> channel) {
-    var service = channel.serviceObject();
+  public Map<String, String> inspectEndpoint(@Descriptor(ENDPOINT) DataEndpoint endpoint) throws IOException {
     return Map
         .of(
-            "dataBufferOpen",
-            (dataBuffers.containsKey(channel) ? "yes" : "no"),
-            "messageBufferOpen",
-            (messageBuffers.containsKey(channel) ? "yes" : "no"),
             "id",
-            channel.ids().collect(joining(", ", "[", "]")),
+            ids.get(endpoint),
             "description",
-            service.toString(),
+            endpoint.toString(),
             "receives",
-            (service instanceof MessageReceiver
-                ? " messages"
-                : service instanceof DataReceiver ? " data" : "nothing"),
+            (endpoint instanceof MessageReceiver ? "messages" : endpoint instanceof DataReceiver ? "data" : "nothing"),
             "sends",
-            (service instanceof MessageSender
-                ? " messages"
-                : service instanceof DataSender ? " data" : "nothing"));
+            (endpoint instanceof MessageSender ? "messages" : endpoint instanceof DataSender ? "data" : "nothing"));
+  }
+
+  public static final String DATA_BUFFER_SIZE = "the size of the data buffer in bytes";
+
+  public static final String MESSAGE_BUFFER_SIZE = "the size of the message buffer";
+
+  public static final String SEND_DATA_DESCRIPTOR = "write the given bytes to the given channel";
+  public static final String SEND_DATA = "the bytes to write to the channel";
+
+  /**
+   * Command: {@value #SEND_DATA_DESCRIPTOR}
+   * 
+   * @param id   {@value #ENDPOINT_ID}
+   * @param data {@link #SEND_DATA}
+   * @throws IOException problem writing the byte
+   */
+  @Descriptor(SEND_DATA_DESCRIPTOR)
+  public int sendData(@Descriptor(ENDPOINT) DataSender endpoint, @Descriptor(SEND_DATA) ByteBuffer data)
+      throws IOException {
+    return endpoint.sendData(data);
+  }
+
+  public static final String RECEIVE_DATA_BYTES_DESCRIPTOR = "read a number of bytes from the open channel";
+  public static final String RECEIVE_BYTE_COUNT = "the number of bytes to read";
+  public static final String RECEIVE_TIMEOUT = "timeout";
+  public static final String RECEIVE_TIME_UNIT = "time unit";
+
+  /**
+   * Command: {@value #RECEIVE_DATA_BYTES_DESCRIPTOR}
+   * 
+   * @param id        {@value #ENDPOINT_ID}
+   * @param byteCount {@value #RECEIVE_BYTE_COUNT}
+   * @return the bytes read from the channel
+   * @throws IOException problem reading the bytes
+   */
+  @Descriptor(RECEIVE_DATA_BYTES_DESCRIPTOR)
+  public ByteBuffer receiveData(
+      @Descriptor(ENDPOINT) DataReceiver endpoint,
+      @Descriptor(RECEIVE_BYTE_COUNT) int byteCount,
+      @Descriptor(RECEIVE_TIMEOUT) long timeout,
+      @Descriptor(RECEIVE_TIME_UNIT) TimeUnit unit)
+      throws IOException {
+    return endpoint.packeting(byteCount).receiveData().getNext().orTimeout(timeout, unit).join();
+  }
+
+  public static final String SEND_MESSAGE_DESCRIPTOR = "write the given message to the given channel";
+  public static final String SEND_MESSAGE = "the message to write to the channel";
+
+  /**
+   * Command: {@value #SEND_MESSAGE_DESCRIPTOR}
+   * 
+   * @param id   {@value #ENDPOINT_ID}
+   * @param data {@link #SEND_MESSAGE}
+   * @throws IOException problem writing the byte
+   */
+  @Descriptor(SEND_MESSAGE_DESCRIPTOR)
+  public void sendMessage(@Descriptor(ENDPOINT) MessageSender endpoint, @Descriptor(SEND_MESSAGE) ByteBuffer data)
+      throws IOException {
+    endpoint.sendMessage(data);
+  }
+
+  public static final String RECEIVE_MESSAGE_DESCRIPTOR = "read a message the open channel";
+
+  /**
+   * Command: {@value #RECEIVE_MESSAGE_DESCRIPTOR}
+   * 
+   * @param id {@value #ENDPOINT_ID}
+   * @return the message read from the channel
+   * @throws IOException problem reading the message
+   */
+  @Descriptor(RECEIVE_MESSAGE_DESCRIPTOR)
+  public ByteBuffer receiveMessage(
+      @Descriptor(ENDPOINT) MessageReceiver endpoint,
+      @Descriptor(RECEIVE_TIMEOUT) long timeout,
+      @Descriptor(RECEIVE_TIME_UNIT) TimeUnit unit)
+      throws IOException {
+    return endpoint.receiveMessages().getNext().orTimeout(timeout, unit).join();
   }
 }
