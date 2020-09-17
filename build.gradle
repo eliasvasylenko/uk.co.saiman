@@ -23,7 +23,7 @@ buildscript {
 
 wrapper {
   jarFile = rootProject.file('.gradle-wrapper/gradle-wrapper.jar')
-  gradleVersion = '5.0'
+  gradleVersion = '6.6'
 }
 
 /* Configure the subprojects */

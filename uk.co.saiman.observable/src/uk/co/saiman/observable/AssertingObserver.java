@@ -46,9 +46,9 @@ public class AssertingObserver<T> extends PassthroughObserver<T, T> {
 
   @Override
   public void onNext(T message) {
-    mapping.apply(message).ifPresentOrElse(failure -> {
+    mapping.apply(message).map(failure -> (Runnable) () -> {
       getObservation().cancel();
       getDownstreamObserver().onFail(failure.get());
-    }, () -> getDownstreamObserver().onNext(message));
+    }).orElseGet(() -> () -> getDownstreamObserver().onNext(message)).run();
   }
 }

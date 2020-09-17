@@ -10,8 +10,13 @@ Bundle-Name: SAI :: State
 	uk.co.saiman.properties;version=snapshot,\
 	uk.co.saiman.utilities;version=snapshot,\
 	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
+	org.apache.felix.gogo.command,\
+	org.apache.felix.gogo.runtime,\
+	org.apache.felix.gogo.shell,\
 	json;version=latest
 
 Export-Package: \
 	uk.co.saiman.state,\
-	uk.co.saiman.state.json
+	uk.co.saiman.state.json,\
+	uk.co.saiman.state.shell

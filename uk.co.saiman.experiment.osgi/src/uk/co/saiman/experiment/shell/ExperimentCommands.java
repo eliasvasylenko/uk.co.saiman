@@ -25,20 +25,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.commands;
+package uk.co.saiman.experiment.shell;
 
+import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.shell.converters.ShellProperties.COMMAND_FUNCTION_KEY;
 import static uk.co.saiman.shell.converters.ShellProperties.COMMAND_SCOPE_PROPERTY;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.felix.service.command.Descriptor;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.definition.ExperimentDefinition;
 import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 
 /**
  * Provide commands to the GoGo shell for interacting with experiments.
@@ -46,18 +51,20 @@ import uk.co.saiman.experiment.executor.Executor;
  * @author Elias N Vasylenko
  */
 @Component(immediate = true, service = ExperimentCommands.class, property = { COMMAND_SCOPE_PROPERTY,
-    COMMAND_FUNCTION_KEY + "=defineExperiment", COMMAND_FUNCTION_KEY + "=defineStep" })
+    COMMAND_FUNCTION_KEY + "=defineExperiment", COMMAND_FUNCTION_KEY + "=defineStep",
+    COMMAND_FUNCTION_KEY + "=listExecutors" })
 public class ExperimentCommands {
+  private final ExecutorService executors;
+
+  @Activate
+  public ExperimentCommands(@Reference ExecutorService executors) {
+    this.executors = executors;
+  }
+
   public static final String EXPERIMENT_ID = "the ID of the experiment";
 
-  public static final String DEFINE_EXPERIMENT = "open the given channel for reading data";
+  public static final String DEFINE_EXPERIMENT = "define an empty experiment";
 
-  /**
-   * Command: {@value #DEFINE_EXPERIMENT}
-   * 
-   * @param id {@value #EXPERIMENT_ID}
-   * @throws IOException problem opening the channel
-   */
   @Descriptor(DEFINE_EXPERIMENT)
   public ExperimentDefinition defineExperiment(@Descriptor(EXPERIMENT_ID) ExperimentId id) {
     return ExperimentDefinition.define(id);
@@ -67,18 +74,18 @@ public class ExperimentCommands {
 
   public static final String STEP_EXECUTOR = "the executor of the experiment step";
 
-  public static final String DEFINE_STEP = "open the given channel for reading messages";
+  public static final String DEFINE_STEP = "define an empty step";
 
-  /**
-   * Command: {@value #DEFINE_STEP}
-   * 
-   * @param id       {@value #STEP_ID}
-   * @param executor {@value #STEP_EXECUTOR}
-   * @throws IOException problem opening the channel
-   */
   @Descriptor(DEFINE_STEP)
   public StepDefinition defineStep(@Descriptor(STEP_ID) ExperimentId id, @Descriptor(STEP_EXECUTOR) Executor executor)
       throws IOException {
     return StepDefinition.define(id, executor);
+  }
+
+  public static final String LIST_EXECUTORS = "list available experiment step executors";
+
+  @Descriptor(DEFINE_STEP)
+  public List<Executor> listExecutors() {
+    return executors.executors().collect(toList());
   }
 }

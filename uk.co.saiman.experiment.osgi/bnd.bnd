@@ -24,7 +24,7 @@ Bundle-Name: SAI :: Experiment :: OSGi
 Private-Package: \
 	uk.co.saiman.experiment.osgi.impl,\
 	uk.co.saiman.experiment.environment.osgi.impl,\
-	uk.co.saiman.experiment.commands
+	uk.co.saiman.experiment.shell
 
 Export-Package: \
 	uk.co.saiman.experiment.osgi,\

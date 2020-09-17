@@ -25,24 +25,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.commands;
+package uk.co.saiman.experiment.shell;
 
 import org.apache.felix.service.command.Converter;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
+import uk.co.saiman.experiment.definition.json.JsonStepDefinitionFormat;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 
 @Component
 public class ExperimentConverterService implements Converter {
+  private final JsonExperimentDefinitionFormat experimentDefinitionFormat;
+  private final JsonStepDefinitionFormat stepDefinitionFormat;
+
   private final ExecutorService executors;
 
   @Activate
   public ExperimentConverterService(@Reference ExecutorService executors) {
+    this.stepDefinitionFormat = new JsonStepDefinitionFormat(executors);
+    this.experimentDefinitionFormat = new JsonExperimentDefinitionFormat(stepDefinitionFormat);
     this.executors = executors;
   }
 
@@ -60,13 +70,19 @@ public class ExperimentConverterService implements Converter {
 
     } else if (type.isAssignableFrom(Executor.class)) {
       return executors.getExecutor(object.toString());
+
+    } else if (type.isAssignableFrom(ExperimentDefinition.class)) {
+      return experimentDefinitionFormat.decodeString(object.toString()).data;
+
+    } else if (type.isAssignableFrom(StepDefinition.class)) {
+      return stepDefinitionFormat.decodeString(object.toString()).data;
     }
 
     return null;
   }
 
   @Override
-  public String format(Object object, int p1, Converter p2) {
+  public String format(Object object, int detail, Converter converter) {
     if (object instanceof ExperimentId) {
       return ((ExperimentId) object).name();
 
@@ -74,7 +90,30 @@ public class ExperimentConverterService implements Converter {
       return ((ExperimentPath<?>) object).toString();
 
     } else if (object instanceof Executor) {
-      return executors.getId((Executor) object);
+      switch (detail) {
+      case INSPECT:
+        return executors.getId((Executor) object);
+      default:
+        return executors.getId((Executor) object);
+      }
+
+    } else if (object instanceof ExperimentDefinition) {
+      var definition = (ExperimentDefinition) object;
+      switch (detail) {
+      case INSPECT:
+        return experimentDefinitionFormat.encodeString(new Payload<>(definition));
+      default:
+        return definition.id().toString();
+      }
+
+    } else if (object instanceof StepDefinition) {
+      var definition = (StepDefinition) object;
+      switch (detail) {
+      case INSPECT:
+        return stepDefinitionFormat.encodeString(new Payload<>(definition));
+      default:
+        return definition.id().toString();
+      }
     }
 
     return null;
