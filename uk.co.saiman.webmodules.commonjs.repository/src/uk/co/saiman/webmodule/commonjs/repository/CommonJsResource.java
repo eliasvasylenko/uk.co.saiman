@@ -47,6 +47,7 @@ import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.EXTENDE
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.FORMAT_ATTRIBUTE;
 import static uk.co.saiman.webmodule.extender.WebModuleExtenderConstants.RESOURCE_ROOT_ATTRIBUTE;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -98,9 +99,9 @@ public class CommonJsResource implements Resource {
     this.requirements = concat(
         Stream.of(createExtenderRequirement()),
         createDependencyRequirements(bundleVersion)).collect(toList());
-    this.resourceCapabilities = List
-        .of(identityCapability(bundleVersion.getBundle().getBundleSymbolicName(format)));
-    this.manifestCapabilities = List.of(createModuleServiceCapability());
+    this.resourceCapabilities = Arrays
+        .asList(identityCapability(bundleVersion.getBundle().getBundleSymbolicName(format)));
+    this.manifestCapabilities = Arrays.asList(createModuleServiceCapability());
   }
 
   private String getEntryPoint(JSONObject json, BundleVersionConfiguration configuration) {
@@ -187,7 +188,8 @@ public class CommonJsResource implements Resource {
           .getDependencies()
           .map(bundleVersion::getDependencyVersion)
           .map(this::createDependencyRequirement)
-          .flatMap(Optional::stream);
+          .filter(Optional::isPresent)
+          .map(Optional::get);
     } catch (RegistryResolutionException e) {
       throw e;
     } catch (Exception e) {

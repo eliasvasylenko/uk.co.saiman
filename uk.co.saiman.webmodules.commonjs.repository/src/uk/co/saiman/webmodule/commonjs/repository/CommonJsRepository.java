@@ -32,6 +32,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -121,8 +122,8 @@ public class CommonJsRepository extends BaseRepository implements Repository {
     this(
         registry,
         log,
-        Path.of(configuration.initialDependencies()),
-        Path.of(configuration.localCache()),
+        FileSystems.getDefault().getPath(configuration.initialDependencies()),
+        FileSystems.getDefault().getPath(configuration.localCache()),
         configuration.bsnPrefix());
   }
 

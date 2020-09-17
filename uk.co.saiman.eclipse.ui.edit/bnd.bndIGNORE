@@ -2,6 +2,10 @@ Bundle-Name: SAI :: Eclipse :: Edit
 Bundle-Description: \
 	Editors for Eclipse E4 model components
 
+# This is here because we need to do some special stuff to get this to build. It must be built against
+# a different set of repos to work, and there is currently no simple way to filter this (like there is
+# for assembling a runtime with -runrepos)
+
 -include:\
 	${build}/include/eclipse.plugin.bnd
 

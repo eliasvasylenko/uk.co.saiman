@@ -52,9 +52,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Stream;
@@ -311,8 +312,7 @@ public class CommonJsJar {
 
   static String sanitizeJavaNamePart(String name, boolean separated) {
     return (separated
-        && Set
-            .of(
+        && new HashSet<>(Arrays.asList(
                 "abstract",
                 "continue",
                 "for",
@@ -362,7 +362,7 @@ public class CommonJsJar {
                 "float",
                 "native",
                 "super",
-                "while")
+                "while"))
             .contains(name)) ? "_" + name : name;
   }
 }
