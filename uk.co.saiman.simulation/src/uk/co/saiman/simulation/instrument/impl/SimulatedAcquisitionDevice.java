@@ -76,21 +76,13 @@ import uk.co.saiman.simulation.instrument.impl.SimulatedAcquisitionDevice.Acquis
  * @author Elias N Vasylenko
  */
 @Designate(ocd = AcquisitionSimulationConfiguration.class, factory = true)
-@Component(
-    configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID,
-    configurationPolicy = REQUIRE,
-    service = { Device.class, AcquisitionDevice.class },
-    immediate = true)
-public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController>
-    implements AcquisitionDevice {
+@Component(configurationPid = SimulatedAcquisitionDevice.CONFIGURATION_PID, configurationPolicy = REQUIRE, service = {
+    Device.class, AcquisitionDevice.class }, immediate = true)
+public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController> implements AcquisitionDevice {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      name = "Simulated Acquisition Device Configuration",
-      description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
+  @ObjectClassDefinition(name = "Simulated Acquisition Device Configuration", description = "The simulated acquisition device provides an implementation which defers to a detector simulation")
   public @interface AcquisitionSimulationConfiguration {
-    @AttributeDefinition(
-        name = "Acquisition Resolution",
-        description = "The minimum resolvable units of time for samples")
+    @AttributeDefinition(name = "Acquisition Resolution", description = "The minimum resolvable units of time for samples")
     String acquisitionResolution() default DEFAULT_ACQUISITION_RESOLUTION_SECONDS + "s";
   }
 
@@ -105,8 +97,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
       counter = getAcquisitionCount();
 
       if (detector == null) {
-        throw new AcquisitionException(
-            "Failed to connect acquisition simulation to detector simulation");
+        throw new AcquisitionException("Failed to connect acquisition simulation to detector simulation");
       }
       if (counter <= 0) {
         throw new AcquisitionException("Requested acquisition count must be positive");
@@ -186,10 +177,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
       AcquisitionSimulationConfiguration configuration,
       @Reference Log log,
       @Reference(name = "detectorService") DetectorSimulationService detectorService) {
-    this(
-        quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class),
-        log,
-        detectorService);
+    this(quantityFormat().parse(configuration.acquisitionResolution()).asType(Time.class), log, detectorService);
   }
 
   public SimulatedAcquisitionDevice(
@@ -418,10 +406,7 @@ public class SimulatedAcquisitionDevice extends DeviceImpl<AcquisitionController
   }
 
   @Override
-  protected AcquisitionController createController(
-      ControlContext context,
-      long timeout,
-      TimeUnit unit) {
+  protected AcquisitionController createController(ControlContext context, long timeout, TimeUnit unit) {
     return new AcquisitionController() {
       @Override
       public void startAcquisition() {

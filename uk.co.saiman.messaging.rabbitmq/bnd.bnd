@@ -7,6 +7,5 @@ Bundle-Name: SAI :: Messaging
 	uk.co.saiman.messaging;version=snapshot
 
 Export-Package: \
-	uk.co.saiman.messaging,\
 	uk.co.saiman.messaging.rabbitmq,\
 	uk.co.saiman.messaging.rest

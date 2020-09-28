@@ -1,0 +1,33 @@
+Bundle-Name: SAI :: MALDI :: Legacy
+
+Export-Package: \
+	uk.co.saiman.maldi.legacy.queue,\
+	uk.co.saiman.maldi.legacy.settings
+
+-includeresource:\
+	res
+
+-buildpath:\
+	uk.co.saiman.osgi;version=snapshot,\
+	uk.co.saiman.shell;version=snapshot,\
+	uk.co.saiman.optics;version=snapshot,\
+	uk.co.saiman.utilities;version=snapshot,\
+	uk.co.saiman.properties;version=snapshot,\
+	uk.co.saiman.data;version=snapshot,\
+	uk.co.saiman.data.function;version=snapshot,\
+	uk.co.saiman.observable;version=snapshot,\
+	uk.co.saiman.instrument.acquisition;version=snapshot,\
+	uk.co.saiman.instrument;version=snapshot,\
+	uk.co.saiman.instrument.raster;version=snapshot,\
+	uk.co.saiman.experiment.declaration;version=snapshot,\
+	uk.co.saiman.experiment.procedure;version=snapshot,\
+	uk.co.saiman.experiment.definition;version=snapshot,\
+	uk.co.saiman.instrument.sampleplate;version=snapshot,\
+	uk.co.saiman.experiment.spectrum;version=snapshot,\
+	uk.co.saiman.maldi.spectrum;version=snapshot,\
+	uk.co.saiman.maldi.stage;version=snapshot,\
+	uk.co.saiman.measurement;version=snapshot,\
+	org.apache.felix.gogo.command,\
+	org.apache.felix.gogo.runtime,\
+	org.apache.felix.gogo.shell,\
+	javax.measure.unit-api

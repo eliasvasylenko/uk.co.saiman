@@ -46,6 +46,57 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
   private final ExperimentId id;
   private Procedure procedure;
 
+  /*
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * TODO some notion of "snippets", steps which exist in a shared area and of which
+   * instances can be included at multiple locations in the experiment. So for example
+   * we could define a shared spectrum processing snippet and attach it as a child of
+   * a sequence of spectrum acquisition steps. This way we only have to change the
+   * processing setup in one place and it applies to all acquired spectra.
+   * 
+   *   
+   * TODO Justification: this is just a convenience feature. The instruction/executor
+   * procedure/conductor model of performing an experiment and collecting results should
+   * not be burdened with the complexity of this.
+   * 
+   * But this class (the experiment definition) is a layer of abstraction above the
+   * instruction/procedure model, and is perhaps the appropriate place for such a
+   * feature.
+   * 
+   * TODO perhaps this could be generalised to other ways of generating substeps/instructions?
+   * 
+   * TODO ... generalise to something equivalent to a pre-processor or macro expander?
+   * 
+   * 
+   * 
+   * 
+   * "shared definition", "snippet"
+   * 
+   * 
+   * "placeholder", "snippet instance"
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   * 
+   */
+  
   private ExperimentDefinition(
       ExperimentId id,
       List<StepDefinition> steps,

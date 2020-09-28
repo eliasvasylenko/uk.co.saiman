@@ -3,7 +3,6 @@ Bundle-Name: SAI :: Experiment :: Scheduling
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.conductor;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.storage;version=snapshot,\
 	uk.co.saiman.observable;version=snapshot,\
