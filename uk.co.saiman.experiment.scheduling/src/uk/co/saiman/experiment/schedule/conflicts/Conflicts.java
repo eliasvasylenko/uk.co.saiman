@@ -32,40 +32,26 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.Resource;
-import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.dependency.ResultPath;
-import uk.co.saiman.experiment.environment.Environment;
-import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public class Conflicts {
   private final Schedule schedule;
-  private final Environment environment;
   private final Map<WorkspaceExperimentPath, Change> differences;
 
-  public Conflicts(Schedule schedule, Environment environment) {
+  public Conflicts(Schedule schedule) {
     this.schedule = schedule;
-    this.environment = environment;
 
     this.differences = new HashMap<>();
-    schedule
-        .getScheduledProcedure()
-        .stream()
-        .flatMap(Procedure::instructionPaths)
-        .forEach(this::checkDifference);
+    schedule.getScheduledProcedure().stream().flatMap(Procedure::instructionPaths).forEach(this::checkDifference);
     schedule
         .getPreviouslyConductedProcedure()
         .stream()
@@ -100,12 +86,8 @@ public class Conflicts {
     public ChangeImpl(WorkspaceExperimentPath path) {
       this.path = path;
 
-      this.previousInstruction = schedule
-          .getPreviouslyConductedProcedure()
-          .flatMap(p -> p.instruction(path.getExperimentPath()));
-      this.scheduledInstruction = schedule
-          .getScheduledProcedure()
-          .flatMap(p -> p.instruction(path.getExperimentPath()));
+      this.previousInstruction = schedule.getPreviouslyConductedProcedure().flatMap(p -> p.instruction(path));
+      this.scheduledInstruction = schedule.getScheduledProcedure().flatMap(p -> p.instruction(path));
     }
 
     @Override
@@ -136,19 +118,13 @@ public class Conflicts {
     @Override
     public Stream<Resource> conflictingResources() throws IOException {
       return currentInstruction().isPresent()
-          ? schedule
-              .getScheduler()
-              .getStorageConfiguration()
-              .locateStorage(path)
-              .location()
-              .resources()
+          ? schedule.getScheduler().getStorageConfiguration().locateStorage(path).location().resources()
           : Stream.empty();
     }
 
     @Override
     public Optional<Instruction> conflictingInstruction() {
-      return previousInstruction
-          .filter(state -> scheduledInstruction.filter(state::equals).isEmpty());
+      return previousInstruction.filter(state -> scheduledInstruction.filter(state::equals).isEmpty());
     }
 
     @Override
@@ -162,36 +138,11 @@ public class Conflicts {
     }
 
     private Stream<Change> resolveDependencies(Instruction scheduledInstruction) {
-      List<ExperimentPath<Absolute>> dependencies = new ArrayList<>();
-
-      Procedures
-          .plan(scheduledInstruction, environment, variables -> new InstructionPlanningContext() {
-            @Override
-            public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
-              path
-                  .getExperimentPath()
-                  .resolveAgainst(scheduledInstruction.path())
-                  .ifPresent(dependencies::add);
-            }
-
-            public void declareConditionRequirement(java.lang.Class<?> production) {
-              scheduledInstruction.path().parent().ifPresent(dependencies::add);
-            }
-
-            public void declareResultRequirement(java.lang.Class<?> production) {
-              scheduledInstruction.path().parent().ifPresent(dependencies::add);
-            }
-          });
-
-      return dependencies
-          .stream()
-          .flatMap(path -> path.resolveAgainst(scheduledInstruction.path()).stream())
-          .flatMap(path -> conflictingDependency(path).stream());
-    }
-
-    private Optional<Change> conflictingDependency(ExperimentPath<Absolute> path) {
-      return change(WorkspaceExperimentPath.define(this.path.getExperimentId(), path))
-          .filter(c -> c.isConflicting());
+      return scheduledInstruction
+          .extractMinimalProcedure()
+          .instructionPaths()
+          .flatMap(path -> change(path).stream())
+          .filter(Change::isConflicting);
     }
   }
 }

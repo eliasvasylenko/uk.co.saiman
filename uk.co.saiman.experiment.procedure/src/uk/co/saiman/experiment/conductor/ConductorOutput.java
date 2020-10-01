@@ -41,7 +41,6 @@ import uk.co.saiman.data.Data;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.output.event.OutputEvent;
 import uk.co.saiman.experiment.output.event.OutputSucceededEvent;
@@ -52,10 +51,10 @@ import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
+import uk.co.saiman.state.json.JsonStateMapFormat;
 
 public class ConductorOutput implements Output {
   private final Conductor conductor;
-  private final Environment environment;
   private final Procedure procedure;
   private final Data<Procedure> data;
 
@@ -69,7 +68,6 @@ public class ConductorOutput implements Output {
   ConductorOutput(Conductor conductor) {
     this.conductor = conductor;
     this.prior = null;
-    this.environment = Environment.EMPTY;
     this.procedure = null;
     this.data = null;
     this.progress = Map.of();
@@ -78,7 +76,6 @@ public class ConductorOutput implements Output {
   private ConductorOutput(ConductorOutput prior) {
     this.conductor = prior.getConductor();
     this.prior = prior;
-    this.environment = Environment.EMPTY;
     this.procedure = null;
     this.data = null;
   }
@@ -86,18 +83,17 @@ public class ConductorOutput implements Output {
   private ConductorOutput(ConductorOutput prior, Procedure procedure) throws IOException {
     this.conductor = prior.getConductor();
     this.prior = prior;
-    this.environment = conductor.createEnvironment();
     this.procedure = procedure;
 
     var storage = conductor.storageConfiguration().locateStorage(procedure.path());
     var procedureFormat = new JsonProcedureFormat(
-        conductor.instructionFormat(),
-        procedure.environment());
+        conductor.executorService(),
+        procedure.environment(),
+        new JsonStateMapFormat());
 
     this.data = Data.locate(storage.location(), procedure.id().name(), procedureFormat);
 
     Procedures.validateDependencies(procedure);
-    Procedures.validateEnvironment(procedure, environment);
 
   }
 
@@ -113,9 +109,7 @@ public class ConductorOutput implements Output {
         data.set(procedure);
         data.save();
 
-        procedure
-            .instructionPaths()
-            .forEach(i -> progress.get(i).updateInstruction(procedure, environment));
+        procedure.instructionPaths().forEach(i -> progress.get(i).updateInstruction(procedure));
         procedure.instructionPaths().forEach(i -> progress.get(i).updateDependencies(this));
         procedure.instructionPaths().forEach(i -> progress.get(i).execute());
 
@@ -144,8 +138,7 @@ public class ConductorOutput implements Output {
   }
 
   @Override
-  public <U extends ExperimentPath<U>> Stream<ProductPath<U, ? extends Result<?>>> resultPaths(
-      ExperimentPath<U> path) {
+  public <U extends ExperimentPath<U>> Stream<ProductPath<U, ? extends Result<?>>> resultPaths(ExperimentPath<U> path) {
     // TODO Auto-generated method stub
     return null;
   }
@@ -222,8 +215,7 @@ public class ConductorOutput implements Output {
     }
   }
 
-  private Map<WorkspaceExperimentPath, ConductorInstruction> inheritOrTerminateProgress(
-      Procedure procedure) {
+  private Map<WorkspaceExperimentPath, ConductorInstruction> inheritOrTerminateProgress(Procedure procedure) {
     var thisProgress = new HashMap<>(this.progress);
     var progress = procedure
         .instructionPaths()
@@ -243,9 +235,5 @@ public class ConductorOutput implements Output {
 
   Conductor getConductor() {
     return conductor;
-  }
-
-  Environment environment() {
-    return environment;
   }
 }

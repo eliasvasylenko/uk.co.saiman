@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.resource.Resource;
-import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public interface Change {

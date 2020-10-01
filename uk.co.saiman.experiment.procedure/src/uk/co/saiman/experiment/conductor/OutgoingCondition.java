@@ -28,8 +28,8 @@
 package uk.co.saiman.experiment.conductor;
 
 import static uk.co.saiman.experiment.executor.Evaluation.ORDERED;
-import static uk.co.saiman.experiment.executor.Evaluation.PARALLEL_TOGETHER;
-import static uk.co.saiman.experiment.executor.Evaluation.SERIAL_TOGETHER;
+import static uk.co.saiman.experiment.executor.Evaluation.PARALLEL;
+import static uk.co.saiman.experiment.executor.Evaluation.SERIAL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,7 +75,6 @@ class OutgoingCondition<T> {
           .allMatch(c -> c.getState() == IncomingDependencyState.DONE)
           && nextConsumer() == conditionDependency;
       break;
-    case SERIAL_TOGETHER:
     case SERIAL:
       acquire = acquiredConsumers
           .stream()
@@ -132,7 +131,7 @@ class OutgoingCondition<T> {
 
   public void invalidatedIncoming(IncomingCondition<T> incoming) {
     if (acquiredConsumers.contains(incoming) && (evaluation == ORDERED
-        || evaluation == PARALLEL_TOGETHER || evaluation == SERIAL_TOGETHER)) {
+        || evaluation == PARALLEL || evaluation == SERIAL)) {
       invalidate();
     }
   }

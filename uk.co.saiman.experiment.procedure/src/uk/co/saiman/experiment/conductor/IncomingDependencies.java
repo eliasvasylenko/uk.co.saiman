@@ -36,11 +36,8 @@ import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.Result;
-import uk.co.saiman.experiment.dependency.ResultPath;
 import uk.co.saiman.experiment.environment.Environment;
-import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
-import uk.co.saiman.experiment.procedure.Procedures;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 public class IncomingDependencies {
@@ -64,53 +61,31 @@ public class IncomingDependencies {
     requireNonNull(instruction);
     requireNonNull(environment);
 
-    incomingCondition = null;
-    incomingResult = null;
-    additionalIncomingResults = List.of();
-
-    Procedures.plan(instruction, environment, variables -> new InstructionPlanningContext() {
-      @Override
-      public void declareConditionRequirement(Class<?> production) {
-        if (incomingResult != null || !additionalIncomingResults.isEmpty()) {
-          throw new ConductorException("Cannot depend on results and conditions at the same time");
-        }
-        if (incomingCondition != null) {
-          throw new ConductorException("Cannot declare multiple primary condition requirements");
-        }
-        incomingCondition = getParent(output)
-            .map(dependency -> dependency.addConditionConsumer(production, path))
-            .orElse(null);
-      }
-
-      @Override
-      public void declareResultRequirement(Class<?> production) {
-        if (incomingResult != null) {
-          throw new ConductorException(
-              "Cannot declare multiple primary result requirements, use additional result requirements");
-        }
-        if (incomingCondition != null) {
-          throw new ConductorException("Cannot depend on results and conditions at the same time");
-        }
-        incomingResult = getParent(output)
-            .map(dependency -> dependency.addResultConsumer(production, path))
-            .orElse(null);
-      }
-
-      @Override
-      public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
-        if (incomingCondition != null) {
-          throw new ConductorException("Cannot depend on results and conditions at the same time");
-        }
-        getParent(output)
-            .ifPresent(
-                dependency -> additionalIncomingResults
-                    .add(
-                        dependency
-                            .addResultConsumer(
-                                path.getProduction(),
-                                IncomingDependencies.this.path)));
-      }
-    });
+    incomingCondition = instruction
+        .conditionRequirement()
+        .flatMap(
+            production -> output
+                .findInstruction(
+                    WorkspaceExperimentPath.define(instruction.experimentId(), production.getExperimentPath()))
+                .map(dependency -> dependency.addConditionConsumer(production.getProduction(), path)))
+        .orElse(null);
+    incomingResult = instruction
+        .resultRequirement()
+        .flatMap(
+            production -> output
+                .findInstruction(
+                    WorkspaceExperimentPath.define(instruction.experimentId(), production.getExperimentPath()))
+                .map(dependency -> dependency.addResultConsumer(production.getProduction(), path)))
+        .orElse(null);
+    additionalIncomingResults = instruction
+        .additionalResultRequirements()
+        .flatMap(
+            production -> output
+                .findInstruction(
+                    WorkspaceExperimentPath.define(instruction.experimentId(), production.getExperimentPath()))
+                .map(dependency -> dependency.addResultConsumer(production.getProduction(), path))
+                .stream())
+        .collect(toList());
   }
 
   protected Optional<ConductorInstruction> getParent(ConductorOutput output) {

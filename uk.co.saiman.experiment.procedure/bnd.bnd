@@ -19,7 +19,6 @@ Export-Package: \
 	uk.co.saiman.experiment.environment.service,\
 	uk.co.saiman.experiment.executor,\
 	uk.co.saiman.experiment.executor.service,\
-	uk.co.saiman.experiment.instruction,\
 	uk.co.saiman.experiment.procedure,\
 	uk.co.saiman.experiment.procedure.json,\
 	uk.co.saiman.experiment.variables

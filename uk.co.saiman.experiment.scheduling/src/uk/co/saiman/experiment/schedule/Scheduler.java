@@ -28,10 +28,8 @@
 package uk.co.saiman.experiment.schedule;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import uk.co.saiman.experiment.conductor.Conductor;
-import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
@@ -58,15 +56,11 @@ public class Scheduler {
   private final ExecutorService executorService;
   private final Conductor conductor;
 
-  public Scheduler(
-      StorageConfiguration<?> storageConfiguration,
-      ExecutorService executorService,
-      Supplier<Environment> environment,
-      Log log) {
+  public Scheduler(StorageConfiguration<?> storageConfiguration, ExecutorService executorService, Log log) {
     this.schedule = null;
     this.storageConfiguration = storageConfiguration;
     this.executorService = executorService;
-    this.conductor = new Conductor(storageConfiguration, executorService, environment, log);
+    this.conductor = new Conductor(storageConfiguration, executorService, log);
   }
 
   public StorageConfiguration<?> getStorageConfiguration() {

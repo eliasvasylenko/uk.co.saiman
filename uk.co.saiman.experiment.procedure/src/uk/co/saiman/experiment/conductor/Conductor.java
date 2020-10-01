@@ -34,13 +34,10 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
-import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.experiment.procedure.json.JsonInstructionFormat;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.log.Log;
 
@@ -62,8 +59,7 @@ import uk.co.saiman.log.Log;
  */
 public class Conductor {
   private final StorageConfiguration<?> storageConfiguration;
-  private final JsonInstructionFormat instructionFormat;
-  private final Supplier<Environment> environment;
+  private final ExecutorService executorService;
   private final Log log;
 
   private final java.util.concurrent.ExecutorService executor;
@@ -71,22 +67,12 @@ public class Conductor {
 
   private ConductorOutput output;
 
-  public Conductor(
-      StorageConfiguration<?> storageConfiguration,
-      ExecutorService executorService,
-      Supplier<Environment> environment,
-      Log log) {
+  public Conductor(StorageConfiguration<?> storageConfiguration, ExecutorService executorService, Log log) {
     this.storageConfiguration = requireNonNull(storageConfiguration);
-    this.instructionFormat = new JsonInstructionFormat(executorService);
-    this.environment = requireNonNull(environment);
+    this.executorService = executorService;
     this.log = log;
 
-    this.executor = new ThreadPoolExecutor(
-        8,
-        Integer.MAX_VALUE,
-        2,
-        SECONDS,
-        new SynchronousQueue<>());
+    this.executor = new ThreadPoolExecutor(8, Integer.MAX_VALUE, 2, SECONDS, new SynchronousQueue<>());
     this.lock = new ReentrantLock();
 
     this.output = new ConductorOutput(this);
@@ -96,12 +82,8 @@ public class Conductor {
     return storageConfiguration;
   }
 
-  JsonInstructionFormat instructionFormat() {
-    return instructionFormat;
-  }
-
-  Environment createEnvironment() {
-    return environment.get();
+  ExecutorService executorService() {
+    return executorService;
   }
 
   Log log() {

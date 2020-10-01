@@ -34,9 +34,7 @@ import java.util.concurrent.locks.Lock;
 
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.Evaluation;
-import uk.co.saiman.experiment.instruction.Instruction;
-import uk.co.saiman.experiment.procedure.InstructionPlanningContext;
-import uk.co.saiman.experiment.procedure.Procedures;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
 class OutgoingConditions {
@@ -67,12 +65,14 @@ class OutgoingConditions {
   }
 
   public void update(Instruction instruction, Environment environment) {
-    Procedures.plan(instruction, environment, variables -> new InstructionPlanningContext() {
-      @Override
-      public void preparesCondition(Class<?> type, Evaluation evaluation) {
-        conditionPreparations
-            .put(type, new OutgoingCondition<>(OutgoingConditions.this, type, evaluation));
-      }
+    instruction.conditionPreparations().forEach(type -> {
+      conditionPreparations
+          .put(
+              type,
+              new OutgoingCondition<>(
+                  OutgoingConditions.this,
+                  type,
+                  instruction.conditionPreparationEvaluation(type)));
     });
 
   }

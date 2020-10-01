@@ -27,18 +27,24 @@
  */
 package uk.co.saiman.experiment.procedure;
 
+import static java.util.Collections.unmodifiableMap;
+import static java.util.stream.Collectors.toSet;
 import static uk.co.saiman.experiment.declaration.ExperimentPath.toRoot;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.environment.Environment;
-import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
+import uk.co.saiman.state.StateMap;
 
 /**
  * An experiment procedure is the machine-consumable bundle of information to
@@ -57,19 +63,20 @@ import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
  */
 public class Procedure {
   private final ExperimentId id;
-  private final LinkedHashMap<WorkspaceExperimentPath, Instruction> instructions;
   private final Environment environment;
+  private final Map<WorkspaceExperimentPath, Instruction> instructions;
 
-  public Procedure(
+  Procedure(
       ExperimentId id,
-      Collection<? extends Instruction> instructions,
-      Environment environment) {
+      Environment environment,
+      LinkedHashMap<WorkspaceExperimentPath, Instruction> instructions) {
     this.id = id;
-    this.instructions = new LinkedHashMap<>();
-    for (var instruction : instructions) {
-      this.instructions.put(WorkspaceExperimentPath.define(id, instruction.path()), instruction);
-    }
     this.environment = environment;
+    this.instructions = unmodifiableMap(instructions);
+  }
+
+  public static Procedure empty(ExperimentId id, Environment environment) {
+    return new Procedure(id, environment, new LinkedHashMap<>());
   }
 
   public ExperimentId id() {
@@ -98,5 +105,41 @@ public class Procedure {
 
   public Optional<Instruction> instruction(ExperimentPath<?> path) {
     return instruction(WorkspaceExperimentPath.define(id, path.toAbsolute()));
+  }
+
+  public Procedure withInstruction(ExperimentPath<Absolute> path, StateMap variableMap, Executor executor) {
+    var instructions = new LinkedHashMap<>(this.instructions);
+    instructions.put(WorkspaceExperimentPath.define(id, path), new Instruction(this, path, variableMap, executor));
+    return new Procedure(id, environment, instructions);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this)
+      return true;
+    if (obj.getClass() != getClass())
+      return false;
+
+    Procedure that = (Procedure) obj;
+
+    return Objects.equals(this.id, that.id) && Objects.equals(this.environment, that.environment)
+        && Objects.equals(this.instructions.keySet(), that.instructions.keySet())
+        && instructions.keySet().stream().allMatch(path -> {
+          var thisInstruction = this.instruction(path).get();
+          var thatInstruction = that.instruction(path).get();
+          return Objects.equals(thisInstruction.variableMap(), thatInstruction.variableMap())
+              && Objects.equals(thisInstruction.executor(), thatInstruction.executor());
+        });
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects
+        .hash(
+            id,
+            environment,
+            List.copyOf(instructions.keySet()),
+            instructions.values().stream().map(Instruction::variableMap).collect(toSet()),
+            instructions.values().stream().map(Instruction::executor).collect(toSet()));
   }
 }

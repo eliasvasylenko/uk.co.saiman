@@ -44,8 +44,9 @@ import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.Environment;
+import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.Executor;
-import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
@@ -129,9 +130,7 @@ public class Step {
     updateVariable(variable, previous -> Optional.ofNullable(value));
   }
 
-  public <T> void updateVariable(
-      Variable<T> variable,
-      Function<? super Optional<T>, ? extends Optional<T>> value) {
+  public <T> void updateVariable(Variable<T> variable, Function<? super Optional<T>, ? extends Optional<T>> value) {
     lock(() -> {
       experiment.updateStep(this, variable, value);
     });
@@ -143,10 +142,7 @@ public class Step {
 
   public Optional<Step> getDependencyStep() {
     return lock(
-        () -> path
-            .parent()
-            .filter(path -> !path.isEmpty())
-            .flatMap(parentPath -> getExperiment().getStep(parentPath)));
+        () -> path.parent().filter(path -> !path.isEmpty()).flatMap(parentPath -> getExperiment().getStep(parentPath)));
   }
 
   public Optional<Step> getDependentStep(ExperimentId id) {
@@ -227,7 +223,7 @@ public class Step {
   }
 
   public Stream<Class<?>> getObservations() {
-    return Procedures.getObservations(getInstruction(), getGlobalEnvironment());
+    return getInstruction().resultObservations();
   }
 
   public boolean prepares(Class<?> type) {
@@ -239,18 +235,22 @@ public class Step {
   }
 
   public Stream<Class<?>> getPreparations() {
-    return Procedures.getPreparations(getInstruction(), getGlobalEnvironment());
+    return getInstruction().conditionPreparations();
+  }
+
+  public Evaluation getPreparations(Class<?> preparation) {
+    return getInstruction().conditionPreparationEvaluation(preparation);
   }
 
   public Stream<VariableDeclaration<?>> getVariableDeclarations() {
-    return Procedures.getVariableDeclarations(getInstruction(), getGlobalEnvironment());
+    return getInstruction().variableDeclarations();
   }
 
   public Stream<? extends Result<?>> getResults() {
     return lock(() -> {
       var output = experiment.getOutput();
       return output.resultPaths(path).map(output::resolveResult).collect(toList());
-      // call the terminal op while we're still in the lock
+      // call the stream's terminal op while we're still in the lock
     }).stream();
   }
 

@@ -73,8 +73,8 @@ import uk.co.saiman.experiment.event.MoveStepEvent;
 import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
-import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.msapex.editor.EditorService;
 

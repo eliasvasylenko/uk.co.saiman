@@ -27,6 +27,8 @@
  */
 package uk.co.saiman.experiment.procedure;
 
+import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
+
 public class ProcedureException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
@@ -36,5 +38,13 @@ public class ProcedureException extends RuntimeException {
 
   public ProcedureException(String message, Throwable cause) {
     super(message, cause);
+  }
+
+  public ProcedureException(WorkspaceExperimentPath instructionPath, String message) {
+    super(message + " @ " + instructionPath);
+  }
+
+  public ProcedureException(WorkspaceExperimentPath instructionPath, String message, Throwable cause) {
+    super(message + " @ " + instructionPath, cause);
   }
 }

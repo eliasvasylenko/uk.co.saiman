@@ -84,7 +84,7 @@ public class Experiment {
       Log log) {
     this.environment = environment;
     this.definition = null;
-    this.scheduler = new Scheduler(storageConfiguration, executorService, environment, log);
+    this.scheduler = new Scheduler(storageConfiguration, executorService, log);
 
     updateDefinition(requireNonNull(procedure));
   }
@@ -148,8 +148,7 @@ public class Experiment {
 
   public synchronized Step attach(StepDefinition stepDefinition) {
     if (getDefinition().findSubstep(stepDefinition.id()).isPresent()) {
-      throw new ExperimentException(
-          "Experiment step already exists with id " + stepDefinition.id());
+      throw new ExperimentException("Experiment step already exists with id " + stepDefinition.id());
     }
 
     boolean changed = updateDefinition(getDefinition().withSubstep(stepDefinition));
@@ -175,22 +174,17 @@ public class Experiment {
       }
     }
 
-    return definition
-        .findSubstep(path)
-        .map(step -> new Step(this, step.executor(), path.toAbsolute()))
-        .map(step -> {
-          steps.put(path, new SoftReference<>(step));
-          return step;
-        });
+    return definition.findSubstep(path).map(step -> new Step(this, step.executor(), path.toAbsolute())).map(step -> {
+      steps.put(path, new SoftReference<>(step));
+      return step;
+    });
   }
 
   Optional<StepDefinition> getStepDefinition(ExperimentPath<Absolute> path) {
     return getDefinition().findSubstep(path);
   }
 
-  private synchronized boolean updateStepDefinition(
-      ExperimentPath<Absolute> path,
-      StepDefinition stepDefinition) {
+  private synchronized boolean updateStepDefinition(ExperimentPath<Absolute> path, StepDefinition stepDefinition) {
     return getDefinition()
         .withSubstep(path, s -> Optional.ofNullable(stepDefinition))
         .map(d -> updateDefinition(d))
@@ -200,17 +194,14 @@ public class Experiment {
   synchronized Step addStep(Step parent, int index, StepDefinition stepDefinition) {
     var parentDefinition = parent.getDefinition();
     if (parentDefinition.findSubstep(stepDefinition.id()).isPresent()) {
-      throw new ExperimentException(
-          "Experiment step already exists with id " + stepDefinition.id());
+      throw new ExperimentException("Experiment step already exists with id " + stepDefinition.id());
     }
 
     var path = parent.getPath();
 
     updateStepDefinition(
         path,
-        index < 0
-            ? parentDefinition.withSubstep(stepDefinition)
-            : parentDefinition.withSubstep(index, stepDefinition));
+        index < 0 ? parentDefinition.withSubstep(stepDefinition) : parentDefinition.withSubstep(index, stepDefinition));
 
     var step = parent.getDependentStep(stepDefinition.id()).get();
 
@@ -270,9 +261,7 @@ public class Experiment {
         path,
         getStepDefinition(path)
             .get()
-            .withVariables(
-                getGlobalEnvironment(),
-                variables -> variables.withOpt(variable, value)))) {
+            .withVariables(getGlobalEnvironment(), variables -> variables.withOpt(variable, value)))) {
       fireEvent(new ChangeVariableEvent(step, variable));
     }
   }
@@ -293,10 +282,6 @@ public class Experiment {
   }
 
   public synchronized Stream<Step> getIndependentSteps() {
-    return definition
-        .substeps()
-        .map(step -> toRoot().resolve(step.id()))
-        .map(this::getStep)
-        .flatMap(Optional::stream);
+    return definition.substeps().map(step -> toRoot().resolve(step.id())).map(this::getStep).flatMap(Optional::stream);
   }
 }

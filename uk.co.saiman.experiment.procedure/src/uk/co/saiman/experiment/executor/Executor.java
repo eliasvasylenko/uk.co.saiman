@@ -27,7 +27,7 @@
  */
 package uk.co.saiman.experiment.executor;
 
-import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Instruction;
 
 /**
  * An implementation of this interface represents a method of executing an

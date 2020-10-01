@@ -27,23 +27,25 @@
  */
 package uk.co.saiman.experiment.procedure.json;
 
-import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
 import static uk.co.saiman.data.format.RegistrationTree.VENDOR;
 import static uk.co.saiman.state.Accessor.stringAccessor;
+import static uk.co.saiman.state.StateList.toStateList;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.declaration.ExperimentId;
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.environment.Environment;
-import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.procedure.Procedure;
-import uk.co.saiman.state.Accessor;
 import uk.co.saiman.state.MapIndex;
+import uk.co.saiman.state.State;
 import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
 
@@ -67,23 +69,28 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
       stringAccessor().map(ExperimentId::fromName, ExperimentId::name));
   private static final String INSTRUCTIONS = "instructions";
 
-  private final MapIndex<List<Instruction>> children;
+  private static final MapIndex<ExperimentPath<Absolute>> PATH = new MapIndex<>(
+      "path",
+      stringAccessor().map(ExperimentPath::absoluteFromString, ExperimentPath::toString));
+  private static final String EXECUTOR = "executor";
+  private static final String VARIABLES = "variables";
+
+  private final MapIndex<Executor> executor;
 
   private final JsonStateMapFormat stateMapFormat;
 
   private final Environment environment;
 
   public JsonProcedureFormat(
-      JsonInstructionFormat instructionFormat,
-      Environment environment) {
+      ExecutorService conductorService,
+      Environment environment,
+      JsonStateMapFormat stateMapFormat) {
     this.environment = environment;
-    this.stateMapFormat = instructionFormat.getStateMapFormat();
-    this.children = new MapIndex<>(
-        INSTRUCTIONS,
-        Accessor
-            .mapAccessor()
-            .map(instructionFormat::loadInstruction, instructionFormat::saveInstruction)
-            .toListAccessor());
+    this.stateMapFormat = stateMapFormat;
+
+    this.executor = new MapIndex<>(
+        EXECUTOR,
+        stringAccessor().map(conductorService::getExecutor, conductorService::getId));
   }
 
   @Override
@@ -102,7 +109,18 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
   }
 
   public Procedure loadProcedure(StateMap data) {
-    return new Procedure(data.get(ID), data.get(children), environment);
+    return data
+        .get(INSTRUCTIONS)
+        .asList()
+        .stream()
+        .map(State::asMap)
+        .sequential()
+        .reduce(
+            Procedure.empty(data.get(ID), environment),
+            (p, s) -> p.withInstruction(s.get(PATH), s.get(VARIABLES).asMap(), s.get(executor)),
+            (a, b) -> {
+              throw new AssertionError();
+            });
   }
 
   @Override
@@ -111,9 +129,15 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
   }
 
   public StateMap saveDefinition(Procedure procedure) {
-    return StateMap
-        .empty()
-        .with(ID, procedure.id())
-        .with(children, procedure.instructions().collect(toList()));
+    State instructions = procedure
+        .instructions()
+        .map(
+            i -> StateMap
+                .empty()
+                .with(PATH, i.path().getExperimentPath())
+                .with(VARIABLES, i.variableMap())
+                .with(executor, i.executor()))
+        .collect(toStateList());
+    return StateMap.empty().with(ID, procedure.id()).with(INSTRUCTIONS, instructions);
   }
 }

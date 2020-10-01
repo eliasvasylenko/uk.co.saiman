@@ -27,10 +27,8 @@
  */
 package uk.co.saiman.experiment.conductor;
 
-import static java.util.Objects.requireNonNull;
-
 import uk.co.saiman.experiment.environment.Environment;
-import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 
@@ -106,16 +104,15 @@ public class ConductorInstruction {
     return conductor;
   }
 
-  void updateInstruction(Procedure procedure, Environment environment) {
+  void updateInstruction(Procedure procedure) {
     var instruction = procedure.instruction(path).get();
-    requireNonNull(environment);
 
     if (!isCompatibleConfiguration(instruction, this.instruction) && execution != null) {
       execution.invalidate();
     }
 
     this.instruction = instruction;
-    this.environment = environment;
+    this.environment = procedure.environment();
   }
 
   void updateDependencies(ConductorOutput output) {
@@ -124,9 +121,7 @@ public class ConductorInstruction {
     incomingDependencies.update(output, instruction, environment);
   }
 
-  protected <T> IncomingCondition<T> addConditionConsumer(
-      Class<T> condition,
-      WorkspaceExperimentPath path) {
+  protected <T> IncomingCondition<T> addConditionConsumer(Class<T> condition, WorkspaceExperimentPath path) {
     return outgoingConditions
         .getOutgoingCondition(condition)
         .orElseThrow(
@@ -139,16 +134,12 @@ public class ConductorInstruction {
     return outgoingResults
         .getOutgoingResult(result)
         .orElseThrow(
-            () -> new ConductorException(
-                "Cannot add dependency on missing result " + result + " to " + this.path))
+            () -> new ConductorException("Cannot add dependency on missing result " + result + " to " + this.path))
         .addConsumer(path);
   }
 
-  private boolean isCompatibleConfiguration(
-      Instruction instruction,
-      Instruction previousInstruction) {
-    return instruction != null && previousInstruction != null
-        && previousInstruction.id().equals(instruction.id())
+  private boolean isCompatibleConfiguration(Instruction instruction, Instruction previousInstruction) {
+    return instruction != null && previousInstruction != null && previousInstruction.id().equals(instruction.id())
         && previousInstruction.executor().equals(instruction.executor())
         && previousInstruction.variableMap().equals(instruction.variableMap());
   }

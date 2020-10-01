@@ -27,19 +27,14 @@
  */
 package uk.co.saiman.experiment.definition;
 
-import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.environment.Environment;
-import uk.co.saiman.experiment.instruction.Instruction;
 import uk.co.saiman.experiment.procedure.Procedure;
 
 public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinition> {
@@ -57,32 +52,29 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
    * 
    * 
    * 
-   * TODO some notion of "snippets", steps which exist in a shared area and of which
-   * instances can be included at multiple locations in the experiment. So for example
-   * we could define a shared spectrum processing snippet and attach it as a child of
-   * a sequence of spectrum acquisition steps. This way we only have to change the
-   * processing setup in one place and it applies to all acquired spectra.
-   * 
-   *   
-   * TODO Justification: this is just a convenience feature. The instruction/executor
-   * procedure/conductor model of performing an experiment and collecting results should
-   * not be burdened with the complexity of this.
-   * 
-   * But this class (the experiment definition) is a layer of abstraction above the
-   * instruction/procedure model, and is perhaps the appropriate place for such a
-   * feature.
-   * 
-   * TODO perhaps this could be generalised to other ways of generating substeps/instructions?
-   * 
-   * TODO ... generalise to something equivalent to a pre-processor or macro expander?
+   * TODO some notion of "snippets", steps which exist in a shared area and of
+   * which instances can be included at multiple locations in the experiment. So
+   * for example we could define a shared spectrum processing snippet and attach
+   * it as a child of a sequence of spectrum acquisition steps. This way we only
+   * have to change the processing setup in one place and it applies to all
+   * acquired spectra.
    * 
    * 
+   * TODO Justification: this is just a convenience feature. The
+   * instruction/executor procedure/conductor model of performing an experiment
+   * and collecting results should not be burdened with the complexity of this.
    * 
+   * But this class (the experiment definition) is a layer of abstraction above
+   * the instruction/procedure model, and is perhaps the appropriate place for
+   * such a feature.
    * 
-   * "shared definition", "snippet"
+   * "shared definition", "snippet", "method", "fragment", "placeholder",
+   * "snippet instance", "method instance"
    * 
-   * 
-   * "placeholder", "snippet instance"
+   * TODO can we have local overrides of e.g. variables/substeps for snippet
+   * instances? If so, how do we keep these in sync if the snippet is updated? An
+   * alternative to local overrides in snippet instances, we can have overrides in
+   * snippet definitions and allow then to extend one another.
    * 
    * 
    * 
@@ -92,11 +84,20 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
    * 
    * 
    * 
+   * 
+   * TODO perhaps this could be generalised to other ways of generating
+   * substeps/instructions?
+   * 
+   * TODO ... generalise to something equivalent to a pre-processor or macro
+   * expander?
+   * 
+   * TODO ALTERNATIVE: batch processing node, which depends on the results of
+   * multiple other nodes and applies processing to all of them.
    * 
    * 
    * 
    */
-  
+
   private ExperimentDefinition(
       ExperimentId id,
       List<StepDefinition> steps,
@@ -133,35 +134,26 @@ public class ExperimentDefinition extends Definition<Absolute, ExperimentDefinit
   }
 
   @Override
-  ExperimentDefinition with(
-      List<StepDefinition> steps,
-      Map<ExperimentId, StepDefinition> dependents) {
+  ExperimentDefinition with(List<StepDefinition> steps, Map<ExperimentId, StepDefinition> dependents) {
     return new ExperimentDefinition(id, steps, dependents);
   }
 
   public Procedure procedure(Environment environment) {
     if (procedure == null) {
-      procedure = new Procedure(
-          id,
-          substepsClosure(this, ExperimentPath.toRoot()).collect(toList()),
-          environment);
+      procedure = substepsClosure(Procedure.empty(id, environment), this, ExperimentPath.toRoot());
     }
     return procedure;
   }
 
-  private Stream<Instruction> substepsClosure(
-      Definition<?, ?> steps,
-      ExperimentPath<Absolute> parentPath) {
-    return steps.substeps().flatMap(step -> stepClosure(step, parentPath));
+  private Procedure substepsClosure(Procedure procedure, Definition<?, ?> steps, ExperimentPath<Absolute> parentPath) {
+    return steps.substeps().reduce(procedure, (p, s) -> stepClosure(p, s, parentPath), (a, b) -> {
+      throw new AssertionError();
+    });
   }
 
-  private Stream<Instruction> stepClosure(StepDefinition step, ExperimentPath<Absolute> path) {
+  private Procedure stepClosure(Procedure procedure, StepDefinition step, ExperimentPath<Absolute> path) {
     var p = path.resolve(step.id());
-    return Stream
-        .concat(
-            step.getPlan() == EXECUTE
-                ? Stream.of(new Instruction(p, step.variableMap(), step.executor()))
-                : Stream.empty(),
-            substepsClosure(step, p));
+    return step.getPlan() == ExecutionPlan.WITHHOLD ? procedure
+        : substepsClosure(procedure.withInstruction(p, step.variableMap(), step.executor()), step, p);
   }
 }

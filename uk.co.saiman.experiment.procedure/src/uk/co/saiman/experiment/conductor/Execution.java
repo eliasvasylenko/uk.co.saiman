@@ -44,11 +44,13 @@ import uk.co.saiman.experiment.dependency.Result;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.ExecutionCancelledException;
 import uk.co.saiman.experiment.executor.ExecutionContext;
-import uk.co.saiman.experiment.instruction.Instruction;
+import uk.co.saiman.experiment.procedure.Instruction;
+import uk.co.saiman.experiment.procedure.json.JsonProcedureFormat;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.experiment.workspace.WorkspaceExperimentPath;
 import uk.co.saiman.log.Log;
 import uk.co.saiman.log.Log.Level;
+import uk.co.saiman.state.json.JsonStateMapFormat;
 
 public class Execution {
   private final Conductor conductor;
@@ -292,8 +294,9 @@ public class Execution {
       conductor.lock().lock();
 
       location = conductor.storageConfiguration().locateStorage(path).location();
-      var data = Data.locate(location, instruction.id().name(), conductor.instructionFormat());
-      data.set(instruction);
+      var procedureFormat = new JsonProcedureFormat(conductor.executorService(), environment, new JsonStateMapFormat());
+      var data = Data.locate(location, instruction.id().name(), procedureFormat);
+      data.set(instruction.extractMinimalProcedure());
       data.save();
 
     } finally {
