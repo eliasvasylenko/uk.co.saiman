@@ -21,7 +21,7 @@ Export-Package: \
 	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.definition;version=snapshot,\
+	uk.co.saiman.experiment.design;version=snapshot,\
 	uk.co.saiman.instrument.sampleplate;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\
 	uk.co.saiman.maldi.spectrum;version=snapshot,\

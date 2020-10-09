@@ -14,4 +14,3 @@ Bundle-Name: SAI :: FX
 Export-Package: \
 	uk.co.saiman.fx,\
 	uk.co.saiman.fx.bindings
-

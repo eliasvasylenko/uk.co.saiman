@@ -86,6 +86,16 @@ public class StateMap implements State {
     }
   }
 
+  public StateMap withAll(StateMap map) {
+    Map<String, State> entries = new HashMap<>(this.entries);
+    entries.putAll(map.entries);
+    return new StateMap(entries);
+  }
+
+  public StateMap withAllDefaults(StateMap map) {
+    return map.withAll(this);
+  }
+
   public StateMap remove(String id) {
     if (!entries.containsKey(id)) {
       return this;

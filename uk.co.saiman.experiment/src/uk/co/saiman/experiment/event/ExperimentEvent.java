@@ -28,21 +28,21 @@
 package uk.co.saiman.experiment.event;
 
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.design.ExperimentDesign;
 
 public abstract class ExperimentEvent {
   private final Experiment experiment;
-  private final ExperimentDefinition definition;
+  private final ExperimentDesign design;
 
   public ExperimentEvent(Experiment experiment) {
     this.experiment = experiment;
-    this.definition = experiment.getDefinition();
+    this.design = experiment.getDesign();
   }
 
   public abstract ExperimentEventKind kind();
 
-  public ExperimentDefinition experimentDefinition() {
-    return definition;
+  public ExperimentDesign experimentDesign() {
+    return design;
   }
 
   public Experiment experiment() {

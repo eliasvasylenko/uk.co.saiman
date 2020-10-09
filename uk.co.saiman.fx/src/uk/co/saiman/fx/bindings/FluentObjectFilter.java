@@ -31,7 +31,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Predicate;
 
-import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 
 public class FluentObjectFilter<T> extends FluentObjectBinding<T> {

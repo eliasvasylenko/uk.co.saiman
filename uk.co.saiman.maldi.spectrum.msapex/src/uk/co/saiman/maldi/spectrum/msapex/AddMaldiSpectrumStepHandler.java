@@ -39,7 +39,7 @@ import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.processing.Processing;
@@ -48,10 +48,7 @@ import uk.co.saiman.maldi.sample.SampleAreaHold;
 
 public class AddMaldiSpectrumStepHandler {
   @CanExecute
-  public boolean canProvideSteps(
-      ExecutorService executors,
-      Experiment experiment,
-      ExperimentPath<Absolute> path) {
+  public boolean canProvideSteps(ExecutorService executors, Experiment experiment, ExperimentPath<Absolute> path) {
     return executors.getExecutor(SPECTRUM_EXECUTOR) != null
         && experiment.getStep(path).filter(step -> step.prepares(SampleAreaHold.class)).isPresent();
   }
@@ -70,15 +67,11 @@ public class AddMaldiSpectrumStepHandler {
     }
 
     var id = ExperimentId
-        .nextAvailableFromName(
-            "Spectrum",
-            parent.getDependentSteps().map(Step::getId).collect(toList()));
+        .nextAvailableFromName("Spectrum", parent.getDependentSteps().map(Step::getId).collect(toList()));
 
-    var step = StepDefinition
-        .define(
-            id,
-            spectrumExecutor,
-            new Variables(environment).with(PROCESSING_VARIABLE, new Processing()));
+    var step = ExperimentStepDesign
+        .define(id, spectrumExecutor)
+        .withVariables(new Variables(environment).with(PROCESSING_VARIABLE, new Processing()));
 
     parent.attach(step);
   }

@@ -54,7 +54,7 @@ public class MoveStepEvent extends ExperimentStepEvent {
   }
 
   public ExperimentId id() {
-    return stepDefinition().id();
+    return stepDesign().id();
   }
 
   public Optional<Step> previousDependencyStep() {

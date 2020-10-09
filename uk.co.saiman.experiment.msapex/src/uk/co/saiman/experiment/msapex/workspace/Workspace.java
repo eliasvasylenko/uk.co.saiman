@@ -43,7 +43,7 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.ExperimentException;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.design.ExperimentDesign;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.format.JsonExperimentFormat;
@@ -186,7 +186,7 @@ public class Workspace {
       StorageConfiguration<?> storageConfiguration) {
     return addExperiment(
         new Experiment(
-            ExperimentDefinition.define(name),
+            ExperimentDesign.define(name),
             storageConfiguration,
             experimentFormat.getExecutorService(),
             environment,

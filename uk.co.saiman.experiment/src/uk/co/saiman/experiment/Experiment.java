@@ -29,7 +29,7 @@ package uk.co.saiman.experiment;
 
 import static java.util.Objects.requireNonNull;
 import static uk.co.saiman.experiment.declaration.ExperimentPath.toRoot;
-import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
+import static uk.co.saiman.experiment.design.ExecutionPlan.EXECUTE;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -44,9 +44,9 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.definition.ExecutionPlan;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExecutionPlan;
+import uk.co.saiman.experiment.design.ExperimentDesign;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
@@ -57,6 +57,7 @@ import uk.co.saiman.experiment.event.RemoveStepEvent;
 import uk.co.saiman.experiment.event.RenameExperimentEvent;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.output.Output;
+import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.schedule.Schedule;
 import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
@@ -65,8 +66,19 @@ import uk.co.saiman.log.Log;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
+/**
+ * A mutable model of a complex, hierarchical experiment. An experiment is
+ * backed by a reference to an immutable {@link ExperimentDesign design object},
+ * which provides a well-defined snapshot of the experiment state at any given
+ * moment, even in the presence of concurrent modification by multiple threads.
+ * This design is used to implement a {@link Procedure procedure} for the
+ * conducting of the experiment.
+ * 
+ * @author Elias N Vasylenko
+ *
+ */
 public class Experiment {
-  private ExperimentDefinition definition;
+  private ExperimentDesign design;
 
   private final Scheduler scheduler;
 
@@ -77,16 +89,16 @@ public class Experiment {
   private final Supplier<Environment> environment;
 
   public Experiment(
-      ExperimentDefinition procedure,
+      ExperimentDesign procedure,
       StorageConfiguration<?> storageConfiguration,
       ExecutorService executorService,
       Supplier<Environment> environment,
       Log log) {
     this.environment = environment;
-    this.definition = null;
+    this.design = null;
     this.scheduler = new Scheduler(storageConfiguration, executorService, log);
 
-    updateDefinition(requireNonNull(procedure));
+    updateDesign(requireNonNull(procedure));
   }
 
   public ExecutorService getExecutorService() {
@@ -97,19 +109,19 @@ public class Experiment {
     return environment.get();
   }
 
-  public ExperimentDefinition getDefinition() {
-    return definition;
+  public ExperimentDesign getDesign() {
+    return design;
   }
 
   public synchronized void scheduleAll() {
-    updateDefinition(definition.withSubsteps(steps -> steps.map(Experiment::withScheduled)));
+    updateDesign(design.withSubsteps(steps -> steps.map(Experiment::withScheduled)));
   }
 
   public synchronized Output conduct() {
     return scheduler.getSchedule().map(Schedule::conduct).orElseGet(() -> scheduler.getOutput());
   }
 
-  static StepDefinition withScheduled(StepDefinition step) {
+  static ExperimentStepDesign withScheduled(ExperimentStepDesign step) {
     return step.withPlan(EXECUTE).withSubsteps(steps -> steps.map(Experiment::withScheduled));
   }
 
@@ -118,22 +130,22 @@ public class Experiment {
   }
 
   public ExperimentId getId() {
-    return getDefinition().id();
+    return getDesign().id();
   }
 
   public synchronized void setId(ExperimentId id) {
     ExperimentId previousId = getId();
 
-    if (updateDefinition(getDefinition().withId(id))) {
+    if (updateDesign(getDesign().withId(id))) {
       fireEvent(new RenameExperimentEvent(this, previousId));
     }
   }
 
-  private synchronized boolean updateDefinition(ExperimentDefinition definition) {
-    boolean changed = !definition.equals(this.definition);
+  private synchronized boolean updateDesign(ExperimentDesign design) {
+    boolean changed = !design.equals(this.design);
     if (changed) {
-      this.definition = definition;
-      scheduler.scheduleProcedure(definition.procedure(getGlobalEnvironment()));
+      this.design = design;
+      scheduler.scheduleProcedure(design.implementProcedure(getGlobalEnvironment()));
     }
     return changed;
   }
@@ -146,14 +158,14 @@ public class Experiment {
     return events;
   }
 
-  public synchronized Step attach(StepDefinition stepDefinition) {
-    if (getDefinition().findSubstep(stepDefinition.id()).isPresent()) {
-      throw new ExperimentException("Experiment step already exists with id " + stepDefinition.id());
+  public synchronized Step attach(ExperimentStepDesign stepDesign) {
+    if (getDesign().findSubstep(stepDesign.id()).isPresent()) {
+      throw new ExperimentException("Experiment step already exists with id " + stepDesign.id());
     }
 
-    boolean changed = updateDefinition(getDefinition().withSubstep(stepDefinition));
+    boolean changed = updateDesign(getDesign().withSubstep(stepDesign));
 
-    Step newStep = getIndependentStep(stepDefinition.id()).get();
+    Step newStep = getIndependentStep(stepDesign.id()).get();
     if (changed) {
       fireEvent(new AddStepEvent(newStep));
     }
@@ -174,36 +186,33 @@ public class Experiment {
       }
     }
 
-    return definition.findSubstep(path).map(step -> new Step(this, step.executor(), path.toAbsolute())).map(step -> {
+    return design.findSubstep(path).map(step -> new Step(this, step.executor(), path.toAbsolute())).map(step -> {
       steps.put(path, new SoftReference<>(step));
       return step;
     });
   }
 
-  Optional<StepDefinition> getStepDefinition(ExperimentPath<Absolute> path) {
-    return getDefinition().findSubstep(path);
+  Optional<ExperimentStepDesign> getStepDesign(ExperimentPath<Absolute> path) {
+    return getDesign().findSubstep(path);
   }
 
-  private synchronized boolean updateStepDefinition(ExperimentPath<Absolute> path, StepDefinition stepDefinition) {
-    return getDefinition()
-        .withSubstep(path, s -> Optional.ofNullable(stepDefinition))
-        .map(d -> updateDefinition(d))
-        .orElse(false);
+  private synchronized boolean updateStepDesign(ExperimentPath<Absolute> path, ExperimentStepDesign stepDesign) {
+    return getDesign().withSubstep(path, s -> Optional.ofNullable(stepDesign)).map(d -> updateDesign(d)).orElse(false);
   }
 
-  synchronized Step addStep(Step parent, int index, StepDefinition stepDefinition) {
-    var parentDefinition = parent.getDefinition();
-    if (parentDefinition.findSubstep(stepDefinition.id()).isPresent()) {
-      throw new ExperimentException("Experiment step already exists with id " + stepDefinition.id());
+  synchronized Step addStep(Step parent, int index, ExperimentStepDesign stepDesign) {
+    var parentDesign = parent.getDesign();
+    if (parentDesign.findSubstep(stepDesign.id()).isPresent()) {
+      throw new ExperimentException("Experiment step already exists with id " + stepDesign.id());
     }
 
     var path = parent.getPath();
 
-    updateStepDefinition(
+    updateStepDesign(
         path,
-        index < 0 ? parentDefinition.withSubstep(stepDefinition) : parentDefinition.withSubstep(index, stepDefinition));
+        index < 0 ? parentDesign.withSubstep(stepDesign) : parentDesign.withSubstep(index, stepDesign));
 
-    var step = parent.getDependentStep(stepDefinition.id()).get();
+    var step = parent.getDependentStep(stepDesign.id()).get();
 
     fireEvent(new AddStepEvent(step));
 
@@ -222,7 +231,7 @@ public class Experiment {
     /*
      * TODO remove all children in map
      */
-    if (updateStepDefinition(path, null)) {
+    if (updateStepDesign(path, null)) {
       fireEvent(new RemoveStepEvent(step, path.parent().flatMap(this::getStep)));
     }
   }
@@ -234,8 +243,8 @@ public class Experiment {
     }
 
     var path = step.getPath();
-    var parentDefinition = path.parent().flatMap(this::getStepDefinition).get();
-    if (parentDefinition.findSubstep(id).isPresent()) {
+    var parentDesign = path.parent().flatMap(this::getStepDesign).get();
+    if (parentDesign.findSubstep(id).isPresent()) {
       throw new ExperimentException("Experiment step already exists with id " + id);
     }
 
@@ -247,7 +256,7 @@ public class Experiment {
       }
     }
 
-    if (updateStepDefinition(path, getStepDefinition(path).get().withId(id))) {
+    if (updateStepDesign(path, getStepDesign(path).get().withId(id))) {
       fireEvent(new MoveStepEvent(step, step.getDependencyStep(), path.id(path.depth() - 1)));
     }
   }
@@ -257,9 +266,9 @@ public class Experiment {
       Variable<T> variable,
       Function<? super Optional<T>, ? extends Optional<T>> value) {
     var path = step.getPath();
-    if (updateStepDefinition(
+    if (updateStepDesign(
         path,
-        getStepDefinition(path)
+        getStepDesign(path)
             .get()
             .withVariables(getGlobalEnvironment(), variables -> variables.withOpt(variable, value)))) {
       fireEvent(new ChangeVariableEvent(step, variable));
@@ -268,7 +277,7 @@ public class Experiment {
 
   synchronized <T> void planStep(Step step, ExecutionPlan plan) {
     var path = step.getPath();
-    if (updateStepDefinition(path, getStepDefinition(path).get().withPlan(plan))) {
+    if (updateStepDesign(path, getStepDesign(path).get().withPlan(plan))) {
       fireEvent(new PlanStepEvent(step, plan));
     }
   }
@@ -282,6 +291,6 @@ public class Experiment {
   }
 
   public synchronized Stream<Step> getIndependentSteps() {
-    return definition.substeps().map(step -> toRoot().resolve(step.id())).map(this::getStep).flatMap(Optional::stream);
+    return design.substeps().map(step -> toRoot().resolve(step.id())).map(this::getStep).flatMap(Optional::stream);
   }
 }

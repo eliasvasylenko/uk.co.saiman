@@ -50,6 +50,6 @@ public class RenameExperimentEvent extends ExperimentEvent {
   }
 
   public ExperimentId id() {
-    return experimentDefinition().id();
+    return experimentDesign().id();
   }
 }

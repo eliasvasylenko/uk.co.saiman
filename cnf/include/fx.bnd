@@ -38,4 +38,5 @@ Import-Package: \
 	!com.sun.glass.ui,\
 	!com.sun.javafx.*,\
 	!javafx.*,\
-	!netscape.javascript,*\
+	!netscape.javascript,\
+	*

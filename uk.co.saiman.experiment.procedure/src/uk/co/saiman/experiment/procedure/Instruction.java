@@ -118,7 +118,7 @@ public class Instruction {
       public void preparesCondition(Class<?> type, Evaluation evaluation) {
         assertLive();
         conditionPreparations.merge(type, evaluation, (a, b) -> {
-          throw new ProcedureException(
+          throw new InstructionException(
               path(),
               "Cannot prepare the condition '" + type + "' multiple times with different evaluation models");
         });
@@ -140,7 +140,7 @@ public class Instruction {
       public <T> Optional<T> declareVariable(VariableDeclaration<T> declaration) {
         assertLive();
         if (declaration.cardinality() == REQUIRED && variables.get(declaration.variable()).isEmpty()) {
-          throw new ProcedureException(path(), "Required variable '" + declaration.variable().id() + "' is missing");
+          throw new InstructionException(path(), "Required variable '" + declaration.variable().id() + "' is missing");
         }
         return variables.get(declaration.variable());
       }
@@ -149,7 +149,7 @@ public class Instruction {
       public void declareResourceRequirement(Class<?> type) {
         assertLive();
         if (!precedingProcedure.environment().providesResource(type)) {
-          throw new ProcedureException(path(), "Required resource '" + type + "' is missing from the environment");
+          throw new InstructionException(path(), "Required resource '" + type + "' is missing from the environment");
         }
         resourceRequirements.add(type);
       }
@@ -158,10 +158,10 @@ public class Instruction {
       public void declareConditionRequirement(Class<?> production) {
         assertLive();
         if (resultRequirement.isSet() || !additionalResultRequirements.isEmpty()) {
-          throw new ProcedureException(path(), "Cannot depend on results and conditions at the same time");
+          throw new InstructionException(path(), "Cannot depend on results and conditions at the same time");
         }
         if (conditionRequirement.isSet()) {
-          throw new ProcedureException(path(), "Cannot declare multiple primary condition requirements");
+          throw new InstructionException(path(), "Cannot declare multiple primary condition requirements");
         }
         conditionRequirement.set(production);
       }
@@ -170,12 +170,12 @@ public class Instruction {
       public void declareResultRequirement(Class<?> production) {
         assertLive();
         if (resultRequirement.isSet()) {
-          throw new ProcedureException(
+          throw new InstructionException(
               path(),
               "Cannot declare multiple primary result requirements, use additional result requirements");
         }
         if (conditionRequirement.isSet()) {
-          throw new ProcedureException(path(), "Cannot depend on results and conditions at the same time");
+          throw new InstructionException(path(), "Cannot depend on results and conditions at the same time");
         }
         resultRequirement.set(production);
       }
@@ -184,7 +184,7 @@ public class Instruction {
       public void declareAdditionalResultRequirement(ResultPath<?, ?> path) {
         assertLive();
         if (conditionRequirement.isSet()) {
-          throw new ProcedureException(path(), "Cannot depend on results and conditions at the same time");
+          throw new InstructionException(path(), "Cannot depend on results and conditions at the same time");
         }
         additionalResultRequirements.add(path.toAbsolute());
       }
@@ -235,7 +235,7 @@ public class Instruction {
   public Evaluation conditionPreparationEvaluation(Class<?> conditionPreparation) {
     var c = conditionPreparations.get(conditionPreparation);
     if (c == null) {
-      throw new ProcedureException(path(), "Condition '" + conditionPreparation + "' is missing");
+      throw new InstructionException(path(), "Condition '" + conditionPreparation + "' is missing");
     }
     return c;
   }

@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.definition.json;
+package uk.co.saiman.experiment.design.json;
 
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
@@ -39,37 +39,37 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExperimentDesign;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.state.MapIndex;
 import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
 
 /**
- * The .edef format, for loading experiment definitions.
+ * The .edef format, for loading experiment designs.
  * 
  * @author Elias N Vasylenko
  */
-public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefinition> {
+public class JsonExperimentDesignFormat implements TextFormat<ExperimentDesign> {
   public static final int VERSION = 1;
 
-  public static final String FILE_EXTENSION = "edef";
+  public static final String FILE_EXTENSION = "edsn";
   public static final MediaType MEDIA_TYPE = new MediaType(
       APPLICATION_TYPE,
-      "saiman.experiment.definition.v" + VERSION,
+      "saiman.experiment.design.v" + VERSION,
       VENDOR).withSuffix("json");
 
   private static final MapIndex<ExperimentId> ID = new MapIndex<>(
       "id",
       stringAccessor().map(ExperimentId::fromName, ExperimentId::name));
 
-  private final MapIndex<List<StepDefinition>> substeps;
+  private final MapIndex<List<ExperimentStepDesign>> substeps;
 
   private final JsonStateMapFormat stateMapFormat;
 
-  public JsonExperimentDefinitionFormat(JsonStepDefinitionFormat stepDefinitionFormat) {
-    this.stateMapFormat = stepDefinitionFormat.getStateMapFormat();
-    this.substeps = stepDefinitionFormat.getSubstepsAccessor();
+  public JsonExperimentDesignFormat(JsonStepDesignFormat stepDesignFormat) {
+    this.stateMapFormat = stepDesignFormat.getStateMapFormat();
+    this.substeps = stepDesignFormat.getSubstepsAccessor();
   }
 
   @Override
@@ -83,23 +83,20 @@ public class JsonExperimentDefinitionFormat implements TextFormat<ExperimentDefi
   }
 
   @Override
-  public Payload<? extends ExperimentDefinition> decodeString(String string) {
-    return new Payload<>(loadDefinition(stateMapFormat.decodeString(string).data));
+  public Payload<? extends ExperimentDesign> decodeString(String string) {
+    return new Payload<>(loadDesign(stateMapFormat.decodeString(string).data));
   }
 
-  public ExperimentDefinition loadDefinition(StateMap data) {
-    return ExperimentDefinition.define(data.get(ID)).withSubsteps(data.get(substeps));
+  public ExperimentDesign loadDesign(StateMap data) {
+    return ExperimentDesign.define(data.get(ID)).withSubsteps(data.get(substeps));
   }
 
   @Override
-  public String encodeString(Payload<? extends ExperimentDefinition> payload) {
-    return stateMapFormat.encodeString(new Payload<>(saveDefinition(payload.data)));
+  public String encodeString(Payload<? extends ExperimentDesign> payload) {
+    return stateMapFormat.encodeString(new Payload<>(saveDesign(payload.data)));
   }
 
-  public StateMap saveDefinition(ExperimentDefinition procedure) {
-    return StateMap
-        .empty()
-        .with(ID, procedure.id())
-        .with(substeps, procedure.substeps().collect(toList()));
+  public StateMap saveDesign(ExperimentDesign procedure) {
+    return StateMap.empty().with(ID, procedure.id()).with(substeps, procedure.substeps().collect(toList()));
   }
 }

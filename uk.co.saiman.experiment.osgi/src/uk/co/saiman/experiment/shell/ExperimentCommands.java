@@ -40,8 +40,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExperimentDesign;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 
@@ -66,8 +66,8 @@ public class ExperimentCommands {
   public static final String DEFINE_EXPERIMENT = "define an empty experiment";
 
   @Descriptor(DEFINE_EXPERIMENT)
-  public ExperimentDefinition defineExperiment(@Descriptor(EXPERIMENT_ID) ExperimentId id) {
-    return ExperimentDefinition.define(id);
+  public ExperimentDesign defineExperiment(@Descriptor(EXPERIMENT_ID) ExperimentId id) {
+    return ExperimentDesign.define(id);
   }
 
   public static final String STEP_ID = "the ID of the experiment step";
@@ -77,9 +77,9 @@ public class ExperimentCommands {
   public static final String DEFINE_STEP = "define an empty step";
 
   @Descriptor(DEFINE_STEP)
-  public StepDefinition defineStep(@Descriptor(STEP_ID) ExperimentId id, @Descriptor(STEP_EXECUTOR) Executor executor)
+  public ExperimentStepDesign defineStep(@Descriptor(STEP_ID) ExperimentId id, @Descriptor(STEP_EXECUTOR) Executor executor)
       throws IOException {
-    return StepDefinition.define(id, executor);
+    return ExperimentStepDesign.define(id, executor);
   }
 
   public static final String LIST_EXECUTORS = "list available experiment step executors";

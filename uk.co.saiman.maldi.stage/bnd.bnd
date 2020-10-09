@@ -21,7 +21,7 @@ Private-Package: \
 	uk.co.saiman.experiment;version=snapshot,\
 	uk.co.saiman.experiment.osgi;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.definition;version=snapshot,\
+	uk.co.saiman.experiment.design;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.sample;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\

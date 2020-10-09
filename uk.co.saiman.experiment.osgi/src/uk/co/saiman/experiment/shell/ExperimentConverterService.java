@@ -35,24 +35,24 @@ import org.osgi.service.component.annotations.Reference;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
-import uk.co.saiman.experiment.definition.json.JsonStepDefinitionFormat;
+import uk.co.saiman.experiment.design.ExperimentDesign;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
+import uk.co.saiman.experiment.design.json.JsonExperimentDesignFormat;
+import uk.co.saiman.experiment.design.json.JsonStepDesignFormat;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 
 @Component
 public class ExperimentConverterService implements Converter {
-  private final JsonExperimentDefinitionFormat experimentDefinitionFormat;
-  private final JsonStepDefinitionFormat stepDefinitionFormat;
+  private final JsonExperimentDesignFormat experimentDefinitionFormat;
+  private final JsonStepDesignFormat stepDefinitionFormat;
 
   private final ExecutorService executors;
 
   @Activate
   public ExperimentConverterService(@Reference ExecutorService executors) {
-    this.stepDefinitionFormat = new JsonStepDefinitionFormat(executors);
-    this.experimentDefinitionFormat = new JsonExperimentDefinitionFormat(stepDefinitionFormat);
+    this.stepDefinitionFormat = new JsonStepDesignFormat(executors);
+    this.experimentDefinitionFormat = new JsonExperimentDesignFormat(stepDefinitionFormat);
     this.executors = executors;
   }
 
@@ -71,10 +71,10 @@ public class ExperimentConverterService implements Converter {
     } else if (type.isAssignableFrom(Executor.class)) {
       return executors.getExecutor(object.toString());
 
-    } else if (type.isAssignableFrom(ExperimentDefinition.class)) {
+    } else if (type.isAssignableFrom(ExperimentDesign.class)) {
       return experimentDefinitionFormat.decodeString(object.toString()).data;
 
-    } else if (type.isAssignableFrom(StepDefinition.class)) {
+    } else if (type.isAssignableFrom(ExperimentStepDesign.class)) {
       return stepDefinitionFormat.decodeString(object.toString()).data;
     }
 
@@ -97,8 +97,8 @@ public class ExperimentConverterService implements Converter {
         return executors.getId((Executor) object);
       }
 
-    } else if (object instanceof ExperimentDefinition) {
-      var definition = (ExperimentDefinition) object;
+    } else if (object instanceof ExperimentDesign) {
+      var definition = (ExperimentDesign) object;
       switch (detail) {
       case INSPECT:
         return experimentDefinitionFormat.encodeString(new Payload<>(definition));
@@ -106,8 +106,8 @@ public class ExperimentConverterService implements Converter {
         return definition.id().toString();
       }
 
-    } else if (object instanceof StepDefinition) {
-      var definition = (StepDefinition) object;
+    } else if (object instanceof ExperimentStepDesign) {
+      var definition = (ExperimentStepDesign) object;
       switch (detail) {
       case INSPECT:
         return stepDefinitionFormat.encodeString(new Payload<>(definition));

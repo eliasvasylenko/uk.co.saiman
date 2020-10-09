@@ -29,7 +29,7 @@ Require-Bundle:\
 	uk.co.saiman.msapex.chart;version=snapshot,\
 	uk.co.saiman.msapex.editor;version=snapshot,\
 	uk.co.saiman.experiment;version=snapshot,\
-	uk.co.saiman.experiment.definition;version=snapshot,\
+	uk.co.saiman.experiment.design;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.scheduling;version=snapshot,\

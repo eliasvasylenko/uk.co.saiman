@@ -65,8 +65,8 @@ import uk.co.saiman.eclipse.utilities.ContextBuffer;
 import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.definition.StepDefinition;
-import uk.co.saiman.experiment.definition.json.JsonStepDefinitionFormat;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
+import uk.co.saiman.experiment.design.json.JsonStepDesignFormat;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
@@ -107,7 +107,7 @@ public class ExperimentStepCell {
   @Inject
   private MCell cell;
 
-  private TransferFormat<StepDefinition> stepTransferFormat;
+  private TransferFormat<ExperimentStepDesign> stepTransferFormat;
 
   @CanExecute
   public boolean canExecute() {
@@ -150,7 +150,7 @@ public class ExperimentStepCell {
     /*
      * Inject configuration
      */
-    context.set(StepDefinition.class, step.getDefinition());
+    context.set(ExperimentStepDesign.class, step.getDesign());
     context.set(Instruction.class, step.getInstruction());
     context.set(Variables.class, step.getVariables());
     context.set(ExperimentPath.class, step.getPath());
@@ -190,14 +190,14 @@ public class ExperimentStepCell {
      * Transfer
      */
     stepTransferFormat = new TransferFormat<>(
-        new JsonStepDefinitionFormat(executorService),
+        new JsonStepDesignFormat(executorService),
         EnumSet.of(COPY, MOVE, DISCARD));
   }
 
   @BeginTransfer
   public TransferSource beginTransfer() {
     System.out.println(" begin transfer at " + step);
-    return new TransferSource().with(stepTransferFormat, step.getDefinition());
+    return new TransferSource().with(stepTransferFormat, step.getDesign());
   }
 
   @CompleteTransfer

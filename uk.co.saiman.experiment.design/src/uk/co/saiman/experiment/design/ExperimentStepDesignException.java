@@ -25,16 +25,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.definition;
+package uk.co.saiman.experiment.design;
 
-public class ExperimentDefinitionException extends RuntimeException {
+import uk.co.saiman.experiment.declaration.ExperimentPath;
+
+public class ExperimentStepDesignException extends ExperimentDesignException {
   private static final long serialVersionUID = 1L;
 
-  public ExperimentDefinitionException(String message) {
+  private final ExperimentPath<?> stepPath;
+
+  ExperimentStepDesignException(String message, ExperimentPath<?> stepPath) {
     super(message);
+    this.stepPath = stepPath;
   }
 
-  public ExperimentDefinitionException(String message, Throwable cause) {
+  ExperimentStepDesignException(String message, Throwable cause, ExperimentPath<?> stepPath) {
     super(message, cause);
+    this.stepPath = stepPath;
+  }
+
+  public ExperimentPath<?> getStepPath() {
+    return stepPath;
   }
 }

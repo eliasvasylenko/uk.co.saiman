@@ -1,7 +1,7 @@
 package uk.co.saiman.maldi.legacy.settings;
 
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 
 public class MaldiPeakDetection {
-  private final StepDefinition snippet;
+  private final ExperimentStepDesign snippet;
 }

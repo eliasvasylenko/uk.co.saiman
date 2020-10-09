@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.definition.json;
+package uk.co.saiman.experiment.design.json;
 
 import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.data.format.MediaType.APPLICATION_TYPE;
@@ -39,8 +39,8 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.definition.ExecutionPlan;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExecutionPlan;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.state.Accessor;
@@ -49,18 +49,16 @@ import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
 
 /**
- * The .sdef format, for loading experiment step definitions.
+ * The .sdef format, for loading experiment step designs.
  * 
  * @author Elias N Vasylenko
  */
-public class JsonStepDefinitionFormat implements TextFormat<StepDefinition> {
+public class JsonStepDesignFormat implements TextFormat<ExperimentStepDesign> {
   public static final int VERSION = 1;
 
-  public static final String FILE_EXTENSION = "sdef"; // json step definition
-  public static final MediaType MEDIA_TYPE = new MediaType(
-      APPLICATION_TYPE,
-      "saiman.step.definition.v" + VERSION,
-      VENDOR).withSuffix("json");
+  public static final String FILE_EXTENSION = "sdsn"; // json step design
+  public static final MediaType MEDIA_TYPE = new MediaType(APPLICATION_TYPE, "saiman.step.design.v" + VERSION, VENDOR)
+      .withSuffix("json");
 
   private static final MapIndex<ExperimentId> ID = new MapIndex<>(
       "id",
@@ -73,17 +71,15 @@ public class JsonStepDefinitionFormat implements TextFormat<StepDefinition> {
   private static final String SUBSTEPS = "substeps";
 
   private final MapIndex<Executor> executor;
-  private final MapIndex<List<StepDefinition>> substeps;
+  private final MapIndex<List<ExperimentStepDesign>> substeps;
 
   private final JsonStateMapFormat stateMapFormat;
 
-  public JsonStepDefinitionFormat(ExecutorService executorService) {
+  public JsonStepDesignFormat(ExecutorService executorService) {
     this(executorService, new JsonStateMapFormat());
   }
 
-  public JsonStepDefinitionFormat(
-      ExecutorService conductorService,
-      JsonStateMapFormat stateMapFormat) {
+  public JsonStepDesignFormat(ExecutorService conductorService, JsonStateMapFormat stateMapFormat) {
     this.stateMapFormat = stateMapFormat;
 
     this.executor = new MapIndex<>(
@@ -94,7 +90,7 @@ public class JsonStepDefinitionFormat implements TextFormat<StepDefinition> {
         Accessor.mapAccessor().map(this::loadStep, this::saveStep).toListAccessor());
   }
 
-  MapIndex<List<StepDefinition>> getSubstepsAccessor() {
+  MapIndex<List<ExperimentStepDesign>> getSubstepsAccessor() {
     return substeps;
   }
 
@@ -113,32 +109,33 @@ public class JsonStepDefinitionFormat implements TextFormat<StepDefinition> {
   }
 
   @Override
-  public Payload<? extends StepDefinition> decodeString(String string) {
+  public Payload<? extends ExperimentStepDesign> decodeString(String string) {
     return new Payload<>(loadStep(stateMapFormat.decodeString(string).data));
   }
 
-  protected StepDefinition loadStep(StateMap data) {
-    StepDefinition step = StepDefinition
-        .define(data.get(ID), (Executor) data.get(executor))
+  protected ExperimentStepDesign loadStep(StateMap data) {
+    ExperimentStepDesign step = ExperimentStepDesign
+        .define(data.get(ID))
         .withVariableMap(data.get(VARIABLES).asMap())
         .withSubsteps(data.get(substeps))
         .withPlan(data.get(PLAN));
 
-    return step;
+    return data.getOptional(executor).map(step::withExecutor).orElse(step);
   }
 
   @Override
-  public String encodeString(Payload<? extends StepDefinition> payload) {
+  public String encodeString(Payload<? extends ExperimentStepDesign> payload) {
     return stateMapFormat.encodeString(new Payload<>(saveStep(payload.data)));
   }
 
-  protected StateMap saveStep(StepDefinition step) {
-    return StateMap
+  protected StateMap saveStep(ExperimentStepDesign step) {
+    StateMap state = StateMap
         .empty()
         .with(ID, step.id())
-        .with(executor, step.executor())
         .with(VARIABLES, step.variableMap())
         .with(substeps, step.substeps().collect(toList()))
-        .with(PLAN, step.getPlan());
+        .with(PLAN, step.plan());
+
+    return step.executor().map(e -> state.with(executor, e)).orElse(state);
   }
 }

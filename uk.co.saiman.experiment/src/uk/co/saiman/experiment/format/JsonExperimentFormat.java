@@ -38,8 +38,8 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
-import uk.co.saiman.experiment.definition.json.JsonExperimentDefinitionFormat;
-import uk.co.saiman.experiment.definition.json.JsonStepDefinitionFormat;
+import uk.co.saiman.experiment.design.json.JsonExperimentDesignFormat;
+import uk.co.saiman.experiment.design.json.JsonStepDesignFormat;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
@@ -50,7 +50,7 @@ import uk.co.saiman.state.StateMap;
 import uk.co.saiman.state.json.JsonStateMapFormat;
 
 /**
- * The .exp format, for loading experiment step definitions.
+ * The .exp format, for loading experiments.
  * 
  * @author Elias N Vasylenko
  */
@@ -58,10 +58,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   public static final int VERSION = 1;
 
   public static final String FILE_EXTENSION = "exp";
-  public static final MediaType MEDIA_TYPE = new MediaType(
-      APPLICATION_TYPE,
-      "saiman.experiment.v" + VERSION,
-      VENDOR).withSuffix("json");
+  public static final MediaType MEDIA_TYPE = new MediaType(APPLICATION_TYPE, "saiman.experiment.v" + VERSION, VENDOR)
+      .withSuffix("json");
 
   private static final String STORAGE = "storage";
 
@@ -93,10 +91,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
     this.storage = new MapIndex<>(
         STORAGE,
-        mapAccessor()
-            .map(
-                s -> storageService.configureStorage(s),
-                r -> storageService.deconfigureStorage(r)));
+        mapAccessor().map(s -> storageService.configureStorage(s), r -> storageService.deconfigureStorage(r)));
 
     this.log = log;
   }
@@ -121,15 +116,14 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
-    var definitionFormat = new JsonExperimentDefinitionFormat(
-        new JsonStepDefinitionFormat(executorService, stateMapFormat));
-    var definition = definitionFormat.loadDefinition(data);
+    var designFormat = new JsonExperimentDesignFormat(new JsonStepDesignFormat(executorService, stateMapFormat));
+    var design = designFormat.loadDesign(data);
     return new Experiment(
-        definition,
+        design,
         data.get(storage),
         executorService,
         environment,
-        log.mapMessage(s -> definition.id() + ": " + s));
+        log.mapMessage(s -> design.id() + ": " + s));
   }
 
   @Override
@@ -138,10 +132,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected StateMap saveExperiment(Experiment data) {
-    var definitionFormat = new JsonExperimentDefinitionFormat(
-        new JsonStepDefinitionFormat(data.getExecutorService(), stateMapFormat));
-    return definitionFormat
-        .saveDefinition(data.getDefinition())
-        .with(storage, data.getStorageConfiguration());
+    var designFormat = new JsonExperimentDesignFormat(
+        new JsonStepDesignFormat(data.getExecutorService(), stateMapFormat));
+    return designFormat.saveDesign(data.getDesign()).with(storage, data.getStorageConfiguration());
   }
 }

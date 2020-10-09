@@ -29,7 +29,7 @@ Export-Package: \
 	uk.co.saiman.experiment.msapex;version=snapshot,\
 	uk.co.saiman.experiment.osgi;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
-	uk.co.saiman.experiment.definition;version=snapshot,\
+	uk.co.saiman.experiment.design;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.processing;version=snapshot,\
 	uk.co.saiman.experiment.spectrum;version=snapshot,\

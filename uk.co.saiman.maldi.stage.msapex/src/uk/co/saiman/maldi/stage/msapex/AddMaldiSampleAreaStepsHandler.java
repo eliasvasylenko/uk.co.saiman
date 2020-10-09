@@ -40,7 +40,7 @@ import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.variables.Variables;
@@ -74,7 +74,7 @@ public class AddMaldiSampleAreaStepsHandler {
     for (var sampleArea : areas) {
       var stepId = ExperimentId.fromName(sampleArea.id());
       if (parent.getDependentStep(stepId).isEmpty()) {
-        var step = StepDefinition
+        var step = ExperimentStepDesign
             .define(stepId, areaExecutor)
             .withVariables(
                 new Variables(environment).with(SAMPLE_AREA, plate.persistSampleArea(sampleArea)));

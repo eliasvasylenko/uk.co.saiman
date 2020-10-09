@@ -25,8 +25,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package uk.co.saiman.experiment.definition;
+package uk.co.saiman.experiment.design;
 
-public enum ExecutionPlan {
-  EXECUTE, WITHHOLD
+import uk.co.saiman.experiment.declaration.ExperimentId;
+
+public class CircularReferenceException extends ExperimentDesignException {
+  private static final long serialVersionUID = 1L;
+
+  private final ExperimentId sharedMethodId;
+
+  public CircularReferenceException(ExperimentId sharedMethodId) {
+    super("Circular reference detected at shared method id '" + sharedMethodId + "'");
+    this.sharedMethodId = sharedMethodId;
+  }
+
+  public ExperimentId getSharedMethodId() {
+    return sharedMethodId;
+  }
 }

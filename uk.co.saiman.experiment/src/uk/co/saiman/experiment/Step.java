@@ -28,8 +28,8 @@
 package uk.co.saiman.experiment;
 
 import static java.util.stream.Collectors.toList;
-import static uk.co.saiman.experiment.definition.ExecutionPlan.EXECUTE;
-import static uk.co.saiman.experiment.definition.ExecutionPlan.WITHHOLD;
+import static uk.co.saiman.experiment.design.ExecutionPlan.EXECUTE;
+import static uk.co.saiman.experiment.design.ExecutionPlan.WITHHOLD;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -39,15 +39,14 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.definition.StepDefinition;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.procedure.Instruction;
-import uk.co.saiman.experiment.procedure.Procedures;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
@@ -100,8 +99,8 @@ public class Step {
     });
   }
 
-  public StepDefinition getDefinition() {
-    return lock(() -> experiment.getStepDefinition(path).get());
+  public ExperimentStepDesign getDesign() {
+    return lock(() -> experiment.getStepDesign(path).get());
   }
 
   public ExperimentId getId() {
@@ -119,7 +118,7 @@ public class Step {
   }
 
   public Variables getVariables() {
-    return lock(() -> getDefinition().variables(getGlobalEnvironment()));
+    return lock(() -> getDesign().variables(getGlobalEnvironment()));
   }
 
   public <T> Optional<T> getVariable(Variable<T> variable) {
@@ -174,13 +173,13 @@ public class Step {
     }
   }
 
-  public Step attach(StepDefinition template) {
+  public Step attach(ExperimentStepDesign template) {
     return attach(-1, template);
   }
 
-  public Step attach(int index, StepDefinition stepDefinition) {
+  public Step attach(int index, ExperimentStepDesign step) {
     return lock(() -> {
-      return experiment.addStep(this, index, stepDefinition);
+      return experiment.addStep(this, index, step);
     });
   }
 
@@ -209,7 +208,7 @@ public class Step {
 
   public Stream<Step> getDependentSteps() {
     return lock(() -> {
-      return getDefinition()
+      return getDesign()
           .substeps()
           .map(step -> path.resolve(step.id()))
           .map(experiment::getStep)
@@ -255,7 +254,7 @@ public class Step {
   }
 
   public Instruction getInstruction() {
-    return new Instruction(path, getDefinition().variableMap(), getExecutor());
+    return new Instruction(path, getDesign().variableMap(), getExecutor());
   }
 
   public int getIndex() {

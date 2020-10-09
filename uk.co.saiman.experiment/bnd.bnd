@@ -2,7 +2,7 @@ Bundle-Name: SAI :: Experiment
 
 -buildpath: \
 	uk.co.saiman.collections;version=snapshot,\
-	uk.co.saiman.experiment.definition;version=snapshot,\
+	uk.co.saiman.experiment.design;version=snapshot,\
 	uk.co.saiman.experiment.procedure;version=snapshot,\
 	uk.co.saiman.experiment.declaration;version=snapshot,\
 	uk.co.saiman.experiment.scheduling;version=snapshot,\

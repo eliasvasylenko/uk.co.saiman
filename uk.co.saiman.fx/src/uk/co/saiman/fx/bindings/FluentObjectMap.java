@@ -31,7 +31,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.function.Function;
 
-import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 
 public class FluentObjectMap<T, U> extends FluentObjectBinding<T> {

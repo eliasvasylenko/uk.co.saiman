@@ -42,7 +42,7 @@ import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.variables.Variables;
@@ -59,24 +59,22 @@ public class AddMaldiSamplePlateStepHandler {
     var plateExecutor = executors.getExecutor(SAMPLE_PLATE_EXECUTOR);
     var areaExecutor = executors.getExecutor(SAMPLE_AREA_EXECUTOR);
 
-    var step = StepDefinition
+    var step = ExperimentStepDesign
         .define(
             ExperimentId
                 .nextAvailableFromName(
                     "Sample Plate",
                     experiment.getIndependentSteps().map(Step::getId).collect(toList())),
-            plateExecutor,
-            new Variables(environment).with(SAMPLE_PLATE, samplePlate));
+            plateExecutor)
+        .withVariables(new Variables(environment).with(SAMPLE_PLATE, samplePlate));
 
     if (sampleAreaSelection != null) {
       var areas = sampleAreaSelection.sampleAreas().collect(toList());
       for (var sampleArea : areas) {
         var stepId = ExperimentId.fromName(sampleArea.id());
-        var substep = StepDefinition
+        var substep = ExperimentStepDesign
             .define(stepId, areaExecutor)
-            .withVariables(
-                new Variables(environment)
-                    .with(SAMPLE_AREA, samplePlate.persistSampleArea(sampleArea)));
+            .withVariables(new Variables(environment).with(SAMPLE_AREA, samplePlate.persistSampleArea(sampleArea)));
         step = step.withSubstep(substep);
       }
     }
@@ -89,7 +87,7 @@ public class AddMaldiSamplePlateStepHandler {
       ExecutorService executors,
       Experiment experiment,
       @Optional ExperimentPath<Absolute> path) {
-    return executors.getExecutor(SAMPLE_PLATE_EXECUTOR) != null
-        && executors.getExecutor(SAMPLE_AREA_EXECUTOR) != null && (path == null || path.isEmpty());
+    return executors.getExecutor(SAMPLE_PLATE_EXECUTOR) != null && executors.getExecutor(SAMPLE_AREA_EXECUTOR) != null
+        && (path == null || path.isEmpty());
   }
 }

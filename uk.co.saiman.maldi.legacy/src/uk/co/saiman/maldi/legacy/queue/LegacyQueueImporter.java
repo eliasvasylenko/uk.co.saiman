@@ -45,8 +45,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
-import uk.co.saiman.experiment.definition.StepDefinition;
+import uk.co.saiman.experiment.design.ExperimentDesign;
+import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.maldi.legacy.settings.MaldiLegacySettings;
 import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor;
 import uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor;
@@ -91,7 +91,7 @@ public class LegacyQueueImporter {
     this.legacySettings = legacySettings;
   }
 
-  public ExperimentDefinition importLegacyQueue(ExperimentId name, Path queueFile) {
+  public ExperimentDesign importLegacyQueue(ExperimentId name, Path queueFile) {
     try {
       var documentBuilderFactory = DocumentBuilderFactory.newInstance();
       var documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -107,7 +107,7 @@ public class LegacyQueueImporter {
     }
   }
 
-  ExperimentDefinition importExperiment(ExperimentId name, Element queue) {
+  ExperimentDesign importExperiment(ExperimentId name, Element queue) {
     var slideName = getTextContent(queue, E_SLIDE_NAME, "96 Well Plate with DM");
 
     var experiments = queue.getElementsByTagName(EXPERIMENT);
@@ -117,12 +117,12 @@ public class LegacyQueueImporter {
         .mapToObj(i -> importSpectrum(i, (Element) experiments.item(i)))
         .collect(toList());
 
-    var plate = StepDefinition.define(fromName(slideName), samplePlate).withSubsteps(wells);
+    var plate = ExperimentStepDesign.define(fromName(slideName), samplePlate).withSubsteps(wells);
 
-    return ExperimentDefinition.define(name).withSubstep(plate);
+    return ExperimentDesign.define(name).withSubstep(plate);
   }
 
-  StepDefinition importSpectrum(int index, Element element) {
+  ExperimentStepDesign importSpectrum(int index, Element element) {
     var sampleAreaId = getTextContent(element, E_NAME, null);
     var spectrumId = getTextContent(
         element,
@@ -139,9 +139,9 @@ public class LegacyQueueImporter {
         .lookupPeakDetection(getTextContent(element, E_MALDI_MASS_SPECTRUM_PEAK_DETECTION_SETUP, null));
     var processing = legacySettings.lookupProcessing(getTextContent(element, E_MALDI_PROCESSING_METHOD, null));
 
-    return StepDefinition
+    return ExperimentStepDesign
         .define(fromName(sampleAreaId), sampleArea)
-        .withSubstep(StepDefinition.define(fromName(spectrumId), spectrum));
+        .withSubstep(ExperimentStepDesign.define(fromName(spectrumId), spectrum));
   }
 
   String getTextContent(Element element, String tag, String def) {

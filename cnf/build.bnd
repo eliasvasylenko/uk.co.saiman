@@ -3,11 +3,11 @@
 ########################
 
 ## Java Compiler Options
-javac.source:		12
-javac.target:		12
-javac.compliance:	12
+javac.source:		14
+javac.target:		14
+javac.compliance:	14
 javac.debug:		on
--runee:				JavaSE-12
+-runee:				JavaSE-14
 
 # The following lines are a hack to force IDE plugin publishing to P2 to work
 #Bundle-RequiredExecutionEnvironment: JavaSE-9
@@ -124,7 +124,7 @@ efxclipse.version: 3.6.0
 		url					=	${fileuri;${build}/efxclipse.${efxclipse.version}.target}
 #		url					=	https://download.eclipse.org/efxclipse/runtime-released/${efxclipse.version}/site/
 
-javafx.version: 13
+javafx.version: 14
 -plugin.javafx = \
 	aQute.bnd.repository.maven.provider.MavenBndRepository;\
 		name				=	"FX";\

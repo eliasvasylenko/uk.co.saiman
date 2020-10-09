@@ -55,7 +55,7 @@ import uk.co.saiman.eclipse.utilities.ContextBuffer;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.design.ExperimentDesign;
 import uk.co.saiman.experiment.event.ExperimentEvent;
 import uk.co.saiman.experiment.msapex.i18n.ExperimentProperties;
 import uk.co.saiman.experiment.msapex.workspace.WorkspaceExperiment;
@@ -138,14 +138,14 @@ public class ExperimentCell {
 
   private void open() {
     context.set(Experiment.class, experiment.open());
-    context.set(ExperimentDefinition.class, experiment.open().getDefinition());
+    context.set(ExperimentDesign.class, experiment.open().getDesign());
     context.set(ExperimentPath.class, ExperimentPath.toRoot());
     updateIcon();
   }
 
   private void close() {
     context.remove(Experiment.class);
-    context.remove(ExperimentDefinition.class);
+    context.remove(ExperimentDesign.class);
     context.remove(ExperimentPath.class);
     updateIcon();
   }
@@ -154,7 +154,7 @@ public class ExperimentCell {
   @Optional
   public void update(ExperimentEvent event) {
     if (experiment.status() == Status.OPEN && event.experiment() == experiment.open()) {
-      cell.setLabel(event.experimentDefinition().id().name());
+      cell.setLabel(event.experimentDesign().id().name());
     }
   }
 

@@ -1,4 +1,4 @@
-Bundle-Name: SAI :: Experiment :: Definition
+Bundle-Name: SAI :: Experiment :: Design
 
 -buildpath: \
 	uk.co.saiman.experiment.storage;version=snapshot,\
@@ -15,5 +15,5 @@ Bundle-Name: SAI :: Experiment :: Definition
 	uk.co.saiman.data;version=snapshot
 
 Export-Package: \
-	uk.co.saiman.experiment.definition,\
-	uk.co.saiman.experiment.definition.json
+	uk.co.saiman.experiment.design,\
+	uk.co.saiman.experiment.design.json

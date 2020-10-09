@@ -30,7 +30,7 @@ package uk.co.saiman.experiment.event;
 import static uk.co.saiman.experiment.event.ExperimentEventKind.CHANGE_VARIABLE;
 
 import uk.co.saiman.experiment.Step;
-import uk.co.saiman.experiment.definition.ExecutionPlan;
+import uk.co.saiman.experiment.design.ExecutionPlan;
 
 public class PlanStepEvent extends ExperimentStepEvent {
   private final ExecutionPlan plan;

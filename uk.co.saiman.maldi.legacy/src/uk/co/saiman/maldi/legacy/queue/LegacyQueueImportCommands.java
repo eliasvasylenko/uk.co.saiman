@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
-import uk.co.saiman.experiment.definition.ExperimentDefinition;
+import uk.co.saiman.experiment.design.ExperimentDesign;
 import uk.co.saiman.maldi.legacy.settings.MaldiLegacySettings;
 import uk.co.saiman.maldi.sample.MaldiSampleAreaExecutor;
 import uk.co.saiman.maldi.sample.MaldiSamplePlateExecutor;
@@ -64,7 +64,7 @@ public class LegacyQueueImportCommands {
     this.importer = new LegacyQueueImporter(samplePlate, sampleArea, spectrum, settings);
   }
 
-  public ExperimentDefinition importLegacyQueue(ExperimentId name, Path queueFile) {
+  public ExperimentDesign importLegacyQueue(ExperimentId name, Path queueFile) {
     return importer.importLegacyQueue(name, queueFile);
   }
 }

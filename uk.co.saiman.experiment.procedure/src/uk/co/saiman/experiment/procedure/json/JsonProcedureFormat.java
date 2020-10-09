@@ -125,10 +125,10 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
 
   @Override
   public String encodeString(Payload<? extends Procedure> payload) {
-    return stateMapFormat.encodeString(new Payload<>(saveDefinition(payload.data)));
+    return stateMapFormat.encodeString(new Payload<>(saveProcedure(payload.data)));
   }
 
-  public StateMap saveDefinition(Procedure procedure) {
+  public StateMap saveProcedure(Procedure procedure) {
     State instructions = procedure
         .instructions()
         .map(
