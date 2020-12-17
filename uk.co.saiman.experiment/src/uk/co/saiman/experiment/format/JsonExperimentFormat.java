@@ -39,7 +39,7 @@ import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.format.TextFormat;
 import uk.co.saiman.experiment.Experiment;
 import uk.co.saiman.experiment.design.json.JsonExperimentDesignFormat;
-import uk.co.saiman.experiment.design.json.JsonStepDesignFormat;
+import uk.co.saiman.experiment.design.json.JsonExperimentStepDesignFormat;
 import uk.co.saiman.experiment.environment.Environment;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
@@ -101,8 +101,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   @Override
-  public String getExtension() {
-    return FILE_EXTENSION;
+  public Stream<String> getExtensions() {
+    return Stream.of(FILE_EXTENSION);
   }
 
   @Override
@@ -116,7 +116,8 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
   }
 
   protected Experiment loadExperiment(StateMap data) {
-    var designFormat = new JsonExperimentDesignFormat(new JsonStepDesignFormat(executorService, stateMapFormat));
+    var designFormat = new JsonExperimentDesignFormat(
+        new JsonExperimentStepDesignFormat(executorService, stateMapFormat));
     var design = designFormat.loadDesign(data);
     return new Experiment(
         design,
@@ -133,7 +134,7 @@ public class JsonExperimentFormat implements TextFormat<Experiment> {
 
   protected StateMap saveExperiment(Experiment data) {
     var designFormat = new JsonExperimentDesignFormat(
-        new JsonStepDesignFormat(data.getExecutorService(), stateMapFormat));
+        new JsonExperimentStepDesignFormat(data.getExecutorService(), stateMapFormat));
     return designFormat.saveDesign(data.getDesign()).with(storage, data.getStorageConfiguration());
   }
 }

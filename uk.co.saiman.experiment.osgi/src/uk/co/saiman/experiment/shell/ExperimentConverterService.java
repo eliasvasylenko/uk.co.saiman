@@ -38,20 +38,20 @@ import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.design.ExperimentDesign;
 import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.design.json.JsonExperimentDesignFormat;
-import uk.co.saiman.experiment.design.json.JsonStepDesignFormat;
+import uk.co.saiman.experiment.design.json.JsonExperimentStepDesignFormat;
 import uk.co.saiman.experiment.executor.Executor;
 import uk.co.saiman.experiment.executor.service.ExecutorService;
 
 @Component
 public class ExperimentConverterService implements Converter {
   private final JsonExperimentDesignFormat experimentDefinitionFormat;
-  private final JsonStepDesignFormat stepDefinitionFormat;
+  private final JsonExperimentStepDesignFormat stepDefinitionFormat;
 
   private final ExecutorService executors;
 
   @Activate
   public ExperimentConverterService(@Reference ExecutorService executors) {
-    this.stepDefinitionFormat = new JsonStepDesignFormat(executors);
+    this.stepDefinitionFormat = new JsonExperimentStepDesignFormat(executors);
     this.experimentDefinitionFormat = new JsonExperimentDesignFormat(stepDefinitionFormat);
     this.executors = executors;
   }

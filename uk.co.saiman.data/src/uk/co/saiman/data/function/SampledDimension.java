@@ -34,23 +34,30 @@ import javax.measure.Quantity;
  * 
  * @author Elias N Vasylenko
  *
- * @param <U>
- *          the unit of measurement of values in this dimension
+ * @param <U> the unit of measurement of values in this dimension
  */
 public interface SampledDimension<U extends Quantity<U>> extends Dimension<U> {
-	/**
-	 * Find the number of samples in the continuum.
-	 * 
-	 * @return The depth of the sampled continuum.
-	 */
-	int getDepth();
+  /**
+   * Find the number of samples in the continuum.
+   * 
+   * @return The depth of the sampled continuum.
+   */
+  int getDepth();
 
-	/**
-	 * The value in the domain at the given index.
-	 * 
-	 * @param index
-	 *          The sample index.
-	 * @return The X value of the sample at the given index.
-	 */
-	double getSample(int index);
+  /**
+   * The value in the domain at the given index.
+   * 
+   * @param index The sample index.
+   * @return The X value of the sample at the given index.
+   */
+  double getSample(int index);
+
+  default double[] toArray() {
+    int depth = getDepth();
+    double[] array = new double[depth];
+    for (int i = 0; i < depth; i++) {
+      array[i] = getSample(i);
+    }
+    return array;
+  }
 }

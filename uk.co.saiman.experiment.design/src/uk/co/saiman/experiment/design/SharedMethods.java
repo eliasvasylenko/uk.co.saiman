@@ -50,33 +50,26 @@ public class SharedMethods {
     return Optional.ofNullable(methods.get(id));
   }
 
-  ExperimentStepDesign substituteMethod(ExperimentStepDesign step, ExperimentPath<?> containingPath) {
-    return substituteMethod(step, containingPath, Set.of());
+  ExperimentStepDesign materializeMethod(ExperimentStepDesign step) {
+    return materializeMethod(step, Set.of());
   }
 
-  ExperimentStepDesign substituteMethod(
-      ExperimentStepDesign step,
-      ExperimentPath<?> containingPath,
-      Set<ExperimentId> visitedMethods) {
+  ExperimentStepDesign materializeMethod(ExperimentStepDesign step, Set<ExperimentId> visitedMethods) {
     if (!step.isMethodInstance()) {
       return step;
     }
 
-    try {
-      var id = step.sharedMethodId().get();
+    var id = step.sharedMethodId().get();
 
-      if (visitedMethods.contains(id)) {
-        throw new CircularReferenceException(id);
-      }
-      visitedMethods = new HashSet<>(visitedMethods);
-      visitedMethods.add(id);
-
-      var method = methodDesign(id).orElseThrow(() -> new UnresolvedReferenceException(id));
-
-      return substituteMethodStep(step.withoutSharedMethod(), method, ExperimentPath.toSelf(), visitedMethods);
-    } catch (Exception e) {
-      throw new MethodInstanceException(step.sharedMethodId().get(), containingPath.resolve(step.id()), e);
+    if (visitedMethods.contains(id)) {
+      throw new CircularReferenceException(id);
     }
+    visitedMethods = new HashSet<>(visitedMethods);
+    visitedMethods.add(id);
+
+    var method = methodDesign(id).orElseThrow(() -> new UnresolvedReferenceException(id));
+
+    return substituteMethodStep(step.withoutSharedMethod(), method, ExperimentPath.toSelf(), visitedMethods);
   }
 
   private ExperimentStepDesign substituteMethodStep(
@@ -95,7 +88,12 @@ public class SharedMethods {
     var methodSubsteps = methodStep.substeps().iterator();
 
     while (methodSubsteps.hasNext()) {
-      var methodSubstep = substituteMethod(methodSubsteps.next(), stepPath, visitedMethods);
+      var methodSubstep = methodSubsteps.next();
+      try {
+        methodSubstep = materializeMethod(methodSubstep, visitedMethods);
+      } catch (Exception e) {
+        throw new MethodInstanceException(step.sharedMethodId().get(), stepPath.resolve(step.id()), e);
+      }
 
       if (!step.findSubstep(methodSubstep.id()).isPresent()) {
         resultSteps.add(methodSubstep);

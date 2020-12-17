@@ -51,12 +51,10 @@ public abstract class SampledRange<U extends Quantity<U>> implements Range<U>, S
    * of the function within the interval in the domain described by the given
    * sample indices.
    * 
-   * @param startIndex
-   *          The index of the sample at the beginning of the domain interval
-   *          whose range we wish to determine
-   * @param endIndex
-   *          The index of the sample at the end of the domain interval whose
-   *          range we wish to determine
+   * @param startIndex The index of the sample at the beginning of the domain
+   *                   interval whose range we wish to determine
+   * @param endIndex   The index of the sample at the end of the domain interval
+   *                   whose range we wish to determine
    * @return The range from the smallest to the largest value of the codomain of
    *         the function within the given interval
    */

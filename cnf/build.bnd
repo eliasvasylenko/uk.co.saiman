@@ -65,10 +65,10 @@ Bundle-Developers:\
 
 -plugin.Central:\
 	aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
-		name=Central;\
-		releaseUrls=https://repo1.maven.org/maven2/;\
-		pom=${build}/central.xml;\
-		location=${build}/cache/central.xml
+		name				=	Central;\
+		releaseUrls			=	https://repo1.maven.org/maven2/;\
+		pom					=	${build}/central.xml;\
+		location			=	${build}/cache/central.xml
 
 -plugin.Bnd:\
 \
@@ -130,6 +130,13 @@ javafx.version: 14
 		name				=	"FX";\
 		releaseUrl			=	https://repo.maven.apache.org/maven2/;\
 		index				=	${build}/javafx.mvn
+
+-plugin.EBI = \
+	aQute.bnd.repository.maven.pom.provider.BndPomRepository;\
+		name				=	"EBI";\
+		releaseUrls			=	https://www.ebi.ac.uk/intact/maven/nexus/content/repositories/ebi-repo/;\
+		pom					=	${build}/ebi.xml;\
+		location			=	${build}/cache/ebi.xml
 
 # Uncomment to build "uk.co.saiman.eclipse.ui.edit"
 # This repo is not compatible with the latest e(fx)clipse

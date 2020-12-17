@@ -78,7 +78,7 @@ public class SimpleData<T> implements Data<T> {
   @Override
   public void relocate(Location location, String name) throws DataException {
     try {
-      relocate(location.getResource(name, format.getExtension()));
+      relocate(location.getResource(name, format));
     } catch (IOException e) {
       throw new DataException("Failed to prepare destination", e);
     }
@@ -107,8 +107,7 @@ public class SimpleData<T> implements Data<T> {
         }
         try {
           var buffer = openBuffer();
-          try (var writeToBuffer = buffer.openWritableChannel();
-              var readFromBuffer = buffer.openReadableChannel()) {
+          try (var writeToBuffer = buffer.openWritableChannel(); var readFromBuffer = buffer.openReadableChannel()) {
             format.save(writeToBuffer, new Payload<>(value));
             /*
              * Write to a buffer first so we don't nuke the resource if our save fails.

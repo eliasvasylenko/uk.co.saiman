@@ -92,6 +92,11 @@ class EmptyDomain<UD extends Quantity<UD>> implements SampledDomain<UD> {
     else
       return -1;
   }
+
+  @Override
+  public double[] toArray() {
+    return new double[] { 0 };
+  }
 }
 
 class EmptyRange<UR extends Quantity<UR>> extends SampledRange<UR> {
@@ -117,5 +122,10 @@ class EmptyRange<UR extends Quantity<UR>> extends SampledRange<UR> {
     if (index != 0)
       throw new ArrayIndexOutOfBoundsException(index);
     return 0;
+  }
+
+  @Override
+  public double[] toArray() {
+    return new double[] { 0 };
   }
 }

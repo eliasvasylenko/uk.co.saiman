@@ -44,14 +44,12 @@ import uk.co.saiman.state.StateList;
 public class JsonStateListFormat extends JsonStateFormat<StateList> {
   public static final int VERSION = 1;
 
-  public static final MediaType MEDIA_TYPE = new MediaType(
-      APPLICATION_TYPE,
-      "saiman.statelist.v" + VERSION,
-      VENDOR).withSuffix("json");
+  public static final MediaType MEDIA_TYPE = new MediaType(APPLICATION_TYPE, "saiman.statelist.v" + VERSION, VENDOR)
+      .withSuffix("json");
 
   @Override
-  public String getExtension() {
-    return "sl";
+  public Stream<String> getExtensions() {
+    return Stream.of("sl");
   }
 
   @Override

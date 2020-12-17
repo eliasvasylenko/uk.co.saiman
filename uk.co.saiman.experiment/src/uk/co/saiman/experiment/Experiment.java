@@ -28,11 +28,8 @@
 package uk.co.saiman.experiment;
 
 import static java.util.Objects.requireNonNull;
-import static uk.co.saiman.experiment.declaration.ExperimentPath.toRoot;
 import static uk.co.saiman.experiment.design.ExecutionPlan.EXECUTE;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +38,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
@@ -63,6 +61,7 @@ import uk.co.saiman.experiment.schedule.Scheduler;
 import uk.co.saiman.experiment.storage.StorageConfiguration;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 import uk.co.saiman.observable.HotObservable;
 import uk.co.saiman.observable.Observable;
 
@@ -75,18 +74,20 @@ import uk.co.saiman.observable.Observable;
  * conducting of the experiment.
  * 
  * @author Elias N Vasylenko
- *
  */
 public class Experiment {
   private ExperimentDesign design;
 
   private final Scheduler scheduler;
 
-  private Map<ExperimentPath<Absolute>, Reference<Step>> steps = new HashMap<>();
+  private Map<ExperimentPath<Absolute>, Step> steps = new HashMap<>();
 
   private final HotObservable<ExperimentEvent> events = new HotObservable<>();
 
-  private final Supplier<Environment> environment;
+  private final Supplier<Environment> environmentSupplier;
+  private Environment environment;
+
+  private final Log log;
 
   public Experiment(
       ExperimentDesign procedure,
@@ -94,9 +95,12 @@ public class Experiment {
       ExecutorService executorService,
       Supplier<Environment> environment,
       Log log) {
-    this.environment = environment;
+    this.log = log.mapMessage(message -> "In experiment '" + design.id() + "': " + message);
+
+    this.environmentSupplier = environment;
+    this.environment = environmentSupplier.get();
     this.design = null;
-    this.scheduler = new Scheduler(storageConfiguration, executorService, log);
+    this.scheduler = new Scheduler(storageConfiguration, executorService, this.log);
 
     updateDesign(requireNonNull(procedure));
   }
@@ -105,8 +109,16 @@ public class Experiment {
     return scheduler.getExecutorService();
   }
 
-  Environment getGlobalEnvironment() {
-    return environment.get();
+  public Environment getEnvironment() {
+    return environment;
+  }
+
+  public void refreshEnvironment() {
+    var environment = environmentSupplier.get();
+    if (!environment.equals(this.environment)) {
+      this.environment = environment;
+      update();
+    }
   }
 
   public ExperimentDesign getDesign() {
@@ -114,7 +126,7 @@ public class Experiment {
   }
 
   public synchronized void scheduleAll() {
-    updateDesign(design.withSubsteps(steps -> steps.map(Experiment::withScheduled)));
+    updateDesign(getDesign().withSubsteps(steps -> steps.map(Experiment::withScheduled)));
   }
 
   public synchronized Output conduct() {
@@ -145,9 +157,21 @@ public class Experiment {
     boolean changed = !design.equals(this.design);
     if (changed) {
       this.design = design;
-      scheduler.scheduleProcedure(design.implementProcedure(getGlobalEnvironment()));
+      update();
     }
     return changed;
+  }
+
+  private synchronized void update() {
+    var cumulativeProcedure = Procedure.empty(getId(), getEnvironment());
+    getSubsteps().reduce(cumulativeProcedure, (p, s) -> s.update(p), StreamUtilities.throwingMerger());
+
+    try {
+      var completeProcedure = design.implementProcedure(getEnvironment());
+      scheduler.scheduleProcedure(completeProcedure);
+    } catch (Exception e) {
+      log.log(Level.WARN, "Failed to schedule experiment '" + getId() + "'", e);
+    }
   }
 
   public StorageConfiguration<?> getStorageConfiguration() {
@@ -165,7 +189,7 @@ public class Experiment {
 
     boolean changed = updateDesign(getDesign().withSubstep(stepDesign));
 
-    Step newStep = getIndependentStep(stepDesign.id()).get();
+    Step newStep = getSubstep(stepDesign.id()).get();
     if (changed) {
       fireEvent(new AddStepEvent(newStep));
     }
@@ -176,20 +200,8 @@ public class Experiment {
 
   }
 
-  public Optional<Step> getStep(ExperimentPath<Absolute> path) {
-    var reference = steps.get(path);
-
-    if (reference != null) {
-      var step = reference.get();
-      if (step != null) {
-        return Optional.of(step);
-      }
-    }
-
-    return design.findSubstep(path).map(step -> new Step(this, step.executor(), path.toAbsolute())).map(step -> {
-      steps.put(path, new SoftReference<>(step));
-      return step;
-    });
+  public synchronized Optional<Step> getStep(ExperimentPath<Absolute> path) {
+    return Optional.ofNullable(steps.get(path));
   }
 
   Optional<ExperimentStepDesign> getStepDesign(ExperimentPath<Absolute> path) {
@@ -212,7 +224,7 @@ public class Experiment {
         path,
         index < 0 ? parentDesign.withSubstep(stepDesign) : parentDesign.withSubstep(index, stepDesign));
 
-    var step = parent.getDependentStep(stepDesign.id()).get();
+    var step = parent.getSubstep(stepDesign.id()).get();
 
     fireEvent(new AddStepEvent(step));
 
@@ -222,15 +234,6 @@ public class Experiment {
   synchronized void removeStep(Step step) {
     var path = step.getPath();
 
-    for (var stepPath : List.copyOf(steps.keySet())) {
-      if (stepPath.relativeTo(path).ancestorDepth() == 0) {
-        steps.remove(stepPath);
-      }
-    }
-
-    /*
-     * TODO remove all children in map
-     */
     if (updateStepDesign(path, null)) {
       fireEvent(new RemoveStepEvent(step, path.parent().flatMap(this::getStep)));
     }
@@ -257,7 +260,7 @@ public class Experiment {
     }
 
     if (updateStepDesign(path, getStepDesign(path).get().withId(id))) {
-      fireEvent(new MoveStepEvent(step, step.getDependencyStep(), path.id(path.depth() - 1)));
+      fireEvent(new MoveStepEvent(step, step.getSuperstep(), path.id(path.depth() - 1)));
     }
   }
 
@@ -268,9 +271,7 @@ public class Experiment {
     var path = step.getPath();
     if (updateStepDesign(
         path,
-        getStepDesign(path)
-            .get()
-            .withVariables(getGlobalEnvironment(), variables -> variables.withOpt(variable, value)))) {
+        getStepDesign(path).get().withVariables(getEnvironment(), variables -> variables.withOpt(variable, value)))) {
       fireEvent(new ChangeVariableEvent(step, variable));
     }
   }
@@ -286,11 +287,15 @@ public class Experiment {
     events.next(event);
   }
 
-  public synchronized Optional<Step> getIndependentStep(ExperimentId id) {
+  public synchronized Optional<Step> getSubstep(ExperimentId id) {
     return getStep(ExperimentPath.toRoot().resolve(id));
   }
 
-  public synchronized Stream<Step> getIndependentSteps() {
-    return design.substeps().map(step -> toRoot().resolve(step.id())).map(this::getStep).flatMap(Optional::stream);
+  public synchronized Stream<Step> getSubsteps() {
+    return getDesign()
+        .substeps()
+        .map(step -> ExperimentPath.toRoot().resolve(step.id()))
+        .map(this::getStep)
+        .flatMap(Optional::stream);
   }
 }

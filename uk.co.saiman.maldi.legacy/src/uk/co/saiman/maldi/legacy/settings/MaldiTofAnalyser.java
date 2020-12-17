@@ -19,6 +19,9 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 public class MaldiTofAnalyser {
   @ObjectClassDefinition(name = "Legacy MALDI ToF Analyser", description = "Experiment settings for MALDI ToF acquisition")
   public @interface Settings {
+    @AttributeDefinition(name = "ID", description = "Unique identifier of the configuration")
+    String id();
+
     String instrumentToFParametersName();
 
     String reflectronToFParametersName();
@@ -52,6 +55,7 @@ public class MaldiTofAnalyser {
 
   static final String CONFIGURATION_PID = "uk.co.saiman.maldi.legacy.tofanalyser";
 
+  private final String id;
   private final String instrumentToFParametersName;
   private final String reflectronToFParametersName;
   private final DelayedExtraction delayedExtraction;
@@ -62,6 +66,8 @@ public class MaldiTofAnalyser {
 
   @Activate
   public MaldiTofAnalyser(Settings settings) {
+    this.id = settings.id();
+
     instrumentToFParametersName = settings.instrumentToFParametersName();
     reflectronToFParametersName = settings.reflectronToFParametersName();
 
@@ -80,6 +86,10 @@ public class MaldiTofAnalyser {
             quantityFormat().parse(settings.gateWidth()).asType(Mass.class))
         : null;
     cid = settings.cidEnabled() ? new CID(quantityFormat().parse(settings.cidTime()).asType(Time.class)) : null;
+  }
+
+  public String id() {
+    return id;
   }
 
   public String instrumentToFParametersName() {

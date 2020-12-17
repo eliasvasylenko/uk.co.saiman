@@ -50,7 +50,7 @@ public class AddProcessingHandler {
   @CanExecute
   boolean canExecute(ExecutorService executors, Experiment experiment, ExperimentPath<Absolute> path) {
     return executors.getExecutor(SPECTRUM_PROCESSING_EXECUTOR) != null
-        && experiment.getStep(path).filter(step -> step.observes(Spectrum.class)).isPresent();
+        && experiment.getStep(path).filter(step -> step.getInstruction().observesResult(Spectrum.class)).isPresent();
   }
 
   @Execute
@@ -67,10 +67,11 @@ public class AddProcessingHandler {
     }
 
     var id = ExperimentId
-        .nextAvailableFromName("Spectrum Processing", parent.getDependentSteps().map(Step::getId).collect(toList()));
+        .nextAvailableFromName("Spectrum Processing", parent.getSubsteps().map(Step::getId).collect(toList()));
 
     var step = ExperimentStepDesign
-        .define(id, processingExecutor)
+        .define(id)
+        .withExecutor(processingExecutor)
         .withVariables(new Variables(environment).with(PROCESSING_VARIABLE, new Processing()));
 
     parent.attach(step);

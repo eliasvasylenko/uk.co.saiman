@@ -41,7 +41,7 @@ public class MoveStepEvent extends ExperimentStepEvent {
     super(step);
     this.previousId = previousId;
     this.previousDependencyStep = previousParent;
-    this.dependencyStep = step.getDependencyStep();
+    this.dependencyStep = step.getSuperstep();
   }
 
   @Override

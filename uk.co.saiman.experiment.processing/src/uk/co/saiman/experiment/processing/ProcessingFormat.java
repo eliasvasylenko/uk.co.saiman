@@ -45,24 +45,20 @@ import uk.co.saiman.state.StateList;
 public class ProcessingFormat implements DataFormat<Processing> {
   public static final int VERSION = 1;
 
-  public static final MediaType MEDIA_TYPE = new MediaType(
-      APPLICATION_TYPE,
-      "saiman.processing.v" + VERSION,
-      VENDOR).withSuffix("json");
+  public static final MediaType MEDIA_TYPE = new MediaType(APPLICATION_TYPE, "saiman.processing.v" + VERSION, VENDOR)
+      .withSuffix("json");
 
   private final DataFormat<StateList> stateListFormat;
   private final ListAccessor<Processing> processingAccessor;
 
-  public ProcessingFormat(
-      DataFormat<StateList> stateListFormat,
-      ProcessingService processorService) {
+  public ProcessingFormat(DataFormat<StateList> stateListFormat, ProcessingService processorService) {
     this.stateListFormat = stateListFormat;
     this.processingAccessor = processingAccessor(processorService);
   }
 
   @Override
-  public String getExtension() {
-    return "processing";
+  public Stream<String> getExtensions() {
+    return Stream.of("processing");
   }
 
   @Override
@@ -76,8 +72,7 @@ public class ProcessingFormat implements DataFormat<Processing> {
   }
 
   @Override
-  public void save(WritableByteChannel outputChannel, Payload<? extends Processing> payload)
-      throws IOException {
+  public void save(WritableByteChannel outputChannel, Payload<? extends Processing> payload) throws IOException {
     stateListFormat.save(outputChannel, new Payload<>(processingAccessor.write(payload.data)));
   }
 }

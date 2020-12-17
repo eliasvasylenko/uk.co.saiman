@@ -56,14 +56,8 @@ public class AddProcessorHandler {
   private ProcessingService processingService;
 
   @CanExecute
-  boolean canExecute(
-      ExecutorService executors,
-      Experiment experiment,
-      ExperimentPath<Absolute> path) {
-    return experiment
-        .getStep(path)
-        .flatMap(step -> step.getVariable(PROCESSING_VARIABLE))
-        .isPresent();
+  boolean canExecute(ExecutorService executors, Experiment experiment, ExperimentPath<Absolute> path) {
+    return experiment.getStep(path).flatMap(step -> step.getVariables().get(PROCESSING_VARIABLE)).isPresent();
   }
 
   @Execute
@@ -81,8 +75,7 @@ public class AddProcessorHandler {
                     step -> step
                         .updateVariable(
                             PROCESSING_VARIABLE,
-                            processing -> processing
-                                .map(p -> p.withStep(processor.createProcessor())))));
+                            processing -> processing.map(p -> p.withStep(processor.createProcessor())))));
   }
 
   private java.util.Optional<ProcessingStrategy<?>> requestProcessorType(
@@ -90,8 +83,7 @@ public class AddProcessorHandler {
       Localized<String> header) {
     List<ProcessingStrategy<?>> strategies = processingService.strategies().collect(toList());
 
-    ChoiceDialog<ProcessingStrategy<?>> nameDialog = strategies.isEmpty()
-        ? new ChoiceDialog<>()
+    ChoiceDialog<ProcessingStrategy<?>> nameDialog = strategies.isEmpty() ? new ChoiceDialog<>()
         : new ChoiceDialog<>(strategies.get(0), strategies);
     nameDialog.titleProperty().bind(wrap(title));
     nameDialog.headerTextProperty().bind(wrap(header));

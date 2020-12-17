@@ -45,10 +45,8 @@ import uk.co.saiman.state.StateMap;
 public class ProcessorFormat implements DataFormat<DataProcessor> {
   public static final int VERSION = 1;
 
-  public static final MediaType MEDIA_TYPE = new MediaType(
-      APPLICATION_TYPE,
-      "saiman.processor.v" + VERSION,
-      VENDOR).withSuffix("json");
+  public static final MediaType MEDIA_TYPE = new MediaType(APPLICATION_TYPE, "saiman.processor.v" + VERSION, VENDOR)
+      .withSuffix("json");
 
   private final DataFormat<StateMap> stateMapFormat;
   private final MapAccessor<DataProcessor> processorAccessor;
@@ -59,8 +57,8 @@ public class ProcessorFormat implements DataFormat<DataProcessor> {
   }
 
   @Override
-  public String getExtension() {
-    return "processor";
+  public Stream<String> getExtensions() {
+    return Stream.of("processor");
   }
 
   @Override
@@ -69,14 +67,12 @@ public class ProcessorFormat implements DataFormat<DataProcessor> {
   }
 
   @Override
-  public Payload<? extends DataProcessor> load(ReadableByteChannel inputChannel)
-      throws IOException {
+  public Payload<? extends DataProcessor> load(ReadableByteChannel inputChannel) throws IOException {
     return new Payload<>(processorAccessor.read(stateMapFormat.load(inputChannel).data));
   }
 
   @Override
-  public void save(WritableByteChannel outputChannel, Payload<? extends DataProcessor> payload)
-      throws IOException {
+  public void save(WritableByteChannel outputChannel, Payload<? extends DataProcessor> payload) throws IOException {
     stateMapFormat.save(outputChannel, new Payload<>(processorAccessor.write(payload.data)));
   }
 }

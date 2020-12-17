@@ -82,11 +82,7 @@ public class Workspace {
     this.experiments = new HashSet<>();
 
     this.rootLocation = new PathLocation(rootPath);
-    this.experimentFormat = new JsonExperimentFormat(
-        conductorService,
-        storageService,
-        environment,
-        log);
+    this.experimentFormat = new JsonExperimentFormat(conductorService, storageService, environment, log);
 
     this.environment = environment;
 
@@ -150,10 +146,9 @@ public class Workspace {
 
   public void syncExperiments() {
     try {
-      String extension = getExperimentFormat().getExtension();
       getWorkspaceLocation()
           .resources()
-          .filter(r -> r.hasExtension(extension))
+          .filter(r -> getExperimentFormat().getExtensions().anyMatch(r::hasExtension))
           .forEach(this::loadExperiment);
 
     } catch (Exception e) {
@@ -166,8 +161,7 @@ public class Workspace {
   private WorkspaceExperiment addExperiment(WorkspaceExperiment experiment) {
     synchronized (experiments) {
       if (getWorkspaceExperiment(experiment.id()).isPresent()) {
-        throw new ExperimentException(
-            format("Workspace already contains experiment named %s", experiment.id()));
+        throw new ExperimentException(format("Workspace already contains experiment named %s", experiment.id()));
       }
 
       experiments.add(experiment);
@@ -181,9 +175,7 @@ public class Workspace {
     return addExperiment(new WorkspaceExperiment(this, resource));
   }
 
-  public WorkspaceExperiment newExperiment(
-      ExperimentId name,
-      StorageConfiguration<?> storageConfiguration) {
+  public WorkspaceExperiment newExperiment(ExperimentId name, StorageConfiguration<?> storageConfiguration) {
     return addExperiment(
         new Experiment(
             ExperimentDesign.define(name),

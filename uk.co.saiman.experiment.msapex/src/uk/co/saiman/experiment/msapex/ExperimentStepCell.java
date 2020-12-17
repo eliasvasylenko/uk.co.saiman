@@ -66,7 +66,7 @@ import uk.co.saiman.eclipse.utilities.EclipseContextUtilities;
 import uk.co.saiman.experiment.Step;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.design.ExperimentStepDesign;
-import uk.co.saiman.experiment.design.json.JsonStepDesignFormat;
+import uk.co.saiman.experiment.design.json.JsonExperimentStepDesignFormat;
 import uk.co.saiman.experiment.event.AddStepEvent;
 import uk.co.saiman.experiment.event.ChangeVariableEvent;
 import uk.co.saiman.experiment.event.MoveStepEvent;
@@ -86,8 +86,7 @@ import uk.co.saiman.msapex.editor.EditorService;
 public class ExperimentStepCell {
   public static final String ID = "uk.co.saiman.experiment.step.cell";
   public static final String SUPPLEMENTAL_TEXT = ID + ".supplemental";
-  public static final PseudoClass SUPPLEMENTAL_PSEUDO_CLASS = getPseudoClass(
-      SUPPLEMENTAL_TEXT.replace('.', '-'));
+  public static final PseudoClass SUPPLEMENTAL_PSEUDO_CLASS = getPseudoClass(SUPPLEMENTAL_TEXT.replace('.', '-'));
 
   public static final String PARENT_STEP = "uk.co.saiman.experiment.step.cell.parent";
 
@@ -117,10 +116,7 @@ public class ExperimentStepCell {
   @Execute
   public void execute() {
     try {
-      editorService
-          .getApplicableEditors(Step.class, step)
-          .findFirst()
-          .ifPresent(editorService::open);
+      editorService.getApplicableEditors(Step.class, step).findFirst().ifPresent(editorService::open);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -154,7 +150,7 @@ public class ExperimentStepCell {
     context.set(Instruction.class, step.getInstruction());
     context.set(Variables.class, step.getVariables());
     context.set(ExperimentPath.class, step.getPath());
-    context.set(Executor.class, step.getExecutor());
+    context.set(Executor.class, step.getExecutor().orElse(null));
 
     EclipseContextUtilities.injectSubtypes(context, Executor.class);
 
@@ -162,20 +158,18 @@ public class ExperimentStepCell {
         .injectDerived(
             context,
             Variables.class,
-            (v, c) -> step
-                .getVariableDeclarations()
-                .forEach(dec -> c.set(dec.variable().id(), new IContextFunction() {
-                  String id = dec.variable().id();
+            (v, c) -> step.getVariableDeclarations().forEach(dec -> c.set(dec.variable().id(), new IContextFunction() {
+              String id = dec.variable().id();
 
-                  @Override
-                  public Object compute(IEclipseContext context, String contextKey) {
-                    if (contextKey.equals(id)) {
-                      return context.get(Step.class).getVariable(dec.variable());
-                    } else {
-                      return null;
-                    }
-                  }
-                })));
+              @Override
+              public Object compute(IEclipseContext context, String contextKey) {
+                if (contextKey.equals(id)) {
+                  return context.get(Step.class).getVariables().get(dec.variable());
+                } else {
+                  return null;
+                }
+              }
+            })));
 
     /*
      * Inject events
@@ -190,7 +184,7 @@ public class ExperimentStepCell {
      * Transfer
      */
     stepTransferFormat = new TransferFormat<>(
-        new JsonStepDesignFormat(executorService),
+        new JsonExperimentStepDesignFormat(executorService),
         EnumSet.of(COPY, MOVE, DISCARD));
   }
 
@@ -212,7 +206,7 @@ public class ExperimentStepCell {
           index++;
         }
       } else {
-        index = (int) step.getDependentSteps().count();
+        index = (int) step.getSubsteps().count();
       }
       step.attach(index, definition);
     });
@@ -248,10 +242,8 @@ public class ExperimentStepCell {
   private Stream<? extends ContextBuffer> updateChildren(
       @Optional AddStepEvent addition,
       @Optional RemoveStepEvent removal) {
-    var hasAddition = addition != null
-        && addition.dependencyStep().filter(step::equals).isPresent();
-    var hasRemoval = removal != null
-        && removal.previousDependencyStep().filter(step::equals).isPresent();
+    var hasAddition = addition != null && addition.dependencyStep().filter(step::equals).isPresent();
+    var hasRemoval = removal != null && removal.previousDependencyStep().filter(step::equals).isPresent();
     if (!hasAddition && !hasRemoval) {
       return null;
     }
@@ -260,8 +252,6 @@ public class ExperimentStepCell {
 
   @Children(snippetId = ExperimentStepCell.ID)
   private Stream<? extends ContextBuffer> updateChildren() {
-    return step
-        .getDependentSteps()
-        .map(step -> ContextBuffer.empty().set(Step.class, step).set(PARENT_STEP, this.step));
+    return step.getSubsteps().map(step -> ContextBuffer.empty().set(Step.class, step).set(PARENT_STEP, this.step));
   }
 }

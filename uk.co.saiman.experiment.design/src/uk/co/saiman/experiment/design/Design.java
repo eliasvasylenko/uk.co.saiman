@@ -47,15 +47,14 @@ import java.util.stream.Stream;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
-import uk.co.saiman.experiment.declaration.ExperimentPath.ExperimentRelation;
 import uk.co.saiman.experiment.procedure.Procedure;
 
-public abstract class ExperimentDesignUnit<U extends ExperimentPath<U>, T extends ExperimentDesignUnit<U, T>> {
+public abstract class Design<U extends ExperimentPath<U>, T extends Design<U, T>> {
   private final ExperimentId id;;
   private final List<ExperimentStepDesign> steps;
   private final Map<ExperimentId, ExperimentStepDesign> dependents;
 
-  ExperimentDesignUnit(ExperimentId id, List<ExperimentStepDesign> steps, Map<ExperimentId, ExperimentStepDesign> dependents) {
+  Design(ExperimentId id, List<ExperimentStepDesign> steps, Map<ExperimentId, ExperimentStepDesign> dependents) {
     this.id = id;
     this.steps = steps;
     this.dependents = dependents;
@@ -84,7 +83,7 @@ public abstract class ExperimentDesignUnit<U extends ExperimentPath<U>, T extend
     if (obj == null || obj.getClass() != getClass())
       return false;
 
-    var that = (ExperimentDesignUnit<?, ?>) obj;
+    var that = (Design<?, ?>) obj;
 
     return Objects.equals(this.steps, that.steps) && Objects.equals(this.id, that.id);
   }
@@ -108,7 +107,7 @@ public abstract class ExperimentDesignUnit<U extends ExperimentPath<U>, T extend
       Map<ExperimentId, ExperimentStepDesign> dependents);
 
   T with(List<ExperimentStepDesign> steps) {
-    return with(id, steps, steps.stream().collect(toMap(ExperimentDesignUnit::id, identity(), throwingMerger(), TreeMap::new)));
+    return with(id, steps, steps.stream().collect(toMap(Design::id, identity(), throwingMerger(), TreeMap::new)));
   }
 
   /**
@@ -227,22 +226,10 @@ public abstract class ExperimentDesignUnit<U extends ExperimentPath<U>, T extend
   }
 
   public Optional<ExperimentStepDesign> findSubstep(ExperimentPath<U> path) {
-    if (path.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var ids = path.iterator();
-    var id = ids.next();
-
-    if (!(id instanceof ExperimentRelation.Dependent)) {
-      throw new ExperimentDesignException(format("Cannot resolve step which is not direct descendent at %s", path));
-    }
-
-    var step = findSubstep(((ExperimentRelation.Dependent) id).id());
-    while (ids.hasNext() && step.isPresent()) {
-      step = step.flatMap(s -> s.findSubstep(((ExperimentRelation.Dependent) ids.next()).id()));
-    }
-    return step;
+    return path.headId().flatMap(head -> {
+      var tail = path.tail().get();
+      return findSubstep(head).flatMap(s -> s.findSubstep(tail));
+    });
   }
 
   /**
@@ -279,4 +266,19 @@ public abstract class ExperimentDesignUnit<U extends ExperimentPath<U>, T extend
       throw new AssertionError();
     });
   }
+
+  /**
+   * @return true if the design contains any method instances, false otherwise
+   */
+  public boolean isAbstract() {
+    return substeps().anyMatch(ExperimentStepDesign::isAbstract);
+  }
+
+  /**
+   * @return false if the design contains any method instances, true otherwise
+   */
+  public boolean isConcrete() {
+    return substeps().allMatch(ExperimentStepDesign::isConcrete);
+  }
+
 }

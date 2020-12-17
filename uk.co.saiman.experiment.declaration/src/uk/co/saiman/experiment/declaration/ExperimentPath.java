@@ -27,6 +27,7 @@
  */
 package uk.co.saiman.experiment.declaration;
 
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
@@ -36,11 +37,9 @@ import static uk.co.saiman.collection.StreamUtilities.throwingMerger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -50,8 +49,7 @@ import java.util.stream.Stream;
  * @author Elias N Vasylenko
  *
  */
-public abstract class ExperimentPath<T extends ExperimentPath<T>>
-    implements Comparable<ExperimentPath<?>> {
+public abstract class ExperimentPath<T extends ExperimentPath<T>> implements Comparable<ExperimentPath<?>> {
   // TODO value and record type
   public static abstract class ExperimentRelation {
     ExperimentRelation() {}
@@ -148,6 +146,14 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
 
   public abstract Optional<ExperimentPath<T>> parent();
 
+  public Optional<ExperimentId> id() {
+    if (ids.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(ids.get(ids.size() - 1));
+    }
+  }
+
   public abstract boolean isAbsolute();
 
   public abstract int ancestorDepth();
@@ -237,9 +243,7 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
   }
 
   public ExperimentPath<Relative> relativeTo(ExperimentPath<?> path) {
-    return path
-        .ids()
-        .reduce(toAncestor(0).resolve(ids), ExperimentPath::relativeTo, throwingMerger());
+    return path.ids().reduce(toAncestor(0).resolve(ids), ExperimentPath::relativeTo, throwingMerger());
   }
 
   public ExperimentPath<Relative> relativeTo(ExperimentId id) {
@@ -255,7 +259,30 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
     return new Relative(ancestors, ids);
   }
 
-  public abstract Iterator<? extends ExperimentRelation> iterator();
+  public Optional<ExperimentRelation> head() {
+    if (ids.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(new ExperimentRelation.Dependent(ids.get(0)));
+    }
+  }
+
+  public Optional<ExperimentId> headId() {
+    return head().map(head -> {
+      if (!(head instanceof ExperimentRelation.Dependent)) {
+        throw new ExperimentDeclarationException(format("Cannot resolve id at head of path %s", this));
+      }
+      return ((ExperimentRelation.Dependent) head).id();
+    });
+  }
+
+  public Optional<ExperimentPath<Relative>> tail() {
+    if (ids.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(new Relative(0, ids.subList(1, ids.size())));
+    }
+  }
 
   /**
    * An absolute path.
@@ -306,20 +333,13 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
 
       } else {
         return Optional
-            .of(
-                new Absolute(getIds().subList(0, getIds().size() - path.ancestorDepth()))
-                    .resolve(path.getIds()));
+            .of(new Absolute(getIds().subList(0, getIds().size() - path.ancestorDepth())).resolve(path.getIds()));
       }
     }
 
     @Override
     public Optional<ExperimentPath<Absolute>> resolveAgainst(ExperimentPath<Absolute> path) {
       return Optional.of(this);
-    }
-
-    @Override
-    public Iterator<? extends ExperimentRelation> iterator() {
-      return ids().map(ExperimentRelation.Dependent::new).collect(toList()).iterator();
     }
   }
 
@@ -338,10 +358,8 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
 
     @Override
     public String toString() {
-      return isEmpty()
-          ? SELF + SEPARATOR
-          : Stream.generate(() -> PARENT + SEPARATOR).limit(ancestors).collect(joining())
-              + super.toString();
+      return isEmpty() ? SELF + SEPARATOR
+          : Stream.generate(() -> PARENT + SEPARATOR).limit(ancestors).collect(joining()) + super.toString();
     }
 
     @Override
@@ -374,19 +392,13 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
         return Optional.of(withIds(path.getIds()));
 
       } else if (path.ancestorDepth() > getIds().size()) {
-        return Optional
-            .of(
-                new Relative(
-                    path.ancestorDepth() + ancestorDepth() - getIds().size(),
-                    emptyList()));
+        return Optional.of(new Relative(path.ancestorDepth() + ancestorDepth() - getIds().size(), emptyList()));
 
       } else {
         return Optional
             .of(
-                new Relative(
-                    ancestorDepth(),
-                    getIds().subList(0, getIds().size() - path.ancestorDepth()))
-                        .resolve(path.getIds()));
+                new Relative(ancestorDepth(), getIds().subList(0, getIds().size() - path.ancestorDepth()))
+                    .resolve(path.getIds()));
       }
     }
 
@@ -395,14 +407,20 @@ public abstract class ExperimentPath<T extends ExperimentPath<T>>
       return path.resolve(this);
     }
 
-    @Override
-    public Iterator<ExperimentRelation> iterator() {
-      return Stream
-          .concat(
-              IntStream.range(0, ancestors).mapToObj(i -> new ExperimentRelation.Dependency()),
-              ids().map(ExperimentRelation.Dependent::new))
-          .collect(toList())
-          .iterator();
+    public Optional<ExperimentRelation> head() {
+      if (ancestors > 0) {
+        return Optional.of(new ExperimentRelation.Dependency());
+      } else {
+        return super.head();
+      }
+    }
+
+    public Optional<ExperimentPath<Relative>> tail() {
+      if (ancestors > 0) {
+        return Optional.of(new Relative(ancestors - 1, getIds()));
+      } else {
+        return super.tail();
+      }
     }
   }
 }

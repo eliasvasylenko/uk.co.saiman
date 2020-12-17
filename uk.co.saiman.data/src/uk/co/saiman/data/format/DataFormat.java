@@ -46,9 +46,9 @@ import uk.co.saiman.reflection.token.TypeToken;
  */
 public interface DataFormat<T> {
   /**
-   * @return the default path extension for files of this format
+   * @return The path extensions associated with files of this format. Stream should be non-empty, the first element is the default.
    */
-  String getExtension();
+  Stream<String> getExtensions();
 
   /**
    * @return the mime types which may be associated with files of this format

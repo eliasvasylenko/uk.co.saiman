@@ -117,7 +117,7 @@ public class LegacyQueueImporter {
         .mapToObj(i -> importSpectrum(i, (Element) experiments.item(i)))
         .collect(toList());
 
-    var plate = ExperimentStepDesign.define(fromName(slideName), samplePlate).withSubsteps(wells);
+    var plate = ExperimentStepDesign.define(fromName(slideName)).withExecutor(samplePlate).withSubsteps(wells);
 
     return ExperimentDesign.define(name).withSubstep(plate);
   }
@@ -140,8 +140,9 @@ public class LegacyQueueImporter {
     var processing = legacySettings.lookupProcessing(getTextContent(element, E_MALDI_PROCESSING_METHOD, null));
 
     return ExperimentStepDesign
-        .define(fromName(sampleAreaId), sampleArea)
-        .withSubstep(ExperimentStepDesign.define(fromName(spectrumId), spectrum));
+        .define(fromName(sampleAreaId))
+        .withExecutor(sampleArea)
+        .withSubstep(ExperimentStepDesign.define(fromName(spectrumId)).withExecutor(spectrum));
   }
 
   String getTextContent(Element element, String tag, String def) {

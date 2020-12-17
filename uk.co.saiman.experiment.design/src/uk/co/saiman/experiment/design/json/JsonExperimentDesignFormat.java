@@ -67,14 +67,14 @@ public class JsonExperimentDesignFormat implements TextFormat<ExperimentDesign> 
 
   private final JsonStateMapFormat stateMapFormat;
 
-  public JsonExperimentDesignFormat(JsonStepDesignFormat stepDesignFormat) {
+  public JsonExperimentDesignFormat(JsonExperimentStepDesignFormat stepDesignFormat) {
     this.stateMapFormat = stepDesignFormat.getStateMapFormat();
     this.substeps = stepDesignFormat.getSubstepsAccessor();
   }
 
   @Override
-  public String getExtension() {
-    return FILE_EXTENSION;
+  public Stream<String> getExtensions() {
+    return Stream.of(FILE_EXTENSION);
   }
 
   @Override

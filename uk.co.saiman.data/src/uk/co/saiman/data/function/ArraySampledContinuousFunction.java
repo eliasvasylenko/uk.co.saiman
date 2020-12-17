@@ -30,7 +30,6 @@ package uk.co.saiman.data.function;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
-import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -38,10 +37,8 @@ import javax.measure.Unit;
 /**
  * A mutable, array backed implementation of {@link SampledContinuousFunction}.
  * 
- * @param <UD>
- *          the type of the units of measurement of values in the domain
- * @param <UR>
- *          the type of the units of measurement of values in the range
+ * @param <UD> the type of the units of measurement of values in the domain
+ * @param <UR> the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
 public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>
@@ -50,33 +47,28 @@ public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends 
   private final Unit<UR> rangeUnit;
 
   private final SampledRange<UR> range;
+  private final double[] intensities;
 
   /**
-   * Instantiate with the given number of samples, values, and intensities.
-   * Arrays are copied into the function, truncated to the sample length given,
-   * or padded with 0s.
+   * Instantiate with the given number of samples, values, and intensities. Arrays
+   * are copied into the function, truncated to the sample length given, or padded
+   * with 0s.
    * 
-   * @param domain
-   *          the domain of the function
-   * @param rangeUnit
-   *          the units of measurement of values in the range
-   * @param intensities
-   *          The Y values of the samples, in the codomain
+   * @param domain      the domain of the function
+   * @param rangeUnit   the units of measurement of values in the range
+   * @param intensities The Y values of the samples, in the codomain
    */
-  public ArraySampledContinuousFunction(
-      SampledDomain<UD> domain,
-      Unit<UR> rangeUnit,
-      double[] intensities) {
+  public ArraySampledContinuousFunction(SampledDomain<UD> domain, Unit<UR> rangeUnit, double[] intensities) {
     this.domain = requireNonNull(domain);
     this.rangeUnit = requireNonNull(rangeUnit);
     /*
      * TODO sort values
      */
-    double[] intensitiesCopy = Arrays.copyOf(requireNonNull(intensities), domain.getDepth());
-    this.range = createDefaultRange(i -> intensitiesCopy[i]);
+    this.intensities = Arrays.copyOf(requireNonNull(intensities), domain.getDepth());
+    this.range = createDefaultRange();
   }
 
-  protected SampledRange<UR> createDefaultRange(Function<Integer, Double> intensityAtIndex) {
+  protected SampledRange<UR> createDefaultRange() {
     return new SampledRange<>(this) {
       @Override
       public Unit<UR> getUnit() {
@@ -90,7 +82,11 @@ public class ArraySampledContinuousFunction<UD extends Quantity<UD>, UR extends 
 
       @Override
       public double getSample(int index) {
-        return intensityAtIndex.apply(index);
+        return intensities[index];
+      }
+
+      public double[] toArray() {
+        return intensities.clone();
       }
     };
   }

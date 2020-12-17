@@ -33,11 +33,10 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 
 /**
- * A partial-implementation of {@link SampledContinuousFunction} with regular
+ * A partial-implementation of {@link SampledContinuousFunction} with irregular
  * intervals in the domain between samples.
  * 
- * @param <U>
- *          the type of the units of measurement of values in the domain
+ * @param <U> the type of the units of measurement of values in the domain
  * @author Elias N Vasylenko
  */
 public class IrregularSampledDomain<U extends Quantity<U>> implements SampledDomain<U> {
@@ -92,5 +91,10 @@ public class IrregularSampledDomain<U extends Quantity<U>> implements SampledDom
   @Override
   public int getDepth() {
     return values.length;
+  }
+
+  @Override
+  public double[] toArray() {
+    return values.clone();
   }
 }

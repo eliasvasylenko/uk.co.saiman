@@ -62,8 +62,8 @@ public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
   }
 
   @Override
-  public String getExtension() {
-    return "rss";
+  public Stream<String> getExtensions() {
+    return Stream.of("rss");
   }
 
   @Override
@@ -73,8 +73,7 @@ public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
   }
 
   @Override
-  public void save(WritableByteChannel outputChannel, Payload<? extends Spectrum> payload)
-      throws IOException {
+  public void save(WritableByteChannel outputChannel, Payload<? extends Spectrum> payload) throws IOException {
     Unit<Time> domainUnits = payload.data.getTimeData().domain().getUnit();
     Unit<Dimensionless> rangeUnits = payload.data.getTimeData().range().getUnit();
 
@@ -89,7 +88,6 @@ public class RegularSampledSpectrumFormat implements DataFormat<Spectrum> {
     overEncodedDomain(domainUnits, rangeUnits)
         .save(
             outputChannel,
-            new Payload<>(
-                (SampledContinuousFunction<Time, Dimensionless>) payload.data.getTimeData()));
+            new Payload<>((SampledContinuousFunction<Time, Dimensionless>) payload.data.getTimeData()));
   }
 }

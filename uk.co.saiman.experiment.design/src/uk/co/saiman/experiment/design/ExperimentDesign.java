@@ -30,6 +30,7 @@ package uk.co.saiman.experiment.design;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
@@ -61,7 +62,7 @@ import uk.co.saiman.experiment.procedure.ProcedureException;
  * 
  * @author Elias N Vasylenko
  */
-public class ExperimentDesign extends ExperimentDesignUnit<Absolute, ExperimentDesign> {
+public class ExperimentDesign extends Design<Absolute, ExperimentDesign> {
   private final SharedMethods sharedMethods;
 
   private ExperimentDesign(
@@ -113,9 +114,10 @@ public class ExperimentDesign extends ExperimentDesignUnit<Absolute, ExperimentD
   }
 
   /**
-   * For each step of this experiment, substitute any
-   * {@link ExperimentStepDesign#isMethodInstance() method instances} with the
-   * shared method of the {@link ExperimentStepDesign#sharedMethodId() given id}.
+   * For each step of this experiment, materialize any
+   * {@link ExperimentStepDesign#isMethodInstance() method instances} according to
+   * the shared method of the {@link ExperimentStepDesign#sharedMethodId() given
+   * id}.
    * 
    * Any variables defined in both the shared method and the instance are
    * overridden by those defined in the instance.
@@ -126,9 +128,22 @@ public class ExperimentDesign extends ExperimentDesignUnit<Absolute, ExperimentD
    * appear in the shared method.
    * 
    * Substeps are merged in this manner recursively.
+   * 
+   * The result of meterializing methods will be {@link #isConcrete() concrete}.
    */
-  public ExperimentDesign substituteSharedMethods() throws MethodInstanceException {
-    return withSubsteps(s -> s.map(t -> t.substituteSharedMethods(ExperimentPath.toRoot(), sharedMethods)));
+  public ExperimentDesign materialize() throws MethodInstanceException {
+    return withSubsteps(s -> s.map(t -> t.materialize(ExperimentPath.toRoot(), sharedMethods)));
+  }
+
+  public Optional<ExperimentStepDesign> materializeSubstep(ExperimentPath<?> path) {
+    return path.headId().flatMap(head -> {
+      var tail = path.tail().get();
+      return findSubstep(head).flatMap(s -> s.materializeSubstep(sharedMethods, ExperimentPath.toRoot(), tail));
+    });
+  }
+
+  public Optional<ExperimentStepDesign> materializeSubstep(ExperimentId id) {
+    return findSubstep(id).map(s -> s.materializeStep(sharedMethods, ExperimentPath.toRoot()));
   }
 
   /**
@@ -136,7 +151,7 @@ public class ExperimentDesign extends ExperimentDesignUnit<Absolute, ExperimentD
    * if this method may fail with an exception for any of the following reasons:
    * <ul>
    * <li>{@link ExecutionPlan#EXECUTE executing} Any shared method instances
-   * cannot be {@link #substituteSharedMethods() substituted}.</li>
+   * cannot be {@link #materialize() materialized}.</li>
    * <li>Any steps are missing a defined {@link ExperimentStepDesign#executor()
    * executor}, post shared method substitution.</li>
    * <li>The designed procedure is not valid.</li>

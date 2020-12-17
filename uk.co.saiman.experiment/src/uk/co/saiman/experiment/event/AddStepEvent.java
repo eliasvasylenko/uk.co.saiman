@@ -38,7 +38,7 @@ public class AddStepEvent extends ExperimentStepEvent {
 
   public AddStepEvent(Step step) {
     super(step);
-    this.dependencyStep = step.getDependencyStep();
+    this.dependencyStep = step.getSuperstep();
   }
 
   @Override

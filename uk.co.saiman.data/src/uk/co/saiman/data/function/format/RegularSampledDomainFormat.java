@@ -41,8 +41,7 @@ import uk.co.saiman.data.format.MediaType;
 import uk.co.saiman.data.format.Payload;
 import uk.co.saiman.data.function.RegularSampledDomain;
 
-public class RegularSampledDomainFormat<U extends Quantity<U>>
-    implements DataFormat<RegularSampledDomain<U>> {
+public class RegularSampledDomainFormat<U extends Quantity<U>> implements DataFormat<RegularSampledDomain<U>> {
   private static final int SIZE = Double.BYTES * 2 + Integer.BYTES;
   private static final String MASS_SPECTRUM_DOMAIN_EXTENSION = "msd";
 
@@ -53,8 +52,8 @@ public class RegularSampledDomainFormat<U extends Quantity<U>>
   }
 
   @Override
-  public String getExtension() {
-    return MASS_SPECTRUM_DOMAIN_EXTENSION;
+  public Stream<String> getExtensions() {
+    return Stream.of(MASS_SPECTRUM_DOMAIN_EXTENSION);
   }
 
   @Override
@@ -64,8 +63,7 @@ public class RegularSampledDomainFormat<U extends Quantity<U>>
   }
 
   @Override
-  public Payload<RegularSampledDomain<U>> load(ReadableByteChannel inputChannel)
-      throws IOException {
+  public Payload<RegularSampledDomain<U>> load(ReadableByteChannel inputChannel) throws IOException {
     ByteBuffer buffer = ByteBuffer.allocate(SIZE);
     do {
       inputChannel.read(buffer);
@@ -79,9 +77,8 @@ public class RegularSampledDomainFormat<U extends Quantity<U>>
   }
 
   @Override
-  public void save(
-      WritableByteChannel outputChannel,
-      Payload<? extends RegularSampledDomain<U>> domain) throws IOException {
+  public void save(WritableByteChannel outputChannel, Payload<? extends RegularSampledDomain<U>> domain)
+      throws IOException {
     ByteBuffer buffer = ByteBuffer.allocate(SIZE);
     buffer.putDouble(domain.data.getFrequency());
     buffer.putDouble(domain.data.getInterval().getLeftEndpoint());

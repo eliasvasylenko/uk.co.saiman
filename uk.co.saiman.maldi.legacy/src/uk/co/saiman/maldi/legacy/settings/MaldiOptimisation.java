@@ -15,6 +15,9 @@ import uk.co.saiman.experiment.spectrum.SelectiveAccumulation;
 public class MaldiOptimisation {
   @ObjectClassDefinition(name = "Legacy MALDI Optimisation", description = "Experiment settings for dynamic signal optimisation")
   public @interface Settings {
+    @AttributeDefinition(name = "ID", description = "Unique identifier of the configuration")
+    String id();
+
     /*
      * Selective acquisition settings
      */
@@ -37,7 +40,7 @@ public class MaldiOptimisation {
 
     String laserPowerIncrementSteps();
 
-    String doNotDecrementLaserWhilstSignalGood();
+    boolean doNotDecrementLaserWhilstSignalGood();
 
     @AttributeDefinition(name = "Laser Power Optimisation Window", description = "Window size to consider signal quality for laser power optimisation.")
     int laserPowerOptimisationWindow();
@@ -58,12 +61,19 @@ public class MaldiOptimisation {
 
   static final String CONFIGURATION_PID = "uk.co.saiman.maldi.legacy.optimisation";
 
+  private final String id;
   private LaserPowerOptimisation laserPowerOptimisation;
   private SamplePositionOptimisation samplePositionOptimisation; // not valid for imaging experiments
   private SelectiveAccumulation selectiveAccumulation;
 
   @Activate
-  public MaldiOptimisation(Settings settings) {}
+  public MaldiOptimisation(Settings settings) {
+    id = settings.id();
+  }
+
+  public String id() {
+    return id;
+  }
 
   public LaserPowerOptimisation laserPowerOptimisation() {
     return laserPowerOptimisation;

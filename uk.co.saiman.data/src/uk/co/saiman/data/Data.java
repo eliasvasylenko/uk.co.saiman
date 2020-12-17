@@ -48,7 +48,7 @@ public interface Data<T> {
 
   static <T> Data<T> locate(Location location, String name, DataFormat<T> format) {
     try {
-      return new SimpleData<>(location.getResource(name, format.getExtension()), format);
+      return new SimpleData<>(location.getResource(name, format), format);
     } catch (IOException e) {
       throw new DataException("Failed to prepare location", e);
     }

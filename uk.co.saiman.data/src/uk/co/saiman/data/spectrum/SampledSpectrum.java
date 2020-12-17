@@ -87,4 +87,7 @@ public class SampledSpectrum implements Spectrum {
   public DataProcessor getProcessing() {
     return processing;
   }
+
+  @Override
+  public void close() throws Exception {}
 }

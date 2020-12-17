@@ -35,7 +35,7 @@ import uk.co.saiman.data.function.ContinuousFunction;
 import uk.co.saiman.data.function.SampledContinuousFunction;
 import uk.co.saiman.data.function.processing.DataProcessor;
 
-public interface Spectrum {
+public interface Spectrum extends AutoCloseable {
   /**
    * @return the raw time data
    */

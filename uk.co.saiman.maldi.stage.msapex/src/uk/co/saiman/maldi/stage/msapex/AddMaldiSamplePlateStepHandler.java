@@ -62,10 +62,8 @@ public class AddMaldiSamplePlateStepHandler {
     var step = ExperimentStepDesign
         .define(
             ExperimentId
-                .nextAvailableFromName(
-                    "Sample Plate",
-                    experiment.getIndependentSteps().map(Step::getId).collect(toList())),
-            plateExecutor)
+                .nextAvailableFromName("Sample Plate", experiment.getSubsteps().map(Step::getId).collect(toList())))
+        .withExecutor(plateExecutor)
         .withVariables(new Variables(environment).with(SAMPLE_PLATE, samplePlate));
 
     if (sampleAreaSelection != null) {
@@ -73,7 +71,8 @@ public class AddMaldiSamplePlateStepHandler {
       for (var sampleArea : areas) {
         var stepId = ExperimentId.fromName(sampleArea.id());
         var substep = ExperimentStepDesign
-            .define(stepId, areaExecutor)
+            .define(stepId)
+            .withExecutor(areaExecutor)
             .withVariables(new Variables(environment).with(SAMPLE_AREA, samplePlate.persistSampleArea(sampleArea)));
         step = step.withSubstep(substep);
       }

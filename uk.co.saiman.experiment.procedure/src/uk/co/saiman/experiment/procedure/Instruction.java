@@ -228,6 +228,10 @@ public class Instruction {
     return deps;
   }
 
+  public boolean preparesCondition(Class<?> type) {
+    return conditionPreparations.containsKey(type);
+  }
+
   public Stream<Class<?>> conditionPreparations() {
     return conditionPreparations.keySet().stream();
   }
@@ -238,6 +242,10 @@ public class Instruction {
       throw new InstructionException(path(), "Condition '" + conditionPreparation + "' is missing");
     }
     return c;
+  }
+
+  public boolean observesResult(Class<?> type) {
+    return resultObservations.contains(type);
   }
 
   public Stream<Class<?>> resultObservations() {

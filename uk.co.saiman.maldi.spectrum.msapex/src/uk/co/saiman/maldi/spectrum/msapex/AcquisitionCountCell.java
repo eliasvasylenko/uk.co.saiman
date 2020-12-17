@@ -53,8 +53,7 @@ public class AcquisitionCountCell {
   EditableCellText acquisitionCountEditor;
 
   @ToBeRendered
-  public static boolean render(
-      @Optional @Named(SPECTRUM_ACQUISITION_COUNT_ID) Object acquisitionCount) {
+  public static boolean render(@Optional @Named(SPECTRUM_ACQUISITION_COUNT_ID) Object acquisitionCount) {
     return acquisitionCount != null;
   }
 
@@ -68,11 +67,11 @@ public class AcquisitionCountCell {
     HBox.setHgrow(acquisitionCountEditor, Priority.SOMETIMES);
 
     step
-        .getVariable(SPECTRUM_ACQUISITION_COUNT)
+        .getVariables()
+        .get(SPECTRUM_ACQUISITION_COUNT)
         .map(Objects::toString)
         .ifPresent(acquisitionCountEditor::setText);
-    acquisitionCountEditor
-        .setTryUpdate(name -> step.setVariable(SPECTRUM_ACQUISITION_COUNT, Integer.parseInt(name)));
+    acquisitionCountEditor.setTryUpdate(name -> step.setVariable(SPECTRUM_ACQUISITION_COUNT, Integer.parseInt(name)));
     acquisitionCountEditor.getLabel().pseudoClassStateChanged(SUPPLEMENTAL_PSEUDO_CLASS, true);
   }
 }

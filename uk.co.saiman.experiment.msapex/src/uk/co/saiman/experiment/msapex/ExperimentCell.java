@@ -172,7 +172,7 @@ public class ExperimentCell {
     case OPEN:
       return experiment
           .open()
-          .getIndependentSteps()
+          .getSubsteps()
           .map(step -> ContextBuffer.empty().set(Step.class, step));
     default:
       return Stream.empty();

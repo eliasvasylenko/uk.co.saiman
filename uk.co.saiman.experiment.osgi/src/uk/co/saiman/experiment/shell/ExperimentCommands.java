@@ -77,9 +77,11 @@ public class ExperimentCommands {
   public static final String DEFINE_STEP = "define an empty step";
 
   @Descriptor(DEFINE_STEP)
-  public ExperimentStepDesign defineStep(@Descriptor(STEP_ID) ExperimentId id, @Descriptor(STEP_EXECUTOR) Executor executor)
+  public ExperimentStepDesign defineStep(
+      @Descriptor(STEP_ID) ExperimentId id,
+      @Descriptor(STEP_EXECUTOR) Executor executor)
       throws IOException {
-    return ExperimentStepDesign.define(id, executor);
+    return ExperimentStepDesign.define(id).withExecutor(executor);
   }
 
   public static final String LIST_EXECUTORS = "list available experiment step executors";

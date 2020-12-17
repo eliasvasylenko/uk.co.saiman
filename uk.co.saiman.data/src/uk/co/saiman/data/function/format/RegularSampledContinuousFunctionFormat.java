@@ -49,10 +49,8 @@ import uk.co.saiman.data.function.SampledContinuousFunction;
 /**
  * @author Elias N Vasylenko
  *
- * @param <UD>
- *          the type of the units of measurement of values in the domain
- * @param <UR>
- *          the type of the units of measurement of values in the range
+ * @param <UD> the type of the units of measurement of values in the domain
+ * @param <UR> the type of the units of measurement of values in the range
  */
 public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR extends Quantity<UR>>
     implements DataFormat<SampledContinuousFunction<UD, UR>> {
@@ -62,16 +60,14 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
   private final RegularSampledDomain<UD> domain;
   private final Unit<UR> rangeUnit;
 
-  protected RegularSampledContinuousFunctionFormat(
-      RegularSampledDomain<UD> domain,
-      Unit<UR> rangeUnit) {
+  protected RegularSampledContinuousFunctionFormat(RegularSampledDomain<UD> domain, Unit<UR> rangeUnit) {
     this.domain = domain;
     this.rangeUnit = rangeUnit;
   }
 
   @Override
-  public String getExtension() {
-    return MASS_SPECTRUM_RANGE_EXTENSION;
+  public Stream<String> getExtensions() {
+    return Stream.of(MASS_SPECTRUM_RANGE_EXTENSION);
   }
 
   @Override
@@ -81,10 +77,8 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
   }
 
   /**
-   * @param domain
-   *          a description of the domain of the function to format
-   * @param rangeUnit
-   *          the type of the units of measurement of values in the range
+   * @param domain    a description of the domain of the function to format
+   * @param rangeUnit the type of the units of measurement of values in the range
    * @return a continuous function byte format for the given domain frequency and
    *         domain start
    */
@@ -95,10 +89,9 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
   }
 
   /**
-   * @param domainUnit
-   *          the type of the units of measurement of values in the domain
-   * @param rangeUnit
-   *          the type of the units of measurement of values in the range
+   * @param domainUnit the type of the units of measurement of values in the
+   *                   domain
+   * @param rangeUnit  the type of the units of measurement of values in the range
    * @return a continuous function byte format which encodes the domain start and
    *         domain frequency
    */
@@ -107,8 +100,8 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
       Unit<UR> rangeUnit) {
     return new DataFormat<SampledContinuousFunction<UD, UR>>() {
       @Override
-      public String getExtension() {
-        return MASS_SPECTRUM_FUNCTION_EXTENSION;
+      public Stream<String> getExtensions() {
+        return Stream.of(MASS_SPECTRUM_FUNCTION_EXTENSION);
       }
 
       @Override
@@ -118,17 +111,14 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
       }
 
       @Override
-      public Payload<SampledContinuousFunction<UD, UR>> load(ReadableByteChannel inputChannel)
-          throws IOException {
-        RegularSampledDomain<UD> domain = new RegularSampledDomainFormat<>(domainUnit)
-            .load(inputChannel).data;
+      public Payload<SampledContinuousFunction<UD, UR>> load(ReadableByteChannel inputChannel) throws IOException {
+        RegularSampledDomain<UD> domain = new RegularSampledDomainFormat<>(domainUnit).load(inputChannel).data;
         return new Payload<>(overDomain(domain, rangeUnit).load(inputChannel).data);
       }
 
       @Override
-      public void save(
-          WritableByteChannel outputChannel,
-          Payload<? extends SampledContinuousFunction<UD, UR>> payload) throws IOException {
+      public void save(WritableByteChannel outputChannel, Payload<? extends SampledContinuousFunction<UD, UR>> payload)
+          throws IOException {
         RegularSampledDomain<UD> domain = (RegularSampledDomain<UD>) payload.data.domain();
         new RegularSampledDomainFormat<>(domainUnit).save(outputChannel, new Payload<>(domain));
         overDomain(domain, rangeUnit).save(outputChannel, payload);
@@ -137,8 +127,7 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
   }
 
   @Override
-  public Payload<SampledContinuousFunction<UD, UR>> load(ReadableByteChannel inputChannel)
-      throws IOException {
+  public Payload<SampledContinuousFunction<UD, UR>> load(ReadableByteChannel inputChannel) throws IOException {
     ByteBuffer buffer = allocate(Double.BYTES * domain.getDepth());
     while (buffer.hasRemaining()) {
       inputChannel.read(buffer);
@@ -152,26 +141,19 @@ public class RegularSampledContinuousFunctionFormat<UD extends Quantity<UD>, UR 
   }
 
   @Override
-  public void save(
-      WritableByteChannel outputChannel,
-      Payload<? extends SampledContinuousFunction<UD, UR>> payload) throws IOException {
+  public void save(WritableByteChannel outputChannel, Payload<? extends SampledContinuousFunction<UD, UR>> payload)
+      throws IOException {
     if (!(payload.data.domain() instanceof RegularSampledDomain<?>)) {
       throw new IllegalArgumentException();
     }
     RegularSampledDomain<UD> dataDomain = (RegularSampledDomain<UD>) payload.data.domain();
 
     if (dataDomain.getFrequency() != domain.getFrequency()) {
-      throw new IllegalArgumentException(
-          dataDomain.getFrequency() + " != " + domain.getFrequency());
+      throw new IllegalArgumentException(dataDomain.getFrequency() + " != " + domain.getFrequency());
     }
-    if (!Objects
-        .equals(
-            dataDomain.getInterval().getLeftEndpoint(),
-            domain.getInterval().getLeftEndpoint())) {
+    if (!Objects.equals(dataDomain.getInterval().getLeftEndpoint(), domain.getInterval().getLeftEndpoint())) {
       throw new IllegalArgumentException(
-          dataDomain.getInterval().getLeftEndpoint()
-              + " != "
-              + domain.getInterval().getLeftEndpoint());
+          dataDomain.getInterval().getLeftEndpoint() + " != " + domain.getInterval().getLeftEndpoint());
     }
     if (dataDomain.getDepth() != domain.getDepth()) {
       throw new IllegalArgumentException(dataDomain.getDepth() + " != " + domain.getDepth());

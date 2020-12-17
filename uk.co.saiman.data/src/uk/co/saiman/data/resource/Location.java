@@ -30,6 +30,8 @@ package uk.co.saiman.data.resource;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+import uk.co.saiman.data.format.DataFormat;
+
 /**
  * An abstraction over a set of named binary resources.
  * 
@@ -62,10 +64,8 @@ public interface Location {
    * the name, so we cannot determine where to split the string. Because of this
    * the representation of a resource name is flattened to a single string.
    * 
-   * @param name
-   *          the name of the file
-   * @param extension
-   *          the extension of the file
+   * @param name      the name of the file
+   * @param extension the extension of the file
    * @return a resource with the derived name [name].[extension]
    * @throws IOException
    */
@@ -79,4 +79,22 @@ public interface Location {
    */
   @Override
   String toString();
+
+  default Resource getResource(String name, DataFormat<?> format) throws IOException {
+    var extensions = format.getExtensions().iterator();
+    while (extensions.hasNext()) {
+      var extension = extensions.next();
+      var resource = getResource(name, extension);
+      if (resource.exists()) {
+        return resource;
+      }
+    }
+    extensions = format.getExtensions().iterator();
+    if (extensions.hasNext()) {
+      var extension = extensions.next();
+      var resource = getResource(name, extension);
+      return resource;
+    }
+    return getResource(name);
+  }
 }

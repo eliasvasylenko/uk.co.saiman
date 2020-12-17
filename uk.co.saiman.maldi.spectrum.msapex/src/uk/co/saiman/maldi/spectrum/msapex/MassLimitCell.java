@@ -63,10 +63,7 @@ public class MassLimitCell {
     node.getChildren().add(massLimitEditor);
     HBox.setHgrow(massLimitEditor, Priority.SOMETIMES);
 
-    step
-        .getVariable(SPECTRUM_MASS_LIMIT)
-        .map(quantityFormat()::format)
-        .ifPresent(massLimitEditor::setText);
+    step.getVariables().get(SPECTRUM_MASS_LIMIT).map(quantityFormat()::format).ifPresent(massLimitEditor::setText);
     massLimitEditor
         .setTryUpdate(
             name -> step

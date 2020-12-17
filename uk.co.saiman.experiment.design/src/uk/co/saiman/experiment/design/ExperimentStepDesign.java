@@ -45,7 +45,7 @@ import uk.co.saiman.experiment.procedure.Procedure;
 import uk.co.saiman.experiment.variables.Variables;
 import uk.co.saiman.state.StateMap;
 
-public class ExperimentStepDesign extends ExperimentDesignUnit<Relative, ExperimentStepDesign> {
+public class ExperimentStepDesign extends Design<Relative, ExperimentStepDesign> {
   private final Executor executor;
   private final StateMap variableMap;
   private final ExecutionPlan plan;
@@ -79,6 +79,17 @@ public class ExperimentStepDesign extends ExperimentDesignUnit<Relative, Experim
 
   public boolean isMethodInstance() {
     return sharedMethodId != null;
+  }
+
+  public boolean isAbstract() {
+    return isMethodInstance() || super.isAbstract();
+  }
+
+  /**
+   * @return false if the design contains any method instances, true otherwise
+   */
+  public boolean isConcrete() {
+    return !isMethodInstance() && super.isConcrete();
   }
 
   public Optional<ExperimentId> sharedMethodId() {
@@ -201,30 +212,50 @@ public class ExperimentStepDesign extends ExperimentDesignUnit<Relative, Experim
     return new ExperimentStepDesign(id, steps, dependents, executor, variableMap, plan, sharedMethodId);
   }
 
-  /**
-   * For this experiment step, and each of for its substeps, substitute any
-   * {@link #isMethodInstance() method instances} with the shared method of the
-   * {@link #sharedMethodId() given id}.
-   * 
-   * Any variables defined in both the shared method and the instance are
-   * overridden by those defined in the instance.
-   * 
-   * Any substeps defined in both the shared method and the instance are
-   * overridden by those defined in the instance. It is an error if any such
-   * substeps appear in a different order in the instance to that in which they
-   * appear in the shared method.
-   * 
-   * Substeps are merged in this manner recursively.
-   */
-  public ExperimentStepDesign substituteSharedMethods(SharedMethods sharedMethods) {
-    return substituteSharedMethods(ExperimentPath.toSelf(), sharedMethods);
+  public Optional<ExperimentStepDesign> materializeSubstep(
+      SharedMethods sharedMethods,
+      ExperimentPath<?> containingPath,
+      ExperimentPath<?> path) {
+    var step = materializeStep(sharedMethods, containingPath);
+    if (path.isEmpty()) {
+      return Optional.of(this);
+    }
+    return path.headId().flatMap(head -> {
+      var containing = containingPath.resolve(id());
+      var tail = path.tail().get();
+      return step.findSubstep(head).flatMap(s -> s.materializeSubstep(sharedMethods, containing, tail));
+    });
   }
 
-  ExperimentStepDesign substituteSharedMethods(ExperimentPath<?> containingPath, SharedMethods sharedMethods) {
-    var step = sharedMethods.substituteMethod(this, containingPath);
+  public Optional<ExperimentStepDesign> materializeSubstep(
+      SharedMethods sharedMethods,
+      ExperimentPath<?> containingPath,
+      ExperimentId id) {
+    var step = materializeStep(sharedMethods, containingPath);
+    var containing = containingPath.resolve(id());
+    return step.findSubstep(id).map(s -> s.materializeStep(sharedMethods, containing));
+  }
+
+  public ExperimentStepDesign materializeStep(SharedMethods sharedMethods, ExperimentPath<?> containingPath) {
+    try {
+      return sharedMethods.materializeMethod(this);
+    } catch (Exception e) {
+      throw new MethodInstanceException(sharedMethodId().get(), containingPath.resolve(id()), e);
+    }
+  }
+
+  ExperimentStepDesign materialize(ExperimentPath<?> containingPath, SharedMethods sharedMethods) {
+    var step = materializeStep(sharedMethods, containingPath);
     var path = containingPath.resolve(id());
 
-    return step.withSubsteps(s -> s.map(t -> t.substituteSharedMethods(path, sharedMethods)));
+    return step.withSubsteps(s -> s.map(t -> t.materialize(path, sharedMethods)));
+  }
+
+  public Procedure implementInstruction(
+      Procedure procedure,
+      ExperimentPath<Absolute> containingPath,
+      SharedMethods sharedMethods) {
+    return withoutSubsteps().implementInstruction(procedure, containingPath, sharedMethods);
   }
 
   public Procedure implementInstructions(
@@ -235,7 +266,7 @@ public class ExperimentStepDesign extends ExperimentDesignUnit<Relative, Experim
       return procedure;
     }
 
-    var step = sharedMethods.substituteMethod(this, containingPath);
+    var step = materializeStep(sharedMethods, containingPath);
     var path = containingPath.resolve(step.id());
     var executor = step.executor().orElseThrow(() -> new MissingExecutorException(path));
 

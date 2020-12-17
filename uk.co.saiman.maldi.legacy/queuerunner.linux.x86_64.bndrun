@@ -13,7 +13,7 @@ runplatform: linux64
 	bnd.identity;id='org.apache.felix.webconsole.plugins.scriptconsole',\
 	bnd.identity;id='org.apache.felix.webconsole.plugins.useradmin',\
 	bnd.identity;id='uk.co.saiman.configadmin.persistence',\
-	bnd.identity;id='uk.co.saiman.maldi.legacy.queue',\
+	bnd.identity;id='uk.co.saiman.maldi.legacy',\
 	bnd.identity;id='uk.co.saiman.maldi.simulation',\
 	bnd.identity;id='uk.co.saiman.maldi.spectrum',\
 	bnd.identity;id='uk.co.saiman.maldi.stage',\
@@ -117,11 +117,12 @@ runplatform: linux64
 	uk.co.saiman.instrument;version=snapshot,\
 	uk.co.saiman.instrument.acquisition;version=snapshot,\
 	uk.co.saiman.instrument.sample;version=snapshot,\
+	uk.co.saiman.instrument.raster;version=snapshot,\
 	uk.co.saiman.instrument.sampleplate;version=snapshot,\
 	uk.co.saiman.instrument.stage;version=snapshot,\
 	uk.co.saiman.instrument.stage.copley;version=snapshot,\
 	uk.co.saiman.instrument.vacuum;version=snapshot,\
-	uk.co.saiman.maldi.legacy.queue;version=snapshot,\
+	uk.co.saiman.maldi.legacy;version=snapshot,\
 	uk.co.saiman.maldi.simulation;version=snapshot,\
 	uk.co.saiman.maldi.spectrum;version=snapshot,\
 	uk.co.saiman.maldi.stage;version=snapshot,\

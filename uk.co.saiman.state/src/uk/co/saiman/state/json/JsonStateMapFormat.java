@@ -45,14 +45,12 @@ import uk.co.saiman.state.StateMap;
 public class JsonStateMapFormat extends JsonStateFormat<StateMap> {
   public static final int VERSION = 1;
 
-  public static final MediaType MEDIA_TYPE = new MediaType(
-      APPLICATION_TYPE,
-      "saiman.statemap.v" + VERSION,
-      VENDOR).withSuffix("json");
+  public static final MediaType MEDIA_TYPE = new MediaType(APPLICATION_TYPE, "saiman.statemap.v" + VERSION, VENDOR)
+      .withSuffix("json");
 
   @Override
-  public String getExtension() {
-    return "sm";
+  public Stream<String> getExtensions() {
+    return Stream.of("sm");
   }
 
   @Override

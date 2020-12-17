@@ -49,8 +49,10 @@ import uk.co.saiman.maldi.sample.SampleAreaHold;
 public class AddMaldiSpectrumStepHandler {
   @CanExecute
   public boolean canProvideSteps(ExecutorService executors, Experiment experiment, ExperimentPath<Absolute> path) {
-    return executors.getExecutor(SPECTRUM_EXECUTOR) != null
-        && experiment.getStep(path).filter(step -> step.prepares(SampleAreaHold.class)).isPresent();
+    return executors.getExecutor(SPECTRUM_EXECUTOR) != null && experiment
+        .getStep(path)
+        .filter(step -> step.getInstruction().preparesCondition(SampleAreaHold.class))
+        .isPresent();
   }
 
   @Execute
@@ -66,11 +68,11 @@ public class AddMaldiSpectrumStepHandler {
       return;
     }
 
-    var id = ExperimentId
-        .nextAvailableFromName("Spectrum", parent.getDependentSteps().map(Step::getId).collect(toList()));
+    var id = ExperimentId.nextAvailableFromName("Spectrum", parent.getSubsteps().map(Step::getId).collect(toList()));
 
     var step = ExperimentStepDesign
-        .define(id, spectrumExecutor)
+        .define(id)
+        .withExecutor(spectrumExecutor)
         .withVariables(new Variables(environment).with(PROCESSING_VARIABLE, new Processing()));
 
     parent.attach(step);

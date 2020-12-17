@@ -94,8 +94,8 @@ public class JsonProcedureFormat implements TextFormat<Procedure> {
   }
 
   @Override
-  public String getExtension() {
-    return FILE_EXTENSION;
+  public Stream<String> getExtensions() {
+    return Stream.of(FILE_EXTENSION);
   }
 
   @Override

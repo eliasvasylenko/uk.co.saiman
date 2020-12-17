@@ -65,7 +65,7 @@ public class AddMaldiSampleAreaStepsHandler {
       return;
     }
 
-    var plate = parent.getVariable(SAMPLE_PLATE).orElse(null);
+    var plate = parent.getVariables().get(SAMPLE_PLATE).orElse(null);
     if (plate == null) {
       return;
     }
@@ -73,11 +73,11 @@ public class AddMaldiSampleAreaStepsHandler {
     var areas = sampleAreaSelection.sampleAreas().collect(toList());
     for (var sampleArea : areas) {
       var stepId = ExperimentId.fromName(sampleArea.id());
-      if (parent.getDependentStep(stepId).isEmpty()) {
+      if (parent.getSubstep(stepId).isEmpty()) {
         var step = ExperimentStepDesign
-            .define(stepId, areaExecutor)
-            .withVariables(
-                new Variables(environment).with(SAMPLE_AREA, plate.persistSampleArea(sampleArea)));
+            .define(stepId)
+            .withExecutor(areaExecutor)
+            .withVariables(new Variables(environment).with(SAMPLE_AREA, plate.persistSampleArea(sampleArea)));
 
         parent.attach(step);
       }
@@ -85,14 +85,10 @@ public class AddMaldiSampleAreaStepsHandler {
   }
 
   @CanExecute
-  public boolean canProvideSteps(
-      ExecutorService executors,
-      Experiment experiment,
-      ExperimentPath<Absolute> path) {
-    return executors.getExecutor(SAMPLE_AREA_EXECUTOR) != null
-        && experiment
-            .getStep(path)
-            .filter(step -> step.prepares(SamplePlateSubmission.class))
-            .isPresent();
+  public boolean canProvideSteps(ExecutorService executors, Experiment experiment, ExperimentPath<Absolute> path) {
+    return executors.getExecutor(SAMPLE_AREA_EXECUTOR) != null && experiment
+        .getStep(path)
+        .filter(step -> step.getInstruction().preparesCondition(SamplePlateSubmission.class))
+        .isPresent();
   }
 }

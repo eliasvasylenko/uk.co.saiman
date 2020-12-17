@@ -34,10 +34,8 @@ import javax.measure.Quantity;
  * The model is as a sequence of (X, Y) points, with (X) increasing in the
  * domain with each index, starting at 0.
  * 
- * @param <UD>
- *          the type of the units of measurement of values in the domain
- * @param <UR>
- *          the type of the units of measurement of values in the range
+ * @param <UD> the type of the units of measurement of values in the domain
+ * @param <UR> the type of the units of measurement of values in the range
  * @author Elias N Vasylenko
  */
 public interface SampledContinuousFunction<UD extends Quantity<UD>, UR extends Quantity<UR>>

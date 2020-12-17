@@ -53,7 +53,7 @@ import uk.co.saiman.state.json.JsonStateMapFormat;
  * 
  * @author Elias N Vasylenko
  */
-public class JsonStepDesignFormat implements TextFormat<ExperimentStepDesign> {
+public class JsonExperimentStepDesignFormat implements TextFormat<ExperimentStepDesign> {
   public static final int VERSION = 1;
 
   public static final String FILE_EXTENSION = "sdsn"; // json step design
@@ -75,11 +75,11 @@ public class JsonStepDesignFormat implements TextFormat<ExperimentStepDesign> {
 
   private final JsonStateMapFormat stateMapFormat;
 
-  public JsonStepDesignFormat(ExecutorService executorService) {
+  public JsonExperimentStepDesignFormat(ExecutorService executorService) {
     this(executorService, new JsonStateMapFormat());
   }
 
-  public JsonStepDesignFormat(ExecutorService conductorService, JsonStateMapFormat stateMapFormat) {
+  public JsonExperimentStepDesignFormat(ExecutorService conductorService, JsonStateMapFormat stateMapFormat) {
     this.stateMapFormat = stateMapFormat;
 
     this.executor = new MapIndex<>(
@@ -99,8 +99,8 @@ public class JsonStepDesignFormat implements TextFormat<ExperimentStepDesign> {
   }
 
   @Override
-  public String getExtension() {
-    return FILE_EXTENSION;
+  public Stream<String> getExtensions() {
+    return Stream.of(FILE_EXTENSION);
   }
 
   @Override

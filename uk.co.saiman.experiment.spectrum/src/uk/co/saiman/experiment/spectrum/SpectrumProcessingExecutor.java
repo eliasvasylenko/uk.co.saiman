@@ -58,17 +58,11 @@ import uk.co.saiman.experiment.variables.VariableCardinality;
  * @author Elias N Vasylenko
  */
 @Designate(ocd = SpectrumProcessingExecutorConfiguration.class, factory = true)
-@Component(
-    configurationPid = SpectrumProcessingExecutor.CONFIGURATION_PID,
-    configurationPolicy = OPTIONAL,
-    property = ExperimentServiceConstants.EXECUTOR_ID
-        + "="
-        + SpectrumProcessingExecutor.SPECTRUM_PROCESSING_EXECUTOR)
+@Component(configurationPid = SpectrumProcessingExecutor.CONFIGURATION_PID, configurationPolicy = OPTIONAL, property = ExperimentServiceConstants.EXECUTOR_ID
+    + "=" + SpectrumProcessingExecutor.SPECTRUM_PROCESSING_EXECUTOR)
 public class SpectrumProcessingExecutor implements Executor {
   @SuppressWarnings("javadoc")
-  @ObjectClassDefinition(
-      name = "Spectrum Processing Experiment Executor",
-      description = "The experiment executor which manages processing of spectra")
+  @ObjectClassDefinition(name = "Spectrum Processing Experiment Executor", description = "The experiment executor which manages processing of spectra")
   public @interface SpectrumProcessingExecutorConfiguration {}
 
   public static final String SPECTRUM_PROCESSING_EXECUTOR = "uk.co.saiman.executor.spectrum.processing";
@@ -121,6 +115,9 @@ public class SpectrumProcessingExecutor implements Executor {
       public SpectrumCalibration getCalibration() {
         return spectrum.getCalibration();
       }
+
+      @Override
+      public void close() throws Exception {}
     };
   }
 }

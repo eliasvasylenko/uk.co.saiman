@@ -120,3 +120,5 @@ uk.co.saiman:uk.co.saiman.maldi.stage.msapex:0.0.1-SNAPSHOT
 uk.co.saiman:uk.co.saiman.maldi.spectrum.msapex:0.0.1-SNAPSHOT
 uk.co.saiman:uk.co.saiman.maldi.legacy:0.0.1-SNAPSHOT
 uk.co.saiman:uk.co.saiman.experiment.design:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.mzml:0.0.1-SNAPSHOT
+uk.co.saiman:uk.co.saiman.data.mzml:0.0.1-SNAPSHOT

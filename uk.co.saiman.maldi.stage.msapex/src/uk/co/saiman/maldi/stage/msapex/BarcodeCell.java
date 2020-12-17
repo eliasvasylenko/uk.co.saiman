@@ -67,7 +67,8 @@ public class BarcodeCell {
     HBox.setHgrow(barcodeEditor, Priority.SOMETIMES);
 
     step
-        .getVariable(SAMPLE_PLATE_BARCODE)
+        .getVariables()
+        .get(SAMPLE_PLATE_BARCODE)
         .flatMap(s -> s.map(Objects::toString))
         .ifPresent(barcodeEditor::setText);
     barcodeEditor
@@ -75,8 +76,7 @@ public class BarcodeCell {
             name -> step
                 .setVariable(
                     SAMPLE_PLATE_BARCODE,
-                    name.isBlank()
-                        ? java.util.Optional.empty()
+                    name.isBlank() ? java.util.Optional.empty()
                         : java.util.Optional.ofNullable(Integer.parseInt(name))));
     barcodeEditor.getLabel().pseudoClassStateChanged(SUPPLEMENTAL_PSEUDO_CLASS, true);
   }

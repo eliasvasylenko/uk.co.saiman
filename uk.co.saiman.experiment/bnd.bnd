@@ -20,4 +20,5 @@ Bundle-Name: SAI :: Experiment
 Export-Package: \
 	uk.co.saiman.experiment,\
 	uk.co.saiman.experiment.event,\
-	uk.co.saiman.experiment.format
+	uk.co.saiman.experiment.format,\
+	uk.co.saiman.experiment.problem

@@ -31,25 +31,36 @@ import static java.util.stream.Collectors.toList;
 import static uk.co.saiman.experiment.design.ExecutionPlan.EXECUTE;
 import static uk.co.saiman.experiment.design.ExecutionPlan.WITHHOLD;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import uk.co.saiman.collection.StreamUtilities;
 import uk.co.saiman.experiment.declaration.ExperimentId;
 import uk.co.saiman.experiment.declaration.ExperimentPath;
 import uk.co.saiman.experiment.declaration.ExperimentPath.Absolute;
 import uk.co.saiman.experiment.dependency.Condition;
 import uk.co.saiman.experiment.dependency.ProductPath;
 import uk.co.saiman.experiment.dependency.Result;
+import uk.co.saiman.experiment.design.ExperimentDesignException;
 import uk.co.saiman.experiment.design.ExperimentStepDesign;
 import uk.co.saiman.experiment.environment.Environment;
-import uk.co.saiman.experiment.executor.Evaluation;
 import uk.co.saiman.experiment.executor.Executor;
+import uk.co.saiman.experiment.problem.DesignProblem;
+import uk.co.saiman.experiment.problem.ExperimentProblem;
+import uk.co.saiman.experiment.problem.ProcedureProblem;
+import uk.co.saiman.experiment.problem.UnknownProblem;
 import uk.co.saiman.experiment.procedure.Instruction;
+import uk.co.saiman.experiment.procedure.Procedure;
+import uk.co.saiman.experiment.procedure.ProcedureException;
 import uk.co.saiman.experiment.variables.Variable;
 import uk.co.saiman.experiment.variables.VariableDeclaration;
 import uk.co.saiman.experiment.variables.Variables;
+import uk.co.saiman.log.Log;
+import uk.co.saiman.log.Log.Level;
 
 /**
  * This class provides a common interface for manipulating, inspecting, and
@@ -60,22 +71,72 @@ import uk.co.saiman.experiment.variables.Variables;
  */
 public class Step {
   private final Experiment experiment;
-  private final Executor executor;
-  private ExperimentPath<Absolute> path;
+  private final ExperimentPath<Absolute> path;
   private boolean detached;
 
-  Step(Experiment experiment, Executor conductor, ExperimentPath<Absolute> path) {
+  private final Log log;
+
+  private ExperimentStepDesign design;
+  private ExperimentStepDesign concreteDesign;
+  private Instruction instruction;
+  private final Set<ExperimentProblem> problems;
+
+  Step(Experiment experiment, ExperimentPath<Absolute> path, Log log) {
+    this.log = log.mapMessage(message -> "At step '" + path + "': " + message);
+
     this.experiment = experiment;
-    this.executor = conductor;
     this.path = path;
+
+    this.problems = new HashSet<>();
+  }
+
+  Procedure update(Procedure cumulativeProcedure) {
+    this.problems.clear();
+    this.design = experiment.getStepDesign(path).orElseGet(() -> ExperimentStepDesign.define(getId()));
+    this.concreteDesign = design;
+
+    try {
+      var sharedMethods = experiment.getDesign().sharedMethods();
+
+      this.concreteDesign = getSuperstep()
+          .map(
+              parent -> getConcreteDesign()
+                  .materializeSubstep(sharedMethods, parent.getPath().parent().get(), getId())
+                  .get())
+          .orElseGet(() -> experiment.getDesign().materializeSubstep(getId()).get());
+      cumulativeProcedure = concreteDesign
+          .implementInstruction(cumulativeProcedure, path.parent().get(), experiment.getDesign().sharedMethods());
+      this.instruction = cumulativeProcedure.instruction(path).get();
+
+      /**
+       * TODO put some more useful error markers here. There is a lot of potential!
+       * The exceptions for design and instruction errors return useful path info and
+       * are typed to describe the nature of the problem.
+       */
+    } catch (ExperimentDesignException e) {
+      this.problems.add(new DesignProblem());
+
+    } catch (ProcedureException e) {
+      this.problems.add(new ProcedureProblem());
+
+    } catch (Exception e) {
+      log.log(Level.WARN, "Unknown update error", e);
+      this.problems.add(new UnknownProblem());
+    }
+
+    return getSubsteps().reduce(cumulativeProcedure, (p, s) -> s.update(p), StreamUtilities.throwingMerger());
+  }
+
+  public Stream<ExperimentProblem> getProblems() {
+    return problems.stream();
   }
 
   /*
    * Environment
    */
 
-  private Environment getGlobalEnvironment() {
-    return experiment.getGlobalEnvironment();
+  private Environment getEnvironment() {
+    return experiment.getEnvironment();
   }
 
   /**
@@ -100,7 +161,11 @@ public class Step {
   }
 
   public ExperimentStepDesign getDesign() {
-    return lock(() -> experiment.getStepDesign(path).get());
+    return lock(() -> design);
+  }
+
+  public ExperimentStepDesign getConcreteDesign() {
+    return lock(() -> concreteDesign);
   }
 
   public ExperimentId getId() {
@@ -113,16 +178,20 @@ public class Step {
     });
   }
 
-  public Executor getExecutor() {
-    return executor;
+  public Optional<Executor> getExecutor() {
+    return getDesign().executor();
+  }
+
+  public Optional<Executor> getConcreteExecutor() {
+    return getConcreteDesign().executor();
   }
 
   public Variables getVariables() {
-    return lock(() -> getDesign().variables(getGlobalEnvironment()));
+    return lock(() -> getDesign().variables(getEnvironment()));
   }
 
-  public <T> Optional<T> getVariable(Variable<T> variable) {
-    return getVariables().get(variable);
+  public Variables getConcreteVariables() {
+    return lock(() -> getConcreteDesign().variables(getEnvironment()));
   }
 
   public <T> void setVariable(Variable<T> variable, T value) {
@@ -139,12 +208,12 @@ public class Step {
    * Experiment Hierarchy
    */
 
-  public Optional<Step> getDependencyStep() {
+  public Optional<Step> getSuperstep() {
     return lock(
         () -> path.parent().filter(path -> !path.isEmpty()).flatMap(parentPath -> getExperiment().getStep(parentPath)));
   }
 
-  public Optional<Step> getDependentStep(ExperimentId id) {
+  public Optional<Step> getSubstep(ExperimentId id) {
     return lock(() -> experiment.getStep(path.resolve(id)));
   }
 
@@ -190,6 +259,10 @@ public class Step {
     });
   }
 
+  public boolean isDetached() {
+    return detached;
+  }
+
   public ExperimentPath<Absolute> getPath() {
     return path;
   }
@@ -206,7 +279,7 @@ public class Step {
     throw new UnsupportedOperationException();
   }
 
-  public Stream<Step> getDependentSteps() {
+  public Stream<Step> getSubsteps() {
     return lock(() -> {
       return getDesign()
           .substeps()
@@ -215,30 +288,6 @@ public class Step {
           .flatMap(Optional::stream)
           .collect(toList()); // call the terminal op while we're still in the lock
     }).stream();
-  }
-
-  public boolean isDetached() {
-    return false;
-  }
-
-  public Stream<Class<?>> getObservations() {
-    return getInstruction().resultObservations();
-  }
-
-  public boolean prepares(Class<?> type) {
-    return getPreparations().anyMatch(type::equals);
-  }
-
-  public boolean observes(Class<?> type) {
-    return getObservations().anyMatch(type::equals);
-  }
-
-  public Stream<Class<?>> getPreparations() {
-    return getInstruction().conditionPreparations();
-  }
-
-  public Evaluation getPreparations(Class<?> preparation) {
-    return getInstruction().conditionPreparationEvaluation(preparation);
   }
 
   public Stream<VariableDeclaration<?>> getVariableDeclarations() {
@@ -254,13 +303,13 @@ public class Step {
   }
 
   public Instruction getInstruction() {
-    return new Instruction(path, getDesign().variableMap(), getExecutor());
+    return instruction;
   }
 
   public int getIndex() {
-    return (int) getDependencyStep()
-        .map(Step::getDependentSteps)
-        .orElseGet(experiment::getIndependentSteps)
+    return (int) getSuperstep()
+        .map(Step::getSubsteps)
+        .orElseGet(experiment::getSubsteps)
         .takeWhile(s -> s != this)
         .count();
   }

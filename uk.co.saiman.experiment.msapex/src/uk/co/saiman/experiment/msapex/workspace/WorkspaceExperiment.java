@@ -58,12 +58,10 @@ public class WorkspaceExperiment {
   public WorkspaceExperiment(Workspace workspace, Experiment experiment) {
     this.workspace = workspace;
     this.id = experiment.getId();
-    this.data = Data
-        .locate(workspace.getWorkspaceLocation(), id.name(), workspace.getExperimentFormat());
+    this.data = Data.locate(workspace.getWorkspaceLocation(), id.name(), workspace.getExperimentFormat());
 
     if (data.getResource().exists()) {
-      throw new ExperimentException(
-          "Experiment file already exists at location " + data.getResource());
+      throw new ExperimentException("Experiment file already exists at location " + data.getResource());
     }
 
     this.experiment = experiment;
@@ -75,19 +73,16 @@ public class WorkspaceExperiment {
   }
 
   public WorkspaceExperiment(Workspace workspace, Resource resource) {
-    if (!resource.hasExtension(workspace.getExperimentFormat().getExtension())) {
-      throw new ExperimentException("Experiment file has wrong extension " + resource);
-    }
+    var extension = workspace
+        .getExperimentFormat()
+        .getExtensions()
+        .filter(resource::hasExtension)
+        .findFirst()
+        .orElseThrow(() -> new ExperimentException("Experiment file has wrong extension " + resource));
 
     this.workspace = workspace;
     this.id = ExperimentId
-        .fromName(
-            resource
-                .getName()
-                .substring(
-                    0,
-                    resource.getName().length()
-                        - workspace.getExperimentFormat().getExtension().length() - 1));
+        .fromName(resource.getName().substring(0, resource.getName().length() - extension.length() - 1));
     this.data = Data.locate(resource, workspace.getExperimentFormat());
 
     this.status = Status.CLOSED;
